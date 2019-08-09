@@ -21,9 +21,27 @@ export class TypeScriptInternals {
    * @returns The associated Symbol.  If there is no semantic information (e.g. if the
    * declaration is an extra semicolon somewhere), then "undefined" is returned.
    */
-  public static tryGetSymbolForDeclaration(declaration: ts.Declaration): ts.Symbol | undefined {
-    const symbol: ts.Symbol = (declaration as any).symbol;
+  public static tryGetSymbolForDeclaration(declaration: ts.Declaration, checker: ts.TypeChecker): ts.Symbol
+    | undefined {
+    let symbol: ts.Symbol | undefined = (declaration as any).symbol;
+    if (symbol && symbol.escapedName === ts.InternalSymbolName.Computed) {
+      const name: ts.DeclarationName | undefined = ts.getNameOfDeclaration(declaration);
+      symbol = name && checker.getSymbolAtLocation(name) || symbol;
+    }
     return symbol;
+  }
+
+  /**
+   * Returns whether the provided Symbol is a TypeScript "late-bound" Symbol (i.e. was created by the Checker
+   * for a computed property based on its type, rather than by the Binder).
+   */
+  public static isLateBoundSymbol(symbol: ts.Symbol): boolean {
+    // tslint:disable-next-line:no-bitwise
+    if (symbol.flags & ts.SymbolFlags.Transient &&
+        (symbol as any).checkFlags === (ts as any).CheckFlags.Late) {
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -65,4 +83,13 @@ export class TypeScriptInternals {
   public static getSymbolParent(symbol: ts.Symbol): ts.Symbol | undefined {
     return (symbol as any).parent;
   }
+
+  /**
+   * In an statement like `export default class X { }`, the `Symbol.name` will be `default`
+   * whereas the `localSymbol` is `X`.
+   */
+  public static tryGetLocalSymbol(declaration: ts.Declaration): ts.Symbol | undefined {
+    return (declaration as any).localSymbol;
+  }
+
 }

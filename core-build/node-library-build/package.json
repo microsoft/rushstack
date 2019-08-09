@@ -1,12 +1,9 @@
 {
   "name": "@microsoft/node-library-build",
-  "version": "6.0.61",
+  "version": "6.1.3",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
-  "tsdoc": {
-    "tsdocFlavor": "AEDoc"
-  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -16,14 +13,14 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.9.26",
-    "@microsoft/gulp-core-build-mocha": "3.5.76",
-    "@microsoft/gulp-core-build-typescript": "8.1.11",
-    "@types/gulp": "3.8.32",
+    "@microsoft/gulp-core-build": "3.11.1",
+    "@microsoft/gulp-core-build-mocha": "3.6.2",
+    "@microsoft/gulp-core-build-typescript": "8.1.27",
+    "@types/gulp": "4.0.6",
     "@types/node": "8.5.8",
-    "gulp": "~3.9.1"
+    "gulp": "~4.0.2"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.2": "0.3.13"
+    "@microsoft/rush-stack-compiler-3.4": "0.1.16"
   }
 }

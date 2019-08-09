@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeclarationReference, Meaning, Navigation } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
-import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
 import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
 import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
@@ -14,7 +14,6 @@ import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiRel
 export interface IApiConstructorOptions extends
   IApiParameterListMixinOptions,
   IApiReleaseTagMixinOptions,
-  IApiStaticMixinOptions,
   IApiDeclaredItemOptions {
 }
 
@@ -45,14 +44,10 @@ export interface IApiConstructorOptions extends
  *
  * @public
  */
-export class ApiConstructor extends ApiParameterListMixin(ApiReleaseTagMixin(ApiStaticMixin(ApiDeclaredItem))) {
+export class ApiConstructor extends ApiParameterListMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
 
-  public static getCanonicalReference(isStatic: boolean, overloadIndex: number): string {
-    if (isStatic) {
-      return `(:constructor,static,${overloadIndex})`;
-    } else {
-      return `(:constructor,instance,${overloadIndex})`;
-    }
+  public static getContainerKey(overloadIndex: number): string {
+    return `|${ApiItemKind.Constructor}|${overloadIndex}`;
   }
 
   public constructor(options: IApiConstructorOptions) {
@@ -65,7 +60,18 @@ export class ApiConstructor extends ApiParameterListMixin(ApiReleaseTagMixin(Api
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiConstructor.getCanonicalReference(this.isStatic, this.overloadIndex);
+  public get containerKey(): string {
+    return ApiConstructor.getContainerKey(this.overloadIndex);
+  }
+
+  /** @beta @override */
+  public buildCanonicalReference(): DeclarationReference {
+    const parent: DeclarationReference = this.parent
+      ? this.parent.canonicalReference
+      // .withMeaning() requires some kind of component
+      : DeclarationReference.empty().addNavigationStep(Navigation.Members, '(parent)');
+    return parent
+      .withMeaning(Meaning.Constructor)
+      .withOverloadIndex(this.overloadIndex);
   }
 }

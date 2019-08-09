@@ -8,6 +8,7 @@ import { Utilities } from '../utilities/Utilities';
 import { IChangeInfo } from '../api/ChangeManagement';
 import { IChangelog } from '../api/Changelog';
 import { JsonFile } from '@microsoft/node-core-library';
+import { RushConfiguration } from '../api/RushConfiguration';
 
 /**
  * This class represents the collection of change files existing in the repo and provides operations
@@ -26,32 +27,42 @@ export class ChangeFiles {
    */
   public static validate(
     newChangeFilePaths: string[],
-    changedPackages: string[]
+    changedPackages: string[],
+    rushConfiguration: RushConfiguration
   ): void {
-    const changedSet: Set<string> = new Set<string>();
+    const projectsWithChangeDescriptions: Set<string> = new Set<string>();
     newChangeFilePaths.forEach((filePath) => {
       console.log(`Found change file: ${filePath}`);
 
-      const changeRequest: IChangeInfo = JsonFile.load(filePath);
-      if (changeRequest && changeRequest.changes) {
-        changeRequest.changes!.forEach(change => {
-          changedSet.add(change.packageName);
-        });
+      const changeFile: IChangeInfo = JsonFile.load(filePath);
+
+      if (rushConfiguration.hotfixChangeEnabled) {
+        if (changeFile.type !== 'none' && changeFile.type !== 'hotfix') {
+          throw new Error(
+            `Change file ${filePath} specifies a type of '${changeFile.type}' ` +
+            `but only 'hotfix' and 'none' change types may be used in a branch with 'hotfixChangeEnabled'.`);
+        }
+      }
+
+      if (changeFile && changeFile.changes) {
+        changeFile.changes.forEach(change => projectsWithChangeDescriptions.add(change.packageName));
       } else {
         throw new Error(`Invalid change file: ${filePath}`);
       }
     });
 
-    const requiredSet: Set<string> = new Set(changedPackages);
-    changedSet.forEach((name) => {
-      requiredSet.delete(name);
-    });
-    if (requiredSet.size > 0) {
-      const missingProjects: string[] = [];
-      requiredSet.forEach(name => {
-        missingProjects.push(name);
-      });
-      throw new Error(`Change file does not contain ${missingProjects.join(',')}.`);
+    const projectsMissingChangeDescriptions: Set<string> = new Set(changedPackages);
+    projectsWithChangeDescriptions.forEach((name) => projectsMissingChangeDescriptions.delete(name));
+    if (projectsMissingChangeDescriptions.size > 0) {
+      const projectsMissingChangeDescriptionsArray: string[] = [];
+      projectsMissingChangeDescriptions.forEach(name => projectsMissingChangeDescriptionsArray.push(name));
+      throw new Error([
+        'The following projects have been changed and require change descriptions, but change descriptions were not ' +
+          'detected for them:',
+        ...projectsMissingChangeDescriptionsArray.map((projectName) => `- ${projectName}`),
+        'To resolve this error, run "rush change." This will generate change description files that must be ' +
+          'committed to source control.'
+      ].join(EOL));
     }
   }
 

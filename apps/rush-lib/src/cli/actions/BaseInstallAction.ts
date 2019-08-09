@@ -17,7 +17,7 @@ import { PurgeManager } from '../../logic/PurgeManager';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { StandardScriptUpdater } from '../../logic/StandardScriptUpdater';
 import { Stopwatch } from '../../utilities/Stopwatch';
-import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
+import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { Variants } from '../../api/Variants';
 
 /**

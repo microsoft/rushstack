@@ -58,5 +58,10 @@ export const enum ConsoleMessageId {
   /**
    * "Unable to create the API report file. Please make sure the target folder exists: ___"
    */
-  ApiReportFolderMissing = 'console-api-report-folder-missing'
+  ApiReportFolderMissing = 'console-api-report-folder-missing',
+
+  /**
+   * Used for the information printed when the "--diagnostics" flag is enabled.
+   */
+  Diagnostics = 'console-diagnostics'
 }

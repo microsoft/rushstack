@@ -87,4 +87,8 @@ export class Excerpt {
     }
     return this._text;
   }
+
+  public get isEmpty(): boolean {
+    return this.tokenRange.startIndex === this.tokenRange.endIndex;
+  }
 }

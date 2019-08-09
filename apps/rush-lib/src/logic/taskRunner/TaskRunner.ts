@@ -11,41 +11,55 @@ import {
 } from '@microsoft/node-core-library';
 
 import { Stopwatch } from '../../utilities/Stopwatch';
-import { ITask, ITaskDefinition } from './ITask';
+import { ITask } from './ITask';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
+import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
+
+export interface ITaskRunnerOptions {
+  quietMode: boolean;
+  parallelism: string | undefined;
+  changedProjectsOnly: boolean;
+  allowWarningsInSuccessfulBuild: boolean;
+  terminal?: Terminal;
+}
 
 /**
  * A class which manages the execution of a set of tasks with interdependencies.
- * Any class of task definition may be registered, and dependencies between tasks are
- * easily specified. Initially, and at the end of each task execution, all unblocked tasks
+ * Initially, and at the end of each task execution, all unblocked tasks
  * are added to a ready queue which is then executed. This is done continually until all
  * tasks are complete, or prematurely fails if any of the tasks fail.
  */
 export class TaskRunner {
-  private _tasks: Map<string, ITask>;
+  private _tasks: ITask[];
   private _changedProjectsOnly: boolean;
+  private _allowWarningsInSuccessfulBuild: boolean;
   private _buildQueue: ITask[];
   private _quietMode: boolean;
   private _hasAnyFailures: boolean;
+  private _hasAnyWarnings: boolean;
   private _parallelism: number;
   private _currentActiveTasks: number;
   private _totalTasks: number;
   private _completedTasks: number;
   private _terminal: Terminal;
 
-  constructor(
-    quietMode: boolean,
-    parallelism: string | undefined,
-    changedProjectsOnly: boolean,
-    terminal?: Terminal
-  ) {
-    this._tasks = new Map<string, ITask>();
-    this._buildQueue = [];
+  constructor(orderedTasks: ITask[], options: ITaskRunnerOptions) {
+    const {
+      quietMode,
+      parallelism,
+      changedProjectsOnly,
+      allowWarningsInSuccessfulBuild,
+      terminal = new Terminal(new ConsoleTerminalProvider())
+    } = options;
+    this._tasks = orderedTasks;
+    this._buildQueue = orderedTasks.slice(0);
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
+    this._hasAnyWarnings = false;
     this._changedProjectsOnly = changedProjectsOnly;
-    this._terminal = terminal || new Terminal(new ConsoleTerminalProvider());
+    this._allowWarningsInSuccessfulBuild = allowWarningsInSuccessfulBuild;
+    this._terminal = terminal;
 
     const numberOfCores: number = os.cpus().length;
 
@@ -78,89 +92,23 @@ export class TaskRunner {
   }
 
   /**
-   * Registers a task definition to the map of defined tasks
-   */
-  public addTask(taskDefinition: ITaskDefinition): void {
-    if (this._tasks.has(taskDefinition.name)) {
-      throw new Error('A task with that name has already been registered.');
-    }
-
-    const task: ITask = taskDefinition as ITask;
-    task.dependencies = new Set<ITask>();
-    task.dependents = new Set<ITask>();
-    task.status = TaskStatus.Ready;
-    task.criticalPathLength = undefined;
-    this._tasks.set(task.name, task);
-
-    if (!this._quietMode) {
-      this._terminal.writeLine(`Registered ${task.name}`);
-    }
-  }
-
-  /**
-   * Returns true if a task with that name has been registered
-   */
-  public hasTask(taskName: string): boolean {
-    return this._tasks.has(taskName);
-  }
-
-  /**
-   * Defines the list of dependencies for an individual task.
-   * @param taskName - the string name of the task for which we are defining dependencies. A task with this
-   * name must already have been registered.
-   */
-  public addDependencies(taskName: string, taskDependencies: string[]): void {
-    const task: ITask | undefined = this._tasks.get(taskName);
-
-    if (!task) {
-      throw new Error(`The task '${taskName}' has not been registered`);
-    }
-    if (!taskDependencies) {
-      throw new Error('The list of dependencies must be defined');
-    }
-
-    for (const dependencyName of taskDependencies) {
-      if (!this._tasks.has(dependencyName)) {
-        throw new Error(`The project '${dependencyName}' has not been registered.`);
-      }
-      const dependency: ITask = this._tasks.get(dependencyName)!;
-      task.dependencies.add(dependency);
-      dependency.dependents.add(task);
-    }
-  }
-
-  /**
    * Executes all tasks which have been registered, returning a promise which is resolved when all the
    * tasks are completed successfully, or rejects when any task fails.
    */
   public execute(): Promise<void> {
     this._currentActiveTasks = 0;
     this._completedTasks = 0;
-    this._totalTasks = this._tasks.size;
+    this._totalTasks = this._buildQueue.length;
     this._terminal.writeLine(`Executing a maximum of ${this._parallelism} simultaneous processes...${os.EOL}`);
-
-    this._checkForCyclicDependencies(this._tasks.values(), []);
-
-    // Precalculate the number of dependent packages
-    this._tasks.forEach((task: ITask) => {
-      this._calculateCriticalPaths(task);
-    });
-
-    // Add everything to the buildQueue
-    this._tasks.forEach((task: ITask) => {
-      this._buildQueue.push(task);
-    });
-
-    // Sort the queue in descending order, nothing will mess with the order
-    this._buildQueue.sort((taskA: ITask, taskB: ITask): number => {
-      return taskB.criticalPathLength! - taskA.criticalPathLength!;
-    });
 
     return this._startAvailableTasks().then(() => {
       this._printTaskStatus();
 
       if (this._hasAnyFailures) {
         return Promise.reject(new Error('Project(s) failed to build'));
+      } else if (this._hasAnyWarnings && !this._allowWarningsInSuccessfulBuild) {
+        this._terminal.writeWarningLine('Project(s) succeeded with warnings');
+        return Promise.reject(new AlreadyReportedError());
       } else {
         return Promise.resolve();
       }
@@ -217,6 +165,7 @@ export class TaskRunner {
               this._markTaskAsSuccess(task);
               break;
             case TaskStatus.SuccessWithWarning:
+              this._hasAnyWarnings = true;
               this._markTaskAsSuccessWithWarning(task);
               break;
             case TaskStatus.Skipped:
@@ -272,8 +221,13 @@ export class TaskRunner {
    * Marks a task as being completed, and removes it from the dependencies list of all its dependents
    */
   private _markTaskAsSuccess(task: ITask): void {
-    this._terminal.writeLine(Colors.green(`${this._getCurrentCompletedTaskString()}`
+    if (task.hadEmptyScript) {
+      this._terminal.writeLine(Colors.green(`${this._getCurrentCompletedTaskString()}`
+      + `[${task.name}] had an empty script`));
+    } else {
+      this._terminal.writeLine(Colors.green(`${this._getCurrentCompletedTaskString()}`
       + `[${task.name}] completed successfully in ${task.stopwatch.toString()}`));
+    }
     task.status = TaskStatus.Success;
 
     task.dependents.forEach((dependent: ITask) => {
@@ -313,43 +267,6 @@ export class TaskRunner {
 
   private _getCurrentCompletedTaskString(): string {
     return `${this._completedTasks} of ${this._totalTasks}: `;
-  }
-
-  /**
-   * Checks for projects that indirectly depend on themselves.
-   */
-  private _checkForCyclicDependencies(tasks: Iterable<ITask>, dependencyChain: string[]): void {
-    for (const task of tasks) {
-      if (dependencyChain.indexOf(task.name) >= 0) {
-        throw new Error('A cyclic dependency was encountered:\n'
-          + '  ' + [...dependencyChain, task.name].reverse().join('\n  -> ')
-          + '\nConsider using the cyclicDependencyProjects option for rush.json.');
-      }
-      dependencyChain.push(task.name);
-      this._checkForCyclicDependencies(task.dependents, dependencyChain);
-      dependencyChain.pop();
-    }
-  }
-
-  /**
-   * Calculate the number of packages which must be built before we reach
-   * the furthest away "root" node
-   */
-  private _calculateCriticalPaths(task: ITask): number {
-    // Return the memoized value
-    if (task.criticalPathLength !== undefined) {
-      return task.criticalPathLength;
-    }
-
-    // If no dependents, we are in a "root"
-    if (task.dependents.size === 0) {
-      return task.criticalPathLength = 0;
-    } else {
-      // Otherwise we are as long as the longest package + 1
-      const depsLengths: number[] = [];
-      task.dependents.forEach(dep => this._calculateCriticalPaths(dep));
-      return task.criticalPathLength = Math.max(...depsLengths) + 1;
-    }
   }
 
   /**
@@ -417,7 +334,7 @@ export class TaskRunner {
           case TaskStatus.SuccessWithWarning:
           case TaskStatus.Blocked:
           case TaskStatus.Failure:
-            if (task.stopwatch) {
+            if (task.stopwatch && !task.hadEmptyScript) {
               const time: string = task.stopwatch.toString();
               this._terminal.writeLine(headingColor(`${task.name} (${time})`));
             } else {

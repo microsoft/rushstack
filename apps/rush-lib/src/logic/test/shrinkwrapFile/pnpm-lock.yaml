@@ -1,7 +1,7 @@
 dependencies:
-  '@rush-temp/project1': 'file:./projects/project1.tgz'
-  '@rush-temp/project2': 'file:./projects/project2.tgz'
-  '@rush-temp/project3': 'file:./projects/project3.tgz'
+  '@rush-temp/project1': 'file:projects/project1.tgz'
+  '@rush-temp/project2': 'file:projects/project2.tgz'
+  '@rush-temp/project3': 'file:projects/project3.tgz'
 packages:
   /jquery/1.0.0:
     resolution:

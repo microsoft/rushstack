@@ -2,6 +2,278 @@
   "name": "@microsoft/node-library-build",
   "entries": [
     {
+      "version": "6.1.3",
+      "tag": "@microsoft/node-library-build_v6.1.3",
+      "date": "Thu, 08 Aug 2019 15:14:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.11.0` to `3.11.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.6.1` to `3.6.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.26` to `8.1.27`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.15` to `0.1.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.1.2",
+      "tag": "@microsoft/node-library-build_v6.1.2",
+      "date": "Thu, 08 Aug 2019 00:49:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.25` to `8.1.26`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.14` to `0.1.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.1.1",
+      "tag": "@microsoft/node-library-build_v6.1.1",
+      "date": "Mon, 05 Aug 2019 22:04:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.10.0` to `3.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.6.0` to `3.6.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.24` to `8.1.25`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.13` to `0.1.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.1.0",
+      "tag": "@microsoft/node-library-build_v6.1.0",
+      "date": "Tue, 23 Jul 2019 19:14:38 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update gulp to 4.0.2"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.26` to `3.10.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.5.76` to `3.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.23` to `8.1.24`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.0.74",
+      "tag": "@microsoft/node-library-build_v6.0.74",
+      "date": "Tue, 23 Jul 2019 01:13:01 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.22` to `8.1.23`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.12` to `0.1.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.0.73",
+      "tag": "@microsoft/node-library-build_v6.0.73",
+      "date": "Mon, 22 Jul 2019 19:13:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.21` to `8.1.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.11` to `0.1.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.0.72",
+      "tag": "@microsoft/node-library-build_v6.0.72",
+      "date": "Fri, 12 Jul 2019 19:12:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.20` to `8.1.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.23` to `0.3.24`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.0.71",
+      "tag": "@microsoft/node-library-build_v6.0.71",
+      "date": "Thu, 11 Jul 2019 19:13:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.19` to `8.1.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.22` to `0.3.23`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.0.70",
+      "tag": "@microsoft/node-library-build_v6.0.70",
+      "date": "Tue, 09 Jul 2019 19:13:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.18` to `8.1.19`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.21` to `0.3.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.0.69",
+      "tag": "@microsoft/node-library-build_v6.0.69",
+      "date": "Mon, 08 Jul 2019 19:12:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.17` to `8.1.18`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.20` to `0.3.21`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.0.68",
+      "tag": "@microsoft/node-library-build_v6.0.68",
+      "date": "Sat, 29 Jun 2019 02:30:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.16` to `8.1.17`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.19` to `0.3.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.0.67",
+      "tag": "@microsoft/node-library-build_v6.0.67",
+      "date": "Wed, 12 Jun 2019 19:12:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.15` to `8.1.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.18` to `0.3.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.0.66",
+      "tag": "@microsoft/node-library-build_v6.0.66",
+      "date": "Tue, 11 Jun 2019 00:48:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.14` to `8.1.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.17` to `0.3.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.0.65",
+      "tag": "@microsoft/node-library-build_v6.0.65",
+      "date": "Thu, 06 Jun 2019 22:33:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.16` to `0.3.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.0.64",
+      "tag": "@microsoft/node-library-build_v6.0.64",
+      "date": "Wed, 05 Jun 2019 19:12:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.13` to `8.1.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.15` to `0.3.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.0.63",
+      "tag": "@microsoft/node-library-build_v6.0.63",
+      "date": "Tue, 04 Jun 2019 05:51:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.12` to `8.1.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.14` to `0.3.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.0.62",
+      "tag": "@microsoft/node-library-build_v6.0.62",
+      "date": "Mon, 27 May 2019 04:13:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.11` to `8.1.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.13` to `0.3.14`"
+          }
+        ]
+      }
+    },
+    {
       "version": "6.0.61",
       "tag": "@microsoft/node-library-build_v6.0.61",
       "date": "Mon, 13 May 2019 02:08:35 GMT",

@@ -60,6 +60,7 @@ export class CommonVersionsConfiguration {
   private _preferredVersions: ProtectableMap<string, string>;
   private _xstitchPreferredVersions: ProtectableMap<string, string>;
   private _allowedAlternativeVersions: ProtectableMap<string, string[]>;
+  private _modified: boolean;
 
   /**
    * Loads the common-versions.json data from the specified file path.
@@ -106,8 +107,14 @@ export class CommonVersionsConfiguration {
   /**
    * Writes the "common-versions.json" file to disk, using the filename that was passed to loadFromFile().
    */
-  public save(): void {
-    JsonFile.save(this._serialize(), this._filePath, { updateExistingFile: true });
+  public save(): boolean {
+    if (this._modified) {
+      JsonFile.save(this._serialize(), this._filePath, { updateExistingFile: true });
+      this._modified = false;
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -212,11 +219,17 @@ export class CommonVersionsConfiguration {
           + ` added to preferredVersions`);
       }
     }
+
+    this._modified = true;
+
     return value;
   }
 
   private _onSetAllowedAlternativeVersions(source: ProtectableMap<string, string>, key: string, value: string): string {
     PackageName.validate(key);
+
+    this._modified = true;
+
     return value;
   }
 

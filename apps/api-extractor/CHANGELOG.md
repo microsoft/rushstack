@@ -1,6 +1,108 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 13 May 2019 02:08:35 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Aug 2019 15:14:17 GMT and should not be manually modified.
+
+## 7.3.7
+Thu, 08 Aug 2019 15:14:17 GMT
+
+*Version update only*
+
+## 7.3.6
+Thu, 08 Aug 2019 00:49:05 GMT
+
+### Patches
+
+- Fix an issue where a function with only one declaration was assigned an overloadIndex of 0 instead of 1
+
+## 7.3.5
+Mon, 05 Aug 2019 22:04:32 GMT
+
+### Patches
+
+- Security updates.
+
+## 7.3.4
+Tue, 23 Jul 2019 01:13:01 GMT
+
+### Patches
+
+- ApiItem.name is now quoted when it contains invalid identifier characters, to avoid conflicts with an ECMAScript symbol expression
+
+## 7.3.3
+Mon, 22 Jul 2019 19:13:10 GMT
+
+### Patches
+
+- Update to use new api-extractor-model
+
+## 7.3.2
+Fri, 12 Jul 2019 19:12:46 GMT
+
+### Patches
+
+- Clarify docs for "--typescript-compiler-folder"
+
+## 7.3.1
+Thu, 11 Jul 2019 19:13:08 GMT
+
+### Patches
+
+- Add support for TypeScript 3.5
+
+## 7.3.0
+Tue, 09 Jul 2019 19:13:24 GMT
+
+### Minor changes
+
+- Add a "--diagnostics" command-line option to help when troubleshooting problems
+
+## 7.2.3
+Mon, 08 Jul 2019 19:12:18 GMT
+
+### Patches
+
+- Fix a problem when analyzing .d.ts files that appear in the same folder as the corresponding .ts file (GitHub #1310)
+
+## 7.2.2
+Sat, 29 Jun 2019 02:30:10 GMT
+
+### Patches
+
+- Fix GitHub issue #1304 where "IExtractorInvokeOptions.typescriptCompilerFolder" did not work with TypeScript 3.4
+
+## 7.2.1
+Wed, 12 Jun 2019 19:12:33 GMT
+
+*Version update only*
+
+## 7.2.0
+Tue, 11 Jun 2019 00:48:06 GMT
+
+### Minor changes
+
+- Generate ApiTypeParameter entries and type alias types
+
+## 7.1.8
+Wed, 05 Jun 2019 19:12:34 GMT
+
+### Patches
+
+- Fix an issue where TSDoc index selectors (ApiParameterListMixin.overloadIndex) started from 0, whereas TSDoc requires a nonzero number
+
+## 7.1.7
+Tue, 04 Jun 2019 05:51:53 GMT
+
+### Patches
+
+- Upgrade api-extractor-model to remove ApiConstructor.isStatic, since TypeScript constructors cannot be static
+- Improve handling of symbolic property and method names.
+
+## 7.1.6
+Mon, 27 May 2019 04:13:44 GMT
+
+### Patches
+
+- Fix incorrect path resolution for the "extends" field when loading tsconfig.json
 
 ## 7.1.5
 Mon, 13 May 2019 02:08:35 GMT

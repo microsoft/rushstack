@@ -10,6 +10,9 @@
    * is typically used to hold an indirect dependency back to a specific version, however generally
    * it can be any SemVer range specifier (e.g. "~1.2.3"), and it will narrow any (compatible)
    * SemVer range specifier.  See the Rush documentation for details about this feature.
+   *
+   * After modifying this field, it's recommended to run "rush update --full" so that the package manager
+   * will recalculate all version selections.
    */
   "preferredVersions": {
 

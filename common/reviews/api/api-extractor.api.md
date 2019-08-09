@@ -13,7 +13,7 @@ import * as tsdoc from '@microsoft/tsdoc';
 export class CompilerState {
     static create(extractorConfig: ExtractorConfig, options?: ICompilerStateCreateOptions): CompilerState;
     readonly program: ts.Program;
-    }
+}
 
 // @public
 export const enum ConsoleMessageId {
@@ -22,6 +22,7 @@ export const enum ConsoleMessageId {
     ApiReportFolderMissing = "console-api-report-folder-missing",
     ApiReportNotCopied = "console-api-report-not-copied",
     ApiReportUnchanged = "console-api-report-unchanged",
+    Diagnostics = "console-diagnostics",
     FoundTSDocMetadata = "console-found-tsdoc-metadata",
     WritingDocModelFile = "console-writing-doc-model-file",
     WritingDtsRollup = "console-writing-dts-rollup"
@@ -42,6 +43,7 @@ export class ExtractorConfig {
     readonly betaTrimmedFilePath: string;
     readonly docModelEnabled: boolean;
     static readonly FILENAME: string;
+    getDiagnosticDump(): string;
     // @internal
     _getShortFilePath(absolutePath: string): string;
     static hasDtsFileExtension(filePath: string): boolean;
@@ -84,7 +86,7 @@ export class ExtractorMessage {
     // @internal
     constructor(options: IExtractorMessageOptions);
     readonly category: ExtractorMessageCategory;
-    formatMessageWithLocation(workingPackageFolderPath: string): string;
+    formatMessageWithLocation(workingPackageFolderPath: string | undefined): string;
     // (undocumented)
     formatMessageWithoutLocation(): string;
     handled: boolean;
@@ -216,6 +218,7 @@ export interface IExtractorInvokeOptions {
     compilerState?: CompilerState;
     localBuild?: boolean;
     messageCallback?: (message: ExtractorMessage) => void;
+    showDiagnostics?: boolean;
     showVerboseMessages?: boolean;
     typescriptCompilerFolder?: string;
 }

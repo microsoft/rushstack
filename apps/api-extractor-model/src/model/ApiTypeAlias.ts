@@ -1,10 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeclarationReference, Meaning, Navigation, Component } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
 import { ApiItemKind } from '../items/ApiItem';
-import { ApiDeclaredItem, IApiDeclaredItemOptions } from '../items/ApiDeclaredItem';
+import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { ApiTypeParameterListMixin, IApiTypeParameterListMixinOptions, IApiTypeParameterListMixinJson
+  } from '../mixins/ApiTypeParameterListMixin';
+import { DeserializerContext } from './DeserializerContext';
 
 /**
  * Constructor options for {@link ApiTypeAlias}.
@@ -13,7 +18,15 @@ import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 export interface IApiTypeAliasOptions extends
   IApiNameMixinOptions,
   IApiReleaseTagMixinOptions,
-  IApiDeclaredItemOptions {
+  IApiDeclaredItemOptions,
+  IApiTypeParameterListMixinOptions {
+  typeTokenRange: IExcerptTokenRange;
+}
+
+export interface IApiTypeAliasJson extends
+  IApiDeclaredItemJson,
+  IApiTypeParameterListMixinJson {
+  typeTokenRange: IExcerptTokenRange;
 }
 
 /**
@@ -42,13 +55,37 @@ export interface IApiTypeAliasOptions extends
  *
  * @public
  */
-export class ApiTypeAlias extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
-  public static getCanonicalReference(name: string): string {
-    return name;
+export class ApiTypeAlias extends ApiTypeParameterListMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
+  /**
+   * An {@link Excerpt} that describes the type of the alias.
+   *
+   * @remarks
+   * In the example below, the `typeExcerpt` would correspond to the subexpression
+   * `T extends any[] ? BoxedArray<T[number]> : BoxedValue<T>;`:
+   *
+   * ```ts
+   * export type Boxed<T> = T extends any[] ? BoxedArray<T[number]> : BoxedValue<T>;
+   * ```
+   */
+  public readonly typeExcerpt: Excerpt;
+
+  /** @override */
+  public static onDeserializeInto(options: Partial<IApiTypeAliasOptions>, context: DeserializerContext,
+    jsonObject: IApiTypeAliasJson): void {
+
+    super.onDeserializeInto(options, context, jsonObject);
+
+    options.typeTokenRange = jsonObject.typeTokenRange;
+  }
+
+  public static getContainerKey(name: string): string {
+    return `${name}|${ApiItemKind.TypeAlias}`;
   }
 
   public constructor(options: IApiTypeAliasOptions) {
     super(options);
+
+    this.typeExcerpt = this.buildExcerpt(options.typeTokenRange);
   }
 
   /** @override */
@@ -57,7 +94,22 @@ export class ApiTypeAlias extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredIte
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiTypeAlias.getCanonicalReference(this.name);
+  public get containerKey(): string {
+    return ApiTypeAlias.getContainerKey(this.name);
+  }
+
+  /** @override */
+  public serializeInto(jsonObject: Partial<IApiTypeAliasJson>): void {
+    super.serializeInto(jsonObject);
+
+    jsonObject.typeTokenRange = this.typeExcerpt.tokenRange;
+  }
+
+  /** @beta @override */
+  public buildCanonicalReference(): DeclarationReference {
+    const nameComponent: Component = DeclarationReference.parseComponent(this.name);
+    return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
+      .addNavigationStep(Navigation.Exports, nameComponent)
+      .withMeaning(Meaning.TypeAlias);
   }
 }

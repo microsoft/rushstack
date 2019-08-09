@@ -117,8 +117,12 @@ export class PackageJsonEditor {
   }
 
   public addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void {
-    const dependency: PackageJsonDependency
-        = new PackageJsonDependency(packageName, newVersion, dependencyType, this._onChange.bind(this));
+    const dependency: PackageJsonDependency = new PackageJsonDependency(
+      packageName,
+      newVersion,
+      dependencyType,
+      this._onChange.bind(this)
+    );
 
     if (dependencyType === DependencyType.Regular || dependencyType === DependencyType.Optional) {
       this._dependencies.set(packageName, dependency);

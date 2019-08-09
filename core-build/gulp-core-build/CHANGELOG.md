@@ -1,6 +1,29 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Wed, 03 Apr 2019 02:58:33 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Aug 2019 15:14:17 GMT and should not be manually modified.
+
+## 3.11.1
+Thu, 08 Aug 2019 15:14:17 GMT
+
+*Version update only*
+
+## 3.11.0
+Mon, 05 Aug 2019 22:04:32 GMT
+
+### Minor changes
+
+- Introduce an optional build timeout.
+
+### Patches
+
+- Security updates.
+
+## 3.10.0
+Tue, 23 Jul 2019 19:14:38 GMT
+
+### Minor changes
+
+- Update gulp to 4.0.2
 
 ## 3.9.26
 Wed, 03 Apr 2019 02:58:33 GMT

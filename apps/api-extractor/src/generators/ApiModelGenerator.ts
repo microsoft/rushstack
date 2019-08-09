@@ -29,7 +29,8 @@ import {
   ApiIndexSignature,
   ApiVariable,
   ApiTypeAlias,
-  ApiCallSignature
+  ApiCallSignature,
+  IApiTypeParameterOptions
 } from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';
@@ -175,10 +176,10 @@ export class ApiModelGenerator {
     parentApiItem: ApiItemContainerMixin): void {
 
     const overloadIndex: number = this._getOverloadIndex(astDeclaration);
-    const canonicalReference: string = ApiCallSignature.getCanonicalReference(overloadIndex);
+    const containerKey: string = ApiCallSignature.getContainerKey(overloadIndex);
 
-    let apiCallSignature: ApiCallSignature | undefined = parentApiItem.tryGetMember(canonicalReference) as
-    ApiCallSignature;
+    let apiCallSignature: ApiCallSignature | undefined = parentApiItem.tryGetMemberByKey(containerKey) as
+      ApiCallSignature;
 
     if (apiCallSignature === undefined) {
       const callSignature: ts.CallSignatureDeclaration = astDeclaration.declaration as ts.CallSignatureDeclaration;
@@ -187,6 +188,9 @@ export class ApiModelGenerator {
 
       const returnTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: callSignature.type, tokenRange: returnTypeTokenRange });
+
+      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(nodesToCapture,
+        callSignature.typeParameters);
 
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, callSignature.parameters);
 
@@ -197,7 +201,7 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
-      apiCallSignature = new ApiCallSignature({ docComment, releaseTag, parameters, overloadIndex,
+      apiCallSignature = new ApiCallSignature({ docComment, releaseTag, typeParameters, parameters, overloadIndex,
         excerptTokens, returnTypeTokenRange });
 
       parentApiItem.addMember(apiCallSignature);
@@ -207,11 +211,10 @@ export class ApiModelGenerator {
   private _processApiConstructor(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
 
-    const isStatic: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Static) !== 0;
     const overloadIndex: number = this._getOverloadIndex(astDeclaration);
-    const canonicalReference: string = ApiConstructor.getCanonicalReference(isStatic, overloadIndex);
+    const containerKey: string = ApiConstructor.getContainerKey(overloadIndex);
 
-    let apiConstructor: ApiConstructor | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiConstructor;
+    let apiConstructor: ApiConstructor | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiConstructor;
 
     if (apiConstructor === undefined) {
       const constructorDeclaration: ts.ConstructorDeclaration = astDeclaration.declaration as ts.ConstructorDeclaration;
@@ -229,7 +232,7 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
-      apiConstructor = new ApiConstructor({ docComment, releaseTag, isStatic, parameters, overloadIndex,
+      apiConstructor = new ApiConstructor({ docComment, releaseTag, parameters, overloadIndex,
         excerptTokens });
 
       parentApiItem.addMember(apiConstructor);
@@ -240,14 +243,18 @@ export class ApiModelGenerator {
     parentApiItem: ApiItemContainerMixin): void {
 
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
-    const canonicalReference: string = ApiClass.getCanonicalReference(name);
+    const containerKey: string = ApiClass.getContainerKey(name);
 
-    let apiClass: ApiClass | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiClass;
+    let apiClass: ApiClass | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiClass;
 
     if (apiClass === undefined) {
       const classDeclaration: ts.ClassDeclaration = astDeclaration.declaration as ts.ClassDeclaration;
 
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
+
+      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(nodesToCapture,
+        classDeclaration.typeParameters);
+
       let extendsTokenRange: IExcerptTokenRange | undefined = undefined;
       const implementsTokenRanges: IExcerptTokenRange[] = [];
 
@@ -274,8 +281,8 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
-      apiClass = new ApiClass({ name, docComment, releaseTag,
-        excerptTokens, extendsTokenRange, implementsTokenRanges });
+      apiClass = new ApiClass({ name, docComment, releaseTag, excerptTokens, typeParameters, extendsTokenRange,
+        implementsTokenRanges });
 
       parentApiItem.addMember(apiClass);
     }
@@ -287,9 +294,9 @@ export class ApiModelGenerator {
     parentApiItem: ApiItemContainerMixin): void {
 
     const overloadIndex: number = this._getOverloadIndex(astDeclaration);
-    const canonicalReference: string = ApiConstructSignature.getCanonicalReference(overloadIndex);
+    const containerKey: string = ApiConstructSignature.getContainerKey(overloadIndex);
 
-    let apiConstructSignature: ApiConstructSignature | undefined = parentApiItem.tryGetMember(canonicalReference) as
+    let apiConstructSignature: ApiConstructSignature | undefined = parentApiItem.tryGetMemberByKey(containerKey) as
       ApiConstructSignature;
 
     if (apiConstructSignature === undefined) {
@@ -301,6 +308,9 @@ export class ApiModelGenerator {
       const returnTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: constructSignature.type, tokenRange: returnTypeTokenRange });
 
+      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(nodesToCapture,
+        constructSignature.typeParameters);
+
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, constructSignature.parameters);
 
       const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
@@ -310,8 +320,8 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
-      apiConstructSignature = new ApiConstructSignature({ docComment, releaseTag, parameters, overloadIndex,
-        excerptTokens, returnTypeTokenRange });
+      apiConstructSignature = new ApiConstructSignature({ docComment, releaseTag, typeParameters, parameters,
+        overloadIndex, excerptTokens, returnTypeTokenRange });
 
       parentApiItem.addMember(apiConstructSignature);
     }
@@ -321,9 +331,9 @@ export class ApiModelGenerator {
     parentApiItem: ApiItemContainerMixin): void {
 
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
-    const canonicalReference: string = ApiEnum.getCanonicalReference(name);
+    const containerKey: string = ApiEnum.getContainerKey(name);
 
-    let apiEnum: ApiEnum | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiEnum;
+    let apiEnum: ApiEnum | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiEnum;
 
     if (apiEnum === undefined) {
       const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
@@ -345,9 +355,9 @@ export class ApiModelGenerator {
     parentApiItem: ApiItemContainerMixin): void {
 
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
-    const canonicalReference: string = ApiEnumMember.getCanonicalReference(name);
+    const containerKey: string = ApiEnumMember.getContainerKey(name);
 
-    let apiEnumMember: ApiEnumMember | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiEnumMember;
+    let apiEnumMember: ApiEnumMember | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiEnumMember;
 
     if (apiEnumMember === undefined) {
       const enumMember: ts.EnumMember = astDeclaration.declaration as ts.EnumMember;
@@ -378,9 +388,9 @@ export class ApiModelGenerator {
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
 
     const overloadIndex: number = this._getOverloadIndex(astDeclaration);
-    const canonicalReference: string = ApiFunction.getCanonicalReference(name, overloadIndex);
+    const containerKey: string = ApiFunction.getContainerKey(name, overloadIndex);
 
-    let apiFunction: ApiFunction | undefined = parentApiItem.tryGetMember(canonicalReference) as
+    let apiFunction: ApiFunction | undefined = parentApiItem.tryGetMemberByKey(containerKey) as
       ApiFunction;
 
     if (apiFunction === undefined) {
@@ -390,6 +400,9 @@ export class ApiModelGenerator {
 
       const returnTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: functionDeclaration.type, tokenRange: returnTypeTokenRange });
+
+      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(nodesToCapture,
+        functionDeclaration.typeParameters);
 
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture,
         functionDeclaration.parameters);
@@ -401,7 +414,7 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
-      apiFunction = new ApiFunction({ name, docComment, releaseTag, parameters, overloadIndex,
+      apiFunction = new ApiFunction({ name, docComment, releaseTag, typeParameters, parameters, overloadIndex,
         excerptTokens, returnTypeTokenRange });
 
       parentApiItem.addMember(apiFunction);
@@ -412,9 +425,9 @@ export class ApiModelGenerator {
     parentApiItem: ApiItemContainerMixin): void {
 
     const overloadIndex: number = this._getOverloadIndex(astDeclaration);
-    const canonicalReference: string = ApiIndexSignature.getCanonicalReference(overloadIndex);
+    const containerKey: string = ApiIndexSignature.getContainerKey(overloadIndex);
 
-    let apiIndexSignature: ApiIndexSignature | undefined = parentApiItem.tryGetMember(canonicalReference) as
+    let apiIndexSignature: ApiIndexSignature | undefined = parentApiItem.tryGetMemberByKey(containerKey) as
     ApiIndexSignature;
 
     if (apiIndexSignature === undefined) {
@@ -445,14 +458,18 @@ export class ApiModelGenerator {
     parentApiItem: ApiItemContainerMixin): void {
 
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
-    const canonicalReference: string = ApiInterface.getCanonicalReference(name);
+    const containerKey: string = ApiInterface.getContainerKey(name);
 
-    let apiInterface: ApiInterface | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiInterface;
+    let apiInterface: ApiInterface | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiInterface;
 
     if (apiInterface === undefined) {
       const interfaceDeclaration: ts.InterfaceDeclaration = astDeclaration.declaration as ts.InterfaceDeclaration;
 
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
+
+      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(nodesToCapture,
+        interfaceDeclaration.typeParameters);
+
       const extendsTokenRanges: IExcerptTokenRange[] = [];
 
       for (const heritageClause of interfaceDeclaration.heritageClauses || []) {
@@ -474,7 +491,9 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
-      apiInterface = new ApiInterface({ name, docComment, releaseTag, excerptTokens, extendsTokenRanges });
+      apiInterface = new ApiInterface({ name, docComment, releaseTag, excerptTokens, typeParameters,
+        extendsTokenRanges });
+
       parentApiItem.addMember(apiInterface);
     }
 
@@ -488,9 +507,9 @@ export class ApiModelGenerator {
 
     const isStatic: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Static) !== 0;
     const overloadIndex: number = this._getOverloadIndex(astDeclaration);
-    const canonicalReference: string = ApiMethod.getCanonicalReference(name, isStatic, overloadIndex);
+    const containerKey: string = ApiMethod.getContainerKey(name, isStatic, overloadIndex);
 
-    let apiMethod: ApiMethod | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiMethod;
+    let apiMethod: ApiMethod | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiMethod;
 
     if (apiMethod === undefined) {
       const methodDeclaration: ts.MethodDeclaration = astDeclaration.declaration as ts.MethodDeclaration;
@@ -499,6 +518,9 @@ export class ApiModelGenerator {
 
       const returnTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: methodDeclaration.type, tokenRange: returnTypeTokenRange });
+
+      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(nodesToCapture,
+        methodDeclaration.typeParameters);
 
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, methodDeclaration.parameters);
 
@@ -510,7 +532,7 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
-      apiMethod = new ApiMethod({ name, docComment, releaseTag, isStatic, parameters, overloadIndex,
+      apiMethod = new ApiMethod({ name, docComment, releaseTag, isStatic, typeParameters, parameters, overloadIndex,
         excerptTokens, returnTypeTokenRange });
 
       parentApiItem.addMember(apiMethod);
@@ -523,9 +545,9 @@ export class ApiModelGenerator {
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
 
     const overloadIndex: number = this._getOverloadIndex(astDeclaration);
-    const canonicalReference: string = ApiMethodSignature.getCanonicalReference(name, overloadIndex);
+    const containerKey: string = ApiMethodSignature.getContainerKey(name, overloadIndex);
 
-    let apiMethodSignature: ApiMethodSignature | undefined = parentApiItem.tryGetMember(canonicalReference) as
+    let apiMethodSignature: ApiMethodSignature | undefined = parentApiItem.tryGetMemberByKey(containerKey) as
       ApiMethodSignature;
 
     if (apiMethodSignature === undefined) {
@@ -536,6 +558,9 @@ export class ApiModelGenerator {
       const returnTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: methodSignature.type, tokenRange: returnTypeTokenRange });
 
+      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(nodesToCapture,
+        methodSignature.typeParameters);
+
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, methodSignature.parameters);
 
       const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
@@ -545,8 +570,8 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
-      apiMethodSignature = new ApiMethodSignature({ name, docComment, releaseTag, parameters, overloadIndex,
-        excerptTokens, returnTypeTokenRange });
+      apiMethodSignature = new ApiMethodSignature({ name, docComment, releaseTag, typeParameters, parameters,
+        overloadIndex, excerptTokens, returnTypeTokenRange });
 
       parentApiItem.addMember(apiMethodSignature);
     }
@@ -556,9 +581,9 @@ export class ApiModelGenerator {
     parentApiItem: ApiItemContainerMixin): void {
 
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
-    const canonicalReference: string = ApiNamespace.getCanonicalReference(name);
+    const containerKey: string = ApiNamespace.getContainerKey(name);
 
-    let apiNamespace: ApiNamespace | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiNamespace;
+    let apiNamespace: ApiNamespace | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiNamespace;
 
     if (apiNamespace === undefined) {
       const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
@@ -583,10 +608,10 @@ export class ApiModelGenerator {
 
     const isStatic: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Static) !== 0;
 
-    const canonicalReference: string = ApiProperty.getCanonicalReference(name, isStatic);
+    const containerKey: string = ApiProperty.getContainerKey(name, isStatic);
 
     let apiProperty: ApiProperty | undefined
-      = parentApiItem.tryGetMember(canonicalReference) as ApiProperty;
+      = parentApiItem.tryGetMemberByKey(containerKey) as ApiProperty;
 
     if (apiProperty === undefined) {
       const propertyDeclaration: ts.PropertyDeclaration = astDeclaration.declaration as ts.PropertyDeclaration;
@@ -615,10 +640,10 @@ export class ApiModelGenerator {
     parentApiItem: ApiItemContainerMixin): void {
 
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
-    const canonicalReference: string = ApiPropertySignature.getCanonicalReference(name);
+    const containerKey: string = ApiPropertySignature.getContainerKey(name);
 
     let apiPropertySignature: ApiPropertySignature | undefined
-      = parentApiItem.tryGetMember(canonicalReference) as ApiPropertySignature;
+      = parentApiItem.tryGetMemberByKey(containerKey) as ApiPropertySignature;
 
     if (apiPropertySignature === undefined) {
       const propertySignature: ts.PropertySignature = astDeclaration.declaration as ts.PropertySignature;
@@ -649,13 +674,21 @@ export class ApiModelGenerator {
 
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
 
-    const canonicalReference: string = ApiTypeAlias.getCanonicalReference(name);
+    const containerKey: string = ApiTypeAlias.getContainerKey(name);
 
-    let apiTypeAlias: ApiTypeAlias | undefined = parentApiItem.tryGetMember(canonicalReference) as
+    let apiTypeAlias: ApiTypeAlias | undefined = parentApiItem.tryGetMemberByKey(containerKey) as
       ApiTypeAlias;
 
     if (apiTypeAlias === undefined) {
+      const typeAliasDeclaration: ts.TypeAliasDeclaration = astDeclaration.declaration as ts.TypeAliasDeclaration;
+
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
+
+      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(nodesToCapture,
+        typeAliasDeclaration.typeParameters);
+
+      const typeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
+      nodesToCapture.push({ node: typeAliasDeclaration.type, tokenRange: typeTokenRange });
 
       const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
         startingNode: astDeclaration.declaration,
@@ -664,7 +697,8 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
-      apiTypeAlias = new ApiTypeAlias({ name, docComment, releaseTag, excerptTokens });
+      apiTypeAlias = new ApiTypeAlias({ name, docComment, typeParameters, releaseTag, excerptTokens,
+        typeTokenRange });
 
       parentApiItem.addMember(apiTypeAlias);
     }
@@ -675,9 +709,9 @@ export class ApiModelGenerator {
 
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
 
-    const canonicalReference: string = ApiVariable.getCanonicalReference(name);
+    const containerKey: string = ApiVariable.getContainerKey(name);
 
-    let apiVariable: ApiVariable | undefined = parentApiItem.tryGetMember(canonicalReference) as
+    let apiVariable: ApiVariable | undefined = parentApiItem.tryGetMemberByKey(containerKey) as
       ApiVariable;
 
     if (apiVariable === undefined) {
@@ -701,6 +735,28 @@ export class ApiModelGenerator {
     }
   }
 
+  private _captureTypeParameters(nodesToCapture: IExcerptBuilderNodeToCapture[], typeParameterNodes:
+    ts.NodeArray<ts.TypeParameterDeclaration> | undefined): IApiTypeParameterOptions[] {
+
+    const typeParameters: IApiTypeParameterOptions[] = [];
+    if (typeParameterNodes) {
+      for (const typeParameter of typeParameterNodes) {
+        const constraintTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
+        nodesToCapture.push({ node: typeParameter.constraint, tokenRange: constraintTokenRange });
+
+        const defaultTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
+        nodesToCapture.push({ node: typeParameter.default, tokenRange: defaultTypeTokenRange });
+
+        typeParameters.push({
+          typeParameterName: typeParameter.name.getText().trim(),
+          constraintTokenRange,
+          defaultTypeTokenRange
+        });
+      }
+    }
+    return typeParameters;
+  }
+
   private _captureParameters(nodesToCapture: IExcerptBuilderNodeToCapture[],
     parameterNodes: ts.NodeArray<ts.ParameterDeclaration>): IApiParameterOptions[] {
 
@@ -719,13 +775,14 @@ export class ApiModelGenerator {
   private _getOverloadIndex(astDeclaration: AstDeclaration): number {
     const allDeclarations: ReadonlyArray<AstDeclaration> = astDeclaration.astSymbol.astDeclarations;
     if (allDeclarations.length === 1) {
-      return 0; // trivial case
+      return 1; // trivial case
     }
 
     let overloadIndex: number | undefined = this._cachedOverloadIndexesByDeclaration.get(astDeclaration);
 
     if (overloadIndex === undefined) {
-      let nextIndex: number = 0;
+      // TSDoc index selectors are positive integers counting from 1
+      let nextIndex: number = 1;
       for (const other of allDeclarations) {
         // Filter out other declarations that are not overloads.  For example, an overloaded function can also
         // be a namespace.

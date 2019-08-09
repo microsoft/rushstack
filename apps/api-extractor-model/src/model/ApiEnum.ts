@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeclarationReference, Meaning, Navigation, Component } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiDeclaredItem, IApiDeclaredItemOptions } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
@@ -41,8 +42,8 @@ export interface IApiEnumOptions extends
  */
 export class ApiEnum extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
 
-  public static getCanonicalReference(name: string): string {
-    return `(${name}:enum)`;
+  public static getContainerKey(name: string): string {
+    return `${name}|${ApiItemKind.Enum}`;
   }
 
   public constructor(options: IApiEnumOptions) {
@@ -60,8 +61,8 @@ export class ApiEnum extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMix
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiEnum.getCanonicalReference(this.name);
+  public get containerKey(): string {
+    return ApiEnum.getContainerKey(this.name);
   }
 
   /** @override */
@@ -70,5 +71,13 @@ export class ApiEnum extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMix
       throw new Error('Only ApiEnumMember objects can be added to an ApiEnum');
     }
     super.addMember(member);
+  }
+
+  /** @beta @override */
+  public buildCanonicalReference(): DeclarationReference {
+    const nameComponent: Component = DeclarationReference.parseComponent(this.name);
+    return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
+      .addNavigationStep(Navigation.Exports, nameComponent)
+      .withMeaning(Meaning.Enum);
   }
 }

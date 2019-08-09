@@ -1,6 +1,93 @@
 # Change Log - @microsoft/node-library-build
 
-This log was last generated on Mon, 13 May 2019 02:08:35 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Aug 2019 15:14:17 GMT and should not be manually modified.
+
+## 6.1.3
+Thu, 08 Aug 2019 15:14:17 GMT
+
+*Version update only*
+
+## 6.1.2
+Thu, 08 Aug 2019 00:49:05 GMT
+
+*Version update only*
+
+## 6.1.1
+Mon, 05 Aug 2019 22:04:32 GMT
+
+*Version update only*
+
+## 6.1.0
+Tue, 23 Jul 2019 19:14:38 GMT
+
+### Minor changes
+
+- Update gulp to 4.0.2
+
+## 6.0.74
+Tue, 23 Jul 2019 01:13:01 GMT
+
+*Version update only*
+
+## 6.0.73
+Mon, 22 Jul 2019 19:13:10 GMT
+
+*Version update only*
+
+## 6.0.72
+Fri, 12 Jul 2019 19:12:46 GMT
+
+*Version update only*
+
+## 6.0.71
+Thu, 11 Jul 2019 19:13:08 GMT
+
+*Version update only*
+
+## 6.0.70
+Tue, 09 Jul 2019 19:13:24 GMT
+
+*Version update only*
+
+## 6.0.69
+Mon, 08 Jul 2019 19:12:18 GMT
+
+*Version update only*
+
+## 6.0.68
+Sat, 29 Jun 2019 02:30:10 GMT
+
+*Version update only*
+
+## 6.0.67
+Wed, 12 Jun 2019 19:12:33 GMT
+
+*Version update only*
+
+## 6.0.66
+Tue, 11 Jun 2019 00:48:06 GMT
+
+*Version update only*
+
+## 6.0.65
+Thu, 06 Jun 2019 22:33:36 GMT
+
+*Version update only*
+
+## 6.0.64
+Wed, 05 Jun 2019 19:12:34 GMT
+
+*Version update only*
+
+## 6.0.63
+Tue, 04 Jun 2019 05:51:53 GMT
+
+*Version update only*
+
+## 6.0.62
+Mon, 27 May 2019 04:13:44 GMT
+
+*Version update only*
 
 ## 6.0.61
 Mon, 13 May 2019 02:08:35 GMT

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeclarationReference, Meaning, Navigation, Component } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
@@ -8,6 +9,9 @@ import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiRel
 import { IExcerptTokenRange } from '../mixins/Excerpt';
 import { HeritageType } from './HeritageType';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { ApiTypeParameterListMixin, IApiTypeParameterListMixinOptions, IApiTypeParameterListMixinJson
+  } from '../mixins/ApiTypeParameterListMixin';
+import { DeserializerContext } from './DeserializerContext';
 
 /**
  * Constructor options for {@link ApiClass}.
@@ -17,13 +21,16 @@ export interface IApiClassOptions extends
   IApiItemContainerMixinOptions,
   IApiNameMixinOptions,
   IApiReleaseTagMixinOptions,
-  IApiDeclaredItemOptions {
+  IApiDeclaredItemOptions,
+  IApiTypeParameterListMixinOptions {
 
   extendsTokenRange: IExcerptTokenRange | undefined;
   implementsTokenRanges: IExcerptTokenRange[];
 }
 
-export interface IApiClassJson extends IApiDeclaredItemJson {
+export interface IApiClassJson extends
+  IApiDeclaredItemJson,
+  IApiTypeParameterListMixinJson {
   extendsTokenRange?: IExcerptTokenRange;
   implementsTokenRanges: IExcerptTokenRange[];
 }
@@ -44,7 +51,8 @@ export interface IApiClassJson extends IApiDeclaredItemJson {
  *
  * @public
  */
-export class ApiClass extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
+export class ApiClass extends ApiItemContainerMixin(ApiNameMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(
+  ApiDeclaredItem)))) {
 
   /**
    * The base class that this class inherits from (using the `extends` keyword), or undefined if there is no base class.
@@ -53,13 +61,15 @@ export class ApiClass extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMi
 
   private readonly _implementsTypes: HeritageType[] = [];
 
-  public static getCanonicalReference(name: string): string {
-    return `(${name}:class)`;
+  public static getContainerKey(name: string): string {
+    return `${name}|${ApiItemKind.Class}`;
   }
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiClassOptions>, jsonObject: IApiClassJson): void {
-    super.onDeserializeInto(options, jsonObject);
+  public static onDeserializeInto(options: Partial<IApiClassOptions>, context: DeserializerContext,
+    jsonObject: IApiClassJson): void {
+
+    super.onDeserializeInto(options, context, jsonObject);
 
     options.extendsTokenRange = jsonObject.extendsTokenRange;
     options.implementsTokenRanges = jsonObject.implementsTokenRanges;
@@ -85,8 +95,8 @@ export class ApiClass extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMi
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiClass.getCanonicalReference(this.name);
+  public get containerKey(): string {
+    return ApiClass.getContainerKey(this.name);
   }
 
   /**
@@ -106,5 +116,13 @@ export class ApiClass extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMi
     }
 
     jsonObject.implementsTokenRanges = this.implementsTypes.map(x => x.excerpt.tokenRange);
+  }
+
+  /** @beta @override */
+  public buildCanonicalReference(): DeclarationReference {
+    const nameComponent: Component = DeclarationReference.parseComponent(this.name);
+    return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
+      .addNavigationStep(Navigation.Exports, nameComponent)
+      .withMeaning(Meaning.Class);
   }
 }

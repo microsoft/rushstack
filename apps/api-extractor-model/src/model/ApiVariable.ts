@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeclarationReference, Meaning, Navigation, Component } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 import { IExcerptTokenRange, Excerpt } from '../mixins/Excerpt';
+import { DeserializerContext } from './DeserializerContext';
 
 /**
  * Constructor options for {@link ApiVariable}.
@@ -50,16 +52,16 @@ export class ApiVariable extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem
   public readonly variableTypeExcerpt: Excerpt;
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiVariableOptions>,
+  public static onDeserializeInto(options: Partial<IApiVariableOptions>, context: DeserializerContext,
     jsonObject: IApiVariableJson): void {
 
-    super.onDeserializeInto(options, jsonObject);
+    super.onDeserializeInto(options, context, jsonObject);
 
     options.variableTypeTokenRange = jsonObject.variableTypeTokenRange;
   }
 
-  public static getCanonicalReference(name: string): string {
-    return name;
+  public static getContainerKey(name: string): string {
+    return `${name}|${ApiItemKind.Variable}`;
   }
 
   public constructor(options: IApiVariableOptions) {
@@ -74,8 +76,8 @@ export class ApiVariable extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiVariable.getCanonicalReference(this.name);
+  public get containerKey(): string {
+    return ApiVariable.getContainerKey(this.name);
   }
 
   /** @override */
@@ -83,5 +85,13 @@ export class ApiVariable extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem
     super.serializeInto(jsonObject);
 
     jsonObject.variableTypeTokenRange = this.variableTypeExcerpt.tokenRange;
+  }
+
+  /** @beta @override */
+  public buildCanonicalReference(): DeclarationReference {
+    const nameComponent: Component = DeclarationReference.parseComponent(this.name);
+    return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
+      .addNavigationStep(Navigation.Exports, nameComponent)
+      .withMeaning(Meaning.Variable);
   }
 }

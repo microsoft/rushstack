@@ -2,6 +2,174 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.11.1",
+      "tag": "@microsoft/rush_v5.11.1",
+      "date": "Fri, 26 Jul 2019 23:08:23 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix critical path computation for projects"
+          },
+          {
+            "comment": "Normalize the casing of a temp folder specified with RUSH_TEMP_FOLDER."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.11.0",
+      "tag": "@microsoft/rush_v5.11.0",
+      "date": "Fri, 26 Jul 2019 08:34:03 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Generate skeleton BuildXL script modules for each package"
+          },
+          {
+            "comment": "Allow building with newer versions of Node during development"
+          },
+          {
+            "comment": "Add experimental rush-buildxl package"
+          },
+          {
+            "comment": "Ensure the filesystem paths that Rush uses have the same character casing that exists on disk."
+          },
+          {
+            "comment": "Tweak NodeJS version warning messages and add suppressNodeLtsWarning option to rush.json to suppress non-LTS version warning."
+          },
+          {
+            "comment": "Do not terminate rush execution if a temp project lacks an entry in the PNPM shrinkwrap. Instead, allow the program to continue so that PNPM can update the outdated shrinkwrap. This fixes #1418 https://github.com/microsoft/web-build-tools/issues/1418."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.10.3",
+      "tag": "@microsoft/rush_v5.10.3",
+      "date": "Thu, 18 Jul 2019 00:07:46 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Make event hooks run from the folder that contains the rush.json file."
+          },
+          {
+            "comment": "Fix 1392 \"rush install not working on pnpm 3.5\" by getting the temporary project dependency key from the shrinkwrap file. See  https://github.com/microsoft/web-build-tools/issues/1392."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.10.2",
+      "tag": "@microsoft/rush_v5.10.2",
+      "date": "Tue, 16 Jul 2019 19:36:08 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Prevent non-hotfix changes from being applied to hotfix branches"
+          },
+          {
+            "comment": "Use the shrinkwrap from temp for \"rush link\" as the committed shrinkwrap may not always be up to date as a result of shrinkwrap churn optimization. See https://github.com/microsoft/web-build-tools/issues/1273#issuecomment-492779995 for more details about shrinkwrap churn optimization."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.10.1",
+      "tag": "@microsoft/rush_v5.10.1",
+      "date": "Thu, 11 Jul 2019 22:00:50 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix for issue https://github.com/microsoft/web-build-tools/issues/1349 rush install fails when there is a preferred version with a peer dependency. This was caused by file format changes in pnpm 3.x "
+          },
+          {
+            "comment": "Fix an issue where \"rush add\" erroneously believes ensureConsistentVersions is unset."
+          },
+          {
+            "comment": "Fix an issue that arises when \"rush add\" is run and the package manager isn't installed."
+          },
+          {
+            "comment": "Fix an issue where rush add -m doesn't corretly update the common-versions.json file."
+          },
+          {
+            "comment": "Fix an issue where rush change will detect unrelated changes."
+          },
+          {
+            "comment": "When rush change detects no changes, clarify that no *relevant* changes were detected in the case that changes were in a package not versioned by rush'"
+          },
+          {
+            "comment": "Fix https://github.com/microsoft/web-build-tools/issues/1347: rush link was failing on pnpm 3+ with the changes in shrinkwrap format with regard to peer dependencies. Rush now resolves the path to the local project accurately by referring to the shrinkwrap rather than figuring out the path on its own."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.10.0",
+      "tag": "@microsoft/rush_v5.10.0",
+      "date": "Sat, 29 Jun 2019 02:47:42 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "New action added to list package name for all projects"
+          },
+          {
+            "comment": "Add ability to opt out of changelog files for version policies."
+          },
+          {
+            "comment": "Workaround for pnpm issue 1890: https://github.com/pnpm/pnpm/issues/1890. Fixes the issue of \"rush update --full\" not working correctly if the internal copy of the pnpm shrinkwrap \"common/temp/node_modules/.shrinkwrap.yaml\" exists even though Rush deletes the formal copy in \"common/temp/shrinkwrap.yaml\"."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.9.1",
+      "tag": "@microsoft/rush_v5.9.1",
+      "date": "Thu, 13 Jun 2019 04:46:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where custom command-line parameters weren't passed to projects' builds."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.9.0",
+      "tag": "@microsoft/rush_v5.9.0",
+      "date": "Tue, 11 Jun 2019 02:26:20 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(BEHAVIOR CHANGE) Fix an issue where CI jobs could succeed even if a task reported warnings to stderr; if your build fails due to warnings after upgrading, please see https://github.com/microsoft/web-build-tools/issues/1329"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.8.0",
+      "tag": "@microsoft/rush_v5.8.0",
+      "date": "Tue, 11 Jun 2019 01:28:33 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new setting \"ignoreDependencyOrder\" in command-line.json"
+          },
+          {
+            "comment": "Clarify \"rush change\" messages."
+          },
+          {
+            "comment": "Improve 'rush version' to fetch before checkout, which avoids an error in cases where the branch wasn't fetched."
+          },
+          {
+            "comment": "Fix typo in command-line help for \"rush add\""
+          },
+          {
+            "comment": "Fix an issue where \"rush build\" ignored changes to a project with an empty build script (GitHub #1282)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.7.3",
       "tag": "@microsoft/rush_v5.7.3",
       "date": "Mon, 06 May 2019 21:03:32 GMT",

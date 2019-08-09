@@ -2,6 +2,225 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.3.7",
+      "tag": "@microsoft/api-extractor_v7.3.7",
+      "date": "Thu, 08 Aug 2019 15:14:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.3.1` to `7.3.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.13.0` to `3.14.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.6",
+      "tag": "@microsoft/api-extractor_v7.3.6",
+      "date": "Thu, 08 Aug 2019 00:49:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where a function with only one declaration was assigned an overloadIndex of 0 instead of 1"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.3.0` to `7.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.5",
+      "tag": "@microsoft/api-extractor_v7.3.5",
+      "date": "Mon, 05 Aug 2019 22:04:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Security updates."
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.4",
+      "tag": "@microsoft/api-extractor_v7.3.4",
+      "date": "Tue, 23 Jul 2019 01:13:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "ApiItem.name is now quoted when it contains invalid identifier characters, to avoid conflicts with an ECMAScript symbol expression"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.3",
+      "tag": "@microsoft/api-extractor_v7.3.3",
+      "date": "Mon, 22 Jul 2019 19:13:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update to use new api-extractor-model"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.2.0` to `7.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.2",
+      "tag": "@microsoft/api-extractor_v7.3.2",
+      "date": "Fri, 12 Jul 2019 19:12:46 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Clarify docs for \"--typescript-compiler-folder\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.1",
+      "tag": "@microsoft/api-extractor_v7.3.1",
+      "date": "Thu, 11 Jul 2019 19:13:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for TypeScript 3.5"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.0",
+      "tag": "@microsoft/api-extractor_v7.3.0",
+      "date": "Tue, 09 Jul 2019 19:13:24 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a \"--diagnostics\" command-line option to help when troubleshooting problems"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.2.3",
+      "tag": "@microsoft/api-extractor_v7.2.3",
+      "date": "Mon, 08 Jul 2019 19:12:18 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a problem when analyzing .d.ts files that appear in the same folder as the corresponding .ts file (GitHub #1310)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.2.2",
+      "tag": "@microsoft/api-extractor_v7.2.2",
+      "date": "Sat, 29 Jun 2019 02:30:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix GitHub issue #1304 where \"IExtractorInvokeOptions.typescriptCompilerFolder\" did not work with TypeScript 3.4"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.2.1",
+      "tag": "@microsoft/api-extractor_v7.2.1",
+      "date": "Wed, 12 Jun 2019 19:12:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `4.2.5` to `4.2.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.2.0",
+      "tag": "@microsoft/api-extractor_v7.2.0",
+      "date": "Tue, 11 Jun 2019 00:48:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Generate ApiTypeParameter entries and type alias types"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.1.3` to `7.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.1.8",
+      "tag": "@microsoft/api-extractor_v7.1.8",
+      "date": "Wed, 05 Jun 2019 19:12:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where TSDoc index selectors (ApiParameterListMixin.overloadIndex) started from 0, whereas TSDoc requires a nonzero number"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.1.2` to `7.1.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.1.7",
+      "tag": "@microsoft/api-extractor_v7.1.7",
+      "date": "Tue, 04 Jun 2019 05:51:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade api-extractor-model to remove ApiConstructor.isStatic, since TypeScript constructors cannot be static"
+          },
+          {
+            "comment": "Improve handling of symbolic property and method names."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.1.1` to `7.1.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.1.6",
+      "tag": "@microsoft/api-extractor_v7.1.6",
+      "date": "Mon, 27 May 2019 04:13:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix incorrect path resolution for the \"extends\" field when loading tsconfig.json"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.1.0` to `7.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `4.2.4` to `4.2.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.1.5",
       "tag": "@microsoft/api-extractor_v7.1.5",
       "date": "Mon, 13 May 2019 02:08:35 GMT",

@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeclarationReference, Meaning, Navigation, Component } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { DeserializerContext } from './DeserializerContext';
 
 /**
  * Constructor options for {@link ApiEnumMember}.
@@ -49,13 +51,16 @@ export class ApiEnumMember extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredIt
    */
   public readonly initializerExcerpt: Excerpt;
 
-  public static getCanonicalReference(name: string): string {
+  public static getContainerKey(name: string): string {
+    // No prefix needed, because ApiEnumMember is the only possible member of an ApiEnum
     return name;
   }
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiEnumMemberOptions>, jsonObject: IApiEnumMemberJson): void {
-    super.onDeserializeInto(options, jsonObject);
+  public static onDeserializeInto(options: Partial<IApiEnumMemberOptions>, context: DeserializerContext,
+    jsonObject: IApiEnumMemberJson): void {
+
+    super.onDeserializeInto(options, context, jsonObject);
 
     options.initializerTokenRange = jsonObject.initializerTokenRange;
   }
@@ -72,8 +77,8 @@ export class ApiEnumMember extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredIt
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiEnumMember.getCanonicalReference(this.name);
+  public get containerKey(): string {
+    return ApiEnumMember.getContainerKey(this.name);
   }
 
   /** @override */
@@ -81,5 +86,13 @@ export class ApiEnumMember extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredIt
     super.serializeInto(jsonObject);
 
     jsonObject.initializerTokenRange = this.initializerExcerpt.tokenRange;
+  }
+
+  /** @beta @override */
+  public buildCanonicalReference(): DeclarationReference {
+    const nameComponent: Component = DeclarationReference.parseComponent(this.name);
+    return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
+      .addNavigationStep(Navigation.Exports, nameComponent)
+      .withMeaning(Meaning.Member);
   }
 }

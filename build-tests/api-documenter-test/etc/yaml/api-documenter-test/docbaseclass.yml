@@ -8,3 +8,29 @@ items:
       - typeScript
     type: class
     package: api-documenter-test
+    children:
+      - api-documenter-test.DocBaseClass.(constructor)
+      - api-documenter-test.DocBaseClass.(constructor)_1
+  - uid: api-documenter-test.DocBaseClass.(constructor)
+    summary: The simple constructor for `DocBaseClass`
+    name: (constructor)()
+    fullName: (constructor)()
+    langs:
+      - typeScript
+    type: constructor
+    syntax:
+      content: constructor();
+  - uid: api-documenter-test.DocBaseClass.(constructor)_1
+    summary: The overloaded constructor for `DocBaseClass`
+    name: (constructor)(x)
+    fullName: (constructor)(x)
+    langs:
+      - typeScript
+    type: constructor
+    syntax:
+      content: 'constructor(x: number);'
+      parameters:
+        - id: x
+          description: ''
+          type:
+            - number

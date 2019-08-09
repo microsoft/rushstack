@@ -68,7 +68,7 @@ describe('parseGitLsTree', () => {
 
 describe('getPackageDeps', () => {
 
-  it('can parse commited file', (done) => {
+  it('can parse committed file', (done) => {
     const results: IPackageDeps = getPackageDeps(TEST_PROJECT_PATH);
     try {
       const expectedFiles: { [key: string]: string } = {
@@ -104,7 +104,7 @@ describe('getPackageDeps', () => {
     done();
   });
 
-  it('can can handle adding one file', (done) => { // tslint:disable-line
+  it('can handle adding one file', (done) => { // tslint:disable-line
     const tempFilePath: string = path.join(TEST_PROJECT_PATH, 'a.txt');
 
     FileSystem.writeFile(tempFilePath, 'a');
@@ -136,7 +136,7 @@ describe('getPackageDeps', () => {
 
   });
 
-  it('can can handle adding two files', (done) => { // tslint:disable-line
+  it('can handle adding two files', (done) => { // tslint:disable-line
     const tempFilePath1: string = path.join(TEST_PROJECT_PATH, 'a.txt');
     const tempFilePath2: string = path.join(TEST_PROJECT_PATH, 'b.txt');
 
@@ -171,13 +171,13 @@ describe('getPackageDeps', () => {
     _done();
   });
 
-  it('can can handle removing one file', (done) => {
+  it('can handle removing one file', (done) => {
     const testFilePath: string = path.join(TEST_PROJECT_PATH, 'file1.txt');
 
     FileSystem.deleteFile(testFilePath);
 
     function _done(e?: Error): void {
-      execSync(`git checkout ${ testFilePath }`);
+      execSync(`git checkout ${ testFilePath }`, { stdio: 'ignore' });
       done(e);
     }
 
@@ -199,13 +199,13 @@ describe('getPackageDeps', () => {
     _done();
   });
 
-  it('can can handle changing one file', (done) => {
+  it('can handle changing one file', (done) => {
     const testFilePath: string = path.join(TEST_PROJECT_PATH, 'file1.txt');
 
     FileSystem.writeFile(testFilePath, 'abc');
 
     function _done(e?: Error): void {
-      execSync(`git checkout ${testFilePath}`);
+      execSync(`git checkout ${testFilePath}`, { stdio: 'ignore' });
       done(e);
     }
 

@@ -12,6 +12,14 @@ import { IExecutable } from './IExecutable';
  */
 export interface IBuildConfig {
   /**
+   * The maximum amount of time the build can run before being terminated.
+   * Specified in milliseconds. By default, there is no timeout.
+   *
+   * If set to zero (0), the build will never time out.
+   */
+  maxBuildTimeMs: number;
+
+  /**
    * Proxy gulp instance.
    */
   gulp: GulpProxy | gulp.Gulp;

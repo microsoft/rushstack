@@ -1,6 +1,98 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Mon, 13 May 2019 02:08:35 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Aug 2019 15:14:17 GMT and should not be manually modified.
+
+## 7.1.3
+Thu, 08 Aug 2019 15:14:17 GMT
+
+*Version update only*
+
+## 7.1.2
+Thu, 08 Aug 2019 00:49:05 GMT
+
+*Version update only*
+
+## 7.1.1
+Mon, 05 Aug 2019 22:04:32 GMT
+
+*Version update only*
+
+## 7.1.0
+Tue, 23 Jul 2019 19:14:38 GMT
+
+### Minor changes
+
+- Update gulp to 4.0.2.
+
+## 7.0.52
+Tue, 23 Jul 2019 01:13:01 GMT
+
+*Version update only*
+
+## 7.0.51
+Mon, 22 Jul 2019 19:13:10 GMT
+
+*Version update only*
+
+## 7.0.50
+Fri, 12 Jul 2019 19:12:46 GMT
+
+*Version update only*
+
+## 7.0.49
+Thu, 11 Jul 2019 19:13:08 GMT
+
+*Version update only*
+
+## 7.0.48
+Tue, 09 Jul 2019 19:13:24 GMT
+
+*Version update only*
+
+## 7.0.47
+Mon, 08 Jul 2019 19:12:18 GMT
+
+*Version update only*
+
+## 7.0.46
+Sat, 29 Jun 2019 02:30:10 GMT
+
+*Version update only*
+
+## 7.0.45
+Wed, 12 Jun 2019 19:12:33 GMT
+
+*Version update only*
+
+## 7.0.44
+Tue, 11 Jun 2019 00:48:06 GMT
+
+*Version update only*
+
+## 7.0.43
+Thu, 06 Jun 2019 22:33:36 GMT
+
+*Version update only*
+
+## 7.0.42
+Wed, 05 Jun 2019 19:12:34 GMT
+
+*Version update only*
+
+## 7.0.41
+Tue, 04 Jun 2019 05:51:54 GMT
+
+*Version update only*
+
+## 7.0.40
+Fri, 31 May 2019 01:13:07 GMT
+
+*Version update only*
+
+## 7.0.39
+Mon, 27 May 2019 04:13:44 GMT
+
+*Version update only*
 
 ## 7.0.38
 Mon, 13 May 2019 02:08:35 GMT

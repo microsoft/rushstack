@@ -33,7 +33,8 @@ import {
   ApiMethodSignature,
   ApiConstructor,
   ApiFunction,
-  ApiReturnTypeMixin
+  ApiReturnTypeMixin,
+  ApiTypeParameterListMixin
 } from '@microsoft/api-extractor-model';
 
 import {
@@ -328,11 +329,11 @@ export class YamlDocumenter {
         break;
       case ApiItemKind.Class:
         yamlItem.type = 'class';
-        this._populateYamlClassOrInterface(yamlItem, apiItem);
+        this._populateYamlClassOrInterface(yamlItem, apiItem as ApiClass);
         break;
       case ApiItemKind.Interface:
         yamlItem.type = 'interface';
-        this._populateYamlClassOrInterface(yamlItem, apiItem);
+        this._populateYamlClassOrInterface(yamlItem, apiItem as ApiInterface);
         break;
       case ApiItemKind.Method:
       case ApiItemKind.MethodSignature:
@@ -379,7 +380,27 @@ export class YamlDocumenter {
     return yamlItem as IYamlItem;
   }
 
-  private _populateYamlClassOrInterface(yamlItem: Partial<IYamlItem>, apiItem: ApiDocumentedItem): void {
+  private _populateYamlTypeParameters(apiItem: ApiTypeParameterListMixin): IYamlParameter[] {
+    const typeParameters: IYamlParameter[] = [];
+    for (const apiTypeParameter of apiItem.typeParameters) {
+      const typeParameter: IYamlParameter = {
+        id: apiTypeParameter.name
+      };
+
+      if (apiTypeParameter.tsdocTypeParamBlock) {
+        typeParameter.description = this._renderMarkdown(apiTypeParameter.tsdocTypeParamBlock.content, apiItem);
+      }
+
+      if (!apiTypeParameter.constraintExcerpt.isEmpty) {
+        typeParameter.type = [ this._linkToUidIfPossible(apiTypeParameter.constraintExcerpt.text) ];
+      }
+
+      typeParameters.push(typeParameter);
+    }
+    return typeParameters;
+  }
+
+  private _populateYamlClassOrInterface(yamlItem: Partial<IYamlItem>, apiItem: ApiClass | ApiInterface): void {
     if (apiItem instanceof ApiClass) {
       if (apiItem.extendsType) {
         yamlItem.extends = [ this._linkToUidIfPossible(apiItem.extendsType.excerpt.text) ];
@@ -396,6 +417,11 @@ export class YamlDocumenter {
         for (const extendsType of apiItem.extendsTypes) {
           yamlItem.extends.push(this._linkToUidIfPossible(extendsType.excerpt.text));
         }
+      }
+
+      const typeParameters: IYamlParameter[] = this._populateYamlTypeParameters(apiItem);
+      if (typeParameters.length) {
+        yamlItem.syntax = { typeParameters };
       }
     }
 
@@ -462,6 +488,14 @@ export class YamlDocumenter {
     if (parameters.length) {
       syntax.parameters = parameters;
     }
+
+    if (ApiTypeParameterListMixin.isBaseClassOf(apiItem)) {
+      const typeParameters: IYamlParameter[] = this._populateYamlTypeParameters(apiItem);
+      if (typeParameters.length) {
+        syntax.typeParameters = typeParameters;
+      }
+    }
+
   }
 
   private _populateYamlProperty(yamlItem: Partial<IYamlItem>, apiItem: ApiPropertyItem): void {
@@ -526,8 +560,10 @@ export class YamlDocumenter {
       // For overloaded methods, add a suffix such as "MyClass.myMethod_2".
       let qualifiedName: string = hierarchyItem.displayName;
       if (ApiParameterListMixin.isBaseClassOf(hierarchyItem)) {
-        if (hierarchyItem.overloadIndex > 0) {
-          qualifiedName += `_${hierarchyItem.overloadIndex}`;
+        if (hierarchyItem.overloadIndex > 1) {
+          // Subtract one for compatibility with earlier releases of API Documenter.
+          // (This will get revamped when we fix GitHub issue #1308)
+          qualifiedName += `_${hierarchyItem.overloadIndex - 1}`;
         }
       }
 
@@ -657,7 +693,7 @@ export class YamlDocumenter {
         case ApiItemKind.EntryPoint:
           break;
         case ApiItemKind.Package:
-          result += PackageName.getUnscopedName(current.displayName);
+          result += Utilities.getSafeFilenameForName(PackageName.getUnscopedName(current.displayName));
           break;
         default:
           if (current.parent && current.parent.kind === ApiItemKind.EntryPoint) {
@@ -665,11 +701,11 @@ export class YamlDocumenter {
           } else {
             result += '.';
           }
-          result += current.displayName;
+          result += Utilities.getSafeFilenameForName(current.displayName);
           break;
       }
     }
-    return path.join(this._outputFolder, result.toLowerCase() + '.yml');
+    return path.join(this._outputFolder, result + '.yml');
   }
 
   private _deleteOldOutputFiles(): void {

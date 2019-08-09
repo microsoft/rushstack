@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeclarationReference, Meaning, Navigation, Component } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
 import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
@@ -8,6 +9,7 @@ import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/
 import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
 import { ApiReturnTypeMixin, IApiReturnTypeMixinOptions } from '../mixins/ApiReturnTypeMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { ApiTypeParameterListMixin, IApiTypeParameterListMixinOptions } from '../mixins/ApiTypeParameterListMixin';
 
 /**
  * Constructor options for {@link ApiMethod}.
@@ -15,6 +17,7 @@ import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
  */
 export interface IApiMethodOptions extends
   IApiNameMixinOptions,
+  IApiTypeParameterListMixinOptions,
   IApiParameterListMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiReturnTypeMixinOptions,
@@ -43,14 +46,14 @@ export interface IApiMethodOptions extends
  *
  * @public
  */
-export class ApiMethod extends ApiNameMixin(ApiParameterListMixin(ApiReleaseTagMixin(
-  ApiReturnTypeMixin(ApiStaticMixin(ApiDeclaredItem))))) {
+export class ApiMethod extends ApiNameMixin(ApiTypeParameterListMixin(ApiParameterListMixin(
+  ApiReleaseTagMixin(ApiReturnTypeMixin(ApiStaticMixin(ApiDeclaredItem)))))) {
 
-  public static getCanonicalReference(name: string, isStatic: boolean, overloadIndex: number): string {
+  public static getContainerKey(name: string, isStatic: boolean, overloadIndex: number): string {
     if (isStatic) {
-      return `(${name}:static,${overloadIndex})`;
+      return `${name}|${ApiItemKind.Method}|static|${overloadIndex}`;
     } else {
-      return `(${name}:instance,${overloadIndex})`;
+      return `${name}|${ApiItemKind.Method}|instance|${overloadIndex}`;
     }
   }
 
@@ -64,7 +67,16 @@ export class ApiMethod extends ApiNameMixin(ApiParameterListMixin(ApiReleaseTagM
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiMethod.getCanonicalReference(this.name, this.isStatic, this.overloadIndex);
+  public get containerKey(): string {
+    return ApiMethod.getContainerKey(this.name, this.isStatic, this.overloadIndex);
+  }
+
+  /** @beta @override */
+  public buildCanonicalReference(): DeclarationReference {
+    const nameComponent: Component = DeclarationReference.parseComponent(this.name);
+    return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
+      .addNavigationStep(this.isStatic ? Navigation.Exports : Navigation.Members, nameComponent)
+      .withMeaning(Meaning.Member)
+      .withOverloadIndex(this.overloadIndex);
   }
 }

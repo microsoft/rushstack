@@ -2,6 +2,47 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.11.1",
+      "tag": "@microsoft/gulp-core-build_v3.11.1",
+      "date": "Thu, 08 Aug 2019 15:14:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.13.0` to `3.14.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.11.0",
+      "tag": "@microsoft/gulp-core-build_v3.11.0",
+      "date": "Mon, 05 Aug 2019 22:04:32 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduce an optional build timeout."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Security updates."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.10.0",
+      "tag": "@microsoft/gulp-core-build_v3.10.0",
+      "date": "Tue, 23 Jul 2019 19:14:38 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update gulp to 4.0.2"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.9.26",
       "tag": "@microsoft/gulp-core-build_v3.9.26",
       "date": "Wed, 03 Apr 2019 02:58:33 GMT",

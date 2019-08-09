@@ -2,21 +2,22 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1000
+    "schemaVersion": 1003,
+    "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "api-extractor-scenarios",
+  "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
+      "canonicalReference": "api-extractor-scenarios!",
       "name": "",
       "members": [
         {
           "kind": "Function",
-          "canonicalReference": "(defaultFunctionDeclaration:0)",
+          "canonicalReference": "api-extractor-scenarios!defaultFunctionDeclaration:function(1)",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -45,7 +46,7 @@
             "endIndex": 4
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [],
           "name": "defaultFunctionDeclaration"
         }

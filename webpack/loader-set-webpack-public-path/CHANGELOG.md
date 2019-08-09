@@ -1,6 +1,93 @@
 # Change Log - @microsoft/loader-set-webpack-public-path
 
-This log was last generated on Mon, 13 May 2019 02:08:35 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Aug 2019 15:14:17 GMT and should not be manually modified.
+
+## 3.2.170
+Thu, 08 Aug 2019 15:14:17 GMT
+
+*Version update only*
+
+## 3.2.169
+Thu, 08 Aug 2019 00:49:06 GMT
+
+*Version update only*
+
+## 3.2.168
+Mon, 05 Aug 2019 22:04:32 GMT
+
+### Patches
+
+- Security updates.
+
+## 3.2.167
+Tue, 23 Jul 2019 19:14:38 GMT
+
+*Version update only*
+
+## 3.2.166
+Tue, 23 Jul 2019 01:13:01 GMT
+
+*Version update only*
+
+## 3.2.165
+Mon, 22 Jul 2019 19:13:10 GMT
+
+*Version update only*
+
+## 3.2.164
+Fri, 12 Jul 2019 19:12:46 GMT
+
+*Version update only*
+
+## 3.2.163
+Thu, 11 Jul 2019 19:13:08 GMT
+
+*Version update only*
+
+## 3.2.162
+Tue, 09 Jul 2019 19:13:24 GMT
+
+*Version update only*
+
+## 3.2.161
+Mon, 08 Jul 2019 19:12:18 GMT
+
+*Version update only*
+
+## 3.2.160
+Sat, 29 Jun 2019 02:30:10 GMT
+
+*Version update only*
+
+## 3.2.159
+Wed, 12 Jun 2019 19:12:33 GMT
+
+*Version update only*
+
+## 3.2.158
+Tue, 11 Jun 2019 00:48:06 GMT
+
+*Version update only*
+
+## 3.2.157
+Thu, 06 Jun 2019 22:33:36 GMT
+
+*Version update only*
+
+## 3.2.156
+Wed, 05 Jun 2019 19:12:34 GMT
+
+*Version update only*
+
+## 3.2.155
+Tue, 04 Jun 2019 05:51:54 GMT
+
+*Version update only*
+
+## 3.2.154
+Mon, 27 May 2019 04:13:44 GMT
+
+*Version update only*
 
 ## 3.2.153
 Mon, 13 May 2019 02:08:35 GMT

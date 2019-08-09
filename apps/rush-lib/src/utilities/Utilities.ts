@@ -14,6 +14,7 @@ import {
   FileConstants
 } from '@microsoft/node-core-library';
 import { RushConfiguration } from '../api/RushConfiguration';
+import { Stream } from 'stream';
 
 export interface IEnvironment {
   // NOTE: the process.env doesn't actually support "undefined" as a value.
@@ -107,16 +108,20 @@ export class Utilities {
     const unresolvedUserFolder: string | undefined = process.env[
       (process.platform === 'win32') ? 'USERPROFILE' : 'HOME'
     ];
+    const dirError: string = 'Unable to determine the current user\'s home directory';
+    if (unresolvedUserFolder === undefined) {
+      throw new Error(dirError);
+    }
     const homeFolder: string = path.resolve(unresolvedUserFolder);
     if (!FileSystem.exists(homeFolder)) {
-      throw new Error('Unable to determine the current user\'s home directory');
+      throw new Error(dirError);
     }
 
     return homeFolder;
   }
 
   /**
-   * NodeJS equivalent of performance.now().
+   * Node.js equivalent of performance.now().
    */
   public static getTimeInMs(): number {
     let seconds: number;
@@ -680,7 +685,7 @@ export class Utilities {
    */
   private static _executeCommandInternal(
     command: string, args: string[], workingDirectory: string,
-    stdio: (string|number)[] | undefined,
+    stdio: 'pipe'|'ignore'|'inherit'|(number|'pipe'|'ignore'|'inherit'|'ipc'|Stream|null|undefined)[]|undefined,
     environment?: IEnvironment,
     keepEnvironment: boolean = false
   ): child_process.SpawnSyncReturns<Buffer> {

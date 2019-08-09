@@ -1,17 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeclarationReference, Meaning, Navigation } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
 import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
 import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiReturnTypeMixin';
+import { IApiTypeParameterListMixinOptions, ApiTypeParameterListMixin } from '../mixins/ApiTypeParameterListMixin';
 
 /**
  * Constructor options for {@link ApiCallSignature}.
  * @public
  */
 export interface IApiCallSignatureOptions extends
+  IApiTypeParameterListMixinOptions,
   IApiParameterListMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiReturnTypeMixinOptions,
@@ -47,10 +50,11 @@ export interface IApiCallSignatureOptions extends
  *
  * @public
  */
-export class ApiCallSignature extends ApiParameterListMixin(ApiReleaseTagMixin(ApiReturnTypeMixin(ApiDeclaredItem))) {
+export class ApiCallSignature extends ApiTypeParameterListMixin(ApiParameterListMixin(ApiReleaseTagMixin(
+  ApiReturnTypeMixin(ApiDeclaredItem)))) {
 
-  public static getCanonicalReference(overloadIndex: number): string {
-    return `(:call,${overloadIndex})`;
+  public static getContainerKey(overloadIndex: number): string {
+    return `|${ApiItemKind.CallSignature}|${overloadIndex}`;
   }
 
   public constructor(options: IApiCallSignatureOptions) {
@@ -63,7 +67,18 @@ export class ApiCallSignature extends ApiParameterListMixin(ApiReleaseTagMixin(A
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiCallSignature.getCanonicalReference(this.overloadIndex);
+  public get containerKey(): string {
+    return ApiCallSignature.getContainerKey(this.overloadIndex);
+  }
+
+  /** @beta @override */
+  public buildCanonicalReference(): DeclarationReference {
+    const parent: DeclarationReference = this.parent
+      ? this.parent.canonicalReference
+      // .withMeaning() requires some kind of component
+      : DeclarationReference.empty().addNavigationStep(Navigation.Members, '(parent)');
+    return parent
+      .withMeaning(Meaning.CallSignature)
+      .withOverloadIndex(this.overloadIndex);
   }
 }

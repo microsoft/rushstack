@@ -290,8 +290,6 @@ export interface INodePackageJson {
     repository?: string;
     scripts?: IPackageJsonScriptTable;
     // @beta
-    tsdoc?: IPackageJsonTsdocConfiguration;
-    // @beta
     tsdocMetadata?: string;
     types?: string;
     typings?: string;
@@ -325,11 +323,6 @@ export interface IPackageJsonLookupParameters {
 // @public
 export interface IPackageJsonScriptTable {
     [scriptName: string]: string;
-}
-
-// @beta
-export interface IPackageJsonTsdocConfiguration {
-    tsdocFlavor?: string;
 }
 
 // @public
