@@ -15,15 +15,19 @@
     "eslint-config"
   ],
   "peerDependencies": {
-    "eslint": "^5.0.0"
+    "eslint": "^6.0.0",
+    "typescript": ">=3.0.0"
+  },
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "2.0.0-alpha.5",
+    "@typescript-eslint/parser": "2.0.0-alpha.5",
+    "eslint-plugin-no-null": "~1.0.2",
+    "eslint-plugin-promise": "~4.2.1",
+    "eslint-plugin-react": "~7.14.3",
+    "eslint-plugin-security": "~1.4.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^2.0.0-alpha.4",
-    "@typescript-eslint/parser": "^1.13.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-react": "^7.14.3",
-    "eslint-plugin-security": "^1.4.0",
-    "eslint": "^5.0.0",
+    "eslint": "^6.0.0",
     "typescript": "~3.5.3"
   }
 }
