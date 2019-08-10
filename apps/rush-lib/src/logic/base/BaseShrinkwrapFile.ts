@@ -35,13 +35,13 @@ export abstract class BaseShrinkwrapFile {
    * @virtual
    */
   public hasCompatibleTopLevelDependency(dependencySpecifier: DependencySpecifier): boolean {
-    const shrinkwrapDependencyVersion: string | undefined
+    const shrinkwrapDependency: DependencySpecifier | undefined
       = this.getTopLevelDependencyVersion(dependencySpecifier.packageName);
-    if (!shrinkwrapDependencyVersion) {
+    if (!shrinkwrapDependency) {
       return false;
     }
 
-    return this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependencyVersion);
+    return this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency.versionSpecifier);
   }
 
   /**
@@ -64,13 +64,13 @@ export abstract class BaseShrinkwrapFile {
    * @virtual
    */
   public tryEnsureCompatibleDependency(dependencySpecifier: DependencySpecifier, tempProjectName: string): boolean {
-    const dependencyVersion: string | undefined =
+    const shrinkwrapDependency: DependencySpecifier | undefined =
       this.tryEnsureDependencyVersion(dependencySpecifier, tempProjectName);
-    if (!dependencyVersion) {
+    if (!shrinkwrapDependency) {
       return false;
     }
 
-    return this._checkDependencyVersion(dependencySpecifier, dependencyVersion);
+    return this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency.versionSpecifier);
   }
 
   /**
@@ -83,10 +83,10 @@ export abstract class BaseShrinkwrapFile {
 
   /** @virtual */
   protected abstract tryEnsureDependencyVersion(dependencySpecifier: DependencySpecifier,
-    tempProjectName: string): string | undefined;
+    tempProjectName: string): DependencySpecifier | undefined;
 
   /** @virtual */
-  protected abstract getTopLevelDependencyVersion(dependencyName: string): string | undefined;
+  protected abstract getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined;
 
   /** @virtual */
   protected abstract serialize(): string;

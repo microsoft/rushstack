@@ -168,13 +168,13 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
+  protected getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined {
     throw new InternalError('Not implemented');
   }
 
   /** @override */
   protected tryEnsureDependencyVersion(dependencySpecifier: DependencySpecifier,
-    tempProjectName: string): string | undefined {
+    tempProjectName: string): DependencySpecifier | undefined {
 
     throw new InternalError('Not implemented');
   }
