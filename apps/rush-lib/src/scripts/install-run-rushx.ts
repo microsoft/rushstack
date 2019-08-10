@@ -1,1 +1,1 @@
-require("./install-run-rush");
+import "./install-run-rush.ts";
