@@ -38,7 +38,7 @@
     "lodash": "~4.17.15",
     "minimatch": "~3.0.2",
     "node-fetch": "~2.1.2",
-    "npm-package-arg": "~5.1.2",
+    "npm-package-arg": "~6.1.0",
     "read-package-tree": "~5.1.5",
     "semver": "~5.3.0",
     "strict-uri-encode": "~2.0.0",
