@@ -4,6 +4,7 @@ import * as semver from 'semver';
 import { FileSystem } from '@microsoft/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
+import { DependencySpecifier } from '../DependencySpecifier';
 
 // This is based on PNPM's own configuration:
 // https://github.com/pnpm/pnpm-shrinkwrap/blob/master/src/write.ts
@@ -141,6 +142,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
   }
 
+  /** @override */
   public getTempProjectNames(): ReadonlyArray<string> {
     return this._getTempProjectNames(this._shrinkwrapJson.dependencies);
   }
@@ -170,6 +172,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    *   'file:projects/article-site-demo.tgz_jest@22.4.4+typescript@2.9.2'
    *   'file:projects/i18n-utilities.tgz_462eaf34881863298955eb323c130fc7'
    *   undefined
+   *
+   * @override
    */
   public getTopLevelDependencyVersion(dependencyName: string): string | undefined {
     return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
@@ -177,6 +181,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
   /**
    * Serializes the PNPM Shrinkwrap file
+   *
+   * @override
    */
   protected serialize(): string {
     return yaml.safeDump(this._shrinkwrapJson, SHRINKWRAP_YAML_FORMAT);
@@ -186,10 +192,12 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * Gets the resolved version number of a dependency for a specific temp project.
    * For PNPM, we can reuse the version that another project is using.
    * Note that this function modifies the shrinkwrap data.
+   *
+   * @override
    */
-  protected tryEnsureDependencyVersion(dependencyName: string,
-    tempProjectName: string,
-    versionRange: string): string | undefined {
+  protected tryEnsureDependencyVersion(dependencySpecifier: DependencySpecifier,
+    tempProjectName: string): string | undefined {
+
     // PNPM doesn't have the same advantage of NPM, where we can skip generate as long as the
     // shrinkwrap file puts our dependency in either the top of the node_modules folder
     // or underneath the package we are looking at.
@@ -197,6 +205,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // to recreate the graph..
     // Because of this, we actually need to check for a version that this package is directly
     // linked to.
+
+    const packageName: string = dependencySpecifier.packageName;
 
     const tempProjectDependencyKey: string | undefined = this.getTopLevelDependencyVersion(tempProjectName);
 
@@ -210,15 +220,17 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       return undefined;
     }
 
-    if (!packageDescription.dependencies.hasOwnProperty(dependencyName)) {
-      if (versionRange) {
+    if (!packageDescription.dependencies.hasOwnProperty(packageName)) {
+      if (dependencySpecifier.versionSpecifier) {
         // this means the current temp project doesn't provide this dependency,
         // however, we may be able to use a different version. we prefer the latest version
         let latestVersion: string | undefined = undefined;
 
         this.getTempProjectNames().forEach((otherTempProject: string) => {
-          const otherVersion: string | undefined = this._getDependencyVersion(dependencyName, otherTempProject);
-          if (otherVersion && semver.satisfies(otherVersion, versionRange)) {
+          const otherVersion: string | undefined = this._getDependencyVersion(
+            dependencySpecifier.packageName, otherTempProject);
+
+          if (otherVersion && semver.satisfies(otherVersion, dependencySpecifier.versionSpecifier)) {
             if (!latestVersion || semver.gt(otherVersion, latestVersion)) {
               latestVersion = otherVersion;
             }
@@ -229,7 +241,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
           // go ahead and fixup the shrinkwrap file to point at this
           const dependencies: { [key: string]: string } | undefined =
             this._shrinkwrapJson.packages[tempProjectDependencyKey].dependencies || {};
-          dependencies[dependencyName] = latestVersion;
+          dependencies[packageName] = latestVersion;
           this._shrinkwrapJson.packages[tempProjectDependencyKey].dependencies = dependencies;
 
           return latestVersion;
@@ -239,10 +251,11 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       return undefined;
     }
 
-    return this._normalizeDependencyVersion(dependencyName, packageDescription.dependencies[dependencyName]);
+    return this._normalizeDependencyVersion(packageName, packageDescription.dependencies[packageName]);
   }
 
-  protected checkValidVersionRange(dependencyVersion: string, versionRange: string): boolean { // override
+  /** @override */
+  protected checkValidVersionRange(dependencyVersion: string, versionRange: string): boolean {
     // dependencyVersion could be a relative or absolute path, for those cases we
     // need to extract the version from the end of the path.
     return super.checkValidVersionRange(this._getValidDependencyVersion(dependencyVersion), versionRange);
@@ -309,12 +322,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return semver.valid(validDependencyVersion) ? validDependencyVersion : dependencyVersion.split('_')[0]!;
   }
 
-  private _normalizeDependencyVersion(dependencyName: string, version: string): string | undefined {
-    if (version) {
-      const extractedVersion: string | undefined = extractVersionFromPnpmVersionSpecifier(version);
+  private _normalizeDependencyVersion(dependencyName: string, versionFromShrinkwrap: string): string | undefined {
+    if (versionFromShrinkwrap) {
+      const extractedVersion: string | undefined = extractVersionFromPnpmVersionSpecifier(versionFromShrinkwrap);
 
       if (!extractedVersion) {
-        throw new Error(`Cannot parse pnpm shrinkwrap version specifier: "${version}" for "${dependencyName}"`);
+        throw new Error(`Cannot parse PNPM shrinkwrap version specifier: "${versionFromShrinkwrap}"`
+          + ` for "${dependencyName}"`);
       }
 
       return extractedVersion;

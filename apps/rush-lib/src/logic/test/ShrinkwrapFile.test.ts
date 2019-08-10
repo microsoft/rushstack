@@ -6,21 +6,23 @@ import * as path from 'path';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { extractVersionFromPnpmVersionSpecifier } from '../pnpm/PnpmShrinkwrapFile';
+import { DependencySpecifier } from '../DependencySpecifier';
 
 describe('npm ShrinkwrapFile', () => {
   const filename: string = path.resolve(path.join(__dirname, './shrinkwrapFile/npm-shrinkwrap.json'));
   const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('npm', filename)!;
 
   it('verifies root-level dependency', () => {
-    expect(shrinkwrapFile.hasCompatibleTopLevelDependency('q', '~1.5.0')).toEqual(true);
+    expect(shrinkwrapFile.hasCompatibleTopLevelDependency(new DependencySpecifier('q', '~1.5.0'))).toEqual(true);
   });
 
   it('verifies temp project dependencies', () => {
     // Found locally
-    expect(shrinkwrapFile.tryEnsureCompatibleDependency('jquery', '>=2.2.4 <3.0.0', '@rush-temp/project2'))
+    expect(shrinkwrapFile.tryEnsureCompatibleDependency(new DependencySpecifier('jquery', '>=2.2.4 <3.0.0'),
+      '@rush-temp/project2'))
       .toEqual(true);
     // Found at root
-    expect(shrinkwrapFile.tryEnsureCompatibleDependency('q', '~1.5.0', '@rush-temp/project2'))
+    expect(shrinkwrapFile.tryEnsureCompatibleDependency(new DependencySpecifier('q', '~1.5.0'), '@rush-temp/project2'))
       .toEqual(true);
   });
 
@@ -37,15 +39,19 @@ const filename: string = path.resolve(path.join(
 const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
 
   it('verifies root-level dependency', () => {
-    expect(shrinkwrapFile.hasCompatibleTopLevelDependency('q', '~1.5.0')).toEqual(false);
+    expect(shrinkwrapFile.hasCompatibleTopLevelDependency(new DependencySpecifier('q', '~1.5.0'))).toEqual(false);
   });
 
   it('verifies temp project dependencies', () => {
-    expect(shrinkwrapFile.tryEnsureCompatibleDependency('jquery', '>=2.0.0 <3.0.0', '@rush-temp/project1'))
+    expect(shrinkwrapFile.tryEnsureCompatibleDependency(new DependencySpecifier('jquery', '>=2.0.0 <3.0.0'),
+      '@rush-temp/project1'))
       .toEqual(true);
-    expect(shrinkwrapFile.tryEnsureCompatibleDependency('q', '~1.5.0', '@rush-temp/project2')).toEqual(true);
-    expect(shrinkwrapFile.tryEnsureCompatibleDependency('left-pad', '~9.9.9', '@rush-temp/project1')).toEqual(false);
-    expect(shrinkwrapFile.tryEnsureCompatibleDependency('@scope/testDep', '>=1.0.0 <2.0.0', '@rush-temp/project3'))
+    expect(shrinkwrapFile.tryEnsureCompatibleDependency(
+      new DependencySpecifier('q', '~1.5.0'), '@rush-temp/project2')).toEqual(true);
+    expect(shrinkwrapFile.tryEnsureCompatibleDependency(
+      new DependencySpecifier('left-pad', '~9.9.9'), '@rush-temp/project1')).toEqual(false);
+    expect(shrinkwrapFile.tryEnsureCompatibleDependency(
+      new DependencySpecifier('@scope/testDep', '>=1.0.0 <2.0.0'), '@rush-temp/project3'))
       .toEqual(true);
   });
 
@@ -56,7 +62,8 @@ const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFi
   });
 
   it('can reuse the latest version that another temp package is providing', () => {
-    expect(shrinkwrapFile.tryEnsureCompatibleDependency('jquery', '>=2.0.0 <3.0.0', '@rush-temp/project3'))
+    expect(shrinkwrapFile.tryEnsureCompatibleDependency(new DependencySpecifier('jquery', '>=2.0.0 <3.0.0'),
+      '@rush-temp/project3'))
       .toEqual(true);
   });
 });
