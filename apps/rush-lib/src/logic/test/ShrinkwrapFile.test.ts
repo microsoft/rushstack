@@ -68,8 +68,8 @@ const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFi
   });
 });
 
-function testParsePnpmDependencyKey(key: string): string | undefined {
-  const specifier: DependencySpecifier | undefined = parsePnpmDependencyKey('example-package', key);
+function testParsePnpmDependencyKey(packageName: string, key: string): string | undefined {
+  const specifier: DependencySpecifier | undefined = parsePnpmDependencyKey(packageName, key);
   if (!specifier) {
     return undefined;
   }
@@ -78,33 +78,57 @@ function testParsePnpmDependencyKey(key: string): string | undefined {
 
 describe('extractVersionFromPnpmVersionSpecifier', () => {
   it('extracts a simple version with no slashes', () => {
-    expect(testParsePnpmDependencyKey('0.0.5')).toEqual('0.0.5');
+    expect(testParsePnpmDependencyKey('anonymous', '0.0.5'))
+      .toEqual('0.0.5');
   });
-  it('extracts an unscoped peer dep', () => {
-    expect(testParsePnpmDependencyKey('/gulp-karma/0.0.5/karma@0.13.22')).toEqual('0.0.5');
-  });
-  it('extracts a scoped peer dep', () => {
-    expect(testParsePnpmDependencyKey('/@ms/sp-client-utilities/3.1.1/foo@13.1.0')).toEqual('3.1.1');
-  });
-  it('extracts relative versions', () => {
-    expect(testParsePnpmDependencyKey('example.pkgs.visualstudio.com/@scope/testDep/1.0.0'))
-      .toEqual('1.0.0');
-    expect(testParsePnpmDependencyKey('example.pkgs.visualstudio.com/@scope/testDep/1.2.3-beta.3'))
+  it('extracts a simple package name', () => {
+    expect(testParsePnpmDependencyKey('isarray', '/isarray/2.0.5'))
+      .toEqual('2.0.5');
+    expect(testParsePnpmDependencyKey('@scope/test-dep', '/@scope/test-dep/1.2.3-beta.3'))
       .toEqual('1.2.3-beta.3');
   });
-  it('extracts a V5 version without a scope', () => {
-    expect(testParsePnpmDependencyKey('23.6.0_babel-core@6.26.3')).toEqual('23.6.0');
+  it('extracts a registry-qualified path', () => {
+    expect(testParsePnpmDependencyKey('@scope/test-dep', 'example.pkgs.visualstudio.com/@scope/test-dep/1.0.0'))
+      .toEqual('1.0.0');
+    expect(testParsePnpmDependencyKey('@scope/test-dep', 'example.pkgs.visualstudio.com/@scope/test-dep/1.2.3-beta.3'))
+      .toEqual('1.2.3-beta.3');
   });
-  it('extracts a V5 peer dependency with a scope', () => {
-    expect(testParsePnpmDependencyKey('1.0.3_@pnpm+logger@1.0.2')).toEqual('1.0.3');
+  it('extracts a V3 peer dependency path', () => {
+    expect(testParsePnpmDependencyKey('gulp-karma', '/gulp-karma/0.0.5/karma@0.13.22'))
+      .toEqual('0.0.5');
+    expect(testParsePnpmDependencyKey('sinon-chai', '/sinon-chai/2.8.0/chai@3.5.0+sinon@1.17.7'))
+      .toEqual('2.8.0');
+    expect(testParsePnpmDependencyKey('@ms/sp-client-utilities', '/@ms/sp-client-utilities/3.1.1/foo@13.1.0'))
+      .toEqual('3.1.1');
+    expect(testParsePnpmDependencyKey('tslint-microsoft-contrib',
+      '/tslint-microsoft-contrib/6.2.0/tslint@5.18.0+typescript@3.5.3'))
+      .toEqual('6.2.0');
+  });
+  it('extracts a V5 peer dependency path', () => {
+    expect(testParsePnpmDependencyKey('anonymous', '23.6.0_babel-core@6.26.3'))
+      .toEqual('23.6.0');
+    expect(testParsePnpmDependencyKey('anonymous', '1.0.7_request@2.88.0'))
+      .toEqual('1.0.7');
+    expect(testParsePnpmDependencyKey('anonymous', '1.0.3_@pnpm+logger@1.0.2'))
+      .toEqual('1.0.3');
+    expect(testParsePnpmDependencyKey('tslint-microsoft-contrib',
+      '/tslint-microsoft-contrib/6.2.0_tslint@5.18.0+typescript@3.5.3'))
+      .toEqual('6.2.0');
+  });
+  it('detects NPM package aliases', () => {
+    expect(testParsePnpmDependencyKey('alias1', '/isarray/2.0.5'))
+      .toEqual('npm:isarray@2.0.5');
+    expect(testParsePnpmDependencyKey('alias2', '/@ms/sp-client-utilities/3.1.1/foo@13.1.0'))
+      .toEqual('npm:@ms/sp-client-utilities@3.1.1');
   });
   it('handles bad cases', () => {
-    expect(testParsePnpmDependencyKey('/foo/gulp-karma/0.0.5/karma@0.13.22')).toEqual(undefined);
-    expect(testParsePnpmDependencyKey('/@ms/3.1.1/foo@13.1.0')).toEqual(undefined);
-    expect(testParsePnpmDependencyKey('')).toEqual(undefined);
-    expect(testParsePnpmDependencyKey('/')).toEqual(undefined);
-    expect(testParsePnpmDependencyKey('//')).toEqual(undefined);
-    expect(testParsePnpmDependencyKey('/@/')).toEqual(undefined);
-    expect(testParsePnpmDependencyKey('example.pkgs.visualstudio.com/@scope/testDep/')).toEqual(undefined);
+    expect(testParsePnpmDependencyKey('example', '/foo/gulp-karma/0.0.5/karma@0.13.22')).toEqual(undefined);
+    expect(testParsePnpmDependencyKey('example', '/@ms/3.1.1/foo@13.1.0')).toEqual(undefined);
+    expect(testParsePnpmDependencyKey('example', 'file:projects/my-app.tgz')).toEqual(undefined);
+    expect(testParsePnpmDependencyKey('example', '')).toEqual(undefined);
+    expect(testParsePnpmDependencyKey('example', '/')).toEqual(undefined);
+    expect(testParsePnpmDependencyKey('example', '//')).toEqual(undefined);
+    expect(testParsePnpmDependencyKey('example', '/@/')).toEqual(undefined);
+    expect(testParsePnpmDependencyKey('example', 'example.pkgs.visualstudio.com/@scope/testDep/')).toEqual(undefined);
   });
 });

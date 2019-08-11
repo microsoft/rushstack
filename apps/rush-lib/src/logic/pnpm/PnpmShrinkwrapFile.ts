@@ -80,49 +80,65 @@ export function parsePnpmDependencyKey(dependencyName: string, dependencyKey: st
     return undefined;
   }
 
-  // Does the string contain any slashes?
-  const versionParts: string[] = dependencyKey.split('/');
-
-  if (versionParts.length === 1) {
-    // No slashes
-
-    // Does it contain the V5 underscore delimiter?
-    const underscoreIndex: number = dependencyKey.indexOf('_');
-    if (underscoreIndex >= 0) {
-      // This form was introduced in PNPM 3 (lockfile version 5):
-      //
-      // Example: "23.6.0_babel-core@6.26.3" --> "23.6.0"
-      // Example: "1.0.7_request@2.88.0" --> "1.70.7"
-      // Example: "1.0.3_@pnpm+logger@1.0.2" --> "1.0.3"
-      return new DependencySpecifier(dependencyName, dependencyKey.substr(0, underscoreIndex));
-    } else {
-      // It is a simple version.
-      //
-      // Example: "0.0.5"
-      return new DependencySpecifier(dependencyName, dependencyKey);
-    }
+  if (/^\w+:/.test(dependencyKey)) {
+    // If it starts with an NPM scheme such as "file:projects/my-app.tgz", we don't support that
+    return undefined;
   }
 
-  // Does it contain an NPM scope?
-  const isScoped: boolean = versionParts[1].indexOf('@') === 0;
+  // The package name parsed from the dependency key, or dependencyName if it was omitted.
+  // Example: "@scope/depame"
+  let parsedPackageName: string;
 
-  if (versionParts.length === 4 && !isScoped) {
-    // Example: "/gulp-karma/0.0.5/karma@0.13.22" --> "0.0.5"
-    // Example: "/sinon-chai/2.8.0/chai@3.5.0+sinon@1.17.7") --> "2.8.0"
-    return new DependencySpecifier(dependencyName, versionParts[2]);
+  // The trailing portion of the dependency key that includes the version and optional peer dependency path.
+  // Example: "2.8.0/chai@3.5.0+sinon@1.17.7"
+  let parsedInstallPath: string;
+
+  // Example: "path.pkgs.visualstudio.com/@scope/depame/1.4.0"  --> 0="@scope/depame" 1="1.4.0"
+  // Example: "/isarray/2.0.1"                                  --> 0="isarray"       1="2.0.1"
+  // Example: "/sinon-chai/2.8.0/chai@3.5.0+sinon@1.17.7"       --> 0="sinon-chai"    1="2.8.0/chai@3.5.0+sinon@1.17.7"
+  const packageNameMatch: RegExpMatchArray | null = /^[^\/]*\/((?:@[^\/]+\/)?[^\/]+)\/(.*)$/.exec(dependencyKey);
+  if (packageNameMatch) {
+    parsedPackageName = packageNameMatch[1];
+    parsedInstallPath = packageNameMatch[2];
+  } else {
+    parsedPackageName = dependencyName;
+
+    // Example: "23.6.0_babel-core@6.26.3"
+    // Example: "23.6.0"
+    parsedInstallPath = dependencyKey;
   }
 
-  if (versionParts.length === 5 && isScoped) {
-    // Example: "/@ms/sp-client-utilities/3.1.1/foo@13.1.0" --> "3.1.1"
-    return new DependencySpecifier(dependencyName, versionParts[3]);
+  // The SemVer value
+  // Example: "2.8.0"
+  let parsedVersionPart: string;
+
+  // Example: "23.6.0_babel-core@6.26.3" --> "23.6.0"
+  // Example: "2.8.0/chai@3.5.0+sinon@1.17.7" --> "2.8.0"
+  const versionMatch: RegExpMatchArray | null = /^([^\/_]+)[\/_]/.exec(parsedInstallPath);
+  if (versionMatch) {
+    parsedVersionPart = versionMatch[1];
+  } else {
+    // Example: "2.8.0"
+    parsedVersionPart = parsedInstallPath;
   }
 
-  if (semver.valid(versionParts[versionParts.length - 1]) !== null) {
-    // Example: "path.pkgs.visualstudio.com/@scope/depame/1.4.0" --> "1.4.0"
-    return new DependencySpecifier(dependencyName, versionParts[versionParts.length - 1]);
+  // By this point, we expect parsedVersionPart to be a valid SemVer range
+  if (!parsedVersionPart) {
+    return undefined;
   }
 
-  return undefined;
+  if (!semver.valid(parsedVersionPart)) {
+    return undefined;
+  }
+
+  // Is it an alias for a different package?
+  if (parsedPackageName === dependencyName) {
+    // No, it's a regular dependency
+    return new DependencySpecifier(parsedPackageName, parsedVersionPart);
+  } else {
+    // If the parsed package name is different from the dependencyName, then this is an NPM package alias
+    return new DependencySpecifier(dependencyName, `npm:${parsedPackageName}@${parsedVersionPart}`);
+  }
 }
 
 export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
