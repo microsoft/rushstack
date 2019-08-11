@@ -41,7 +41,7 @@ export abstract class BaseShrinkwrapFile {
       return false;
     }
 
-    return this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency.versionSpecifier);
+    return this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency);
   }
 
   /**
@@ -70,7 +70,7 @@ export abstract class BaseShrinkwrapFile {
       return false;
     }
 
-    return this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency.versionSpecifier);
+    return this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency);
   }
 
   /**
@@ -103,24 +103,53 @@ export abstract class BaseShrinkwrapFile {
     return result;
   }
 
-  protected checkValidVersionRange(dependencyVersion: string, versionRange: string): boolean {
-    // If it's a SemVer pattern, then require that the shrinkwrapped version must be compatible
-    return semver.satisfies(dependencyVersion, versionRange);
-  }
+  private _checkDependencyVersion(projectDependency: DependencySpecifier,
+    shrinkwrapDependency: DependencySpecifier): boolean {
 
-  private _checkDependencyVersion(dependencySpecifier: DependencySpecifier,
-    shrinkwrapDependencyVersion: string): boolean {
+    let normalizedProjectDependency: DependencySpecifier = projectDependency;
+    let normalizedShrinkwrapDependency: DependencySpecifier = shrinkwrapDependency;
 
-    switch (dependencySpecifier.specifierType) {
+    // Special handling for NPM package aliases such as this:
+    //
+    // "dependencies": {
+    //   "alias-name": "npm:target-name@^1.2.3"
+    // }
+    //
+    // In this case, the shrinkwrap file will have a key equivalent to "npm:target-name@1.2.5",
+    // and so we need to unwrap the target and compare "1.2.5" with "^1.2.3".
+    if (projectDependency.specifierType === 'alias') {
+      // Does the shrinkwrap install it as an alias?
+      if (shrinkwrapDependency.specifierType === 'alias') {
+        // Does the shrinkwrap have the right package name?
+        if (projectDependency.packageName === shrinkwrapDependency.packageName) {
+          // Yes, the aliases match, so let's compare their targets in the logic below
+          normalizedProjectDependency = projectDependency.aliasTarget!;
+          normalizedShrinkwrapDependency = shrinkwrapDependency.aliasTarget!;
+        } else {
+          // If the names are different, then it's a mismatch
+          return false;
+        }
+      } else {
+        // A non-alias cannot satisfy an alias dependency; at least, let's avoid that idea
+        return false;
+      }
+    }
+
+    switch (normalizedProjectDependency.specifierType) {
       case 'version':
       case 'range':
-        return this.checkValidVersionRange(shrinkwrapDependencyVersion, dependencySpecifier.versionSpecifier);
+        return semver.satisfies(normalizedShrinkwrapDependency.versionSpecifier,
+          normalizedProjectDependency.versionSpecifier);
       default:
-        // Only warn once for each spec
-        if (!this._alreadyWarnedSpecs.has(dependencySpecifier.versionSpecifier)) {
-          this._alreadyWarnedSpecs.add(dependencySpecifier.versionSpecifier);
-          console.log(colors.yellow(`WARNING: Not validating ${dependencySpecifier.specifierType}-based`
-            + ` specifier: "${dependencySpecifier.versionSpecifier}"`));
+        // For other version specifier types like "file:./blah.tgz" or "git://github.com/npm/cli.git#v1.0.27"
+        // we allow the installation to continue but issue a warning.  The "rush install" checks will not work
+        // correctly.
+
+        // Only warn once for each versionSpecifier
+        if (!this._alreadyWarnedSpecs.has(projectDependency.versionSpecifier)) {
+          this._alreadyWarnedSpecs.add(projectDependency.versionSpecifier);
+          console.log(colors.yellow(`WARNING: Not validating ${projectDependency.specifierType}-based`
+            + ` specifier: "${projectDependency.versionSpecifier}"`));
         }
         return true;
     }

@@ -301,14 +301,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       return undefined;
     }
 
-    return this._parsePnpmDependencyKey(packageName, packageDescription.dependencies[packageName]);
-  }
-
-  /** @override */
-  protected checkValidVersionRange(dependencyVersion: string, versionRange: string): boolean {
-    // dependencyVersion could be a relative or absolute path, for those cases we
-    // need to extract the version from the end of the path.
-    return super.checkValidVersionRange(this._getValidDependencyVersion(dependencyVersion), versionRange);
+    const dependencyKey: string = packageDescription.dependencies[packageName];
+    return this._parsePnpmDependencyKey(packageName, dependencyKey);
   }
 
   private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml) {
@@ -364,11 +358,6 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     return packageDescription;
-  }
-
-  private _getValidDependencyVersion(dependencyVersion: string): string {
-    const validDependencyVersion: string = dependencyVersion.split('/').pop()!;
-    return semver.valid(validDependencyVersion) ? validDependencyVersion : dependencyVersion.split('_')[0]!;
   }
 
   private _parsePnpmDependencyKey(dependencyName: string, pnpmDependencyKey: string): DependencySpecifier | undefined {
