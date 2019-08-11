@@ -6,6 +6,7 @@ import { IPackageJson, PackageName } from '@microsoft/node-core-library';
 import { ApprovedPackagesPolicy } from '../api/ApprovedPackagesPolicy';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
+import { DependencySpecifier } from './DependencySpecifier';
 
 export class ApprovedPackagesChecker {
   /**
@@ -42,7 +43,22 @@ export class ApprovedPackagesChecker {
 
     if (dependencies) {
       for (const packageName of Object.keys(dependencies)) {
-        const scope: string = PackageName.getScope(packageName);
+
+        let referencedPackageName: string = packageName;
+
+        // Special handling for NPM package aliases such as this:
+        //
+        // "dependencies": {
+        //   "alias-name": "npm:target-name@^1.2.3"
+        // }
+        const dependencySpecifier: DependencySpecifier
+          = new DependencySpecifier(packageName, dependencies[packageName]);
+        if (dependencySpecifier.aliasTarget) {
+          // Use "target-name" instead of "alias-name"
+          referencedPackageName = dependencySpecifier.aliasTarget.packageName;
+        }
+
+        const scope: string = PackageName.getScope(referencedPackageName);
 
         // Make sure the scope isn't something like "@types" which should be ignored
         if (!approvedPackagesPolicy.ignoredNpmScopes.has(scope)) {
@@ -50,12 +66,12 @@ export class ApprovedPackagesChecker {
 
           // By default we put everything in the browser file.  But if it already appears in the
           // non-browser file, then use that instead.
-          if (approvedPackagesPolicy.nonbrowserApprovedPackages.getItemByName(packageName)) {
+          if (approvedPackagesPolicy.nonbrowserApprovedPackages.getItemByName(referencedPackageName)) {
             approvedPackagesPolicy.nonbrowserApprovedPackages
-              .addOrUpdatePackage(packageName, rushProject.reviewCategory);
+              .addOrUpdatePackage(referencedPackageName, rushProject.reviewCategory);
           } else {
             approvedPackagesPolicy.browserApprovedPackages
-              .addOrUpdatePackage(packageName, rushProject.reviewCategory);
+              .addOrUpdatePackage(referencedPackageName, rushProject.reviewCategory);
           }
         }
       }
