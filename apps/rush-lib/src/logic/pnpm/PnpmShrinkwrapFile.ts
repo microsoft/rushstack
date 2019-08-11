@@ -70,34 +70,36 @@ interface IPnpmShrinkwrapYaml {
 }
 
 /**
- * Given an encoded "dependency path" from the PNPM shrinkwrap file, this extracts the version component.
+ * Given an encoded "dependency key" from the PNPM shrinkwrap file, this parses it into an equivalent
+ * DependencySpecifier.
+ *
  * @returns a SemVer string, or undefined if the version specifier cannot be parsed
  */
-export function extractVersionFromPnpmVersionSpecifier(version: string): string | undefined {
-  if (!version) {
+export function parsePnpmDependencyKey(dependencyName: string, dependencyKey: string): DependencySpecifier | undefined {
+  if (!dependencyKey) {
     return undefined;
   }
 
   // Does the string contain any slashes?
-  const versionParts: string[] = version.split('/');
+  const versionParts: string[] = dependencyKey.split('/');
 
   if (versionParts.length === 1) {
     // No slashes
 
     // Does it contain the V5 underscore delimiter?
-    const underscoreIndex: number = version.indexOf('_');
+    const underscoreIndex: number = dependencyKey.indexOf('_');
     if (underscoreIndex >= 0) {
       // This form was introduced in PNPM 3 (lockfile version 5):
       //
-      // Example: "23.6.0_babel-core@6.26.3"
-      // Example: "1.0.7_request@2.88.0"
-      // Example: "1.0.3_@pnpm+logger@1.0.2"
-      return version.substr(0, underscoreIndex); // e.g. "23.6.0"
+      // Example: "23.6.0_babel-core@6.26.3" --> "23.6.0"
+      // Example: "1.0.7_request@2.88.0" --> "1.70.7"
+      // Example: "1.0.3_@pnpm+logger@1.0.2" --> "1.0.3"
+      return new DependencySpecifier(dependencyName, dependencyKey.substr(0, underscoreIndex));
     } else {
       // It is a simple version.
       //
       // Example: "0.0.5"
-      return version;
+      return new DependencySpecifier(dependencyName, dependencyKey);
     }
   }
 
@@ -105,19 +107,19 @@ export function extractVersionFromPnpmVersionSpecifier(version: string): string 
   const isScoped: boolean = versionParts[1].indexOf('@') === 0;
 
   if (versionParts.length === 4 && !isScoped) {
-    // Example: "/gulp-karma/0.0.5/karma@0.13.22"
-    // Example: "/sinon-chai/2.8.0/chai@3.5.0+sinon@1.17.7")
-    return versionParts[2]; // e.g. "0.0.5"
+    // Example: "/gulp-karma/0.0.5/karma@0.13.22" --> "0.0.5"
+    // Example: "/sinon-chai/2.8.0/chai@3.5.0+sinon@1.17.7") --> "2.8.0"
+    return new DependencySpecifier(dependencyName, versionParts[2]);
   }
 
   if (versionParts.length === 5 && isScoped) {
-    // Example: "/@ms/sp-client-utilities/3.1.1/foo@13.1.0"
-    return versionParts[3]; // e.g. "3.1.1"
+    // Example: "/@ms/sp-client-utilities/3.1.1/foo@13.1.0" --> "3.1.1"
+    return new DependencySpecifier(dependencyName, versionParts[3]);
   }
 
   if (semver.valid(versionParts[versionParts.length - 1]) !== null) {
-    // Example: "path.pkgs.visualstudio.com/@scope/depame/1.4.0"
-    return versionParts[versionParts.length - 1];  // e.g. "1.4.0"
+    // Example: "path.pkgs.visualstudio.com/@scope/depame/1.4.0" --> "1.4.0"
+    return new DependencySpecifier(dependencyName, versionParts[versionParts.length - 1]);
   }
 
   return undefined;
@@ -283,7 +285,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       return undefined;
     }
 
-    return this._normalizeDependencyVersion(packageName, packageDescription.dependencies[packageName]);
+    return this._parsePnpmDependencyKey(packageName, packageDescription.dependencies[packageName]);
   }
 
   /** @override */
@@ -331,7 +333,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       return undefined;
     }
 
-    return this._normalizeDependencyVersion(dependencyName, packageDescription.dependencies[dependencyName]);
+    return this._parsePnpmDependencyKey(dependencyName, packageDescription.dependencies[dependencyName]);
   }
 
   /**
@@ -353,18 +355,17 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return semver.valid(validDependencyVersion) ? validDependencyVersion : dependencyVersion.split('_')[0]!;
   }
 
-  private _normalizeDependencyVersion(dependencyName: string,
-    versionFromShrinkwrap: string): DependencySpecifier | undefined {
+  private _parsePnpmDependencyKey(dependencyName: string, pnpmDependencyKey: string): DependencySpecifier | undefined {
 
-    if (versionFromShrinkwrap) {
-      const extractedVersion: string | undefined = extractVersionFromPnpmVersionSpecifier(versionFromShrinkwrap);
+    if (pnpmDependencyKey) {
+      const result: DependencySpecifier | undefined = parsePnpmDependencyKey(dependencyName, pnpmDependencyKey);
 
-      if (!extractedVersion) {
-        throw new Error(`Cannot parse PNPM shrinkwrap version specifier: "${versionFromShrinkwrap}"`
+      if (!result) {
+        throw new Error(`Cannot parse PNPM shrinkwrap version specifier: "${pnpmDependencyKey}"`
           + ` for "${dependencyName}"`);
       }
 
-      return new DependencySpecifier(dependencyName, extractedVersion);
+      return result;
     } else {
       return undefined;
     }
