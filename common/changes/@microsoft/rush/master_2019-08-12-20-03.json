@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Allow to enable incremental builds for custom commands",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "wbern@users.noreply.github.com"
+}
