@@ -32,6 +32,7 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
   allowWarningsInSuccessfulBuild: boolean;
+  enableIncrementalBuild: boolean;
 
   /**
    * Optional command to run. Otherwise, use the `actionName` as the command to run.
@@ -66,6 +67,7 @@ export class BulkScriptAction extends BaseScriptAction {
     super(options);
     this._enableParallelism = options.enableParallelism;
     this._ignoreMissingScript = options.ignoreMissingScript;
+    this._isIncrementalBuildAllowed = options.enableIncrementalBuild;
     this._commandToRun = options.commandToRun || options.actionName;
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;

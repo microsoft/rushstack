@@ -82,6 +82,11 @@
               "title": "Allow Warnings in Successful Build",
               "description": "By default, Rush returns a nonzero exit code if errors or warnings occur during build. If this option is set to \"true\", Rush will return a zero exit code if warnings occur.",
               "type": "boolean"
+            },
+            "enableIncrementalBuild": {
+              "title": "Allow to skip build if source and build parameters are unchanged",
+              "description": "Allow Rush to skip the build if it was previously built successfully without errors, and if the same build parameters were used again.",
+              "type": "boolean"
             }
           }
         },

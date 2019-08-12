@@ -26,6 +26,7 @@ export interface IBaseScriptActionOptions extends IBaseRushActionOptions {
 export abstract class BaseScriptAction extends BaseRushAction {
   protected readonly _commandLineConfiguration: CommandLineConfiguration | undefined;
   protected readonly customParameters: CommandLineParameter[] = [];
+  protected _isIncrementalBuildAllowed: boolean;
 
   constructor(
     options: IBaseScriptActionOptions
