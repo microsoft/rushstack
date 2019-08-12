@@ -1,6 +1,13 @@
 # Change Log - @microsoft/ts-command-line
 
-This log was last generated on Wed, 12 Jun 2019 19:12:33 GMT and should not be manually modified.
+This log was last generated on Mon, 12 Aug 2019 15:15:14 GMT and should not be manually modified.
+
+## 4.2.7
+Mon, 12 Aug 2019 15:15:14 GMT
+
+### Patches
+
+- fix for #1443 allow rush command to use numbers
 
 ## 4.2.6
 Wed, 12 Jun 2019 19:12:33 GMT
