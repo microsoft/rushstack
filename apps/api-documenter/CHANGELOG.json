@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.3.16",
+      "tag": "@microsoft/api-documenter_v7.3.16",
+      "date": "Tue, 13 Aug 2019 00:14:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve algorithm for UID generation to prevent certain naming collisions (e.g. between static/instance members with the same name)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.3.15",
       "tag": "@microsoft/api-documenter_v7.3.15",
       "date": "Mon, 12 Aug 2019 15:15:14 GMT",

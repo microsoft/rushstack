@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Mon, 12 Aug 2019 15:15:14 GMT and should not be manually modified.
+This log was last generated on Tue, 13 Aug 2019 00:14:22 GMT and should not be manually modified.
+
+## 7.3.16
+Tue, 13 Aug 2019 00:14:22 GMT
+
+### Patches
+
+- Improve algorithm for UID generation to prevent certain naming collisions (e.g. between static/instance members with the same name)
 
 ## 7.3.15
 Mon, 12 Aug 2019 15:15:14 GMT
