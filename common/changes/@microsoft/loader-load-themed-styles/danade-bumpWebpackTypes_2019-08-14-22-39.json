@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-load-themed-styles",
+      "comment": "Updating dependency @microsoft/gulp-core-build from 4.4.0 to 4.32.1",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/loader-load-themed-styles",
+  "email": "3473356+D4N14L@users.noreply.github.com"
+}
