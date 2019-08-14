@@ -13,7 +13,7 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@types/webpack": "4.4.0"
+    "@types/webpack": "4.32.1"
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.4": "0.1.17",
