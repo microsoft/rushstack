@@ -584,7 +584,7 @@
       "packageName": "@microsoft/eslint-config-scalable-ts",
       "projectFolder": "libraries/eslint-config-scalable-ts",
       "reviewCategory": "libraries",
-      "shouldPublish": false // For now
+      "shouldPublish": true
     },
     {
       "packageName": "@microsoft/load-themed-styles",
