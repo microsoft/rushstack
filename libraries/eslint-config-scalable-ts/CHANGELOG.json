@@ -1,0 +1,17 @@
+{
+  "name": "@microsoft/eslint-config-scalable-ts",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.1.0",
+      "date": "Thu, 15 Aug 2019 02:56:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release"
+          }
+        ]
+      }
+    }
+  ]
+}
