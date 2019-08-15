@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Added install-run-rushx script to allow running rushx in CI",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "kaghiya@microsoft.com"
+}
