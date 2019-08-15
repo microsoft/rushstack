@@ -1,1 +1,1 @@
-import "./install-run-rush.ts";
+import './install-run-rush';
