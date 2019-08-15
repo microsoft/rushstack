@@ -30,6 +30,12 @@ module.exports = {
         // RATIONALE:         Security risk.
         "react/jsx-no-target-blank": "error",
 
+        // RATIONALE:         Fixes the no-unused-vars rule to make it compatible with React
+        "react/jsx-uses-react": "error",
+
+        // RATIONALE:         Fixes the no-unused-vars rule to make it compatible with React
+        "react/jsx-uses-vars": "error",
+
         // RATIONALE:         Catches a common coding mistake.
         "react/no-children-prop": "error",
 
