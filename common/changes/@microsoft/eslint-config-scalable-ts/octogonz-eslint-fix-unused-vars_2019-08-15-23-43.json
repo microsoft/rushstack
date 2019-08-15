@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/eslint-config-scalable-ts",
+      "comment": "Fix an issue where @typescript-eslint/no-unused-vars didn't work properly with React source files",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/eslint-config-scalable-ts",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
