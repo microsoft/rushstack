@@ -37,10 +37,14 @@ export class ChangeFiles {
       const changeFile: IChangeInfo = JsonFile.load(filePath);
 
       if (rushConfiguration.hotfixChangeEnabled) {
-        if (changeFile.type !== 'none' && changeFile.type !== 'hotfix') {
-          throw new Error(
-            `Change file ${filePath} specifies a type of '${changeFile.type}' ` +
-            `but only 'hotfix' and 'none' change types may be used in a branch with 'hotfixChangeEnabled'.`);
+        if (changeFile && changeFile.changes) {
+          for (const change of changeFile.changes) {
+            if (change.type !== 'none' && change.type !== 'hotfix') {
+              throw new Error(
+                `Change file ${filePath} specifies a type of '${change.type}' ` +
+                `but only 'hotfix' and 'none' change types may be used in a branch with 'hotfixChangeEnabled'.`);
+            }
+          }
         }
       }
 
