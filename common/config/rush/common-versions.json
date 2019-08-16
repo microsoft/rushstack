@@ -22,7 +22,10 @@
     // From the allowedAlternativeVersions list below, this should be the TypeScript version that's used to
     // build most of the projects in the repo.  Preferring it avoids errors for indirect dependencies
     // that request it as a peer dependency.
-    "typescript": "~3.4.3"
+    "typescript": "~3.4.3",
+
+    // Workaround for https://github.com/microsoft/web-build-tools/issues/1466
+    "eslint": "^6.0.0"
   },
 
   /**
