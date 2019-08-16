@@ -4,6 +4,9 @@
 // Mock child_process so we can verify tasks are (or are not) invoked as we expect
 jest.mock('child_process');
 
+// add needs more than the default 5 seconds
+jest.setTimeout(30000);
+
 /**
  * Mock RushCommandLineParser itself to prevent `process.exit` to be called on failure
  */
@@ -39,7 +42,7 @@ interface IParserTestInstance {
 /**
  * Helper to set up a test instance for RushCommandLineParser.
  */
-function getCommandLineParserInstance(repoName: string, taskName: string, ...otherParams: string[]): IParserTestInstance {
+function getCommandLineParserInstance(repoName: string, taskName: string): IParserTestInstance {
   // Point to the test repo folder
   const startPath: string = resolve(__dirname, repoName);
 
@@ -55,7 +58,7 @@ function getCommandLineParserInstance(repoName: string, taskName: string, ...oth
   const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
 
   // Mock the command
-  process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', taskName, ...otherParams];
+  process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', taskName];
   const spawnMock: jest.Mock = setSpawnMock();
 
   return {
@@ -283,15 +286,57 @@ describe('RushCommandLineParser', () => {
   describe(`in repo with tests for add`, () => {
     describe(`'add' action`, () => {
       it(`adds a dependency to just one sub-repo`, () => {
-        const repoName: string = 'addRepo';
-        const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'add', 'assert', '-t', 'a');
+        const startPath: string = resolve(__dirname, 'addRepo');
+        const aPath: string = resolve(__dirname, 'addRepo/a');
+        FileSystem.deleteFile(resolve(__dirname, `addRepo/a/package-deps.json`));
 
-        expect.assertions(1);
-        return expect(instance.parser.execute()).resolves.toEqual(true)
+        // Create a Rush CLI instance. This instance is heavy-weight and relies on setting process.exit
+        // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test
+        // repo will fail due to contention over the same lock which is kept until the test runner process
+        // ends.
+        const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
+
+        // Switching to the "a" package of addRepo
+        process.chdir(aPath);
+
+        // Mock the command
+        process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', 'add', '-p', 'assert'];
+
+        expect.assertions(2);
+        return expect(parser.execute()).resolves.toEqual(true)
           .then(() => {
-            // There should be 1 build per package
-            const packageCount: number = instance.spawnMock.mock.calls.length;
-            expect(packageCount).toEqual(1);
+            const packageJSON = FileSystem.readFile(resolve(__dirname, `addRepo/a/package.json`));
+            expect(packageJSON).toEqual(expect.stringMatching('"assert"'));
+          });
+      });
+    });
+
+    describe(`'add' action with --all`, () => {
+      it(`adds a dependency to just one sub-repo`, () => {
+        const startPath: string = resolve(__dirname, 'addRepo');
+        const aPath: string = resolve(__dirname, 'addRepo/a');
+        FileSystem.deleteFile(resolve(__dirname, `addRepo/a/package-deps.json`));
+        FileSystem.deleteFile(resolve(__dirname, `addRepo/b/package-deps.json`));
+
+        // Create a Rush CLI instance. This instance is heavy-weight and relies on setting process.exit
+        // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test
+        // repo will fail due to contention over the same lock which is kept until the test runner process
+        // ends.
+        const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
+
+        // Switching to the "a" package of addRepo
+        process.chdir(aPath);
+
+        // Mock the command
+        process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', 'add', '-p', 'assert', '--all'];
+
+        expect.assertions(3);
+        return expect(parser.execute()).resolves.toEqual(true)
+          .then(() => {
+            const packageAJSON = FileSystem.readFile(resolve(__dirname, `addRepo/a/package.json`));
+            expect(packageAJSON).toEqual(expect.stringMatching('"assert"'));
+            const packageBJSON = FileSystem.readFile(resolve(__dirname, `addRepo/b/package.json`));
+            expect(packageBJSON).toEqual(expect.stringMatching('"assert"'));
           });
       });
     });
