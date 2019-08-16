@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 26 Jul 2019 23:08:23 GMT and should not be manually modified.
+This log was last generated on Fri, 16 Aug 2019 05:15:17 GMT and should not be manually modified.
+
+## 5.11.2
+Fri, 16 Aug 2019 05:15:17 GMT
+
+### Updates
+
+- Refactor build action to allow generating build graph statically
+- Security updates.
+- Fix validation of hotfix changes in a hotfix-enabled branch
+- Clarify that "rush update --full" should be run when changing certain settings
 
 ## 5.11.1
 Fri, 26 Jul 2019 23:08:23 GMT
