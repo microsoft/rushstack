@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Allow override default commands",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "cbub@users.noreply.github.com"
+}
