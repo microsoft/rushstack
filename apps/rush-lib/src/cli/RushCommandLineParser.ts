@@ -250,7 +250,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
     // Register each custom command
     for (const command of commandLineConfiguration.commands) {
-      if (this.tryGetAction(command.name)) {
+      if (!command.overrideDefaultCommand && this.tryGetAction(command.name)) {
         throw new Error(`${RushConstants.commandLineFilename} defines a command "${command.name}"`
           + ` using a name that already exists`);
       }
