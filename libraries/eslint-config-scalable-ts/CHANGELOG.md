@@ -1,6 +1,13 @@
 # Change Log - @microsoft/eslint-config-scalable-ts
 
-This log was last generated on Fri, 16 Aug 2019 01:15:03 GMT and should not be manually modified.
+This log was last generated on Fri, 16 Aug 2019 21:58:15 GMT and should not be manually modified.
+
+## 0.1.2
+Fri, 16 Aug 2019 21:58:15 GMT
+
+### Patches
+
+- Relax peer dependency to allow usage with ESLint 5
 
 ## 0.1.1
 Fri, 16 Aug 2019 01:15:03 GMT

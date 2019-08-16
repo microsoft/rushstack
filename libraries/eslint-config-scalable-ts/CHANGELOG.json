@@ -2,6 +2,18 @@
   "name": "@microsoft/eslint-config-scalable-ts",
   "entries": [
     {
+      "version": "0.1.2",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.1.2",
+      "date": "Fri, 16 Aug 2019 21:58:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Relax peer dependency to allow usage with ESLint 5"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.1",
       "tag": "@microsoft/eslint-config-scalable-ts_v0.1.1",
       "date": "Fri, 16 Aug 2019 01:15:03 GMT",
