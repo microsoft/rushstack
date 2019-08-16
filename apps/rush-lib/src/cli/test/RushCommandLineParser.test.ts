@@ -39,7 +39,7 @@ interface IParserTestInstance {
 /**
  * Helper to set up a test instance for RushCommandLineParser.
  */
-function getCommandLineParserInstance(repoName: string, taskName: string): IParserTestInstance {
+function getCommandLineParserInstance(repoName: string, taskName: string, ...otherParams: string[]): IParserTestInstance {
   // Point to the test repo folder
   const startPath: string = resolve(__dirname, repoName);
 
@@ -55,7 +55,7 @@ function getCommandLineParserInstance(repoName: string, taskName: string): IPars
   const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
 
   // Mock the command
-  process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', taskName];
+  process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', taskName, ...otherParams];
   const spawnMock: jest.Mock = setSpawnMock();
 
   return {
@@ -276,6 +276,23 @@ describe('RushCommandLineParser', () => {
         return expect(() => {
           getCommandLineParserInstance(repoName, 'doesnt-matter');
         }).toThrowError('"safeForSimultaneousRushProcesses=true". This configuration is not supported');
+      });
+    });
+  });
+
+  describe(`in repo with tests for add`, () => {
+    describe(`'add' action`, () => {
+      it(`adds a dependency to just one sub-repo`, () => {
+        const repoName: string = 'addRepo';
+        const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'add', 'assert', '-t', 'a');
+
+        expect.assertions(1);
+        return expect(instance.parser.execute()).resolves.toEqual(true)
+          .then(() => {
+            // There should be 1 build per package
+            const packageCount: number = instance.spawnMock.mock.calls.length;
+            expect(packageCount).toEqual(1);
+          });
       });
     });
   });
