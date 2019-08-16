@@ -43,7 +43,14 @@ module.exports = {
         "@typescript-eslint/ban-types": "error",
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        "@typescript-eslint/camelcase": "error",
+        "@typescript-eslint/camelcase": [
+          "error",
+          {
+            // This is a special exception for naming patterns that use an underscore to separate two camel-cased
+            // parts.  Example:  "checkBox1_onChanged" or "_checkBox1_onChanged"
+            allow: [ "^_?[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*_[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*$" ]
+          }
+        ],
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         "@typescript-eslint/class-name-casing": [
