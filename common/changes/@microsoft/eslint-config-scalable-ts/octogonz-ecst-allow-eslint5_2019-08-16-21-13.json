@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/eslint-config-scalable-ts",
+      "comment": "Relax peer dependency to allow usage with ESLint 5",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/eslint-config-scalable-ts",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
