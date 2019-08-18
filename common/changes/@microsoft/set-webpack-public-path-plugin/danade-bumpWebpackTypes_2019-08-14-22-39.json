@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/set-webpack-public-path-plugin",
-      "comment": "Updating dependency @microsoft/gulp-core-build from 4.4.0 to 4.32.1",
-      "type": "minor"
+      "comment": "Update @types/webpack dependency from from 4.4.0 to 4.32.1.",
+      "type": "patch"
     }
   ],
   "packageName": "@microsoft/set-webpack-public-path-plugin",
