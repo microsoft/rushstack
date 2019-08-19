@@ -285,7 +285,7 @@ describe('RushCommandLineParser', () => {
 
   describe(`in repo with tests for add`, () => {
     describe(`'add' action`, () => {
-      it(`adds a dependency to just one sub-repo`, () => {
+      it(`adds a dependency to just one repo in the workspace`, () => {
         const startPath: string = resolve(__dirname, 'addRepo');
         const aPath: string = resolve(__dirname, 'addRepo/a');
         FileSystem.deleteFile(resolve(__dirname, `addRepo/a/package-deps.json`));
@@ -312,7 +312,7 @@ describe('RushCommandLineParser', () => {
     });
 
     describe(`'add' action with --all`, () => {
-      it(`adds a dependency to just one sub-repo`, () => {
+      it(`adds a dependency to all repos in the workspace`, () => {
         const startPath: string = resolve(__dirname, 'addRepo');
         const aPath: string = resolve(__dirname, 'addRepo/a');
         FileSystem.deleteFile(resolve(__dirname, `addRepo/a/package-deps.json`));
