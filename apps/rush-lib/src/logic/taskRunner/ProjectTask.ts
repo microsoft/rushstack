@@ -18,8 +18,44 @@ import {
   PackageChangeAnalyzer
 } from '../PackageChangeAnalyzer';
 
+import * as crypto from 'crypto';
+import * as fs from 'fs';
+
 interface IPackageDependencies extends IPackageDeps {
   arguments: string;
+}
+
+interface IPrebuiltJson {
+  path: string,
+  dirs: string[],
+  files: string[]
+}
+
+function copyFolder(source: string, target: string) {
+  if (!FileSystem.exists(source))
+  {
+    console.log(`Source doesn't exist: ${source}`);
+    return;
+  }
+
+  var files: string[] = [];
+
+  var targetFolder = path.join(target, path.basename(source));
+  if (!fs.existsSync(targetFolder)) {
+    fs.mkdirSync(targetFolder);
+  }
+
+  if (fs.lstatSync(source).isDirectory()) {
+    files = fs.readdirSync(source);
+    files.forEach(function (file) {
+      var curSource = path.join(source, file);
+      if (fs.lstatSync(curSource).isDirectory()) {
+        copyFolder(curSource, targetFolder);
+      } else {
+        FileSystem.copyFile( { sourcePath: curSource, destinationPath: targetFolder} );
+      }
+    });
+  }
 }
 
 export interface IProjectTaskOptions {
@@ -28,6 +64,8 @@ export interface IProjectTaskOptions {
   commandToRun: string;
   isIncrementalBuildAllowed: boolean;
   packageChangeAnalyzer: PackageChangeAnalyzer;
+  fromCache: boolean;
+  toCache: boolean;
 }
 
 /**
@@ -46,6 +84,8 @@ export class ProjectTask implements ITaskDefinition {
   private _rushConfiguration: RushConfiguration;
   private _commandToRun: string;
   private _packageChangeAnalyzer: PackageChangeAnalyzer;
+  private _fromCache: boolean;
+  private _toCache: boolean;
 
   constructor(options: IProjectTaskOptions) {
     this._rushProject = options.rushProject;
@@ -53,6 +93,8 @@ export class ProjectTask implements ITaskDefinition {
     this._commandToRun = options.commandToRun;
     this.isIncrementalBuildAllowed = options.isIncrementalBuildAllowed;
     this._packageChangeAnalyzer = options.packageChangeAnalyzer;
+    this._fromCache = options.fromCache;
+    this._toCache = options.toCache;
 }
 
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
@@ -117,6 +159,7 @@ export class ProjectTask implements ITaskDefinition {
       );
 
       if (isPackageUnchanged && this.isIncrementalBuildAllowed) {
+        this.toCache(currentPackageDeps);
         return Promise.resolve(TaskStatus.Skipped);
       } else {
         // If the deps file exists, remove it before starting a build.
@@ -134,6 +177,32 @@ export class ProjectTask implements ITaskDefinition {
           return Promise.resolve(TaskStatus.Success);
         }
 
+        if(this._fromCache) {
+          console.log(`Using cache for project: ${this._rushProject.packageName}\r\n`);
+          const prebuiltJson: IPrebuiltJson = JSON.parse(fs.readFileSync(path.resolve(this._rushConfiguration.rushJsonFolder, 
+            RushConstants.prebuiltFileName), 'utf8'));
+
+          if (currentPackageDeps) {
+            var currentHash: string = crypto.createHash('md5').update(JsonFile.stringify(currentPackageDeps)).digest('hex');
+            var cachePath: string = path.resolve(prebuiltJson.path, this._rushProject.packageName.replace('/', ''), currentHash);
+
+            if (FileSystem.exists(cachePath))
+            {
+              prebuiltJson.dirs.forEach(element => {
+                copyFolder(path.resolve(cachePath, element), this._rushProject.projectFolder);
+              });
+
+              prebuiltJson.files.forEach(element => {
+                FileSystem.copyFile( {sourcePath: path.resolve(cachePath, element),
+                  destinationPath: path.resolve(this._rushProject.projectFolder, element)});
+              });
+            }
+          }
+          
+          this.toCache(currentPackageDeps);
+          return Promise.resolve(TaskStatus.Success);
+        }
+        
         // Run the task
 
         writer.writeLine(this._commandToRun);
@@ -186,6 +255,34 @@ export class ProjectTask implements ITaskDefinition {
 
       this._writeLogsToDisk(writer);
       return Promise.reject(new TaskError('error', error.toString()));
+    }
+  }
+
+  private toCache(currentPackageDeps: IPackageDependencies | undefined) {
+    if (this._toCache) {
+      console.log(`Saving to cache for project: ${this._rushProject.packageName}\r\n`);
+      const prebuiltJson: IPrebuiltJson = JSON.parse(fs.readFileSync(path.resolve(this._rushConfiguration.rushJsonFolder, RushConstants.prebuiltFileName), 'utf8'));
+      if (currentPackageDeps) {
+        var currentHash: string = crypto.createHash('md5').update(JsonFile.stringify(currentPackageDeps)).digest('hex');
+        var cacheProject = path.resolve(prebuiltJson.path, this._rushProject.packageName.replace('/', ''));
+        var cacheProjectHash: string = path.resolve(cacheProject, currentHash);
+        if (FileSystem.exists(cacheProjectHash)) {
+          // this is an ERROR
+        }
+        else {
+          fs.mkdirSync(cacheProject);
+          fs.mkdirSync(cacheProjectHash);
+          prebuiltJson.dirs.forEach(element => {
+            copyFolder(path.resolve(this._rushProject.projectFolder, element), cacheProjectHash);
+          });
+          prebuiltJson.files.forEach(element => {
+            FileSystem.copyFile({
+            sourcePath: path.resolve(this._rushProject.projectFolder, element),
+              destinationPath: path.resolve(cacheProjectHash, element)
+            });
+          });
+        }
+      }
     }
   }
 

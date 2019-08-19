@@ -54,6 +54,8 @@ export class BulkScriptAction extends BaseScriptAction {
   private _commandToRun: string;
 
   private _changedProjectsOnly: CommandLineFlagParameter;
+  private _fromCache: CommandLineFlagParameter;
+  private _toCache: CommandLineFlagParameter;
   private _fromFlag: CommandLineStringListParameter;
   private _toFlag: CommandLineStringListParameter;
   private _toVersionPolicy: CommandLineStringListParameter;
@@ -104,6 +106,8 @@ export class BulkScriptAction extends BaseScriptAction {
       customParameterValues,
       isQuietMode: isQuietMode,
       isIncrementalBuildAllowed: this.actionName === 'build',
+      fromCache: this.actionName === 'build' && this._fromCache.value,
+      toCache: this.actionName === 'build' && this._toCache.value,
       ignoreMissingScript: this._ignoreMissingScript,
       ignoreDependencyOrder: this._ignoreDependencyOrder
     });
@@ -179,6 +183,21 @@ export class BulkScriptAction extends BaseScriptAction {
         description: 'If specified, the incremental build will only rebuild projects that have changed, '
           + 'but not any projects that directly or indirectly depend on the changed package.'
       });
+
+      this._fromCache = this.defineFlagParameter({
+        parameterLongName: '--from-cache',
+        description: 'Fetches binaries from cache.'
+      });
+
+      this._toCache = this.defineFlagParameter({
+        parameterLongName: '--to-cache',
+        description: 'Saves binaries to cache.'
+      });
+
+      if (this._fromCache || this._toCache)
+      {
+        console.log("aaaaaaa");
+      }
     }
 
     this.defineScriptParameters();

@@ -81,6 +81,11 @@ export namespace RushConstants {
   export const pnpmV3ShrinkwrapFilename: string = 'pnpm-lock.yaml';
 
   /**
+   * Prebuilt
+   */
+  export const prebuiltFileName: string = 'prebuilt.json';
+
+  /**
    * The filename ("pnpmfile.js") used to add custom configuration to PNPM
    */
   export const pnpmfileFilename: string = 'pnpmfile.js';
