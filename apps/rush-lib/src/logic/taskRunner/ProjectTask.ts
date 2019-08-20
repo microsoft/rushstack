@@ -52,7 +52,7 @@ function copyFolder(source: string, target: string) {
       if (fs.lstatSync(curSource).isDirectory()) {
         copyFolder(curSource, targetFolder);
       } else {
-        FileSystem.copyFile( { sourcePath: curSource, destinationPath: targetFolder} );
+        FileSystem.copyFile( { sourcePath: curSource, destinationPath: path.join(targetFolder, file) } );
       }
     });
   }
@@ -273,7 +273,9 @@ export class ProjectTask implements ITaskDefinition {
           fs.mkdirSync(cacheProject);
           fs.mkdirSync(cacheProjectHash);
           prebuiltJson.dirs.forEach(element => {
-            copyFolder(path.resolve(this._rushProject.projectFolder, element), cacheProjectHash);
+            var source: string = path.resolve(this._rushProject.projectFolder, element);
+            console.log(`Copying ${source} to ${cacheProjectHash}\r\n`);
+            copyFolder(source, cacheProjectHash);
           });
           prebuiltJson.files.forEach(element => {
             FileSystem.copyFile({
