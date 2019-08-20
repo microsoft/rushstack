@@ -199,7 +199,6 @@ export class ProjectTask implements ITaskDefinition {
             }
           }
           
-          this.toCache(currentPackageDeps);
           return Promise.resolve(TaskStatus.Success);
         }
         
@@ -244,6 +243,7 @@ export class ProjectTask implements ITaskDefinition {
               // Write deps on success.
               if (currentPackageDeps) {
                 JsonFile.save(currentPackageDeps, currentDepsPath);
+                this.toCache(currentPackageDeps);
               }
               resolve(TaskStatus.Success);
             }
