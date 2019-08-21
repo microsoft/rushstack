@@ -26,8 +26,6 @@ export interface ITaskSelectorConstructor {
  *  - based on to/from flags, solving the dependency graph and figuring out which projects need to be run
  *  - creating a ProjectTask for each project that needs to be built
  *  - registering the necessary ProjectTasks with the TaskRunner, which actually orchestrates execution
- *
- * This class is currently only used by CustomRushAction
  */
 export class TaskSelector {
   private _taskCollection: TaskCollection;
