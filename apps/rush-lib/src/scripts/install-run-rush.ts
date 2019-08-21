@@ -25,7 +25,7 @@ import {
 const PACKAGE_NAME: string = '@microsoft/rush';
 const RUSH_PREVIEW_VERSION: string = 'RUSH_PREVIEW_VERSION';
 
-function getRushVersion(): string {
+function _getRushVersion(): string {
   const rushPreviewVersion: string | undefined = process.env[RUSH_PREVIEW_VERSION];
   if (rushPreviewVersion !== undefined) {
     console.log(`Using Rush version from environment variable ${RUSH_PREVIEW_VERSION}=${rushPreviewVersion}`);
@@ -49,7 +49,7 @@ function getRushVersion(): string {
   }
 }
 
-function run(): void {
+function _run(): void {
   const [
     nodePath, /* Ex: /bin/node */
     scriptPath, /* /repo/common/scripts/install-run-rush.js */
@@ -75,11 +75,11 @@ function run(): void {
   }
 
   runWithErrorAndStatusCode(() => {
-    const version: string = getRushVersion();
+    const version: string = _getRushVersion();
     console.log(`The rush.json configuration requests Rush version ${version}`);
 
     return installAndRun(PACKAGE_NAME, version, bin, packageBinArgs);
   });
 }
 
-run();
+_run();
