@@ -2,6 +2,18 @@
   "name": "@microsoft/eslint-config-scalable-ts",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.2.0",
+      "date": "Wed, 21 Aug 2019 21:56:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Enable react/no-deprecated, react/no-unescaped-entities, and react/self-closing-comp"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.2",
       "tag": "@microsoft/eslint-config-scalable-ts_v0.1.2",
       "date": "Fri, 16 Aug 2019 21:58:15 GMT",

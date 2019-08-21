@@ -1,6 +1,13 @@
 # Change Log - @microsoft/eslint-config-scalable-ts
 
-This log was last generated on Fri, 16 Aug 2019 21:58:15 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Aug 2019 21:56:59 GMT and should not be manually modified.
+
+## 0.2.0
+Wed, 21 Aug 2019 21:56:59 GMT
+
+### Minor changes
+
+- Enable react/no-deprecated, react/no-unescaped-entities, and react/self-closing-comp
 
 ## 0.1.2
 Fri, 16 Aug 2019 21:58:15 GMT
