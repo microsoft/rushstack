@@ -165,8 +165,7 @@ export class TaskSelector {
   }
 
   /**
-   * Inverts the localLinks to arrive at the dependent graph, rather than using the dependency graph
-   * this helps when using the --from flag
+   * Inverts the localLinks to arrive at the dependent graph. This helps when using the --from flag
    */
   private _buildDependentGraph(): void {
     this._dependentList = new Map<string, Set<string>>();
