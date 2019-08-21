@@ -374,14 +374,19 @@ function writeFlagFile(packageInstallFolder: string): void {
 function getRushTempFolder(rushCommonFolder: string): string {
   const rushTempFolder: string | undefined = process.env[RUSH_TEMP_FOLDER_ENV_VARIABLE_NAME];
   if (rushTempFolder !== undefined) {
-    if (!fs.existsSync(rushTempFolder)) {
-      fs.mkdirSync(rushTempFolder);
-    }
-
+    ensureFolder(rushTempFolder);
     return rushTempFolder;
+  } else {
+    return ensureAndJoinPath(rushCommonFolder, 'temp');
   }
+}
 
-  return ensureAndJoinPath(rushCommonFolder, 'temp');
+function ensureFolder(folderPath: string): void {
+  if (!fs.existsSync(folderPath)) {
+    const parentDir: string = path.dirname(folderPath);
+    ensureFolder(parentDir);
+    fs.mkdirSync(folderPath);
+  }
 }
 
 export function installAndRun(
