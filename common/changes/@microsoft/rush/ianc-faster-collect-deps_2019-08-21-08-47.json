@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Some optimizations for --to, --from, and cyclic dependency detection for repos with large numbers of projects.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}
