@@ -80,16 +80,18 @@ export class TaskSelector {
     }
 
     // Register any dependencies it may have
-    dependencies.forEach(dep => this._registerTask(this._options.rushConfiguration.getProjectByName(dep)));
+    for (const dependency of dependencies) {
+      this._registerTask(this._options.rushConfiguration.getProjectByName(dependency));
+    }
 
     if (!this._options.ignoreDependencyOrder) {
       // Add ordering relationships for each dependency
-      dependencies.forEach(dependency => {
+      for (const dependency of dependencies) {
         this._taskCollection.addDependencies(
           dependency,
           this._rushLinkJson.localLinks[dependency] || []
         );
-      });
+      }
     }
   }
 
@@ -108,19 +110,19 @@ export class TaskSelector {
     }
 
     // Register all downstream dependents
-    dependents.forEach(dependent => {
+    for (const dependent of dependents) {
       this._registerTask(this._options.rushConfiguration.getProjectByName(dependent));
-    });
+    }
 
     if (!this._options.ignoreDependencyOrder) {
       // Only add ordering relationships for projects which have been registered
       // e.g. package C may depend on A & B, but if we are only building A's downstream, we will ignore B
-      dependents.forEach(dependent => {
+      for (const dependent of dependents) {
         this._taskCollection.addDependencies(
           dependent,
           (this._rushLinkJson.localLinks[dependent] || []).filter(dep => dependents.has(dep))
         );
-      });
+      }
     }
   }
 
@@ -145,8 +147,8 @@ export class TaskSelector {
     if (!result.has(project)) {
       result.add(project);
 
-      for (const dep of this._rushLinkJson.localLinks[project] || []) {
-        this._collectAllDependencies(dep, result);
+      for (const dependency of this._rushLinkJson.localLinks[project] || []) {
+        this._collectAllDependencies(dependency, result);
       }
     }
   }
@@ -158,8 +160,8 @@ export class TaskSelector {
     if (!result.has(project)) {
       result.add(project);
 
-      for (const dep of (this._dependentList.get(project) || new Set<string>())) {
-        this._collectAllDependents(dep, result);
+      for (const dependent of (this._dependentList.get(project) || new Set<string>())) {
+        this._collectAllDependents(dependent, result);
       }
     }
   }
@@ -171,14 +173,15 @@ export class TaskSelector {
   private _buildDependentGraph(): void {
     this._dependentList = new Map<string, Set<string>>();
 
-    Object.keys(this._rushLinkJson.localLinks).forEach(project => {
-      this._rushLinkJson.localLinks[project].forEach(dep => {
+    for (const project of Object.keys(this._rushLinkJson.localLinks)) {
+      for (const dep of this._rushLinkJson.localLinks[project]) {
         if (!this._dependentList.has(dep)) {
           this._dependentList.set(dep, new Set<string>());
         }
+
         this._dependentList.get(dep)!.add(project);
-      });
-    });
+      }
+    }
   }
 
   private _registerTask(project: RushConfigurationProject | undefined): void {
