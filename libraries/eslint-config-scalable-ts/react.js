@@ -42,8 +42,16 @@ module.exports = {
         // RATIONALE:         Catches a common coding mistake.
         "react/no-danger-with-children": "error",
 
+        // RATIONALE:         Avoids usage of deprecated APIs.
+        //
+        // Note that the set of deprecated APIs is determined by the "react.version" setting.
+        "react/no-deprecated": "error",
+
         // RATIONALE:         Catches a common coding mistake.
         "react/no-direct-mutation-state": "error",
+
+        // RATIONALE:         Catches some common coding mistakes.
+        "react/no-unescaped-entities": "error",
 
         // RATIONALE:         Avoids a potential performance problem.
         "react/no-find-dom-node": "error",
@@ -56,6 +64,9 @@ module.exports = {
 
         // RATIONALE:         Deprecated API.
         "react/no-string-refs": "error",
+
+        // RATIONALE:         Improves syntax for some cases that are not already handled by Prettier.
+        "react/self-closing-comp": "error",
       }
     }
   ]
