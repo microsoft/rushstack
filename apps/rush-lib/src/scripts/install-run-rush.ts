@@ -49,6 +49,8 @@ function run(): void {
     ...packageBinArgs /* [build, --to, myproject] */
   ]: string[] = process.argv;
 
+  // Detect if this script was directly invoked, or if the install-run-rushx script was invokved to select the
+  // appropriate binary inside the rush package to run
   const scriptName: string = path.basename(scriptPath);
   const bin: string = scriptName.toLowerCase() === 'install-run-rushx.js' ? 'rushx' : 'rush';
   if (!nodePath || !scriptPath) {
