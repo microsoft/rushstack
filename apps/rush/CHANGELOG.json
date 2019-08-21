@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.11.3",
+      "tag": "@microsoft/rush_v5.11.3",
+      "date": "Wed, 21 Aug 2019 22:13:26 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add support for the RUSH_PREVIEW_VERSION environment variable to the install-run-rush script."
+          },
+          {
+            "comment": "Add support for the RUSH_TEMP_FOLDER environment variable in the install-run-rush script."
+          },
+          {
+            "comment": "Add install-run-rushx script to enable easy execution of the rushx command in CI"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.11.2",
       "tag": "@microsoft/rush_v5.11.2",
       "date": "Fri, 16 Aug 2019 05:15:17 GMT",

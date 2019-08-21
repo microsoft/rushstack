@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 16 Aug 2019 05:15:17 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Aug 2019 22:13:26 GMT and should not be manually modified.
+
+## 5.11.3
+Wed, 21 Aug 2019 22:13:26 GMT
+
+### Updates
+
+- Add support for the RUSH_PREVIEW_VERSION environment variable to the install-run-rush script.
+- Add support for the RUSH_TEMP_FOLDER environment variable in the install-run-rush script.
+- Add install-run-rushx script to enable easy execution of the rushx command in CI
 
 ## 5.11.2
 Fri, 16 Aug 2019 05:15:17 GMT
