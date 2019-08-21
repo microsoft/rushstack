@@ -19,6 +19,7 @@ import * as path from 'path';
 import { IPackageJson } from '@microsoft/node-core-library';
 
 export const RUSH_JSON_FILENAME: string = 'rush.json';
+const RUSH_TEMP_FOLDER_ENV_VARIABLE_NAME: string = 'RUSH_TEMP_FOLDER';
 const INSTALLED_FLAG_FILENAME: string = 'installed.flag';
 const NODE_MODULES_FOLDER_NAME: string = 'node_modules';
 const PACKAGE_JSON_FILENAME: string = 'package.json';
@@ -64,7 +65,7 @@ function resolvePackageVersion(rushCommonFolder: string, { name, version }: IPac
   } else {
     // version resolves to
     try {
-      const rushTempFolder: string = ensureAndJoinPath(rushCommonFolder, 'temp');
+      const rushTempFolder: string = getRushTempFolder(rushCommonFolder);
       const sourceNpmrcFolder: string = path.join(rushCommonFolder, 'config', 'rush');
 
       syncNpmrc(sourceNpmrcFolder, rushTempFolder);
@@ -276,7 +277,7 @@ function isPackageAlreadyInstalled(packageInstallFolder: string): boolean {
  *  -
  *  - node_modules
  */
-function cleanInstallFolder(rushCommonFolder: string, packageInstallFolder: string): void {
+function cleanInstallFolder(rushTempFolder: string, packageInstallFolder: string): void {
   try {
     const flagFile: string = path.resolve(packageInstallFolder, INSTALLED_FLAG_FILENAME);
     if (fs.existsSync(flagFile)) {
@@ -291,8 +292,7 @@ function cleanInstallFolder(rushCommonFolder: string, packageInstallFolder: stri
     const nodeModulesFolder: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME);
     if (fs.existsSync(nodeModulesFolder)) {
       const rushRecyclerFolder: string = ensureAndJoinPath(
-        rushCommonFolder,
-        'temp',
+        rushTempFolder,
         'rush-recycler',
         `install-run-${Date.now().toString()}`
       );
@@ -371,6 +371,24 @@ function writeFlagFile(packageInstallFolder: string): void {
   }
 }
 
+function getRushTempFolder(rushCommonFolder: string): string {
+  const rushTempFolder: string | undefined = process.env[RUSH_TEMP_FOLDER_ENV_VARIABLE_NAME];
+  if (rushTempFolder !== undefined) {
+    ensureFolder(rushTempFolder);
+    return rushTempFolder;
+  } else {
+    return ensureAndJoinPath(rushCommonFolder, 'temp');
+  }
+}
+
+function ensureFolder(folderPath: string): void {
+  if (!fs.existsSync(folderPath)) {
+    const parentDir: string = path.dirname(folderPath);
+    ensureFolder(parentDir);
+    fs.mkdirSync(folderPath);
+  }
+}
+
 export function installAndRun(
   packageName: string,
   packageVersion: string,
@@ -379,16 +397,16 @@ export function installAndRun(
 ): number {
   const rushJsonFolder: string = findRushJsonFolder();
   const rushCommonFolder: string = path.join(rushJsonFolder, 'common');
+  const rushTempFolder: string = getRushTempFolder(rushCommonFolder);
   const packageInstallFolder: string = ensureAndJoinPath(
-    rushCommonFolder,
-    'temp',
+    rushTempFolder,
     'install-run',
     `${packageName}@${packageVersion}`
   );
 
   if (!isPackageAlreadyInstalled(packageInstallFolder)) {
     // The package isn't already installed
-    cleanInstallFolder(rushCommonFolder, packageInstallFolder);
+    cleanInstallFolder(rushTempFolder, packageInstallFolder);
 
     const sourceNpmrcFolder: string = path.join(rushCommonFolder, 'config', 'rush');
     syncNpmrc(sourceNpmrcFolder, packageInstallFolder);
