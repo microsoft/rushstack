@@ -59,7 +59,11 @@ function run(): void {
 
   if (process.argv.length < 3) {
     console.log(`Usage: ${scriptName} <command> [args...]`);
-    console.log(`Example: ${scriptName} build --to myproject`);
+    if (scriptName === 'install-run-rush.js') {
+      console.log(`Example: ${scriptName} build --to myproject`);
+    } else {
+      console.log(`Example: ${scriptName} custom-command`);
+    }
     process.exit(1);
   }
 
