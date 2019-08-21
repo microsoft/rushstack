@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add support for the RUSH_PREVIEW_VERSION environment variable to the install-run-rush script.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "nayanshah@users.noreply.github.com"
+}
