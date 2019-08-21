@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add install-run-rushx script to enable easy execution of the rushx command in CI",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "kaghiya@microsoft.com"
+}

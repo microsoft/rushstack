@@ -56,13 +56,21 @@ function run(): void {
     ...packageBinArgs /* [build, --to, myproject] */
   ]: string[] = process.argv;
 
+  // Detect if this script was directly invoked, or if the install-run-rushx script was invokved to select the
+  // appropriate binary inside the rush package to run
+  const scriptName: string = path.basename(scriptPath);
+  const bin: string = scriptName.toLowerCase() === 'install-run-rushx.js' ? 'rushx' : 'rush';
   if (!nodePath || !scriptPath) {
     throw new Error('Unexpected exception: could not detect node path or script path');
   }
 
   if (process.argv.length < 3) {
-    console.log('Usage: install-run-rush.js <command> [args...]');
-    console.log('Example: install-run-rush.js build --to myproject');
+    console.log(`Usage: ${scriptName} <command> [args...]`);
+    if (scriptName === 'install-run-rush.js') {
+      console.log(`Example: ${scriptName} build --to myproject`);
+    } else {
+      console.log(`Example: ${scriptName} custom-command`);
+    }
     process.exit(1);
   }
 
@@ -70,7 +78,7 @@ function run(): void {
     const version: string = getRushVersion();
     console.log(`The rush.json configuration requests Rush version ${version}`);
 
-    return installAndRun(PACKAGE_NAME, version, 'rush', packageBinArgs);
+    return installAndRun(PACKAGE_NAME, version, bin, packageBinArgs);
   });
 }
 
