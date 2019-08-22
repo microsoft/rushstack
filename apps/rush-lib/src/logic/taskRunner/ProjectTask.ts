@@ -288,6 +288,10 @@ export class ProjectTask implements ITaskDefinition {
             if (FileSystem.exists(source)) {
               var zipFileName: string = source + '.zip';
 
+              if(FileSystem.exists(zipFileName)) {
+                FileSystem.deleteFile(zipFileName);
+              }
+
               this.zipFolder(source, zipFileName).then(() => {
                 console.log(`Copying ${zipFileName} to ${cacheProjectHash}\r\n`);
                 // copyFolder(source, cacheProjectHash);
