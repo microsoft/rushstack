@@ -82,7 +82,7 @@ export class AddAction extends BaseRushAction {
     });
     this._allFlag = this.defineFlagParameter({
       parameterLongName: '--all',
-      description: 'If specified, the dependency will be added to all of your projects.'
+      description: 'If specified, the dependency will be added to all projects.'
     });
   }
 
