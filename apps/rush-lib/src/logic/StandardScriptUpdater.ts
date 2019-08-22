@@ -11,7 +11,11 @@ import { RushConfiguration } from '../api/RushConfiguration';
  * This is used by the "rush install" and "rush update" commands.
  */
 export class StandardScriptUpdater {
-  private static readonly _scriptNames: string[] = [ 'install-run.js', 'install-run-rush.js' ];
+  private static readonly _scriptNames: string[] = [
+    'install-run.js',
+    'install-run-rush.js',
+    'install-run-rushx.js'
+  ];
 
   /**
    * Recopy the scripts if the scripts are out of date.
