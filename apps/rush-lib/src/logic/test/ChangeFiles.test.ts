@@ -52,6 +52,12 @@ describe('ChangeFiles', () => {
       }).toThrow(Error);
     });
 
+    it('allows a hotfix in a hotfix branch.', () => {
+      const changeFile: string = path.join(__dirname, 'multipleHotfixChanges', 'change1.json');
+      const changedPackages: string[] = ['a'];
+      ChangeFiles.validate([changeFile], changedPackages, { hotfixChangeEnabled: true } as RushConfiguration);
+    });
+
     it('throws when there is any missing package.', () => {
       const changeFile: string = path.join(__dirname, 'verifyChanges', 'changes.json');
       const changedPackages: string[] = ['a', 'b', 'c'];

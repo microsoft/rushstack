@@ -1,10 +1,10 @@
 ### YamlMime:UniversalReference
 items:
-  - uid: api-documenter-test.Generic
+  - uid: 'api-documenter-test!Generic:class'
     summary: Generic class.
     name: Generic
     fullName: Generic
     langs:
       - typeScript
     type: class
-    package: api-documenter-test
+    package: api-documenter-test!

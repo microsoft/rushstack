@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-lib",
-  "version": "5.11.1",
+  "version": "5.11.4",
   "description": "A library for writing scripts that interact with the Rush tool",
   "repository": {
     "type": "git",
@@ -19,9 +19,9 @@
   "license": "MIT",
   "dependencies": {
     "@microsoft/node-core-library": "3.14.0",
-    "@microsoft/package-deps-hash": "2.2.169",
-    "@microsoft/stream-collator": "3.0.84",
-    "@microsoft/ts-command-line": "4.2.6",
+    "@microsoft/package-deps-hash": "2.2.170",
+    "@microsoft/stream-collator": "3.0.85",
+    "@microsoft/ts-command-line": "4.2.7",
     "@pnpm/link-bins": "~1.0.1",
     "@pnpm/logger": "~1.0.1",
     "@types/inquirer": "0.0.43",
@@ -48,8 +48,8 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.1.3",
-    "@microsoft/rush-stack-compiler-3.4": "0.1.16",
+    "@microsoft/node-library-build": "6.1.4",
+    "@microsoft/rush-stack-compiler-3.4": "0.1.17",
     "@types/glob": "5.0.30",
     "@types/jest": "23.3.11",
     "@types/js-yaml": "3.12.1",

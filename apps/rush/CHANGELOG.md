@@ -1,6 +1,33 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 26 Jul 2019 23:08:23 GMT and should not be manually modified.
+This log was last generated on Fri, 23 Aug 2019 03:31:52 GMT and should not be manually modified.
+
+## 5.11.4
+Fri, 23 Aug 2019 03:31:52 GMT
+
+### Updates
+
+- Some optimizations for --to, --from, and cyclic dependency detection for repos with large numbers of projects.
+- Ensure install-run-rushx script is updated during "rush update"
+
+## 5.11.3
+Wed, 21 Aug 2019 22:13:26 GMT
+
+### Updates
+
+- Add support for the RUSH_PREVIEW_VERSION environment variable to the install-run-rush script.
+- Add support for the RUSH_TEMP_FOLDER environment variable in the install-run-rush script.
+- Add install-run-rushx script to enable easy execution of the rushx command in CI
+
+## 5.11.2
+Fri, 16 Aug 2019 05:15:17 GMT
+
+### Updates
+
+- Refactor build action to allow generating build graph statically
+- Security updates.
+- Fix validation of hotfix changes in a hotfix-enabled branch
+- Clarify that "rush update --full" should be run when changing certain settings
 
 ## 5.11.1
 Fri, 26 Jul 2019 23:08:23 GMT

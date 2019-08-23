@@ -2,6 +2,60 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.11.4",
+      "tag": "@microsoft/rush_v5.11.4",
+      "date": "Fri, 23 Aug 2019 03:31:52 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Some optimizations for --to, --from, and cyclic dependency detection for repos with large numbers of projects."
+          },
+          {
+            "comment": "Ensure install-run-rushx script is updated during \"rush update\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.11.3",
+      "tag": "@microsoft/rush_v5.11.3",
+      "date": "Wed, 21 Aug 2019 22:13:26 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add support for the RUSH_PREVIEW_VERSION environment variable to the install-run-rush script."
+          },
+          {
+            "comment": "Add support for the RUSH_TEMP_FOLDER environment variable in the install-run-rush script."
+          },
+          {
+            "comment": "Add install-run-rushx script to enable easy execution of the rushx command in CI"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.11.2",
+      "tag": "@microsoft/rush_v5.11.2",
+      "date": "Fri, 16 Aug 2019 05:15:17 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Refactor build action to allow generating build graph statically"
+          },
+          {
+            "comment": "Security updates."
+          },
+          {
+            "comment": "Fix validation of hotfix changes in a hotfix-enabled branch"
+          },
+          {
+            "comment": "Clarify that \"rush update --full\" should be run when changing certain settings"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.11.1",
       "tag": "@microsoft/rush_v5.11.1",
       "date": "Fri, 26 Jul 2019 23:08:23 GMT",
