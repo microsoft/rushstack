@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 21 Aug 2019 22:13:26 GMT and should not be manually modified.
+This log was last generated on Fri, 23 Aug 2019 03:31:52 GMT and should not be manually modified.
+
+## 5.11.4
+Fri, 23 Aug 2019 03:31:52 GMT
+
+### Updates
+
+- Some optimizations for --to, --from, and cyclic dependency detection for repos with large numbers of projects.
+- Ensure install-run-rushx script is updated during "rush update"
 
 ## 5.11.3
 Wed, 21 Aug 2019 22:13:26 GMT

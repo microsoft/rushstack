@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.11.4",
+      "tag": "@microsoft/rush_v5.11.4",
+      "date": "Fri, 23 Aug 2019 03:31:52 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Some optimizations for --to, --from, and cyclic dependency detection for repos with large numbers of projects."
+          },
+          {
+            "comment": "Ensure install-run-rushx script is updated during \"rush update\""
+          }
+        ]
+      }
+    },
+    {
       "version": "5.11.3",
       "tag": "@microsoft/rush_v5.11.3",
       "date": "Wed, 21 Aug 2019 22:13:26 GMT",
