@@ -143,9 +143,9 @@ export class ChangeAction extends BaseRushAction {
 
   private _verify(): void {
     const changedPackages: string[] = this._getChangedPackageNames();
-
     if (changedPackages.length > 0) {
       this._validateChangeFile(changedPackages);
+      console.log('end');
     } else {
       this._logNoChangeFileRequired();
     }
@@ -198,9 +198,12 @@ export class ChangeAction extends BaseRushAction {
   private _hasProjectChanged(changedFolders: Array<string | undefined>,
     project: RushConfigurationProject): boolean {
     let normalizedFolder: string = project.projectRelativeFolder;
+
+    const rushPathDiff: string = this._findRushPathDiff(changedFolders, project);
     if (normalizedFolder.charAt(normalizedFolder.length - 1) !== '/') {
       normalizedFolder = normalizedFolder + '/';
     }
+    normalizedFolder = rushPathDiff + normalizedFolder;
     const pathRegex: RegExp = new RegExp(`^${normalizedFolder}`, 'i');
     for (const folder of changedFolders) {
       if (folder && folder.match(pathRegex)) {
@@ -208,6 +211,25 @@ export class ChangeAction extends BaseRushAction {
       }
     }
     return false;
+  }
+
+  private _findRushPathDiff(changedFolders: Array<string | undefined>,
+    project: RushConfigurationProject): string {
+      const normalizedFolder: string = project.projectRelativeFolder;
+      let rushPathDiff: string = '';
+      for (const folder of changedFolders) {
+        if (folder !== undefined) {
+          const splitted: Array<string | undefined> = folder.split('/');
+          if (splitted[0] !== normalizedFolder) {
+            // if rush.json is not under the root directory
+            const changeProjectIndex: number = splitted.indexOf(normalizedFolder);
+            for (let i: number = 0; i < changeProjectIndex; i++) {
+              rushPathDiff = rushPathDiff + splitted[i] + '/';
+            }
+          }
+        }
+      }
+    return rushPathDiff;
   }
 
   /**
@@ -253,7 +275,6 @@ export class ChangeAction extends BaseRushAction {
    * Asks all questions which are needed to generate changelist for a project.
    */
   private _askQuestions(packageName: string): Promise<IChangeInfo | undefined> {
-    console.log(`${os.EOL}${packageName}`);
     const comments: string[] | undefined = this._changeComments.get(packageName);
     if (comments) {
       console.log(`Found existing comments:`);
