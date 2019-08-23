@@ -20,7 +20,7 @@ import {
 
 import * as crypto from 'crypto';
 import * as fs from 'fs';
-import * as archiver from 'archiver';
+import * as tar from 'tar';
 
 interface IPackageDependencies extends IPackageDeps {
   arguments: string;
@@ -32,32 +32,32 @@ interface IPrebuiltJson {
   files: string[]
 }
 
-function copyFolder(source: string, target: string) {
-  if (!FileSystem.exists(source))
-  {
-    console.log(`Source doesn't exist: ${source}`);
-    return;
-  }
+// function copyFolder(source: string, target: string) {
+//   if (!FileSystem.exists(source))
+//   {
+//     console.log(`Source doesn't exist: ${source}`);
+//     return;
+//   }
 
-  var files: string[] = [];
+//   var files: string[] = [];
 
-  var targetFolder = path.join(target, path.basename(source));
-  if (!fs.existsSync(targetFolder)) {
-    fs.mkdirSync(targetFolder);
-  }
+//   var targetFolder = path.join(target, path.basename(source));
+//   if (!fs.existsSync(targetFolder)) {
+//     fs.mkdirSync(targetFolder);
+//   }
 
-  if (fs.lstatSync(source).isDirectory()) {
-    files = fs.readdirSync(source);
-    files.forEach(function (file) {
-      var curSource = path.join(source, file);
-      if (fs.lstatSync(curSource).isDirectory()) {
-        copyFolder(curSource, targetFolder);
-      } else {
-        FileSystem.copyFile( { sourcePath: curSource, destinationPath: path.join(targetFolder, file) } );
-      }
-    });
-  }
-}
+//   if (fs.lstatSync(source).isDirectory()) {
+//     files = fs.readdirSync(source);
+//     files.forEach(function (file) {
+//       var curSource = path.join(source, file);
+//       if (fs.lstatSync(curSource).isDirectory()) {
+//         copyFolder(curSource, targetFolder);
+//       } else {
+//         FileSystem.copyFile( { sourcePath: curSource, destinationPath: path.join(targetFolder, file) } );
+//       }
+//     });
+//   }
+// }
 
 export interface IProjectTaskOptions {
   rushProject: RushConfigurationProject;
@@ -178,7 +178,7 @@ export class ProjectTask implements ITaskDefinition {
           return Promise.resolve(TaskStatus.Success);
         }
 
-        if(this._fromCache) {
+        if(this._fromCache && this.isIncrementalBuildAllowed) {
           const prebuiltJson: IPrebuiltJson = JSON.parse(fs.readFileSync(path.resolve(this._rushConfiguration.rushJsonFolder, 
             RushConstants.prebuiltFileName), 'utf8'));
 
@@ -186,11 +186,29 @@ export class ProjectTask implements ITaskDefinition {
             var currentHash: string = crypto.createHash('md5').update(JsonFile.stringify(currentPackageDeps)).digest('hex');
             var cachePath: string = path.resolve(prebuiltJson.path, this._rushProject.packageName.replace('/', ''), currentHash);
 
-            if (FileSystem.exists(cachePath))
-            {
+            if (FileSystem.exists(cachePath)) {
               console.log(`Using cache for project: ${this._rushProject.packageName}\r\n`);
               prebuiltJson.dirs.forEach(element => {
-                copyFolder(path.resolve(cachePath, element), this._rushProject.projectFolder);
+                const tarName = element + '.tar';                
+
+                // copyFolder(path.resolve(cachePath, element), this._rushProject.projectFolder);
+                var zipFileSourcePath = path.resolve(cachePath, tarName);
+                if (FileSystem.exists(zipFileSourcePath)) {                  
+                  var zipFileDestPath = path.resolve(this._rushProject.projectFolder, tarName);
+                  
+                  FileSystem.copyFile( {sourcePath: zipFileSourcePath,
+                    destinationPath: zipFileDestPath});
+
+                  tar.extract({
+                    cwd: this._rushProject.projectFolder,
+                    file: zipFileDestPath,
+                    sync: true
+                  });
+
+                  if(FileSystem.exists(zipFileDestPath)) {
+                    FileSystem.deleteFile(zipFileDestPath);
+                  }
+                }
               });
 
               prebuiltJson.files.forEach(element => {
@@ -198,10 +216,10 @@ export class ProjectTask implements ITaskDefinition {
                   destinationPath: path.resolve(this._rushProject.projectFolder, element)});
               });
           
-              return Promise.resolve(TaskStatus.Success);
+              return Promise.resolve(TaskStatus.Skipped);
+              
             }
-            else
-            {
+            else {
               console.log(`No cache for project: ${this._rushProject.packageName}\r\n`);
             }
           }
@@ -283,23 +301,41 @@ export class ProjectTask implements ITaskDefinition {
 
           fs.mkdirSync(cacheProjectHash);
           prebuiltJson.dirs.forEach(element => {
+            const tarName = element + '.tar';
             var source: string = path.resolve(this._rushProject.projectFolder, element);
             
             if (FileSystem.exists(source)) {
-              var zipFileName: string = source + '.zip';
+              var zipFileName: string = path.resolve(this._rushProject.projectFolder, tarName);
 
               if(FileSystem.exists(zipFileName)) {
                 FileSystem.deleteFile(zipFileName);
               }
 
-              this.zipFolder(source, zipFileName).then(() => {
-                console.log(`Copying ${zipFileName} to ${cacheProjectHash}\r\n`);
-                // copyFolder(source, cacheProjectHash);
-                FileSystem.copyFile({
-                  sourcePath: zipFileName,
-                  destinationPath: path.resolve(cacheProjectHash, element + '.zip')
-                });
+              tar.create({
+                gzip: false,
+                file: zipFileName,
+                cwd: this._rushProject.projectFolder,
+                portable: true,
+                sync: true
+              } as tar.CreateOptions, [element]);
+
+              FileSystem.copyFile({
+                sourcePath: zipFileName,
+                destinationPath: path.resolve(cacheProjectHash, tarName)
               });
+
+              if(FileSystem.exists(zipFileName)) {
+                FileSystem.deleteFile(zipFileName);
+              }
+
+              // this.zipFolder(source, zipFileName).then(() => {
+              //   console.log(`Copying ${zipFileName} to ${cacheProjectHash}\r\n`);
+              //   // copyFolder(source, cacheProjectHash);
+              //   FileSystem.copyFile({
+              //     sourcePath: zipFileName,
+              //     destinationPath: path.resolve(cacheProjectHash, element + '.zip')
+              //   });
+              // });
             }
             else
             {
@@ -317,30 +353,30 @@ export class ProjectTask implements ITaskDefinition {
     }
   }
 
-  private zipFolder(sourceDir, out) {
-    const archive = archiver('zip', { 
-      zlib: 
-      {
-        level: 1 // best speed 
-      }
-    });
+  // private zipFolder(sourceDir, out) {
+  //   const archive = archiver('zip', { 
+  //     zlib: 
+  //     {
+  //       level: 1 // best speed 
+  //     }
+  //   });
 
-    const stream = fs.createWriteStream(out);
+  //   const stream = fs.createWriteStream(out);
   
-    return new Promise((resolve, reject) => {
-      archive
-        .directory(sourceDir, false)
-        .on('error', err => {
-          console.log(err);
-          reject(err);
-        })
-        .pipe(stream)
-      ;
+  //   return new Promise((resolve, reject) => {
+  //     archive
+  //       .directory(sourceDir, false)
+  //       .on('error', err => {
+  //         console.log(err);
+  //         reject(err);
+  //       })
+  //       .pipe(stream)
+  //     ;
   
-      stream.on('close', () => resolve());
-      archive.finalize();
-    });
-  }
+  //     stream.on('close', () => resolve());
+  //     archive.finalize();
+  //   });
+  // }
 
   // @todo #179371: add log files to list of things that get gulp cleaned
   private _writeLogsToDisk(writer: ITaskWriter): void {

@@ -231,7 +231,7 @@ export class TaskRunner {
     task.status = TaskStatus.Success;
 
     task.dependents.forEach((dependent: ITask) => {
-      if (!this._changedProjectsOnly) {
+      if (!this._changedProjectsOnly && !task.hadEmptyScript) {
         dependent.isIncrementalBuildAllowed = false;
       }
       dependent.dependencies.delete(task);
