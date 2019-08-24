@@ -53,7 +53,7 @@ export class CommandLineConfiguration {
       const jsonObject: any = JsonFile.load(jsonFilename);
 
       // TODO: Investigate appropriate solution
-      const defaults =
+      const defaults: any =
         [{
           commandKind: 'bulk',
           name: 'build',
@@ -76,7 +76,7 @@ export class CommandLineConfiguration {
 
         }
       ];
-      let defaultReBuilds = false;
+      let defaultReBuilds: boolean = false;
 
       // TODO: optimize
       for (const command of jsonObject.commands) {
@@ -91,8 +91,7 @@ export class CommandLineConfiguration {
         lodash.merge(jsonObject.commands, defaults);
       }
 
-      const jsonSchema =  CommandLineConfiguration._jsonSchema;
-      jsonSchema.validateObject(jsonObject, jsonFilename);
+      CommandLineConfiguration._jsonSchema.validateObject(jsonObject, jsonFilename);
       commandLineJson = jsonObject;
 
     }
