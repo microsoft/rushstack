@@ -1,0 +1,26 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
+  "commands": [
+    {
+      "commandKind": "bulk",
+      "name": "build",
+      "summary": "Build all projects that haven't been built, or have changed since they were last built",
+      "enableParallelism": true,
+      "allowWarningsInSuccessfulBuild": true
+    }
+  ],
+  "parameters": [
+    {
+      "longName": "--no-color",
+      "parameterKind": "flag",
+      "description": "disable colors in the build log, defaults to 'true'",
+      "associatedCommands": [ "build", "rebuild" ]
+    },
+    {
+      "longName": "--production",
+      "parameterKind": "flag",
+      "description": "Perform a production build, including minification and localization steps",
+      "associatedCommands": [ "build", "rebuild" ]
+    }
+  ]
+}
