@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update to support simplified build and rebuild settings",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "darsi-an@users.noreply.github.com"
+}
