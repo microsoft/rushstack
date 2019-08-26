@@ -43,17 +43,17 @@ export class CommandLineConfiguration {
   }
 
   /**
-   * Loads the configuration from the specified file and applies any ommited default settings.
-   * If the file does not exist, then an empty default instance is returned.
+   * Loads the configuration from the specified file and applies any ommited default build
+   * settings.  If the file does not exist, then an empty default instance is returned.
    * If the file contains errors, then an exception is thrown.
    */
   public static loadFromFileAndDefault(jsonFilename: string): CommandLineConfiguration {
     let commandLineJson: ICommandLineJson | undefined = undefined;
     if (FileSystem.exists(jsonFilename)) {
-      const jsonObject: any = JsonFile.load(jsonFilename);
+      commandLineJson = JsonFile.load(jsonFilename);
 
-      // TODO: Investigate appropriate solution
-      const defaults: any =
+      // TODO: Investigate
+      const defaultBuildSettings: CommandJson[] =
         [{
           commandKind: 'bulk',
           name: 'build',
@@ -62,8 +62,8 @@ export class CommandLineConfiguration {
           enableParallelism: true,
           ignoreMissingScript: false,
           ignoreDependencyOrder: false,
-          allowWarningsInSuccessfulBuild: false
-
+          allowWarningsInSuccessfulBuild: false,
+          safeForSimultaneousRushProcesses: false
         },
         {
           commandKind: 'bulk',
@@ -72,28 +72,40 @@ export class CommandLineConfiguration {
           enableParallelism: true,
           ignoreMissingScript: false,
           ignoreDependencyOrder: false,
-          allowWarningsInSuccessfulBuild: false
-
+          allowWarningsInSuccessfulBuild: false,
+          safeForSimultaneousRushProcesses: false
         }
       ];
-      let defaultReBuilds: boolean = false;
 
-      // TODO: optimize
-      for (const command of jsonObject.commands) {
-        if (command.commandKind === 'bulk' && (command.name === 'rebuild' || command.name === 'build')) {
-          defaultReBuilds = true;
+      let applyDefaults: boolean = false;
+
+      if (commandLineJson && commandLineJson.commands) {
+        for (const command of commandLineJson.commands) {
+          if (command.commandKind === 'bulk' && (command.name === 'rebuild' || command.name === 'build')) {
+            applyDefaults = true;
+            break;
+          }
         }
       }
 
-      // TODO : optimize
-      if (defaultReBuilds) {
-        lodash.merge(lodash.keyBy(defaults, 'name'), lodash.keyBy(jsonObject.commands, 'name'));
-        lodash.merge(jsonObject.commands, defaults);
+      let mergedBuildSettings: CommandJson[] = [];
+      // merge commands specified in command-line.json and default (re)build settings
+      // Ensure both build commands are included and preserve any other commands specified
+      if (applyDefaults && commandLineJson) {
+        mergedBuildSettings = lodash({}) // Start with an empty object
+        .merge(
+          lodash(defaultBuildSettings).groupBy('name').value(),
+          lodash(commandLineJson.commands).groupBy('name').value()
+          )
+          .values()
+          .flatten()
+          .value();
+        commandLineJson.commands = mergedBuildSettings;
       }
 
-      CommandLineConfiguration._jsonSchema.validateObject(jsonObject, jsonFilename);
-      commandLineJson = jsonObject;
-
+      if (commandLineJson) {
+        CommandLineConfiguration._jsonSchema.validateObject(commandLineJson, jsonFilename) ;
+      }
     }
 
     return new CommandLineConfiguration(commandLineJson);
