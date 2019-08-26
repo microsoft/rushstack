@@ -466,19 +466,31 @@ module.exports = {
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         "use-isnan": "error",
 
-        // RATIONALE:         Most programming languages have a "null" or "nil" value that serves several purposes:
-        //                    (1) the initial value for an uninitialized variable, (2) the value of x.y or x["y"]
-        //                    when x has no such key, and (3) a special token that developers can assign to indicate
-        //                    an unknown or empty state.  In JavaScript, the "undefined" value fulfills all three
-        //                    roles.  JavaScript's "null" value is a redundant secondary token that only fulfills #3,
-        //                    even though its name confusingly implies otherwise.  The "null" value was arguably
-        //                    a mistake in the original JavaScript language design, but it cannot be banned entirely
-        //                    because it is returned by some entrenched system APIs such as JSON.parse(), and also
-        //                    some popular NPM packages.  To avoid requiring lint suppressions when interacting with
-        //                    these legacy APIs, the "no-null" rule prohibits the value but not the type annotation.
-        //                    In other words, it tolerates preexisting nulls but blocks new ones from being
-        //                    introduced.
-        "no-null/no-null": "error",
+        // The "no-restricted-syntax" rule is a general purpose pattern matcher that we can use to experiment with
+        // new rules.  If a rule works well, we should convert it to a proper rule so it gets its own name
+        // for suppressions and documentation.
+        // How it works:    https://eslint.org/docs/rules/no-restricted-syntax
+        // AST visualizer:  https://astexplorer.net/
+        // Debugger:        http://estools.github.io/esquery/
+        "no-restricted-syntax": [
+          "error",
+          // RATIONALE:       Most programming languages have a "null" or "nil" value that serves several purposes:
+          //                  (1) the initial value for an uninitialized variable, (2) the value of x.y or x["y"]
+          //                  when x has no such key, and (3) a special token that developers can assign to indicate
+          //                  an unknown or empty state.  In JavaScript, the "undefined" value fulfills all three
+          //                  roles.  JavaScript's "null" value is a redundant secondary token that only fulfills #3,
+          //                  even though its name confusingly implies otherwise.  The "null" value was arguably
+          //                  a mistake in the original JavaScript language design, but it cannot be banned entirely
+          //                  because it is returned by some entrenched system APIs such as JSON.parse(), and also
+          //                  some popular NPM packages.  To avoid requiring lint suppressions when interacting with
+          //                  these legacy APIs, this rule prohibits "null" as a literal value, but not in type
+          //                  annotations.  Comparisons with "null" are also allowed.  In other words, this rule
+          //                  aims to tolerate preexisting null values but prevents new ones from being introduced.
+          {
+            "selector": ":not(BinaryExpression:matches([operator='!=='], [operator='==='])) > Literal[value=null]",
+            "message": "Usage of \"null\" is deprecated except when received from legacy APIs; use \"undefined\" instead"
+          }
+        ],
       }
     }
   ]
