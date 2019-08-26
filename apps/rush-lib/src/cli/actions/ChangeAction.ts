@@ -218,7 +218,7 @@ export class ChangeAction extends BaseRushAction {
   private _findRushPathDiff(changedFolders: Array<string | undefined>,
     project: RushConfigurationProject): string {
       const normalizedFolder: string = project.projectRelativeFolder;
-      let rushPathDiff: string = '';
+      const rushPathDiff: string = '';
       for (const folder of changedFolders) {
         if (folder !== undefined) {
           const splitted: Array<string> = folder.split(path.sep);
