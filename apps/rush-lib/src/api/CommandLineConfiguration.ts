@@ -81,12 +81,11 @@ export class CommandLineConfiguration {
         return command.commandKind === 'bulk' && (command.name === 'build' || command.name === 'rebuild');
       }) : false;
 
-      let mergedBuildSettings: CommandJson[] = [];
       // merge commands specified in command-line.json and default (re)build settings
       // Ensure both build commands are included and preserve any other commands specified
       if (commandLineJson) {
         if (applyDefaults) {
-          mergedBuildSettings = lodash({}) // Start with an empty object
+          const mergedBuildSettings: CommandJson[] = lodash({}) // Start with an empty object
           .merge(
             lodash(defaultBuildSettings).groupBy('name').value(),
             lodash(commandLineJson.commands).groupBy('name').value()
