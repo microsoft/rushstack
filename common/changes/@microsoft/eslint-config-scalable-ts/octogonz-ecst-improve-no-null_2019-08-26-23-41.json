@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/eslint-config-scalable-ts",
+      "comment": "Replace \"eslint-plugin-no-null\" with a more lenient implementation that allows equality comparisons with \"null\"",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/eslint-config-scalable-ts",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
