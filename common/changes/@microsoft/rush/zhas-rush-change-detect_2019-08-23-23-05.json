@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "fix the rush change detect when rush.json is not under the root",
+      "comment": "Fix an inssue with rush change when rush.json isn't in the repository root",
       "packageName": "@microsoft/rush",
       "type": "none"
     }

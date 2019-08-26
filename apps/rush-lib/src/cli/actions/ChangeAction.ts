@@ -145,7 +145,6 @@ export class ChangeAction extends BaseRushAction {
     const changedPackages: string[] = this._getChangedPackageNames();
     if (changedPackages.length > 0) {
       this._validateChangeFile(changedPackages);
-      console.log('end');
     } else {
       this._logNoChangeFileRequired();
     }
@@ -181,6 +180,7 @@ export class ChangeAction extends BaseRushAction {
         changedPackageNames.add(hostName);
       }
     });
+
     return [...changedPackageNames];
   }
 
@@ -203,32 +203,35 @@ export class ChangeAction extends BaseRushAction {
     if (normalizedFolder.charAt(normalizedFolder.length - 1) !== '/') {
       normalizedFolder = normalizedFolder + '/';
     }
-    normalizedFolder = rushPathDiff + normalizedFolder;
+    normalizedFolder = path.join(rushPathDiff, normalizedFolder);
     const pathRegex: RegExp = new RegExp(`^${normalizedFolder}`, 'i');
     for (const folder of changedFolders) {
       if (folder && folder.match(pathRegex)) {
         return true;
       }
     }
+
     return false;
   }
 
+  // find the difference between the relative and root path
   private _findRushPathDiff(changedFolders: Array<string | undefined>,
     project: RushConfigurationProject): string {
       const normalizedFolder: string = project.projectRelativeFolder;
       let rushPathDiff: string = '';
       for (const folder of changedFolders) {
         if (folder !== undefined) {
-          const splitted: Array<string | undefined> = folder.split('/');
+          const splitted: Array<string> = folder.split(path.sep);
           if (splitted[0] !== normalizedFolder) {
-            // if rush.json is not under the root directory
+            // if rush.json isn't in the root directory
             const changeProjectIndex: number = splitted.indexOf(normalizedFolder);
             for (let i: number = 0; i < changeProjectIndex; i++) {
-              rushPathDiff = rushPathDiff + splitted[i] + '/';
+              path.join(rushPathDiff, splitted[i]);
             }
           }
         }
       }
+
     return rushPathDiff;
   }
 
@@ -275,6 +278,7 @@ export class ChangeAction extends BaseRushAction {
    * Asks all questions which are needed to generate changelist for a project.
    */
   private _askQuestions(packageName: string): Promise<IChangeInfo | undefined> {
+    console.log(`${os.EOL}${packageName}`);
     const comments: string[] | undefined = this._changeComments.get(packageName);
     if (comments) {
       console.log(`Found existing comments:`);
