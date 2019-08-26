@@ -77,34 +77,26 @@ export class CommandLineConfiguration {
         }
       ];
 
-      let applyDefaults: boolean = false;
-
-      if (commandLineJson && commandLineJson.commands) {
-        for (const command of commandLineJson.commands) {
-          if (command.commandKind === 'bulk' && (command.name === 'rebuild' || command.name === 'build')) {
-            applyDefaults = true;
-            break;
-          }
-        }
-      }
+      const applyDefaults: boolean = commandLineJson ? lodash.some(commandLineJson.commands, (command) => {
+        return command.commandKind === 'bulk' && (command.name === 'build' || command.name === 'rebuild');
+      }) : false;
 
       let mergedBuildSettings: CommandJson[] = [];
       // merge commands specified in command-line.json and default (re)build settings
       // Ensure both build commands are included and preserve any other commands specified
-      if (applyDefaults && commandLineJson) {
-        mergedBuildSettings = lodash({}) // Start with an empty object
-        .merge(
-          lodash(defaultBuildSettings).groupBy('name').value(),
-          lodash(commandLineJson.commands).groupBy('name').value()
-          )
-          .values()
-          .flatten()
-          .value();
-        commandLineJson.commands = mergedBuildSettings;
-      }
-
       if (commandLineJson) {
-        CommandLineConfiguration._jsonSchema.validateObject(commandLineJson, jsonFilename) ;
+        if (applyDefaults) {
+          mergedBuildSettings = lodash({}) // Start with an empty object
+          .merge(
+            lodash(defaultBuildSettings).groupBy('name').value(),
+            lodash(commandLineJson.commands).groupBy('name').value()
+            )
+            .values()
+            .flatten()
+            .value();
+          commandLineJson.commands = mergedBuildSettings;
+        }
+        CommandLineConfiguration._jsonSchema.validateObject(commandLineJson, jsonFilename);
       }
     }
 
