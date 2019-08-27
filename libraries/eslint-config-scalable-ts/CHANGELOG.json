@@ -2,6 +2,18 @@
   "name": "@microsoft/eslint-config-scalable-ts",
   "entries": [
     {
+      "version": "0.2.2",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.2.2",
+      "date": "Tue, 27 Aug 2019 01:48:45 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove unused plugin reference"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.1",
       "tag": "@microsoft/eslint-config-scalable-ts_v0.2.1",
       "date": "Tue, 27 Aug 2019 01:24:54 GMT",
