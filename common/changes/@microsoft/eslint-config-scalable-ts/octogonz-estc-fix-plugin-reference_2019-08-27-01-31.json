@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/eslint-config-scalable-ts",
+      "comment": "Remove unused plugin reference",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/eslint-config-scalable-ts",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
