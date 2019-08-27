@@ -947,9 +947,9 @@ export class InstallManager {
 
                 // pnpm-store is managed by PNPM internally, so leave it as is for the retry.
                 // This also ensures that packages that have already been downloaded need not be
-                // downloaded again for the retry, thereby potentially increasing the chances of
-                // successful install. If the installation fails again, rush purge shall be used to
-                // clear the common/temp folder.
+                // downloaded again, thereby potentially increasing the chances of a successful
+                // install. If the installation fails again, rush purge may be used to clear
+                // the common/temp folder.
 
                 Utilities.createFolderWithRetry(commonNodeModulesFolder);
               }
