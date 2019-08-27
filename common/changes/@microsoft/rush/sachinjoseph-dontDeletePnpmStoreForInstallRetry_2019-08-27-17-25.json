@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Do not delete the pnpm-store for a rush install retry.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "sachinjoseph@users.noreply.github.com"
+}
