@@ -122,10 +122,12 @@ export class BulkScriptAction extends BaseScriptAction {
       allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
     });
 
+    console.log('Starting ' + new Date().toISOString());
     return taskRunner.execute().then(() => {
       stopwatch.stop();
       console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
       this._doAfterTask(stopwatch, true);
+      console.log('Done ' + new Date().toISOString());
     }).catch((error: Error) => {
       stopwatch.stop();
       if (error instanceof AlreadyReportedError) {
