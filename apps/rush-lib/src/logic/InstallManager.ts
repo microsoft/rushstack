@@ -942,14 +942,14 @@ export class InstallManager {
             undefined,
             false, () => {
               if (this._rushConfiguration.packageManager === 'pnpm') {
-                // If there is a failure in pnpm, it is possible that it left the
-                // store in a bad state. Therefore, we should clean out the store
-                // before attempting the install again.
-
                 console.log(colors.yellow(`Deleting the "node_modules" folder`));
                 this._commonTempFolderRecycler.moveFolder(commonNodeModulesFolder);
-                console.log(colors.yellow(`Deleting the "pnpm-store" folder`));
-                this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
+
+                // pnpm-store is managed by PNPM internally, so leave it as is for the retry.
+                // This also ensures that packages that have already been downloaded need not be
+                // downloaded again for the retry, thereby potentially increasing the chances of
+                // successful install. If the installation fails again, rush purge shall be used to
+                // clear the common/temp folder.
 
                 Utilities.createFolderWithRetry(commonNodeModulesFolder);
               }
