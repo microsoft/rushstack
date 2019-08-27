@@ -7,7 +7,6 @@ module.exports = {
 
   plugins: [
     "@typescript-eslint/eslint-plugin",
-    "eslint-plugin-no-null",
     "eslint-plugin-promise",
     "eslint-plugin-security"
   ],
