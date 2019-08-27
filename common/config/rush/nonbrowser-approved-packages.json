@@ -239,10 +239,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "eslint-plugin-no-null",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "eslint-plugin-promise",
       "allowedCategories": [ "libraries" ]
     },
