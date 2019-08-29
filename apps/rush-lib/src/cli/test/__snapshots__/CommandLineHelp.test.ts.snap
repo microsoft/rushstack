@@ -415,8 +415,8 @@ Optional arguments:
                         will be published with --force on npm
   --apply-git-tags-on-pack
                         If specified with --publish and --pack, git tags will 
-                        be applied for packages on pack as if a publish was 
-                        being run without --pack.
+                        be applied for packages as if a publish was being run 
+                        without --pack.
 "
 `;
 

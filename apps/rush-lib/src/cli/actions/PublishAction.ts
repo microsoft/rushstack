@@ -233,6 +233,10 @@ export class PublishAction extends BaseRushAction {
     if (this._registryUrl.value && this._pack.value) {
       throw new Error(`--registry cannot be used with --pack`);
     }
+    if (this._applyGitTagsOnPack.value && !this._pack.value) {
+      throw new Error(`${this._applyGitTagsOnPack.longName} must be used `
+      + `with ${this._pack.longName}`);
+    }
   }
 
   private _publishChanges(allPackages: Map<string, RushConfigurationProject>): void {
