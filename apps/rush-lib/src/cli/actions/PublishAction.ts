@@ -184,7 +184,7 @@ export class PublishAction extends BaseRushAction {
     this._applyGitTagsOnPack = this.defineFlagParameter({
       parameterLongName: '--apply-git-tags-on-pack',
       parameterShortName: undefined,
-      description: `If specified with --publish and --pack, git tags will be applied for packages on pack` +
+      description: `If specified with --publish and --pack, git tags will be applied for packages` +
       ` as if a publish was being run without --pack.`
     });
   }
