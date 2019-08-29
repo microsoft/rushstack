@@ -5,18 +5,18 @@
 ```ts
 
 // @public (undocumented)
-class "ClassΞ" {
+class ClassΞ {
     // (undocumented)
-    'invalid chars'<T = "ClassΞ">(): void;
+    'invalid chars'<T = ClassΞ>(): void;
     // (undocumented)
-    memberΔ(paramΩ: string): "ClassΞ";
+    memberΔ(paramΩ: string): ClassΞ;
     // (undocumented)
     'validChars'(): void;
 }
 
-export { "ClassΞ" as ClassΞ }
+export { ClassΞ }
 
-export { "ClassΞ" as ClassΣ }
+export { ClassΞ as ClassΣ }
 
 
 // (No @packageDocumentation comment for this package)
