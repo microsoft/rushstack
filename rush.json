@@ -607,7 +607,7 @@
       "projectFolder": "libraries/package-deps-hash",
       "reviewCategory": "libraries",
       "shouldPublish": true
-   },
+    },
     {
       "packageName": "@microsoft/rushell",
       "projectFolder": "libraries/rushell",
@@ -629,7 +629,15 @@
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.4"
       ]
-   },
+    },
+
+    // "repo-scripts" folder (alphabetical order)
+    {
+      "packageName": "doc-plugin-rush-stack",
+      "projectFolder": "repo-scripts/doc-plugin-rush-stack",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
 
     // "stack" folder (alphabetical order)
     {
