@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.3.9",
+      "tag": "@microsoft/api-extractor_v7.3.9",
+      "date": "Fri, 30 Aug 2019 00:14:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a problem where Unicode API names were not handled correctly"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.3.8",
       "tag": "@microsoft/api-extractor_v7.3.8",
       "date": "Mon, 12 Aug 2019 15:15:14 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 12 Aug 2019 15:15:14 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Aug 2019 00:14:32 GMT and should not be manually modified.
+
+## 7.3.9
+Fri, 30 Aug 2019 00:14:32 GMT
+
+### Patches
+
+- Fix a problem where Unicode API names were not handled correctly
 
 ## 7.3.8
 Mon, 12 Aug 2019 15:15:14 GMT

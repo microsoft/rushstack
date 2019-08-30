@@ -2,6 +2,21 @@
   "name": "@microsoft/rush-stack",
   "entries": [
     {
+      "version": "0.1.100",
+      "tag": "@microsoft/rush-stack_v0.1.100",
+      "date": "Fri, 30 Aug 2019 00:14:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.17` to `0.1.18`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.4` to `6.1.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.99",
       "tag": "@microsoft/rush-stack_v0.1.99",
       "date": "Mon, 12 Aug 2019 15:15:14 GMT",
