@@ -35,7 +35,7 @@
     "@microsoft/api-extractor-model": "7.3.2",
     "@microsoft/node-core-library": "3.14.0",
     "@microsoft/ts-command-line": "4.2.7",
-    "@microsoft/tsdoc": "0.12.12",
+    "@microsoft/tsdoc": "0.12.13",
     "colors": "~1.2.1",
     "lodash": "~4.17.15",
     "resolve": "1.8.1",
