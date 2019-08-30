@@ -14,6 +14,8 @@
   "bin": {
     "api-documenter": "./bin/api-documenter"
   },
+  "main": "lib/index.js",
+  "typings": "dist/rollup.d.ts",
   "dependencies": {
     "@microsoft/api-extractor-model": "7.3.4",
     "@microsoft/node-core-library": "3.14.1",
