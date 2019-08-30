@@ -638,6 +638,12 @@
       "reviewCategory": "libraries",
       "shouldPublish": false
     },
+    {
+      "packageName": "generate-api-docs",
+      "projectFolder": "repo-scripts/generate-api-docs",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
 
     // "stack" folder (alphabetical order)
     {
