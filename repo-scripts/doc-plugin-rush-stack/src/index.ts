@@ -2,15 +2,16 @@
 // See LICENSE in the project root for license information.
 
 import { IApiDocumenterPluginManifest } from '@microsoft/api-documenter';
-import { RushStackExtension } from './RushStackExtension';
+import { RushStackFeature } from './RushStackFeature';
 
 // tslint:disable-next-line:export-name
 export const apiDocumenterPluginManifest: IApiDocumenterPluginManifest = {
-  extensions: [
+  manifestVersion: 1000,
+  features: [
     {
-      name: 'rush-stack',
-      kind: 'MarkdownDocumenterExtension',
-      subclass: RushStackExtension
+      featureName: 'rush-stack-markdown-documenter',
+      kind: 'MarkdownDocumenterFeature',
+      subclass: RushStackFeature
     }
   ]
 };

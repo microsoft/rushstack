@@ -7,20 +7,30 @@
 // @public (undocumented)
 export interface IApiDocumenterPluginManifest {
     // (undocumented)
-    extensions: IExtensionDefinition[];
+    features: IFeatureDefinition[];
+    // (undocumented)
+    manifestVersion: 1000;
 }
 
 // @public (undocumented)
-export interface IExtensionDefinition {
-    kind: 'MarkdownDocumenterExtension';
-    name: string;
+export interface IFeatureDefinition {
+    featureName: string;
+    kind: 'MarkdownDocumenterFeature';
     subclass: {
-        new (): MarkdownDocumenterExtension;
+        new (initialization: PluginInitialization): MarkdownDocumenterFeature;
     };
 }
 
 // @public (undocumented)
-export class MarkdownDocumenterExtension {
+export class MarkdownDocumenterFeature {
+    // @internal
+    constructor(initialization: PluginInitialization);
+    // @virtual
+    onInitialized(): void;
+}
+
+// @public (undocumented)
+export class PluginInitialization {
 }
 
 
