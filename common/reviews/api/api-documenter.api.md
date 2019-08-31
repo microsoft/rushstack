@@ -22,9 +22,9 @@ export interface IFeatureDefinition {
 }
 
 // @public
-export interface IMarkdownDocumenterFeatureOnBeforeWritePage {
-    apiItem: ApiItem;
-    outputFilename: string;
+export interface IMarkdownDocumenterFeatureOnBeforeWritePageArgs {
+    readonly apiItem: ApiItem;
+    readonly outputFilename: string;
     pageContent: string;
 }
 
@@ -33,7 +33,7 @@ export class MarkdownDocumenterFeature extends PluginFeature {
     // (undocumented)
     context: MarkdownDocumenterFeatureContext;
     // @virtual
-    onBeforeWritePage(eventArgs: IMarkdownDocumenterFeatureOnBeforeWritePage): void;
+    onBeforeWritePage(eventArgs: IMarkdownDocumenterFeatureOnBeforeWritePageArgs): void;
 }
 
 // @public

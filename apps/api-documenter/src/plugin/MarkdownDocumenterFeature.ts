@@ -17,11 +17,11 @@ export class MarkdownDocumenterFeatureContext {
  * Event arguments for MarkdownDocumenterFeature.onBeforeWritePage()
  * @public
  */
-export interface IMarkdownDocumenterFeatureOnBeforeWritePage {
+export interface IMarkdownDocumenterFeatureOnBeforeWritePageArgs {
   /**
    * The API item corresponding to this page.
    */
-  apiItem: ApiItem;
+  readonly apiItem: ApiItem;
 
   /**
    * The page content.  The onBeforeWritePage() handler can reassign this string to customize the page appearance.
@@ -31,7 +31,7 @@ export interface IMarkdownDocumenterFeatureOnBeforeWritePage {
   /**
    * The filename where the output will be written.
    */
-  outputFilename: string;
+  readonly outputFilename: string;
 }
 
 /**
@@ -47,7 +47,7 @@ export class MarkdownDocumenterFeature extends PluginFeature {
    * This event function is called before writing a page.
    * @virtual
    */
-  public onBeforeWritePage(eventArgs: IMarkdownDocumenterFeatureOnBeforeWritePage): void {
+  public onBeforeWritePage(eventArgs: IMarkdownDocumenterFeatureOnBeforeWritePageArgs): void {
     // (implemented by child class)
   }
 }

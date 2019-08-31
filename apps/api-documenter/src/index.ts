@@ -7,7 +7,7 @@ export {
 } from './plugin/IApiDocumenterPluginManifest';
 export {
   MarkdownDocumenterFeatureContext,
-  IMarkdownDocumenterFeatureOnBeforeWritePage,
+  IMarkdownDocumenterFeatureOnBeforeWritePageArgs,
   MarkdownDocumenterFeature
 } from './plugin/MarkdownDocumenterFeature';
 export {

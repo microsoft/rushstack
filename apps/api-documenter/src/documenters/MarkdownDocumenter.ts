@@ -51,6 +51,8 @@ import { DocTableCell } from '../nodes/DocTableCell';
 import { DocNoteBox } from '../nodes/DocNoteBox';
 import { Utilities } from '../utils/Utilities';
 import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter';
+import { PluginLoader } from '../plugin/PluginLoader';
+import { IMarkdownDocumenterFeatureOnBeforeWritePageArgs } from '../plugin/MarkdownDocumenterFeature';
 
 /**
  * Renders API documentation in the Markdown file format.
@@ -58,12 +60,14 @@ import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter';
  */
 export class MarkdownDocumenter {
   private readonly _apiModel: ApiModel;
+  private readonly _pluginLoader: PluginLoader;
   private readonly _tsdocConfiguration: TSDocConfiguration;
   private readonly _markdownEmitter: CustomMarkdownEmitter;
   private _outputFolder: string;
 
-  public constructor(apiModel: ApiModel) {
+  public constructor(apiModel: ApiModel, pluginLoader: PluginLoader) {
     this._apiModel = apiModel;
+    this._pluginLoader = pluginLoader;
     this._tsdocConfiguration = CustomDocNodes.configuration;
     this._markdownEmitter = new CustomMarkdownEmitter(this._apiModel);
   }
@@ -249,7 +253,20 @@ export class MarkdownDocumenter {
       }
     });
 
-    FileSystem.writeFile(filename, stringBuilder.toString(), {
+    let pageContent: string = stringBuilder.toString();
+
+    if (this._pluginLoader.markdownDocumenterFeature) {
+      // Allow the plugin to customize the pageContent
+      const eventArgs: IMarkdownDocumenterFeatureOnBeforeWritePageArgs = {
+        apiItem: apiItem,
+        outputFilename: filename,
+        pageContent: pageContent
+      };
+      this._pluginLoader.markdownDocumenterFeature.onBeforeWritePage(eventArgs);
+      pageContent = eventArgs.pageContent;
+    }
+
+    FileSystem.writeFile(filename, pageContent, {
       convertLineEndings: NewlineKind.CrLf
     });
   }
