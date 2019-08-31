@@ -2,6 +2,37 @@
 // See LICENSE in the project root for license information.
 
 import { PluginFeature } from './PluginFeature';
+import { ApiItem } from '@microsoft/api-extractor-model';
+
+/**
+ * Context object for {@link MarkdownDocumenterFeature}.
+ *
+ * @public
+ */
+export class MarkdownDocumenterFeatureContext {
+
+}
+
+/**
+ * Event arguments for MarkdownDocumenterFeature.onBeforeWritePage()
+ * @public
+ */
+export interface IMarkdownDocumenterFeatureOnBeforeWritePage {
+  /**
+   * The API item corresponding to this page.
+   */
+  apiItem: ApiItem;
+
+  /**
+   * The page content.  The onBeforeWritePage() handler can reassign this string to customize the page appearance.
+   */
+  pageContent: string;
+
+  /**
+   * The filename where the output will be written.
+   */
+  outputFilename: string;
+}
 
 /**
  * Inherit from this base class to implement an API Documenter plugin feature that customizes
@@ -10,4 +41,13 @@ import { PluginFeature } from './PluginFeature';
  * @public
  */
 export class MarkdownDocumenterFeature extends PluginFeature {
+  public context: MarkdownDocumenterFeatureContext;
+
+  /**
+   * This event function is called before writing a page.
+   * @virtual
+   */
+  public onBeforeWritePage(eventArgs: IMarkdownDocumenterFeatureOnBeforeWritePage): void {
+    // (implemented by child class)
+  }
 }

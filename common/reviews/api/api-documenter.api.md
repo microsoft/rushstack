@@ -4,6 +4,8 @@
 
 ```ts
 
+import { ApiItem } from '@microsoft/api-extractor-model';
+
 // @public
 export interface IApiDocumenterPluginManifest {
     features: IFeatureDefinition[];
@@ -20,21 +22,44 @@ export interface IFeatureDefinition {
 }
 
 // @public
+export interface IMarkdownDocumenterFeatureOnBeforeWritePage {
+    apiItem: ApiItem;
+    outputFilename: string;
+    pageContent: string;
+}
+
+// @public
 export class MarkdownDocumenterFeature extends PluginFeature {
+    // (undocumented)
+    context: MarkdownDocumenterFeatureContext;
+    // @virtual
+    onBeforeWritePage(eventArgs: IMarkdownDocumenterFeatureOnBeforeWritePage): void;
+}
+
+// @public
+export class MarkdownDocumenterFeatureContext {
 }
 
 // @public
 export abstract class PluginFeature {
     // @internal
     constructor(initialization: PluginFeatureInitialization);
+    // (undocumented)
+    context: PluginFeatureContext;
     // @virtual
     onInitialized(): void;
+}
+
+// @public
+export class PluginFeatureContext {
 }
 
 // @public
 export class PluginFeatureInitialization {
     // @internal
     constructor();
+    // @internal (undocumented)
+    _context: PluginFeatureContext;
 }
 
 

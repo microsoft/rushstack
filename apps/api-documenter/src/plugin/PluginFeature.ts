@@ -14,6 +14,17 @@ export class PluginFeatureInitialization {
   public constructor() {
     // reserved for future use
   }
+
+  /** @internal */
+  public _context: PluginFeatureContext;
+}
+
+/**
+ * Context object for {@link PluginFeature}.
+ *
+ * @public
+ */
+export class PluginFeatureContext {
 }
 
 /**
@@ -21,6 +32,8 @@ export class PluginFeatureInitialization {
  * @public
  */
 export abstract class PluginFeature {
+  public context: PluginFeatureContext;
+
   /**
    * The subclass should pass the `initialization` through to the base class.
    * Do not put custom initialization code in the constructor.  Insteadm perform your initialization in the
@@ -29,6 +42,7 @@ export abstract class PluginFeature {
    */
   public constructor(initialization: PluginFeatureInitialization) {
     // reserved for future expansion
+    this.context = initialization._context;
   }
 
   /**
