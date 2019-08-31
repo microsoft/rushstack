@@ -45,12 +45,12 @@ export class GenerateAction extends BaseAction {
 
     const apiModel: ApiModel = this.buildApiModel();
 
-    if (configFile.outputTarget === 'docfx') {
-      const yamlDocumenter: ExperimentalYamlDocumenter = new ExperimentalYamlDocumenter(apiModel, configFile);
-      yamlDocumenter.generateFiles(this.outputFolder);
-    } else {
+    if (configFile.outputTarget === 'markdown') {
       const markdownDocumenter: MarkdownDocumenter = new MarkdownDocumenter(apiModel);
       markdownDocumenter.generateFiles(this.outputFolder);
+    } else {
+      const yamlDocumenter: ExperimentalYamlDocumenter = new ExperimentalYamlDocumenter(apiModel, configFile);
+      yamlDocumenter.generateFiles(this.outputFolder);
     }
 
     return Promise.resolve();
