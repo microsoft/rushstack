@@ -7,7 +7,7 @@ import * as resolve from 'resolve';
 import { IConfigPlugin } from '../documenters/IConfigFile';
 import { IApiDocumenterPluginManifest, IFeatureDefinition } from './IApiDocumenterPluginManifest';
 import { MarkdownDocumenterFeature } from './MarkdownDocumenterFeature';
-import { PluginInitialization } from './MarkdownDocumenterFeature';
+import { PluginFeatureInitialization } from './PluginFeature';
 
 interface ILoadedPlugin {
   packageName: string;
@@ -69,7 +69,7 @@ export class PluginContext {
               throw new Error('A MarkdownDocumenterFeature is already loaded');
             }
 
-            const initialization: PluginInitialization = new PluginInitialization();
+            const initialization: PluginFeatureInitialization  = new PluginFeatureInitialization();
             let markdownDocumenterFeature: MarkdownDocumenterFeature | undefined = undefined;
             try {
               markdownDocumenterFeature = new featureDefinition.subclass(initialization);

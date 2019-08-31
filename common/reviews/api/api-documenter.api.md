@@ -4,33 +4,37 @@
 
 ```ts
 
-// @public (undocumented)
+// @public
 export interface IApiDocumenterPluginManifest {
-    // (undocumented)
     features: IFeatureDefinition[];
-    // (undocumented)
     manifestVersion: 1000;
 }
 
-// @public (undocumented)
+// @public
 export interface IFeatureDefinition {
     featureName: string;
     kind: 'MarkdownDocumenterFeature';
     subclass: {
-        new (initialization: PluginInitialization): MarkdownDocumenterFeature;
+        new (initialization: PluginFeatureInitialization): MarkdownDocumenterFeature;
     };
 }
 
-// @public (undocumented)
-export class MarkdownDocumenterFeature {
+// @public
+export class MarkdownDocumenterFeature extends PluginFeature {
+}
+
+// @public
+export abstract class PluginFeature {
     // @internal
-    constructor(initialization: PluginInitialization);
+    constructor(initialization: PluginFeatureInitialization);
     // @virtual
     onInitialized(): void;
 }
 
-// @public (undocumented)
-export class PluginInitialization {
+// @public
+export class PluginFeatureInitialization {
+    // @internal
+    constructor();
 }
 
 
