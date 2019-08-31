@@ -9,6 +9,6 @@
   },
   "dependencies": {
     "doc-plugin-rush-stack": "1.0.0",
-    "@microsoft/api-documenter": "7.3.16"
+    "@microsoft/api-documenter": "7.3.17"
   }
 }
