@@ -28,14 +28,31 @@ export class LegacyAdapters {
     arg1: TArg1,
     arg2: TArg2
   ): Promise<TResult>;
-  public static convertCallbackToPromise<TResult, TError, TArg1, TArg2>(
+  public static convertCallbackToPromise<TResult, TError, TArg1, TArg2, TArg3>(
+    fn: (arg1: TArg1, arg2: TArg2, arg3: TArg3, cb: callback<TResult, TError>) => void,
+    arg1: TArg1,
+    arg2: TArg2,
+    arg3: TArg3
+  ): Promise<TResult>;
+  public static convertCallbackToPromise<TResult, TError, TArg1, TArg2, TArg3, TArg4>(
+    fn: (arg1: TArg1, arg2: TArg2, arg3: TArg3, arg4: TArg4, cb: callback<TResult, TError>) => void,
+    arg1: TArg1,
+    arg2: TArg2,
+    arg3: TArg3,
+    arg4: TArg4
+  ): Promise<TResult>;
+  public static convertCallbackToPromise<TResult, TError, TArg1, TArg2, TArg3, TArg4>(
     fn: (
       a: TArg1 | callback<TResult, TError>,
       b?: TArg2 | callback<TResult, TError>,
-      c?: TArg2 | callback<TResult, TError>
+      c?: TArg3 | callback<TResult, TError>,
+      d?: TArg4 | callback<TResult, TError>,
+      e?: TArg4 | callback<TResult, TError>
     ) => void,
     arg1?: TArg1,
-    arg2?: TArg2
+    arg2?: TArg2,
+    arg3?: TArg3,
+    arg4?: TArg4
   ): Promise<TResult> {
     return new Promise((resolve: (result: TResult) => void, reject: (error: Error) => void) => {
       const cb: callback<TResult, TError> = (error: TError, result: TResult) => {
@@ -47,7 +64,11 @@ export class LegacyAdapters {
       };
 
       try {
-        if (arg1 !== undefined && arg2 !== undefined ) {
+        if (arg1 !== undefined && arg2 !== undefined && arg3 !== undefined && arg4 !== undefined) {
+          fn(arg1, arg2, arg3, arg4, cb);
+        } else if (arg1 !== undefined && arg2 !== undefined && arg3 !== undefined) {
+          fn(arg1, arg2, arg3, cb);
+        } else if (arg1 !== undefined && arg2 !== undefined ) {
           fn(arg1, arg2, cb);
         } else if (arg1 !== undefined ) {
           fn(arg1, cb);
