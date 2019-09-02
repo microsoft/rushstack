@@ -114,9 +114,10 @@ export function extractVersionFromPnpmVersionSpecifier(version: string): string 
     return versionParts[3]; // e.g. "3.1.1"
   }
 
-  if (semver.valid(versionParts[versionParts.length - 1]) !== null) {
+  const trimmedVersion = versionParts[versionParts.length - 1].split('_')[0];
+  if (semver.valid(trimmedVersion) !== null) {
     // Example: "path.pkgs.visualstudio.com/@scope/depame/1.4.0"
-    return versionParts[versionParts.length - 1];  // e.g. "1.4.0"
+    return trimmedVersion;  // e.g. "1.4.0"
   }
 
   return undefined;

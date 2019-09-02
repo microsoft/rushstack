@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fixing the bug with pnpm-lock.yaml syntax",
+      "packageName": "@microsoft/rush",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "jabher@users.noreply.github.com"
+}
