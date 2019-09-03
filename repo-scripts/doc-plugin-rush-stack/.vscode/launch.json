@@ -15,7 +15,7 @@
         "--input-folder",
         "../../common/temp/api",
         "--output-folder",
-        "./dist"
+        "./dist/api"
       ]
     },
   ]
