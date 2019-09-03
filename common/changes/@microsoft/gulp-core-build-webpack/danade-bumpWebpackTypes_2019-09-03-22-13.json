@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-webpack",
+      "comment": "Update @types/webpack dependency from from 4.4.0 to 4.39.1, add @types/webpack-dev-server.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-webpack",
+  "email": "3473356+D4N14L@users.noreply.github.com"
+}
