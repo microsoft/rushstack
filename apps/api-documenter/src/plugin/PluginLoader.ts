@@ -14,7 +14,7 @@ interface ILoadedPlugin {
   manifest: IApiDocumenterPluginManifest;
 }
 
-export class PluginContext {
+export class PluginLoader {
   public markdownDocumenterFeature: MarkdownDocumenterFeature | undefined;
 
   public load(configPlugins: IConfigPlugin[], configFilePath: string): void {

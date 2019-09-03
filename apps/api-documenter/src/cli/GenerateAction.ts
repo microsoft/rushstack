@@ -12,7 +12,7 @@ import { IConfigFile } from '../documenters/IConfigFile';
 import { ApiModel } from '@microsoft/api-extractor-model';
 import { FileSystem } from '@microsoft/node-core-library';
 import { MarkdownDocumenter } from '../documenters/MarkdownDocumenter';
-import { PluginContext } from '../plugin/PluginContext';
+import { PluginLoader } from '../plugin/PluginLoader';
 
 export class GenerateAction extends BaseAction {
   constructor(parser: ApiDocumenterCommandLine) {
@@ -40,8 +40,8 @@ export class GenerateAction extends BaseAction {
 
     const configFile: IConfigFile = DocumenterConfig.loadFile(configFilePath);
 
-    const pluginContext: PluginContext = new PluginContext();
-    pluginContext.load(configFile.plugins || [], configFilePath);
+    const pluginLoader: PluginLoader = new PluginLoader();
+    pluginLoader.load(configFile.plugins || [], configFilePath);
 
     const apiModel: ApiModel = this.buildApiModel();
 
