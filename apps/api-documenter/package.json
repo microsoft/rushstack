@@ -21,7 +21,6 @@
     "@microsoft/node-core-library": "3.14.1",
     "@microsoft/ts-command-line": "4.2.7",
     "@microsoft/tsdoc": "0.12.14",
-    "@types/resolve": "0.0.8",
     "colors": "~1.2.1",
     "js-yaml": "~3.13.1",
     "resolve": "1.8.1"
@@ -32,6 +31,7 @@
     "@types/jest": "23.3.11",
     "@types/js-yaml": "3.12.1",
     "@types/node": "8.5.8",
+    "@types/resolve": "0.0.8",
     "gulp": "~4.0.2",
     "jest": "~23.6.0"
   }
