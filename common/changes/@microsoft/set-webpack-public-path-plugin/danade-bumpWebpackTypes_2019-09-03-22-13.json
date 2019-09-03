@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/set-webpack-public-path-plugin",
-      "comment": "Update @types/webpack dependency from from 4.4.0 to 4.39.1.",
+      "comment": "Make @types/webpack dependency more loose.",
       "type": "patch"
     }
   ],

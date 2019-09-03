@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/loader-load-themed-styles",
-      "comment": "Update @types/webpack dependency from from 4.4.0 to 4.39.1.",
-      "type": "patch"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@microsoft/loader-load-themed-styles",
