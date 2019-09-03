@@ -2,7 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { PluginFeature } from './PluginFeature';
-import { ApiItem } from '@microsoft/api-extractor-model';
+import { ApiItem, ApiModel } from '@microsoft/api-extractor-model';
+import { MarkdownDocumenterAccessor } from './MarkdownDocumenterAccessor';
 
 /**
  * Context object for {@link MarkdownDocumenterFeature}.
@@ -10,7 +11,27 @@ import { ApiItem } from '@microsoft/api-extractor-model';
  * @public
  */
 export class MarkdownDocumenterFeatureContext {
+  /** @internal */
+  public constructor(options: MarkdownDocumenterFeatureContext) {
+    this.apiModel = options.apiModel;
+    this.outputFolder = options.outputFolder;
+    this.documenter = options.documenter;
+  }
 
+  /**
+   * Provides access to the `ApiModel` for the documentation being generated.
+   */
+  public readonly apiModel: ApiModel;
+
+  /**
+   * The full path to the output folder.
+   */
+  public readonly outputFolder: string;
+
+  /**
+   * Exposes functionality of the documenter.
+   */
+  public readonly documenter: MarkdownDocumenterAccessor;
 }
 
 /**
@@ -35,6 +56,13 @@ export interface IMarkdownDocumenterFeatureOnBeforeWritePageArgs {
 }
 
 /**
+ * Event arguments for MarkdownDocumenterFeature.onFinished()
+ * @public
+ */
+export interface IMarkdownDocumenterFeatureOnFinishedArgs {
+}
+
+/**
  * Inherit from this base class to implement an API Documenter plugin feature that customizes
  * the generation of markdown output.
  *
@@ -44,10 +72,19 @@ export class MarkdownDocumenterFeature extends PluginFeature {
   public context: MarkdownDocumenterFeatureContext;
 
   /**
-   * This event function is called before writing a page.
+   * This event occurs before each markdown file is written.  It provides an opportunity to customize the
+   * content of the file.
    * @virtual
    */
   public onBeforeWritePage(eventArgs: IMarkdownDocumenterFeatureOnBeforeWritePageArgs): void {
+    // (implemented by child class)
+  }
+
+  /**
+   * This event occurs after all output files have been written.
+   * @virtual
+   */
+  public onFinished(eventArgs: IMarkdownDocumenterFeatureOnFinishedArgs): void {
     // (implemented by child class)
   }
 }

@@ -5,6 +5,7 @@
 ```ts
 
 import { ApiItem } from '@microsoft/api-extractor-model';
+import { ApiModel } from '@microsoft/api-extractor-model';
 
 // @public
 export interface IApiDocumenterPluginManifest {
@@ -29,15 +30,35 @@ export interface IMarkdownDocumenterFeatureOnBeforeWritePageArgs {
 }
 
 // @public
+export interface IMarkdownDocumenterFeatureOnFinishedArgs {
+}
+
+// @public
+export class MarkdownDocumenterAccessor {
+    // Warning: (ae-forgotten-export) The symbol "IMarkdownDocumenterAccessorImplementation" needs to be exported by the entry point index.d.ts
+    // 
+    // @internal
+    constructor(implementation: IMarkdownDocumenterAccessorImplementation);
+    getLinkForApiItem(apiItem: ApiItem): string | undefined;
+    }
+
+// @public
 export class MarkdownDocumenterFeature extends PluginFeature {
     // (undocumented)
     context: MarkdownDocumenterFeatureContext;
     // @virtual
     onBeforeWritePage(eventArgs: IMarkdownDocumenterFeatureOnBeforeWritePageArgs): void;
+    // @virtual
+    onFinished(eventArgs: IMarkdownDocumenterFeatureOnFinishedArgs): void;
 }
 
 // @public
 export class MarkdownDocumenterFeatureContext {
+    // @internal
+    constructor(options: MarkdownDocumenterFeatureContext);
+    readonly apiModel: ApiModel;
+    readonly documenter: MarkdownDocumenterAccessor;
+    readonly outputFolder: string;
 }
 
 // @public

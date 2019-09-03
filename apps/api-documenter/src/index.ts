@@ -5,9 +5,11 @@ export {
   IFeatureDefinition,
   IApiDocumenterPluginManifest
 } from './plugin/IApiDocumenterPluginManifest';
+export { MarkdownDocumenterAccessor } from './plugin/MarkdownDocumenterAccessor';
 export {
   MarkdownDocumenterFeatureContext,
   IMarkdownDocumenterFeatureOnBeforeWritePageArgs,
+  IMarkdownDocumenterFeatureOnFinishedArgs,
   MarkdownDocumenterFeature
 } from './plugin/MarkdownDocumenterFeature';
 export {

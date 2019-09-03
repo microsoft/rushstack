@@ -4,10 +4,10 @@
 import * as path from 'path';
 import * as resolve from 'resolve';
 
-import { IConfigPlugin } from '../documenters/IConfigFile';
 import { IApiDocumenterPluginManifest, IFeatureDefinition } from './IApiDocumenterPluginManifest';
 import { MarkdownDocumenterFeature, MarkdownDocumenterFeatureContext } from './MarkdownDocumenterFeature';
 import { PluginFeatureInitialization } from './PluginFeature';
+import { DocumenterConfig } from '../documenters/DocumenterConfig';
 
 interface ILoadedPlugin {
   packageName: string;
@@ -17,9 +17,9 @@ interface ILoadedPlugin {
 export class PluginLoader {
   public markdownDocumenterFeature: MarkdownDocumenterFeature | undefined;
 
-  public load(configPlugins: IConfigPlugin[], configFilePath: string): void {
-    const configFileFolder: string = path.dirname(configFilePath);
-    for (const configPlugin of configPlugins) {
+  public load(documenterConfig: DocumenterConfig, createContext: () => MarkdownDocumenterFeatureContext): void {
+    const configFileFolder: string = path.dirname(documenterConfig.configFilePath);
+    for (const configPlugin of (documenterConfig.configFile.plugins || [])) {
       try {
         // Look for the package name in the same place as the config file
         const resolvedEntryPointPath: string = resolve.sync(configPlugin.packageName, {
@@ -69,10 +69,8 @@ export class PluginLoader {
               throw new Error('A MarkdownDocumenterFeature is already loaded');
             }
 
-            const context: MarkdownDocumenterFeatureContext = new MarkdownDocumenterFeatureContext();
-
             const initialization: PluginFeatureInitialization  = new PluginFeatureInitialization();
-            initialization._context = context;
+            initialization._context = createContext();
 
             let markdownDocumenterFeature: MarkdownDocumenterFeature | undefined = undefined;
             try {

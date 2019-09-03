@@ -52,7 +52,12 @@ import { DocNoteBox } from '../nodes/DocNoteBox';
 import { Utilities } from '../utils/Utilities';
 import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter';
 import { PluginLoader } from '../plugin/PluginLoader';
-import { IMarkdownDocumenterFeatureOnBeforeWritePageArgs } from '../plugin/MarkdownDocumenterFeature';
+import {
+  IMarkdownDocumenterFeatureOnBeforeWritePageArgs,
+  MarkdownDocumenterFeatureContext
+} from '../plugin/MarkdownDocumenterFeature';
+import { DocumenterConfig } from './DocumenterConfig';
+import { MarkdownDocumenterAccessor } from '../plugin/MarkdownDocumenterAccessor';
 
 /**
  * Renders API documentation in the Markdown file format.
@@ -60,20 +65,37 @@ import { IMarkdownDocumenterFeatureOnBeforeWritePageArgs } from '../plugin/Markd
  */
 export class MarkdownDocumenter {
   private readonly _apiModel: ApiModel;
-  private readonly _pluginLoader: PluginLoader;
+  private readonly _documenterConfig: DocumenterConfig | undefined;
   private readonly _tsdocConfiguration: TSDocConfiguration;
   private readonly _markdownEmitter: CustomMarkdownEmitter;
   private _outputFolder: string;
+  private readonly _pluginLoader: PluginLoader;
 
-  public constructor(apiModel: ApiModel, pluginLoader: PluginLoader) {
+  public constructor(apiModel: ApiModel, documenterConfig: DocumenterConfig | undefined) {
     this._apiModel = apiModel;
-    this._pluginLoader = pluginLoader;
+    this._documenterConfig = documenterConfig;
     this._tsdocConfiguration = CustomDocNodes.configuration;
     this._markdownEmitter = new CustomMarkdownEmitter(this._apiModel);
+
+    this._pluginLoader = new PluginLoader();
   }
 
   public generateFiles(outputFolder: string): void {
     this._outputFolder = outputFolder;
+
+    if (this._documenterConfig) {
+      this._pluginLoader.load(this._documenterConfig, () => {
+        return new MarkdownDocumenterFeatureContext({
+          apiModel: this._apiModel,
+          outputFolder: outputFolder,
+          documenter: new MarkdownDocumenterAccessor({
+            getLinkForApiItem: (apiItem: ApiItem) => {
+              return this._getLinkFilenameForApiItem(apiItem);
+            }
+          })
+        });
+      });
+    }
 
     console.log();
     this._deleteOldOutputFiles();
@@ -81,6 +103,10 @@ export class MarkdownDocumenter {
     for (const apiPackage of this._apiModel.packages) {
       console.log(`Writing ${apiPackage.name} package`);
       this._writeApiItemPage(apiPackage);
+    }
+
+    if (this._pluginLoader.markdownDocumenterFeature) {
+      this._pluginLoader.markdownDocumenterFeature.onFinished({ });
     }
   }
 

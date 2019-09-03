@@ -5,7 +5,6 @@ import { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
 import { BaseAction } from './BaseAction';
 import { MarkdownDocumenter } from '../documenters/MarkdownDocumenter';
 import { ApiModel } from '@microsoft/api-extractor-model';
-import { PluginLoader } from '../plugin/PluginLoader';
 
 export class MarkdownAction extends BaseAction {
   constructor(parser: ApiDocumenterCommandLine) {
@@ -20,8 +19,7 @@ export class MarkdownAction extends BaseAction {
   protected onExecute(): Promise<void> { // override
     const apiModel: ApiModel = this.buildApiModel();
 
-    const pluginLoader: PluginLoader = new PluginLoader();
-    const markdownDocumenter: MarkdownDocumenter = new MarkdownDocumenter(apiModel, pluginLoader);
+    const markdownDocumenter: MarkdownDocumenter = new MarkdownDocumenter(apiModel, undefined);
     markdownDocumenter.generateFiles(this.outputFolder);
     return Promise.resolve();
   }
