@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/eslint-config-scalable-ts",
+      "comment": "Fix an issue where the @typescript-eslint/array-type rule required a syntax that broke compatibility with TypeScript versions prior to 3.4",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/eslint-config-scalable-ts",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
