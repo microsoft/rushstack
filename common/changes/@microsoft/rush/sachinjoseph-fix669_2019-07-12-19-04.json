@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "For rush publish and rush version, change the path spec for git add to include everything from the root directory. This addresses https://github.com/microsoft/web-build-tools/issues/669.",
+      "comment": "For rush publish and rush version, change the path spec for git add to include everything from the repo root directory. This addresses https://github.com/microsoft/web-build-tools/issues/669.",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
