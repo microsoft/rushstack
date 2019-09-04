@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Thu, 08 Aug 2019 15:14:17 GMT and should not be manually modified.
+This log was last generated on Wed, 04 Sep 2019 18:28:06 GMT and should not be manually modified.
+
+## 3.14.1
+Wed, 04 Sep 2019 18:28:06 GMT
+
+### Patches
+
+- Add support for two more arguments in LegacyAdapters.convertCallbackToPromise.
 
 ## 3.14.0
 Thu, 08 Aug 2019 15:14:17 GMT
