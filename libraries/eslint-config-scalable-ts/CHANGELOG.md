@@ -1,6 +1,13 @@
 # Change Log - @microsoft/eslint-config-scalable-ts
 
-This log was last generated on Tue, 27 Aug 2019 01:48:45 GMT and should not be manually modified.
+This log was last generated on Tue, 03 Sep 2019 23:13:45 GMT and should not be manually modified.
+
+## 0.2.3
+Tue, 03 Sep 2019 23:13:45 GMT
+
+### Patches
+
+- Upgrade to @typescript-eslint/eslint-plugin 2.1.0
 
 ## 0.2.2
 Tue, 27 Aug 2019 01:48:45 GMT
