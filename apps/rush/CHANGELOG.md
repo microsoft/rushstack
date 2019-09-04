@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 23 Aug 2019 03:31:52 GMT and should not be manually modified.
+This log was last generated on Wed, 04 Sep 2019 19:01:42 GMT and should not be manually modified.
+
+## 5.12.0
+Wed, 04 Sep 2019 19:01:42 GMT
+
+### Updates
+
+- Adding --apply-git-tags-on-pack flag to the publish command to apply git tags when using --pack
+- For rush publish and rush version, change the path spec for git add to include everything from the repo root directory. This addresses https://github.com/microsoft/web-build-tools/issues/669.
+- Add support for NPM package aliases (i.e. dependency versions such as "npm:example@^1.2.3")
+- Fix an issue with rush change that occurs when rush.json isn't in the repository root.
 
 ## 5.11.4
 Fri, 23 Aug 2019 03:31:52 GMT

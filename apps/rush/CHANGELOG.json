@@ -2,6 +2,27 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.12.0",
+      "tag": "@microsoft/rush_v5.12.0",
+      "date": "Wed, 04 Sep 2019 19:01:42 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Adding --apply-git-tags-on-pack flag to the publish command to apply git tags when using --pack"
+          },
+          {
+            "comment": "For rush publish and rush version, change the path spec for git add to include everything from the repo root directory. This addresses https://github.com/microsoft/web-build-tools/issues/669."
+          },
+          {
+            "comment": "Add support for NPM package aliases (i.e. dependency versions such as \"npm:example@^1.2.3\")"
+          },
+          {
+            "comment": "Fix an issue with rush change that occurs when rush.json isn't in the repository root."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.11.4",
       "tag": "@microsoft/rush_v5.11.4",
       "date": "Fri, 23 Aug 2019 03:31:52 GMT",
