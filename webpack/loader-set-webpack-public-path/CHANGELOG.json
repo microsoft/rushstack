@@ -2,6 +2,18 @@
   "name": "@microsoft/loader-set-webpack-public-path",
   "entries": [
     {
+      "version": "3.2.173",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.2.173",
+      "date": "Wed, 04 Sep 2019 01:43:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `2.1.128` to `2.1.129`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.172",
       "tag": "@microsoft/loader-set-webpack-public-path_v3.2.172",
       "date": "Fri, 30 Aug 2019 00:14:32 GMT",

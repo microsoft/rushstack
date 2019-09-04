@@ -2,6 +2,18 @@
   "name": "@microsoft/resolve-chunk-plugin",
   "entries": [
     {
+      "version": "2.0.129",
+      "tag": "@microsoft/resolve-chunk-plugin_v2.0.129",
+      "date": "Wed, 04 Sep 2019 01:43:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Make @types/webpack dependency more loose."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.128",
       "tag": "@microsoft/resolve-chunk-plugin_v2.0.128",
       "date": "Fri, 30 Aug 2019 00:14:32 GMT",

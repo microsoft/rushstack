@@ -2,6 +2,18 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.10.0",
+      "tag": "@microsoft/load-themed-styles_v1.10.0",
+      "date": "Wed, 04 Sep 2019 01:43:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Remove support for IE9"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.9.20",
       "tag": "@microsoft/load-themed-styles_v1.9.20",
       "date": "Fri, 30 Aug 2019 00:14:32 GMT",

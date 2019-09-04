@@ -2,6 +2,18 @@
   "name": "@microsoft/eslint-config-scalable-ts",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.3.0",
+      "date": "Wed, 04 Sep 2019 01:43:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix an issue where the @typescript-eslint/array-type rule required a syntax that broke compatibility with TypeScript versions prior to 3.4"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.3",
       "tag": "@microsoft/eslint-config-scalable-ts_v0.2.3",
       "date": "Tue, 03 Sep 2019 23:13:45 GMT",

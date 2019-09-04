@@ -1,6 +1,13 @@
 # Change Log - @microsoft/eslint-config-scalable-ts
 
-This log was last generated on Tue, 03 Sep 2019 23:13:45 GMT and should not be manually modified.
+This log was last generated on Wed, 04 Sep 2019 01:43:31 GMT and should not be manually modified.
+
+## 0.3.0
+Wed, 04 Sep 2019 01:43:31 GMT
+
+### Minor changes
+
+- Fix an issue where the @typescript-eslint/array-type rule required a syntax that broke compatibility with TypeScript versions prior to 3.4
 
 ## 0.2.3
 Tue, 03 Sep 2019 23:13:45 GMT
