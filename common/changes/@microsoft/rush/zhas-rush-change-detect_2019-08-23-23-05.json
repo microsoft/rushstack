@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix an issue with rush change that occurs when rush.json isn't in the repository root.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "zhas@microsoft.com"
+}
