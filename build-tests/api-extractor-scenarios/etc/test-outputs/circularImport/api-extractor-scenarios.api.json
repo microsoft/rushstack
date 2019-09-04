@@ -2,22 +2,22 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1001,
+    "schemaVersion": 1003,
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "api-extractor-scenarios",
+  "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
+      "canonicalReference": "api-extractor-scenarios!",
       "name": "",
       "members": [
         {
           "kind": "Class",
-          "canonicalReference": "(IFile:class)",
+          "canonicalReference": "api-extractor-scenarios!IFile:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -38,7 +38,7 @@
           "members": [
             {
               "kind": "Property",
-              "canonicalReference": "(containingFolder:instance)",
+              "canonicalReference": "api-extractor-scenarios!IFile#containingFolder:member",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -71,7 +71,7 @@
         },
         {
           "kind": "Class",
-          "canonicalReference": "(IFolder:class)",
+          "canonicalReference": "api-extractor-scenarios!IFolder:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -92,7 +92,7 @@
           "members": [
             {
               "kind": "Property",
-              "canonicalReference": "(containingFolder:instance)",
+              "canonicalReference": "api-extractor-scenarios!IFolder#containingFolder:member",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -126,7 +126,7 @@
             },
             {
               "kind": "Property",
-              "canonicalReference": "(files:instance)",
+              "canonicalReference": "api-extractor-scenarios!IFolder#files:member",
               "docComment": "",
               "excerptTokens": [
                 {

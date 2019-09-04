@@ -44,6 +44,7 @@ This project tests various documentation generation scenarios and doc comment sy
 
 |  Namespace | Description |
 |  --- | --- |
+|  [EcmaSmbols](./api-documenter-test.ecmasmbols.md) | A namespace containing an ECMAScript symbol |
 |  [OuterNamespace](./api-documenter-test.outernamespace.md) | A top-level namespace |
 
 ## Variables

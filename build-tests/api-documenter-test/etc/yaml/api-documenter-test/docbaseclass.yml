@@ -1,17 +1,17 @@
 ### YamlMime:UniversalReference
 items:
-  - uid: api-documenter-test.DocBaseClass
+  - uid: 'api-documenter-test!DocBaseClass:class'
     summary: Example base class
     name: DocBaseClass
     fullName: DocBaseClass
     langs:
       - typeScript
     type: class
-    package: api-documenter-test
+    package: api-documenter-test!
     children:
-      - api-documenter-test.DocBaseClass.(constructor)
-      - api-documenter-test.DocBaseClass.(constructor)_1
-  - uid: api-documenter-test.DocBaseClass.(constructor)
+      - 'api-documenter-test!DocBaseClass:constructor(1)'
+      - 'api-documenter-test!DocBaseClass:constructor(2)'
+  - uid: 'api-documenter-test!DocBaseClass:constructor(1)'
     summary: The simple constructor for `DocBaseClass`
     name: (constructor)()
     fullName: (constructor)()
@@ -20,7 +20,7 @@ items:
     type: constructor
     syntax:
       content: constructor();
-  - uid: api-documenter-test.DocBaseClass.(constructor)_1
+  - uid: 'api-documenter-test!DocBaseClass:constructor(2)'
     summary: The overloaded constructor for `DocBaseClass`
     name: (constructor)(x)
     fullName: (constructor)(x)

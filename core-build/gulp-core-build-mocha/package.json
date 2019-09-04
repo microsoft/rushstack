@@ -1,12 +1,9 @@
 {
   "name": "@microsoft/gulp-core-build-mocha",
-  "version": "3.5.76",
+  "version": "3.6.2",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
-  "tsdoc": {
-    "tsdocFlavor": "AEDoc"
-  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -16,22 +13,20 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.9.26",
+    "@microsoft/gulp-core-build": "3.11.1",
     "@types/node": "8.5.8",
     "glob": "~7.0.5",
-    "gulp": "~3.9.1",
+    "gulp": "~4.0.2",
     "gulp-istanbul": "~0.10.3",
     "gulp-mocha": "~6.0.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.2": "0.3.23",
-    "@microsoft/node-library-build": "6.0.71",
+    "@microsoft/rush-stack-compiler-3.4": "0.1.15",
     "@types/glob": "5.0.30",
-    "@types/gulp": "3.8.32",
+    "@types/gulp": "4.0.6",
     "@types/gulp-istanbul": "0.9.30",
     "@types/gulp-mocha": "0.0.32",
     "@types/mocha": "5.2.5",
-    "@types/orchestrator": "0.0.30",
-    "@types/q": "0.0.32"
+    "@types/orchestrator": "0.0.30"
   }
 }

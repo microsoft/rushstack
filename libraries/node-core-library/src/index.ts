@@ -22,8 +22,7 @@ export {
   INodePackageJson,
   IPackageJson,
   IPackageJsonDependencyTable,
-  IPackageJsonScriptTable,
-  IPackageJsonTsdocConfiguration
+  IPackageJsonScriptTable
 } from './IPackageJson';
 export { InternalError } from './InternalError';
 export {

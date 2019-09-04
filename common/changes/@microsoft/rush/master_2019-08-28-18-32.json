@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Adding --apply-git-tags-on-pack flag to the publish command to apply git tags when using --pack",
+      "packageName": "@microsoft/rush",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "chaseholland@users.noreply.github.com"
+}

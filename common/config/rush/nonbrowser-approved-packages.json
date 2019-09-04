@@ -100,6 +100,10 @@
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.4",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-3.5",
       "allowedCategories": [ "tests" ]
     },
     {
@@ -140,6 +144,22 @@
     },
     {
       "name": "@pnpm/logger",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@typescript-eslint/eslint-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@typescript-eslint/experimental-utils",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@typescript-eslint/parser",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@typescript-eslint/typescript-estree",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -212,6 +232,22 @@
     },
     {
       "name": "end-of-stream",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "eslint",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "eslint-plugin-promise",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "eslint-plugin-react",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "eslint-plugin-security",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -476,6 +512,10 @@
     },
     {
       "name": "through2",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "true-case-path",
       "allowedCategories": [ "libraries" ]
     },
     {

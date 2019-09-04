@@ -75,4 +75,7 @@ export {
   VersionPolicyConfiguration
 } from './api/VersionPolicyConfiguration';
 
-export { Rush } from './api/Rush';
+export {
+  ILaunchOptions,
+  Rush
+} from './api/Rush';

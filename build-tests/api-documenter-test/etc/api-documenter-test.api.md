@@ -39,6 +39,11 @@ export enum DocEnum {
 }
 
 // @public
+export namespace EcmaSmbols {
+    const example: unique symbol;
+}
+
+// @public
 export type ExampleTypeAlias = Promise<boolean>;
 
 // @public
@@ -61,9 +66,12 @@ export interface IDocInterface2 extends IDocInterface1 {
 
 // @public
 export interface IDocInterface3 {
+    "[not.a.symbol]": string;
+    [EcmaSmbols.example]: string;
     (x: number): number;
     [x: string]: string;
     new (): IDocInterface1;
+    "redundantQuotes": string;
 }
 
 // @public

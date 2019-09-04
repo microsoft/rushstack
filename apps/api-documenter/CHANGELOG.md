@@ -1,6 +1,55 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 12 Jul 2019 19:12:46 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Aug 2019 00:14:32 GMT and should not be manually modified.
+
+## 7.3.17
+Fri, 30 Aug 2019 00:14:32 GMT
+
+*Version update only*
+
+## 7.3.16
+Tue, 13 Aug 2019 00:14:22 GMT
+
+### Patches
+
+- Improve algorithm for UID generation to prevent certain naming collisions (e.g. between static/instance members with the same name)
+
+## 7.3.15
+Mon, 12 Aug 2019 15:15:14 GMT
+
+*Version update only*
+
+## 7.3.14
+Thu, 08 Aug 2019 15:14:17 GMT
+
+*Version update only*
+
+## 7.3.13
+Thu, 08 Aug 2019 00:49:05 GMT
+
+*Version update only*
+
+## 7.3.12
+Mon, 05 Aug 2019 22:04:32 GMT
+
+*Version update only*
+
+## 7.3.11
+Tue, 23 Jul 2019 19:14:38 GMT
+
+*Version update only*
+
+## 7.3.10
+Tue, 23 Jul 2019 01:13:01 GMT
+
+### Patches
+
+- Fix an issue where generated filenames sometimes mcontained invalid characters
+
+## 7.3.9
+Mon, 22 Jul 2019 19:13:10 GMT
+
+*Version update only*
 
 ## 7.3.8
 Fri, 12 Jul 2019 19:12:46 GMT

@@ -114,7 +114,7 @@ export class AsyncRecycler {
 
   /**
    * Starts an asynchronous process to delete the recycler folder.  Deleting will continue
-   * even if the current NodeJS process is killed.
+   * even if the current Node.js process is killed.
    *
    * NOTE: To avoid spawning multiple instances of the same command, moveFolder()
    * MUST NOT be called again after deleteAll() has started.

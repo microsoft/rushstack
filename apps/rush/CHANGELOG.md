@@ -1,6 +1,69 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 11 Jul 2019 22:00:50 GMT and should not be manually modified.
+This log was last generated on Fri, 23 Aug 2019 03:31:52 GMT and should not be manually modified.
+
+## 5.11.4
+Fri, 23 Aug 2019 03:31:52 GMT
+
+### Updates
+
+- Some optimizations for --to, --from, and cyclic dependency detection for repos with large numbers of projects.
+- Ensure install-run-rushx script is updated during "rush update"
+
+## 5.11.3
+Wed, 21 Aug 2019 22:13:26 GMT
+
+### Updates
+
+- Add support for the RUSH_PREVIEW_VERSION environment variable to the install-run-rush script.
+- Add support for the RUSH_TEMP_FOLDER environment variable in the install-run-rush script.
+- Add install-run-rushx script to enable easy execution of the rushx command in CI
+
+## 5.11.2
+Fri, 16 Aug 2019 05:15:17 GMT
+
+### Updates
+
+- Refactor build action to allow generating build graph statically
+- Security updates.
+- Fix validation of hotfix changes in a hotfix-enabled branch
+- Clarify that "rush update --full" should be run when changing certain settings
+
+## 5.11.1
+Fri, 26 Jul 2019 23:08:23 GMT
+
+### Updates
+
+- Fix critical path computation for projects
+- Normalize the casing of a temp folder specified with RUSH_TEMP_FOLDER.
+
+## 5.11.0
+Fri, 26 Jul 2019 08:34:03 GMT
+
+### Updates
+
+- Generate skeleton BuildXL script modules for each package
+- Allow building with newer versions of Node during development
+- Add experimental rush-buildxl package
+- Ensure the filesystem paths that Rush uses have the same character casing that exists on disk.
+- Tweak NodeJS version warning messages and add suppressNodeLtsWarning option to rush.json to suppress non-LTS version warning.
+- Do not terminate rush execution if a temp project lacks an entry in the PNPM shrinkwrap. Instead, allow the program to continue so that PNPM can update the outdated shrinkwrap. This fixes #1418 https://github.com/microsoft/web-build-tools/issues/1418.
+
+## 5.10.3
+Thu, 18 Jul 2019 00:07:46 GMT
+
+### Updates
+
+- Make event hooks run from the folder that contains the rush.json file.
+- Fix 1392 "rush install not working on pnpm 3.5" by getting the temporary project dependency key from the shrinkwrap file. See  https://github.com/microsoft/web-build-tools/issues/1392.
+
+## 5.10.2
+Tue, 16 Jul 2019 19:36:08 GMT
+
+### Updates
+
+- Prevent non-hotfix changes from being applied to hotfix branches
+- Use the shrinkwrap from temp for "rush link" as the committed shrinkwrap may not always be up to date as a result of shrinkwrap churn optimization. See https://github.com/microsoft/web-build-tools/issues/1273#issuecomment-492779995 for more details about shrinkwrap churn optimization.
 
 ## 5.10.1
 Thu, 11 Jul 2019 22:00:50 GMT

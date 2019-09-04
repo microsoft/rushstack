@@ -1,10 +1,50 @@
 ### YamlMime:UniversalReference
 items:
-  - uid: api-documenter-test.IDocInterface3
+  - uid: 'api-documenter-test!IDocInterface3:interface'
     summary: Some less common TypeScript declaration kinds.
     name: IDocInterface3
     fullName: IDocInterface3
     langs:
       - typeScript
     type: interface
-    package: api-documenter-test
+    package: api-documenter-test!
+    children:
+      - 'api-documenter-test!IDocInterface3#"[not.a.symbol]":member'
+      - 'api-documenter-test!IDocInterface3#[EcmaSmbols.example]:member'
+      - 'api-documenter-test!IDocInterface3#redundantQuotes:member'
+  - uid: 'api-documenter-test!IDocInterface3#"[not.a.symbol]":member'
+    summary: An identifier that does needs quotes. It misleadingly looks like an ECMAScript symbol.
+    name: '"[not.a.symbol]"'
+    fullName: '"[not.a.symbol]"'
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: '"[not.a.symbol]": string;'
+      return:
+        type:
+          - string
+  - uid: 'api-documenter-test!IDocInterface3#[EcmaSmbols.example]:member'
+    summary: ECMAScript symbol
+    name: '[EcmaSmbols.example]'
+    fullName: '[EcmaSmbols.example]'
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: '[EcmaSmbols.example]: string;'
+      return:
+        type:
+          - string
+  - uid: 'api-documenter-test!IDocInterface3#redundantQuotes:member'
+    summary: A quoted identifier with redundant quotes.
+    name: redundantQuotes
+    fullName: redundantQuotes
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: '"redundantQuotes": string;'
+      return:
+        type:
+          - string

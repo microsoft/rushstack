@@ -57,19 +57,35 @@
      * be incompatible with certain packages, for example the "@types" packages from DefinitelyTyped.  Rush's default
      * is "fewer-dependencies", which causes PNPM to avoid installing a newer version if an already installed version
      * can be reused; this is more similar to NPM's algorithm.
+     *
+     * After modifying this field, it's recommended to run "rush update --full" so that the package manager
+     * will recalculate all version selections.
      */
     /*[LINE "HYPOTHETICAL"]*/ "resolutionStrategy": "fast"
   },
 
   /**
-   * Older releases of the NodeJS engine may be missing features required by your system.
+   * Older releases of the Node.js engine may be missing features required by your system.
    * Other releases may have bugs.  In particular, the "latest" version will not be a
    * Long Term Support (LTS) version and is likely to have regressions.
    *
-   * Specify a SemVer range to ensure developers use a NodeJS version that is appropriate
+   * Specify a SemVer range to ensure developers use a Node.js version that is appropriate
    * for your repo.
    */
   "nodeSupportedVersionRange": ">=10.13.0 <11.0.0",
+
+  /**
+  * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
+  * spend six months in a stabilization period before the first Long Term Support (LTS) version.
+  * For example, 8.9.0 was the first LTS version of Node.js 8.  Pre-LTS versions are not recommended
+  * for production usage because they frequently have bugs.  They may cause Rush itself
+  * to malfunction.
+  *
+  * Rush normally prints a warning if it detects a pre-LTS Node.js version.  If you are testing
+  * pre-LTS versions in preparation for supporting the first LTS version, you can use this setting
+  * to disable Rush's warning.
+  */
+  /*[LINE "HYPOTHETICAL"]*/ "suppressNodeLtsWarning": false,
 
   /**
    * If you would like the version specifiers for your dependencies to be consistent, then
@@ -100,7 +116,7 @@
    * occasionally, but if that's painful, it's a warning sign that your development style may
    * discourage refactoring.  Reorganizing the categories should be an enlightening discussion
    * that brings people together, and maybe also identifies poor coding practices (e.g. file
-   * references that reach into other project's folders without using NodeJS module resolution).
+   * references that reach into other project's folders without using Node.js module resolution).
    *
    * The defaults are projectFolderMinDepth=1 and projectFolderMaxDepth=2.
    *
