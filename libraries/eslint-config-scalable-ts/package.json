@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/eslint-config-scalable-ts",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Base set of ESLint rules for scalable TypeScript projects.",
   "license": "MIT",
   "repository": {
