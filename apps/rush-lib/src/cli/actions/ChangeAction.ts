@@ -170,10 +170,16 @@ export class ChangeAction extends BaseRushAction {
     }
     const changedPackageNames: Set<string> = new Set<string>();
 
+    const repoRootFolder: string | undefined = VersionControl.getRepositoryRootPath();
     this.rushConfiguration.projects
     .filter(project => project.shouldPublish)
     .filter(project => !project.versionPolicy || !project.versionPolicy.exemptFromRushChange)
-    .filter(project => this._hasProjectChanged(changedFolders, project))
+    .filter(project => {
+      const projectFolder: string = repoRootFolder
+        ? path.relative(repoRootFolder, project.projectFolder)
+        : project.projectRelativeFolder;
+      return this._hasProjectChanged(changedFolders, projectFolder);
+    })
     .forEach(project => {
       const hostName: string | undefined = this._projectHostMap.get(project.packageName);
       if (hostName) {
@@ -195,15 +201,15 @@ export class ChangeAction extends BaseRushAction {
     });
   }
 
-  private _hasProjectChanged(changedFolders: Array<string | undefined>,
-    project: RushConfigurationProject): boolean {
-    let normalizedFolder: string = project.projectRelativeFolder;
-
-    const rushPathDiff: string = this._findRushPathDiff(changedFolders, project);
+  private _hasProjectChanged(
+    changedFolders: Array<string | undefined>,
+    projectFolder: string
+  ): boolean {
+    let normalizedFolder: string = projectFolder.replace(/\\/g, '/'); // Replace backslashes with forward slashes
     if (normalizedFolder.charAt(normalizedFolder.length - 1) !== '/') {
       normalizedFolder = normalizedFolder + '/';
     }
-    normalizedFolder = path.join(rushPathDiff, normalizedFolder);
+
     const pathRegex: RegExp = new RegExp(`^${normalizedFolder}`, 'i');
     for (const folder of changedFolders) {
       if (folder && folder.match(pathRegex)) {
@@ -212,27 +218,6 @@ export class ChangeAction extends BaseRushAction {
     }
 
     return false;
-  }
-
-  // find the difference between the relative and root path
-  private _findRushPathDiff(changedFolders: Array<string | undefined>,
-    project: RushConfigurationProject): string {
-      const normalizedFolder: string = project.projectRelativeFolder;
-      const rushPathDiff: string = '';
-      for (const folder of changedFolders) {
-        if (folder !== undefined) {
-          const splitted: Array<string> = folder.split(path.sep);
-          if (splitted[0] !== normalizedFolder) {
-            // if rush.json isn't in the root directory
-            const changeProjectIndex: number = splitted.indexOf(normalizedFolder);
-            for (let i: number = 0; i < changeProjectIndex; i++) {
-              path.join(rushPathDiff, splitted[i]);
-            }
-          }
-        }
-      }
-
-    return rushPathDiff;
   }
 
   /**

@@ -10,6 +10,19 @@ const DEFAULT_REMOTE: string = 'origin';
 const DEFAULT_FULLY_QUALIFIED_BRANCH: string = `${DEFAULT_REMOTE}/${DEFAULT_BRANCH}`;
 
 export class VersionControl {
+  public static getRepositoryRootPath(): string | undefined {
+    const output: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
+      'git',
+      ['rev-parse', '--show-toplevel']
+    );
+
+    if (output.status !== 0) {
+      return undefined;
+    } else {
+      return output.stdout.trim();
+    }
+  }
+
   public static getChangedFolders(
     targetBranch: string,
     skipFetch: boolean = false
