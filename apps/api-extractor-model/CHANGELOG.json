@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.3.3",
+      "tag": "@microsoft/api-extractor-model_v7.3.3",
+      "date": "Wed, 04 Sep 2019 15:15:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update TSDoc dependency to 0.12.14"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.3.2",
       "tag": "@microsoft/api-extractor-model_v7.3.2",
       "date": "Thu, 08 Aug 2019 15:14:17 GMT",
