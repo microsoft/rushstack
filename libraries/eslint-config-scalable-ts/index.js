@@ -33,8 +33,19 @@ module.exports = {
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         "@typescript-eslint/adjacent-overload-signatures": "error",
 
-        // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        "@typescript-eslint/array-type": "error",
+        // RATIONALE:         We require "string[]" (instead of "Array<string>") because it is idiomatic TypeScript.
+        //                    We require "ReadonlyArray<string>" (instead of "readonly string[]") because, although
+        //                    the latter form is nicer, it is not supported by TypeScript version prior to 3.4.
+        //                    It can be expensive to upgrade a large code base to use the latest compiler, so our
+        //                    lint rules should not require usage of bleeding edge language features.  In the future
+        //                    when TypeScript 3 is obsolete, we'll change this rule to require "readonly string[]".
+        "@typescript-eslint/array-type": [
+          "error",
+          {
+            default: "array",
+            readonly: "generic"
+          }
+        ],
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         //
