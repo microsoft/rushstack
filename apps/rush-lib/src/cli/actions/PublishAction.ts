@@ -263,7 +263,7 @@ export class PublishAction extends BaseRushAction {
 
       if (VersionControl.hasUncommittedChanges()) {
         // Stage, commit, and push the changes to remote temp branch.
-        git.addChanges();
+        git.addChanges(':/*');
         git.commit(this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE);
         git.push(tempBranch);
 
