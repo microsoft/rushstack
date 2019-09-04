@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/set-webpack-public-path-plugin",
+      "comment": "Make @types/webpack dependency more loose.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/set-webpack-public-path-plugin",
+  "email": "3473356+D4N14L@users.noreply.github.com"
+}

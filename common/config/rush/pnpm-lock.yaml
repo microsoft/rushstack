@@ -97,12 +97,13 @@ dependencies:
   '@types/serve-static': 1.13.1
   '@types/sinon': 1.16.34
   '@types/source-map': 0.5.0
-  '@types/tapable': 1.0.2
+  '@types/tapable': 1.0.4
   '@types/tar': 4.0.0
   '@types/through2': 2.0.32
   '@types/uglify-js': 2.6.29
   '@types/vinyl': 2.0.3
-  '@types/webpack': 4.4.0
+  '@types/webpack': 4.39.1
+  '@types/webpack-dev-server': 3.1.7
   '@types/webpack-env': 1.13.0
   '@types/yargs': 0.0.34
   '@types/z-schema': 3.16.31
@@ -412,6 +413,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-NsEzBVa5aMgn/n79piyJtpUQFzJ97tB2R2r8PSJlLnMA6LJmchKuv7ATN+/nZH/3QRd/+uFXEq07/i/ajsqVGQ==
+  /@types/anymatch/1.3.1:
+    dev: false
+    resolution:
+      integrity: sha512-/+CRPXpBDpo2RK9C68N3b2cOvO0Cf5B9aPijHsoDQTHivnGSObdOF2BRQOYjojWTDy6nQvMjmqRXIxH55VjxxA==
   /@types/argparse/1.0.33:
     dev: false
     resolution:
@@ -437,6 +442,13 @@ packages:
     dev: false
     resolution:
       integrity: sha512-A1HQhQ0hkvqqByJMgg+Wiv9p9XdoYEzuwm11SVo1mX2/4PSdhjcrUlilJQoqLscIheC51t1D5g+EFWCXZ2VTQQ==
+  /@types/connect-history-api-fallback/1.3.3:
+    dependencies:
+      '@types/express-serve-static-core': 4.11.0
+      '@types/node': 8.5.8
+    dev: false
+    resolution:
+      integrity: sha512-7SxFCd+FLlxCfwVwbyPxbR4khL9aNikJhrorw8nUIOqeuooc9gifBuDQOJw5kzN7i6i3vLn9G8Wde/4QDihpYw==
   /@types/connect/3.4.32:
     dependencies:
       '@types/node': 8.5.8
@@ -502,6 +514,20 @@ packages:
     dev: false
     resolution:
       integrity: sha512-0E8/iV/7FKWyQWSmi7jnUvgXXgaw+pfAzEB06Xu+l0iXVJppLbpOye5z7E2klw5akXd+8kPtYuk65YBcZPM4ow==
+  /@types/http-proxy-middleware/0.19.3:
+    dependencies:
+      '@types/connect': 3.4.32
+      '@types/http-proxy': 1.17.0
+      '@types/node': 8.5.8
+    dev: false
+    resolution:
+      integrity: sha512-lnBTx6HCOUeIJMLbI/LaL5EmdKLhczJY5oeXZpX/cXE4rRqb3RmV7VcMpiEfYkmTjipv3h7IAyIINe4plEv7cA==
+  /@types/http-proxy/1.17.0:
+    dependencies:
+      '@types/node': 8.5.8
+    dev: false
+    resolution:
+      integrity: sha512-l+s0IoxSHqhLFJPDHRfO235kgrCkvFD8JmdV/T9C4BKBYPIjrQopGFH4r7h2e3jQqgJRCthRCAZIxDoFnj1zwQ==
   /@types/inquirer/0.0.43:
     dependencies:
       '@types/rx': 4.1.1
@@ -528,7 +554,7 @@ packages:
   /@types/loader-utils/1.1.3:
     dependencies:
       '@types/node': 8.5.8
-      '@types/webpack': 4.4.0
+      '@types/webpack': 4.39.1
     dev: false
     resolution:
       integrity: sha512-euKGFr2oCB3ASBwG39CYJMR3N9T0nanVqXdiH7Zu/Nqddt6SmFRxytq/i2w9LQYNQekEtGBz+pE3qG6fQTNvRg==
@@ -711,14 +737,18 @@ packages:
     dev: false
     resolution:
       integrity: sha1-qXYf/zPQ97P+YYdbV3d4oldqmgM=
+  /@types/source-list-map/0.1.2:
+    dev: false
+    resolution:
+      integrity: sha512-K5K+yml8LTo9bWJI/rECfIPrGgxdpeNbj+d53lwN4QjW1MCwlkhUms+gtdzigTeUyBr09+u8BwOIY3MXvHdcsA==
   /@types/source-map/0.5.0:
     dev: false
     resolution:
       integrity: sha1-3TS72OMv5OdPLj2KwH+KpbRaR6w=
-  /@types/tapable/1.0.2:
+  /@types/tapable/1.0.4:
     dev: false
     resolution:
-      integrity: sha512-42zEJkBpNfMEAvWR5WlwtTH22oDzcMjFsL9gDGExwF8X8WvAiw7Vwop7hPw03QT8TKfec83LwbHj6SvpqM4ELQ==
+      integrity: sha512-78AdXtlhpCHT0K3EytMpn4JNxaf5tbqbLcbIRoQIHzpTIyjpxLQKRoxU55ujBXAtg3Nl2h/XWvfDa9dsMOd0pQ==
   /@types/tar/4.0.0:
     dependencies:
       '@types/node': 8.5.8
@@ -767,19 +797,39 @@ packages:
     dev: false
     resolution:
       integrity: sha512-hrT6xg16CWSmndZqOTJ6BGIn2abKyTw0B58bI+7ioUoj3Sma6u8ftZ1DTI2yCaJamOVGLOnQWiPH3a74+EaqTA==
+  /@types/webpack-dev-server/3.1.7:
+    dependencies:
+      '@types/connect-history-api-fallback': 1.3.3
+      '@types/express': 4.11.0
+      '@types/http-proxy-middleware': 0.19.3
+      '@types/serve-static': 1.13.1
+      '@types/webpack': 4.39.1
+    dev: false
+    resolution:
+      integrity: sha512-VIRkDkBDuOkYRXQ1EG/etisQ3odo6pcjSmA1Si4VYANuNhSBsLxfuPGeGERwCx1nDKxK3aaXnicPzi0gUvxUaw==
   /@types/webpack-env/1.13.0:
     dev: false
     resolution:
       integrity: sha1-MEQ4FkfhHulzxa8uklMjkw9pHYA=
-  /@types/webpack/4.4.0:
+  /@types/webpack-sources/0.1.5:
     dependencies:
       '@types/node': 8.5.8
-      '@types/tapable': 1.0.2
-      '@types/uglify-js': 2.6.29
+      '@types/source-list-map': 0.1.2
       source-map: 0.6.1
     dev: false
     resolution:
-      integrity: sha512-G7TXt4IRP7NTQO8R8QyDN7YwkQzlxjiKhA+z7W5FvkGbK7kIdOUtW2e7AE2w33Q10uphyG+vr8pfRy7wBWLmsA==
+      integrity: sha512-zfvjpp7jiafSmrzJ2/i3LqOyTYTuJ7u1KOXlKgDlvsj9Rr0x7ZiYu5lZbXwobL7lmsRNtPXlBfmaUD8eU2Hu8w==
+  /@types/webpack/4.39.1:
+    dependencies:
+      '@types/anymatch': 1.3.1
+      '@types/node': 8.5.8
+      '@types/tapable': 1.0.4
+      '@types/uglify-js': 2.6.29
+      '@types/webpack-sources': 0.1.5
+      source-map: 0.6.1
+    dev: false
+    resolution:
+      integrity: sha512-rgO9ihNu/l72Sjx3shqwc9r6gi+tOMsqxhMEZhOEVIZt82GFOeUyEdpTk1BO2HqEHLS/XJW8ldUTIIfIMMyYFQ==
   /@types/yargs/0.0.34:
     dev: false
     resolution:
@@ -10176,14 +10226,15 @@ packages:
       '@types/orchestrator': 0.0.30
       '@types/source-map': 0.5.0
       '@types/uglify-js': 2.6.29
-      '@types/webpack': 4.4.0
+      '@types/webpack': 4.39.1
+      '@types/webpack-dev-server': 3.1.7
       colors: 1.2.5
       gulp: 4.0.2
       webpack: 3.11.0
     dev: false
     name: '@rush-temp/gulp-core-build-webpack'
     resolution:
-      integrity: sha512-kTlAKaHrpfOl2tx4PgwErHJjhJ4AIMWDNXlgcTYaXpsW+6hf3G+1Mo3K1jo6rTr+KySr8MF9d75BAiUH6jbbpg==
+      integrity: sha512-YaFfM4Ss75gW/ligxOZlNuvKrdJIXlRq/ORPfFO+1vSodSkp8NScjSIcr13JfUzbKlbYH5iDyzAScMobDWdluA==
       tarball: 'file:projects/gulp-core-build-webpack.tgz'
     version: 0.0.0
   'file:projects/gulp-core-build.tgz':
@@ -10251,14 +10302,14 @@ packages:
       '@types/loader-utils': 1.1.3
       '@types/mocha': 5.2.5
       '@types/node': 8.5.8
-      '@types/webpack': 4.4.0
+      '@types/webpack': 4.39.1
       chai: 3.5.0
       gulp: 4.0.2
       loader-utils: 1.1.0
     dev: false
     name: '@rush-temp/loader-load-themed-styles'
     resolution:
-      integrity: sha512-CW22gM1ZOlsv4rbHmjkXf4zD5aHm6MxqqATI6HQ7uqm7xD8Xg3Ehpdk2rmFuG3LjSatqBP97WVXdchVih50STQ==
+      integrity: sha512-I5ruEdymc23R0rOczkDUwf1Qif7s1JSkR7ylisq3reFeck1n5DlhHoStIUzJ8wmc8IntHsraivRST4mjdsJdaw==
       tarball: 'file:projects/loader-load-themed-styles.tgz'
     version: 0.0.0
   'file:projects/loader-raw-script.tgz':
@@ -10351,14 +10402,14 @@ packages:
   'file:projects/resolve-chunk-plugin.tgz':
     dependencies:
       '@types/mocha': 5.2.5
-      '@types/webpack': 4.4.0
+      '@types/webpack': 4.39.1
       chai: 3.5.0
       gulp: 4.0.2
       mocha: 5.2.0
     dev: false
     name: '@rush-temp/resolve-chunk-plugin'
     resolution:
-      integrity: sha512-0zf26hfPhE8/BCbY2wi4DbTikVlEvRj32V6yxekYEKDjuL/LXUKYLjhUMQHv02LYj5HowJEi0PpEvjal99pt/g==
+      integrity: sha512-4Q3VOZZUV94U7V3+165BrJvM1Nuc2RfvNoV5+B1rNr4K7YT7mwcLvrCR11IFWPiTJESaxtXTEx8dxmR3R0jTlA==
       tarball: 'file:projects/resolve-chunk-plugin.tgz'
     version: 0.0.0
   'file:projects/rush-buildxl.tgz':
@@ -10726,9 +10777,9 @@ packages:
       '@types/lodash': 4.14.116
       '@types/mocha': 5.2.5
       '@types/node': 8.5.8
-      '@types/tapable': 1.0.2
+      '@types/tapable': 1.0.4
       '@types/uglify-js': 2.6.29
-      '@types/webpack': 4.4.0
+      '@types/webpack': 4.39.1
       chai: 3.5.0
       gulp: 4.0.2
       lodash: 4.17.15
@@ -10737,7 +10788,7 @@ packages:
     dev: false
     name: '@rush-temp/set-webpack-public-path-plugin'
     resolution:
-      integrity: sha512-GOnZfyumtv+6NMz0moz/it4WRihljh/oxw4XShio74xS+nkdS9Gns43Tt1uQS335V3PbYoNQNIXaEwwnsSpCLQ==
+      integrity: sha512-K17cpZj8l64erosvaaA5vtaGE/00Z2qZSyvINSdR77apouG1mYCJVFr1XN+eV1ehReVfQ+FP5U5vLKBAYQAsOw==
       tarball: 'file:projects/set-webpack-public-path-plugin.tgz'
     version: 0.0.0
   'file:projects/stream-collator.tgz':
@@ -10894,12 +10945,13 @@ specifiers:
   '@types/serve-static': 1.13.1
   '@types/sinon': 1.16.34
   '@types/source-map': 0.5.0
-  '@types/tapable': 1.0.2
+  '@types/tapable': ^1.0.0
   '@types/tar': 4.0.0
   '@types/through2': 2.0.32
   '@types/uglify-js': 2.6.29
   '@types/vinyl': 2.0.3
-  '@types/webpack': 4.4.0
+  '@types/webpack': ^4.0.0
+  '@types/webpack-dev-server': 3.1.7
   '@types/webpack-env': 1.13.0
   '@types/yargs': 0.0.34
   '@types/z-schema': 3.16.31
