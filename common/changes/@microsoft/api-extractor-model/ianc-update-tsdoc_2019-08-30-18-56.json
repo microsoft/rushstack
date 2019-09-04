@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor-model",
-      "comment": "Update TSDoc dependency to 0.12.13.",
+      "comment": "Update TSDoc dependency to 0.12.14",
       "type": "patch"
     }
   ],
