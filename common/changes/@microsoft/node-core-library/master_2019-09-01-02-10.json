@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/node-core-library",
+      "comment": "Add support for two more arguments in LegacyAdapters.convertCallbackToPromise.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/node-core-library",
+  "email": "iclanton@users.noreply.github.com"
+}
