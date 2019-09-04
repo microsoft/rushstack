@@ -161,7 +161,7 @@ dependencies:
   node-forge: 0.7.6
   node-notifier: 5.0.2
   node-sass: 4.12.0
-  npm-package-arg: 5.1.2
+  npm-package-arg: 6.1.1
   object-assign: 4.1.1
   orchestrator: 0.3.8
   postcss: 7.0.5
@@ -6740,15 +6740,15 @@ packages:
       node: '>= 0.10'
     resolution:
       integrity: sha512-KGvQ0cB70AQfg107Xvs/Fbu+dGmZoTRJp2TaPwcwQm3/7PteUyN2BCgk8KBMPGBUXZdVwyWS8fDCGFygBm19UQ==
-  /npm-package-arg/5.1.2:
+  /npm-package-arg/6.1.1:
     dependencies:
       hosted-git-info: 2.8.4
       osenv: 0.1.5
-      semver: 5.3.0
+      semver: 5.7.1
       validate-npm-package-name: 3.0.0
     dev: false
     resolution:
-      integrity: sha512-wJBsrf0qpypPT7A0LART18hCdyhpCMxeTtcb0X4IZO2jsP6Om7EHN1d9KSKiqD+KVH030RVNpWS9thk+pb7wzA==
+      integrity: sha512-qBpssaL3IOZWi5vEKUKW0cO7kzLeT+EQO9W8RsLOZf76KF9E/K9+wH0C7t06HXPpaH8WH5xF1MExLuCwbTqRUg==
   /npm-run-path/2.0.2:
     dependencies:
       path-key: 2.0.1
@@ -10452,7 +10452,7 @@ packages:
       lodash: 4.17.15
       minimatch: 3.0.4
       node-fetch: 2.1.2
-      npm-package-arg: 5.1.2
+      npm-package-arg: 6.1.1
       read-package-tree: 5.1.6
       semver: 5.3.0
       strict-uri-encode: 2.0.0
@@ -10463,7 +10463,7 @@ packages:
     dev: false
     name: '@rush-temp/rush-lib'
     resolution:
-      integrity: sha512-Njd7pn5YQfb6W+fowcHIIhHDT67qd+obd62rbTG4PQduM2w3X9pqtxgDOy810lLe1Pw2U5RbdC2lDTibu0eJ6w==
+      integrity: sha512-29GnJmpeTiT/B2pGDFJUYMKPnqVG8A/CGKvy7xoUuJTXp31e79VHEoTKTGheR4lapG0hdXYaAInDi/miQF0Jww==
       tarball: 'file:projects/rush-lib.tgz'
     version: 0.0.0
   'file:projects/rush-stack-compiler-2.4-library-test.tgz':
@@ -11009,7 +11009,7 @@ specifiers:
   node-forge: ~0.7.1
   node-notifier: ~5.0.2
   node-sass: 4.12.0
-  npm-package-arg: ~5.1.2
+  npm-package-arg: ~6.1.0
   object-assign: ~4.1.0
   orchestrator: ~0.3.8
   postcss: 7.0.5

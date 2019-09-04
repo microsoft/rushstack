@@ -57,6 +57,7 @@ import { CreateOptions } from 'tar';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { PackageManagerName } from '../api/packageManager/PackageManager';
 import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
+import { DependencySpecifier } from './DependencySpecifier';
 
 export interface CreateOptions { // tslint:disable-line:interface-name
   /**
@@ -503,7 +504,9 @@ export class InstallManager {
     if (shrinkwrapFile) {
       // Check any (explicitly) preferred dependencies first
       allExplicitPreferredVersions.forEach((version: string, dependency: string) => {
-        if (!shrinkwrapFile.hasCompatibleTopLevelDependency(dependency, version)) {
+        const dependencySpecifier: DependencySpecifier = new DependencySpecifier(dependency, version);
+
+        if (!shrinkwrapFile.hasCompatibleTopLevelDependency(dependencySpecifier)) {
           shrinkwrapWarnings.push(`"${dependency}" (${version}) required by the preferred versions from `
             + RushConstants.commonVersionsFilename);
           shrinkwrapIsUpToDate = false;
@@ -614,6 +617,8 @@ export class InstallManager {
       Sort.sortMapKeys(tempDependencies);
 
       for (const [packageName, packageVersion] of tempDependencies.entries()) {
+        const dependencySpecifier: DependencySpecifier = new DependencySpecifier(packageName, packageVersion);
+
         // Is there a locally built Rush project that could satisfy this dependency?
         // If so, then we will symlink to the project folder rather than to common/temp/node_modules.
         // In this case, we don't want "npm install" to process this package, but we do need
@@ -644,8 +649,7 @@ export class InstallManager {
         tempPackageJson.dependencies![packageName] = packageVersion;
 
         if (shrinkwrapFile) {
-          if (!shrinkwrapFile.tryEnsureCompatibleDependency(packageName, packageVersion,
-            rushProject.tempProjectName)) {
+          if (!shrinkwrapFile.tryEnsureCompatibleDependency(dependencySpecifier, rushProject.tempProjectName)) {
             shrinkwrapWarnings.push(`"${packageName}" (${packageVersion}) required by`
               + ` "${rushProject.packageName}"`);
             shrinkwrapIsUpToDate = false;

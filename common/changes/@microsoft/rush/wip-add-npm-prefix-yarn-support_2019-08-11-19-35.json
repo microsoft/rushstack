@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add support for NPM package aliases (i.e. dependency versions such as \"npm:example@^1.2.3\")",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

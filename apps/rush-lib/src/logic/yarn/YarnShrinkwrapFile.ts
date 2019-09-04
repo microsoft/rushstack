@@ -5,6 +5,7 @@ import {
 } from '../base/BaseShrinkwrapFile';
 import { FileSystem, PackageName, IParsedPackageNameOrError, InternalError } from '@microsoft/node-core-library';
 import { RushConstants } from '../RushConstants';
+import { DependencySpecifier } from '../DependencySpecifier';
 
 /**
  * Used with YarnShrinkwrapFile._encodePackageNameAndSemVer() and _decodePackageNameAndSemVer().
@@ -138,17 +139,18 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
     return packageNameAndSemVer.packageName + '@' + packageNameAndSemVer.semVerRange;
   }
 
-  public getTempProjectNames(): ReadonlyArray<string> { // abstract
+  /** @override */
+  public getTempProjectNames(): ReadonlyArray<string> {
     return this._tempProjectNames;
   }
 
   /** @override */
-  public hasCompatibleTopLevelDependency(dependencyName: string, versionRange: string): boolean {
+  public hasCompatibleTopLevelDependency(dependencySpecifier: DependencySpecifier): boolean {
     // It seems like we should normalize the key somehow, but Yarn apparently does not
     // do any normalization.
     const key: string = YarnShrinkwrapFile._encodePackageNameAndSemVer({
-      packageName: dependencyName,
-      semVerRange: versionRange
+      packageName: dependencySpecifier.packageName,
+      semVerRange: dependencySpecifier.versionSpecifier
     });
 
     // Check whether this exact key appears in the shrinkwrap file
@@ -156,24 +158,23 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public tryEnsureCompatibleDependency(dependencyName: string, versionRange: string, tempProjectName: string): boolean {
-    return this.hasCompatibleTopLevelDependency(dependencyName, versionRange);
+  public tryEnsureCompatibleDependency(dependencySpecifier: DependencySpecifier, tempProjectName: string): boolean {
+    return this.hasCompatibleTopLevelDependency(dependencySpecifier);
   }
 
   /** @override */
-  protected serialize(): string { // abstract
+  protected serialize(): string {
     return lockfile.stringify(this._shrinkwrapJson);
   }
 
   /** @override */
-  protected getTopLevelDependencyVersion(dependencyName: string): string | undefined { // abstract
+  protected getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined {
     throw new InternalError('Not implemented');
   }
 
   /** @override */
-  protected tryEnsureDependencyVersion(dependencyName: string,
-    tempProjectName: string,
-    versionRange: string): string | undefined { // abstract
+  protected tryEnsureDependencyVersion(dependencySpecifier: DependencySpecifier,
+    tempProjectName: string): DependencySpecifier | undefined {
 
     throw new InternalError('Not implemented');
   }

@@ -60,6 +60,21 @@ export class BasePackage {
   public name: string;
 
   /**
+   * The package.json name can differ from the installation folder name, in the case of an NPM package alias
+   * such as this:
+   *
+   * ```
+   * "dependencies": {
+   *   "@alias-scope/alias-name": "npm:target-name@^1.2.3"
+   * }
+   * ```
+   *
+   * In this case the folder will be `node_modules/@alias-scope/alias-name`
+   * instead of `node_modules/target-name`.
+   */
+  public installedName: string;
+
+  /**
    * The "version" field from package.json. This is expensive to read
    * because we have to open the package.json file.  Only when DEBUG=true
    */
@@ -169,6 +184,17 @@ export class BasePackage {
     this.packageJson = packageJson;
     this.version = version;
     this.folderPath = folderPath;
+
+    // Extract `@alias-scope/alias-name` from  `C:\node_modules\@alias-scope\alias-name`
+    const pathParts: string[] = folderPath.split(/[\\\/]/);
+    this.installedName = pathParts[pathParts.length - 1];
+    if (pathParts.length >= 2) {
+      // Is there an NPM scope?
+      const parentFolder: string = pathParts[pathParts.length - 2];
+      if (parentFolder[0] === '@') {
+        this.installedName = parentFolder + '/' + this.installedName;
+      }
+    }
 
     this.children = [];
     this._childrenByName = new Map<string, BasePackage>();
