@@ -44,7 +44,12 @@ export class RushStackFeature extends MarkdownDocumenterFeature {
 
   public onFinished(eventArgs: IMarkdownDocumenterFeatureOnFinishedArgs): void {
     const navigationFile: INavigationFile = {
-      api_nav: []
+      api_nav: [
+        {
+          title: 'API Reference',
+          url: '/pages/api/'
+        }
+      ]
     };
     this._buildNavigation(navigationFile.api_nav, this.context.apiModel);
 
