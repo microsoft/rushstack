@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Wed, 04 Sep 2019 18:28:06 GMT and should not be manually modified.
+This log was last generated on Thu, 05 Sep 2019 15:15:09 GMT and should not be manually modified.
+
+## 7.3.20
+Thu, 05 Sep 2019 15:15:09 GMT
+
+### Patches
+
+- (Experimental) Introduce an API for writing API Documenter plugins
 
 ## 7.3.19
 Wed, 04 Sep 2019 18:28:06 GMT
