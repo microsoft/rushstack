@@ -100,10 +100,7 @@ export class MarkdownDocumenter {
     console.log();
     this._deleteOldOutputFiles();
 
-    for (const apiPackage of this._apiModel.packages) {
-      console.log(`Writing ${apiPackage.name} package`);
-      this._writeApiItemPage(apiPackage);
-    }
+    this._writeApiItemPage(this._apiModel);
 
     if (this._pluginLoader.markdownDocumenterFeature) {
       this._pluginLoader.markdownDocumenterFeature.onFinished({ });
@@ -139,10 +136,14 @@ export class MarkdownDocumenter {
       case ApiItemKind.Function:
         output.appendNode(new DocHeading({ configuration, title: `${scopedName} function` }));
         break;
+      case ApiItemKind.Model:
+        output.appendNode(new DocHeading({ configuration, title: `API Reference` }));
+        break;
       case ApiItemKind.Namespace:
         output.appendNode(new DocHeading({ configuration, title: `${scopedName} namespace` }));
         break;
       case ApiItemKind.Package:
+        console.log(`Writing ${apiItem.displayName} package`);
         const unscopedPackageName: string = PackageName.getUnscopedName(apiItem.displayName);
         output.appendNode(new DocHeading({ configuration, title: `${unscopedPackageName} package` }));
         break;
@@ -226,6 +227,9 @@ export class MarkdownDocumenter {
       case ApiItemKind.Namespace:
         this._writePackageOrNamespaceTables(output, apiItem as ApiNamespace);
         break;
+      case ApiItemKind.Model:
+        this._writeModelTable(output, apiItem as ApiModel);
+        break;
       case ApiItemKind.Package:
         this._writePackageOrNamespaceTables(output, apiItem as ApiPackage);
         break;
@@ -295,6 +299,37 @@ export class MarkdownDocumenter {
     FileSystem.writeFile(filename, pageContent, {
       convertLineEndings: NewlineKind.CrLf
     });
+  }
+
+  /**
+   * GENERATE PAGE: MODEL
+   */
+  private _writeModelTable(output: DocSection, apiModel: ApiModel): void {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+
+    const packagesTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Package', 'Description' ]
+    });
+
+    for (const apiMember of apiModel.members) {
+
+      const row: DocTableRow = new DocTableRow({ configuration }, [
+        this._createTitleCell(apiMember),
+        this._createDescriptionCell(apiMember)
+      ]);
+
+      switch (apiMember.kind) {
+        case ApiItemKind.Package:
+          packagesTable.addRow(row);
+          this._writeApiItemPage(apiMember);
+          break;
+      }
+    }
+
+    if (packagesTable.rows.length > 0) {
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Packages' }));
+      output.appendNode(packagesTable);
+    }
   }
 
   /**
@@ -767,7 +802,7 @@ export class MarkdownDocumenter {
       configuration: this._tsdocConfiguration,
       tagName: '@link',
       linkText: 'Home',
-      urlDestination: './index.md'
+      urlDestination: this._getLinkFilenameForApiItem(this._apiModel)
     }));
 
     for (const hierarchyItem of apiItem.getHierarchy()) {
@@ -831,6 +866,10 @@ export class MarkdownDocumenter {
   }
 
   private _getFilenameForApiItem(apiItem: ApiItem): string {
+    if (apiItem.kind === ApiItemKind.Model) {
+      return 'index.md';
+    }
+
     let baseName: string = '';
     for (const hierarchyItem of apiItem.getHierarchy()) {
       // For overloaded methods, add a suffix such as "MyClass.myMethod_2".
