@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.10.1",
+  "rushVersion": "5.11.1",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -46,7 +46,7 @@
      * The default value is false to avoid legacy compatibility issues.
      * It is strongly recommended to set strictPeerDependencies=true.
      */
-    // "strictPeerDependencies": true,
+    "strictPeerDependencies": true,
 
 
     /**
@@ -69,7 +69,7 @@
    * Specify a SemVer range to ensure developers use a NodeJS version that is appropriate
    * for your repo.
    */
-  "nodeSupportedVersionRange": ">=8.9.4 <9.0.0 || >=10.13.0 <11.0.0",
+  "nodeSupportedVersionRange": ">=8.9.4 <9.0.0 || >=10.13.0 <11.0.0 || >=12.0.0 <13.0.0",
 
   /**
    * If you would like the version specifiers for your dependencies to be consistent, then
@@ -371,6 +371,12 @@
       "versionPolicyName": "rush"
     },
     {
+      "packageName": "@microsoft/rush-buildxl",
+      "projectFolder": "apps/rush-buildxl",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
+    {
       "packageName": "@microsoft/rush-lib",
       "projectFolder": "apps/rush-lib",
       "reviewCategory": "libraries",
@@ -575,6 +581,12 @@
 
     // "libraries" folder (alphabetical order)
     {
+      "packageName": "@microsoft/eslint-config-scalable-ts",
+      "projectFolder": "libraries/eslint-config-scalable-ts",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@microsoft/load-themed-styles",
       "projectFolder": "libraries/load-themed-styles",
       "reviewCategory": "libraries",
@@ -723,7 +735,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.2"
+        "@microsoft/rush-stack-compiler-3.4"
       ]
     },
     {

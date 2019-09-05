@@ -21,6 +21,8 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { FileSystem } from '@microsoft/node-core-library';
+import { TaskRunner } from '../../logic/taskRunner/TaskRunner';
+import { TaskCollection } from '../../logic/taskRunner/TaskCollection';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -97,22 +99,29 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const changedProjectsOnly: boolean = this._isIncrementalBuildAllowed && this._changedProjectsOnly.value;
 
-    const tasks: TaskSelector = new TaskSelector({
+    const taskSelector: TaskSelector = new TaskSelector({
       rushConfiguration: this.rushConfiguration,
       toFlags: this._mergeToProjects(),
       fromFlags: this._fromFlag.values,
       commandToRun: this._commandToRun,
       customParameterValues,
-      isQuietMode,
-      parallelism,
+      isQuietMode: isQuietMode,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
-      changedProjectsOnly,
       ignoreMissingScript: this._ignoreMissingScript,
-      ignoreDependencyOrder: this._ignoreDependencyOrder,
+      ignoreDependencyOrder: this._ignoreDependencyOrder
+    });
+
+    // Register all tasks with the task collection
+    const taskCollection: TaskCollection = taskSelector.registerTasks();
+
+    const taskRunner: TaskRunner = new TaskRunner(taskCollection.getOrderedTasks(), {
+      quietMode: isQuietMode,
+      parallelism: parallelism,
+      changedProjectsOnly: changedProjectsOnly,
       allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
     });
 
-    return tasks.execute().then(() => {
+    return taskRunner.execute().then(() => {
       stopwatch.stop();
       console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
       this._doAfterTask(stopwatch, true);

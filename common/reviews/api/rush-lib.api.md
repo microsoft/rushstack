@@ -87,6 +87,7 @@ export const enum DependencyType {
 // @public
 export const enum EnvironmentVariableNames {
     RUSH_ABSOLUTE_SYMLINKS = "RUSH_ABSOLUTE_SYMLINKS",
+    RUSH_ALLOW_UNSUPPORTED_NODEJS = "RUSH_ALLOW_UNSUPPORTED_NODEJS",
     RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
     RUSH_TEMP_FOLDER = "RUSH_TEMP_FOLDER",
     RUSH_VARIANT = "RUSH_VARIANT"
@@ -108,6 +109,12 @@ export class EventHooks {
     constructor(eventHooksJson: IEventHooksJson);
     get(event: Event): string[];
     }
+
+// @public
+export interface ILaunchOptions {
+    alreadyReportedNodeTooNewError?: boolean;
+    isManaged: boolean;
+}
 
 // @beta
 export class IndividualVersionPolicy extends VersionPolicy {
@@ -221,8 +228,8 @@ export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
 
 // @public
 export class Rush {
-    static launch(launcherVersion: string, isManaged: boolean): void;
-    static launchRushX(launcherVersion: string, isManaged: boolean): void;
+    static launch(launcherVersion: string, arg: ILaunchOptions): void;
+    static launchRushX(launcherVersion: string, options: ILaunchOptions): void;
     static readonly version: string;
 }
 
@@ -278,6 +285,7 @@ export class RushConfiguration {
     readonly rushLinkJsonFilename: string;
     readonly shrinkwrapFilename: string;
     readonly shrinkwrapFilePhrase: string;
+    readonly suppressNodeLtsWarning: boolean;
     // @beta
     readonly telemetryEnabled: boolean;
     readonly tempShrinkwrapFilename: string;

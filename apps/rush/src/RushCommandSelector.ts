@@ -23,7 +23,7 @@ export class RushCommandSelector {
   }
 
   // tslint:disable-next-line:no-any
-  public static execute(launcherVersion: string, isManaged: boolean, selectedRushLib: any): void {
+  public static execute(launcherVersion: string, selectedRushLib: any, options: rushLib.ILaunchOptions): void {
     const Rush: typeof rushLib.Rush = selectedRushLib.Rush;
 
     if (!Rush) {
@@ -36,9 +36,21 @@ export class RushCommandSelector {
         RushCommandSelector._failWithError(`This repository is using Rush version ${Rush.version}`
           + ` which does not support the "rushx" command`);
       }
-      Rush.launchRushX(launcherVersion, isManaged);
+      Rush.launchRushX(
+        launcherVersion,
+        {
+          isManaged: options.isManaged,
+          alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
+        }
+      );
     } else {
-      Rush.launch(launcherVersion, isManaged);
+      Rush.launch(
+        launcherVersion,
+        {
+          isManaged: options.isManaged,
+          alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
+        }
+      );
     }
   }
 

@@ -43,7 +43,7 @@ export interface ICommandLineActionOptions {
  */
 export abstract class CommandLineAction extends CommandLineParameterProvider {
   // Example: "do-something"
-  private static _actionNameRegExp: RegExp = /^[a-z]+([-:][a-z]+)*$/;
+  private static _actionNameRegExp: RegExp = /^[a-z][a-z0-9]*([-:][a-z0-9]+)*$/;
 
   /** {@inheritDoc ICommandLineActionOptions.actionName} */
   public readonly actionName: string;

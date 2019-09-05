@@ -2,6 +2,18 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "4.2.7",
+      "tag": "@microsoft/ts-command-line_v4.2.7",
+      "date": "Mon, 12 Aug 2019 15:15:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "fix for #1443 allow rush command to use numbers"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.2.6",
       "tag": "@microsoft/ts-command-line_v4.2.6",
       "date": "Wed, 12 Jun 2019 19:12:33 GMT",

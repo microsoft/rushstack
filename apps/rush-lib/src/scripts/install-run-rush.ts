@@ -23,8 +23,15 @@ import {
 } from './install-run';
 
 const PACKAGE_NAME: string = '@microsoft/rush';
+const RUSH_PREVIEW_VERSION: string = 'RUSH_PREVIEW_VERSION';
 
-function getRushVersion(): string {
+function _getRushVersion(): string {
+  const rushPreviewVersion: string | undefined = process.env[RUSH_PREVIEW_VERSION];
+  if (rushPreviewVersion !== undefined) {
+    console.log(`Using Rush version from environment variable ${RUSH_PREVIEW_VERSION}=${rushPreviewVersion}`);
+    return rushPreviewVersion;
+  }
+
   const rushJsonFolder: string = findRushJsonFolder();
   const rushJsonPath: string = path.join(rushJsonFolder, RUSH_JSON_FILENAME);
   try {
@@ -42,29 +49,37 @@ function getRushVersion(): string {
   }
 }
 
-function run(): void {
+function _run(): void {
   const [
     nodePath, /* Ex: /bin/node */
     scriptPath, /* /repo/common/scripts/install-run-rush.js */
     ...packageBinArgs /* [build, --to, myproject] */
   ]: string[] = process.argv;
 
+  // Detect if this script was directly invoked, or if the install-run-rushx script was invokved to select the
+  // appropriate binary inside the rush package to run
+  const scriptName: string = path.basename(scriptPath);
+  const bin: string = scriptName.toLowerCase() === 'install-run-rushx.js' ? 'rushx' : 'rush';
   if (!nodePath || !scriptPath) {
     throw new Error('Unexpected exception: could not detect node path or script path');
   }
 
   if (process.argv.length < 3) {
-    console.log('Usage: install-run-rush.js <command> [args...]');
-    console.log('Example: install-run-rush.js build --to myproject');
+    console.log(`Usage: ${scriptName} <command> [args...]`);
+    if (scriptName === 'install-run-rush.js') {
+      console.log(`Example: ${scriptName} build --to myproject`);
+    } else {
+      console.log(`Example: ${scriptName} custom-command`);
+    }
     process.exit(1);
   }
 
   runWithErrorAndStatusCode(() => {
-    const version: string = getRushVersion();
+    const version: string = _getRushVersion();
     console.log(`The rush.json configuration requests Rush version ${version}`);
 
-    return installAndRun(PACKAGE_NAME, version, 'rush', packageBinArgs);
+    return installAndRun(PACKAGE_NAME, version, bin, packageBinArgs);
   });
 }
 
-run();
+_run();

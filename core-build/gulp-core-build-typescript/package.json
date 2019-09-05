@@ -1,12 +1,9 @@
 {
   "name": "@microsoft/gulp-core-build-typescript",
-  "version": "8.1.21",
+  "version": "8.1.31",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
-  "tsdoc": {
-    "tsdocFlavor": "AEDoc"
-  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -16,8 +13,8 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.9.26",
-    "@microsoft/node-core-library": "3.13.0",
+    "@microsoft/gulp-core-build": "3.11.2",
+    "@microsoft/node-core-library": "3.14.1",
     "@types/node": "8.5.8",
     "decomment": "~0.9.1",
     "glob": "~7.0.5",
@@ -25,13 +22,13 @@
     "resolve": "1.8.1"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "7.3.2",
-    "@microsoft/node-library-build": "6.0.71",
-    "@microsoft/rush-stack-compiler-3.1": "0.6.23",
-    "@microsoft/rush-stack-compiler-3.4": "0.1.11",
+    "@microsoft/api-extractor": "7.3.11",
+    "@microsoft/node-library-build": "6.1.2",
+    "@microsoft/rush-stack-compiler-3.1": "0.6.32",
+    "@microsoft/rush-stack-compiler-3.4": "0.1.15",
     "@types/glob": "5.0.30",
     "@types/resolve": "0.0.8",
-    "gulp": "~3.9.1",
+    "gulp": "~4.0.2",
     "tslint-microsoft-contrib": "~5.2.1",
     "typescript": "~3.2.4"
   }

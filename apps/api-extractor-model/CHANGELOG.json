@@ -2,6 +2,66 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.3.4",
+      "tag": "@microsoft/api-extractor-model_v7.3.4",
+      "date": "Wed, 04 Sep 2019 18:28:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.14.0` to `3.14.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.3",
+      "tag": "@microsoft/api-extractor-model_v7.3.3",
+      "date": "Wed, 04 Sep 2019 15:15:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update TSDoc dependency to 0.12.14"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.2",
+      "tag": "@microsoft/api-extractor-model_v7.3.2",
+      "date": "Thu, 08 Aug 2019 15:14:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.13.0` to `3.14.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.1",
+      "tag": "@microsoft/api-extractor-model_v7.3.1",
+      "date": "Thu, 08 Aug 2019 00:49:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "(Experimental) Add ApiExtractor.canonicalReference which is a beta implementation of the revised TSDoc declaration reference notation"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.0",
+      "tag": "@microsoft/api-extractor-model_v7.3.0",
+      "date": "Mon, 22 Jul 2019 19:13:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Rename `ApiItem.canonicalReference` to `.containerKey`; rename `ApiItemContainerMixin.tryGetMember()` to `.tryGetMemberByKey()`; rename `Api___.getCanonicalReference()` to `.getContainerKey()`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.2.0",
       "tag": "@microsoft/api-extractor-model_v7.2.0",
       "date": "Tue, 11 Jun 2019 00:48:06 GMT",

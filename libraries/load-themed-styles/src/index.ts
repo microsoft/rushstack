@@ -95,10 +95,6 @@ export const enum ClearStyleOptions {
   all = 3
 }
 
-// IE needs to inject styles using cssText. However, we need to evaluate this lazily, so this
-// value will initialize as undefined, and later will be set once on first loadStyles injection.
-let _injectStylesWithCssText: boolean;
-
 // Store the theming state in __themeState__ global scope for reuse in the case of duplicate
 // load-themed-styles hosted on the page.
 const _root: any = (typeof window === 'undefined') ? global : window; // tslint:disable-line:no-any
@@ -113,9 +109,6 @@ const _themeState: IThemeState = initializeThemeState();
  */
 // tslint:disable-next-line:max-line-length
 const _themeTokenRegex: RegExp = /[\'\"]\[theme:\s*(\w+)\s*(?:\,\s*default:\s*([\\"\']?[\.\,\(\)\#\-\s\w]*[\.\,\(\)\#\-\w][\"\']?))?\s*\][\'\"]/g;
-
-/** Maximum style text length, for supporting IE style restrictions. */
-const MAX_STYLE_CONTENT_SIZE: number = 10000;
 
 const now: () => number =
   () => (typeof performance !== 'undefined' && !!performance.now) ? performance.now() : Date.now();
@@ -170,9 +163,6 @@ function initializeThemeState(): IThemeState {
 export function loadStyles(styles: string | ThemableArray, loadAsync: boolean = false): void {
   measure(() => {
     const styleParts: ThemableArray = Array.isArray(styles) ? styles : splitStyles(styles);
-    if (_injectStylesWithCssText === undefined) {
-      _injectStylesWithCssText = shouldUseCssText();
-    }
     const {
       mode,
       buffer,
@@ -242,8 +232,6 @@ function applyThemableStyles(stylesArray: ThemableArray, styleRecord?: IStyleRec
   if (_themeState.loadStyles) {
     _themeState.loadStyles(resolveThemableArray(stylesArray).styleString, stylesArray);
   } else {
-    _injectStylesWithCssText ?
-      registerStylesIE(stylesArray, styleRecord) :
       registerStyles(stylesArray);
   }
 }
@@ -419,67 +407,4 @@ function registerStyles(styleArray: ThemableArray): void {
   } else {
     _themeState.registeredStyles.push(record);
   }
-}
-
-/**
- * Registers a set of style text, for IE 9 and below, which has a ~30 style element limit so we need
- * to register slightly differently.
- * @param {ThemableArray} styleArray Array of IThemingInstruction objects to register.
- * @param {IStyleRecord} styleRecord May specify a style Element to update.
- */
-function registerStylesIE(styleArray: ThemableArray, styleRecord?: IStyleRecord): void {
-  if (typeof document === 'undefined') {
-    return;
-  }
-  const head: HTMLHeadElement = document.getElementsByTagName('head')[0];
-  const registeredStyles: IStyleRecord[] = _themeState.registeredStyles;
-  let lastStyleElement: IExtendedHtmlStyleElement = _themeState.lastStyleElement;
-
-  const stylesheet: IStyleSheet | undefined = lastStyleElement ? lastStyleElement.styleSheet : undefined;
-  const lastStyleContent: string = stylesheet ? stylesheet.cssText : '';
-  let lastRegisteredStyle: IStyleRecord = registeredStyles[registeredStyles.length - 1];
-  const resolvedStyleText: string = resolveThemableArray(styleArray).styleString;
-
-  if (!lastStyleElement || (lastStyleContent.length + resolvedStyleText.length) > MAX_STYLE_CONTENT_SIZE) {
-    lastStyleElement = document.createElement('style') as IExtendedHtmlStyleElement;
-    lastStyleElement.type = 'text/css';
-
-    if (styleRecord) {
-      head.replaceChild(lastStyleElement, styleRecord.styleElement);
-      styleRecord.styleElement = lastStyleElement;
-    } else {
-      head.appendChild(lastStyleElement);
-    }
-
-    if (!styleRecord) {
-      lastRegisteredStyle = {
-        styleElement: lastStyleElement,
-        themableStyle: styleArray
-      };
-      registeredStyles.push(lastRegisteredStyle);
-    }
-  }
-
-  lastStyleElement.styleSheet.cssText += detokenize(resolvedStyleText);
-  Array.prototype.push.apply(lastRegisteredStyle.themableStyle, styleArray); // concat in-place
-
-  // Preserve the theme state.
-  _themeState.lastStyleElement = lastStyleElement;
-}
-
-/**
- * Checks to see if styleSheet exists as a property off of a style element.
- * This will determine if style registration should be done via cssText (<= IE9) or not
- */
-function shouldUseCssText(): boolean {
-  let useCSSText: boolean = false;
-
-  if (typeof document !== 'undefined') {
-    const emptyStyle: IExtendedHtmlStyleElement = document.createElement('style') as IExtendedHtmlStyleElement;
-
-    emptyStyle.type = 'text/css';
-    useCSSText = !!emptyStyle.styleSheet;
-  }
-
-  return useCSSText;
 }

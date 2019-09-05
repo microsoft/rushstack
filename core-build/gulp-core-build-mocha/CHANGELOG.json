@@ -2,6 +2,59 @@
   "name": "@microsoft/gulp-core-build-mocha",
   "entries": [
     {
+      "version": "3.6.3",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.6.3",
+      "date": "Wed, 04 Sep 2019 18:28:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.11.1` to `3.11.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.2",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.6.2",
+      "date": "Thu, 08 Aug 2019 15:14:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.11.0` to `3.11.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.1",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.6.1",
+      "date": "Mon, 05 Aug 2019 22:04:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.10.0` to `3.11.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.0",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.6.0",
+      "date": "Tue, 23 Jul 2019 19:14:38 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update gulp to 4.0.2"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.26` to `3.10.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.5.76",
       "tag": "@microsoft/gulp-core-build-mocha_v3.5.76",
       "date": "Wed, 03 Apr 2019 02:58:33 GMT",

@@ -3,7 +3,6 @@
 
 import * as child_process from 'child_process';
 import * as path from 'path';
-import * as process from 'process';
 import { JsonFile, Text, FileSystem } from '@microsoft/node-core-library';
 import { ITaskWriter } from '@microsoft/stream-collator';
 import { IPackageDeps } from '@microsoft/package-deps-hash';
@@ -27,9 +26,7 @@ export interface IProjectTaskOptions {
   rushProject: RushConfigurationProject;
   rushConfiguration: RushConfiguration;
   commandToRun: string;
-  customParameterValues: string[];
   isIncrementalBuildAllowed: boolean;
-  ignoreMissingScript: boolean;
   packageChangeAnalyzer: PackageChangeAnalyzer;
 }
 
@@ -48,40 +45,35 @@ export class ProjectTask implements ITaskDefinition {
   private _rushProject: RushConfigurationProject;
   private _rushConfiguration: RushConfiguration;
   private _commandToRun: string;
-  private _customParameterValues: string[];
-  private _ignoreMissingScript: boolean;
   private _packageChangeAnalyzer: PackageChangeAnalyzer;
 
   constructor(options: IProjectTaskOptions) {
     this._rushProject = options.rushProject;
     this._rushConfiguration = options.rushConfiguration;
     this._commandToRun = options.commandToRun;
-    this._customParameterValues = options.customParameterValues;
     this.isIncrementalBuildAllowed = options.isIncrementalBuildAllowed;
-    this._ignoreMissingScript = options.ignoreMissingScript;
     this._packageChangeAnalyzer = options.packageChangeAnalyzer;
-  }
+}
 
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
     try {
-      const taskCommand: string = this._getScriptToRun();
-      if (!taskCommand) {
+      if (!this._commandToRun) {
         this.hadEmptyScript = true;
       }
-      const deps: IPackageDependencies | undefined = this._getPackageDependencies(taskCommand, writer);
-      return this._executeTask(taskCommand, writer, deps);
+      const deps: IPackageDependencies | undefined = this._getPackageDependencies(writer);
+      return this._executeTask(writer, deps);
     } catch (error) {
       return Promise.reject(new TaskError('executing', error.message));
     }
   }
 
-  private _getPackageDependencies(taskCommand: string, writer: ITaskWriter): IPackageDependencies | undefined {
+  private _getPackageDependencies(writer: ITaskWriter): IPackageDependencies | undefined {
     let deps: IPackageDependencies | undefined = undefined;
     this._rushConfiguration = this._rushConfiguration;
     try {
       deps = {
         files: this._packageChangeAnalyzer.getPackageDepsHash(this._rushProject.packageName)!.files,
-        arguments: taskCommand
+        arguments: this._commandToRun
       };
     } catch (error) {
       writer.writeLine('Unable to calculate incremental build state. ' +
@@ -92,7 +84,6 @@ export class ProjectTask implements ITaskDefinition {
   }
 
   private _executeTask(
-    taskCommand: string,
     writer: ITaskWriter,
     currentPackageDeps: IPackageDependencies | undefined
   ): Promise<TaskStatus> {
@@ -137,7 +128,7 @@ export class ProjectTask implements ITaskDefinition {
         // If the deps file exists, remove it before starting a build.
         FileSystem.deleteFile(currentDepsPath);
 
-        if (!taskCommand) {
+        if (!this._commandToRun) {
           writer.writeLine(`The task command "${this._commandToRun}" was registered in the package.json but is blank,`
             + ` so no action will be taken.`);
 
@@ -153,13 +144,9 @@ export class ProjectTask implements ITaskDefinition {
 
         // Run the task
 
-        const normalizedTaskCommand: string = process.platform === 'win32'
-          ? convertSlashesForWindows(taskCommand)
-          : taskCommand;
-
-        writer.writeLine(normalizedTaskCommand);
+        writer.writeLine(this._commandToRun);
         const task: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(
-          normalizedTaskCommand,
+          this._commandToRun,
           {
             rushConfiguration: this._rushConfiguration,
             workingDirectory: projectFolder,
@@ -210,38 +197,6 @@ export class ProjectTask implements ITaskDefinition {
       this._writeLogsToDisk(writer);
       return Promise.reject(new TaskError('error', error.toString()));
     }
-  }
-
-  private _getScriptToRun(): string {
-    const script: string | undefined = this._getScriptCommand(this._commandToRun);
-
-    if (script === undefined && !this._ignoreMissingScript) {
-      // tslint:disable-next-line:max-line-length
-      throw new Error(`The project [${this._rushProject.packageName}] does not define a '${this._commandToRun}' command in the 'scripts' section of its package.json`);
-    }
-
-    if (!script) {
-      return '';
-    }
-
-    // TODO: Properly escape these strings
-    return `${script} ${this._customParameterValues.join(' ')}`;
-  }
-
-  private _getScriptCommand(script: string): string | undefined {
-    // tslint:disable-next-line:no-string-literal
-    if (!this._rushProject.packageJson.scripts) {
-      return undefined;
-    }
-
-    const rawCommand: string = this._rushProject.packageJson.scripts[script];
-
-    // tslint:disable-next-line:no-null-keyword
-    if (rawCommand === undefined || rawCommand === null) {
-      return undefined;
-    }
-
-    return rawCommand;
   }
 
   // @todo #179371: add log files to list of things that get gulp cleaned
