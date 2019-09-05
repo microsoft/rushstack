@@ -1,6 +1,20 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Wed, 20 Mar 2019 19:14:49 GMT and should not be manually modified.
+This log was last generated on Wed, 04 Sep 2019 18:28:06 GMT and should not be manually modified.
+
+## 3.14.1
+Wed, 04 Sep 2019 18:28:06 GMT
+
+### Patches
+
+- Add support for two more arguments in LegacyAdapters.convertCallbackToPromise.
+
+## 3.14.0
+Thu, 08 Aug 2019 15:14:17 GMT
+
+### Minor changes
+
+- Remove experimental IPackageJsonTsdocConfiguration API, since the "tsdocFlavor" field is no longer used by API Extractor
 
 ## 3.13.0
 Wed, 20 Mar 2019 19:14:49 GMT

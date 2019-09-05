@@ -1,6 +1,6 @@
 ### YamlMime:UniversalReference
 items:
-  - uid: api-documenter-test
+  - uid: api-documenter-test!
     summary: |-
       api-extractor-test-05
 
@@ -11,20 +11,20 @@ items:
       - typeScript
     type: package
     children:
-      - api-documenter-test.DocBaseClass
-      - api-documenter-test.DocClass1
-      - api-documenter-test.DocEnum
-      - api-documenter-test.Generic
-      - api-documenter-test.globalFunction
-      - api-documenter-test.IDocInterface1
-      - api-documenter-test.IDocInterface2
-      - api-documenter-test.IDocInterface3
-      - api-documenter-test.IDocInterface4
-      - api-documenter-test.IDocInterface5
-      - api-documenter-test.IDocInterface6
-      - api-documenter-test.OuterNamespace.InnerNamespace.nestedFunction
-      - api-documenter-test.SystemEvent
-  - uid: api-documenter-test.globalFunction
+      - 'api-documenter-test!DocBaseClass:class'
+      - 'api-documenter-test!DocClass1:class'
+      - 'api-documenter-test!DocEnum:enum'
+      - 'api-documenter-test!Generic:class'
+      - 'api-documenter-test!globalFunction:function(1)'
+      - 'api-documenter-test!IDocInterface1:interface'
+      - 'api-documenter-test!IDocInterface2:interface'
+      - 'api-documenter-test!IDocInterface3:interface'
+      - 'api-documenter-test!IDocInterface4:interface'
+      - 'api-documenter-test!IDocInterface5:interface'
+      - 'api-documenter-test!IDocInterface6:interface'
+      - 'api-documenter-test!OuterNamespace.InnerNamespace.nestedFunction:function(1)'
+      - 'api-documenter-test!SystemEvent:class'
+  - uid: 'api-documenter-test!globalFunction:function(1)'
     summary: An exported function
     name: globalFunction(x)
     fullName: globalFunction(x)
@@ -42,10 +42,10 @@ items:
           description: ''
           type:
             - number
-  - uid: api-documenter-test.OuterNamespace.InnerNamespace.nestedFunction
+  - uid: 'api-documenter-test!OuterNamespace.InnerNamespace.nestedFunction:function(1)'
     summary: A function inside a namespace
-    name: OuterNamespace.InnerNamespace.nestedFunction
-    fullName: OuterNamespace.InnerNamespace.nestedFunction
+    name: OuterNamespace.InnerNamespace.nestedFunction(x)
+    fullName: OuterNamespace.InnerNamespace.nestedFunction(x)
     langs:
       - typeScript
     type: function
@@ -61,25 +61,25 @@ items:
           type:
             - number
 references:
-  - uid: api-documenter-test.DocBaseClass
+  - uid: 'api-documenter-test!DocBaseClass:class'
     name: DocBaseClass
-  - uid: api-documenter-test.DocClass1
+  - uid: 'api-documenter-test!DocClass1:class'
     name: DocClass1
-  - uid: api-documenter-test.DocEnum
+  - uid: 'api-documenter-test!DocEnum:enum'
     name: DocEnum
-  - uid: api-documenter-test.Generic
+  - uid: 'api-documenter-test!Generic:class'
     name: Generic
-  - uid: api-documenter-test.IDocInterface1
+  - uid: 'api-documenter-test!IDocInterface1:interface'
     name: IDocInterface1
-  - uid: api-documenter-test.IDocInterface2
+  - uid: 'api-documenter-test!IDocInterface2:interface'
     name: IDocInterface2
-  - uid: api-documenter-test.IDocInterface3
+  - uid: 'api-documenter-test!IDocInterface3:interface'
     name: IDocInterface3
-  - uid: api-documenter-test.IDocInterface4
+  - uid: 'api-documenter-test!IDocInterface4:interface'
     name: IDocInterface4
-  - uid: api-documenter-test.IDocInterface5
+  - uid: 'api-documenter-test!IDocInterface5:interface'
     name: IDocInterface5
-  - uid: api-documenter-test.IDocInterface6
+  - uid: 'api-documenter-test!IDocInterface6:interface'
     name: IDocInterface6
-  - uid: api-documenter-test.SystemEvent
+  - uid: 'api-documenter-test!SystemEvent:class'
     name: SystemEvent

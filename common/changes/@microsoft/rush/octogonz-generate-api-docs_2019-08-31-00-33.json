@@ -1,11 +1,11 @@
 {
   "changes": [
     {
-      "comment": "Security updates.",
+      "comment": "",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
   ],
   "packageName": "@microsoft/rush",
-  "email": "halfnibble@users.noreply.github.com"
+  "email": "4673363+octogonz@users.noreply.github.com"
 }

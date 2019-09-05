@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItem, ApiItemKind, IApiItemJson } from '../items/ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import { JsonFile, IJsonFileSaveOptions, PackageJsonLookup, IPackageJson } from '@microsoft/node-core-library';
@@ -202,5 +203,10 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
     } as IApiPackageJson;
     this.serializeInto(jsonObject);
     JsonFile.save(jsonObject, apiJsonFilename, options);
+  }
+
+  /** @beta @override */
+  public buildCanonicalReference(): DeclarationReference {
+    return DeclarationReference.package(this.name);
   }
 }

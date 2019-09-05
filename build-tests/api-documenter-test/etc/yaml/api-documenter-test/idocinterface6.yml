@@ -1,16 +1,16 @@
 ### YamlMime:UniversalReference
 items:
-  - uid: api-documenter-test.IDocInterface6
+  - uid: 'api-documenter-test!IDocInterface6:interface'
     summary: Interface without inline tag to test custom TOC with injection
     name: IDocInterface6
     fullName: IDocInterface6
     langs:
       - typeScript
     type: interface
-    package: api-documenter-test
+    package: api-documenter-test!
     children:
-      - api-documenter-test.IDocInterface6.regularProperty
-  - uid: api-documenter-test.IDocInterface6.regularProperty
+      - 'api-documenter-test!IDocInterface6#regularProperty:member'
+  - uid: 'api-documenter-test!IDocInterface6#regularProperty:member'
     summary: Property of type number that does something
     name: regularProperty
     fullName: regularProperty

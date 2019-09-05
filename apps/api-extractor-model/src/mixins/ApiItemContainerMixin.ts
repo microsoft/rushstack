@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.s
 
-import { ApiItem, ApiItem_parent, IApiItemJson, IApiItemOptions, IApiItemConstructor } from '../items/ApiItem';
+import { ApiItem, ApiItem_onParentChanged, IApiItemJson, IApiItemOptions, IApiItemConstructor } from '../items/ApiItem';
 import { ApiNameMixin } from './ApiNameMixin';
 import { DeserializerContext } from '../model/DeserializerContext';
 
@@ -135,7 +135,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
         throw new Error('Another member has already been added with the same name and containerKey');
       }
 
-      const existingParent: ApiItem | undefined = member[ApiItem_parent];
+      const existingParent: ApiItem | undefined = member.parent;
       if (existingParent !== undefined) {
         throw new Error(`This item has already been added to another container: "${existingParent.displayName}"`);
       }
@@ -145,7 +145,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
       this[_membersSorted] = false;
       this[_membersByContainerKey].set(member.containerKey, member);
 
-      member[ApiItem_parent] = this;
+      member[ApiItem_onParentChanged](this);
     }
 
     public tryGetMemberByKey(containerKey: string): ApiItem | undefined {

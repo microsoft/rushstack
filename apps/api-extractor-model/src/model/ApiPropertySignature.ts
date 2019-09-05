@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeclarationReference, Meaning, Navigation, Component } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyItem';
 
@@ -51,5 +52,13 @@ export class ApiPropertySignature extends ApiPropertyItem {
   /** @override */
   public get containerKey(): string {
     return ApiPropertySignature.getContainerKey(this.name);
+  }
+
+  /** @beta @override */
+  public buildCanonicalReference(): DeclarationReference {
+    const nameComponent: Component = DeclarationReference.parseComponent(this.name);
+    return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
+      .addNavigationStep(Navigation.Members, nameComponent)
+      .withMeaning(Meaning.Member);
   }
 }

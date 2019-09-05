@@ -91,7 +91,7 @@ export class TaskCollection {
    * It also makes sure there are no cyclic dependencies in the tasks.
    */
   public getOrderedTasks(): ITask[] {
-    this._checkForCyclicDependencies(this._tasks.values(), []);
+    this._checkForCyclicDependencies(this._tasks.values(), [], new Set<string>());
 
     // Precalculate the number of dependent packages
     this._tasks.forEach((task: ITask) => {
@@ -115,16 +115,24 @@ export class TaskCollection {
   /**
    * Checks for projects that indirectly depend on themselves.
    */
-  private _checkForCyclicDependencies(tasks: Iterable<ITask>, dependencyChain: string[]): void {
+  private _checkForCyclicDependencies(
+    tasks: Iterable<ITask>,
+    dependencyChain: string[],
+    alreadyCheckedProjects: Set<string>
+  ): void {
     for (const task of tasks) {
       if (dependencyChain.indexOf(task.name) >= 0) {
         throw new Error('A cyclic dependency was encountered:\n'
           + '  ' + [...dependencyChain, task.name].reverse().join('\n  -> ')
           + '\nConsider using the cyclicDependencyProjects option for rush.json.');
       }
-      dependencyChain.push(task.name);
-      this._checkForCyclicDependencies(task.dependents, dependencyChain);
-      dependencyChain.pop();
+
+      if (!alreadyCheckedProjects.has(task.name)) {
+        alreadyCheckedProjects.add(task.name);
+        dependencyChain.push(task.name);
+        this._checkForCyclicDependencies(task.dependents, dependencyChain, alreadyCheckedProjects);
+        dependencyChain.pop();
+      }
     }
   }
 

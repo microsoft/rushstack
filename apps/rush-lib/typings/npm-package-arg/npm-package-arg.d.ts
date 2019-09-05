@@ -4,6 +4,8 @@
 
 declare module 'npm-package-arg' {
   namespace npmPackageArg {
+    type SpecType = 'git' | 'tag' | 'version' | 'range' | 'file' | 'directory' | 'remote' | 'alias';
+
     interface IResult {
       /**
        * Indicates the type of dependency reference.  For example 'version' indicates
@@ -16,8 +18,9 @@ declare module 'npm-package-arg' {
        * file - A local .tar.gz, .tar or .tgz file
        * directory - A local directory
        * remote - An HTTP url to a .tar.gz, .tar or .tgz file
+       * alias - A package alias such as "npm:other-package@^1.2.3"
        */
-      type: 'git' | 'tag' | 'version' | 'range' | 'file' | 'directory' | 'remote';
+      type: SpecType;
 
       /**
        * True for tag, version and range types.
@@ -74,6 +77,12 @@ declare module 'npm-package-arg' {
        * spec parameters will be combined, e.g. "example" and "1.2" will be combined as "example@1.2".
        */
       raw: string;
+
+      /**
+       * The parsed result for the alias target.
+       * For example `other-package@^1.2.3` from `npm:other-package@^1.2.3`
+       */
+      subSpec: IResult | undefined;
     }
 
     /**

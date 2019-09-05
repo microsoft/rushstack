@@ -210,8 +210,8 @@ export class VersionAction extends BaseRushAction {
 
     if (changeLogUpdated) {
       git.addChanges('.', this.rushConfiguration.changesFolder);
-      git.addChanges('**/CHANGELOG.json');
-      git.addChanges('**/CHANGELOG.md');
+      git.addChanges(':/**/CHANGELOG.json');
+      git.addChanges(':/**/CHANGELOG.md');
       git.commit('Deleting change files and updating change logs for package updates.');
     }
 
@@ -221,7 +221,7 @@ export class VersionAction extends BaseRushAction {
     });
 
     if (packageJsonUpdated) {
-      git.addChanges();
+      git.addChanges(':/*');
       git.commit(this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE);
     }
 

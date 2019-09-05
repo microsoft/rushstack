@@ -775,7 +775,7 @@ export class ApiModelGenerator {
   private _getOverloadIndex(astDeclaration: AstDeclaration): number {
     const allDeclarations: ReadonlyArray<AstDeclaration> = astDeclaration.astSymbol.astDeclarations;
     if (allDeclarations.length === 1) {
-      return 0; // trivial case
+      return 1; // trivial case
     }
 
     let overloadIndex: number | undefined = this._cachedOverloadIndexesByDeclaration.get(astDeclaration);

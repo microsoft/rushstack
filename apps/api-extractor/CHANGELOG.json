@@ -2,6 +2,94 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.3.11",
+      "tag": "@microsoft/api-extractor_v7.3.11",
+      "date": "Wed, 04 Sep 2019 18:28:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.3.3` to `7.3.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.14.0` to `3.14.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.10",
+      "tag": "@microsoft/api-extractor_v7.3.10",
+      "date": "Wed, 04 Sep 2019 15:15:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update TSDoc dependency to 0.12.14"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.3.2` to `7.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.9",
+      "tag": "@microsoft/api-extractor_v7.3.9",
+      "date": "Fri, 30 Aug 2019 00:14:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a problem where Unicode API names were not handled correctly"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.8",
+      "tag": "@microsoft/api-extractor_v7.3.8",
+      "date": "Mon, 12 Aug 2019 15:15:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `4.2.6` to `4.2.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.7",
+      "tag": "@microsoft/api-extractor_v7.3.7",
+      "date": "Thu, 08 Aug 2019 15:14:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.3.1` to `7.3.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.13.0` to `3.14.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.6",
+      "tag": "@microsoft/api-extractor_v7.3.6",
+      "date": "Thu, 08 Aug 2019 00:49:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where a function with only one declaration was assigned an overloadIndex of 0 instead of 1"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.3.0` to `7.3.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.3.5",
       "tag": "@microsoft/api-extractor_v7.3.5",
       "date": "Mon, 05 Aug 2019 22:04:32 GMT",

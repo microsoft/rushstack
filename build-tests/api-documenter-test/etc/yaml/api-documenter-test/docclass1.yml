@@ -1,6 +1,6 @@
 ### YamlMime:UniversalReference
 items:
-  - uid: api-documenter-test.DocClass1
+  - uid: 'api-documenter-test!DocClass1:class'
     summary: This is an example class.
     remarks: >-
       These are some remarks.
@@ -14,22 +14,22 @@ items:
       - typeScript
     type: class
     extends:
-      - api-documenter-test.DocBaseClass
+      - 'api-documenter-test!DocBaseClass:class'
     implements:
-      - api-documenter-test.IDocInterface1
-      - api-documenter-test.IDocInterface2
-    package: api-documenter-test
+      - 'api-documenter-test!IDocInterface1:interface'
+      - 'api-documenter-test!IDocInterface2:interface'
+    package: api-documenter-test!
     children:
-      - api-documenter-test.DocClass1.deprecatedExample
-      - api-documenter-test.DocClass1.exampleFunction
-      - api-documenter-test.DocClass1.exampleFunction_1
-      - api-documenter-test.DocClass1.interestingEdgeCases
-      - api-documenter-test.DocClass1.malformedEvent
-      - api-documenter-test.DocClass1.modifiedEvent
-      - api-documenter-test.DocClass1.regularProperty
-      - api-documenter-test.DocClass1.sumWithExample
-      - api-documenter-test.DocClass1.tableExample
-  - uid: api-documenter-test.DocClass1.deprecatedExample
+      - 'api-documenter-test!DocClass1#deprecatedExample:member(1)'
+      - 'api-documenter-test!DocClass1#exampleFunction:member(1)'
+      - 'api-documenter-test!DocClass1#exampleFunction:member(2)'
+      - 'api-documenter-test!DocClass1#interestingEdgeCases:member(1)'
+      - 'api-documenter-test!DocClass1#malformedEvent:member'
+      - 'api-documenter-test!DocClass1#modifiedEvent:member'
+      - 'api-documenter-test!DocClass1#regularProperty:member'
+      - 'api-documenter-test!DocClass1.sumWithExample:member(1)'
+      - 'api-documenter-test!DocClass1#tableExample:member(1)'
+  - uid: 'api-documenter-test!DocClass1#deprecatedExample:member(1)'
     deprecated:
       content: Use `otherThing()` instead.
     name: deprecatedExample()
@@ -43,7 +43,7 @@ items:
         type:
           - void
         description: ''
-  - uid: api-documenter-test.DocClass1.exampleFunction
+  - uid: 'api-documenter-test!DocClass1#exampleFunction:member(1)'
     summary: This is an overloaded function.
     name: 'exampleFunction(a, b)'
     fullName: 'exampleFunction(a, b)'
@@ -65,7 +65,7 @@ items:
           description: the second string
           type:
             - string
-  - uid: api-documenter-test.DocClass1.exampleFunction_1
+  - uid: 'api-documenter-test!DocClass1#exampleFunction:member(2)'
     summary: This is also an overloaded function.
     name: exampleFunction(x)
     fullName: exampleFunction(x)
@@ -83,7 +83,7 @@ items:
           description: the number
           type:
             - number
-  - uid: api-documenter-test.DocClass1.interestingEdgeCases
+  - uid: 'api-documenter-test!DocClass1#interestingEdgeCases:member(1)'
     summary: |-
       Example: "<!-- -->{ \\<!-- -->"maxItemsToShow<!-- -->\\<!-- -->": 123 }<!-- -->"
 
@@ -99,7 +99,7 @@ items:
         type:
           - void
         description: ''
-  - uid: api-documenter-test.DocClass1.malformedEvent
+  - uid: 'api-documenter-test!DocClass1#malformedEvent:member'
     summary: This event should have been marked as readonly.
     name: malformedEvent
     fullName: malformedEvent
@@ -110,8 +110,8 @@ items:
       content: 'malformedEvent: SystemEvent;'
       return:
         type:
-          - api-documenter-test.SystemEvent
-  - uid: api-documenter-test.DocClass1.modifiedEvent
+          - 'api-documenter-test!SystemEvent:class'
+  - uid: 'api-documenter-test!DocClass1#modifiedEvent:member'
     summary: This event is fired whenever the object is modified.
     name: modifiedEvent
     fullName: modifiedEvent
@@ -122,8 +122,8 @@ items:
       content: 'readonly modifiedEvent: SystemEvent;'
       return:
         type:
-          - api-documenter-test.SystemEvent
-  - uid: api-documenter-test.DocClass1.regularProperty
+          - 'api-documenter-test!SystemEvent:class'
+  - uid: 'api-documenter-test!DocClass1#regularProperty:member'
     summary: This is a regular property that happens to use the SystemEvent type.
     name: regularProperty
     fullName: regularProperty
@@ -134,8 +134,8 @@ items:
       content: 'regularProperty: SystemEvent;'
       return:
         type:
-          - api-documenter-test.SystemEvent
-  - uid: api-documenter-test.DocClass1.sumWithExample
+          - 'api-documenter-test!SystemEvent:class'
+  - uid: 'api-documenter-test!DocClass1.sumWithExample:member(1)'
     summary: Returns the sum of two numbers.
     remarks: This illustrates usage of the `@example` block tag.
     name: 'sumWithExample(x, y)'
@@ -158,7 +158,7 @@ items:
           description: the second number to add
           type:
             - number
-  - uid: api-documenter-test.DocClass1.tableExample
+  - uid: 'api-documenter-test!DocClass1#tableExample:member(1)'
     summary: 'An example with tables:'
     remarks: <table> <tr> <td>John</td> <td>Doe</td> </tr> </table>
     name: tableExample()

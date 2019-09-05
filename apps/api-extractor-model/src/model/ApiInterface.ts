@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeclarationReference, Meaning, Navigation, Component } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions, IApiItemContainerJson
   } from '../mixins/ApiItemContainerMixin';
@@ -102,5 +103,13 @@ export class ApiInterface extends ApiItemContainerMixin(ApiNameMixin(ApiTypePara
     super.serializeInto(jsonObject);
 
     jsonObject.extendsTokenRanges = this.extendsTypes.map(x => x.excerpt.tokenRange);
+  }
+
+  /** @beta @override */
+  public buildCanonicalReference(): DeclarationReference {
+    const nameComponent: Component = DeclarationReference.parseComponent(this.name);
+    return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
+      .addNavigationStep(Navigation.Exports, nameComponent)
+      .withMeaning(Meaning.Interface);
   }
 }
