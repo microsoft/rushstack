@@ -1,0 +1,14 @@
+{
+  "name": "generate-api-docs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Used to generate API docs for the rushstack.io website",
+  "license": "MIT",
+  "scripts": {
+    "build": ""
+  },
+  "dependencies": {
+    "doc-plugin-rush-stack": "1.0.0",
+    "@microsoft/api-documenter": "7.3.19"
+  }
+}

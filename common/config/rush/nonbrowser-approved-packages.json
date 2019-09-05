@@ -4,7 +4,7 @@
   "packages": [
     {
       "name": "@microsoft/api-documenter",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/api-extractor",
@@ -228,6 +228,10 @@
     },
     {
       "name": "del",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "doc-plugin-rush-stack",
       "allowedCategories": [ "libraries" ]
     },
     {
