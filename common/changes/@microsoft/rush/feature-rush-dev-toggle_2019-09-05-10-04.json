@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add toggle to disable RushVersionManager when working on rush itself",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "1504027+VincentSurelle@users.noreply.github.com"
+}
