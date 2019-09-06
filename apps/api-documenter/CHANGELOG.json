@@ -2,6 +2,23 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.4.0",
+      "tag": "@microsoft/api-documenter_v7.4.0",
+      "date": "Fri, 06 Sep 2019 15:14:57 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "For the markdown target, generate an \"index.md\" file with an inventory of documented packages"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "(Experimental) Expand the API for API Documenter plugins"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.3.20",
       "tag": "@microsoft/api-documenter_v7.3.20",
       "date": "Thu, 05 Sep 2019 15:15:09 GMT",
