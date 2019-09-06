@@ -27,7 +27,10 @@ items:
             }) => boolean;
       return:
         type:
-          - 'api-documenter-test!IDocInterface4#Context~0:complex'
+          - |-
+            ({ children }: {
+                    children: string;
+                }) => boolean
   - uid: 'api-documenter-test!IDocInterface4#generic:member'
     summary: make sure html entities are escaped in tables.
     name: generic
@@ -65,36 +68,6 @@ items:
         type:
           - string | number
 references:
-  - uid: 'api-documenter-test!IDocInterface4#Context~0:complex'
-    name: |-
-      ({ children }: {
-              children: string;
-          }) => boolean
-    fullName: |-
-      ({ children }: {
-              children: string;
-          }) => boolean
-    spec.typeScript:
-      - name: '({ '
-        fullName: '({ '
-      - uid: children
-        name: children
-        fullName: children
-      - name: |2-
-           }: {
-                  
-        fullName: |2-
-           }: {
-                  
-      - uid: children
-        name: children
-        fullName: children
-      - name: |-
-          : string;
-              }) => boolean
-        fullName: |-
-          : string;
-              }) => boolean
   - uid: 'api-documenter-test!IDocInterface4#generic~0:complex'
     name: Generic<number>
     fullName: Generic<number>
