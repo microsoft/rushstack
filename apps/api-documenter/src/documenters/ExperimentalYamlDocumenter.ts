@@ -5,9 +5,10 @@ import { PackageName } from '@microsoft/node-core-library';
 import { DocComment, DocInlineTag } from '@microsoft/tsdoc';
 import { ApiModel, ApiItem, ApiItemKind, ApiDocumentedItem } from '@microsoft/api-extractor-model';
 
-import { IConfigFile, IConfigTableOfContents } from './IConfigFile';
+import { IConfigTableOfContents } from './IConfigFile';
 import { IYamlTocItem, IYamlTocFile } from '../yaml/IYamlTocFile';
 import { YamlDocumenter } from './YamlDocumenter';
+import { DocumenterConfig } from './DocumenterConfig';
 
 /**
  * EXPERIMENTAL - This documenter is a prototype of a new config file driven mode of operation for
@@ -18,9 +19,9 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
   private _tocPointerMap: { [key: string]: IYamlTocItem };
   private _catchAllPointer: IYamlTocItem;
 
-  public constructor(apiModel: ApiModel, configFile: IConfigFile) {
+  public constructor(apiModel: ApiModel, documenterConfig: DocumenterConfig) {
     super(apiModel);
-    this._config = configFile.tableOfContents!;
+    this._config = documenterConfig.configFile.tableOfContents!;
 
     this._tocPointerMap = {};
 

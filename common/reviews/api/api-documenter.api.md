@@ -4,6 +4,9 @@
 
 ```ts
 
+import { ApiItem } from '@microsoft/api-extractor-model';
+import { ApiModel } from '@microsoft/api-extractor-model';
+
 // @public
 export interface IApiDocumenterPluginManifest {
     features: IFeatureDefinition[];
@@ -20,21 +23,62 @@ export interface IFeatureDefinition {
 }
 
 // @public
+export interface IMarkdownDocumenterFeatureOnBeforeWritePageArgs {
+    readonly apiItem: ApiItem;
+    readonly outputFilename: string;
+    pageContent: string;
+}
+
+// @public
+export interface IMarkdownDocumenterFeatureOnFinishedArgs {
+}
+
+// @public
+export class MarkdownDocumenterAccessor {
+    // Warning: (ae-forgotten-export) The symbol "IMarkdownDocumenterAccessorImplementation" needs to be exported by the entry point index.d.ts
+    // 
+    // @internal
+    constructor(implementation: IMarkdownDocumenterAccessorImplementation);
+    getLinkForApiItem(apiItem: ApiItem): string | undefined;
+    }
+
+// @public
 export class MarkdownDocumenterFeature extends PluginFeature {
+    context: MarkdownDocumenterFeatureContext;
+    // @virtual
+    onBeforeWritePage(eventArgs: IMarkdownDocumenterFeatureOnBeforeWritePageArgs): void;
+    // @virtual
+    onFinished(eventArgs: IMarkdownDocumenterFeatureOnFinishedArgs): void;
+}
+
+// @public
+export class MarkdownDocumenterFeatureContext {
+    // @internal
+    constructor(options: MarkdownDocumenterFeatureContext);
+    readonly apiModel: ApiModel;
+    readonly documenter: MarkdownDocumenterAccessor;
+    readonly outputFolder: string;
 }
 
 // @public
 export abstract class PluginFeature {
     // @internal
     constructor(initialization: PluginFeatureInitialization);
+    context: PluginFeatureContext;
     // @virtual
     onInitialized(): void;
+}
+
+// @public
+export class PluginFeatureContext {
 }
 
 // @public
 export class PluginFeatureInitialization {
     // @internal
     constructor();
+    // @internal (undocumented)
+    _context: PluginFeatureContext;
 }
 
 
