@@ -56,6 +56,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private _changedProjectsOnly: CommandLineFlagParameter;
   private _fromFlag: CommandLineStringListParameter;
   private _toFlag: CommandLineStringListParameter;
+  private _fromVersionPolicy: CommandLineStringListParameter;
   private _toVersionPolicy: CommandLineStringListParameter;
   private _verboseParameter: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
@@ -98,8 +99,8 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const taskSelector: TaskSelector = new TaskSelector({
       rushConfiguration: this.rushConfiguration,
-      toFlags: this._mergeToProjects(),
-      fromFlags: this._fromFlag.values,
+      toFlags: this._mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy),
+      fromFlags: this._mergeProjectsWithVersionPolicy(this._fromFlag, this._fromVersionPolicy),
       commandToRun: this._commandToRun,
       customParameterValues,
       isQuietMode: isQuietMode,
@@ -156,6 +157,12 @@ export class BulkScriptAction extends BaseScriptAction {
       argumentName: 'PROJECT1',
       description: 'Run command in the specified project and all of its dependencies'
     });
+    this._fromVersionPolicy =  this.defineStringListParameter({
+      parameterLongName: '--from-version-policy',
+      argumentName: 'VERSION_POLICY_NAME',
+      description: 'Run command in all projects with the specified version policy '
+        + 'and all projects that directly or indirectly depend on them'
+    });
     this._toVersionPolicy =  this.defineStringListParameter({
       parameterLongName: '--to-version-policy',
       argumentName: 'VERSION_POLICY_NAME',
@@ -184,11 +191,13 @@ export class BulkScriptAction extends BaseScriptAction {
     this.defineScriptParameters();
   }
 
-  private _mergeToProjects(): string[] {
-    const projects: string[] = [...this._toFlag.values];
-    if (this._toVersionPolicy.values && this._toVersionPolicy.values.length) {
+  private _mergeProjectsWithVersionPolicy(flags: CommandLineStringListParameter,
+    versionPolicies: CommandLineStringListParameter): string[] {
+
+    const projects: string[] = [...flags.values];
+    if (versionPolicies.values && versionPolicies.values.length) {
       this.rushConfiguration.projects.forEach(project => {
-        const matches: boolean = this._toVersionPolicy.values.some(policyName => {
+        const matches: boolean = versionPolicies.values.some(policyName => {
           return project.versionPolicyName === policyName;
         });
         if (matches) {

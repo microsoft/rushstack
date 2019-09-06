@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add --from-version-policy flag for \"rush rebuild\" to allow building from a version policy with direct and indirect dependant projects",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "domarmstrong@users.noreply.github.com"
+}
