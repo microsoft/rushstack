@@ -21,6 +21,7 @@ export class PluginFeatureInitialization {
 
 /**
  * Context object for {@link PluginFeature}.
+ * Exposes various services that can be used by a plugin.
  *
  * @public
  */
@@ -32,11 +33,14 @@ export class PluginFeatureContext {
  * @public
  */
 export abstract class PluginFeature {
+  /**
+   * Exposes various services that can be used by a plugin.
+   */
   public context: PluginFeatureContext;
 
   /**
    * The subclass should pass the `initialization` through to the base class.
-   * Do not put custom initialization code in the constructor.  Insteadm perform your initialization in the
+   * Do not put custom initialization code in the constructor.  Instead perform your initialization in the
    * `onInitialized()` event function.
    * @internal
    */

@@ -44,7 +44,6 @@ export class MarkdownDocumenterAccessor {
 
 // @public
 export class MarkdownDocumenterFeature extends PluginFeature {
-    // (undocumented)
     context: MarkdownDocumenterFeatureContext;
     // @virtual
     onBeforeWritePage(eventArgs: IMarkdownDocumenterFeatureOnBeforeWritePageArgs): void;
@@ -65,7 +64,6 @@ export class MarkdownDocumenterFeatureContext {
 export abstract class PluginFeature {
     // @internal
     constructor(initialization: PluginFeatureInitialization);
-    // (undocumented)
     context: PluginFeatureContext;
     // @virtual
     onInitialized(): void;

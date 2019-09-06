@@ -7,6 +7,7 @@ import { MarkdownDocumenterAccessor } from './MarkdownDocumenterAccessor';
 
 /**
  * Context object for {@link MarkdownDocumenterFeature}.
+ * Exposes various services that can be used by a plugin.
  *
  * @public
  */
@@ -45,7 +46,8 @@ export interface IMarkdownDocumenterFeatureOnBeforeWritePageArgs {
   readonly apiItem: ApiItem;
 
   /**
-   * The page content.  The onBeforeWritePage() handler can reassign this string to customize the page appearance.
+   * The page content.  The {@link MarkdownDocumenterFeature.onBeforeWritePage} handler can reassign this
+   * string to customize the page appearance.
    */
   pageContent: string;
 
@@ -69,6 +71,7 @@ export interface IMarkdownDocumenterFeatureOnFinishedArgs {
  * @public
  */
 export class MarkdownDocumenterFeature extends PluginFeature {
+  /** {@inheritdoc PluginFeature.context} */
   public context: MarkdownDocumenterFeatureContext;
 
   /**
