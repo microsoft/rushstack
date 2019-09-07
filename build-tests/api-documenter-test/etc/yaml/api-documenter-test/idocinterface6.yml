@@ -112,7 +112,6 @@ references:
         fullName: IDocInterface1
       - name: '[]'
         fullName: '[]'
-  - uid: T
   - uid: 'api-documenter-test!IDocInterface6#intersectionProperty~0:complex'
     name: IDocInterface1 & IDocInterface2
     fullName: IDocInterface1 & IDocInterface2

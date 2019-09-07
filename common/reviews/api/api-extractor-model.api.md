@@ -617,14 +617,10 @@ export class ExcerptToken {
     // (undocumented)
     readonly canonicalReference: DeclarationReference | undefined;
     // (undocumented)
-    static fromJSON(object: IExcerptToken): ExcerptToken;
-    // (undocumented)
     readonly kind: ExcerptTokenKind;
     // (undocumented)
     readonly text: string;
-    // (undocumented)
-    toJSON(): IExcerptToken;
-}
+    }
 
 // @public (undocumented)
 export const enum ExcerptTokenKind {

@@ -63,6 +63,7 @@ const yamlApiSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, '..',
 interface IYamlReferences {
   references: IYamlReference[];
   typeNameToUid: Map<string, string>;
+  uidTypeReferenceCounters: Map<string, number>;
 }
 
 /**
@@ -73,9 +74,7 @@ export class YamlDocumenter {
   private readonly _markdownEmitter: CustomMarkdownEmitter;
 
   private _apiItemsByCanonicalReference: Map<string, ApiItem>;
-  private _knownTypeParameters: Set<string> | undefined;
   private _yamlReferences: IYamlReferences | undefined;
-  private _uidTypeReferenceCounters: Map<string, number>;
 
   private _outputFolder: string;
 
@@ -83,7 +82,6 @@ export class YamlDocumenter {
     this._apiModel = apiModel;
     this._markdownEmitter = new CustomMarkdownEmitter(this._apiModel);
     this._apiItemsByCanonicalReference = new Map<string, ApiItem>();
-    this._uidTypeReferenceCounters = new Map<string, number>();
 
     this._initApiItems();
   }
@@ -118,94 +116,78 @@ export class YamlDocumenter {
   }
 
   private _visitApiItems(apiItem: ApiDocumentedItem, parentYamlFile: IYamlApiFile | undefined): boolean {
-    const savedKnownTypeParameters: Set<string> | undefined = this._knownTypeParameters;
-    try {
-      // Track type parameters declared by a declaration so that we do not resolve them
-      // when looking up types in _linkToUidIfPossible()
-      if (ApiTypeParameterListMixin.isBaseClassOf(apiItem)) {
-        this._knownTypeParameters = savedKnownTypeParameters
-          ? new Set(savedKnownTypeParameters)
-          : new Set();
-        for (const typeParameter of apiItem.typeParameters) {
-          this._knownTypeParameters.add(typeParameter.name);
-        }
-      }
-
-      const yamlItem: IYamlItem | undefined = this._generateYamlItem(apiItem);
-      if (!yamlItem) {
-        return false;
-      }
-
-      this.onCustomizeYamlItem(yamlItem);
-
-      if (this._shouldEmbed(apiItem.kind)) {
-        if (!parentYamlFile) {
-          throw new InternalError('Missing file context');
-        }
-        parentYamlFile.items.push(yamlItem);
-      } else {
-        const newYamlFile: IYamlApiFile = {
-          items: []
-        };
-        newYamlFile.items.push(yamlItem);
-
-        let children: ReadonlyArray<ApiItem>;
-        if (apiItem.kind === ApiItemKind.Package) {
-          // Skip over the entry point, since it's not part of the documentation hierarchy
-          children = apiItem.members[0].members;
-        } else {
-          children = apiItem.members;
-        }
-
-        const flattenedChildren: ApiItem[] = this._flattenNamespaces(children);
-
-        for (const child of flattenedChildren) {
-          if (child instanceof ApiDocumentedItem) {
-            if (this._visitApiItems(child, newYamlFile)) {
-              if (!yamlItem.children) {
-                yamlItem.children = [];
-              }
-              yamlItem.children.push(this._getUid(child));
-            }
-          }
-        }
-
-        if (this._yamlReferences) {
-          if (this._yamlReferences.references.length > 0) {
-            if (newYamlFile.references) {
-              newYamlFile.references = [...newYamlFile.references, ...this._yamlReferences.references];
-            } else {
-              newYamlFile.references = this._yamlReferences.references;
-            }
-          }
-          this._yamlReferences = undefined;
-        }
-
-        const yamlFilePath: string = this._getYamlFilePath(apiItem);
-
-        if (apiItem.kind === ApiItemKind.Package) {
-          console.log('Writing ' + yamlFilePath);
-        }
-
-        this._writeYamlFile(newYamlFile, yamlFilePath, 'UniversalReference', yamlApiSchema);
-
-        if (parentYamlFile) {
-          if (!parentYamlFile.references) {
-            parentYamlFile.references = [];
-          }
-
-          parentYamlFile.references.push({
-            uid: this._getUid(apiItem),
-            name: this._getYamlItemName(apiItem)
-          });
-
-        }
-      }
-
-      return true;
-    } finally {
-      this._knownTypeParameters = savedKnownTypeParameters;
+    const yamlItem: IYamlItem | undefined = this._generateYamlItem(apiItem);
+    if (!yamlItem) {
+      return false;
     }
+
+    this.onCustomizeYamlItem(yamlItem);
+
+    if (this._shouldEmbed(apiItem.kind)) {
+      if (!parentYamlFile) {
+        throw new InternalError('Missing file context');
+      }
+      parentYamlFile.items.push(yamlItem);
+    } else {
+      const newYamlFile: IYamlApiFile = {
+        items: []
+      };
+      newYamlFile.items.push(yamlItem);
+
+      let children: ReadonlyArray<ApiItem>;
+      if (apiItem.kind === ApiItemKind.Package) {
+        // Skip over the entry point, since it's not part of the documentation hierarchy
+        children = apiItem.members[0].members;
+      } else {
+        children = apiItem.members;
+      }
+
+      const flattenedChildren: ApiItem[] = this._flattenNamespaces(children);
+
+      for (const child of flattenedChildren) {
+        if (child instanceof ApiDocumentedItem) {
+          if (this._visitApiItems(child, newYamlFile)) {
+            if (!yamlItem.children) {
+              yamlItem.children = [];
+            }
+            yamlItem.children.push(this._getUid(child));
+          }
+        }
+      }
+
+      if (this._yamlReferences) {
+        if (this._yamlReferences.references.length > 0) {
+          if (newYamlFile.references) {
+            newYamlFile.references = [...newYamlFile.references, ...this._yamlReferences.references];
+          } else {
+            newYamlFile.references = this._yamlReferences.references;
+          }
+        }
+        this._yamlReferences = undefined;
+      }
+
+      const yamlFilePath: string = this._getYamlFilePath(apiItem);
+
+      if (apiItem.kind === ApiItemKind.Package) {
+        console.log('Writing ' + yamlFilePath);
+      }
+
+      this._writeYamlFile(newYamlFile, yamlFilePath, 'UniversalReference', yamlApiSchema);
+
+      if (parentYamlFile) {
+        if (!parentYamlFile.references) {
+          parentYamlFile.references = [];
+        }
+
+        parentYamlFile.references.push({
+          uid: this._getUid(apiItem),
+          name: this._getYamlItemName(apiItem)
+        });
+
+      }
+    }
+
+    return true;
   }
 
   // Since the YAML schema does not yet support nested namespaces, we simply omit them from
@@ -636,7 +618,8 @@ export class YamlDocumenter {
     if (!this._yamlReferences) {
       this._yamlReferences = {
         references: [],
-        typeNameToUid: new Map()
+        typeNameToUid: new Map(),
+        uidTypeReferenceCounters: new Map()
       };
     }
     return this._yamlReferences;
@@ -661,11 +644,6 @@ export class YamlDocumenter {
     }
 
     const typeName: string = typeExcerpt.text.trim();
-
-    // Record a reference to a type parameter as its name, so as not to resolve to a conflicting name
-    if (this._knownTypeParameters && this._knownTypeParameters.has(typeName)) {
-      return this._recordYamlReference(this._ensureYamlReferences(), typeName, typeName);
-    }
 
     // If there are no references to be used for a complex type, return the type name.
     if (!excerptTokens.some(tok => tok.kind === ExcerptTokenKind.Reference && !!tok.canonicalReference)) {
@@ -700,8 +678,8 @@ export class YamlDocumenter {
 
     // Keep track of the count for the base uid (without meaning or overload index) to ensure
     // that each complex type reference is unique.
-    const counter: number = this._uidTypeReferenceCounters.get(baseUid) || 0;
-    this._uidTypeReferenceCounters.set(baseUid, counter + 1);
+    const counter: number = yamlReferences.uidTypeReferenceCounters.get(baseUid) || 0;
+    yamlReferences.uidTypeReferenceCounters.set(baseUid, counter + 1);
 
     const uid: string = contextUid
       .addNavigationStep(Navigation.Locals, `${counter}`)
