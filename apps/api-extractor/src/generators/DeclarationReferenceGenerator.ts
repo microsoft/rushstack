@@ -72,14 +72,27 @@ export class DeclarationReferenceGenerator {
       return new DeclarationReference(this._sourceFileToModuleSource(sourceFile));
     }
 
+    // Do not generate a declaration reference for a type parameter.
     if (symbol.flags & ts.SymbolFlags.TypeParameter) {
-      return DeclarationReference.parse(DeclarationReference.escapeComponentString(symbol.name));
+      return undefined;
     }
 
     const parent: ts.Symbol | undefined = TypeScriptInternals.getSymbolParent(symbol);
-    const parentRef: DeclarationReference | undefined = parent
-      ? this._symbolToDeclarationReference(parent, ts.SymbolFlags.Namespace, /*includeModuleSymbols*/ true)
-      : new DeclarationReference(GlobalSource.instance);
+    let parentRef: DeclarationReference | undefined;
+    if (parent) {
+      parentRef = this._symbolToDeclarationReference(parent, ts.SymbolFlags.Namespace, /*includeModuleSymbols*/ true);
+    } else {
+      // this may be a local symbol in a module...
+      const sourceFile: ts.SourceFile | undefined =
+        symbol.declarations
+        && symbol.declarations[0]
+        && symbol.declarations[0].getSourceFile();
+      if (ts.isExternalModule(sourceFile)) {
+        parentRef = new DeclarationReference(this._sourceFileToModuleSource(sourceFile));
+      } else {
+        parentRef = new DeclarationReference(GlobalSource.instance);
+      }
+    }
 
     if (parentRef === undefined) {
       return undefined;
@@ -108,9 +121,13 @@ export class DeclarationReferenceGenerator {
       }
     }
 
-    const navigation: Navigation = isTypeMemberOrNonStaticClassMember(symbol)
-      ? Navigation.Members
-      : Navigation.Exports;
+    let navigation: Navigation | 'global' = getNavigationToSymbol(symbol);
+    if (navigation === 'global') {
+      if (parentRef.source !== GlobalSource.instance) {
+        parentRef = new DeclarationReference(GlobalSource.instance);
+      }
+      navigation = Navigation.Exports;
+    }
 
     return parentRef
       .addNavigationStep(navigation, localName)
@@ -144,17 +161,64 @@ function isExternalModuleSymbol(symbol: ts.Symbol): boolean {
     && ts.isSourceFile(symbol.valueDeclaration);
 }
 
-function isTypeMemberOrNonStaticClassMember(symbol: ts.Symbol): boolean {
-  if (symbol.valueDeclaration) {
-    if (ts.isClassLike(symbol.valueDeclaration.parent)) {
-      return ts.isClassElement(symbol.valueDeclaration)
-        && !(ts.getCombinedModifierFlags(symbol.valueDeclaration) & ts.ModifierFlags.Static);
+function isSameSymbol(left: ts.Symbol | undefined, right: ts.Symbol): boolean {
+  return left === right
+    || !!(left && left.valueDeclaration && right.valueDeclaration && left.valueDeclaration === right.valueDeclaration);
+}
+
+function getNavigationToSymbol(symbol: ts.Symbol): Navigation | 'global' {
+  const parent: ts.Symbol | undefined = TypeScriptInternals.getSymbolParent(symbol);
+  // First, try to determine navigation to symbol via its parent.
+  if (parent) {
+    if (parent.exports && isSameSymbol(parent.exports.get(symbol.escapedName), symbol)) {
+      return Navigation.Exports;
     }
-    if (ts.isInterfaceDeclaration(symbol.valueDeclaration.parent)) {
-      return ts.isTypeElement(symbol.valueDeclaration);
+    if (parent.members && isSameSymbol(parent.members.get(symbol.escapedName), symbol)) {
+      return Navigation.Members;
+    }
+    if (parent.globalExports && isSameSymbol(parent.globalExports.get(symbol.escapedName), symbol)) {
+      return 'global';
     }
   }
-  return false;
+
+  // Next, try determining navigation to symbol by its node
+  if (symbol.valueDeclaration) {
+    const declaration: ts.Declaration = ts.isBindingElement(symbol.valueDeclaration)
+      ? ts.walkUpBindingElementsAndPatterns(symbol.valueDeclaration)
+      : symbol.valueDeclaration;
+    if (ts.isClassElement(declaration) && ts.isClassLike(declaration.parent)) {
+      // class members are an "export" if they have the static modifier.
+      return ts.getCombinedModifierFlags(declaration) & ts.ModifierFlags.Static
+        ? Navigation.Exports
+        : Navigation.Members;
+    }
+    if (ts.isTypeElement(declaration) || ts.isObjectLiteralElement(declaration)) {
+      // type and object literal element members are just members
+      return Navigation.Members;
+    }
+    if (ts.isEnumMember(declaration)) {
+      // enum members are exports
+      return Navigation.Exports;
+    }
+    if (ts.isExportSpecifier(declaration)
+      || ts.isExportAssignment(declaration)
+      || ts.isExportSpecifier(declaration)
+      || ts.isExportDeclaration(declaration)
+      || ts.isNamedExports(declaration)
+    ) {
+      return Navigation.Exports;
+    }
+    // declarations are exports if they have an `export` modifier.
+    if (ts.getCombinedModifierFlags(declaration) & ts.ModifierFlags.Export) {
+      return Navigation.Exports;
+    }
+    if (ts.isSourceFile(declaration.parent) && !ts.isExternalModule(declaration.parent)) {
+      // declarations in a source file are global if the source file is not a module.
+      return 'global';
+    }
+  }
+  // all other declarations are locals
+  return Navigation.Locals;
 }
 
 function getMeaningOfSymbol(symbol: ts.Symbol, meaning: ts.SymbolFlags): Meaning | undefined {

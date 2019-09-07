@@ -52,20 +52,6 @@ export class ExcerptToken {
   public get canonicalReference(): DeclarationReference | undefined {
     return this._canonicalReference;
   }
-
-  public static fromJSON(object: IExcerptToken): ExcerptToken {
-    const canonicalReference: DeclarationReference | undefined = object.canonicalReference === undefined ? undefined :
-      DeclarationReference.parse(object.canonicalReference);
-    return new ExcerptToken(object.kind, object.text, canonicalReference);
-  }
-
-  public toJSON(): IExcerptToken {
-    const excerptToken: IExcerptToken = { kind: this.kind, text: this.text };
-    if (this._canonicalReference !== undefined) {
-      excerptToken.canonicalReference = this._canonicalReference.toString();
-    }
-    return excerptToken;
-  }
 }
 
 /**

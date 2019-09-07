@@ -1540,8 +1540,7 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "T",
-                  "canonicalReference": "T"
+                  "text": "T"
                 },
                 {
                   "kind": "Content",
@@ -1549,8 +1548,7 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "T",
-                  "canonicalReference": "T"
+                  "text": "T"
                 },
                 {
                   "kind": "Content",

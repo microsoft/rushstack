@@ -83,7 +83,7 @@
             {
               "kind": "Reference",
               "text": "ForgottenExport",
-              "canonicalReference": "!ForgottenExport:class"
+              "canonicalReference": "api-extractor-scenarios!~ForgottenExport:class"
             },
             {
               "kind": "Content",
