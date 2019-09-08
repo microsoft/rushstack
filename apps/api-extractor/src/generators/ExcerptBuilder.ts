@@ -117,11 +117,16 @@ export class ExcerptBuilder {
     }
 
     if (span.prefix) {
+      let canonicalReference: DeclarationReference | undefined = undefined;
+
       if (span.kind === ts.SyntaxKind.Identifier) {
         const name: ts.Identifier = span.node as ts.Identifier;
-        const canonicalReference: DeclarationReference | undefined = isDeclarationName(name)
-          ? undefined
-          : state.referenceGenerator.getDeclarationReferenceForIdentifier(name);
+        if (!isDeclarationName(name)) {
+          canonicalReference = state.referenceGenerator.getDeclarationReferenceForIdentifier(name);
+        }
+      }
+
+      if (canonicalReference) {
         ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Reference,
           span.prefix, state, canonicalReference);
       } else {

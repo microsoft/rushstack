@@ -22,15 +22,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "A"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class A "
             }
           ],
           "releaseTag": "Public",
@@ -45,15 +37,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "B"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class B "
             }
           ],
           "releaseTag": "Public",
@@ -68,15 +52,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "IFile"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class IFile "
             }
           ],
           "releaseTag": "Public",
@@ -88,12 +64,8 @@
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "containingFolder"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "containingFolder: "
                 },
                 {
                   "kind": "Reference",
@@ -108,8 +80,8 @@
               "releaseTag": "Public",
               "name": "containingFolder",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "isStatic": false
             }
@@ -123,15 +95,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "IFolder"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class IFolder "
             }
           ],
           "releaseTag": "Public",
@@ -143,12 +107,8 @@
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "containingFolder"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "containingFolder: "
                 },
                 {
                   "kind": "Reference",
@@ -167,8 +127,8 @@
               "releaseTag": "Public",
               "name": "containingFolder",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 4
+                "startIndex": 1,
+                "endIndex": 3
               },
               "isStatic": false
             },
@@ -178,12 +138,8 @@
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "files"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "files: "
                 },
                 {
                   "kind": "Reference",
@@ -202,8 +158,8 @@
               "releaseTag": "Public",
               "name": "files",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 4
+                "startIndex": 1,
+                "endIndex": 3
               },
               "isStatic": false
             }

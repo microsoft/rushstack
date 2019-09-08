@@ -22,15 +22,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "CyclicA"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class CyclicA "
             }
           ],
           "releaseTag": "Public",
@@ -42,12 +34,8 @@
               "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "methodA1"
-                },
-                {
                   "kind": "Content",
-                  "text": "(): "
+                  "text": "methodA1(): "
                 },
                 {
                   "kind": "Content",
@@ -60,8 +48,8 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
@@ -74,12 +62,8 @@
               "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "methodA3"
-                },
-                {
                   "kind": "Content",
-                  "text": "(): "
+                  "text": "methodA3(): "
                 },
                 {
                   "kind": "Content",
@@ -92,8 +76,8 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
@@ -110,15 +94,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "CyclicB"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class CyclicB "
             }
           ],
           "releaseTag": "Public",
@@ -130,12 +106,8 @@
               "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "methodB2"
-                },
-                {
                   "kind": "Content",
-                  "text": "(): "
+                  "text": "methodB2(): "
                 },
                 {
                   "kind": "Content",
@@ -148,8 +120,8 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
@@ -162,12 +134,8 @@
               "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "methodB4"
-                },
-                {
                   "kind": "Content",
-                  "text": "(): "
+                  "text": "methodB4(): "
                 },
                 {
                   "kind": "Content",
@@ -180,8 +148,8 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
@@ -198,15 +166,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "FailWithSelfReference"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class FailWithSelfReference "
             }
           ],
           "releaseTag": "Public",
@@ -218,12 +178,8 @@
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "method1"
-                },
-                {
                   "kind": "Content",
-                  "text": "(): "
+                  "text": "method1(): "
                 },
                 {
                   "kind": "Content",
@@ -236,8 +192,8 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
@@ -250,12 +206,8 @@
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "method2"
-                },
-                {
                   "kind": "Content",
-                  "text": "(): "
+                  "text": "method2(): "
                 },
                 {
                   "kind": "Content",
@@ -268,8 +220,8 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
               "overloadIndex": 1,

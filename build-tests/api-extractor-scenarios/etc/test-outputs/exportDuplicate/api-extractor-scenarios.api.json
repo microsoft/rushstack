@@ -22,15 +22,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "X"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class X "
             }
           ],
           "releaseTag": "Public",

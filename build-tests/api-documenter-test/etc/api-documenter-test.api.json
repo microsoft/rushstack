@@ -21,12 +21,8 @@
           "docComment": "/**\n * An exported variable declaration.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
-              "kind": "Reference",
-              "text": "constVariable"
-            },
-            {
               "kind": "Content",
-              "text": ": "
+              "text": "constVariable: "
             },
             {
               "kind": "Content",
@@ -36,8 +32,8 @@
           "releaseTag": "Public",
           "name": "constVariable",
           "variableTypeTokenRange": {
-            "startIndex": 2,
-            "endIndex": 3
+            "startIndex": 1,
+            "endIndex": 2
           }
         },
         {
@@ -47,15 +43,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "DocBaseClass"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class DocBaseClass "
             }
           ],
           "releaseTag": "Public",
@@ -82,15 +70,7 @@
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "constructor("
-                },
-                {
-                  "kind": "Reference",
-                  "text": "x"
-                },
-                {
-                  "kind": "Content",
-                  "text": ": "
+                  "text": "constructor(x: "
                 },
                 {
                   "kind": "Content",
@@ -107,8 +87,8 @@
                 {
                   "parameterName": "x",
                   "parameterTypeTokenRange": {
-                    "startIndex": 3,
-                    "endIndex": 4
+                    "startIndex": 1,
+                    "endIndex": 2
                   }
                 }
               ]
@@ -123,15 +103,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "DocClass1"
-            },
-            {
-              "kind": "Content",
-              "text": " extends "
+              "text": "export declare class DocClass1 extends "
             },
             {
               "kind": "Reference",
@@ -174,12 +146,8 @@
               "docComment": "/**\n * @deprecated\n *\n * Use `otherThing()` instead.\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "deprecatedExample"
-                },
-                {
                   "kind": "Content",
-                  "text": "(): "
+                  "text": "deprecatedExample(): "
                 },
                 {
                   "kind": "Content",
@@ -192,8 +160,8 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
@@ -206,20 +174,8 @@
               "docComment": "/**\n * This is an overloaded function.\n *\n * @param a - the first string\n *\n * @param b - the second string\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "exampleFunction"
-                },
-                {
                   "kind": "Content",
-                  "text": "("
-                },
-                {
-                  "kind": "Reference",
-                  "text": "a"
-                },
-                {
-                  "kind": "Content",
-                  "text": ": "
+                  "text": "exampleFunction(a: "
                 },
                 {
                   "kind": "Content",
@@ -227,15 +183,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "b"
-                },
-                {
-                  "kind": "Content",
-                  "text": ": "
+                  "text": ", b: "
                 },
                 {
                   "kind": "Content",
@@ -256,8 +204,8 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 10,
-                "endIndex": 11
+                "startIndex": 5,
+                "endIndex": 6
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
@@ -265,15 +213,15 @@
                 {
                   "parameterName": "a",
                   "parameterTypeTokenRange": {
-                    "startIndex": 4,
-                    "endIndex": 5
+                    "startIndex": 1,
+                    "endIndex": 2
                   }
                 },
                 {
                   "parameterName": "b",
                   "parameterTypeTokenRange": {
-                    "startIndex": 8,
-                    "endIndex": 9
+                    "startIndex": 3,
+                    "endIndex": 4
                   }
                 }
               ],
@@ -285,20 +233,8 @@
               "docComment": "/**\n * This is also an overloaded function.\n *\n * @param x - the number\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "exampleFunction"
-                },
-                {
                   "kind": "Content",
-                  "text": "("
-                },
-                {
-                  "kind": "Reference",
-                  "text": "x"
-                },
-                {
-                  "kind": "Content",
-                  "text": ": "
+                  "text": "exampleFunction(x: "
                 },
                 {
                   "kind": "Content",
@@ -319,8 +255,8 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 6,
-                "endIndex": 7
+                "startIndex": 3,
+                "endIndex": 4
               },
               "releaseTag": "Public",
               "overloadIndex": 2,
@@ -328,8 +264,8 @@
                 {
                   "parameterName": "x",
                   "parameterTypeTokenRange": {
-                    "startIndex": 4,
-                    "endIndex": 5
+                    "startIndex": 1,
+                    "endIndex": 2
                   }
                 }
               ],
@@ -341,12 +277,8 @@
               "docComment": "/**\n * Example: \"\\{ \\\\\"maxItemsToShow\\\\\": 123 \\}\"\n *\n * The regular expression used to validate the constraints is /^[a-zA-Z0-9\\\\-_]+$/\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "interestingEdgeCases"
-                },
-                {
                   "kind": "Content",
-                  "text": "(): "
+                  "text": "interestingEdgeCases(): "
                 },
                 {
                   "kind": "Content",
@@ -359,8 +291,8 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
@@ -373,12 +305,8 @@
               "docComment": "/**\n * This event should have been marked as readonly.\n *\n * @eventProperty\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "malformedEvent"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "malformedEvent: "
                 },
                 {
                   "kind": "Reference",
@@ -393,8 +321,8 @@
               "releaseTag": "Public",
               "name": "malformedEvent",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "isStatic": false
             },
@@ -405,15 +333,7 @@
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "readonly "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "modifiedEvent"
-                },
-                {
-                  "kind": "Content",
-                  "text": ": "
+                  "text": "readonly modifiedEvent: "
                 },
                 {
                   "kind": "Reference",
@@ -428,8 +348,8 @@
               "releaseTag": "Public",
               "name": "modifiedEvent",
               "propertyTypeTokenRange": {
-                "startIndex": 3,
-                "endIndex": 4
+                "startIndex": 1,
+                "endIndex": 2
               },
               "isStatic": false
             },
@@ -439,12 +359,8 @@
               "docComment": "/**\n * This is a regular property that happens to use the SystemEvent type.\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "regularProperty"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "regularProperty: "
                 },
                 {
                   "kind": "Reference",
@@ -459,8 +375,8 @@
               "releaseTag": "Public",
               "name": "regularProperty",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "isStatic": false
             },
@@ -471,23 +387,7 @@
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "static "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "sumWithExample"
-                },
-                {
-                  "kind": "Content",
-                  "text": "("
-                },
-                {
-                  "kind": "Reference",
-                  "text": "x"
-                },
-                {
-                  "kind": "Content",
-                  "text": ": "
+                  "text": "static sumWithExample(x: "
                 },
                 {
                   "kind": "Content",
@@ -495,15 +395,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": ", "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "y"
-                },
-                {
-                  "kind": "Content",
-                  "text": ": "
+                  "text": ", y: "
                 },
                 {
                   "kind": "Content",
@@ -524,8 +416,8 @@
               ],
               "isStatic": true,
               "returnTypeTokenRange": {
-                "startIndex": 11,
-                "endIndex": 12
+                "startIndex": 5,
+                "endIndex": 6
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
@@ -533,15 +425,15 @@
                 {
                   "parameterName": "x",
                   "parameterTypeTokenRange": {
-                    "startIndex": 5,
-                    "endIndex": 6
+                    "startIndex": 1,
+                    "endIndex": 2
                   }
                 },
                 {
                   "parameterName": "y",
                   "parameterTypeTokenRange": {
-                    "startIndex": 9,
-                    "endIndex": 10
+                    "startIndex": 3,
+                    "endIndex": 4
                   }
                 }
               ],
@@ -553,12 +445,8 @@
               "docComment": "/**\n * An example with tables:\n *\n * @remarks\n *\n * <table> <tr> <td>John</td> <td>Doe</td> </tr> </table>\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "tableExample"
-                },
-                {
                   "kind": "Content",
-                  "text": "(): "
+                  "text": "tableExample(): "
                 },
                 {
                   "kind": "Content",
@@ -571,8 +459,8 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
@@ -581,17 +469,17 @@
             }
           ],
           "extendsTokenRange": {
-            "startIndex": 3,
-            "endIndex": 5
+            "startIndex": 1,
+            "endIndex": 3
           },
           "implementsTokenRanges": [
             {
-              "startIndex": 6,
-              "endIndex": 7
+              "startIndex": 4,
+              "endIndex": 5
             },
             {
-              "startIndex": 8,
-              "endIndex": 10
+              "startIndex": 6,
+              "endIndex": 8
             }
           ]
         },
@@ -602,15 +490,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare enum "
-            },
-            {
-              "kind": "Reference",
-              "text": "DocEnum"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare enum DocEnum "
             }
           ],
           "releaseTag": "Public",
@@ -622,12 +502,8 @@
               "docComment": "/**\n * These are some docs for One\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "One"
-                },
-                {
                   "kind": "Content",
-                  "text": " = "
+                  "text": "One = "
                 },
                 {
                   "kind": "Content",
@@ -637,8 +513,8 @@
               "releaseTag": "Public",
               "name": "One",
               "initializerTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             },
             {
@@ -647,12 +523,8 @@
               "docComment": "/**\n * These are some docs for Two\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "Two"
-                },
-                {
                   "kind": "Content",
-                  "text": " = "
+                  "text": "Two = "
                 },
                 {
                   "kind": "Content",
@@ -662,8 +534,8 @@
               "releaseTag": "Public",
               "name": "Two",
               "initializerTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             },
             {
@@ -672,12 +544,8 @@
               "docComment": "/**\n * These are some docs for Zero\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "Zero"
-                },
-                {
                   "kind": "Content",
-                  "text": " = "
+                  "text": "Zero = "
                 },
                 {
                   "kind": "Content",
@@ -687,8 +555,8 @@
               "releaseTag": "Public",
               "name": "Zero",
               "initializerTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             }
           ]
@@ -700,15 +568,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare namespace "
-            },
-            {
-              "kind": "Reference",
-              "text": "EcmaSmbols"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare namespace EcmaSmbols "
             }
           ],
           "releaseTag": "Public",
@@ -720,12 +580,8 @@
               "docComment": "/**\n * An ECMAScript symbol\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "example"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "example: "
                 },
                 {
                   "kind": "Content",
@@ -735,8 +591,8 @@
               "releaseTag": "Public",
               "name": "example",
               "variableTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             }
           ]
@@ -748,15 +604,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare type "
-            },
-            {
-              "kind": "Reference",
-              "text": "ExampleTypeAlias"
-            },
-            {
-              "kind": "Content",
-              "text": " = "
+              "text": "export declare type ExampleTypeAlias = "
             },
             {
               "kind": "Reference",
@@ -775,8 +623,8 @@
           "releaseTag": "Public",
           "name": "ExampleTypeAlias",
           "typeTokenRange": {
-            "startIndex": 3,
-            "endIndex": 5
+            "startIndex": 1,
+            "endIndex": 3
           }
         },
         {
@@ -786,23 +634,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "Generic"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "T"
-            },
-            {
-              "kind": "Content",
-              "text": "> "
+              "text": "export declare class Generic<T> "
             }
           ],
           "releaseTag": "Public",
@@ -830,23 +662,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function "
-            },
-            {
-              "kind": "Reference",
-              "text": "globalFunction"
-            },
-            {
-              "kind": "Content",
-              "text": "("
-            },
-            {
-              "kind": "Reference",
-              "text": "x"
-            },
-            {
-              "kind": "Content",
-              "text": ": "
+              "text": "export declare function globalFunction(x: "
             },
             {
               "kind": "Content",
@@ -866,8 +682,8 @@
             }
           ],
           "returnTypeTokenRange": {
-            "startIndex": 7,
-            "endIndex": 8
+            "startIndex": 3,
+            "endIndex": 4
           },
           "releaseTag": "Public",
           "overloadIndex": 1,
@@ -875,8 +691,8 @@
             {
               "parameterName": "x",
               "parameterTypeTokenRange": {
-                "startIndex": 5,
-                "endIndex": 6
+                "startIndex": 1,
+                "endIndex": 2
               }
             }
           ],
@@ -889,15 +705,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export interface "
-            },
-            {
-              "kind": "Reference",
-              "text": "IDocInterface1"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export interface IDocInterface1 "
             }
           ],
           "releaseTag": "Public",
@@ -909,12 +717,8 @@
               "docComment": "/**\n * Does something\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "regularProperty"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "regularProperty: "
                 },
                 {
                   "kind": "Reference",
@@ -929,8 +733,8 @@
               "releaseTag": "Public",
               "name": "regularProperty",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             }
           ],
@@ -943,15 +747,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export interface "
-            },
-            {
-              "kind": "Reference",
-              "text": "IDocInterface2"
-            },
-            {
-              "kind": "Content",
-              "text": " extends "
+              "text": "export interface IDocInterface2 extends "
             },
             {
               "kind": "Reference",
@@ -972,12 +768,8 @@
               "docComment": "/**\n * @deprecated\n *\n * Use `otherThing()` instead.\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "deprecatedExample"
-                },
-                {
                   "kind": "Content",
-                  "text": "(): "
+                  "text": "deprecatedExample(): "
                 },
                 {
                   "kind": "Content",
@@ -989,8 +781,8 @@
                 }
               ],
               "returnTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
@@ -1000,8 +792,8 @@
           ],
           "extendsTokenRanges": [
             {
-              "startIndex": 3,
-              "endIndex": 5
+              "startIndex": 1,
+              "endIndex": 3
             }
           ]
         },
@@ -1012,15 +804,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export interface "
-            },
-            {
-              "kind": "Reference",
-              "text": "IDocInterface3"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export interface IDocInterface3 "
             }
           ],
           "releaseTag": "Public",
@@ -1092,15 +876,7 @@
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "("
-                },
-                {
-                  "kind": "Reference",
-                  "text": "x"
-                },
-                {
-                  "kind": "Content",
-                  "text": ": "
+                  "text": "(x: "
                 },
                 {
                   "kind": "Content",
@@ -1120,8 +896,8 @@
                 }
               ],
               "returnTypeTokenRange": {
-                "startIndex": 5,
-                "endIndex": 6
+                "startIndex": 3,
+                "endIndex": 4
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
@@ -1129,8 +905,8 @@
                 {
                   "parameterName": "x",
                   "parameterTypeTokenRange": {
-                    "startIndex": 3,
-                    "endIndex": 4
+                    "startIndex": 1,
+                    "endIndex": 2
                   }
                 }
               ]
@@ -1169,15 +945,7 @@
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "["
-                },
-                {
-                  "kind": "Reference",
-                  "text": "x"
-                },
-                {
-                  "kind": "Content",
-                  "text": ": "
+                  "text": "[x: "
                 },
                 {
                   "kind": "Content",
@@ -1197,8 +965,8 @@
                 }
               ],
               "returnTypeTokenRange": {
-                "startIndex": 5,
-                "endIndex": 6
+                "startIndex": 3,
+                "endIndex": 4
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
@@ -1206,8 +974,8 @@
                 {
                   "parameterName": "x",
                   "parameterTypeTokenRange": {
-                    "startIndex": 3,
-                    "endIndex": 4
+                    "startIndex": 1,
+                    "endIndex": 2
                   }
                 }
               ]
@@ -1247,15 +1015,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export interface "
-            },
-            {
-              "kind": "Reference",
-              "text": "IDocInterface4"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export interface IDocInterface4 "
             }
           ],
           "releaseTag": "Public",
@@ -1267,32 +1027,12 @@
               "docComment": "/**\n * Test newline rendering when code blocks are used in tables\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "Context"
+                  "kind": "Content",
+                  "text": "Context: "
                 },
                 {
                   "kind": "Content",
-                  "text": ": "
-                },
-                {
-                  "kind": "Content",
-                  "text": "({ "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "children"
-                },
-                {
-                  "kind": "Content",
-                  "text": " }: {\n        "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "children"
-                },
-                {
-                  "kind": "Content",
-                  "text": ": string;\n    }) => boolean"
+                  "text": "({ children }: {\n        children: string;\n    }) => boolean"
                 },
                 {
                   "kind": "Content",
@@ -1302,8 +1042,8 @@
               "releaseTag": "Public",
               "name": "Context",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 7
+                "startIndex": 1,
+                "endIndex": 2
               }
             },
             {
@@ -1312,12 +1052,8 @@
               "docComment": "/**\n * make sure html entities are escaped in tables.\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "generic"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "generic: "
                 },
                 {
                   "kind": "Reference",
@@ -1336,8 +1072,8 @@
               "releaseTag": "Public",
               "name": "generic",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 4
+                "startIndex": 1,
+                "endIndex": 3
               }
             },
             {
@@ -1346,12 +1082,8 @@
               "docComment": "/**\n * a union type with a function\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "numberOrFunction"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "numberOrFunction: "
                 },
                 {
                   "kind": "Content",
@@ -1365,8 +1097,8 @@
               "releaseTag": "Public",
               "name": "numberOrFunction",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             },
             {
@@ -1375,12 +1107,8 @@
               "docComment": "/**\n * a union type\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "stringOrNumber"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "stringOrNumber: "
                 },
                 {
                   "kind": "Content",
@@ -1394,8 +1122,8 @@
               "releaseTag": "Public",
               "name": "stringOrNumber",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             }
           ],
@@ -1408,15 +1136,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export interface "
-            },
-            {
-              "kind": "Reference",
-              "text": "IDocInterface5"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export interface IDocInterface5 "
             }
           ],
           "releaseTag": "Public",
@@ -1428,12 +1148,8 @@
               "docComment": "/**\n * Property of type string that does something\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "regularProperty"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "regularProperty: "
                 },
                 {
                   "kind": "Content",
@@ -1447,8 +1163,8 @@
               "releaseTag": "Public",
               "name": "regularProperty",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             }
           ],
@@ -1461,15 +1177,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export interface "
-            },
-            {
-              "kind": "Reference",
-              "text": "IDocInterface6"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export interface IDocInterface6 "
             }
           ],
           "releaseTag": "Public",
@@ -1481,12 +1189,8 @@
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "arrayProperty"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "arrayProperty: "
                 },
                 {
                   "kind": "Reference",
@@ -1505,8 +1209,8 @@
               "releaseTag": "Public",
               "name": "arrayProperty",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 4
+                "startIndex": 1,
+                "endIndex": 3
               }
             },
             {
@@ -1515,31 +1219,11 @@
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "genericReferenceMethod"
+                  "kind": "Content",
+                  "text": "genericReferenceMethod<T>(x: "
                 },
                 {
                   "kind": "Content",
-                  "text": "<"
-                },
-                {
-                  "kind": "Reference",
-                  "text": "T"
-                },
-                {
-                  "kind": "Content",
-                  "text": ">("
-                },
-                {
-                  "kind": "Reference",
-                  "text": "x"
-                },
-                {
-                  "kind": "Content",
-                  "text": ": "
-                },
-                {
-                  "kind": "Reference",
                   "text": "T"
                 },
                 {
@@ -1547,7 +1231,7 @@
                   "text": "): "
                 },
                 {
-                  "kind": "Reference",
+                  "kind": "Content",
                   "text": "T"
                 },
                 {
@@ -1556,8 +1240,8 @@
                 }
               ],
               "returnTypeTokenRange": {
-                "startIndex": 8,
-                "endIndex": 9
+                "startIndex": 3,
+                "endIndex": 4
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
@@ -1565,8 +1249,8 @@
                 {
                   "parameterName": "x",
                   "parameterTypeTokenRange": {
-                    "startIndex": 6,
-                    "endIndex": 7
+                    "startIndex": 1,
+                    "endIndex": 2
                   }
                 }
               ],
@@ -1591,12 +1275,8 @@
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "intersectionProperty"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "intersectionProperty: "
                 },
                 {
                   "kind": "Reference",
@@ -1620,8 +1300,8 @@
               "releaseTag": "Public",
               "name": "intersectionProperty",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 5
+                "startIndex": 1,
+                "endIndex": 4
               }
             },
             {
@@ -1630,12 +1310,8 @@
               "docComment": "/**\n * Property of type number that does something\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "regularProperty"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "regularProperty: "
                 },
                 {
                   "kind": "Content",
@@ -1649,8 +1325,8 @@
               "releaseTag": "Public",
               "name": "regularProperty",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             },
             {
@@ -1659,12 +1335,8 @@
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "tupleProperty"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "tupleProperty: "
                 },
                 {
                   "kind": "Content",
@@ -1696,8 +1368,8 @@
               "releaseTag": "Public",
               "name": "tupleProperty",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 7
+                "startIndex": 1,
+                "endIndex": 6
               }
             },
             {
@@ -1706,12 +1378,8 @@
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "typeReferenceProperty"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "typeReferenceProperty: "
                 },
                 {
                   "kind": "Reference",
@@ -1739,8 +1407,8 @@
               "releaseTag": "Public",
               "name": "typeReferenceProperty",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 6
+                "startIndex": 1,
+                "endIndex": 5
               }
             },
             {
@@ -1749,12 +1417,8 @@
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "unionProperty"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "unionProperty: "
                 },
                 {
                   "kind": "Reference",
@@ -1778,8 +1442,8 @@
               "releaseTag": "Public",
               "name": "unionProperty",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 5
+                "startIndex": 1,
+                "endIndex": 4
               }
             }
           ],
@@ -1792,15 +1456,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare namespace "
-            },
-            {
-              "kind": "Reference",
-              "text": "OuterNamespace"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare namespace OuterNamespace "
             }
           ],
           "releaseTag": "Public",
@@ -1813,15 +1469,7 @@
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "namespace "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "InnerNamespace"
-                },
-                {
-                  "kind": "Content",
-                  "text": " "
+                  "text": "namespace InnerNamespace "
                 }
               ],
               "releaseTag": "Public",
@@ -1834,23 +1482,7 @@
                   "excerptTokens": [
                     {
                       "kind": "Content",
-                      "text": "function "
-                    },
-                    {
-                      "kind": "Reference",
-                      "text": "nestedFunction"
-                    },
-                    {
-                      "kind": "Content",
-                      "text": "("
-                    },
-                    {
-                      "kind": "Reference",
-                      "text": "x"
-                    },
-                    {
-                      "kind": "Content",
-                      "text": ": "
+                      "text": "function nestedFunction(x: "
                     },
                     {
                       "kind": "Content",
@@ -1870,8 +1502,8 @@
                     }
                   ],
                   "returnTypeTokenRange": {
-                    "startIndex": 7,
-                    "endIndex": 8
+                    "startIndex": 3,
+                    "endIndex": 4
                   },
                   "releaseTag": "Public",
                   "overloadIndex": 1,
@@ -1879,8 +1511,8 @@
                     {
                       "parameterName": "x",
                       "parameterTypeTokenRange": {
-                        "startIndex": 5,
-                        "endIndex": 6
+                        "startIndex": 1,
+                        "endIndex": 2
                       }
                     }
                   ],
@@ -1894,12 +1526,8 @@
               "docComment": "/**\n * A variable exported from within a namespace.\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "nestedVariable"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "nestedVariable: "
                 },
                 {
                   "kind": "Content",
@@ -1909,8 +1537,8 @@
               "releaseTag": "Public",
               "name": "nestedVariable",
               "variableTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             }
           ]
@@ -1922,15 +1550,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "SystemEvent"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class SystemEvent "
             }
           ],
           "releaseTag": "Public",
@@ -1942,20 +1562,8 @@
               "docComment": "/**\n * Adds an handler for the event.\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "addHandler"
-                },
-                {
                   "kind": "Content",
-                  "text": "("
-                },
-                {
-                  "kind": "Reference",
-                  "text": "handler"
-                },
-                {
-                  "kind": "Content",
-                  "text": ": "
+                  "text": "addHandler(handler: "
                 },
                 {
                   "kind": "Content",
@@ -1976,8 +1584,8 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 6,
-                "endIndex": 7
+                "startIndex": 3,
+                "endIndex": 4
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
@@ -1985,8 +1593,8 @@
                 {
                   "parameterName": "handler",
                   "parameterTypeTokenRange": {
-                    "startIndex": 4,
-                    "endIndex": 5
+                    "startIndex": 1,
+                    "endIndex": 2
                   }
                 }
               ],

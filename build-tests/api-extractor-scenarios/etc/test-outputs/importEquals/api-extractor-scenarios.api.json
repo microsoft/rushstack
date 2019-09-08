@@ -22,23 +22,15 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function "
-            },
-            {
-              "kind": "Reference",
-              "text": "useColors"
+              "text": "export declare function useColors(): "
             },
             {
               "kind": "Content",
-              "text": "(): "
-            },
-            {
-              "kind": "Content",
-              "text": "typeof "
+              "text": "typeof colors."
             },
             {
               "kind": "Reference",
-              "text": "colors.zebra",
+              "text": "zebra",
               "canonicalReference": "colors!zebra:var"
             },
             {
@@ -47,8 +39,8 @@
             }
           ],
           "returnTypeTokenRange": {
-            "startIndex": 3,
-            "endIndex": 5
+            "startIndex": 1,
+            "endIndex": 3
           },
           "releaseTag": "Public",
           "overloadIndex": 1,
