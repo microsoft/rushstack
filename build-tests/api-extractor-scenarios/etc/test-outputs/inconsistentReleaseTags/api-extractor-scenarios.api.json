@@ -22,15 +22,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export interface "
-            },
-            {
-              "kind": "Reference",
-              "text": "IBeta"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export interface IBeta "
             }
           ],
           "releaseTag": "Beta",
@@ -42,12 +34,8 @@
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "x"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "x: "
                 },
                 {
                   "kind": "Content",
@@ -61,8 +49,8 @@
               "releaseTag": "Beta",
               "name": "x",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             }
           ],
@@ -75,15 +63,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function "
-            },
-            {
-              "kind": "Reference",
-              "text": "publicFunctionReturnsBeta"
-            },
-            {
-              "kind": "Content",
-              "text": "(): "
+              "text": "export declare function publicFunctionReturnsBeta(): "
             },
             {
               "kind": "Reference",
@@ -96,8 +76,8 @@
             }
           ],
           "returnTypeTokenRange": {
-            "startIndex": 3,
-            "endIndex": 4
+            "startIndex": 1,
+            "endIndex": 2
           },
           "releaseTag": "Public",
           "overloadIndex": 1,

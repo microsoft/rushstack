@@ -22,15 +22,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "A"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class A "
             }
           ],
           "releaseTag": "Public",
@@ -45,15 +37,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "B"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class B "
             }
           ],
           "releaseTag": "Public",
@@ -68,15 +52,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "C"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class C "
             }
           ],
           "releaseTag": "Public",

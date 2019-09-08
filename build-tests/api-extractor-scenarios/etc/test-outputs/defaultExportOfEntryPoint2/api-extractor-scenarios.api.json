@@ -21,12 +21,8 @@
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
-              "kind": "Reference",
-              "text": "defaultFunctionStatement"
-            },
-            {
               "kind": "Content",
-              "text": ": "
+              "text": "defaultFunctionStatement: "
             },
             {
               "kind": "Content",
@@ -36,8 +32,8 @@
           "releaseTag": "Public",
           "name": "defaultFunctionStatement",
           "variableTypeTokenRange": {
-            "startIndex": 2,
-            "endIndex": 3
+            "startIndex": 1,
+            "endIndex": 2
           }
         }
       ]

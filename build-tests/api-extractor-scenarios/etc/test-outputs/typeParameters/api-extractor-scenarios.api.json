@@ -22,15 +22,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "ClassWithGenericMethod"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class ClassWithGenericMethod "
             }
           ],
           "releaseTag": "Public",
@@ -42,20 +34,8 @@
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "method"
-                },
-                {
                   "kind": "Content",
-                  "text": "<"
-                },
-                {
-                  "kind": "Reference",
-                  "text": "T"
-                },
-                {
-                  "kind": "Content",
-                  "text": ">(): "
+                  "text": "method<T>(): "
                 },
                 {
                   "kind": "Content",
@@ -68,8 +48,8 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 4,
-                "endIndex": 5
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
@@ -99,23 +79,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "GenericClass"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "T"
-            },
-            {
-              "kind": "Content",
-              "text": "> "
+              "text": "export declare class GenericClass<T> "
             }
           ],
           "releaseTag": "Public",
@@ -143,23 +107,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "GenericClassWithConstraint"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "T"
-            },
-            {
-              "kind": "Content",
-              "text": " extends "
+              "text": "export declare class GenericClassWithConstraint<T extends "
             },
             {
               "kind": "Content",
@@ -175,8 +123,8 @@
             {
               "typeParameterName": "T",
               "constraintTokenRange": {
-                "startIndex": 5,
-                "endIndex": 6
+                "startIndex": 1,
+                "endIndex": 2
               },
               "defaultTypeTokenRange": {
                 "startIndex": 0,
@@ -195,23 +143,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "GenericClassWithDefault"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "T"
-            },
-            {
-              "kind": "Content",
-              "text": " = "
+              "text": "export declare class GenericClassWithDefault<T = "
             },
             {
               "kind": "Content",
@@ -231,8 +163,8 @@
                 "endIndex": 0
               },
               "defaultTypeTokenRange": {
-                "startIndex": 5,
-                "endIndex": 6
+                "startIndex": 1,
+                "endIndex": 2
               }
             }
           ],
@@ -247,23 +179,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function "
-            },
-            {
-              "kind": "Reference",
-              "text": "genericFunction"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "T"
-            },
-            {
-              "kind": "Content",
-              "text": ">(): "
+              "text": "export declare function genericFunction<T>(): "
             },
             {
               "kind": "Content",
@@ -275,8 +191,8 @@
             }
           ],
           "returnTypeTokenRange": {
-            "startIndex": 5,
-            "endIndex": 6
+            "startIndex": 1,
+            "endIndex": 2
           },
           "releaseTag": "Public",
           "overloadIndex": 1,
@@ -303,23 +219,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export interface "
-            },
-            {
-              "kind": "Reference",
-              "text": "GenericInterface"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "T"
-            },
-            {
-              "kind": "Content",
-              "text": "> "
+              "text": "export interface GenericInterface<T> "
             }
           ],
           "releaseTag": "Public",
@@ -347,26 +247,10 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare type "
-            },
-            {
-              "kind": "Reference",
-              "text": "GenericTypeAlias"
+              "text": "export declare type GenericTypeAlias<T> = "
             },
             {
               "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "T"
-            },
-            {
-              "kind": "Content",
-              "text": "> = "
-            },
-            {
-              "kind": "Reference",
               "text": "T"
             },
             {
@@ -390,8 +274,8 @@
             }
           ],
           "typeTokenRange": {
-            "startIndex": 5,
-            "endIndex": 6
+            "startIndex": 1,
+            "endIndex": 2
           }
         },
         {
@@ -401,15 +285,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export interface "
-            },
-            {
-              "kind": "Reference",
-              "text": "InterfaceWithGenericCallSignature"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export interface InterfaceWithGenericCallSignature "
             }
           ],
           "releaseTag": "Public",
@@ -422,15 +298,7 @@
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "<"
-                },
-                {
-                  "kind": "Reference",
-                  "text": "T"
-                },
-                {
-                  "kind": "Content",
-                  "text": ">(): "
+                  "text": "<T>(): "
                 },
                 {
                   "kind": "Content",
@@ -442,8 +310,8 @@
                 }
               ],
               "returnTypeTokenRange": {
-                "startIndex": 3,
-                "endIndex": 4
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
@@ -472,15 +340,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export interface "
-            },
-            {
-              "kind": "Reference",
-              "text": "InterfaceWithGenericConstructSignature"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export interface InterfaceWithGenericConstructSignature "
             }
           ],
           "releaseTag": "Public",
@@ -493,18 +353,10 @@
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "new <"
-                },
-                {
-                  "kind": "Reference",
-                  "text": "T"
+                  "text": "new <T>(): "
                 },
                 {
                   "kind": "Content",
-                  "text": ">(): "
-                },
-                {
-                  "kind": "Reference",
                   "text": "T"
                 },
                 {
@@ -513,8 +365,8 @@
                 }
               ],
               "returnTypeTokenRange": {
-                "startIndex": 3,
-                "endIndex": 4
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
