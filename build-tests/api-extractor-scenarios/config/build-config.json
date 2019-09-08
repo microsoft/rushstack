@@ -22,6 +22,7 @@
     "inconsistentReleaseTags",
     "preapproved",
     "typeOf",
+    "typeOf2",
     "typeParameters"
   ]
 }
