@@ -40,3 +40,5 @@ Best of all, **API Extractor** is free and open source.  Join the community and 
 # Getting Started
 
 For more details and support resources, please visit: https://api-extractor.com/
+
+API documentation for this package: https://rushstack.io/pages/api/api-extractor/

@@ -7,15 +7,13 @@
 // @public
 export function getPackageDeps(packagePath?: string, excludedPaths?: string[]): IPackageDeps;
 
-// @public (undocumented)
+// @public
 export interface IPackageDeps {
-    // (undocumented)
+    arguments?: string;
     files: {
         [key: string]: string;
     };
 }
 
-
-// (No @packageDocumentation comment for this package)
 
 ```
