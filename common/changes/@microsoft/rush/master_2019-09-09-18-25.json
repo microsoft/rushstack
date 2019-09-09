@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fixing apply git tags during publish when using --pack and the tag already exists (existing tags not re-tagged, same as non --pack publish)",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "chaseholland@users.noreply.github.com"
+}
