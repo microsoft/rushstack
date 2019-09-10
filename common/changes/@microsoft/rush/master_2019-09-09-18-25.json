@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Fix an issue where Rush attempted to add Git tags for packages that had already been published when the publish command is run with the --pack and --apply-git-tags-on-pack flag. This caused a fatal error when tags already existed.",
+      "comment": "Fix an issue where Rush attempted to add Git tags for packages that had already been published when the publish command is run with the --pack and --apply-git-tags-on-pack flags. This caused a fatal error when tags already existed.",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
