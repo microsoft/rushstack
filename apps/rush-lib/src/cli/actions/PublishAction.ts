@@ -327,6 +327,11 @@ export class PublishAction extends BaseRushAction {
             return;
           }
 
+          // Do not tag packages that already exist. This will fail with a fatal error.
+          if (this._packageExists(packageConfig)) {
+            return;
+          }
+
           git.addTag(!!this._publish.value && !this._registryUrl.value, packageName, packageConfig.packageJson.version);
           updated = true;
         };
