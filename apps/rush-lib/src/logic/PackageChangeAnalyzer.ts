@@ -72,7 +72,7 @@ export class PackageChangeAnalyzer {
         const excludes: string[] = commandLineConfiguration.commands.reduce(
           (filenames: string[], command: CommandJson) => {
             if (command.commandKind === 'bulk') {
-              filenames.push(`package-deps.${command.name}.json`);
+              filenames.push(`package-deps_${command.name}.json`);
             }
 
             return filenames;
@@ -116,10 +116,10 @@ export class PackageChangeAnalyzer {
      *
      * Temporarily revert below code in favor of replacing this solution with something more
      * flexible. Idea is essentially that we should have gulp-core-build (or other build tool)
-     * create the package-deps.json. The build tool would default to using the 'simple'
+     * create the package-deps_<command>.json. The build tool would default to using the 'simple'
      * algorithm (e.g. only files that are in a project folder are associated with the project), however it would
      * also provide a hook which would allow certain tasks to modify the package-deps-hash before being written.
-     * At the end of the build, a we would create a package-deps.json file like so:
+     * At the end of the build, a we would create a package-deps_<command>.json file like so:
      *
      *  {
      *    commandLine: ["--production"],
@@ -141,7 +141,7 @@ export class PackageChangeAnalyzer {
      *   Notes:
      *   * We need to store the command line arguments, which is currently done by rush instead of GCB
      *   * We need to store the hash/text of the a file which describes the state of the node_modules folder
-     *   * The package-deps.json should be a complete list of dependencies, and it should be extremely cheap
+     *   * The package-deps_<command>.json should be a complete list of dependencies, and it should be extremely cheap
      *       to validate/check the file (even if creating it is more computationally costly).
      */
 
@@ -157,11 +157,10 @@ export class PackageChangeAnalyzer {
     const variant: string | undefined = this._rushConfiguration.currentInstalledVariant;
 
     // Add the shrinkwrap file to every project's dependencies
-
-    const shrinkwrapFile: string =
-      path.relative(this._rushConfiguration.rushJsonFolder,
-        this._rushConfiguration.getCommittedShrinkwrapFilename(variant))
-        .replace(/\\/g, '/');
+    const shrinkwrapFile: string = path.relative(
+      this._rushConfiguration.rushJsonFolder,
+      this._rushConfiguration.getCommittedShrinkwrapFilename(variant)
+    ).replace(/\\/g, '/');
 
     for (const project of this._rushConfiguration.projects) {
       const shrinkwrapHash: string | undefined = noProjectHashes[shrinkwrapFile];

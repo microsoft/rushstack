@@ -207,7 +207,7 @@ export class RushCommandLineParser extends CommandLineParser {
           + ' source files that are tracked by Git and whose path is under the project folder. (For more details'
           + ' about this algorithm, see the documentation for the "package-deps-hash" NPM package.) The incremental'
           + ' build state is tracked in a folder called ".rush" which should NOT be added to Git. The build command is'
-          + ' tracked by the "arguments" field in the "package-deps.build.json" file contained therein; a full'
+          + ' tracked by the "arguments" field in the "package-deps_build.json" file contained therein; a full'
           + ' rebuild is forced whenever the command has changed (e.g. "--production" or not).',
         parser: this,
         commandLineConfiguration: commandLineConfiguration,

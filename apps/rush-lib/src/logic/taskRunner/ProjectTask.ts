@@ -9,7 +9,6 @@ import { IPackageDeps } from '@microsoft/package-deps-hash';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { RushConstants } from '../../logic/RushConstants';
 import { Utilities } from '../../utilities/Utilities';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
@@ -94,10 +93,9 @@ export class ProjectTask implements ITaskDefinition {
 
       writer.writeLine(`>>> ${this.name}`);
 
-      const packageDepsFilename: string = `package-deps.${this._commandToRun}.json`;
+      const packageDepsFilename: string = `package-deps_${this._commandToRun}.json`;
       const currentDepsPath: string = path.join(
-        this._rushProject.projectFolder,
-        RushConstants.packageDepsFolderName,
+        this._rushProject.projectRushTempFolder,
         packageDepsFilename
       );
 
