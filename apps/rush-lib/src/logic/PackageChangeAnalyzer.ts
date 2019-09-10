@@ -10,12 +10,8 @@ import {
 } from '@microsoft/package-deps-hash';
 import { Path } from '@microsoft/node-core-library';
 
-import { RushConstants } from '../logic/RushConstants';
 import { RushConfiguration } from '../api/RushConfiguration';
-import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
-import { CommandJson } from '../api/CommandLineJson';
 import { Git } from './Git';
-import { Utilities } from '../utilities/Utilities';
 
 export class PackageChangeAnalyzer {
   // Allow this function to be overwritten during unit tests
@@ -59,33 +55,8 @@ export class PackageChangeAnalyzer {
     let repoDeps: IPackageDeps;
     try {
       if (this._isGitSupported) {
-        const commandLineConfigFile: string = path.join(
-          this._rushConfiguration.commonRushConfigFolder,
-          RushConstants.commandLineFilename
-        );
-
-        const commandLineConfiguration: CommandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(
-          commandLineConfigFile
-        );
-
-        // Generate possible package-deps filenames from commands in order to
-        // ensure they are not included in the repoDeps
-        const excludes: string[] = commandLineConfiguration.commands.reduce(
-          (filenames: string[], command: CommandJson) => {
-            if (command.commandKind === 'bulk') {
-              filenames.push(Utilities.getPackageDepsFilenameForCommand(command.name));
-            }
-
-            return filenames;
-          },
-          []
-        );
-
         // Load the package deps hash for the whole repository
-        repoDeps = PackageChangeAnalyzer.getPackageDeps(
-          this._rushConfiguration.rushJsonFolder,
-          excludes
-        );
+        repoDeps = PackageChangeAnalyzer.getPackageDeps(this._rushConfiguration.rushJsonFolder, []);
       } else {
         return projectHashDeps;
       }
