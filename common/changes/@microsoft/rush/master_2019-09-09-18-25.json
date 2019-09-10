@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Fixing apply git tags during publish when using --pack and the tag already exists (existing tags not re-tagged, same as non --pack publish)",
+      "comment": "ix an issue where Rush attempted to add Git tags for packages that had already been published when the publish command is run with the --pack and --apply-git-tags-on-pack flag. This caused a fatal error when tags already existed.",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
