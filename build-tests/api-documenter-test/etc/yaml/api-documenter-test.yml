@@ -24,6 +24,7 @@ items:
       - 'api-documenter-test!IDocInterface6:interface'
       - 'api-documenter-test!OuterNamespace.InnerNamespace.nestedFunction:function(1)'
       - 'api-documenter-test!SystemEvent:class'
+      - 'api-documenter-test!yamlReferenceUniquenessTest:function(1)'
   - uid: 'api-documenter-test!globalFunction:function(1)'
     summary: An exported function
     name: globalFunction(x)
@@ -60,6 +61,18 @@ items:
           description: ''
           type:
             - number
+  - uid: 'api-documenter-test!yamlReferenceUniquenessTest:function(1)'
+    name: yamlReferenceUniquenessTest()
+    fullName: yamlReferenceUniquenessTest()
+    langs:
+      - typeScript
+    type: function
+    syntax:
+      content: 'export declare function yamlReferenceUniquenessTest(): IDocInterface1;'
+      return:
+        type:
+          - 'api-documenter-test!IDocInterface1:interface'
+        description: ''
 references:
   - uid: 'api-documenter-test!DocBaseClass:class'
     name: DocBaseClass

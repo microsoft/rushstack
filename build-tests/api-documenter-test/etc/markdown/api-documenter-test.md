@@ -28,6 +28,7 @@ This project tests various documentation generation scenarios and doc comment sy
 |  Function | Description |
 |  --- | --- |
 |  [globalFunction(x)](./api-documenter-test.globalfunction.md) | An exported function |
+|  [yamlReferenceUniquenessTest()](./api-documenter-test.yamlreferenceuniquenesstest.md) |  |
 
 ## Interfaces
 

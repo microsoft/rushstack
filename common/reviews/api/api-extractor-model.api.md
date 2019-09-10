@@ -613,7 +613,9 @@ export class Excerpt {
 
 // @public (undocumented)
 export class ExcerptToken {
-    constructor(kind: ExcerptTokenKind, text: string);
+    constructor(kind: ExcerptTokenKind, text: string, canonicalReference?: DeclarationReference);
+    // (undocumented)
+    readonly canonicalReference: DeclarationReference | undefined;
     // (undocumented)
     readonly kind: ExcerptTokenKind;
     // (undocumented)
@@ -815,6 +817,8 @@ export interface IApiVariableOptions extends IApiNameMixinOptions, IApiReleaseTa
 
 // @public (undocumented)
 export interface IExcerptToken {
+    // (undocumented)
+    canonicalReference?: string;
     // (undocumented)
     readonly kind: ExcerptTokenKind;
     // (undocumented)

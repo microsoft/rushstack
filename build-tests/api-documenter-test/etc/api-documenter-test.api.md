@@ -95,6 +95,22 @@ export interface IDocInterface6 {
 }
 
 // @public
+export interface IDocInterface6 {
+    // (undocumented)
+    arrayProperty: IDocInterface1[];
+    // (undocumented)
+    genericReferenceMethod<T>(x: T): T;
+    // (undocumented)
+    intersectionProperty: IDocInterface1 & IDocInterface2;
+    // (undocumented)
+    tupleProperty: [IDocInterface1, IDocInterface2];
+    // (undocumented)
+    typeReferenceProperty: Generic<IDocInterface1>;
+    // (undocumented)
+    unionProperty: IDocInterface1 | IDocInterface2;
+}
+
+// @public
 export namespace OuterNamespace {
     export namespace InnerNamespace {
         export function nestedFunction(x: number): number;
@@ -106,6 +122,9 @@ export namespace OuterNamespace {
 export class SystemEvent {
     addHandler(handler: () => void): void;
 }
+
+// @public (undocumented)
+export function yamlReferenceUniquenessTest(): IDocInterface1;
 
 
 ```

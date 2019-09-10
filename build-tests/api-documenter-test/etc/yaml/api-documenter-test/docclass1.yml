@@ -172,3 +172,12 @@ items:
         type:
           - void
         description: ''
+references:
+  - uid: 'api-documenter-test!DocBaseClass:class'
+    name: DocBaseClass
+  - uid: 'api-documenter-test!IDocInterface1:interface'
+    name: IDocInterface1
+  - uid: 'api-documenter-test!IDocInterface2:interface'
+    name: IDocInterface2
+  - uid: 'api-documenter-test!SystemEvent:class'
+    name: SystemEvent
