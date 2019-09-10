@@ -82,6 +82,4 @@ export class PluginFeatureInitialization {
 }
 
 
-// (No @packageDocumentation comment for this package)
-
 ```
