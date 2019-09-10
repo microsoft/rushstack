@@ -239,7 +239,7 @@ export class RushCommandLineParser extends CommandLineParser {
         enableParallelism: true,
         ignoreMissingScript: false,
         ignoreDependencyOrder: false,
-        incremental: true,
+        incremental: false,
         allowWarningsInSuccessfulBuild: false
       }));
     }
