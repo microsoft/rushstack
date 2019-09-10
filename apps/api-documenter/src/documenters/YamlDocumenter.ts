@@ -116,6 +116,12 @@ export class YamlDocumenter {
   }
 
   private _visitApiItems(apiItem: ApiDocumentedItem, parentYamlFile: IYamlApiFile | undefined): boolean {
+    let savedYamlReferences: IYamlReferences | undefined;
+    if (!this._shouldEmbed(apiItem.kind)) {
+      savedYamlReferences = this._yamlReferences;
+      this._yamlReferences = undefined;
+    }
+
     const yamlItem: IYamlItem | undefined = this._generateYamlItem(apiItem);
     if (!yamlItem) {
       return false;
@@ -155,16 +161,11 @@ export class YamlDocumenter {
         }
       }
 
-      if (this._yamlReferences) {
-        if (this._yamlReferences.references.length > 0) {
-          if (newYamlFile.references) {
-            newYamlFile.references = [...newYamlFile.references, ...this._yamlReferences.references];
-          } else {
-            newYamlFile.references = this._yamlReferences.references;
-          }
-        }
-        this._yamlReferences = undefined;
+      if (this._yamlReferences && this._yamlReferences.references.length > 0) {
+        newYamlFile.references = this._yamlReferences.references;
       }
+
+      this._yamlReferences = savedYamlReferences;
 
       const yamlFilePath: string = this._getYamlFilePath(apiItem);
 
@@ -175,15 +176,10 @@ export class YamlDocumenter {
       this._writeYamlFile(newYamlFile, yamlFilePath, 'UniversalReference', yamlApiSchema);
 
       if (parentYamlFile) {
-        if (!parentYamlFile.references) {
-          parentYamlFile.references = [];
-        }
-
-        parentYamlFile.references.push({
-          uid: this._getUid(apiItem),
-          name: this._getYamlItemName(apiItem)
-        });
-
+        this._recordYamlReference(
+          this._ensureYamlReferences(),
+          this._getUid(apiItem),
+          this._getYamlItemName(apiItem));
       }
     }
 

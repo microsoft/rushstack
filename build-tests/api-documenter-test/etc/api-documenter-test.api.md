@@ -123,5 +123,8 @@ export class SystemEvent {
     addHandler(handler: () => void): void;
 }
 
+// @public (undocumented)
+export function yamlReferenceUniquenessTest(): IDocInterface1;
+
 
 ```

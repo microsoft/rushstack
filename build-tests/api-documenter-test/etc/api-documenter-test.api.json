@@ -1602,6 +1602,34 @@
             }
           ],
           "implementsTokenRanges": []
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "api-documenter-test!yamlReferenceUniquenessTest:function(1)",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function yamlReferenceUniquenessTest(): "
+            },
+            {
+              "kind": "Reference",
+              "text": "IDocInterface1",
+              "canonicalReference": "api-documenter-test!IDocInterface1:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [],
+          "name": "yamlReferenceUniquenessTest"
         }
       ]
     }
