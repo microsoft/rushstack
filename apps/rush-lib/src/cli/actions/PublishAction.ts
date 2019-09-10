@@ -328,7 +328,7 @@ export class PublishAction extends BaseRushAction {
           }
 
           // Do not tag packages that already exist. This will fail with a fatal error.
-          if (!this._packageExists(packageConfig)) {
+          if (this._packageExists(packageConfig)) {
             return;
           }
 
