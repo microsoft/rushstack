@@ -11,6 +11,9 @@ import { IConfigFile } from './IConfigFile';
  * represents the raw JSON file structure.
  */
 export class DocumenterConfig {
+  public readonly configFilePath: string;
+  public readonly configFile: IConfigFile;
+
   /**
    * The JSON Schema for API Extractor config file (api-extractor.schema.json).
    */
@@ -25,9 +28,14 @@ export class DocumenterConfig {
   /**
    * Load and validate an api-documenter.json file.
    */
-  public static loadFile(configFilePath: string): IConfigFile {
+  public static loadFile(configFilePath: string): DocumenterConfig {
     const configFile: IConfigFile = JsonFile.loadAndValidate(configFilePath, DocumenterConfig.jsonSchema);
 
-    return configFile;
+    return new DocumenterConfig(path.resolve(configFilePath), configFile);
+  }
+
+  private constructor(filePath: string, configFile: IConfigFile) {
+    this.configFilePath = filePath;
+    this.configFile = configFile;
   }
 }

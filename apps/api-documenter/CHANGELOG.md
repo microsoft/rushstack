@@ -1,6 +1,24 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Wed, 04 Sep 2019 18:28:06 GMT and should not be manually modified.
+This log was last generated on Fri, 06 Sep 2019 15:14:57 GMT and should not be manually modified.
+
+## 7.4.0
+Fri, 06 Sep 2019 15:14:57 GMT
+
+### Minor changes
+
+- For the markdown target, generate an "index.md" file with an inventory of documented packages
+
+### Patches
+
+- (Experimental) Expand the API for API Documenter plugins
+
+## 7.3.20
+Thu, 05 Sep 2019 15:15:09 GMT
+
+### Patches
+
+- (Experimental) Introduce an API for writing API Documenter plugins
 
 ## 7.3.19
 Wed, 04 Sep 2019 18:28:06 GMT
