@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 04 Sep 2019 19:01:42 GMT and should not be manually modified.
+This log was last generated on Tue, 10 Sep 2019 19:45:15 GMT and should not be manually modified.
+
+## 5.12.1
+Tue, 10 Sep 2019 19:45:15 GMT
+
+### Updates
+
+- Fix an issue where Rush attempted to add Git tags for packages that had already been published when the publish command is run with the --pack and --apply-git-tags-on-pack flags. This caused a fatal error when tags already existed.
 
 ## 5.12.0
 Wed, 04 Sep 2019 19:01:42 GMT
