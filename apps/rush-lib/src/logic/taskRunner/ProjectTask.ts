@@ -13,9 +13,7 @@ import { Utilities } from '../../utilities/Utilities';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
 import { ITaskDefinition } from '../taskRunner/ITask';
-import {
-  PackageChangeAnalyzer
-} from '../PackageChangeAnalyzer';
+import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
 
 interface IPackageDependencies extends IPackageDeps {
   arguments: string;
@@ -27,6 +25,7 @@ export interface IProjectTaskOptions {
   commandToRun: string;
   isIncrementalBuildAllowed: boolean;
   packageChangeAnalyzer: PackageChangeAnalyzer;
+  packageDepsFilename: string;
 }
 
 /**
@@ -45,6 +44,7 @@ export class ProjectTask implements ITaskDefinition {
   private _rushConfiguration: RushConfiguration;
   private _commandToRun: string;
   private _packageChangeAnalyzer: PackageChangeAnalyzer;
+  private _packageDepsFilename: string;
 
   constructor(options: IProjectTaskOptions) {
     this._rushProject = options.rushProject;
@@ -52,6 +52,7 @@ export class ProjectTask implements ITaskDefinition {
     this._commandToRun = options.commandToRun;
     this.isIncrementalBuildAllowed = options.isIncrementalBuildAllowed;
     this._packageChangeAnalyzer = options.packageChangeAnalyzer;
+    this._packageDepsFilename = options.packageDepsFilename;
 }
 
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
@@ -93,10 +94,9 @@ export class ProjectTask implements ITaskDefinition {
 
       writer.writeLine(`>>> ${this.name}`);
 
-      const packageDepsFilename: string = `package-deps_${this._commandToRun}.json`;
       const currentDepsPath: string = path.join(
         this._rushProject.projectRushTempFolder,
-        packageDepsFilename
+        this._packageDepsFilename
       );
 
       if (FileSystem.exists(currentDepsPath)) {
@@ -105,7 +105,7 @@ export class ProjectTask implements ITaskDefinition {
         } catch (e) {
           // Warn and ignore - treat failing to load the file as the project being not built.
           writer.writeLine(
-            `Warning: error parsing ${packageDepsFilename}: ${e}. Ignoring and ` +
+            `Warning: error parsing ${this._packageDepsFilename}: ${e}. Ignoring and ` +
             `treating the command "${this._commandToRun}" as not run.`
           );
         }

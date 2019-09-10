@@ -15,6 +15,7 @@ import { RushConfiguration } from '../api/RushConfiguration';
 import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
 import { CommandJson } from '../api/CommandLineJson';
 import { Git } from './Git';
+import { Utilities } from '../utilities/Utilities';
 
 export class PackageChangeAnalyzer {
   // Allow this function to be overwritten during unit tests
@@ -72,7 +73,7 @@ export class PackageChangeAnalyzer {
         const excludes: string[] = commandLineConfiguration.commands.reduce(
           (filenames: string[], command: CommandJson) => {
             if (command.commandKind === 'bulk') {
-              filenames.push(`package-deps_${command.name}.json`);
+              filenames.push(Utilities.getPackageDepsFilenameForCommand(command.name));
             }
 
             return filenames;

@@ -23,6 +23,7 @@ import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { FileSystem } from '@microsoft/node-core-library';
 import { TaskRunner } from '../../logic/taskRunner/TaskRunner';
 import { TaskCollection } from '../../logic/taskRunner/TaskCollection';
+import { Utilities } from '../../utilities/Utilities';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -108,18 +109,22 @@ export class BulkScriptAction extends BaseScriptAction {
       isQuietMode: isQuietMode,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
       ignoreMissingScript: this._ignoreMissingScript,
-      ignoreDependencyOrder: this._ignoreDependencyOrder
+      ignoreDependencyOrder: this._ignoreDependencyOrder,
+      packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(this._commandToRun)
     });
 
     // Register all tasks with the task collection
     const taskCollection: TaskCollection = taskSelector.registerTasks();
 
-    const taskRunner: TaskRunner = new TaskRunner(taskCollection.getOrderedTasks(), {
-      quietMode: isQuietMode,
-      parallelism: parallelism,
-      changedProjectsOnly: changedProjectsOnly,
-      allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
-    });
+    const taskRunner: TaskRunner = new TaskRunner(
+      taskCollection.getOrderedTasks(),
+      {
+        quietMode: isQuietMode,
+        parallelism: parallelism,
+        changedProjectsOnly: changedProjectsOnly,
+        allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
+      }
+    );
 
     return taskRunner.execute().then(() => {
       stopwatch.stop();
