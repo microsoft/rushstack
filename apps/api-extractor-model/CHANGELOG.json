@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.4.0",
+      "tag": "@microsoft/api-extractor-model_v7.4.0",
+      "date": "Tue, 10 Sep 2019 20:38:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add 'canonicalReference' to ExcerptToken"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.3.4",
       "tag": "@microsoft/api-extractor-model_v7.3.4",
       "date": "Wed, 04 Sep 2019 18:28:06 GMT",

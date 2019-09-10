@@ -2,6 +2,29 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.4.1",
+      "tag": "@microsoft/api-documenter_v7.4.1",
+      "date": "Tue, 10 Sep 2019 20:38:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for emitting deeply linked types in YamlDocumenter"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.3.4` to `7.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.20` to `0.1.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.7` to `6.1.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.4.0",
       "tag": "@microsoft/api-documenter_v7.4.0",
       "date": "Fri, 06 Sep 2019 15:14:57 GMT",

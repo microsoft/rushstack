@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 06 Sep 2019 15:14:57 GMT and should not be manually modified.
+This log was last generated on Tue, 10 Sep 2019 20:38:33 GMT and should not be manually modified.
+
+## 7.4.1
+Tue, 10 Sep 2019 20:38:33 GMT
+
+### Patches
+
+- Add support for emitting deeply linked types in YamlDocumenter
 
 ## 7.4.0
 Fri, 06 Sep 2019 15:14:57 GMT
