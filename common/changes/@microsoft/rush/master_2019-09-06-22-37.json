@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Add --from-version-policy flag for \"rush rebuild\" to allow building from a version policy with direct and indirect dependant projects",
+      "comment": "Add a --from-version-policy option for bulk commands to allow running the command (like build) from packages with a version policy and their direct and indirect dependent projects",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
