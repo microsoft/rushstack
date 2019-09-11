@@ -94,10 +94,10 @@ export class ProjectTask implements ITaskDefinition {
 
       writer.writeLine(`>>> ${this.name}`);
 
-      const currentDepsPath: string = path.join(
-        this._rushProject.projectRushTempFolder,
-        this._packageDepsFilename
-      );
+      // TODO: Remove legacyDepsPath with the next major release of Rush
+      const legacyDepsPath: string = path.join(this._rushProject.projectFolder, 'package-deps.json');
+
+      const currentDepsPath: string = path.join(this._rushProject.projectRushTempFolder, this._packageDepsFilename);
 
       if (FileSystem.exists(currentDepsPath)) {
         try {
@@ -125,6 +125,9 @@ export class ProjectTask implements ITaskDefinition {
       } else {
         // If the deps file exists, remove it before starting a build.
         FileSystem.deleteFile(currentDepsPath);
+
+        // Delete the legacy package-deps.json
+        FileSystem.deleteFile(legacyDepsPath);
 
         if (!this._commandToRun) {
           writer.writeLine(`The task command "${this._commandToRun}" was registered in the package.json but is blank,`
