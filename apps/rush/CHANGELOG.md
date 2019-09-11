@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 10 Sep 2019 19:45:15 GMT and should not be manually modified.
+This log was last generated on Wed, 11 Sep 2019 21:41:34 GMT and should not be manually modified.
+
+## 5.13.0
+Wed, 11 Sep 2019 21:41:34 GMT
+
+### Updates
+
+- Add support for incremental custom commands. This change also adds a per-project `.rush/temp` folder that should be included in `.gitignore` (i.e. - `.rush/temp/**`).
+- Add a --from-version-policy option for bulk commands to allow running the command (like build) from packages with a version policy and their direct and indirect dependent projects
+- Update documentation
+- Do not delete the pnpm store if an installation retry fails. Delete the pnpm store if and only if all the installation retry attempts fail.
 
 ## 5.12.1
 Tue, 10 Sep 2019 19:45:15 GMT
