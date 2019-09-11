@@ -125,7 +125,8 @@ Optional arguments:
   --from-version-policy VERSION_POLICY_NAME
                         Run command in all projects with the specified 
                         version policy and all projects that directly or 
-                        indirectly depend on them
+                        indirectly depend on projects with the specified 
+                        version policy
   --to-version-policy VERSION_POLICY_NAME
                         Run command in all projects with the specified 
                         version policy and all of their dependencies
@@ -233,7 +234,8 @@ Optional arguments:
   --from-version-policy VERSION_POLICY_NAME
                         Run command in all projects with the specified 
                         version policy and all projects that directly or 
-                        indirectly depend on them
+                        indirectly depend on projects with the specified 
+                        version policy
   --to-version-policy VERSION_POLICY_NAME
                         Run command in all projects with the specified 
                         version policy and all of their dependencies
@@ -477,7 +479,8 @@ Optional arguments:
   --from-version-policy VERSION_POLICY_NAME
                         Run command in all projects with the specified 
                         version policy and all projects that directly or 
-                        indirectly depend on them
+                        indirectly depend on projects with the specified 
+                        version policy
   --to-version-policy VERSION_POLICY_NAME
                         Run command in all projects with the specified 
                         version policy and all of their dependencies
