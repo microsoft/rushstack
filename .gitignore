@@ -68,5 +68,8 @@ temp
 common/temp/**
 .rush/temp/**
 
+# Remove eventually
+package-deps.json
+
 # OS X
 .DS_Store
