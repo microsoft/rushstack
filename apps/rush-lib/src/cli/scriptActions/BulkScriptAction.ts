@@ -161,7 +161,7 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterLongName: '--from-version-policy',
       argumentName: 'VERSION_POLICY_NAME',
       description: 'Run command in all projects with the specified version policy '
-        + 'and all projects that directly or indirectly depend on them'
+        + 'and all projects that directly or indirectly depend on projects with the specified version policy'
     });
     this._toVersionPolicy =  this.defineStringListParameter({
       parameterLongName: '--to-version-policy',
