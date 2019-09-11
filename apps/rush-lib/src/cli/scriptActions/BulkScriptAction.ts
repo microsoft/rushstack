@@ -195,7 +195,7 @@ export class BulkScriptAction extends BaseScriptAction {
     versionPolicies: CommandLineStringListParameter): string[] {
 
     const projects: string[] = [...flags.values];
-    if (versionPolicies.values && versionPolicies.values.length) {
+    if (versionPolicies.values && versionPolicies.values.length > 0) {
       this.rushConfiguration.projects.forEach(project => {
         const matches: boolean = versionPolicies.values.some(policyName => {
           return project.versionPolicyName === policyName;
