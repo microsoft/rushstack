@@ -9,14 +9,11 @@ import { IPackageDeps } from '@microsoft/package-deps-hash';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { RushConstants } from '../../logic/RushConstants';
 import { Utilities } from '../../utilities/Utilities';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
 import { ITaskDefinition } from '../taskRunner/ITask';
-import {
-  PackageChangeAnalyzer
-} from '../PackageChangeAnalyzer';
+import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
 
 interface IPackageDependencies extends IPackageDeps {
   arguments: string;
@@ -28,6 +25,7 @@ export interface IProjectTaskOptions {
   commandToRun: string;
   isIncrementalBuildAllowed: boolean;
   packageChangeAnalyzer: PackageChangeAnalyzer;
+  packageDepsFilename: string;
 }
 
 /**
@@ -46,6 +44,7 @@ export class ProjectTask implements ITaskDefinition {
   private _rushConfiguration: RushConfiguration;
   private _commandToRun: string;
   private _packageChangeAnalyzer: PackageChangeAnalyzer;
+  private _packageDepsFilename: string;
 
   constructor(options: IProjectTaskOptions) {
     this._rushProject = options.rushProject;
@@ -53,6 +52,7 @@ export class ProjectTask implements ITaskDefinition {
     this._commandToRun = options.commandToRun;
     this.isIncrementalBuildAllowed = options.isIncrementalBuildAllowed;
     this._packageChangeAnalyzer = options.packageChangeAnalyzer;
+    this._packageDepsFilename = options.packageDepsFilename;
 }
 
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
@@ -94,15 +94,19 @@ export class ProjectTask implements ITaskDefinition {
 
       writer.writeLine(`>>> ${this.name}`);
 
-      const currentDepsPath: string = path.join(this._rushProject.projectFolder, RushConstants.packageDepsFilename);
+      // TODO: Remove legacyDepsPath with the next major release of Rush
+      const legacyDepsPath: string = path.join(this._rushProject.projectFolder, 'package-deps.json');
+
+      const currentDepsPath: string = path.join(this._rushProject.projectRushTempFolder, this._packageDepsFilename);
+
       if (FileSystem.exists(currentDepsPath)) {
         try {
           lastPackageDeps = JsonFile.load(currentDepsPath) as IPackageDependencies;
         } catch (e) {
           // Warn and ignore - treat failing to load the file as the project being not built.
           writer.writeLine(
-            `Warning: error parsing ${RushConstants.packageDepsFilename}: ${e}. Ignoring and ` +
-            'treating the project as non-built.'
+            `Warning: error parsing ${this._packageDepsFilename}: ${e}. Ignoring and ` +
+            `treating the command "${this._commandToRun}" as not run.`
           );
         }
       }
@@ -122,13 +126,18 @@ export class ProjectTask implements ITaskDefinition {
         // If the deps file exists, remove it before starting a build.
         FileSystem.deleteFile(currentDepsPath);
 
+        // Delete the legacy package-deps.json
+        FileSystem.deleteFile(legacyDepsPath);
+
         if (!this._commandToRun) {
-          writer.writeLine(`The task command ${this._commandToRun} was registered in the package.json but is blank,`
+          writer.writeLine(`The task command "${this._commandToRun}" was registered in the package.json but is blank,`
             + ` so no action will be taken.`);
 
           // Write deps on success.
           if (currentPackageDeps) {
-            JsonFile.save(currentPackageDeps, currentDepsPath);
+            JsonFile.save(currentPackageDeps, currentDepsPath, {
+              ensureFolderExists: true
+            });
           }
 
           return Promise.resolve(TaskStatus.Success);
@@ -174,7 +183,9 @@ export class ProjectTask implements ITaskDefinition {
             } else {
               // Write deps on success.
               if (currentPackageDeps) {
-                JsonFile.save(currentPackageDeps, currentDepsPath);
+                JsonFile.save(currentPackageDeps, currentDepsPath, {
+                  ensureFolderExists: true
+                });
               }
               resolve(TaskStatus.Success);
             }

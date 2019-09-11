@@ -315,6 +315,7 @@ export class RushConfigurationProject {
     readonly packageName: string;
     readonly projectFolder: string;
     readonly projectRelativeFolder: string;
+    readonly projectRushTempFolder: string;
     readonly reviewCategory: string;
     readonly shouldPublish: boolean;
     readonly skipRushCheck: boolean;

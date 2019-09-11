@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add support for incremental custom commands. This change also adds a per-project `.rush/temp` folder that should be included in `.gitignore` (i.e. - `.rush/temp/**`).",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "565754+kaidjohnson@users.noreply.github.com"
+}

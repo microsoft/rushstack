@@ -23,6 +23,7 @@ import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { FileSystem } from '@microsoft/node-core-library';
 import { TaskRunner } from '../../logic/taskRunner/TaskRunner';
 import { TaskCollection } from '../../logic/taskRunner/TaskCollection';
+import { Utilities } from '../../utilities/Utilities';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -31,6 +32,7 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   enableParallelism: boolean;
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
+  incremental: boolean;
   allowWarningsInSuccessfulBuild: boolean;
 
   /**
@@ -51,6 +53,7 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
 export class BulkScriptAction extends BaseScriptAction {
   private _enableParallelism: boolean;
   private _ignoreMissingScript: boolean;
+  private _isIncrementalBuildAllowed: boolean;
   private _commandToRun: string;
 
   private _changedProjectsOnly: CommandLineFlagParameter;
@@ -67,6 +70,7 @@ export class BulkScriptAction extends BaseScriptAction {
     super(options);
     this._enableParallelism = options.enableParallelism;
     this._ignoreMissingScript = options.ignoreMissingScript;
+    this._isIncrementalBuildAllowed = options.incremental;
     this._commandToRun = options.commandToRun || options.actionName;
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
@@ -95,7 +99,7 @@ export class BulkScriptAction extends BaseScriptAction {
       customParameter.appendToArgList(customParameterValues);
     }
 
-    const changedProjectsOnly: boolean = this.actionName === 'build' && this._changedProjectsOnly.value;
+    const changedProjectsOnly: boolean = this._isIncrementalBuildAllowed && this._changedProjectsOnly.value;
 
     const taskSelector: TaskSelector = new TaskSelector({
       rushConfiguration: this.rushConfiguration,
@@ -104,20 +108,24 @@ export class BulkScriptAction extends BaseScriptAction {
       commandToRun: this._commandToRun,
       customParameterValues,
       isQuietMode: isQuietMode,
-      isIncrementalBuildAllowed: this.actionName === 'build',
+      isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
       ignoreMissingScript: this._ignoreMissingScript,
-      ignoreDependencyOrder: this._ignoreDependencyOrder
+      ignoreDependencyOrder: this._ignoreDependencyOrder,
+      packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(this._commandToRun)
     });
 
     // Register all tasks with the task collection
     const taskCollection: TaskCollection = taskSelector.registerTasks();
 
-    const taskRunner: TaskRunner = new TaskRunner(taskCollection.getOrderedTasks(), {
-      quietMode: isQuietMode,
-      parallelism: parallelism,
-      changedProjectsOnly: changedProjectsOnly,
-      allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
-    });
+    const taskRunner: TaskRunner = new TaskRunner(
+      taskCollection.getOrderedTasks(),
+      {
+        quietMode: isQuietMode,
+        parallelism: parallelism,
+        changedProjectsOnly: changedProjectsOnly,
+        allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
+      }
+    );
 
     return taskRunner.execute().then(() => {
       stopwatch.stop();
@@ -179,7 +187,7 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterShortName: '-v',
       description: 'Display the logs during the build, rather than just displaying the build status summary'
     });
-    if (this.actionName === 'build') {
+    if (this._isIncrementalBuildAllowed) {
       this._changedProjectsOnly = this.defineFlagParameter({
         parameterLongName: '--changed-projects-only',
         parameterShortName: '-o',

@@ -31,6 +31,7 @@ describe('PackageChangeAnalyzer', () => {
 
     PackageChangeAnalyzer.getPackageDeps = (packagePath: string, ignored: string[]) => repoHashDeps;
     const rushConfiguration: RushConfiguration = {
+      commonRushConfigFolder: '',
       projects: [{
         packageName: packageA,
         projectRelativeFolder: packageAPath
