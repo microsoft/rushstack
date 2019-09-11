@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Do not delete the store if an installation retry fails. Delete store if and only if all the retry attempts fail.",
+      "comment": "Do not delete the pnpm store if an installation retry fails. Delete the pnpm store if and only if all the installation retry attempts fail.",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
