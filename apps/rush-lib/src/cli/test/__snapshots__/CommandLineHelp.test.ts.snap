@@ -95,6 +95,7 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for each action: build 1`] = `
 "usage: rush build [-h] [-p COUNT] [-t PROJECT1]
+                  [--from-version-policy VERSION_POLICY_NAME]
                   [--to-version-policy VERSION_POLICY_NAME] [-f PROJECT2] [-v]
                   [-o] [-s] [-m]
                   
@@ -121,6 +122,11 @@ Optional arguments:
   -t PROJECT1, --to PROJECT1
                         Run command in the specified project and all of its 
                         dependencies
+  --from-version-policy VERSION_POLICY_NAME
+                        Run command in all projects with the specified 
+                        version policy and all projects that directly or 
+                        indirectly depend on projects with the specified 
+                        version policy
   --to-version-policy VERSION_POLICY_NAME
                         Run command in all projects with the specified 
                         version policy and all of their dependencies
@@ -205,6 +211,7 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for each action: import-strings 1`] = `
 "usage: rush import-strings [-h] [-p COUNT] [-t PROJECT1]
+                           [--from-version-policy VERSION_POLICY_NAME]
                            [--to-version-policy VERSION_POLICY_NAME]
                            [-f PROJECT2] [-v]
                            [--locale {en-us,fr-fr,es-es,zh-cn}]
@@ -224,6 +231,11 @@ Optional arguments:
   -t PROJECT1, --to PROJECT1
                         Run command in the specified project and all of its 
                         dependencies
+  --from-version-policy VERSION_POLICY_NAME
+                        Run command in all projects with the specified 
+                        version policy and all projects that directly or 
+                        indirectly depend on projects with the specified 
+                        version policy
   --to-version-policy VERSION_POLICY_NAME
                         Run command in all projects with the specified 
                         version policy and all of their dependencies
@@ -439,6 +451,7 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for each action: rebuild 1`] = `
 "usage: rush rebuild [-h] [-p COUNT] [-t PROJECT1]
+                    [--from-version-policy VERSION_POLICY_NAME]
                     [--to-version-policy VERSION_POLICY_NAME] [-f PROJECT2]
                     [-v] [-s] [-m]
                     
@@ -463,6 +476,11 @@ Optional arguments:
   -t PROJECT1, --to PROJECT1
                         Run command in the specified project and all of its 
                         dependencies
+  --from-version-policy VERSION_POLICY_NAME
+                        Run command in all projects with the specified 
+                        version policy and all projects that directly or 
+                        indirectly depend on projects with the specified 
+                        version policy
   --to-version-policy VERSION_POLICY_NAME
                         Run command in all projects with the specified 
                         version policy and all of their dependencies
