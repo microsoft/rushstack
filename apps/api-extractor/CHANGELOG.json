@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.4.2",
+      "tag": "@microsoft/api-extractor_v7.4.2",
+      "date": "Wed, 11 Sep 2019 19:56:23 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for an exported name that conflicts with a global name (GitHub #1350)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.4.1",
       "tag": "@microsoft/api-extractor_v7.4.1",
       "date": "Tue, 10 Sep 2019 22:32:23 GMT",

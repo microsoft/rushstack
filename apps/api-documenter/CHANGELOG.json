@@ -2,6 +2,26 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.4.3",
+      "tag": "@microsoft/api-documenter_v7.4.3",
+      "date": "Wed, 11 Sep 2019 19:56:23 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updating OfficeYamlDocumenter to account for new deeply linked types"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.22` to `0.1.23`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.9` to `6.1.10`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.4.2",
       "tag": "@microsoft/api-documenter_v7.4.2",
       "date": "Tue, 10 Sep 2019 22:32:23 GMT",

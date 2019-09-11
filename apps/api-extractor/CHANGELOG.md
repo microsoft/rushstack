@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 10 Sep 2019 22:32:23 GMT and should not be manually modified.
+This log was last generated on Wed, 11 Sep 2019 19:56:23 GMT and should not be manually modified.
+
+## 7.4.2
+Wed, 11 Sep 2019 19:56:23 GMT
+
+### Patches
+
+- Add support for an exported name that conflicts with a global name (GitHub #1350)
 
 ## 7.4.1
 Tue, 10 Sep 2019 22:32:23 GMT
