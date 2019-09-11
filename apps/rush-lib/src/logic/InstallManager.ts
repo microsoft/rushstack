@@ -940,24 +940,36 @@ export class InstallManager {
               + FileSystem.getRealPath(packageManagerFilename) + ' ' + installArgs.join(' ') + os.EOL);
           }
 
-          Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename,
-            installArgs,
-            this._rushConfiguration.commonTempFolder,
-            undefined,
-            false, () => {
-              if (this._rushConfiguration.packageManager === 'pnpm') {
-                // If there is a failure in pnpm, it is possible that it left the
-                // store in a bad state. Therefore, we should clean out the store
-                // before attempting the install again.
+          try {
+            Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename,
+              installArgs,
+              this._rushConfiguration.commonTempFolder,
+              undefined,
+              false, () => {
+                if (this._rushConfiguration.packageManager === 'pnpm') {
+                  console.log(colors.yellow(`Deleting the "node_modules" folder`));
+                  this._commonTempFolderRecycler.moveFolder(commonNodeModulesFolder);
 
-                console.log(colors.yellow(`Deleting the "node_modules" folder`));
-                this._commonTempFolderRecycler.moveFolder(commonNodeModulesFolder);
-                console.log(colors.yellow(`Deleting the "pnpm-store" folder`));
-                this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
+                  // Leave the pnpm-store as is for the retry. This ensures that packages that have already
+                  // been downloaded need not be downloaded again, thereby potentially increasing the chances
+                  // of a subsequent successful install.
 
-                Utilities.createFolderWithRetry(commonNodeModulesFolder);
-              }
+                  Utilities.createFolderWithRetry(commonNodeModulesFolder);
+                }
             });
+          } catch (error) {
+            // All the install attempts failed.
+
+            if (this._rushConfiguration.packageManager === 'pnpm') {
+              // If the installation has failed even after the retries, then pnpm store may
+              // have got into a corrupted, irrecoverable state. Delete the store so that a
+              // future install can create the store afresh.
+              console.log(colors.yellow(`Deleting the "pnpm-store" folder`));
+              this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
+            }
+
+            throw error;
+          }
 
           if (this._rushConfiguration.packageManager === 'npm') {
 
