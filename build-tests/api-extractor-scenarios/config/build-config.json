@@ -21,8 +21,10 @@
     "exportStar3",
     "importEquals",
     "inconsistentReleaseTags",
+    "internationalCharacters",
     "preapproved",
     "typeOf",
+    "typeOf2",
     "typeParameters"
   ]
 }

@@ -189,7 +189,8 @@ You can also mix the two models.  For example, we could augment the `WidgetComma
 
 ### Further reading
 
-The [API reference](https://microsoft.github.io/web-build-tools/api/) has complete documentation for the library.
+The [API reference](https://rushstack.io/pages/api/ts-command-line/) has
+complete documentation for the library.
 
 Here are some real world GitHub projects that illustrate different use cases for **ts-command-line**:
 

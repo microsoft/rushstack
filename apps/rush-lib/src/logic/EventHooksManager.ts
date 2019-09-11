@@ -36,7 +36,7 @@ export class EventHooksManager {
             script,
             {
               rushConfiguration: this._rushConfiguration,
-              workingDirectory: process.cwd(),
+              workingDirectory: this._rushConfiguration.rushJsonFolder,
               initCwd: this._commonTempFolder,
               handleOutput: true,
               environmentPathOptions: {

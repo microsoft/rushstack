@@ -128,7 +128,13 @@ export function gitStatus(path: string): string {
 }
 
 /**
- * Collects the current git filehashes for a directory
+ * Builds an object containing hashes for the files under the specified `packagePath` folder.
+ * @param packagePath - The folder path to derive the package dependencies from. This is typically the folder
+ *                      containing package.json.  If omitted, the default value is the current working directory.
+ * @param excludedPaths - An optional array of file path exclusions. If a file should be omitted from the list
+ *                         of dependencies, use this to exclude it.
+ * @returns the package-deps.json file content
+ *
  * @public
  */
 export function getPackageDeps(packagePath: string = process.cwd(), excludedPaths?: string[]): IPackageDeps {

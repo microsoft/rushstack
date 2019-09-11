@@ -5,14 +5,11 @@
   "private": true,
   "main": "lib/index.js",
   "typings": "dist/api-extractor-test-02.d.ts",
-  "tsdoc": {
-    "tsdocFlavor": "AEDoc"
-  },
   "scripts": {
     "build": "node build.js"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "7.3.0",
+    "@microsoft/api-extractor": "7.4.1",
     "@types/semver": "5.3.33",
     "@types/node": "8.5.8",
     "api-extractor-test-01": "1.0.0",

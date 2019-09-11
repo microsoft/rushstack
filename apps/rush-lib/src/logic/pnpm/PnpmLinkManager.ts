@@ -36,16 +36,14 @@ export class PnpmLinkManager extends BaseLinkManager {
         localLinks: {}
       };
 
-      const pnpmShrinkwrapFileName: string = this._rushConfiguration.getCommittedShrinkwrapFilename(
-        this._rushConfiguration.currentInstalledVariant
-      );
-
+      // Use shrinkwrap from temp as the committed shrinkwrap may not always be up to date
+      // See https://github.com/microsoft/web-build-tools/issues/1273#issuecomment-492779995
       const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
-        pnpmShrinkwrapFileName
+        this._rushConfiguration.tempShrinkwrapFilename
       );
 
       if (!pnpmShrinkwrapFile) {
-        throw new InternalError(`Cannot load shrinkwrap at "${pnpmShrinkwrapFileName}"`);
+        throw new InternalError(`Cannot load shrinkwrap at "${this._rushConfiguration.tempShrinkwrapFilename}"`);
       }
 
       let promise: Promise<void> = Promise.resolve();
@@ -157,20 +155,17 @@ export class PnpmLinkManager extends BaseLinkManager {
     //   file:projects/bentleyjs-core.tgz
     //   file:projects/build-tools.tgz_dc21d88642e18a947127a751e00b020a
     //   file:projects/imodel-from-geojson.tgz_request@2.88.0
-    const topLevelDependencyVersion: string | undefined =
-      pnpmShrinkwrapFile.getTopLevelDependencyVersion(project.tempProjectName);
+    const tempProjectDependencyKey: string | undefined =
+      pnpmShrinkwrapFile.getTempProjectDependencyKey(project.tempProjectName);
 
-    if (!topLevelDependencyVersion) {
-      throw new InternalError(`Cannot find top level dependency for "${project.tempProjectName}"` +
-        ` in shrinkwrap.`);
+    if (!tempProjectDependencyKey) {
+      throw new Error(`Cannot get dependency key for temp project: ${project.tempProjectName}`);
     }
-
     // e.g.: file:projects/project-name.tgz
-    const tarballEntry: string | undefined = pnpmShrinkwrapFile.getTarballPath(topLevelDependencyVersion);
+    const tarballEntry: string | undefined = pnpmShrinkwrapFile.getTarballPath(tempProjectDependencyKey);
 
     if (!tarballEntry) {
-      throw new InternalError(`Cannot find tarball path for "${topLevelDependencyVersion}"` +
-        ` in shrinkwrap.`);
+      throw new InternalError(`Cannot find tarball path for "${project.tempProjectName}" in shrinkwrap.`);
     }
 
     // e.g.: projects\api-documenter.tgz
@@ -193,8 +188,8 @@ export class PnpmLinkManager extends BaseLinkManager {
     //   '' [empty string]
     //   _jsdom@11.12.0
     //   _2a665c89609864b4e75bc5365d7f8f56
-    const folderNameSuffix: string = (tarballEntry && tarballEntry.length < topLevelDependencyVersion.length ?
-      topLevelDependencyVersion.slice(tarballEntry.length) : '');
+    const folderNameSuffix: string = (tarballEntry && tarballEntry.length < tempProjectDependencyKey.length ?
+      tempProjectDependencyKey.slice(tarballEntry.length) : '');
 
     // e.g.:
     //   C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz

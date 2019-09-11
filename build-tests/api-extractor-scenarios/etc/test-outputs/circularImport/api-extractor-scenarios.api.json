@@ -2,35 +2,27 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1001,
+    "schemaVersion": 1003,
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "api-extractor-scenarios",
+  "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
+      "canonicalReference": "api-extractor-scenarios!",
       "name": "",
       "members": [
         {
           "kind": "Class",
-          "canonicalReference": "(IFile:class)",
+          "canonicalReference": "api-extractor-scenarios!IFile:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "IFile"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class IFile "
             }
           ],
           "releaseTag": "Public",
@@ -38,20 +30,17 @@
           "members": [
             {
               "kind": "Property",
-              "canonicalReference": "(containingFolder:instance)",
+              "canonicalReference": "api-extractor-scenarios!IFile#containingFolder:member",
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "containingFolder"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "containingFolder: "
                 },
                 {
                   "kind": "Reference",
-                  "text": "IFolder"
+                  "text": "IFolder",
+                  "canonicalReference": "api-extractor-scenarios!IFolder:class"
                 },
                 {
                   "kind": "Content",
@@ -61,8 +50,8 @@
               "releaseTag": "Public",
               "name": "containingFolder",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "isStatic": false
             }
@@ -71,20 +60,12 @@
         },
         {
           "kind": "Class",
-          "canonicalReference": "(IFolder:class)",
+          "canonicalReference": "api-extractor-scenarios!IFolder:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "IFolder"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class IFolder "
             }
           ],
           "releaseTag": "Public",
@@ -92,20 +73,17 @@
           "members": [
             {
               "kind": "Property",
-              "canonicalReference": "(containingFolder:instance)",
+              "canonicalReference": "api-extractor-scenarios!IFolder#containingFolder:member",
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "containingFolder"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "containingFolder: "
                 },
                 {
                   "kind": "Reference",
-                  "text": "IFolder"
+                  "text": "IFolder",
+                  "canonicalReference": "api-extractor-scenarios!IFolder:class"
                 },
                 {
                   "kind": "Content",
@@ -119,27 +97,24 @@
               "releaseTag": "Public",
               "name": "containingFolder",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 4
+                "startIndex": 1,
+                "endIndex": 3
               },
               "isStatic": false
             },
             {
               "kind": "Property",
-              "canonicalReference": "(files:instance)",
+              "canonicalReference": "api-extractor-scenarios!IFolder#files:member",
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "files"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "files: "
                 },
                 {
                   "kind": "Reference",
-                  "text": "IFile"
+                  "text": "IFile",
+                  "canonicalReference": "api-extractor-scenarios!IFile:class"
                 },
                 {
                   "kind": "Content",
@@ -153,8 +128,8 @@
               "releaseTag": "Public",
               "name": "files",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 4
+                "startIndex": 1,
+                "endIndex": 3
               },
               "isStatic": false
             }

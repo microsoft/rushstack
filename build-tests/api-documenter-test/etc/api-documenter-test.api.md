@@ -39,6 +39,11 @@ export enum DocEnum {
 }
 
 // @public
+export namespace EcmaSmbols {
+    const example: unique symbol;
+}
+
+// @public
 export type ExampleTypeAlias = Promise<boolean>;
 
 // @public
@@ -61,9 +66,12 @@ export interface IDocInterface2 extends IDocInterface1 {
 
 // @public
 export interface IDocInterface3 {
+    "[not.a.symbol]": string;
+    [EcmaSmbols.example]: string;
     (x: number): number;
     [x: string]: string;
     new (): IDocInterface1;
+    "redundantQuotes": string;
 }
 
 // @public
@@ -87,6 +95,22 @@ export interface IDocInterface6 {
 }
 
 // @public
+export interface IDocInterface6 {
+    // (undocumented)
+    arrayProperty: IDocInterface1[];
+    // (undocumented)
+    genericReferenceMethod<T>(x: T): T;
+    // (undocumented)
+    intersectionProperty: IDocInterface1 & IDocInterface2;
+    // (undocumented)
+    tupleProperty: [IDocInterface1, IDocInterface2];
+    // (undocumented)
+    typeReferenceProperty: Generic<IDocInterface1>;
+    // (undocumented)
+    unionProperty: IDocInterface1 | IDocInterface2;
+}
+
+// @public
 export namespace OuterNamespace {
     export namespace InnerNamespace {
         export function nestedFunction(x: number): number;
@@ -98,6 +122,9 @@ export namespace OuterNamespace {
 export class SystemEvent {
     addHandler(handler: () => void): void;
 }
+
+// @public (undocumented)
+export function yamlReferenceUniquenessTest(): IDocInterface1;
 
 
 ```

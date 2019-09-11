@@ -1,22 +1,17 @@
 import { EOL } from 'os';
-import { TaskRunner } from '../TaskRunner';
+import { TaskRunner, ITaskRunnerOptions } from '../TaskRunner';
 import { ITaskWriter } from '@microsoft/stream-collator';
 import { TaskStatus } from '../TaskStatus';
-import { ITaskDefinition } from '../ITask';
+import { ITaskDefinition, ITask } from '../ITask';
 import { StringBufferTerminalProvider, Terminal } from '@microsoft/node-core-library';
 
-function createDummyTask(name: string, action?: () => void): ITaskDefinition {
-  return {
-    name,
-    isIncrementalBuildAllowed: false,
-    execute: (writer: ITaskWriter) => {
-      if (action) {
-        action();
-      }
-      return Promise.resolve(TaskStatus.Success);
-    },
-    hadEmptyScript: false
-  };
+function createTaskRunner(taskRunnerOptions: ITaskRunnerOptions, taskDefinition: ITaskDefinition): TaskRunner {
+  const task: ITask = taskDefinition as ITask;
+  task.dependencies = new Set<ITask>();
+  task.dependents = new Set<ITask>();
+  task.status = TaskStatus.Ready;
+
+  return new TaskRunner([task], taskRunnerOptions);
 }
 
 function checkConsoleOutput(terminalProvider: StringBufferTerminalProvider): void {
@@ -30,6 +25,7 @@ describe('TaskRunner', () => {
   let terminalProvider: StringBufferTerminalProvider;
   let terminal: Terminal;
   let taskRunner: TaskRunner;
+  let taskRunnerOptions: ITaskRunnerOptions;
 
   beforeEach(() => {
     terminalProvider = new StringBufferTerminalProvider(true);
@@ -38,7 +34,7 @@ describe('TaskRunner', () => {
 
   describe('Constructor', () => {
     it('throwsErrorOnInvalidParallelism', () => {
-      expect(() => new TaskRunner({
+      expect(() => new TaskRunner([], {
         quietMode: false,
         parallelism: 'tequila',
         changedProjectsOnly: false,
@@ -48,66 +44,21 @@ describe('TaskRunner', () => {
     });
   });
 
-  describe('Dependencies', () => {
-    beforeEach(() => {
-      taskRunner = new TaskRunner({
-          quietMode: false,
-          parallelism: '1',
-          changedProjectsOnly: false,
-          terminal,
-          allowWarningsInSuccessfulBuild: false
-      });
-    });
-
-    it('throwsErrorOnNonExistentTask', () => {
-      expect(() => taskRunner.addDependencies('foo', []))
-        .toThrowErrorMatchingSnapshot();
-    });
-
-    it('throwsErrorOnNonExistentDependency', () => {
-      taskRunner.addTask(createDummyTask('foo'));
-      expect(() => taskRunner.addDependencies('foo', ['bar']))
-        .toThrowErrorMatchingSnapshot();
-    });
-
-    it('detectsDependencyCycle', () => {
-      taskRunner.addTask(createDummyTask('foo'));
-      taskRunner.addTask(createDummyTask('bar'));
-      taskRunner.addDependencies('foo', ['bar']);
-      taskRunner.addDependencies('bar', ['foo']);
-      expect(() => taskRunner.execute()).toThrowErrorMatchingSnapshot();
-    });
-
-    it('respectsDependencyOrder', () => {
-      const result: Array<string> = [];
-      taskRunner.addTask(createDummyTask('two', () => result.push('2')));
-      taskRunner.addTask(createDummyTask('one', () => result.push('1')));
-      taskRunner.addDependencies('two', ['one']);
-      return taskRunner
-        .execute()
-        .then(() => {
-          expect(result.join(',')).toEqual('1,2');
-          checkConsoleOutput(terminalProvider);
-        })
-        .catch(error => fail(error));
-    });
-  });
-
   describe('Error logging', () => {
     beforeEach(() => {
-      taskRunner = new TaskRunner({
+      taskRunnerOptions = {
         quietMode: false,
         parallelism: '1',
         changedProjectsOnly: false,
         terminal,
         allowWarningsInSuccessfulBuild: false
-      });
+      };
     });
 
     const EXPECTED_FAIL: string = 'Promise returned by execute() resolved but was expected to fail';
 
     it('printedStderrAfterError', () => {
-      taskRunner.addTask({
+      taskRunner = createTaskRunner(taskRunnerOptions, {
         name: 'stdout+stderr',
         isIncrementalBuildAllowed: false,
         execute: (writer: ITaskWriter) => {
@@ -117,6 +68,7 @@ describe('TaskRunner', () => {
         },
         hadEmptyScript: false
       });
+
       return taskRunner
         .execute()
         .then(() => fail(EXPECTED_FAIL))
@@ -130,7 +82,7 @@ describe('TaskRunner', () => {
     });
 
     it('printedStdoutAfterErrorWithEmptyStderr', () => {
-      taskRunner.addTask({
+      taskRunner = createTaskRunner(taskRunnerOptions, {
         name: 'stdout only',
         isIncrementalBuildAllowed: false,
         execute: (writer: ITaskWriter) => {
@@ -140,6 +92,7 @@ describe('TaskRunner', () => {
         },
         hadEmptyScript: false
       });
+
       return taskRunner
         .execute()
         .then(() => fail(EXPECTED_FAIL))
@@ -151,7 +104,7 @@ describe('TaskRunner', () => {
     });
 
     it('printedAbridgedStdoutAfterErrorWithEmptyStderr', () => {
-      taskRunner.addTask({
+      taskRunner = createTaskRunner(taskRunnerOptions, {
         name: 'large stdout only',
         isIncrementalBuildAllowed: false,
         execute: (writer: ITaskWriter) => {
@@ -163,6 +116,7 @@ describe('TaskRunner', () => {
         },
         hadEmptyScript: false
       });
+
       return taskRunner
         .execute()
         .then(() => fail(EXPECTED_FAIL))
@@ -175,7 +129,7 @@ describe('TaskRunner', () => {
     });
 
     it('preservedLeadingBlanksButTrimmedTrailingBlanks', () => {
-      taskRunner.addTask({
+      taskRunner = createTaskRunner(taskRunnerOptions, {
         name: 'large stderr with leading and trailing blanks',
         isIncrementalBuildAllowed: false,
         execute: (writer: ITaskWriter) => {
@@ -187,6 +141,7 @@ describe('TaskRunner', () => {
         },
         hadEmptyScript: false
       });
+
       return taskRunner
         .execute()
         .then(() => fail(EXPECTED_FAIL))
@@ -202,17 +157,17 @@ describe('TaskRunner', () => {
   describe('Warning logging', () => {
     describe('Fail on warning', () => {
       beforeEach(() => {
-        taskRunner = new TaskRunner({
+        taskRunnerOptions = {
           quietMode: false,
           parallelism: '1',
           changedProjectsOnly: false,
           terminal,
           allowWarningsInSuccessfulBuild: false
-        });
+        };
       });
 
       it('Logs warnings correctly', () => {
-        taskRunner.addTask({
+        taskRunner = createTaskRunner(taskRunnerOptions, {
           name: 'success with warnings (failure)',
           isIncrementalBuildAllowed: false,
           execute: (writer: ITaskWriter) => {
@@ -238,17 +193,17 @@ describe('TaskRunner', () => {
 
     describe('Success on warning', () => {
       beforeEach(() => {
-        taskRunner = new TaskRunner({
+        taskRunnerOptions = {
           quietMode: false,
           parallelism: '1',
           changedProjectsOnly: false,
           terminal,
           allowWarningsInSuccessfulBuild: true
-        });
+        };
       });
 
       it('Logs warnings correctly', () => {
-        taskRunner.addTask({
+        taskRunner = createTaskRunner(taskRunnerOptions, {
           name: 'success with warnings (success)',
           isIncrementalBuildAllowed: false,
           execute: (writer: ITaskWriter) => {

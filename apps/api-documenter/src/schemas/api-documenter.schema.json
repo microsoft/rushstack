@@ -8,11 +8,26 @@
       "type": "string"
     },
 
+    "outputTarget": {
+      "description": "Specifies what type of documentation will be generated",
+      "type": "string",
+      "enum": [
+        "docfx",
+        "markdown"
+      ]
+    },
+
+    "plugins": {
+      "description": "Specifies plugin packages to be loaded",
+      "type": "array"
+    },
+
     "tableOfContents": {
       "description": "Configures how the table of contents is generated.",
       "type": "object",
       "additionalProperties": true
     },
   },
+
   "additionalProperties": false
 }

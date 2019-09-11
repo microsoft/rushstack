@@ -2,35 +2,27 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1001,
+    "schemaVersion": 1003,
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "api-extractor-scenarios",
+  "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
+      "canonicalReference": "api-extractor-scenarios!",
       "name": "",
       "members": [
         {
           "kind": "Interface",
-          "canonicalReference": "(ITeamsContext:interface)",
+          "canonicalReference": "api-extractor-scenarios!ITeamsContext:interface",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export interface "
-            },
-            {
-              "kind": "Reference",
-              "text": "ITeamsContext"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export interface ITeamsContext "
             }
           ],
           "releaseTag": "Public",
@@ -38,20 +30,17 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "canonicalReference": "context",
+              "canonicalReference": "api-extractor-scenarios!ITeamsContext#context:member",
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "context"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "context: "
                 },
                 {
                   "kind": "Reference",
-                  "text": "Context"
+                  "text": "Context",
+                  "canonicalReference": "!microsoftTeams.Context:interface"
                 },
                 {
                   "kind": "Content",
@@ -61,8 +50,8 @@
               "releaseTag": "Public",
               "name": "context",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             }
           ],

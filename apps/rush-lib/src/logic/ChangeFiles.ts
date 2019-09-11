@@ -8,6 +8,7 @@ import { Utilities } from '../utilities/Utilities';
 import { IChangeInfo } from '../api/ChangeManagement';
 import { IChangelog } from '../api/Changelog';
 import { JsonFile } from '@microsoft/node-core-library';
+import { RushConfiguration } from '../api/RushConfiguration';
 
 /**
  * This class represents the collection of change files existing in the repo and provides operations
@@ -26,13 +27,27 @@ export class ChangeFiles {
    */
   public static validate(
     newChangeFilePaths: string[],
-    changedPackages: string[]
+    changedPackages: string[],
+    rushConfiguration: RushConfiguration
   ): void {
     const projectsWithChangeDescriptions: Set<string> = new Set<string>();
     newChangeFilePaths.forEach((filePath) => {
       console.log(`Found change file: ${filePath}`);
 
       const changeFile: IChangeInfo = JsonFile.load(filePath);
+
+      if (rushConfiguration.hotfixChangeEnabled) {
+        if (changeFile && changeFile.changes) {
+          for (const change of changeFile.changes) {
+            if (change.type !== 'none' && change.type !== 'hotfix') {
+              throw new Error(
+                `Change file ${filePath} specifies a type of '${change.type}' ` +
+                `but only 'hotfix' and 'none' change types may be used in a branch with 'hotfixChangeEnabled'.`);
+            }
+          }
+        }
+      }
+
       if (changeFile && changeFile.changes) {
         changeFile.changes.forEach(change => projectsWithChangeDescriptions.add(change.packageName));
       } else {

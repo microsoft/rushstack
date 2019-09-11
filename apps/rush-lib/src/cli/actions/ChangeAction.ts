@@ -143,7 +143,6 @@ export class ChangeAction extends BaseRushAction {
 
   private _verify(): void {
     const changedPackages: string[] = this._getChangedPackageNames();
-
     if (changedPackages.length > 0) {
       this._validateChangeFile(changedPackages);
     } else {
@@ -171,22 +170,29 @@ export class ChangeAction extends BaseRushAction {
     }
     const changedPackageNames: Set<string> = new Set<string>();
 
+    const repoRootFolder: string | undefined = VersionControl.getRepositoryRootPath();
     this.rushConfiguration.projects
     .filter(project => project.shouldPublish)
     .filter(project => !project.versionPolicy || !project.versionPolicy.exemptFromRushChange)
-    .filter(project => this._hasProjectChanged(changedFolders, project))
+    .filter(project => {
+      const projectFolder: string = repoRootFolder
+        ? path.relative(repoRootFolder, project.projectFolder)
+        : project.projectRelativeFolder;
+      return this._hasProjectChanged(changedFolders, projectFolder);
+    })
     .forEach(project => {
       const hostName: string | undefined = this._projectHostMap.get(project.packageName);
       if (hostName) {
         changedPackageNames.add(hostName);
       }
     });
+
     return [...changedPackageNames];
   }
 
   private _validateChangeFile(changedPackages: string[]): void {
     const files: string[] = this._getChangeFiles();
-    ChangeFiles.validate(files, changedPackages);
+    ChangeFiles.validate(files, changedPackages, this.rushConfiguration);
   }
 
   private _getChangeFiles(): string[] {
@@ -195,18 +201,22 @@ export class ChangeAction extends BaseRushAction {
     });
   }
 
-  private _hasProjectChanged(changedFolders: Array<string | undefined>,
-    project: RushConfigurationProject): boolean {
-    let normalizedFolder: string = project.projectRelativeFolder;
+  private _hasProjectChanged(
+    changedFolders: Array<string | undefined>,
+    projectFolder: string
+  ): boolean {
+    let normalizedFolder: string = projectFolder.replace(/\\/g, '/'); // Replace backslashes with forward slashes
     if (normalizedFolder.charAt(normalizedFolder.length - 1) !== '/') {
       normalizedFolder = normalizedFolder + '/';
     }
+
     const pathRegex: RegExp = new RegExp(`^${normalizedFolder}`, 'i');
     for (const folder of changedFolders) {
       if (folder && folder.match(pathRegex)) {
         return true;
       }
     }
+
     return false;
   }
 
@@ -329,16 +339,13 @@ export class ChangeAction extends BaseRushAction {
     const project: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(packageName);
     const versionPolicy: VersionPolicy | undefined = project!.versionPolicy;
 
-    let bumpOptions: { [type: string]: string } = {
+    let bumpOptions: { [type: string]: string } = this.rushConfiguration.hotfixChangeEnabled ? {
+      'hotfix': 'hotfix - for changes that need to be published in a separate hotfix package'
+    } : {
       'major': 'major - for changes that break compatibility, e.g. removing an API',
       'minor': 'minor - for backwards compatible changes, e.g. adding a new API',
       'patch': 'patch - for changes that do not affect compatibility, e.g. fixing a bug'
     };
-
-    if (this.rushConfiguration.hotfixChangeEnabled) {
-      // tslint:disable-next-line:no-string-literal
-      bumpOptions['hotfix'] = 'hotfix - for changes that need to be published in a separate hotfix package';
-    }
 
     if (versionPolicy) {
       if (versionPolicy.definitionName === VersionPolicyDefinitionName.lockStepVersion) {

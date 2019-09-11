@@ -3,10 +3,10 @@
 
 import * as colors from 'colors';
 import * as semver from 'semver';
-import npmPackageArg = require('npm-package-arg');
 import { PackageName, FileSystem } from '@microsoft/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
+import { DependencySpecifier } from '../DependencySpecifier';
 
 /**
  * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's pnpm-lock.yaml file formats.
@@ -34,13 +34,14 @@ export abstract class BaseShrinkwrapFile {
    *
    * @virtual
    */
-  public hasCompatibleTopLevelDependency(dependencyName: string, versionRange: string): boolean {
-    const dependencyVersion: string | undefined = this.getTopLevelDependencyVersion(dependencyName);
-    if (!dependencyVersion) {
+  public hasCompatibleTopLevelDependency(dependencySpecifier: DependencySpecifier): boolean {
+    const shrinkwrapDependency: DependencySpecifier | undefined
+      = this.getTopLevelDependencyVersion(dependencySpecifier.packageName);
+    if (!shrinkwrapDependency) {
       return false;
     }
 
-    return this._checkDependencyVerson(dependencyName, versionRange, dependencyVersion);
+    return this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency);
   }
 
   /**
@@ -62,25 +63,32 @@ export abstract class BaseShrinkwrapFile {
    *
    * @virtual
    */
-  public tryEnsureCompatibleDependency(dependencyName: string, versionRange: string, tempProjectName: string): boolean {
-    const dependencyVersion: string | undefined =
-      this.tryEnsureDependencyVersion(dependencyName, tempProjectName, versionRange);
-    if (!dependencyVersion) {
+  public tryEnsureCompatibleDependency(dependencySpecifier: DependencySpecifier, tempProjectName: string): boolean {
+    const shrinkwrapDependency: DependencySpecifier | undefined =
+      this.tryEnsureDependencyVersion(dependencySpecifier, tempProjectName);
+    if (!shrinkwrapDependency) {
       return false;
     }
 
-    return this._checkDependencyVerson(dependencyName, versionRange, dependencyVersion);
+    return this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency);
   }
 
   /**
    * Returns the list of temp projects defined in this file.
    * Example: [ '@rush-temp/project1', '@rush-temp/project2' ]
+   *
+   * @virtual
    */
   public abstract getTempProjectNames(): ReadonlyArray<string>;
 
-  protected abstract tryEnsureDependencyVersion(dependencyName: string,
-    tempProjectName: string, versionRange: string): string | undefined;
-  protected abstract getTopLevelDependencyVersion(dependencyName: string): string | undefined;
+  /** @virtual */
+  protected abstract tryEnsureDependencyVersion(dependencySpecifier: DependencySpecifier,
+    tempProjectName: string): DependencySpecifier | undefined;
+
+  /** @virtual */
+  protected abstract getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined;
+
+  /** @virtual */
   protected abstract serialize(): string;
 
   protected _getTempProjectNames(dependencies: { [key: string]: {} } ): ReadonlyArray<string> {
@@ -95,22 +103,53 @@ export abstract class BaseShrinkwrapFile {
     return result;
   }
 
-  protected checkValidVersionRange(dependencyVersion: string, versionRange: string): boolean {
-    // If it's a SemVer pattern, then require that the shrinkwrapped version must be compatible
-    return semver.satisfies(dependencyVersion, versionRange);
-  }
+  private _checkDependencyVersion(projectDependency: DependencySpecifier,
+    shrinkwrapDependency: DependencySpecifier): boolean {
 
-  private _checkDependencyVerson(dependencyName: string, versionRange: string, dependencyVersion: string): boolean {
-    const result: npmPackageArg.IResult = npmPackageArg.resolve(dependencyName, versionRange);
-    switch (result.type) {
+    let normalizedProjectDependency: DependencySpecifier = projectDependency;
+    let normalizedShrinkwrapDependency: DependencySpecifier = shrinkwrapDependency;
+
+    // Special handling for NPM package aliases such as this:
+    //
+    // "dependencies": {
+    //   "alias-name": "npm:target-name@^1.2.3"
+    // }
+    //
+    // In this case, the shrinkwrap file will have a key equivalent to "npm:target-name@1.2.5",
+    // and so we need to unwrap the target and compare "1.2.5" with "^1.2.3".
+    if (projectDependency.specifierType === 'alias') {
+      // Does the shrinkwrap install it as an alias?
+      if (shrinkwrapDependency.specifierType === 'alias') {
+        // Does the shrinkwrap have the right package name?
+        if (projectDependency.packageName === shrinkwrapDependency.packageName) {
+          // Yes, the aliases match, so let's compare their targets in the logic below
+          normalizedProjectDependency = projectDependency.aliasTarget!;
+          normalizedShrinkwrapDependency = shrinkwrapDependency.aliasTarget!;
+        } else {
+          // If the names are different, then it's a mismatch
+          return false;
+        }
+      } else {
+        // A non-alias cannot satisfy an alias dependency; at least, let's avoid that idea
+        return false;
+      }
+    }
+
+    switch (normalizedProjectDependency.specifierType) {
       case 'version':
       case 'range':
-        return this.checkValidVersionRange(dependencyVersion, versionRange);
+        return semver.satisfies(normalizedShrinkwrapDependency.versionSpecifier,
+          normalizedProjectDependency.versionSpecifier);
       default:
-        // Only warn once for each spec
-        if (!this._alreadyWarnedSpecs.has(result.rawSpec)) {
-          this._alreadyWarnedSpecs.add(result.rawSpec);
-          console.log(colors.yellow(`WARNING: Not validating ${result.type}-based specifier: "${result.rawSpec}"`));
+        // For other version specifier types like "file:./blah.tgz" or "git://github.com/npm/cli.git#v1.0.27"
+        // we allow the installation to continue but issue a warning.  The "rush install" checks will not work
+        // correctly.
+
+        // Only warn once for each versionSpecifier
+        if (!this._alreadyWarnedSpecs.has(projectDependency.versionSpecifier)) {
+          this._alreadyWarnedSpecs.add(projectDependency.versionSpecifier);
+          console.log(colors.yellow(`WARNING: Not validating ${projectDependency.specifierType}-based`
+            + ` specifier: "${projectDependency.versionSpecifier}"`));
         }
         return true;
     }

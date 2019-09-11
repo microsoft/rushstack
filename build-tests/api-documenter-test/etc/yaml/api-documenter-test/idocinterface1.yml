@@ -1,15 +1,15 @@
 ### YamlMime:UniversalReference
 items:
-  - uid: api-documenter-test.IDocInterface1
+  - uid: 'api-documenter-test!IDocInterface1:interface'
     name: IDocInterface1
     fullName: IDocInterface1
     langs:
       - typeScript
     type: interface
-    package: api-documenter-test
+    package: api-documenter-test!
     children:
-      - api-documenter-test.IDocInterface1.regularProperty
-  - uid: api-documenter-test.IDocInterface1.regularProperty
+      - 'api-documenter-test!IDocInterface1#regularProperty:member'
+  - uid: 'api-documenter-test!IDocInterface1#regularProperty:member'
     summary: Does something
     name: regularProperty
     fullName: regularProperty
@@ -20,4 +20,7 @@ items:
       content: 'regularProperty: SystemEvent;'
       return:
         type:
-          - api-documenter-test.SystemEvent
+          - 'api-documenter-test!SystemEvent:class'
+references:
+  - uid: 'api-documenter-test!SystemEvent:class'
+    name: SystemEvent

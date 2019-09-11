@@ -5,8 +5,15 @@ import * as path from 'path';
 
 import { IChangelog } from '../../api/Changelog';
 import { ChangeFiles } from '../ChangeFiles';
+import { RushConfiguration } from '../../api/RushConfiguration';
 
 describe('ChangeFiles', () => {
+  let rushConfiguration: RushConfiguration;
+
+  beforeEach(() => {
+    rushConfiguration = {} as RushConfiguration;
+  });
+
   describe('getFiles', () => {
     it('returns correctly when there is one change file', () => {
       const changesPath: string = path.join(__dirname, 'leafChange');
@@ -37,11 +44,25 @@ describe('ChangeFiles', () => {
   });
 
   describe('validate', () => {
+    it('throws when there is a patch in a hotfix branch.', () => {
+      const changeFile: string = path.join(__dirname, 'leafChange', 'change1.json');
+      const changedPackages: string[] = ['d'];
+      expect(() => {
+        ChangeFiles.validate([changeFile], changedPackages, { hotfixChangeEnabled: true } as RushConfiguration);
+      }).toThrow(Error);
+    });
+
+    it('allows a hotfix in a hotfix branch.', () => {
+      const changeFile: string = path.join(__dirname, 'multipleHotfixChanges', 'change1.json');
+      const changedPackages: string[] = ['a'];
+      ChangeFiles.validate([changeFile], changedPackages, { hotfixChangeEnabled: true } as RushConfiguration);
+    });
+
     it('throws when there is any missing package.', () => {
       const changeFile: string = path.join(__dirname, 'verifyChanges', 'changes.json');
       const changedPackages: string[] = ['a', 'b', 'c'];
       expect(() => {
-        ChangeFiles.validate([changeFile], changedPackages);
+        ChangeFiles.validate([changeFile], changedPackages, rushConfiguration);
       }).toThrow(Error);
     });
 
@@ -49,7 +70,7 @@ describe('ChangeFiles', () => {
       const changeFile: string = path.join(__dirname, 'verifyChanges', 'changes.json');
       const changedPackages: string[] = ['a'];
       expect(() => {
-        ChangeFiles.validate([changeFile], changedPackages);
+        ChangeFiles.validate([changeFile], changedPackages, rushConfiguration);
       }).not.toThrow();
     });
 
@@ -58,7 +79,7 @@ describe('ChangeFiles', () => {
       const changeFileB: string = path.join(__dirname, 'categorizedChanges', '@ms', 'b', 'changeB.json');
       const changedPackages: string[] = ['@ms/a', '@ms/b', 'c'];
       expect(() => {
-        ChangeFiles.validate([changeFileA, changeFileB], changedPackages);
+        ChangeFiles.validate([changeFileA, changeFileB], changedPackages, rushConfiguration);
       }).toThrow(Error);
     });
 
@@ -68,7 +89,7 @@ describe('ChangeFiles', () => {
       const changeFileC: string = path.join(__dirname, 'categorizedChanges', 'changeC.json');
       const changedPackages: string[] = ['@ms/a', '@ms/b', 'c'];
       expect(() => {
-        ChangeFiles.validate([changeFileA, changeFileB, changeFileC], changedPackages);
+        ChangeFiles.validate([changeFileA, changeFileB, changeFileC], changedPackages, rushConfiguration);
       }).not.toThrow(Error);
     });
   });

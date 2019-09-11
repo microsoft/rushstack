@@ -98,6 +98,8 @@ export interface ISetWebpackPublicPathPluginOptions extends ISetWebpackPublicPat
 
 interface IV4MainTemplate extends Webpack.compilation.MainTemplate {
   hooks: {
+    jsonpScript?: Tapable.SyncWaterfallHook<string, Webpack.compilation.Chunk, string>;
+    requireExtensions: Tapable.SyncWaterfallHook<string, Webpack.compilation.Chunk, string>;
     startup: Tapable.SyncHook<string, Webpack.compilation.Chunk, string>;
   };
   requireFn: string;

@@ -30,6 +30,4 @@ export interface ITaskWriter {
 }
 
 
-// (No @packageDocumentation comment for this package)
-
 ```

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeclarationReference, Meaning, Navigation, Component } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
 import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyItem';
@@ -49,11 +50,11 @@ export interface IApiPropertyOptions extends IApiPropertyItemOptions,
  */
 export class ApiProperty extends ApiStaticMixin(ApiPropertyItem) {
 
-  public static getCanonicalReference(name: string, isStatic: boolean): string {
+  public static getContainerKey(name: string, isStatic: boolean): string {
     if (isStatic) {
-      return `(${name}:static)`;
+      return `${name}|${ApiItemKind.Property}|static`;
     } else {
-      return `(${name}:instance)`;
+      return `${name}|${ApiItemKind.Property}|instance`;
     }
   }
 
@@ -67,7 +68,15 @@ export class ApiProperty extends ApiStaticMixin(ApiPropertyItem) {
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiProperty.getCanonicalReference(this.name, this.isStatic);
+  public get containerKey(): string {
+    return ApiProperty.getContainerKey(this.name, this.isStatic);
+  }
+
+  /** @beta @override */
+  public buildCanonicalReference(): DeclarationReference {
+    const nameComponent: Component = DeclarationReference.parseComponent(this.name);
+    return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
+      .addNavigationStep(this.isStatic ? Navigation.Exports : Navigation.Members, nameComponent)
+      .withMeaning(Meaning.Member);
   }
 }

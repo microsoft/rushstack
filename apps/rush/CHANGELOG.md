@@ -1,6 +1,99 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 29 Jun 2019 02:47:42 GMT and should not be manually modified.
+This log was last generated on Tue, 10 Sep 2019 19:45:15 GMT and should not be manually modified.
+
+## 5.12.1
+Tue, 10 Sep 2019 19:45:15 GMT
+
+### Updates
+
+- Fix an issue where Rush attempted to add Git tags for packages that had already been published when the publish command is run with the --pack and --apply-git-tags-on-pack flags. This caused a fatal error when tags already existed.
+
+## 5.12.0
+Wed, 04 Sep 2019 19:01:42 GMT
+
+### Updates
+
+- Adding --apply-git-tags-on-pack flag to the publish command to apply git tags when using --pack
+- For rush publish and rush version, change the path spec for git add to include everything from the repo root directory. This addresses https://github.com/microsoft/web-build-tools/issues/669.
+- Add support for NPM package aliases (i.e. dependency versions such as "npm:example@^1.2.3")
+- Fix an issue with rush change that occurs when rush.json isn't in the repository root.
+
+## 5.11.4
+Fri, 23 Aug 2019 03:31:52 GMT
+
+### Updates
+
+- Some optimizations for --to, --from, and cyclic dependency detection for repos with large numbers of projects.
+- Ensure install-run-rushx script is updated during "rush update"
+
+## 5.11.3
+Wed, 21 Aug 2019 22:13:26 GMT
+
+### Updates
+
+- Add support for the RUSH_PREVIEW_VERSION environment variable to the install-run-rush script.
+- Add support for the RUSH_TEMP_FOLDER environment variable in the install-run-rush script.
+- Add install-run-rushx script to enable easy execution of the rushx command in CI
+
+## 5.11.2
+Fri, 16 Aug 2019 05:15:17 GMT
+
+### Updates
+
+- Refactor build action to allow generating build graph statically
+- Security updates.
+- Fix validation of hotfix changes in a hotfix-enabled branch
+- Clarify that "rush update --full" should be run when changing certain settings
+
+## 5.11.1
+Fri, 26 Jul 2019 23:08:23 GMT
+
+### Updates
+
+- Fix critical path computation for projects
+- Normalize the casing of a temp folder specified with RUSH_TEMP_FOLDER.
+
+## 5.11.0
+Fri, 26 Jul 2019 08:34:03 GMT
+
+### Updates
+
+- Generate skeleton BuildXL script modules for each package
+- Allow building with newer versions of Node during development
+- Add experimental rush-buildxl package
+- Ensure the filesystem paths that Rush uses have the same character casing that exists on disk.
+- Tweak NodeJS version warning messages and add suppressNodeLtsWarning option to rush.json to suppress non-LTS version warning.
+- Do not terminate rush execution if a temp project lacks an entry in the PNPM shrinkwrap. Instead, allow the program to continue so that PNPM can update the outdated shrinkwrap. This fixes #1418 https://github.com/microsoft/web-build-tools/issues/1418.
+
+## 5.10.3
+Thu, 18 Jul 2019 00:07:46 GMT
+
+### Updates
+
+- Make event hooks run from the folder that contains the rush.json file.
+- Fix 1392 "rush install not working on pnpm 3.5" by getting the temporary project dependency key from the shrinkwrap file. See  https://github.com/microsoft/web-build-tools/issues/1392.
+
+## 5.10.2
+Tue, 16 Jul 2019 19:36:08 GMT
+
+### Updates
+
+- Prevent non-hotfix changes from being applied to hotfix branches
+- Use the shrinkwrap from temp for "rush link" as the committed shrinkwrap may not always be up to date as a result of shrinkwrap churn optimization. See https://github.com/microsoft/web-build-tools/issues/1273#issuecomment-492779995 for more details about shrinkwrap churn optimization.
+
+## 5.10.1
+Thu, 11 Jul 2019 22:00:50 GMT
+
+### Updates
+
+- Fix for issue https://github.com/microsoft/web-build-tools/issues/1349 rush install fails when there is a preferred version with a peer dependency. This was caused by file format changes in pnpm 3.x 
+- Fix an issue where "rush add" erroneously believes ensureConsistentVersions is unset.
+- Fix an issue that arises when "rush add" is run and the package manager isn't installed.
+- Fix an issue where rush add -m doesn't corretly update the common-versions.json file.
+- Fix an issue where rush change will detect unrelated changes.
+- When rush change detects no changes, clarify that no *relevant* changes were detected in the case that changes were in a package not versioned by rush'
+- Fix https://github.com/microsoft/web-build-tools/issues/1347: rush link was failing on pnpm 3+ with the changes in shrinkwrap format with regard to peer dependencies. Rush now resolves the path to the local project accurately by referring to the shrinkwrap rather than figuring out the path on its own.
 
 ## 5.10.0
 Sat, 29 Jun 2019 02:47:42 GMT

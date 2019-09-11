@@ -1,0 +1,101 @@
+{
+  "metadata": {
+    "toolPackage": "@microsoft/api-extractor",
+    "toolVersion": "[test mode]",
+    "schemaVersion": 1003,
+    "oldestForwardsCompatibleVersion": 1001
+  },
+  "kind": "Package",
+  "canonicalReference": "api-extractor-scenarios!",
+  "docComment": "",
+  "name": "api-extractor-scenarios",
+  "members": [
+    {
+      "kind": "EntryPoint",
+      "canonicalReference": "api-extractor-scenarios!",
+      "name": "",
+      "members": [
+        {
+          "kind": "Function",
+          "canonicalReference": "api-extractor-scenarios!f:function(1)",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function f(): "
+            },
+            {
+              "kind": "Content",
+              "text": "{\n    a: number;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [],
+          "name": "f"
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "api-extractor-scenarios!g:function(1)",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function g(callback: "
+            },
+            {
+              "kind": "Content",
+              "text": "typeof "
+            },
+            {
+              "kind": "Reference",
+              "text": "f",
+              "canonicalReference": "api-extractor-scenarios!f:function"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "typeof "
+            },
+            {
+              "kind": "Reference",
+              "text": "f",
+              "canonicalReference": "api-extractor-scenarios!f:function"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 4,
+            "endIndex": 6
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "callback",
+              "parameterTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 3
+              }
+            }
+          ],
+          "name": "g"
+        }
+      ]
+    }
+  ]
+}

@@ -2,35 +2,27 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1001,
+    "schemaVersion": 1003,
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "api-extractor-scenarios",
+  "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
+      "canonicalReference": "api-extractor-scenarios!",
       "name": "",
       "members": [
         {
           "kind": "Class",
-          "canonicalReference": "(CyclicA:class)",
+          "canonicalReference": "api-extractor-scenarios!CyclicA:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "CyclicA"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class CyclicA "
             }
           ],
           "releaseTag": "Public",
@@ -38,16 +30,12 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "(methodA1:instance,0)",
+              "canonicalReference": "api-extractor-scenarios!CyclicA#methodA1:member(1)",
               "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "methodA1"
-                },
-                {
                   "kind": "Content",
-                  "text": "(): "
+                  "text": "methodA1(): "
                 },
                 {
                   "kind": "Content",
@@ -60,26 +48,22 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "methodA1"
             },
             {
               "kind": "Method",
-              "canonicalReference": "(methodA3:instance,0)",
+              "canonicalReference": "api-extractor-scenarios!CyclicA#methodA3:member(1)",
               "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "methodA3"
-                },
-                {
                   "kind": "Content",
-                  "text": "(): "
+                  "text": "methodA3(): "
                 },
                 {
                   "kind": "Content",
@@ -92,11 +76,11 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "methodA3"
             }
@@ -105,20 +89,12 @@
         },
         {
           "kind": "Class",
-          "canonicalReference": "(CyclicB:class)",
+          "canonicalReference": "api-extractor-scenarios!CyclicB:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "CyclicB"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class CyclicB "
             }
           ],
           "releaseTag": "Public",
@@ -126,16 +102,12 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "(methodB2:instance,0)",
+              "canonicalReference": "api-extractor-scenarios!CyclicB#methodB2:member(1)",
               "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "methodB2"
-                },
-                {
                   "kind": "Content",
-                  "text": "(): "
+                  "text": "methodB2(): "
                 },
                 {
                   "kind": "Content",
@@ -148,26 +120,22 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "methodB2"
             },
             {
               "kind": "Method",
-              "canonicalReference": "(methodB4:instance,0)",
+              "canonicalReference": "api-extractor-scenarios!CyclicB#methodB4:member(1)",
               "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "methodB4"
-                },
-                {
                   "kind": "Content",
-                  "text": "(): "
+                  "text": "methodB4(): "
                 },
                 {
                   "kind": "Content",
@@ -180,11 +148,11 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "methodB4"
             }
@@ -193,20 +161,12 @@
         },
         {
           "kind": "Class",
-          "canonicalReference": "(FailWithSelfReference:class)",
+          "canonicalReference": "api-extractor-scenarios!FailWithSelfReference:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "FailWithSelfReference"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class FailWithSelfReference "
             }
           ],
           "releaseTag": "Public",
@@ -214,16 +174,12 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "(method1:instance,0)",
+              "canonicalReference": "api-extractor-scenarios!FailWithSelfReference#method1:member(1)",
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "method1"
-                },
-                {
                   "kind": "Content",
-                  "text": "(): "
+                  "text": "method1(): "
                 },
                 {
                   "kind": "Content",
@@ -236,26 +192,22 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "method1"
             },
             {
               "kind": "Method",
-              "canonicalReference": "(method2:instance,0)",
+              "canonicalReference": "api-extractor-scenarios!FailWithSelfReference#method2:member(1)",
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "method2"
-                },
-                {
                   "kind": "Content",
-                  "text": "(): "
+                  "text": "method2(): "
                 },
                 {
                   "kind": "Content",
@@ -268,11 +220,11 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "method2"
             }

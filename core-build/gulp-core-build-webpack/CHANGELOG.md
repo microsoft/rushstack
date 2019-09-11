@@ -1,6 +1,85 @@
 # Change Log - @microsoft/gulp-core-build-webpack
 
-This log was last generated on Tue, 09 Jul 2019 19:13:24 GMT and should not be manually modified.
+This log was last generated on Tue, 10 Sep 2019 22:32:23 GMT and should not be manually modified.
+
+## 3.5.10
+Tue, 10 Sep 2019 22:32:23 GMT
+
+*Version update only*
+
+## 3.5.9
+Tue, 10 Sep 2019 20:38:33 GMT
+
+*Version update only*
+
+## 3.5.8
+Wed, 04 Sep 2019 18:28:06 GMT
+
+*Version update only*
+
+## 3.5.7
+Wed, 04 Sep 2019 15:15:37 GMT
+
+*Version update only*
+
+## 3.5.6
+Wed, 04 Sep 2019 01:43:31 GMT
+
+### Patches
+
+- Make @types/webpack dependency more loose, add @types/webpack-dev-server.
+
+## 3.5.5
+Fri, 30 Aug 2019 00:14:32 GMT
+
+*Version update only*
+
+## 3.5.4
+Mon, 12 Aug 2019 15:15:14 GMT
+
+*Version update only*
+
+## 3.5.3
+Thu, 08 Aug 2019 15:14:17 GMT
+
+*Version update only*
+
+## 3.5.2
+Thu, 08 Aug 2019 00:49:05 GMT
+
+*Version update only*
+
+## 3.5.1
+Mon, 05 Aug 2019 22:04:32 GMT
+
+*Version update only*
+
+## 3.5.0
+Tue, 23 Jul 2019 19:14:38 GMT
+
+### Minor changes
+
+- Update gulp to 4.0.2
+
+## 3.4.115
+Tue, 23 Jul 2019 01:13:01 GMT
+
+*Version update only*
+
+## 3.4.114
+Mon, 22 Jul 2019 19:13:10 GMT
+
+*Version update only*
+
+## 3.4.113
+Fri, 12 Jul 2019 19:12:46 GMT
+
+*Version update only*
+
+## 3.4.112
+Thu, 11 Jul 2019 19:13:08 GMT
+
+*Version update only*
 
 ## 3.4.111
 Tue, 09 Jul 2019 19:13:24 GMT

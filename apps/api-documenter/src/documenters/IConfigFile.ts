@@ -51,9 +51,35 @@ export interface IConfigTableOfContents {
 }
 
 /**
+ * Describes plugin packages to be loaded, and which features to enable.
+ */
+export interface IConfigPlugin {
+  /**
+   * Specifies the name of an API Documenter plugin package to be loaded.  By convention, the NPM package name
+   * should have the prefix `doc-plugin-`.  Its main entry point should export an object named
+   * `apiDocumenterPluginManifest` which implements the {@link IApiDocumenterPluginManifest} interface.
+   */
+  packageName: string;
+
+  /**
+   * A list of features to be enabled.  The features are defined in {@link IApiDocumenterPluginManifest.features}.
+   * The `enabledFeatureNames` strings are matched with {@link IFeatureDefinition.featureName}.
+   */
+  enabledFeatureNames: string[];
+}
+
+/**
  * This interface represents the api-extractor.json file format.
  */
 export interface IConfigFile {
+  /**
+   * Specifies the output target.
+   */
+  outputTarget: 'docfx' | 'markdown';
+
+  /** {@inheritDoc IConfigPlugin} */
+  plugins?: IConfigPlugin[];
+
   /** {@inheritDoc IConfigTableOfContents} */
   tableOfContents?: IConfigTableOfContents;
 }

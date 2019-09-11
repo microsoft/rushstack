@@ -2,29 +2,9 @@
 
 exports[`TaskRunner Constructor throwsErrorOnInvalidParallelism 1`] = `"Invalid parallelism value of 'tequila', expected a number or 'max'"`;
 
-exports[`TaskRunner Dependencies detectsDependencyCycle 1`] = `
-"A cyclic dependency was encountered:
-  foo
-  -> bar
-  -> foo
-Consider using the cyclicDependencyProjects option for rush.json."
-`;
-
-exports[`TaskRunner Dependencies respectsDependencyOrder 1`] = `"Registered two[n]Registered one[n]Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[one] started[x][39m[n][x][32m1 of 2: [one] completed successfully in 0.00 seconds[x][39m[n][x][37m[two] started[x][39m[n][x][32m2 of 2: [two] completed successfully in 0.00 seconds[x][39m[n][n][x][32mSUCCESS (2)[x][39m[n][x][32m================================[x][39m[n][x][32mtwo (0.00 seconds)[x][39m[n][x][32mone (0.00 seconds)[x][39m[n][x][32m================================[-n-][x][39m[n][n]"`;
-
-exports[`TaskRunner Dependencies respectsDependencyOrder 2`] = `""`;
-
-exports[`TaskRunner Dependencies respectsDependencyOrder 3`] = `""`;
-
-exports[`TaskRunner Dependencies respectsDependencyOrder 4`] = `""`;
-
-exports[`TaskRunner Dependencies throwsErrorOnNonExistentDependency 1`] = `"The project 'bar' has not been registered."`;
-
-exports[`TaskRunner Dependencies throwsErrorOnNonExistentTask 1`] = `"The task 'foo' has not been registered"`;
-
 exports[`TaskRunner Error logging preservedLeadingBlanksButTrimmedTrailingBlanks 1`] = `"Project(s) failed to build"`;
 
-exports[`TaskRunner Error logging preservedLeadingBlanksButTrimmedTrailingBlanks 2`] = `"Registered large stderr with leading and trailing blanks[n]Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[large stderr with leading and trailing blanks] started[x][39m[n][n][x][31mFAILURE (1)[x][39m[n][x][31m================================[x][39m[n][x][31mlarge stderr with leading and trailing blanks (0.00 seconds)[x][39m[n]List of errors:[-n-] - error #1;[-n-] - error #2;[-n-] - error #3;[-n-] - error #4;[-n-] - error #5;[-n-] - error #6;[-n-] - error #7;[-n-] - error #8;[-n-] - error #9;[-n-][...21 lines omitted...][-n-] - error #31;[-n-] - error #32;[-n-] - error #33;[-n-] - error #34;[-n-] - error #35;[-n-] - error #36;[-n-] - error #37;[-n-] - error #38;[-n-] - error #39;[-n-] - error #40;[-n-] - error #41;[-n-] - error #42;[-n-] - error #43;[-n-] - error #44;[-n-] - error #45;[-n-] - error #46;[-n-] - error #47;[-n-] - error #48;[-n-] - error #49;[-n-] - error #50;[n][x][31m================================[-n-][x][39m[n][n]"`;
+exports[`TaskRunner Error logging preservedLeadingBlanksButTrimmedTrailingBlanks 2`] = `"Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[large stderr with leading and trailing blanks] started[x][39m[n][n][x][31mFAILURE (1)[x][39m[n][x][31m================================[x][39m[n][x][31mlarge stderr with leading and trailing blanks (0.00 seconds)[x][39m[n]List of errors:[-n-] - error #1;[-n-] - error #2;[-n-] - error #3;[-n-] - error #4;[-n-] - error #5;[-n-] - error #6;[-n-] - error #7;[-n-] - error #8;[-n-] - error #9;[-n-][...21 lines omitted...][-n-] - error #31;[-n-] - error #32;[-n-] - error #33;[-n-] - error #34;[-n-] - error #35;[-n-] - error #36;[-n-] - error #37;[-n-] - error #38;[-n-] - error #39;[-n-] - error #40;[-n-] - error #41;[-n-] - error #42;[-n-] - error #43;[-n-] - error #44;[-n-] - error #45;[-n-] - error #46;[-n-] - error #47;[-n-] - error #48;[-n-] - error #49;[-n-] - error #50;[n][x][31m================================[-n-][x][39m[n][n]"`;
 
 exports[`TaskRunner Error logging preservedLeadingBlanksButTrimmedTrailingBlanks 3`] = `""`;
 
@@ -34,7 +14,7 @@ exports[`TaskRunner Error logging preservedLeadingBlanksButTrimmedTrailingBlanks
 
 exports[`TaskRunner Error logging printedAbridgedStdoutAfterErrorWithEmptyStderr 1`] = `"Project(s) failed to build"`;
 
-exports[`TaskRunner Error logging printedAbridgedStdoutAfterErrorWithEmptyStderr 2`] = `"Registered large stdout only[n]Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[large stdout only] started[x][39m[n][n][x][31mFAILURE (1)[x][39m[n][x][31m================================[x][39m[n][x][31mlarge stdout only (0.00 seconds)[x][39m[n]Building units...[-n-] - unit #1;[-n-] - unit #2;[-n-] - unit #3;[-n-] - unit #4;[-n-] - unit #5;[-n-] - unit #6;[-n-] - unit #7;[-n-] - unit #8;[-n-] - unit #9;[-n-][...21 lines omitted...][-n-] - unit #31;[-n-] - unit #32;[-n-] - unit #33;[-n-] - unit #34;[-n-] - unit #35;[-n-] - unit #36;[-n-] - unit #37;[-n-] - unit #38;[-n-] - unit #39;[-n-] - unit #40;[-n-] - unit #41;[-n-] - unit #42;[-n-] - unit #43;[-n-] - unit #44;[-n-] - unit #45;[-n-] - unit #46;[-n-] - unit #47;[-n-] - unit #48;[-n-] - unit #49;[-n-] - unit #50;[n][x][31m================================[-n-][x][39m[n][n]"`;
+exports[`TaskRunner Error logging printedAbridgedStdoutAfterErrorWithEmptyStderr 2`] = `"Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[large stdout only] started[x][39m[n][n][x][31mFAILURE (1)[x][39m[n][x][31m================================[x][39m[n][x][31mlarge stdout only (0.00 seconds)[x][39m[n]Building units...[-n-] - unit #1;[-n-] - unit #2;[-n-] - unit #3;[-n-] - unit #4;[-n-] - unit #5;[-n-] - unit #6;[-n-] - unit #7;[-n-] - unit #8;[-n-] - unit #9;[-n-][...21 lines omitted...][-n-] - unit #31;[-n-] - unit #32;[-n-] - unit #33;[-n-] - unit #34;[-n-] - unit #35;[-n-] - unit #36;[-n-] - unit #37;[-n-] - unit #38;[-n-] - unit #39;[-n-] - unit #40;[-n-] - unit #41;[-n-] - unit #42;[-n-] - unit #43;[-n-] - unit #44;[-n-] - unit #45;[-n-] - unit #46;[-n-] - unit #47;[-n-] - unit #48;[-n-] - unit #49;[-n-] - unit #50;[n][x][31m================================[-n-][x][39m[n][n]"`;
 
 exports[`TaskRunner Error logging printedAbridgedStdoutAfterErrorWithEmptyStderr 3`] = `""`;
 
@@ -44,7 +24,7 @@ exports[`TaskRunner Error logging printedAbridgedStdoutAfterErrorWithEmptyStderr
 
 exports[`TaskRunner Error logging printedStderrAfterError 1`] = `"Project(s) failed to build"`;
 
-exports[`TaskRunner Error logging printedStderrAfterError 2`] = `"Registered stdout+stderr[n]Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[stdout+stderr] started[x][39m[n][n][x][31mFAILURE (1)[x][39m[n][x][31m================================[x][39m[n][x][31mstdout+stderr (0.00 seconds)[x][39m[n]Error: step 1 failed[n][x][31m================================[-n-][x][39m[n][n]"`;
+exports[`TaskRunner Error logging printedStderrAfterError 2`] = `"Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[stdout+stderr] started[x][39m[n][n][x][31mFAILURE (1)[x][39m[n][x][31m================================[x][39m[n][x][31mstdout+stderr (0.00 seconds)[x][39m[n]Error: step 1 failed[n][x][31m================================[-n-][x][39m[n][n]"`;
 
 exports[`TaskRunner Error logging printedStderrAfterError 3`] = `""`;
 
@@ -54,7 +34,7 @@ exports[`TaskRunner Error logging printedStderrAfterError 5`] = `"[x][31m[-n-]1 
 
 exports[`TaskRunner Error logging printedStdoutAfterErrorWithEmptyStderr 1`] = `"Project(s) failed to build"`;
 
-exports[`TaskRunner Error logging printedStdoutAfterErrorWithEmptyStderr 2`] = `"Registered stdout only[n]Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[stdout only] started[x][39m[n][n][x][31mFAILURE (1)[x][39m[n][x][31m================================[x][39m[n][x][31mstdout only (0.00 seconds)[x][39m[n]Build step 1[-n-]Error: step 1 failed[n][x][31m================================[-n-][x][39m[n][n]"`;
+exports[`TaskRunner Error logging printedStdoutAfterErrorWithEmptyStderr 2`] = `"Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[stdout only] started[x][39m[n][n][x][31mFAILURE (1)[x][39m[n][x][31m================================[x][39m[n][x][31mstdout only (0.00 seconds)[x][39m[n]Build step 1[-n-]Error: step 1 failed[n][x][31m================================[-n-][x][39m[n][n]"`;
 
 exports[`TaskRunner Error logging printedStdoutAfterErrorWithEmptyStderr 3`] = `""`;
 
@@ -64,7 +44,7 @@ exports[`TaskRunner Error logging printedStdoutAfterErrorWithEmptyStderr 5`] = `
 
 exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 1`] = `"An error occurred."`;
 
-exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 2`] = `"Registered success with warnings (failure)[n]Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[success with warnings (failure)] started[x][39m[n][n][x][33m[x][4mSUCCESS WITH WARNINGS (1)[x][24m[x][39m[n][x][33m================================[x][39m[n][x][33m[x][4msuccess with warnings (failure) (0.00 seconds)[x][24m[x][39m[n]Build step 1[-n-]Warning: step 1 succeeded with warnings[n][x][33m================================[-n-][x][39m[n][n]"`;
+exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 2`] = `"Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[success with warnings (failure)] started[x][39m[n][n][x][33m[x][4mSUCCESS WITH WARNINGS (1)[x][24m[x][39m[n][x][33m================================[x][39m[n][x][33m[x][4msuccess with warnings (failure) (0.00 seconds)[x][24m[x][39m[n]Build step 1[-n-]Warning: step 1 succeeded with warnings[n][x][33m================================[-n-][x][39m[n][n]"`;
 
 exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 3`] = `""`;
 
@@ -72,7 +52,7 @@ exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 4`] 
 
 exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 5`] = `""`;
 
-exports[`TaskRunner Warning logging Success on warning Logs warnings correctly 1`] = `"Registered success with warnings (success)[n]Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[success with warnings (success)] started[x][39m[n][n][x][33m[x][4mSUCCESS WITH WARNINGS (1)[x][24m[x][39m[n][x][33m================================[x][39m[n][x][33m[x][4msuccess with warnings (success) (0.00 seconds)[x][24m[x][39m[n]Build step 1[-n-]Warning: step 1 succeeded with warnings[n][x][33m================================[-n-][x][39m[n][n]"`;
+exports[`TaskRunner Warning logging Success on warning Logs warnings correctly 1`] = `"Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[success with warnings (success)] started[x][39m[n][n][x][33m[x][4mSUCCESS WITH WARNINGS (1)[x][24m[x][39m[n][x][33m================================[x][39m[n][x][33m[x][4msuccess with warnings (success) (0.00 seconds)[x][24m[x][39m[n]Build step 1[-n-]Warning: step 1 succeeded with warnings[n][x][33m================================[-n-][x][39m[n][n]"`;
 
 exports[`TaskRunner Warning logging Success on warning Logs warnings correctly 2`] = `""`;
 

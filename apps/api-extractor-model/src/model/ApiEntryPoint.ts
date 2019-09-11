@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItem, ApiItemKind } from '../items/ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { ApiPackage } from './ApiPackage';
 
 /**
  * Constructor options for {@link ApiEntryPoint}.
@@ -20,8 +22,11 @@ export interface IApiEntryPointOptions extends IApiItemContainerMixinOptions, IA
  * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
  * API declarations.
  *
- * `ApiEntryPoint` represents the entry point to an NPM package.  For example, suppose the package.json file
- * looks like this:
+ * `ApiEntryPoint` represents the entry point to an NPM package.  API Extractor does not currently support
+ * analysis of multiple entry points, but the `ApiEntryPoint` object is included to support a future feature.
+ * In the current implementation, `ApiEntryPoint.importPath` is always the empty string.
+ *
+ * For example, suppose the package.json file looks like this:
  *
  * ```json
  * {
@@ -47,7 +52,34 @@ export class ApiEntryPoint extends ApiItemContainerMixin(ApiNameMixin(ApiItem)) 
   }
 
   /** @override */
-  public get canonicalReference(): string {
+  public get containerKey(): string {
+    // No prefix needed, because ApiEntryPoint is the only possible member of an ApiPackage
     return this.name;
+  }
+
+  /**
+   * The module path for this entry point, relative to the parent `ApiPackage`.  In the current implementation,
+   * this is always the empty string, indicating the default entry point.
+   *
+   * @remarks
+   *
+   * API Extractor does not currently support analysis of multiple entry points.  If that feature is implemented
+   * in the future, then the `ApiEntryPoint.importPath` will be used to distinguish different entry points,
+   * for example: `controls/Button` in `import { Button } from "example-package/controls/Button";`.
+   *
+   * The `ApiEntryPoint.name` property stores the same value as `ApiEntryPoint.importPath`.
+   */
+  public get importPath(): string {
+    return this.name;
+  }
+
+  /** @beta @override */
+  public buildCanonicalReference(): DeclarationReference {
+
+    if (this.parent instanceof ApiPackage) {
+      return DeclarationReference.package(this.parent.name, this.importPath);
+    }
+
+    return DeclarationReference.empty();
   }
 }

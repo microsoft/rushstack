@@ -326,10 +326,6 @@ function wireUpProcessErrorHandling(shouldWarningsFailBuild: boolean): void {
         writeSummary(() => {
           exitProcess(1);
 
-          if (localCache.gulp) {
-            localCache.gulp.stop();
-          }
-
           if (localCache.gulpErrorCallback) {
             localCache.gulpErrorCallback(err);
           }

@@ -33,12 +33,12 @@ describe('EnvironmentConfiguration', () => {
 
     it('can be re-initialized', () => {
       process.env['RUSH_TEMP_FOLDER'] = '/var/tempA'; // tslint:disable-line:no-string-literal
-      EnvironmentConfiguration.initialize();
+      EnvironmentConfiguration.initialize({ doNotNormalizePaths: true });
 
       expect(EnvironmentConfiguration.rushTempFolderOverride).toEqual('/var/tempA');
 
       process.env['RUSH_TEMP_FOLDER'] = '/var/tempB'; // tslint:disable-line:no-string-literal
-      EnvironmentConfiguration.initialize();
+      EnvironmentConfiguration.initialize({ doNotNormalizePaths: true });
 
       expect(EnvironmentConfiguration.rushTempFolderOverride).toEqual('/var/tempB');
     });
@@ -58,7 +58,7 @@ describe('EnvironmentConfiguration', () => {
     it('returns the value for a set environment variable', () => {
       const expectedValue: string = '/var/temp';
       process.env['RUSH_TEMP_FOLDER'] = expectedValue; // tslint:disable-line:no-string-literal
-      EnvironmentConfiguration.initialize();
+      EnvironmentConfiguration.initialize({ doNotNormalizePaths: true });
 
       expect(EnvironmentConfiguration.rushTempFolderOverride).toEqual(expectedValue);
     });
