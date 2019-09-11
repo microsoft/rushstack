@@ -73,7 +73,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
 
   /** @override */
   protected onCustomizeYamlItem(yamlItem: IYamlItem): void {
-    const nameWithoutPackage: string = yamlItem.uid.replace(/^[^.]+\./, '');
+    const nameWithoutPackage: string = yamlItem.uid.replace(/^[^.]+\!/, '');
     if (yamlItem.summary) {
       yamlItem.summary = this._fixupApiSet(yamlItem.summary, yamlItem.uid);
       yamlItem.summary = this._fixBoldAndItalics(yamlItem.summary);
