@@ -66,6 +66,9 @@ temp
 
 # Rush files
 common/temp/**
+.rush/temp/**
+
+# Remove eventually
 package-deps.json
 
 # OS X
