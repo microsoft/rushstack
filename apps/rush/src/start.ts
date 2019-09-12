@@ -12,18 +12,19 @@ if (NodeJsCompatibility.warnAboutVersionTooOld()) {
   process.exit(1);
 }
 
-const alreadyReportedNodeTooNewError: boolean = NodeJsCompatibility.warnAboutVersionTooNew(
-  {
-    isRushLib: false,
-    alreadyReportedNodeTooNewError: false
-  }
-);
+const alreadyReportedNodeTooNewError: boolean = NodeJsCompatibility.warnAboutVersionTooNew({
+  isRushLib: false,
+  alreadyReportedNodeTooNewError: false
+});
 
 import * as colors from 'colors';
 import * as os from 'os';
 import * as semver from 'semver';
 
-import { Text, PackageJsonLookup } from '@microsoft/node-core-library';
+import {
+  Text,
+  PackageJsonLookup
+} from '@microsoft/node-core-library';
 import { EnvironmentVariableNames } from '@microsoft/rush-lib';
 import * as rushLib from '@microsoft/rush-lib';
 
@@ -32,26 +33,17 @@ import { RushVersionSelector } from './RushVersionSelector';
 import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 
 // Load the configuration
-const configuration:
-  | MinimalRushConfiguration
-  | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
+const configuration: MinimalRushConfiguration | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
 
-const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(
-  __dirname
-).version;
+const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 
 let rushVersionToLoad: string | undefined = undefined;
 
-const previewVersion: string | undefined =
-  process.env[EnvironmentVariableNames.RUSH_PREVIEW_VERSION];
+const previewVersion: string | undefined = process.env[EnvironmentVariableNames.RUSH_PREVIEW_VERSION];
 
 if (previewVersion) {
   if (!semver.valid(previewVersion, false)) {
-    console.error(
-      colors.red(
-        `Invalid value for RUSH_PREVIEW_VERSION environment variable: "${previewVersion}"`
-      )
-    );
+    console.error(colors.red(`Invalid value for RUSH_PREVIEW_VERSION environment variable: "${previewVersion}"`));
     process.exit(1);
   }
 
@@ -62,18 +54,12 @@ if (previewVersion) {
     `*********************************************************************`,
     `* WARNING! THE "RUSH_PREVIEW_VERSION" ENVIRONMENT VARIABLE IS SET.  *`,
     `*                                                                   *`,
-    `* You are previewing Rush version:        ${Text.padEnd(
-      previewVersion,
-      25
-    )} *`
+    `* You are previewing Rush version:        ${Text.padEnd(previewVersion, 25)} *`
   );
 
   if (configuration) {
     lines.push(
-      `* The rush.json configuration asks for:   ${Text.padEnd(
-        configuration.rushVersion,
-        25
-      )} *`
+      `* The rush.json configuration asks for:   ${Text.padEnd(configuration.rushVersion, 25)} *`
     );
   }
 
@@ -84,9 +70,10 @@ if (previewVersion) {
     `*********************************************************************`
   );
 
-  console.error(
-    lines.map(line => colors.black(colors.bgYellow(line))).join(os.EOL)
-  );
+  console.error(lines
+    .map(line => colors.black(colors.bgYellow(line)))
+    .join(os.EOL));
+
 } else if (configuration) {
   rushVersionToLoad = configuration.rushVersion;
 }
@@ -99,22 +86,13 @@ if (rushVersionToLoad && semver.lt(rushVersionToLoad, '5.0.0-dev.18')) {
 
 // Rush is "managed" if its version and configuration are dictated by a repo's rush.json
 const isManaged: boolean = !!configuration;
-const launchOptions: rushLib.ILaunchOptions = {
-  isManaged,
-  alreadyReportedNodeTooNewError
-};
+const launchOptions: rushLib.ILaunchOptions = { isManaged, alreadyReportedNodeTooNewError };
 
 // If we're inside a repo folder, and it's requesting a different version, then use the RushVersionManager to
 // install it
 // If we're working on rush itself, bypass it and use the dev build of rush
-if (
-  rushVersionToLoad &&
-  rushVersionToLoad !== currentPackageVersion &&
-  !process.env[EnvironmentVariableNames.RUSH_BYPASS_VERSION_MANAGER]
-) {
-  const versionSelector: RushVersionSelector = new RushVersionSelector(
-    currentPackageVersion
-  );
+if (rushVersionToLoad && rushVersionToLoad !== currentPackageVersion && !process.env[EnvironmentVariableNames.RUSH_BYPASS_VERSION_MANAGER]) {
+  const versionSelector: RushVersionSelector = new RushVersionSelector(currentPackageVersion);
   versionSelector
     .ensureRushVersionInstalled(rushVersionToLoad, configuration, launchOptions)
     .catch((error: Error) => {

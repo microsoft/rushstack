@@ -103,29 +103,20 @@ export class EnvironmentConfiguration {
   /**
    * Reads and validates environment variables. If any are invalid, this function will throw.
    */
-  public static initialize(
-    options: IEnvironmentConfigurationInitializeOptions = {}
-  ): void {
+  public static initialize(options: IEnvironmentConfigurationInitializeOptions = {}): void {
     EnvironmentConfiguration.reset();
 
     const unknownEnvVariables: string[] = [];
     for (const envVarName in process.env) {
-      if (
-        process.env.hasOwnProperty(envVarName) &&
-        envVarName.match(/^RUSH_/i)
-      ) {
+      if (process.env.hasOwnProperty(envVarName) && envVarName.match(/^RUSH_/i)) {
         const value: string | undefined = process.env[envVarName];
         // Environment variables are only case-insensitive on Windows
-        const normalizedEnvVarName: string =
-          os.platform() === 'win32' ? envVarName.toUpperCase() : envVarName;
+        const normalizedEnvVarName: string = os.platform() === 'win32' ? envVarName.toUpperCase() : envVarName;
         switch (normalizedEnvVarName) {
           case EnvironmentVariableNames.RUSH_TEMP_FOLDER: {
-            EnvironmentConfiguration._rushTempFolderOverride =
-              value && !options.doNotNormalizePaths
-                ? EnvironmentConfiguration._normalizeDeepestParentFolderPath(
-                    value
-                  ) || value
-                : value;
+            EnvironmentConfiguration._rushTempFolderOverride = (value && !options.doNotNormalizePaths)
+              ? EnvironmentConfiguration._normalizeDeepestParentFolderPath(value) || value
+              : value;
             break;
           }
 
@@ -135,8 +126,7 @@ export class EnvironmentConfiguration {
           }
 
           case EnvironmentVariableNames.RUSH_ALLOW_UNSUPPORTED_NODEJS: {
-            EnvironmentConfiguration._allowUnsupportedNodeVersion =
-              value === 'true';
+            EnvironmentConfiguration._allowUnsupportedNodeVersion = value === 'true';
             break;
           }
 
@@ -145,7 +135,6 @@ export class EnvironmentConfiguration {
           case EnvironmentVariableNames.RUSH_BYPASS_VERSION_MANAGER:
             // Handled by @microsoft/rush front end
             break;
-
           default:
             unknownEnvVariables.push(envVarName);
             break;
@@ -157,9 +146,7 @@ export class EnvironmentConfiguration {
     if (unknownEnvVariables.length > 0) {
       throw new Error(
         'The following environment variables were found with the "RUSH_" prefix, but they are not ' +
-          `recognized by this version of Rush: ${unknownEnvVariables.join(
-            ', '
-          )}`
+        `recognized by this version of Rush: ${unknownEnvVariables.join(', ')}`
       );
     }
 
@@ -177,9 +164,7 @@ export class EnvironmentConfiguration {
 
   private static _ensureInitialized(): void {
     if (!EnvironmentConfiguration._hasBeenInitialized) {
-      throw new Error(
-        'The EnvironmentConfiguration must be initialized before values can be accessed.'
-      );
+      throw new Error('The EnvironmentConfiguration must be initialized before values can be accessed.');
     }
   }
 
@@ -195,19 +180,13 @@ export class EnvironmentConfiguration {
    * _normalizeFirstExistingFolderPath('c:\\folder1\\folder2\\temp\\subfolder')
    * returns 'C:\\Folder1\\folder2\\temp\\subfolder'
    */
-  private static _normalizeDeepestParentFolderPath(
-    folderPath: string
-  ): string | undefined {
+  private static _normalizeDeepestParentFolderPath(folderPath: string): string | undefined {
     folderPath = path.normalize(folderPath);
-    const endsWithSlash: boolean =
-      folderPath.charAt(folderPath.length - 1) === path.sep;
+    const endsWithSlash: boolean = folderPath.charAt(folderPath.length - 1) === path.sep;
     const parsedPath: path.ParsedPath = path.parse(folderPath);
     const pathRoot: string = parsedPath.root;
     const pathWithoutRoot: String = parsedPath.dir.substr(pathRoot.length);
-    const pathParts: string[] = [
-      ...pathWithoutRoot.split(path.sep),
-      parsedPath.name
-    ].filter(part => !!part);
+    const pathParts: string[] = [...pathWithoutRoot.split(path.sep), parsedPath.name].filter((part) => !!part);
 
     // Starting with all path sections, and eliminating one from the end during each loop iteration,
     // run trueCasePathSync. If trueCasePathSync returns without exception, we've found a subset
@@ -215,18 +194,10 @@ export class EnvironmentConfiguration {
     //
     // Once we've found a parent folder that exists, append the path sections that didn't exist.
     for (let i: number = pathParts.length; i >= 0; i--) {
-      const constructedPath: string = path.join(
-        pathRoot,
-        ...pathParts.slice(0, i)
-      );
+      const constructedPath: string = path.join(pathRoot, ...pathParts.slice(0, i));
       try {
-        const normalizedConstructedPath: string = trueCasePathSync(
-          constructedPath
-        );
-        const result: string = path.join(
-          normalizedConstructedPath,
-          ...pathParts.slice(i)
-        );
+        const normalizedConstructedPath: string = trueCasePathSync(constructedPath);
+        const result: string = path.join(normalizedConstructedPath, ...pathParts.slice(i));
         if (endsWithSlash) {
           return `${result}${path.sep}`;
         } else {
