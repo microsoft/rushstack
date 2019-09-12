@@ -15,7 +15,7 @@ const SHRINKWRAP_YAML_FORMAT: yaml.DumpOptions = {
   sortKeys: true
 };
 
-interface IPnpmShrinkwrapDependencyYaml {
+export interface IPnpmShrinkwrapDependencyYaml {
   /** Information about the resolved package */
   resolution: {
     /** The hash of the tarball, to ensure archive integrity */
@@ -224,6 +224,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       return tempProjectSpecifier.versionSpecifier;
     }
     return undefined;
+  }
+
+  public getShrinkwrapEntry(name: string, version: string): IPnpmShrinkwrapDependencyYaml | undefined {
+    return this._shrinkwrapJson.packages[`/${name}/${version}`];
   }
 
   /**

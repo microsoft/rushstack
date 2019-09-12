@@ -24,6 +24,7 @@ import { RushConstants } from '../../logic/RushConstants';
 import { IRushLinkJson } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PnpmShrinkwrapFile } from './PnpmShrinkwrapFile';
+import { PnpmProjectDependencyManifest } from './PnpmProjectDependencyManifest';
 
 // special flag for debugging, will print extra diagnostic information,
 // but comes with performance cost
@@ -72,7 +73,8 @@ export class PnpmLinkManager extends BaseLinkManager {
   private _linkProject(
     project: RushConfigurationProject,
     rushLinkJson: IRushLinkJson,
-    pnpmShrinkwrapFile: PnpmShrinkwrapFile): Promise<void> {
+    pnpmShrinkwrapFile: PnpmShrinkwrapFile
+  ): Promise<void> {
 
     // first, read the temp package.json information
 
@@ -87,8 +89,12 @@ export class PnpmLinkManager extends BaseLinkManager {
     const packageJsonFilename: string = path.join(extractedFolder, FileConstants.PackageJson);
 
     // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp\project1"
-    const installFolderName: string = path.join(this._rushConfiguration.commonTempFolder,
-      RushConstants.nodeModulesFolderName, RushConstants.rushTempNpmScope, unscopedTempProjectName);
+    const installFolderName: string = path.join(
+      this._rushConfiguration.commonTempFolder,
+      RushConstants.nodeModulesFolderName,
+      RushConstants.rushTempNpmScope,
+      unscopedTempProjectName
+    );
 
     const commonPackage: BasePackage = BasePackage.createVirtualTempPackage(packageJsonFilename, installFolderName);
 
@@ -102,7 +108,6 @@ export class PnpmLinkManager extends BaseLinkManager {
 
     // first, start with the rush dependencies, we just need to link to the project folder
     for (const dependencyName of Object.keys(commonPackage.packageJson!.rushDependencies || {})) {
-
       const matchedRushPackage: RushConfigurationProject | undefined =
         this._rushConfiguration.getProjectByName(dependencyName);
 
@@ -130,8 +135,9 @@ export class PnpmLinkManager extends BaseLinkManager {
         newLocalPackage.symlinkTargetFolderPath = matchedRushPackage.projectFolder;
         localPackage.children.push(newLocalPackage);
       } else {
-        throw new InternalError(`Cannot find dependency "${dependencyName}" for "${project.packageName}" in `
-          + ` the Rush configuration`);
+        throw new InternalError(
+          `Cannot find dependency "${dependencyName}" for "${project.packageName}" in the Rush configuration`
+        );
       }
     }
 
@@ -155,8 +161,9 @@ export class PnpmLinkManager extends BaseLinkManager {
     //   file:projects/bentleyjs-core.tgz
     //   file:projects/build-tools.tgz_dc21d88642e18a947127a751e00b020a
     //   file:projects/imodel-from-geojson.tgz_request@2.88.0
-    const tempProjectDependencyKey: string | undefined =
-      pnpmShrinkwrapFile.getTempProjectDependencyKey(project.tempProjectName);
+    const tempProjectDependencyKey: string | undefined = pnpmShrinkwrapFile.getTempProjectDependencyKey(
+      project.tempProjectName
+    );
 
     if (!tempProjectDependencyKey) {
       throw new Error(`Cannot get dependency key for temp project: ${project.tempProjectName}`);
@@ -188,8 +195,9 @@ export class PnpmLinkManager extends BaseLinkManager {
     //   '' [empty string]
     //   _jsdom@11.12.0
     //   _2a665c89609864b4e75bc5365d7f8f56
-    const folderNameSuffix: string = (tarballEntry && tarballEntry.length < tempProjectDependencyKey.length ?
-      tempProjectDependencyKey.slice(tarballEntry.length) : '');
+    const folderNameSuffix: string = tarballEntry && tarballEntry.length < tempProjectDependencyKey.length
+      ? tempProjectDependencyKey.slice(tarballEntry.length)
+      : '';
 
     // e.g.:
     //   C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz
@@ -205,7 +213,13 @@ export class PnpmLinkManager extends BaseLinkManager {
       RushConstants.nodeModulesFolderName,
       '.local',
       folderNameInLocalInstallationRoot,
-      RushConstants.nodeModulesFolderName);
+      RushConstants.nodeModulesFolderName
+    );
+
+    const pnpmProjectDependencyManifest: PnpmProjectDependencyManifest = new PnpmProjectDependencyManifest({
+      pnpmShrinkwrapFile,
+      project
+    });
 
     for (const dependencyName of Object.keys(commonPackage.packageJson!.dependencies || {})) {
       // the dependency we are looking for should have already created a symlink here
@@ -233,23 +247,24 @@ export class PnpmLinkManager extends BaseLinkManager {
       // it pointed, rather than linking to a link.
       const dependencyLocalInstallationRealpath: string = FileSystem.getRealPath(dependencyLocalInstallationSymlink);
 
-      const newLocalFolderPath: string = path.join(
-          localPackage.folderPath, 'node_modules', dependencyName);
+      const newLocalFolderPath: string = path.join(localPackage.folderPath, 'node_modules', dependencyName);
 
       let version: string | undefined = undefined;
-      if (DEBUG) {
+      // if (DEBUG) {
         // read the version number for diagnostic purposes
         const packageJsonForDependency: IPackageJson = JsonFile.load(
           path.join(dependencyLocalInstallationRealpath, FileConstants.PackageJson));
 
         version = packageJsonForDependency.version;
-      }
+      // }
 
       const newLocalPackage: BasePackage = BasePackage.createLinkedPackage(
         dependencyName,
         version,
         newLocalFolderPath
       );
+
+      pnpmProjectDependencyManifest.addDependency(newLocalPackage);
 
       newLocalPackage.symlinkTargetFolderPath = dependencyLocalInstallationRealpath;
       localPackage.addChild(newLocalPackage);
@@ -260,6 +275,8 @@ export class PnpmLinkManager extends BaseLinkManager {
     }
 
     PnpmLinkManager._createSymlinksForTopLevelProject(localPackage);
+
+    pnpmProjectDependencyManifest.save();
 
     // Also symlink the ".bin" folder
     const projectFolder: string = path.join(localPackage.folderPath, 'node_modules');

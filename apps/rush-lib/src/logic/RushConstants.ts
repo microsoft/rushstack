@@ -143,4 +143,10 @@ export namespace RushConstants {
    * before asynchronously deleting them.
    */
   export const rushRecyclerFolderName: string = 'rush-recycler';
+
+  /**
+   * The name of the file to drop in project-folder/.rush/temp/ containing a listing of the projects direct
+   * and indirect dependencies. This is used to detect if a project's dependencies have changed since the last build.
+   */
+  export const projectDependencyManifestFilename: string = 'project-dependencies.json';
 }
