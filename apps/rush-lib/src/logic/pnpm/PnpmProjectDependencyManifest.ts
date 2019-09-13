@@ -20,6 +20,11 @@ export interface IPnpmProjectDependencyManifestOptions {
   project: RushConfigurationProject;
 }
 
+/**
+ * This class handles creating the project/.rush/temp/project-dependencies.json file
+ * which tracks the direct and indirect dependencies that a project consumes. This is used
+ * to better determine which projects should be rebuilt when dependencies are updated.
+ */
 export class PnpmProjectDependencyManifest {
   private static _cache: Map<string, string> = new Map<string, string>();
 
@@ -29,6 +34,10 @@ export class PnpmProjectDependencyManifest {
 
   private _projectDependencyManifestFile: Map<string, string>;
 
+  /**
+   * Get the fully-qualified path to the project/.rush/temp/project-dependencies.json
+   * for the specified project.
+   */
   public static getFilePathForProject(project: RushConfigurationProject): string {
     return path.join(
       project.projectRushTempFolder,
@@ -52,6 +61,9 @@ export class PnpmProjectDependencyManifest {
     this._addDependencyInternal(pkg.name, pkg.version);
   }
 
+  /**
+   * Save the current state of the object to project/.rush/temp/project-dependencies.json
+   */
   public save(): void {
     const file: { [specifier: string]: string } = {};
     const keys: string[] = Array.from(this._projectDependencyManifestFile.keys()).sort();
