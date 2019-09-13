@@ -29,13 +29,17 @@ export class PnpmProjectDependencyManifest {
 
   private _projectDependencyManifestFile: Map<string, string>;
 
+  public static getFilePathForProject(project: RushConfigurationProject): string {
+    return path.join(
+      project.projectRushTempFolder,
+      RushConstants.projectDependencyManifestFilename
+    );
+  }
+
   public constructor(options: IPnpmProjectDependencyManifestOptions) {
     this._pnpmShrinkwrapFile = options.pnpmShrinkwrapFile;
     this._project = options.project;
-    this._projectDependencyManifestFilename = path.join(
-      this._project.projectRushTempFolder,
-      RushConstants.projectDependencyManifestFilename
-    );
+    this._projectDependencyManifestFilename = PnpmProjectDependencyManifest.getFilePathForProject(this._project);
 
     this._projectDependencyManifestFile = new Map<string, string>();
   }

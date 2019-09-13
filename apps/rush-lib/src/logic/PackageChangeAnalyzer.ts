@@ -6,12 +6,18 @@ import * as colors from 'colors';
 
 import {
   getPackageDeps,
+  gitHashFiles,
   IPackageDeps
 } from '@microsoft/package-deps-hash';
-import { Path } from '@microsoft/node-core-library';
+import {
+  Path,
+  InternalError
+} from '@microsoft/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Git } from './Git';
+import { PnpmProjectDependencyManifest } from './pnpm/PnpmProjectDependencyManifest';
+import { RushConfigurationProject } from '../api/RushConfigurationProject';
 
 export class PackageChangeAnalyzer {
   // Allow this function to be overwritten during unit tests
@@ -125,19 +131,48 @@ export class PackageChangeAnalyzer {
     //  });
     // }
 
-    // Determine the current variant from the link JSON.
-    const variant: string | undefined = this._rushConfiguration.currentInstalledVariant;
+    if (this._rushConfiguration.packageManager === 'pnpm') {
+      const projects: RushConfigurationProject[] = [];
+      const projectDependencyManifestPaths: string[] = [];
 
-    // Add the shrinkwrap file to every project's dependencies
-    const shrinkwrapFile: string = path.relative(
-      this._rushConfiguration.rushJsonFolder,
-      this._rushConfiguration.getCommittedShrinkwrapFilename(variant)
-    ).replace(/\\/g, '/');
+      for (const project of this._rushConfiguration.projects) {
+        const dependencyManifestFilePath: string = PnpmProjectDependencyManifest.getFilePathForProject(project);
+        const relativeDependencyManifestFilePath: string = path.relative(
+          this._rushConfiguration.rushJsonFolder,
+          dependencyManifestFilePath
+        ).replace(/\\/g, '/');
+        projects.push(project);
+        projectDependencyManifestPaths.push(relativeDependencyManifestFilePath);
+      }
 
-    for (const project of this._rushConfiguration.projects) {
-      const shrinkwrapHash: string | undefined = noProjectHashes[shrinkwrapFile];
-      if (shrinkwrapHash) {
-        projectHashDeps.get(project.packageName)!.files[shrinkwrapFile] = shrinkwrapHash;
+      const hashes: Map<string, string> = gitHashFiles(
+        projectDependencyManifestPaths,
+        this._rushConfiguration.rushJsonFolder
+      );
+      for (let i: number = 0; i < projects.length; i++) {
+        const project: RushConfigurationProject = projects[i];
+        const projectDependencyManifestPath: string = projectDependencyManifestPaths[i];
+        if (!hashes.has(projectDependencyManifestPath)) {
+          throw new InternalError(`Expected to get a hash for ${projectDependencyManifestPath}`);
+        }
+        const hash: string = hashes.get(projectDependencyManifestPath)!;
+        projectHashDeps.get(project.packageName)!.files[projectDependencyManifestPath] = hash;
+      }
+    } else {
+      // Determine the current variant from the link JSON.
+      const variant: string | undefined = this._rushConfiguration.currentInstalledVariant;
+
+      // Add the shrinkwrap file to every project's dependencies
+      const shrinkwrapFile: string = path.relative(
+        this._rushConfiguration.rushJsonFolder,
+        this._rushConfiguration.getCommittedShrinkwrapFilename(variant)
+      ).replace(/\\/g, '/');
+
+      for (const project of this._rushConfiguration.projects) {
+        const shrinkwrapHash: string | undefined = noProjectHashes[shrinkwrapFile];
+        if (shrinkwrapHash) {
+          projectHashDeps.get(project.packageName)!.files[shrinkwrapFile] = shrinkwrapHash;
+        }
       }
     }
 
