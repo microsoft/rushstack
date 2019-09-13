@@ -249,14 +249,11 @@ export class PnpmLinkManager extends BaseLinkManager {
 
       const newLocalFolderPath: string = path.join(localPackage.folderPath, 'node_modules', dependencyName);
 
-      let version: string | undefined = undefined;
-      // if (DEBUG) {
-        // read the version number for diagnostic purposes
-        const packageJsonForDependency: IPackageJson = JsonFile.load(
-          path.join(dependencyLocalInstallationRealpath, FileConstants.PackageJson));
-
-        version = packageJsonForDependency.version;
-      // }
+      // read the version number
+      const packageJsonForDependency: IPackageJson = JsonFile.load(
+        path.join(dependencyLocalInstallationRealpath, FileConstants.PackageJson)
+      );
+      const version: string | undefined = packageJsonForDependency.version;
 
       const newLocalPackage: BasePackage = BasePackage.createLinkedPackage(
         dependencyName,
