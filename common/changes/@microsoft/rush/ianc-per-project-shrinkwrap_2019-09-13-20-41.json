@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "When using pnpm, introduce the ability to only rebuild projects whose direct and/or indirect dependencies have changed.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}
