@@ -8,6 +8,9 @@
 export function getPackageDeps(packagePath?: string, excludedPaths?: string[]): IPackageDeps;
 
 // @public
+export function gitHashFiles(filesToHash: string[], packagePath: string): Map<string, string>;
+
+// @public
 export interface IPackageDeps {
     arguments?: string;
     files: {
