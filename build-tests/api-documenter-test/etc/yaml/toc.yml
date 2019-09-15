@@ -10,38 +10,38 @@ items:
           - name: DocBaseClass
             items:
               - name: DocBaseClass
-                uid: api-documenter-test.DocBaseClass
+                uid: 'api-documenter-test!DocBaseClass:class'
               - name: IDocInterface1
-                uid: api-documenter-test.IDocInterface1
+                uid: 'api-documenter-test!IDocInterface1:interface'
               - name: IDocInterface2
-                uid: api-documenter-test.IDocInterface2
+                uid: 'api-documenter-test!IDocInterface2:interface'
           - name: DocClass1
             items:
               - name: DocClass1
-                uid: api-documenter-test.DocClass1
+                uid: 'api-documenter-test!DocClass1:class'
               - name: IDocInterface3
-                uid: api-documenter-test.IDocInterface3
+                uid: 'api-documenter-test!IDocInterface3:interface'
               - name: IDocInterface4
-                uid: api-documenter-test.IDocInterface4
+                uid: 'api-documenter-test!IDocInterface4:interface'
       - name: Interfaces
         items:
           - name: Interface5
             items:
               - name: IDocInterface5
-                uid: api-documenter-test.IDocInterface5
+                uid: 'api-documenter-test!IDocInterface5:interface'
           - name: Interface6
             items:
               - name: InjectedCustomInterface
                 uid: customUid
               - name: IDocInterface6
-                uid: api-documenter-test.IDocInterface6
+                uid: 'api-documenter-test!IDocInterface6:interface'
       - name: References
         items:
           - name: InjectedCustomItem
             uid: customUrl
           - name: DocEnum
-            uid: api-documenter-test.DocEnum
+            uid: 'api-documenter-test!DocEnum:enum'
           - name: Generic
-            uid: api-documenter-test.Generic
+            uid: 'api-documenter-test!Generic:class'
           - name: SystemEvent
-            uid: api-documenter-test.SystemEvent
+            uid: 'api-documenter-test!SystemEvent:class'

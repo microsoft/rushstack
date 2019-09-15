@@ -1,4 +1,6 @@
 import * as Webpack from 'webpack';
+// @ts-ignore
+import * as WebpackDevServer from 'webpack-dev-server';
 import { WebpackTask } from './WebpackTask';
 import * as path from 'path';
 

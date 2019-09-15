@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-lib",
-  "version": "5.10.3",
+  "version": "5.13.0",
   "description": "A library for writing scripts that interact with the Rush tool",
   "repository": {
     "type": "git",
@@ -13,18 +13,15 @@
   "homepage": "https://rushjs.io",
   "main": "lib/index.js",
   "typings": "dist/rush-lib.d.ts",
-  "tsdoc": {
-    "tsdocFlavor": "AEDoc"
-  },
   "scripts": {
     "build": "gulp test --clean"
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "3.13.0",
-    "@microsoft/package-deps-hash": "2.2.163",
-    "@microsoft/stream-collator": "3.0.78",
-    "@microsoft/ts-command-line": "4.2.6",
+    "@microsoft/node-core-library": "3.14.2",
+    "@microsoft/package-deps-hash": "2.2.176",
+    "@microsoft/stream-collator": "3.0.91",
+    "@microsoft/ts-command-line": "4.2.8",
     "@pnpm/link-bins": "~1.0.1",
     "@pnpm/logger": "~1.0.1",
     "@types/inquirer": "0.0.43",
@@ -38,20 +35,21 @@
     "https-proxy-agent": "~2.2.1",
     "inquirer": "~6.2.0",
     "js-yaml": "~3.13.1",
-    "lodash": "~4.17.5",
+    "lodash": "~4.17.15",
     "minimatch": "~3.0.2",
     "node-fetch": "~2.1.2",
-    "npm-package-arg": "~5.1.2",
+    "npm-package-arg": "~6.1.0",
     "read-package-tree": "~5.1.5",
     "semver": "~5.3.0",
     "strict-uri-encode": "~2.0.0",
     "tar": "~4.4.1",
+    "true-case-path": "~2.2.1",
     "wordwrap": "~1.0.0",
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.0.72",
-    "@microsoft/rush-stack-compiler-3.2": "0.3.24",
+    "@microsoft/node-library-build": "6.1.10",
+    "@microsoft/rush-stack-compiler-3.4": "0.1.23",
     "@types/glob": "5.0.30",
     "@types/jest": "23.3.11",
     "@types/js-yaml": "3.12.1",
@@ -62,6 +60,6 @@
     "@types/semver": "5.3.33",
     "@types/tar": "4.0.0",
     "@types/z-schema": "3.16.31",
-    "gulp": "~3.9.1"
+    "gulp": "~4.0.2"
   }
 }

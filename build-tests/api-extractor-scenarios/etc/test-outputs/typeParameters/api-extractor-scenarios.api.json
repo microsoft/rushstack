@@ -2,35 +2,27 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1001,
+    "schemaVersion": 1003,
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "api-extractor-scenarios",
+  "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
+      "canonicalReference": "api-extractor-scenarios!",
       "name": "",
       "members": [
         {
           "kind": "Class",
-          "canonicalReference": "(ClassWithGenericMethod:class)",
+          "canonicalReference": "api-extractor-scenarios!ClassWithGenericMethod:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "ClassWithGenericMethod"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class ClassWithGenericMethod "
             }
           ],
           "releaseTag": "Public",
@@ -38,24 +30,12 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "(method:instance,0)",
+              "canonicalReference": "api-extractor-scenarios!ClassWithGenericMethod#method:member(1)",
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "method"
-                },
-                {
                   "kind": "Content",
-                  "text": "<"
-                },
-                {
-                  "kind": "Reference",
-                  "text": "T"
-                },
-                {
-                  "kind": "Content",
-                  "text": ">(): "
+                  "text": "method<T>(): "
                 },
                 {
                   "kind": "Content",
@@ -68,11 +48,11 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 4,
-                "endIndex": 5
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "typeParameters": [
                 {
@@ -94,28 +74,12 @@
         },
         {
           "kind": "Class",
-          "canonicalReference": "(GenericClass:class)",
+          "canonicalReference": "api-extractor-scenarios!GenericClass:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "GenericClass"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "T"
-            },
-            {
-              "kind": "Content",
-              "text": "> "
+              "text": "export declare class GenericClass<T> "
             }
           ],
           "releaseTag": "Public",
@@ -138,28 +102,12 @@
         },
         {
           "kind": "Class",
-          "canonicalReference": "(GenericClassWithConstraint:class)",
+          "canonicalReference": "api-extractor-scenarios!GenericClassWithConstraint:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "GenericClassWithConstraint"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "T"
-            },
-            {
-              "kind": "Content",
-              "text": " extends "
+              "text": "export declare class GenericClassWithConstraint<T extends "
             },
             {
               "kind": "Content",
@@ -175,8 +123,8 @@
             {
               "typeParameterName": "T",
               "constraintTokenRange": {
-                "startIndex": 5,
-                "endIndex": 6
+                "startIndex": 1,
+                "endIndex": 2
               },
               "defaultTypeTokenRange": {
                 "startIndex": 0,
@@ -190,28 +138,12 @@
         },
         {
           "kind": "Class",
-          "canonicalReference": "(GenericClassWithDefault:class)",
+          "canonicalReference": "api-extractor-scenarios!GenericClassWithDefault:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "GenericClassWithDefault"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "T"
-            },
-            {
-              "kind": "Content",
-              "text": " = "
+              "text": "export declare class GenericClassWithDefault<T = "
             },
             {
               "kind": "Content",
@@ -231,8 +163,8 @@
                 "endIndex": 0
               },
               "defaultTypeTokenRange": {
-                "startIndex": 5,
-                "endIndex": 6
+                "startIndex": 1,
+                "endIndex": 2
               }
             }
           ],
@@ -242,28 +174,12 @@
         },
         {
           "kind": "Function",
-          "canonicalReference": "(genericFunction:0)",
+          "canonicalReference": "api-extractor-scenarios!genericFunction:function(1)",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function "
-            },
-            {
-              "kind": "Reference",
-              "text": "genericFunction"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "T"
-            },
-            {
-              "kind": "Content",
-              "text": ">(): "
+              "text": "export declare function genericFunction<T>(): "
             },
             {
               "kind": "Content",
@@ -275,11 +191,11 @@
             }
           ],
           "returnTypeTokenRange": {
-            "startIndex": 5,
-            "endIndex": 6
+            "startIndex": 1,
+            "endIndex": 2
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [],
           "typeParameters": [
             {
@@ -298,28 +214,12 @@
         },
         {
           "kind": "Interface",
-          "canonicalReference": "(GenericInterface:interface)",
+          "canonicalReference": "api-extractor-scenarios!GenericInterface:interface",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export interface "
-            },
-            {
-              "kind": "Reference",
-              "text": "GenericInterface"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "T"
-            },
-            {
-              "kind": "Content",
-              "text": "> "
+              "text": "export interface GenericInterface<T> "
             }
           ],
           "releaseTag": "Public",
@@ -341,174 +241,16 @@
           "extendsTokenRanges": []
         },
         {
-          "kind": "Interface",
-          "canonicalReference": "(InterfaceWithGenericCallSignature:interface)",
-          "docComment": "/**\n * @public\n */\n",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export interface "
-            },
-            {
-              "kind": "Reference",
-              "text": "InterfaceWithGenericCallSignature"
-            },
-            {
-              "kind": "Content",
-              "text": " "
-            }
-          ],
-          "releaseTag": "Public",
-          "name": "InterfaceWithGenericCallSignature",
-          "members": [
-            {
-              "kind": "CallSignature",
-              "canonicalReference": "(:call,0)",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "<"
-                },
-                {
-                  "kind": "Reference",
-                  "text": "T"
-                },
-                {
-                  "kind": "Content",
-                  "text": ">(): "
-                },
-                {
-                  "kind": "Content",
-                  "text": "void"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "returnTypeTokenRange": {
-                "startIndex": 3,
-                "endIndex": 4
-              },
-              "releaseTag": "Public",
-              "overloadIndex": 0,
-              "parameters": [],
-              "typeParameters": [
-                {
-                  "typeParameterName": "T",
-                  "constraintTokenRange": {
-                    "startIndex": 0,
-                    "endIndex": 0
-                  },
-                  "defaultTypeTokenRange": {
-                    "startIndex": 0,
-                    "endIndex": 0
-                  }
-                }
-              ]
-            }
-          ],
-          "extendsTokenRanges": []
-        },
-        {
-          "kind": "Interface",
-          "canonicalReference": "(InterfaceWithGenericConstructSignature:interface)",
-          "docComment": "/**\n * @public\n */\n",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export interface "
-            },
-            {
-              "kind": "Reference",
-              "text": "InterfaceWithGenericConstructSignature"
-            },
-            {
-              "kind": "Content",
-              "text": " "
-            }
-          ],
-          "releaseTag": "Public",
-          "name": "InterfaceWithGenericConstructSignature",
-          "members": [
-            {
-              "kind": "ConstructSignature",
-              "canonicalReference": "(:new,0)",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "new <"
-                },
-                {
-                  "kind": "Reference",
-                  "text": "T"
-                },
-                {
-                  "kind": "Content",
-                  "text": ">(): "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "T"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "returnTypeTokenRange": {
-                "startIndex": 3,
-                "endIndex": 4
-              },
-              "releaseTag": "Public",
-              "overloadIndex": 0,
-              "parameters": [],
-              "typeParameters": [
-                {
-                  "typeParameterName": "T",
-                  "constraintTokenRange": {
-                    "startIndex": 0,
-                    "endIndex": 0
-                  },
-                  "defaultTypeTokenRange": {
-                    "startIndex": 0,
-                    "endIndex": 0
-                  }
-                }
-              ]
-            }
-          ],
-          "extendsTokenRanges": []
-        },
-        {
           "kind": "TypeAlias",
-          "canonicalReference": "GenericTypeAlias",
+          "canonicalReference": "api-extractor-scenarios!GenericTypeAlias:type",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare type "
-            },
-            {
-              "kind": "Reference",
-              "text": "GenericTypeAlias"
+              "text": "export declare type GenericTypeAlias<T> = "
             },
             {
               "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "T"
-            },
-            {
-              "kind": "Content",
-              "text": "> = "
-            },
-            {
-              "kind": "Reference",
               "text": "T"
             },
             {
@@ -532,9 +274,119 @@
             }
           ],
           "typeTokenRange": {
-            "startIndex": 5,
-            "endIndex": 6
+            "startIndex": 1,
+            "endIndex": 2
           }
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "api-extractor-scenarios!InterfaceWithGenericCallSignature:interface",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface InterfaceWithGenericCallSignature "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "InterfaceWithGenericCallSignature",
+          "members": [
+            {
+              "kind": "CallSignature",
+              "canonicalReference": "api-extractor-scenarios!InterfaceWithGenericCallSignature:call(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "<T>(): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "void"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [],
+              "typeParameters": [
+                {
+                  "typeParameterName": "T",
+                  "constraintTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  },
+                  "defaultTypeTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  }
+                }
+              ]
+            }
+          ],
+          "extendsTokenRanges": []
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "api-extractor-scenarios!InterfaceWithGenericConstructSignature:interface",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface InterfaceWithGenericConstructSignature "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "InterfaceWithGenericConstructSignature",
+          "members": [
+            {
+              "kind": "ConstructSignature",
+              "canonicalReference": "api-extractor-scenarios!InterfaceWithGenericConstructSignature:new(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "new <T>(): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "T"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [],
+              "typeParameters": [
+                {
+                  "typeParameterName": "T",
+                  "constraintTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  },
+                  "defaultTypeTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  }
+                }
+              ]
+            }
+          ],
+          "extendsTokenRanges": []
         }
       ]
     }

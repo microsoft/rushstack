@@ -295,7 +295,6 @@ export class ChangeAction extends BaseRushAction {
 
   private _verify(): void {
     const changedPackages: string[] = this._getChangedPackageNames();
-
     if (changedPackages.length > 0) {
       this._validateChangeFile(changedPackages);
     } else {
@@ -323,16 +322,23 @@ export class ChangeAction extends BaseRushAction {
     }
     const changedPackageNames: Set<string> = new Set<string>();
 
+    const repoRootFolder: string | undefined = VersionControl.getRepositoryRootPath();
     this.rushConfiguration.projects
-      .filter(project => project.shouldPublish)
-      .filter(project => !project.versionPolicy || !project.versionPolicy.exemptFromRushChange)
-      .filter(project => this._hasProjectChanged(changedFolders, project))
-      .forEach(project => {
-        const hostName: string | undefined = this._projectHostMap.get(project.packageName);
-        if (hostName) {
-          changedPackageNames.add(hostName);
-        }
-      });
+    .filter(project => project.shouldPublish)
+    .filter(project => !project.versionPolicy || !project.versionPolicy.exemptFromRushChange)
+    .filter(project => {
+      const projectFolder: string = repoRootFolder
+        ? path.relative(repoRootFolder, project.projectFolder)
+        : project.projectRelativeFolder;
+      return this._hasProjectChanged(changedFolders, projectFolder);
+    })
+    .forEach(project => {
+      const hostName: string | undefined = this._projectHostMap.get(project.packageName);
+      if (hostName) {
+        changedPackageNames.add(hostName);
+      }
+    });
+
     return [...changedPackageNames];
   }
 
@@ -349,9 +355,9 @@ export class ChangeAction extends BaseRushAction {
 
   private _hasProjectChanged(
     changedFolders: Array<string | undefined>,
-    project: RushConfigurationProject
+    projectFolder: string
   ): boolean {
-    let normalizedFolder: string = project.projectRelativeFolder;
+    let normalizedFolder: string = projectFolder.replace(/\\/g, '/'); // Replace backslashes with forward slashes
     if (normalizedFolder.charAt(normalizedFolder.length - 1) !== '/') {
       normalizedFolder = normalizedFolder + '/';
     }

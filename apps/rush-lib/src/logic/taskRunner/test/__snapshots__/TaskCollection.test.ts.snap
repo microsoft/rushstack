@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TaskCollection Dependencies detectsDependencyCycle 1`] = `
+"A cyclic dependency was encountered:
+  foo
+  -> bar
+  -> foo
+Consider using the cyclicDependencyProjects option for rush.json."
+`;
+
+exports[`TaskCollection Dependencies respectsDependencyOrder 1`] = `""`;
+
+exports[`TaskCollection Dependencies respectsDependencyOrder 2`] = `""`;
+
+exports[`TaskCollection Dependencies respectsDependencyOrder 3`] = `""`;
+
+exports[`TaskCollection Dependencies respectsDependencyOrder 4`] = `""`;
+
+exports[`TaskCollection Dependencies throwsErrorOnNonExistentDependency 1`] = `"The project 'bar' has not been registered."`;
+
+exports[`TaskCollection Dependencies throwsErrorOnNonExistentTask 1`] = `"The task 'foo' has not been registered"`;

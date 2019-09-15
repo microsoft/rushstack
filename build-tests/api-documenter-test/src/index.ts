@@ -12,6 +12,7 @@
 
 export * from './DocClass1';
 export * from './DocEnums';
+import { IDocInterface1 } from './DocClass1';
 
 /**
  * A type alias
@@ -55,3 +56,8 @@ export namespace OuterNamespace {
    */
   export let nestedVariable: boolean = false;
 }
+
+/**
+ * @public
+ */
+export declare function yamlReferenceUniquenessTest(): IDocInterface1;

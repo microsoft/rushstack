@@ -8,6 +8,7 @@ import {
 import {
   BaseShrinkwrapFile
 } from '../base/BaseShrinkwrapFile';
+import { DependencySpecifier } from '../DependencySpecifier';
 
 interface INpmShrinkwrapDependencyJson {
   version: string;
@@ -45,15 +46,18 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
   }
 
+  /** @override */
   public getTempProjectNames(): ReadonlyArray<string> {
     return this._getTempProjectNames(this._shrinkwrapJson.dependencies);
   }
 
+  /** @override */
   protected serialize(): string {
     return JsonFile.stringify(this._shrinkwrapJson);
   }
 
-  protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
+  /** @override */
+  protected getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined {
      // First, check under tempProjectName, as this is the first place "rush link" looks.
     const dependencyJson: INpmShrinkwrapDependencyJson | undefined =
       NpmShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
@@ -62,17 +66,17 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
        return undefined;
      }
 
-     return dependencyJson.version;
+     return new DependencySpecifier(dependencyName, dependencyJson.version);
   }
 
   /**
    * @param dependencyName the name of the dependency to get a version for
    * @param tempProjectName the name of the temp project to check for this dependency
    * @param versionRange Not used, just exists to satisfy abstract API contract
+   * @override
    */
-  protected tryEnsureDependencyVersion(dependencyName: string,
-    tempProjectName: string,
-    versionRange: string): string | undefined {
+  protected tryEnsureDependencyVersion(dependencySpecifier: DependencySpecifier,
+    tempProjectName: string): DependencySpecifier | undefined {
 
     // First, check under tempProjectName, as this is the first place "rush link" looks.
     let dependencyJson: INpmShrinkwrapDependencyJson | undefined = undefined;
@@ -80,15 +84,15 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     const tempDependency: INpmShrinkwrapDependencyJson | undefined = NpmShrinkwrapFile.tryGetValue(
       this._shrinkwrapJson.dependencies, tempProjectName);
     if (tempDependency && tempDependency.dependencies) {
-      dependencyJson = NpmShrinkwrapFile.tryGetValue(tempDependency.dependencies, dependencyName);
+      dependencyJson = NpmShrinkwrapFile.tryGetValue(tempDependency.dependencies, dependencySpecifier.packageName);
     }
 
     // Otherwise look at the root of the shrinkwrap file
     if (!dependencyJson) {
-      return this.getTopLevelDependencyVersion(dependencyName);
+      return this.getTopLevelDependencyVersion(dependencySpecifier.packageName);
     }
 
-    return dependencyJson.version;
+    return new DependencySpecifier(dependencySpecifier.packageName, dependencyJson.version);
   }
 
   private constructor(shrinkwrapJson: INpmShrinkwrapJson) {

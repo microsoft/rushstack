@@ -21,6 +21,9 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { FileSystem } from '@microsoft/node-core-library';
+import { TaskRunner } from '../../logic/taskRunner/TaskRunner';
+import { TaskCollection } from '../../logic/taskRunner/TaskCollection';
+import { Utilities } from '../../utilities/Utilities';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -29,6 +32,7 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   enableParallelism: boolean;
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
+  incremental: boolean;
   allowWarningsInSuccessfulBuild: boolean;
 
   /**
@@ -49,11 +53,13 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
 export class BulkScriptAction extends BaseScriptAction {
   private _enableParallelism: boolean;
   private _ignoreMissingScript: boolean;
+  private _isIncrementalBuildAllowed: boolean;
   private _commandToRun: string;
 
   private _changedProjectsOnly: CommandLineFlagParameter;
   private _fromFlag: CommandLineStringListParameter;
   private _toFlag: CommandLineStringListParameter;
+  private _fromVersionPolicy: CommandLineStringListParameter;
   private _toVersionPolicy: CommandLineStringListParameter;
   private _verboseParameter: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
@@ -64,6 +70,7 @@ export class BulkScriptAction extends BaseScriptAction {
     super(options);
     this._enableParallelism = options.enableParallelism;
     this._ignoreMissingScript = options.ignoreMissingScript;
+    this._isIncrementalBuildAllowed = options.incremental;
     this._commandToRun = options.commandToRun || options.actionName;
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
@@ -92,24 +99,35 @@ export class BulkScriptAction extends BaseScriptAction {
       customParameter.appendToArgList(customParameterValues);
     }
 
-    const changedProjectsOnly: boolean = this.actionName === 'build' && this._changedProjectsOnly.value;
+    const changedProjectsOnly: boolean = this._isIncrementalBuildAllowed && this._changedProjectsOnly.value;
 
-    const tasks: TaskSelector = new TaskSelector({
+    const taskSelector: TaskSelector = new TaskSelector({
       rushConfiguration: this.rushConfiguration,
-      toFlags: this._mergeToProjects(),
-      fromFlags: this._fromFlag.values,
+      toFlags: this._mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy),
+      fromFlags: this._mergeProjectsWithVersionPolicy(this._fromFlag, this._fromVersionPolicy),
       commandToRun: this._commandToRun,
       customParameterValues,
-      isQuietMode,
-      parallelism,
-      isIncrementalBuildAllowed: this.actionName === 'build',
-      changedProjectsOnly,
+      isQuietMode: isQuietMode,
+      isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
       ignoreMissingScript: this._ignoreMissingScript,
       ignoreDependencyOrder: this._ignoreDependencyOrder,
-      allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
+      packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(this._commandToRun)
     });
 
-    return tasks.execute().then(() => {
+    // Register all tasks with the task collection
+    const taskCollection: TaskCollection = taskSelector.registerTasks();
+
+    const taskRunner: TaskRunner = new TaskRunner(
+      taskCollection.getOrderedTasks(),
+      {
+        quietMode: isQuietMode,
+        parallelism: parallelism,
+        changedProjectsOnly: changedProjectsOnly,
+        allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
+      }
+    );
+
+    return taskRunner.execute().then(() => {
       stopwatch.stop();
       console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
       this._doAfterTask(stopwatch, true);
@@ -147,6 +165,12 @@ export class BulkScriptAction extends BaseScriptAction {
       argumentName: 'PROJECT1',
       description: 'Run command in the specified project and all of its dependencies'
     });
+    this._fromVersionPolicy =  this.defineStringListParameter({
+      parameterLongName: '--from-version-policy',
+      argumentName: 'VERSION_POLICY_NAME',
+      description: 'Run command in all projects with the specified version policy '
+        + 'and all projects that directly or indirectly depend on projects with the specified version policy'
+    });
     this._toVersionPolicy =  this.defineStringListParameter({
       parameterLongName: '--to-version-policy',
       argumentName: 'VERSION_POLICY_NAME',
@@ -163,7 +187,7 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterShortName: '-v',
       description: 'Display the logs during the build, rather than just displaying the build status summary'
     });
-    if (this.actionName === 'build') {
+    if (this._isIncrementalBuildAllowed) {
       this._changedProjectsOnly = this.defineFlagParameter({
         parameterLongName: '--changed-projects-only',
         parameterShortName: '-o',
@@ -175,11 +199,13 @@ export class BulkScriptAction extends BaseScriptAction {
     this.defineScriptParameters();
   }
 
-  private _mergeToProjects(): string[] {
-    const projects: string[] = [...this._toFlag.values];
-    if (this._toVersionPolicy.values && this._toVersionPolicy.values.length) {
+  private _mergeProjectsWithVersionPolicy(flags: CommandLineStringListParameter,
+    versionPolicies: CommandLineStringListParameter): string[] {
+
+    const projects: string[] = [...flags.values];
+    if (versionPolicies.values && versionPolicies.values.length > 0) {
       this.rushConfiguration.projects.forEach(project => {
-        const matches: boolean = this._toVersionPolicy.values.some(policyName => {
+        const matches: boolean = versionPolicies.values.some(policyName => {
           return project.versionPolicyName === policyName;
         });
         if (matches) {

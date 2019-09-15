@@ -2,35 +2,27 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1001,
+    "schemaVersion": 1003,
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "api-extractor-scenarios",
+  "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
+      "canonicalReference": "api-extractor-scenarios!",
       "name": "",
       "members": [
         {
           "kind": "Function",
-          "canonicalReference": "(defaultFunctionDeclaration:0)",
+          "canonicalReference": "api-extractor-scenarios!defaultFunctionDeclaration:function(1)",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export default function "
-            },
-            {
-              "kind": "Reference",
-              "text": "defaultFunctionDeclaration"
-            },
-            {
-              "kind": "Content",
-              "text": "(): "
+              "text": "export default function defaultFunctionDeclaration(): "
             },
             {
               "kind": "Content",
@@ -42,11 +34,11 @@
             }
           ],
           "returnTypeTokenRange": {
-            "startIndex": 3,
-            "endIndex": 4
+            "startIndex": 1,
+            "endIndex": 2
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [],
           "name": "defaultFunctionDeclaration"
         }

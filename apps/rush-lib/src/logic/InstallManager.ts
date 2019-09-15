@@ -57,6 +57,7 @@ import { CreateOptions } from 'tar';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { PackageManagerName } from '../api/packageManager/PackageManager';
 import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
+import { DependencySpecifier } from './DependencySpecifier';
 
 export interface CreateOptions { // tslint:disable-line:interface-name
   /**
@@ -503,7 +504,9 @@ export class InstallManager {
     if (shrinkwrapFile) {
       // Check any (explicitly) preferred dependencies first
       allExplicitPreferredVersions.forEach((version: string, dependency: string) => {
-        if (!shrinkwrapFile.hasCompatibleTopLevelDependency(dependency, version)) {
+        const dependencySpecifier: DependencySpecifier = new DependencySpecifier(dependency, version);
+
+        if (!shrinkwrapFile.hasCompatibleTopLevelDependency(dependencySpecifier)) {
           shrinkwrapWarnings.push(`"${dependency}" (${version}) required by the preferred versions from `
             + RushConstants.commonVersionsFilename);
           shrinkwrapIsUpToDate = false;
@@ -614,6 +617,8 @@ export class InstallManager {
       Sort.sortMapKeys(tempDependencies);
 
       for (const [packageName, packageVersion] of tempDependencies.entries()) {
+        const dependencySpecifier: DependencySpecifier = new DependencySpecifier(packageName, packageVersion);
+
         // Is there a locally built Rush project that could satisfy this dependency?
         // If so, then we will symlink to the project folder rather than to common/temp/node_modules.
         // In this case, we don't want "npm install" to process this package, but we do need
@@ -644,8 +649,7 @@ export class InstallManager {
         tempPackageJson.dependencies![packageName] = packageVersion;
 
         if (shrinkwrapFile) {
-          if (!shrinkwrapFile.tryEnsureCompatibleDependency(packageName, packageVersion,
-            rushProject.tempProjectName)) {
+          if (!shrinkwrapFile.tryEnsureCompatibleDependency(dependencySpecifier, rushProject.tempProjectName)) {
             shrinkwrapWarnings.push(`"${packageName}" (${packageVersion}) required by`
               + ` "${rushProject.packageName}"`);
             shrinkwrapIsUpToDate = false;
@@ -936,24 +940,36 @@ export class InstallManager {
               + FileSystem.getRealPath(packageManagerFilename) + ' ' + installArgs.join(' ') + os.EOL);
           }
 
-          Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename,
-            installArgs,
-            this._rushConfiguration.commonTempFolder,
-            undefined,
-            false, () => {
-              if (this._rushConfiguration.packageManager === 'pnpm') {
-                // If there is a failure in pnpm, it is possible that it left the
-                // store in a bad state. Therefore, we should clean out the store
-                // before attempting the install again.
+          try {
+            Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename,
+              installArgs,
+              this._rushConfiguration.commonTempFolder,
+              undefined,
+              false, () => {
+                if (this._rushConfiguration.packageManager === 'pnpm') {
+                  console.log(colors.yellow(`Deleting the "node_modules" folder`));
+                  this._commonTempFolderRecycler.moveFolder(commonNodeModulesFolder);
 
-                console.log(colors.yellow(`Deleting the "node_modules" folder`));
-                this._commonTempFolderRecycler.moveFolder(commonNodeModulesFolder);
-                console.log(colors.yellow(`Deleting the "pnpm-store" folder`));
-                this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
+                  // Leave the pnpm-store as is for the retry. This ensures that packages that have already
+                  // been downloaded need not be downloaded again, thereby potentially increasing the chances
+                  // of a subsequent successful install.
 
-                Utilities.createFolderWithRetry(commonNodeModulesFolder);
-              }
+                  Utilities.createFolderWithRetry(commonNodeModulesFolder);
+                }
             });
+          } catch (error) {
+            // All the install attempts failed.
+
+            if (this._rushConfiguration.packageManager === 'pnpm') {
+              // If the installation has failed even after the retries, then pnpm store may
+              // have got into a corrupted, irrecoverable state. Delete the store so that a
+              // future install can create the store afresh.
+              console.log(colors.yellow(`Deleting the "pnpm-store" folder`));
+              this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
+            }
+
+            throw error;
+          }
 
           if (this._rushConfiguration.packageManager === 'npm') {
 
@@ -991,7 +1007,7 @@ export class InstallManager {
       if (FileSystem.exists(lastCheckFile)) {
         let cachedResult: boolean | 'error' | undefined = undefined;
         try {
-          // NOTE: mtimeMs is not supported yet in NodeJS 6.x
+          // NOTE: mtimeMs is not supported yet in Node.js 6.x
           const nowMs: number = new Date().getTime();
           const ageMs: number = nowMs - FileSystem.getStatistics(lastCheckFile).mtime.getTime();
           const HOUR: number = 60 * 60 * 1000;

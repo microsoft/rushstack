@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /**
- * A library for writing scripts that interact with the Rush tool.
+ * A library for writing scripts that interact with the {@link https://rushjs.io/ | Rush} tool.
  * @packageDocumentation
  */
 
@@ -75,4 +75,7 @@ export {
   VersionPolicyConfiguration
 } from './api/VersionPolicyConfiguration';
 
-export { Rush } from './api/Rush';
+export {
+  ILaunchOptions,
+  Rush
+} from './api/Rush';

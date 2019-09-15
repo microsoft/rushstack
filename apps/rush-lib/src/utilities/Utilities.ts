@@ -121,7 +121,7 @@ export class Utilities {
   }
 
   /**
-   * NodeJS equivalent of performance.now().
+   * Node.js equivalent of performance.now().
    */
   public static getTimeInMs(): number {
     let seconds: number;
@@ -562,6 +562,10 @@ export class Utilities {
 
   public static getRushConfigNotFoundError(): Error {
     return new Error('Unable to find rush.json configuration file');
+  }
+
+  public static getPackageDepsFilenameForCommand(command: string): string {
+    return `package-deps_${command}.json`;
   }
 
   private static _executeLifecycleCommandInternal<TCommandResult>(

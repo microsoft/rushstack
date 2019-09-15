@@ -46,6 +46,7 @@ export class PublishAction extends BaseRushAction {
   private _force: CommandLineFlagParameter;
   private _prereleaseToken: PrereleaseToken;
   private _versionPolicy: CommandLineStringParameter;
+  private _applyGitTagsOnPack: CommandLineFlagParameter;
 
   private _releaseFolder: CommandLineStringParameter;
   private _pack: CommandLineFlagParameter;
@@ -180,6 +181,11 @@ export class PublishAction extends BaseRushAction {
       parameterShortName: undefined,
       description: 'If this flag is specified with --publish, packages will be published with --force on npm'
     });
+    this._applyGitTagsOnPack = this.defineFlagParameter({
+      parameterLongName: '--apply-git-tags-on-pack',
+      description: `If specified with --publish and --pack, git tags will be applied for packages` +
+      ` as if a publish was being run without --pack.`
+    });
   }
 
   /**
@@ -227,6 +233,10 @@ export class PublishAction extends BaseRushAction {
     if (this._registryUrl.value && this._pack.value) {
       throw new Error(`--registry cannot be used with --pack`);
     }
+    if (this._applyGitTagsOnPack.value && !this._pack.value) {
+      throw new Error(`${this._applyGitTagsOnPack.longName} must be used `
+      + `with ${this._pack.longName}`);
+    }
   }
 
   private _publishChanges(allPackages: Map<string, RushConfigurationProject>): void {
@@ -253,7 +263,7 @@ export class PublishAction extends BaseRushAction {
 
       if (VersionControl.hasUncommittedChanges()) {
         // Stage, commit, and push the changes to remote temp branch.
-        git.addChanges();
+        git.addChanges(':/*');
         git.commit(this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE);
         git.push(tempBranch);
 
@@ -312,14 +322,28 @@ export class PublishAction extends BaseRushAction {
       if (packageConfig.shouldPublish &&
         (!this._versionPolicy.value || this._versionPolicy.value === packageConfig.versionPolicyName)
       ) {
+        const applyTag: (apply: boolean) => void = (apply: boolean): void => {
+          if (!apply) {
+            return;
+          }
+
+          // Do not tag packages that already exist. This will fail with a fatal error.
+          if (this._packageExists(packageConfig)) {
+            return;
+          }
+
+          git.addTag(!!this._publish.value && !this._registryUrl.value, packageName, packageConfig.packageJson.version);
+          updated = true;
+        };
+
         if (this._pack.value) {
           // packs to tarball instead of publishing to NPM repository
           this._npmPack(packageName, packageConfig);
+          applyTag(this._applyGitTagsOnPack.value);
         } else if (this._force.value || !this._packageExists(packageConfig)) {
           // Publish to npm repository
           this._npmPublish(packageName, packageConfig.projectFolder);
-          git.addTag(!!this._publish.value && !this._registryUrl.value, packageName, packageConfig.packageJson.version);
-          updated = true;
+          applyTag(true);
         } else {
           console.log(`Skip ${packageName}. Not updated.`);
         }

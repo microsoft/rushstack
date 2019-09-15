@@ -2,35 +2,27 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1001,
+    "schemaVersion": 1003,
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "api-extractor-scenarios",
+  "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
+      "canonicalReference": "api-extractor-scenarios!",
       "name": "",
       "members": [
         {
           "kind": "Class",
-          "canonicalReference": "(AbstractClass:class)",
+          "canonicalReference": "api-extractor-scenarios!AbstractClass:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare abstract class "
-            },
-            {
-              "kind": "Reference",
-              "text": "AbstractClass"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare abstract class AbstractClass "
             }
           ],
           "releaseTag": "Public",
@@ -38,20 +30,12 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "(member:instance,0)",
+              "canonicalReference": "api-extractor-scenarios!AbstractClass#member:member(1)",
               "docComment": "",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "abstract "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "member"
-                },
-                {
-                  "kind": "Content",
-                  "text": "(): "
+                  "text": "abstract member(): "
                 },
                 {
                   "kind": "Content",
@@ -64,11 +48,11 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 3,
-                "endIndex": 4
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "member"
             }
@@ -77,20 +61,12 @@
         },
         {
           "kind": "Class",
-          "canonicalReference": "(ClassWithTypeLiterals:class)",
+          "canonicalReference": "api-extractor-scenarios!ClassWithTypeLiterals:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "ClassWithTypeLiterals"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class ClassWithTypeLiterals "
             }
           ],
           "releaseTag": "Public",
@@ -98,44 +74,16 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "(method1:instance,0)",
+              "canonicalReference": "api-extractor-scenarios!ClassWithTypeLiterals#method1:member(1)",
               "docComment": "/**\n * type literal in\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "method1"
+                  "kind": "Content",
+                  "text": "method1(vector: "
                 },
                 {
                   "kind": "Content",
-                  "text": "("
-                },
-                {
-                  "kind": "Reference",
-                  "text": "vector"
-                },
-                {
-                  "kind": "Content",
-                  "text": ": "
-                },
-                {
-                  "kind": "Content",
-                  "text": "{\n        "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "x"
-                },
-                {
-                  "kind": "Content",
-                  "text": ": number;\n        "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "y"
-                },
-                {
-                  "kind": "Content",
-                  "text": ": number;\n    }"
+                  "text": "{\n        x: number;\n        y: number;\n    }"
                 },
                 {
                   "kind": "Content",
@@ -152,17 +100,17 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 10,
-                "endIndex": 11
+                "startIndex": 3,
+                "endIndex": 4
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [
                 {
                   "parameterName": "vector",
                   "parameterTypeTokenRange": {
-                    "startIndex": 4,
-                    "endIndex": 9
+                    "startIndex": 1,
+                    "endIndex": 2
                   }
                 }
               ],
@@ -170,44 +118,25 @@
             },
             {
               "kind": "Method",
-              "canonicalReference": "(method2:instance,0)",
+              "canonicalReference": "api-extractor-scenarios!ClassWithTypeLiterals#method2:member(1)",
               "docComment": "/**\n * type literal output\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "method2"
+                  "kind": "Content",
+                  "text": "method2(): "
                 },
                 {
                   "kind": "Content",
-                  "text": "(): "
-                },
-                {
-                  "kind": "Content",
-                  "text": "{\n        "
+                  "text": "{\n        classValue: "
                 },
                 {
                   "kind": "Reference",
-                  "text": "classValue"
+                  "text": "ClassWithTypeLiterals",
+                  "canonicalReference": "api-extractor-scenarios!ClassWithTypeLiterals:class"
                 },
                 {
                   "kind": "Content",
-                  "text": ": "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "ClassWithTypeLiterals"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";\n        "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "callback"
-                },
-                {
-                  "kind": "Content",
-                  "text": ": () => number;\n    } | undefined"
+                  "text": ";\n        callback: () => number;\n    } | undefined"
                 },
                 {
                   "kind": "Content",
@@ -216,11 +145,11 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 9
+                "startIndex": 1,
+                "endIndex": 4
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "method2"
             }
@@ -229,20 +158,12 @@
         },
         {
           "kind": "Enum",
-          "canonicalReference": "(ConstEnum:enum)",
+          "canonicalReference": "api-extractor-scenarios!ConstEnum:enum",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare const enum "
-            },
-            {
-              "kind": "Reference",
-              "text": "ConstEnum"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare const enum ConstEnum "
             }
           ],
           "releaseTag": "Public",
@@ -250,16 +171,12 @@
           "members": [
             {
               "kind": "EnumMember",
-              "canonicalReference": "One",
+              "canonicalReference": "api-extractor-scenarios!ConstEnum.One:member",
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "One"
-                },
-                {
                   "kind": "Content",
-                  "text": " = "
+                  "text": "One = "
                 },
                 {
                   "kind": "Content",
@@ -269,22 +186,18 @@
               "releaseTag": "Public",
               "name": "One",
               "initializerTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             },
             {
               "kind": "EnumMember",
-              "canonicalReference": "Two",
+              "canonicalReference": "api-extractor-scenarios!ConstEnum.Two:member",
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "Two"
-                },
-                {
                   "kind": "Content",
-                  "text": " = "
+                  "text": "Two = "
                 },
                 {
                   "kind": "Content",
@@ -294,22 +207,18 @@
               "releaseTag": "Public",
               "name": "Two",
               "initializerTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             },
             {
               "kind": "EnumMember",
-              "canonicalReference": "Zero",
+              "canonicalReference": "api-extractor-scenarios!ConstEnum.Zero:member",
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "Zero"
-                },
-                {
                   "kind": "Content",
-                  "text": " = "
+                  "text": "Zero = "
                 },
                 {
                   "kind": "Content",
@@ -319,28 +228,20 @@
               "releaseTag": "Public",
               "name": "Zero",
               "initializerTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             }
           ]
         },
         {
           "kind": "Interface",
-          "canonicalReference": "(IInterface:interface)",
+          "canonicalReference": "api-extractor-scenarios!IInterface:interface",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export interface "
-            },
-            {
-              "kind": "Reference",
-              "text": "IInterface"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export interface IInterface "
             }
           ],
           "releaseTag": "Public",
@@ -348,16 +249,12 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "canonicalReference": "member",
+              "canonicalReference": "api-extractor-scenarios!IInterface#member:member",
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "member"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "member: "
                 },
                 {
                   "kind": "Content",
@@ -371,8 +268,8 @@
               "releaseTag": "Public",
               "name": "member",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             }
           ],
@@ -380,20 +277,12 @@
         },
         {
           "kind": "Namespace",
-          "canonicalReference": "(NamespaceContainingVariable:namespace)",
+          "canonicalReference": "api-extractor-scenarios!NamespaceContainingVariable:namespace",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare namespace "
-            },
-            {
-              "kind": "Reference",
-              "text": "NamespaceContainingVariable"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare namespace NamespaceContainingVariable "
             }
           ],
           "releaseTag": "Public",
@@ -401,16 +290,12 @@
           "members": [
             {
               "kind": "Variable",
-              "canonicalReference": "constVariable",
+              "canonicalReference": "api-extractor-scenarios!NamespaceContainingVariable.constVariable:var",
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "constVariable"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "constVariable: "
                 },
                 {
                   "kind": "Content",
@@ -420,22 +305,18 @@
               "releaseTag": "Public",
               "name": "constVariable",
               "variableTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             },
             {
               "kind": "Variable",
-              "canonicalReference": "variable",
+              "canonicalReference": "api-extractor-scenarios!NamespaceContainingVariable.variable:var",
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "variable"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "variable: "
                 },
                 {
                   "kind": "Content",
@@ -445,28 +326,20 @@
               "releaseTag": "Public",
               "name": "variable",
               "variableTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             }
           ]
         },
         {
           "kind": "Enum",
-          "canonicalReference": "(RegularEnum:enum)",
+          "canonicalReference": "api-extractor-scenarios!RegularEnum:enum",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare enum "
-            },
-            {
-              "kind": "Reference",
-              "text": "RegularEnum"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare enum RegularEnum "
             }
           ],
           "releaseTag": "Public",
@@ -474,16 +347,12 @@
           "members": [
             {
               "kind": "EnumMember",
-              "canonicalReference": "One",
+              "canonicalReference": "api-extractor-scenarios!RegularEnum.One:member",
               "docComment": "/**\n * These are some docs for One\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "One"
-                },
-                {
                   "kind": "Content",
-                  "text": " = "
+                  "text": "One = "
                 },
                 {
                   "kind": "Content",
@@ -493,22 +362,18 @@
               "releaseTag": "Public",
               "name": "One",
               "initializerTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             },
             {
               "kind": "EnumMember",
-              "canonicalReference": "Two",
+              "canonicalReference": "api-extractor-scenarios!RegularEnum.Two:member",
               "docComment": "/**\n * These are some docs for Two\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "Two"
-                },
-                {
                   "kind": "Content",
-                  "text": " = "
+                  "text": "Two = "
                 },
                 {
                   "kind": "Content",
@@ -518,22 +383,18 @@
               "releaseTag": "Public",
               "name": "Two",
               "initializerTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             },
             {
               "kind": "EnumMember",
-              "canonicalReference": "Zero",
+              "canonicalReference": "api-extractor-scenarios!RegularEnum.Zero:member",
               "docComment": "/**\n * These are some docs for Zero\n */\n",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "Zero"
-                },
-                {
                   "kind": "Content",
-                  "text": " = "
+                  "text": "Zero = "
                 },
                 {
                   "kind": "Content",
@@ -543,28 +404,20 @@
               "releaseTag": "Public",
               "name": "Zero",
               "initializerTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             }
           ]
         },
         {
           "kind": "Class",
-          "canonicalReference": "(SimpleClass:class)",
+          "canonicalReference": "api-extractor-scenarios!SimpleClass:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class "
-            },
-            {
-              "kind": "Reference",
-              "text": "SimpleClass"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare class SimpleClass "
             }
           ],
           "releaseTag": "Public",
@@ -572,16 +425,12 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "(member:instance,0)",
+              "canonicalReference": "api-extractor-scenarios!SimpleClass#member:member(1)",
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "member"
-                },
-                {
                   "kind": "Content",
-                  "text": "(): "
+                  "text": "member(): "
                 },
                 {
                   "kind": "Content",
@@ -594,11 +443,11 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "member"
             }
@@ -607,16 +456,12 @@
         },
         {
           "kind": "Variable",
-          "canonicalReference": "VARIABLE",
+          "canonicalReference": "api-extractor-scenarios!VARIABLE:var",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
-              "kind": "Reference",
-              "text": "VARIABLE"
-            },
-            {
               "kind": "Content",
-              "text": ": "
+              "text": "VARIABLE: "
             },
             {
               "kind": "Content",
@@ -626,8 +471,8 @@
           "releaseTag": "Public",
           "name": "VARIABLE",
           "variableTypeTokenRange": {
-            "startIndex": 2,
-            "endIndex": 3
+            "startIndex": 1,
+            "endIndex": 2
           }
         }
       ]

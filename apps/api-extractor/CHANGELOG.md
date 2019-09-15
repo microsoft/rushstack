@@ -1,6 +1,84 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 12 Jul 2019 19:12:46 GMT and should not be manually modified.
+This log was last generated on Wed, 11 Sep 2019 19:56:23 GMT and should not be manually modified.
+
+## 7.4.2
+Wed, 11 Sep 2019 19:56:23 GMT
+
+### Patches
+
+- Add support for an exported name that conflicts with a global name (GitHub #1350)
+
+## 7.4.1
+Tue, 10 Sep 2019 22:32:23 GMT
+
+### Patches
+
+- Update documentation
+
+## 7.4.0
+Tue, 10 Sep 2019 20:38:33 GMT
+
+### Minor changes
+
+- Add support for generating declaration references
+
+## 7.3.11
+Wed, 04 Sep 2019 18:28:06 GMT
+
+*Version update only*
+
+## 7.3.10
+Wed, 04 Sep 2019 15:15:37 GMT
+
+### Patches
+
+- Update TSDoc dependency to 0.12.14
+
+## 7.3.9
+Fri, 30 Aug 2019 00:14:32 GMT
+
+### Patches
+
+- Fix a problem where Unicode API names were not handled correctly
+
+## 7.3.8
+Mon, 12 Aug 2019 15:15:14 GMT
+
+*Version update only*
+
+## 7.3.7
+Thu, 08 Aug 2019 15:14:17 GMT
+
+*Version update only*
+
+## 7.3.6
+Thu, 08 Aug 2019 00:49:05 GMT
+
+### Patches
+
+- Fix an issue where a function with only one declaration was assigned an overloadIndex of 0 instead of 1
+
+## 7.3.5
+Mon, 05 Aug 2019 22:04:32 GMT
+
+### Patches
+
+- Security updates.
+
+## 7.3.4
+Tue, 23 Jul 2019 01:13:01 GMT
+
+### Patches
+
+- ApiItem.name is now quoted when it contains invalid identifier characters, to avoid conflicts with an ECMAScript symbol expression
+
+## 7.3.3
+Mon, 22 Jul 2019 19:13:10 GMT
+
+### Patches
+
+- Update to use new api-extractor-model
 
 ## 7.3.2
 Fri, 12 Jul 2019 19:12:46 GMT

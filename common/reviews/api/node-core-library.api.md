@@ -8,9 +8,6 @@ import * as child_process from 'child_process';
 import * as fs from 'fs';
 
 // @beta
-export type callback<TResult, TError> = (error: TError, result: TResult) => void;
-
-// @beta
 export class Colors {
     // (undocumented)
     static black(text: string | IColorableSequence): IColorableSequence;
@@ -290,8 +287,6 @@ export interface INodePackageJson {
     repository?: string;
     scripts?: IPackageJsonScriptTable;
     // @beta
-    tsdoc?: IPackageJsonTsdocConfiguration;
-    // @beta
     tsdocMetadata?: string;
     types?: string;
     typings?: string;
@@ -325,11 +320,6 @@ export interface IPackageJsonLookupParameters {
 // @public
 export interface IPackageJsonScriptTable {
     [scriptName: string]: string;
-}
-
-// @beta
-export interface IPackageJsonTsdocConfiguration {
-    tsdocFlavor?: string;
 }
 
 // @public
@@ -384,15 +374,22 @@ export class JsonSchema {
     validateObjectWithCallback(jsonObject: Object, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): void;
     }
 
-// @beta
+// @public
 export class LegacyAdapters {
-    static convertCallbackToPromise<TResult, TError>(fn: (cb: callback<TResult, TError>) => void): Promise<TResult>;
+    static convertCallbackToPromise<TResult, TError>(fn: (cb: LegacyCallback<TResult, TError>) => void): Promise<TResult>;
     // (undocumented)
-    static convertCallbackToPromise<TResult, TError, TArg1>(fn: (arg1: TArg1, cb: callback<TResult, TError>) => void, arg1: TArg1): Promise<TResult>;
+    static convertCallbackToPromise<TResult, TError, TArg1>(fn: (arg1: TArg1, cb: LegacyCallback<TResult, TError>) => void, arg1: TArg1): Promise<TResult>;
     // (undocumented)
-    static convertCallbackToPromise<TResult, TError, TArg1, TArg2>(fn: (arg1: TArg1, arg2: TArg2, cb: callback<TResult, TError>) => void, arg1: TArg1, arg2: TArg2): Promise<TResult>;
+    static convertCallbackToPromise<TResult, TError, TArg1, TArg2>(fn: (arg1: TArg1, arg2: TArg2, cb: LegacyCallback<TResult, TError>) => void, arg1: TArg1, arg2: TArg2): Promise<TResult>;
+    // (undocumented)
+    static convertCallbackToPromise<TResult, TError, TArg1, TArg2, TArg3>(fn: (arg1: TArg1, arg2: TArg2, arg3: TArg3, cb: LegacyCallback<TResult, TError>) => void, arg1: TArg1, arg2: TArg2, arg3: TArg3): Promise<TResult>;
+    // (undocumented)
+    static convertCallbackToPromise<TResult, TError, TArg1, TArg2, TArg3, TArg4>(fn: (arg1: TArg1, arg2: TArg2, arg3: TArg3, arg4: TArg4, cb: LegacyCallback<TResult, TError>) => void, arg1: TArg1, arg2: TArg2, arg3: TArg3, arg4: TArg4): Promise<TResult>;
     static scrubError(error: Error | string | any): Error;
 }
+
+// @public
+export type LegacyCallback<TResult, TError> = (error: TError, result: TResult) => void;
 
 // @public
 export class LockFile {

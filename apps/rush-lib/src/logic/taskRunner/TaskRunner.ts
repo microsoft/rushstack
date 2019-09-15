@@ -11,7 +11,7 @@ import {
 } from '@microsoft/node-core-library';
 
 import { Stopwatch } from '../../utilities/Stopwatch';
-import { ITask, ITaskDefinition } from './ITask';
+import { ITask } from './ITask';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
@@ -26,13 +26,12 @@ export interface ITaskRunnerOptions {
 
 /**
  * A class which manages the execution of a set of tasks with interdependencies.
- * Any class of task definition may be registered, and dependencies between tasks are
- * easily specified. Initially, and at the end of each task execution, all unblocked tasks
+ * Initially, and at the end of each task execution, all unblocked tasks
  * are added to a ready queue which is then executed. This is done continually until all
  * tasks are complete, or prematurely fails if any of the tasks fail.
  */
 export class TaskRunner {
-  private _tasks: Map<string, ITask>;
+  private _tasks: ITask[];
   private _changedProjectsOnly: boolean;
   private _allowWarningsInSuccessfulBuild: boolean;
   private _buildQueue: ITask[];
@@ -45,7 +44,7 @@ export class TaskRunner {
   private _completedTasks: number;
   private _terminal: Terminal;
 
-  constructor(options: ITaskRunnerOptions) {
+  constructor(orderedTasks: ITask[], options: ITaskRunnerOptions) {
     const {
       quietMode,
       parallelism,
@@ -53,8 +52,8 @@ export class TaskRunner {
       allowWarningsInSuccessfulBuild,
       terminal = new Terminal(new ConsoleTerminalProvider())
     } = options;
-    this._tasks = new Map<string, ITask>();
-    this._buildQueue = [];
+    this._tasks = orderedTasks;
+    this._buildQueue = orderedTasks.slice(0);
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
     this._hasAnyWarnings = false;
@@ -93,83 +92,14 @@ export class TaskRunner {
   }
 
   /**
-   * Registers a task definition to the map of defined tasks
-   */
-  public addTask(taskDefinition: ITaskDefinition): void {
-    if (this._tasks.has(taskDefinition.name)) {
-      throw new Error('A task with that name has already been registered.');
-    }
-
-    const task: ITask = taskDefinition as ITask;
-    task.dependencies = new Set<ITask>();
-    task.dependents = new Set<ITask>();
-    task.status = TaskStatus.Ready;
-    task.criticalPathLength = undefined;
-    this._tasks.set(task.name, task);
-
-    if (!this._quietMode) {
-      this._terminal.writeLine(`Registered ${task.name}`);
-    }
-  }
-
-  /**
-   * Returns true if a task with that name has been registered
-   */
-  public hasTask(taskName: string): boolean {
-    return this._tasks.has(taskName);
-  }
-
-  /**
-   * Defines the list of dependencies for an individual task.
-   * @param taskName - the string name of the task for which we are defining dependencies. A task with this
-   * name must already have been registered.
-   */
-  public addDependencies(taskName: string, taskDependencies: string[]): void {
-    const task: ITask | undefined = this._tasks.get(taskName);
-
-    if (!task) {
-      throw new Error(`The task '${taskName}' has not been registered`);
-    }
-    if (!taskDependencies) {
-      throw new Error('The list of dependencies must be defined');
-    }
-
-    for (const dependencyName of taskDependencies) {
-      if (!this._tasks.has(dependencyName)) {
-        throw new Error(`The project '${dependencyName}' has not been registered.`);
-      }
-      const dependency: ITask = this._tasks.get(dependencyName)!;
-      task.dependencies.add(dependency);
-      dependency.dependents.add(task);
-    }
-  }
-
-  /**
    * Executes all tasks which have been registered, returning a promise which is resolved when all the
    * tasks are completed successfully, or rejects when any task fails.
    */
   public execute(): Promise<void> {
     this._currentActiveTasks = 0;
     this._completedTasks = 0;
-    this._totalTasks = this._tasks.size;
+    this._totalTasks = this._buildQueue.length;
     this._terminal.writeLine(`Executing a maximum of ${this._parallelism} simultaneous processes...${os.EOL}`);
-
-    this._checkForCyclicDependencies(this._tasks.values(), []);
-
-    // Precalculate the number of dependent packages
-    this._tasks.forEach((task: ITask) => {
-      this._calculateCriticalPaths(task);
-    });
-
-    // Add everything to the buildQueue
-    this._tasks.forEach((task: ITask) => {
-      this._buildQueue.push(task);
-    });
-
-    // Sort the queue in descending order, nothing will mess with the order
-    this._buildQueue.sort((taskA: ITask, taskB: ITask): number => {
-      return taskB.criticalPathLength! - taskA.criticalPathLength!;
-    });
 
     return this._startAvailableTasks().then(() => {
       this._printTaskStatus();
@@ -337,43 +267,6 @@ export class TaskRunner {
 
   private _getCurrentCompletedTaskString(): string {
     return `${this._completedTasks} of ${this._totalTasks}: `;
-  }
-
-  /**
-   * Checks for projects that indirectly depend on themselves.
-   */
-  private _checkForCyclicDependencies(tasks: Iterable<ITask>, dependencyChain: string[]): void {
-    for (const task of tasks) {
-      if (dependencyChain.indexOf(task.name) >= 0) {
-        throw new Error('A cyclic dependency was encountered:\n'
-          + '  ' + [...dependencyChain, task.name].reverse().join('\n  -> ')
-          + '\nConsider using the cyclicDependencyProjects option for rush.json.');
-      }
-      dependencyChain.push(task.name);
-      this._checkForCyclicDependencies(task.dependents, dependencyChain);
-      dependencyChain.pop();
-    }
-  }
-
-  /**
-   * Calculate the number of packages which must be built before we reach
-   * the furthest away "root" node
-   */
-  private _calculateCriticalPaths(task: ITask): number {
-    // Return the memoized value
-    if (task.criticalPathLength !== undefined) {
-      return task.criticalPathLength;
-    }
-
-    // If no dependents, we are in a "root"
-    if (task.dependents.size === 0) {
-      return task.criticalPathLength = 0;
-    } else {
-      // Otherwise we are as long as the longest package + 1
-      const depsLengths: number[] = [];
-      task.dependents.forEach(dep => this._calculateCriticalPaths(dep));
-      return task.criticalPathLength = Math.max(...depsLengths) + 1;
-    }
   }
 
   /**

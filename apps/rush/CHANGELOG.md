@@ -1,6 +1,80 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 18 Jul 2019 00:07:46 GMT and should not be manually modified.
+This log was last generated on Wed, 11 Sep 2019 21:41:34 GMT and should not be manually modified.
+
+## 5.13.0
+Wed, 11 Sep 2019 21:41:34 GMT
+
+### Updates
+
+- Add support for incremental custom commands. This change also adds a per-project `.rush/temp` folder that should be included in `.gitignore` (i.e. - `.rush/temp/**`).
+- Add a --from-version-policy option for bulk commands to allow running the command (like build) from packages with a version policy and their direct and indirect dependent projects
+- Update documentation
+- Do not delete the pnpm store if an installation retry fails. Delete the pnpm store if and only if all the installation retry attempts fail.
+
+## 5.12.1
+Tue, 10 Sep 2019 19:45:15 GMT
+
+### Updates
+
+- Fix an issue where Rush attempted to add Git tags for packages that had already been published when the publish command is run with the --pack and --apply-git-tags-on-pack flags. This caused a fatal error when tags already existed.
+
+## 5.12.0
+Wed, 04 Sep 2019 19:01:42 GMT
+
+### Updates
+
+- Adding --apply-git-tags-on-pack flag to the publish command to apply git tags when using --pack
+- For rush publish and rush version, change the path spec for git add to include everything from the repo root directory. This addresses https://github.com/microsoft/web-build-tools/issues/669.
+- Add support for NPM package aliases (i.e. dependency versions such as "npm:example@^1.2.3")
+- Fix an issue with rush change that occurs when rush.json isn't in the repository root.
+
+## 5.11.4
+Fri, 23 Aug 2019 03:31:52 GMT
+
+### Updates
+
+- Some optimizations for --to, --from, and cyclic dependency detection for repos with large numbers of projects.
+- Ensure install-run-rushx script is updated during "rush update"
+
+## 5.11.3
+Wed, 21 Aug 2019 22:13:26 GMT
+
+### Updates
+
+- Add support for the RUSH_PREVIEW_VERSION environment variable to the install-run-rush script.
+- Add support for the RUSH_TEMP_FOLDER environment variable in the install-run-rush script.
+- Add install-run-rushx script to enable easy execution of the rushx command in CI
+
+## 5.11.2
+Fri, 16 Aug 2019 05:15:17 GMT
+
+### Updates
+
+- Refactor build action to allow generating build graph statically
+- Security updates.
+- Fix validation of hotfix changes in a hotfix-enabled branch
+- Clarify that "rush update --full" should be run when changing certain settings
+
+## 5.11.1
+Fri, 26 Jul 2019 23:08:23 GMT
+
+### Updates
+
+- Fix critical path computation for projects
+- Normalize the casing of a temp folder specified with RUSH_TEMP_FOLDER.
+
+## 5.11.0
+Fri, 26 Jul 2019 08:34:03 GMT
+
+### Updates
+
+- Generate skeleton BuildXL script modules for each package
+- Allow building with newer versions of Node during development
+- Add experimental rush-buildxl package
+- Ensure the filesystem paths that Rush uses have the same character casing that exists on disk.
+- Tweak NodeJS version warning messages and add suppressNodeLtsWarning option to rush.json to suppress non-LTS version warning.
+- Do not terminate rush execution if a temp project lacks an entry in the PNPM shrinkwrap. Instead, allow the program to continue so that PNPM can update the outdated shrinkwrap. This fixes #1418 https://github.com/microsoft/web-build-tools/issues/1418.
 
 ## 5.10.3
 Thu, 18 Jul 2019 00:07:46 GMT

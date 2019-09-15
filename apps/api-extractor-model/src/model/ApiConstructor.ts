@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeclarationReference, Meaning, Navigation } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
 import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
@@ -45,8 +46,8 @@ export interface IApiConstructorOptions extends
  */
 export class ApiConstructor extends ApiParameterListMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
 
-  public static getCanonicalReference(overloadIndex: number): string {
-    return `(:constructor,${overloadIndex})`;
+  public static getContainerKey(overloadIndex: number): string {
+    return `|${ApiItemKind.Constructor}|${overloadIndex}`;
   }
 
   public constructor(options: IApiConstructorOptions) {
@@ -59,7 +60,18 @@ export class ApiConstructor extends ApiParameterListMixin(ApiReleaseTagMixin(Api
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiConstructor.getCanonicalReference(this.overloadIndex);
+  public get containerKey(): string {
+    return ApiConstructor.getContainerKey(this.overloadIndex);
+  }
+
+  /** @beta @override */
+  public buildCanonicalReference(): DeclarationReference {
+    const parent: DeclarationReference = this.parent
+      ? this.parent.canonicalReference
+      // .withMeaning() requires some kind of component
+      : DeclarationReference.empty().addNavigationStep(Navigation.Members, '(parent)');
+    return parent
+      .withMeaning(Meaning.Constructor)
+      .withOverloadIndex(this.overloadIndex);
   }
 }

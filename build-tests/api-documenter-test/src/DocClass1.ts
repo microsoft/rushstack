@@ -55,6 +55,17 @@ export interface IDocInterface2 extends IDocInterface1 {
 }
 
 /**
+ * A namespace containing an ECMAScript symbol
+ * @public
+ */
+export namespace EcmaSmbols {
+  /**
+   * An ECMAScript symbol
+   */
+  export const example: unique symbol = Symbol('EcmaSmbols.exampleSymbol');
+}
+
+/**
  * Some less common TypeScript declaration kinds.
  * @public
  * {@docCategory DocClass1}
@@ -76,6 +87,21 @@ export interface IDocInterface3 {
    * @param x - the parameter
    */
   [x: string]: string;
+
+  /**
+   * ECMAScript symbol
+   */
+  [EcmaSmbols.example]: string;
+
+  /**
+   * A quoted identifier with redundant quotes.
+   */
+  "redundantQuotes": string;
+
+  /**
+   * An identifier that does needs quotes.  It misleadingly looks like an ECMAScript symbol.
+   */
+  "[not.a.symbol]": string
 }
 
 /**
@@ -237,4 +263,17 @@ export interface IDocInterface6 {
    * Property of type number that does something
    */
   regularProperty: number;
+}
+
+/**
+ * Interface for testing complex properties
+ * @public
+ */
+export interface IDocInterface6 {
+  arrayProperty: IDocInterface1[];
+  tupleProperty: [IDocInterface1, IDocInterface2];
+  unionProperty: IDocInterface1 | IDocInterface2;
+  intersectionProperty: IDocInterface1 & IDocInterface2;
+  typeReferenceProperty: Generic<IDocInterface1>;
+  genericReferenceMethod<T>(x: T): T;
 }

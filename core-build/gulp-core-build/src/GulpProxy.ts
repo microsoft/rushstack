@@ -8,7 +8,7 @@ import Orchestrator = require('orchestrator');
 /**
  * A helper utility for gulp which can be extended to provide additional features to gulp vinyl streams
  */
-export class GulpProxy extends Orchestrator implements gulp.Gulp {
+export class GulpProxy extends Orchestrator {
   public src: gulp.SrcMethod;
   public dest: gulp.DestMethod;
   public watch: gulp.WatchMethod;

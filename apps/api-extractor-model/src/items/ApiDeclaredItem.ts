@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.s
 
+import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiDocumentedItem, IApiDocumentedItemJson, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 import { Excerpt, ExcerptToken, IExcerptTokenRange, IExcerptToken } from '../mixins/Excerpt';
 import { DeserializerContext } from '../model/DeserializerContext';
@@ -47,7 +48,11 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
   public constructor(options: IApiDeclaredItemOptions) {
     super(options);
 
-    this._excerptTokens = options.excerptTokens.map(x => new ExcerptToken(x.kind, x.text));
+    this._excerptTokens = options.excerptTokens.map(x => {
+      const canonicalReference: DeclarationReference | undefined = x.canonicalReference === undefined ? undefined :
+        DeclarationReference.parse(x.canonicalReference);
+      return new ExcerptToken(x.kind, x.text, canonicalReference);
+    });
     this._excerpt = new Excerpt(this.excerptTokens, { startIndex: 0, endIndex: this.excerptTokens.length });
   }
 
@@ -99,7 +104,13 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
   /** @override */
   public serializeInto(jsonObject: Partial<IApiDeclaredItemJson>): void {
     super.serializeInto(jsonObject);
-    jsonObject.excerptTokens = this.excerptTokens.map(x => ({ kind: x.kind, text: x.text }));
+    jsonObject.excerptTokens = this.excerptTokens.map(x => {
+      const excerptToken: IExcerptToken = { kind: x.kind, text: x.text };
+      if (x.canonicalReference !== undefined) {
+        excerptToken.canonicalReference = x.canonicalReference.toString();
+      }
+      return excerptToken;
+    });
   }
 
   /**

@@ -27,3 +27,5 @@ This package is NOT intended to be a dumping ground for arbitrary utilities
 that seem like they might be useful.  Code should start somewhere else, and
 then graduate to **node-core-library** after its value has already been
 demonstrated.  If in doubt, create your own NPM package.
+
+API documentation for this package: https://rushstack.io/pages/api/node-core-library/

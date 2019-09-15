@@ -7,10 +7,10 @@ import { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
 import { BaseAction } from './BaseAction';
 import { DocumenterConfig } from '../documenters/DocumenterConfig';
 import { ExperimentalYamlDocumenter } from '../documenters/ExperimentalYamlDocumenter';
-import { IConfigFile } from '../documenters/IConfigFile';
 
 import { ApiModel } from '@microsoft/api-extractor-model';
 import { FileSystem } from '@microsoft/node-core-library';
+import { MarkdownDocumenter } from '../documenters/MarkdownDocumenter';
 
 export class GenerateAction extends BaseAction {
   constructor(parser: ApiDocumenterCommandLine) {
@@ -36,12 +36,18 @@ export class GenerateAction extends BaseAction {
       }
     }
 
-    const configFile: IConfigFile = DocumenterConfig.loadFile(configFilePath);
+    const documenterConfig: DocumenterConfig = DocumenterConfig.loadFile(configFilePath);
 
     const apiModel: ApiModel = this.buildApiModel();
 
-    const yamlDocumenter: ExperimentalYamlDocumenter = new ExperimentalYamlDocumenter(apiModel, configFile);
-    yamlDocumenter.generateFiles(this.outputFolder);
+    if (documenterConfig.configFile.outputTarget === 'markdown') {
+      const markdownDocumenter: MarkdownDocumenter = new MarkdownDocumenter(apiModel, documenterConfig);
+      markdownDocumenter.generateFiles(this.outputFolder);
+    } else {
+      const yamlDocumenter: ExperimentalYamlDocumenter = new ExperimentalYamlDocumenter(apiModel, documenterConfig);
+      yamlDocumenter.generateFiles(this.outputFolder);
+    }
+
     return Promise.resolve();
   }
 }

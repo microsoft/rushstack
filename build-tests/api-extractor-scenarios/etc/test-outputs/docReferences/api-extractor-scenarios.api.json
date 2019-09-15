@@ -2,35 +2,27 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1001,
+    "schemaVersion": 1003,
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "api-extractor-scenarios",
+  "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
+      "canonicalReference": "api-extractor-scenarios!",
       "name": "",
       "members": [
         {
           "kind": "Function",
-          "canonicalReference": "(failWithBrokenLink:0)",
+          "canonicalReference": "api-extractor-scenarios!failWithBrokenLink:function(1)",
           "docComment": "/**\n * {@inheritDoc MyNamespace.MyClass.nonExistentMethod}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function "
-            },
-            {
-              "kind": "Reference",
-              "text": "failWithBrokenLink"
-            },
-            {
-              "kind": "Content",
-              "text": "(): "
+              "text": "export declare function failWithBrokenLink(): "
             },
             {
               "kind": "Content",
@@ -42,30 +34,22 @@
             }
           ],
           "returnTypeTokenRange": {
-            "startIndex": 3,
-            "endIndex": 4
+            "startIndex": 1,
+            "endIndex": 2
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [],
           "name": "failWithBrokenLink"
         },
         {
           "kind": "Function",
-          "canonicalReference": "(failWithMissingReference:0)",
+          "canonicalReference": "api-extractor-scenarios!failWithMissingReference:function(1)",
           "docComment": "/**\n * {@inheritDoc}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function "
-            },
-            {
-              "kind": "Reference",
-              "text": "failWithMissingReference"
-            },
-            {
-              "kind": "Content",
-              "text": "(): "
+              "text": "export declare function failWithMissingReference(): "
             },
             {
               "kind": "Content",
@@ -77,30 +61,22 @@
             }
           ],
           "returnTypeTokenRange": {
-            "startIndex": 3,
-            "endIndex": 4
+            "startIndex": 1,
+            "endIndex": 2
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [],
           "name": "failWithMissingReference"
         },
         {
           "kind": "Namespace",
-          "canonicalReference": "(MyNamespace:namespace)",
+          "canonicalReference": "api-extractor-scenarios!MyNamespace:namespace",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare namespace "
-            },
-            {
-              "kind": "Reference",
-              "text": "MyNamespace"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export declare namespace MyNamespace "
             }
           ],
           "releaseTag": "Public",
@@ -108,20 +84,12 @@
           "members": [
             {
               "kind": "Class",
-              "canonicalReference": "(MyClass:class)",
+              "canonicalReference": "api-extractor-scenarios!MyNamespace.MyClass:class",
               "docComment": "",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "class "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "MyClass"
-                },
-                {
-                  "kind": "Content",
-                  "text": " "
+                  "text": "class MyClass "
                 }
               ],
               "releaseTag": "Public",
@@ -129,24 +97,12 @@
               "members": [
                 {
                   "kind": "Method",
-                  "canonicalReference": "(myMethod:instance,0)",
+                  "canonicalReference": "api-extractor-scenarios!MyNamespace.MyClass#myMethod:member(1)",
                   "docComment": "/**\n * Summary for myMethod\n *\n * @remarks\n *\n * Remarks for myMethod\n *\n * @param x - the parameter\n *\n * @returns a number\n *\n * @beta\n */\n",
                   "excerptTokens": [
                     {
-                      "kind": "Reference",
-                      "text": "myMethod"
-                    },
-                    {
                       "kind": "Content",
-                      "text": "("
-                    },
-                    {
-                      "kind": "Reference",
-                      "text": "x"
-                    },
-                    {
-                      "kind": "Content",
-                      "text": ": "
+                      "text": "myMethod(x: "
                     },
                     {
                       "kind": "Content",
@@ -167,17 +123,17 @@
                   ],
                   "isStatic": false,
                   "returnTypeTokenRange": {
-                    "startIndex": 6,
-                    "endIndex": 7
+                    "startIndex": 3,
+                    "endIndex": 4
                   },
                   "releaseTag": "Beta",
-                  "overloadIndex": 0,
+                  "overloadIndex": 1,
                   "parameters": [
                     {
                       "parameterName": "x",
                       "parameterTypeTokenRange": {
-                        "startIndex": 4,
-                        "endIndex": 5
+                        "startIndex": 1,
+                        "endIndex": 2
                       }
                     }
                   ],
@@ -190,20 +146,12 @@
         },
         {
           "kind": "Function",
-          "canonicalReference": "(succeedForNow:0)",
+          "canonicalReference": "api-extractor-scenarios!succeedForNow:function(1)",
           "docComment": "/**\n * {@inheritDoc nonexistent-package#MyNamespace.MyClass.nonExistentMethod}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function "
-            },
-            {
-              "kind": "Reference",
-              "text": "succeedForNow"
-            },
-            {
-              "kind": "Content",
-              "text": "(): "
+              "text": "export declare function succeedForNow(): "
             },
             {
               "kind": "Content",
@@ -215,30 +163,22 @@
             }
           ],
           "returnTypeTokenRange": {
-            "startIndex": 3,
-            "endIndex": 4
+            "startIndex": 1,
+            "endIndex": 2
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [],
           "name": "succeedForNow"
         },
         {
           "kind": "Function",
-          "canonicalReference": "(testSimple:0)",
+          "canonicalReference": "api-extractor-scenarios!testSimple:function(1)",
           "docComment": "/**\n * Summary for myMethod\n *\n * @remarks\n *\n * Remarks for myMethod\n *\n * @param x - the parameter\n *\n * @returns a number\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function "
-            },
-            {
-              "kind": "Reference",
-              "text": "testSimple"
-            },
-            {
-              "kind": "Content",
-              "text": "(): "
+              "text": "export declare function testSimple(): "
             },
             {
               "kind": "Content",
@@ -250,11 +190,11 @@
             }
           ],
           "returnTypeTokenRange": {
-            "startIndex": 3,
-            "endIndex": 4
+            "startIndex": 1,
+            "endIndex": 2
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [],
           "name": "testSimple"
         }

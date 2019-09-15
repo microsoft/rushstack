@@ -2,35 +2,27 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1001,
+    "schemaVersion": 1003,
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "api-extractor-scenarios",
+  "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
+      "canonicalReference": "api-extractor-scenarios!",
       "name": "",
       "members": [
         {
           "kind": "Function",
-          "canonicalReference": "(f:0)",
+          "canonicalReference": "api-extractor-scenarios!f:function(1)",
           "docComment": "/**\n * Reference Lib1Class via \"typeof\"\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function "
-            },
-            {
-              "kind": "Reference",
-              "text": "f"
-            },
-            {
-              "kind": "Content",
-              "text": "(): "
+              "text": "export declare function f(): "
             },
             {
               "kind": "Content",
@@ -38,7 +30,8 @@
             },
             {
               "kind": "Reference",
-              "text": "Lib1Class"
+              "text": "Lib1Class",
+              "canonicalReference": "api-extractor-lib1-test!Lib1Class:class"
             },
             {
               "kind": "Content",
@@ -50,30 +43,22 @@
             }
           ],
           "returnTypeTokenRange": {
-            "startIndex": 3,
-            "endIndex": 6
+            "startIndex": 1,
+            "endIndex": 4
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [],
           "name": "f"
         },
         {
           "kind": "Function",
-          "canonicalReference": "(g:0)",
+          "canonicalReference": "api-extractor-scenarios!g:function(1)",
           "docComment": "/**\n * Reference IForgottenExport via \"typeof\"\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function "
-            },
-            {
-              "kind": "Reference",
-              "text": "g"
-            },
-            {
-              "kind": "Content",
-              "text": "(): "
+              "text": "export declare function g(): "
             },
             {
               "kind": "Content",
@@ -81,7 +66,8 @@
             },
             {
               "kind": "Reference",
-              "text": "ForgottenExport"
+              "text": "ForgottenExport",
+              "canonicalReference": "api-extractor-scenarios!~ForgottenExport:class"
             },
             {
               "kind": "Content",
@@ -93,11 +79,11 @@
             }
           ],
           "returnTypeTokenRange": {
-            "startIndex": 3,
-            "endIndex": 6
+            "startIndex": 1,
+            "endIndex": 4
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [],
           "name": "g"
         }
