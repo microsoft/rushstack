@@ -226,9 +226,9 @@ export class ChangeAction extends BaseRushAction {
             changes: [
               {
                 comment,
-                changeType: projectChangeType,
+                type: projectChangeType,
                 packageName
-              } as unknown as IChangeInfo
+              } as IChangeInfo
             ],
             packageName,
             email
