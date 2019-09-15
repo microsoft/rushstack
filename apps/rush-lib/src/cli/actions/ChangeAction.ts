@@ -618,7 +618,7 @@ export class ChangeAction extends BaseRushAction {
       (interactiveMode ? await this._promptForOverwrite(promptModule, filePath) : false)
     );
 
-    if (!interactiveMode && !overwrite) {
+    if (!interactiveMode && fileExists && !overwrite) {
       throw new Error(`Changefile ${filePath} already exists`);
     }
 
