@@ -9,7 +9,6 @@ import pnpmLinkBins from '@pnpm/link-bins';
 import {
   JsonFile,
   Text,
-  IPackageJson,
   PackageName,
   FileSystem,
   FileConstants,
@@ -23,7 +22,7 @@ import { BasePackage } from '../base/BasePackage';
 import { RushConstants } from '../../logic/RushConstants';
 import { IRushLinkJson } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { PnpmShrinkwrapFile } from './PnpmShrinkwrapFile';
+import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from './PnpmShrinkwrapFile';
 import { PnpmProjectDependencyManifest } from './PnpmProjectDependencyManifest';
 
 // special flag for debugging, will print extra diagnostic information,
@@ -249,11 +248,17 @@ export class PnpmLinkManager extends BaseLinkManager {
 
       const newLocalFolderPath: string = path.join(localPackage.folderPath, 'node_modules', dependencyName);
 
-      // read the version number
-      const packageJsonForDependency: IPackageJson = JsonFile.load(
-        path.join(dependencyLocalInstallationRealpath, FileConstants.PackageJson)
-      );
-      const version: string | undefined = packageJsonForDependency.version;
+      // read the version number from the shrinkwrap entry
+      const shrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined =
+        pnpmShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(tempProjectDependencyKey);
+      if (!shrinkwrapEntry) {
+        throw new InternalError(`Cannot find shrinkwrap entry using dependency key for temp project: ${project.tempProjectName}`);
+      }
+
+      const version: string | undefined = shrinkwrapEntry.dependencies[dependencyName];
+      if (!version) {
+        throw new InternalError(`Cannot find shrinkwrap entry dependency "${dependencyName}" for temp project: ${project.tempProjectName}`);
+      }
 
       const newLocalPackage: BasePackage = BasePackage.createLinkedPackage(
         dependencyName,

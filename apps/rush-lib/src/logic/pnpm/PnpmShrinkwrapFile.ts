@@ -226,17 +226,14 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return undefined;
   }
 
-  public getShrinkwrapEntry(name: string, version: string): IPnpmShrinkwrapDependencyYaml | undefined {
-    const packagePath: string = `/${name}/${version}`;
-    const foundEntry: IPnpmShrinkwrapDependencyYaml | undefined = this._shrinkwrapJson.packages[packagePath];
-    if (foundEntry) {
-      return foundEntry;
-    }
+  public getShrinkwrapEntryFromTempProjectDependencyKey(
+    tempProjectDependencyKey: string
+  ): IPnpmShrinkwrapDependencyYaml | undefined {
+    return this._shrinkwrapJson.packages[tempProjectDependencyKey];
+  }
 
-    const extendedPackagePath: string = `${packagePath}_`;
-    const similarPackages: string[] =
-      Object.keys(this._shrinkwrapJson.packages).filter(p => p.lastIndexOf(extendedPackagePath, 0) === 0);
-    return similarPackages.length === 1 ? this._shrinkwrapJson.packages[similarPackages[0]] : undefined;
+  public getShrinkwrapEntry(name: string, version: string): IPnpmShrinkwrapDependencyYaml | undefined {
+    return this._shrinkwrapJson.packages[`/${name}/${version}`];
   }
 
   /**
