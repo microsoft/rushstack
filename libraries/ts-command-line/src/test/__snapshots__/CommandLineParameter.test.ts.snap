@@ -359,10 +359,8 @@ Array [
 `;
 
 exports[`CommandLineParameter prints the action help 1`] = `
-"usage: example do:the-job [-h] [-c {one,two,three,default}]
-                          [--choice-with-default {one,two,three,default}] [-f]
-                          [-i NUMBER] [--integer-with-default NUMBER]
-                          --integer-required NUMBER [-s TEXT]
+"usage: example do:the-job [-h] [-c {one,two,three,default}] [--choice-with-default {one,two,three,default}] [-f]
+                          [-i NUMBER] [--integer-with-default NUMBER] --integer-required NUMBER [-s TEXT]
                           [--string-with-default TEXT] [-l LIST]
                           
 
@@ -371,33 +369,27 @@ a longer description
 Optional arguments:
   -h, --help            Show this help message and exit.
   -c {one,two,three,default}, --choice {one,two,three,default}
-                        A choice. This parameter may alternatively specified 
-                        via the ENV_CHOICE environment variable.
+                        A choice. This parameter may alternatively specified via the ENV_CHOICE environment variable.
   --choice-with-default {one,two,three,default}
-                        A choice with a default. This parameter may 
-                        alternatively specified via the ENV_CHOICE 
+                        A choice with a default. This parameter may alternatively specified via the ENV_CHOICE 
                         environment variable. The default value is \\"default\\".
-  -f, --flag            A flag. This parameter may alternatively specified 
-                        via the ENV_FLAG environment variable.
+  -f, --flag            A flag. This parameter may alternatively specified via the ENV_FLAG environment variable.
   -i NUMBER, --integer NUMBER
-                        An integer. This parameter may alternatively 
-                        specified via the ENV_INTEGER environment variable.
+                        An integer. This parameter may alternatively specified via the ENV_INTEGER environment 
+                        variable.
   --integer-with-default NUMBER
-                        An integer with a default. This parameter may 
-                        alternatively specified via the ENV_INTEGER 
+                        An integer with a default. This parameter may alternatively specified via the ENV_INTEGER 
                         environment variable. The default value is 123.
   --integer-required NUMBER
                         An integer
   -s TEXT, --string TEXT
-                        A string. This parameter may alternatively specified 
-                        via the ENV_INTEGER environment variable.
+                        A string. This parameter may alternatively specified via the ENV_INTEGER environment variable.
   --string-with-default TEXT
-                        A string with a default. This parameter may 
-                        alternatively specified via the ENV_INTEGER 
+                        A string with a default. This parameter may alternatively specified via the ENV_INTEGER 
                         environment variable. The default value is \\"123\\".
   -l LIST, --string-list LIST
-                        A string list. This parameter may alternatively 
-                        specified via the ENV_INTEGER environment variable.
+                        A string list. This parameter may alternatively specified via the ENV_INTEGER environment 
+                        variable.
 "
 `;
 
