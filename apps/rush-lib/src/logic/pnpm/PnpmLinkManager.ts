@@ -252,12 +252,16 @@ export class PnpmLinkManager extends BaseLinkManager {
       const shrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined =
         pnpmShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(tempProjectDependencyKey);
       if (!shrinkwrapEntry) {
-        throw new InternalError(`Cannot find shrinkwrap entry using dependency key for temp project: ${project.tempProjectName}`);
+        throw new InternalError(
+          'Cannot find shrinkwrap entry using dependency key for temp project: ' +
+          `${project.tempProjectName}`);
       }
 
       const version: string | undefined = shrinkwrapEntry.dependencies[dependencyName];
       if (!version) {
-        throw new InternalError(`Cannot find shrinkwrap entry dependency "${dependencyName}" for temp project: ${project.tempProjectName}`);
+        throw new InternalError(
+          'Cannot find shrinkwrap entry dependency "${dependencyName}" for temp project: ' +
+          `${project.tempProjectName}`);
       }
 
       const newLocalPackage: BasePackage = BasePackage.createLinkedPackage(
