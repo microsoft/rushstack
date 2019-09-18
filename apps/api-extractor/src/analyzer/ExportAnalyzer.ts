@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import { InternalError } from '@microsoft/node-core-library';
+import { InternalError, PackageName } from '@microsoft/node-core-library';
 
 import { TypeScriptHelpers } from './TypeScriptHelpers';
 import { AstSymbol } from './AstSymbol';
@@ -55,6 +55,7 @@ interface IAstModuleReference {
 export class ExportAnalyzer {
   private readonly _program: ts.Program;
   private readonly _typeChecker: ts.TypeChecker;
+  private readonly _bundledPackageNames: Set<string>;
   private readonly _astSymbolTable: IAstSymbolTable;
 
   private readonly _astModulesByModuleSymbol: Map<ts.Symbol, AstModule>
@@ -65,9 +66,11 @@ export class ExportAnalyzer {
 
   private readonly _astImportsByKey: Map<string, AstImport> = new Map<string, AstImport>();
 
-  public constructor(program: ts.Program, typeChecker: ts.TypeChecker, astSymbolTable: IAstSymbolTable) {
+  public constructor(program: ts.Program, typeChecker: ts.TypeChecker, bundledPackageNames: Set<string>,
+    astSymbolTable: IAstSymbolTable) {
     this._program = program;
     this._typeChecker = typeChecker;
+    this._bundledPackageNames = bundledPackageNames;
     this._astSymbolTable = astSymbolTable;
   }
 
@@ -93,7 +96,7 @@ export class ExportAnalyzer {
       if (moduleReference !== undefined) {
         // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
         // but ignore:  "../folder/LocalFile"
-        if (!ts.isExternalModuleNameRelative(moduleReference.moduleSpecifier)) {
+        if (this._isExternalModulePath(moduleReference.moduleSpecifier)) {
           externalModulePath = moduleReference.moduleSpecifier;
         }
       }
@@ -229,6 +232,30 @@ export class ExportAnalyzer {
       entryPointAstModule.astModuleExportInfo = astModuleExportInfo;
     }
     return entryPointAstModule.astModuleExportInfo;
+  }
+
+  /**
+   * Returns true if the module specifier refers to an external package.  Ignores packages listed in the
+   * "bundledPackages" setting from the api-extractor.json config file.
+   *
+   * @remarks
+   * Examples:
+   *
+   * - NO:  `./file1`
+   * - YES: `library1`
+   * - YES: `@my-scope/my-package`
+   */
+  private _isExternalModulePath(moduleSpecifier: string): boolean {
+    if (ts.isExternalModuleNameRelative(moduleSpecifier)) {
+      return false;
+    }
+
+    // TODO: The moduleSpecifier may include a path like "@my-scope/my-package/path1/path2".
+
+    if (this._bundledPackageNames.has(moduleSpecifier)) {
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -617,7 +644,7 @@ export class ExportAnalyzer {
 
     // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
     // but ignore:  "../folder/LocalFile"
-    if (!ts.isExternalModuleNameRelative(moduleSpecifier)) {
+    if (this._isExternalModulePath(moduleSpecifier)) {
       return moduleSpecifier;
     }
 
