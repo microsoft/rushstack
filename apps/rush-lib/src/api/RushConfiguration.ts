@@ -87,6 +87,7 @@ export interface IRushRepositoryJson {
 export interface IPnpmOptionsJson {
   strictPeerDependencies?: boolean;
   resolutionStrategy?: ResolutionStrategy;
+  disablePerProjectDependencyManifest?: boolean;
 }
 
 /**
@@ -186,10 +187,17 @@ export class PnpmOptionsConfiguration {
    */
   public readonly resolutionStrategy: ResolutionStrategy;
 
+  /**
+   * If set to `true`, don't attempt to generate a file that records the dependencies of each project to be used for
+   * incremental builds.
+   */
+  public readonly disablePerProjectDependencyManifest: boolean;
+
   /** @internal */
   public constructor(json: IPnpmOptionsJson) {
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
+    this.disablePerProjectDependencyManifest = !!json.disablePerProjectDependencyManifest;
   }
 }
 

@@ -270,7 +270,9 @@ export class PnpmLinkManager extends BaseLinkManager {
         newLocalFolderPath
       );
 
-      pnpmProjectDependencyManifest.addDependency(newLocalPackage);
+      if (!this._rushConfiguration.pnpmOptions.disablePerProjectDependencyManifest) {
+        pnpmProjectDependencyManifest.addDependency(newLocalPackage);
+      }
 
       newLocalPackage.symlinkTargetFolderPath = dependencyLocalInstallationRealpath;
       localPackage.addChild(newLocalPackage);
@@ -282,7 +284,9 @@ export class PnpmLinkManager extends BaseLinkManager {
 
     PnpmLinkManager._createSymlinksForTopLevelProject(localPackage);
 
-    pnpmProjectDependencyManifest.save();
+    if (!this._rushConfiguration.pnpmOptions.disablePerProjectDependencyManifest) {
+      pnpmProjectDependencyManifest.save();
+    }
 
     // Also symlink the ".bin" folder
     const projectFolder: string = path.join(localPackage.folderPath, 'node_modules');

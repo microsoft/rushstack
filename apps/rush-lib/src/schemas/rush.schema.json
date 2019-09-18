@@ -65,6 +65,10 @@
           "description": "Configures the strategy used to select versions during installation.  This feature requires PNPM version 3.1 or newer.  It corresponds to the \"--resolution-strategy\" command-line option for PNPM.  Possible values are \"fast\" and \"fewer-dependencies\".  PNPM's default is \"fast\", but this may be incompatible with certain packages, for example the \"@types\" packages from DefinitelyTyped.  Rush's default is \"fewer-dependencies\", which causes PNPM to avoid installing a newer version if an already installed version can be reused; this is more similar to NPM's algorithm.",
           "type": "string",
           "enum": ["fewer-dependencies", "fast"]
+        },
+        "disablePerProjectDependencyManifest": {
+          "description": "If set to `true`, don't attempt to generate a file that records the dependencies of each project to be used for incremental builds.",
+          "type": "boolean"
         }
       },
       "additionalProperties": false

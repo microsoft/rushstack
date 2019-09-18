@@ -219,6 +219,7 @@ export class PnpmOptionsConfiguration {
     // 
     // @internal
     constructor(json: IPnpmOptionsJson);
+    readonly disablePerProjectDependencyManifest: boolean;
     readonly resolutionStrategy: ResolutionStrategy;
     readonly strictPeerDependencies: boolean;
 }

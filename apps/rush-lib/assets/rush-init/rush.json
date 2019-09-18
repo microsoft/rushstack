@@ -61,7 +61,13 @@
      * After modifying this field, it's recommended to run "rush update --full" so that the package manager
      * will recalculate all version selections.
      */
-    /*[LINE "HYPOTHETICAL"]*/ "resolutionStrategy": "fast"
+    /*[LINE "HYPOTHETICAL"]*/ "resolutionStrategy": "fast",
+
+    /**
+     * If set to `true`, don't attempt to generate a file that records the dependencies of each project to
+     * be used for incremental builds.
+     */
+    /*[LINE "DEMO"]*/ "disablePerProjectDependencyManifest": false
   },
 
   /**

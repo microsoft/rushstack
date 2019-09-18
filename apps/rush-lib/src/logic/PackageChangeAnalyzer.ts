@@ -104,9 +104,11 @@ export class PackageChangeAnalyzer {
      *    files: {
      *      "src/index.ts": "478789a7fs8a78989afd8",
      *      "src/fileOne.ts": "a8sfa8979871fdjiojlk",
-     *      "common/api/review": "324598afasfdsd",     // this entry was added by the API Extractor task (for example)
-     *      "node_modules.json": "3428789dsafdsfaf"    // this is a file which will be created by rush link describing
-     *                                                 //   the state of the node_modules folder
+     *      "common/api/review": "324598afasfdsd",                      // this entry was added by the API Extractor
+     *                                                                  //  task (for example)
+     *      ".rush/temp/project-dependencies.json": "3428789dsafdsfaf"  // this is a file which will be created by rush
+     *                                                                  //  link describing the state of the
+     *                                                                  //  node_modules folder
      *    }
      *  }
      *
@@ -131,7 +133,10 @@ export class PackageChangeAnalyzer {
     //  });
     // }
 
-    if (this._rushConfiguration.packageManager === 'pnpm') {
+    if (
+      this._rushConfiguration.packageManager === 'pnpm' &&
+      !this._rushConfiguration.pnpmOptions.disablePerProjectDependencyManifest
+    ) {
       const projects: RushConfigurationProject[] = [];
       const projectDependencyManifestPaths: string[] = [];
 
