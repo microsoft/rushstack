@@ -41,6 +41,7 @@ export class ExtractorConfig {
     readonly apiJsonFilePath: string;
     readonly apiReportEnabled: boolean;
     readonly betaTrimmedFilePath: string;
+    readonly bundledPackages: string[];
     readonly docModelEnabled: boolean;
     static readonly FILENAME: string;
     getDiagnosticDump(): string;
@@ -175,6 +176,7 @@ export interface IConfigDtsRollup {
 // @public
 export interface IConfigFile {
     apiReport?: IConfigApiReport;
+    bundledPackages?: string[];
     compiler?: IConfigCompiler;
     docModel?: IConfigDocModel;
     // @beta

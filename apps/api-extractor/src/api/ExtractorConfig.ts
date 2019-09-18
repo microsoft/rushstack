@@ -95,6 +95,7 @@ interface IExtractorConfigParameters {
   packageJson: INodePackageJson | undefined;
   packageFolder: string | undefined;
   mainEntryPointFilePath: string;
+  bundledPackages: string[];
   tsconfigFilePath: string;
   overrideTsconfig: { } | undefined;
   skipLibCheck: boolean;
@@ -153,6 +154,9 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigFile.mainEntryPointFilePath} */
   public readonly mainEntryPointFilePath: string;
 
+  /** {@inheritDoc IConfigFile.bundledPackages} */
+  public readonly bundledPackages: string[];
+
   /** {@inheritDoc IConfigCompiler.tsconfigFilePath} */
   public readonly tsconfigFilePath: string;
 
@@ -202,6 +206,7 @@ export class ExtractorConfig {
     this.packageJson = parameters.packageJson;
     this.packageFolder = parameters.packageFolder;
     this.mainEntryPointFilePath = parameters.mainEntryPointFilePath;
+    this.bundledPackages = parameters.bundledPackages;
     this.tsconfigFilePath = parameters.tsconfigFilePath;
     this.overrideTsconfig = parameters.overrideTsconfig;
     this.skipLibCheck = parameters.skipLibCheck;
@@ -543,6 +548,13 @@ export class ExtractorConfig {
         throw new Error('The "mainEntryPointFilePath" path does not exist: ' + mainEntryPointFilePath);
       }
 
+      const bundledPackages: string[] = configObject.bundledPackages || [];
+      for (const bundledPackage of bundledPackages) {
+        if (!PackageName.isValidName(bundledPackage)) {
+          throw new Error(`The "bundledPackages" list contains an invalid package name: "${bundledPackage}"`);
+        }
+      }
+
       const tsconfigFilePath: string = ExtractorConfig._resolvePathWithTokens('tsconfigFilePath',
         configObject.compiler.tsconfigFilePath, tokenContext);
 
@@ -645,6 +657,7 @@ export class ExtractorConfig {
         packageJson,
         packageFolder,
         mainEntryPointFilePath,
+        bundledPackages,
         tsconfigFilePath,
         overrideTsconfig: configObject.compiler.overrideTsconfig,
         skipLibCheck: !!configObject.compiler.skipLibCheck,
