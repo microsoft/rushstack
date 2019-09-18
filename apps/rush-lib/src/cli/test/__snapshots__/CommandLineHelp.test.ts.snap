@@ -151,7 +151,7 @@ exports[`CommandLineHelp prints the help for each action: change 1`] = `
 "usage: rush change [-h] [-v] [--no-fetch] [-b BRANCH] [--overwrite]
                    [--email EMAIL] [--bulk] [--message MESSAGE]
                    [--bump-type {major,minor,patch,none}]
-                    
+                   
 
 Asks a series of questions and then generates a <branchname>-<timestamp>.json 
 file in the common folder. The \`publish\` command will consume these files and 
