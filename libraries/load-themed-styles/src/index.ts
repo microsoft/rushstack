@@ -62,6 +62,10 @@ interface IStyleRecord {
   themableStyle: ThemableArray;
 }
 
+interface ICustomEvent<T> extends Event {
+  args?: T;
+}
+
 /**
  * object returned from resolveThemableArray function
  */
@@ -397,6 +401,13 @@ function registerStyles(styleArray: ThemableArray): void {
   styleElement.appendChild(document.createTextNode(styleString));
   _themeState.perf.count++;
   head.appendChild(styleElement);
+
+  var ev: ICustomEvent<{ newStyle: HTMLStyleElement}> = document.createEvent('HTMLEvents');
+  ev.initEvent("load-themed-styles-added", true /* bubbleEvent */);
+  ev.args = {
+    newStyle: styleElement
+  };
+  document.dispatchEvent(ev)
 
   const record: IStyleRecord = {
     styleElement: styleElement,
