@@ -9,7 +9,10 @@ import {
 } from '@microsoft/api-extractor';
 import * as ApiExtractor from '@microsoft/api-extractor';
 
-import { RushStackCompilerBase } from './RushStackCompilerBase';
+import {
+  RushStackCompilerBase,
+  IRushStackCompilerBaseOptions
+} from './RushStackCompilerBase';
 import { ToolPaths } from './ToolPaths';
 
 /**
@@ -24,12 +27,13 @@ export class ApiExtractorRunner extends RushStackCompilerBase {
   private _extractorOptions: IExtractorInvokeOptions;
 
   constructor(
+    options: IRushStackCompilerBaseOptions,
     extractorConfig: ExtractorConfig,
     extractorOptions: IExtractorInvokeOptions,
     rootPath: string,
     terminalProvider: ITerminalProvider
   ) {
-    super({}, rootPath, terminalProvider);
+    super(options, rootPath, terminalProvider);
 
     this._extractorConfig = extractorConfig;
     this._extractorOptions = extractorOptions;
@@ -41,20 +45,50 @@ export class ApiExtractorRunner extends RushStackCompilerBase {
         ...this._extractorOptions,
         messageCallback: (message: ApiExtractor.ExtractorMessage) => {
           switch (message.logLevel) {
-            case ApiExtractor.ExtractorLogLevel.Error:
-              this._terminal.writeErrorLine(message.text);
+            case ApiExtractor.ExtractorLogLevel.Error: {
+              if (message.sourceFilePath) {
+                this._fileError(
+                  message.sourceFilePath,
+                  message.sourceFileLine!,
+                  message.sourceFileColumn!,
+                  message.category,
+                  message.text
+                );
+              } else {
+                this._terminal.writeErrorLine(message.text);
+              }
+
               break;
-            case ApiExtractor.ExtractorLogLevel.Warning:
-              this._terminal.writeWarningLine(message.text);
+            }
+
+            case ApiExtractor.ExtractorLogLevel.Warning: {
+              if (message.sourceFilePath) {
+                this._fileWarning(
+                  message.sourceFilePath,
+                  message.sourceFileLine!,
+                  message.sourceFileColumn!,
+                  message.category,
+                  message.text
+                );
+              } else {
+                this._terminal.writeWarningLine(message.text);
+              }
               break;
-            case ApiExtractor.ExtractorLogLevel.Info:
+            }
+
+            case ApiExtractor.ExtractorLogLevel.Info: {
               this._terminal.writeLine(message.text);
               break;
-            case ApiExtractor.ExtractorLogLevel.Verbose:
+            }
+
+            case ApiExtractor.ExtractorLogLevel.Verbose: {
               this._terminal.writeVerboseLine(message.text);
               break;
-            default:
+            }
+
+            default: {
               return;
+            }
           }
           message.handled = true;
         },

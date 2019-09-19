@@ -6,12 +6,15 @@ import { ITerminalProvider } from '@microsoft/node-core-library';
 
 import { CmdRunner } from './CmdRunner';
 import { ToolPaths } from './ToolPaths';
-import { RushStackCompilerBase } from './RushStackCompilerBase';
+import {
+  RushStackCompilerBase,
+  IRushStackCompilerBaseOptions
+} from './RushStackCompilerBase';
 
 /**
  * @beta
  */
-export interface ITypescriptCompilerOptions {
+export interface ITypescriptCompilerOptions extends IRushStackCompilerBaseOptions {
   /**
    * Option to pass custom arguments to the tsc command.
    */
@@ -24,14 +27,8 @@ export interface ITypescriptCompilerOptions {
 export class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompilerOptions> {
   private _cmdRunner: CmdRunner;
 
-  constructor(rootPath: string, terminalProvider: ITerminalProvider);
-  constructor(taskOptions: ITypescriptCompilerOptions, rootPath: string, terminalProvider: ITerminalProvider);
-  constructor(arg1: ITypescriptCompilerOptions | string, arg2: string | ITerminalProvider, arg3?: ITerminalProvider) {
-    super(
-      typeof arg1 === 'string' ? {} : arg1,
-      typeof arg2 === 'string' ? arg2 : arg1 as string,
-      arg3 ? arg3 : arg2 as ITerminalProvider
-    );
+  constructor(taskOptions: ITypescriptCompilerOptions, rootPath: string, terminalProvider: ITerminalProvider) {
+    super(taskOptions, rootPath, terminalProvider);
     this._cmdRunner = new CmdRunner(
       this._standardBuildFolders,
       this._terminal,
