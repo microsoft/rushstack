@@ -7,6 +7,8 @@ import { PluginFeatureInitialization } from './PluginFeature';
 /**
  * Defines a "feature" that is provided by an API Documenter plugin.  A feature is a user-defined module
  * that customizes the behavior of API Documenter.
+ *
+ * @public
  */
 export interface IFeatureDefinition {
   /**
@@ -58,6 +60,7 @@ export interface IFeatureDefinition {
  *   ]
  * };
  * ```
+ * @public
  */
 export interface IApiDocumenterPluginManifest {
   /**
