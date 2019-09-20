@@ -9,8 +9,12 @@ import {
 } from '@microsoft/api-extractor';
 import * as ApiExtractor from '@microsoft/api-extractor';
 
-import { RushStackCompilerBase } from './RushStackCompilerBase';
+import {
+  RushStackCompilerBase,
+  IRushStackCompilerBaseOptions
+} from './RushStackCompilerBase';
 import { ToolPaths } from './ToolPaths';
+import { LoggingUtilities } from './LoggingUtilities';
 
 /**
  * The ApiExtractorTask uses the api-extractor tool to analyze a project for public APIs. api-extractor will detect
@@ -28,8 +32,42 @@ export class ApiExtractorRunner extends RushStackCompilerBase {
     extractorOptions: IExtractorInvokeOptions,
     rootPath: string,
     terminalProvider: ITerminalProvider
+  ) // Remove in the next major version
+  constructor(
+    options: IRushStackCompilerBaseOptions,
+    extractorConfig: ExtractorConfig,
+    extractorOptions: IExtractorInvokeOptions,
+    rootPath: string,
+    terminalProvider: ITerminalProvider
+  )
+  constructor(
+    arg1: IRushStackCompilerBaseOptions| ExtractorConfig,
+    arg2: ExtractorConfig| IExtractorInvokeOptions,
+    arg3: IExtractorInvokeOptions| string,
+    arg4: string | ITerminalProvider,
+    arg5?: ITerminalProvider
   ) {
-    super({}, rootPath, terminalProvider);
+    let options: IRushStackCompilerBaseOptions;
+    let extractorConfig: ExtractorConfig;
+    let extractorOptions: IExtractorInvokeOptions;
+    let rootPath: string;
+    let terminalProvider: ITerminalProvider;
+    if (arg1 instanceof ExtractorConfig) {
+      extractorConfig = arg1;
+      extractorOptions = arg2 as IExtractorInvokeOptions;
+      rootPath = arg3 as string;
+      terminalProvider = arg4 as ITerminalProvider;
+      const loggingUtilities: LoggingUtilities = new LoggingUtilities(terminalProvider);
+      options = loggingUtilities.getDefaultRushStackCompilerBaseOptions();
+    } else {
+      options = arg1;
+      extractorConfig = arg2 as ExtractorConfig;
+      extractorOptions = arg3 as IExtractorInvokeOptions;
+      rootPath = arg4 as string;
+      terminalProvider = arg5 as ITerminalProvider;
+    }
+
+    super(options, rootPath, terminalProvider);
 
     this._extractorConfig = extractorConfig;
     this._extractorOptions = extractorOptions;
@@ -41,20 +79,50 @@ export class ApiExtractorRunner extends RushStackCompilerBase {
         ...this._extractorOptions,
         messageCallback: (message: ApiExtractor.ExtractorMessage) => {
           switch (message.logLevel) {
-            case ApiExtractor.ExtractorLogLevel.Error:
-              this._terminal.writeErrorLine.bind(this._terminal);
+            case ApiExtractor.ExtractorLogLevel.Error: {
+              if (message.sourceFilePath) {
+                this._fileError(
+                  message.sourceFilePath,
+                  message.sourceFileLine!,
+                  message.sourceFileColumn!,
+                  message.category,
+                  message.text
+                );
+              } else {
+                this._terminal.writeErrorLine(message.text);
+              }
+
               break;
-            case ApiExtractor.ExtractorLogLevel.Warning:
-              this._terminal.writeWarningLine.bind(this._terminal);
+            }
+
+            case ApiExtractor.ExtractorLogLevel.Warning: {
+              if (message.sourceFilePath) {
+                this._fileWarning(
+                  message.sourceFilePath,
+                  message.sourceFileLine!,
+                  message.sourceFileColumn!,
+                  message.category,
+                  message.text
+                );
+              } else {
+                this._terminal.writeWarningLine(message.text);
+              }
               break;
-            case ApiExtractor.ExtractorLogLevel.Info:
-              this._terminal.writeLine.bind(this._terminal);
+            }
+
+            case ApiExtractor.ExtractorLogLevel.Info: {
+              this._terminal.writeLine(message.text);
               break;
-            case ApiExtractor.ExtractorLogLevel.Verbose:
-              this._terminal.writeVerboseLine.bind(this._terminal);
+            }
+
+            case ApiExtractor.ExtractorLogLevel.Verbose: {
+              this._terminal.writeVerboseLine(message.text);
               break;
-            default:
+            }
+
+            default: {
               return;
+            }
           }
           message.handled = true;
         },
