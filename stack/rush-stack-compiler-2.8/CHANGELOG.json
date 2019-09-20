@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-stack-compiler-2.8",
   "entries": [
     {
+      "version": "0.1.23",
+      "tag": "@microsoft/rush-stack-compiler-2.8_v0.1.23",
+      "date": "Fri, 20 Sep 2019 21:27:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where api-extractor warnings weren't being reported."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.22",
       "tag": "@microsoft/rush-stack-compiler-2.8_v0.1.22",
       "date": "Wed, 11 Sep 2019 19:56:23 GMT",
