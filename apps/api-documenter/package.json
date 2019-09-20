@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-documenter",
-  "version": "7.4.3",
+  "version": "7.4.4",
   "description": "Read JSON files from api-extractor, generate documentation pages",
   "repository": {
     "type": "git",
@@ -26,8 +26,8 @@
     "resolve": "1.8.1"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.4": "0.1.23",
-    "@microsoft/node-library-build": "6.1.10",
+    "@microsoft/rush-stack-compiler-3.4": "0.1.24",
+    "@microsoft/node-library-build": "6.1.11",
     "@types/jest": "23.3.11",
     "@types/js-yaml": "3.12.1",
     "@types/node": "8.5.8",

@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-typescript",
-  "version": "8.1.34",
+  "version": "8.1.35",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -24,7 +24,7 @@
   "devDependencies": {
     "@microsoft/api-extractor": "7.4.2",
     "@microsoft/node-library-build": "6.1.2",
-    "@microsoft/rush-stack-compiler-3.1": "0.6.35",
+    "@microsoft/rush-stack-compiler-3.1": "0.6.36",
     "@microsoft/rush-stack-compiler-3.4": "0.1.15",
     "@types/glob": "5.0.30",
     "@types/resolve": "0.0.8",

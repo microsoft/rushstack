@@ -37,8 +37,8 @@
     "semver": "~5.3.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.4": "0.1.23",
-    "@microsoft/node-library-build": "6.1.10",
+    "@microsoft/rush-stack-compiler-3.4": "0.1.24",
+    "@microsoft/node-library-build": "6.1.11",
     "@types/chai": "3.4.34",
     "@types/mocha": "5.2.5",
     "@types/node": "8.5.8",
