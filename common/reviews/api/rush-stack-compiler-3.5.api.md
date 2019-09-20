@@ -15,6 +15,7 @@ import * as Typescript from 'typescript';
 
 // @beta
 export class ApiExtractorRunner extends RushStackCompilerBase {
+    constructor(extractorConfig: ExtractorConfig, extractorOptions: IExtractorInvokeOptions, rootPath: string, terminalProvider: ITerminalProvider);
     constructor(options: IRushStackCompilerBaseOptions, extractorConfig: ExtractorConfig, extractorOptions: IExtractorInvokeOptions, rootPath: string, terminalProvider: ITerminalProvider);
     // (undocumented)
     static apiExtractor: typeof ApiExtractor;
@@ -101,6 +102,7 @@ export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
 
 // @beta (undocumented)
 export class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompilerOptions> {
+    constructor(rootPath: string, terminalProvider: ITerminalProvider);
     constructor(taskOptions: ITypescriptCompilerOptions, rootPath: string, terminalProvider: ITerminalProvider);
     // (undocumented)
     invoke(): Promise<void>;
