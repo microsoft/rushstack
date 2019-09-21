@@ -75,6 +75,8 @@ export class YamlDocumenter {
 
   private _apiItemsByCanonicalReference: Map<string, ApiItem>;
   private _yamlReferences: IYamlReferences | undefined;
+  // Keeps track of ApiItems whose names collide with one or more siblings.
+  private _collisions: Set<ApiItem>;
 
   private _outputFolder: string;
 
@@ -82,6 +84,7 @@ export class YamlDocumenter {
     this._apiModel = apiModel;
     this._markdownEmitter = new CustomMarkdownEmitter(this._apiModel);
     this._apiItemsByCanonicalReference = new Map<string, ApiItem>();
+    this._collisions = new Set<ApiItem>();
 
     this._initApiItems();
   }
@@ -232,7 +235,7 @@ export class YamlDocumenter {
       if (apiItem.kind === ApiItemKind.Namespace) {
         // Namespaces don't have nodes yet
         tocItem = {
-          name: apiItem.displayName
+          name: this._getTocItemName(apiItem)
         };
       } else {
         if (this._shouldEmbed(apiItem.kind)) {
@@ -240,17 +243,10 @@ export class YamlDocumenter {
           continue;
         }
 
-        if (apiItem.kind === ApiItemKind.Package) {
-          tocItem = {
-            name: PackageName.getUnscopedName(apiItem.displayName),
-            uid: this._getUid(apiItem)
-          };
-        } else {
-          tocItem = {
-            name: apiItem.displayName,
-            uid: this._getUid(apiItem)
-          };
-        }
+        tocItem = {
+          name: this._getTocItemName(apiItem),
+          uid: this._getUid(apiItem)
+        };
       }
 
       tocItems.push(tocItem);
@@ -269,6 +265,20 @@ export class YamlDocumenter {
       }
     }
     return tocItems;
+  }
+
+  /** @virtual */
+  protected _getTocItemName(apiItem: ApiItem): string {
+    let name: string = apiItem.displayName;
+    if (apiItem.kind === ApiItemKind.Package) {
+      name = PackageName.getUnscopedName(name);
+    }
+
+    if (this._collisions.has(apiItem)) {
+      name += ` (${apiItem.kind})`;
+    }
+
+    return name;
   }
 
   protected _shouldEmbed(apiItemKind: ApiItemKind): boolean {
@@ -591,7 +601,6 @@ export class YamlDocumenter {
    */
   private _initApiItems(): void {
     this._initApiItemsRecursive(this._apiModel);
-
   }
 
   /**
@@ -604,9 +613,36 @@ export class YamlDocumenter {
 
     // Recurse container members
     if (ApiItemContainerMixin.isBaseClassOf(apiItem)) {
+      const singletons: Map<string, ApiItem> = new Map<string, ApiItem>();
+      const collidingNames: Set<string> = new Set<string>();
       for (const apiMember of apiItem.members) {
+        this._trackCollisionsWithSiblings(apiMember, singletons, collidingNames);
         this._initApiItemsRecursive(apiMember);
       }
+    }
+  }
+
+  private _trackCollisionsWithSiblings(
+    apiItem: ApiItem,
+    singletons?: Map<string, ApiItem>,
+    collidingNames?: Set<string>
+  ): void {
+    if (singletons && collidingNames) {
+      if (!collidingNames.has(apiItem.displayName)) {
+        const collision: ApiItem | undefined = singletons.get(apiItem.displayName);
+        if (!collision) {
+          // No collision. Record this singleton entry.
+          singletons.set(apiItem.displayName, apiItem);
+          return;
+        }
+        // First collision. Record the colliding name.
+        collidingNames.add(apiItem.displayName);
+        singletons.delete(apiItem.displayName);
+        // Record the initial entry.
+        this._collisions.add(collision);
+      }
+      // Record the colliding entry.
+      this._collisions.add(apiItem);
     }
   }
 
@@ -803,7 +839,13 @@ export class YamlDocumenter {
           break;
       }
     }
-    return path.join(this._outputFolder, result + '.yml');
+
+    let disambiguator: string = '';
+    if (this._collisions.has(apiItem)) {
+      disambiguator = `-${apiItem.kind.toLowerCase()}`;
+    }
+
+    return path.join(this._outputFolder, result + disambiguator + '.yml');
   }
 
   private _deleteOldOutputFiles(): void {
