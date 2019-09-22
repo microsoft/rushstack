@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/ts-command-line",
+      "comment": "Remove unnecessary dependencies on @types/argparse and @types/node",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/ts-command-line",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

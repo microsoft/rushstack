@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/set-webpack-public-path-plugin",
+      "comment": "Remove unnecessary dependencies on @types/node and @types/tapable",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/set-webpack-public-path-plugin",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
