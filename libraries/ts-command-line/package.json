@@ -14,7 +14,7 @@
   "license": "MIT",
   "dependencies": {
     "@types/argparse": "1.0.33",
-    "@types/node": "8.5.8",
+    "@types/node": "8.10.54",
     "argparse": "~1.0.9",
     "colors": "~1.2.1"
   },

@@ -14,7 +14,7 @@
   "dependencies": {
     "@types/fs-extra": "5.0.4",
     "@types/jju": "~1.4.0",
-    "@types/node": "8.5.8",
+    "@types/node": "8.10.54",
     "@types/z-schema": "3.16.31",
     "colors": "~1.2.1",
     "fs-extra": "~7.0.1",

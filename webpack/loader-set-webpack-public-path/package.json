@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@microsoft/set-webpack-public-path-plugin": "2.1.135",
-    "@types/node": "8.5.8",
+    "@types/node": "8.10.54",
     "loader-utils": "~1.1.0",
     "lodash": "~4.17.15"
   },
