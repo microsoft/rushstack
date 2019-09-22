@@ -66,6 +66,12 @@ interface IYamlReferences {
   uidTypeReferenceCounters: Map<string, number>;
 }
 
+const enum FlattenMode {
+  NestedNamespacesAndChildren,
+  NestedNamespacesOnly,
+  NoNamespaces
+}
+
 /**
  * Writes documentation in the Universal Reference YAML file format, as defined by typescript.schema.json.
  */
@@ -139,17 +145,8 @@ export class YamlDocumenter {
       };
       newYamlFile.items.push(yamlItem);
 
-      let children: ReadonlyArray<ApiItem>;
-      if (apiItem.kind === ApiItemKind.Package) {
-        // Skip over the entry point, since it's not part of the documentation hierarchy
-        children = apiItem.members[0].members;
-      } else {
-        children = apiItem.members;
-      }
-
-      const flattenedChildren: ApiItem[] = this._flattenNamespaces(children);
-
-      for (const child of flattenedChildren) {
+      const children: ApiItem[] = this._getLogicalChildren(apiItem);
+      for (const child of children) {
         if (child instanceof ApiDocumentedItem) {
           if (this._visitApiItems(child, newYamlFile)) {
             if (!yamlItem.children) {
@@ -178,25 +175,54 @@ export class YamlDocumenter {
         this._recordYamlReference(
           this._ensureYamlReferences(),
           this._getUid(apiItem),
-          this._getYamlItemName(apiItem));
+          this._getYamlItemName(apiItem, /*includeSignature*/ true));
       }
     }
 
     return true;
   }
 
-  // Since the YAML schema does not yet support nested namespaces, we simply omit them from
-  // the tree.  However, _getYamlItemName() will show the namespace.
-  private _flattenNamespaces(items: ReadonlyArray<ApiItem>): ApiItem[] {
-    const flattened: ApiItem[] = [];
+  protected _getLogicalChildren(apiItem: ApiItem): ApiItem[] {
+    const children: ApiItem[] = [];
+    if (apiItem.kind === ApiItemKind.Package) {
+      // Skip over the entry point, since it's not part of the documentation hierarchy
+      this._flattenNamespaces(apiItem.members[0].members, children, FlattenMode.NestedNamespacesAndChildren);
+    } else {
+      this._flattenNamespaces(apiItem.members, children, FlattenMode.NoNamespaces);
+    }
+    return children;
+  }
+
+  // Flattens nested namespaces into top level entries so that the following:
+  //   namespace X { export namespace Y { export namespace Z { } }
+  // Is represented as:
+  //   - X
+  //   - X.Y
+  //   - X.Y.Z
+  private _flattenNamespaces(items: ReadonlyArray<ApiItem>, childrenOut: ApiItem[], mode: FlattenMode): boolean {
+    let hasNonNamespaceChildren: boolean = false;
     for (const item of items) {
-      if (item.kind === ApiItemKind.Namespace) {
-        flattened.push(... this._flattenNamespaces(item.members));
-      } else {
-        flattened.push(item);
+      if (item.kind === ApiItemKind.Namespace && mode !== FlattenMode.NoNamespaces) {
+        // At any level, always include a nested namespace if it has non-namespace children, but do not include its
+        // non-namespace children in the result.
+
+        // Record the offset at which the namespace is added in case we need to remove it later.
+        const index: number = childrenOut.length;
+        childrenOut.push(item);
+
+        if (!this._flattenNamespaces(item.members, childrenOut, FlattenMode.NestedNamespacesOnly)) {
+          // This namespace had no non-namespace children, remove it.
+          childrenOut.splice(index, 1);
+        }
+      } else if (this._shouldInclude(item.kind)) {
+        if (mode !== FlattenMode.NestedNamespacesOnly) {
+          // At the top level, include non-namespace children as well.
+          childrenOut.push(item);
+        }
+        hasNonNamespaceChildren = true;
       }
     }
-    return flattened;
+    return hasNonNamespaceChildren;
   }
 
   /**
@@ -226,35 +252,18 @@ export class YamlDocumenter {
   private _buildTocItems(apiItems: ReadonlyArray<ApiItem>): IYamlTocItem[] {
     const tocItems: IYamlTocItem[] = [];
     for (const apiItem of apiItems) {
-      let tocItem: IYamlTocItem;
-
-      if (apiItem.kind === ApiItemKind.Namespace) {
-        // Namespaces don't have nodes yet
-        tocItem = {
-          name: this._getTocItemName(apiItem)
-        };
-      } else {
-        if (this._shouldEmbed(apiItem.kind)) {
-          // Don't generate table of contents items for embedded definitions
-          continue;
-        }
-
-        tocItem = {
-          name: this._getTocItemName(apiItem),
-          uid: this._getUid(apiItem)
-        };
+      if (this._shouldEmbed(apiItem.kind)) {
+        // Don't generate table of contents items for embedded definitions
+        continue;
       }
 
+      const tocItem: IYamlTocItem = {
+        name: this._getTocItemName(apiItem),
+        uid: this._getUid(apiItem)
+      };
       tocItems.push(tocItem);
 
-      let children: ReadonlyArray<ApiItem>;
-      if (apiItem.kind === ApiItemKind.Package) {
-        // Skip over the entry point, since it's not part of the documentation hierarchy
-        children = apiItem.members[0].members;
-      } else {
-        children = apiItem.members;
-      }
-
+      const children: ApiItem[] = this._getLogicalChildren(apiItem);
       const childItems: IYamlTocItem[] = this._buildTocItems(children);
       if (childItems.length > 0) {
         tocItem.items = childItems;
@@ -265,9 +274,11 @@ export class YamlDocumenter {
 
   /** @virtual */
   protected _getTocItemName(apiItem: ApiItem): string {
-    let name: string = apiItem.displayName;
+    let name: string;
     if (apiItem.kind === ApiItemKind.Package) {
-      name = PackageName.getUnscopedName(name);
+      name = PackageName.getUnscopedName(apiItem.displayName);
+    } else {
+      name = this._getYamlItemName(apiItem, /*includeSignature*/ false);
     }
 
     if (apiItem.getMergedSiblings().length > 1) {
@@ -283,20 +294,29 @@ export class YamlDocumenter {
       case ApiItemKind.Package:
       case ApiItemKind.Interface:
       case ApiItemKind.Enum:
-      return false;
+      case ApiItemKind.Namespace:
+        return false;
+    }
+    return true;
+  }
+
+  protected _shouldInclude(apiItemKind: ApiItemKind): boolean {
+    // Filter out known items that are not yet supported
+    switch (apiItemKind) {
+      case ApiItemKind.CallSignature:
+      case ApiItemKind.ConstructSignature:
+      case ApiItemKind.IndexSignature:
+      case ApiItemKind.TypeAlias:
+      case ApiItemKind.Variable:
+        return false;
     }
     return true;
   }
 
   private _generateYamlItem(apiItem: ApiDocumentedItem): IYamlItem | undefined {
     // Filter out known items that are not yet supported
-    switch (apiItem.kind) {
-      case ApiItemKind.CallSignature:
-      case ApiItemKind.ConstructSignature:
-      case ApiItemKind.IndexSignature:
-      case ApiItemKind.TypeAlias:
-      case ApiItemKind.Variable:
-        return undefined;
+    if (!this._shouldInclude(apiItem.kind)) {
+      return undefined;
     }
 
     const uid: DeclarationReference = this._getUidObject(apiItem);
@@ -334,7 +354,7 @@ export class YamlDocumenter {
       }
     }
 
-    yamlItem.name = this._getYamlItemName(apiItem);
+    yamlItem.name = this._getYamlItemName(apiItem, /*includeSignature*/ true);
 
     yamlItem.fullName = yamlItem.name;
     yamlItem.langs = [ 'typeScript' ];
@@ -373,6 +393,9 @@ export class YamlDocumenter {
 
       case ApiItemKind.Package:
         yamlItem.type = 'package';
+        break;
+      case ApiItemKind.Namespace:
+        yamlItem.type = 'namespace';
         break;
       case ApiItemKind.Property:
       case ApiItemKind.PropertySignature:
@@ -743,7 +766,8 @@ export class YamlDocumenter {
     return uid;
   }
 
-  private _getYamlItemName(apiItem: ApiItem): string {
+  private _getYamlItemName(apiItem: ApiItem, includeSignature: boolean): string {
+    const baseName: string = includeSignature ? Utilities.getConciseSignature(apiItem) : apiItem.displayName;
     if (apiItem.parent && apiItem.parent.kind === ApiItemKind.Namespace) {
       // If the immediate parent is a namespace, then add the namespaces to the name.  For example:
       //
@@ -771,7 +795,7 @@ export class YamlDocumenter {
       // embeds this entry in the web page for "N1.N2.C", so the container is obvious.  Whereas "N1.N2.f(x,y)"
       // needs to be qualified because the DocFX template doesn't make pages for namespaces.  Instead, they get
       // flattened into the package's page.
-      const nameParts: string[] = [ Utilities.getConciseSignature(apiItem) ];
+      const nameParts: string[] = [ baseName ];
 
       for (let current: ApiItem | undefined = apiItem.parent; current; current = current.parent) {
         if (current.kind !== ApiItemKind.Namespace) {
@@ -783,7 +807,7 @@ export class YamlDocumenter {
 
       return nameParts.join('.');
     } else {
-      return Utilities.getConciseSignature(apiItem);
+      return baseName;
     }
   }
 

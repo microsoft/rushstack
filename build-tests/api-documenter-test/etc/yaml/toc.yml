@@ -47,5 +47,7 @@ items:
             uid: 'api-documenter-test!DocEnum:enum'
           - name: Generic
             uid: 'api-documenter-test!Generic:class'
+          - name: OuterNamespace.InnerNamespace
+            uid: 'api-documenter-test!OuterNamespace.InnerNamespace:namespace'
           - name: SystemEvent
             uid: 'api-documenter-test!SystemEvent:class'

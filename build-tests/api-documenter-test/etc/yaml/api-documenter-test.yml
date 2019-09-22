@@ -24,7 +24,7 @@ items:
       - 'api-documenter-test!IDocInterface4:interface'
       - 'api-documenter-test!IDocInterface5:interface'
       - 'api-documenter-test!IDocInterface6:interface'
-      - 'api-documenter-test!OuterNamespace.InnerNamespace.nestedFunction:function(1)'
+      - 'api-documenter-test!OuterNamespace.InnerNamespace:namespace'
       - 'api-documenter-test!SystemEvent:class'
       - 'api-documenter-test!yamlReferenceUniquenessTest:function(1)'
   - uid: 'api-documenter-test!globalFunction:function(1)'
@@ -36,24 +36,6 @@ items:
     type: function
     syntax:
       content: 'export declare function globalFunction(x: number): number;'
-      return:
-        type:
-          - number
-        description: ''
-      parameters:
-        - id: x
-          description: ''
-          type:
-            - number
-  - uid: 'api-documenter-test!OuterNamespace.InnerNamespace.nestedFunction:function(1)'
-    summary: A function inside a namespace
-    name: OuterNamespace.InnerNamespace.nestedFunction(x)
-    fullName: OuterNamespace.InnerNamespace.nestedFunction(x)
-    langs:
-      - typeScript
-    type: function
-    syntax:
-      content: 'function nestedFunction(x: number): number;'
       return:
         type:
           - number
@@ -100,5 +82,7 @@ references:
     name: IDocInterface5
   - uid: 'api-documenter-test!IDocInterface6:interface'
     name: IDocInterface6
+  - uid: 'api-documenter-test!OuterNamespace.InnerNamespace:namespace'
+    name: OuterNamespace.InnerNamespace
   - uid: 'api-documenter-test!SystemEvent:class'
     name: SystemEvent

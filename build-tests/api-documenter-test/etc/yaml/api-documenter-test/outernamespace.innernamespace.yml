@@ -1,0 +1,30 @@
+### YamlMime:UniversalReference
+items:
+  - uid: 'api-documenter-test!OuterNamespace.InnerNamespace:namespace'
+    summary: A nested namespace
+    name: OuterNamespace.InnerNamespace
+    fullName: OuterNamespace.InnerNamespace
+    langs:
+      - typeScript
+    type: namespace
+    package: api-documenter-test!
+    children:
+      - 'api-documenter-test!OuterNamespace.InnerNamespace.nestedFunction:function(1)'
+  - uid: 'api-documenter-test!OuterNamespace.InnerNamespace.nestedFunction:function(1)'
+    summary: A function inside a namespace
+    name: OuterNamespace.InnerNamespace.nestedFunction(x)
+    fullName: OuterNamespace.InnerNamespace.nestedFunction(x)
+    langs:
+      - typeScript
+    type: function
+    syntax:
+      content: 'function nestedFunction(x: number): number;'
+      return:
+        type:
+          - number
+        description: ''
+      parameters:
+        - id: x
+          description: ''
+          type:
+            - number

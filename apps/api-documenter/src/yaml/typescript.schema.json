@@ -129,7 +129,7 @@
 					"$ref": "#/definitions/syntax"
 				},
 				"type": {
-					"enum": [ "class", "constructor", "enum", "field", "function", "interface", "method", "package", "property", "event", "typealias", "variable" ]
+					"enum": [ "class", "constructor", "enum", "field", "function", "interface", "method", "package", "property", "event", "typealias", "variable", "namespace" ]
 				},
 				"uid": {
 					"type": "string",

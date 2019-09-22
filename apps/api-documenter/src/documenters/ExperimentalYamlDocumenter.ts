@@ -36,39 +36,23 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
   private _buildTocItems2(apiItems: ReadonlyArray<ApiItem>): IYamlTocItem[] {
     const tocItems: IYamlTocItem[] = [];
     for (const apiItem of apiItems) {
-      let tocItem: IYamlTocItem;
+      if (this._shouldEmbed(apiItem.kind)) {
+        // Don't generate table of contents items for embedded definitions
+        continue;
+      }
 
-      if (apiItem.kind === ApiItemKind.Namespace) {
-        // Namespaces don't have nodes yet
-        tocItem = {
-          name: this._getTocItemName(apiItem)
-        };
-      } else {
-        if (this._shouldEmbed(apiItem.kind)) {
-          // Don't generate table of contents items for embedded definitions
-          continue;
-        }
+      const tocItem: IYamlTocItem = {
+        name: this._getTocItemName(apiItem),
+        uid: this._getUid(apiItem)
+      };
 
-        tocItem = {
-          name: this._getTocItemName(apiItem),
-          uid: this._getUid(apiItem)
-        };
-
-        if (apiItem.kind !== ApiItemKind.Package) {
-          this._filterItem(apiItem, tocItem);
-        }
+      if (apiItem.kind !== ApiItemKind.Package) {
+        this._filterItem(apiItem, tocItem);
       }
 
       tocItems.push(tocItem);
 
-      let children: ReadonlyArray<ApiItem>;
-      if (apiItem.kind === ApiItemKind.Package) {
-        // Skip over the entry point, since it's not part of the documentation hierarchy
-        children = apiItem.members[0].members;
-      } else {
-        children = apiItem.members;
-      }
-
+      const children: ApiItem[] = this._getLogicalChildren(apiItem);
       const childItems: IYamlTocItem[] = this._buildTocItems2(children);
       if (childItems.length > 0) {
         tocItem.items = childItems;
