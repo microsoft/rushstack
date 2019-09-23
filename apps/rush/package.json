@@ -41,7 +41,7 @@
     "@microsoft/node-library-build": "6.1.11",
     "@types/chai": "3.4.34",
     "@types/mocha": "5.2.5",
-    "@types/node": "8.5.8",
+    "@types/node": "8.10.54",
     "@types/semver": "5.3.33",
     "@types/sinon": "1.16.34",
     "chai": "~3.5.0",

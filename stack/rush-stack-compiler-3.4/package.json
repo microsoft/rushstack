@@ -20,7 +20,7 @@
   "dependencies": {
     "@microsoft/api-extractor": "7.4.2",
     "@microsoft/node-core-library": "3.14.2",
-    "@types/node": "8.5.8",
+    "@types/node": "8.10.54",
     "tslint": "~5.12.1",
     "tslint-microsoft-contrib": "~5.2.1",
     "typescript": "~3.4.3"

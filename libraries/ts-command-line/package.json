@@ -13,13 +13,13 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@types/argparse": "1.0.33",
-    "@types/node": "8.5.8",
     "argparse": "~1.0.9",
     "colors": "~1.2.1"
   },
   "devDependencies": {
+    "@types/argparse": "1.0.33",
     "@types/jest": "23.3.11",
+    "@types/node": "8.10.54",
     "gulp": "~4.0.2",
     "@microsoft/node-library-build": "6.1.2",
     "@microsoft/rush-stack-compiler-3.4": "0.1.15"

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/stream-collator",
+      "comment": "Remove unnecessary dependency on @types/node",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/stream-collator",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

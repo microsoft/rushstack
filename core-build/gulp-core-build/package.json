@@ -16,7 +16,7 @@
     "@microsoft/node-core-library": "3.14.2",
     "@types/chalk": "0.4.31",
     "@types/gulp": "4.0.6",
-    "@types/node": "8.5.8",
+    "@types/node": "8.10.54",
     "@types/node-notifier": "0.0.28",
     "@types/orchestrator": "0.0.30",
     "@types/semver": "5.3.33",
