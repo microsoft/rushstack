@@ -1,0 +1,25 @@
+### YamlMime:UniversalReference
+items:
+  - uid: 'api-documenter-test!OuterNamespace:namespace'
+    summary: A top-level namespace
+    name: OuterNamespace
+    fullName: OuterNamespace
+    langs:
+      - typeScript
+    type: namespace
+    package: api-documenter-test!
+    children:
+      - 'api-documenter-test!OuterNamespace.nestedVariable:var'
+  - uid: 'api-documenter-test!OuterNamespace.nestedVariable:var'
+    summary: A variable exported from within a namespace.
+    name: nestedVariable
+    fullName: OuterNamespace.nestedVariable
+    langs:
+      - typeScript
+    namespace: 'api-documenter-test!OuterNamespace:namespace'
+    type: variable
+    syntax:
+      content: 'nestedVariable: boolean'
+      return:
+        type:
+          - boolean

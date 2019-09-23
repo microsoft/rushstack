@@ -45,8 +45,12 @@ items:
             uid: 'api-documenter-test!DocClassInterfaceMerge:interface'
           - name: DocEnum
             uid: 'api-documenter-test!DocEnum:enum'
+          - name: EcmaSmbols
+            uid: 'api-documenter-test!EcmaSmbols:namespace'
           - name: Generic
             uid: 'api-documenter-test!Generic:class'
+          - name: OuterNamespace
+            uid: 'api-documenter-test!OuterNamespace:namespace'
           - name: OuterNamespace.InnerNamespace
             uid: 'api-documenter-test!OuterNamespace.InnerNamespace:namespace'
           - name: SystemEvent

@@ -61,3 +61,13 @@ export namespace OuterNamespace {
  * @public
  */
 export declare function yamlReferenceUniquenessTest(): IDocInterface1;
+
+/**
+ * @public
+ */
+export type TypeAlias = number;
+
+/**
+ * @public
+ */
+export type GenericTypeAlias<T> = T[];

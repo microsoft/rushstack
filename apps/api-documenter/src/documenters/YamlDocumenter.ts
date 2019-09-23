@@ -36,7 +36,10 @@ import {
   ApiTypeParameterListMixin,
   Excerpt,
   ExcerptToken,
-  ExcerptTokenKind
+  ExcerptTokenKind,
+  HeritageType,
+  ApiVariable,
+  ApiTypeAlias
 } from '@microsoft/api-extractor-model';
 import {
   DeclarationReference,
@@ -49,7 +52,8 @@ import {
   IYamlSyntax,
   IYamlParameter,
   IYamlReference,
-  IYamlReferenceSpec
+  IYamlReferenceSpec,
+  IYamlInheritanceTree
 } from '../yaml/IYamlApiFile';
 import {
   IYamlTocFile,
@@ -70,6 +74,11 @@ const enum FlattenMode {
   NestedNamespacesAndChildren,
   NestedNamespacesOnly,
   NoNamespaces
+}
+
+interface INameOptions {
+  includeSignature?: boolean;
+  includeNamespace?: boolean;
 }
 
 /**
@@ -172,10 +181,13 @@ export class YamlDocumenter {
       this._writeYamlFile(newYamlFile, yamlFilePath, 'UniversalReference', yamlApiSchema);
 
       if (parentYamlFile) {
+        // References should be recorded in the parent YAML file with the local name of the embedded item.
+        // This avoids unnecessary repetition when listing items inside of a namespace.
         this._recordYamlReference(
           this._ensureYamlReferences(),
           this._getUid(apiItem),
-          this._getYamlItemName(apiItem, /*includeSignature*/ true));
+          this._getYamlItemName(apiItem, { includeSignature: true }),
+          this._getYamlItemName(apiItem, { includeNamespace: true, includeSignature: true }));
       }
     }
 
@@ -202,17 +214,19 @@ export class YamlDocumenter {
   private _flattenNamespaces(items: ReadonlyArray<ApiItem>, childrenOut: ApiItem[], mode: FlattenMode): boolean {
     let hasNonNamespaceChildren: boolean = false;
     for (const item of items) {
-      if (item.kind === ApiItemKind.Namespace && mode !== FlattenMode.NoNamespaces) {
-        // At any level, always include a nested namespace if it has non-namespace children, but do not include its
-        // non-namespace children in the result.
+      if (item.kind === ApiItemKind.Namespace) {
+        if (mode !== FlattenMode.NoNamespaces) {
+          // At any level, always include a nested namespace if it has non-namespace children, but do not include its
+          // non-namespace children in the result.
 
-        // Record the offset at which the namespace is added in case we need to remove it later.
-        const index: number = childrenOut.length;
-        childrenOut.push(item);
+          // Record the offset at which the namespace is added in case we need to remove it later.
+          const index: number = childrenOut.length;
+          childrenOut.push(item);
 
-        if (!this._flattenNamespaces(item.members, childrenOut, FlattenMode.NestedNamespacesOnly)) {
-          // This namespace had no non-namespace children, remove it.
-          childrenOut.splice(index, 1);
+          if (!this._flattenNamespaces(item.members, childrenOut, FlattenMode.NestedNamespacesOnly)) {
+            // This namespace had no non-namespace children, remove it.
+            childrenOut.splice(index, 1);
+          }
         }
       } else if (this._shouldInclude(item.kind)) {
         if (mode !== FlattenMode.NestedNamespacesOnly) {
@@ -278,10 +292,10 @@ export class YamlDocumenter {
     if (apiItem.kind === ApiItemKind.Package) {
       name = PackageName.getUnscopedName(apiItem.displayName);
     } else {
-      name = this._getYamlItemName(apiItem, /*includeSignature*/ false);
+      name = this._getYamlItemName(apiItem);
     }
 
-    if (apiItem.getMergedSiblings().length > 1) {
+    if (name === apiItem.displayName && apiItem.getMergedSiblings().length > 1) {
       name += ` (${apiItem.kind})`;
     }
 
@@ -306,8 +320,6 @@ export class YamlDocumenter {
       case ApiItemKind.CallSignature:
       case ApiItemKind.ConstructSignature:
       case ApiItemKind.IndexSignature:
-      case ApiItemKind.TypeAlias:
-      case ApiItemKind.Variable:
         return false;
     }
     return true;
@@ -354,10 +366,15 @@ export class YamlDocumenter {
       }
     }
 
-    yamlItem.name = this._getYamlItemName(apiItem, /*includeSignature*/ true);
-
-    yamlItem.fullName = yamlItem.name;
+    yamlItem.name = this._getYamlItemName(apiItem, { includeSignature: true });
+    yamlItem.fullName = this._getYamlItemName(apiItem, { includeSignature: true, includeNamespace: true });
     yamlItem.langs = [ 'typeScript' ];
+
+    // Add the namespace of the item if it is contained in one.
+    // Do not add the namespace parent of a namespace as they are flattened in the documentation.
+    if (apiItem.kind !== ApiItemKind.Namespace && apiItem.parent && apiItem.parent.kind === ApiItemKind.Namespace) {
+      yamlItem.namespace = apiItem.parent.canonicalReference.toString();
+    }
 
     switch (apiItem.kind) {
       case ApiItemKind.Enum:
@@ -413,6 +430,16 @@ export class YamlDocumenter {
         this._populateYamlFunctionLike(uid, yamlItem, apiItem as ApiFunction);
         break;
 
+      case ApiItemKind.Variable:
+        yamlItem.type = 'variable';
+        this._populateYamlVariable(uid, yamlItem, apiItem as ApiVariable);
+        break;
+
+      case ApiItemKind.TypeAlias:
+        yamlItem.type = 'typealias';
+        this._populateYamlTypeAlias(uid, yamlItem, apiItem as ApiTypeAlias);
+        break;
+
       default:
         throw new Error('Unimplemented item kind: ' + apiItem.kind);
     }
@@ -456,6 +483,7 @@ export class YamlDocumenter {
     if (apiItem instanceof ApiClass) {
       if (apiItem.extendsType) {
         yamlItem.extends = [ this._renderType(uid, apiItem.extendsType.excerpt) ];
+        yamlItem.inheritance = this._renderInheritance(uid, [apiItem.extendsType]);
       }
       if (apiItem.implementsTypes.length > 0) {
         yamlItem.implements = [];
@@ -469,6 +497,7 @@ export class YamlDocumenter {
         for (const extendsType of apiItem.extendsTypes) {
           yamlItem.extends.push(this._renderType(uid, extendsType.excerpt));
         }
+        yamlItem.inheritance = this._renderInheritance(uid, apiItem.extendsTypes);
       }
 
       const typeParameters: IYamlParameter[] = this._populateYamlTypeParameters(uid, apiItem);
@@ -565,6 +594,41 @@ export class YamlDocumenter {
     }
   }
 
+  private _populateYamlVariable(uid: DeclarationReference, yamlItem: Partial<IYamlItem>, apiItem: ApiVariable):
+    void {
+
+    const syntax: IYamlSyntax = {
+      content: apiItem.getExcerptWithModifiers()
+    };
+    yamlItem.syntax = syntax;
+
+    if (apiItem.variableTypeExcerpt.text) {
+      syntax.return = {
+        type: [ this._renderType(uid, apiItem.variableTypeExcerpt) ]
+      };
+    }
+  }
+
+  private _populateYamlTypeAlias(uid: DeclarationReference, yamlItem: Partial<IYamlItem>, apiItem: ApiTypeAlias):
+    void {
+
+    const syntax: IYamlSyntax = {
+      content: apiItem.getExcerptWithModifiers()
+    };
+    yamlItem.syntax = syntax;
+
+    const typeParameters: IYamlParameter[] = this._populateYamlTypeParameters(uid, apiItem);
+    if (typeParameters.length) {
+      syntax.typeParameters = typeParameters;
+    }
+
+    if (apiItem.typeExcerpt.text) {
+      syntax.return = {
+        type: [ this._renderType(uid, apiItem.typeExcerpt) ]
+      };
+    }
+  }
+
   private _renderMarkdown(docSection: DocSection, contextApiItem: ApiItem): string {
     const stringBuilder: StringBuilder = new StringBuilder();
 
@@ -649,6 +713,30 @@ export class YamlDocumenter {
     return this._yamlReferences;
   }
 
+  private _renderInheritance(contextUid: DeclarationReference, heritageTypes: ReadonlyArray<HeritageType>):
+    IYamlInheritanceTree[] {
+
+    const result: IYamlInheritanceTree[] = [];
+    for (const heritageType of heritageTypes) {
+      const type: string = this._renderType(contextUid, heritageType.excerpt);
+      const yamlInheritance: IYamlInheritanceTree = { type };
+      const apiItem: ApiItem | undefined = this._apiItemsByCanonicalReference.get(type);
+      if (apiItem) {
+        if (apiItem instanceof ApiClass) {
+          if (apiItem.extendsType) {
+            yamlInheritance.inheritance = this._renderInheritance(this._getUidObject(apiItem), [apiItem.extendsType]);
+          }
+        } else if (apiItem instanceof ApiInterface) {
+          if (apiItem.extendsTypes.length > 0) {
+            yamlInheritance.inheritance = this._renderInheritance(this._getUidObject(apiItem), apiItem.extendsTypes);
+          }
+        }
+      }
+      result.push(yamlInheritance);
+    }
+    return result;
+  }
+
   private _renderType(contextUid: DeclarationReference, typeExcerpt: Excerpt): string {
     const excerptTokens: ExcerptToken[] = typeExcerpt.tokens.slice(
       typeExcerpt.tokenRange.startIndex,
@@ -686,10 +774,13 @@ export class YamlDocumenter {
     if (excerptTokens.length === 1 &&
       excerptTokens[0].kind === ExcerptTokenKind.Reference &&
       excerptTokens[0].canonicalReference) {
+      const excerptRef: string = excerptTokens[0].canonicalReference.toString();
+      const apiItem: ApiItem | undefined = this._apiItemsByCanonicalReference.get(excerptRef);
       return this._recordYamlReference(
         yamlReferences,
         excerptTokens[0].canonicalReference.toString(),
-        typeName
+        apiItem ? this._getYamlItemName(apiItem) : typeName,
+        apiItem ? this._getYamlItemName(apiItem, { includeNamespace: true }) : typeName
       );
     }
 
@@ -711,10 +802,10 @@ export class YamlDocumenter {
       .withOverloadIndex(undefined)
       .toString();
 
-    return this._recordYamlReference(yamlReferences, uid, typeName, excerptTokens);
+    return this._recordYamlReference(yamlReferences, uid, typeName, typeName, excerptTokens);
   }
 
-  private _recordYamlReference(yamlReferences: IYamlReferences, uid: string, typeName: string,
+  private _recordYamlReference(yamlReferences: IYamlReferences, uid: string, name: string, fullName: string,
     excerptTokens?: ExcerptToken[]): string {
 
     if (yamlReferences.references.some(ref => ref.uid === uid)) {
@@ -758,17 +849,24 @@ export class YamlDocumenter {
       yamlReference.name = specs.map(s => s.name).join('').trim();
       yamlReference.fullName = specs.map(s => s.fullName || s.name).join('').trim();
       yamlReference['spec.typeScript'] = specs;
-    } else if (typeName !== uid) {
-      yamlReference.name = typeName;
+    } else {
+      if (name !== uid) {
+        yamlReference.name = name;
+      }
+      if (fullName !== uid && fullName !== name) {
+        yamlReference.fullName = fullName;
+      }
     }
 
     yamlReferences.references.push(yamlReference);
     return uid;
   }
 
-  private _getYamlItemName(apiItem: ApiItem, includeSignature: boolean): string {
+  private _getYamlItemName(apiItem: ApiItem, options: INameOptions = {}): string {
+    const { includeSignature, includeNamespace } = options;
     const baseName: string = includeSignature ? Utilities.getConciseSignature(apiItem) : apiItem.displayName;
-    if (apiItem.parent && apiItem.parent.kind === ApiItemKind.Namespace) {
+    if ((includeNamespace || apiItem.kind === ApiItemKind.Namespace) && apiItem.parent &&
+      apiItem.parent.kind === ApiItemKind.Namespace) {
       // If the immediate parent is a namespace, then add the namespaces to the name.  For example:
       //
       //   // Name: "N1"

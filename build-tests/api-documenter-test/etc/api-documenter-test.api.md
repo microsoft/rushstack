@@ -58,6 +58,9 @@ export type ExampleTypeAlias = Promise<boolean>;
 export class Generic<T> {
 }
 
+// @public (undocumented)
+export type GenericTypeAlias<T> = T[];
+
 // @public
 export function globalFunction(x: number): number;
 
@@ -130,6 +133,9 @@ export namespace OuterNamespace {
 export class SystemEvent {
     addHandler(handler: () => void): void;
 }
+
+// @public (undocumented)
+export type TypeAlias = number;
 
 // @public (undocumented)
 export function yamlReferenceUniquenessTest(): IDocInterface1;
