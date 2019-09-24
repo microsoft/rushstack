@@ -1,6 +1,23 @@
 # Change Log - @microsoft/stream-collator
 
-This log was last generated on Wed, 11 Sep 2019 19:56:23 GMT and should not be manually modified.
+This log was last generated on Tue, 24 Sep 2019 02:58:49 GMT and should not be manually modified.
+
+## 3.1.1
+Tue, 24 Sep 2019 02:58:49 GMT
+
+*Version update only*
+
+## 3.1.0
+Mon, 23 Sep 2019 15:14:55 GMT
+
+### Minor changes
+
+- Remove unnecessary dependency on @types/node
+
+## 3.0.92
+Fri, 20 Sep 2019 21:27:22 GMT
+
+*Version update only*
 
 ## 3.0.91
 Wed, 11 Sep 2019 19:56:23 GMT

@@ -6,12 +6,16 @@ import { ITerminalProvider } from '@microsoft/node-core-library';
 
 import { CmdRunner } from './CmdRunner';
 import { ToolPaths } from './ToolPaths';
-import { RushStackCompilerBase } from './RushStackCompilerBase';
+import {
+  RushStackCompilerBase,
+  IRushStackCompilerBaseOptions
+} from './RushStackCompilerBase';
+import { LoggingUtilities } from './LoggingUtilities';
 
 /**
  * @beta
  */
-export interface ITypescriptCompilerOptions {
+export interface ITypescriptCompilerOptions extends IRushStackCompilerBaseOptions {
   /**
    * Option to pass custom arguments to the tsc command.
    */
@@ -23,15 +27,39 @@ export interface ITypescriptCompilerOptions {
  */
 export class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompilerOptions> {
   private _cmdRunner: CmdRunner;
+  constructor(rootPath: string, terminalProvider: ITerminalProvider) // Remove in the next major version
+  constructor(taskOptions: ITypescriptCompilerOptions, rootPath: string, terminalProvider: ITerminalProvider)
+  constructor(
+    arg1: ITypescriptCompilerOptions | string,
+    arg2: string | ITerminalProvider,
+    arg3?: ITerminalProvider
+  ) {
+    let taskOptions: ITypescriptCompilerOptions | undefined = undefined;
+    let rootPath: string;
+    let terminalProvider: ITerminalProvider;
+    if (typeof arg1 === 'string') {
+      rootPath = arg1;
+      terminalProvider = arg2 as ITerminalProvider;
+    } else {
+      taskOptions = arg1 as ITypescriptCompilerOptions;
+      rootPath = arg2 as string;
+      terminalProvider = arg3 as ITerminalProvider;
+    }
 
-  constructor(rootPath: string, terminalProvider: ITerminalProvider);
-  constructor(taskOptions: ITypescriptCompilerOptions, rootPath: string, terminalProvider: ITerminalProvider);
-  constructor(arg1: ITypescriptCompilerOptions | string, arg2: string | ITerminalProvider, arg3?: ITerminalProvider) {
-    super(
-      typeof arg1 === 'string' ? {} : arg1,
-      typeof arg2 === 'string' ? arg2 : arg1 as string,
-      arg3 ? arg3 : arg2 as ITerminalProvider
-    );
+    const loggingUtilities: LoggingUtilities = new LoggingUtilities(terminalProvider);
+    if (taskOptions) {
+      if (!taskOptions.fileError) {
+        taskOptions.fileError = loggingUtilities.fileError;
+      }
+
+      if (!taskOptions.fileWarning) {
+        taskOptions.fileWarning = loggingUtilities.fileWarning;
+      }
+    } else {
+      taskOptions = loggingUtilities.getDefaultRushStackCompilerBaseOptions();
+    }
+
+    super(taskOptions, rootPath, terminalProvider);
     this._cmdRunner = new CmdRunner(
       this._standardBuildFolders,
       this._terminal,

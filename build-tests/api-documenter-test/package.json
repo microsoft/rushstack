@@ -8,11 +8,11 @@
   "scripts": {
     "build": "node build.js"
   },
-  "dependencies": {
-    "@microsoft/api-extractor": "7.4.2",
-    "@microsoft/api-documenter": "7.4.3",
+  "devDependencies": {
+    "@microsoft/api-extractor": "7.4.4",
+    "@microsoft/api-documenter": "7.4.6",
     "@types/jest": "23.3.11",
-    "@types/node": "8.5.8",
+    "@types/node": "8.10.54",
     "fs-extra": "~7.0.1",
     "typescript": "~3.1.6"
   }

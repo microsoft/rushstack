@@ -9,10 +9,12 @@
     "build": "node build.js"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "7.4.2",
+    "api-extractor-lib1-test": "1.0.0"
+  },
+  "devDependencies": {
+    "@microsoft/api-extractor": "7.4.4",
     "@types/jest": "23.3.11",
-    "@types/node": "8.5.8",
-    "api-extractor-lib1-test": "1.0.0",
+    "@types/node": "8.10.54",
     "fs-extra": "~7.0.1",
     "typescript": "~3.1.6"
   }
