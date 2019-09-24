@@ -15,14 +15,17 @@
  */
 
 export { ApiExtractorRunner } from './ApiExtractorRunner';
-export { RushStackCompilerBase }  from './RushStackCompilerBase';
+export {
+  RushStackCompilerBase,
+  IRushStackCompilerBaseOptions,
+  WriteFileIssueFunction
+} from './RushStackCompilerBase';
 export { StandardBuildFolders } from './StandardBuildFolders';
 export {
   TypescriptCompiler,
   ITypescriptCompilerOptions
 } from './TypescriptCompiler';
 export {
-  WriteFileIssueFunction,
   ITslintRunnerConfig,
   TslintRunner
 } from './TslintRunner';
