@@ -87,6 +87,8 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
 
 /**
  * Takes a list of files and returns the current git hashes for them
+ *
+ * @public
  */
 export function gitHashFiles(filesToHash: string[], packagePath: string): Map<string, string> {
   const changes: Map<string, string> = new Map<string, string>();
