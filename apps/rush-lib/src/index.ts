@@ -14,6 +14,7 @@ export {
   RushConfiguration,
   ITryFindRushJsonLocationOptions,
   ResolutionStrategy,
+  IncrementalBuildDependencyGranularity,
   PnpmOptionsConfiguration,
   YarnOptionsConfiguration
 } from './api/RushConfiguration';

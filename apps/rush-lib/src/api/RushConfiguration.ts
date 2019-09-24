@@ -87,7 +87,8 @@ export interface IRushRepositoryJson {
 export interface IPnpmOptionsJson {
   strictPeerDependencies?: boolean;
   resolutionStrategy?: ResolutionStrategy;
-  disablePerProjectDependencyManifest?: boolean;
+  /** @beta */
+  incrementalBuildDependencyGranularity?: IncrementalBuildDependencyGranularity;
 }
 
 /**
@@ -188,16 +189,26 @@ export class PnpmOptionsConfiguration {
   public readonly resolutionStrategy: ResolutionStrategy;
 
   /**
-   * If set to `true`, don't attempt to generate a file that records the dependencies of each project to be used for
-   * incremental builds.
+   * This is the mode for tracking external dependencies to detect if a project needs to be rebuilt
+   * during an incremental build.
+   *
+   * If set to "project," track individual projects' dependencies when detecting if a project needs
+   * to be rebuilt during an incremental build.
+   *
+   * If set to "repository," rebuild all projects when any dependencies across the repository are changed
+   * during an incremental build.
+   *
+   * If unset, defaults to "project."
+   *
+   * @beta
    */
-  public readonly disablePerProjectDependencyManifest: boolean;
+  public readonly incrementalBuildDependencyGranularity: IncrementalBuildDependencyGranularity;
 
   /** @internal */
   public constructor(json: IPnpmOptionsJson) {
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
-    this.disablePerProjectDependencyManifest = !!json.disablePerProjectDependencyManifest;
+    this.incrementalBuildDependencyGranularity = json.incrementalBuildDependencyGranularity || 'project';
   }
 }
 
@@ -247,6 +258,12 @@ export interface ITryFindRushJsonLocationOptions {
  * @public
  */
 export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
+
+/**
+ * This represents the available dependency-tracking granularities during incremental builds.
+ * @beta
+ */
+export type IncrementalBuildDependencyGranularity = 'project' | 'repository';
 
 /**
  * This represents the Rush configuration for a repository, based on the "rush.json"

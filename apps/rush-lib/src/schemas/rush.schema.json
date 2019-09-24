@@ -66,9 +66,10 @@
           "type": "string",
           "enum": ["fewer-dependencies", "fast"]
         },
-        "disablePerProjectDependencyManifest": {
-          "description": "If set to `true`, don't attempt to generate a file that records the dependencies of each project to be used for incremental builds.",
-          "type": "boolean"
+        "incrementalBuildDependencyGranularity": {
+          "description": "This is the mode for tracking external dependencies to detect if a project needs to be rebuilt during an incremental build.",
+          "type": "string",
+          "enum": ["project", "repository"]
         }
       },
       "additionalProperties": false

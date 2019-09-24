@@ -117,6 +117,9 @@ export interface ILaunchOptions {
 }
 
 // @beta
+export type IncrementalBuildDependencyGranularity = 'project' | 'repository';
+
+// @beta
 export class IndividualVersionPolicy extends VersionPolicy {
     // Warning: (ae-forgotten-export) The symbol "IIndividualVersionJson" needs to be exported by the entry point index.d.ts
     // 
@@ -219,7 +222,8 @@ export class PnpmOptionsConfiguration {
     // 
     // @internal
     constructor(json: IPnpmOptionsJson);
-    readonly disablePerProjectDependencyManifest: boolean;
+    // @beta
+    readonly incrementalBuildDependencyGranularity: IncrementalBuildDependencyGranularity;
     readonly resolutionStrategy: ResolutionStrategy;
     readonly strictPeerDependencies: boolean;
 }
