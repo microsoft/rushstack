@@ -206,7 +206,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       //       '@microsoft/load-themed-styles': 1.10.7
       //       ...
       //      resolution:
-      //       integrity: sha512-guuoFIcUlWTiUt81Cyd3czgkolQ4rneTuhi3RvtIIcEy7Dq5Y3EWewsImlmXGklB48tpWFzBeD16yDALNhxnow==
+      //       integrity: sha512-guuoFIc**==
       //       tarball: 'file:projects/sp-filepicker.tgz'
 
       //    Here, we are interested in the part 'file:projects/sp-filepicker.tgz'. Splitting by underscores is not the
@@ -217,7 +217,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       //    '@microsoft/set-webpack-public-path-plugin': 2.1.133
       //    @microsoft/sp-build-node': 1.9.0-dev.27_typescript@2.9.2
 
-      //    Here, we could just split by underscores and take the first part. 
+      //    Here, we could just split by underscores and take the first part.
 
       // The below code is also compatible with lockfile versions < 5.1
 
