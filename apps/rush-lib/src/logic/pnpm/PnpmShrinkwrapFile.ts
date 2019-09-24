@@ -184,18 +184,55 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * Gets the version number from the list of top-level dependencies in the "dependencies" section
    * of the shrinkwrap file. Sample return values:
    *   '2.1.113'
-   *   '1.9.0-dev.27_typescript@2.9.2'
-   *   '5.0.0_25c559a5921686293a001a397be4dce0'
+   *   '1.9.0-dev.27'
    *   'file:projects/empty-webpart-project.tgz'
-   *   'file:projects/article-site-demo.tgz_jest@22.4.4+typescript@2.9.2'
-   *   'file:projects/i18n-utilities.tgz_462eaf34881863298955eb323c130fc7'
    *   undefined
    *
    * @override
    */
   public getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined {
-    const value: string | undefined = BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
+    let value: string | undefined = BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
     if (value) {
+
+      // Getting the top level depenedency version from a PNPM lockfile version 5.1
+      // --------------------------------------------------------------------------
+      //
+      // 1) Top-level tarball dependency entries in pnpm-lock.yaml look like:
+      //    '@rush-temp/sp-filepicker': 'file:projects/sp-filepicker.tgz_0ec79d3b08edd81ebf49cd19ca50b3f5'
+
+      //    Then, it would be defined below:
+      //    'file:projects/sp-filepicker.tgz_0ec79d3b08edd81ebf49cd19ca50b3f5':
+      //      dependencies:
+      //       '@microsoft/load-themed-styles': 1.10.7
+      //       ...
+      //      resolution:
+      //       integrity: sha512-guuoFIcUlWTiUt81Cyd3czgkolQ4rneTuhi3RvtIIcEy7Dq5Y3EWewsImlmXGklB48tpWFzBeD16yDALNhxnow==
+      //       tarball: 'file:projects/sp-filepicker.tgz'
+
+      //    Here, we are interested in the part 'file:projects/sp-filepicker.tgz'. Splitting by underscores is not the
+      //    best way to get this because file names could have underscores in them. Instead, we could use the tarball
+      //    field in the resolution section.
+
+      // 2) Top-level non-tarball dependency entries in pnpm-lock.yaml would look like:
+      //    '@microsoft/set-webpack-public-path-plugin': 2.1.133
+      //    @microsoft/sp-build-node': 1.9.0-dev.27_typescript@2.9.2
+
+      //    Here, we could just split by underscores and take the first part. 
+
+      // The below code is also compatible with lockfile versions < 5.1
+
+      const dependency: IPnpmShrinkwrapDependencyYaml = this._shrinkwrapJson.packages[value];
+
+      if (dependency && dependency.resolution && dependency.resolution.tarball &&
+        value.startsWith(dependency.resolution.tarball)) {
+        return new DependencySpecifier(dependencyName, dependency.resolution.tarball);
+      } else {
+        const underscoreIndex: number = value.indexOf('_');
+        if (underscoreIndex >= 0) {
+          value = value.substr(0, underscoreIndex);
+        }
+      }
+
       return new DependencySpecifier(dependencyName, value);
     }
     return undefined;
@@ -206,23 +243,27 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    *
    * ```
    * dependencies:
-   *   '@rush-temp/my-app': 'file:projects/my-app.tgz'
+   *   '@rush-temp/my-app': 'file:projects/my-app.tgz_25c559a5921686293a001a397be4dce0'
    * packages:
    *   /@types/node/10.14.15:
    *     dev: false
-   *   'file:projects/my-app.tgz':
+   *   'file:projects/my-app.tgz_25c559a5921686293a001a397be4dce0':
    *     dev: false
    *     name: '@rush-temp/my-app'
    *     version: 0.0.0
    * ```
    *
-   * We refer to "file:projects/my-app.tgz" as the temp project dependency key.
+   * We refer to 'file:projects/my-app.tgz_25c559a5921686293a001a397be4dce0' as the temp project dependency key
+   * of the temp project '@rush-temp/my-app'.
    */
   public getTempProjectDependencyKey(tempProjectName: string): string | undefined {
-    const tempProjectSpecifier: DependencySpecifier | undefined = this.getTopLevelDependencyVersion(tempProjectName);
-    if (tempProjectSpecifier) {
-      return tempProjectSpecifier.versionSpecifier;
+    const tempProjectDependencyKey: string | undefined =
+      BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, tempProjectName);
+
+    if (tempProjectDependencyKey) {
+      return tempProjectDependencyKey;
     }
+
     return undefined;
   }
 
