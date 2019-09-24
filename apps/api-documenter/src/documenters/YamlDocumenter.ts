@@ -624,26 +624,24 @@ export class YamlDocumenter {
 
   private _trackCollisionsWithSiblings(
     apiItem: ApiItem,
-    singletons?: Map<string, ApiItem>,
-    collidingNames?: Set<string>
+    singletons: Map<string, ApiItem>,
+    collidingNames: Set<string>
   ): void {
-    if (singletons && collidingNames) {
-      if (!collidingNames.has(apiItem.displayName)) {
-        const collision: ApiItem | undefined = singletons.get(apiItem.displayName);
-        if (!collision) {
-          // No collision. Record this singleton entry.
-          singletons.set(apiItem.displayName, apiItem);
-          return;
-        }
-        // First collision. Record the colliding name.
-        collidingNames.add(apiItem.displayName);
-        singletons.delete(apiItem.displayName);
-        // Record the initial entry.
-        this._collisions.add(collision);
+    if (!collidingNames.has(apiItem.displayName)) {
+      const collision: ApiItem | undefined = singletons.get(apiItem.displayName);
+      if (!collision) {
+        // No collision. Record this singleton entry.
+        singletons.set(apiItem.displayName, apiItem);
+        return;
       }
-      // Record the colliding entry.
-      this._collisions.add(apiItem);
+      // First collision. Record the colliding name.
+      collidingNames.add(apiItem.displayName);
+      singletons.delete(apiItem.displayName);
+      // Record the initial entry.
+      this._collisions.add(collision);
     }
+    // Record the colliding entry.
+    this._collisions.add(apiItem);
   }
 
   private _ensureYamlReferences(): IYamlReferences {
