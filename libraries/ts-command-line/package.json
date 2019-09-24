@@ -13,11 +13,11 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@types/argparse": "1.0.33",
     "argparse": "~1.0.9",
     "colors": "~1.2.1"
   },
   "devDependencies": {
-    "@types/argparse": "1.0.33",
     "@types/jest": "23.3.11",
     "@types/node": "8.10.54",
     "gulp": "~4.0.2",
