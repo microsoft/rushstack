@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix a regression in Rush 5.13.0 in which rush fails to install on pnpm 3.5+.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "sachinjoseph@users.noreply.github.com"
+}
