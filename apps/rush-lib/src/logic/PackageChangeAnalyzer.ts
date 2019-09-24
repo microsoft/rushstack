@@ -11,7 +11,8 @@ import {
 } from '@microsoft/package-deps-hash';
 import {
   Path,
-  InternalError
+  InternalError,
+  FileSystem
 } from '@microsoft/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -146,6 +147,14 @@ export class PackageChangeAnalyzer {
           this._rushConfiguration.rushJsonFolder,
           dependencyManifestFilePath
         ).replace(/\\/g, '/');
+
+        if (!FileSystem.exists(dependencyManifestFilePath)) {
+          throw new Error(
+            `A project dependency file (${relativeDependencyManifestFilePath}) is missing. You may need to run ` +
+            '"rush unlink" and "rush link".'
+          );
+        }
+
         projects.push(project);
         projectDependencyManifestPaths.push(relativeDependencyManifestFilePath);
       }

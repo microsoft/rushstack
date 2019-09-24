@@ -4,7 +4,8 @@
 import * as path from 'path';
 import {
   JsonFile,
-  InternalError
+  InternalError,
+  FileSystem
 } from '@microsoft/node-core-library';
 
 import {
@@ -76,6 +77,13 @@ export class PnpmProjectDependencyManifest {
       this._projectDependencyManifestFilename,
       { ensureFolderExists: true }
     );
+  }
+
+  /**
+   * If the project/.rush/temp/project-dependencies.json file exists, delete it. Otherwise, do nothing.
+   */
+  public deleteIfExists(): void {
+    FileSystem.deleteFile(this._projectDependencyManifestFilename, { throwIfNotExists: false });
   }
 
   private _addDependencyInternal(

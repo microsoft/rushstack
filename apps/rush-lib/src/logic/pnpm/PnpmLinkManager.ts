@@ -286,6 +286,8 @@ export class PnpmLinkManager extends BaseLinkManager {
 
     if (!this._rushConfiguration.pnpmOptions.disablePerProjectDependencyManifest) {
       pnpmProjectDependencyManifest.save();
+    } else {
+      pnpmProjectDependencyManifest.deleteIfExists();
     }
 
     // Also symlink the ".bin" folder
