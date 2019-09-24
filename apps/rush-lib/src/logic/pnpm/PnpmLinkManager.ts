@@ -279,8 +279,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         'local',
         folderNameInLocalInstallationRoot,
         RushConstants.nodeModulesFolderName);
-    }
-    else {
+    } else {
       return path.join(this._rushConfiguration.commonTempFolder,
         RushConstants.nodeModulesFolderName,
         '.local',

@@ -184,18 +184,21 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * Gets the version number from the list of top-level dependencies in the "dependencies" section
    * of the shrinkwrap file. Sample return values:
    *   '2.1.113'
-   *   '1.9.0-dev.27_typescript@2.9.2'
-   *   '5.0.0_25c559a5921686293a001a397be4dce0'
+   *   '1.9.0-dev.27'
    *   'file:projects/empty-webpart-project.tgz'
-   *   'file:projects/article-site-demo.tgz_jest@22.4.4+typescript@2.9.2'
-   *   'file:projects/i18n-utilities.tgz_462eaf34881863298955eb323c130fc7'
    *   undefined
    *
    * @override
    */
   public getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined {
-    const value: string | undefined = BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
+    let value: string | undefined = BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
     if (value) {
+
+      const underscoreIndex: number = value.indexOf('_');
+      if (underscoreIndex >= 0) {
+        value = value.substr(0, underscoreIndex);
+      }
+
       return new DependencySpecifier(dependencyName, value);
     }
     return undefined;
@@ -206,23 +209,27 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    *
    * ```
    * dependencies:
-   *   '@rush-temp/my-app': 'file:projects/my-app.tgz'
+   *   '@rush-temp/my-app': 'file:projects/my-app.tgz_25c559a5921686293a001a397be4dce0'
    * packages:
    *   /@types/node/10.14.15:
    *     dev: false
-   *   'file:projects/my-app.tgz':
+   *   'file:projects/my-app.tgz_25c559a5921686293a001a397be4dce0':
    *     dev: false
    *     name: '@rush-temp/my-app'
    *     version: 0.0.0
    * ```
    *
-   * We refer to "file:projects/my-app.tgz" as the temp project dependency key.
+   * We refer to 'file:projects/my-app.tgz_25c559a5921686293a001a397be4dce0' as the temp project dependency key
+   * of the temp project '@rush-temp/my-app'.
    */
   public getTempProjectDependencyKey(tempProjectName: string): string | undefined {
-    const tempProjectSpecifier: DependencySpecifier | undefined = this.getTopLevelDependencyVersion(tempProjectName);
-    if (tempProjectSpecifier) {
-      return tempProjectSpecifier.versionSpecifier;
+    const tempProjectDependencyKey: string | undefined =
+      BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, tempProjectName);
+
+    if (tempProjectDependencyKey) {
+      return tempProjectDependencyKey;
     }
+
     return undefined;
   }
 
