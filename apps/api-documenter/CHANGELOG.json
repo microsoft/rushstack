@@ -2,6 +2,24 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.4.6",
+      "tag": "@microsoft/api-documenter_v7.4.6",
+      "date": "Tue, 24 Sep 2019 02:58:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `4.3.0` to `4.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.0` to `0.2.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.0` to `6.2.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.4.5",
       "tag": "@microsoft/api-documenter_v7.4.5",
       "date": "Mon, 23 Sep 2019 15:14:55 GMT",
