@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.5.0",
+      "tag": "@microsoft/api-extractor-model_v7.5.0",
+      "date": "Wed, 25 Sep 2019 15:15:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add ApiItem.getMergedSiblings() API"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.4.2",
       "tag": "@microsoft/api-extractor-model_v7.4.2",
       "date": "Mon, 23 Sep 2019 15:14:55 GMT",

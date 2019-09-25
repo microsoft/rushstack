@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Mon, 23 Sep 2019 15:14:55 GMT and should not be manually modified.
+This log was last generated on Wed, 25 Sep 2019 15:15:31 GMT and should not be manually modified.
+
+## 7.5.0
+Wed, 25 Sep 2019 15:15:31 GMT
+
+### Minor changes
+
+- Add ApiItem.getMergedSiblings() API
 
 ## 7.4.2
 Mon, 23 Sep 2019 15:14:55 GMT
