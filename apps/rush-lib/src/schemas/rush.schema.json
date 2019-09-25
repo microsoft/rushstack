@@ -67,7 +67,7 @@
           "enum": ["fewer-dependencies", "fast"]
         },
         "incrementalBuildDependencyGranularity": {
-          "description": "This is the mode for tracking external dependencies to detect if a project needs to be rebuilt during an incremental build.",
+          "description": "Defines the granularity by which external dependencies are tracked to detect if a project needs to be rebuilt during an incremental build.",
           "type": "string",
           "enum": ["project", "repository"]
         }

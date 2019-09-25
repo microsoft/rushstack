@@ -189,14 +189,14 @@ export class PnpmOptionsConfiguration {
   public readonly resolutionStrategy: ResolutionStrategy;
 
   /**
-   * This is the mode for tracking external dependencies to detect if a project needs to be rebuilt
-   * during an incremental build.
-   *
-   * If set to "project," track individual projects' dependencies when detecting if a project needs
+   * This defines the granularity by which external dependencies are tracked to detect if a project needs
    * to be rebuilt during an incremental build.
    *
-   * If set to "repository," rebuild all projects when any dependencies across the repository are changed
-   * during an incremental build.
+   * If set to "project," Rush will track only the individual project's direct and indirect dependencies when
+   * detecting if a project needs to be rebuilt.
+   *
+   * If set to "repository," all projects will be rebuilt if any external dependencies anywhere in the repository
+   * are changed.
    *
    * If unset, defaults to "project."
    *
