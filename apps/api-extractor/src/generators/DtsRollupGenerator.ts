@@ -110,15 +110,29 @@ export class DtsRollupGenerator {
       }
 
       if (entity.astEntity instanceof AstSymbol) {
-
         // Emit all the declarations for this entry
         for (const astDeclaration of entity.astEntity.astDeclarations || []) {
+          const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
+          const checkDeclarationReleaseTag: boolean = (
+            astDeclaration.declaration.kind === ts.SyntaxKind.FunctionDeclaration ||
+            astDeclaration.declaration.kind === ts.SyntaxKind.MethodDeclaration
+          ) && !!declarationMetadata;
 
-          stringWriter.writeLine();
-
-          const span: Span = new Span(astDeclaration.declaration);
-          DtsRollupGenerator._modifySpan(collector, span, entity, astDeclaration, dtsKind);
-          stringWriter.writeLine(span.getModifiedText());
+          if (
+            checkDeclarationReleaseTag &&
+            !this._shouldIncludeReleaseTag(declarationMetadata.declaredReleaseTag, dtsKind)
+          ) {
+              if (!collector.extractorConfig.omitTrimmingComments) {
+                stringWriter.writeLine();
+                stringWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} overload */`);
+              }
+              continue;
+          } else {
+            const span: Span = new Span(astDeclaration.declaration);
+            DtsRollupGenerator._modifySpan(collector, span, entity, astDeclaration, dtsKind);
+            stringWriter.writeLine();
+            stringWriter.writeLine(span.getModifiedText());
+          }
         }
       }
 

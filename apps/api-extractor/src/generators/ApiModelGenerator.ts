@@ -38,6 +38,8 @@ import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { ExcerptBuilder, IExcerptBuilderNodeToCapture } from './ExcerptBuilder';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { DeclarationReferenceGenerator } from './DeclarationReferenceGenerator';
+import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import { SymbolMetadata } from '../collector/SymbolMetadata';
 
 export class ApiModelGenerator {
   private readonly _collector: Collector;
@@ -425,11 +427,31 @@ export class ApiModelGenerator {
         startingNode: astDeclaration.declaration,
         nodesToCapture
       });
-      const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
-      const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
+      const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
+      const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
+      const declaredReleaseTag: ReleaseTag = declarationMetadata.declaredReleaseTag;
+      if (declaredReleaseTag === ReleaseTag.Internal || declaredReleaseTag === ReleaseTag.Alpha) {
+        return; // trim out items marked as "@internal" or "@alpha"
+      }
+      // If we have less accessible function overloads, include that information
+      const symbolMetadata: SymbolMetadata = this._collector.fetchMetadata(astDeclaration.astSymbol);
+      const releaseTag: ReleaseTag = (
+        declaredReleaseTag !== ReleaseTag.None &&
+        declaredReleaseTag < symbolMetadata.releaseTag
+      )
+        ? declaredReleaseTag
+        : symbolMetadata.releaseTag;
 
-      apiFunction = new ApiFunction({ name, docComment, releaseTag, typeParameters, parameters, overloadIndex,
-        excerptTokens, returnTypeTokenRange });
+      apiFunction = new ApiFunction({
+        name,
+        docComment,
+        releaseTag,
+        typeParameters,
+        parameters,
+        overloadIndex,
+        excerptTokens,
+        returnTypeTokenRange
+      });
 
       parentApiItem.addMember(apiFunction);
     }
@@ -545,12 +567,32 @@ export class ApiModelGenerator {
         startingNode: astDeclaration.declaration,
         nodesToCapture
       });
+      const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
+      const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
+      const declaredReleaseTag: ReleaseTag = declarationMetadata.declaredReleaseTag;
+      if (declaredReleaseTag === ReleaseTag.Internal || declaredReleaseTag === ReleaseTag.Alpha) {
+        return; // trim out items marked as "@internal" or "@alpha"
+      }
+      // If we have less accessible function overloads, include that information
+      const symbolMetadata: SymbolMetadata = this._collector.fetchMetadata(astDeclaration.astSymbol);
+      const releaseTag: ReleaseTag = (
+        declaredReleaseTag !== ReleaseTag.None &&
+        declaredReleaseTag < symbolMetadata.releaseTag
+      )
+        ? declaredReleaseTag
+        : symbolMetadata.releaseTag;
 
-      const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
-      const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
-
-      apiMethod = new ApiMethod({ name, docComment, releaseTag, isStatic, typeParameters, parameters, overloadIndex,
-        excerptTokens, returnTypeTokenRange });
+      apiMethod = new ApiMethod({
+        name,
+        docComment,
+        releaseTag,
+        isStatic,
+        typeParameters,
+        parameters,
+        overloadIndex,
+        excerptTokens,
+        returnTypeTokenRange
+      });
 
       parentApiItem.addMember(apiMethod);
     }

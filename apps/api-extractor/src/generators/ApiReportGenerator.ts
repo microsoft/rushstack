@@ -374,12 +374,22 @@ export class ApiReportGenerator {
 
     const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
     const symbolMetadata: SymbolMetadata = collector.fetchMetadata(astDeclaration.astSymbol);
+    // If we have less accessible function overloads, include that information
+    const useDeclarationReleaseTag: boolean = (
+        astDeclaration.declaration.kind === ts.SyntaxKind.FunctionDeclaration ||
+        astDeclaration.declaration.kind === ts.SyntaxKind.MethodDeclaration
+      ) &&
+      declarationMetadata.declaredReleaseTag !== ReleaseTag.None &&
+      declarationMetadata.declaredReleaseTag < symbolMetadata.releaseTag;
 
     const footerParts: string[] = [];
 
-    if (!symbolMetadata.releaseTagSameAsParent) {
+    if (!symbolMetadata.releaseTagSameAsParent || useDeclarationReleaseTag) {
       if (symbolMetadata.releaseTag !== ReleaseTag.None) {
-        footerParts.push(ReleaseTag.getTagName(symbolMetadata.releaseTag));
+        footerParts.push(ReleaseTag.getTagName(useDeclarationReleaseTag
+          ? declarationMetadata.declaredReleaseTag
+          : symbolMetadata.releaseTag
+        ));
       }
     }
 

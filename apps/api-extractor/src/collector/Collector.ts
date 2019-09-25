@@ -511,29 +511,32 @@ export class Collector {
       this._calculateMetadataForDeclaration(astDeclaration);
     }
 
-    // We know we solved parentAstSymbol.metadata above
-    const parentSymbolMetadata: SymbolMetadata | undefined = astSymbol.parentAstSymbol
-      ? astSymbol.parentAstSymbol.metadata as SymbolMetadata : undefined;
-
-    const symbolMetadata: SymbolMetadata = new SymbolMetadata();
-
     // Do any of the declarations have a release tag?
     let effectiveReleaseTag: ReleaseTag = ReleaseTag.None;
 
     for (const astDeclaration of astSymbol.astDeclarations) {
       // We know we solved this above
       const declarationMetadata: DeclarationMetadata = astDeclaration.metadata as DeclarationMetadata;
-
       const declaredReleaseTag: ReleaseTag = declarationMetadata.declaredReleaseTag;
 
       if (declaredReleaseTag !== ReleaseTag.None) {
         if (effectiveReleaseTag !== ReleaseTag.None && effectiveReleaseTag !== declaredReleaseTag) {
           if (!astSymbol.isExternal) { // for now, don't report errors for external code
-            this.messageRouter.addAnalyzerIssue(
-              ExtractorMessageId.DifferentReleaseTags,
-              'This symbol has another declaration with a different release tag',
-              astDeclaration
-            );
+            if (
+              astDeclaration.declaration.kind === ts.SyntaxKind.FunctionDeclaration ||
+              astDeclaration.declaration.kind === ts.SyntaxKind.MethodDeclaration
+            ) {
+              // For functions overrides, take the highest accessability from multiple declarations
+              if (effectiveReleaseTag < declaredReleaseTag) {
+                effectiveReleaseTag = declaredReleaseTag;
+              }
+            } else {
+              this.messageRouter.addAnalyzerIssue(
+                ExtractorMessageId.DifferentReleaseTags,
+                'This symbol has another declaration with a different release tag',
+                astDeclaration
+              );
+            }
           }
         } else {
           effectiveReleaseTag = declaredReleaseTag;
@@ -541,11 +544,14 @@ export class Collector {
       }
     }
 
+    // We know we solved parentAstSymbol.metadata above
+    const parentSymbolMetadata: SymbolMetadata | undefined = astSymbol.parentAstSymbol
+      ? astSymbol.parentAstSymbol.metadata as SymbolMetadata
+      : undefined;
+
     // If this declaration doesn't have a release tag, then inherit it from the parent
-    if (effectiveReleaseTag === ReleaseTag.None && astSymbol.parentAstSymbol) {
-      if (parentSymbolMetadata) {
-        effectiveReleaseTag = parentSymbolMetadata.releaseTag;
-      }
+    if (effectiveReleaseTag === ReleaseTag.None && parentSymbolMetadata) {
+      effectiveReleaseTag = parentSymbolMetadata.releaseTag;
     }
 
     if (effectiveReleaseTag === ReleaseTag.None) {
@@ -556,7 +562,6 @@ export class Collector {
           // We also don't report errors for the default export of an entry point, since its doc comment
           // isn't easy to obtain from the .d.ts file
           if (astSymbol.rootAstSymbol.localName !== '_default') {
-
             this.messageRouter.addAnalyzerIssue(
               ExtractorMessageId.MissingReleaseTag,
               `"${entity.astEntity.localName}" is exported by the package, but it is missing `
@@ -570,6 +575,7 @@ export class Collector {
       effectiveReleaseTag = ReleaseTag.Public;
     }
 
+    const symbolMetadata: SymbolMetadata = new SymbolMetadata();
     symbolMetadata.releaseTag = effectiveReleaseTag;
     symbolMetadata.releaseTagSameAsParent = false;
     if (parentSymbolMetadata) {
