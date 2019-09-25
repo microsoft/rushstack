@@ -10,7 +10,7 @@ export function combine(x: boolean, y: boolean): boolean;
 // @beta (undocumented)
 export function combine(x: string, y: string): string;
 
-// @public (undocumented)
+// @internal (undocumented)
 export function combine(x: number, y: number): number;
 
 // @public (undocumented)

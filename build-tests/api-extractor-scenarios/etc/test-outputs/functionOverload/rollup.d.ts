@@ -10,7 +10,7 @@ export declare function combine(x: boolean, y: boolean): boolean;
 export declare function combine(x: string, y: string): string;
 
 /**
- * @public
+ * @internal
  */
 export declare function combine(x: number, y: number): number;
 

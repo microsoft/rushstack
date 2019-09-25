@@ -1,12 +1,5 @@
 
-/* Excluded from this release type: combine overload */
-
-/* Excluded from this release type: combine overload */
-
-/**
- * @public
- */
-export declare function combine(x: number, y: number): number;
+/* Excluded from this release type: combine */
 
 /**
  * @public

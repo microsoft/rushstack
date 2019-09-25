@@ -12,7 +12,7 @@ export function combine(x: boolean, y: boolean): boolean;
 export function combine(x: string, y: string): string;
 
 /**
- * @public
+ * @internal
  */
 export function combine(x: number, y: number): number;
 

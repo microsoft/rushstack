@@ -6,10 +6,7 @@
  */
 export declare function combine(x: string, y: string): string;
 
-/**
- * @public
- */
-export declare function combine(x: number, y: number): number;
+/* Excluded from this release type: combine overload */
 
 /**
  * @public
