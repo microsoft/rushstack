@@ -1,9 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.s
 
-import { ApiItem, ApiItem_onParentChanged, IApiItemJson, IApiItemOptions, IApiItemConstructor } from '../items/ApiItem';
+import {
+  ApiItem,
+  ApiItem_onParentChanged,
+  IApiItemJson,
+  IApiItemOptions,
+  IApiItemConstructor,
+  ApiItemKind
+} from '../items/ApiItem';
 import { ApiNameMixin } from './ApiNameMixin';
 import { DeserializerContext } from '../model/DeserializerContext';
+import { InternalError } from '@microsoft/node-core-library';
 
 /**
  * Constructor options for {@link (ApiItemContainerMixin:interface)}.
@@ -21,6 +29,7 @@ const _members: unique symbol = Symbol('ApiItemContainerMixin._members');
 const _membersSorted: unique symbol = Symbol('ApiItemContainerMixin._membersSorted');
 const _membersByContainerKey: unique symbol = Symbol('ApiItemContainerMixin._membersByContainerKey');
 const _membersByName: unique symbol = Symbol('ApiItemContainerMixin._membersByName');
+const _membersByKind: unique symbol = Symbol('ApiItemContainerMixin._membersByKind');
 
 /**
  * The mixin base class for API items that act as containers for other child items.
@@ -73,6 +82,12 @@ export interface ApiItemContainerMixin extends ApiItem {
    */
   findMembersByName(name: string): ReadonlyArray<ApiItem>;
 
+  /**
+   * For a given member of this container, return its `ApiItem.getMergedSiblings()` list.
+   * @internal
+   */
+  _getMergedSiblingsForMember(memberApiItem: ApiItem): ReadonlyArray<ApiItem>;
+
   /** @override */
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
@@ -92,7 +107,14 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
     public readonly [_members]: ApiItem[];
     public [_membersSorted]: boolean;
     public [_membersByContainerKey]: Map<string, ApiItem>;
+
+    // For members of this container that extend ApiNameMixin, this stores the list of members with a given name.
+    // Examples include merged declarations, overloaded functions, etc.
     public [_membersByName]: Map<string, ApiItem[]> | undefined;
+
+    // For members of this container that do NOT extend ApiNameMixin, this stores the list of members
+    // that share a common ApiItemKind.  Examples include overloaded constructors or index signatures.
+    public [_membersByKind]: Map<string, ApiItem[]> | undefined;  // key is ApiItemKind
 
     /** @override */
     public static onDeserializeInto(options: Partial<IApiItemContainerMixinOptions>,
@@ -142,6 +164,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
 
       this[_members].push(member);
       this[_membersByName] = undefined; // invalidate the lookup
+      this[_membersByKind] = undefined; // invalidate the lookup
       this[_membersSorted] = false;
       this[_membersByContainerKey].set(member.containerKey, member);
 
@@ -153,25 +176,55 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
     }
 
     public findMembersByName(name: string): ReadonlyArray<ApiItem> {
-      // Build the lookup on demand
+      this._ensureMemberMaps();
+      return this[_membersByName]!.get(name) || [];
+    }
+
+    /** @internal */
+    public _getMergedSiblingsForMember(memberApiItem: ApiItem): ReadonlyArray<ApiItem> {
+      this._ensureMemberMaps();
+      let result: ApiItem[] | undefined;
+      if (ApiNameMixin.isBaseClassOf(memberApiItem)) {
+        result = this[_membersByName]!.get(memberApiItem.name);
+      } else {
+        result = this[_membersByKind]!.get(memberApiItem.kind);
+      }
+      if (!result) {
+        throw new InternalError('Item was not found in the _membersByName/_membersByKind lookup');
+      }
+      return result;
+    }
+
+    /** @internal */
+    public _ensureMemberMaps(): void {
+      // Build the _membersByName and _membersByKind tables if they don't already exist
       if (this[_membersByName] === undefined) {
-        const map: Map<string, ApiItem[]> = new Map<string, ApiItem[]>();
+        const membersByName: Map<string, ApiItem[]> = new Map<string, ApiItem[]>();
+        const membersByKind: Map<string, ApiItem[]> = new Map<string, ApiItem[]>();
 
         for (const member of this[_members]) {
+          let map: Map<string, ApiItem[]> | Map<ApiItemKind, ApiItem[]>;
+          let key: string | ApiItemKind;
+
           if (ApiNameMixin.isBaseClassOf(member)) {
-            let list: ApiItem[] | undefined = map.get(member.name);
-            if (list === undefined) {
-              list = [];
-              map.set(member.name, list);
-            }
-            list.push(member);
+            map = membersByName;
+            key = member.name;
+          } else {
+            map = membersByKind;
+            key = member.kind;
           }
+
+          let list: ApiItem[] | undefined = map.get(key);
+          if (list === undefined) {
+            list = [];
+            map.set(key, list);
+          }
+          list.push(member);
         }
 
-        this[_membersByName] = map;
+        this[_membersByName] = membersByName;
+        this[_membersByKind] = membersByKind;
       }
-
-      return this[_membersByName]!.get(name) || [];
     }
 
     /** @override */
