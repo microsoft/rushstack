@@ -75,16 +75,12 @@ export class YamlDocumenter {
 
   private _apiItemsByCanonicalReference: Map<string, ApiItem>;
   private _yamlReferences: IYamlReferences | undefined;
-  // Keeps track of ApiItems whose names collide with one or more siblings.
-  private _collisions: Set<ApiItem>;
-
   private _outputFolder: string;
 
   public constructor(apiModel: ApiModel) {
     this._apiModel = apiModel;
     this._markdownEmitter = new CustomMarkdownEmitter(this._apiModel);
     this._apiItemsByCanonicalReference = new Map<string, ApiItem>();
-    this._collisions = new Set<ApiItem>();
 
     this._initApiItems();
   }
@@ -274,7 +270,7 @@ export class YamlDocumenter {
       name = PackageName.getUnscopedName(name);
     }
 
-    if (this._collisions.has(apiItem)) {
+    if (apiItem.getMergedSiblings().length > 1) {
       name += ` (${apiItem.kind})`;
     }
 
@@ -613,35 +609,10 @@ export class YamlDocumenter {
 
     // Recurse container members
     if (ApiItemContainerMixin.isBaseClassOf(apiItem)) {
-      const singletons: Map<string, ApiItem> = new Map<string, ApiItem>();
-      const collidingNames: Set<string> = new Set<string>();
       for (const apiMember of apiItem.members) {
-        this._trackCollisionsWithSiblings(apiMember, singletons, collidingNames);
         this._initApiItemsRecursive(apiMember);
       }
     }
-  }
-
-  private _trackCollisionsWithSiblings(
-    apiItem: ApiItem,
-    singletons: Map<string, ApiItem>,
-    collidingNames: Set<string>
-  ): void {
-    if (!collidingNames.has(apiItem.displayName)) {
-      const collision: ApiItem | undefined = singletons.get(apiItem.displayName);
-      if (!collision) {
-        // No collision. Record this singleton entry.
-        singletons.set(apiItem.displayName, apiItem);
-        return;
-      }
-      // First collision. Record the colliding name.
-      collidingNames.add(apiItem.displayName);
-      singletons.delete(apiItem.displayName);
-      // Record the initial entry.
-      this._collisions.add(collision);
-    }
-    // Record the colliding entry.
-    this._collisions.add(apiItem);
   }
 
   private _ensureYamlReferences(): IYamlReferences {
@@ -839,7 +810,7 @@ export class YamlDocumenter {
     }
 
     let disambiguator: string = '';
-    if (this._collisions.has(apiItem)) {
+    if (apiItem.getMergedSiblings().length > 1) {
       disambiguator = `-${apiItem.kind.toLowerCase()}`;
     }
 
