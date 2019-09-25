@@ -374,7 +374,7 @@ export class ApiReportGenerator {
 
     const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
     const symbolMetadata: SymbolMetadata = collector.fetchMetadata(astDeclaration.astSymbol);
-    // If we have less accessible function overloads, include that information
+    // If we have lower-release function overloads, include that information
     const useDeclarationReleaseTag: boolean = (
         astDeclaration.declaration.kind === ts.SyntaxKind.FunctionDeclaration ||
         astDeclaration.declaration.kind === ts.SyntaxKind.MethodDeclaration

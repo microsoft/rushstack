@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as fs from 'fs';
 import * as path from 'path';
 import { JsonFile } from '@microsoft/node-core-library';
 import {
@@ -24,6 +25,8 @@ export function runScenarios(buildConfigPath: string): void {
     const entryPoint: string = path.resolve(`./lib/${scenarioFolderName}/index.d.ts`);
     entryPoints.push(entryPoint);
 
+    const overridesPath = path.resolve(`./src/${scenarioFolderName}/config/api-extractor-overrides.json`);
+    const apiExtractorJsonOverrides = fs.existsSync(overridesPath) ? JsonFile.load(overridesPath) : {};
     const apiExtractorJson = {
       '$schema': 'https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json',
 
@@ -59,7 +62,8 @@ export function runScenarios(buildConfigPath: string): void {
         }
       },
 
-      'testMode': true
+      'testMode': true,
+      ...apiExtractorJsonOverrides
     };
 
     const apiExtractorJsonPath: string = `./temp/configs/api-extractor-${scenarioFolderName}.json`;

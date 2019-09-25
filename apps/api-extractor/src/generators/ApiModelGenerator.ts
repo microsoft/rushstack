@@ -433,7 +433,7 @@ export class ApiModelGenerator {
       if (declaredReleaseTag === ReleaseTag.Internal || declaredReleaseTag === ReleaseTag.Alpha) {
         return; // trim out items marked as "@internal" or "@alpha"
       }
-      // If we have less accessible function overloads, include that information
+      // If we have lower-release function overloads, include that information
       const symbolMetadata: SymbolMetadata = this._collector.fetchMetadata(astDeclaration.astSymbol);
       const releaseTag: ReleaseTag = (
         declaredReleaseTag !== ReleaseTag.None &&
@@ -573,7 +573,7 @@ export class ApiModelGenerator {
       if (declaredReleaseTag === ReleaseTag.Internal || declaredReleaseTag === ReleaseTag.Alpha) {
         return; // trim out items marked as "@internal" or "@alpha"
       }
-      // If we have less accessible function overloads, include that information
+      // If we have lower-release function overloads, include that information
       const symbolMetadata: SymbolMetadata = this._collector.fetchMetadata(astDeclaration.astSymbol);
       const releaseTag: ReleaseTag = (
         declaredReleaseTag !== ReleaseTag.None &&

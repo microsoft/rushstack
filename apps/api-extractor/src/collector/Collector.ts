@@ -526,7 +526,7 @@ export class Collector {
               astDeclaration.declaration.kind === ts.SyntaxKind.FunctionDeclaration ||
               astDeclaration.declaration.kind === ts.SyntaxKind.MethodDeclaration
             ) {
-              // For functions overrides, take the highest accessability from multiple declarations
+              // For function and method overloads, take the highest release from multiple declarations
               if (effectiveReleaseTag < declaredReleaseTag) {
                 effectiveReleaseTag = declaredReleaseTag;
               }
