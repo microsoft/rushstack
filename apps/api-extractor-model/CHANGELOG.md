@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Tue, 10 Sep 2019 22:32:23 GMT and should not be manually modified.
+This log was last generated on Mon, 23 Sep 2019 15:14:55 GMT and should not be manually modified.
+
+## 7.4.2
+Mon, 23 Sep 2019 15:14:55 GMT
+
+### Patches
+
+- Remove unnecessary dependency on @types/node
 
 ## 7.4.1
 Tue, 10 Sep 2019 22:32:23 GMT

@@ -1,6 +1,25 @@
 # Change Log - @microsoft/rush-stack-compiler-3.5
 
-This log was last generated on Wed, 11 Sep 2019 19:56:23 GMT and should not be manually modified.
+This log was last generated on Tue, 24 Sep 2019 02:58:49 GMT and should not be manually modified.
+
+## 0.2.1
+Tue, 24 Sep 2019 02:58:49 GMT
+
+*Version update only*
+
+## 0.2.0
+Mon, 23 Sep 2019 15:14:55 GMT
+
+### Minor changes
+
+- Upgrade @types/node dependency
+
+## 0.1.13
+Fri, 20 Sep 2019 21:27:22 GMT
+
+### Patches
+
+- Fix an issue where api-extractor warnings weren't being reported.
 
 ## 0.1.12
 Wed, 11 Sep 2019 19:56:23 GMT

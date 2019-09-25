@@ -2,6 +2,50 @@
   "name": "@microsoft/rush-stack-compiler-3.5",
   "entries": [
     {
+      "version": "0.2.1",
+      "tag": "@microsoft/rush-stack-compiler-3.5_v0.2.1",
+      "date": "Tue, 24 Sep 2019 02:58:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.4.3` to `7.4.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.0",
+      "tag": "@microsoft/rush-stack-compiler-3.5_v0.2.0",
+      "date": "Mon, 23 Sep 2019 15:14:55 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade @types/node dependency"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.4.2` to `7.4.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.14.2` to `3.15.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.13",
+      "tag": "@microsoft/rush-stack-compiler-3.5_v0.1.13",
+      "date": "Fri, 20 Sep 2019 21:27:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where api-extractor warnings weren't being reported."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.12",
       "tag": "@microsoft/rush-stack-compiler-3.5_v0.1.12",
       "date": "Wed, 11 Sep 2019 19:56:23 GMT",

@@ -2,6 +2,60 @@
   "name": "@microsoft/loader-load-themed-styles",
   "entries": [
     {
+      "version": "1.7.187",
+      "tag": "@microsoft/loader-load-themed-styles_v1.7.187",
+      "date": "Tue, 24 Sep 2019 02:58:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.10.7` to `1.10.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.0` to `6.2.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.0` to `0.2.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.7.186",
+      "tag": "@microsoft/loader-load-themed-styles_v1.7.186",
+      "date": "Mon, 23 Sep 2019 15:14:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.10.6` to `1.10.7`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.11` to `6.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.24` to `0.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.7.185",
+      "tag": "@microsoft/loader-load-themed-styles_v1.7.185",
+      "date": "Fri, 20 Sep 2019 21:27:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.10.5` to `1.10.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.10` to `6.1.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.23` to `0.1.24`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.7.184",
       "tag": "@microsoft/loader-load-themed-styles_v1.7.184",
       "date": "Wed, 11 Sep 2019 19:56:23 GMT",

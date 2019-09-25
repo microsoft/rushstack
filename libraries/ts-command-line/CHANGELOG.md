@@ -1,6 +1,20 @@
 # Change Log - @microsoft/ts-command-line
 
-This log was last generated on Tue, 10 Sep 2019 22:32:23 GMT and should not be manually modified.
+This log was last generated on Tue, 24 Sep 2019 02:58:49 GMT and should not be manually modified.
+
+## 4.3.1
+Tue, 24 Sep 2019 02:58:49 GMT
+
+### Patches
+
+- Add back a missing dependency.
+
+## 4.3.0
+Mon, 23 Sep 2019 15:14:55 GMT
+
+### Minor changes
+
+- Remove unnecessary dependencies on @types/argparse and @types/node
 
 ## 4.2.8
 Tue, 10 Sep 2019 22:32:23 GMT
