@@ -373,14 +373,17 @@ export class ApiReportGenerator {
     }
 
     const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
-    const symbolMetadata: SymbolMetadata = collector.fetchMetadata(astDeclaration.astSymbol);
-    // If we have lower-release function overloads, include that information
-    const useEffectiveReleaseTag: boolean = (
-      declarationMetadata.effectiveReleaseTag !== ReleaseTag.None &&
-      declarationMetadata.effectiveReleaseTag < symbolMetadata.releaseTag
-    );
-    const footerParts: string[] = [];
+    let useEffectiveReleaseTag: boolean = declarationMetadata.effectiveReleaseTag !== ReleaseTag.None;
+    if (astDeclaration.parent) {
+      const parentDeclarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration.parent);
+      useEffectiveReleaseTag = (
+        declarationMetadata.effectiveReleaseTag !== ReleaseTag.None &&
+        declarationMetadata.effectiveReleaseTag !== parentDeclarationMetadata.effectiveReleaseTag
+      );
+    }
 
+    const footerParts: string[] = [];
+    const symbolMetadata: SymbolMetadata = collector.fetchMetadata(astDeclaration.astSymbol);
     if (!symbolMetadata.releaseTagSameAsParent || useEffectiveReleaseTag) {
       if (symbolMetadata.releaseTag !== ReleaseTag.None) {
         footerParts.push(ReleaseTag.getTagName(useEffectiveReleaseTag

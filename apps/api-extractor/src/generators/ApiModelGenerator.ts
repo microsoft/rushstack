@@ -39,7 +39,6 @@ import { ExcerptBuilder, IExcerptBuilderNodeToCapture } from './ExcerptBuilder';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { DeclarationReferenceGenerator } from './DeclarationReferenceGenerator';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
-import { SymbolMetadata } from '../collector/SymbolMetadata';
 
 export class ApiModelGenerator {
   private readonly _collector: Collector;
@@ -429,18 +428,10 @@ export class ApiModelGenerator {
       });
       const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
-      const effectiveReleaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
-      if (effectiveReleaseTag === ReleaseTag.Internal || effectiveReleaseTag === ReleaseTag.Alpha) {
+      const releaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
+      if (releaseTag === ReleaseTag.Internal || releaseTag === ReleaseTag.Alpha) {
         return; // trim out items marked as "@internal" or "@alpha"
       }
-      // If we have lower-release function overloads, include that information
-      const symbolMetadata: SymbolMetadata = this._collector.fetchMetadata(astDeclaration.astSymbol);
-      const releaseTag: ReleaseTag = (
-        effectiveReleaseTag !== ReleaseTag.None &&
-        effectiveReleaseTag < symbolMetadata.releaseTag
-      )
-        ? effectiveReleaseTag
-        : symbolMetadata.releaseTag;
 
       apiFunction = new ApiFunction({
         name,
@@ -569,18 +560,10 @@ export class ApiModelGenerator {
       });
       const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
-      const effectiveReleaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
-      if (effectiveReleaseTag === ReleaseTag.Internal || effectiveReleaseTag === ReleaseTag.Alpha) {
+      const releaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
+      if (releaseTag === ReleaseTag.Internal || releaseTag === ReleaseTag.Alpha) {
         return; // trim out items marked as "@internal" or "@alpha"
       }
-      // If we have lower-release function overloads, include that information
-      const symbolMetadata: SymbolMetadata = this._collector.fetchMetadata(astDeclaration.astSymbol);
-      const releaseTag: ReleaseTag = (
-        effectiveReleaseTag !== ReleaseTag.None &&
-        effectiveReleaseTag < symbolMetadata.releaseTag
-      )
-        ? effectiveReleaseTag
-        : symbolMetadata.releaseTag;
 
       apiMethod = new ApiMethod({
         name,
