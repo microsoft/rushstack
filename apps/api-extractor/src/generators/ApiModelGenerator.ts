@@ -429,17 +429,17 @@ export class ApiModelGenerator {
       });
       const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
-      const declaredReleaseTag: ReleaseTag = declarationMetadata.declaredReleaseTag;
-      if (declaredReleaseTag === ReleaseTag.Internal || declaredReleaseTag === ReleaseTag.Alpha) {
+      const effectiveReleaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
+      if (effectiveReleaseTag === ReleaseTag.Internal || effectiveReleaseTag === ReleaseTag.Alpha) {
         return; // trim out items marked as "@internal" or "@alpha"
       }
       // If we have lower-release function overloads, include that information
       const symbolMetadata: SymbolMetadata = this._collector.fetchMetadata(astDeclaration.astSymbol);
       const releaseTag: ReleaseTag = (
-        declaredReleaseTag !== ReleaseTag.None &&
-        declaredReleaseTag < symbolMetadata.releaseTag
+        effectiveReleaseTag !== ReleaseTag.None &&
+        effectiveReleaseTag < symbolMetadata.releaseTag
       )
-        ? declaredReleaseTag
+        ? effectiveReleaseTag
         : symbolMetadata.releaseTag;
 
       apiFunction = new ApiFunction({
@@ -569,17 +569,17 @@ export class ApiModelGenerator {
       });
       const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
-      const declaredReleaseTag: ReleaseTag = declarationMetadata.declaredReleaseTag;
-      if (declaredReleaseTag === ReleaseTag.Internal || declaredReleaseTag === ReleaseTag.Alpha) {
+      const effectiveReleaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
+      if (effectiveReleaseTag === ReleaseTag.Internal || effectiveReleaseTag === ReleaseTag.Alpha) {
         return; // trim out items marked as "@internal" or "@alpha"
       }
       // If we have lower-release function overloads, include that information
       const symbolMetadata: SymbolMetadata = this._collector.fetchMetadata(astDeclaration.astSymbol);
       const releaseTag: ReleaseTag = (
-        declaredReleaseTag !== ReleaseTag.None &&
-        declaredReleaseTag < symbolMetadata.releaseTag
+        effectiveReleaseTag !== ReleaseTag.None &&
+        effectiveReleaseTag < symbolMetadata.releaseTag
       )
-        ? declaredReleaseTag
+        ? effectiveReleaseTag
         : symbolMetadata.releaseTag;
 
       apiMethod = new ApiMethod({

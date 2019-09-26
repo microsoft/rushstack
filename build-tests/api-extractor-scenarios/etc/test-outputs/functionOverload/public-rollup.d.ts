@@ -5,8 +5,8 @@
  * @public
  */
 export declare class Combiner {
-    /* Excluded from this release type: combine overload */
-    /* Excluded from this release type: combine overload */
+    /* Excluded from this release type: combine */
+    /* Excluded from this release type: combine */
     /**
      * @public
      */

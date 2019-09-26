@@ -512,7 +512,7 @@ export class Collector {
     }
 
     // Do any of the declarations have a release tag?
-    let effectiveReleaseTag: ReleaseTag = ReleaseTag.None;
+    let symbolReleaseTag: ReleaseTag = ReleaseTag.None;
 
     for (const astDeclaration of astSymbol.astDeclarations) {
       // We know we solved this above
@@ -520,15 +520,15 @@ export class Collector {
       const declaredReleaseTag: ReleaseTag = declarationMetadata.declaredReleaseTag;
 
       if (declaredReleaseTag !== ReleaseTag.None) {
-        if (effectiveReleaseTag !== ReleaseTag.None && effectiveReleaseTag !== declaredReleaseTag) {
+        if (symbolReleaseTag !== ReleaseTag.None && symbolReleaseTag !== declaredReleaseTag) {
           if (!astSymbol.isExternal) { // for now, don't report errors for external code
             if (
               astDeclaration.declaration.kind === ts.SyntaxKind.FunctionDeclaration ||
               astDeclaration.declaration.kind === ts.SyntaxKind.MethodDeclaration
             ) {
               // For function and method overloads, take the highest release from multiple declarations
-              if (effectiveReleaseTag < declaredReleaseTag) {
-                effectiveReleaseTag = declaredReleaseTag;
+              if (symbolReleaseTag < declaredReleaseTag) {
+                symbolReleaseTag = declaredReleaseTag;
               }
             } else {
               this.messageRouter.addAnalyzerIssue(
@@ -539,7 +539,7 @@ export class Collector {
             }
           }
         } else {
-          effectiveReleaseTag = declaredReleaseTag;
+          symbolReleaseTag = declaredReleaseTag;
         }
       }
     }
@@ -550,11 +550,11 @@ export class Collector {
       : undefined;
 
     // If this declaration doesn't have a release tag, then inherit it from the parent
-    if (effectiveReleaseTag === ReleaseTag.None && parentSymbolMetadata) {
-      effectiveReleaseTag = parentSymbolMetadata.releaseTag;
+    if (symbolReleaseTag === ReleaseTag.None && parentSymbolMetadata) {
+      symbolReleaseTag = parentSymbolMetadata.releaseTag;
     }
 
-    if (effectiveReleaseTag === ReleaseTag.None) {
+    if (symbolReleaseTag === ReleaseTag.None) {
       if (!astSymbol.isExternal) { // for now, don't report errors for external code
         // Don't report missing release tags for forgotten exports
         const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
@@ -572,11 +572,11 @@ export class Collector {
         }
       }
 
-      effectiveReleaseTag = ReleaseTag.Public;
+      symbolReleaseTag = ReleaseTag.Public;
     }
 
     const symbolMetadata: SymbolMetadata = new SymbolMetadata();
-    symbolMetadata.releaseTag = effectiveReleaseTag;
+    symbolMetadata.releaseTag = symbolReleaseTag;
     symbolMetadata.releaseTagSameAsParent = false;
     if (parentSymbolMetadata) {
       symbolMetadata.releaseTagSameAsParent = symbolMetadata.releaseTag === parentSymbolMetadata.releaseTag;
@@ -635,6 +635,9 @@ export class Collector {
       declarationMetadata.tsdocComment = parserContext.docComment;
 
       declarationMetadata.declaredReleaseTag = declaredReleaseTag;
+      declarationMetadata.effectiveReleaseTag = (declaredReleaseTag === ReleaseTag.None && astDeclaration.parent)
+        ? this.fetchMetadata(astDeclaration.parent).effectiveReleaseTag
+        : declarationMetadata.declaredReleaseTag;
 
       declarationMetadata.isEventProperty = modifierTagSet.isEventProperty();
       declarationMetadata.isOverride = modifierTagSet.isOverride();

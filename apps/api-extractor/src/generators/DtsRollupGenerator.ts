@@ -115,13 +115,12 @@ export class DtsRollupGenerator {
           const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
 
           if (
-            astDeclaration.declaration.kind === ts.SyntaxKind.FunctionDeclaration &&
             !!declarationMetadata &&
-            !this._shouldIncludeReleaseTag(declarationMetadata.declaredReleaseTag, dtsKind)
+            !this._shouldIncludeReleaseTag(declarationMetadata.effectiveReleaseTag, dtsKind)
           ) {
               if (!collector.extractorConfig.omitTrimmingComments) {
                 stringWriter.writeLine();
-                stringWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} overload */`);
+                stringWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
               }
               continue;
           } else {
@@ -276,16 +275,7 @@ export class DtsRollupGenerator {
         let trimmed: boolean = false;
         if (AstDeclaration.isSupportedSyntaxKind(child.kind)) {
           childAstDeclaration = collector.astSymbolTable.getChildAstDeclarationByNode(child.node, astDeclaration);
-          const childDeclarationMetadata: DeclarationMetadata = collector.fetchMetadata(childAstDeclaration);
-          const symbolMetadata: SymbolMetadata = collector.fetchMetadata(childAstDeclaration.astSymbol);
-          // If we have lower-release method overloads, include that information
-          const useDeclarationReleaseTag: boolean = (
-            childAstDeclaration.declaration.kind === ts.SyntaxKind.MethodDeclaration &&
-            !!childDeclarationMetadata
-          );
-          const releaseTag: ReleaseTag = useDeclarationReleaseTag
-            ? childDeclarationMetadata.declaredReleaseTag
-            : symbolMetadata.releaseTag;
+          const releaseTag: ReleaseTag = collector.fetchMetadata(childAstDeclaration).effectiveReleaseTag;
 
           if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
             let nodeToTrim: Span = child;
@@ -307,9 +297,7 @@ export class DtsRollupGenerator {
             modification.omitChildren = true;
 
             if (!collector.extractorConfig.omitTrimmingComments) {
-              modification.prefix = useDeclarationReleaseTag
-                ? `/* Excluded from this release type: ${name} overload */`
-                : `/* Excluded from this release type: ${name} */`;
+              modification.prefix = `/* Excluded from this release type: ${name} */`;
             } else {
               modification.prefix = '';
             }

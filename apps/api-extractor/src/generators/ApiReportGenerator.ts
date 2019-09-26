@@ -375,19 +375,16 @@ export class ApiReportGenerator {
     const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
     const symbolMetadata: SymbolMetadata = collector.fetchMetadata(astDeclaration.astSymbol);
     // If we have lower-release function overloads, include that information
-    const useDeclarationReleaseTag: boolean = (
-        astDeclaration.declaration.kind === ts.SyntaxKind.FunctionDeclaration ||
-        astDeclaration.declaration.kind === ts.SyntaxKind.MethodDeclaration
-      ) &&
-      declarationMetadata.declaredReleaseTag !== ReleaseTag.None &&
-      declarationMetadata.declaredReleaseTag < symbolMetadata.releaseTag;
-
+    const useEffectiveReleaseTag: boolean = (
+      declarationMetadata.effectiveReleaseTag !== ReleaseTag.None &&
+      declarationMetadata.effectiveReleaseTag < symbolMetadata.releaseTag
+    );
     const footerParts: string[] = [];
 
-    if (!symbolMetadata.releaseTagSameAsParent || useDeclarationReleaseTag) {
+    if (!symbolMetadata.releaseTagSameAsParent || useEffectiveReleaseTag) {
       if (symbolMetadata.releaseTag !== ReleaseTag.None) {
-        footerParts.push(ReleaseTag.getTagName(useDeclarationReleaseTag
-          ? declarationMetadata.declaredReleaseTag
+        footerParts.push(ReleaseTag.getTagName(useEffectiveReleaseTag
+          ? declarationMetadata.effectiveReleaseTag
           : symbolMetadata.releaseTag
         ));
       }

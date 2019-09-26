@@ -1,18 +1,18 @@
 
-/* Excluded from this release type: combine overload */
+/* Excluded from this release type: combine */
 
 /**
  * @beta
  */
 export declare function combine(x: string, y: string): string;
 
-/* Excluded from this release type: combine overload */
+/* Excluded from this release type: combine */
 
 /**
  * @public
  */
 export declare class Combiner {
-    /* Excluded from this release type: combine overload */
+    /* Excluded from this release type: combine */
     /**
      * @beta
      */
