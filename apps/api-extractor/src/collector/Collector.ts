@@ -522,20 +522,20 @@ export class Collector {
       if (declaredReleaseTag !== ReleaseTag.None) {
         if (symbolReleaseTag !== ReleaseTag.None && symbolReleaseTag !== declaredReleaseTag) {
           if (!astSymbol.isExternal) { // for now, don't report errors for external code
-            if (
-              astDeclaration.declaration.kind === ts.SyntaxKind.FunctionDeclaration ||
-              astDeclaration.declaration.kind === ts.SyntaxKind.MethodDeclaration
-            ) {
-              // For function and method overloads, take the highest release from multiple declarations
-              if (symbolReleaseTag < declaredReleaseTag) {
-                symbolReleaseTag = declaredReleaseTag;
-              }
-            } else {
-              this.messageRouter.addAnalyzerIssue(
-                ExtractorMessageId.DifferentReleaseTags,
-                'This symbol has another declaration with a different release tag',
-                astDeclaration
-              );
+            switch (astDeclaration.declaration.kind) {
+              case ts.SyntaxKind.FunctionDeclaration:
+              case ts.SyntaxKind.MethodDeclaration:
+                // For function and method overloads, take the highest release from multiple declarations
+                if (symbolReleaseTag < declaredReleaseTag) {
+                  symbolReleaseTag = declaredReleaseTag;
+                }
+                break;
+              default:
+                this.messageRouter.addAnalyzerIssue(
+                  ExtractorMessageId.DifferentReleaseTags,
+                  'This symbol has another declaration with a different release tag',
+                  astDeclaration
+                );
             }
           }
         } else {
@@ -635,9 +635,6 @@ export class Collector {
       declarationMetadata.tsdocComment = parserContext.docComment;
 
       declarationMetadata.declaredReleaseTag = declaredReleaseTag;
-      declarationMetadata.effectiveReleaseTag = (declaredReleaseTag === ReleaseTag.None && astDeclaration.parent)
-        ? this.fetchMetadata(astDeclaration.parent).effectiveReleaseTag
-        : declarationMetadata.declaredReleaseTag;
 
       declarationMetadata.isEventProperty = modifierTagSet.isEventProperty();
       declarationMetadata.isOverride = modifierTagSet.isOverride();
@@ -673,6 +670,14 @@ export class Collector {
         }
       }
     }
+
+    // This needs to be set regardless of whether or not a parserContext exists
+    declarationMetadata.effectiveReleaseTag = (
+      declarationMetadata.declaredReleaseTag === ReleaseTag.None &&
+      astDeclaration.parent
+    )
+        ? this.fetchMetadata(astDeclaration.parent).effectiveReleaseTag
+        : declarationMetadata.declaredReleaseTag;
   }
 
   private _parseTsdocForAstDeclaration(astDeclaration: AstDeclaration): tsdoc.ParserContext | undefined {
