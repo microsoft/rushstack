@@ -6,7 +6,7 @@
 
 _**This repo hosts a collection of tools and libraries used to build web projects at Microsoft.**_
 
-- **[CURRENT NEWS](https://github.com/Microsoft/web-build-tools/wiki)**:  See what's happening with the **web-build-tools** projects!
+- **[CURRENT NEWS](https://github.com/Microsoft/web-build-tools/blob/master/apps/rush/CHANGELOG.md)**:  See what's happening with the **web-build-tools** projects!
 
 Highlighted projects:
 
