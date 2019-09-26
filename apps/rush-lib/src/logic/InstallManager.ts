@@ -299,15 +299,15 @@ export class InstallManager {
       }
 
       const approvedPackagesChecker: ApprovedPackagesChecker = new ApprovedPackagesChecker(this._rushConfiguration);
-      if (this._options.allowShrinkwrapUpdates) {
-        if (approvedPackagesChecker.approvedPackagesFilesAreOutOfDate) {
+      if (approvedPackagesChecker.approvedPackagesFilesAreOutOfDate) {
+        if (this._options.allowShrinkwrapUpdates) {
           approvedPackagesChecker.rewriteConfigFiles();
           console.log(colors.yellow(
             'Approved package files have been updated. These updates should be committed to source control'
           ));
+        } else {
+          throw new Error(`Approved packages files are out-of date. Run "rush update" to update them.`);
         }
-      } else if (approvedPackagesChecker.approvedPackagesFilesAreOutOfDate) {
-        throw new Error(`Approved packages files are out-of date. Run "rush update" to update them.`);
       }
 
       // Ensure that the package manager is installed
