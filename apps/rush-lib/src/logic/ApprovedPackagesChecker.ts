@@ -56,12 +56,17 @@ export class ApprovedPackagesChecker {
         rushProject
       );
       this._collectDependencies(
-        packageJson.optionalDependencies,
+        packageJson.devDependencies,
         this._approvedPackagesPolicy,
         rushProject
       );
       this._collectDependencies(
-        packageJson.devDependencies,
+        packageJson.peerDependencies,
+        this._approvedPackagesPolicy,
+        rushProject
+      );
+      this._collectDependencies(
+        packageJson.optionalDependencies,
         this._approvedPackagesPolicy,
         rushProject
       );
