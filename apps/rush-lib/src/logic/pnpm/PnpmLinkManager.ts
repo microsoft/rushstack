@@ -270,7 +270,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         newLocalFolderPath
       );
 
-      if (this._rushConfiguration.pnpmOptions.incrementalBuildDependencyGranularity === 'project') {
+      if (!this._rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection) {
         pnpmProjectDependencyManifest.addDependency(newLocalPackage);
       }
 
@@ -284,7 +284,7 @@ export class PnpmLinkManager extends BaseLinkManager {
 
     PnpmLinkManager._createSymlinksForTopLevelProject(localPackage);
 
-    if (this._rushConfiguration.pnpmOptions.incrementalBuildDependencyGranularity === 'project') {
+    if (!this._rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection) {
       pnpmProjectDependencyManifest.save();
     } else {
       pnpmProjectDependencyManifest.deleteIfExists();

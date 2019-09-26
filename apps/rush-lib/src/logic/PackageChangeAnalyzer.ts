@@ -136,7 +136,7 @@ export class PackageChangeAnalyzer {
 
     if (
       this._rushConfiguration.packageManager === 'pnpm' &&
-      this._rushConfiguration.pnpmOptions.incrementalBuildDependencyGranularity === 'project'
+      !this._rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection
     ) {
       const projects: RushConfigurationProject[] = [];
       const projectDependencyManifestPaths: string[] = [];

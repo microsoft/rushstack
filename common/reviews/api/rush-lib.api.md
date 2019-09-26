@@ -114,11 +114,12 @@ export class EventHooks {
 export class ExperimentsConfiguration {
     // @internal
     constructor(jsonFileName: string);
-    readonly experimentConfiguration: Readonly<IExperimentsJson>;
+    readonly configuration: Readonly<IExperimentsJson>;
     }
 
 // @beta (undocumented)
 export interface IExperimentsJson {
+    legacyIncrementalBuildDependencyDetection?: boolean;
 }
 
 // @public
@@ -126,9 +127,6 @@ export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
     isManaged: boolean;
 }
-
-// @beta
-export type IncrementalBuildDependencyGranularity = 'project' | 'repository';
 
 // @beta
 export class IndividualVersionPolicy extends VersionPolicy {
@@ -233,8 +231,6 @@ export class PnpmOptionsConfiguration {
     // 
     // @internal
     constructor(json: IPnpmOptionsJson);
-    // @beta
-    readonly incrementalBuildDependencyGranularity: IncrementalBuildDependencyGranularity;
     readonly resolutionStrategy: ResolutionStrategy;
     readonly strictPeerDependencies: boolean;
 }

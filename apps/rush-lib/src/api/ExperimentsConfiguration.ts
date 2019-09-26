@@ -12,6 +12,11 @@ import {
  * @beta
  */
 export interface IExperimentsJson {
+  /**
+   * If this setting is enabled, incremental builds should use repo-wide dependency tracking
+   * instead of project-specific tracking.
+   */
+  legacyIncrementalBuildDependencyDetection?: boolean;
 }
 
 /**
@@ -47,7 +52,7 @@ export class ExperimentsConfiguration {
   /**
    * Get the experiments configuration.
    */
-  public get experimentConfiguration(): Readonly<IExperimentsJson> {
+  public get configuration(): Readonly<IExperimentsJson> {
     return this._experimentConfiguration;
   }
 }

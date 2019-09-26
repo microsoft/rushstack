@@ -61,21 +61,7 @@
      * After modifying this field, it's recommended to run "rush update --full" so that the package manager
      * will recalculate all version selections.
      */
-    /*[LINE "HYPOTHETICAL"]*/ "resolutionStrategy": "fast",
-
-    /**
-     * This defines the granularity by which external dependencies are tracked to detect if a project needs
-     * to be rebuilt during an incremental build.
-     *
-     * If set to "project," Rush will track only the individual project's direct and indirect dependencies when
-     * detecting if a project needs to be rebuilt.
-     *
-     * If set to "repository," all projects will be rebuilt if any external dependencies anywhere in the repository
-     * are changed.
-     *
-     * If unset, defaults to "project."
-     */
-    /*[LINE "DEMO"]*/ "incrementalBuildDependencyGranularity": "project"
+    /*[LINE "HYPOTHETICAL"]*/ "resolutionStrategy": "fast"
   },
 
   /**

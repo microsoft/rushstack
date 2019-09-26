@@ -89,8 +89,6 @@ export interface IRushRepositoryJson {
 export interface IPnpmOptionsJson {
   strictPeerDependencies?: boolean;
   resolutionStrategy?: ResolutionStrategy;
-  /** @beta */
-  incrementalBuildDependencyGranularity?: IncrementalBuildDependencyGranularity;
 }
 
 /**
@@ -190,27 +188,10 @@ export class PnpmOptionsConfiguration {
    */
   public readonly resolutionStrategy: ResolutionStrategy;
 
-  /**
-   * This defines the granularity by which external dependencies are tracked to detect if a project needs
-   * to be rebuilt during an incremental build.
-   *
-   * If set to "project," Rush will track only the individual project's direct and indirect dependencies when
-   * detecting if a project needs to be rebuilt.
-   *
-   * If set to "repository," all projects will be rebuilt if any external dependencies anywhere in the repository
-   * are changed.
-   *
-   * If unset, defaults to "project."
-   *
-   * @beta
-   */
-  public readonly incrementalBuildDependencyGranularity: IncrementalBuildDependencyGranularity;
-
   /** @internal */
   public constructor(json: IPnpmOptionsJson) {
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
-    this.incrementalBuildDependencyGranularity = json.incrementalBuildDependencyGranularity || 'project';
   }
 }
 
@@ -260,12 +241,6 @@ export interface ITryFindRushJsonLocationOptions {
  * @public
  */
 export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
-
-/**
- * This represents the available dependency-tracking granularities during incremental builds.
- * @beta
- */
-export type IncrementalBuildDependencyGranularity = 'project' | 'repository';
 
 /**
  * This represents the Rush configuration for a repository, based on the "rush.json"
