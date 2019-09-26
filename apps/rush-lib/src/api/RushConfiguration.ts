@@ -26,6 +26,7 @@ import { PackageManagerName, PackageManager } from './packageManager/PackageMana
 import { NpmPackageManager } from './packageManager/NpmPackageManager';
 import { YarnPackageManager } from './packageManager/YarnPackageManager';
 import { PnpmPackageManager } from './packageManager/PnpmPackageManager';
+import { ExperimentsConfiguration } from './ExperimentsConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 
@@ -40,7 +41,8 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.browserApprovedPackagesFilename,
   RushConstants.nonbrowserApprovedPackagesFilename,
   RushConstants.versionPoliciesFilename,
-  RushConstants.commandLineFilename
+  RushConstants.commandLineFilename,
+  RushConstants.experimentsFilename
 ];
 
 /**
@@ -327,6 +329,7 @@ export class RushConfiguration {
   private _projectsByName: Map<string, RushConfigurationProject>;
 
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
+  private _experimentsConfiguration: ExperimentsConfiguration;
 
   /**
    * Loads the configuration data from an Rush.json configuration file and returns
@@ -1014,6 +1017,16 @@ export class RushConfiguration {
   }
 
   /**
+   * This configuration object contains settings repo maintainers have specified to enable
+   * and disable experimental Rush features.
+   *
+   * @beta
+   */
+  public get experimentsConfiguration(): ExperimentsConfiguration {
+    return this._experimentsConfiguration;
+  }
+
+  /**
    * Returns the project for which the specified path is underneath that project's folder.
    * If the path is not under any project's folder, returns undefined.
    */
@@ -1077,8 +1090,14 @@ export class RushConfiguration {
 
     this._ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
 
+    const experimentsConfigFile: string = path.join(
+      this._commonRushConfigFolder,
+      RushConstants.experimentsFilename
+    );
+    this._experimentsConfiguration = new ExperimentsConfiguration(experimentsConfigFile);
+
     this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || {});
-    this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || { });
+    this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || {});
 
     // TODO: Add an actual "packageManager" field in rush.json
     const packageManagerFields: string[] = [];
@@ -1185,8 +1204,10 @@ export class RushConfiguration {
       this._eventHooks = new EventHooks(rushConfigurationJson.eventHooks);
     }
 
-    const versionPolicyConfigFile: string =
-      path.join(this._commonRushConfigFolder, RushConstants.versionPoliciesFilename);
+    const versionPolicyConfigFile: string = path.join(
+      this._commonRushConfigFolder,
+      RushConstants.versionPoliciesFilename
+    );
     this._versionPolicyConfiguration = new VersionPolicyConfiguration(versionPolicyConfigFile);
 
     this._projects = [];

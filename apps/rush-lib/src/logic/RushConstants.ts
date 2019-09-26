@@ -129,6 +129,11 @@ export namespace RushConstants {
   export const versionPoliciesFilename: string = 'version-policies.json';
 
   /**
+   * Experiments configuration file, which
+   */
+  export const experimentsFilename: string = 'experiments.json';
+
+  /**
    * The URL ("http://rushjs.io") for the Rush web site.
    */
   export const rushWebSiteUrl: string = 'https://rushjs.io';

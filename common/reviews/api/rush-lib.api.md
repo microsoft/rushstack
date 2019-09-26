@@ -110,6 +110,17 @@ export class EventHooks {
     get(event: Event): string[];
     }
 
+// @beta
+export class ExperimentsConfiguration {
+    // @internal
+    constructor(jsonFileName: string);
+    readonly experimentConfiguration: Readonly<IExperimentsJson>;
+    }
+
+// @beta (undocumented)
+export interface IExperimentsJson {
+}
+
 // @public
 export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
@@ -255,6 +266,8 @@ export class RushConfiguration {
     readonly ensureConsistentVersions: boolean;
     // @beta
     readonly eventHooks: EventHooks;
+    // @beta
+    readonly experimentsConfiguration: ExperimentsConfiguration;
     findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
     findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
     getCommittedShrinkwrapFilename(variant?: string | undefined): string;

@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Rush experiments.json config file",
+  "description": "For use with the Rush tool, this file allows repo maintainers to enable and disable experimental Rush features.",
+
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}
