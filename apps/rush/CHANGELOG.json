@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.13.1",
+      "tag": "@microsoft/rush_v5.13.1",
+      "date": "Fri, 27 Sep 2019 22:34:50 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve support for pnpm lockfile version 5.1. Also fixes a regression in Rush 5.12.0 in which rush install can fail on pnpm 3.5+ with the error message \"ERROR: Invalid Version\""
+          }
+        ]
+      }
+    },
+    {
       "version": "5.13.0",
       "tag": "@microsoft/rush_v5.13.0",
       "date": "Wed, 11 Sep 2019 21:41:34 GMT",
