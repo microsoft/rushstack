@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/package-deps-hash",
-  "version": "2.2.178",
+  "version": "2.2.179",
   "description": "",
   "main": "lib/index.js",
   "typings": "dist/package-deps-hash.d.ts",
@@ -13,8 +13,8 @@
     "build": "gulp test --clean"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.4": "0.2.0",
-    "@microsoft/node-library-build": "6.2.0",
+    "@microsoft/rush-stack-compiler-3.4": "0.2.1",
+    "@microsoft/node-library-build": "6.2.1",
     "@microsoft/node-core-library": "3.15.0",
     "@types/chai": "3.4.34",
     "@types/mocha": "5.2.5",
