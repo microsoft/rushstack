@@ -1,7 +1,7 @@
 dependencies:
   '@rush-temp/project1': 'file:projects/project1.tgz'
   '@rush-temp/project2': 'file:projects/project2.tgz'
-  '@rush-temp/project3': 'file:projects/project3.tgz'
+  '@rush-temp/project3': 'file:projects/project3.tgz_462eaf34881863298955eb323c130fc7'
 packages:
   /jquery/1.0.0:
     resolution:
@@ -25,7 +25,7 @@ packages:
     dependencies:
       q: 1.5.3
       jquery: 1.0.0
-  'file:projects/project3.tgz':
+  'file:projects/project3.tgz_462eaf34881863298955eb323c130fc7':
     dependencies:
       q: 1.5.3
       '@scope/testDep': example.pkgs.visualstudio.com/@scope/testDep/1.0.0
