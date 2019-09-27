@@ -39,6 +39,10 @@ items:
         items:
           - name: InjectedCustomItem
             uid: customUrl
+          - name: DocClassInterfaceMerge (Class)
+            uid: 'api-documenter-test!DocClassInterfaceMerge:class'
+          - name: DocClassInterfaceMerge (Interface)
+            uid: 'api-documenter-test!DocClassInterfaceMerge:interface'
           - name: DocEnum
             uid: 'api-documenter-test!DocEnum:enum'
           - name: Generic
