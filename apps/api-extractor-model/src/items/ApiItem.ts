@@ -7,6 +7,7 @@ import { ApiPackage } from '../model/ApiPackage';
 import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 import { DeserializerContext } from '../model/DeserializerContext';
 import { InternalError } from '@microsoft/node-core-library';
+import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 
 /**
  * The type returned by the {@link ApiItem.kind} property, which can be used to easily distinguish subclasses of
@@ -170,6 +171,24 @@ export class ApiItem {
    * @virtual
    */
   public get members(): ReadonlyArray<ApiItem> {
+    return [];
+  }
+
+  /**
+   * If this item has a name (i.e. extends `ApiNameMixin`), then return all items that have the same parent
+   * and the same name.  Otherwise, return all items that have the same parent and the same `ApiItemKind`.
+   *
+   * @remarks
+   * Examples: For a function, this would return all overloads for the function.  For a constructor, this would
+   * return all overloads for the constructor.  For a merged declaration (e.g. a `namespace` and `enum` with the
+   * same name), this would return both declarations.  If this item does not have a parent, or if it is the only
+   * item of its name/kind, then the result is an array containing only this item.
+   */
+  public getMergedSiblings(): ReadonlyArray<ApiItem> {
+    const parent: ApiItem | undefined = this._parent;
+    if (parent && ApiItemContainerMixin.isBaseClassOf(parent)) {
+      return parent._getMergedSiblingsForMember(this);
+    }
     return [];
   }
 
