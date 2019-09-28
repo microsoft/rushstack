@@ -10,7 +10,7 @@ import { IPackageJson } from '@microsoft/node-core-library';
 export class ApprovedPackagesConfiguration {
     constructor(jsonFilename: string);
     // (undocumented)
-    addOrUpdatePackage(packageName: string, reviewCategory: string): void;
+    addOrUpdatePackage(packageName: string, reviewCategory: string): boolean;
     clear(): void;
     // (undocumented)
     getItemByName(packageName: string): ApprovedPackagesItem | undefined;

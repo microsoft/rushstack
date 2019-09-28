@@ -271,8 +271,6 @@ export class InstallManager {
       // Check the policies
       PolicyValidator.validatePolicy(this._rushConfiguration, options.bypassPolicy);
 
-      ApprovedPackagesChecker.rewriteConfigFiles(this._rushConfiguration);
-
       // Git hooks are only installed if the repo opts in by including files in /common/git-hooks
       const hookSource: string = path.join(this._rushConfiguration.commonFolder, 'git-hooks');
       const hookDestination: string | undefined = Git.getHooksFolder();
@@ -297,6 +295,18 @@ export class InstallManager {
           }
 
           console.log('Successfully installed these Git hook scripts: ' + filteredHookFilenames.join(', ') + os.EOL);
+        }
+      }
+
+      const approvedPackagesChecker: ApprovedPackagesChecker = new ApprovedPackagesChecker(this._rushConfiguration);
+      if (approvedPackagesChecker.approvedPackagesFilesAreOutOfDate) {
+        if (this._options.allowShrinkwrapUpdates) {
+          approvedPackagesChecker.rewriteConfigFiles();
+          console.log(colors.yellow(
+            'Approved package files have been updated. These updates should be committed to source control'
+          ));
+        } else {
+          throw new Error(`Approved packages files are out-of date. Run "rush update" to update them.`);
         }
       }
 
