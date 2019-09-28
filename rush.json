@@ -644,6 +644,12 @@
       "reviewCategory": "libraries",
       "shouldPublish": false
     },
+    {
+      "packageName": "repo-toolbox",
+      "projectFolder": "repo-scripts/repo-toolbox",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
 
     // "stack" folder (alphabetical order)
     {
