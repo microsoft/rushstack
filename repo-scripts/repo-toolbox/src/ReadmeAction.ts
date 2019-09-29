@@ -28,6 +28,7 @@ export class ReadmeAction extends CommandLineAction {
     Sort.sortBy(orderedProjects, x => x.projectRelativeFolder);
 
     builder.append('## Published Packages\n\n');
+    builder.append('<!-- the table below was generated using the ./repo-scripts/repo-toolbox script -->\n\n');
     builder.append('| Folder | Version | Changelog | Package |\n');
     builder.append('| ------ | ------- | --------- | ------- |\n');
     for (const project of orderedProjects.filter(x => ReadmeAction._isPublished(x))) {
@@ -65,6 +66,7 @@ export class ReadmeAction extends CommandLineAction {
     }
 
     builder.append('\n\n## Unpublished Local Projects\n\n');
+    builder.append('<!-- the table below was generated using the ./repo-scripts/repo-toolbox script -->\n\n');
     builder.append('| Folder | Description |\n');
     builder.append('| ------ | -----------|\n');
     for (const project of orderedProjects.filter(x => !ReadmeAction._isPublished(x))) {

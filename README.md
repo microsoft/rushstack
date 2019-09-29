@@ -6,18 +6,20 @@
 [![Join the chat at https://gitter.im/web-build-tools](https://badges.gitter.im/web-build-tools.svg)](https://gitter.im/web-build-tools?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) &nbsp; [![Build Status](https://dev.azure.com/RushStack/Gearbox%20GitHub%20Projects/_apis/build/status/web-build-tools/web-build-tools%20CI%20Build?branchName=master)](https://dev.azure.com/RushStack/Gearbox%20GitHub%20Projects/_build/latest?definitionId=3&branchName=master)
 
 The home for various projects maintained by the Rush Stack community, whose mission is to develop reusable tooling
-for large scale NodeJS monorepos.
+for large scale TypeScript monorepos.
 
 ## Documentation Links
 
-- [What is Rush Stack?](https://rushstack.io/)
-- [Package API reference](https://rushstack.io/pages/api/)
-- [Gitter chat room](https://gitter.im/web-build-tools/web-build-tools): chat with the Rush Stack developers
-- [Rush](https://rushjs.io/): a scalable NodeJS build orchestrator
-- [API Extractor](https://api-extractor.com/): manages API reviews and generates .d.ts rollups
-- [API Documenter](https://api-extractor.com/pages/setup/generating_docs/): generates your API documentation website
+- [What is Rush Stack?](https://rushstack.io/) - learn about the mission behind these projects
+- [API reference](https://rushstack.io/pages/api/) - browse API documentation for NPM packages
+- [Gitter chat room](https://gitter.im/web-build-tools/web-build-tools) - chat with the Rush Stack developers
+- [Rush](https://rushjs.io/) - a build orchestrator for large scale TypeScript monorepos
+- [API Extractor](https://api-extractor.com/) - create .d.ts rollups and track your TypeScript API signatures
+- [API Documenter](https://api-extractor.com/pages/setup/generating_docs/) - use TSDoc comments to publish an API documentation website
 
 ## Published Packages
+
+<!-- the table below was generated using the ./repo-scripts/repo-toolbox script -->
 
 | Folder | Version | Changelog | Package |
 | ------ | ------- | --------- | ------- |
@@ -60,6 +62,8 @@ for large scale NodeJS monorepos.
 
 
 ## Unpublished Local Projects
+
+<!-- the table below was generated using the ./repo-scripts/repo-toolbox script -->
 
 | Folder | Description |
 | ------ | -----------|
