@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack-compiler-3.1",
+      "comment": "Update repository URL",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-3.1",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
