@@ -8,13 +8,13 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@microsoft/node-core-library": "3.15.0",
+    "@microsoft/node-core-library": "3.15.1",
     "@microsoft/rush-lib": "5.13.1",
-    "@microsoft/ts-command-line": "4.3.1"
+    "@microsoft/ts-command-line": "4.3.2"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.4": "0.2.2",
-    "@microsoft/node-library-build": "6.2.2",
+    "@microsoft/rush-stack-compiler-3.4": "0.2.3",
+    "@microsoft/node-library-build": "6.2.3",
     "@types/node": "8.10.54",
     "gulp": "~4.0.2"
   }
