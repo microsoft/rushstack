@@ -432,7 +432,7 @@ export class InstallManager {
           // the package at all, we can reasonably assume it's good for all the repositories.
           // In particular, we'll assume that two different NPM registries cannot have two
           // different implementations of the same version of the same package.
-          // This was needed for: https://github.com/Microsoft/web-build-tools/issues/691
+          // This was needed for: https://github.com/microsoft/rushstack/issues/691
           commonRushConfigFolder: this._rushConfiguration.commonRushConfigFolder
         });
 
@@ -1145,7 +1145,7 @@ export class InstallManager {
         //
         // This issue has been fixed as of npm v5.0.0: https://github.com/npm/npm/releases/tag/v5.0.0
         //
-        // For more context, see https://github.com/Microsoft/web-build-tools/issues/761#issuecomment-428689600
+        // For more context, see https://github.com/microsoft/rushstack/issues/761#issuecomment-428689600
         args.push('--no-optional');
       }
       args.push('--cache', this._rushConfiguration.npmCacheFolder);

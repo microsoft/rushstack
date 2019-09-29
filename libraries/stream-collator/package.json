@@ -4,7 +4,7 @@
   "description": "Display intelligible realtime output from your asynchronous streams",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/libraries/stream-collator"
+    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/stream-collator"
   },
   "main": "lib/index.js",
   "typings": "dist/stream-collator.d.ts",

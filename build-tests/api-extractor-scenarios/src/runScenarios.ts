@@ -19,7 +19,7 @@ export function runScenarios(buildConfigPath: string): void {
   const entryPoints: string[] = [];
 
   // TODO: Eliminate this workaround
-  // See GitHub issue https://github.com/Microsoft/web-build-tools/issues/1017
+  // See GitHub issue https://github.com/microsoft/rushstack/issues/1017
   for (const scenarioFolderName of buildConfig.scenarioFolderNames) {
     const entryPoint: string = path.resolve(`./lib/${scenarioFolderName}/index.d.ts`);
     entryPoints.push(entryPoint);
