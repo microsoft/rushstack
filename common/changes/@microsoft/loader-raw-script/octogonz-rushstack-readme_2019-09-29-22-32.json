@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-raw-script",
+      "comment": "Update repository URL",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/loader-raw-script",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

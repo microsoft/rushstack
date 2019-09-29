@@ -6,7 +6,7 @@
   "typings": "dist/node-core-library.d.ts",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/libraries/node-core-library"
+    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/node-core-library"
   },
   "scripts": {
     "build": "gulp test --clean"

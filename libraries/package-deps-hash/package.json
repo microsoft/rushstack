@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/libraries/package-deps-hash"
+    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/package-deps-hash"
   },
   "scripts": {
     "build": "gulp test --clean"

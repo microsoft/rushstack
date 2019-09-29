@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/webpack/loader-set-webpack-public-path"
+    "url": "https://github.com/microsoft/rushstack/tree/master/webpack/loader-set-webpack-public-path"
   },
   "scripts": {
     "build": "gulp test --clean"

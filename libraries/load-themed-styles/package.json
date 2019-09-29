@@ -4,7 +4,7 @@
   "description": "Loads themed styles.",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/libraries/load-themed-styles"
+    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/load-themed-styles"
   },
   "scripts": {
     "build": "gulp --clean"

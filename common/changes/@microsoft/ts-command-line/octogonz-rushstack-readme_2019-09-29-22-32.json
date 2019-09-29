@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/ts-command-line",
+      "comment": "Update repository URL",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/ts-command-line",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

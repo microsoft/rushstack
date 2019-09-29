@@ -24,7 +24,7 @@
     // that request it as a peer dependency.
     "typescript": "~3.4.3",
 
-    // Workaround for https://github.com/microsoft/web-build-tools/issues/1466
+    // Workaround for https://github.com/microsoft/rushstack/issues/1466
     "eslint": "^6.0.0"
   },
 

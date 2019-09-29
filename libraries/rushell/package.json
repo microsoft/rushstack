@@ -4,7 +4,7 @@
   "description": "Execute shell commands using a consistent syntax on every platform",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/libraries/rushell"
+    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/rushell"
   },
   "main": "lib/index.js",
   "typings": "dist/rushell.d.ts",

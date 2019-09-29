@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Update repository URL",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-typescript",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/webpack/loader-load-themed-styles"
+    "url": "https://github.com/microsoft/rushstack/tree/master/webpack/loader-load-themed-styles"
   },
   "scripts": {
     "build": "gulp test --clean"

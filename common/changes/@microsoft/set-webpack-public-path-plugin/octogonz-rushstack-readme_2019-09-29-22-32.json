@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/set-webpack-public-path-plugin",
+      "comment": "Update repository URL",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/set-webpack-public-path-plugin",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

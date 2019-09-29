@@ -4,7 +4,7 @@
   "description": "An experimental tool that connects Rush and BuildXL",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/apps/rush-buildxl"
+    "url": "https://github.com/microsoft/rushstack/tree/master/apps/rush-buildxl"
   },
   "engines": {
     "node": ">=5.6.0"

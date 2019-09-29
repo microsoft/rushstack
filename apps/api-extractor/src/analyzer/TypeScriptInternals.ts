@@ -9,7 +9,7 @@ export class TypeScriptInternals {
 
   public static getImmediateAliasedSymbol(symbol: ts.Symbol, typeChecker: ts.TypeChecker): ts.Symbol {
     // Compiler internal:
-    // https://github.com/Microsoft/TypeScript/blob/v3.2.2/src/compiler/checker.ts
+    // https://github.com/microsoft/TypeScript/blob/v3.2.2/src/compiler/checker.ts
     return (typeChecker as any).getImmediateAliasedSymbol(symbol); // tslint:disable-line:no-any
   }
 
@@ -49,7 +49,7 @@ export class TypeScriptInternals {
    */
   public static getJSDocCommentRanges(node: ts.Node, text: string): ts.CommentRange[] | undefined {
     // Compiler internal:
-    // https://github.com/Microsoft/TypeScript/blob/v2.4.2/src/compiler/utilities.ts#L616
+    // https://github.com/microsoft/TypeScript/blob/v2.4.2/src/compiler/utilities.ts#L616
 
     return (ts as any).getJSDocCommentRanges.apply(this, arguments);
   }
@@ -59,7 +59,7 @@ export class TypeScriptInternals {
    */
   public static getTextOfIdentifierOrLiteral(node: ts.Identifier | ts.StringLiteralLike | ts.NumericLiteral): string {
     // Compiler internal:
-    // https://github.com/Microsoft/TypeScript/blob/v3.2.2/src/compiler/utilities.ts#L2721
+    // https://github.com/microsoft/TypeScript/blob/v3.2.2/src/compiler/utilities.ts#L2721
 
     return (ts as any).getTextOfIdentifierOrLiteral(node);
   }
@@ -72,7 +72,7 @@ export class TypeScriptInternals {
     | undefined {
 
     // Compiler internal:
-    // https://github.com/Microsoft/TypeScript/blob/v3.2.2/src/compiler/utilities.ts#L218
+    // https://github.com/microsoft/TypeScript/blob/v3.2.2/src/compiler/utilities.ts#L218
 
     return (ts as any).getResolvedModule(sourceFile, moduleNameText);
   }

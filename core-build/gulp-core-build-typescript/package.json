@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/core-build/gulp-core-build-typescript"
+    "url": "https://github.com/microsoft/rushstack/tree/master/core-build/gulp-core-build-typescript"
   },
   "scripts": {
     "build": "gulp --clean"

@@ -152,7 +152,7 @@ export class DocCommentEnhancer {
 
         // Is it referring to the working package?  If not, we don't do any link validation, because
         // AstReferenceResolver doesn't support it yet (but ModelReferenceResolver does of course).
-        // Tracked by:  https://github.com/Microsoft/web-build-tools/issues/1195
+        // Tracked by:  https://github.com/microsoft/rushstack/issues/1195
         if (node.codeDestination.packageName === undefined
           || node.codeDestination.packageName === this._collector.workingPackage.name) {
 
@@ -192,7 +192,7 @@ export class DocCommentEnhancer {
 
       // It's referencing an external package, so skip this inheritDoc tag, since AstReferenceResolver doesn't
       // support it yet.  As a workaround, this tag will get handled later by api-documenter.
-      // Tracked by:  https://github.com/Microsoft/web-build-tools/issues/1195
+      // Tracked by:  https://github.com/microsoft/rushstack/issues/1195
       return;
     }
 
