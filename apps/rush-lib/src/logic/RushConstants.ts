@@ -45,7 +45,8 @@ export namespace RushConstants {
   export const rushTempNpmScope: string = '@rush-temp';
 
   /**
-   * The folder name ("temp") under the common folder where temporary files will be stored.
+   * The folder name ("temp") under the common folder, or under the .rush folder in each project's directory where
+   * temporary files will be stored.
    * Example: `C:\MyRepo\common\temp`
    */
   export const rushTempFolderName: string = 'temp';
@@ -114,10 +115,10 @@ export namespace RushConstants {
   export const commonVersionsFilename: string = 'common-versions.json';
 
   /**
-   * The name of the package-deps.json file, which is used by the "rush build"
-   * command to determine if a particular project needs to be rebuilt.
+   * The name of the per-project folder where project-specific Rush files are stored. For example,
+   * the package-deps files, which are used by commands to determine if a particular project needs to be rebuilt.
    */
-  export const packageDepsFilename: string = 'package-deps.json';
+  export const projectRushFolderName: string = '.rush';
 
   /**
    * Custom command line configuration file, which is used by rush for implementing

@@ -1,6 +1,57 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 16 Aug 2019 05:15:17 GMT and should not be manually modified.
+This log was last generated on Fri, 27 Sep 2019 22:34:50 GMT and should not be manually modified.
+
+## 5.13.1
+Fri, 27 Sep 2019 22:34:50 GMT
+
+### Updates
+
+- Improve support for pnpm lockfile version 5.1. Also fixes a regression in Rush 5.12.0 in which rush install can fail on pnpm 3.5+ with the error message "ERROR: Invalid Version"
+
+## 5.13.0
+Wed, 11 Sep 2019 21:41:34 GMT
+
+### Updates
+
+- Add support for incremental custom commands. This change also adds a per-project `.rush/temp` folder that should be included in `.gitignore` (i.e. - `.rush/temp/**`).
+- Add a --from-version-policy option for bulk commands to allow running the command (like build) from packages with a version policy and their direct and indirect dependent projects
+- Update documentation
+- Do not delete the pnpm store if an installation retry fails. Delete the pnpm store if and only if all the installation retry attempts fail.
+
+## 5.12.1
+Tue, 10 Sep 2019 19:45:15 GMT
+
+### Updates
+
+- Fix an issue where Rush attempted to add Git tags for packages that had already been published when the publish command is run with the --pack and --apply-git-tags-on-pack flags. This caused a fatal error when tags already existed.
+
+## 5.12.0
+Wed, 04 Sep 2019 19:01:42 GMT
+
+### Updates
+
+- Adding --apply-git-tags-on-pack flag to the publish command to apply git tags when using --pack
+- For rush publish and rush version, change the path spec for git add to include everything from the repo root directory. This addresses https://github.com/microsoft/web-build-tools/issues/669.
+- Add support for NPM package aliases (i.e. dependency versions such as "npm:example@^1.2.3")
+- Fix an issue with rush change that occurs when rush.json isn't in the repository root.
+
+## 5.11.4
+Fri, 23 Aug 2019 03:31:52 GMT
+
+### Updates
+
+- Some optimizations for --to, --from, and cyclic dependency detection for repos with large numbers of projects.
+- Ensure install-run-rushx script is updated during "rush update"
+
+## 5.11.3
+Wed, 21 Aug 2019 22:13:26 GMT
+
+### Updates
+
+- Add support for the RUSH_PREVIEW_VERSION environment variable to the install-run-rush script.
+- Add support for the RUSH_TEMP_FOLDER environment variable in the install-run-rush script.
+- Add install-run-rushx script to enable easy execution of the rushx command in CI
 
 ## 5.11.2
 Fri, 16 Aug 2019 05:15:17 GMT

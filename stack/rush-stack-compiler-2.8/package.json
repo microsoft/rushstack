@@ -1,11 +1,11 @@
 {
   "name": "@microsoft/rush-stack-compiler-2.8",
-  "version": "0.1.16",
+  "version": "0.2.3",
   "description": "A plug-in for selecting the compiler used with the @microsoft/rush-stack toolchain. This version selects TypeScript 2.8.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/stack/rush-stack-compiler-2.8"
+    "url": "https://github.com/microsoft/rushstack/tree/master/stack/rush-stack-compiler-2.8"
   },
   "bin": {
     "rush-api-extractor": "./bin/rush-api-extractor",
@@ -18,9 +18,9 @@
   "main": "lib/shared/index.js",
   "typings": "lib/shared/index.d.ts",
   "dependencies": {
-    "@microsoft/api-extractor": "7.3.8",
-    "@microsoft/node-core-library": "3.14.0",
-    "@types/node": "8.5.8",
+    "@microsoft/api-extractor": "7.4.6",
+    "@microsoft/node-core-library": "3.15.1",
+    "@types/node": "8.10.54",
     "tslint": "~5.12.1",
     "tslint-microsoft-contrib": "~5.2.1",
     "typescript": "~2.8.4"

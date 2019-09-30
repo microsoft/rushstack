@@ -42,7 +42,7 @@ items:
       content: 'generic: Generic<number>;'
       return:
         type:
-          - Generic<number>
+          - 'api-documenter-test!IDocInterface4#generic~0:complex'
   - uid: 'api-documenter-test!IDocInterface4#numberOrFunction:member'
     summary: a union type with a function
     name: numberOrFunction
@@ -67,3 +67,13 @@ items:
       return:
         type:
           - string | number
+references:
+  - uid: 'api-documenter-test!IDocInterface4#generic~0:complex'
+    name: Generic<number>
+    fullName: Generic<number>
+    spec.typeScript:
+      - uid: 'api-documenter-test!Generic:class'
+        name: Generic
+        fullName: Generic
+      - name: <number>
+        fullName: <number>

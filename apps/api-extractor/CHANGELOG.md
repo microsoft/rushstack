@@ -1,6 +1,68 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 12 Aug 2019 15:15:14 GMT and should not be manually modified.
+This log was last generated on Sun, 29 Sep 2019 23:56:29 GMT and should not be manually modified.
+
+## 7.4.6
+Sun, 29 Sep 2019 23:56:29 GMT
+
+### Patches
+
+- Update repository URL
+
+## 7.4.5
+Wed, 25 Sep 2019 15:15:31 GMT
+
+*Version update only*
+
+## 7.4.4
+Tue, 24 Sep 2019 02:58:49 GMT
+
+*Version update only*
+
+## 7.4.3
+Mon, 23 Sep 2019 15:14:55 GMT
+
+*Version update only*
+
+## 7.4.2
+Wed, 11 Sep 2019 19:56:23 GMT
+
+### Patches
+
+- Add support for an exported name that conflicts with a global name (GitHub #1350)
+
+## 7.4.1
+Tue, 10 Sep 2019 22:32:23 GMT
+
+### Patches
+
+- Update documentation
+
+## 7.4.0
+Tue, 10 Sep 2019 20:38:33 GMT
+
+### Minor changes
+
+- Add support for generating declaration references
+
+## 7.3.11
+Wed, 04 Sep 2019 18:28:06 GMT
+
+*Version update only*
+
+## 7.3.10
+Wed, 04 Sep 2019 15:15:37 GMT
+
+### Patches
+
+- Update TSDoc dependency to 0.12.14
+
+## 7.3.9
+Fri, 30 Aug 2019 00:14:32 GMT
+
+### Patches
+
+- Fix a problem where Unicode API names were not handled correctly
 
 ## 7.3.8
 Mon, 12 Aug 2019 15:15:14 GMT

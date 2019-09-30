@@ -19,6 +19,7 @@ export interface ITaskSelectorConstructor {
   isIncrementalBuildAllowed: boolean;
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
+  packageDepsFilename: string;
 }
 
 /**
@@ -26,8 +27,6 @@ export interface ITaskSelectorConstructor {
  *  - based on to/from flags, solving the dependency graph and figuring out which projects need to be run
  *  - creating a ProjectTask for each project that needs to be built
  *  - registering the necessary ProjectTasks with the TaskRunner, which actually orchestrates execution
- *
- * This class is currently only used by CustomRushAction
  */
 export class TaskSelector {
   private _taskCollection: TaskCollection;
@@ -67,6 +66,8 @@ export class TaskSelector {
   }
 
   private _registerToFlags(toFlags: ReadonlyArray<string>): void {
+    const dependencies: Set<string> = new Set<string>();
+
     for (const toFlag of toFlags) {
       const toProject: RushConfigurationProject | undefined =
         this._options.rushConfiguration.findProjectByShorthandName(toFlag);
@@ -74,19 +75,29 @@ export class TaskSelector {
         throw new Error(`The project '${toFlag}' does not exist in rush.json`);
       }
 
-      const deps: Set<string> = this._collectAllDependencies(toProject.packageName);
+      this._collectAllDependencies(toProject.packageName, dependencies);
+    }
 
-      // Register any dependencies it may have
-      deps.forEach(dep => this._registerTask(this._options.rushConfiguration.getProjectByName(dep)));
+    // Register any dependencies it may have
+    for (const dependency of dependencies) {
+      this._registerTask(this._options.rushConfiguration.getProjectByName(dependency));
+    }
 
-      if (!this._options.ignoreDependencyOrder) {
-        // Add ordering relationships for each dependency
-        deps.forEach(dep => this._taskCollection.addDependencies(dep, this._rushLinkJson.localLinks[dep] || []));
+    if (!this._options.ignoreDependencyOrder) {
+      // Add ordering relationships for each dependency
+      for (const dependency of dependencies) {
+        this._taskCollection.addDependencies(
+          dependency,
+          this._rushLinkJson.localLinks[dependency] || []
+        );
       }
     }
   }
 
   private _registerFromFlags(fromFlags: ReadonlyArray<string>): void {
+    this._buildDependentGraph();
+    const dependents: Set<string> = new Set<string>();
+
     for (const fromFlag of fromFlags) {
       const fromProject: RushConfigurationProject | undefined
         = this._options.rushConfiguration.findProjectByShorthandName(fromFlag);
@@ -94,24 +105,22 @@ export class TaskSelector {
         throw new Error(`The project '${fromFlag}' does not exist in rush.json`);
       }
 
-      // Only register projects which depend on the current package, as well as things that depend on them
-      this._buildDependentGraph();
+      this._collectAllDependents(fromProject.packageName, dependents);
+    }
 
-      // We will assume this project will be built, but act like it has no dependencies
-      const dependents: Set<string> = this._collectAllDependents(fromProject.packageName);
-      dependents.add(fromProject.packageName);
+    // Register all downstream dependents
+    for (const dependent of dependents) {
+      this._registerTask(this._options.rushConfiguration.getProjectByName(dependent));
+    }
 
-      // Register all downstream dependents
-      dependents.forEach(dependent => {
-        this._registerTask(this._options.rushConfiguration.getProjectByName(dependent));
-      });
-
-      if (!this._options.ignoreDependencyOrder) {
-        // Only add ordering relationships for projects which have been registered
-        // e.g. package C may depend on A & B, but if we are only building A's downstream, we will ignore B
-        dependents.forEach(dependent =>
-          this._taskCollection.addDependencies(dependent,
-            (this._rushLinkJson.localLinks[dependent] || []).filter(dep => dependents.has(dep))));
+    if (!this._options.ignoreDependencyOrder) {
+      // Only add ordering relationships for projects which have been registered
+      // e.g. package C may depend on A & B, but if we are only building A's downstream, we will ignore B
+      for (const dependent of dependents) {
+        this._taskCollection.addDependencies(
+          dependent,
+          (this._rushLinkJson.localLinks[dependent] || []).filter(dep => dependents.has(dep))
+        );
       }
     }
   }
@@ -121,6 +130,7 @@ export class TaskSelector {
     for (const rushProject of this._options.rushConfiguration.projects) {
       this._registerTask(rushProject);
     }
+
     if (!this._options.ignoreDependencyOrder) {
       // Add ordering relationships for each dependency
       for (const projectName of Object.keys(this._rushLinkJson.localLinks)) {
@@ -132,40 +142,44 @@ export class TaskSelector {
   /**
    * Collects all upstream dependencies for a certain project
    */
-  private _collectAllDependencies(project: string): Set<string> {
-    const deps: Set<string> = new Set<string>(this._rushLinkJson.localLinks[project]);
-    deps.forEach(dep => this._collectAllDependencies(dep).forEach(innerDep => deps.add(innerDep)));
-    deps.add(project);
-    return deps;
+  private _collectAllDependencies(project: string, result: Set<string>): void {
+    if (!result.has(project)) {
+      result.add(project);
+
+      for (const dependency of this._rushLinkJson.localLinks[project] || []) {
+        this._collectAllDependencies(dependency, result);
+      }
+    }
   }
 
   /**
    * Collects all downstream dependents of a certain project
    */
-  private _collectAllDependents(project: string): Set<string> {
-    const deps: Set<string> = new Set<string>();
-    (this._dependentList.get(project) || new Set<string>()).forEach((dep) => {
-      deps.add(dep);
-    });
-    deps.forEach(dep => this._collectAllDependents(dep).forEach(innerDep => deps.add(innerDep)));
-    return deps;
+  private _collectAllDependents(project: string, result: Set<string>): void {
+    if (!result.has(project)) {
+      result.add(project);
+
+      for (const dependent of (this._dependentList.get(project) || new Set<string>())) {
+        this._collectAllDependents(dependent, result);
+      }
+    }
   }
 
   /**
-   * Inverts the localLinks to arrive at the dependent graph, rather than using the dependency graph
-   * this helps when using the --from flag
+   * Inverts the localLinks to arrive at the dependent graph. This helps when using the --from flag
    */
   private _buildDependentGraph(): void {
     this._dependentList = new Map<string, Set<string>>();
 
-    Object.keys(this._rushLinkJson.localLinks).forEach(project => {
-      this._rushLinkJson.localLinks[project].forEach(dep => {
+    for (const project of Object.keys(this._rushLinkJson.localLinks)) {
+      for (const dep of this._rushLinkJson.localLinks[project]) {
         if (!this._dependentList.has(dep)) {
           this._dependentList.set(dep, new Set<string>());
         }
+
         this._dependentList.get(dep)!.add(project);
-      });
-    });
+      }
+    }
   }
 
   private _registerTask(project: RushConfigurationProject | undefined): void {
@@ -175,7 +189,8 @@ export class TaskSelector {
         rushConfiguration: this._options.rushConfiguration,
         commandToRun: this._getScriptToRun(project),
         isIncrementalBuildAllowed: this._options.isIncrementalBuildAllowed,
-        packageChangeAnalyzer: this._packageChangeAnalyzer
+        packageChangeAnalyzer: this._packageChangeAnalyzer,
+        packageDepsFilename: this._options.packageDepsFilename
       });
 
       if (!this._taskCollection.hasTask(projectTask.name)) {

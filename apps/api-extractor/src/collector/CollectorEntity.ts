@@ -81,9 +81,17 @@ export class CollectorEntity {
    * such as "export class X { }" instead of "export { X }".
    */
   public get shouldInlineExport(): boolean {
-    return this._singleExportName !== undefined
-      && this._singleExportName !== ts.InternalSymbolName.Default
-      && this.astEntity instanceof AstSymbol;
+    // We don't inline an AstImport
+    if (this.astEntity instanceof AstSymbol) {
+      // We don't inline a symbol with more than one exported name
+      if (this._singleExportName !== undefined && this._singleExportName !== ts.InternalSymbolName.Default) {
+        // We can't inline a symbol whose emitted name is different from the export name
+        if (this._nameForEmit === undefined || this._nameForEmit === this._singleExportName) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   /**

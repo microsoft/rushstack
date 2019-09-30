@@ -2,6 +2,167 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.4.6",
+      "tag": "@microsoft/api-extractor_v7.4.6",
+      "date": "Sun, 29 Sep 2019 23:56:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update repository URL"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.5.0` to `7.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.15.0` to `3.15.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `4.3.1` to `4.3.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.4.5",
+      "tag": "@microsoft/api-extractor_v7.4.5",
+      "date": "Wed, 25 Sep 2019 15:15:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.4.2` to `7.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.4.4",
+      "tag": "@microsoft/api-extractor_v7.4.4",
+      "date": "Tue, 24 Sep 2019 02:58:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `4.3.0` to `4.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.4.3",
+      "tag": "@microsoft/api-extractor_v7.4.3",
+      "date": "Mon, 23 Sep 2019 15:14:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.4.1` to `7.4.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.14.2` to `3.15.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `4.2.8` to `4.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.4.2",
+      "tag": "@microsoft/api-extractor_v7.4.2",
+      "date": "Wed, 11 Sep 2019 19:56:23 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for an exported name that conflicts with a global name (GitHub #1350)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.4.1",
+      "tag": "@microsoft/api-extractor_v7.4.1",
+      "date": "Tue, 10 Sep 2019 22:32:23 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update documentation"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.4.0` to `7.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.14.1` to `3.14.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `4.2.7` to `4.2.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.4.0",
+      "tag": "@microsoft/api-extractor_v7.4.0",
+      "date": "Tue, 10 Sep 2019 20:38:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for generating declaration references"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.3.4` to `7.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.11",
+      "tag": "@microsoft/api-extractor_v7.3.11",
+      "date": "Wed, 04 Sep 2019 18:28:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.3.3` to `7.3.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.14.0` to `3.14.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.10",
+      "tag": "@microsoft/api-extractor_v7.3.10",
+      "date": "Wed, 04 Sep 2019 15:15:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update TSDoc dependency to 0.12.14"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.3.2` to `7.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.9",
+      "tag": "@microsoft/api-extractor_v7.3.9",
+      "date": "Fri, 30 Aug 2019 00:14:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a problem where Unicode API names were not handled correctly"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.3.8",
       "tag": "@microsoft/api-extractor_v7.3.8",
       "date": "Mon, 12 Aug 2019 15:15:14 GMT",

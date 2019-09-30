@@ -12,3 +12,5 @@ might interfere with the globally installed Rush).
 
 The **@microsoft/rush** version number is always exactly equal
 to the **@microsoft/rush-lib** version number that it depends on.
+
+API documentation for this package: https://rushstack.io/pages/api/rush-lib/

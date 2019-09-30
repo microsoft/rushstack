@@ -57,6 +57,7 @@ import { CreateOptions } from 'tar';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { PackageManagerName } from '../api/packageManager/PackageManager';
 import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
+import { DependencySpecifier } from './DependencySpecifier';
 
 export interface CreateOptions { // tslint:disable-line:interface-name
   /**
@@ -270,8 +271,6 @@ export class InstallManager {
       // Check the policies
       PolicyValidator.validatePolicy(this._rushConfiguration, options.bypassPolicy);
 
-      ApprovedPackagesChecker.rewriteConfigFiles(this._rushConfiguration);
-
       // Git hooks are only installed if the repo opts in by including files in /common/git-hooks
       const hookSource: string = path.join(this._rushConfiguration.commonFolder, 'git-hooks');
       const hookDestination: string | undefined = Git.getHooksFolder();
@@ -296,6 +295,18 @@ export class InstallManager {
           }
 
           console.log('Successfully installed these Git hook scripts: ' + filteredHookFilenames.join(', ') + os.EOL);
+        }
+      }
+
+      const approvedPackagesChecker: ApprovedPackagesChecker = new ApprovedPackagesChecker(this._rushConfiguration);
+      if (approvedPackagesChecker.approvedPackagesFilesAreOutOfDate) {
+        if (this._options.allowShrinkwrapUpdates) {
+          approvedPackagesChecker.rewriteConfigFiles();
+          console.log(colors.yellow(
+            'Approved package files have been updated. These updates should be committed to source control'
+          ));
+        } else {
+          throw new Error(`Approved packages files are out-of date. Run "rush update" to update them.`);
         }
       }
 
@@ -421,7 +432,7 @@ export class InstallManager {
           // the package at all, we can reasonably assume it's good for all the repositories.
           // In particular, we'll assume that two different NPM registries cannot have two
           // different implementations of the same version of the same package.
-          // This was needed for: https://github.com/Microsoft/web-build-tools/issues/691
+          // This was needed for: https://github.com/microsoft/rushstack/issues/691
           commonRushConfigFolder: this._rushConfiguration.commonRushConfigFolder
         });
 
@@ -503,7 +514,9 @@ export class InstallManager {
     if (shrinkwrapFile) {
       // Check any (explicitly) preferred dependencies first
       allExplicitPreferredVersions.forEach((version: string, dependency: string) => {
-        if (!shrinkwrapFile.hasCompatibleTopLevelDependency(dependency, version)) {
+        const dependencySpecifier: DependencySpecifier = new DependencySpecifier(dependency, version);
+
+        if (!shrinkwrapFile.hasCompatibleTopLevelDependency(dependencySpecifier)) {
           shrinkwrapWarnings.push(`"${dependency}" (${version}) required by the preferred versions from `
             + RushConstants.commonVersionsFilename);
           shrinkwrapIsUpToDate = false;
@@ -614,6 +627,8 @@ export class InstallManager {
       Sort.sortMapKeys(tempDependencies);
 
       for (const [packageName, packageVersion] of tempDependencies.entries()) {
+        const dependencySpecifier: DependencySpecifier = new DependencySpecifier(packageName, packageVersion);
+
         // Is there a locally built Rush project that could satisfy this dependency?
         // If so, then we will symlink to the project folder rather than to common/temp/node_modules.
         // In this case, we don't want "npm install" to process this package, but we do need
@@ -644,8 +659,7 @@ export class InstallManager {
         tempPackageJson.dependencies![packageName] = packageVersion;
 
         if (shrinkwrapFile) {
-          if (!shrinkwrapFile.tryEnsureCompatibleDependency(packageName, packageVersion,
-            rushProject.tempProjectName)) {
+          if (!shrinkwrapFile.tryEnsureCompatibleDependency(dependencySpecifier, rushProject.tempProjectName)) {
             shrinkwrapWarnings.push(`"${packageName}" (${packageVersion}) required by`
               + ` "${rushProject.packageName}"`);
             shrinkwrapIsUpToDate = false;
@@ -936,24 +950,36 @@ export class InstallManager {
               + FileSystem.getRealPath(packageManagerFilename) + ' ' + installArgs.join(' ') + os.EOL);
           }
 
-          Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename,
-            installArgs,
-            this._rushConfiguration.commonTempFolder,
-            undefined,
-            false, () => {
-              if (this._rushConfiguration.packageManager === 'pnpm') {
-                // If there is a failure in pnpm, it is possible that it left the
-                // store in a bad state. Therefore, we should clean out the store
-                // before attempting the install again.
+          try {
+            Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename,
+              installArgs,
+              this._rushConfiguration.commonTempFolder,
+              undefined,
+              false, () => {
+                if (this._rushConfiguration.packageManager === 'pnpm') {
+                  console.log(colors.yellow(`Deleting the "node_modules" folder`));
+                  this._commonTempFolderRecycler.moveFolder(commonNodeModulesFolder);
 
-                console.log(colors.yellow(`Deleting the "node_modules" folder`));
-                this._commonTempFolderRecycler.moveFolder(commonNodeModulesFolder);
-                console.log(colors.yellow(`Deleting the "pnpm-store" folder`));
-                this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
+                  // Leave the pnpm-store as is for the retry. This ensures that packages that have already
+                  // been downloaded need not be downloaded again, thereby potentially increasing the chances
+                  // of a subsequent successful install.
 
-                Utilities.createFolderWithRetry(commonNodeModulesFolder);
-              }
+                  Utilities.createFolderWithRetry(commonNodeModulesFolder);
+                }
             });
+          } catch (error) {
+            // All the install attempts failed.
+
+            if (this._rushConfiguration.packageManager === 'pnpm') {
+              // If the installation has failed even after the retries, then pnpm store may
+              // have got into a corrupted, irrecoverable state. Delete the store so that a
+              // future install can create the store afresh.
+              console.log(colors.yellow(`Deleting the "pnpm-store" folder`));
+              this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
+            }
+
+            throw error;
+          }
 
           if (this._rushConfiguration.packageManager === 'npm') {
 
@@ -1119,7 +1145,7 @@ export class InstallManager {
         //
         // This issue has been fixed as of npm v5.0.0: https://github.com/npm/npm/releases/tag/v5.0.0
         //
-        // For more context, see https://github.com/Microsoft/web-build-tools/issues/761#issuecomment-428689600
+        // For more context, see https://github.com/microsoft/rushstack/issues/761#issuecomment-428689600
         args.push('--no-optional');
       }
       args.push('--cache', this._rushConfiguration.npmCacheFolder);

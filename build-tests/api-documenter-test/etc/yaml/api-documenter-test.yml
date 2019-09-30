@@ -13,6 +13,8 @@ items:
     children:
       - 'api-documenter-test!DocBaseClass:class'
       - 'api-documenter-test!DocClass1:class'
+      - 'api-documenter-test!DocClassInterfaceMerge:class'
+      - 'api-documenter-test!DocClassInterfaceMerge:interface'
       - 'api-documenter-test!DocEnum:enum'
       - 'api-documenter-test!Generic:class'
       - 'api-documenter-test!globalFunction:function(1)'
@@ -24,6 +26,7 @@ items:
       - 'api-documenter-test!IDocInterface6:interface'
       - 'api-documenter-test!OuterNamespace.InnerNamespace.nestedFunction:function(1)'
       - 'api-documenter-test!SystemEvent:class'
+      - 'api-documenter-test!yamlReferenceUniquenessTest:function(1)'
   - uid: 'api-documenter-test!globalFunction:function(1)'
     summary: An exported function
     name: globalFunction(x)
@@ -60,11 +63,27 @@ items:
           description: ''
           type:
             - number
+  - uid: 'api-documenter-test!yamlReferenceUniquenessTest:function(1)'
+    name: yamlReferenceUniquenessTest()
+    fullName: yamlReferenceUniquenessTest()
+    langs:
+      - typeScript
+    type: function
+    syntax:
+      content: 'export declare function yamlReferenceUniquenessTest(): IDocInterface1;'
+      return:
+        type:
+          - 'api-documenter-test!IDocInterface1:interface'
+        description: ''
 references:
   - uid: 'api-documenter-test!DocBaseClass:class'
     name: DocBaseClass
   - uid: 'api-documenter-test!DocClass1:class'
     name: DocClass1
+  - uid: 'api-documenter-test!DocClassInterfaceMerge:class'
+    name: DocClassInterfaceMerge
+  - uid: 'api-documenter-test!DocClassInterfaceMerge:interface'
+    name: DocClassInterfaceMerge
   - uid: 'api-documenter-test!DocEnum:enum'
     name: DocEnum
   - uid: 'api-documenter-test!Generic:class'

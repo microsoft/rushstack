@@ -21,12 +21,8 @@
           "docComment": "",
           "excerptTokens": [
             {
-              "kind": "Reference",
-              "text": "_default"
-            },
-            {
               "kind": "Content",
-              "text": ": "
+              "text": "_default: "
             },
             {
               "kind": "Content",
@@ -36,8 +32,8 @@
           "releaseTag": "Public",
           "name": "_default",
           "variableTypeTokenRange": {
-            "startIndex": 2,
-            "endIndex": 3
+            "startIndex": 1,
+            "endIndex": 2
           }
         }
       ]

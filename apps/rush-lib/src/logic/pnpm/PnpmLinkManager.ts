@@ -37,7 +37,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       };
 
       // Use shrinkwrap from temp as the committed shrinkwrap may not always be up to date
-      // See https://github.com/microsoft/web-build-tools/issues/1273#issuecomment-492779995
+      // See https://github.com/microsoft/rushstack/issues/1273#issuecomment-492779995
       const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
         this._rushConfiguration.tempShrinkwrapFilename
       );
@@ -156,7 +156,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     //   file:projects/build-tools.tgz_dc21d88642e18a947127a751e00b020a
     //   file:projects/imodel-from-geojson.tgz_request@2.88.0
     const tempProjectDependencyKey: string | undefined =
-      pnpmShrinkwrapFile.getTopLevelDependencyVersion(project.tempProjectName);
+      pnpmShrinkwrapFile.getTempProjectDependencyKey(project.tempProjectName);
 
     if (!tempProjectDependencyKey) {
       throw new Error(`Cannot get dependency key for temp project: ${project.tempProjectName}`);

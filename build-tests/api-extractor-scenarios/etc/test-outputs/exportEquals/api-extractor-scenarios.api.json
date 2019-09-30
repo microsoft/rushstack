@@ -22,15 +22,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export interface "
-            },
-            {
-              "kind": "Reference",
-              "text": "ITeamsContext"
-            },
-            {
-              "kind": "Content",
-              "text": " "
+              "text": "export interface ITeamsContext "
             }
           ],
           "releaseTag": "Public",
@@ -42,16 +34,13 @@
               "docComment": "",
               "excerptTokens": [
                 {
-                  "kind": "Reference",
-                  "text": "context"
-                },
-                {
                   "kind": "Content",
-                  "text": ": "
+                  "text": "context: "
                 },
                 {
                   "kind": "Reference",
-                  "text": "Context"
+                  "text": "Context",
+                  "canonicalReference": "!microsoftTeams.Context:interface"
                 },
                 {
                   "kind": "Content",
@@ -61,8 +50,8 @@
               "releaseTag": "Public",
               "name": "context",
               "propertyTypeTokenRange": {
-                "startIndex": 2,
-                "endIndex": 3
+                "startIndex": 1,
+                "endIndex": 2
               }
             }
           ],

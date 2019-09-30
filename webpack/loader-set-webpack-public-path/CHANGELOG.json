@@ -2,6 +2,226 @@
   "name": "@microsoft/loader-set-webpack-public-path",
   "entries": [
     {
+      "version": "3.3.3",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.3.3",
+      "date": "Sun, 29 Sep 2019 23:56:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update repository URL"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `2.2.2` to `2.2.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.2` to `0.2.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.2` to `6.2.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.2",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.3.2",
+      "date": "Wed, 25 Sep 2019 15:15:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `2.2.1` to `2.2.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.1` to `0.2.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.1` to `6.2.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.1",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.3.1",
+      "date": "Tue, 24 Sep 2019 02:58:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `2.2.0` to `2.2.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.0` to `0.2.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.0` to `6.2.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.0",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.3.0",
+      "date": "Mon, 23 Sep 2019 15:14:55 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Remove unnecessary dependency on @types/node"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `2.1.135` to `2.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.24` to `0.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.11` to `6.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.179",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.2.179",
+      "date": "Fri, 20 Sep 2019 21:27:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `2.1.134` to `2.1.135`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.23` to `0.1.24`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.10` to `6.1.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.178",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.2.178",
+      "date": "Wed, 11 Sep 2019 19:56:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `2.1.133` to `2.1.134`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.22` to `0.1.23`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.9` to `6.1.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.177",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.2.177",
+      "date": "Tue, 10 Sep 2019 22:32:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `2.1.132` to `2.1.133`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.21` to `0.1.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.8` to `6.1.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.176",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.2.176",
+      "date": "Tue, 10 Sep 2019 20:38:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `2.1.131` to `2.1.132`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.20` to `0.1.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.7` to `6.1.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.175",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.2.175",
+      "date": "Wed, 04 Sep 2019 18:28:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `2.1.130` to `2.1.131`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.19` to `0.1.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.6` to `6.1.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.174",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.2.174",
+      "date": "Wed, 04 Sep 2019 15:15:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `2.1.129` to `2.1.130`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.18` to `0.1.19`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.5` to `6.1.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.173",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.2.173",
+      "date": "Wed, 04 Sep 2019 01:43:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `2.1.128` to `2.1.129`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.172",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.2.172",
+      "date": "Fri, 30 Aug 2019 00:14:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `2.1.127` to `2.1.128`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.17` to `0.1.18`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.4` to `6.1.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.171",
       "tag": "@microsoft/loader-set-webpack-public-path_v3.2.171",
       "date": "Mon, 12 Aug 2019 15:15:14 GMT",

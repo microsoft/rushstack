@@ -248,6 +248,7 @@ export class ApiItem {
     readonly displayName: string;
     getAssociatedPackage(): ApiPackage | undefined;
     getHierarchy(): ReadonlyArray<ApiItem>;
+    getMergedSiblings(): ReadonlyArray<ApiItem>;
     getScopedNameWithinPackage(): string;
     // @virtual (undocumented)
     getSortKey(): string;
@@ -270,6 +271,8 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
 export interface ApiItemContainerMixin extends ApiItem {
     addMember(member: ApiItem): void;
     findMembersByName(name: string): ReadonlyArray<ApiItem>;
+    // @internal
+    _getMergedSiblingsForMember(memberApiItem: ApiItem): ReadonlyArray<ApiItem>;
     readonly members: ReadonlyArray<ApiItem>;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiItemJson>): void;
@@ -613,7 +616,9 @@ export class Excerpt {
 
 // @public (undocumented)
 export class ExcerptToken {
-    constructor(kind: ExcerptTokenKind, text: string);
+    constructor(kind: ExcerptTokenKind, text: string, canonicalReference?: DeclarationReference);
+    // (undocumented)
+    readonly canonicalReference: DeclarationReference | undefined;
     // (undocumented)
     readonly kind: ExcerptTokenKind;
     // (undocumented)
@@ -815,6 +820,8 @@ export interface IApiVariableOptions extends IApiNameMixinOptions, IApiReleaseTa
 
 // @public (undocumented)
 export interface IExcerptToken {
+    // (undocumented)
+    canonicalReference?: string;
     // (undocumented)
     readonly kind: ExcerptTokenKind;
     // (undocumented)

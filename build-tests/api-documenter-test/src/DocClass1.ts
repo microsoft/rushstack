@@ -264,3 +264,30 @@ export interface IDocInterface6 {
    */
   regularProperty: number;
 }
+
+/**
+ * Interface for testing complex properties
+ * @public
+ */
+export interface IDocInterface6 {
+  arrayProperty: IDocInterface1[];
+  tupleProperty: [IDocInterface1, IDocInterface2];
+  unionProperty: IDocInterface1 | IDocInterface2;
+  intersectionProperty: IDocInterface1 & IDocInterface2;
+  typeReferenceProperty: Generic<IDocInterface1>;
+  genericReferenceMethod<T>(x: T): T;
+}
+
+/**
+ * Class that merges with interface
+ * @public
+ */
+export class DocClassInterfaceMerge {
+}
+
+/**
+ * Interface that merges with class
+ * @public
+ */
+export interface DocClassInterfaceMerge {
+}

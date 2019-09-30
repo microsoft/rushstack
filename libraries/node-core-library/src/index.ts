@@ -76,7 +76,7 @@ export {
 } from './FileWriter';
 export {
   LegacyAdapters,
-  callback
+  LegacyCallback
 } from './LegacyAdapters';
 export { StringBuilder, IStringBuilder } from './StringBuilder';
 export { Terminal } from './Terminal/Terminal';

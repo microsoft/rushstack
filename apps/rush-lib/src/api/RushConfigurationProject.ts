@@ -13,6 +13,7 @@ import {
 import { RushConfiguration } from '../api/RushConfiguration';
 import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
 import { PackageJsonEditor } from './PackageJsonEditor';
+import { RushConstants } from '../logic/RushConstants';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
@@ -36,6 +37,7 @@ export class RushConfigurationProject {
   private _packageName: string;
   private _projectFolder: string;
   private _projectRelativeFolder: string;
+  private _projectRushTempFolder: string;
   private _reviewCategory: string;
   private _packageJson: IPackageJson;
   private _packageJsonEditor: PackageJsonEditor;
@@ -50,9 +52,11 @@ export class RushConfigurationProject {
   private readonly _rushConfiguration: RushConfiguration;
 
   /** @internal */
-  constructor(projectJson: IRushConfigurationProjectJson,
-              rushConfiguration: RushConfiguration,
-              tempProjectName: string) {
+  constructor(
+    projectJson: IRushConfigurationProjectJson,
+    rushConfiguration: RushConfiguration,
+    tempProjectName: string
+  ) {
     this._rushConfiguration = rushConfiguration;
     this._packageName = projectJson.packageName;
     this._projectRelativeFolder = projectJson.projectFolder;
@@ -75,6 +79,12 @@ export class RushConfigurationProject {
     if (!FileSystem.exists(this._projectFolder)) {
       throw new Error(`Project folder not found: ${projectJson.projectFolder}`);
     }
+
+    this._projectRushTempFolder = path.join(
+      this._projectFolder,
+      RushConstants.projectRushFolderName,
+      RushConstants.rushTempFolderName
+    );
 
     // Are we using a package review file?
     if (rushConfiguration.approvedPackagesPolicy.enabled) {
@@ -146,6 +156,15 @@ export class RushConfigurationProject {
    */
   public get projectRelativeFolder(): string {
     return this._projectRelativeFolder;
+  }
+
+  /**
+   * The project-specific Rush temp folder. This folder is used to store Rush-specific temporary files.
+   *
+   * Example: `C:\MyRepo\libraries\my-project\.rush\temp`
+   */
+  public get projectRushTempFolder(): string {
+    return this._projectRushTempFolder;
   }
 
   /**

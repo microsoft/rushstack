@@ -51,6 +51,10 @@ export class ApiExtractorTask extends RSCTask<IApiExtractorTaskConfig>  {
     );
 
     const apiExtractorRunner: TApiExtractorRunner = new ApiExtractorRunner(
+      {
+        fileError: this.fileError.bind(this),
+        fileWarning: this.fileWarning.bind(this)
+      },
       extractorConfig,
       extractorOptions,
       this.buildFolder,

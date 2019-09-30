@@ -1,10 +1,10 @@
 {
   "name": "@microsoft/rush-lib",
-  "version": "5.11.2",
+  "version": "5.13.1",
   "description": "A library for writing scripts that interact with the Rush tool",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/apps/rush-lib"
+    "url": "https://github.com/microsoft/rushstack/tree/master/apps/rush-lib"
   },
   "engines": {
     "node": ">=5.6.0"
@@ -18,13 +18,12 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "3.14.0",
-    "@microsoft/package-deps-hash": "2.2.170",
-    "@microsoft/stream-collator": "3.0.85",
-    "@microsoft/ts-command-line": "4.2.7",
+    "@microsoft/node-core-library": "3.15.1",
+    "@microsoft/package-deps-hash": "2.2.181",
+    "@microsoft/stream-collator": "3.1.3",
+    "@microsoft/ts-command-line": "4.3.2",
     "@pnpm/link-bins": "~1.0.1",
     "@pnpm/logger": "~1.0.1",
-    "@types/inquirer": "0.0.43",
     "@yarnpkg/lockfile": "~1.0.2",
     "builtins": "~1.0.3",
     "cli-table": "~0.3.1",
@@ -38,7 +37,7 @@
     "lodash": "~4.17.15",
     "minimatch": "~3.0.2",
     "node-fetch": "~2.1.2",
-    "npm-package-arg": "~5.1.2",
+    "npm-package-arg": "~6.1.0",
     "read-package-tree": "~5.1.5",
     "semver": "~5.3.0",
     "strict-uri-encode": "~2.0.0",
@@ -48,14 +47,15 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.1.4",
-    "@microsoft/rush-stack-compiler-3.4": "0.1.17",
+    "@microsoft/node-library-build": "6.2.3",
+    "@microsoft/rush-stack-compiler-3.4": "0.2.3",
     "@types/glob": "5.0.30",
+    "@types/inquirer": "0.0.43",
     "@types/jest": "23.3.11",
     "@types/js-yaml": "3.12.1",
     "@types/lodash": "4.14.116",
     "@types/minimatch": "2.0.29",
-    "@types/node": "8.5.8",
+    "@types/node": "8.10.54",
     "@types/node-fetch": "1.6.9",
     "@types/semver": "5.3.33",
     "@types/tar": "4.0.0",

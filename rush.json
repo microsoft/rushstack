@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.11.1",
+  "rushVersion": "5.13.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -202,7 +202,7 @@
      * your PR branch, and in this situation "rush change" will also automatically invoke "git fetch"
      * to retrieve the latest activity for the remote master branch.
      */
-    "url": "https://github.com/Microsoft/web-build-tools.git"
+    "url": "https://github.com/microsoft/rushstack.git"
   },
 
   /**
@@ -607,7 +607,7 @@
       "projectFolder": "libraries/package-deps-hash",
       "reviewCategory": "libraries",
       "shouldPublish": true
-   },
+    },
     {
       "packageName": "@microsoft/rushell",
       "projectFolder": "libraries/rushell",
@@ -629,7 +629,27 @@
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.4"
       ]
-   },
+    },
+
+    // "repo-scripts" folder (alphabetical order)
+    {
+      "packageName": "doc-plugin-rush-stack",
+      "projectFolder": "repo-scripts/doc-plugin-rush-stack",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "generate-api-docs",
+      "projectFolder": "repo-scripts/generate-api-docs",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "repo-toolbox",
+      "projectFolder": "repo-scripts/repo-toolbox",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
 
     // "stack" folder (alphabetical order)
     {

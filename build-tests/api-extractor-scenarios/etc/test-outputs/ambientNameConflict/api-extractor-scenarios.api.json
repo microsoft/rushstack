@@ -22,27 +22,12 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function "
+              "text": "export declare function ambientNameConflict(p1: "
             },
             {
               "kind": "Reference",
-              "text": "ambientNameConflict"
-            },
-            {
-              "kind": "Content",
-              "text": "("
-            },
-            {
-              "kind": "Reference",
-              "text": "p1"
-            },
-            {
-              "kind": "Content",
-              "text": ": "
-            },
-            {
-              "kind": "Reference",
-              "text": "Promise"
+              "text": "Promise",
+              "canonicalReference": "!Promise:interface"
             },
             {
               "kind": "Content",
@@ -50,19 +35,12 @@
             },
             {
               "kind": "Content",
-              "text": ", "
+              "text": ", p2: "
             },
             {
               "kind": "Reference",
-              "text": "p2"
-            },
-            {
-              "kind": "Content",
-              "text": ": "
-            },
-            {
-              "kind": "Reference",
-              "text": "MyPromise"
+              "text": "MyPromise",
+              "canonicalReference": "api-extractor-scenarios!Promise:class"
             },
             {
               "kind": "Content",
@@ -82,8 +60,8 @@
             }
           ],
           "returnTypeTokenRange": {
-            "startIndex": 13,
-            "endIndex": 14
+            "startIndex": 7,
+            "endIndex": 8
           },
           "releaseTag": "Public",
           "overloadIndex": 1,
@@ -91,15 +69,15 @@
             {
               "parameterName": "p1",
               "parameterTypeTokenRange": {
-                "startIndex": 5,
-                "endIndex": 7
+                "startIndex": 1,
+                "endIndex": 3
               }
             },
             {
               "parameterName": "p2",
               "parameterTypeTokenRange": {
-                "startIndex": 10,
-                "endIndex": 12
+                "startIndex": 4,
+                "endIndex": 6
               }
             }
           ],

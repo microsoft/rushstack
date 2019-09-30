@@ -2,6 +2,54 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "4.3.2",
+      "tag": "@microsoft/ts-command-line_v4.3.2",
+      "date": "Sun, 29 Sep 2019 23:56:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update repository URL"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.1",
+      "tag": "@microsoft/ts-command-line_v4.3.1",
+      "date": "Tue, 24 Sep 2019 02:58:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add back a missing dependency."
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.0",
+      "tag": "@microsoft/ts-command-line_v4.3.0",
+      "date": "Mon, 23 Sep 2019 15:14:55 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Remove unnecessary dependencies on @types/argparse and @types/node"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.8",
+      "tag": "@microsoft/ts-command-line_v4.2.8",
+      "date": "Tue, 10 Sep 2019 22:32:23 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update documentation"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.2.7",
       "tag": "@microsoft/ts-command-line_v4.2.7",
       "date": "Mon, 12 Aug 2019 15:15:14 GMT",
