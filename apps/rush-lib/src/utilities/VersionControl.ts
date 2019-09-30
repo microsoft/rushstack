@@ -3,6 +3,7 @@
 
 import * as child_process from 'child_process';
 import * as colors from 'colors';
+import * as lodash from 'lodash';
 import { Executable } from '@microsoft/node-core-library';
 
 const DEFAULT_BRANCH: string = 'master';
@@ -59,7 +60,7 @@ export class VersionControl {
     const output: string = child_process.execSync(
       `git diff ${targetBranch}... --name-only --no-renames --diff-filter=A`
     ).toString();
-    const regex: RegExp | undefined = pathPrefix ? new RegExp(`^${pathPrefix}`, 'i') : undefined;
+    const regex: RegExp | undefined = pathPrefix ? new RegExp(`^${lodash.escapeRegExp(pathPrefix)}`, 'i') : undefined;
     return output.split('\n').map((line) => {
       if (line) {
         const trimmedLine: string = line.trim();

@@ -5,6 +5,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import * as colors from 'colors';
+import * as lodash from 'lodash';
 
 import inquirer = require('inquirer');
 
@@ -210,7 +211,7 @@ export class ChangeAction extends BaseRushAction {
       normalizedFolder = normalizedFolder + '/';
     }
 
-    const pathRegex: RegExp = new RegExp(`^${normalizedFolder}`, 'i');
+    const pathRegex: RegExp = new RegExp(`^${lodash.escapeRegExp(normalizedFolder)}`, 'i');
     for (const folder of changedFolders) {
       if (folder && folder.match(pathRegex)) {
         return true;
