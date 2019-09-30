@@ -90,8 +90,8 @@ Optional arguments:
                         same version of the dependency.
   -s, --skip-update     If specified, the \\"rush update\\" command will not be 
                         run after updating the package.json files.
-  --all                 If specified, the dependency will be added to all of 
-                        your projects.
+  --all                 If specified, the dependency will be added to all 
+                        projects.
 "
 `;
 

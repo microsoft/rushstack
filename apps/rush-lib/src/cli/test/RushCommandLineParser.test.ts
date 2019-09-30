@@ -30,6 +30,7 @@ import { ChildProcessModuleMock, ISpawnMockConfig } from 'child_process';
 import { FileSystem } from '@microsoft/node-core-library';
 import { Interleaver } from '@microsoft/stream-collator';
 import { RushCommandLineParser } from '../RushCommandLineParser';
+import { PackageJsonUpdater } from '../../logic/PackageJsonUpdater';
 
 /**
  * Interface definition for a test instance for the RushCommandLineParser.
@@ -284,11 +285,27 @@ describe('RushCommandLineParser', () => {
   });
 
   describe(`in repo with tests for add`, () => {
+    let doRushAddMock: jest.SpyInstance;
+    let oldExitCode: number;
+    let oldArgs: string[];
+
+    beforeEach(() => {
+      doRushAddMock = jest.spyOn(PackageJsonUpdater.prototype, 'doRushAdd').mockImplementation(() => Promise.resolve());
+      jest.spyOn(process, 'exit').mockImplementation(() => { /* stub */ });
+      oldExitCode = process.exitCode;
+      oldArgs = process.argv;
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+      process.exitCode = oldExitCode;
+      process.argv = oldArgs;
+    });
+
     describe(`'add' action`, () => {
       it(`adds a dependency to just one repo in the workspace`, () => {
         const startPath: string = resolve(__dirname, 'addRepo');
-        const aPath: string = resolve(__dirname, 'addRepo/a');
-        FileSystem.deleteFile(resolve(__dirname, `addRepo/a/package-deps.json`));
+        const aPath: string = resolve(__dirname, 'addRepo', 'a');
 
         // Create a Rush CLI instance. This instance is heavy-weight and relies on setting process.exit
         // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test
@@ -297,16 +314,16 @@ describe('RushCommandLineParser', () => {
         const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
 
         // Switching to the "a" package of addRepo
-        process.chdir(aPath);
+        jest.spyOn(process, 'cwd').mockReturnValue(aPath);
 
         // Mock the command
         process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', 'add', '-p', 'assert'];
 
-        expect.assertions(2);
         return expect(parser.execute()).resolves.toEqual(true)
           .then(() => {
-            const packageJSON = FileSystem.readFile(resolve(__dirname, `addRepo/a/package.json`));
-            expect(packageJSON).toEqual(expect.stringMatching('"assert"'));
+            expect(doRushAddMock).toHaveBeenCalledTimes(1);
+            expect(doRushAddMock.mock.calls[0][0].currentProject.packageName).toEqual('a');
+            expect(doRushAddMock.mock.calls[0][0].packageName).toEqual('assert');
           });
       });
     });
@@ -314,9 +331,7 @@ describe('RushCommandLineParser', () => {
     describe(`'add' action with --all`, () => {
       it(`adds a dependency to all repos in the workspace`, () => {
         const startPath: string = resolve(__dirname, 'addRepo');
-        const aPath: string = resolve(__dirname, 'addRepo/a');
-        FileSystem.deleteFile(resolve(__dirname, `addRepo/a/package-deps.json`));
-        FileSystem.deleteFile(resolve(__dirname, `addRepo/b/package-deps.json`));
+        const aPath: string = resolve(__dirname, 'addRepo', 'a');
 
         // Create a Rush CLI instance. This instance is heavy-weight and relies on setting process.exit
         // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test
@@ -325,18 +340,18 @@ describe('RushCommandLineParser', () => {
         const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
 
         // Switching to the "a" package of addRepo
-        process.chdir(aPath);
+        jest.spyOn(process, 'cwd').mockReturnValue(aPath);
 
         // Mock the command
         process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', 'add', '-p', 'assert', '--all'];
 
-        expect.assertions(3);
         return expect(parser.execute()).resolves.toEqual(true)
           .then(() => {
-            const packageAJSON = FileSystem.readFile(resolve(__dirname, `addRepo/a/package.json`));
-            expect(packageAJSON).toEqual(expect.stringMatching('"assert"'));
-            const packageBJSON = FileSystem.readFile(resolve(__dirname, `addRepo/b/package.json`));
-            expect(packageBJSON).toEqual(expect.stringMatching('"assert"'));
+            expect(doRushAddMock).toHaveBeenCalledTimes(2);
+            expect(doRushAddMock.mock.calls[0][0].currentProject.packageName).toEqual('a');
+            expect(doRushAddMock.mock.calls[0][0].packageName).toEqual('assert');
+            expect(doRushAddMock.mock.calls[1][0].currentProject.packageName).toEqual('b');
+            expect(doRushAddMock.mock.calls[1][0].packageName).toEqual('assert');
           });
       });
     });
