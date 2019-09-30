@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Escape a few regular expressions that contain paths.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}
