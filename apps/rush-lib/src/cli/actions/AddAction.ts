@@ -122,7 +122,7 @@ export class AddAction extends BaseRushAction {
     }
 
     let projects: RushConfigurationProject[];
-    if (this._allFlag) {
+    if (this._allFlag.value) {
       projects = this.rushConfiguration.projects;
     } else {
       projects = [currentProject];
@@ -143,7 +143,5 @@ export class AddAction extends BaseRushAction {
           : (this._exactFlag.value ? SemVerStyle.Exact : SemVerStyle.Tilde)
       });
     }
-
-    return;
   }
 }
