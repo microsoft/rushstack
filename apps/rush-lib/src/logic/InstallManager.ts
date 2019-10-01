@@ -311,7 +311,6 @@ export class InstallManager {
 
     // Ensure that the package manager is installed
     await this.ensureLocalPackageManager();
-
     let shrinkwrapFile: BaseShrinkwrapFile | undefined = undefined;
 
     // (If it's a full update, then we ignore the shrinkwrap from Git since it will be overwritten)
