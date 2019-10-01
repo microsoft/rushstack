@@ -5,7 +5,6 @@ import * as os from 'os';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import * as colors from 'colors';
-import * as lodash from 'lodash';
 
 import inquirer = require('inquirer');
 
@@ -13,7 +12,10 @@ import {
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
-import { FileSystem } from '@microsoft/node-core-library';
+import {
+  FileSystem,
+  Path
+} from '@microsoft/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import {
@@ -211,9 +213,8 @@ export class ChangeAction extends BaseRushAction {
       normalizedFolder = normalizedFolder + '/';
     }
 
-    const pathRegex: RegExp = new RegExp(`^${lodash.escapeRegExp(normalizedFolder)}`, 'i');
     for (const folder of changedFolders) {
-      if (folder && folder.match(pathRegex)) {
+      if (folder && Path.isUnderOrEqual(folder, normalizedFolder)) {
         return true;
       }
     }
