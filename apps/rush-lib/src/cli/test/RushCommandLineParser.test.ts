@@ -1,36 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// Mock child_process so we can verify tasks are (or are not) invoked as we expect
-jest.mock('child_process');
+import './mockRushCommandLineParser';
 
-// add needs more than the default 5 seconds
-jest.setTimeout(30000);
-
-/**
- * Mock RushCommandLineParser itself to prevent `process.exit` to be called on failure
- */
-jest.mock('../RushCommandLineParser', () => {
-  // tslint:disable-next-line: no-any
-  const actualModule: any = jest.requireActual('../RushCommandLineParser');
-  if (actualModule.RushCommandLineParser) {
-    // Stub out the troublesome method that calls `process.exit`
-    actualModule.RushCommandLineParser.prototype._reportErrorAndSetExitCode = mockReportErrorAndSetExitCode;
-  }
-  return actualModule;
-
-  function mockReportErrorAndSetExitCode(error: Error): void {
-    // Just rethrow the error so the unit tests can catch it
-    throw error;
-  }
-});
-
-import { resolve } from 'path';
+import * as path from 'path';
 import { ChildProcessModuleMock, ISpawnMockConfig } from 'child_process';
 import { FileSystem } from '@microsoft/node-core-library';
 import { Interleaver } from '@microsoft/stream-collator';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { PackageJsonUpdater } from '../../logic/PackageJsonUpdater';
 
 /**
  * Interface definition for a test instance for the RushCommandLineParser.
@@ -45,12 +22,12 @@ interface IParserTestInstance {
  */
 function getCommandLineParserInstance(repoName: string, taskName: string): IParserTestInstance {
   // Point to the test repo folder
-  const startPath: string = resolve(__dirname, repoName);
+  const startPath: string = path.resolve(__dirname, repoName);
 
   // The `build` task is hard-coded to be incremental. So delete the package-deps file folder in
   // the test repo to guarantee the test actually runs.
-  FileSystem.deleteFolder(resolve(__dirname, `${repoName}/a/.rush/temp`));
-  FileSystem.deleteFolder(resolve(__dirname, `${repoName}/b/.rush/temp`));
+  FileSystem.deleteFolder(path.resolve(__dirname, `${repoName}/a/.rush/temp`));
+  FileSystem.deleteFolder(path.resolve(__dirname, `${repoName}/b/.rush/temp`));
 
   // Create a Rush CLI instance. This instance is heavy-weight and relies on setting process.exit
   // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test
@@ -121,7 +98,7 @@ describe('RushCommandLineParser', () => {
                 expect.stringMatching(expectedBuildTaskRegexp)
               ]));
               expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/a`));
+              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
 
               // tslint:disable-next-line: no-any
               const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -129,7 +106,7 @@ describe('RushCommandLineParser', () => {
                 expect.stringMatching(expectedBuildTaskRegexp)
               ]));
               expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/b`));
+              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
             });
         });
       });
@@ -155,7 +132,7 @@ describe('RushCommandLineParser', () => {
                 expect.stringMatching(expectedBuildTaskRegexp)
               ]));
               expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/a`));
+              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
 
               // tslint:disable-next-line: no-any
               const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -163,7 +140,7 @@ describe('RushCommandLineParser', () => {
                 expect.stringMatching(expectedBuildTaskRegexp)
               ]));
               expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/b`));
+              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
             });
         });
       });
@@ -191,7 +168,7 @@ describe('RushCommandLineParser', () => {
                 expect.stringMatching(expectedBuildTaskRegexp)
               ]));
               expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/a`));
+              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
 
               // tslint:disable-next-line: no-any
               const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -199,7 +176,7 @@ describe('RushCommandLineParser', () => {
                 expect.stringMatching(expectedBuildTaskRegexp)
               ]));
               expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/b`));
+              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
             });
         });
       });
@@ -225,7 +202,7 @@ describe('RushCommandLineParser', () => {
                 expect.stringMatching(expectedBuildTaskRegexp)
               ]));
               expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/a`));
+              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
 
               // tslint:disable-next-line: no-any
               const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -233,7 +210,7 @@ describe('RushCommandLineParser', () => {
                 expect.stringMatching(expectedBuildTaskRegexp)
               ]));
               expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/b`));
+              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
             });
         });
       });
@@ -280,79 +257,6 @@ describe('RushCommandLineParser', () => {
         return expect(() => {
           getCommandLineParserInstance(repoName, 'doesnt-matter');
         }).toThrowError('"safeForSimultaneousRushProcesses=true". This configuration is not supported');
-      });
-    });
-  });
-
-  describe(`in repo with tests for add`, () => {
-    let doRushAddMock: jest.SpyInstance;
-    let oldExitCode: number;
-    let oldArgs: string[];
-
-    beforeEach(() => {
-      doRushAddMock = jest.spyOn(PackageJsonUpdater.prototype, 'doRushAdd').mockImplementation(() => Promise.resolve());
-      jest.spyOn(process, 'exit').mockImplementation(() => { /* stub */ });
-      oldExitCode = process.exitCode;
-      oldArgs = process.argv;
-    });
-
-    afterEach(() => {
-      jest.clearAllMocks();
-      process.exitCode = oldExitCode;
-      process.argv = oldArgs;
-    });
-
-    describe(`'add' action`, () => {
-      it(`adds a dependency to just one repo in the workspace`, () => {
-        const startPath: string = resolve(__dirname, 'addRepo');
-        const aPath: string = resolve(__dirname, 'addRepo', 'a');
-
-        // Create a Rush CLI instance. This instance is heavy-weight and relies on setting process.exit
-        // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test
-        // repo will fail due to contention over the same lock which is kept until the test runner process
-        // ends.
-        const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
-
-        // Switching to the "a" package of addRepo
-        jest.spyOn(process, 'cwd').mockReturnValue(aPath);
-
-        // Mock the command
-        process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', 'add', '-p', 'assert'];
-
-        return expect(parser.execute()).resolves.toEqual(true)
-          .then(() => {
-            expect(doRushAddMock).toHaveBeenCalledTimes(1);
-            expect(doRushAddMock.mock.calls[0][0].currentProject.packageName).toEqual('a');
-            expect(doRushAddMock.mock.calls[0][0].packageName).toEqual('assert');
-          });
-      });
-    });
-
-    describe(`'add' action with --all`, () => {
-      it(`adds a dependency to all repos in the workspace`, () => {
-        const startPath: string = resolve(__dirname, 'addRepo');
-        const aPath: string = resolve(__dirname, 'addRepo', 'a');
-
-        // Create a Rush CLI instance. This instance is heavy-weight and relies on setting process.exit
-        // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test
-        // repo will fail due to contention over the same lock which is kept until the test runner process
-        // ends.
-        const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
-
-        // Switching to the "a" package of addRepo
-        jest.spyOn(process, 'cwd').mockReturnValue(aPath);
-
-        // Mock the command
-        process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', 'add', '-p', 'assert', '--all'];
-
-        return expect(parser.execute()).resolves.toEqual(true)
-          .then(() => {
-            expect(doRushAddMock).toHaveBeenCalledTimes(2);
-            expect(doRushAddMock.mock.calls[0][0].currentProject.packageName).toEqual('a');
-            expect(doRushAddMock.mock.calls[0][0].packageName).toEqual('assert');
-            expect(doRushAddMock.mock.calls[1][0].currentProject.packageName).toEqual('b');
-            expect(doRushAddMock.mock.calls[1][0].packageName).toEqual('assert');
-          });
       });
     });
   });
