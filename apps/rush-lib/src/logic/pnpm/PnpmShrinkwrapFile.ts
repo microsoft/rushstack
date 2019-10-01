@@ -25,6 +25,10 @@ export interface IPnpmShrinkwrapDependencyYaml {
   };
   /** The list of dependencies and the resolved version */
   dependencies: { [dependency: string]: string };
+  /** The list of optional dependencies and the resolved version */
+  optionalDependencies: { [dependency: string]: string };
+  /** The list of peer dependencies and the resolved version */
+  peerDependencies: { [dependency: string]: string };
 }
 
 /**
@@ -180,6 +184,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return dependency.resolution.tarball;
   }
 
+  public getTopLevelDependencyKey(dependencyName: string): string | undefined {
+    return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
+  }
+
   /**
    * Gets the version number from the list of top-level dependencies in the "dependencies" section
    * of the shrinkwrap file. Sample return values:
@@ -196,7 +204,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined {
     const value: string | undefined = BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
     if (value) {
-      return new DependencySpecifier(dependencyName, value);
+      const dependencySpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(dependencyName, value);
+      return !!dependencySpecifier ? dependencySpecifier : new DependencySpecifier(dependencyName, value);
     }
     return undefined;
   }

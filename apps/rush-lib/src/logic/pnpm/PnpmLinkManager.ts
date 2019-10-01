@@ -271,7 +271,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       );
 
       if (!this._rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection) {
-        pnpmProjectDependencyManifest.addDependency(newLocalPackage);
+        pnpmProjectDependencyManifest.addDependency(newLocalPackage, shrinkwrapEntry);
       }
 
       newLocalPackage.symlinkTargetFolderPath = dependencyLocalInstallationRealpath;
