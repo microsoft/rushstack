@@ -1,6 +1,13 @@
 # Change Log - @microsoft/eslint-config-scalable-ts
 
-This log was last generated on Wed, 04 Sep 2019 01:43:31 GMT and should not be manually modified.
+This log was last generated on Sun, 29 Sep 2019 23:56:29 GMT and should not be manually modified.
+
+## 0.3.1
+Sun, 29 Sep 2019 23:56:29 GMT
+
+### Patches
+
+- Update repository URL
 
 ## 0.3.0
 Wed, 04 Sep 2019 01:43:31 GMT

@@ -33,7 +33,7 @@ describe('parseGitLsTree', () => {
   });
 
   it('can handle a submodule', (done) => {
-    const filename: string = 'web-build-tools';
+    const filename: string = 'rushstack';
     const hash: string = 'c5880bf5b0c6c1f2e2c43c95beeb8f0a808e8bac';
 
     const output: string = `160000 commit ${hash}\t${filename}`;

@@ -35,14 +35,18 @@ export class ApprovedPackagesPolicy {
     }
 
     // Load browser-approved-packages.json
-    const browserApprovedPackagesPath: string = path.join(rushConfiguration.commonRushConfigFolder,
-      RushConstants.browserApprovedPackagesFilename);
+    const browserApprovedPackagesPath: string = path.join(
+      rushConfiguration.commonRushConfigFolder,
+      RushConstants.browserApprovedPackagesFilename
+    );
     this._browserApprovedPackages = new ApprovedPackagesConfiguration(browserApprovedPackagesPath);
     this._browserApprovedPackages.tryLoadFromFile(this._enabled);
 
     // Load nonbrowser-approved-packages.json
-    const nonbrowserApprovedPackagesPath: string = path.join(rushConfiguration.commonRushConfigFolder,
-      RushConstants.nonbrowserApprovedPackagesFilename);
+    const nonbrowserApprovedPackagesPath: string = path.join(
+      rushConfiguration.commonRushConfigFolder,
+      RushConstants.nonbrowserApprovedPackagesFilename
+    );
     this._nonbrowserApprovedPackages = new ApprovedPackagesConfiguration(nonbrowserApprovedPackagesPath);
     this._nonbrowserApprovedPackages.tryLoadFromFile(this._enabled);
   }

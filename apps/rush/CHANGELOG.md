@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 11 Sep 2019 21:41:34 GMT and should not be manually modified.
+This log was last generated on Fri, 27 Sep 2019 22:34:50 GMT and should not be manually modified.
+
+## 5.13.1
+Fri, 27 Sep 2019 22:34:50 GMT
+
+### Updates
+
+- Improve support for pnpm lockfile version 5.1. Also fixes a regression in Rush 5.12.0 in which rush install can fail on pnpm 3.5+ with the error message "ERROR: Invalid Version"
 
 ## 5.13.0
 Wed, 11 Sep 2019 21:41:34 GMT

@@ -484,6 +484,36 @@
           ]
         },
         {
+          "kind": "Class",
+          "canonicalReference": "api-documenter-test!DocClassInterfaceMerge:class",
+          "docComment": "/**\n * Class that merges with interface\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare class DocClassInterfaceMerge "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "DocClassInterfaceMerge",
+          "members": [],
+          "implementsTokenRanges": []
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "api-documenter-test!DocClassInterfaceMerge:interface",
+          "docComment": "/**\n * Interface that merges with class\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface DocClassInterfaceMerge "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "DocClassInterfaceMerge",
+          "members": [],
+          "extendsTokenRanges": []
+        },
+        {
           "kind": "Enum",
           "canonicalReference": "api-documenter-test!DocEnum:enum",
           "docComment": "/**\n * Docs for DocEnum\n *\n * {@docCategory SystemEvent}\n *\n * @public\n */\n",

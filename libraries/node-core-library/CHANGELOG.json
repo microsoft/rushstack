@@ -2,6 +2,18 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.15.1",
+      "tag": "@microsoft/node-core-library_v3.15.1",
+      "date": "Sun, 29 Sep 2019 23:56:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update repository URL"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.15.0",
       "tag": "@microsoft/node-core-library_v3.15.0",
       "date": "Mon, 23 Sep 2019 15:14:55 GMT",

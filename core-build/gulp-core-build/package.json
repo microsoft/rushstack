@@ -1,10 +1,10 @@
 {
   "name": "@microsoft/gulp-core-build",
-  "version": "3.12.0",
+  "version": "3.12.1",
   "description": "Core gulp build tasks for building typescript, html, less, etc.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/core-build/gulp-core-build"
+    "url": "https://github.com/microsoft/rushstack/tree/master/core-build/gulp-core-build"
   },
   "scripts": {
     "build": "gulp --clean"
@@ -13,7 +13,7 @@
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "3.15.0",
+    "@microsoft/node-core-library": "3.15.1",
     "@types/chalk": "0.4.31",
     "@types/gulp": "4.0.6",
     "@types/node": "8.10.54",

@@ -248,6 +248,7 @@ export class ApiItem {
     readonly displayName: string;
     getAssociatedPackage(): ApiPackage | undefined;
     getHierarchy(): ReadonlyArray<ApiItem>;
+    getMergedSiblings(): ReadonlyArray<ApiItem>;
     getScopedNameWithinPackage(): string;
     // @virtual (undocumented)
     getSortKey(): string;
@@ -270,6 +271,8 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
 export interface ApiItemContainerMixin extends ApiItem {
     addMember(member: ApiItem): void;
     findMembersByName(name: string): ReadonlyArray<ApiItem>;
+    // @internal
+    _getMergedSiblingsForMember(memberApiItem: ApiItem): ReadonlyArray<ApiItem>;
     readonly members: ReadonlyArray<ApiItem>;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiItemJson>): void;

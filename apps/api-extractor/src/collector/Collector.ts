@@ -437,7 +437,7 @@ export class Collector {
   private _collectGlobalNames(usedNames: Set<string>): void {
     // As a temporary workaround, this a short list of names that appear in typical projects.
     // The full solution is tracked by this issue:
-    // https://github.com/Microsoft/web-build-tools/issues/1095
+    // https://github.com/microsoft/rushstack/issues/1095
     const globalNames: string[] = [
       'Array',
       'ArrayConstructor',

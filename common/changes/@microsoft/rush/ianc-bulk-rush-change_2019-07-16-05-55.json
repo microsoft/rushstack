@@ -1,8 +1,8 @@
 {
   "changes": [
     {
-      "comment": "",
       "packageName": "@microsoft/rush",
+      "comment": "Add options to rush change to allow creating changefiles for all changed projects.",
       "type": "none"
     }
   ],

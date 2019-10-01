@@ -31,4 +31,4 @@ with the following common goals:
 
 ## Project Status
 
-**Rush Stack** is still in its early phases.  If you'd like to participate, please [open an issue](https://github.com/Microsoft/web-build-tools/issues) or join the [web-build-tools Gitter community](https://gitter.im/web-build-tools/web-build-tools).
+**Rush Stack** is still in its early phases.  If you'd like to participate, please [open an issue](https://github.com/microsoft/rushstack/issues) or join the [web-build-tools Gitter community](https://gitter.im/web-build-tools/web-build-tools).

@@ -1,6 +1,18 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Tue, 24 Sep 2019 02:58:49 GMT and should not be manually modified.
+This log was last generated on Sun, 29 Sep 2019 23:56:29 GMT and should not be manually modified.
+
+## 1.10.10
+Sun, 29 Sep 2019 23:56:29 GMT
+
+### Patches
+
+- Update repository URL
+
+## 1.10.9
+Wed, 25 Sep 2019 15:15:31 GMT
+
+*Version update only*
 
 ## 1.10.8
 Tue, 24 Sep 2019 02:58:49 GMT

@@ -72,7 +72,7 @@ export class DtsRollupGenerator {
     // Emit the triple slash directives
     for (const typeDirectiveReference of collector.dtsTypeReferenceDirectives) {
       // tslint:disable-next-line:max-line-length
-      // https://github.com/Microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
+      // https://github.com/microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
       stringWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
     }
 

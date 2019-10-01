@@ -1,10 +1,10 @@
 {
   "name": "@microsoft/eslint-config-scalable-ts",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Base set of ESLint rules for scalable TypeScript projects.",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/libraries/eslint-config-scalable-ts"
+    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/eslint-config-scalable-ts"
   },
   "scripts": {
     "build": ""
