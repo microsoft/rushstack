@@ -32,9 +32,9 @@ export const enum SemVerStyle {
  */
 export interface IPackageJsonUpdaterRushAddOptions {
   /**
-   * The project whose package.json should get updated
+   * The projects whose package.jsons should get updated
    */
-  currentProject: RushConfigurationProject;
+  projects: RushConfigurationProject[];
   /**
    * The name of the dependency to be added
    */
@@ -112,7 +112,7 @@ export class PackageJsonUpdater {
    */
   public doRushAdd(options: IPackageJsonUpdaterRushAddOptions): Promise<void> {
     const {
-      currentProject,
+      projects,
       packageName,
       initialVersion,
       devDependency,
@@ -160,51 +160,58 @@ export class PackageJsonUpdater {
       console.log(colors.green(`Updating projects to use `) + packageName + '@' + colors.cyan(version));
       console.log();
 
-      const currentProjectUpdate: IUpdateProjectOptions = {
-        project: new VersionMismatchFinderProject(currentProject),
-        packageName,
-        newVersion: version,
-        dependencyType: devDependency ? DependencyType.Dev : undefined
-      };
-      this.updateProject(currentProjectUpdate);
+      const allPackageUpdates: IUpdateProjectOptions[] = [];
 
-      const otherPackageUpdates: Array<IUpdateProjectOptions> = [];
+      for (const project of projects) {
+        const currentProjectUpdate: IUpdateProjectOptions = {
+          project: new VersionMismatchFinderProject(project),
+          packageName,
+          newVersion: version,
+          dependencyType: devDependency ? DependencyType.Dev : undefined
+        };
+        this.updateProject(currentProjectUpdate);
 
-      if (this._rushConfiguration.ensureConsistentVersions || updateOtherPackages) {
-        // we need to do a mismatch check
-        const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(this._rushConfiguration, {
-          variant: variant
-        });
+        const otherPackageUpdates: Array<IUpdateProjectOptions> = [];
 
-        const mismatches: Array<string> = mismatchFinder.getMismatches();
-        if (mismatches.length) {
-          if (!updateOtherPackages) {
-            return Promise.reject(new Error(`Adding '${packageName}@${version}' to ${currentProject.packageName}`
-              + ` causes mismatched dependencies. Use the "--make-consistent" flag to update other packages to use this`
-              + ` version, or do not specify a SemVer range.`));
-          }
+        if (this._rushConfiguration.ensureConsistentVersions || updateOtherPackages) {
+          // we need to do a mismatch check
+          const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(this._rushConfiguration, {
+            variant: variant
+          });
 
-          // otherwise we need to go update a bunch of other projects
-          const mismatchedVersions: Array<string> | undefined = mismatchFinder.getVersionsOfMismatch(packageName);
-          if (mismatchedVersions) {
-            for (const mismatchedVersion of mismatchedVersions) {
-              for (const consumer of mismatchFinder.getConsumersOfMismatch(packageName, mismatchedVersion)!) {
-                if (consumer instanceof VersionMismatchFinderProject) {
-                  otherPackageUpdates.push({
-                    project: consumer,
-                    packageName: packageName,
-                    newVersion: version
-                  });
+          const mismatches: Array<string> = mismatchFinder.getMismatches().filter((mismatch) => {
+            return !projects.find((proj) => proj.packageName === mismatch);
+          });
+          if (mismatches.length) {
+            if (!updateOtherPackages) {
+              throw new Error(`Adding '${packageName}@${version}' to ${project.packageName}`
+                + ` causes mismatched dependencies. Use the "--make-consistent" flag to update other packages to use`
+                + ` this version, or do not specify a SemVer range.`);
+            }
+
+            // otherwise we need to go update a bunch of other projects
+            const mismatchedVersions: Array<string> | undefined = mismatchFinder.getVersionsOfMismatch(packageName);
+            if (mismatchedVersions) {
+              for (const mismatchedVersion of mismatchedVersions) {
+                for (const consumer of mismatchFinder.getConsumersOfMismatch(packageName, mismatchedVersion)!) {
+                  if (consumer instanceof VersionMismatchFinderProject) {
+                    otherPackageUpdates.push({
+                      project: consumer,
+                      packageName: packageName,
+                      newVersion: version
+                    });
+                  }
                 }
               }
             }
           }
         }
+
+        this.updateProjects(otherPackageUpdates);
+
+        allPackageUpdates.push(currentProjectUpdate, ...otherPackageUpdates);
       }
 
-      this.updateProjects(otherPackageUpdates);
-
-      const allPackageUpdates: IUpdateProjectOptions[] = [currentProjectUpdate, ...otherPackageUpdates];
       for (const { project } of allPackageUpdates) {
         if (project.saveIfModified()) {
           console.log(colors.green('Wrote ') + project.filePath);

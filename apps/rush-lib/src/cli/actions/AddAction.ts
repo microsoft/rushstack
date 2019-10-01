@@ -130,18 +130,16 @@ export class AddAction extends BaseRushAction {
 
     const updater: PackageJsonUpdater = new PackageJsonUpdater(this.rushConfiguration, this.rushGlobalFolder);
 
-    for (const project of projects) {
-      await updater.doRushAdd({
-        currentProject: project,
-        packageName: packageName,
-        initialVersion: version,
-        devDependency: this._devDependencyFlag.value,
-        updateOtherPackages: this._makeConsistentFlag.value,
-        skipUpdate: this._skipUpdateFlag.value,
-        debugInstall: this.parser.isDebug,
-        rangeStyle: this._caretFlag.value ? SemVerStyle.Caret
-          : (this._exactFlag.value ? SemVerStyle.Exact : SemVerStyle.Tilde)
-      });
-    }
+    await updater.doRushAdd({
+      projects: projects,
+      packageName: packageName,
+      initialVersion: version,
+      devDependency: this._devDependencyFlag.value,
+      updateOtherPackages: this._makeConsistentFlag.value,
+      skipUpdate: this._skipUpdateFlag.value,
+      debugInstall: this.parser.isDebug,
+      rangeStyle: this._caretFlag.value ? SemVerStyle.Caret
+        : (this._exactFlag.value ? SemVerStyle.Exact : SemVerStyle.Tilde)
+    });
   }
 }
