@@ -104,7 +104,9 @@ export class AddAction extends BaseRushAction {
     }
 
     if (this._caretFlag.value && this._exactFlag.value) {
-      throw new Error('Only one of "--caret" and "--exact" should be specified');
+      throw new Error(
+        `Only one of "${this._caretFlag.longName}" and "${this._exactFlag.longName}" should be specified`
+      );
     }
 
     let version: string | undefined = undefined;
@@ -130,6 +132,22 @@ export class AddAction extends BaseRushAction {
 
     const updater: PackageJsonUpdater = new PackageJsonUpdater(this.rushConfiguration, this.rushGlobalFolder);
 
+    let rangeStyle: SemVerStyle;
+    if (version && version !== 'latest') {
+      if (this._exactFlag.value || this._caretFlag.value) {
+        throw new Error(
+          `The "${this._caretFlag.longName}" and "${this._exactFlag.longName}" flags may not be specified if a ` +
+          `version is provided in the ${this._packageName.longName} specifier. In this case "${version}" was provided.`
+        );
+      }
+
+      rangeStyle = SemVerStyle.Passthrough;
+    } else {
+      rangeStyle = this._caretFlag.value
+        ? SemVerStyle.Caret
+        : (this._exactFlag.value ? SemVerStyle.Exact : SemVerStyle.Tilde);
+    }
+
     await updater.doRushAdd({
       projects: projects,
       packageName: packageName,
@@ -138,8 +156,7 @@ export class AddAction extends BaseRushAction {
       updateOtherPackages: this._makeConsistentFlag.value,
       skipUpdate: this._skipUpdateFlag.value,
       debugInstall: this.parser.isDebug,
-      rangeStyle: this._caretFlag.value ? SemVerStyle.Caret
-        : (this._exactFlag.value ? SemVerStyle.Exact : SemVerStyle.Tilde)
+      rangeStyle: rangeStyle
     });
   }
 }

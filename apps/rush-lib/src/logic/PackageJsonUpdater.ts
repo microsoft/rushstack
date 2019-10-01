@@ -24,7 +24,8 @@ import { VersionMismatchFinderProject } from './versionMismatch/VersionMismatchF
 export const enum SemVerStyle {
   Exact = 'exact',
   Caret = 'caret',
-  Tilde = 'tilde'
+  Tilde = 'tilde',
+  Passthrough = 'passthrough'
 }
 
 /**
@@ -311,7 +312,7 @@ export class PackageJsonUpdater {
     let selectedVersion: string | undefined;
 
     if (initialSpec && initialSpec !== 'latest') {
-      console.log(colors.gray('Finding newest version that satisfies the selector: ') + initialSpec);
+      console.log(colors.gray('Finding versions that satisfy the selector: ') + initialSpec);
       console.log();
       console.log(`Querying registry for all versions of "${packageName}"...`);
 
@@ -320,22 +321,20 @@ export class PackageJsonUpdater {
           ['view', packageName, 'versions', '--json'],
           this._rushConfiguration.commonTempFolder);
 
-      let versionList: Array<string> = JSON.parse(allVersions);
-      versionList = versionList.sort((a: string, b: string) => { return semver.gt(a, b) ? -1 : 1; });
-
+      const versionList: Array<string> = JSON.parse(allVersions);
       console.log(colors.gray(`Found ${versionList.length} available versions.`));
 
       for (const version of versionList) {
         if (semver.satisfies(version, initialSpec)) {
-          selectedVersion = version;
-          console.log(`Found latest version: ${colors.cyan(selectedVersion)}`);
+          selectedVersion = initialSpec;
+          console.log(`Found a version that satisfies ${initialSpec}: ${colors.cyan(version)}`);
           break;
         }
       }
 
       if (!selectedVersion) {
         throw new Error(`Unable to find a version of "${packageName}" that satisfies`
-          + ` the version range "${initialSpec}"`);
+          + ` the version specifier "${initialSpec}"`);
       }
     } else {
       if (!this._rushConfiguration.ensureConsistentVersions) {
@@ -358,17 +357,36 @@ export class PackageJsonUpdater {
 
     console.log();
 
-    if (rangeStyle === SemVerStyle.Caret) {
-      console.log(colors.grey(`Assigning version "^${selectedVersion}" for "${packageName}" because the "--caret"`
-        + ` flag was specified.`));
-      return '^' + selectedVersion;
-    } else if (rangeStyle === SemVerStyle.Exact) {
-      console.log(colors.grey(`Assigning version "${selectedVersion}" for "${packageName}" because the "--exact"`
-        + ` flag was specified.`));
-      return selectedVersion;
-    } else {
-      console.log(colors.gray(`Assigning version "~${selectedVersion}" for "${packageName}".`));
-      return '~' + selectedVersion!;
+    if (!selectedVersion) {
+      throw new Error(`Unable to determine an acceptable version for "${packageName}. This is not expected.`);
+    }
+
+    switch (rangeStyle) {
+      case SemVerStyle.Caret: {
+        console.log(colors.grey(`Assigning version "^${selectedVersion}" for "${packageName}" because the "--caret"`
+          + ` flag was specified.`));
+        return `^${selectedVersion}`;
+      }
+
+      case SemVerStyle.Exact: {
+        console.log(colors.grey(`Assigning version "${selectedVersion}" for "${packageName}" because the "--exact"`
+          + ` flag was specified.`));
+        return selectedVersion;
+      }
+
+      case SemVerStyle.Tilde: {
+        console.log(colors.gray(`Assigning version "~${selectedVersion}" for "${packageName}".`));
+        return `~${selectedVersion}`;
+      }
+
+      case SemVerStyle.Passthrough: {
+        console.log(colors.gray(`Assigning version "${selectedVersion}" for "${packageName}".`));
+        return selectedVersion;
+      }
+
+      default: {
+        throw new Error(`Unexpected SemVerStyle ${rangeStyle}.`);
+      }
     }
   }
 }
