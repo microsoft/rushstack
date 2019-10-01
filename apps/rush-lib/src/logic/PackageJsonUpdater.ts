@@ -110,7 +110,7 @@ export class PackageJsonUpdater {
   /**
    * Adds a dependency to a particular project. The core business logic for "rush add".
    */
-  public doRushAdd(options: IPackageJsonUpdaterRushAddOptions): Promise<void> {
+  public async doRushAdd(options: IPackageJsonUpdaterRushAddOptions): Promise<void> {
     const {
       projects,
       packageName,
@@ -149,91 +149,86 @@ export class PackageJsonUpdater {
       installManagerOptions
     );
 
-    return this._getNormalizedVersionSpec(
+    const version: string = await this._getNormalizedVersionSpec(
       installManager,
       packageName,
       initialVersion,
       implicitlyPinned.get(packageName),
       rangeStyle
-    ).then((version) => {
-      console.log();
-      console.log(colors.green(`Updating projects to use `) + packageName + '@' + colors.cyan(version));
-      console.log();
+    );
 
-      const allPackageUpdates: IUpdateProjectOptions[] = [];
+    console.log();
+    console.log(colors.green(`Updating projects to use `) + packageName + '@' + colors.cyan(version));
+    console.log();
 
-      for (const project of projects) {
-        const currentProjectUpdate: IUpdateProjectOptions = {
-          project: new VersionMismatchFinderProject(project),
-          packageName,
-          newVersion: version,
-          dependencyType: devDependency ? DependencyType.Dev : undefined
-        };
-        this.updateProject(currentProjectUpdate);
+    const allPackageUpdates: IUpdateProjectOptions[] = [];
 
-        const otherPackageUpdates: Array<IUpdateProjectOptions> = [];
+    for (const project of projects) {
+      const currentProjectUpdate: IUpdateProjectOptions = {
+        project: new VersionMismatchFinderProject(project),
+        packageName,
+        newVersion: version,
+        dependencyType: devDependency ? DependencyType.Dev : undefined
+      };
+      this.updateProject(currentProjectUpdate);
 
-        if (this._rushConfiguration.ensureConsistentVersions || updateOtherPackages) {
-          // we need to do a mismatch check
-          const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(this._rushConfiguration, {
-            variant: variant
-          });
+      const otherPackageUpdates: Array<IUpdateProjectOptions> = [];
 
-          const mismatches: Array<string> = mismatchFinder.getMismatches().filter((mismatch) => {
-            return !projects.find((proj) => proj.packageName === mismatch);
-          });
-          if (mismatches.length) {
-            if (!updateOtherPackages) {
-              throw new Error(`Adding '${packageName}@${version}' to ${project.packageName}`
-                + ` causes mismatched dependencies. Use the "--make-consistent" flag to update other packages to use`
-                + ` this version, or do not specify a SemVer range.`);
-            }
+      if (this._rushConfiguration.ensureConsistentVersions || updateOtherPackages) {
+        // we need to do a mismatch check
+        const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(this._rushConfiguration, {
+          variant: variant
+        });
 
-            // otherwise we need to go update a bunch of other projects
-            const mismatchedVersions: Array<string> | undefined = mismatchFinder.getVersionsOfMismatch(packageName);
-            if (mismatchedVersions) {
-              for (const mismatchedVersion of mismatchedVersions) {
-                for (const consumer of mismatchFinder.getConsumersOfMismatch(packageName, mismatchedVersion)!) {
-                  if (consumer instanceof VersionMismatchFinderProject) {
-                    otherPackageUpdates.push({
-                      project: consumer,
-                      packageName: packageName,
-                      newVersion: version
-                    });
-                  }
+        const mismatches: Array<string> = mismatchFinder.getMismatches().filter((mismatch) => {
+          return !projects.find((proj) => proj.packageName === mismatch);
+        });
+        if (mismatches.length) {
+          if (!updateOtherPackages) {
+            throw new Error(`Adding '${packageName}@${version}' to ${project.packageName}`
+              + ` causes mismatched dependencies. Use the "--make-consistent" flag to update other packages to use`
+              + ` this version, or do not specify a SemVer range.`);
+          }
+
+          // otherwise we need to go update a bunch of other projects
+          const mismatchedVersions: Array<string> | undefined = mismatchFinder.getVersionsOfMismatch(packageName);
+          if (mismatchedVersions) {
+            for (const mismatchedVersion of mismatchedVersions) {
+              for (const consumer of mismatchFinder.getConsumersOfMismatch(packageName, mismatchedVersion)!) {
+                if (consumer instanceof VersionMismatchFinderProject) {
+                  otherPackageUpdates.push({
+                    project: consumer,
+                    packageName: packageName,
+                    newVersion: version
+                  });
                 }
               }
             }
           }
         }
-
-        this.updateProjects(otherPackageUpdates);
-
-        allPackageUpdates.push(currentProjectUpdate, ...otherPackageUpdates);
       }
 
-      for (const { project } of allPackageUpdates) {
-        if (project.saveIfModified()) {
-          console.log(colors.green('Wrote ') + project.filePath);
-        }
-      }
+      this.updateProjects(otherPackageUpdates);
 
-      if (skipUpdate) {
-        return Promise.resolve();
-      }
+      allPackageUpdates.push(currentProjectUpdate, ...otherPackageUpdates);
+    }
 
+    for (const { project } of allPackageUpdates) {
+      if (project.saveIfModified()) {
+        console.log(colors.green('Wrote ') + project.filePath);
+      }
+    }
+
+    if (!skipUpdate) {
       console.log();
       console.log(colors.green('Running "rush update"'));
       console.log();
-      return installManager.doInstall()
-        .then(() => {
-          purgeManager.deleteAll();
-        })
-        .catch((error) => {
-          purgeManager.deleteAll();
-          throw error;
-        });
-      });
+      try {
+        await installManager.doInstall();
+      } finally {
+        purgeManager.deleteAll();
+      }
+    }
   }
 
   /**
@@ -278,14 +273,13 @@ export class PackageJsonUpdater {
    * @param rangeStyle - if this version is selected by querying registry, then this range specifier is prepended to
    *   the selected version.
    */
-  private _getNormalizedVersionSpec(
+  private async _getNormalizedVersionSpec(
     installManager: InstallManager,
     packageName: string,
     initialSpec: string | undefined,
     implicitlyPinnedVersion: string | undefined,
     rangeStyle: SemVerStyle
   ): Promise<string> {
-
     console.log(colors.gray(`Determining new version for dependency: ${packageName}`));
     if (initialSpec) {
       console.log(`Specified version selector: ${colors.cyan(initialSpec)}`);
@@ -300,82 +294,81 @@ export class PackageJsonUpdater {
       console.log(colors.green('Assigning "')
         + colors.cyan(initialSpec)
         + colors.green(`" for "${packageName}" because it matches what other projects are using in this repo.`));
-      return Promise.resolve(initialSpec);
+      return initialSpec;
     }
 
     if (this._rushConfiguration.ensureConsistentVersions && !initialSpec && implicitlyPinnedVersion) {
       console.log(`Assigning the version range "${colors.cyan(implicitlyPinnedVersion)}" for "${packageName}" because`
         + ` it is already used by other projects in this repo.`);
-      return Promise.resolve(implicitlyPinnedVersion);
+      return implicitlyPinnedVersion;
     }
 
     if (this._rushConfiguration.packageManager === 'yarn') {
       throw new Error('The Yarn package manager is not currently supported by the "rush add" command.');
     }
 
-    return installManager.ensureLocalPackageManager().then(() => {
-      let selectedVersion: string | undefined;
+    await installManager.ensureLocalPackageManager();
+    let selectedVersion: string | undefined;
 
-      if (initialSpec && initialSpec !== 'latest') {
-        console.log(colors.gray('Finding newest version that satisfies the selector: ') + initialSpec);
-        console.log();
-        console.log(`Querying registry for all versions of "${packageName}"...`);
+    if (initialSpec && initialSpec !== 'latest') {
+      console.log(colors.gray('Finding newest version that satisfies the selector: ') + initialSpec);
+      console.log();
+      console.log(`Querying registry for all versions of "${packageName}"...`);
 
-        const allVersions: string =
-          Utilities.executeCommandAndCaptureOutput(this._rushConfiguration.packageManagerToolFilename,
-            ['view', packageName, 'versions', '--json'],
-            this._rushConfiguration.commonTempFolder);
+      const allVersions: string =
+        Utilities.executeCommandAndCaptureOutput(this._rushConfiguration.packageManagerToolFilename,
+          ['view', packageName, 'versions', '--json'],
+          this._rushConfiguration.commonTempFolder);
 
-        let versionList: Array<string> = JSON.parse(allVersions);
-        versionList = versionList.sort((a: string, b: string) => { return semver.gt(a, b) ? -1 : 1; });
+      let versionList: Array<string> = JSON.parse(allVersions);
+      versionList = versionList.sort((a: string, b: string) => { return semver.gt(a, b) ? -1 : 1; });
 
-        console.log(colors.gray(`Found ${versionList.length} available versions.`));
+      console.log(colors.gray(`Found ${versionList.length} available versions.`));
 
-        for (const version of versionList) {
-          if (semver.satisfies(version, initialSpec)) {
-            selectedVersion = version;
-            console.log(`Found latest version: ${colors.cyan(selectedVersion)}`);
-            break;
-          }
+      for (const version of versionList) {
+        if (semver.satisfies(version, initialSpec)) {
+          selectedVersion = version;
+          console.log(`Found latest version: ${colors.cyan(selectedVersion)}`);
+          break;
         }
-
-        if (!selectedVersion) {
-          throw new Error(`Unable to find a version of "${packageName}" that satisfies`
-            + ` the version range "${initialSpec}"`);
-        }
-      } else {
-        if (!this._rushConfiguration.ensureConsistentVersions) {
-          console.log(colors.gray(`The "ensureConsistentVersions" policy is NOT active,`
-            + ` so we will assign the latest version.`));
-          console.log();
-        }
-        console.log(`Querying NPM registry for latest version of "${packageName}"...`);
-
-        selectedVersion = Utilities.executeCommandAndCaptureOutput(
-          this._rushConfiguration.packageManagerToolFilename,
-          ['view', `${packageName}@latest`, 'version'],
-          this._rushConfiguration.commonTempFolder
-        ).trim();
-
-        console.log();
-
-        console.log(`Found latest version: ${colors.cyan(selectedVersion)}`);
       }
+
+      if (!selectedVersion) {
+        throw new Error(`Unable to find a version of "${packageName}" that satisfies`
+          + ` the version range "${initialSpec}"`);
+      }
+    } else {
+      if (!this._rushConfiguration.ensureConsistentVersions) {
+        console.log(colors.gray(`The "ensureConsistentVersions" policy is NOT active,`
+          + ` so we will assign the latest version.`));
+        console.log();
+      }
+      console.log(`Querying NPM registry for latest version of "${packageName}"...`);
+
+      selectedVersion = Utilities.executeCommandAndCaptureOutput(
+        this._rushConfiguration.packageManagerToolFilename,
+        ['view', `${packageName}@latest`, 'version'],
+        this._rushConfiguration.commonTempFolder
+      ).trim();
 
       console.log();
 
-      if (rangeStyle === SemVerStyle.Caret) {
-        console.log(colors.grey(`Assigning version "^${selectedVersion}" for "${packageName}" because the "--caret"`
-          + ` flag was specified.`));
-        return '^' + selectedVersion;
-      } else if (rangeStyle === SemVerStyle.Exact) {
-        console.log(colors.grey(`Assigning version "${selectedVersion}" for "${packageName}" because the "--exact"`
-          + ` flag was specified.`));
-        return selectedVersion;
-      } else {
-        console.log(colors.gray(`Assigning version "~${selectedVersion}" for "${packageName}".`));
-        return '~' + selectedVersion!;
-      }
-    });
+      console.log(`Found latest version: ${colors.cyan(selectedVersion)}`);
+    }
+
+    console.log();
+
+    if (rangeStyle === SemVerStyle.Caret) {
+      console.log(colors.grey(`Assigning version "^${selectedVersion}" for "${packageName}" because the "--caret"`
+        + ` flag was specified.`));
+      return '^' + selectedVersion;
+    } else if (rangeStyle === SemVerStyle.Exact) {
+      console.log(colors.grey(`Assigning version "${selectedVersion}" for "${packageName}" because the "--exact"`
+        + ` flag was specified.`));
+      return selectedVersion;
+    } else {
+      console.log(colors.gray(`Assigning version "~${selectedVersion}" for "${packageName}".`));
+      return '~' + selectedVersion!;
+    }
   }
 }
