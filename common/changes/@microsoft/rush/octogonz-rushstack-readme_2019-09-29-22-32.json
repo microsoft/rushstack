@@ -1,11 +1,11 @@
 {
   "changes": [
     {
-      "comment": "",
+      "comment": "Update repository URL",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
   ],
   "packageName": "@microsoft/rush",
-  "email": "iclanton@users.noreply.github.com"
+  "email": "4673363+octogonz@users.noreply.github.com"
 }

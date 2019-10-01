@@ -78,17 +78,23 @@ export class ApprovedPackagesConfiguration {
     return this._itemsByName.get(packageName);
   }
 
-  public addOrUpdatePackage(packageName: string, reviewCategory: string): void {
+  public addOrUpdatePackage(packageName: string, reviewCategory: string): boolean {
+    let changed: boolean = false;
+
     let item: ApprovedPackagesItem | undefined = this._itemsByName.get(packageName);
     if (!item) {
       item = new ApprovedPackagesItem();
       item.packageName = packageName;
       this._addItem(item);
+      changed = true;
     }
 
-    if (reviewCategory) {
+    if (reviewCategory && !item.allowedCategories.has(reviewCategory)) {
       item.allowedCategories.add(reviewCategory);
+      changed = true;
     }
+
+    return changed;
   }
 
   /**

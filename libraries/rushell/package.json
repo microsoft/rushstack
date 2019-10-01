@@ -4,7 +4,7 @@
   "description": "Execute shell commands using a consistent syntax on every platform",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/libraries/rushell"
+    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/rushell"
   },
   "main": "lib/index.js",
   "typings": "dist/rushell.d.ts",
@@ -14,11 +14,11 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "3.15.0"
+    "@microsoft/node-core-library": "3.15.1"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.4": "0.2.2",
-    "@microsoft/node-library-build": "6.2.2",
+    "@microsoft/rush-stack-compiler-3.4": "0.2.3",
+    "@microsoft/node-library-build": "6.2.3",
     "@types/jest": "23.3.11",
     "@types/node": "8.10.54",
     "gulp": "~4.0.2",

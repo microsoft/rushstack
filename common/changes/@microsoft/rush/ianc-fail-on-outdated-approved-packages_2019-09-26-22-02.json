@@ -1,11 +1,11 @@
 {
   "changes": [
     {
-      "comment": "",
+      "comment": "Include peerDependencies in the approved packages files.",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
   ],
   "packageName": "@microsoft/rush",
-  "email": "4673363+octogonz@users.noreply.github.com"
+  "email": "iclanton@users.noreply.github.com"
 }
