@@ -12,7 +12,10 @@ import {
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
-import { FileSystem } from '@microsoft/node-core-library';
+import {
+  FileSystem,
+  Path
+} from '@microsoft/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import {
@@ -205,14 +208,8 @@ export class ChangeAction extends BaseRushAction {
     changedFolders: Array<string | undefined>,
     projectFolder: string
   ): boolean {
-    let normalizedFolder: string = projectFolder.replace(/\\/g, '/'); // Replace backslashes with forward slashes
-    if (normalizedFolder.charAt(normalizedFolder.length - 1) !== '/') {
-      normalizedFolder = normalizedFolder + '/';
-    }
-
-    const pathRegex: RegExp = new RegExp(`^${normalizedFolder}`, 'i');
     for (const folder of changedFolders) {
-      if (folder && folder.match(pathRegex)) {
+      if (folder && Path.isUnderOrEqual(folder, projectFolder)) {
         return true;
       }
     }
