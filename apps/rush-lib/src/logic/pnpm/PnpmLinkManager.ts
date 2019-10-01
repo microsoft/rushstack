@@ -37,7 +37,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       };
 
       // Use shrinkwrap from temp as the committed shrinkwrap may not always be up to date
-      // See https://github.com/microsoft/web-build-tools/issues/1273#issuecomment-492779995
+      // See https://github.com/microsoft/rushstack/issues/1273#issuecomment-492779995
       const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
         this._rushConfiguration.tempShrinkwrapFilename
       );

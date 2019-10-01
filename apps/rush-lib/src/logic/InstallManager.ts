@@ -270,8 +270,6 @@ export class InstallManager {
     // Check the policies
     PolicyValidator.validatePolicy(this._rushConfiguration, options.bypassPolicy);
 
-    ApprovedPackagesChecker.rewriteConfigFiles(this._rushConfiguration);
-
     // Git hooks are only installed if the repo opts in by including files in /common/git-hooks
     const hookSource: string = path.join(this._rushConfiguration.commonFolder, 'git-hooks');
     const hookDestination: string | undefined = Git.getHooksFolder();
@@ -299,9 +297,20 @@ export class InstallManager {
       }
     }
 
+    const approvedPackagesChecker: ApprovedPackagesChecker = new ApprovedPackagesChecker(this._rushConfiguration);
+    if (approvedPackagesChecker.approvedPackagesFilesAreOutOfDate) {
+      if (this._options.allowShrinkwrapUpdates) {
+        approvedPackagesChecker.rewriteConfigFiles();
+        console.log(colors.yellow(
+          'Approved package files have been updated. These updates should be committed to source control'
+        ));
+      } else {
+        throw new Error(`Approved packages files are out-of date. Run "rush update" to update them.`);
+      }
+    }
+
     // Ensure that the package manager is installed
     await this.ensureLocalPackageManager();
-
     let shrinkwrapFile: BaseShrinkwrapFile | undefined = undefined;
 
     // (If it's a full update, then we ignore the shrinkwrap from Git since it will be overwritten)
@@ -418,7 +427,7 @@ export class InstallManager {
           // the package at all, we can reasonably assume it's good for all the repositories.
           // In particular, we'll assume that two different NPM registries cannot have two
           // different implementations of the same version of the same package.
-          // This was needed for: https://github.com/Microsoft/web-build-tools/issues/691
+          // This was needed for: https://github.com/microsoft/rushstack/issues/691
           commonRushConfigFolder: this._rushConfiguration.commonRushConfigFolder
         });
 
@@ -1131,7 +1140,7 @@ export class InstallManager {
         //
         // This issue has been fixed as of npm v5.0.0: https://github.com/npm/npm/releases/tag/v5.0.0
         //
-        // For more context, see https://github.com/Microsoft/web-build-tools/issues/761#issuecomment-428689600
+        // For more context, see https://github.com/microsoft/rushstack/issues/761#issuecomment-428689600
         args.push('--no-optional');
       }
       args.push('--cache', this._rushConfiguration.npmCacheFolder);

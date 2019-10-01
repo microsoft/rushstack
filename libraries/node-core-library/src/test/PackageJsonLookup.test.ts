@@ -46,7 +46,7 @@ describe('PackageJsonLookup', () => {
       const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
       const sourceFilePath: string = path.join(__dirname, './test-data/example-package/src/ExampleFile.txt');
 
-      // Example: C:\web-build-tools\libraries\node-core-library\src\test\example-package
+      // Example: C:\rushstack\libraries\node-core-library\src\test\example-package
       const foundFolder: string | undefined = packageJsonLookup.tryGetPackageFolderFor(sourceFilePath);
       expect(foundFolder).toBeDefined();
       expect(foundFolder!.search(/[\\/]example-package$/i)).toBeGreaterThan(0);
