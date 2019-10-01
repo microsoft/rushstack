@@ -208,13 +208,8 @@ export class ChangeAction extends BaseRushAction {
     changedFolders: Array<string | undefined>,
     projectFolder: string
   ): boolean {
-    let normalizedFolder: string = projectFolder.replace(/\\/g, '/'); // Replace backslashes with forward slashes
-    if (normalizedFolder.charAt(normalizedFolder.length - 1) !== '/') {
-      normalizedFolder = normalizedFolder + '/';
-    }
-
     for (const folder of changedFolders) {
-      if (folder && Path.isUnderOrEqual(folder, normalizedFolder)) {
+      if (folder && Path.isUnderOrEqual(folder, projectFolder)) {
         return true;
       }
     }
