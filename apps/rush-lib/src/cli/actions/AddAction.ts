@@ -87,17 +87,24 @@ export class AddAction extends BaseRushAction {
   }
 
   public async run(): Promise<void> {
-    const currentProject: RushConfigurationProject | undefined = this.rushConfiguration.tryGetProjectForPath(
-      process.cwd()
-    );
+    let projects: RushConfigurationProject[];
+    if (this._allFlag.value) {
+      projects = this.rushConfiguration.projects;
+    } else {
+      const currentProject: RushConfigurationProject | undefined = this.rushConfiguration.tryGetProjectForPath(
+        process.cwd()
+      );
 
-    if (!currentProject) {
-      return Promise.reject(new Error('The "rush add" command must be invoked under a project'
-        + ' folder that is registered in rush.json.'));
+      if (!currentProject) {
+        throw new Error('The "rush add" command must be invoked under a project'
+          + ` folder that is registered in rush.json unless the ${this._allFlag.longName} is used.`);
+      }
+
+      projects = [currentProject];
     }
 
     if (this._caretFlag.value && this._exactFlag.value) {
-      return Promise.reject(new Error('Only one of "--caret" and "--exact" should be specified'));
+      throw new Error('Only one of "--caret" and "--exact" should be specified');
     }
 
     let version: string | undefined = undefined;
@@ -114,18 +121,11 @@ export class AddAction extends BaseRushAction {
     }
 
     if (!PackageName.isValidName(packageName)) {
-      return Promise.reject(new Error(`The package name "${packageName}" is not valid.`));
+      throw new Error(`The package name "${packageName}" is not valid.`);
     }
 
     if (version && version !== 'latest' && !semver.validRange(version) && !semver.valid(version)) {
-      return Promise.reject(new Error(`The SemVer specifier "${version}" is not valid.`));
-    }
-
-    let projects: RushConfigurationProject[];
-    if (this._allFlag.value) {
-      projects = this.rushConfiguration.projects;
-    } else {
-      projects = [currentProject];
+      throw new Error(`The SemVer specifier "${version}" is not valid.`);
     }
 
     const updater: PackageJsonUpdater = new PackageJsonUpdater(this.rushConfiguration, this.rushGlobalFolder);
