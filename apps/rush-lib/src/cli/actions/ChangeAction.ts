@@ -510,7 +510,7 @@ export class ChangeAction extends BaseRushAction {
         } else if (versionPolicy.definitionName === VersionPolicyDefinitionName.individualVersion) {
           const individualPolicy: IndividualVersionPolicy = versionPolicy as IndividualVersionPolicy;
           if (individualPolicy.lockedMajor !== undefined) {
-            delete bumpOptions[ChangeType.major];
+            delete bumpOptions[ChangeType[ChangeType.major]];
           }
         }
       }
