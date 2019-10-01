@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Make detection of changefiles and changes in projects safer.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}
