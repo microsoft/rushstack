@@ -317,9 +317,11 @@ export class PackageJsonUpdater {
       console.log(`Querying registry for all versions of "${packageName}"...`);
 
       const allVersions: string =
-        Utilities.executeCommandAndCaptureOutput(this._rushConfiguration.packageManagerToolFilename,
+        Utilities.executeCommandAndCaptureOutput(
+          this._rushConfiguration.packageManagerToolFilename,
           ['view', packageName, 'versions', '--json'],
-          this._rushConfiguration.commonTempFolder);
+          this._rushConfiguration.commonTempFolder
+        );
 
       const versionList: Array<string> = JSON.parse(allVersions);
       console.log(colors.gray(`Found ${versionList.length} available versions.`));
