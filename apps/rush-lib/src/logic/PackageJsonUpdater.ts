@@ -357,10 +357,6 @@ export class PackageJsonUpdater {
 
     console.log();
 
-    if (!selectedVersion) {
-      throw new Error(`Unable to determine an acceptable version for "${packageName}. This is not expected.`);
-    }
-
     switch (rangeStyle) {
       case SemVerStyle.Caret: {
         console.log(colors.grey(`Assigning version "^${selectedVersion}" for "${packageName}" because the "--caret"`
