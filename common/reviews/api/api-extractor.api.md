@@ -6,6 +6,7 @@
 
 import { INodePackageJson } from '@microsoft/node-core-library';
 import { JsonSchema } from '@microsoft/node-core-library';
+import { NewlineKind } from '@microsoft/node-core-library';
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 
@@ -218,6 +219,7 @@ export interface IExtractorInvokeOptions {
     compilerState?: CompilerState;
     localBuild?: boolean;
     messageCallback?: (message: ExtractorMessage) => void;
+    newlineKind?: NewlineKind;
     showDiagnostics?: boolean;
     showVerboseMessages?: boolean;
     typescriptCompilerFolder?: string;

@@ -49,14 +49,16 @@ export class DtsRollupGenerator {
    * Generates the typings file and writes it to disk.
    *
    * @param dtsFilename    - The *.d.ts output filename
+   * @param newlineKind    - The *.d.ts output eol
    */
-  public static writeTypingsFile(collector: Collector, dtsFilename: string, dtsKind: DtsRollupKind): void {
+  public static writeTypingsFile(collector: Collector, dtsFilename: string, dtsKind: DtsRollupKind,
+    newlineKind: NewlineKind): void {
     const stringWriter: StringWriter = new StringWriter();
 
     DtsRollupGenerator._generateTypingsFileContent(collector, stringWriter, dtsKind);
 
     FileSystem.writeFile(dtsFilename, stringWriter.toString(), {
-      convertLineEndings: NewlineKind.CrLf,
+      convertLineEndings: newlineKind,
       ensureFolderExists: true
     });
   }

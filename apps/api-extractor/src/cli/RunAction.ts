@@ -7,13 +7,15 @@ import * as path from 'path';
 import {
   PackageJsonLookup,
   FileSystem,
-  IPackageJson
+  IPackageJson,
+  NewlineKind
 } from '@microsoft/node-core-library';
 
 import {
   CommandLineAction,
   CommandLineStringParameter,
-  CommandLineFlagParameter
+  CommandLineFlagParameter,
+  CommandLineChoiceParameter
 } from '@microsoft/ts-command-line';
 
 import { Extractor, ExtractorResult } from '../api/Extractor';
@@ -28,6 +30,7 @@ export class RunAction extends CommandLineAction {
   private _verboseParameter: CommandLineFlagParameter;
   private _diagnosticsParameter: CommandLineFlagParameter;
   private _typescriptCompilerFolder: CommandLineStringParameter;
+  private _newLineParameter: CommandLineChoiceParameter;
 
   constructor(parser: ApiExtractorCommandLine) {
     super({
@@ -74,6 +77,14 @@ export class RunAction extends CommandLineAction {
       + ' errors due to differences in the system typings (e.g. lib.dom.d.ts).  You can use the'
       + ' "--typescriptCompilerFolder" option to specify the folder path where you installed the TypeScript package,'
       + ' and API Extractor\'s compiler will use those system typings instead.'
+    });
+
+    this._newLineParameter = this.defineChoiceParameter({
+      alternatives: ['crlf', 'lf'],
+      defaultValue: 'crlf',
+      parameterLongName: '--newline',
+      description: 'Use the specified end of line sequence to be used when emitting files: '
+        + '"crlf" (windows) or "lf" (unix).'
     });
   }
 
@@ -138,6 +149,10 @@ export class RunAction extends CommandLineAction {
       console.log(`Using configuration from ${configFilename}` + os.EOL);
     }
 
+    const newlineKind: NewlineKind = this._newLineParameter.value === 'lf'
+      ? NewlineKind.CrLf
+      : NewlineKind.CrLf;
+
     const configObjectFullPath: string = path.resolve(configFilename);
     const configObject: IConfigFile = ExtractorConfig.loadFile(configObjectFullPath);
 
@@ -152,7 +167,8 @@ export class RunAction extends CommandLineAction {
         localBuild: this._localParameter.value,
         showVerboseMessages: this._verboseParameter.value,
         showDiagnostics: this._diagnosticsParameter.value,
-        typescriptCompilerFolder: typescriptCompilerFolder
+        typescriptCompilerFolder: typescriptCompilerFolder,
+        newlineKind: newlineKind
       }
     );
 

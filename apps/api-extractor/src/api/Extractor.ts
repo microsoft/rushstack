@@ -82,6 +82,11 @@ export interface IExtractorInvokeOptions {
    * the STDERR/STDOUT console.
    */
   messageCallback?: (message: ExtractorMessage) => void;
+
+  /**
+   * Specifies the EOL for the output files.
+   */
+  newlineKind?: NewlineKind;
 }
 
 /**
@@ -182,7 +187,7 @@ export class Extractor {
   public static invoke(extractorConfig: ExtractorConfig, options?: IExtractorInvokeOptions): ExtractorResult {
 
     if (!options) {
-      options = { };
+      options = {};
     }
 
     const localBuild: boolean = options.localBuild || false;
@@ -193,6 +198,8 @@ export class Extractor {
     } else {
       compilerState = CompilerState.create(extractorConfig, options);
     }
+
+    const newlineKind: NewlineKind = options.newlineKind || NewlineKind.CrLf;
 
     const messageRouter: MessageRouter = new MessageRouter({
       workingPackageFolder: extractorConfig.packageFolder,
@@ -233,7 +240,7 @@ export class Extractor {
         toolPackage: Extractor.packageName,
         toolVersion: Extractor.version,
 
-        newlineConversion: NewlineKind.CrLf,
+        newlineConversion: newlineKind,
         ensureFolderExists: true,
         testMode: extractorConfig.testMode
       });
@@ -253,7 +260,7 @@ export class Extractor {
       // Write the actual file
       FileSystem.writeFile(actualApiReportPath, actualApiReportContent, {
         ensureFolderExists: true,
-        convertLineEndings: NewlineKind.CrLf
+        convertLineEndings: newlineKind
       });
 
       // Compare it against the expected file
@@ -278,7 +285,7 @@ export class Extractor {
 
             FileSystem.writeFile(expectedApiReportPath, actualApiReportContent, {
               ensureFolderExists: true,
-              convertLineEndings: NewlineKind.CrLf
+              convertLineEndings: newlineKind
             });
           }
        } else {
@@ -309,7 +316,7 @@ export class Extractor {
             );
           } else {
             FileSystem.writeFile(expectedApiReportPath, actualApiReportContent, {
-              convertLineEndings: NewlineKind.CrLf
+              convertLineEndings: newlineKind
             });
             messageRouter.logWarning(ConsoleMessageId.ApiReportCreated,
               'The API report file was missing, so a new file was created. Please add this file to Git:\n'
@@ -321,14 +328,26 @@ export class Extractor {
     }
 
     if (extractorConfig.rollupEnabled) {
-      Extractor._generateRollupDtsFile(collector, extractorConfig.publicTrimmedFilePath, DtsRollupKind.PublicRelease);
-      Extractor._generateRollupDtsFile(collector, extractorConfig.betaTrimmedFilePath, DtsRollupKind.BetaRelease);
-      Extractor._generateRollupDtsFile(collector, extractorConfig.untrimmedFilePath, DtsRollupKind.InternalRelease);
+      Extractor._generateRollupDtsFile(
+        collector,
+        extractorConfig.publicTrimmedFilePath,
+        DtsRollupKind.PublicRelease,
+        newlineKind);
+      Extractor._generateRollupDtsFile(
+        collector,
+        extractorConfig.betaTrimmedFilePath,
+        DtsRollupKind.BetaRelease,
+        newlineKind);
+      Extractor._generateRollupDtsFile(
+        collector,
+        extractorConfig.untrimmedFilePath,
+        DtsRollupKind.InternalRelease,
+        newlineKind);
     }
 
     if (extractorConfig.tsdocMetadataEnabled) {
       // Write the tsdoc-metadata.json file for this project
-      PackageMetadataManager.writeTsdocMetadataFile(extractorConfig.tsdocMetadataFilePath);
+      PackageMetadataManager.writeTsdocMetadataFile(extractorConfig.tsdocMetadataFilePath, newlineKind);
     }
 
     // Show all the messages that we collected during analysis
@@ -354,10 +373,11 @@ export class Extractor {
     });
   }
 
-  private static _generateRollupDtsFile(collector: Collector, outputPath: string, dtsKind: DtsRollupKind): void {
+  private static _generateRollupDtsFile(collector: Collector, outputPath: string, dtsKind: DtsRollupKind,
+    newlineKind: NewlineKind): void {
     if (outputPath !== '') {
       collector.messageRouter.logVerbose(ConsoleMessageId.WritingDtsRollup, `Writing package typings: ${outputPath}`);
-      DtsRollupGenerator.writeTypingsFile(collector, outputPath, dtsKind);
+      DtsRollupGenerator.writeTypingsFile(collector, outputPath, dtsKind, newlineKind);
     }
   }
 }
