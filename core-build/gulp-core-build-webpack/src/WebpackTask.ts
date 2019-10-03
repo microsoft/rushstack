@@ -17,9 +17,10 @@ export interface IWebpackTaskConfig {
   configPath: string;
 
   /**
-   * Webpack config object. If a path is specified by "configPath," and it is valid, this option is ignored.
+   * Webpack config object, or array of config objects for multi-compiler.
+   * If a path is specified by "configPath," and it is valid, this option is ignored.
    */
-  config?: Webpack.Configuration;
+  config?: Webpack.Configuration | Webpack.Configuration[];
 
   /**
    * An array of regular expressions or regular expression strings. If a warning matches any of them, it
