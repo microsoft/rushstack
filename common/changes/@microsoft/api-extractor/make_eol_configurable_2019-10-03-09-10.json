@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Added the --newline option to api-extractor CLI. This will output all generated files with the chosen EOL setting. The default remains CRLF.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "Beretta1979@users.noreply.github.com"
+}
