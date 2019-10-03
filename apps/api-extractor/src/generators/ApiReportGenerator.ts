@@ -11,7 +11,6 @@ import { Span } from '../analyzer/Span';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
-import { SymbolMetadata } from '../collector/SymbolMetadata';
 import { AstImport } from '../analyzer/AstImport';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { ExtractorMessage } from '../api/ExtractorMessage';
@@ -372,24 +371,11 @@ export class ApiReportGenerator {
       ApiReportGenerator._writeLineAsComments(stringWriter, 'Warning: ' + message.formatMessageWithoutLocation());
     }
 
-    const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
-    let useEffectiveReleaseTag: boolean = declarationMetadata.effectiveReleaseTag !== ReleaseTag.None;
-    if (astDeclaration.parent) {
-      const parentDeclarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration.parent);
-      useEffectiveReleaseTag = (
-        declarationMetadata.effectiveReleaseTag !== ReleaseTag.None &&
-        declarationMetadata.effectiveReleaseTag !== parentDeclarationMetadata.effectiveReleaseTag
-      );
-    }
-
     const footerParts: string[] = [];
-    const symbolMetadata: SymbolMetadata = collector.fetchMetadata(astDeclaration.astSymbol);
-    if (!symbolMetadata.releaseTagSameAsParent || useEffectiveReleaseTag) {
-      if (symbolMetadata.releaseTag !== ReleaseTag.None) {
-        footerParts.push(ReleaseTag.getTagName(useEffectiveReleaseTag
-          ? declarationMetadata.effectiveReleaseTag
-          : symbolMetadata.releaseTag
-        ));
+    const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
+    if (!declarationMetadata.releaseTagSameAsParent) {
+      if (declarationMetadata.effectiveReleaseTag !== ReleaseTag.None) {
+        footerParts.push(ReleaseTag.getTagName(declarationMetadata.effectiveReleaseTag));
       }
     }
 

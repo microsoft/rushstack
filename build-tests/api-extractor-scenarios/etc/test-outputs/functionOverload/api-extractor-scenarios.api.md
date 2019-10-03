@@ -10,8 +10,16 @@ export function combine(x: boolean, y: boolean): boolean;
 // @beta (undocumented)
 export function combine(x: string, y: string): string;
 
-// @internal (undocumented)
+// @public (undocumented)
 export function combine(x: number, y: number): number;
+
+// @beta (undocumented)
+export function _combine(x: string, y: string): string;
+
+// Warning: (ae-internal-mixed-release-tag) Mixed release tags are not allowed for overload "_combine" when one is marked as @internal
+// 
+// @internal (undocumented)
+export function _combine(x: number, y: number): number;
 
 // @public (undocumented)
 export class Combiner {

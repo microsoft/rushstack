@@ -7,6 +7,7 @@ import * as ts from 'typescript';
 import { Collector } from '../collector/Collector';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
+import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { SymbolMetadata } from '../collector/SymbolMetadata';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
@@ -30,32 +31,56 @@ export class ValidationEnhancer {
     }
   }
 
-  private static _checkForInternalUnderscore(collector: Collector, collectorEntity: CollectorEntity,
-    astSymbol: AstSymbol): void {
+  private static _checkForInternalUnderscore(
+    collector: Collector,
+    collectorEntity: CollectorEntity,
+    astSymbol: AstSymbol
+  ): void {
+    let containsInternal: boolean = false;
+    for (let i: number = 0; i < astSymbol.astDeclarations.length; i++) {
+      const astDeclaration: AstDeclaration = astSymbol.astDeclarations[i];
+      const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
 
-    const astSymbolMetadata: SymbolMetadata = collector.fetchMetadata(astSymbol);
+      if (
+        (containsInternal && declarationMetadata.effectiveReleaseTag !== ReleaseTag.Internal) ||
+        (!containsInternal && declarationMetadata.effectiveReleaseTag === ReleaseTag.Internal && i > 0)
+      ) {
+        const exportName: string = astDeclaration.astSymbol.localName;
+        collector.messageRouter.addAnalyzerIssue(
+          ExtractorMessageId.InternalMixedReleaseTag,
+          `Mixed release tags are not allowed for overload "${exportName}" when one is marked as @internal`,
+          astDeclaration
+        );
+      } else if (declarationMetadata.effectiveReleaseTag === ReleaseTag.Internal) {
+        containsInternal = true;
+      }
 
-    if (astSymbolMetadata.releaseTag === ReleaseTag.Internal && !astSymbolMetadata.releaseTagSameAsParent) {
-      for (const exportName of collectorEntity.exportNames) {
-        if (exportName[0] !== '_') {
-          collector.messageRouter.addAnalyzerIssue(
-            ExtractorMessageId.InternalMissingUnderscore,
-            `The name "${exportName}" should be prefixed with an underscore`
-            + ` because the declaration is marked as @internal`,
-            astSymbol,
-            { exportName }
-          );
+      if (
+        declarationMetadata.effectiveReleaseTag === ReleaseTag.Internal &&
+        !declarationMetadata.releaseTagSameAsParent
+      ) {
+        for (const exportName of collectorEntity.exportNames) {
+          if (exportName[0] !== '_') {
+            collector.messageRouter.addAnalyzerIssue(
+              ExtractorMessageId.InternalMissingUnderscore,
+              `The name "${exportName}" should be prefixed with an underscore`
+              + ` because the declaration is marked as @internal`,
+              astSymbol,
+              { exportName }
+            );
+          }
         }
       }
     }
-
   }
 
-  private static _checkReferences(collector: Collector, astDeclaration: AstDeclaration,
-    alreadyWarnedSymbols: Set<AstSymbol>): void {
-
-    const astSymbolMetadata: SymbolMetadata = collector.fetchMetadata(astDeclaration.astSymbol);
-    const astSymbolReleaseTag: ReleaseTag = astSymbolMetadata.releaseTag;
+  private static _checkReferences(
+    collector: Collector,
+    astDeclaration: AstDeclaration,
+    alreadyWarnedSymbols: Set<AstSymbol>
+  ): void {
+    const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
+    const declarationReleaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
 
     for (const referencedEntity of astDeclaration.referencedAstEntities) {
 
@@ -71,12 +96,12 @@ export class ValidationEnhancer {
 
           if (collectorEntity && collectorEntity.exported) {
             const referencedMetadata: SymbolMetadata = collector.fetchMetadata(referencedEntity);
-            const referencedReleaseTag: ReleaseTag = referencedMetadata.releaseTag;
+            const referencedReleaseTag: ReleaseTag = referencedMetadata.maxEffectiveReleaseTag;
 
-            if (ReleaseTag.compare(astSymbolReleaseTag, referencedReleaseTag) > 0) {
+            if (ReleaseTag.compare(declarationReleaseTag, referencedReleaseTag) > 0) {
               collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.IncompatibleReleaseTags,
                 `The symbol "${astDeclaration.astSymbol.localName}"`
-                + ` is marked as ${ReleaseTag.getTagName(astSymbolReleaseTag)},`
+                + ` is marked as ${ReleaseTag.getTagName(declarationReleaseTag)},`
                 + ` but its signature references "${referencedEntity.localName}"`
                 + ` which is marked as ${ReleaseTag.getTagName(referencedReleaseTag)}`,
                 astDeclaration);

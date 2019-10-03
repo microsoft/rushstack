@@ -6,7 +6,17 @@
  */
 export declare function combine(x: string, y: string): string;
 
-/* Excluded from this release type: combine */
+/**
+ * @public
+ */
+export declare function combine(x: number, y: number): number;
+
+/**
+ * @beta
+ */
+export declare function _combine(x: string, y: string): string;
+
+/* Excluded from this release type: _combine */
 
 /**
  * @public

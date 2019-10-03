@@ -88,7 +88,7 @@ export class DtsRollupGenerator {
         // For example, if the imported API comes from an external package that supports AEDoc,
         // and it was marked as `@internal`, then don't emit it.
         const symbolMetadata: SymbolMetadata | undefined = collector.tryFetchMetadataForAstEntity(astImport);
-        const releaseTag: ReleaseTag = symbolMetadata ? symbolMetadata.releaseTag : ReleaseTag.None;
+        const releaseTag: ReleaseTag = symbolMetadata ? symbolMetadata.maxEffectiveReleaseTag : ReleaseTag.None;
 
         if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
           DtsEmitHelpers.emitImport(stringWriter, entity, astImport);
@@ -99,7 +99,7 @@ export class DtsRollupGenerator {
     // Emit the regular declarations
     for (const entity of collector.entities) {
       const symbolMetadata: SymbolMetadata | undefined = collector.tryFetchMetadataForAstEntity(entity.astEntity);
-      const releaseTag: ReleaseTag = symbolMetadata ? symbolMetadata.releaseTag : ReleaseTag.None;
+      const releaseTag: ReleaseTag = symbolMetadata ? symbolMetadata.maxEffectiveReleaseTag : ReleaseTag.None;
 
       if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
         if (!collector.extractorConfig.omitTrimmingComments) {

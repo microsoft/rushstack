@@ -48,6 +48,11 @@ export const enum ExtractorMessageId {
   InternalMissingUnderscore = 'ae-internal-missing-underscore',
 
   /**
+   * "Mixed release tags are not allowed for overload ___ when one is marked as `@internal`."
+   */
+  InternalMixedReleaseTag = 'ae-internal-mixed-release-tag',
+
+  /**
    * "The `@preapproved` tag cannot be applied to ___ because it is not a supported declaration type."
    */
   PreapprovedUnsupportedType = 'ae-preapproved-unsupported-type',
@@ -91,6 +96,7 @@ export const allExtractorMessageIds: Set<string> = new Set<string>([
   'ae-misplaced-package-tag',
   'ae-forgotten-export',
   'ae-internal-missing-underscore',
+  'ae-internal-mixed-release-tag',
   'ae-preapproved-unsupported-type',
   'ae-preapproved-bad-release-tag',
   'ae-unresolved-inheritdoc-reference',

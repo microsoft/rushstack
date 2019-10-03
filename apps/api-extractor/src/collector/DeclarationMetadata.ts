@@ -43,5 +43,8 @@ export class DeclarationMetadata {
   // Assigned by DocCommentEnhancer
   public needsDocumentation: boolean = true;
 
+  // If true, then it would be redundant to show this release tag
+  public releaseTagSameAsParent: boolean = false;
+
   public docCommentEnhancerVisitorState: VisitorState = VisitorState.Unvisited;
 }

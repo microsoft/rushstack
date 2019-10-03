@@ -10,9 +10,19 @@ export declare function combine(x: boolean, y: boolean): boolean;
 export declare function combine(x: string, y: string): string;
 
 /**
- * @internal
+ * @public
  */
 export declare function combine(x: number, y: number): number;
+
+/**
+ * @beta
+ */
+export declare function _combine(x: string, y: string): string;
+
+/**
+ * @internal
+ */
+export declare function _combine(x: number, y: number): number;
 
 /**
  * @public

@@ -512,22 +512,23 @@ export class Collector {
     }
 
     // Do any of the declarations have a release tag?
-    let symbolReleaseTag: ReleaseTag = ReleaseTag.None;
+    let maxEffectiveReleaseTag: ReleaseTag = ReleaseTag.None;
 
     for (const astDeclaration of astSymbol.astDeclarations) {
       // We know we solved this above
       const declarationMetadata: DeclarationMetadata = astDeclaration.metadata as DeclarationMetadata;
-      const declaredReleaseTag: ReleaseTag = declarationMetadata.declaredReleaseTag;
+      const effectiveReleaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
 
-      if (declaredReleaseTag !== ReleaseTag.None) {
-        if (symbolReleaseTag !== ReleaseTag.None && symbolReleaseTag !== declaredReleaseTag) {
+      if (effectiveReleaseTag !== ReleaseTag.None) {
+        if (maxEffectiveReleaseTag !== ReleaseTag.None && maxEffectiveReleaseTag !== effectiveReleaseTag) {
           if (!astSymbol.isExternal) { // for now, don't report errors for external code
             switch (astDeclaration.declaration.kind) {
               case ts.SyntaxKind.FunctionDeclaration:
               case ts.SyntaxKind.MethodDeclaration:
                 // For function and method overloads, take the highest release from multiple declarations
-                if (symbolReleaseTag < declaredReleaseTag) {
-                  symbolReleaseTag = declaredReleaseTag;
+                // TODO: Expand this out to more kinds
+                if (maxEffectiveReleaseTag < effectiveReleaseTag) {
+                  maxEffectiveReleaseTag = effectiveReleaseTag;
                 }
                 break;
               default:
@@ -539,48 +540,13 @@ export class Collector {
             }
           }
         } else {
-          symbolReleaseTag = declaredReleaseTag;
+          maxEffectiveReleaseTag = effectiveReleaseTag;
         }
       }
-    }
-
-    // We know we solved parentAstSymbol.metadata above
-    const parentSymbolMetadata: SymbolMetadata | undefined = astSymbol.parentAstSymbol
-      ? astSymbol.parentAstSymbol.metadata as SymbolMetadata
-      : undefined;
-
-    // If this declaration doesn't have a release tag, then inherit it from the parent
-    if (symbolReleaseTag === ReleaseTag.None && parentSymbolMetadata) {
-      symbolReleaseTag = parentSymbolMetadata.releaseTag;
-    }
-
-    if (symbolReleaseTag === ReleaseTag.None) {
-      if (!astSymbol.isExternal) { // for now, don't report errors for external code
-        // Don't report missing release tags for forgotten exports
-        const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
-        if (entity && entity.exported) {
-          // We also don't report errors for the default export of an entry point, since its doc comment
-          // isn't easy to obtain from the .d.ts file
-          if (astSymbol.rootAstSymbol.localName !== '_default') {
-            this.messageRouter.addAnalyzerIssue(
-              ExtractorMessageId.MissingReleaseTag,
-              `"${entity.astEntity.localName}" is exported by the package, but it is missing `
-              + `a release tag (@alpha, @beta, @public, or @internal)`,
-              astSymbol
-            );
-          }
-        }
-      }
-
-      symbolReleaseTag = ReleaseTag.Public;
     }
 
     const symbolMetadata: SymbolMetadata = new SymbolMetadata();
-    symbolMetadata.releaseTag = symbolReleaseTag;
-    symbolMetadata.releaseTagSameAsParent = false;
-    if (parentSymbolMetadata) {
-      symbolMetadata.releaseTagSameAsParent = symbolMetadata.releaseTag === parentSymbolMetadata.releaseTag;
-    }
+    symbolMetadata.maxEffectiveReleaseTag = maxEffectiveReleaseTag;
 
     // Update this last when we're sure no exceptions were thrown
     astSymbol.metadata = symbolMetadata;
@@ -672,12 +638,39 @@ export class Collector {
     }
 
     // This needs to be set regardless of whether or not a parserContext exists
-    declarationMetadata.effectiveReleaseTag = (
-      declarationMetadata.declaredReleaseTag === ReleaseTag.None &&
-      astDeclaration.parent
-    )
-        ? this.fetchMetadata(astDeclaration.parent).effectiveReleaseTag
+    if (astDeclaration.parent) {
+      const parentDeclarationMetadata: DeclarationMetadata = this.fetchMetadata(astDeclaration.parent);
+      declarationMetadata.effectiveReleaseTag = declarationMetadata.declaredReleaseTag === ReleaseTag.None
+        ? parentDeclarationMetadata.effectiveReleaseTag
         : declarationMetadata.declaredReleaseTag;
+
+      declarationMetadata.releaseTagSameAsParent =
+        parentDeclarationMetadata.effectiveReleaseTag === declarationMetadata.effectiveReleaseTag;
+    } else {
+      declarationMetadata.effectiveReleaseTag = declarationMetadata.declaredReleaseTag;
+    }
+
+    if (declarationMetadata.effectiveReleaseTag === ReleaseTag.None) {
+      if (!astDeclaration.astSymbol.isExternal) { // for now, don't report errors for external code
+        // Don't report missing release tags for forgotten exports
+        const astSymbol: AstSymbol = astDeclaration.astSymbol;
+        const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
+        if (entity && entity.exported) {
+          // We also don't report errors for the default export of an entry point, since its doc comment
+          // isn't easy to obtain from the .d.ts file
+          if (astSymbol.rootAstSymbol.localName !== '_default') {
+            this.messageRouter.addAnalyzerIssue(
+              ExtractorMessageId.MissingReleaseTag,
+              `"${entity.astEntity.localName}" is exported by the package, but it is missing `
+              + `a release tag (@alpha, @beta, @public, or @internal)`,
+              astSymbol
+            );
+          }
+        }
+      }
+
+      declarationMetadata.effectiveReleaseTag = ReleaseTag.Public;
+    }
   }
 
   private _parseTsdocForAstDeclaration(astDeclaration: AstDeclaration): tsdoc.ParserContext | undefined {

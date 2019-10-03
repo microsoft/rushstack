@@ -12,12 +12,27 @@ export function combine(x: boolean, y: boolean): boolean;
 export function combine(x: string, y: string): string;
 
 /**
- * @internal
+ * @public
  */
 export function combine(x: number, y: number): number;
 
 // implementation
 export function combine(x: string|number|boolean, y: string|number|boolean): string|number|boolean {
+  return 42;
+}
+
+/**
+ * @beta
+ */
+export function _combine(x: string, y: string): string;
+
+/**
+ * @internal
+ */
+export function _combine(x: number, y: number): number;
+
+// implementation
+export function _combine(x: string|number, y: string|number): string|number {
   return 42;
 }
 

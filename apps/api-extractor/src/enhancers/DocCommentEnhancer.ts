@@ -12,7 +12,6 @@ import { AedocDefinitions, ReleaseTag } from '@microsoft/api-extractor-model';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import { VisitorState } from '../collector/VisitorState';
 import { ResolverFailure } from '../analyzer/AstReferenceResolver';
-import { SymbolMetadata } from '../collector/SymbolMetadata';
 
 export class DocCommentEnhancer {
   private readonly _collector: Collector;
@@ -93,9 +92,8 @@ export class DocCommentEnhancer {
         ]);
       }
 
-      const symbolMetadata: SymbolMetadata = this._collector.fetchMetadata(astDeclaration.astSymbol);
-
-      if (symbolMetadata.releaseTag === ReleaseTag.Internal) {
+      const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
+      if (declarationMetadata.effectiveReleaseTag === ReleaseTag.Internal) {
         // If the constructor is marked as internal, then add a boilerplate notice for the containing class
         const classMetadata: DeclarationMetadata = this._collector.fetchMetadata(classDeclaration);
 
