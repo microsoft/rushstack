@@ -18,7 +18,7 @@
         {
           "kind": "Interface",
           "canonicalReference": "api-extractor-scenarios!A:interface",
-          "docComment": "",
+          "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
