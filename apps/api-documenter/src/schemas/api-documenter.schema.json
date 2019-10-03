@@ -17,6 +17,12 @@
       ]
     },
 
+    "newlineKind": {
+      "description": "Specifies what type of newlines API Documenter should use when writing output files.  By default, the output files will be written with POSIX-style newlines.  To use Windows-style newlines, specify \"crlf\" instead.",
+      "type": "string",
+      "enum": [ "crlf", "lf" ]
+    },
+
     "plugins": {
       "description": "Specifies plugin packages to be loaded",
       "type": "array"

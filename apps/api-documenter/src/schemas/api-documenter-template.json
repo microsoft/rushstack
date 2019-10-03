@@ -5,6 +5,29 @@
   "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-documenter.schema.json",
 
   /**
+   * Specifies the output target.
+   * Supported values are "docfx" or "markdown"
+   */
+  // "outputTarget": "markdown",
+
+  /**
+   * Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files
+   * will be written with POSIX-style newlines.  To use Windows-style newlines, specify "crlf" instead.
+   * DEFAULT VALUE: "lf"
+   */
+  // "newlineKind": "crlf",
+
+  /**
+   * Describes plugin packages to be loaded, and which features to enable.
+   */
+  "plugins": [
+    // {
+    //  "packageName": "doc-plugin-example",
+    //  "enabledFeatureNames": [ "example-feature" ]
+    // }
+  ],
+
+  /**
    * Configures how the table of contents is generated.
    */
   "tableOfContents": {
