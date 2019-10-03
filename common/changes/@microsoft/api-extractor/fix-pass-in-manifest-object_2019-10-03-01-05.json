@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Fix an issue where IExtractorConfigPrepareOptions.packageJson was ignored (GitHub #1559)",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "bgotink@users.noreply.github.com"
+}
