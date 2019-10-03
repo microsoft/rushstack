@@ -1,0 +1,49 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "test generate",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/api-documenter-test",
+      "args": [
+        "generate",
+        "--input-folder",
+        "etc",
+        "--output-folder",
+        "etc/yaml"
+      ],
+      "sourceMaps": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "test markdown",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/api-documenter-test",
+      "args": [
+        "markdown",
+        "--input-folder",
+        "etc",
+        "--output-folder",
+        "etc/markdown"
+      ],
+      "sourceMaps": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "scratch",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "(your project path)",
+      "args": [
+        "markdown"
+      ],
+      "sourceMaps": true
+    }
+  ]
+}
