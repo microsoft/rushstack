@@ -529,6 +529,16 @@
       ]
     },
     {
+      "packageName": "@microsoft/gulp-core-build-eslint",
+      "projectFolder": "core-build/gulp-core-build-eslint",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": [
+        "@microsoft/node-library-build",
+        "@microsoft/rush-stack-compiler-3.4"
+      ]
+    },
+    {
       "packageName": "@microsoft/gulp-core-build-mocha",
       "projectFolder": "core-build/gulp-core-build-mocha",
       "reviewCategory": "libraries",

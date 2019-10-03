@@ -1,0 +1,26 @@
+{
+  "name": "@microsoft/gulp-core-build-eslint",
+  "version": "0.0.0",
+  "description": "A library for running ESLint in the gulp-core-build build system.",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack/tree/master/core-build/gulp-core-build-eslint"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "gulp --clean"
+  },
+  "dependencies": {
+    "@microsoft/gulp-core-build": "3.12.1",
+    "@microsoft/node-core-library": "3.15.1",
+    "@types/node": "8.10.54",
+    "resolve": "1.8.1",
+    "eslint": "^6.0.0"
+  },
+  "devDependencies": {
+    "@microsoft/node-library-build": "6.1.2",
+    "@microsoft/rush-stack-compiler-3.4": "0.1.15"
+  }
+}
