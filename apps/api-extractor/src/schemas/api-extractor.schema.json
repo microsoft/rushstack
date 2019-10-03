@@ -23,6 +23,12 @@
       "type": "string"
     },
 
+    "newlineKind": {
+      "description": "Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files will be written with POSIX-style newlines.  To use Windows-style newlines, specify \"crlf\" instead.",
+      "type": "string",
+      "enum": [ "crlf", "lf" ]
+    },
+
     "compiler": {
       "description": "Determines how the TypeScript compiler engine will be invoked by API Extractor.",
       "type": "object",

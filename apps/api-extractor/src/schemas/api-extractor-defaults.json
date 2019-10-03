@@ -3,6 +3,8 @@
 
   "projectFolder": "<lookup>",
 
+  "newlineKind": "lf",
+
   "compiler": {
     "tsconfigFilePath": "<projectFolder>/tsconfig.json",
     "skipLibCheck": false

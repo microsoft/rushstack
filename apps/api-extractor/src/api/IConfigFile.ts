@@ -322,6 +322,15 @@ export interface IConfigFile {
   mainEntryPointFilePath: string;
 
   /**
+   * Specifies what type of newlines API Extractor should use when writing output files.
+   *
+   * @remarks
+   * By default, the output files will be written with POSIX-style newlines.  To use Windows-style newlines,
+   * specify `crlf` instead.
+   */
+  newlineKind?: 'crlf' | 'lf';
+
+  /**
    * {@inheritDoc IConfigCompiler}
    */
   compiler?: IConfigCompiler;

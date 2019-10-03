@@ -48,6 +48,13 @@
   "mainEntryPointFilePath": "<projectFolder>/lib/index.d.ts",
 
   /**
+   * Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files
+   * will be written with POSIX-style newlines.  To use Windows-style newlines, specify "crlf" instead.
+   * DEFAULT VALUE: "lf"
+   */
+  // "newlineKind": "crlf",
+
+  /**
    * Determines how the TypeScript compiler engine will be invoked by API Extractor.
    */
   "compiler": {

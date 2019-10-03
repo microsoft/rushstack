@@ -14,7 +14,8 @@ import {
   PackageName,
   Text,
   InternalError,
-  Path
+  Path,
+  NewlineKind
 } from '@microsoft/node-core-library';
 import {
   IConfigFile,
@@ -95,6 +96,7 @@ interface IExtractorConfigParameters {
   packageJson: INodePackageJson | undefined;
   packageFolder: string | undefined;
   mainEntryPointFilePath: string;
+  newlineKind: NewlineKind;
   tsconfigFilePath: string;
   overrideTsconfig: { } | undefined;
   skipLibCheck: boolean;
@@ -150,6 +152,12 @@ export class ExtractorConfig {
    */
   public readonly packageFolder: string | undefined;
 
+  /**
+   * Specifies what type of newlines API Extractor should use when writing output files.
+   * By default, the output files will be written with POSIX-style newlines.
+   */
+  public readonly newlineKind: NewlineKind;
+
   /** {@inheritDoc IConfigFile.mainEntryPointFilePath} */
   public readonly mainEntryPointFilePath: string;
 
@@ -202,6 +210,7 @@ export class ExtractorConfig {
     this.packageJson = parameters.packageJson;
     this.packageFolder = parameters.packageFolder;
     this.mainEntryPointFilePath = parameters.mainEntryPointFilePath;
+    this.newlineKind = parameters.newlineKind;
     this.tsconfigFilePath = parameters.tsconfigFilePath;
     this.overrideTsconfig = parameters.overrideTsconfig;
     this.skipLibCheck = parameters.skipLibCheck;
@@ -470,6 +479,7 @@ export class ExtractorConfig {
     }
 
     try {
+      const newlineKind: NewlineKind = configObject.newlineKind === 'crlf' ? NewlineKind.CrLf : NewlineKind.Lf;
 
       if (!configObject.compiler) {
         // A merged configuration should have this
@@ -644,6 +654,7 @@ export class ExtractorConfig {
         projectFolder: projectFolder,
         packageJson,
         packageFolder,
+        newlineKind,
         mainEntryPointFilePath,
         tsconfigFilePath,
         overrideTsconfig: configObject.compiler.overrideTsconfig,
