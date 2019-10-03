@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-eslint",
+      "comment": "Initial package creation.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-eslint",
+  "email": "iclanton@users.noreply.github.com"
+}
