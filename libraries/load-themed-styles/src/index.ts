@@ -403,7 +403,7 @@ function registerStyles(styleArray: ThemableArray): void {
   head.appendChild(styleElement);
 
   var ev: ICustomEvent<{ newStyle: HTMLStyleElement}> = document.createEvent('HTMLEvents');
-  ev.initEvent("load-themed-styles-added", true /* bubbleEvent */, false /* cancelable */);
+  ev.initEvent("styleinsert", true /* bubbleEvent */, false /* cancelable */);
   ev.args = {
     newStyle: styleElement
   };
