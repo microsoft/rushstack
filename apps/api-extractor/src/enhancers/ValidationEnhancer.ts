@@ -25,7 +25,9 @@ export class ValidationEnhancer {
             ValidationEnhancer._checkReferences(collector, astDeclaration, alreadyWarnedSymbols);
           });
 
-          ValidationEnhancer._checkForInternalUnderscore(collector, entity, entity.astEntity);
+          const symbolMetadata: SymbolMetadata = collector.fetchMetadata(entity.astEntity);
+          ValidationEnhancer._checkForInternalUnderscore(collector, entity, entity.astEntity, symbolMetadata);
+          ValidationEnhancer._checkForInconsistentReleaseTags(collector, entity.astEntity, symbolMetadata);
         }
       }
     }
@@ -34,42 +36,123 @@ export class ValidationEnhancer {
   private static _checkForInternalUnderscore(
     collector: Collector,
     collectorEntity: CollectorEntity,
-    astSymbol: AstSymbol
+    astSymbol: AstSymbol,
+    symbolMetadata: SymbolMetadata
   ): void {
-    let containsInternal: boolean = false;
-    for (let i: number = 0; i < astSymbol.astDeclarations.length; i++) {
-      const astDeclaration: AstDeclaration = astSymbol.astDeclarations[i];
-      const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
 
-      if (
-        (containsInternal && declarationMetadata.effectiveReleaseTag !== ReleaseTag.Internal) ||
-        (!containsInternal && declarationMetadata.effectiveReleaseTag === ReleaseTag.Internal && i > 0)
-      ) {
-        const exportName: string = astDeclaration.astSymbol.localName;
-        collector.messageRouter.addAnalyzerIssue(
-          ExtractorMessageId.InternalMixedReleaseTag,
-          `Mixed release tags are not allowed for overload "${exportName}" when one is marked as @internal`,
-          astDeclaration
-        );
-      } else if (declarationMetadata.effectiveReleaseTag === ReleaseTag.Internal) {
-        containsInternal = true;
+    let needsUnderscore: boolean = false;
+
+    if (symbolMetadata.maxEffectiveReleaseTag === ReleaseTag.Internal) {
+      if (!astSymbol.parentAstSymbol) {
+        // If it's marked as @internal and has no parent, then it needs and underscore.
+        // We use maxEffectiveReleaseTag because a merged declaration would NOT need an underscore in a case like this:
+        //
+        //   /** @public */
+        //   export enum X { }
+        //
+        //   /** @internal */
+        //   export namespace X { }
+        //
+        // (The above normally reports an error "ae-different-release-tags", but that may be suppressed.)
+        needsUnderscore = true;
+      } else {
+        // If it's marked as @internal and the parent isn't obviously already @internal, then it needs an underscore.
+        //
+        // For example, we WOULD need an underscore for a merged declaration like this:
+        //
+        //   /** @internal */
+        //   export namespace X {
+        //     export interface _Y { }
+        //   }
+        //
+        //   /** @public */
+        //   export class X {
+        //     /** @internal */
+        //     public static _Y(): void { }   // <==== different from parent
+        //   }
+        const parentSymbolMetadata: SymbolMetadata = collector.fetchMetadata(astSymbol);
+        if (parentSymbolMetadata.maxEffectiveReleaseTag > ReleaseTag.Internal) {
+          needsUnderscore = true;
+        }
+      }
+    }
+
+    if (needsUnderscore) {
+      for (const exportName of collectorEntity.exportNames) {
+        if (exportName[0] !== '_') {
+          collector.messageRouter.addAnalyzerIssue(
+            ExtractorMessageId.InternalMissingUnderscore,
+            `The name "${exportName}" should be prefixed with an underscore`
+            + ` because the declaration is marked as @internal`,
+            astSymbol,
+            { exportName }
+          );
+        }
+      }
+    }
+  }
+
+  private static _checkForInconsistentReleaseTags(
+    collector: Collector,
+    astSymbol: AstSymbol,
+    symbolMetadata: SymbolMetadata
+  ): void {
+    if (astSymbol.isExternal) {
+      // For now, don't report errors for external code.  If the developer cares about it, they should run
+      // API Extractor separately on the external project
+      return;
+    }
+
+    // Normally we will expect all release tags to be the same.  Arbitrarily we choose the maxEffectiveReleaseTag
+    // as the thing they should all match.
+    const expectedEffectiveReleaseTag: ReleaseTag = symbolMetadata.maxEffectiveReleaseTag;
+
+    // This is set to true if we find a declaration whose release tag is different from expectedEffectiveReleaseTag
+    let mixedReleaseTags: boolean = false;
+
+    // This is set to false if we find a declaration that is not a function/method overload
+    let onlyFunctionOverloads: boolean = true;
+
+    // This is set to true if we find a declaration that is @internal
+    let anyInternalReleaseTags: boolean = false;
+
+    for (const astDeclaration of astSymbol.astDeclarations) {
+      const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
+      const effectiveReleaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
+
+      switch (astDeclaration.declaration.kind) {
+        case ts.SyntaxKind.FunctionDeclaration:
+        case ts.SyntaxKind.MethodDeclaration:
+          break;
+        default:
+          onlyFunctionOverloads = false;
       }
 
-      if (
-        declarationMetadata.effectiveReleaseTag === ReleaseTag.Internal &&
-        !declarationMetadata.releaseTagSameAsParent
-      ) {
-        for (const exportName of collectorEntity.exportNames) {
-          if (exportName[0] !== '_') {
-            collector.messageRouter.addAnalyzerIssue(
-              ExtractorMessageId.InternalMissingUnderscore,
-              `The name "${exportName}" should be prefixed with an underscore`
-              + ` because the declaration is marked as @internal`,
-              astSymbol,
-              { exportName }
-            );
-          }
-        }
+      if (effectiveReleaseTag !== expectedEffectiveReleaseTag) {
+        mixedReleaseTags = true;
+      }
+
+      if (effectiveReleaseTag === ReleaseTag.Internal) {
+        anyInternalReleaseTags = true;
+      }
+    }
+
+    if (mixedReleaseTags) {
+      if (!onlyFunctionOverloads) {
+        collector.messageRouter.addAnalyzerIssue(
+          ExtractorMessageId.DifferentReleaseTags,
+          'This symbol has another declaration with a different release tag',
+          astSymbol
+        );
+      }
+
+      if (anyInternalReleaseTags) {
+        collector.messageRouter.addAnalyzerIssue(
+          ExtractorMessageId.InternalMixedReleaseTag,
+          `Mixed release tags are not allowed for "${astSymbol.localName}" because one of its declarations` +
+          ` is marked as @internal`,
+          astSymbol
+        );
       }
     }
   }

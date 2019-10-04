@@ -511,7 +511,7 @@ export class Collector {
       this._calculateMetadataForDeclaration(astDeclaration);
     }
 
-    // Do any of the declarations have a release tag?
+    // The most public effectiveReleaseTag for all declarations
     let maxEffectiveReleaseTag: ReleaseTag = ReleaseTag.None;
 
     for (const astDeclaration of astSymbol.astDeclarations) {
@@ -519,29 +519,8 @@ export class Collector {
       const declarationMetadata: DeclarationMetadata = astDeclaration.metadata as DeclarationMetadata;
       const effectiveReleaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
 
-      if (effectiveReleaseTag !== ReleaseTag.None) {
-        if (maxEffectiveReleaseTag !== ReleaseTag.None && maxEffectiveReleaseTag !== effectiveReleaseTag) {
-          if (!astSymbol.isExternal) { // for now, don't report errors for external code
-            switch (astDeclaration.declaration.kind) {
-              case ts.SyntaxKind.FunctionDeclaration:
-              case ts.SyntaxKind.MethodDeclaration:
-                // For function and method overloads, take the highest release from multiple declarations
-                // TODO: Expand this out to more kinds
-                if (maxEffectiveReleaseTag < effectiveReleaseTag) {
-                  maxEffectiveReleaseTag = effectiveReleaseTag;
-                }
-                break;
-              default:
-                this.messageRouter.addAnalyzerIssue(
-                  ExtractorMessageId.DifferentReleaseTags,
-                  'This symbol has another declaration with a different release tag',
-                  astDeclaration
-                );
-            }
-          }
-        } else {
-          maxEffectiveReleaseTag = effectiveReleaseTag;
-        }
+      if (effectiveReleaseTag > maxEffectiveReleaseTag) {
+        maxEffectiveReleaseTag = effectiveReleaseTag;
       }
     }
 
