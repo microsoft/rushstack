@@ -402,12 +402,12 @@ function registerStyles(styleArray: ThemableArray): void {
   _themeState.perf.count++;
   head.appendChild(styleElement);
 
-  var ev: ICustomEvent<{ newStyle: HTMLStyleElement}> = document.createEvent('HTMLEvents');
+  const ev: ICustomEvent<{ newStyle: HTMLStyleElement}> = document.createEvent('HTMLEvents');
   ev.initEvent('styleinsert', true /* bubbleEvent */, false /* cancelable */);
   ev.args = {
     newStyle: styleElement
   };
-  document.dispatchEvent(ev)
+  document.dispatchEvent(ev);
 
   const record: IStyleRecord = {
     styleElement: styleElement,
