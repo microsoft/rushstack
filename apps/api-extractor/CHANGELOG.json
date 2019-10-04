@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.4.7",
+      "tag": "@microsoft/api-extractor_v7.4.7",
+      "date": "Fri, 04 Oct 2019 00:15:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where IExtractorConfigPrepareOptions.packageJson was ignored (GitHub #1559)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.4.6",
       "tag": "@microsoft/api-extractor_v7.4.6",
       "date": "Sun, 29 Sep 2019 23:56:29 GMT",

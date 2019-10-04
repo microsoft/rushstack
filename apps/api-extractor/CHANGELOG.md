@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sun, 29 Sep 2019 23:56:29 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Oct 2019 00:15:22 GMT and should not be manually modified.
+
+## 7.4.7
+Fri, 04 Oct 2019 00:15:22 GMT
+
+### Patches
+
+- Fix an issue where IExtractorConfigPrepareOptions.packageJson was ignored (GitHub #1559)
 
 ## 7.4.6
 Sun, 29 Sep 2019 23:56:29 GMT
