@@ -48,7 +48,7 @@ export const enum ExtractorMessageId {
   InternalMissingUnderscore = 'ae-internal-missing-underscore',
 
   /**
-   * "Mixed release tags are not allowed for overload ___ when one is marked as `@internal`."
+   * "Mixed release tags are not allowed for ___ because one of its declarations is marked as `@internal`."
    */
   InternalMixedReleaseTag = 'ae-internal-mixed-release-tag',
 
