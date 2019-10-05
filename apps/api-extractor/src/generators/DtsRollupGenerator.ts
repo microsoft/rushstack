@@ -88,9 +88,10 @@ export class DtsRollupGenerator {
         // For example, if the imported API comes from an external package that supports AEDoc,
         // and it was marked as `@internal`, then don't emit it.
         const symbolMetadata: SymbolMetadata | undefined = collector.tryFetchMetadataForAstEntity(astImport);
-        const releaseTag: ReleaseTag = symbolMetadata ? symbolMetadata.maxEffectiveReleaseTag : ReleaseTag.None;
+        const maxEffectiveReleaseTag: ReleaseTag = symbolMetadata
+          ? symbolMetadata.maxEffectiveReleaseTag : ReleaseTag.None;
 
-        if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
+        if (this._shouldIncludeReleaseTag(maxEffectiveReleaseTag, dtsKind)) {
           DtsEmitHelpers.emitImport(stringWriter, entity, astImport);
         }
       }
@@ -99,9 +100,10 @@ export class DtsRollupGenerator {
     // Emit the regular declarations
     for (const entity of collector.entities) {
       const symbolMetadata: SymbolMetadata | undefined = collector.tryFetchMetadataForAstEntity(entity.astEntity);
-      const releaseTag: ReleaseTag = symbolMetadata ? symbolMetadata.maxEffectiveReleaseTag : ReleaseTag.None;
+      const maxEffectiveReleaseTag: ReleaseTag = symbolMetadata
+        ? symbolMetadata.maxEffectiveReleaseTag : ReleaseTag.None;
 
-      if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
+      if (!this._shouldIncludeReleaseTag(maxEffectiveReleaseTag, dtsKind)) {
         if (!collector.extractorConfig.omitTrimmingComments) {
           stringWriter.writeLine();
           stringWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
@@ -120,7 +122,7 @@ export class DtsRollupGenerator {
           ) {
               if (!collector.extractorConfig.omitTrimmingComments) {
                 stringWriter.writeLine();
-                stringWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
+                stringWriter.writeLine(`/* Excluded declaration from this release type: ${entity.nameForEmit} */`);
               }
               continue;
           } else {

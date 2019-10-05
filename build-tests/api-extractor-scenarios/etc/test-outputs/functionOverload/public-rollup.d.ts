@@ -1,7 +1,7 @@
 
-/* Excluded from this release type: combine */
+/* Excluded declaration from this release type: combine */
 
-/* Excluded from this release type: combine */
+/* Excluded declaration from this release type: combine */
 
 /**
  * @public
