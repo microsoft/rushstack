@@ -4,7 +4,7 @@
 
 ```ts
 
-import { Lib2Class } from 'api-extractor-lib2-test';
+import { Lib2Class } from 'api-extractor-lib2-test/lib/index';
 
 // Warning: (ae-forgotten-export) The symbol "Lib1Class" needs to be exported by the entry point index.d.ts
 // 

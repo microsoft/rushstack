@@ -53,6 +53,14 @@ interface IAstModuleReference {
  * generating .d.ts rollups.
  */
 export class ExportAnalyzer {
+  // Captures "@a/b" or "d" from these examples:
+  //   @a/b
+  //   @a/b/c
+  //   d
+  //   d/
+  //   d/e
+  private static _modulePathRegExp: RegExp = /^((?:@[^@\/\s]+\/)?[^@\/\s]+)(?:.*)$/;
+
   private readonly _program: ts.Program;
   private readonly _typeChecker: ts.TypeChecker;
   private readonly _bundledPackageNames: Set<string>;
@@ -234,14 +242,6 @@ export class ExportAnalyzer {
     return entryPointAstModule.astModuleExportInfo;
   }
 
-  // Captures "@a/b" or "d" from these examples:
-  //   @a/b
-  //   @a/b/c
-  //   d
-  //   d/
-  //   d/e
-  private static _modulePathRegExp: RegExp = /^((?:@[^@\/\s]+\/)?[^@\/\s]+)(?:.*)$/;
-
   /**
    * Returns true if the module specifier refers to an external package.  Ignores packages listed in the
    * "bundledPackages" setting from the api-extractor.json config file.
@@ -261,7 +261,7 @@ export class ExportAnalyzer {
     const match: RegExpExecArray | null = ExportAnalyzer._modulePathRegExp.exec(moduleSpecifier);
     if (match) {
       // Extract "@my-scope/my-package" from "@my-scope/my-package/path/module"
-      const packageName: string = match[0];
+      const packageName: string = match[1];
       if (this._bundledPackageNames.has(packageName)) {
         return false;
       }
