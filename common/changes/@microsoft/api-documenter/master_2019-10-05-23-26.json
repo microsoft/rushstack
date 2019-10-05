@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "For the markdown target, reorder the \"Remarks\" section to appear before the members for classes, interfaces, namespaces, and packages (GitHub #1550)",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter",
+  "email": "giniedp@users.noreply.github.com"
+}
