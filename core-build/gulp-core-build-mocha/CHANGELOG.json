@@ -2,6 +2,40 @@
   "name": "@microsoft/gulp-core-build-mocha",
   "entries": [
     {
+      "version": "3.7.1",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.7.1",
+      "date": "Sun, 29 Sep 2019 23:56:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update repository URL"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.12.0` to `3.12.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.7.0",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.7.0",
+      "date": "Mon, 23 Sep 2019 15:14:55 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade @types/node dependency"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.11.3` to `3.12.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.6.4",
       "tag": "@microsoft/gulp-core-build-mocha_v3.6.4",
       "date": "Tue, 10 Sep 2019 22:32:23 GMT",

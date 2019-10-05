@@ -116,6 +116,7 @@ export const enum ExtractorMessageId {
     ForgottenExport = "ae-forgotten-export",
     IncompatibleReleaseTags = "ae-incompatible-release-tags",
     InternalMissingUnderscore = "ae-internal-missing-underscore",
+    InternalMixedReleaseTag = "ae-internal-mixed-release-tag",
     MisplacedPackageTag = "ae-misplaced-package-tag",
     MissingReleaseTag = "ae-missing-release-tag",
     PreapprovedBadReleaseTag = "ae-preapproved-bad-release-tag",

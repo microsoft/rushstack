@@ -448,7 +448,7 @@ export class ExportAnalyzer {
 
         if (externalModulePath === undefined) {
           // The implementation here only works when importing from an external module.
-          // The full solution is tracked by: https://github.com/Microsoft/web-build-tools/issues/1029
+          // The full solution is tracked by: https://github.com/microsoft/rushstack/issues/1029
           throw new Error('"import * as ___ from ___;" is not supported yet for local files.'
             + '\nFailure in: ' + importDeclaration.getSourceFile().fileName);
         }

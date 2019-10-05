@@ -1,6 +1,40 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Wed, 11 Sep 2019 19:56:23 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Oct 2019 00:15:22 GMT and should not be manually modified.
+
+## 7.4.9
+Fri, 04 Oct 2019 00:15:22 GMT
+
+*Version update only*
+
+## 7.4.8
+Sun, 29 Sep 2019 23:56:29 GMT
+
+### Patches
+
+- Update repository URL
+
+## 7.4.7
+Wed, 25 Sep 2019 15:15:31 GMT
+
+### Patches
+
+- Disambiguate output files for items with colliding names
+
+## 7.4.6
+Tue, 24 Sep 2019 02:58:49 GMT
+
+*Version update only*
+
+## 7.4.5
+Mon, 23 Sep 2019 15:14:55 GMT
+
+*Version update only*
+
+## 7.4.4
+Fri, 20 Sep 2019 21:27:22 GMT
+
+*Version update only*
 
 ## 7.4.3
 Wed, 11 Sep 2019 19:56:23 GMT

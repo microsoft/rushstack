@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-stack",
-  "version": "0.1.105",
+  "version": "0.1.111",
   "description": "A standardized toolchain for building JavaScript projects in a Rush monorepo",
   "license": "MIT",
   "keywords": [
@@ -15,7 +15,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/stack/rush-stack"
+    "url": "https://github.com/microsoft/rushstack/tree/master/stack/rush-stack"
   },
   "main": "lib/start.js",
   "bin": {
@@ -25,14 +25,14 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@microsoft/node-core-library": "3.14.2",
-    "@microsoft/ts-command-line": "4.2.8",
+    "@microsoft/node-core-library": "3.15.1",
+    "@microsoft/ts-command-line": "4.3.2",
     "colors": "~1.2.1"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.4": "0.1.23",
-    "@microsoft/node-library-build": "6.1.10",
-    "@types/node": "8.5.8",
+    "@microsoft/rush-stack-compiler-3.4": "0.2.4",
+    "@microsoft/node-library-build": "6.2.4",
+    "@types/node": "8.10.54",
     "gulp": "~4.0.2"
   }
 }

@@ -1,6 +1,20 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Tue, 10 Sep 2019 22:32:23 GMT and should not be manually modified.
+This log was last generated on Sun, 29 Sep 2019 23:56:29 GMT and should not be manually modified.
+
+## 3.15.1
+Sun, 29 Sep 2019 23:56:29 GMT
+
+### Patches
+
+- Update repository URL
+
+## 3.15.0
+Mon, 23 Sep 2019 15:14:55 GMT
+
+### Minor changes
+
+- Upgrade @types/node dependency and remove unnecessary dependencies on @types/fs-extra, @types/jju, and @types/z-schema
 
 ## 3.14.2
 Tue, 10 Sep 2019 22:32:23 GMT

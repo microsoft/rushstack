@@ -2,6 +2,52 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.5.1",
+      "tag": "@microsoft/api-extractor-model_v7.5.1",
+      "date": "Sun, 29 Sep 2019 23:56:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update repository URL"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.15.0` to `3.15.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.5.0",
+      "tag": "@microsoft/api-extractor-model_v7.5.0",
+      "date": "Wed, 25 Sep 2019 15:15:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add ApiItem.getMergedSiblings() API"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.4.2",
+      "tag": "@microsoft/api-extractor-model_v7.4.2",
+      "date": "Mon, 23 Sep 2019 15:14:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove unnecessary dependency on @types/node"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.14.2` to `3.15.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.4.1",
       "tag": "@microsoft/api-extractor-model_v7.4.1",
       "date": "Tue, 10 Sep 2019 22:32:23 GMT",

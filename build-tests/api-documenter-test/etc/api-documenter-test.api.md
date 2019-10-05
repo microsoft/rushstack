@@ -32,6 +32,14 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
 }
 
 // @public
+export class DocClassInterfaceMerge {
+}
+
+// @public
+export interface DocClassInterfaceMerge {
+}
+
+// @public
 export enum DocEnum {
     One = 1,
     Two = 2,

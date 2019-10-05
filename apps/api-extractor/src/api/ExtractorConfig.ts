@@ -466,7 +466,9 @@ export class ExtractorConfig {
         throw new Error('The "packageJsonFullPath" setting must be an absolute path');
       }
 
-      if (!options.packageJson) {
+      if (options.packageJson) {
+        packageJson = options.packageJson;
+      } else {
         const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
         packageJson = packageJsonLookup.loadNodePackageJson(packageJsonFullPath);
       }

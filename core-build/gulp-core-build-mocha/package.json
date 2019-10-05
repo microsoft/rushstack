@@ -1,20 +1,20 @@
 {
   "name": "@microsoft/gulp-core-build-mocha",
-  "version": "3.6.4",
+  "version": "3.7.1",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/core-build/gulp-core-build-mocha"
+    "url": "https://github.com/microsoft/rushstack/tree/master/core-build/gulp-core-build-mocha"
   },
   "scripts": {
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.11.3",
-    "@types/node": "8.5.8",
+    "@microsoft/gulp-core-build": "3.12.1",
+    "@types/node": "8.10.54",
     "glob": "~7.0.5",
     "gulp": "~4.0.2",
     "gulp-istanbul": "~0.10.3",

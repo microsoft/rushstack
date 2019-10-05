@@ -6,6 +6,7 @@ export declare namespace A {
     }
 }
 
+/** @public */
 export declare interface A {
     myProperty: string;
 }
@@ -18,7 +19,7 @@ export declare function failWithAmbiguity(): void;
 
 /**
  * NOTE: The broken link checker currently is not able to validate references to external packages.
- * Tracked by:  https://github.com/Microsoft/web-build-tools/issues/1195
+ * Tracked by:  https://github.com/microsoft/rushstack/issues/1195
  * {@link nonexistent#nonexistent}
  * @public
  */

@@ -1,6 +1,42 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Wed, 11 Sep 2019 19:56:23 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Oct 2019 00:15:22 GMT and should not be manually modified.
+
+## 8.2.4
+Fri, 04 Oct 2019 00:15:22 GMT
+
+*Version update only*
+
+## 8.2.3
+Sun, 29 Sep 2019 23:56:29 GMT
+
+### Patches
+
+- Update repository URL
+
+## 8.2.2
+Wed, 25 Sep 2019 15:15:31 GMT
+
+*Version update only*
+
+## 8.2.1
+Tue, 24 Sep 2019 02:58:49 GMT
+
+*Version update only*
+
+## 8.2.0
+Mon, 23 Sep 2019 15:14:55 GMT
+
+### Minor changes
+
+- Upgrade @types/node dependency
+
+## 8.1.35
+Fri, 20 Sep 2019 21:27:22 GMT
+
+### Patches
+
+- Fix an issue where api-extractor warnings weren't being reported.
 
 ## 8.1.34
 Wed, 11 Sep 2019 19:56:23 GMT

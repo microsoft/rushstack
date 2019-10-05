@@ -75,7 +75,6 @@ export class YamlDocumenter {
 
   private _apiItemsByCanonicalReference: Map<string, ApiItem>;
   private _yamlReferences: IYamlReferences | undefined;
-
   private _outputFolder: string;
 
   public constructor(apiModel: ApiModel) {
@@ -232,7 +231,7 @@ export class YamlDocumenter {
       if (apiItem.kind === ApiItemKind.Namespace) {
         // Namespaces don't have nodes yet
         tocItem = {
-          name: apiItem.displayName
+          name: this._getTocItemName(apiItem)
         };
       } else {
         if (this._shouldEmbed(apiItem.kind)) {
@@ -240,17 +239,10 @@ export class YamlDocumenter {
           continue;
         }
 
-        if (apiItem.kind === ApiItemKind.Package) {
-          tocItem = {
-            name: PackageName.getUnscopedName(apiItem.displayName),
-            uid: this._getUid(apiItem)
-          };
-        } else {
-          tocItem = {
-            name: apiItem.displayName,
-            uid: this._getUid(apiItem)
-          };
-        }
+        tocItem = {
+          name: this._getTocItemName(apiItem),
+          uid: this._getUid(apiItem)
+        };
       }
 
       tocItems.push(tocItem);
@@ -269,6 +261,20 @@ export class YamlDocumenter {
       }
     }
     return tocItems;
+  }
+
+  /** @virtual */
+  protected _getTocItemName(apiItem: ApiItem): string {
+    let name: string = apiItem.displayName;
+    if (apiItem.kind === ApiItemKind.Package) {
+      name = PackageName.getUnscopedName(name);
+    }
+
+    if (apiItem.getMergedSiblings().length > 1) {
+      name += ` (${apiItem.kind})`;
+    }
+
+    return name;
   }
 
   protected _shouldEmbed(apiItemKind: ApiItemKind): boolean {
@@ -591,7 +597,6 @@ export class YamlDocumenter {
    */
   private _initApiItems(): void {
     this._initApiItemsRecursive(this._apiModel);
-
   }
 
   /**
@@ -803,7 +808,13 @@ export class YamlDocumenter {
           break;
       }
     }
-    return path.join(this._outputFolder, result + '.yml');
+
+    let disambiguator: string = '';
+    if (apiItem.getMergedSiblings().length > 1) {
+      disambiguator = `-${apiItem.kind.toLowerCase()}`;
+    }
+
+    return path.join(this._outputFolder, result + disambiguator + '.yml');
   }
 
   private _deleteOldOutputFiles(): void {

@@ -7,26 +7,16 @@ import * as TSLint from 'tslint';
 
 import { CmdRunner } from './CmdRunner';
 import { ToolPaths } from './ToolPaths';
-import { RushStackCompilerBase } from './RushStackCompilerBase';
+import {
+  RushStackCompilerBase,
+  IRushStackCompilerBaseOptions,
+  WriteFileIssueFunction
+} from './RushStackCompilerBase';
 
 /**
  * @public
  */
-export type WriteFileIssueFunction = (
-  filePath: string,
-  line: number,
-  column: number,
-  errorCode: string,
-  message: string
-) => void;
-
-/**
- * @public
- */
-export interface ITslintRunnerConfig {
-  fileError: WriteFileIssueFunction;
-  fileWarning: WriteFileIssueFunction;
-
+export interface ITslintRunnerConfig extends IRushStackCompilerBaseOptions {
   /**
    * If true, displays warnings as errors. Defaults to false.
    */
@@ -62,13 +52,7 @@ export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
       args: args,
       onData: (data: Buffer) => {
         const dataStr: string = data.toString().trim();
-        const tslintErrorLogFn: (
-          filePath: string,
-          line: number,
-          column: number,
-          errorCode: string,
-          message: string
-        ) => void = this._taskOptions.displayAsError
+        const tslintErrorLogFn: WriteFileIssueFunction = this._taskOptions.displayAsError
           ? this._taskOptions.fileError
           : this._taskOptions.fileWarning;
 

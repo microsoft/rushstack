@@ -108,13 +108,7 @@ export class NodeJsCompatibility {
   }
 
   public static get isLtsVersion(): boolean {
-    interface IExtendedNodeProcess extends NodeJS.Process {
-      release: {
-        lts?: string;
-      };
-    }
-
-     return !!(process as IExtendedNodeProcess).release.lts;
+     return !!process.release.lts;
   }
 
   public static get isOddNumberedVersion(): boolean {

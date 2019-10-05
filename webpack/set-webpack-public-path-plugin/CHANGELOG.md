@@ -1,6 +1,40 @@
 # Change Log - @microsoft/set-webpack-public-path-plugin
 
-This log was last generated on Wed, 11 Sep 2019 19:56:23 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Oct 2019 00:15:22 GMT and should not be manually modified.
+
+## 2.2.4
+Fri, 04 Oct 2019 00:15:22 GMT
+
+*Version update only*
+
+## 2.2.3
+Sun, 29 Sep 2019 23:56:29 GMT
+
+### Patches
+
+- Update repository URL
+
+## 2.2.2
+Wed, 25 Sep 2019 15:15:31 GMT
+
+*Version update only*
+
+## 2.2.1
+Tue, 24 Sep 2019 02:58:49 GMT
+
+*Version update only*
+
+## 2.2.0
+Mon, 23 Sep 2019 15:14:55 GMT
+
+### Minor changes
+
+- Remove unnecessary dependencies on @types/node and @types/tapable
+
+## 2.1.135
+Fri, 20 Sep 2019 21:27:22 GMT
+
+*Version update only*
 
 ## 2.1.134
 Wed, 11 Sep 2019 19:56:23 GMT

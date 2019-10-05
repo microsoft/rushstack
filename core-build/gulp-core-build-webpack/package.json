@@ -1,28 +1,28 @@
 {
   "name": "@microsoft/gulp-core-build-webpack",
-  "version": "3.5.11",
+  "version": "3.6.4",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/core-build/gulp-core-build-webpack"
+    "url": "https://github.com/microsoft/rushstack/tree/master/core-build/gulp-core-build-webpack"
   },
   "scripts": {
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.11.3",
+    "@microsoft/gulp-core-build": "3.12.1",
     "@types/gulp": "4.0.6",
-    "@types/node": "8.5.8",
+    "@types/node": "8.10.54",
     "colors": "~1.2.1",
     "gulp": "~4.0.2",
     "webpack": "~3.11.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.1.10",
-    "@microsoft/rush-stack-compiler-3.4": "0.1.23",
+    "@microsoft/node-library-build": "6.2.4",
+    "@microsoft/rush-stack-compiler-3.4": "0.2.4",
     "@types/orchestrator": "0.0.30",
     "@types/source-map": "0.5.0",
     "@types/uglify-js": "2.6.29",
