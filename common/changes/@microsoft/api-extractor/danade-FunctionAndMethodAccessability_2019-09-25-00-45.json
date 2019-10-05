@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Keep overloaded function and method accessibility annotations",
-      "type": "patch"
+      "comment": "Allow separate release tags for overloaded functions and methods",
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/api-extractor",
