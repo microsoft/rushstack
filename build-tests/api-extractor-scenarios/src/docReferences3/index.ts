@@ -9,6 +9,7 @@ export namespace A {
   }
 }
 
+/** @public */
 export interface A {
   myProperty: string;
 }

@@ -56,6 +56,10 @@
         "logLevel": "warning",
         "addToApiReportFile": true
       },
+      "ae-internal-mixed-release-tag": {
+        "logLevel": "warning",
+        "addToApiReportFile": true
+      },
       "ae-unresolved-inheritdoc-reference": {
         "logLevel": "warning",
         "addToApiReportFile": true
