@@ -1,7 +1,9 @@
 {
+  "projectFolder": "<lookup>",
+
   // ("mainEntryPointFilePath" is required)
 
-  "projectFolder": "<lookup>",
+  "bundledPackages": [ ],
 
   "compiler": {
     "tsconfigFilePath": "<projectFolder>/tsconfig.json",

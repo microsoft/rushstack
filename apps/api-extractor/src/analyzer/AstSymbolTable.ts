@@ -85,7 +85,7 @@ export class AstSymbolTable {
     = new Map<ts.Identifier, AstEntity | undefined>();
 
   public constructor(program: ts.Program, typeChecker: ts.TypeChecker, packageJsonLookup: PackageJsonLookup,
-    messageRouter: MessageRouter) {
+    bundledPackageNames: Set<string>, messageRouter: MessageRouter) {
 
     this._program = program;
     this._typeChecker = typeChecker;
@@ -94,6 +94,7 @@ export class AstSymbolTable {
     this._exportAnalyzer = new ExportAnalyzer(
       this._program,
       this._typeChecker,
+      bundledPackageNames,
       {
         analyze: this.analyze.bind(this),
         fetchAstSymbol: this._fetchAstSymbol.bind(this)

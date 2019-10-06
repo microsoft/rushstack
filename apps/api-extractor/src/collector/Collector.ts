@@ -113,8 +113,11 @@ export class Collector {
     this.typeChecker = options.program.getTypeChecker();
 
     this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
+
+    const bundledPackageNames: Set<string> = new Set<string>(this.extractorConfig.bundledPackages);
+
     this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup,
-      this.messageRouter);
+      bundledPackageNames, this.messageRouter);
     this.astReferenceResolver = new AstReferenceResolver(this.astSymbolTable, this.workingPackage);
   }
 

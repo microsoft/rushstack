@@ -23,6 +23,14 @@
       "type": "string"
     },
 
+    "bundledPackages": {
+      "description": "A list of NPM package names whose exports should be treated as part of this package.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+
     "compiler": {
       "description": "Determines how the TypeScript compiler engine will be invoked by API Extractor.",
       "type": "object",

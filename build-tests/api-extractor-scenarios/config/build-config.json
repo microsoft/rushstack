@@ -3,6 +3,7 @@
     "ambientNameConflict",
     "ambientNameConflict2",
     "apiItemKinds",
+    "bundledPackages",
     "circularImport",
     "circularImport2",
     "defaultExportOfEntryPoint",
