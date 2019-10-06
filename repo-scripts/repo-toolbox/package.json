@@ -13,8 +13,8 @@
     "@microsoft/ts-command-line": "4.3.2"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.4": "0.2.4",
-    "@microsoft/node-library-build": "6.2.4",
+    "@microsoft/rush-stack-compiler-3.4": "0.2.5",
+    "@microsoft/node-library-build": "6.2.5",
     "@types/node": "8.10.54",
     "gulp": "~4.0.2"
   }
