@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 04 Oct 2019 00:15:22 GMT and should not be manually modified.
+This log was last generated on Sun, 06 Oct 2019 00:27:39 GMT and should not be manually modified.
+
+## 7.5.0
+Sun, 06 Oct 2019 00:27:39 GMT
+
+### Minor changes
+
+- For the markdown target, reorder the "Remarks" section to appear before the members for classes, interfaces, namespaces, and packages (GitHub #1550)
 
 ## 7.4.9
 Fri, 04 Oct 2019 00:15:22 GMT
