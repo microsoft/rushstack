@@ -20,7 +20,7 @@ export class UnlinkManager {
 
   /**
    * Delete flag file and all the existing node_modules symlinks and all
-   * project/.rush/temp/project-dependencies.json files
+   * project/.rush/temp/shrinkwrap-deps.json files
    *
    * Returns true if anything was deleted.
    */
@@ -32,7 +32,7 @@ export class UnlinkManager {
   /**
    * Delete:
    *  - all the node_modules symlinks of configured Rush projects
-   *  - all of the project/.rush/temp/project-dependencies.json files of configured Rush projects
+   *  - all of the project/.rush/temp/shrinkwrap-deps.json files of configured Rush projects
    *
    * Returns true if anything was deleted
    * */

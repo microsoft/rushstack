@@ -25,7 +25,7 @@ export interface IPnpmProjectDependencyManifestOptions {
 }
 
 /**
- * This class handles creating the project/.rush/temp/project-dependencies.json file
+ * This class handles creating the project/.rush/temp/shrinkwrap-deps.json file
  * which tracks the direct and indirect dependencies that a project consumes. This is used
  * to better determine which projects should be rebuilt when dependencies are updated.
  */
@@ -39,7 +39,7 @@ export class PnpmProjectDependencyManifest {
   private _projectDependencyManifestFile: Map<string, string>;
 
   /**
-   * Get the fully-qualified path to the project/.rush/temp/project-dependencies.json
+   * Get the fully-qualified path to the project/.rush/temp/shrinkwrap-deps.json
    * for the specified project.
    */
   public static getFilePathForProject(project: RushConfigurationProject): string {
@@ -66,7 +66,7 @@ export class PnpmProjectDependencyManifest {
   }
 
   /**
-   * Save the current state of the object to project/.rush/temp/project-dependencies.json
+   * Save the current state of the object to project/.rush/temp/shrinkwrap-deps.json
    */
   public save(): void {
     const file: { [specifier: string]: string } = {};
@@ -83,7 +83,7 @@ export class PnpmProjectDependencyManifest {
   }
 
   /**
-   * If the project/.rush/temp/project-dependencies.json file exists, delete it. Otherwise, do nothing.
+   * If the project/.rush/temp/shrinkwrap-deps.json file exists, delete it. Otherwise, do nothing.
    */
   public deleteIfExists(): void {
     FileSystem.deleteFile(this._projectDependencyManifestFilename, { throwIfNotExists: false });

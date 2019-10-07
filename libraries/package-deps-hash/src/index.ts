@@ -15,6 +15,6 @@
 
 export {
   getPackageDeps,
-  gitHashFiles
+  getGitHashForFiles
 } from './getPackageDeps';
 export { IPackageDeps } from './IPackageDeps';

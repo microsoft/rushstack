@@ -6,7 +6,7 @@ import * as colors from 'colors';
 
 import {
   getPackageDeps,
-  gitHashFiles,
+  getGitHashForFiles,
   IPackageDeps
 } from '@microsoft/package-deps-hash';
 import {
@@ -107,7 +107,7 @@ export class PackageChangeAnalyzer {
      *      "src/fileOne.ts": "a8sfa8979871fdjiojlk",
      *      "common/api/review": "324598afasfdsd",                      // this entry was added by the API Extractor
      *                                                                  //  task (for example)
-     *      ".rush/temp/project-dependencies.json": "3428789dsafdsfaf"  // this is a file which will be created by rush
+     *      ".rush/temp/shrinkwrap-deps.json": "3428789dsafdsfaf"       // this is a file which will be created by rush
      *                                                                  //  link describing the state of the
      *                                                                  //  node_modules folder
      *    }
@@ -159,7 +159,7 @@ export class PackageChangeAnalyzer {
         projectDependencyManifestPaths.push(relativeDependencyManifestFilePath);
       }
 
-      const hashes: Map<string, string> = gitHashFiles(
+      const hashes: Map<string, string> = getGitHashForFiles(
         projectDependencyManifestPaths,
         this._rushConfiguration.rushJsonFolder
       );

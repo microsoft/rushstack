@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "When using pnpm, introduce the ability to only rebuild projects whose direct and/or indirect dependencies have changed.",
+      "comment": "Improve 'rush build' to avoid rebuilding unnecessarily when the package-lock.json file has changed (pnpm only).",
       "packageName": "@microsoft/rush",
       "type": "none"
     }

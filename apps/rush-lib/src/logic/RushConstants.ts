@@ -153,5 +153,5 @@ export namespace RushConstants {
    * The name of the file to drop in project-folder/.rush/temp/ containing a listing of the project's direct
    * and indirect dependencies. This is used to detect if a project's dependencies have changed since the last build.
    */
-  export const projectDependencyManifestFilename: string = 'project-dependencies.json';
+  export const projectDependencyManifestFilename: string = 'shrinkwrap-deps.json';
 }
