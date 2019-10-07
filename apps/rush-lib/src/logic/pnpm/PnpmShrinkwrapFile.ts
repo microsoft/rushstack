@@ -376,7 +376,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, shrinkwrapFilename: string) {
     super();
     this._shrinkwrapJson = shrinkwrapJson;
-    this.
+    this.shrinkwrapFilename = shrinkwrapFilename;
 
     // Normalize the data
     if (!this._shrinkwrapJson.registry) {

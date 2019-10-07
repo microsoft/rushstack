@@ -117,7 +117,7 @@ export class ExperimentsConfiguration {
     readonly configuration: Readonly<IExperimentsJson>;
     }
 
-// @beta (undocumented)
+// @beta
 export interface IExperimentsJson {
     legacyIncrementalBuildDependencyDetection?: boolean;
 }
