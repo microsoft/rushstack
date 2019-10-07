@@ -9,6 +9,8 @@ import {
 } from '@microsoft/node-core-library';
 
 /**
+ * This interface represents the raw experiments.json file which allows repo
+ * maintainers to enable and disable experimental Rush features.
  * @beta
  */
 export interface IExperimentsJson {

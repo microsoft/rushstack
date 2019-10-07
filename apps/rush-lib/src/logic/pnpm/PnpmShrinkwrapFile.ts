@@ -146,6 +146,11 @@ export function parsePnpmDependencyKey(dependencyName: string, dependencyKey: st
 }
 
 export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
+  /**
+   * The filename of the shrinkwrap file.
+   */
+  public readonly shrinkwrapFilename: string;
+
   private _shrinkwrapJson: IPnpmShrinkwrapYaml;
 
   public static loadFromFile(shrinkwrapYamlFilename: string): PnpmShrinkwrapFile | undefined {
@@ -158,7 +163,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       // and typically very large, so we want to load it the same way that NPM does.
       const parsedData: IPnpmShrinkwrapYaml = yaml.safeLoad(FileSystem.readFile(shrinkwrapYamlFilename).toString());
 
-      return new PnpmShrinkwrapFile(parsedData);
+      return new PnpmShrinkwrapFile(parsedData, shrinkwrapYamlFilename);
     } catch (error) {
       throw new Error(`Error reading "${shrinkwrapYamlFilename}":${os.EOL}  ${error.message}`);
     }
@@ -368,9 +373,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return this._parsePnpmDependencyKey(packageName, dependencyKey);
   }
 
-  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml) {
+  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, shrinkwrapFilename: string) {
     super();
     this._shrinkwrapJson = shrinkwrapJson;
+    this.
 
     // Normalize the data
     if (!this._shrinkwrapJson.registry) {

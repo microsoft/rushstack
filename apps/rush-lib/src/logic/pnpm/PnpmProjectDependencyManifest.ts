@@ -30,13 +30,33 @@ export interface IPnpmProjectDependencyManifestOptions {
  * to better determine which projects should be rebuilt when dependencies are updated.
  */
 export class PnpmProjectDependencyManifest {
-  private static _cache: Map<string, string> = new Map<string, string>();
+  /**
+   * This cache is used to map the shrinkwrap path to a generated map of all dependency specifiers
+   * and their respective integrity hashes. For example, if shrinkwrap A contains a project which
+   * contains dependencies B and C, the cache would look like:
+   * 'path/to/A/pnpm-lock.yaml': {
+   *   'B@1.2.3': '{Integrity of B}',
+   *   'C@4.5.6': '{Integrity of C}',
+   *   ...
+   * }
+   */
+  private static readonly _dependencyIntegrityCache: Map<string, Map<string, string>> =
+    new Map<string, Map<string, string>>();
 
+  /**
+   * This mapping is used to map all project dependencies and all their dependencies
+   * to their respective dependency integrity hash. For example, if the project contains
+   * a dependency A which itself has a dependency on B, the mapping would look like:
+   * 'A@1.2.3': '{Integrity of A}',
+   * 'B@4.5.6': '{Integrity of B}',
+   * ...
+   */
+  private _projectDependencyManifestFile: Map<string, string>;
+
+  private readonly _shrinkwrapDependencyIntegrityCache: Map<string, string>;
   private readonly _projectDependencyManifestFilename: string;
   private readonly _pnpmShrinkwrapFile: PnpmShrinkwrapFile;
   private readonly _project: RushConfigurationProject;
-
-  private _projectDependencyManifestFile: Map<string, string>;
 
   /**
    * Get the fully-qualified path to the project/.rush/temp/shrinkwrap-deps.json
@@ -54,6 +74,16 @@ export class PnpmProjectDependencyManifest {
     this._project = options.project;
     this._projectDependencyManifestFilename = PnpmProjectDependencyManifest.getFilePathForProject(this._project);
 
+    if (!PnpmProjectDependencyManifest._dependencyIntegrityCache.has(this._pnpmShrinkwrapFile.shrinkwrapFilename)) {
+      PnpmProjectDependencyManifest._dependencyIntegrityCache.set(
+        this._pnpmShrinkwrapFile.shrinkwrapFilename,
+        new Map<string, string>()
+      );
+    }
+
+    this._shrinkwrapDependencyIntegrityCache = PnpmProjectDependencyManifest._dependencyIntegrityCache.get(
+      this._pnpmShrinkwrapFile.shrinkwrapFilename
+    )!;
     this._projectDependencyManifestFile = new Map<string, string>();
   }
 
@@ -96,7 +126,7 @@ export class PnpmProjectDependencyManifest {
     throwIfShrinkwrapEntryMissing: boolean = true
   ): void {
     const specifier: string = `${name}@${version}`;
-    if (!PnpmProjectDependencyManifest._cache.has(specifier)) {
+    if (!this._shrinkwrapDependencyIntegrityCache.has(specifier)) {
       const shrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined = this._pnpmShrinkwrapFile.getShrinkwrapEntry(
         name,
         version
@@ -109,7 +139,7 @@ export class PnpmProjectDependencyManifest {
         return;
       }
 
-      PnpmProjectDependencyManifest._cache.set(specifier, shrinkwrapEntry.resolution.integrity);
+      this._shrinkwrapDependencyIntegrityCache.set(specifier, shrinkwrapEntry.resolution.integrity);
 
       for (const dependencyName in shrinkwrapEntry.dependencies) {
         if (shrinkwrapEntry.dependencies.hasOwnProperty(dependencyName)) {
@@ -193,7 +223,7 @@ export class PnpmProjectDependencyManifest {
       }
     }
 
-    const integrity: string = PnpmProjectDependencyManifest._cache.get(specifier)!;
+    const integrity: string = this._shrinkwrapDependencyIntegrityCache.get(specifier)!;
 
     if (
       this._projectDependencyManifestFile.has(specifier) &&
