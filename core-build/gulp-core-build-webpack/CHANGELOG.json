@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-webpack",
   "entries": [
     {
+      "version": "3.7.0",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.7.0",
+      "date": "Mon, 07 Oct 2019 20:15:00 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for multi-compiler webpack config setting."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.6.5",
       "tag": "@microsoft/gulp-core-build-webpack_v3.6.5",
       "date": "Sun, 06 Oct 2019 00:27:39 GMT",

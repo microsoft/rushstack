@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-webpack
 
-This log was last generated on Sun, 06 Oct 2019 00:27:39 GMT and should not be manually modified.
+This log was last generated on Mon, 07 Oct 2019 20:15:00 GMT and should not be manually modified.
+
+## 3.7.0
+Mon, 07 Oct 2019 20:15:00 GMT
+
+### Minor changes
+
+- Add support for multi-compiler webpack config setting.
 
 ## 3.6.5
 Sun, 06 Oct 2019 00:27:39 GMT
