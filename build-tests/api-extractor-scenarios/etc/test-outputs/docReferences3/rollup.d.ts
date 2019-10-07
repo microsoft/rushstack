@@ -6,6 +6,7 @@ export declare namespace A {
     }
 }
 
+/** @public */
 export declare interface A {
     myProperty: string;
 }

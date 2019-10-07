@@ -2,6 +2,60 @@
   "name": "@microsoft/web-library-build",
   "entries": [
     {
+      "version": "7.2.5",
+      "tag": "@microsoft/web-library-build_v7.2.5",
+      "date": "Sun, 06 Oct 2019 00:27:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.8.4` to `4.8.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.5.4` to `3.5.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.2.4` to `8.2.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.6.4` to `3.6.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.4` to `6.2.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.4` to `0.2.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.2.4",
+      "tag": "@microsoft/web-library-build_v7.2.4",
+      "date": "Fri, 04 Oct 2019 00:15:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.8.3` to `4.8.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.5.3` to `3.5.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.2.3` to `8.2.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.6.3` to `3.6.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.3` to `6.2.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.3` to `0.2.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.2.3",
       "tag": "@microsoft/web-library-build_v7.2.3",
       "date": "Sun, 29 Sep 2019 23:56:29 GMT",

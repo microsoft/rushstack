@@ -2,6 +2,33 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.14.0",
+      "tag": "@microsoft/rush_v5.14.0",
+      "date": "Wed, 02 Oct 2019 01:18:02 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add an --all flag to \"rush add\" to add a dependency to all projects."
+          },
+          {
+            "comment": "Add options to rush change to allow creating changefiles for all changed projects."
+          },
+          {
+            "comment": "Rush update now prints a message when the approved packages files are out-of-date, and rush install exits with an error if they are out-of-date."
+          },
+          {
+            "comment": "Include peerDependencies in the approved packages files."
+          },
+          {
+            "comment": "Make detection of changefiles and changes in projects safer."
+          },
+          {
+            "comment": "Update repository URL"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.13.1",
       "tag": "@microsoft/rush_v5.13.1",
       "date": "Fri, 27 Sep 2019 22:34:50 GMT",
