@@ -215,67 +215,42 @@ export class PnpmLinkManager extends BaseLinkManager {
       RushConstants.nodeModulesFolderName
     );
 
+    const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined =
+      pnpmShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(tempProjectDependencyKey);
+    if (!parentShrinkwrapEntry) {
+      throw new InternalError(
+        'Cannot find shrinkwrap entry using dependency key for temp project: ' +
+        `${project.tempProjectName}`);
+    }
+
     const pnpmProjectDependencyManifest: PnpmProjectDependencyManifest = new PnpmProjectDependencyManifest({
       pnpmShrinkwrapFile,
       project
     });
 
     for (const dependencyName of Object.keys(commonPackage.packageJson!.dependencies || {})) {
-      // the dependency we are looking for should have already created a symlink here
-
-      // FYI dependencyName might contain an NPM scope, here it gets converted into a filesystem folder name
-      // e.g. if the dependency is supi:
-      // tslint:disable-next-line:max-line-length
-      // "C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules\supi"
-      const dependencyLocalInstallationSymlink: string = path.join(
+      const newLocalPackage: BasePackage = this._createLocalPackageForDependency(
+        pnpmProjectDependencyManifest,
+        project,
+        parentShrinkwrapEntry,
+        localPackage,
         pathToLocalInstallation,
-        dependencyName);
-
-      if (!FileSystem.exists(dependencyLocalInstallationSymlink)) {
-        // if this occurs, it is a bug in Rush algorithm or unexpected PNPM behavior
-        throw new InternalError(`Cannot find installed dependency "${dependencyName}" in "${pathToLocalInstallation}"`);
-      }
-
-      if (!FileSystem.getLinkStatistics(dependencyLocalInstallationSymlink).isSymbolicLink()) {
-        // if this occurs, it is a bug in Rush algorithm or unexpected PNPM behavior
-        throw new InternalError(`Dependency "${dependencyName}" is not a symlink in "${pathToLocalInstallation}`);
-      }
-
-      // The dependencyLocalInstallationSymlink is just a symlink to another folder.
-      // To reduce the number of filesystem reads that are needed, we will link to where that symlink
-      // it pointed, rather than linking to a link.
-      const dependencyLocalInstallationRealpath: string = FileSystem.getRealPath(dependencyLocalInstallationSymlink);
-
-      const newLocalFolderPath: string = path.join(localPackage.folderPath, 'node_modules', dependencyName);
-
-      // read the version number from the shrinkwrap entry
-      const shrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined =
-        pnpmShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(tempProjectDependencyKey);
-      if (!shrinkwrapEntry) {
-        throw new InternalError(
-          'Cannot find shrinkwrap entry using dependency key for temp project: ' +
-          `${project.tempProjectName}`);
-      }
-
-      const version: string | undefined = shrinkwrapEntry.dependencies[dependencyName];
-      if (!version) {
-        throw new InternalError(
-          'Cannot find shrinkwrap entry dependency "${dependencyName}" for temp project: ' +
-          `${project.tempProjectName}`);
-      }
-
-      const newLocalPackage: BasePackage = BasePackage.createLinkedPackage(
-        dependencyName,
-        version,
-        newLocalFolderPath
-      );
-
-      if (!this._rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection) {
-        pnpmProjectDependencyManifest.addDependency(newLocalPackage, shrinkwrapEntry);
-      }
-
-      newLocalPackage.symlinkTargetFolderPath = dependencyLocalInstallationRealpath;
+        dependencyName)!;
       localPackage.addChild(newLocalPackage);
+    }
+
+    for (const dependencyName of Object.keys(commonPackage.packageJson!.optionalDependencies || {})) {
+      const newLocalPackage: BasePackage | undefined = this._createLocalPackageForDependency(
+        pnpmProjectDependencyManifest,
+        project,
+        parentShrinkwrapEntry,
+        localPackage,
+        pathToLocalInstallation,
+        dependencyName,
+        true); // isOptional
+      if (newLocalPackage) {
+        localPackage.addChild(newLocalPackage);
+      }
     }
 
     if (DEBUG) {
@@ -297,5 +272,65 @@ export class PnpmLinkManager extends BaseLinkManager {
     // Return type is Promise<void[]> because the API returns Promise.all()
     return pnpmLinkBins(projectFolder, projectBinFolder)
       .then(() => { /* empty block */ });
+  }
+
+  private _createLocalPackageForDependency(
+    pnpmProjectDependencyManifest: PnpmProjectDependencyManifest,
+    project: RushConfigurationProject,
+    parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml,
+    localPackage: BasePackage,
+    pathToLocalInstallation: string,
+    dependencyName: string,
+    isOptional: boolean = false
+  ): BasePackage | undefined {
+    // the dependency we are looking for should have already created a symlink here
+
+    // FYI dependencyName might contain an NPM scope, here it gets converted into a filesystem folder name
+    // e.g. if the dependency is supi:
+    // tslint:disable-next-line:max-line-length
+    // "C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules\supi"
+    const dependencyLocalInstallationSymlink: string = path.join(
+      pathToLocalInstallation,
+      dependencyName);
+
+    if (!FileSystem.exists(dependencyLocalInstallationSymlink)) {
+      // if this occurs, it is a bug in Rush algorithm or unexpected PNPM behavior
+      throw new InternalError(`Cannot find installed dependency "${dependencyName}" in "${pathToLocalInstallation}"`);
+    }
+
+    if (!FileSystem.getLinkStatistics(dependencyLocalInstallationSymlink).isSymbolicLink()) {
+      // if this occurs, it is a bug in Rush algorithm or unexpected PNPM behavior
+      throw new InternalError(`Dependency "${dependencyName}" is not a symlink in "${pathToLocalInstallation}`);
+    }
+
+    // read the version number from the shrinkwrap entry
+    const version: string | undefined = isOptional
+      ? (parentShrinkwrapEntry.optionalDependencies || {})[dependencyName]
+      : (parentShrinkwrapEntry.dependencies || {})[dependencyName];
+    if (!version) {
+      if (!isOptional) {
+        throw new InternalError(
+          'Cannot find shrinkwrap entry dependency "${dependencyName}" for temp project: ' +
+          `${project.tempProjectName}`);
+      }
+      return;
+    }
+
+    const newLocalFolderPath: string = path.join(localPackage.folderPath, 'node_modules', dependencyName);
+    const newLocalPackage: BasePackage = BasePackage.createLinkedPackage(
+      dependencyName,
+      version,
+      newLocalFolderPath
+    );
+
+    // The dependencyLocalInstallationSymlink is just a symlink to another folder. To reduce the number of filesystem
+    // reads that are needed, we will link to where that symlink pointed, rather than linking to a link.
+    newLocalPackage.symlinkTargetFolderPath = FileSystem.getRealPath(dependencyLocalInstallationSymlink);
+
+    if (!this._rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection) {
+      pnpmProjectDependencyManifest.addDependency(newLocalPackage, parentShrinkwrapEntry);
+    }
+
+    return newLocalPackage;
   }
 }
