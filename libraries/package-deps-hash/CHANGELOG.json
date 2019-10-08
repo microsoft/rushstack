@@ -2,6 +2,18 @@
   "name": "@microsoft/package-deps-hash",
   "entries": [
     {
+      "version": "2.3.0",
+      "tag": "@microsoft/package-deps-hash_v2.3.0",
+      "date": "Tue, 08 Oct 2019 22:38:39 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expose the gitFileHash function."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.183",
       "tag": "@microsoft/package-deps-hash_v2.2.183",
       "date": "Sun, 06 Oct 2019 00:27:39 GMT",

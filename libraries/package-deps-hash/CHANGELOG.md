@@ -1,6 +1,13 @@
 # Change Log - @microsoft/package-deps-hash
 
-This log was last generated on Sun, 06 Oct 2019 00:27:39 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Oct 2019 22:38:39 GMT and should not be manually modified.
+
+## 2.3.0
+Tue, 08 Oct 2019 22:38:39 GMT
+
+### Minor changes
+
+- Expose the gitFileHash function.
 
 ## 2.2.183
 Sun, 06 Oct 2019 00:27:39 GMT
