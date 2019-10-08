@@ -239,19 +239,21 @@ export class PnpmLinkManager extends BaseLinkManager {
       localPackage.addChild(newLocalPackage);
     }
 
-    for (const dependencyName of Object.keys(commonPackage.packageJson!.optionalDependencies || {})) {
-      const newLocalPackage: BasePackage | undefined = this._createLocalPackageForDependency(
-        pnpmProjectDependencyManifest,
-        project,
-        parentShrinkwrapEntry,
-        localPackage,
-        pathToLocalInstallation,
-        dependencyName,
-        true); // isOptional
-      if (newLocalPackage) {
-        localPackage.addChild(newLocalPackage);
-      }
-    }
+    // TODO: Rush does not currently handle optional dependencies of projects. This should be uncommented when
+    // support is added
+    // for (const dependencyName of Object.keys(commonPackage.packageJson!.optionalDependencies || {})) {
+    //   const newLocalPackage: BasePackage | undefined = this._createLocalPackageForDependency(
+    //     pnpmProjectDependencyManifest,
+    //     project,
+    //     parentShrinkwrapEntry,
+    //     localPackage,
+    //     pathToLocalInstallation,
+    //     dependencyName,
+    //     true); // isOptional
+    //   if (newLocalPackage) {
+    //     localPackage.addChild(newLocalPackage);
+    //   }
+    // }
 
     if (DEBUG) {
       localPackage.printTree();
