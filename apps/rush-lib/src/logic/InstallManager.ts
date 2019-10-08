@@ -1161,7 +1161,11 @@ export class InstallManager {
 
       // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
       // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
-      args.push('--no-prefer-frozen-shrinkwrap');
+      if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
+        args.push('--no-prefer-frozen-lockfile');
+      } else {
+        args.push('--no-prefer-frozen-shrinkwrap');
+      }
 
       if (options.collectLogFile) {
         args.push('--reporter', 'ndjson');
