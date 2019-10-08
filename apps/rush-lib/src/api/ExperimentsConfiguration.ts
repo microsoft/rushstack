@@ -28,7 +28,7 @@ export interface IExperimentsJson {
  */
 export class ExperimentsConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '..', 'schemas', 'experiments.schema.json')
+    path.resolve(__dirname, '..', 'schemas', 'experiments.schema.json')
   );
 
   private _experimentConfiguration: IExperimentsJson;
