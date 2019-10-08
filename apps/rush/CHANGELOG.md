@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 02 Oct 2019 01:18:02 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Oct 2019 22:58:33 GMT and should not be manually modified.
+
+## 5.15.0
+Tue, 08 Oct 2019 22:58:33 GMT
+
+### Updates
+
+- Improve 'rush build' to avoid rebuilding unnecessarily when the package-lock.json file has changed (pnpm only).
 
 ## 5.14.0
 Wed, 02 Oct 2019 01:18:02 GMT

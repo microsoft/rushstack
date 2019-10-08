@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.15.0",
+      "tag": "@microsoft/rush_v5.15.0",
+      "date": "Tue, 08 Oct 2019 22:58:33 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve 'rush build' to avoid rebuilding unnecessarily when the package-lock.json file has changed (pnpm only)."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.14.0",
       "tag": "@microsoft/rush_v5.14.0",
       "date": "Wed, 02 Oct 2019 01:18:02 GMT",
