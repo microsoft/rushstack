@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import * as semver from 'semver';
 import {
   JsonFile,
   InternalError,
@@ -10,7 +11,8 @@ import {
 
 import {
   PnpmShrinkwrapFile,
-  IPnpmShrinkwrapDependencyYaml
+  IPnpmShrinkwrapDependencyYaml,
+  parsePnpmDependencyKey
 } from './PnpmShrinkwrapFile';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../RushConstants';
@@ -146,22 +148,53 @@ export class PnpmProjectDependencyManifest {
 
     for (const peerDependencyName in shrinkwrapEntry.peerDependencies) {
       if (shrinkwrapEntry.peerDependencies.hasOwnProperty(peerDependencyName)) {
-        // Check the current package or parent package to see if the dependency is already satisfied
+        // Peer dependencies come in the form of a semantic version range
+        const dependencySemVer: string = shrinkwrapEntry.peerDependencies[peerDependencyName];
+        // Check the current package to see if the dependency is already satisfied
         if (
-          (shrinkwrapEntry.dependencies && shrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName)) ||
-          (parentShrinkwrapEntry.dependencies && parentShrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName))
+          shrinkwrapEntry.dependencies &&
+          shrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName)
         ) {
-          continue;
+          const dependencySpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(
+            peerDependencyName,
+            shrinkwrapEntry.dependencies[peerDependencyName]
+          );
+          if (dependencySpecifier) {
+            if (!semver.valid(dependencySpecifier.versionSpecifier)) {
+              throw new InternalError(
+                `The version '${dependencySemVer}' of peer dependency '${peerDependencyName}' is invalid`
+              );
+            }
+            continue;
+          }
+        }
+
+        // If not, check the parent.
+        if (
+          parentShrinkwrapEntry.dependencies &&
+          parentShrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName)
+        ) {
+          const dependencySpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(
+            peerDependencyName,
+            parentShrinkwrapEntry.dependencies[peerDependencyName]
+          );
+          if (dependencySpecifier) {
+            if (!semver.valid(dependencySpecifier.versionSpecifier)) {
+              throw new InternalError(
+                `The version '${dependencySemVer}' of peer dependency '${peerDependencyName}' is invalid`
+              );
+            }
+            continue;
+          }
         }
 
         // The parent doesn't have a version that satisfies the range. As a last attempt, check
         // if it's been hoisted up as a top-level dependency
         const topLevelDependencySpecifier: DependencySpecifier | undefined =
           this._pnpmShrinkwrapFile.getTopLevelDependencyVersion(peerDependencyName);
-        if (!topLevelDependencySpecifier) {
+        if (!topLevelDependencySpecifier || !semver.valid(topLevelDependencySpecifier.versionSpecifier)) {
           throw new InternalError(
-            `Could not find peer dependency '${peerDependencyName}' that satisfies version ` +
-              `'${shrinkwrapEntry.peerDependencies[peerDependencyName]}'`
+            `Could not find peer dependency '${peerDependencyName}' that satisfies version '${dependencySemVer}'`
           );
         }
 
