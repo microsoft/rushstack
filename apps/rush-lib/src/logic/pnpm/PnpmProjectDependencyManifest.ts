@@ -31,19 +31,6 @@ export interface IPnpmProjectDependencyManifestOptions {
  */
 export class PnpmProjectDependencyManifest {
   /**
-   * This cache is used to map the shrinkwrap path to a generated map of all dependency specifiers
-   * and their respective integrity hashes. For example, if shrinkwrap A contains a project which
-   * contains dependencies B and C, the cache would look like:
-   * 'path/to/A/pnpm-lock.yaml': {
-   *   'B@1.2.3': '{Integrity of B}',
-   *   'C@4.5.6': '{Integrity of C}',
-   *   ...
-   * }
-   */
-  private static readonly _dependencyIntegrityCache: Map<string, Map<string, string>> =
-    new Map<string, Map<string, string>>();
-
-  /**
    * This mapping is used to map all project dependencies and all their dependencies
    * to their respective dependency integrity hash. For example, if the project contains
    * a dependency A which itself has a dependency on B, the mapping would look like:
@@ -53,7 +40,6 @@ export class PnpmProjectDependencyManifest {
    */
   private _projectDependencyManifestFile: Map<string, string>;
 
-  private readonly _shrinkwrapDependencyIntegrityCache: Map<string, string>;
   private readonly _projectDependencyManifestFilename: string;
   private readonly _pnpmShrinkwrapFile: PnpmShrinkwrapFile;
   private readonly _project: RushConfigurationProject;
@@ -74,16 +60,6 @@ export class PnpmProjectDependencyManifest {
     this._project = options.project;
     this._projectDependencyManifestFilename = PnpmProjectDependencyManifest.getFilePathForProject(this._project);
 
-    if (!PnpmProjectDependencyManifest._dependencyIntegrityCache.has(this._pnpmShrinkwrapFile.shrinkwrapFilename)) {
-      PnpmProjectDependencyManifest._dependencyIntegrityCache.set(
-        this._pnpmShrinkwrapFile.shrinkwrapFilename,
-        new Map<string, string>()
-      );
-    }
-
-    this._shrinkwrapDependencyIntegrityCache = PnpmProjectDependencyManifest._dependencyIntegrityCache.get(
-      this._pnpmShrinkwrapFile.shrinkwrapFilename
-    )!;
     this._projectDependencyManifestFile = new Map<string, string>();
   }
 
@@ -125,113 +101,111 @@ export class PnpmProjectDependencyManifest {
     parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml,
     throwIfShrinkwrapEntryMissing: boolean = true
   ): void {
+    const shrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined = this._pnpmShrinkwrapFile.getShrinkwrapEntry(
+      name,
+      version
+    );
+
+    if (!shrinkwrapEntry) {
+      if (throwIfShrinkwrapEntryMissing) {
+        throw new InternalError(`Unable to find dependency ${name} with version ${version} in shrinkwrap.`);
+      }
+      return;
+    }
+
     const specifier: string = `${name}@${version}`;
-    if (!this._shrinkwrapDependencyIntegrityCache.has(specifier)) {
-      const shrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined = this._pnpmShrinkwrapFile.getShrinkwrapEntry(
-        name,
-        version
-      );
-
-      if (!shrinkwrapEntry) {
-        if (throwIfShrinkwrapEntryMissing) {
-          throw new InternalError(`Unable to find dependency ${name} with version ${version} in shrinkwrap.`);
-        }
-        return;
+    const integrity: string = shrinkwrapEntry.resolution.integrity;
+    if (this._projectDependencyManifestFile.has(specifier)) {
+      if (this._projectDependencyManifestFile.get(specifier) !== integrity) {
+        throw new Error(`Collision: ${specifier} already exists in with a different integrity`);
       }
+      return;
+    }
 
-      this._shrinkwrapDependencyIntegrityCache.set(specifier, shrinkwrapEntry.resolution.integrity);
+    // Add the current dependency
+    this._projectDependencyManifestFile.set(specifier, integrity);
 
-      for (const dependencyName in shrinkwrapEntry.dependencies) {
-        if (shrinkwrapEntry.dependencies.hasOwnProperty(dependencyName)) {
-          const dependencyVersion: string = shrinkwrapEntry.dependencies[dependencyName];
-          this._addDependencyInternal(dependencyName, dependencyVersion, shrinkwrapEntry);
-        }
+    // Add the dependencies of the dependency
+    for (const dependencyName in shrinkwrapEntry.dependencies) {
+      if (shrinkwrapEntry.dependencies.hasOwnProperty(dependencyName)) {
+        const dependencyVersion: string = shrinkwrapEntry.dependencies[dependencyName];
+        this._addDependencyInternal(dependencyName, dependencyVersion, shrinkwrapEntry);
       }
+    }
 
-      for (const optionalDependencyName in shrinkwrapEntry.optionalDependencies) {
-        if (shrinkwrapEntry.optionalDependencies.hasOwnProperty(optionalDependencyName)) {
-          // Optional dependencies may not exist. Don't blow up if it can't be found
-          const dependencyVersion: string = shrinkwrapEntry.optionalDependencies[optionalDependencyName];
-          this._addDependencyInternal(
-            optionalDependencyName,
-            dependencyVersion,
-            shrinkwrapEntry,
-            throwIfShrinkwrapEntryMissing = false);
-        }
+    // Add the optional dependencies of the dependency
+    for (const optionalDependencyName in shrinkwrapEntry.optionalDependencies) {
+      if (shrinkwrapEntry.optionalDependencies.hasOwnProperty(optionalDependencyName)) {
+        // Optional dependencies may not exist. Don't blow up if it can't be found
+        const dependencyVersion: string = shrinkwrapEntry.optionalDependencies[optionalDependencyName];
+        this._addDependencyInternal(
+          optionalDependencyName,
+          dependencyVersion,
+          shrinkwrapEntry,
+          throwIfShrinkwrapEntryMissing = false);
       }
+    }
 
-      for (const peerDependencyName in shrinkwrapEntry.peerDependencies) {
-        if (shrinkwrapEntry.peerDependencies.hasOwnProperty(peerDependencyName)) {
-          // Peer dependencies come in the form of a semantic version range
-          const dependencySemVer: string = shrinkwrapEntry.peerDependencies[peerDependencyName];
-          // Check the current package to see if the dependency is already satisfied
-          if (
-            shrinkwrapEntry.dependencies &&
-            shrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName)
-          ) {
-            const dependencySpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(
-              peerDependencyName,
-              shrinkwrapEntry.dependencies[peerDependencyName]
-            );
-            if (
-              dependencySpecifier &&
-              semver.valid(dependencySpecifier.versionSpecifier) &&
-              semver.satisfies(dependencySpecifier.versionSpecifier, dependencySemVer)
-            ) {
-              continue;
-            }
-          }
-
-          // If not, check the parent.
-          if (
-            parentShrinkwrapEntry.dependencies &&
-            parentShrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName)
-          ) {
-            const dependencySpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(
-              peerDependencyName,
-              parentShrinkwrapEntry.dependencies[peerDependencyName]
-            );
-            if (
-              dependencySpecifier &&
-              semver.valid(dependencySpecifier.versionSpecifier) &&
-              semver.satisfies(dependencySpecifier.versionSpecifier, dependencySemVer)
-            ) {
-              continue;
-            }
-          }
-
-          // The parent doesn't have a version that satisfies the range. As a last attempt, check
-          // if it's been hoisted up as a top-level dependency
-          const topLevelDependencySpecifier: DependencySpecifier | undefined =
-            this._pnpmShrinkwrapFile.getTopLevelDependencyVersion(peerDependencyName);
-          if (
-            !topLevelDependencySpecifier ||
-            !semver.valid(topLevelDependencySpecifier.versionSpecifier) ||
-            !semver.satisfies(topLevelDependencySpecifier.versionSpecifier, dependencySemVer)
-          ) {
-            throw new InternalError(
-              `Could not find peer dependency '${peerDependencyName}' that satisfies version '${dependencySemVer}'`
-            );
-          }
-
-          this._addDependencyInternal(
+    for (const peerDependencyName in shrinkwrapEntry.peerDependencies) {
+      if (shrinkwrapEntry.peerDependencies.hasOwnProperty(peerDependencyName)) {
+        // Peer dependencies come in the form of a semantic version range
+        const dependencySemVer: string = shrinkwrapEntry.peerDependencies[peerDependencyName];
+        // Check the current package to see if the dependency is already satisfied
+        if (
+          shrinkwrapEntry.dependencies &&
+          shrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName)
+        ) {
+          const dependencySpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(
             peerDependencyName,
-            this._pnpmShrinkwrapFile.getTopLevelDependencyKey(peerDependencyName)!,
-            shrinkwrapEntry
+            shrinkwrapEntry.dependencies[peerDependencyName]
+          );
+          if (
+            dependencySpecifier &&
+            semver.valid(dependencySpecifier.versionSpecifier) &&
+            semver.satisfies(dependencySpecifier.versionSpecifier, dependencySemVer)
+          ) {
+            continue;
+          }
+        }
+
+        // If not, check the parent.
+        if (
+          parentShrinkwrapEntry.dependencies &&
+          parentShrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName)
+        ) {
+          const dependencySpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(
+            peerDependencyName,
+            parentShrinkwrapEntry.dependencies[peerDependencyName]
+          );
+          if (
+            dependencySpecifier &&
+            semver.valid(dependencySpecifier.versionSpecifier) &&
+            semver.satisfies(dependencySpecifier.versionSpecifier, dependencySemVer)
+          ) {
+            continue;
+          }
+        }
+
+        // The parent doesn't have a version that satisfies the range. As a last attempt, check
+        // if it's been hoisted up as a top-level dependency
+        const topLevelDependencySpecifier: DependencySpecifier | undefined =
+          this._pnpmShrinkwrapFile.getTopLevelDependencyVersion(peerDependencyName);
+        if (
+          !topLevelDependencySpecifier ||
+          !semver.valid(topLevelDependencySpecifier.versionSpecifier) ||
+          !semver.satisfies(topLevelDependencySpecifier.versionSpecifier, dependencySemVer)
+        ) {
+          throw new InternalError(
+            `Could not find peer dependency '${peerDependencyName}' that satisfies version '${dependencySemVer}'`
           );
         }
+
+        this._addDependencyInternal(
+          peerDependencyName,
+          this._pnpmShrinkwrapFile.getTopLevelDependencyKey(peerDependencyName)!,
+          shrinkwrapEntry
+        );
       }
     }
-
-    const integrity: string = this._shrinkwrapDependencyIntegrityCache.get(specifier)!;
-
-    if (
-      this._projectDependencyManifestFile.has(specifier) &&
-      this._projectDependencyManifestFile.get(specifier) !== integrity
-    ) {
-      throw new Error(`Collision: ${specifier} already exists in with a different integrity`);
-    }
-
-    this._projectDependencyManifestFile.set(specifier, integrity);
   }
 }
