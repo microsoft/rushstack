@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Rush experiments.json config file",
+  "description": "For use with the Rush tool, this file allows repo maintainers to enable and disable experimental Rush features.",
+
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "legacyIncrementalBuildDependencyDetection": {
+      "description": "Rush 5.14.0 improved incremental builds to ignore spurious changes in the pnpm-lock.json file. This optimization is enabled by default. If you encounter a problem where \"rush build\" is neglecting to build some projects, please open a GitHub issue. As a workaround you can uncomment this line to temporarily restore the old behavior where everything must be rebuilt whenever pnpm-lock.json is modified.",
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false
+}

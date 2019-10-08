@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Improve 'rush build' to avoid rebuilding unnecessarily when the package-lock.json file has changed (pnpm only).",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}

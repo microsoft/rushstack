@@ -87,8 +87,10 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
 
 /**
  * Takes a list of files and returns the current git hashes for them
+ *
+ * @public
  */
-export function gitHashFiles(filesToHash: string[], packagePath: string): Map<string, string> {
+export function getGitHashForFiles(filesToHash: string[], packagePath: string): Map<string, string> {
   const changes: Map<string, string> = new Map<string, string>();
   if (filesToHash.length) {
     const hashStdout: string = child_process.execSync(
@@ -173,7 +175,7 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
     }
   });
 
-  gitHashFiles(filesToHash, packagePath).forEach((hash: string, filename: string) => {
+  getGitHashForFiles(filesToHash, packagePath).forEach((hash: string, filename: string) => {
     changes.files[filename] = hash;
   });
 

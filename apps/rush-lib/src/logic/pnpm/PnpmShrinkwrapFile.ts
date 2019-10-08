@@ -15,7 +15,7 @@ const SHRINKWRAP_YAML_FORMAT: yaml.DumpOptions = {
   sortKeys: true
 };
 
-interface IPnpmShrinkwrapDependencyYaml {
+export interface IPnpmShrinkwrapDependencyYaml {
   /** Information about the resolved package */
   resolution: {
     /** The hash of the tarball, to ensure archive integrity */
@@ -25,6 +25,10 @@ interface IPnpmShrinkwrapDependencyYaml {
   };
   /** The list of dependencies and the resolved version */
   dependencies: { [dependency: string]: string };
+  /** The list of optional dependencies and the resolved version */
+  optionalDependencies: { [dependency: string]: string };
+  /** The list of peer dependencies and the resolved version */
+  peerDependencies: { [dependency: string]: string };
 }
 
 /**
@@ -142,6 +146,11 @@ export function parsePnpmDependencyKey(dependencyName: string, dependencyKey: st
 }
 
 export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
+  /**
+   * The filename of the shrinkwrap file.
+   */
+  public readonly shrinkwrapFilename: string;
+
   private _shrinkwrapJson: IPnpmShrinkwrapYaml;
 
   public static loadFromFile(shrinkwrapYamlFilename: string): PnpmShrinkwrapFile | undefined {
@@ -154,7 +163,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       // and typically very large, so we want to load it the same way that NPM does.
       const parsedData: IPnpmShrinkwrapYaml = yaml.safeLoad(FileSystem.readFile(shrinkwrapYamlFilename).toString());
 
-      return new PnpmShrinkwrapFile(parsedData);
+      return new PnpmShrinkwrapFile(parsedData, shrinkwrapYamlFilename);
     } catch (error) {
       throw new Error(`Error reading "${shrinkwrapYamlFilename}":${os.EOL}  ${error.message}`);
     }
@@ -178,6 +187,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     return dependency.resolution.tarball;
+  }
+
+  public getTopLevelDependencyKey(dependencyName: string): string | undefined {
+    return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
   }
 
   /**
@@ -267,6 +280,20 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return undefined;
   }
 
+  public getShrinkwrapEntryFromTempProjectDependencyKey(
+    tempProjectDependencyKey: string
+  ): IPnpmShrinkwrapDependencyYaml | undefined {
+    return this._shrinkwrapJson.packages[tempProjectDependencyKey];
+  }
+
+  public getShrinkwrapEntry(name: string, version: string): IPnpmShrinkwrapDependencyYaml | undefined {
+    // Version can sometimes be in the form of a path that's already in the /name/version format.
+    const packageId: string = version.indexOf('/') !== -1
+      ? version
+      : `/${name}/${version}`;
+    return this._shrinkwrapJson.packages[packageId];
+  }
+
   /**
    * Serializes the PNPM Shrinkwrap file
    *
@@ -346,9 +373,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return this._parsePnpmDependencyKey(packageName, dependencyKey);
   }
 
-  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml) {
+  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, shrinkwrapFilename: string) {
     super();
     this._shrinkwrapJson = shrinkwrapJson;
+    this.shrinkwrapFilename = shrinkwrapFilename;
 
     // Normalize the data
     if (!this._shrinkwrapJson.registry) {

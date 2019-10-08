@@ -5,6 +5,9 @@
 ```ts
 
 // @public
+export function getGitHashForFiles(filesToHash: string[], packagePath: string): Map<string, string>;
+
+// @public
 export function getPackageDeps(packagePath?: string, excludedPaths?: string[]): IPackageDeps;
 
 // @public
