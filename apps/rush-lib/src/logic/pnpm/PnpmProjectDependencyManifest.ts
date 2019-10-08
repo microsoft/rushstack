@@ -150,6 +150,7 @@ export class PnpmProjectDependencyManifest {
       if (shrinkwrapEntry.peerDependencies.hasOwnProperty(peerDependencyName)) {
         // Peer dependencies come in the form of a semantic version range
         const dependencySemVer: string = shrinkwrapEntry.peerDependencies[peerDependencyName];
+
         // Check the current package to see if the dependency is already satisfied
         if (
           shrinkwrapEntry.dependencies &&
