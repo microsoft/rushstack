@@ -745,10 +745,10 @@ export class InstallManager {
         // new lockfile. Deleting this file in addition to deleting common/temp/pnpm-lock.yaml
         // ensures that a new lockfile will be generated with "rush update --full".
 
-        // Note that there is period in the file name: common/temp/node_modules/.pnpm-lock.yaml
-        const pnpmShrinkwrapInNodeModulesFolder: string = path.join(commonNodeModulesFolder, '.'
-          + this._rushConfiguration.shrinkwrapFilename);
-        FileSystem.deleteFile(pnpmShrinkwrapInNodeModulesFolder);
+        const pnpmPackageManager: PnpmPackageManager =
+          (this._rushConfiguration.packageManagerWrapper as PnpmPackageManager);
+
+        FileSystem.deleteFile(path.join(commonNodeModulesFolder, pnpmPackageManager.getInternalShrinkwrapFilePath()));
       }
     }
 
