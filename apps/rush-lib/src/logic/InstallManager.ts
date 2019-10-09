@@ -740,8 +740,6 @@ export class InstallManager {
       FileSystem.deleteFile(this._rushConfiguration.tempShrinkwrapFilename);
 
       if (this._rushConfiguration.packageManager === 'pnpm') {
-        const commonNodeModulesFolder: string = path.join(this._rushConfiguration.commonTempFolder, 'node_modules');
-
         // Workaround for https://github.com/pnpm/pnpm/issues/1890
         //
         // When "rush update --full" is run, rush deletes common/temp/pnpm-lock.yaml so that
@@ -753,7 +751,8 @@ export class InstallManager {
         const pnpmPackageManager: PnpmPackageManager =
           (this._rushConfiguration.packageManagerWrapper as PnpmPackageManager);
 
-        FileSystem.deleteFile(path.join(commonNodeModulesFolder, pnpmPackageManager.internalShrinkwrapRelativePath));
+        FileSystem.deleteFile(path.join(this._rushConfiguration.commonTempFolder,
+          pnpmPackageManager.internalShrinkwrapRelativePath));
       }
     }
 
