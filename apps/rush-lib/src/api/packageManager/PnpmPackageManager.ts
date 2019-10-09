@@ -22,14 +22,14 @@ export class PnpmPackageManager extends PackageManager {
   public constructor(version: string) {
     super(version, 'pnpm');
 
-    const pnpmVersion: semver.SemVer = new semver.SemVer(version);
+    const parsedVersion: semver.SemVer = new semver.SemVer(version);
 
     this.supportsResolutionStrategy = false;
 
-    if (pnpmVersion.major >= 3) {
+    if (parsedVersion.major >= 3) {
       this._shrinkwrapFilename = RushConstants.pnpmV3ShrinkwrapFilename;
 
-      if (pnpmVersion.minor >= 1) {
+      if (parsedVersion.minor >= 1) {
         // Introduced in version 3.1.0-0
         this.supportsResolutionStrategy = true;
       }
@@ -37,10 +37,10 @@ export class PnpmPackageManager extends PackageManager {
       this._shrinkwrapFilename = RushConstants.pnpmV1ShrinkwrapFilename;
     }
 
-    if (pnpmVersion.major <= 2) {
+    if (parsedVersion.major <= 2) {
       // node_modules/.shrinkwrap.yaml
       this.internalShrinkwrapRelativePath = path.join('node_modules', '.shrinkwrap.yaml');
-    } else if (pnpmVersion.major <= 3) {
+    } else if (parsedVersion.major <= 3) {
       // node_modules/.pnpm-lock.yaml
       this.internalShrinkwrapRelativePath = path.join('node_modules', '.pnpm-lock.yaml');
     } else {

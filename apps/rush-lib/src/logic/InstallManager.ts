@@ -1150,7 +1150,7 @@ export class InstallManager {
         args.push('--verbose');
       }
     } else if (this._rushConfiguration.packageManager === 'pnpm') {
-      // args.push('--store', this._rushConfiguration.pnpmStoreFolder);
+      args.push('--store', this._rushConfiguration.pnpmStoreFolder);
 
       // we are using the --no-lock flag for now, which unfortunately prints a warning, but should be OK
       // since rush already has its own install lock file which will invalidate the cache for us.
