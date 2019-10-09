@@ -1,6 +1,32 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 11 Sep 2019 21:41:34 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Oct 2019 22:58:33 GMT and should not be manually modified.
+
+## 5.15.0
+Tue, 08 Oct 2019 22:58:33 GMT
+
+### Updates
+
+- Improve 'rush build' to avoid rebuilding unnecessarily when the package-lock.json file has changed (pnpm only).
+
+## 5.14.0
+Wed, 02 Oct 2019 01:18:02 GMT
+
+### Updates
+
+- Add an --all flag to "rush add" to add a dependency to all projects.
+- Add options to rush change to allow creating changefiles for all changed projects.
+- Rush update now prints a message when the approved packages files are out-of-date, and rush install exits with an error if they are out-of-date.
+- Include peerDependencies in the approved packages files.
+- Make detection of changefiles and changes in projects safer.
+- Update repository URL
+
+## 5.13.1
+Fri, 27 Sep 2019 22:34:50 GMT
+
+### Updates
+
+- Improve support for pnpm lockfile version 5.1. Also fixes a regression in Rush 5.12.0 in which rush install can fail on pnpm 3.5+ with the error message "ERROR: Invalid Version"
 
 ## 5.13.0
 Wed, 11 Sep 2019 21:41:34 GMT

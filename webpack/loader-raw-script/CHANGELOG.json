@@ -2,6 +2,56 @@
   "name": "@microsoft/loader-raw-script",
   "entries": [
     {
+      "version": "1.2.182",
+      "tag": "@microsoft/loader-raw-script_v1.2.182",
+      "date": "Sun, 06 Oct 2019 00:27:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.4` to `0.2.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.4` to `6.2.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.181",
+      "tag": "@microsoft/loader-raw-script_v1.2.181",
+      "date": "Fri, 04 Oct 2019 00:15:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.3` to `0.2.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.3` to `6.2.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.180",
+      "tag": "@microsoft/loader-raw-script_v1.2.180",
+      "date": "Sun, 29 Sep 2019 23:56:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update repository URL"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.2` to `0.2.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.2` to `6.2.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.179",
       "tag": "@microsoft/loader-raw-script_v1.2.179",
       "date": "Wed, 25 Sep 2019 15:15:31 GMT",

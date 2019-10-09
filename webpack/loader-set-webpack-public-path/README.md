@@ -14,7 +14,7 @@ property.
 
 Webpack's `resolveLoader.root` property was [removed](https://webpack.js.org/guides/migrating/#loaders-in-configuration-resolve-relative-to-context)
 in webpack 2.X. This has an unfortunate side-effect for standardardized build configurations like
-[gulp-core-build](https://github.com/Microsoft/web-build-tools) build rigs with loaders in the rig's
+[gulp-core-build](https://github.com/microsoft/rushstack) build rigs with loaders in the rig's
 `package.json`, but not in the `package.json` of the project being built. This side-effect causes these
 loaders to not be resolved under some circumstances. In order to work around this, we recommend you use the
 [Webpack plugin](https://www.npmjs.com/package/@microsoft/set-webpack-public-path-plugin) instead of this loader.

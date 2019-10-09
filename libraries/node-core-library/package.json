@@ -1,12 +1,12 @@
 {
   "name": "@microsoft/node-core-library",
-  "version": "3.15.0",
+  "version": "3.15.1",
   "description": "Core libraries that every NodeJS toolchain project should use",
   "main": "lib/index.js",
   "typings": "dist/node-core-library.d.ts",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/libraries/node-core-library"
+    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/node-core-library"
   },
   "scripts": {
     "build": "gulp test --clean"

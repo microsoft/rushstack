@@ -13,7 +13,7 @@ export function parseGitLsTree(output: string): Map<string, string> {
   if (output) {
     // A line is expected to look like:
     // 100644 blob 3451bccdc831cb43d7a70ed8e628dcf9c7f888c8    src/typings/tsd.d.ts
-    // 160000 commit c5880bf5b0c6c1f2e2c43c95beeb8f0a808e8bac  web-build-tools
+    // 160000 commit c5880bf5b0c6c1f2e2c43c95beeb8f0a808e8bac  rushstack
     const gitRegex: RegExp = /([0-9]{6})\s(blob|commit)\s([a-f0-9]{40})\s*(.*)/;
 
     // Note: The output of git ls-tree uses \n newlines regardless of OS.
@@ -87,8 +87,10 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
 
 /**
  * Takes a list of files and returns the current git hashes for them
+ *
+ * @public
  */
-export function gitHashFiles(filesToHash: string[], packagePath: string): Map<string, string> {
+export function getGitHashForFiles(filesToHash: string[], packagePath: string): Map<string, string> {
   const changes: Map<string, string> = new Map<string, string>();
   if (filesToHash.length) {
     const hashStdout: string = child_process.execSync(
@@ -173,7 +175,7 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
     }
   });
 
-  gitHashFiles(filesToHash, packagePath).forEach((hash: string, filename: string) => {
+  getGitHashForFiles(filesToHash, packagePath).forEach((hash: string, filename: string) => {
     changes.files[filename] = hash;
   });
 

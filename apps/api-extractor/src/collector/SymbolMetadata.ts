@@ -4,8 +4,7 @@
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 
 export class SymbolMetadata {
-  public releaseTag: ReleaseTag = ReleaseTag.None;
-
-  // If true, then it would be redundant to show this release tag
-  public releaseTagSameAsParent: boolean = false;
+  // For all declarations associated with this symbol, this is the
+  // `DeclarationMetadata.effectiveReleaseTag` value that is most public.
+  public maxEffectiveReleaseTag: ReleaseTag = ReleaseTag.None;
 }

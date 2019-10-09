@@ -41,6 +41,7 @@ export class ExtractorConfig {
     readonly apiJsonFilePath: string;
     readonly apiReportEnabled: boolean;
     readonly betaTrimmedFilePath: string;
+    readonly bundledPackages: string[];
     readonly docModelEnabled: boolean;
     static readonly FILENAME: string;
     getDiagnosticDump(): string;
@@ -115,6 +116,7 @@ export const enum ExtractorMessageId {
     ForgottenExport = "ae-forgotten-export",
     IncompatibleReleaseTags = "ae-incompatible-release-tags",
     InternalMissingUnderscore = "ae-internal-missing-underscore",
+    InternalMixedReleaseTag = "ae-internal-mixed-release-tag",
     MisplacedPackageTag = "ae-misplaced-package-tag",
     MissingReleaseTag = "ae-missing-release-tag",
     PreapprovedBadReleaseTag = "ae-preapproved-bad-release-tag",
@@ -175,6 +177,7 @@ export interface IConfigDtsRollup {
 // @public
 export interface IConfigFile {
     apiReport?: IConfigApiReport;
+    bundledPackages?: string[];
     compiler?: IConfigCompiler;
     docModel?: IConfigDocModel;
     // @beta

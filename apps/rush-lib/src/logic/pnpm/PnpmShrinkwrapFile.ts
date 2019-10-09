@@ -15,7 +15,7 @@ const SHRINKWRAP_YAML_FORMAT: yaml.DumpOptions = {
   sortKeys: true
 };
 
-interface IPnpmShrinkwrapDependencyYaml {
+export interface IPnpmShrinkwrapDependencyYaml {
   /** Information about the resolved package */
   resolution: {
     /** The hash of the tarball, to ensure archive integrity */
@@ -25,6 +25,10 @@ interface IPnpmShrinkwrapDependencyYaml {
   };
   /** The list of dependencies and the resolved version */
   dependencies: { [dependency: string]: string };
+  /** The list of optional dependencies and the resolved version */
+  optionalDependencies: { [dependency: string]: string };
+  /** The list of peer dependencies and the resolved version */
+  peerDependencies: { [dependency: string]: string };
 }
 
 /**
@@ -142,6 +146,11 @@ export function parsePnpmDependencyKey(dependencyName: string, dependencyKey: st
 }
 
 export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
+  /**
+   * The filename of the shrinkwrap file.
+   */
+  public readonly shrinkwrapFilename: string;
+
   private _shrinkwrapJson: IPnpmShrinkwrapYaml;
 
   public static loadFromFile(shrinkwrapYamlFilename: string): PnpmShrinkwrapFile | undefined {
@@ -154,7 +163,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       // and typically very large, so we want to load it the same way that NPM does.
       const parsedData: IPnpmShrinkwrapYaml = yaml.safeLoad(FileSystem.readFile(shrinkwrapYamlFilename).toString());
 
-      return new PnpmShrinkwrapFile(parsedData);
+      return new PnpmShrinkwrapFile(parsedData, shrinkwrapYamlFilename);
     } catch (error) {
       throw new Error(`Error reading "${shrinkwrapYamlFilename}":${os.EOL}  ${error.message}`);
     }
@@ -180,6 +189,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return dependency.resolution.tarball;
   }
 
+  public getTopLevelDependencyKey(dependencyName: string): string | undefined {
+    return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
+  }
+
   /**
    * Gets the version number from the list of top-level dependencies in the "dependencies" section
    * of the shrinkwrap file. Sample return values:
@@ -194,9 +207,43 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     let value: string | undefined = BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
     if (value) {
 
-      const underscoreIndex: number = value.indexOf('_');
-      if (underscoreIndex >= 0) {
-        value = value.substr(0, underscoreIndex);
+      // Getting the top level depenedency version from a PNPM lockfile version 5.1
+      // --------------------------------------------------------------------------
+      //
+      // 1) Top-level tarball dependency entries in pnpm-lock.yaml look like:
+      //    '@rush-temp/sp-filepicker': 'file:projects/sp-filepicker.tgz_0ec79d3b08edd81ebf49cd19ca50b3f5'
+
+      //    Then, it would be defined below:
+      //    'file:projects/sp-filepicker.tgz_0ec79d3b08edd81ebf49cd19ca50b3f5':
+      //      dependencies:
+      //       '@microsoft/load-themed-styles': 1.10.7
+      //       ...
+      //      resolution:
+      //       integrity: sha512-guuoFIc**==
+      //       tarball: 'file:projects/sp-filepicker.tgz'
+
+      //    Here, we are interested in the part 'file:projects/sp-filepicker.tgz'. Splitting by underscores is not the
+      //    best way to get this because file names could have underscores in them. Instead, we could use the tarball
+      //    field in the resolution section.
+
+      // 2) Top-level non-tarball dependency entries in pnpm-lock.yaml would look like:
+      //    '@microsoft/set-webpack-public-path-plugin': 2.1.133
+      //    @microsoft/sp-build-node': 1.9.0-dev.27_typescript@2.9.2
+
+      //    Here, we could just split by underscores and take the first part.
+
+      // The below code is also compatible with lockfile versions < 5.1
+
+      const dependency: IPnpmShrinkwrapDependencyYaml = this._shrinkwrapJson.packages[value];
+
+      if (dependency && dependency.resolution && dependency.resolution.tarball &&
+        value.startsWith(dependency.resolution.tarball)) {
+        return new DependencySpecifier(dependencyName, dependency.resolution.tarball);
+      } else {
+        const underscoreIndex: number = value.indexOf('_');
+        if (underscoreIndex >= 0) {
+          value = value.substr(0, underscoreIndex);
+        }
       }
 
       return new DependencySpecifier(dependencyName, value);
@@ -231,6 +278,20 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     return undefined;
+  }
+
+  public getShrinkwrapEntryFromTempProjectDependencyKey(
+    tempProjectDependencyKey: string
+  ): IPnpmShrinkwrapDependencyYaml | undefined {
+    return this._shrinkwrapJson.packages[tempProjectDependencyKey];
+  }
+
+  public getShrinkwrapEntry(name: string, version: string): IPnpmShrinkwrapDependencyYaml | undefined {
+    // Version can sometimes be in the form of a path that's already in the /name/version format.
+    const packageId: string = version.indexOf('/') !== -1
+      ? version
+      : `/${name}/${version}`;
+    return this._shrinkwrapJson.packages[packageId];
   }
 
   /**
@@ -312,9 +373,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return this._parsePnpmDependencyKey(packageName, dependencyKey);
   }
 
-  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml) {
+  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, shrinkwrapFilename: string) {
     super();
     this._shrinkwrapJson = shrinkwrapJson;
+    this.shrinkwrapFilename = shrinkwrapFilename;
 
     // Normalize the data
     if (!this._shrinkwrapJson.registry) {

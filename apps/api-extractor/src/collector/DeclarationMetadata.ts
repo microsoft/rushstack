@@ -20,10 +20,16 @@ export class DeclarationMetadata {
 
   /**
    * This is the release tag that was explicitly specified in the original doc comment, if any.
-   * Compare with SymbolMetadata.releaseTag, which is the effective release tag, possibly inherited from
-   * a parent.
    */
   public declaredReleaseTag: ReleaseTag = ReleaseTag.None;
+
+  /**
+   * The "effective" release tag is a normalized value that is based on `declaredReleaseTag`,
+   * but may be inherited from a parent, or corrected if the declared value was somehow invalid.
+   * When actually trimming .d.ts files or generating docs, API Extractor uses the "effective" value
+   * instead of the "declared" value.
+   */
+  public effectiveReleaseTag: ReleaseTag = ReleaseTag.None;
 
   // NOTE: In the future, the Collector may infer or error-correct some of these states.
   // Generators should rely on these instead of tsdocComment.modifierTagSet.
@@ -36,6 +42,9 @@ export class DeclarationMetadata {
 
   // Assigned by DocCommentEnhancer
   public needsDocumentation: boolean = true;
+
+  // If true, then it would be redundant to show this release tag
+  public releaseTagSameAsParent: boolean = false;
 
   public docCommentEnhancerVisitorState: VisitorState = VisitorState.Unvisited;
 }

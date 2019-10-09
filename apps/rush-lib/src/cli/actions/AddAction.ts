@@ -16,6 +16,7 @@ import { PackageJsonUpdater, SemVerStyle } from '../../logic/PackageJsonUpdater'
 import { PackageName } from '@microsoft/node-core-library';
 
 export class AddAction extends BaseRushAction {
+  private _allFlag: CommandLineFlagParameter;
   private _exactFlag: CommandLineFlagParameter;
   private _caretFlag: CommandLineFlagParameter;
   private _devDependencyFlag: CommandLineFlagParameter;
@@ -79,20 +80,33 @@ export class AddAction extends BaseRushAction {
       description: 'If specified, the "rush update" command will not be run after updating the'
         + ' package.json files.'
     });
+    this._allFlag = this.defineFlagParameter({
+      parameterLongName: '--all',
+      description: 'If specified, the dependency will be added to all projects.'
+    });
   }
 
-  public run(): Promise<void> {
-    const currentProject: RushConfigurationProject | undefined = this.rushConfiguration.tryGetProjectForPath(
-      process.cwd()
-    );
+  public async run(): Promise<void> {
+    let projects: RushConfigurationProject[];
+    if (this._allFlag.value) {
+      projects = this.rushConfiguration.projects;
+    } else {
+      const currentProject: RushConfigurationProject | undefined = this.rushConfiguration.tryGetProjectForPath(
+        process.cwd()
+      );
 
-    if (!currentProject) {
-      return Promise.reject(new Error('The "rush add" command must be invoked under a project'
-        + ' folder that is registered in rush.json.'));
+      if (!currentProject) {
+        throw new Error('The "rush add" command must be invoked under a project'
+          + ` folder that is registered in rush.json unless the ${this._allFlag.longName} is used.`);
+      }
+
+      projects = [currentProject];
     }
 
     if (this._caretFlag.value && this._exactFlag.value) {
-      return Promise.reject(new Error('Only one of "--caret" and "--exact" should be specified'));
+      throw new Error(
+        `Only one of "${this._caretFlag.longName}" and "${this._exactFlag.longName}" should be specified`
+      );
     }
 
     let version: string | undefined = undefined;
@@ -109,23 +123,40 @@ export class AddAction extends BaseRushAction {
     }
 
     if (!PackageName.isValidName(packageName)) {
-      return Promise.reject(new Error(`The package name "${packageName}" is not valid.`));
+      throw new Error(`The package name "${packageName}" is not valid.`);
     }
 
     if (version && version !== 'latest' && !semver.validRange(version) && !semver.valid(version)) {
-      return Promise.reject(new Error(`The SemVer specifier "${version}" is not valid.`));
+      throw new Error(`The SemVer specifier "${version}" is not valid.`);
     }
 
-    return new PackageJsonUpdater(this.rushConfiguration, this.rushGlobalFolder).doRushAdd({
-      currentProject: currentProject,
+    const updater: PackageJsonUpdater = new PackageJsonUpdater(this.rushConfiguration, this.rushGlobalFolder);
+
+    let rangeStyle: SemVerStyle;
+    if (version && version !== 'latest') {
+      if (this._exactFlag.value || this._caretFlag.value) {
+        throw new Error(
+          `The "${this._caretFlag.longName}" and "${this._exactFlag.longName}" flags may not be specified if a ` +
+          `version is provided in the ${this._packageName.longName} specifier. In this case "${version}" was provided.`
+        );
+      }
+
+      rangeStyle = SemVerStyle.Passthrough;
+    } else {
+      rangeStyle = this._caretFlag.value
+        ? SemVerStyle.Caret
+        : (this._exactFlag.value ? SemVerStyle.Exact : SemVerStyle.Tilde);
+    }
+
+    await updater.doRushAdd({
+      projects: projects,
       packageName: packageName,
       initialVersion: version,
       devDependency: this._devDependencyFlag.value,
       updateOtherPackages: this._makeConsistentFlag.value,
       skipUpdate: this._skipUpdateFlag.value,
       debugInstall: this.parser.isDebug,
-      rangeStyle: this._caretFlag.value ? SemVerStyle.Caret
-        : (this._exactFlag.value ? SemVerStyle.Exact : SemVerStyle.Tilde)
+      rangeStyle: rangeStyle
     });
   }
 }

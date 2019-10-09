@@ -73,7 +73,7 @@ export class GitEmailPolicy {
 
     // If there is a policy, at least one of the RegExp's must match
     for (const pattern of rushConfiguration.gitAllowedEmailRegExps) {
-      const regex: RegExp = new RegExp('^' + pattern + '$', 'i');
+      const regex: RegExp = new RegExp(`^${pattern}$`, 'i');
       if (userEmail.match(regex)) {
         return;
       }

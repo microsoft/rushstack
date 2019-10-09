@@ -129,6 +129,11 @@ export namespace RushConstants {
   export const versionPoliciesFilename: string = 'version-policies.json';
 
   /**
+   * Experiments configuration file, which
+   */
+  export const experimentsFilename: string = 'experiments.json';
+
+  /**
    * The URL ("http://rushjs.io") for the Rush web site.
    */
   export const rushWebSiteUrl: string = 'https://rushjs.io';
@@ -143,4 +148,10 @@ export namespace RushConstants {
    * before asynchronously deleting them.
    */
   export const rushRecyclerFolderName: string = 'rush-recycler';
+
+  /**
+   * The name of the file to drop in project-folder/.rush/temp/ containing a listing of the project's direct
+   * and indirect dependencies. This is used to detect if a project's dependencies have changed since the last build.
+   */
+  export const projectDependencyManifestFilename: string = 'shrinkwrap-deps.json';
 }

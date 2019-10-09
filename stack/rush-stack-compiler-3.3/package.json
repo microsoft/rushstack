@@ -1,11 +1,11 @@
 {
   "name": "@microsoft/rush-stack-compiler-3.3",
-  "version": "0.3.2",
+  "version": "0.3.5",
   "description": "A plug-in for selecting the compiler used with the @microsoft/rush-stack toolchain. This version selects TypeScript 3.3.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/stack/rush-stack-compiler-3.3"
+    "url": "https://github.com/microsoft/rushstack/tree/master/stack/rush-stack-compiler-3.3"
   },
   "bin": {
     "rush-api-extractor": "./bin/rush-api-extractor",
@@ -18,8 +18,8 @@
   "main": "lib/shared/index.js",
   "typings": "lib/shared/index.d.ts",
   "dependencies": {
-    "@microsoft/api-extractor": "7.4.5",
-    "@microsoft/node-core-library": "3.15.0",
+    "@microsoft/api-extractor": "7.5.0",
+    "@microsoft/node-core-library": "3.15.1",
     "@types/node": "8.10.54",
     "tslint": "~5.12.1",
     "tslint-microsoft-contrib": "~5.2.1",

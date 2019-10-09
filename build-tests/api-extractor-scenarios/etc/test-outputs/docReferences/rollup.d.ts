@@ -33,7 +33,7 @@ export declare namespace MyNamespace {
  *
  * @privateRemarks
  * succeedForNow() should fail due to a broken link, but it's ignored until we fix this issue:
- * https://github.com/Microsoft/web-build-tools/issues/1195
+ * https://github.com/microsoft/rushstack/issues/1195
  *
  * @public
  */

@@ -54,7 +54,7 @@ For detailed help about a specific command, use: rush <command> -h
 `;
 
 exports[`CommandLineHelp prints the help for each action: add 1`] = `
-"usage: rush add [-h] -p PACKAGE [--exact] [--caret] [--dev] [-m] [-s]
+"usage: rush add [-h] -p PACKAGE [--exact] [--caret] [--dev] [-m] [-s] [--all]
 
 Adds a specified package as a dependency of the current project (as 
 determined by the current working directory) and then runs \\"rush update\\". If 
@@ -90,6 +90,8 @@ Optional arguments:
                         same version of the dependency.
   -s, --skip-update     If specified, the \\"rush update\\" command will not be 
                         run after updating the package.json files.
+  --all                 If specified, the dependency will be added to all 
+                        projects.
 "
 `;
 
@@ -148,7 +150,10 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: change 1`] = `
-"usage: rush change [-h] [-v] [--no-fetch] [-b BRANCH]
+"usage: rush change [-h] [-v] [--no-fetch] [-b BRANCH] [--overwrite]
+                   [--email EMAIL] [--bulk] [--message MESSAGE]
+                   [--bump-type {major,minor,patch,none}]
+                   
 
 Asks a series of questions and then generates a <branchname>-<timestamp>.json 
 file in the common folder. The \`publish\` command will consume these files and 
@@ -179,6 +184,20 @@ Optional arguments:
                         which projects were changed. If this parameter is not 
                         specified, the checked out branch is compared against 
                         the \\"master\\" branch.
+  --overwrite           If a changefile already exists, overwrite without 
+                        prompting (or erroring in --bulk mode).
+  --email EMAIL         The email address to use in changefiles. If this 
+                        parameter is not provided, the email address will be 
+                        detected or prompted for in interactive mode.
+  --bulk                If this flag is specified, apply the same change 
+                        message and bump type to all changed projects. The 
+                        --message and the --bump-type parameters must be 
+                        specified if the --bulk parameter is specified
+  --message MESSAGE     The message to apply to all changed projects if the 
+                        --bulk flag is provided.
+  --bump-type {major,minor,patch,none}
+                        The bump type to apply to all changed projects if the 
+                        --bulk flag is provided.
 "
 `;
 

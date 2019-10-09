@@ -12,7 +12,6 @@ import { AedocDefinitions, ReleaseTag } from '@microsoft/api-extractor-model';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import { VisitorState } from '../collector/VisitorState';
 import { ResolverFailure } from '../analyzer/AstReferenceResolver';
-import { SymbolMetadata } from '../collector/SymbolMetadata';
 
 export class DocCommentEnhancer {
   private readonly _collector: Collector;
@@ -93,9 +92,8 @@ export class DocCommentEnhancer {
         ]);
       }
 
-      const symbolMetadata: SymbolMetadata = this._collector.fetchMetadata(astDeclaration.astSymbol);
-
-      if (symbolMetadata.releaseTag === ReleaseTag.Internal) {
+      const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
+      if (declarationMetadata.effectiveReleaseTag === ReleaseTag.Internal) {
         // If the constructor is marked as internal, then add a boilerplate notice for the containing class
         const classMetadata: DeclarationMetadata = this._collector.fetchMetadata(classDeclaration);
 
@@ -152,7 +150,7 @@ export class DocCommentEnhancer {
 
         // Is it referring to the working package?  If not, we don't do any link validation, because
         // AstReferenceResolver doesn't support it yet (but ModelReferenceResolver does of course).
-        // Tracked by:  https://github.com/Microsoft/web-build-tools/issues/1195
+        // Tracked by:  https://github.com/microsoft/rushstack/issues/1195
         if (node.codeDestination.packageName === undefined
           || node.codeDestination.packageName === this._collector.workingPackage.name) {
 
@@ -192,7 +190,7 @@ export class DocCommentEnhancer {
 
       // It's referencing an external package, so skip this inheritDoc tag, since AstReferenceResolver doesn't
       // support it yet.  As a workaround, this tag will get handled later by api-documenter.
-      // Tracked by:  https://github.com/Microsoft/web-build-tools/issues/1195
+      // Tracked by:  https://github.com/microsoft/rushstack/issues/1195
       return;
     }
 

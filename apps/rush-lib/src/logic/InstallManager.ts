@@ -264,119 +264,124 @@ export class InstallManager {
     });
   }
 
-  public doInstall(): Promise<void> {
-    return Promise.resolve().then(() => {
-      const options: IInstallManagerOptions = this._options;
+  public async doInstall(): Promise<void> {
+    const options: IInstallManagerOptions = this._options;
 
-      // Check the policies
-      PolicyValidator.validatePolicy(this._rushConfiguration, options.bypassPolicy);
+    // Check the policies
+    PolicyValidator.validatePolicy(this._rushConfiguration, options.bypassPolicy);
 
-      ApprovedPackagesChecker.rewriteConfigFiles(this._rushConfiguration);
+    // Git hooks are only installed if the repo opts in by including files in /common/git-hooks
+    const hookSource: string = path.join(this._rushConfiguration.commonFolder, 'git-hooks');
+    const hookDestination: string | undefined = Git.getHooksFolder();
 
-      // Git hooks are only installed if the repo opts in by including files in /common/git-hooks
-      const hookSource: string = path.join(this._rushConfiguration.commonFolder, 'git-hooks');
-      const hookDestination: string | undefined = Git.getHooksFolder();
+    if (FileSystem.exists(hookSource) && hookDestination) {
+      const hookFilenames: Array<string> = FileSystem.readFolder(hookSource);
+      if (hookFilenames.length > 0) {
+        console.log(os.EOL + colors.bold('Found files in the "common/git-hooks" folder.'));
 
-      if (FileSystem.exists(hookSource) && hookDestination) {
-        const hookFilenames: Array<string> = FileSystem.readFolder(hookSource);
-        if (hookFilenames.length > 0) {
-          console.log(os.EOL + colors.bold('Found files in the "common/git-hooks" folder.'));
+        // Clear the currently installed git hooks and install fresh copies
+        FileSystem.ensureEmptyFolder(hookDestination);
 
-          // Clear the currently installed git hooks and install fresh copies
-          FileSystem.ensureEmptyFolder(hookDestination);
-
-          // Only copy files that look like Git hook names
-          const filteredHookFilenames: string[] = hookFilenames.filter(x => /^[a-z\-]+/.test(x));
-          for (const filename of filteredHookFilenames) {
-            FileSystem.copyFile({
-              sourcePath: path.join(hookSource, filename),
-              destinationPath: path.join(hookDestination, filename)
-            });
-            FileSystem.changePosixModeBits(path.join(hookDestination, filename),
-              PosixModeBits.UserRead | PosixModeBits.UserExecute);
-          }
-
-          console.log('Successfully installed these Git hook scripts: ' + filteredHookFilenames.join(', ') + os.EOL);
-        }
-      }
-
-      // Ensure that the package manager is installed
-      return this.ensureLocalPackageManager()
-        .then(() => {
-          let shrinkwrapFile: BaseShrinkwrapFile | undefined = undefined;
-
-          // (If it's a full update, then we ignore the shrinkwrap from Git since it will be overwritten)
-          if (!options.fullUpgrade) {
-            try {
-              shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(this._rushConfiguration.packageManager,
-                this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant));
-            } catch (ex) {
-              console.log();
-              console.log(`Unable to load the ${this._shrinkwrapFilePhrase}: ${ex.message}`);
-
-              if (!options.allowShrinkwrapUpdates) {
-                console.log();
-                console.log(colors.red('You need to run "rush update" to fix this problem'));
-                throw new AlreadyReportedError();
-              }
-
-              shrinkwrapFile = undefined;
-            }
-          }
-
-          // Write a file indicating which variant is being installed.
-          // This will be used by bulk scripts to determine the correct Shrinkwrap file to track.
-          const currentVariantJsonFilename: string = this._rushConfiguration.currentVariantJsonFilename;
-          const currentVariantJson: ICurrentVariantJson = {
-            variant: options.variant || null // tslint:disable-line:no-null-keyword
-          };
-
-          // Determine if the variant is already current by updating current-variant.json.
-          // If nothing is written, the variant has not changed.
-          const variantIsUpToDate: boolean = !JsonFile.save(currentVariantJson, currentVariantJsonFilename, {
-            onlyIfChanged: true
+        // Only copy files that look like Git hook names
+        const filteredHookFilenames: string[] = hookFilenames.filter(x => /^[a-z\-]+/.test(x));
+        for (const filename of filteredHookFilenames) {
+          FileSystem.copyFile({
+            sourcePath: path.join(hookSource, filename),
+            destinationPath: path.join(hookDestination, filename)
           });
+          FileSystem.changePosixModeBits(path.join(hookDestination, filename),
+            PosixModeBits.UserRead | PosixModeBits.UserExecute);
+        }
 
-          if (options.variant) {
-            console.log();
-            console.log(colors.bold(`Using variant '${options.variant}' for installation.`));
-          } else if (!variantIsUpToDate && !options.variant) {
-            console.log();
-            console.log(colors.bold('Using the default variant for installation.'));
-          }
+        console.log('Successfully installed these Git hook scripts: ' + filteredHookFilenames.join(', ') + os.EOL);
+      }
+    }
 
-          const shrinkwrapIsUpToDate: boolean =
-            this._createTempModulesAndCheckShrinkwrap({
-              shrinkwrapFile,
-              variant: options.variant
-            })
-            && !options.recheckShrinkwrap;
+    const approvedPackagesChecker: ApprovedPackagesChecker = new ApprovedPackagesChecker(this._rushConfiguration);
+    if (approvedPackagesChecker.approvedPackagesFilesAreOutOfDate) {
+      if (this._options.allowShrinkwrapUpdates) {
+        approvedPackagesChecker.rewriteConfigFiles();
+        console.log(colors.yellow(
+          'Approved package files have been updated. These updates should be committed to source control'
+        ));
+      } else {
+        throw new Error(`Approved packages files are out-of date. Run "rush update" to update them.`);
+      }
+    }
 
-          if (!shrinkwrapIsUpToDate) {
-            if (!options.allowShrinkwrapUpdates) {
-              console.log();
-              console.log(colors.red(`The ${this._shrinkwrapFilePhrase} is out of date.`
-                + `  You need to run "rush update".`));
-              throw new AlreadyReportedError();
-            }
-          }
+    // Ensure that the package manager is installed
+    await this.ensureLocalPackageManager();
+    let shrinkwrapFile: BaseShrinkwrapFile | undefined = undefined;
 
-          return this._installCommonModules({
-            shrinkwrapIsUpToDate,
-            variantIsUpToDate,
-            ...options
-          })
-            .then(() => {
-              if (!options.noLink) {
-                const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this._rushConfiguration);
-                return linkManager.createSymlinksForProjects(false);
-              } else {
-                console.log(os.EOL
-                  + colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.'));
-              }
-            });
-        });
+    // (If it's a full update, then we ignore the shrinkwrap from Git since it will be overwritten)
+    if (!options.fullUpgrade) {
+      try {
+        shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(this._rushConfiguration.packageManager,
+          this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant));
+      } catch (ex) {
+        console.log();
+        console.log(`Unable to load the ${this._shrinkwrapFilePhrase}: ${ex.message}`);
+
+        if (!options.allowShrinkwrapUpdates) {
+          console.log();
+          console.log(colors.red('You need to run "rush update" to fix this problem'));
+          throw new AlreadyReportedError();
+        }
+
+        shrinkwrapFile = undefined;
+      }
+    }
+
+    // Write a file indicating which variant is being installed.
+    // This will be used by bulk scripts to determine the correct Shrinkwrap file to track.
+    const currentVariantJsonFilename: string = this._rushConfiguration.currentVariantJsonFilename;
+    const currentVariantJson: ICurrentVariantJson = {
+      variant: options.variant || null // tslint:disable-line:no-null-keyword
+    };
+
+    // Determine if the variant is already current by updating current-variant.json.
+    // If nothing is written, the variant has not changed.
+    const variantIsUpToDate: boolean = !JsonFile.save(currentVariantJson, currentVariantJsonFilename, {
+      onlyIfChanged: true
     });
+
+    if (options.variant) {
+      console.log();
+      console.log(colors.bold(`Using variant '${options.variant}' for installation.`));
+    } else if (!variantIsUpToDate && !options.variant) {
+      console.log();
+      console.log(colors.bold('Using the default variant for installation.'));
+    }
+
+    const shrinkwrapIsUpToDate: boolean = this._createTempModulesAndCheckShrinkwrap({
+      shrinkwrapFile,
+      variant: options.variant
+    }) && !options.recheckShrinkwrap;
+
+    if (!shrinkwrapIsUpToDate) {
+      if (!options.allowShrinkwrapUpdates) {
+        console.log();
+        console.log(colors.red(
+          `The ${this._shrinkwrapFilePhrase} is out of date. You need to run "rush update".`
+        ));
+        throw new AlreadyReportedError();
+      }
+    }
+
+    await this._installCommonModules({
+      shrinkwrapIsUpToDate,
+      variantIsUpToDate,
+      ...options
+    });
+
+    if (!options.noLink) {
+      const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this._rushConfiguration);
+      await linkManager.createSymlinksForProjects(false);
+    } else {
+      console.log(
+        os.EOL + colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.')
+      );
+    }
   }
 
   /**
@@ -422,7 +427,7 @@ export class InstallManager {
           // the package at all, we can reasonably assume it's good for all the repositories.
           // In particular, we'll assume that two different NPM registries cannot have two
           // different implementations of the same version of the same package.
-          // This was needed for: https://github.com/Microsoft/web-build-tools/issues/691
+          // This was needed for: https://github.com/microsoft/rushstack/issues/691
           commonRushConfigFolder: this._rushConfiguration.commonRushConfigFolder
         });
 
@@ -1135,7 +1140,7 @@ export class InstallManager {
         //
         // This issue has been fixed as of npm v5.0.0: https://github.com/npm/npm/releases/tag/v5.0.0
         //
-        // For more context, see https://github.com/Microsoft/web-build-tools/issues/761#issuecomment-428689600
+        // For more context, see https://github.com/microsoft/rushstack/issues/761#issuecomment-428689600
         args.push('--no-optional');
       }
       args.push('--cache', this._rushConfiguration.npmCacheFolder);
@@ -1156,7 +1161,11 @@ export class InstallManager {
 
       // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
       // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
-      args.push('--no-prefer-frozen-shrinkwrap');
+      if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
+        args.push('--no-prefer-frozen-lockfile');
+      } else {
+        args.push('--no-prefer-frozen-shrinkwrap');
+      }
 
       if (options.collectLogFile) {
         args.push('--reporter', 'ndjson');

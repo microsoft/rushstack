@@ -150,6 +150,7 @@ export class InitAction extends BaseConfiglessRushAction {
       'common/config/rush/[dot]npmrc',
       'common/config/rush/command-line.json',
       'common/config/rush/common-versions.json',
+      'common/config/rush/experiments.json',
       'common/config/rush/pnpmfile.js',
       'common/config/rush/version-policies.json'
     ];
