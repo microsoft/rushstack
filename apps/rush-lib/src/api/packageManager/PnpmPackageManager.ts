@@ -15,48 +15,38 @@ export class PnpmPackageManager extends PackageManager {
    */
   public readonly supportsResolutionStrategy: boolean;
 
-  private parsedVersion: semver.SemVer;
+  // example: node_modules/.pnpm/lock.yaml
+  public readonly internalShrinkwrapRelativePath: string;
 
   /** @internal */
   public constructor(version: string) {
     super(version, 'pnpm');
 
-    this.parsedVersion = new semver.SemVer(version);
+    const pnpmVersion: semver.SemVer = new semver.SemVer(version);
 
     this.supportsResolutionStrategy = false;
 
-    if (this.parsedVersion.major >= 3) {
+    if (pnpmVersion.major >= 3) {
       this._shrinkwrapFilename = RushConstants.pnpmV3ShrinkwrapFilename;
 
-      if (this.parsedVersion.minor >= 1) {
+      if (pnpmVersion.minor >= 1) {
         // Introduced in version 3.1.0-0
         this.supportsResolutionStrategy = true;
       }
     } else {
       this._shrinkwrapFilename = RushConstants.pnpmV1ShrinkwrapFilename;
     }
-  }
 
-  /**
-   * Returns the relative path to the internal shrinkwrap file
-   * Ex: node_modules/.pnpm/lock.yaml
-   */
-  public getInternalShrinkwrapFilePath(): string {
-
-    let internalShrinkwrapPath: string;
-
-    if (this.parsedVersion.major <= 2) {
+    if (pnpmVersion.major <= 2) {
       // node_modules/.shrinkwrap.yaml
-      internalShrinkwrapPath = path.join('node_modules', '.shrinkwrap.yaml');
-    } else if (this.parsedVersion.major <= 3) {
+      this.internalShrinkwrapRelativePath = path.join('node_modules', '.shrinkwrap.yaml');
+    } else if (pnpmVersion.major <= 3) {
       // node_modules/.pnpm-lock.yaml
-      internalShrinkwrapPath = path.join('node_modules', '.pnpm-lock.yaml');
+      this.internalShrinkwrapRelativePath = path.join('node_modules', '.pnpm-lock.yaml');
     } else {
       // node_modules/.pnpm/lock.yaml
       // See https://github.com/pnpm/pnpm/releases/tag/v4.0.0 for more details.
-      internalShrinkwrapPath = path.join('node_modules', '.pnpm', 'lock.yaml');
+      this.internalShrinkwrapRelativePath = path.join('node_modules', '.pnpm', 'lock.yaml');
     }
-
-    return internalShrinkwrapPath;
   }
 }

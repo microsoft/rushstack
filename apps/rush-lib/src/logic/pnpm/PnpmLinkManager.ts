@@ -277,6 +277,7 @@ export class PnpmLinkManager extends BaseLinkManager {
   }
 
   private GetPathToLocalInstallation(folderNameInLocalInstallationRoot: string): string {
+    // See https://github.com/pnpm/pnpm/releases/tag/v4.0.0
     if (this._pnpmVersion.major >= 4) {
       return path.join(this._rushConfiguration.commonTempFolder,
         RushConstants.nodeModulesFolderName,

@@ -753,7 +753,7 @@ export class InstallManager {
         const pnpmPackageManager: PnpmPackageManager =
           (this._rushConfiguration.packageManagerWrapper as PnpmPackageManager);
 
-        FileSystem.deleteFile(path.join(commonNodeModulesFolder, pnpmPackageManager.getInternalShrinkwrapFilePath()));
+        FileSystem.deleteFile(path.join(commonNodeModulesFolder, pnpmPackageManager.internalShrinkwrapRelativePath));
       }
     }
 
