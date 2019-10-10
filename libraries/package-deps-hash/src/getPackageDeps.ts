@@ -2,10 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
-import { IPackageDeps } from './IPackageDeps';
+import { Executable } from '@microsoft/node-core-library';
 
-// 8191 is the longest supported command on Windows
-const MAX_COMMAND_LENGTH: number = 8191;
+import { IPackageDeps } from './IPackageDeps';
 
 /**
  * Parses the output of the "git ls-tree" command
@@ -96,39 +95,32 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
 export function getGitHashForFiles(filesToHash: string[], packagePath: string): Map<string, string> {
   const changes: Map<string, string> = new Map<string, string>();
 
-  let index: number = 0;
-  while (index < filesToHash.length) {
-    const HASH_OBJECT_COMMAND: string = 'git hash-object';
-    const filesInBatch: string[] = [];
-    let commandPartsTextLength: number = HASH_OBJECT_COMMAND.length;
+  if (filesToHash.length) {
+    const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
+      'git',
+      ['hash-object', ...filesToHash],
+      { currentWorkingDirectory: packagePath }
+    );
 
-    for (; index < filesToHash.length; index++) {
-      const filePath: string = filesToHash[index];
-      // The "1" accounts for the space between commands
-      const newLength: number = commandPartsTextLength + 1 + filePath.length;
-      if (newLength > MAX_COMMAND_LENGTH) {
-        break;
-      }
-
-      filesInBatch.push(filePath);
-      commandPartsTextLength = newLength;
+    if (result.status !== 0) {
+      throw new Error(`git hash-object exited with status ${result}: ${result.stderr}`);
     }
 
-    const hashStdout: string = child_process.execSync(
-      [HASH_OBJECT_COMMAND, ...filesInBatch].join(' '),
-      { cwd: packagePath }
-    ).toString().trim();
+    const hashStdout: string = result.stdout.trim();
 
+    // The result of "git hash-object" will be a list of file hashes delimited by newlines
     const hashes: string[] = hashStdout.split('\n');
-    if (hashes.length !== filesInBatch.length) {
-      throw new Error(`Passed ${filesInBatch.length} file paths to Git to hash, but received ${hashes.length} hashes.`);
+
+    if (hashes.length !== filesToHash.length) {
+      throw new Error(`Passed ${filesToHash.length} file paths to Git to hash, but received ${hashes.length} hashes.`);
     }
 
     for (let i: number = 0; i < hashes.length; i++) {
       const hash: string = hashes[i];
-      const filePath: string = filesInBatch[i];
+      const filePath: string = filesToHash[i];
       changes.set(filePath, hash);
     }
+
   }
 
   return changes;
@@ -138,24 +130,38 @@ export function getGitHashForFiles(filesToHash: string[], packagePath: string): 
  * Executes "git ls-tree" in a folder
  */
 export function gitLsTree(path: string): string {
-  return child_process.execSync(
-    `git ls-tree HEAD -r`,
+  const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
+    'git',
+    ['ls-tree', 'HEAD', '-r'],
     {
-      cwd: path,
-      stdio: 'pipe'
-    }).toString();
+      currentWorkingDirectory: path
+    }
+  );
+
+  if (result.status !== 0) {
+    throw new Error(`git ls-tree exited with status ${result}: ${result.stderr}`);
+  }
+
+  return result.stdout;
 }
 
 /**
  * Executes "git status" in a folder
  */
 export function gitStatus(path: string): string {
-  return child_process.execSync(
-    `git status -s -u .`,
+  const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
+    'git',
+    ['status', '-s', '-u', '.'],
     {
-      cwd: path,
-      stdio: 'pipe'
-    }).toString();
+      currentWorkingDirectory: path
+    }
+  );
+
+  if (result.status !== 0) {
+    throw new Error(`git ls-tree exited with status ${result}: ${result.stderr}`);
+  }
+
+  return result.stdout;
 }
 
 /**
