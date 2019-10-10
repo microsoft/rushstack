@@ -52,7 +52,6 @@ export class CommandLineConfiguration {
     if (FileSystem.exists(jsonFilename)) {
       commandLineJson = JsonFile.load(jsonFilename);
 
-      // TODO: Investigate
       const defaultBuildSettings: CommandJson[] =
         [{
           commandKind: 'bulk',
@@ -62,6 +61,7 @@ export class CommandLineConfiguration {
           enableParallelism: true,
           ignoreMissingScript: false,
           ignoreDependencyOrder: false,
+          incremental: true,
           allowWarningsInSuccessfulBuild: false,
           safeForSimultaneousRushProcesses: false
         },
@@ -72,6 +72,7 @@ export class CommandLineConfiguration {
           enableParallelism: true,
           ignoreMissingScript: false,
           ignoreDependencyOrder: false,
+          incremental: false,
           allowWarningsInSuccessfulBuild: false,
           safeForSimultaneousRushProcesses: false
         }
