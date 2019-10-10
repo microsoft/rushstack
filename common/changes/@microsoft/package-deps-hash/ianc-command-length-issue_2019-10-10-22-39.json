@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/package-deps-hash",
+      "comment": "Fix an issue where git commands can be too long.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/package-deps-hash",
+  "email": "iclanton@users.noreply.github.com"
+}
