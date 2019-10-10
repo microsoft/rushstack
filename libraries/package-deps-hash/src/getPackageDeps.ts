@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
+import { Executable } from '@microsoft/node-core-library';
+
 import { IPackageDeps } from './IPackageDeps';
 
 /**
@@ -92,16 +94,35 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
  */
 export function getGitHashForFiles(filesToHash: string[], packagePath: string): Map<string, string> {
   const changes: Map<string, string> = new Map<string, string>();
-  if (filesToHash.length) {
-    const hashStdout: string = child_process.execSync(
-      'git hash-object ' + filesToHash.join(' '),
-      { cwd: packagePath }).toString();
 
-    // The result of hashStdout will be a list of file hashes delimited by newlines
+  if (filesToHash.length) {
+    const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
+      'git',
+      ['hash-object', ...filesToHash],
+      { currentWorkingDirectory: packagePath }
+    );
+
+    if (result.status !== 0) {
+      throw new Error(`git hash-object exited with status ${result.status}: ${result.stderr}`);
+    }
+
+    const hashStdout: string = result.stdout.trim();
+
+    // The result of "git hash-object" will be a list of file hashes delimited by newlines
     const hashes: string[] = hashStdout.split('\n');
 
-    filesToHash.forEach((filename, i) => changes.set(filename, hashes[i]));
+    if (hashes.length !== filesToHash.length) {
+      throw new Error(`Passed ${filesToHash.length} file paths to Git to hash, but received ${hashes.length} hashes.`);
+    }
+
+    for (let i: number = 0; i < hashes.length; i++) {
+      const hash: string = hashes[i];
+      const filePath: string = filesToHash[i];
+      changes.set(filePath, hash);
+    }
+
   }
+
   return changes;
 }
 
@@ -109,24 +130,38 @@ export function getGitHashForFiles(filesToHash: string[], packagePath: string): 
  * Executes "git ls-tree" in a folder
  */
 export function gitLsTree(path: string): string {
-  return child_process.execSync(
-    `git ls-tree HEAD -r`,
+  const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
+    'git',
+    ['ls-tree', 'HEAD', '-r'],
     {
-      cwd: path,
-      stdio: 'pipe'
-    }).toString();
+      currentWorkingDirectory: path
+    }
+  );
+
+  if (result.status !== 0) {
+    throw new Error(`git ls-tree exited with status ${result.status}: ${result.stderr}`);
+  }
+
+  return result.stdout;
 }
 
 /**
  * Executes "git status" in a folder
  */
 export function gitStatus(path: string): string {
-  return child_process.execSync(
-    `git status -s -u .`,
+  const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
+    'git',
+    ['status', '-s', '-u', '.'],
     {
-      cwd: path,
-      stdio: 'pipe'
-    }).toString();
+      currentWorkingDirectory: path
+    }
+  );
+
+  if (result.status !== 0) {
+    throw new Error(`git status exited with status ${result.status}: ${result.stderr}`);
+  }
+
+  return result.stdout;
 }
 
 /**
