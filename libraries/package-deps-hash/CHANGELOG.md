@@ -1,6 +1,13 @@
 # Change Log - @microsoft/package-deps-hash
 
-This log was last generated on Tue, 08 Oct 2019 22:38:39 GMT and should not be manually modified.
+This log was last generated on Thu, 10 Oct 2019 23:28:59 GMT and should not be manually modified.
+
+## 2.3.1
+Thu, 10 Oct 2019 23:28:59 GMT
+
+### Patches
+
+- Fix an issue where git commands can be too long.
 
 ## 2.3.0
 Tue, 08 Oct 2019 22:38:39 GMT

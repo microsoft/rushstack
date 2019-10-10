@@ -2,6 +2,18 @@
   "name": "@microsoft/package-deps-hash",
   "entries": [
     {
+      "version": "2.3.1",
+      "tag": "@microsoft/package-deps-hash_v2.3.1",
+      "date": "Thu, 10 Oct 2019 23:28:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where git commands can be too long."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.3.0",
       "tag": "@microsoft/package-deps-hash_v2.3.0",
       "date": "Tue, 08 Oct 2019 22:38:39 GMT",
