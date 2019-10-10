@@ -237,7 +237,7 @@ describe('RushCommandLineParser', () => {
                 expect.stringMatching(expectedBuildTaskRegexp)
               ]));
               expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/a`));
+              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
 
               // tslint:disable-next-line: no-any
               const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -245,7 +245,7 @@ describe('RushCommandLineParser', () => {
                 expect.stringMatching(expectedBuildTaskRegexp)
               ]));
               expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/b`));
+              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
             });
         });
       });
@@ -270,7 +270,7 @@ describe('RushCommandLineParser', () => {
                 expect.stringMatching(expectedBuildTaskRegexp)
               ]));
               expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/a`));
+              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
 
               // tslint:disable-next-line: no-any
               const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -278,7 +278,7 @@ describe('RushCommandLineParser', () => {
                 expect.stringMatching(expectedBuildTaskRegexp)
               ]));
               expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/b`));
+              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
             });
         });
       });
