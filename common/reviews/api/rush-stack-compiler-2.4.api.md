@@ -16,6 +16,7 @@ import * as Typescript from 'typescript';
 // @beta
 export class ApiExtractorRunner extends RushStackCompilerBase {
     constructor(extractorConfig: ExtractorConfig, extractorOptions: IExtractorInvokeOptions, rootPath: string, terminalProvider: ITerminalProvider);
+    constructor(options: IRushStackCompilerBaseOptions, extractorConfig: ExtractorConfig, extractorOptions: IExtractorInvokeOptions, rootPath: string, terminalProvider: ITerminalProvider);
     // (undocumented)
     static apiExtractor: typeof ApiExtractor;
     // (undocumented)
@@ -23,22 +24,30 @@ export class ApiExtractorRunner extends RushStackCompilerBase {
 }
 
 // @public (undocumented)
-export interface ITslintRunnerConfig {
-    displayAsError?: boolean;
+export interface IRushStackCompilerBaseOptions {
     // (undocumented)
     fileError: WriteFileIssueFunction;
     // (undocumented)
     fileWarning: WriteFileIssueFunction;
 }
 
+// @public (undocumented)
+export interface ITslintRunnerConfig extends IRushStackCompilerBaseOptions {
+    displayAsError?: boolean;
+}
+
 // @beta (undocumented)
-export interface ITypescriptCompilerOptions {
+export interface ITypescriptCompilerOptions extends IRushStackCompilerBaseOptions {
     customArgs?: string[];
 }
 
 // @beta (undocumented)
-export abstract class RushStackCompilerBase<TOptions = {}> {
+export abstract class RushStackCompilerBase<TOptions extends IRushStackCompilerBaseOptions = IRushStackCompilerBaseOptions> {
     constructor(taskOptions: TOptions, rootPath: string, terminalProvider: ITerminalProvider);
+    // (undocumented)
+    protected _fileError: WriteFileIssueFunction;
+    // (undocumented)
+    protected _fileWarning: WriteFileIssueFunction;
     // (undocumented)
     protected _standardBuildFolders: StandardBuildFolders;
     // (undocumented)

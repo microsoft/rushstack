@@ -73,8 +73,19 @@ export interface IYamlParameter {
  * declared in a separate YAML file.
  */
 export interface IYamlReference {
-  name?: string;
   uid?: string;
+  name?: string;
+  fullName?: string;
+  'spec.typeScript'?: IYamlReferenceSpec[];
+}
+
+/**
+ * Part of the IYamlApiFile structure.  Represents a text specification for a reference.
+ */
+export interface IYamlReferenceSpec {
+  uid?: string;
+  name?: string;
+  fullName?: string;
 }
 
 /**

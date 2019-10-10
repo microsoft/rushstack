@@ -5,19 +5,23 @@ import * as os from 'os';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import * as colors from 'colors';
-
-import inquirer = require('inquirer');
+import * as inquirer from 'inquirer';
 
 import {
   CommandLineFlagParameter,
-  CommandLineStringParameter
+  CommandLineStringParameter,
+  CommandLineChoiceParameter
 } from '@microsoft/ts-command-line';
-import { FileSystem } from '@microsoft/node-core-library';
+import {
+  FileSystem,
+  Path
+} from '@microsoft/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import {
   IChangeFile,
-  IChangeInfo
+  IChangeInfo,
+  ChangeType
 } from '../../api/ChangeManagement';
 import { VersionControl } from '../../utilities/VersionControl';
 import { ChangeFile } from '../../api/ChangeFile';
@@ -30,18 +34,20 @@ import {
   LockStepVersionPolicy,
   VersionPolicyDefinitionName
 } from '../../api/VersionPolicy';
+import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 export class ChangeAction extends BaseRushAction {
-  private _sortedProjectList: string[];
-  private _changeFileData: Map<string, IChangeFile>;
-  private _changeComments: Map<string, string[]>;
   private _verifyParameter: CommandLineFlagParameter;
   private _noFetchParameter: CommandLineFlagParameter;
   private _targetBranchParameter: CommandLineStringParameter;
+  private _changeEmailParameter: CommandLineStringParameter;
+  private _bulkChangeParameter: CommandLineFlagParameter;
+  private _bulkChangeMessageParameter: CommandLineStringParameter;
+  private _bulkChangeBumpTypeParameter: CommandLineChoiceParameter;
+  private _overwriteFlagParameter: CommandLineFlagParameter;
+
   private _targetBranchName: string;
   private _projectHostMap: Map<string, string>;
-
-  private _prompt: inquirer.PromptModule;
 
   constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
@@ -81,6 +87,10 @@ export class ChangeAction extends BaseRushAction {
   }
 
   public onDefineParameters(): void {
+    const BULK_LONG_NAME: string = '--bulk';
+    const BULK_MESSAGE_LONG_NAME: string = '--message';
+    const BULK_BUMP_TYPE_LONG_NAME: string = '--bump-type';
+
     this._verifyParameter = this.defineFlagParameter({
       parameterLongName: '--verify',
       parameterShortName: '-v',
@@ -100,32 +110,175 @@ export class ChangeAction extends BaseRushAction {
         'determine which projects were changed. If this parameter is not specified, the checked out branch ' +
         'is compared against the "master" branch.'
     });
+
+    this._overwriteFlagParameter = this.defineFlagParameter({
+      parameterLongName: '--overwrite',
+      description: `If a changefile already exists, overwrite without prompting ` +
+        `(or erroring in ${BULK_LONG_NAME} mode).`
+    });
+
+    this._changeEmailParameter = this.defineStringParameter({
+      parameterLongName: '--email',
+      argumentName: 'EMAIL',
+      description: 'The email address to use in changefiles. If this parameter is not provided, the email address ' +
+        'will be detected or prompted for in interactive mode.'
+    });
+
+    this._bulkChangeParameter = this.defineFlagParameter({
+      parameterLongName: BULK_LONG_NAME,
+      description: 'If this flag is specified, apply the same change message and bump type to all changed projects. ' +
+        `The ${BULK_MESSAGE_LONG_NAME} and the ${BULK_BUMP_TYPE_LONG_NAME} parameters must be specified if the ` +
+        `${BULK_LONG_NAME} parameter is specified`
+    });
+
+    this._bulkChangeMessageParameter = this.defineStringParameter({
+      parameterLongName: BULK_MESSAGE_LONG_NAME,
+      argumentName: 'MESSAGE',
+      description: `The message to apply to all changed projects if the ${BULK_LONG_NAME} flag is provided.`
+    });
+
+    this._bulkChangeBumpTypeParameter = this.defineChoiceParameter({
+      parameterLongName: BULK_BUMP_TYPE_LONG_NAME,
+      alternatives: [...Object.keys(this._getBumpOptions()), ChangeType[ChangeType.none]],
+      description: `The bump type to apply to all changed projects if the ${BULK_LONG_NAME} flag is provided.`
+    });
   }
 
-  public run(): Promise<void> {
+  public async run(): Promise<void> {
     console.log(`The target branch is ${this._targetBranch}`);
     this._projectHostMap = this._generateHostMap();
 
     if (this._verifyParameter.value) {
+      const errors: string[] = ([
+        this._bulkChangeParameter,
+        this._bulkChangeMessageParameter,
+        this._bulkChangeBumpTypeParameter,
+        this._overwriteFlagParameter
+      ]).map((parameter) => {
+        return parameter.value
+        ? (
+          `The {${this._bulkChangeParameter.longName} parameter cannot be provided with the ` +
+            `${this._verifyParameter.longName} parameter`
+          )
+        : '';
+      }).filter((error) => error !== '');
+      if (errors.length > 0) {
+        errors.forEach((error) => console.error(error));
+        throw new AlreadyReportedError();
+      }
+
       this._verify();
-      return Promise.resolve();
+      return;
     }
 
-    this._sortedProjectList = this._getChangedPackageNames().sort();
-    if (this._sortedProjectList.length === 0) {
+    const sortedProjectList: string[] = this._getChangedPackageNames().sort();
+    if (sortedProjectList.length === 0) {
       this._logNoChangeFileRequired();
       this._warnUncommittedChanges();
-      return Promise.resolve();
+      return;
     }
 
-    this._prompt = inquirer.createPromptModule();
-    this._changeFileData = new Map<string, IChangeFile>();
-    this._changeComments = ChangeFiles.getChangeComments(this._getChangeFiles());
+    this._warnUncommittedChanges();
 
-    return this._promptLoop()
-      .catch((error: Error) => {
-        throw new Error(`There was an error creating a change file: ${error.toString()}`);
+    const promptModule: inquirer.PromptModule = inquirer.createPromptModule();
+    let changeFileData: Map<string, IChangeFile> = new Map<string, IChangeFile>();
+    let interactiveMode: boolean = false;
+    if (this._bulkChangeParameter.value) {
+      if (
+        !this._bulkChangeBumpTypeParameter.value ||
+        (
+          !this._bulkChangeMessageParameter.value &&
+          this._bulkChangeBumpTypeParameter.value !== ChangeType[ChangeType.none]
+        )
+      ) {
+        throw new Error(
+          `The ${this._bulkChangeBumpTypeParameter.longName} and ${this._bulkChangeMessageParameter.longName} ` +
+          `parameters must provided if the ${this._bulkChangeParameter.longName} flag is provided. If the value ` +
+          `"${ChangeType[ChangeType.none]}" is provided to the ${this._bulkChangeBumpTypeParameter.longName} ` +
+          `parameter, the ${this._bulkChangeMessageParameter.longName} parameter may be omitted.`
+        );
+      }
+
+      const email: string | undefined = this._changeEmailParameter.value || this._detectEmail();
+      if (!email) {
+        throw new Error(
+          'Unable to detect Git email and an email address wasn\'t provided using the ' +
+          `${this._changeEmailParameter.longName} paramter.`
+        );
+      }
+
+      const errors: string[] = [];
+
+      const comment: string = this._bulkChangeMessageParameter.value || '';
+      const changeType: string = this._bulkChangeBumpTypeParameter.value;
+      for (const packageName of sortedProjectList) {
+        const allowedBumpTypes: string[] = Object.keys(this._getBumpOptions(packageName));
+        let projectChangeType: string = changeType;
+        if (allowedBumpTypes.length === 0) {
+          projectChangeType = ChangeType[ChangeType.none];
+        } else if (
+          projectChangeType !== ChangeType[ChangeType.none] &&
+          allowedBumpTypes.indexOf(projectChangeType) === -1
+        ) {
+          errors.push(`The "${projectChangeType}" change type is not allowed for package "${packageName}".`);
+        }
+
+        changeFileData.set(
+          packageName,
+          {
+            changes: [
+              {
+                comment,
+                type: projectChangeType,
+                packageName
+              } as IChangeInfo
+            ],
+            packageName,
+            email
+          }
+        );
+      }
+
+      if (errors.length > 0) {
+        for (const error of errors) {
+          console.error(error);
+        }
+
+        throw new AlreadyReportedError();
+      }
+    } else if (this._bulkChangeBumpTypeParameter.value || this._bulkChangeMessageParameter.value) {
+      throw new Error(
+        `The ${this._bulkChangeParameter.longName} flag must be provided with the ` +
+        `${this._bulkChangeBumpTypeParameter.longName} and ${this._bulkChangeMessageParameter.longName} parameters.`
+      );
+    } else {
+      interactiveMode = true;
+
+      const existingChangeComments: Map<string, string[]> = ChangeFiles.getChangeComments(this._getChangeFiles());
+      changeFileData = await this._promptForChangeFileData(
+        promptModule,
+        sortedProjectList,
+        existingChangeComments
+      );
+
+      const email: string = this._changeEmailParameter.value
+        ? this._changeEmailParameter.value
+        : await this._detectOrAskForEmail(promptModule);
+      changeFileData.forEach((changeFile: IChangeFile) => {
+        changeFile.email = email;
       });
+    }
+
+    try {
+      return await this._writeChangeFiles(
+        promptModule,
+        changeFileData,
+        this._overwriteFlagParameter.value,
+        interactiveMode
+      );
+    } catch (error) {
+      throw new Error(`There was an error creating a change file: ${error.toString()}`);
+    }
   }
 
   private _generateHostMap(): Map<string, string> {
@@ -136,14 +289,15 @@ export class ChangeAction extends BaseRushAction {
         const lockstepPolicy: LockStepVersionPolicy = project.versionPolicy as LockStepVersionPolicy;
         hostProjectName = lockstepPolicy.mainProject || project.packageName;
       }
+
       hostMap.set(project.packageName, hostProjectName);
     });
+
     return hostMap;
   }
 
   private _verify(): void {
     const changedPackages: string[] = this._getChangedPackageNames();
-
     if (changedPackages.length > 0) {
       this._validateChangeFile(changedPackages);
     } else {
@@ -171,16 +325,23 @@ export class ChangeAction extends BaseRushAction {
     }
     const changedPackageNames: Set<string> = new Set<string>();
 
+    const repoRootFolder: string | undefined = VersionControl.getRepositoryRootPath();
     this.rushConfiguration.projects
     .filter(project => project.shouldPublish)
     .filter(project => !project.versionPolicy || !project.versionPolicy.exemptFromRushChange)
-    .filter(project => this._hasProjectChanged(changedFolders, project))
+    .filter(project => {
+      const projectFolder: string = repoRootFolder
+        ? path.relative(repoRootFolder, project.projectFolder)
+        : project.projectRelativeFolder;
+      return this._hasProjectChanged(changedFolders, projectFolder);
+    })
     .forEach(project => {
       const hostName: string | undefined = this._projectHostMap.get(project.packageName);
       if (hostName) {
         changedPackageNames.add(hostName);
       }
     });
+
     return [...changedPackageNames];
   }
 
@@ -195,72 +356,70 @@ export class ChangeAction extends BaseRushAction {
     });
   }
 
-  private _hasProjectChanged(changedFolders: Array<string | undefined>,
-    project: RushConfigurationProject): boolean {
-    let normalizedFolder: string = project.projectRelativeFolder;
-    if (normalizedFolder.charAt(normalizedFolder.length - 1) !== '/') {
-      normalizedFolder = normalizedFolder + '/';
-    }
-    const pathRegex: RegExp = new RegExp(`^${normalizedFolder}`, 'i');
+  private _hasProjectChanged(
+    changedFolders: Array<string | undefined>,
+    projectFolder: string
+  ): boolean {
     for (const folder of changedFolders) {
-      if (folder && folder.match(pathRegex)) {
+      if (folder && Path.isUnderOrEqual(folder, projectFolder)) {
         return true;
       }
     }
+
     return false;
   }
 
   /**
-   * The main loop which continually asks user for questions about changes until they don't
-   * have any more, at which point we collect their email and write the change file.
+   * The main loop which prompts the user for information on changed projects.
    */
-  private _promptLoop(): Promise<void> {
-    // If there are still projects, ask about the next one
-    if (this._sortedProjectList.length) {
-      return this._askQuestions(this._sortedProjectList.pop()!)
-        .then((answers: IChangeInfo) => {
-          if (answers) {
-            // Save the info into the change file
-            let changeFile: IChangeFile | undefined = this._changeFileData.get(answers.packageName);
-            if (!changeFile) {
-              changeFile = {
-                changes: [],
-                packageName: answers.packageName,
-                email: undefined
-              };
-              this._changeFileData.set(answers.packageName, changeFile!);
-            }
-            changeFile!.changes.push(answers);
-          }
-          // Continue to loop
-          return this._promptLoop();
+  private async _promptForChangeFileData(
+    promptModule: inquirer.PromptModule,
+    sortedProjectList: string[],
+    existingChangeComments: Map<string, string[]>
+  ): Promise<Map<string, IChangeFile>> {
+    const changedFileData: Map<string, IChangeFile> = new Map<string, IChangeFile>();
 
-        });
-    } else {
-      this._warnUncommittedChanges();
-      // We are done, collect their email
-      return this._detectOrAskForEmail().then((email: string) => {
-        this._changeFileData.forEach((changeFile: IChangeFile) => {
-          changeFile.email = email;
-        });
+    for (const projectName of sortedProjectList) {
+      const changeInfo: IChangeInfo | undefined = await this._askQuestions(
+        promptModule,
+        projectName,
+        existingChangeComments
+      );
+      if (changeInfo) {
+        // Save the info into the change file
+        let changeFile: IChangeFile | undefined = changedFileData.get(changeInfo.packageName);
+        if (!changeFile) {
+          changeFile = {
+            changes: [],
+            packageName: changeInfo.packageName,
+            email: undefined
+          };
+          changedFileData.set(changeInfo.packageName, changeFile!);
+        }
 
-        this._writeChangeFiles();
-      });
+        changeFile!.changes.push(changeInfo);
+      }
     }
+
+    return changedFileData;
   }
 
   /**
    * Asks all questions which are needed to generate changelist for a project.
    */
-  private _askQuestions(packageName: string): Promise<IChangeInfo | undefined> {
+  private async _askQuestions(
+    promptModule: inquirer.PromptModule,
+    packageName: string,
+    existingChangeComments: Map<string, string[]>
+  ): Promise<IChangeInfo | undefined> {
     console.log(`${os.EOL}${packageName}`);
-    const comments: string[] | undefined = this._changeComments.get(packageName);
+    const comments: string[] | undefined = existingChangeComments.get(packageName);
     if (comments) {
       console.log(`Found existing comments:`);
       comments.forEach(comment => {
         console.log(`    > ${comment}`);
       });
-      return this._prompt({
+      const { appendComment }: { appendComment: 'skip' | 'append' } = await promptModule({
         name: 'appendComment',
         type: 'list',
         default: 'skip',
@@ -275,135 +434,134 @@ export class ChangeAction extends BaseRushAction {
             'value': 'append'
           }
         ]
-      })
-      .then(({ appendComment }: { appendComment: 'skip' | 'append' }) => {
-        if (appendComment === 'skip') {
-          return undefined;
-        } else {
-          return this._promptForComments(packageName);
-        }
       });
+
+      if (appendComment === 'skip') {
+        return undefined;
+      } else {
+        return await this._promptForComments(promptModule, packageName);
+      }
     } else {
-      return this._promptForComments(packageName);
+      return await this._promptForComments(promptModule, packageName);
     }
   }
 
-  private _promptForComments(packageName: string): Promise<IChangeInfo | undefined> {
+  private async _promptForComments(
+    promptModule: inquirer.PromptModule,
+    packageName: string
+  ): Promise<IChangeInfo | undefined> {
     const bumpOptions: { [type: string]: string } = this._getBumpOptions(packageName);
-    return this._prompt({
+    const { comment }: { comment: string } = await promptModule({
       name: 'comment',
       type: 'input',
       message: `Describe changes, or ENTER if no changes:`
-    })
-    .then(({ comment }: { comment: string }) => {
-      if (Object.keys(bumpOptions).length === 0 || !comment) {
-        return {
-          comment: comment || '',
-          packageName: packageName,
-          type: 'none'
-        } as IChangeInfo;
-      } else {
-        return this._prompt({
-          choices: Object.keys(bumpOptions).map(option => {
-            return {
-              'value': option,
-              'name': bumpOptions[option]
-            };
-          }),
-          default: 'patch',
-          message: 'Select the type of change:',
-          name: 'bumpType',
-          type: 'list'
-        }).then(({ bumpType }: { bumpType: string }) => {
-          return {
-            packageName: packageName,
-            comment: comment,
-            type: bumpType
-          } as IChangeInfo;
-        });
-      }
     });
+
+    if (Object.keys(bumpOptions).length === 0 || !comment) {
+      return {
+        packageName: packageName,
+        comment: comment || '',
+        type: ChangeType[ChangeType.none]
+      } as IChangeInfo;
+    } else {
+      const { bumpType }: { bumpType: string } = await promptModule({
+        choices: Object.keys(bumpOptions).map(option => {
+          return {
+            'value': option,
+            'name': bumpOptions[option]
+          };
+        }),
+        default: 'patch',
+        message: 'Select the type of change:',
+        name: 'bumpType',
+        type: 'list'
+      });
+
+      return {
+        packageName: packageName,
+        comment: comment,
+        type: bumpType
+      } as IChangeInfo;
+    }
   }
 
-  private _getBumpOptions(packageName: string): {[type: string]: string } {
-    const project: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(packageName);
-    const versionPolicy: VersionPolicy | undefined = project!.versionPolicy;
+  private _getBumpOptions(packageName?: string): { [type: string]: string } {
+    let bumpOptions: { [type: string]: string } = (this.rushConfiguration && this.rushConfiguration.hotfixChangeEnabled)
+      ? {
+          [ChangeType[ChangeType.hotfix]]: 'hotfix - for changes that need to be published in a separate hotfix package'
+        }
+      : {
+          [ChangeType[ChangeType.major]]: 'major - for changes that break compatibility, e.g. removing an API',
+          [ChangeType[ChangeType.minor]]: 'minor - for backwards compatible changes, e.g. adding a new API',
+          [ChangeType[ChangeType.patch]]: 'patch - for changes that do not affect compatibility, e.g. fixing a bug'
+        };
 
-    let bumpOptions: { [type: string]: string } = this.rushConfiguration.hotfixChangeEnabled ? {
-      'hotfix': 'hotfix - for changes that need to be published in a separate hotfix package'
-    } : {
-      'major': 'major - for changes that break compatibility, e.g. removing an API',
-      'minor': 'minor - for backwards compatible changes, e.g. adding a new API',
-      'patch': 'patch - for changes that do not affect compatibility, e.g. fixing a bug'
-    };
+    if (packageName) {
+      const project: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(packageName);
+      const versionPolicy: VersionPolicy | undefined = project!.versionPolicy;
 
-    if (versionPolicy) {
-      if (versionPolicy.definitionName === VersionPolicyDefinitionName.lockStepVersion) {
-        // No need to ask for bump types if project is lockstep versioned.
-        bumpOptions = {};
-      } else if (versionPolicy.definitionName === VersionPolicyDefinitionName.individualVersion) {
-        const individualPolicy: IndividualVersionPolicy = versionPolicy as IndividualVersionPolicy;
-        if (individualPolicy.lockedMajor !== undefined) {
-          // tslint:disable-next-line:no-string-literal
-          delete bumpOptions['major'];
+      if (versionPolicy) {
+        if (versionPolicy.definitionName === VersionPolicyDefinitionName.lockStepVersion) {
+          // No need to ask for bump types if project is lockstep versioned.
+          bumpOptions = {};
+        } else if (versionPolicy.definitionName === VersionPolicyDefinitionName.individualVersion) {
+          const individualPolicy: IndividualVersionPolicy = versionPolicy as IndividualVersionPolicy;
+          if (individualPolicy.lockedMajor !== undefined) {
+            delete bumpOptions[ChangeType[ChangeType.major]];
+          }
         }
       }
     }
+
     return bumpOptions;
   }
 
   /**
-   * Will determine a user's email by first detecting it from their git config,
-   * or will ask for it if it is not found or the git config is wrong.
+   * Will determine a user's email by first detecting it from their Git config,
+   * or will ask for it if it is not found or the Git config is wrong.
    */
-  private _detectOrAskForEmail(): Promise<string> {
-    return this._detectAndConfirmEmail().then((email: string) => {
-
-      if (email) {
-        return Promise.resolve(email);
-      } else {
-        return this._promptForEmail();
-      }
-
-    });
+  private async _detectOrAskForEmail(promptModule: inquirer.PromptModule): Promise<string> {
+    return await this._detectAndConfirmEmail(promptModule) || await this._promptForEmail(promptModule);
   }
 
-  /**
-   * Detects the user's email address from their git configuration, prompts the user to approve the
-   * detected email. It returns undefined if it cannot be detected.
-   */
-  private _detectAndConfirmEmail(): Promise<string | undefined> {
-    let email: string | undefined;
+  private _detectEmail(): string | undefined {
     try {
-      email = child_process.execSync('git config user.email')
+      return child_process.execSync('git config user.email')
         .toString()
         .replace(/(\r\n|\n|\r)/gm, '');
     } catch (err) {
       console.log('There was an issue detecting your Git email...');
-      email = undefined;
+      return undefined;
     }
+  }
+
+  /**
+   * Detects the user's email address from their Git configuration, prompts the user to approve the
+   * detected email. It returns undefined if it cannot be detected.
+   */
+  private async _detectAndConfirmEmail(promptModule: inquirer.PromptModule): Promise<string | undefined> {
+    const email: string | undefined = this._detectEmail();
 
     if (email) {
-      return this._prompt([
+      const { isCorrectEmail }: { isCorrectEmail: boolean } = await promptModule([
         {
           type: 'confirm',
           name: 'isCorrectEmail',
           default: 'Y',
-          message: `Is your email address ${email} ?`
+          message: `Is your email address ${email}?`
         }
-      ]).then(({ isCorrectEmail }: { isCorrectEmail: boolean }) => {
-        return isCorrectEmail ? email : undefined;
-      });
+      ]);
+      return isCorrectEmail ? email : undefined;
     } else {
-      return Promise.resolve(undefined);
+      return undefined;
     }
   }
 
   /**
    * Asks the user for their email address
    */
-  private _promptForEmail(): Promise<string> {
-    return this._prompt([
+  private async _promptForEmail(promptModule: inquirer.PromptModule): Promise<string> {
+    const { email }: { email: string } = await promptModule([
       {
         type: 'input',
         name: 'email',
@@ -412,8 +570,8 @@ export class ChangeAction extends BaseRushAction {
           return true; // @todo should be an email
         }
       }
-    ])
-    .then(({ email }) => email);
+    ]);
+    return email;
   }
 
   private _warnUncommittedChanges(): void {
@@ -435,45 +593,70 @@ export class ChangeAction extends BaseRushAction {
   /**
    * Writes change files to the common/changes folder. Will prompt for overwrite if file already exists.
    */
-  private _writeChangeFiles(): void {
-    this._changeFileData.forEach((changeFile: IChangeFile) => {
-      this._writeChangeFile(changeFile);
+  private async _writeChangeFiles(
+    promptModule: inquirer.PromptModule,
+    changeFileData: Map<string, IChangeFile>,
+    overwrite: boolean,
+    interactiveMode: boolean
+  ): Promise<void> {
+    await changeFileData.forEach(async (changeFile: IChangeFile) => {
+      await this._writeChangeFile(promptModule, changeFile, overwrite, interactiveMode);
     });
   }
 
-  private _writeChangeFile(changeFileData: IChangeFile): void {
+  private async _writeChangeFile(
+    promptModule: inquirer.PromptModule,
+    changeFileData: IChangeFile,
+    overwrite: boolean,
+    interactiveMode: boolean
+  ): Promise<void> {
     const output: string = JSON.stringify(changeFileData, undefined, 2);
     const changeFile: ChangeFile = new ChangeFile(changeFileData, this.rushConfiguration);
     const filePath: string = changeFile.generatePath();
 
-    if (FileSystem.exists(filePath)) {
-      // prompt about overwrite
-      this._prompt([
-        {
-          name: 'overwrite',
-          type: 'confirm',
-          message: `Overwrite ${filePath} ?`
-        }
-      ]).then(({ overwrite }) => {
-        if (overwrite) {
-          this._writeFile(filePath, output);
-        } else {
-          console.log(`Not overwriting ${filePath}...`);
-        }
-      }).catch((error) => {
-        console.error(colors.red(error.message));
-      });
+    const fileExists: boolean = FileSystem.exists(filePath);
+    const shouldWrite: boolean = (
+      !fileExists ||
+      overwrite ||
+      (interactiveMode ? await this._promptForOverwrite(promptModule, filePath) : false)
+    );
+
+    if (!interactiveMode && fileExists && !overwrite) {
+      throw new Error(`Changefile ${filePath} already exists`);
     }
 
-    this._writeFile(filePath, output);
+    if (shouldWrite) {
+      this._writeFile(filePath, output, shouldWrite && fileExists);
+    }
+  }
+
+  private async _promptForOverwrite(promptModule: inquirer.PromptModule, filePath: string): Promise<boolean> {
+    const overwrite: boolean = await promptModule([
+      {
+        name: 'overwrite',
+        type: 'confirm',
+        message: `Overwrite ${filePath}?`
+      }
+    ]);
+
+    if (overwrite) {
+      return true;
+    } else {
+      console.log(`Not overwriting ${filePath}`);
+      return false;
+    }
   }
 
   /**
    * Writes a file to disk, ensuring the directory structure up to that point exists
    */
-  private _writeFile(fileName: string, output: string): void {
+  private _writeFile(fileName: string, output: string, isOverwrite: boolean): void {
     FileSystem.writeFile(fileName, output, { ensureFolderExists: true });
-    console.log(`Created file: ${fileName}`);
+    if (isOverwrite) {
+      console.log(`Overwrote file: ${fileName}`);
+    } else {
+      console.log(`Created file: ${fileName}`);
+    }
   }
 
   private _logNoChangeFileRequired(): void {

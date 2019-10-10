@@ -8,12 +8,10 @@
   "scripts": {
     "build": "gulp test --clean"
   },
-  "dependencies": {
-    "@types/node": "8.5.8"
-  },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.1.4",
-    "@microsoft/rush-stack-compiler-2.9": "0.7.29",
+    "@microsoft/node-library-build": "6.2.5",
+    "@microsoft/rush-stack-compiler-2.9": "0.8.5",
+    "@types/node": "8.10.54",
     "gulp": "~4.0.2"
   }
 }

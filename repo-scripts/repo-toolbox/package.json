@@ -1,0 +1,21 @@
+{
+  "name": "repo-toolbox",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Used to execute various operations specific to this repo",
+  "license": "MIT",
+  "scripts": {
+    "build": "gulp test --clean"
+  },
+  "dependencies": {
+    "@microsoft/node-core-library": "3.15.1",
+    "@microsoft/rush-lib": "5.15.0",
+    "@microsoft/ts-command-line": "4.3.2"
+  },
+  "devDependencies": {
+    "@microsoft/rush-stack-compiler-3.4": "0.2.5",
+    "@microsoft/node-library-build": "6.2.5",
+    "@types/node": "8.10.54",
+    "gulp": "~4.0.2"
+  }
+}

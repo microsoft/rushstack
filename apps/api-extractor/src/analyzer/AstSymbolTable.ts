@@ -85,7 +85,7 @@ export class AstSymbolTable {
     = new Map<ts.Identifier, AstEntity | undefined>();
 
   public constructor(program: ts.Program, typeChecker: ts.TypeChecker, packageJsonLookup: PackageJsonLookup,
-    messageRouter: MessageRouter) {
+    bundledPackageNames: Set<string>, messageRouter: MessageRouter) {
 
     this._program = program;
     this._typeChecker = typeChecker;
@@ -94,6 +94,7 @@ export class AstSymbolTable {
     this._exportAnalyzer = new ExportAnalyzer(
       this._program,
       this._typeChecker,
+      bundledPackageNames,
       {
         analyze: this.analyze.bind(this),
         fetchAstSymbol: this._fetchAstSymbol.bind(this)
@@ -227,19 +228,17 @@ export class AstSymbolTable {
    * ```
    */
   public static getLocalNameForSymbol(symbol: ts.Symbol): string {
-    const symbolName: string = symbol.name;
-
     // TypeScript binds well-known ECMAScript symbols like "[Symbol.iterator]" as "__@iterator".
     // Decode it back into "[Symbol.iterator]".
-    const wellKnownSymbolName: string | undefined = TypeScriptHelpers.tryDecodeWellKnownSymbolName(symbolName);
+    const wellKnownSymbolName: string | undefined = TypeScriptHelpers.tryDecodeWellKnownSymbolName(symbol.escapedName);
     if (wellKnownSymbolName) {
       return wellKnownSymbolName;
     }
 
-    const isUniqueSymbol: boolean = TypeScriptHelpers.isUniqueSymbolName(symbolName);
+    const isUniqueSymbol: boolean = TypeScriptHelpers.isUniqueSymbolName(symbol.escapedName);
 
     // We will try to obtain the name from a declaration; otherwise we'll fall back to the symbol name.
-    let unquotedName: string = symbolName;
+    let unquotedName: string = symbol.name;
 
     for (const declaration of symbol.declarations || []) {
       // Handle cases such as "export default class X { }" where the symbol name is "default"

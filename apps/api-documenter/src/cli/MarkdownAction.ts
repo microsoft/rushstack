@@ -18,7 +18,8 @@ export class MarkdownAction extends BaseAction {
 
   protected onExecute(): Promise<void> { // override
     const apiModel: ApiModel = this.buildApiModel();
-    const markdownDocumenter: MarkdownDocumenter = new MarkdownDocumenter(apiModel);
+
+    const markdownDocumenter: MarkdownDocumenter = new MarkdownDocumenter(apiModel, undefined);
     markdownDocumenter.generateFiles(this.outputFolder);
     return Promise.resolve();
   }

@@ -113,8 +113,11 @@ export class Collector {
     this.typeChecker = options.program.getTypeChecker();
 
     this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
+
+    const bundledPackageNames: Set<string> = new Set<string>(this.extractorConfig.bundledPackages);
+
     this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup,
-      this.messageRouter);
+      bundledPackageNames, this.messageRouter);
     this.astReferenceResolver = new AstReferenceResolver(this.astSymbolTable, this.workingPackage);
   }
 
@@ -352,41 +355,78 @@ export class Collector {
    * Ensures a unique name for each item in the package typings file.
    */
   private _makeUniqueNames(): void {
-    const usedNames: Set<string> = new Set<string>();
-    this._collectGlobalNames(usedNames);
+    // The following examples illustrate the nameForEmit heuristics:
+    //
+    // Example 1:
+    //   class X { } <--- nameForEmit should be "A" to simplify things and reduce possibility of conflicts
+    //   export { X as A };
+    //
+    // Example 2:
+    //   class X { } <--- nameForEmit should be "X" because choosing A or B would be nondeterministic
+    //   export { X as A };
+    //   export { X as B };
+    //
+    // Example 3:
+    //   class X { } <--- nameForEmit should be "X_1" because Y has a stronger claim to the name
+    //   export { X as A };
+    //   export { X as B };
+    //   class Y { } <--- nameForEmit should be "X"
+    //   export { Y as X };
 
-    // First collect the explicit package exports (named)
+    // Set of names that should NOT be used when generating a unique nameForEmit
+    const usedNames: Set<string> = new Set<string>();
+
+    // First collect the names of explicit package exports, and perform a sanity check.
     for (const entity of this._entities) {
       for (const exportName of entity.exportNames) {
         if (usedNames.has(exportName)) {
           // This should be impossible
           throw new InternalError(`A package cannot have two exports with the name "${exportName}"`);
         }
-
         usedNames.add(exportName);
       }
     }
 
-    // Next generate unique names for the non-exports that will be emitted (and the default export)
+    // Next, add in the global names
+    const globalNames: Set<string> = new Set<string>();
+    this._collectGlobalNames(globalNames);
+
+    for (const globalName of globalNames) {
+      // Note that globalName may conflict with an exported name.
+      // We'll check for this conflict below.
+      usedNames.add(globalName);
+    }
+
+    // Ensure that each entity has a unique nameForEmit
     for (const entity of this._entities) {
 
-      // If this entity is exported exactly once, then emit the exported name
+      // What name would we ideally want to emit it as?
+      let idealNameForEmit: string;
+
+      // If this entity is exported exactly once, then we prefer the exported name
       if (entity.singleExportName !== undefined && entity.singleExportName !== ts.InternalSymbolName.Default) {
-        entity.nameForEmit = entity.singleExportName;
-        continue;
+        idealNameForEmit = entity.singleExportName;
+      } else {
+        // otherwise use the local name
+        idealNameForEmit = entity.astEntity.localName;
       }
 
-      // If the localName happens to be the same as one of the exports, then emit that name
-      if (entity.exportNames.has(entity.astEntity.localName)) {
-        entity.nameForEmit = entity.astEntity.localName;
-        continue;
+      // If the idealNameForEmit happens to be the same as one of the exports, then we're safe to use that...
+      if (entity.exportNames.has(idealNameForEmit)) {
+        // ...except that if it conflicts with a global name, then the global name wins
+        if (!globalNames.has(idealNameForEmit)) {
+          entity.nameForEmit = idealNameForEmit;
+          continue;
+        }
       }
 
-      // In all other cases, generate a unique name based on the localName
+      // Generate a unique name based on idealNameForEmit
       let suffix: number = 1;
-      let nameForEmit: string = entity.astEntity.localName;
+      let nameForEmit: string = idealNameForEmit;
+
+      // Choose a name that doesn't conflict with usedNames
       while (usedNames.has(nameForEmit)) {
-        nameForEmit = `${entity.astEntity.localName}_${++suffix}`;
+        nameForEmit = `${idealNameForEmit}_${++suffix}`;
       }
       entity.nameForEmit = nameForEmit;
       usedNames.add(nameForEmit);
@@ -400,7 +440,7 @@ export class Collector {
   private _collectGlobalNames(usedNames: Set<string>): void {
     // As a temporary workaround, this a short list of names that appear in typical projects.
     // The full solution is tracked by this issue:
-    // https://github.com/Microsoft/web-build-tools/issues/1095
+    // https://github.com/microsoft/rushstack/issues/1095
     const globalNames: string[] = [
       'Array',
       'ArrayConstructor',
@@ -474,70 +514,21 @@ export class Collector {
       this._calculateMetadataForDeclaration(astDeclaration);
     }
 
-    // We know we solved parentAstSymbol.metadata above
-    const parentSymbolMetadata: SymbolMetadata | undefined = astSymbol.parentAstSymbol
-      ? astSymbol.parentAstSymbol.metadata as SymbolMetadata : undefined;
-
-    const symbolMetadata: SymbolMetadata = new SymbolMetadata();
-
-    // Do any of the declarations have a release tag?
-    let effectiveReleaseTag: ReleaseTag = ReleaseTag.None;
+    // The most public effectiveReleaseTag for all declarations
+    let maxEffectiveReleaseTag: ReleaseTag = ReleaseTag.None;
 
     for (const astDeclaration of astSymbol.astDeclarations) {
       // We know we solved this above
       const declarationMetadata: DeclarationMetadata = astDeclaration.metadata as DeclarationMetadata;
+      const effectiveReleaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
 
-      const declaredReleaseTag: ReleaseTag = declarationMetadata.declaredReleaseTag;
-
-      if (declaredReleaseTag !== ReleaseTag.None) {
-        if (effectiveReleaseTag !== ReleaseTag.None && effectiveReleaseTag !== declaredReleaseTag) {
-          if (!astSymbol.isExternal) { // for now, don't report errors for external code
-            this.messageRouter.addAnalyzerIssue(
-              ExtractorMessageId.DifferentReleaseTags,
-              'This symbol has another declaration with a different release tag',
-              astDeclaration
-            );
-          }
-        } else {
-          effectiveReleaseTag = declaredReleaseTag;
-        }
+      if (effectiveReleaseTag > maxEffectiveReleaseTag) {
+        maxEffectiveReleaseTag = effectiveReleaseTag;
       }
     }
 
-    // If this declaration doesn't have a release tag, then inherit it from the parent
-    if (effectiveReleaseTag === ReleaseTag.None && astSymbol.parentAstSymbol) {
-      if (parentSymbolMetadata) {
-        effectiveReleaseTag = parentSymbolMetadata.releaseTag;
-      }
-    }
-
-    if (effectiveReleaseTag === ReleaseTag.None) {
-      if (!astSymbol.isExternal) { // for now, don't report errors for external code
-        // Don't report missing release tags for forgotten exports
-        const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
-        if (entity && entity.exported) {
-          // We also don't report errors for the default export of an entry point, since its doc comment
-          // isn't easy to obtain from the .d.ts file
-          if (astSymbol.rootAstSymbol.localName !== '_default') {
-
-            this.messageRouter.addAnalyzerIssue(
-              ExtractorMessageId.MissingReleaseTag,
-              `"${entity.astEntity.localName}" is exported by the package, but it is missing `
-              + `a release tag (@alpha, @beta, @public, or @internal)`,
-              astSymbol
-            );
-          }
-        }
-      }
-
-      effectiveReleaseTag = ReleaseTag.Public;
-    }
-
-    symbolMetadata.releaseTag = effectiveReleaseTag;
-    symbolMetadata.releaseTagSameAsParent = false;
-    if (parentSymbolMetadata) {
-      symbolMetadata.releaseTagSameAsParent = symbolMetadata.releaseTag === parentSymbolMetadata.releaseTag;
-    }
+    const symbolMetadata: SymbolMetadata = new SymbolMetadata();
+    symbolMetadata.maxEffectiveReleaseTag = maxEffectiveReleaseTag;
 
     // Update this last when we're sure no exceptions were thrown
     astSymbol.metadata = symbolMetadata;
@@ -626,6 +617,41 @@ export class Collector {
             break;
         }
       }
+    }
+
+    // This needs to be set regardless of whether or not a parserContext exists
+    if (astDeclaration.parent) {
+      const parentDeclarationMetadata: DeclarationMetadata = this.fetchMetadata(astDeclaration.parent);
+      declarationMetadata.effectiveReleaseTag = declarationMetadata.declaredReleaseTag === ReleaseTag.None
+        ? parentDeclarationMetadata.effectiveReleaseTag
+        : declarationMetadata.declaredReleaseTag;
+
+      declarationMetadata.releaseTagSameAsParent =
+        parentDeclarationMetadata.effectiveReleaseTag === declarationMetadata.effectiveReleaseTag;
+    } else {
+      declarationMetadata.effectiveReleaseTag = declarationMetadata.declaredReleaseTag;
+    }
+
+    if (declarationMetadata.effectiveReleaseTag === ReleaseTag.None) {
+      if (!astDeclaration.astSymbol.isExternal) { // for now, don't report errors for external code
+        // Don't report missing release tags for forgotten exports
+        const astSymbol: AstSymbol = astDeclaration.astSymbol;
+        const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
+        if (entity && entity.exported) {
+          // We also don't report errors for the default export of an entry point, since its doc comment
+          // isn't easy to obtain from the .d.ts file
+          if (astSymbol.rootAstSymbol.localName !== '_default') {
+            this.messageRouter.addAnalyzerIssue(
+              ExtractorMessageId.MissingReleaseTag,
+              `"${entity.astEntity.localName}" is exported by the package, but it is missing `
+              + `a release tag (@alpha, @beta, @public, or @internal)`,
+              astSymbol
+            );
+          }
+        }
+      }
+
+      declarationMetadata.effectiveReleaseTag = ReleaseTag.Public;
     }
   }
 

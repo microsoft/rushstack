@@ -1,6 +1,103 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 13 Aug 2019 00:14:22 GMT and should not be manually modified.
+This log was last generated on Sun, 06 Oct 2019 00:27:39 GMT and should not be manually modified.
+
+## 7.5.0
+Sun, 06 Oct 2019 00:27:39 GMT
+
+### Minor changes
+
+- For the markdown target, reorder the "Remarks" section to appear before the members for classes, interfaces, namespaces, and packages (GitHub #1550)
+
+## 7.4.9
+Fri, 04 Oct 2019 00:15:22 GMT
+
+*Version update only*
+
+## 7.4.8
+Sun, 29 Sep 2019 23:56:29 GMT
+
+### Patches
+
+- Update repository URL
+
+## 7.4.7
+Wed, 25 Sep 2019 15:15:31 GMT
+
+### Patches
+
+- Disambiguate output files for items with colliding names
+
+## 7.4.6
+Tue, 24 Sep 2019 02:58:49 GMT
+
+*Version update only*
+
+## 7.4.5
+Mon, 23 Sep 2019 15:14:55 GMT
+
+*Version update only*
+
+## 7.4.4
+Fri, 20 Sep 2019 21:27:22 GMT
+
+*Version update only*
+
+## 7.4.3
+Wed, 11 Sep 2019 19:56:23 GMT
+
+### Patches
+
+- Updating OfficeYamlDocumenter to account for new deeply linked types
+
+## 7.4.2
+Tue, 10 Sep 2019 22:32:23 GMT
+
+### Patches
+
+- Update documentation
+
+## 7.4.1
+Tue, 10 Sep 2019 20:38:33 GMT
+
+### Patches
+
+- Add support for emitting deeply linked types in YamlDocumenter
+
+## 7.4.0
+Fri, 06 Sep 2019 15:14:57 GMT
+
+### Minor changes
+
+- For the markdown target, generate an "index.md" file with an inventory of documented packages
+
+### Patches
+
+- (Experimental) Expand the API for API Documenter plugins
+
+## 7.3.20
+Thu, 05 Sep 2019 15:15:09 GMT
+
+### Patches
+
+- (Experimental) Introduce an API for writing API Documenter plugins
+
+## 7.3.19
+Wed, 04 Sep 2019 18:28:06 GMT
+
+*Version update only*
+
+## 7.3.18
+Wed, 04 Sep 2019 15:15:37 GMT
+
+### Patches
+
+- Update TSDoc dependency to 0.12.14
+
+## 7.3.17
+Fri, 30 Aug 2019 00:14:32 GMT
+
+*Version update only*
 
 ## 7.3.16
 Tue, 13 Aug 2019 00:14:22 GMT

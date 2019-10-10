@@ -17,7 +17,7 @@ export interface IWebpackResources {
 
 // @public (undocumented)
 export interface IWebpackTaskConfig {
-    config?: Webpack.Configuration;
+    config?: Webpack.Configuration | Webpack.Configuration[];
     configPath: string;
     printStats?: boolean;
     suppressWarnings?: (string | RegExp)[];

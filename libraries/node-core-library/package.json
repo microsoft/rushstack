@@ -1,28 +1,28 @@
 {
   "name": "@microsoft/node-core-library",
-  "version": "3.14.0",
+  "version": "3.15.1",
   "description": "Core libraries that every NodeJS toolchain project should use",
   "main": "lib/index.js",
   "typings": "dist/node-core-library.d.ts",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/libraries/node-core-library"
+    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/node-core-library"
   },
   "scripts": {
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@types/fs-extra": "5.0.4",
-    "@types/jju": "~1.4.0",
-    "@types/node": "8.5.8",
-    "@types/z-schema": "3.16.31",
+    "@types/node": "8.10.54",
     "colors": "~1.2.1",
     "fs-extra": "~7.0.1",
     "jju": "~1.4.0",
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
+    "@types/fs-extra": "5.0.4",
     "@types/jest": "23.3.11",
+    "@types/jju": "1.4.1",
+    "@types/z-schema": "3.16.31",
     "gulp": "~4.0.2",
     "@microsoft/node-library-build": "6.1.2",
     "@microsoft/rush-stack-compiler-3.4": "0.1.15"

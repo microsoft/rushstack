@@ -2,9 +2,10 @@
 // See LICENSE in the project root for license information.
 
 /**
- * API Extractor helps you build better TypeScript library packages.
- * It helps with validation, documentation, and reviewing of the exported API
- * for a TypeScript library.
+ * Use this library to read and write *.api.json files as defined by the
+ * {@link https://api-extractor.com/ | API Extractor}  tool.  These files are used to generate a documentation
+ * website for your TypeScript package.  The files store the API signatures and doc comments that were extracted
+ * from your package.
  *
  * @packageDocumentation
  */

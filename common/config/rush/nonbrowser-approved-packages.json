@@ -4,7 +4,7 @@
   "packages": [
     {
       "name": "@microsoft/api-documenter",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/api-extractor",
@@ -231,15 +231,15 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "doc-plugin-rush-stack",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "end-of-stream",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "eslint",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "eslint-plugin-no-null",
       "allowedCategories": [ "libraries" ]
     },
     {

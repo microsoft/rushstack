@@ -2,6 +2,235 @@
   "name": "@microsoft/package-deps-hash",
   "entries": [
     {
+      "version": "2.3.0",
+      "tag": "@microsoft/package-deps-hash_v2.3.0",
+      "date": "Tue, 08 Oct 2019 22:38:39 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expose the gitFileHash function."
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.183",
+      "tag": "@microsoft/package-deps-hash_v2.2.183",
+      "date": "Sun, 06 Oct 2019 00:27:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.4` to `0.2.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.4` to `6.2.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.182",
+      "tag": "@microsoft/package-deps-hash_v2.2.182",
+      "date": "Fri, 04 Oct 2019 00:15:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.3` to `0.2.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.3` to `6.2.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.181",
+      "tag": "@microsoft/package-deps-hash_v2.2.181",
+      "date": "Sun, 29 Sep 2019 23:56:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update repository URL"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.2` to `0.2.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.2` to `6.2.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.15.0` to `3.15.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.180",
+      "tag": "@microsoft/package-deps-hash_v2.2.180",
+      "date": "Wed, 25 Sep 2019 15:15:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.1` to `0.2.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.1` to `6.2.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.179",
+      "tag": "@microsoft/package-deps-hash_v2.2.179",
+      "date": "Tue, 24 Sep 2019 02:58:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.0` to `0.2.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.0` to `6.2.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.178",
+      "tag": "@microsoft/package-deps-hash_v2.2.178",
+      "date": "Mon, 23 Sep 2019 15:14:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.24` to `0.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.11` to `6.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.14.2` to `3.15.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.177",
+      "tag": "@microsoft/package-deps-hash_v2.2.177",
+      "date": "Fri, 20 Sep 2019 21:27:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.23` to `0.1.24`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.10` to `6.1.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.176",
+      "tag": "@microsoft/package-deps-hash_v2.2.176",
+      "date": "Wed, 11 Sep 2019 19:56:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.22` to `0.1.23`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.9` to `6.1.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.175",
+      "tag": "@microsoft/package-deps-hash_v2.2.175",
+      "date": "Tue, 10 Sep 2019 22:32:23 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update documentation"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.21` to `0.1.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.8` to `6.1.9`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.14.1` to `3.14.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.174",
+      "tag": "@microsoft/package-deps-hash_v2.2.174",
+      "date": "Tue, 10 Sep 2019 20:38:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.20` to `0.1.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.7` to `6.1.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.173",
+      "tag": "@microsoft/package-deps-hash_v2.2.173",
+      "date": "Wed, 04 Sep 2019 18:28:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.19` to `0.1.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.6` to `6.1.7`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.14.0` to `3.14.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.172",
+      "tag": "@microsoft/package-deps-hash_v2.2.172",
+      "date": "Wed, 04 Sep 2019 15:15:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.18` to `0.1.19`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.5` to `6.1.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.171",
+      "tag": "@microsoft/package-deps-hash_v2.2.171",
+      "date": "Fri, 30 Aug 2019 00:14:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.17` to `0.1.18`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.1.4` to `6.1.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.170",
       "tag": "@microsoft/package-deps-hash_v2.2.170",
       "date": "Mon, 12 Aug 2019 15:15:14 GMT",

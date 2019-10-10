@@ -19,6 +19,7 @@ export interface ITaskSelectorConstructor {
   isIncrementalBuildAllowed: boolean;
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
+  packageDepsFilename: string;
 }
 
 /**
@@ -188,7 +189,8 @@ export class TaskSelector {
         rushConfiguration: this._options.rushConfiguration,
         commandToRun: this._getScriptToRun(project),
         isIncrementalBuildAllowed: this._options.isIncrementalBuildAllowed,
-        packageChangeAnalyzer: this._packageChangeAnalyzer
+        packageChangeAnalyzer: this._packageChangeAnalyzer,
+        packageDepsFilename: this._options.packageDepsFilename
       });
 
       if (!this._taskCollection.hasTask(projectTask.name)) {

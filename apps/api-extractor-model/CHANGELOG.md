@@ -1,6 +1,53 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Thu, 08 Aug 2019 15:14:17 GMT and should not be manually modified.
+This log was last generated on Sun, 29 Sep 2019 23:56:29 GMT and should not be manually modified.
+
+## 7.5.1
+Sun, 29 Sep 2019 23:56:29 GMT
+
+### Patches
+
+- Update repository URL
+
+## 7.5.0
+Wed, 25 Sep 2019 15:15:31 GMT
+
+### Minor changes
+
+- Add ApiItem.getMergedSiblings() API
+
+## 7.4.2
+Mon, 23 Sep 2019 15:14:55 GMT
+
+### Patches
+
+- Remove unnecessary dependency on @types/node
+
+## 7.4.1
+Tue, 10 Sep 2019 22:32:23 GMT
+
+### Patches
+
+- Update documentation
+
+## 7.4.0
+Tue, 10 Sep 2019 20:38:33 GMT
+
+### Minor changes
+
+- Add 'canonicalReference' to ExcerptToken
+
+## 7.3.4
+Wed, 04 Sep 2019 18:28:06 GMT
+
+*Version update only*
+
+## 7.3.3
+Wed, 04 Sep 2019 15:15:37 GMT
+
+### Patches
+
+- Update TSDoc dependency to 0.12.14
 
 ## 7.3.2
 Thu, 08 Aug 2019 15:14:17 GMT

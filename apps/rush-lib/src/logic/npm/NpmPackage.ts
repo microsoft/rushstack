@@ -182,7 +182,15 @@ export class NpmPackage extends BasePackage {
     while (true) {
       // Does any child match?
       for (const child of currentParent.children) {
-        if (child.name === dependencyName) {
+        // The package.json name can differ from the installation folder name, in the case of an NPM package alias
+        // such as this:
+        //
+        // "dependencies": {
+        //   "@alias-scope/alias-name": "npm:target-name@^1.2.3"
+        // }
+        //
+        // Thus we need to compare child.installedName instead of child.name:
+        if (child.installedName === dependencyName) {
           // One of the children matched.  Note that parentForCreate may be
           // undefined, e.g. if an immediate child is found but has the wrong version,
           // then we have no place in the tree to create another version.

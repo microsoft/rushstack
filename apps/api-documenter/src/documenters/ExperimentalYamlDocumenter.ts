@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { PackageName } from '@microsoft/node-core-library';
 import { DocComment, DocInlineTag } from '@microsoft/tsdoc';
 import { ApiModel, ApiItem, ApiItemKind, ApiDocumentedItem } from '@microsoft/api-extractor-model';
 
-import { IConfigFile, IConfigTableOfContents } from './IConfigFile';
+import { IConfigTableOfContents } from './IConfigFile';
 import { IYamlTocItem, IYamlTocFile } from '../yaml/IYamlTocFile';
 import { YamlDocumenter } from './YamlDocumenter';
+import { DocumenterConfig } from './DocumenterConfig';
 
 /**
  * EXPERIMENTAL - This documenter is a prototype of a new config file driven mode of operation for
@@ -18,9 +18,9 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
   private _tocPointerMap: { [key: string]: IYamlTocItem };
   private _catchAllPointer: IYamlTocItem;
 
-  public constructor(apiModel: ApiModel, configFile: IConfigFile) {
+  public constructor(apiModel: ApiModel, documenterConfig: DocumenterConfig) {
     super(apiModel);
-    this._config = configFile.tableOfContents!;
+    this._config = documenterConfig.configFile.tableOfContents!;
 
     this._tocPointerMap = {};
 
@@ -41,7 +41,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
       if (apiItem.kind === ApiItemKind.Namespace) {
         // Namespaces don't have nodes yet
         tocItem = {
-          name: apiItem.displayName
+          name: this._getTocItemName(apiItem)
         };
       } else {
         if (this._shouldEmbed(apiItem.kind)) {
@@ -49,16 +49,12 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
           continue;
         }
 
-        if (apiItem.kind === ApiItemKind.Package) {
-          tocItem = {
-            name: PackageName.getUnscopedName(apiItem.displayName),
-            uid: this._getUid(apiItem)
-          };
-        } else {
-          tocItem = {
-            name: apiItem.displayName,
-            uid: this._getUid(apiItem)
-          };
+        tocItem = {
+          name: this._getTocItemName(apiItem),
+          uid: this._getUid(apiItem)
+        };
+
+        if (apiItem.kind !== ApiItemKind.Package) {
           this._filterItem(apiItem, tocItem);
         }
       }

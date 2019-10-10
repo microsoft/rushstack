@@ -1,7 +1,9 @@
 {
   "scenarioFolderNames": [
     "ambientNameConflict",
+    "ambientNameConflict2",
     "apiItemKinds",
+    "bundledPackages",
     "circularImport",
     "circularImport2",
     "defaultExportOfEntryPoint",
@@ -18,10 +20,13 @@
     "exportStar",
     "exportStar2",
     "exportStar3",
+    "functionOverload",
     "importEquals",
     "inconsistentReleaseTags",
+    "internationalCharacters",
     "preapproved",
     "typeOf",
+    "typeOf2",
     "typeParameters"
   ]
 }

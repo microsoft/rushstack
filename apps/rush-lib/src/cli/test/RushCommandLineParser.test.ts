@@ -1,28 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// Mock child_process so we can verify tasks are (or are not) invoked as we expect
-jest.mock('child_process');
+import './mockRushCommandLineParser';
 
-/**
- * Mock RushCommandLineParser itself to prevent `process.exit` to be called on failure
- */
-jest.mock('../RushCommandLineParser', () => {
-  // tslint:disable-next-line: no-any
-  const actualModule: any = jest.requireActual('../RushCommandLineParser');
-  if (actualModule.RushCommandLineParser) {
-    // Stub out the troublesome method that calls `process.exit`
-    actualModule.RushCommandLineParser.prototype._reportErrorAndSetExitCode = mockReportErrorAndSetExitCode;
-  }
-  return actualModule;
-
-  function mockReportErrorAndSetExitCode(error: Error): void {
-    // Just rethrow the error so the unit tests can catch it
-    throw error;
-  }
-});
-
-import { resolve } from 'path';
+import * as path from 'path';
 import { ChildProcessModuleMock, ISpawnMockConfig } from 'child_process';
 import { FileSystem } from '@microsoft/node-core-library';
 import { Interleaver } from '@microsoft/stream-collator';
@@ -41,12 +22,12 @@ interface IParserTestInstance {
  */
 function getCommandLineParserInstance(repoName: string, taskName: string): IParserTestInstance {
   // Point to the test repo folder
-  const startPath: string = resolve(__dirname, repoName);
+  const startPath: string = path.resolve(__dirname, repoName);
 
-  // The `build` task is hard-coded to be incremental. So delete the `package-deps.json` files in
+  // The `build` task is hard-coded to be incremental. So delete the package-deps file folder in
   // the test repo to guarantee the test actually runs.
-  FileSystem.deleteFile(resolve(__dirname, `${repoName}/a/package-deps.json`));
-  FileSystem.deleteFile(resolve(__dirname, `${repoName}/b/package-deps.json`));
+  FileSystem.deleteFolder(path.resolve(__dirname, `${repoName}/a/.rush/temp`));
+  FileSystem.deleteFolder(path.resolve(__dirname, `${repoName}/b/.rush/temp`));
 
   // Create a Rush CLI instance. This instance is heavy-weight and relies on setting process.exit
   // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test
@@ -117,7 +98,7 @@ describe('RushCommandLineParser', () => {
                 expect.stringMatching(expectedBuildTaskRegexp)
               ]));
               expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/a`));
+              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
 
               // tslint:disable-next-line: no-any
               const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -125,7 +106,7 @@ describe('RushCommandLineParser', () => {
                 expect.stringMatching(expectedBuildTaskRegexp)
               ]));
               expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/b`));
+              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
             });
         });
       });
@@ -151,7 +132,7 @@ describe('RushCommandLineParser', () => {
                 expect.stringMatching(expectedBuildTaskRegexp)
               ]));
               expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/a`));
+              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
 
               // tslint:disable-next-line: no-any
               const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -159,7 +140,7 @@ describe('RushCommandLineParser', () => {
                 expect.stringMatching(expectedBuildTaskRegexp)
               ]));
               expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/b`));
+              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
             });
         });
       });
@@ -187,7 +168,7 @@ describe('RushCommandLineParser', () => {
                 expect.stringMatching(expectedBuildTaskRegexp)
               ]));
               expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/a`));
+              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
 
               // tslint:disable-next-line: no-any
               const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -195,7 +176,7 @@ describe('RushCommandLineParser', () => {
                 expect.stringMatching(expectedBuildTaskRegexp)
               ]));
               expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/b`));
+              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
             });
         });
       });
@@ -221,7 +202,7 @@ describe('RushCommandLineParser', () => {
                 expect.stringMatching(expectedBuildTaskRegexp)
               ]));
               expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/a`));
+              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
 
               // tslint:disable-next-line: no-any
               const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -229,7 +210,7 @@ describe('RushCommandLineParser', () => {
                 expect.stringMatching(expectedBuildTaskRegexp)
               ]));
               expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/b`));
+              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
             });
         });
       });

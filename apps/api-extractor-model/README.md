@@ -1,11 +1,10 @@
 # @microsoft/api-extractor-model
 
-This library is used with the [@microsoft/api-extractor](https://www.npmjs.com/package/@microsoft/api-extractor).
-For documentation and other information about the API Extractor tool, please visit the
-[web site](https://api-extractor.com/).
+Use this library to read and write *.api.json files as defined by the [API Extractor](https://api-extractor.com/) tool.
+These files are used to generate a documentation website for your TypeScript package.  The files store the
+API signatures and doc comments that were extracted from your package.
 
-The **@microsoft/api-extractor-model** library is used to read and write the *.api.json data file format,
-which stores information about the exported API signatures for a TypeScript project.
+API documentation for this package: https://rushstack.io/pages/api/api-extractor-model/
 
 ## Example Usage
 
@@ -56,5 +55,5 @@ to extend more than one base class).  The "mixin" is a TypeScript merged declara
 the function that generates a subclass, an interface that describes the members of the subclass, and
 a namespace containing static members of the class.
 
-> For a complete example that shows how to uset these APIs to generate an API reference web site,
+> For a complete project that uses these APIs to generate an API reference web site,
 > see the [@microsoft/api-documenter](https://www.npmjs.com/package/@microsoft/api-documenter) source code.

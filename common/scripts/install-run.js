@@ -17,13 +17,14 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 exports.RUSH_JSON_FILENAME = 'rush.json';
+const RUSH_TEMP_FOLDER_ENV_VARIABLE_NAME = 'RUSH_TEMP_FOLDER';
 const INSTALLED_FLAG_FILENAME = 'installed.flag';
 const NODE_MODULES_FOLDER_NAME = 'node_modules';
 const PACKAGE_JSON_FILENAME = 'package.json';
 /**
  * Parse a package specifier (in the form of name\@version) into name and version parts.
  */
-function parsePackageSpecifier(rawPackageSpecifier) {
+function _parsePackageSpecifier(rawPackageSpecifier) {
     rawPackageSpecifier = (rawPackageSpecifier || '').trim();
     const separatorIndex = rawPackageSpecifier.lastIndexOf('@');
     let name;
@@ -48,7 +49,7 @@ function parsePackageSpecifier(rawPackageSpecifier) {
 /**
  * Resolve a package specifier to a static version
  */
-function resolvePackageVersion(rushCommonFolder, { name, version }) {
+function _resolvePackageVersion(rushCommonFolder, { name, version }) {
     if (!version) {
         version = '*'; // If no version is specified, use the latest version
     }
@@ -60,9 +61,9 @@ function resolvePackageVersion(rushCommonFolder, { name, version }) {
     else {
         // version resolves to
         try {
-            const rushTempFolder = ensureAndJoinPath(rushCommonFolder, 'temp');
+            const rushTempFolder = _getRushTempFolder(rushCommonFolder);
             const sourceNpmrcFolder = path.join(rushCommonFolder, 'config', 'rush');
-            syncNpmrc(sourceNpmrcFolder, rushTempFolder);
+            _syncNpmrc(sourceNpmrcFolder, rushTempFolder);
             const npmPath = getNpmPath();
             // This returns something that looks like:
             //  @microsoft/rush@3.0.0 '3.0.0'
@@ -106,7 +107,7 @@ function getNpmPath() {
                 const whereOutput = childProcess.execSync('where npm', { stdio: [] }).toString();
                 const lines = whereOutput.split(os.EOL).filter((line) => !!line);
                 // take the last result, we are looking for a .cmd command
-                // see https://github.com/Microsoft/web-build-tools/issues/759
+                // see https://github.com/microsoft/rushstack/issues/759
                 _npmPath = lines[lines.length - 1];
             }
             else {
@@ -156,7 +157,7 @@ exports.findRushJsonFolder = findRushJsonFolder;
  * Does not support "." or ".." path segments.
  * Assumes the baseFolder exists.
  */
-function ensureAndJoinPath(baseFolder, ...pathSegments) {
+function _ensureAndJoinPath(baseFolder, ...pathSegments) {
     let joinedPath = baseFolder;
     try {
         for (let pathSegment of pathSegments) {
@@ -186,7 +187,7 @@ function ensureAndJoinPath(baseFolder, ...pathSegments) {
  *
  * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities._syncNpmrc()
  */
-function syncNpmrc(sourceNpmrcFolder, targetNpmrcFolder) {
+function _syncNpmrc(sourceNpmrcFolder, targetNpmrcFolder) {
     const sourceNpmrcPath = path.join(sourceNpmrcFolder, '.npmrc');
     const targetNpmrcPath = path.join(targetNpmrcFolder, '.npmrc');
     try {
@@ -233,7 +234,7 @@ function syncNpmrc(sourceNpmrcFolder, targetNpmrcFolder) {
 /**
  * Detects if the package in the specified directory is installed
  */
-function isPackageAlreadyInstalled(packageInstallFolder) {
+function _isPackageAlreadyInstalled(packageInstallFolder) {
     try {
         const flagFilePath = path.join(packageInstallFolder, INSTALLED_FLAG_FILENAME);
         if (!fs.existsSync(flagFilePath)) {
@@ -252,7 +253,7 @@ function isPackageAlreadyInstalled(packageInstallFolder) {
  *  -
  *  - node_modules
  */
-function cleanInstallFolder(rushCommonFolder, packageInstallFolder) {
+function _cleanInstallFolder(rushTempFolder, packageInstallFolder) {
     try {
         const flagFile = path.resolve(packageInstallFolder, INSTALLED_FLAG_FILENAME);
         if (fs.existsSync(flagFile)) {
@@ -264,7 +265,7 @@ function cleanInstallFolder(rushCommonFolder, packageInstallFolder) {
         }
         const nodeModulesFolder = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME);
         if (fs.existsSync(nodeModulesFolder)) {
-            const rushRecyclerFolder = ensureAndJoinPath(rushCommonFolder, 'temp', 'rush-recycler', `install-run-${Date.now().toString()}`);
+            const rushRecyclerFolder = _ensureAndJoinPath(rushTempFolder, 'rush-recycler', `install-run-${Date.now().toString()}`);
             fs.renameSync(nodeModulesFolder, rushRecyclerFolder);
         }
     }
@@ -272,7 +273,7 @@ function cleanInstallFolder(rushCommonFolder, packageInstallFolder) {
         throw new Error(`Error cleaning the package install folder (${packageInstallFolder}): ${e}`);
     }
 }
-function createPackageJson(packageInstallFolder, name, version) {
+function _createPackageJson(packageInstallFolder, name, version) {
     try {
         const packageJsonContents = {
             'name': 'ci-rush',
@@ -294,7 +295,7 @@ function createPackageJson(packageInstallFolder, name, version) {
 /**
  * Run "npm install" in the package install folder.
  */
-function installPackage(packageInstallFolder, name, version) {
+function _installPackage(packageInstallFolder, name, version) {
     try {
         console.log(`Installing ${name}...`);
         const npmPath = getNpmPath();
@@ -315,7 +316,7 @@ function installPackage(packageInstallFolder, name, version) {
 /**
  * Get the ".bin" path for the package.
  */
-function getBinPath(packageInstallFolder, binName) {
+function _getBinPath(packageInstallFolder, binName) {
     const binFolderPath = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
     const resolvedBinName = (os.platform() === 'win32') ? `${binName}.cmd` : binName;
     return path.resolve(binFolderPath, resolvedBinName);
@@ -323,7 +324,7 @@ function getBinPath(packageInstallFolder, binName) {
 /**
  * Write a flag file to the package's install directory, signifying that the install was successful.
  */
-function writeFlagFile(packageInstallFolder) {
+function _writeFlagFile(packageInstallFolder) {
     try {
         const flagFilePath = path.join(packageInstallFolder, INSTALLED_FLAG_FILENAME);
         fs.writeFileSync(flagFilePath, process.version);
@@ -332,23 +333,41 @@ function writeFlagFile(packageInstallFolder) {
         throw new Error(`Unable to create installed.flag file in ${packageInstallFolder}`);
     }
 }
+function _getRushTempFolder(rushCommonFolder) {
+    const rushTempFolder = process.env[RUSH_TEMP_FOLDER_ENV_VARIABLE_NAME];
+    if (rushTempFolder !== undefined) {
+        _ensureFolder(rushTempFolder);
+        return rushTempFolder;
+    }
+    else {
+        return _ensureAndJoinPath(rushCommonFolder, 'temp');
+    }
+}
+function _ensureFolder(folderPath) {
+    if (!fs.existsSync(folderPath)) {
+        const parentDir = path.dirname(folderPath);
+        _ensureFolder(parentDir);
+        fs.mkdirSync(folderPath);
+    }
+}
 function installAndRun(packageName, packageVersion, packageBinName, packageBinArgs) {
     const rushJsonFolder = findRushJsonFolder();
     const rushCommonFolder = path.join(rushJsonFolder, 'common');
-    const packageInstallFolder = ensureAndJoinPath(rushCommonFolder, 'temp', 'install-run', `${packageName}@${packageVersion}`);
-    if (!isPackageAlreadyInstalled(packageInstallFolder)) {
+    const rushTempFolder = _getRushTempFolder(rushCommonFolder);
+    const packageInstallFolder = _ensureAndJoinPath(rushTempFolder, 'install-run', `${packageName}@${packageVersion}`);
+    if (!_isPackageAlreadyInstalled(packageInstallFolder)) {
         // The package isn't already installed
-        cleanInstallFolder(rushCommonFolder, packageInstallFolder);
+        _cleanInstallFolder(rushTempFolder, packageInstallFolder);
         const sourceNpmrcFolder = path.join(rushCommonFolder, 'config', 'rush');
-        syncNpmrc(sourceNpmrcFolder, packageInstallFolder);
-        createPackageJson(packageInstallFolder, packageName, packageVersion);
-        installPackage(packageInstallFolder, packageName, packageVersion);
-        writeFlagFile(packageInstallFolder);
+        _syncNpmrc(sourceNpmrcFolder, packageInstallFolder);
+        _createPackageJson(packageInstallFolder, packageName, packageVersion);
+        _installPackage(packageInstallFolder, packageName, packageVersion);
+        _writeFlagFile(packageInstallFolder);
     }
     const statusMessage = `Invoking "${packageBinName} ${packageBinArgs.join(' ')}"`;
     const statusMessageLine = new Array(statusMessage.length + 1).join('-');
     console.log(os.EOL + statusMessage + os.EOL + statusMessageLine + os.EOL);
-    const binPath = getBinPath(packageInstallFolder, packageBinName);
+    const binPath = _getBinPath(packageInstallFolder, packageBinName);
     const result = childProcess.spawnSync(binPath, packageBinArgs, {
         stdio: 'inherit',
         cwd: process.cwd(),
@@ -368,7 +387,7 @@ function runWithErrorAndStatusCode(fn) {
     }
 }
 exports.runWithErrorAndStatusCode = runWithErrorAndStatusCode;
-function run() {
+function _run() {
     const [nodePath, /* Ex: /bin/node */ scriptPath, /* /repo/common/scripts/install-run-rush.js */ rawPackageSpecifier, /* qrcode@^1.2.0 */ packageBinName, /* qrcode */ ...packageBinArgs /* [-f, myproject/lib] */] = process.argv;
     if (!nodePath) {
         throw new Error('Unexpected exception: could not detect node path');
@@ -385,15 +404,15 @@ function run() {
     }
     runWithErrorAndStatusCode(() => {
         const rushJsonFolder = findRushJsonFolder();
-        const rushCommonFolder = ensureAndJoinPath(rushJsonFolder, 'common');
-        const packageSpecifier = parsePackageSpecifier(rawPackageSpecifier);
+        const rushCommonFolder = _ensureAndJoinPath(rushJsonFolder, 'common');
+        const packageSpecifier = _parsePackageSpecifier(rawPackageSpecifier);
         const name = packageSpecifier.name;
-        const version = resolvePackageVersion(rushCommonFolder, packageSpecifier);
+        const version = _resolvePackageVersion(rushCommonFolder, packageSpecifier);
         if (packageSpecifier.version !== version) {
             console.log(`Resolved to ${name}@${version}`);
         }
         return installAndRun(name, version, packageBinName, packageBinArgs);
     });
 }
-run();
+_run();
 //# sourceMappingURL=install-run.js.map

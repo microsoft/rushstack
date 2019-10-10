@@ -62,7 +62,7 @@ export class PackageMetadataManager {
   private readonly _packageMetadataByPackageJsonPath: Map<string, PackageMetadata>
     = new Map<string, PackageMetadata>();
 
-  // This feature is still being standardized: https://github.com/Microsoft/tsdoc/issues/7
+  // This feature is still being standardized: https://github.com/microsoft/tsdoc/issues/7
   // In the future we will use the @microsoft/tsdoc library to read this file.
   private static _resolveTsdocMetadataPathFromPackageJson(packageFolder: string,
     packageJson: INodePackageJson): string {

@@ -78,6 +78,11 @@
               "description": "Normally Rush requires that each project's package.json has a \"scripts\" entry matching the custom command name. To disable this check, set \"ignoreMissingScript\" to true.",
               "type": "boolean"
             },
+            "incremental": {
+              "title": "Incremental",
+              "description": "If true then this command will be incremental like the built-in \"build\" and \"rebuild\" commands",
+              "type": "boolean"
+            },
             "allowWarningsInSuccessfulBuild": {
               "title": "Allow Warnings in Successful Build",
               "description": "By default, Rush returns a nonzero exit code if errors or warnings occur during build. If this option is set to \"true\", Rush will return a zero exit code if warnings occur.",
@@ -98,7 +103,8 @@
 
             "enableParallelism": { "$ref": "#/definitions/anything" },
             "ignoreDependencyOrder": { "$ref": "#/definitions/anything" },
-            "ignoreMissingScript": { "$ref": "#/definitions/anything" }
+            "ignoreMissingScript": { "$ref": "#/definitions/anything" },
+            "incremental": { "$ref": "#/definitions/anything" }
           }
         }
       ]

@@ -2,6 +2,184 @@
   "name": "@microsoft/rush-stack-compiler-2.9",
   "entries": [
     {
+      "version": "0.8.5",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.8.5",
+      "date": "Sun, 06 Oct 2019 00:27:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.4.7` to `7.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.4",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.8.4",
+      "date": "Fri, 04 Oct 2019 00:15:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.4.6` to `7.4.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.3",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.8.3",
+      "date": "Sun, 29 Sep 2019 23:56:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update repository URL"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.4.5` to `7.4.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.15.0` to `3.15.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.2",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.8.2",
+      "date": "Wed, 25 Sep 2019 15:15:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.4.4` to `7.4.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.1",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.8.1",
+      "date": "Tue, 24 Sep 2019 02:58:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.4.3` to `7.4.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.0",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.8.0",
+      "date": "Mon, 23 Sep 2019 15:14:55 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade @types/node dependency"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.4.2` to `7.4.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.14.2` to `3.15.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.36",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.7.36",
+      "date": "Fri, 20 Sep 2019 21:27:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where api-extractor warnings weren't being reported."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.35",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.7.35",
+      "date": "Wed, 11 Sep 2019 19:56:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.4.1` to `7.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.34",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.7.34",
+      "date": "Tue, 10 Sep 2019 22:32:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.4.0` to `7.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.14.1` to `3.14.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.33",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.7.33",
+      "date": "Tue, 10 Sep 2019 20:38:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.3.11` to `7.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.32",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.7.32",
+      "date": "Wed, 04 Sep 2019 18:28:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.3.10` to `7.3.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.14.0` to `3.14.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.31",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.7.31",
+      "date": "Wed, 04 Sep 2019 15:15:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.3.9` to `7.3.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.30",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.7.30",
+      "date": "Fri, 30 Aug 2019 00:14:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.3.8` to `7.3.9`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.29",
       "tag": "@microsoft/rush-stack-compiler-2.9_v0.7.29",
       "date": "Mon, 12 Aug 2019 15:15:14 GMT",

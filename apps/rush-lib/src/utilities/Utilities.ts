@@ -564,6 +564,10 @@ export class Utilities {
     return new Error('Unable to find rush.json configuration file');
   }
 
+  public static getPackageDepsFilenameForCommand(command: string): string {
+    return `package-deps_${command}.json`;
+  }
+
   private static _executeLifecycleCommandInternal<TCommandResult>(
     command: string,
     spawnFunction: (command: String, args: string[], spawnOptions: child_process.SpawnOptions) => TCommandResult,

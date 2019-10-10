@@ -46,7 +46,7 @@ export class Rush {
    *
    * @remarks
    * Earlier versions of the rush frontend used a different API contract. In the old contract,
-   * the second argument was the `isManaged` value of the {@see ILaunchOptions} object.
+   * the second argument was the `isManaged` value of the {@link ILaunchOptions} object.
    *
    * Even though this API isn't documented, it is still supported for legacy compatibility.
    */
@@ -91,7 +91,7 @@ export class Rush {
   }
 
   /**
-   * This function normalizes legacy options to the current {@see ILaunchOptions} object.
+   * This function normalizes legacy options to the current {@link ILaunchOptions} object.
    */
   private static _normalizeLaunchOptions(arg: ILaunchOptions): ILaunchOptions {
     return (typeof arg === 'boolean')

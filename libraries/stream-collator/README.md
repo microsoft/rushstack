@@ -1,11 +1,14 @@
 ## stream-collator
 
-Oftentimes, when working with multiple parallel asynchronous processes, it is helpful to ensure that their
-outputs are not mixed together, as this can cause readability issues in the console or log. The
-**stream-collator** manages the output of these streams carefully, such that no two streams are writing
-at the same time. At any given time, one stream registered with the collator is the **active stream**
-which means that particular stream will be live streaming, while the others will wait for that stream
-to finish before their completion.
+This library enables a tool to display live console output from multiple asynchronous processes,
+while ensuring that their output does not get jumbled together.
+
+## How does it work?
+
+The **stream-collator** manages the output of these streams, ensuring that no two streams are writing to the console
+at the same time. At any given time, one stream registered with the collator is the **active stream**, which means
+that particular stream will be live streaming, while the others will wait for that stream to finish before their
+output is displayed.
 
 For example, if you have 3 streams (e.g. from using `child_process.spawn()`).
 
@@ -15,23 +18,23 @@ Stream B will write: `BBBBBBBBBBBBBBBBBBBB`
 
 Stream C will write: `CCCCCCCCCC`
 
-If these streams are all being piped directly to stdout, you could end up with something like:
+If these streams are all being piped directly to stdout (without stream-collator), you could end up with jumbled
+output:
 
 `ABACCCBCCCCBBABBCBBABBBBBBCCAB`
 
-**Yikes!**
-
-Most likely, something like the following would be much more useful to users of your application:
+Something like the following would be much more useful to users of your application:
 
 `AAAAABBBBBBBBBBBBBBBCCCCCCCCCC`
 
-This is where the **stream-collator** comes in handy!
+This is where the **stream-collator** comes in!
 
-## Installation
+## Usage
 
 Install the stream-collator:
 
 `npm install --save @microsoft/stream-collator`
+
 
 Import the collator:
 
@@ -43,8 +46,6 @@ import StreamCollator from '@microsoft/stream-collator'; // es6
 const StreamCollator = require('@microsoft/stream-collator'); // commonjs
 ```
 
-## Usage
-
 A stream collator adheres to the [NodeJS Stream API](https://nodejs.org/api/stream.html), meaning that it effectively
 is special type of [ReadableStream](https://nodejs.org/api/stream.html#stream_class_stream_readable). This makes
 working with the stream collator very simple. Imagine we had the 3 streams from the example above:
@@ -55,7 +56,7 @@ const streamB = getRepeaterStream('B', 15); // fake helper function that returns
 const streamC = getRepeaterStream('C', 10); // fake helper function that returns a ReadableStream
 ```
 
-Now, instantiate a stream collator instance and register the streams with it:
+Next, instantiate a stream collator instance and register the streams with it:
 
 ```javascript
 const collator = new StreamCollator();

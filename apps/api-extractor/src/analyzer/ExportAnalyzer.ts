@@ -53,8 +53,17 @@ interface IAstModuleReference {
  * generating .d.ts rollups.
  */
 export class ExportAnalyzer {
+  // Captures "@a/b" or "d" from these examples:
+  //   @a/b
+  //   @a/b/c
+  //   d
+  //   d/
+  //   d/e
+  private static _modulePathRegExp: RegExp = /^((?:@[^@\/\s]+\/)?[^@\/\s]+)(?:.*)$/;
+
   private readonly _program: ts.Program;
   private readonly _typeChecker: ts.TypeChecker;
+  private readonly _bundledPackageNames: Set<string>;
   private readonly _astSymbolTable: IAstSymbolTable;
 
   private readonly _astModulesByModuleSymbol: Map<ts.Symbol, AstModule>
@@ -65,9 +74,11 @@ export class ExportAnalyzer {
 
   private readonly _astImportsByKey: Map<string, AstImport> = new Map<string, AstImport>();
 
-  public constructor(program: ts.Program, typeChecker: ts.TypeChecker, astSymbolTable: IAstSymbolTable) {
+  public constructor(program: ts.Program, typeChecker: ts.TypeChecker, bundledPackageNames: Set<string>,
+    astSymbolTable: IAstSymbolTable) {
     this._program = program;
     this._typeChecker = typeChecker;
+    this._bundledPackageNames = bundledPackageNames;
     this._astSymbolTable = astSymbolTable;
   }
 
@@ -93,7 +104,7 @@ export class ExportAnalyzer {
       if (moduleReference !== undefined) {
         // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
         // but ignore:  "../folder/LocalFile"
-        if (!ts.isExternalModuleNameRelative(moduleReference.moduleSpecifier)) {
+        if (this._isExternalModulePath(moduleReference.moduleSpecifier)) {
           externalModulePath = moduleReference.moduleSpecifier;
         }
       }
@@ -229,6 +240,34 @@ export class ExportAnalyzer {
       entryPointAstModule.astModuleExportInfo = astModuleExportInfo;
     }
     return entryPointAstModule.astModuleExportInfo;
+  }
+
+  /**
+   * Returns true if the module specifier refers to an external package.  Ignores packages listed in the
+   * "bundledPackages" setting from the api-extractor.json config file.
+   *
+   * @remarks
+   * Examples:
+   *
+   * - NO:  `./file1`
+   * - YES: `library1/path/path`
+   * - YES: `@my-scope/my-package`
+   */
+  private _isExternalModulePath(moduleSpecifier: string): boolean {
+    if (ts.isExternalModuleNameRelative(moduleSpecifier)) {
+      return false;
+    }
+
+    const match: RegExpExecArray | null = ExportAnalyzer._modulePathRegExp.exec(moduleSpecifier);
+    if (match) {
+      // Extract "@my-scope/my-package" from "@my-scope/my-package/path/module"
+      const packageName: string = match[1];
+      if (this._bundledPackageNames.has(packageName)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /**
@@ -409,7 +448,7 @@ export class ExportAnalyzer {
 
         if (externalModulePath === undefined) {
           // The implementation here only works when importing from an external module.
-          // The full solution is tracked by: https://github.com/Microsoft/web-build-tools/issues/1029
+          // The full solution is tracked by: https://github.com/microsoft/rushstack/issues/1029
           throw new Error('"import * as ___ from ___;" is not supported yet for local files.'
             + '\nFailure in: ' + importDeclaration.getSourceFile().fileName);
         }
@@ -617,7 +656,7 @@ export class ExportAnalyzer {
 
     // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
     // but ignore:  "../folder/LocalFile"
-    if (!ts.isExternalModuleNameRelative(moduleSpecifier)) {
+    if (this._isExternalModulePath(moduleSpecifier)) {
       return moduleSpecifier;
     }
 

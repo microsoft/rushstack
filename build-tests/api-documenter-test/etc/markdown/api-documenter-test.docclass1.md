@@ -12,6 +12,12 @@ This is an example class.
 export declare class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInterface2 
 ```
 
+## Remarks
+
+These are some remarks.
+
+The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `DocClass1` class.
+
 ## Events
 
 |  Property | Modifiers | Type | Description |
@@ -35,10 +41,4 @@ export declare class DocClass1 extends DocBaseClass implements IDocInterface1, I
 |  [interestingEdgeCases()](./api-documenter-test.docclass1.interestingedgecases.md) |  | Example: "<!-- -->{ \\<!-- -->"maxItemsToShow<!-- -->\\<!-- -->": 123 }<!-- -->"<!-- -->The regular expression used to validate the constraints is /^\[a-zA-Z0-9<!-- -->\\<!-- -->-\_\]+$/ |
 |  [sumWithExample(x, y)](./api-documenter-test.docclass1.sumwithexample.md) | <code>static</code> | Returns the sum of two numbers. |
 |  [tableExample()](./api-documenter-test.docclass1.tableexample.md) |  | An example with tables: |
-
-## Remarks
-
-These are some remarks.
-
-The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `DocClass1` class.
 

@@ -3,13 +3,29 @@
 
 import * as child_process from 'child_process';
 import * as colors from 'colors';
-import { Executable } from '@microsoft/node-core-library';
+import {
+  Executable,
+  Path
+} from '@microsoft/node-core-library';
 
 const DEFAULT_BRANCH: string = 'master';
 const DEFAULT_REMOTE: string = 'origin';
 const DEFAULT_FULLY_QUALIFIED_BRANCH: string = `${DEFAULT_REMOTE}/${DEFAULT_BRANCH}`;
 
 export class VersionControl {
+  public static getRepositoryRootPath(): string | undefined {
+    const output: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
+      'git',
+      ['rev-parse', '--show-toplevel']
+    );
+
+    if (output.status !== 0) {
+      return undefined;
+    } else {
+      return output.stdout.trim();
+    }
+  }
+
   public static getChangedFolders(
     targetBranch: string,
     skipFetch: boolean = false
@@ -46,16 +62,15 @@ export class VersionControl {
     const output: string = child_process.execSync(
       `git diff ${targetBranch}... --name-only --no-renames --diff-filter=A`
     ).toString();
-    const regex: RegExp | undefined = pathPrefix ? new RegExp(`^${pathPrefix}`, 'i') : undefined;
     return output.split('\n').map((line) => {
       if (line) {
         const trimmedLine: string = line.trim();
-        if (regex && trimmedLine.match(regex)) {
+        if (!pathPrefix || Path.isUnderOrEqual(trimmedLine, pathPrefix)) {
           return trimmedLine;
         }
+      } else {
+        return undefined;
       }
-
-      return undefined;
     }).filter((line) => {
       return line && line.length > 0;
     }) as string[];

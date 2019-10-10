@@ -10,7 +10,7 @@ import { IPackageJson } from '@microsoft/node-core-library';
 export class ApprovedPackagesConfiguration {
     constructor(jsonFilename: string);
     // (undocumented)
-    addOrUpdatePackage(packageName: string, reviewCategory: string): void;
+    addOrUpdatePackage(packageName: string, reviewCategory: string): boolean;
     clear(): void;
     // (undocumented)
     getItemByName(packageName: string): ApprovedPackagesItem | undefined;
@@ -109,6 +109,18 @@ export class EventHooks {
     constructor(eventHooksJson: IEventHooksJson);
     get(event: Event): string[];
     }
+
+// @beta
+export class ExperimentsConfiguration {
+    // @internal
+    constructor(jsonFileName: string);
+    readonly configuration: Readonly<IExperimentsJson>;
+    }
+
+// @beta
+export interface IExperimentsJson {
+    legacyIncrementalBuildDependencyDetection?: boolean;
+}
 
 // @public
 export interface ILaunchOptions {
@@ -250,6 +262,8 @@ export class RushConfiguration {
     readonly ensureConsistentVersions: boolean;
     // @beta
     readonly eventHooks: EventHooks;
+    // @beta
+    readonly experimentsConfiguration: ExperimentsConfiguration;
     findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
     findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
     getCommittedShrinkwrapFilename(variant?: string | undefined): string;
@@ -315,6 +329,7 @@ export class RushConfigurationProject {
     readonly packageName: string;
     readonly projectFolder: string;
     readonly projectRelativeFolder: string;
+    readonly projectRushTempFolder: string;
     readonly reviewCategory: string;
     readonly shouldPublish: boolean;
     readonly skipRushCheck: boolean;
