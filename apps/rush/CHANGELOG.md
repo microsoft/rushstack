@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 08 Oct 2019 22:58:33 GMT and should not be manually modified.
+This log was last generated on Thu, 10 Oct 2019 23:47:19 GMT and should not be manually modified.
+
+## 5.15.1
+Thu, 10 Oct 2019 23:47:19 GMT
+
+### Updates
+
+- Fix an issue where build commands can fail because git commands used to track changes can be too long.
+- Fix compatibility issue where PNPM 4 requires --no-prefer-frozen-lockfile instead of --no-prefer-frozen-shrinkwrap
 
 ## 5.15.0
 Tue, 08 Oct 2019 22:58:33 GMT
