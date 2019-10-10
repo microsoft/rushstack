@@ -103,7 +103,7 @@ export function getGitHashForFiles(filesToHash: string[], packagePath: string): 
     );
 
     if (result.status !== 0) {
-      throw new Error(`git hash-object exited with status ${result}: ${result.stderr}`);
+      throw new Error(`git hash-object exited with status ${result.status}: ${result.stderr}`);
     }
 
     const hashStdout: string = result.stdout.trim();
@@ -139,7 +139,7 @@ export function gitLsTree(path: string): string {
   );
 
   if (result.status !== 0) {
-    throw new Error(`git ls-tree exited with status ${result}: ${result.stderr}`);
+    throw new Error(`git ls-tree exited with status ${result.status}: ${result.stderr}`);
   }
 
   return result.stdout;
@@ -158,7 +158,7 @@ export function gitStatus(path: string): string {
   );
 
   if (result.status !== 0) {
-    throw new Error(`git ls-tree exited with status ${result}: ${result.stderr}`);
+    throw new Error(`git status exited with status ${result.status}: ${result.stderr}`);
   }
 
   return result.stdout;
