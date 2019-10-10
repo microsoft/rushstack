@@ -4,6 +4,9 @@
 import * as child_process from 'child_process';
 import { IPackageDeps } from './IPackageDeps';
 
+// 8191 is the longest supported command on Windows
+const MAX_COMMAND_LENGTH: number = 8191;
+
 /**
  * Parses the output of the "git ls-tree" command
  */
@@ -92,16 +95,42 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
  */
 export function getGitHashForFiles(filesToHash: string[], packagePath: string): Map<string, string> {
   const changes: Map<string, string> = new Map<string, string>();
-  if (filesToHash.length) {
+
+  let index: number = 0;
+  while (index < filesToHash.length) {
+    const HASH_OBJECT_COMMAND: string = 'git hash-object';
+    const filesInBatch: string[] = [];
+    let commandPartsTextLength: number = HASH_OBJECT_COMMAND.length;
+
+    for (; index < filesToHash.length; index++) {
+      const filePath: string = filesToHash[index];
+      // The "1" accounts for the space between commands
+      const newLength: number = commandPartsTextLength + 1 + filePath.length;
+      if (newLength > MAX_COMMAND_LENGTH) {
+        break;
+      }
+
+      filesInBatch.push(filePath);
+      commandPartsTextLength = newLength;
+    }
+
     const hashStdout: string = child_process.execSync(
-      'git hash-object ' + filesToHash.join(' '),
-      { cwd: packagePath }).toString();
+      [HASH_OBJECT_COMMAND, ...filesInBatch].join(' '),
+      { cwd: packagePath }
+    ).toString().trim();
 
-    // The result of hashStdout will be a list of file hashes delimited by newlines
     const hashes: string[] = hashStdout.split('\n');
+    if (hashes.length !== filesInBatch.length) {
+      throw new Error(`Passed ${filesInBatch.length} file paths to Git to hash, but received ${hashes.length} hashes.`);
+    }
 
-    filesToHash.forEach((filename, i) => changes.set(filename, hashes[i]));
+    for (let i: number = 0; i < hashes.length; i++) {
+      const hash: string = hashes[i];
+      const filePath: string = filesInBatch[i];
+      changes.set(filePath, hash);
+    }
   }
+
   return changes;
 }
 
