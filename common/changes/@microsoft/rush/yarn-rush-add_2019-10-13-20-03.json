@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Added rush add support for yarn",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "ron4ex@users.noreply.github.com"
+}
