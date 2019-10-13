@@ -1,5 +1,5 @@
 {
-  "name": "@microsoft/eslint-config-scalable-ts",
+  "name": "@rushstack/eslint-config",
   "entries": [
     {
       "version": "0.3.1",

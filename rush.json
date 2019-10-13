@@ -581,12 +581,6 @@
 
     // "libraries" folder (alphabetical order)
     {
-      "packageName": "@microsoft/eslint-config-scalable-ts",
-      "projectFolder": "libraries/eslint-config-scalable-ts",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
       "packageName": "@microsoft/load-themed-styles",
       "projectFolder": "libraries/load-themed-styles",
       "reviewCategory": "libraries",
@@ -652,6 +646,12 @@
     },
 
     // "stack" folder (alphabetical order)
+    {
+      "packageName": "@rushstack/eslint-config",
+      "projectFolder": "stack/eslint-config",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
     {
       "packageName": "@microsoft/rush-stack",
       "projectFolder": "stack/rush-stack",
