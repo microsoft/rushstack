@@ -1,0 +1,116 @@
+{
+  "name": "@microsoft/eslint-config-scalable-ts",
+  "entries": [
+    {
+      "version": "0.3.1",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.3.1",
+      "date": "Sun, 29 Sep 2019 23:56:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update repository URL"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.0",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.3.0",
+      "date": "Wed, 04 Sep 2019 01:43:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix an issue where the @typescript-eslint/array-type rule required a syntax that broke compatibility with TypeScript versions prior to 3.4"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.3",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.2.3",
+      "date": "Tue, 03 Sep 2019 23:13:45 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade to @typescript-eslint/eslint-plugin 2.1.0"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.2",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.2.2",
+      "date": "Tue, 27 Aug 2019 01:48:45 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove unused plugin reference"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.1",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.2.1",
+      "date": "Tue, 27 Aug 2019 01:24:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace \"eslint-plugin-no-null\" with a more lenient implementation that allows equality comparisons with \"null\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.0",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.2.0",
+      "date": "Wed, 21 Aug 2019 21:56:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Enable react/no-deprecated, react/no-unescaped-entities, and react/self-closing-comp"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.2",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.1.2",
+      "date": "Fri, 16 Aug 2019 21:58:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Relax peer dependency to allow usage with ESLint 5"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.1",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.1.1",
+      "date": "Fri, 16 Aug 2019 01:15:03 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where @typescript-eslint/no-unused-vars didn't work properly with React source files"
+          },
+          {
+            "comment": "Relax @typescript-eslint/camelcase to allow \"_checkBox1_onChanged\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.1.0",
+      "date": "Thu, 15 Aug 2019 02:56:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release"
+          }
+        ]
+      }
+    }
+  ]
+}
