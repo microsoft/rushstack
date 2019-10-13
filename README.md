@@ -8,6 +8,7 @@
 The home for various projects maintained by the Rush Stack community, whose mission is to develop reusable tooling
 for large scale TypeScript monorepos.
 
+
 ## Documentation Links
 
 - [What is Rush Stack?](https://rushstack.io/) - learn about the mission behind these projects
@@ -16,6 +17,7 @@ for large scale TypeScript monorepos.
 - [Rush](https://rushjs.io/) - a build orchestrator for large scale TypeScript monorepos
 - [API Extractor](https://api-extractor.com/) - create .d.ts rollups and track your TypeScript API signatures
 - [API Documenter](https://api-extractor.com/pages/setup/generating_docs/) - use TSDoc comments to publish an API documentation website
+
 
 ## Published Packages
 
@@ -37,12 +39,12 @@ for large scale TypeScript monorepos.
 | [/core-build/gulp-core-build-webpack](./core-build/gulp-core-build-webpack/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-webpack.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-webpack) | [changelog](./core-build/gulp-core-build-webpack/CHANGELOG.md) | [@microsoft/gulp-core-build-webpack](https://www.npmjs.com/package/@microsoft/gulp-core-build-webpack) |
 | [/core-build/node-library-build](./core-build/node-library-build/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fnode-library-build.svg)](https://badge.fury.io/js/%40microsoft%2Fnode-library-build) | [changelog](./core-build/node-library-build/CHANGELOG.md) | [@microsoft/node-library-build](https://www.npmjs.com/package/@microsoft/node-library-build) |
 | [/core-build/web-library-build](./core-build/web-library-build/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fweb-library-build.svg)](https://badge.fury.io/js/%40microsoft%2Fweb-library-build) | [changelog](./core-build/web-library-build/CHANGELOG.md) | [@microsoft/web-library-build](https://www.npmjs.com/package/@microsoft/web-library-build) |
-| [/libraries/eslint-config-scalable-ts](./libraries/eslint-config-scalable-ts/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Feslint-config-scalable-ts.svg)](https://badge.fury.io/js/%40microsoft%2Feslint-config-scalable-ts) | [changelog](./libraries/eslint-config-scalable-ts/CHANGELOG.md) | [@microsoft/eslint-config-scalable-ts](https://www.npmjs.com/package/@microsoft/eslint-config-scalable-ts) |
 | [/libraries/load-themed-styles](./libraries/load-themed-styles/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fload-themed-styles.svg)](https://badge.fury.io/js/%40microsoft%2Fload-themed-styles) | [changelog](./libraries/load-themed-styles/CHANGELOG.md) | [@microsoft/load-themed-styles](https://www.npmjs.com/package/@microsoft/load-themed-styles) |
 | [/libraries/node-core-library](./libraries/node-core-library/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fnode-core-library.svg)](https://badge.fury.io/js/%40microsoft%2Fnode-core-library) | [changelog](./libraries/node-core-library/CHANGELOG.md) | [@microsoft/node-core-library](https://www.npmjs.com/package/@microsoft/node-core-library) |
 | [/libraries/package-deps-hash](./libraries/package-deps-hash/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fpackage-deps-hash.svg)](https://badge.fury.io/js/%40microsoft%2Fpackage-deps-hash) | [changelog](./libraries/package-deps-hash/CHANGELOG.md) | [@microsoft/package-deps-hash](https://www.npmjs.com/package/@microsoft/package-deps-hash) |
 | [/libraries/stream-collator](./libraries/stream-collator/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fstream-collator.svg)](https://badge.fury.io/js/%40microsoft%2Fstream-collator) | [changelog](./libraries/stream-collator/CHANGELOG.md) | [@microsoft/stream-collator](https://www.npmjs.com/package/@microsoft/stream-collator) |
 | [/libraries/ts-command-line](./libraries/ts-command-line/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fts-command-line.svg)](https://badge.fury.io/js/%40microsoft%2Fts-command-line) | [changelog](./libraries/ts-command-line/CHANGELOG.md) | [@microsoft/ts-command-line](https://www.npmjs.com/package/@microsoft/ts-command-line) |
+| [/stack/eslint-config](./stack/eslint-config/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Feslint-config.svg)](https://badge.fury.io/js/%40rushstack%2Feslint-config) | [changelog](./stack/eslint-config/CHANGELOG.md) | [@rushstack/eslint-config](https://www.npmjs.com/package/@rushstack/eslint-config) |
 | [/stack/rush-stack](./stack/rush-stack/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-stack.svg)](https://badge.fury.io/js/%40microsoft%2Frush-stack) | [changelog](./stack/rush-stack/CHANGELOG.md) | [@microsoft/rush-stack](https://www.npmjs.com/package/@microsoft/rush-stack) |
 | [/stack/rush-stack-compiler-2.4](./stack/rush-stack-compiler-2.4/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-2.4.svg)](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-2.4) | [changelog](./stack/rush-stack-compiler-2.4/CHANGELOG.md) | [@microsoft/rush-stack-compiler-2.4](https://www.npmjs.com/package/@microsoft/rush-stack-compiler-2.4) |
 | [/stack/rush-stack-compiler-2.7](./stack/rush-stack-compiler-2.7/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-2.7.svg)](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-2.7) | [changelog](./stack/rush-stack-compiler-2.7/CHANGELOG.md) | [@microsoft/rush-stack-compiler-2.7](https://www.npmjs.com/package/@microsoft/rush-stack-compiler-2.7) |
@@ -94,6 +96,7 @@ for large scale TypeScript monorepos.
 | [/repo-scripts/generate-api-docs](./repo-scripts/generate-api-docs/) | Used to generate API docs for the rushstack.io website |
 | [/repo-scripts/repo-toolbox](./repo-scripts/repo-toolbox/) | Used to execute various operations specific to this repo |
 | [/stack/rush-stack-compiler-shared](./stack/rush-stack-compiler-shared/) |  |
+
 
 ## Contributor Notice
 
