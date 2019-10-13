@@ -314,7 +314,7 @@ export class PackageJsonUpdater {
 
       let commandArgs: Array<string> = ['view', packageName, 'versions', '--json'];
       if (this._rushConfiguration.packageManager === 'yarn') {
-        commandArgs = ['info', packageName, 'versions', '--json']
+        commandArgs = ['info', packageName, 'versions', '--json'];
       }
 
       const allVersions: string =
@@ -326,13 +326,12 @@ export class PackageJsonUpdater {
 
         let versionList: Array<string>;
 
-        if(this._rushConfiguration.packageManager === 'yarn') {
+        if (this._rushConfiguration.packageManager === 'yarn') {
           versionList = JSON.parse(allVersions).data;
         } else {
           versionList = JSON.parse(allVersions);
         }
 
-      
       console.log(colors.gray(`Found ${versionList.length} available versions.`));
 
       for (const version of versionList) {
@@ -357,7 +356,7 @@ export class PackageJsonUpdater {
 
       let commandArgs: Array<string> = ['view', `${packageName}@latest`, 'version'];
       if (this._rushConfiguration.packageManager === 'yarn') {
-        commandArgs = ['info', packageName, 'dist-tags.latest', '--silent']
+        commandArgs = ['info', packageName, 'dist-tags.latest', '--silent'];
       }
 
       selectedVersion = Utilities.executeCommandAndCaptureOutput(
