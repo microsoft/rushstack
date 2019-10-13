@@ -304,10 +304,6 @@ export class PackageJsonUpdater {
       return implicitlyPinnedVersion;
     }
 
-    if (this._rushConfiguration.packageManager === 'yarn') {
-      throw new Error('The Yarn package manager is not currently supported by the "rush add" command.');
-    }
-
     await installManager.ensureLocalPackageManager();
     let selectedVersion: string | undefined;
 
@@ -316,14 +312,27 @@ export class PackageJsonUpdater {
       console.log();
       console.log(`Querying registry for all versions of "${packageName}"...`);
 
+      let commandArgs: Array<string> = ['view', packageName, 'versions', '--json'];
+      if (this._rushConfiguration.packageManager === 'yarn') {
+        commandArgs = ['info', packageName, 'versions', '--json']
+      }
+
       const allVersions: string =
         Utilities.executeCommandAndCaptureOutput(
           this._rushConfiguration.packageManagerToolFilename,
-          ['view', packageName, 'versions', '--json'],
+          commandArgs,
           this._rushConfiguration.commonTempFolder
         );
 
-      const versionList: Array<string> = JSON.parse(allVersions);
+        let versionList: Array<string>;
+
+        if(this._rushConfiguration.packageManager === 'yarn') {
+          versionList = JSON.parse(allVersions).data;
+        } else {
+          versionList = JSON.parse(allVersions);
+        }
+
+      
       console.log(colors.gray(`Found ${versionList.length} available versions.`));
 
       for (const version of versionList) {
@@ -346,9 +355,14 @@ export class PackageJsonUpdater {
       }
       console.log(`Querying NPM registry for latest version of "${packageName}"...`);
 
+      let commandArgs: Array<string> = ['view', `${packageName}@latest`, 'version'];
+      if (this._rushConfiguration.packageManager === 'yarn') {
+        commandArgs = ['info', packageName, 'dist-tags.latest', '--silent']
+      }
+
       selectedVersion = Utilities.executeCommandAndCaptureOutput(
         this._rushConfiguration.packageManagerToolFilename,
-        ['view', `${packageName}@latest`, 'version'],
+        commandArgs,
         this._rushConfiguration.commonTempFolder
       ).trim();
 
