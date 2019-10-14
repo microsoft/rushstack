@@ -312,9 +312,11 @@ export class PackageJsonUpdater {
       console.log();
       console.log(`Querying registry for all versions of "${packageName}"...`);
 
-      let commandArgs: Array<string> = ['view', packageName, 'versions', '--json'];
+      let commandArgs: Array<string>;
       if (this._rushConfiguration.packageManager === 'yarn') {
         commandArgs = ['info', packageName, 'versions', '--json'];
+      } else {
+        commandArgs = ['view', packageName, 'versions', '--json'];
       }
 
       const allVersions: string =
@@ -325,7 +327,6 @@ export class PackageJsonUpdater {
         );
 
         let versionList: Array<string>;
-
         if (this._rushConfiguration.packageManager === 'yarn') {
           versionList = JSON.parse(allVersions).data;
         } else {
@@ -354,9 +355,11 @@ export class PackageJsonUpdater {
       }
       console.log(`Querying NPM registry for latest version of "${packageName}"...`);
 
-      let commandArgs: Array<string> = ['view', `${packageName}@latest`, 'version'];
+      let commandArgs: Array<string>;
       if (this._rushConfiguration.packageManager === 'yarn') {
         commandArgs = ['info', packageName, 'dist-tags.latest', '--silent'];
+      } else {
+        commandArgs = ['view', `${packageName}@latest`, 'version'];
       }
 
       selectedVersion = Utilities.executeCommandAndCaptureOutput(
