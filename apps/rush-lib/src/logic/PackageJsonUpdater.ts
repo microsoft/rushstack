@@ -326,12 +326,12 @@ export class PackageJsonUpdater {
           this._rushConfiguration.commonTempFolder
         );
 
-        let versionList: Array<string>;
-        if (this._rushConfiguration.packageManager === 'yarn') {
-          versionList = JSON.parse(allVersions).data;
-        } else {
-          versionList = JSON.parse(allVersions);
-        }
+      let versionList: Array<string>;
+      if (this._rushConfiguration.packageManager === 'yarn') {
+        versionList = JSON.parse(allVersions).data;
+      } else {
+        versionList = JSON.parse(allVersions);
+      }
 
       console.log(colors.gray(`Found ${versionList.length} available versions.`));
 
