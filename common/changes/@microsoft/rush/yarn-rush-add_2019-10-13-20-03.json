@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Added rush add support for yarn",
+      "comment": "Add support for \"rush add\" for repos using the Yarn package manager.",
       "type": "none"
     }
   ],
