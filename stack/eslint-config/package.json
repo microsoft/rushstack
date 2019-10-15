@@ -1,0 +1,36 @@
+{
+  "name": "@rushstack/eslint-config",
+  "version": "0.3.1",
+  "description": "Base set of ESLint rules for scalable TypeScript projects.",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/microsoft/rushstack/tree/master/stack/eslint-config"
+  },
+  "scripts": {
+    "build": ""
+  },
+  "keywords": [
+    "eslint",
+    "eslint-config",
+    "rush",
+    "rushstack",
+    "typescript"
+  ],
+  "peerDependencies": {
+    "eslint": "^5.0.0 || ^6.0.0",
+    "typescript": ">=3.0.0"
+  },
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "2.3.3",
+    "@typescript-eslint/experimental-utils": "2.3.3",
+    "@typescript-eslint/parser": "2.3.3",
+    "@typescript-eslint/typescript-estree": "2.3.3",
+    "eslint-plugin-promise": "~4.2.1",
+    "eslint-plugin-react": "~7.16.0",
+    "eslint-plugin-security": "~1.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.0.0",
+    "typescript": "~3.5.3"
+  }
+}
