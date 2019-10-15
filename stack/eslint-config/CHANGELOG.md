@@ -1,6 +1,17 @@
-# Change Log - @microsoft/eslint-config-scalable-ts
+# Change Log - @rushstack/eslint-config
 
-This log was last generated on Sun, 29 Sep 2019 23:56:29 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Oct 2019 01:22:16 GMT and should not be manually modified.
+
+## 0.4.0
+Tue, 15 Oct 2019 01:22:16 GMT
+
+### Minor changes
+
+- Rename `@microsoft/eslint-config-scalable-ts` to `@rushstack/eslint-config`
+
+### Patches
+
+- Upgraded ESLint plugin dependencies
 
 ## 0.3.1
 Sun, 29 Sep 2019 23:56:29 GMT
