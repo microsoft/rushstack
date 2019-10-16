@@ -4,6 +4,7 @@
 import * as semver from 'semver';
 import { RushConstants } from '../../logic/RushConstants';
 import { PackageManager } from './PackageManager';
+import * as path from 'path';
 
 /**
  * Support for interacting with the PNPM package manager.
@@ -13,6 +14,9 @@ export class PnpmPackageManager extends PackageManager {
    * PNPM only.  True if `--resolution-strategy` is supported.
    */
   public readonly supportsResolutionStrategy: boolean;
+
+  // example: node_modules/.pnpm/lock.yaml
+  public readonly internalShrinkwrapRelativePath: string;
 
   /** @internal */
   public constructor(version: string) {
@@ -31,6 +35,18 @@ export class PnpmPackageManager extends PackageManager {
       }
     } else {
       this._shrinkwrapFilename = RushConstants.pnpmV1ShrinkwrapFilename;
+    }
+
+    if (parsedVersion.major <= 2) {
+      // node_modules/.shrinkwrap.yaml
+      this.internalShrinkwrapRelativePath = path.join('node_modules', '.shrinkwrap.yaml');
+    } else if (parsedVersion.major <= 3) {
+      // node_modules/.pnpm-lock.yaml
+      this.internalShrinkwrapRelativePath = path.join('node_modules', '.pnpm-lock.yaml');
+    } else {
+      // node_modules/.pnpm/lock.yaml
+      // See https://github.com/pnpm/pnpm/releases/tag/v4.0.0 for more details.
+      this.internalShrinkwrapRelativePath = path.join('node_modules', '.pnpm', 'lock.yaml');
     }
   }
 }

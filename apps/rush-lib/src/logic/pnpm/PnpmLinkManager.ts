@@ -5,6 +5,7 @@ import * as os from 'os';
 import * as path from 'path';
 import uriEncode = require('strict-uri-encode');
 import pnpmLinkBins from '@pnpm/link-bins';
+import * as semver from 'semver';
 
 import {
   JsonFile,
@@ -30,6 +31,10 @@ import { PnpmProjectDependencyManifest } from './PnpmProjectDependencyManifest';
 const DEBUG: boolean = false;
 
 export class PnpmLinkManager extends BaseLinkManager {
+
+  private readonly _pnpmVersion: semver.SemVer
+    = new semver.SemVer(this._rushConfiguration.packageManagerToolVersion);
+
   protected _linkProjects(): Promise<void> {
     try {
       const rushLinkJson: IRushLinkJson = {
@@ -207,13 +212,8 @@ export class PnpmLinkManager extends BaseLinkManager {
 
     // tslint:disable-next-line:max-line-length
     // e.g.: C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules
-    const pathToLocalInstallation: string = path.join(
-      this._rushConfiguration.commonTempFolder,
-      RushConstants.nodeModulesFolderName,
-      '.local',
-      folderNameInLocalInstallationRoot,
-      RushConstants.nodeModulesFolderName
-    );
+
+    const pathToLocalInstallation: string = this.GetPathToLocalInstallation(folderNameInLocalInstallationRoot);
 
     const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined =
       pnpmShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(tempProjectDependencyKey);
@@ -276,6 +276,23 @@ export class PnpmLinkManager extends BaseLinkManager {
       .then(() => { /* empty block */ });
   }
 
+  private GetPathToLocalInstallation(folderNameInLocalInstallationRoot: string): string {
+    // See https://github.com/pnpm/pnpm/releases/tag/v4.0.0
+    if (this._pnpmVersion.major >= 4) {
+      return path.join(this._rushConfiguration.commonTempFolder,
+        RushConstants.nodeModulesFolderName,
+        '.pnpm',
+        'local',
+        folderNameInLocalInstallationRoot,
+        RushConstants.nodeModulesFolderName);
+    } else {
+      return path.join(this._rushConfiguration.commonTempFolder,
+        RushConstants.nodeModulesFolderName,
+        '.local',
+        folderNameInLocalInstallationRoot,
+        RushConstants.nodeModulesFolderName);
+    }
+  }
   private _createLocalPackageForDependency(
     pnpmProjectDependencyManifest: PnpmProjectDependencyManifest,
     project: RushConfigurationProject,
