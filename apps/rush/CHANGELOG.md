@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 10 Oct 2019 23:47:19 GMT and should not be manually modified.
+This log was last generated on Thu, 17 Oct 2019 00:41:01 GMT and should not be manually modified.
+
+## 5.16.0
+Thu, 17 Oct 2019 00:41:01 GMT
+
+### Updates
+
+- Support PNPM 4 on Rush
+- Add support for "rush add" for repos using the Yarn package manager.
 
 ## 5.15.1
 Thu, 10 Oct 2019 23:47:19 GMT
