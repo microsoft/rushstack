@@ -209,7 +209,7 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
   constructor(definition: ICommandLineChoiceDefinition) {
     super(definition);
 
-    if (definition.alternatives.length <= 1) {
+    if (definition.alternatives.length < 1) {
       throw new Error(`When defining a choice parameter, the alternatives list must contain at least one value.`);
     }
     if (definition.defaultValue && definition.alternatives.indexOf(definition.defaultValue) === -1) {
