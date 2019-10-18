@@ -2,6 +2,18 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "4.3.3",
+      "tag": "@microsoft/ts-command-line_v4.3.3",
+      "date": "Fri, 18 Oct 2019 15:15:00 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix Choice parameter error when only one alternative value is provided"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.3.2",
       "tag": "@microsoft/ts-command-line_v4.3.2",
       "date": "Sun, 29 Sep 2019 23:56:29 GMT",
