@@ -45,7 +45,7 @@ export class EslintRunner extends RushStackCompilerBase<ILintRunnerConfig> {
       {
         packagePath: ToolPaths.eslintPackagePath,
         packageJson: ToolPaths.eslintPackageJson,
-        packageBinPath: path.join('bin', 'eslint')
+        packageBinPath: path.join('bin', 'eslint.js')
       }
     );
   }
