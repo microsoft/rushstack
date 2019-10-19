@@ -439,8 +439,14 @@
       "shouldPublish": false
     },
     {
-      "packageName": "node-library-build-test",
-      "projectFolder": "build-tests/node-library-build-test",
+      "packageName": "node-library-build-eslint-test",
+      "projectFolder": "build-tests/node-library-build-eslint-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "node-library-build-tslint-test",
+      "projectFolder": "build-tests/node-library-build-tslint-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
