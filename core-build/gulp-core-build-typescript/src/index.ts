@@ -6,6 +6,10 @@ import {
   ITscCmdTaskConfig
 } from './TscCmdTask';
 import {
+  LintCmdTask,
+  ILintCmdTaskConfig
+} from './LintCmdTask';
+import {
   TslintCmdTask,
   ITslintCmdTaskConfig
 } from './TslintCmdTask';
@@ -15,7 +19,9 @@ export {
   TscCmdTask,
   ITscCmdTaskConfig,
   TslintCmdTask,
-  ITslintCmdTaskConfig
+  ITslintCmdTaskConfig,
+  LintCmdTask,
+  ILintCmdTaskConfig
 };
 
 /** @public */
@@ -23,6 +29,9 @@ export const tscCmd: TscCmdTask = new TscCmdTask();
 
 /** @public */
 export const tslintCmd: TslintCmdTask = new TslintCmdTask();
+
+/** @public */
+export const lintCmd: LintCmdTask = new LintCmdTask();
 
 /** @public */
 export const apiExtractor: ApiExtractorTask = new ApiExtractorTask();

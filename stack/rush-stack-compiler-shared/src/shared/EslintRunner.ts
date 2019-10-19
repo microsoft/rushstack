@@ -3,7 +3,6 @@
 
 import * as path from 'path';
 import { ITerminalProvider } from '@microsoft/node-core-library';
-import * as TSLint from 'tslint';
 
 import { CmdRunner } from './CmdRunner';
 import { ToolPaths } from './ToolPaths';
@@ -13,26 +12,40 @@ import {
   WriteFileIssueFunction
 } from './RushStackCompilerBase';
 
-/**
- * @public
- */
-export interface ITslintRunnerConfig extends ILintRunnerConfig { }
+interface IEslintFileOutput {
+  filePath: string;
+  messages: IEslintMessage[];
+  errorCount: number;
+  warningCount: number;
+  fixableErrorCount: number;
+  fixableWarningCount: number;
+  source: string;
+}
 
-/**
- * @beta
- */
-export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
+interface IEslintMessage {
+  ruleId: string;
+  severity: number;
+  message: string;
+  line: number;
+  column: number;
+  nodeType: string;
+  messageId: string;
+  endLine: number;
+  endColumn: number;
+}
+
+export class EslintRunner extends RushStackCompilerBase<ILintRunnerConfig> {
   private _cmdRunner: CmdRunner;
 
-  constructor(taskOptions: ITslintRunnerConfig, rootPath: string, terminalProvider: ITerminalProvider) {
+  constructor(taskOptions: ILintRunnerConfig, rootPath: string, terminalProvider: ITerminalProvider) {
     super(taskOptions, rootPath, terminalProvider);
     this._cmdRunner = new CmdRunner(
       this._standardBuildFolders,
       this._terminal,
       {
-        packagePath: ToolPaths.tslintPackagePath,
-        packageJson: ToolPaths.tslintPackageJson,
-        packageBinPath: path.join('bin', 'tslint')
+        packagePath: ToolPaths.eslintPackagePath,
+        packageJson: ToolPaths.eslintPackageJson,
+        packageBinPath: path.join('bin', 'eslint')
       }
     );
   }
@@ -40,32 +53,35 @@ export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
   public invoke(): Promise<void> {
     const args: string[] = [
       '--format', 'json',
-      '--project', this._standardBuildFolders.projectFolderPath
+      'src/**/*.{ts,tsx}'
     ];
 
     return this._cmdRunner.runCmd({
       args: args,
       onData: (data: Buffer) => {
         const dataStr: string = data.toString().trim();
-        const tslintErrorLogFn: WriteFileIssueFunction = this._taskOptions.displayAsError
+        const eslintErrorLogFn: WriteFileIssueFunction = this._taskOptions.displayAsError
           ? this._taskOptions.fileError
           : this._taskOptions.fileWarning;
 
-        // TSLint errors are logged to stdout
+        // ESLint errors are logged to stdout
         try {
-          const errors: TSLint.IRuleFailureJson[] = JSON.parse(dataStr);
-          for (const error of errors) {
-            const pathFromRoot: string = path.relative(this._standardBuildFolders.projectFolderPath, error.name);
-            tslintErrorLogFn(
-              pathFromRoot,
-              error.startPosition.line + 1,
-              error.startPosition.character + 1,
-              error.ruleName,
-              error.failure
-            );
+          const eslintOutput: IEslintFileOutput[] = JSON.parse(dataStr);
+          for (const eslintFileOutput of eslintOutput) {
+            const pathFromRoot: string = path.relative(this._standardBuildFolders.projectFolderPath,
+              eslintFileOutput.filePath);
+            for (const message of eslintFileOutput.messages) {
+              eslintErrorLogFn(
+                pathFromRoot,
+                message.line,
+                message.column,
+                message.messageId,
+                message.message
+              );
+            }
           }
         } catch (e) {
-          // If we fail to parse the JSON, it's likely TSLint encountered an error parsing the config file,
+          // If we fail to parse the JSON, it's likely ESLint encountered an error parsing the config file,
           // or it experienced an inner error. In this case, log the output as an error regardless of the
           // displayAsError value
           this._terminal.writeErrorLine(dataStr);

@@ -85,7 +85,7 @@ export class CmdRunner {
     const binaryPath: string = path.resolve(this._options.packagePath, this._options.packageBinPath);
     if (!FileSystem.exists(binaryPath)) {
       return Promise.reject(new Error(
-        `The binary is missing. This indicates that ${this._options} is not ` +
+        `The binary is missing. This indicates that ${this._options.packageBinPath} is not ` +
         'installed correctly.'
       ));
     }

@@ -12,7 +12,7 @@ import {
   IExecutable,
   setConfig
 } from '@microsoft/gulp-core-build';
-import { tscCmd, tslintCmd, apiExtractor } from '@microsoft/gulp-core-build-typescript';
+import { tscCmd, lintCmd, apiExtractor } from '@microsoft/gulp-core-build-typescript';
 import { instrument, mocha } from '@microsoft/gulp-core-build-mocha';
 
 export * from '@microsoft/gulp-core-build';
@@ -40,7 +40,7 @@ setConfig({
 
 const buildSubtask: IExecutable = serial(
   preCopy,
-  parallel(tslintCmd, tscCmd, copyStaticAssets),
+  parallel(lintCmd, tscCmd, copyStaticAssets),
   apiExtractor,
   postCopy
 );

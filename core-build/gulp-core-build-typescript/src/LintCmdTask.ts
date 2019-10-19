@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { JsonFile } from '@microsoft/node-core-library';
-import { TslintRunner as TTslintRunner } from '@microsoft/rush-stack-compiler-3.1';
+import { LintRunner as TLintRunner } from '@microsoft/rush-stack-compiler-3.1';
 
 import {
   RSCTask,
@@ -13,7 +13,7 @@ import {
 /**
  * @public
  */
-export interface ITslintCmdTaskConfig extends IRSCTaskConfig {
+export interface ILintCmdTaskConfig extends IRSCTaskConfig {
   /**
    * If true, displays warnings as errors. Defaults to false.
    */
@@ -23,10 +23,10 @@ export interface ITslintCmdTaskConfig extends IRSCTaskConfig {
 /**
  * @public
  */
-export class TslintCmdTask extends RSCTask<ITslintCmdTaskConfig> {
+export class LintCmdTask extends RSCTask<ILintCmdTaskConfig> {
   constructor() {
     super(
-      'tslint',
+      'lint',
       {
         displayAsError: false
       }
@@ -40,7 +40,7 @@ export class TslintCmdTask extends RSCTask<ITslintCmdTaskConfig> {
   public executeTask(): Promise<void> {
     this.initializeRushStackCompiler();
 
-    const tslintRunner: TTslintRunner = new this._rushStackCompiler.TslintRunner(
+    const tslintRunner: TLintRunner = new this._rushStackCompiler.LintRunner(
       {
         displayAsError: this.taskConfig.displayAsError,
 
