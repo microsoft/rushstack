@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack-compiler-2.8",
+      "comment": "Add support for ESLint+TypeScript",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-2.8",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
