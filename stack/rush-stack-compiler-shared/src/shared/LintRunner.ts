@@ -25,11 +25,25 @@ export class LintRunner extends RushStackCompilerBase<ILintRunnerConfig> {
   }
 
   public invoke(): Promise<void> {
-    const filePath: string = path.join(this._standardBuildFolders.projectFolderPath, 'tslint.json');
-    if (FileSystem.exists(filePath)) {
-      return this._tslintRunner.invoke();
-    } else {
-      return this._eslintRunner.invoke();
+    const tslintFilePath: string = path.join(this._standardBuildFolders.projectFolderPath, 'tslint.json');
+
+    let promise: Promise<void> = Promise.resolve();
+
+    if (FileSystem.exists(tslintFilePath)) {
+      promise = promise.then(() => this._tslintRunner.invoke());
     }
+
+    // ESLint supports a crazy amount of different filenames and formats for its config file.  To reduce
+    // pointless inconsistency, we only support JSON and JavaScript.  They are the most conventional formats,
+    // and have useful tradeoffs:  JSON is deterministic, whereas JavaScript enables certain workarounds
+    // for limitations of the format.
+    const eslintFilePath1: string = path.join(this._standardBuildFolders.projectFolderPath, '.eslintrc.js');
+    const eslintFilePath2: string = path.join(this._standardBuildFolders.projectFolderPath, '.eslintrc.json');
+
+    if (FileSystem.exists(eslintFilePath1) || FileSystem.exists(eslintFilePath2)) {
+      promise = promise.then(() => this._eslintRunner.invoke());
+    }
+
+    return promise;
   }
 }
