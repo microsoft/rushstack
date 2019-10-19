@@ -30,7 +30,7 @@
     "eslint-plugin-security": "~1.4.0"
   },
   "devDependencies": {
-    "eslint": "^6.0.0",
+    "eslint": "~6.5.1",
     "typescript": "~3.5.3"
   }
 }
