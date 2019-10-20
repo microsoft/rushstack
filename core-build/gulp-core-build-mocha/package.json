@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.4": "0.3.0",
+    "@rushstack/eslint-config": "0.4.0",
     "@types/glob": "5.0.30",
     "@types/gulp": "4.0.6",
     "@types/gulp-istanbul": "0.9.30",
