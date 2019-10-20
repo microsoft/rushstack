@@ -95,7 +95,7 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
       taskName,
       {
         allowBuiltinCompiler: false,
-        ...(defaultConfig as any) // tslint:disable-line:no-any (the spread operator isn't working here for some reason)
+        ...(defaultConfig as any) // eslint-disable-line @typescript-eslint/no-explicit-any (the spread operator isn't working here for some reason)
       } as TTaskConfig
     );
   }

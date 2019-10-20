@@ -64,8 +64,8 @@ let _buildConfig: IBuildConfig = {
   // gulp and rootPath are set to undefined here because they'll be defined in the initialize function below,
   //  but we don't want their types to be nullable because a task that uses StrictNullChecks should expect them
   //  to be defined without checking their values.
-  gulp: undefined as any, // tslint:disable-line:no-any
-  rootPath: undefined as any, // tslint:disable-line:no-any
+  gulp: undefined as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+  rootPath: undefined as any, // eslint-disable-line @typescript-eslint/no-explicit-any
   packageFolder,
   srcFolder: 'src',
   distFolder: path.join(packageFolder, 'dist'),
@@ -317,7 +317,7 @@ export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecuta
   }
 
   return {
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     execute: (buildConfig: IBuildConfig): Promise<any> => {
       return new Promise<void[]>((resolve, reject) => {
         const promises: Promise<void>[] = [];

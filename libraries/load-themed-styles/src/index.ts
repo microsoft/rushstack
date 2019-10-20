@@ -5,7 +5,7 @@
 
 // Declaring a global here in case that the execution environment is Node.js (without importing the
 // entire node.js d.ts for now)
-declare var global: any; // tslint:disable-line:no-any
+declare var global: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export interface IThemingInstruction {
   theme?: string;
@@ -101,7 +101,7 @@ export const enum ClearStyleOptions {
 
 // Store the theming state in __themeState__ global scope for reuse in the case of duplicate
 // load-themed-styles hosted on the page.
-const _root: any = (typeof window === 'undefined') ? global : window; // tslint:disable-line:no-any
+const _root: any = (typeof window === 'undefined') ? global : window; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 // Nonce string to inject into script tag if one provided. This is used in CSP (Content Security Policy).
 const _styleNonce: string = _root && _root.CSPSettings && _root.CSPSettings.nonce;
@@ -349,7 +349,7 @@ export function splitStyles(styles: string): ThemableArray {
   const result: ThemableArray = [];
   if (styles) {
     let pos: number = 0; // Current position in styles.
-    let tokenMatch: RegExpExecArray | null; // tslint:disable-line:no-null-keyword
+    let tokenMatch: RegExpExecArray | null; // eslint-disable-line no-restricted-syntax
     while (tokenMatch = _themeTokenRegex.exec(styles)) {
       const matchIndex: number = tokenMatch.index;
       if (matchIndex > pos) {

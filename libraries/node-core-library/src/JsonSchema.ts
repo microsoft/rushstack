@@ -222,7 +222,7 @@ export class JsonSchema {
         ]
       };
 
-      // tslint:disable-next-line:no-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (newValidator as any).setRemoteReference('http://json-schema.org/draft-04/schema',  anythingSchema);
 
       const collectedSchemas: JsonSchema[] = [];

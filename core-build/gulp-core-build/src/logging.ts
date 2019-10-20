@@ -356,7 +356,7 @@ export function logSummary(value: string): void {
  * @param args - the messages to log to the console
  * @public
  */
-export function log(...args: Array<string>): void {
+export function log(...args: string[]): void {
   const currentTime: Date = new Date();
   const timestamp: string = colors.gray(
     [padTimePart(currentTime.getHours()),
@@ -500,7 +500,7 @@ export function addSuppression(suppression: string | RegExp): void {
  * @param message - the warning description
  * @public
  */
-export function warn(...args: Array<string>): void {
+export function warn(...args: string[]): void {
   args.splice(0, 0, 'Warning -');
 
   const stringMessage: string = normalizeMessage(args.join(' '));
@@ -516,7 +516,7 @@ export function warn(...args: Array<string>): void {
  * @param message - the error description
  * @public
  */
-export function error(...args: Array<string>): void {
+export function error(...args: string[]): void {
   args.splice(0, 0, 'Error -');
 
   const stringMessage: string = normalizeMessage(args.join(' '));
@@ -602,7 +602,7 @@ export function fileError(
  * @param args - the messages to log when in verbose mode
  * @public
  */
-export function verbose(...args: Array<string>): void {
+export function verbose(...args: string[]): void {
 
   if (getFlagValue('verbose')) {
     log.apply(undefined, args);

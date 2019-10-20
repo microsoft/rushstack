@@ -67,7 +67,7 @@ export interface ApiTypeParameterListMixin extends ApiItem {
  * @public
  */
 export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiTypeParameterListMixin) { // tslint:disable-line:no-any
+  TBaseClass & (new (...args: any[]) => ApiTypeParameterListMixin) { // eslint-disable-line @typescript-eslint/no-explicit-any
 
   abstract class MixedClass extends baseClass implements ApiTypeParameterListMixin {
     public readonly [_typeParameters]: TypeParameter[];
@@ -81,7 +81,7 @@ export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor
       options.typeParameters = jsonObject.typeParameters || [];
     }
 
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(...args: any[]) {
       super(...args);
 

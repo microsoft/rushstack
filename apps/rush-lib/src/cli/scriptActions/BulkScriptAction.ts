@@ -249,7 +249,7 @@ export class BulkScriptAction extends BaseScriptAction {
         case CommandLineParameterKind.Choice:
         case CommandLineParameterKind.String:
         case CommandLineParameterKind.Integer:
-          // tslint:disable-next-line:no-any
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           extraData[customParameter.longName] = JSON.stringify((customParameter as any).value);
           break;
         default:

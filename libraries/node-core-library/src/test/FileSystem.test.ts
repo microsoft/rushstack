@@ -5,7 +5,7 @@ import { FileSystem } from '../FileSystem';
 import { PosixModeBits } from '../PosixModeBits';
 
 // The PosixModeBits are intended to be used with bitwise operations.
-// tslint:disable:no-bitwise
+/* eslint-disable no-bitwise */
 
 test('PosixModeBits tests', () => {
   let modeBits: number = PosixModeBits.AllRead | PosixModeBits.AllWrite;

@@ -142,6 +142,10 @@ export function getProcessStartTime(pid: number): string | undefined {
 export class LockFile {
   private static _getStartTime: (pid: number) => string | undefined = getProcessStartTime;
 
+  private _fileWriter: FileWriter | undefined;
+  private _filePath: string;
+  private _dirtyWhenAcquired: boolean;
+
   /**
    * Returns the path to the lockfile, should it be created successfully.
    */
@@ -411,9 +415,9 @@ export class LockFile {
     return this._fileWriter === undefined;
   }
 
-  private constructor(
-    private _fileWriter: FileWriter | undefined,
-    private _filePath: string,
-    private _dirtyWhenAcquired: boolean) {
+  private constructor(_fileWriter: FileWriter | undefined, _filePath: string, _dirtyWhenAcquired: boolean) {
+    this._fileWriter = _fileWriter;
+    this._filePath = _filePath;
+    this._dirtyWhenAcquired = _dirtyWhenAcquired;
   }
 }

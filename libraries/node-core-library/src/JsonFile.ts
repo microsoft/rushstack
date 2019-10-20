@@ -61,7 +61,7 @@ export class JsonFile {
   /**
    * Loads a JSON file.
    */
-  public static load(jsonFilename: string): any { // tslint:disable-line:no-any
+  public static load(jsonFilename: string): any { // eslint-disable-line @typescript-eslint/no-explicit-any
     if (!FileSystem.exists(jsonFilename)) {
       throw new Error(`Input file not found: ${jsonFilename}`);
     }
@@ -78,9 +78,9 @@ export class JsonFile {
    * Loads a JSON file and validate its schema.
    */
   public static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema,
-    options?: IJsonSchemaValidateOptions): any { // tslint:disable-line:no-any
+    options?: IJsonSchemaValidateOptions): any { // eslint-disable-line @typescript-eslint/no-explicit-any
 
-    const jsonObject: any = JsonFile.load(jsonFilename); // tslint:disable-line:no-any
+    const jsonObject: any = JsonFile.load(jsonFilename); // eslint-disable-line @typescript-eslint/no-explicit-any
     jsonSchema.validateObject(jsonObject, jsonFilename, options);
 
     return jsonObject;
@@ -92,9 +92,9 @@ export class JsonFile {
    * See JsonSchema.validateObjectWithCallback() for more info.
    */
   public static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema,
-    errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): any { // tslint:disable-line:no-any
+    errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): any { // eslint-disable-line @typescript-eslint/no-explicit-any
 
-    const jsonObject: any = JsonFile.load(jsonFilename); // tslint:disable-line:no-any
+    const jsonObject: any = JsonFile.load(jsonFilename); // eslint-disable-line @typescript-eslint/no-explicit-any
     jsonSchema.validateObjectWithCallback(jsonObject, errorCallback);
 
     return jsonObject;
@@ -219,7 +219,7 @@ export class JsonFile {
    * Used to validate a data structure before writing.  Reports an error if there
    * are any undefined members.
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static validateNoUndefinedMembers(jsonObject: Object): void {
     return JsonFile._validateNoUndefinedMembers(jsonObject, []);
   }
@@ -233,7 +233,7 @@ export class JsonFile {
       for (const key of Object.keys(jsonObject)) {
         keyPath.push(key);
 
-        // tslint:disable-next-line:no-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const value: any = jsonObject[key];
         if (value === undefined) {
           const fullPath: string = JsonFile._formatKeyPath(keyPath);

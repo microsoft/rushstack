@@ -9,7 +9,7 @@ class ExampleApi {
   public setCount: number = 0;
   private _studentAgesByName: ProtectableMap<string, number>;
 
-  constructor() {
+  public constructor() {
     this._studentAgesByName = new ProtectableMap({
       onClear: (source: ProtectableMap<string, number>) => {
         ++this.clearedCount;

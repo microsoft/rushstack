@@ -111,7 +111,7 @@ export class AddAction extends BaseRushAction {
 
     let version: string | undefined = undefined;
     let packageName: string | undefined = this._packageName.value!;
-    const parts: Array<string> = packageName.split('@');
+    const parts: string[] = packageName.split('@');
 
     if (parts[0] === '') {
       // this is a scoped package

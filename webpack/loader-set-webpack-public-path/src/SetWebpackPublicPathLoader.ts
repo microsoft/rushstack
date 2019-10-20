@@ -41,7 +41,7 @@ export class SetWebpackPublicPathLoader {
     return getSetPublicPathCode(options, self.emitWarning);
   }
 
-  private static getOptions(context: any): IInternalOptions { // tslint:disable-line:no-any
+  private static getOptions(context: any): IInternalOptions { // eslint-disable-line @typescript-eslint/no-explicit-any
     const queryOptions: ISetWebpackPublicPathLoaderOptions = loaderUtils.getOptions(context);
 
     const options: ISetWebpackPublicPathLoaderOptions & IInternalOptions =

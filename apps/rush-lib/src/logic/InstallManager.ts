@@ -45,7 +45,7 @@ import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
 
 // The PosixModeBits are intended to be used with bitwise operations.
-// tslint:disable:no-bitwise
+/* eslint-disable no-bitwise */
 
 const MAX_INSTALL_ATTEMPTS: number = 2;
 
@@ -275,7 +275,7 @@ export class InstallManager {
     const hookDestination: string | undefined = Git.getHooksFolder();
 
     if (FileSystem.exists(hookSource) && hookDestination) {
-      const hookFilenames: Array<string> = FileSystem.readFolder(hookSource);
+      const hookFilenames: string[] = FileSystem.readFolder(hookSource);
       if (hookFilenames.length > 0) {
         console.log(os.EOL + colors.bold('Found files in the "common/git-hooks" folder.'));
 
@@ -336,7 +336,7 @@ export class InstallManager {
     // This will be used by bulk scripts to determine the correct Shrinkwrap file to track.
     const currentVariantJsonFilename: string = this._rushConfiguration.currentVariantJsonFilename;
     const currentVariantJson: ICurrentVariantJson = {
-      variant: options.variant || null // tslint:disable-line:no-null-keyword
+      variant: options.variant || null // eslint-disable-line no-restricted-syntax
     };
 
     // Determine if the variant is already current by updating current-variant.json.

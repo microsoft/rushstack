@@ -132,7 +132,7 @@ function getPackageMetadata(testPackageName: string): { packageFolder: string, p
   return { packageFolder, packageJson };
 }
 
-// tslint:disable-next-line:no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function firstArgument(mockFn: jest.Mock): any {
   return mockFn.mock.calls[0][0];
 }

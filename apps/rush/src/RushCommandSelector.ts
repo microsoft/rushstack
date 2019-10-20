@@ -22,7 +22,7 @@ export class RushCommandSelector {
     }
   }
 
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static execute(launcherVersion: string, selectedRushLib: any, options: rushLib.ILaunchOptions): void {
     const Rush: typeof rushLib.Rush = selectedRushLib.Rush;
 

@@ -85,7 +85,7 @@ export class PackageJsonLookup {
       + ` ${errorPath}`);
   }
 
-  constructor(parameters?: IPackageJsonLookupParameters) {
+  public constructor(parameters?: IPackageJsonLookupParameters) {
     if (parameters) {
       if (parameters.loadExtraFields) {
         this._loadExtraFields = parameters.loadExtraFields;

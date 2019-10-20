@@ -101,7 +101,7 @@ export interface ApiItemContainerMixin extends ApiItem {
  * @public
  */
 export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiItemContainerMixin) { // tslint:disable-line:no-any
+  TBaseClass & (new (...args: any[]) => ApiItemContainerMixin) { // eslint-disable-line @typescript-eslint/no-explicit-any
 
   abstract class MixedClass extends baseClass implements ApiItemContainerMixin {
     public readonly [_members]: ApiItem[];
@@ -128,7 +128,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
       }
     }
 
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(...args: any[]) {
       super(...args);
       const options: IApiItemContainerMixinOptions = args[0] as IApiItemContainerMixinOptions;

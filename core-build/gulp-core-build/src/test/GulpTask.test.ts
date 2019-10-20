@@ -37,7 +37,7 @@ class StreamTask extends GulpTask<IConfig> {
     super('stream', {});
   }
 
-  public executeTask(gulp: typeof Gulp): any { // tslint:disable-line:no-any
+  public executeTask(gulp: typeof Gulp): any { // eslint-disable-line @typescript-eslint/no-explicit-any
     const stream: Readable = new Readable({ objectMode: true });
 
     // Add no opt function to make it compat with through
@@ -186,7 +186,7 @@ describe('GulpTask', () => {
   it(`throws validation error is config does not conform to schema file`, (done) => {
     const schemaTask: SchemaTask = new SchemaTask();
 
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (schemaTask as any)._getConfigFilePath = (): string => {
       return path.join(__dirname, 'other-schema-task.config.json');
     };

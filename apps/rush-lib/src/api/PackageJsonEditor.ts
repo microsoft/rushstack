@@ -210,7 +210,7 @@ export class PackageJsonEditor {
     delete this._data.peerDependencies;
     delete this._data.devDependencies;
 
-    const keys: Array<string> = [...this._dependencies.keys()].sort();
+    const keys: string[] = [...this._dependencies.keys()].sort();
 
     for (const packageName of keys) {
       const dependency: PackageJsonDependency = this._dependencies.get(packageName)!;
@@ -237,7 +237,7 @@ export class PackageJsonEditor {
       }
     }
 
-    const devDependenciesKeys: Array<string> = [...this._devDependencies.keys()].sort();
+    const devDependenciesKeys: string[] = [...this._devDependencies.keys()].sort();
 
     for (const packageName of devDependenciesKeys) {
       const dependency: PackageJsonDependency = this._devDependencies.get(packageName)!;

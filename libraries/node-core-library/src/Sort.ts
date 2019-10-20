@@ -24,7 +24,7 @@ export class Sort {
    * array.sort(Sort.compareByValue);  // [2, 3, 6]
    * ```
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static compareByValue(x: any, y: any): number {
     if (x === y) {
       return 0;
@@ -39,10 +39,10 @@ export class Sort {
     }
 
     // Null is smaller than anything except undefined
-    if (x === null) { // tslint:disable-line:no-null-keyword
+    if (x === null) { // eslint-disable-line no-restricted-syntax
       return -1;
     }
-    if (y === null) { // tslint:disable-line:no-null-keyword
+    if (y === null) { // eslint-disable-line no-restricted-syntax
       return 1;
     }
 
@@ -68,7 +68,7 @@ export class Sort {
    * Sort.sortBy(array, x => x.length);  // [ 'c', 'bb', 'aaa' ]
    * ```
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static sortBy<T>(array: T[], keySelector: (element: T) => any, comparer: (x: any, y: any) => number
     = Sort.compareByValue): void {
     array.sort((x, y) => comparer(keySelector(x), keySelector(y)));
@@ -77,7 +77,7 @@ export class Sort {
   /**
    * Returns true if the array is already sorted.
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static isSorted<T>(array: T[], comparer: (x: any, y: any) => number = Sort.compareByValue): boolean {
     let previous: T | undefined = undefined;
     for (const element of array) {
@@ -99,7 +99,7 @@ export class Sort {
    * Sort.isSortedBy(array, x => x.length); // true
    * ```
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static isSortedBy<T>(array: T[], keySelector: (element: T) => any, comparer: (x: any, y: any) => number
     = Sort.compareByValue): boolean {
 
@@ -128,7 +128,7 @@ export class Sort {
    * console.log(JSON.stringify(Array.from(map.keys()))); // ["aardvark","goose","zebra"]
    * ```
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static sortMapKeys<K, V>(map: Map<K, V>, keyComparer: (x: K, y: K) => number = Sort.compareByValue): void {
     const pairs: [K, V][] = Array.from(map.entries());
 
@@ -158,7 +158,7 @@ export class Sort {
    * console.log(Array.from(set)); // ['c', 'bb', 'aaa']
    * ```
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static sortSetBy<T>(set: Set<T>, keySelector: (element: T) => any,
     keyComparer: (x: T, y: T) => number = Sort.compareByValue): void {
 
@@ -191,7 +191,7 @@ export class Sort {
    * console.log(Array.from(set)); // ['aardvark', 'goose', 'zebra']
    * ```
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static sortSet<T>(set: Set<T>, comparer: (x: T, y: T) => number = Sort.compareByValue): void {
     const array: T[] = Array.from(set);
 

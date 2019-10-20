@@ -60,7 +60,7 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
         suppressWarnings: [],
         printStats: true,
         ...(extendedConfig as Object)
-      } as any // tslint:disable-line:no-any
+      } as any // eslint-disable-line @typescript-eslint/no-explicit-any
     );
   }
 
@@ -77,7 +77,7 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
   public isEnabled(buildConfig: IBuildConfig): boolean {
     return (
       super.isEnabled(buildConfig) &&
-      this.taskConfig.configPath !== null // tslint:disable-line:no-null-keyword
+      this.taskConfig.configPath !== null // eslint-disable-line no-restricted-syntax
     );
   }
 

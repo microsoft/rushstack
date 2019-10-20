@@ -14,7 +14,7 @@ export class ProtectableMapView<K, V> extends Map<K, V> {
   private readonly _owner: ProtectableMap<K, V>;
   private readonly _parameters: IProtectableMapParameters<K, V>;
 
-  constructor(owner: ProtectableMap<K, V>, parameters: IProtectableMapParameters<K, V>) {
+  public constructor(owner: ProtectableMap<K, V>, parameters: IProtectableMapParameters<K, V>) {
     super();
 
     this._owner = owner;

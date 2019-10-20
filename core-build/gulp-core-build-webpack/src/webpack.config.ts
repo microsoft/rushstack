@@ -40,7 +40,7 @@ const webpackConfiguration: Webpack.Configuration = {
       amd: 'react-dom',
       commonjs: 'react-dom'
     }
-  } as any, // tslint:disable-line:no-any
+  } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
 
   plugins: [
     // new WebpackNotifierPlugin()

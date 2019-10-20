@@ -38,7 +38,7 @@ export class InternalError extends Error {
    * {@link InternalError.unformattedMessage}.  The `Error.message` field will have additional boilerplate
    * explaining that the user has encountered a software defect.
    */
-  constructor(message: string) {
+  public constructor(message: string) {
     super(InternalError._formatMessage(message));
 
     // Manually set the prototype, as we can no longer extend built-in classes like Error, Array, Map, etc.
@@ -46,12 +46,13 @@ export class InternalError extends Error {
     // https://github.com/microsoft/TypeScript-wiki/blob/master/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
     //
     // Note: the prototype must also be set on any classes which extend this one
-    (this as any).__proto__ = InternalError.prototype; // tslint:disable-line:no-any
+    (this as any).__proto__ = InternalError.prototype; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     this.unformattedMessage = message;
 
     if (InternalError.breakInDebugger) {
-      debugger; // tslint:disable-line:no-debugger
+      // eslint-disable-next-line no-debugger
+      debugger;
     }
   }
 

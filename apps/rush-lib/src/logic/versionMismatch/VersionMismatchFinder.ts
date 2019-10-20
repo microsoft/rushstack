@@ -119,11 +119,11 @@ export class VersionMismatchFinder {
     return this._mismatches.size;
   }
 
-  public getMismatches(): Array<string> {
+  public getMismatches(): string[] {
     return this._getKeys(this._mismatches);
   }
 
-  public getVersionsOfMismatch(mismatch: string): Array<string> | undefined {
+  public getVersionsOfMismatch(mismatch: string): string[] | undefined {
     return this._mismatches.has(mismatch)
       ? this._getKeys(this._mismatches.get(mismatch))
       : undefined;
@@ -206,11 +206,11 @@ export class VersionMismatchFinder {
     return Boolean(allowedAlternatives && allowedAlternatives.indexOf(version) > -1);
   }
 
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _getKeys(iterable: Map<string, any> | undefined): string[] {
     const keys: string[] = [];
     if (iterable) {
-      // tslint:disable-next-line:no-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       iterable.forEach((value: any, key: string) => {
         keys.push(key);
       });

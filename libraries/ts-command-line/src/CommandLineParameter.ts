@@ -103,7 +103,7 @@ export abstract class CommandLineParameter {
    * Called internally by CommandLineParameterProvider._processParsedData()
    * @internal
    */
-  public abstract _setValue(data: any): void; // tslint:disable-line:no-any
+  public abstract _setValue(data: any): void; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   /**
    * Returns additional text used by the help formatter.
@@ -139,7 +139,7 @@ export abstract class CommandLineParameter {
   /**
    * Internal usage only.  Used to report unexpected output from the argparse library.
    */
-  protected reportInvalidData(data: any): never { // tslint:disable-line:no-any
+  protected reportInvalidData(data: any): never { // eslint-disable-line @typescript-eslint/no-explicit-any
     throw new Error(`Unexpected data object for parameter "${this.longName}": `
       + JSON.stringify(data));
   }
@@ -231,7 +231,7 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
    * {@inheritDoc CommandLineParameter._setValue}
    * @internal
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public _setValue(data: any): void { // abstract
     if (data !== null && data !== undefined) {
       if (typeof data !== 'string') {
@@ -315,7 +315,7 @@ export class CommandLineFlagParameter extends CommandLineParameter {
    * {@inheritDoc CommandLineParameter._setValue}
    * @internal
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public _setValue(data: any): void { // abstract
     if (data !== null && data !== undefined) {
       if (typeof data !== 'boolean') {
@@ -386,7 +386,7 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
    * {@inheritDoc CommandLineParameter._setValue}
    * @internal
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public _setValue(data: any): void { // abstract
     if (data !== null && data !== undefined) {
       if (typeof data !== 'number') {
@@ -476,7 +476,7 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
    * {@inheritDoc CommandLineParameter._setValue}
    * @internal
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public _setValue(data: any): void { // abstract
     if (data !== null && data !== undefined) {
       if (typeof data !== 'string') {
@@ -560,7 +560,7 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
    * {@inheritDoc CommandLineParameter._setValue}
    * @internal
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public _setValue(data: any): void { // abstract
     if (data !== null && data !== undefined) {
       if (!Array.isArray(data)) {
