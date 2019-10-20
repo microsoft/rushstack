@@ -73,7 +73,7 @@ export class Tokenizer {
     return c === ' ' || c === '\t';
   }
 
-  constructor(input: TextRange | string) {
+  public constructor(input: TextRange | string) {
     if (typeof(input) === 'string') {
       this.input = TextRange.fromString(input);
     } else {

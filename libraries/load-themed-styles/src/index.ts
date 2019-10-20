@@ -5,7 +5,7 @@
 
 // Declaring a global here in case that the execution environment is Node.js (without importing the
 // entire node.js d.ts for now)
-declare var global: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+declare let global: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export interface IThemingInstruction {
   theme?: string;
@@ -13,7 +13,7 @@ export interface IThemingInstruction {
   rawString?: string;
 }
 
-export type ThemableArray = Array<IThemingInstruction>;
+export type ThemableArray = IThemingInstruction[];
 
 export interface ITheme {
   [key: string]: string;
@@ -350,7 +350,7 @@ export function splitStyles(styles: string): ThemableArray {
   if (styles) {
     let pos: number = 0; // Current position in styles.
     let tokenMatch: RegExpExecArray | null; // eslint-disable-line no-restricted-syntax
-    while (tokenMatch = _themeTokenRegex.exec(styles)) {
+    while (tokenMatch = _themeTokenRegex.exec(styles)) { // eslint-disable-line no-cond-assign
       const matchIndex: number = tokenMatch.index;
       if (matchIndex > pos) {
         result.push({

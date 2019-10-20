@@ -69,7 +69,7 @@ export class Parser {
   private _parseCompoundWord(): AstCompoundWord | undefined {
     const compoundWord: AstCompoundWord = new AstCompoundWord();
 
-    while (true) {
+    for (;;) {
       const node: AstNode | undefined = this._parseText();
       if (!node) {
         break;
