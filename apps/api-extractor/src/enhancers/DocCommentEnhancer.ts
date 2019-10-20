@@ -16,7 +16,7 @@ import { ResolverFailure } from '../analyzer/AstReferenceResolver';
 export class DocCommentEnhancer {
   private readonly _collector: Collector;
 
-  constructor(collector: Collector) {
+  public constructor(collector: Collector) {
     this._collector = collector;
   }
 

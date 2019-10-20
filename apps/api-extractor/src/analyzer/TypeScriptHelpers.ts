@@ -21,7 +21,7 @@ export class TypeScriptHelpers {
    */
   public static followAliases(symbol: ts.Symbol, typeChecker: ts.TypeChecker): ts.Symbol {
     let current: ts.Symbol = symbol;
-    while (true) { // tslint:disable-line:no-constant-condition
+    for (;;) {
       if (!(current.flags & ts.SymbolFlags.Alias)) {
         break;
       }
@@ -84,7 +84,7 @@ export class TypeScriptHelpers {
       // is acting as a module or not).
       const sourceFile: ts.SourceFile = firstDeclaration.getSourceFile();
 
-      if (!!typeChecker.getSymbolAtLocation(sourceFile)) {
+      if (typeChecker.getSymbolAtLocation(sourceFile)) {
         return false;
       }
     }
@@ -199,7 +199,7 @@ export class TypeScriptHelpers {
     let current: ts.Node | undefined = node;
     let highest: T | undefined = undefined;
 
-    while (true) { // tslint:disable-line:no-constant-condition
+    for (;;) {
       current = TypeScriptHelpers.findFirstParent<T>(current, kindToMatch);
       if (!current) {
         break;

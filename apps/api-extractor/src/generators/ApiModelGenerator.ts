@@ -265,7 +265,7 @@ export class ApiModelGenerator {
   private _processApiClass(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
 
-    const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
+    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
     const containerKey: string = ApiClass.getContainerKey(name);
 
     let apiClass: ApiClass | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiClass;
@@ -371,7 +371,7 @@ export class ApiModelGenerator {
   private _processApiEnum(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
 
-    const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
+    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
     const containerKey: string = ApiEnum.getContainerKey(name);
 
     let apiEnum: ApiEnum | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiEnum;
@@ -396,7 +396,7 @@ export class ApiModelGenerator {
   private _processApiEnumMember(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
 
-    const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
+    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
     const containerKey: string = ApiEnumMember.getContainerKey(name);
 
     let apiEnumMember: ApiEnumMember | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiEnumMember;
@@ -433,7 +433,7 @@ export class ApiModelGenerator {
   private _processApiFunction(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
 
-    const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
+    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
 
     const overloadIndex: number = this._getOverloadIndex(astDeclaration);
     const containerKey: string = ApiFunction.getContainerKey(name, overloadIndex);
@@ -526,7 +526,7 @@ export class ApiModelGenerator {
   private _processApiInterface(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
 
-    const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
+    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
     const containerKey: string = ApiInterface.getContainerKey(name);
 
     let apiInterface: ApiInterface | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiInterface;
@@ -579,7 +579,7 @@ export class ApiModelGenerator {
   private _processApiMethod(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
 
-    const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
+    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
 
     const isStatic: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Static) !== 0;
     const overloadIndex: number = this._getOverloadIndex(astDeclaration);
@@ -631,7 +631,7 @@ export class ApiModelGenerator {
   private _processApiMethodSignature(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
 
-    const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
+    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
 
     const overloadIndex: number = this._getOverloadIndex(astDeclaration);
     const containerKey: string = ApiMethodSignature.getContainerKey(name, overloadIndex);
@@ -679,7 +679,7 @@ export class ApiModelGenerator {
   private _processApiNamespace(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
 
-    const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
+    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
     const containerKey: string = ApiNamespace.getContainerKey(name);
 
     let apiNamespace: ApiNamespace | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiNamespace;
@@ -704,7 +704,7 @@ export class ApiModelGenerator {
   private _processApiProperty(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
 
-    const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
+    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
 
     const isStatic: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Static) !== 0;
 
@@ -741,7 +741,7 @@ export class ApiModelGenerator {
   private _processApiPropertySignature(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
 
-    const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
+    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
     const containerKey: string = ApiPropertySignature.getContainerKey(name);
 
     let apiPropertySignature: ApiPropertySignature | undefined
@@ -782,7 +782,7 @@ export class ApiModelGenerator {
   private _processApiTypeAlias(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
 
-    const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
+    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
 
     const containerKey: string = ApiTypeAlias.getContainerKey(name);
 
@@ -825,7 +825,7 @@ export class ApiModelGenerator {
   private _processApiVariable(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
 
-    const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
+    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
 
     const containerKey: string = ApiVariable.getContainerKey(name);
 

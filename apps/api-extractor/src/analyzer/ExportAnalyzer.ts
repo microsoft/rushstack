@@ -333,7 +333,7 @@ export class ExportAnalyzer {
     if (referringModuleIsExternal) {
       current = TypeScriptHelpers.followAliases(symbol, this._typeChecker);
     } else {
-      while (true) { // tslint:disable-line:no-constant-condition
+      for (; ;) {
         // Is this symbol an import/export that we need to follow to find the real declaration?
         for (const declaration of current.declarations || []) {
 
@@ -348,7 +348,7 @@ export class ExportAnalyzer {
           }
         }
 
-        if (!(current.flags & ts.SymbolFlags.Alias)) { // tslint:disable-line:no-bitwise
+        if (!(current.flags & ts.SymbolFlags.Alias)) { // eslint-disable-line no-bitwise
           break;
         }
 

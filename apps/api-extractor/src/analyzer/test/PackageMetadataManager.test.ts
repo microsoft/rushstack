@@ -3,7 +3,7 @@ import * as path from 'path';
 import { PackageMetadataManager } from '../PackageMetadataManager';
 import { FileSystem, PackageJsonLookup, INodePackageJson } from '@microsoft/node-core-library';
 
-/* tslint:disable:typedef */
+/* eslint-disable @typescript-eslint/typedef */
 
 describe('PackageMetadataManager', () => {
   describe('.writeTsdocMetadataFile()', () => {
@@ -115,7 +115,7 @@ describe('PackageMetadataManager', () => {
   });
 });
 
-/* tslint:enable:typedef */
+/* eslint-enable @typescript-eslint/typedef */
 
 const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 

@@ -22,7 +22,7 @@ export class DeclarationReferenceGenerator {
   private _program: ts.Program;
   private _typeChecker: ts.TypeChecker;
 
-  constructor(packageJsonLookup: PackageJsonLookup, workingPackageName: string, program: ts.Program,
+  public constructor(packageJsonLookup: PackageJsonLookup, workingPackageName: string, program: ts.Program,
     typeChecker: ts.TypeChecker) {
 
     this._packageJsonLookup = packageJsonLookup;
