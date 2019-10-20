@@ -17,7 +17,7 @@ export class LintRunner extends RushStackCompilerBase<ILintRunnerConfig> {
   private _eslintRunner: EslintRunner;
   private _tslintRunner: TslintRunner;
 
-  constructor(taskOptions: ILintRunnerConfig, rootPath: string, terminalProvider: ITerminalProvider) {
+  public constructor(taskOptions: ILintRunnerConfig, rootPath: string, terminalProvider: ITerminalProvider) {
     super(taskOptions, rootPath, terminalProvider);
 
     this._eslintRunner = new EslintRunner(taskOptions, rootPath, terminalProvider);

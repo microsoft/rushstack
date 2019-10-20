@@ -7,7 +7,7 @@ import { BasicTasks } from '../logic/BasicTasks';
 import { BuildContext } from '../logic/BuildContext';
 
 export class CleanAction extends CommandLineAction {
-  constructor(parser: RushStackCommandLine) {
+  public constructor(parser: RushStackCommandLine) {
     super({
       actionName: 'clean',
       summary: 'Delete all the intermediary files created during a build',

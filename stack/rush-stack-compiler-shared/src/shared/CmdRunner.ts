@@ -55,7 +55,7 @@ export class CmdRunner {
   private _options: IBaseTaskOptions;
   private _errorHasBeenLogged: boolean;
 
-  constructor(
+  public constructor(
     constants: StandardBuildFolders,
     terminal: Terminal,
     options: IBaseTaskOptions

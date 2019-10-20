@@ -60,7 +60,7 @@ interface IEslintMessage {
 export class EslintRunner extends RushStackCompilerBase<ILintRunnerConfig> {
   private _cmdRunner: CmdRunner;
 
-  constructor(taskOptions: ILintRunnerConfig, rootPath: string, terminalProvider: ITerminalProvider) {
+  public constructor(taskOptions: ILintRunnerConfig, rootPath: string, terminalProvider: ITerminalProvider) {
     super(taskOptions, rootPath, terminalProvider);
     this._cmdRunner = new CmdRunner(
       this._standardBuildFolders,
