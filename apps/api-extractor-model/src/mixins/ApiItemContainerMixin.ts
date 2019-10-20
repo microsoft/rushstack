@@ -3,7 +3,7 @@
 
 import {
   ApiItem,
-  ApiItem_onParentChanged,
+  apiItem_onParentChanged,
   IApiItemJson,
   IApiItemOptions,
   IApiItemConstructor,
@@ -51,7 +51,7 @@ const _membersByKind: unique symbol = Symbol('ApiItemContainerMixin._membersByKi
  *
  * @public
  */
-// tslint:disable-next-line:interface-name
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface ApiItemContainerMixin extends ApiItem {
   /**
    * Returns the members of this container, sorted alphabetically.
@@ -129,7 +129,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    constructor(...args: any[]) {
+    public constructor(...args: any[]) {
       super(...args);
       const options: IApiItemContainerMixinOptions = args[0] as IApiItemContainerMixinOptions;
 
@@ -168,7 +168,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
       this[_membersSorted] = false;
       this[_membersByContainerKey].set(member.containerKey, member);
 
-      member[ApiItem_onParentChanged](this);
+      member[apiItem_onParentChanged](this);
     }
 
     public tryGetMemberByKey(containerKey: string): ApiItem | undefined {

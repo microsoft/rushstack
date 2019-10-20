@@ -35,7 +35,7 @@ const _releaseTag: unique symbol = Symbol('ApiReleaseTagMixin._releaseTag');
  *
  * @public
  */
-// tslint:disable-next-line:interface-name
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface ApiReleaseTagMixin extends ApiItem {
   /**
    * The effective release tag for this declaration.  If it is not explicitly specified, the value may be
@@ -79,7 +79,7 @@ export function ApiReleaseTagMixin<TBaseClass extends IApiItemConstructor>(baseC
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    constructor(...args: any[]) {
+    public constructor(...args: any[]) {
       super(...args);
 
       const options: IApiReleaseTagMixinOptions = args[0];

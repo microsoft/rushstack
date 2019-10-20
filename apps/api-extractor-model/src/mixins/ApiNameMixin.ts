@@ -34,7 +34,7 @@ const _name: unique symbol = Symbol('ApiNameMixin._name');
  *
  * @public
  */
-// tslint:disable-next-line:interface-name
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface ApiNameMixin extends ApiItem {
   /**
    * The exported name of this API item.
@@ -72,7 +72,7 @@ export function ApiNameMixin<TBaseClass extends IApiItemConstructor>(baseClass: 
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    constructor(...args: any[]) {
+    public constructor(...args: any[]) {
       super(...args);
 
       const options: IApiNameMixinOptions = args[0];

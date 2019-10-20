@@ -47,7 +47,7 @@ const _typeParameters: unique symbol = Symbol('ApiTypeParameterListMixin._typePa
  *
  * @public
  */
-// tslint:disable-next-line:interface-name
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface ApiTypeParameterListMixin extends ApiItem {
   /**
    * The type parameters.
@@ -82,7 +82,7 @@ export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    constructor(...args: any[]) {
+    public constructor(...args: any[]) {
       super(...args);
 
       const options: IApiTypeParameterListMixinOptions = args[0];

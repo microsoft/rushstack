@@ -49,7 +49,7 @@ const _parameters: unique symbol = Symbol('ApiParameterListMixin._parameters');
  *
  * @public
  */
-// tslint:disable-next-line:interface-name
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface ApiParameterListMixin extends ApiItem {
   /**
    * When a function has multiple overloaded declarations, this zero-based integer index can be used to unqiuely
@@ -114,7 +114,7 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(ba
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    constructor(...args: any[]) {
+    public constructor(...args: any[]) {
       super(...args);
 
       const options: IApiParameterListMixinOptions = args[0];

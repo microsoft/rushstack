@@ -52,8 +52,7 @@ export interface IApiItemJson {
 
 // PRIVATE - Allows ApiItemContainerMixin to assign the parent.
 //
-// tslint:disable-next-line:variable-name
-export const ApiItem_onParentChanged: unique symbol = Symbol('ApiItem._onAddToContainer');
+export const apiItem_onParentChanged: unique symbol = Symbol('ApiItem._onAddToContainer');
 
 /**
  * The abstract base class for all members of an `ApiModel` object.
@@ -70,6 +69,7 @@ export class ApiItem {
   public static deserialize(jsonObject: IApiItemJson, context: DeserializerContext): ApiItem {
     // The Deserializer class is coupled with a ton of other classes, so  we delay loading it
     // to avoid ES5 circular imports.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const deserializerModule: typeof import('../model/Deserializer') = require('../model/Deserializer');
     return deserializerModule.Deserializer.deserialize(context, jsonObject);
   }
@@ -268,7 +268,7 @@ export class ApiItem {
    *
    * @internal
    */
-  public [ApiItem_onParentChanged](parent: ApiItem | undefined): void {
+  public [apiItem_onParentChanged](parent: ApiItem | undefined): void {
     this._parent = parent;
     this._canonicalReference = undefined;
   }

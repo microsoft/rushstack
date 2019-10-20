@@ -33,7 +33,7 @@ const _isStatic: unique symbol = Symbol('ApiStaticMixin._isStatic');
  *
  * @public
  */
-// tslint:disable-next-line:interface-name
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface ApiStaticMixin extends ApiItem {
   /**
    * Whether the declaration has the TypeScript `static` keyword.
@@ -68,7 +68,7 @@ export function ApiStaticMixin<TBaseClass extends IApiItemConstructor>(baseClass
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    constructor(...args: any[]) {
+    public constructor(...args: any[]) {
       super(...args);
 
       const options: IApiStaticMixinOptions = args[0];
