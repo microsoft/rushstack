@@ -6,6 +6,7 @@
 import { GulpTask } from '@microsoft/gulp-core-build';
 import { FileSystem } from '@microsoft/node-core-library';
 import * as forgeType from 'node-forge';
+// eslint-disable-next-line
 const forge: typeof forgeType & IForgeExtensions = require('node-forge');
 import * as path from 'path';
 import * as child_process from 'child_process';
@@ -83,7 +84,7 @@ function _ensureCertUtilExePath(parentTask: GulpTask<{}>): string {
     const where: child_process.SpawnSyncReturns<string> = child_process.spawnSync('where', ['certutil']);
 
     const whereErr: string = where.stderr.toString();
-    if (!!whereErr) {
+    if (whereErr) {
       parentTask.logError(`Error finding certUtil command: "${whereErr}"`);
       _certutilExePath = undefined;
     } else {

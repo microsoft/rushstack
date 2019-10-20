@@ -16,7 +16,7 @@ import {
  *  and signed, but the user must trust it manually.
  */
 export class TrustCertTask extends GulpTask<void> {
-  constructor() {
+  public constructor() {
     super('trust-cert');
   }
 

@@ -13,7 +13,7 @@ export interface IMochaTaskConfig {
 }
 
 export class MochaTask extends GulpTask<IMochaTaskConfig> {
-  constructor() {
+  public constructor() {
     super(
       'mocha',
       {
@@ -33,7 +33,9 @@ export class MochaTask extends GulpTask<IMochaTaskConfig> {
   public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream
     | Promise<void> {
 
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const istanbul: typeof gulpIstanbul = require('gulp-istanbul');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const mocha: typeof gulpMocha = require('gulp-mocha');
 
     const globPattern: string = this.taskConfig.testMatch.join('|');
@@ -43,9 +45,8 @@ export class MochaTask extends GulpTask<IMochaTaskConfig> {
       return Promise.resolve();
     }
 
-    /* tslint:disable:no-string-literal */
+    // eslint-disable-next-line dot-notation
     const matchString: string = this.buildConfig.args['match'] as string;
-    /* tslint:enable:no-string-literal */
 
     return gulp.src(this.taskConfig.testMatch, { read: false })
       .pipe(

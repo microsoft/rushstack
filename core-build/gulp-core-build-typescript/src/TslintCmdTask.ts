@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile, JsonObject } from '@microsoft/node-core-library';
 import { TslintRunner as TTslintRunner } from '@microsoft/rush-stack-compiler-3.1';
 
 import {
@@ -24,7 +24,7 @@ export interface ITslintCmdTaskConfig extends IRSCTaskConfig {
  * @public
  */
 export class TslintCmdTask extends RSCTask<ITslintCmdTaskConfig> {
-  constructor() {
+  public constructor() {
     super(
       'tslint',
       {
@@ -33,7 +33,7 @@ export class TslintCmdTask extends RSCTask<ITslintCmdTaskConfig> {
     );
   }
 
-  public loadSchema(): Object {
+  public loadSchema(): JsonObject {
     return JsonFile.load(path.resolve(__dirname, 'schemas', 'tslint-cmd.schema.json'));
   }
 

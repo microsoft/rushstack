@@ -10,7 +10,7 @@ export interface IInstrumentTaskConfig {
 }
 
 export class InstrumentTask extends GulpTask<IInstrumentTaskConfig> {
-  constructor() {
+  public constructor() {
     super(
       'instrument',
       {
@@ -27,6 +27,7 @@ export class InstrumentTask extends GulpTask<IInstrumentTaskConfig> {
   }
 
   public executeTask(gulp: typeof Gulp, completeCallback?: (error?: string) => void): NodeJS.ReadWriteStream {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const istanbul: typeof gulpIstanbul = require('gulp-istanbul');
 
     return gulp.src(this.taskConfig.coverageMatch)

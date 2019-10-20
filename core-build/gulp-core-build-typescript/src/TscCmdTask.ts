@@ -5,7 +5,8 @@ import * as path from 'path';
 import {
   JsonFile,
   FileSystem,
-  LegacyAdapters
+  LegacyAdapters,
+  JsonObject
 } from '@microsoft/node-core-library';
 import * as glob from 'glob';
 import * as globEscape from 'glob-escape';
@@ -45,7 +46,7 @@ export interface ITscCmdTaskConfig extends IRSCTaskConfig {
  * @public
  */
 export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
-  constructor() {
+  public constructor() {
     super(
       'tsc',
       {
@@ -59,7 +60,7 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
     );
   }
 
-  public loadSchema(): Object {
+  public loadSchema(): JsonObject {
     return JsonFile.load(path.resolve(__dirname, 'schemas', 'tsc-cmd.schema.json'));
   }
 
@@ -128,7 +129,7 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
     const dataLines: (string | undefined)[] = data.toString().split('\n');
     for (const dataLine of dataLines) {
       const trimmedLine: string = (dataLine || '').trim();
-      if (!!trimmedLine) {
+      if (trimmedLine) {
         if (trimmedLine.match(/\serror\s/i)) {
           // If the line looks like an error, log it as an error
           this.logError(trimmedLine);
@@ -145,8 +146,8 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
       return Promise.reject(new Error('Unable to resolve tsconfig file to determine outDir.'));
     }
 
-    // tslint:disable-next-line:typedef
-    const tsConfig = typescript.parseJsonConfigFileContent(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const tsConfig: any = typescript.parseJsonConfigFileContent(
       JsonFile.load(configFilePath),
       new TsParseConfigHost(),
       path.dirname(configFilePath)
