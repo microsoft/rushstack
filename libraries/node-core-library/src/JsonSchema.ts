@@ -5,7 +5,7 @@ import * as os from 'os';
 import * as path from 'path';
 import Validator = require('z-schema');
 
-import { JsonFile } from './JsonFile';
+import { JsonFile, JsonObject } from './JsonFile';
 import { FileSystem } from './FileSystem';
 
 interface ISchemaWithId {
@@ -72,7 +72,7 @@ export class JsonSchema {
   private _dependentSchemas: JsonSchema[] = [];
   private _filename: string = '';
   private _validator: Validator | undefined = undefined;
-  private _schemaObject: Object | undefined = undefined;
+  private _schemaObject: JsonObject | undefined = undefined;
 
   /**
    * Registers a JsonSchema that will be loaded from a file on disk.
@@ -103,14 +103,14 @@ export class JsonSchema {
    * NOTE: An error occurs if the file does not exist; however, the file itself is not loaded or validated
    * until it the schema is actually used.
    */
-  public static fromLoadedObject(schemaObject: Object): JsonSchema {
+  public static fromLoadedObject(schemaObject: JsonObject): JsonSchema {
     const schema: JsonSchema = new JsonSchema();
     schema._schemaObject = schemaObject;
     return schema;
   }
 
   private static _collectDependentSchemas(collectedSchemas: JsonSchema[], dependentSchemas: JsonSchema[],
-    seenObjects: Set<Object>, seenIds: Set<string>): void {
+    seenObjects: Set<JsonSchema>, seenIds: Set<string>): void {
 
     for (const dependentSchema of dependentSchemas) {
       // It's okay for the same schema to appear multiple times in the tree, but we only process it once
@@ -211,7 +211,7 @@ export class JsonSchema {
         noExtraKeywords: true
       });
 
-      const anythingSchema: Object = {
+      const anythingSchema: JsonObject = {
         'type': [
           'array',
           'boolean',
@@ -226,7 +226,7 @@ export class JsonSchema {
       (newValidator as any).setRemoteReference('http://json-schema.org/draft-04/schema',  anythingSchema);
 
       const collectedSchemas: JsonSchema[] = [];
-      const seenObjects: Set<Object> = new Set<Object>();
+      const seenObjects: Set<JsonSchema> = new Set<JsonSchema>();
       const seenIds: Set<string> = new Set<string>();
 
       JsonSchema._collectDependentSchemas(collectedSchemas, this._dependentSchemas, seenObjects, seenIds);
@@ -252,7 +252,7 @@ export class JsonSchema {
    *    if not applicable
    * @param options - Other options that control the validation
    */
-  public validateObject(jsonObject: Object, filenameForErrors: string, options?: IJsonSchemaValidateOptions): void {
+  public validateObject(jsonObject: JsonObject, filenameForErrors: string, options?: IJsonSchemaValidateOptions): void {
     this.validateObjectWithCallback(jsonObject, (errorInfo: IJsonSchemaErrorInfo) => {
       const prefix: string = (options && options.customErrorHeader) ? options.customErrorHeader
         : 'JSON validation failed:';
@@ -266,7 +266,7 @@ export class JsonSchema {
    * Validates the specified JSON object against this JSON schema.  If the validation fails,
    * a callback is called for each validation error.
    */
-  public validateObjectWithCallback(jsonObject: Object,
+  public validateObjectWithCallback(jsonObject: JsonObject,
     errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): void {
 
     this.ensureCompiled();

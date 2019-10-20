@@ -9,6 +9,18 @@ import { Text, NewlineKind } from './Text';
 import { FileSystem } from './FileSystem';
 
 /**
+ * Represents a JSON-serializable object whose type has not been determined yet.
+ *
+ * @remarks
+ *
+ * This type is similar to `any`, except that it communicates that the object is serializable JSON.
+ *
+ * @public
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type JsonObject = any;
+
+/**
  * Options for JsonFile.stringify()
  *
  * @public
@@ -61,7 +73,7 @@ export class JsonFile {
   /**
    * Loads a JSON file.
    */
-  public static load(jsonFilename: string): any { // eslint-disable-line @typescript-eslint/no-explicit-any
+  public static load(jsonFilename: string): JsonObject {
     if (!FileSystem.exists(jsonFilename)) {
       throw new Error(`Input file not found: ${jsonFilename}`);
     }
@@ -78,9 +90,9 @@ export class JsonFile {
    * Loads a JSON file and validate its schema.
    */
   public static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema,
-    options?: IJsonSchemaValidateOptions): any { // eslint-disable-line @typescript-eslint/no-explicit-any
+    options?: IJsonSchemaValidateOptions): JsonObject {
 
-    const jsonObject: any = JsonFile.load(jsonFilename); // eslint-disable-line @typescript-eslint/no-explicit-any
+    const jsonObject: JsonObject = JsonFile.load(jsonFilename);
     jsonSchema.validateObject(jsonObject, jsonFilename, options);
 
     return jsonObject;
@@ -92,9 +104,9 @@ export class JsonFile {
    * See JsonSchema.validateObjectWithCallback() for more info.
    */
   public static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema,
-    errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): any { // eslint-disable-line @typescript-eslint/no-explicit-any
+    errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): JsonObject {
 
-    const jsonObject: any = JsonFile.load(jsonFilename); // eslint-disable-line @typescript-eslint/no-explicit-any
+    const jsonObject: JsonObject = JsonFile.load(jsonFilename);
     jsonSchema.validateObjectWithCallback(jsonObject, errorCallback);
 
     return jsonObject;
@@ -106,7 +118,7 @@ export class JsonFile {
    * @param options - other settings that control serialization
    * @returns a JSON string, with newlines, and indented with two spaces
    */
-  public static stringify(jsonObject: Object, options?: IJsonFileStringifyOptions): string {
+  public static stringify(jsonObject: JsonObject, options?: IJsonFileStringifyOptions): string {
     return JsonFile.updateString('', jsonObject, options);
   }
 
@@ -116,7 +128,7 @@ export class JsonFile {
    * @param options - other settings that control serialization
    * @returns a JSON string, with newlines, and indented with two spaces
    */
-  public static updateString(previousJson: string, newJsonObject: Object,
+  public static updateString(previousJson: string, newJsonObject: JsonObject,
     options?: IJsonFileStringifyOptions): string {
     if (!options) {
       options = { };
@@ -163,7 +175,7 @@ export class JsonFile {
    * @param options - other settings that control how the file is saved
    * @returns false if ISaveJsonFileOptions.onlyIfChanged didn't save anything; true otherwise
    */
-  public static save(jsonObject: Object, jsonFilename: string, options?: IJsonFileSaveOptions): boolean {
+  public static save(jsonObject: JsonObject, jsonFilename: string, options?: IJsonFileSaveOptions): boolean {
     if (!options) {
       options = { };
     }
@@ -220,12 +232,12 @@ export class JsonFile {
    * are any undefined members.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static validateNoUndefinedMembers(jsonObject: Object): void {
+  public static validateNoUndefinedMembers(jsonObject: JsonObject): void {
     return JsonFile._validateNoUndefinedMembers(jsonObject, []);
   }
 
   // Private implementation of validateNoUndefinedMembers()
-  private static _validateNoUndefinedMembers(jsonObject: Object, keyPath: string[]): void {
+  private static _validateNoUndefinedMembers(jsonObject: JsonObject, keyPath: string[]): void {
     if (!jsonObject) {
       return;
     }
