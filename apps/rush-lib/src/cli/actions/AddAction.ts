@@ -24,7 +24,7 @@ export class AddAction extends BaseRushAction {
   private _skipUpdateFlag: CommandLineFlagParameter;
   private _packageName: CommandLineStringParameter;
 
-  constructor(parser: RushCommandLineParser) {
+  public constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
       'Adds a specified package as a dependency of the current project (as determined by the current working directory)'
       + ' and then runs "rush update". If no version is specified, a version will be automatically detected (typically'

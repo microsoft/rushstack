@@ -178,8 +178,7 @@ export class NpmPackage extends BasePackage {
     let currentParent: NpmPackage = this;
     let parentForCreate: NpmPackage | undefined = undefined;
 
-    // tslint:disable-next-line:no-constant-condition
-    while (true) {
+    for (;;) {
       // Does any child match?
       for (const child of currentParent.children) {
         // The package.json name can differ from the installation folder name, in the case of an NPM package alias

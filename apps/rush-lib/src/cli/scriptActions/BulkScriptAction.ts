@@ -66,7 +66,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private _ignoreDependencyOrder: boolean;
   private _allowWarningsInSuccessfulBuild: boolean;
 
-  constructor(options: IBulkScriptActionOptions) {
+  public constructor(options: IBulkScriptActionOptions) {
     super(options);
     this._enableParallelism = options.enableParallelism;
     this._ignoreMissingScript = options.ignoreMissingScript;

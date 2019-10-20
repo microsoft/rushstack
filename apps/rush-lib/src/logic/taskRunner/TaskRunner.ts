@@ -44,7 +44,7 @@ export class TaskRunner {
   private _completedTasks: number;
   private _terminal: Terminal;
 
-  constructor(orderedTasks: ITask[], options: ITaskRunnerOptions) {
+  public constructor(orderedTasks: ITask[], options: ITaskRunnerOptions) {
     const {
       quietMode,
       parallelism,

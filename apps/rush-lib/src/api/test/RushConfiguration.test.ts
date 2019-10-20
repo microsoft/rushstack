@@ -25,8 +25,8 @@ describe('RushConfiguration', () => {
     _oldEnv = process.env;
     process.env = {};
 
-    process.env['USERPROFILE'] = _oldEnv['USERPROFILE']; // tslint:disable-line:no-string-literal
-    process.env['HOME'] = _oldEnv['HOME']; // tslint:disable-line:no-string-literal
+    process.env['USERPROFILE'] = _oldEnv['USERPROFILE']; // eslint-disable-line dot-notation
+    process.env['HOME'] = _oldEnv['HOME']; // eslint-disable-line dot-notation
   });
 
   afterEach(() => {
@@ -192,7 +192,7 @@ describe('RushConfiguration', () => {
 
   it('allows the temp directory to be set via environment variable', () => {
     const expectedValue: string = path.resolve('/var/temp');
-    process.env['RUSH_TEMP_FOLDER'] = expectedValue; // tslint:disable-line:no-string-literal
+    process.env['RUSH_TEMP_FOLDER'] = expectedValue; // eslint-disable-line dot-notation
 
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm.json');
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);

@@ -8,7 +8,7 @@ jest.mock('child_process');
  * Mock RushCommandLineParser itself to prevent `process.exit` to be called on failure
  */
 jest.mock('../RushCommandLineParser', () => {
-  // tslint:disable-next-line: no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const actualModule: any = jest.requireActual('../RushCommandLineParser');
   if (actualModule.RushCommandLineParser) {
     // Stub out the troublesome method that calls `process.exit`

@@ -20,7 +20,7 @@ export abstract class VersionMismatchFinderEntity {
   public abstract filePath: string;
   public abstract allDependencies: ReadonlyArray<PackageJsonDependency>;
 
-  constructor(options: IVersionMismatchFinderEntityOptions) {
+  public constructor(options: IVersionMismatchFinderEntityOptions) {
     this.friendlyName = options.friendlyName;
     this.cyclicDependencyProjects = options.cyclicDependencyProjects;
     this.skipRushCheck = options.skipRushCheck;

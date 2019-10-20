@@ -11,7 +11,7 @@ import { VersionMismatchFinderEntity } from '../../logic/versionMismatch/Version
 import { VersionMismatchFinderProject } from '../../logic/versionMismatch/VersionMismatchFinderProject';
 import { VersionMismatchFinderCommonVersions } from '../../logic/versionMismatch/VersionMismatchFinderCommonVersions';
 
-// tslint:disable:no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 describe('VersionMismatchFinder', () => {
   it('finds no mismatches if there are none', (done: jest.DoneCallback) => {
     const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({

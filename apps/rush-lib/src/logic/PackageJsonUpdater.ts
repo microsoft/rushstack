@@ -173,7 +173,7 @@ export class PackageJsonUpdater {
       };
       this.updateProject(currentProjectUpdate);
 
-      const otherPackageUpdates: Array<IUpdateProjectOptions> = [];
+      const otherPackageUpdates: IUpdateProjectOptions[] = [];
 
       if (this._rushConfiguration.ensureConsistentVersions || updateOtherPackages) {
         // we need to do a mismatch check
@@ -235,7 +235,7 @@ export class PackageJsonUpdater {
   /**
    * Updates several projects' package.json files
    */
-  public updateProjects(projectUpdates: Array<IUpdateProjectOptions>): void {
+  public updateProjects(projectUpdates: IUpdateProjectOptions[]): void {
     for (const update of projectUpdates) {
       this.updateProject(update);
     }

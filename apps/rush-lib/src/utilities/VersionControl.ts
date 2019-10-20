@@ -29,7 +29,7 @@ export class VersionControl {
   public static getChangedFolders(
     targetBranch: string,
     skipFetch: boolean = false
-  ): Array<string | undefined> | undefined {
+  ): (string | undefined)[] | undefined {
     if (!skipFetch) {
       VersionControl._fetchRemoteBranch(targetBranch);
     }

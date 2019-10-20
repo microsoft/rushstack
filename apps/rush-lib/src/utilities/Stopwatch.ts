@@ -29,7 +29,7 @@ export class Stopwatch {
     return new Stopwatch().start();
   }
 
-  constructor(getTime: () => number = Utilities.getTimeInMs) {
+  public constructor(getTime: () => number = Utilities.getTimeInMs) {
     this._startTime = undefined;
     this._endTime = undefined;
     this._getTime = getTime;

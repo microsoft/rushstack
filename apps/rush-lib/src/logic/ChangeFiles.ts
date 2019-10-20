@@ -94,7 +94,7 @@ export class ChangeFiles {
     return changes;
   }
 
-  constructor(changesPath: string) {
+  public constructor(changesPath: string) {
     this._changesPath = changesPath;
   }
 

@@ -281,7 +281,7 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
  */
 export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable {
   const flatTasks: IExecutable[] = <IExecutable[]>_flatten(tasks).filter(taskExecutable => {
-    // tslint:disable-next-line:no-null-keyword
+    // eslint-disable-next-line no-restricted-syntax
     return taskExecutable !== null && taskExecutable !== undefined;
   });
 
@@ -308,7 +308,7 @@ export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutabl
  */
 export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable {
   const flatTasks: IExecutable[] = _flatten<IExecutable>(tasks).filter(taskExecutable => {
-    // tslint:disable-next-line:no-null-keyword
+    // eslint-disable-next-line no-restricted-syntax
     return taskExecutable !== null && taskExecutable !== undefined;
   });
 

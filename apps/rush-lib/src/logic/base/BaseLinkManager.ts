@@ -179,7 +179,7 @@ export abstract class BaseLinkManager {
     }
   }
 
-  constructor(rushConfiguration: RushConfiguration) {
+  public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
   }
 

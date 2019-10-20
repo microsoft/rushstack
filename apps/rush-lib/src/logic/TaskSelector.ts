@@ -35,7 +35,7 @@ export class TaskSelector {
   private _options: ITaskSelectorConstructor;
   private _packageChangeAnalyzer: PackageChangeAnalyzer;
 
-  constructor(options: ITaskSelectorConstructor) {
+  public constructor(options: ITaskSelectorConstructor) {
     this._options = options;
 
     this._packageChangeAnalyzer = new PackageChangeAnalyzer(options.rushConfiguration);
@@ -225,7 +225,7 @@ export class TaskSelector {
 
     const rawCommand: string = rushProject.packageJson.scripts[script];
 
-    // tslint:disable-next-line:no-null-keyword
+    // eslint-disable-next-line no-restricted-syntax
     if (rawCommand === undefined || rawCommand === null) {
       return undefined;
     }

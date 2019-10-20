@@ -105,7 +105,7 @@ export class VersionMismatchFinder {
     }
   }
 
-  constructor(
+  public constructor(
     projects: VersionMismatchFinderEntity[],
     allowedAlternativeVersions?: Map<string, ReadonlyArray<string>>
   ) {
@@ -129,7 +129,7 @@ export class VersionMismatchFinder {
       : undefined;
   }
 
-  public getConsumersOfMismatch(mismatch: string, version: string): Array<VersionMismatchFinderEntity> | undefined {
+  public getConsumersOfMismatch(mismatch: string, version: string): VersionMismatchFinderEntity[] | undefined {
     const mismatchedPackage: Map<string, VersionMismatchFinderEntity[]> | undefined = this._mismatches.get(mismatch);
     if (!mismatchedPackage) {
       return undefined;

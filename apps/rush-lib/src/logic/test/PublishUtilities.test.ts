@@ -15,7 +15,7 @@ import {
 } from '../PublishUtilities';
 import { ChangeFiles } from '../ChangeFiles';
 
-/* tslint:disable:no-string-literal */
+/* eslint-disable dot-notation */
 
 describe('findChangeRequests', () => {
   let packagesRushConfiguration: RushConfiguration;

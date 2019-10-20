@@ -52,7 +52,7 @@ export class RushConfigurationProject {
   private readonly _rushConfiguration: RushConfiguration;
 
   /** @internal */
-  constructor(
+  public constructor(
     projectJson: IRushConfigurationProjectJson,
     rushConfiguration: RushConfiguration,
     tempProjectName: string

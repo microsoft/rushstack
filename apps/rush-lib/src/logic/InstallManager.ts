@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* eslint max-lines: off */
+
 import * as glob from 'glob';
 import * as colors from 'colors';
 import * as fetch from 'node-fetch';
@@ -59,7 +61,8 @@ import { PackageManagerName } from '../api/packageManager/PackageManager';
 import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
 import { DependencySpecifier } from './DependencySpecifier';
 
-export interface CreateOptions { // tslint:disable-line:interface-name
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
+export interface CreateOptions {
   /**
    * "Set to true to omit writing mtime values for entries. Note that this prevents using other
    * mtime-based features like tar.update or the keepNewer option with the resulting tar archive."
@@ -86,7 +89,7 @@ export interface IInstallManagerOptions {
    */
   noLink: boolean;
   /**
-   * Whether to delete the shrinkwrap file before installation, i.e. so that all dependenices
+   * Whether to delete the shrinkwrap file before installation, i.e. so that all dependencies
    * will be upgraded to the latest SemVer-compatible version.
    */
   fullUpgrade: boolean;
@@ -246,7 +249,7 @@ export class InstallManager {
     return this._commonNodeModulesMarker;
   }
 
-  constructor(
+  public constructor(
     rushConfiguration: RushConfiguration,
     rushGlobalFolder: RushGlobalFolder,
     purgeManager: PurgeManager,

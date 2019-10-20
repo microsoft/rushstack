@@ -49,7 +49,7 @@ export class ChangeAction extends BaseRushAction {
   private _targetBranchName: string;
   private _projectHostMap: Map<string, string>;
 
-  constructor(parser: RushCommandLineParser) {
+  public constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
       'Asks a series of questions and then generates a <branchname>-<timestamp>.json file ' +
       'in the common folder. The `publish` command will consume these files and perform the proper ' +
@@ -316,7 +316,7 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private _getChangedPackageNames(): string[] {
-    const changedFolders: Array<string | undefined> | undefined = VersionControl.getChangedFolders(
+    const changedFolders: (string | undefined)[] | undefined = VersionControl.getChangedFolders(
       this._targetBranch,
       this._noFetchParameter.value
     );
@@ -357,7 +357,7 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private _hasProjectChanged(
-    changedFolders: Array<string | undefined>,
+    changedFolders: (string | undefined)[],
     projectFolder: string
   ): boolean {
     for (const folder of changedFolders) {

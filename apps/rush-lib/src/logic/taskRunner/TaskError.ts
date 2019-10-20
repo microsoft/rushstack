@@ -7,7 +7,7 @@
 export class TaskError extends Error {
   protected _type: string;
 
-  constructor(type: string, message: string) {
+  public constructor(type: string, message: string) {
     super(message);
 
     this._type = type;
@@ -30,7 +30,7 @@ export class BuildTaskError extends TaskError {
   protected _line: number;
   protected _offset: number;
 
-  constructor(type: string, message: string, file: string, line: number, offset: number) {
+  public constructor(type: string, message: string, file: string, line: number, offset: number) {
     super(type, message);
     this._file = file;
     this._line = line;

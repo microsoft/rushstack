@@ -79,7 +79,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   // Example inputs:
   // "js-tokens@^3.0.0 || ^4.0.0"
   // "@rush-temp/api-extractor-test-03@file:./projects/api-extractor-test-03.tgz"
-  private static packageNameAndSemVerRegExp: RegExp = /^(@?[^@\s]+)(?:@(.*))?$/;
+  private static _packageNameAndSemVerRegExp: RegExp = /^(@?[^@\s]+)(?:@(.*))?$/;
 
   private _shrinkwrapJson: IYarnShrinkwrapJson;
   private _tempProjectNames: string[];
@@ -109,7 +109,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
    * Example output: { packageName: "js-tokens", semVerRange: "^3.0.0 || ^4.0.0" }
    */
   private static _decodePackageNameAndSemVer(packageNameAndSemVer: string): IPackageNameAndSemVer {
-    const result: RegExpExecArray | null = YarnShrinkwrapFile.packageNameAndSemVerRegExp.exec(packageNameAndSemVer);
+    const result: RegExpExecArray | null = YarnShrinkwrapFile._packageNameAndSemVerRegExp.exec(packageNameAndSemVer);
     if (!result) {
       // Sanity check -- this should never happen
       throw new Error('Unable to parse package/semver expression in the Yarn shrinkwrap file (yarn.lock): '

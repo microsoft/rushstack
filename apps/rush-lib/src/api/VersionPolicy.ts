@@ -78,7 +78,7 @@ export abstract class VersionPolicy {
   /**
    * @internal
    */
-  constructor(versionPolicyJson: IVersionPolicyJson) {
+  public constructor(versionPolicyJson: IVersionPolicyJson) {
     this._policyName = versionPolicyJson.policyName;
     this._definitionName = VersionPolicyDefinitionName[versionPolicyJson.definitionName];
     this._exemptFromRushChange = versionPolicyJson.exemptFromRushChange || false;
@@ -210,7 +210,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
   /**
    * @internal
    */
-  constructor(versionPolicyJson: ILockStepVersionJson) {
+  public constructor(versionPolicyJson: ILockStepVersionJson) {
     super(versionPolicyJson);
     this._version = new semver.SemVer(versionPolicyJson.version);
     this._nextBump = BumpType[versionPolicyJson.nextBump];
@@ -336,7 +336,7 @@ export class IndividualVersionPolicy extends VersionPolicy {
   /**
    * @internal
    */
-  constructor(versionPolicyJson: IIndividualVersionJson) {
+  public constructor(versionPolicyJson: IIndividualVersionJson) {
     super(versionPolicyJson);
     this._lockedMajor = versionPolicyJson.lockedMajor;
   }

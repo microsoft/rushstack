@@ -11,7 +11,7 @@ import { CommandLineStringParameter } from '@microsoft/ts-command-line';
 export class CheckAction extends BaseRushAction {
   private _variant: CommandLineStringParameter;
 
-  constructor(parser: RushCommandLineParser) {
+  public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'check',
       summary: 'Checks each project\'s package.json files and ensures that all dependencies are of the same ' +
