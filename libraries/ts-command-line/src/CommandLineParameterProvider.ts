@@ -44,7 +44,7 @@ export abstract class CommandLineParameterProvider {
 
   /** @internal */
   // Third party code should not inherit subclasses or call this constructor
-  constructor() {
+  public constructor() {
     this._parameters = [];
     this._parametersByLongName = new Map<string, CommandLineParameter>();
   }

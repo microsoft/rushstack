@@ -67,7 +67,7 @@ export abstract class CommandLineParameter {
   public readonly environmentVariable: string | undefined;
 
   /** @internal */
-  constructor(definition: IBaseCommandLineDefinition) {
+  public constructor(definition: IBaseCommandLineDefinition) {
     this.longName = definition.parameterLongName;
     this.shortName = definition.parameterShortName;
     this.description = definition.description;
@@ -173,7 +173,7 @@ export abstract class CommandLineParameterWithArgument extends CommandLineParame
   public readonly argumentName: string;
 
   /** @internal */
-  constructor(definition: IBaseCommandLineDefinitionWithArgument) {
+  public constructor(definition: IBaseCommandLineDefinitionWithArgument) {
     super(definition);
 
     if (definition.argumentName === '') {
@@ -206,7 +206,7 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
   private _value: string | undefined = undefined;
 
   /** @internal */
-  constructor(definition: ICommandLineChoiceDefinition) {
+  public constructor(definition: ICommandLineChoiceDefinition) {
     super(definition);
 
     if (definition.alternatives.length < 1) {
@@ -302,7 +302,7 @@ export class CommandLineFlagParameter extends CommandLineParameter {
   private _value: boolean = false;
 
   /** @internal */
-  constructor(definition: ICommandLineFlagDefinition) {
+  public constructor(definition: ICommandLineFlagDefinition) {
     super(definition);
   }
 
@@ -371,7 +371,7 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
   private _value: number | undefined = undefined;
 
   /** @internal */
-  constructor(definition: ICommandLineIntegerDefinition) {
+  public constructor(definition: ICommandLineIntegerDefinition) {
     super(definition);
     this.defaultValue = definition.defaultValue;
     this.validateDefaultValue(!!this.defaultValue);
@@ -460,7 +460,7 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
   private _value: string | undefined = undefined;
 
   /** @internal */
-  constructor(definition: ICommandLineStringDefinition) {
+  public constructor(definition: ICommandLineStringDefinition) {
     super(definition);
 
     this.defaultValue = definition.defaultValue;
@@ -547,7 +547,7 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
   private _values: string[] = [];
 
   /** @internal */
-  constructor(definition: ICommandLineStringListDefinition) {
+  public constructor(definition: ICommandLineStringListDefinition) {
     super(definition);
   }
 
