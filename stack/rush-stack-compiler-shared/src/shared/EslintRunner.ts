@@ -12,26 +12,49 @@ import {
   WriteFileIssueFunction
 } from './RushStackCompilerBase';
 
-interface IEslintFileOutput {
+interface IEslintFileResult {
+  // Example: "/full/path/to/File.ts"
   filePath: string;
+
+  // Full content of the source file
+  source: string;
+
   messages: IEslintMessage[];
+
   errorCount: number;
   warningCount: number;
   fixableErrorCount: number;
   fixableWarningCount: number;
-  source: string;
+}
+
+enum EslintSeverity {
+  Off = 0,
+  Warn = 1,
+  Error = 2
 }
 
 interface IEslintMessage {
-  ruleId: string;
-  severity: number;
-  message: string;
+  // The line number starts at 1
   line: number;
-  column: number;
-  nodeType: string;
-  messageId: string;
   endLine: number;
+
+  // The column number starts at 1
+  column: number;
   endColumn: number;
+
+  // Example: "no-bitwise"
+  ruleId: string;
+
+  // Example: "unexpected"
+  messageId: string;
+
+  // Example: "Unexpected use of '&'."
+  message: string;
+
+  severity: EslintSeverity;
+
+  // Example: "BinaryExpression"
+  nodeType: string | null;
 }
 
 export class EslintRunner extends RushStackCompilerBase<ILintRunnerConfig> {
@@ -66,16 +89,16 @@ export class EslintRunner extends RushStackCompilerBase<ILintRunnerConfig> {
 
         // ESLint errors are logged to stdout
         try {
-          const eslintOutput: IEslintFileOutput[] = JSON.parse(dataStr);
-          for (const eslintFileOutput of eslintOutput) {
+          const eslintFileResults: IEslintFileResult[] = JSON.parse(dataStr);
+          for (const eslintFileResult of eslintFileResults) {
             const pathFromRoot: string = path.relative(this._standardBuildFolders.projectFolderPath,
-              eslintFileOutput.filePath);
-            for (const message of eslintFileOutput.messages) {
+              eslintFileResult.filePath);
+            for (const message of eslintFileResult.messages) {
               eslintErrorLogFn(
                 pathFromRoot,
                 message.line,
                 message.column,
-                message.messageId,
+                message.ruleId,
                 message.message
               );
             }
