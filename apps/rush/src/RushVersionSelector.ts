@@ -21,7 +21,7 @@ export class RushVersionSelector {
   private _rushGlobalFolder: _RushGlobalFolder;
   private _currentPackageVersion: string;
 
-  constructor(currentPackageVersion: string) {
+  public constructor(currentPackageVersion: string) {
     this._rushGlobalFolder = new _RushGlobalFolder();
     this._currentPackageVersion = currentPackageVersion;
   }
@@ -111,6 +111,7 @@ export class RushVersionSelector {
         ));
       } else {
         // For newer rush-lib, RushCommandSelector can test whether "rushx" is supported or not
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const rushCliEntrypoint: { } = require(path.join(
           expectedRushPath,
           'node_modules',
