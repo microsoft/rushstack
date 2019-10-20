@@ -91,9 +91,8 @@ let _buildConfig: IBuildConfig = {
  * @public
  */
 export function setConfig(config: Partial<IBuildConfig>): void {
-  /* tslint:disable:typedef */
+  // eslint-disable-next-line
   const objectAssign = require('object-assign');
-  /* tslint:enable:typedef */
 
   _buildConfig = objectAssign({}, _buildConfig, config);
 }
@@ -105,9 +104,8 @@ export function setConfig(config: Partial<IBuildConfig>): void {
  * @public
  */
 export function mergeConfig(config: Partial<IBuildConfig>): void {
-  /* tslint:disable:typedef */
+  // eslint-disable-next-line
   const merge = require('lodash.merge');
-  /* tslint:enable:typedef */
 
   _buildConfig = merge({}, _buildConfig, config);
 }
@@ -158,20 +156,21 @@ export function task(taskName: string, taskExecutable: IExecutable): IExecutable
  * @public
  */
 export interface ICustomGulpTask {
-  (gulp: typeof Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: Object) => void):
-    Promise<Object> | NodeJS.ReadWriteStream | void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (gulp: typeof Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: any) => void):
+    Promise<object> | NodeJS.ReadWriteStream | void;
 }
 
 /** @public */
 class CustomTask extends GulpTask<void> {
   private _fn: ICustomGulpTask;
-  constructor(name: string, fn: ICustomGulpTask) {
+  public constructor(name: string, fn: ICustomGulpTask) {
     super(name);
     this._fn = fn.bind(this);
   }
 
   public executeTask(gulp: typeof Gulp | GulpProxy, completeCallback?: (error?: string | Error) => void):
-    Promise<Object> | NodeJS.ReadWriteStream | void {
+    Promise<object> | NodeJS.ReadWriteStream | void {
     return this._fn(gulp, getConfig(), completeCallback);
   }
 }
@@ -279,8 +278,8 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
  * Takes in IExecutables as arguments and returns an IExecutable that will execute them in serial.
  * @public
  */
-export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable {
-  const flatTasks: IExecutable[] = <IExecutable[]>_flatten(tasks).filter(taskExecutable => {
+export function serial(...tasks: (IExecutable[] | IExecutable)[]): IExecutable {
+  const flatTasks: IExecutable[] = _flatten(tasks).filter(taskExecutable => {
     // eslint-disable-next-line no-restricted-syntax
     return taskExecutable !== null && taskExecutable !== undefined;
   });
@@ -306,7 +305,7 @@ export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutabl
  * Takes in IExecutables as arguments and returns an IExecutable that will execute them in parallel.
  * @public
  */
-export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable {
+export function parallel(...tasks: (IExecutable[] | IExecutable)[]): IExecutable {
   const flatTasks: IExecutable[] = _flatten<IExecutable>(tasks).filter(taskExecutable => {
     // eslint-disable-next-line no-restricted-syntax
     return taskExecutable !== null && taskExecutable !== undefined;
@@ -401,11 +400,11 @@ function _registerTask(gulp: typeof Gulp, taskName: string, taskExecutable: IExe
 function _executeTask(taskExecutable: IExecutable, buildConfig: IBuildConfig): Promise<void> {
   // Try to fallback to the default task if provided.
   if (taskExecutable && !taskExecutable.execute) {
-    /* tslint:disable:no-any */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((taskExecutable as any).default) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       taskExecutable = (taskExecutable as any).default;
     }
-    /* tslint:enable:no-any */
   }
 
   // If the task is missing, throw a meaningful error.
@@ -450,10 +449,10 @@ function _trackTask(taskExecutable: IExecutable): void {
 /**
  * Flattens a set of arrays into a single array.
  */
-function _flatten<T>(oArr: Array<T | T[]>): T[] {
+function _flatten<T>(oArr: (T | T[])[]): T[] {
   const output: T[] = [];
 
-  function traverse(arr: Array<T | T[]>): void {
+  function traverse(arr: (T | T[])[]): void {
     for (let i: number = 0; i < arr.length; ++i) {
       if (Array.isArray(arr[i])) {
         traverse(arr[i] as T[]);
@@ -473,7 +472,7 @@ function _handleCommandLineArguments(): void {
 }
 
 function _handleTasksListArguments(): void {
-  /* tslint:disable:no-string-literal */
+  /* eslint-disable dot-notation */
   if (args['tasks'] || args['tasks-simple'] || args['T']) {
     global['dontWatchExit'] = true;
   }
@@ -481,7 +480,7 @@ function _handleTasksListArguments(): void {
     // we are showing a help command prompt via yargs or ts-command-line
     global['dontWatchExit'] = true;
   }
-  /* tslint:enable:no-string-literal */
+  /* eslint-enable dot-notation */
 }
 
 /** @public */

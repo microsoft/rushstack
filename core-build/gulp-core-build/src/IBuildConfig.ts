@@ -5,8 +5,6 @@ import * as gulp from 'gulp';
 import { GulpProxy } from './GulpProxy';
 import { IExecutable } from './IExecutable';
 
-/* tslint:disable:no-any */
-
 /**
  * @public
  */
@@ -119,6 +117,7 @@ export interface IBuildConfig {
   /**
    * Arbitrary property bag for a task to store environment values in.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   properties?: { [key: string]: any };
 
   /**
@@ -129,6 +128,7 @@ export interface IBuildConfig {
   /**
    * Optional callback to be executed when a task ends.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onTaskEnd?: (taskName: string, duration: number[], error?: any) => void;
 
   /**

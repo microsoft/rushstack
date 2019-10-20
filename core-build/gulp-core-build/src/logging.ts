@@ -4,9 +4,9 @@
 import * as colors from 'colors';
 import * as Gulp from 'gulp';
 import * as path from 'path';
-/* tslint:disable:typedef */
+// eslint-disable-next-line
 const prettyTime = require('pretty-hrtime');
-/* tslint:enable:typedef */
+
 import { IBuildConfig } from './IBuildConfig';
 import * as state from './State';
 import { getFlagValue } from './config';
@@ -34,14 +34,16 @@ interface ILocalCache {
   totalTaskSrc: number;
   wroteSummary: boolean;
   writingSummary: boolean;
-  writeSummaryCallbacks: Array<() => void>;
+  writeSummaryCallbacks: (() => void)[];
   watchMode?: boolean;
   fromRunGulp?: boolean;
   exitCode: number;
   writeSummaryLogs: string[];
   gulp: typeof Gulp | undefined;
-  gulpErrorCallback: undefined | ((err: Object) => void);
-  gulpStopCallback: undefined | ((err: Object) => void);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  gulpErrorCallback: undefined | ((err: any) => void);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  gulpStopCallback: undefined | ((err: any) => void);
   errorAndWarningSuppressions: (string | RegExp)[];
   shouldLogWarningsDuringSummary: boolean;
   shouldLogErrorsDuringSummary: boolean;
@@ -50,9 +52,8 @@ interface ILocalCache {
 let wiredUpErrorHandling: boolean = false;
 let duringFastExit: boolean = false;
 
-/* tslint:disable:no-any */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const globalInstance: any = global as any;
-/* tslint:enable:no-any */
 
 const localCache: ILocalCache = globalInstance.__loggingCache = globalInstance.__loggingCache || {
   warnings: [],
@@ -91,9 +92,8 @@ function isVerbose(): boolean {
   return getFlagValue('verbose');
 }
 
-/* tslint:disable:no-any */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function formatError(e: any): string | undefined {
-/* tslint:enable:no-any */
 
   if (!e.err) {
     if (isVerbose()) {
@@ -260,9 +260,8 @@ function writeSummary(callback: () => void): void {
   }
 }
 
-/* tslint:disable:no-any */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function _writeTaskError(e: any): void {
-/* tslint:enable:no-any */
   if (!e || !(e.err && e.err[WROTE_ERROR_KEY])) {
     writeError(e);
     localCache.taskErrors++;
@@ -287,7 +286,7 @@ function wireUpProcessErrorHandling(shouldWarningsFailBuild: boolean): void {
       const oldStdErr: Function = process.stderr.write;
       // tslint:disable-next-line:no-function-expression
       process.stderr.write = function (text: string | Buffer): boolean {
-        if (!!text.toString()) {
+        if (text.toString()) {
           wroteToStdErr = true;
           return oldStdErr.apply(process.stderr, arguments);
         }
@@ -297,7 +296,7 @@ function wireUpProcessErrorHandling(shouldWarningsFailBuild: boolean): void {
 
     process.on('exit', (code: number) => {
       duringFastExit = true;
-      if (!global['dontWatchExit']) { // tslint:disable-line:no-string-literal
+      if (!global['dontWatchExit']) { // eslint-disable-line dot-notation
         if (!localCache.wroteSummary) {
           localCache.wroteSummary = true;
           console.log('About to exit with code:', code);
@@ -474,6 +473,7 @@ export function coverageData(coverage: number, threshold: number, filePath: stri
   localCache.coverageTotal += coverage;
 }
 
+// eslint-disable-next-line no-control-regex
 const colorCodeRegex: RegExp = /\x1B[[(?);]{0,2}(;?\d)*./g;
 
 /**
@@ -610,13 +610,13 @@ export function verbose(...args: string[]): void {
 }
 
 /** @public */
-export function generateGulpError(err: Object): Object {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function generateGulpError(err: any): any {
   if (isVerbose()) {
     return err;
   } else {
-    /* tslint:disable:no-any */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const output: any = {
-    /* tslint:enable:no-any */
       showStack: false,
       toString: (): string => {
         return '';
@@ -629,14 +629,13 @@ export function generateGulpError(err: Object): Object {
   }
 }
 
-/* tslint:disable:no-any */
 /**
  * Logs an error to standard error and causes the build to fail.
  * @param e - the error (can be a string or Error object)
  * @public
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function writeError(e: any): void {
-/* tslint:enable:no-any */
   if (e) {
     if (!e[WROTE_ERROR_KEY]) {
       if (e.err) {
@@ -788,12 +787,14 @@ export function initialize(
     // Do Nothing
   });
 
-  gulp.on('start', (err: Object) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  gulp.on('start', (err: any) => {
 
     log('Starting gulp');
   });
 
-  gulp.on('stop', (err: Object) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  gulp.on('stop', (err: any) => {
 
     writeSummary(() => {
       // error if we have any errors
@@ -811,7 +812,8 @@ export function initialize(
     });
   });
 
-  gulp.on('err', (err: Object) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  gulp.on('err', (err: any) => {
 
     _writeTaskError(err);
     writeSummary(() => {
@@ -822,9 +824,8 @@ export function initialize(
     });
   });
 
-  /* tslint:disable:no-any */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   gulp.on('task_start', (e: any) => {
-  /* tslint:enable:no-any */
 
     if (localCache.fromRunGulp) {
       log('Starting', '\'' + colors.cyan(e.task) + '\'...');
@@ -833,9 +834,8 @@ export function initialize(
     localCache.taskRun++;
   });
 
-  /* tslint:disable:no-any */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   gulp.on('task_stop', (e: any) => {
-  /* tslint:enable:no-any */
 
     const time: string = prettyTime(e.hrDuration);
 
@@ -847,9 +847,8 @@ export function initialize(
     }
   });
 
-  /* tslint:disable:no-any */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   gulp.on('task_err', (err: any) => {
-  /* tslint:enable:no-any */
 
     _writeTaskError(err);
     writeSummary(() => {
@@ -857,9 +856,8 @@ export function initialize(
     });
   });
 
-  /* tslint:disable:no-any */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   gulp.on('task_not_found', (err: any) => {
-  /* tslint:enable:no-any */
 
     log(
       colors.red('Task \'' + err.task + '\' is not in your gulpfile')

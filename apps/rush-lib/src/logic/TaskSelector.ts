@@ -218,7 +218,6 @@ export class TaskSelector {
   }
 
   private _getScriptCommand(rushProject: RushConfigurationProject, script: string): string | undefined {
-    // tslint:disable-next-line:no-string-literal
     if (!rushProject.packageJson.scripts) {
       return undefined;
     }

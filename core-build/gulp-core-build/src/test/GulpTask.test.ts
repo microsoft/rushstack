@@ -20,7 +20,7 @@ interface IConfig {
 let testArray: string[] = [];
 
 class PromiseTask extends GulpTask<IConfig> {
-  constructor() {
+  public constructor() {
     super('promise', {});
   }
 
@@ -33,7 +33,7 @@ class PromiseTask extends GulpTask<IConfig> {
 }
 
 class StreamTask extends GulpTask<IConfig> {
-  constructor() {
+  public constructor() {
     super('stream', {});
   }
 
@@ -41,7 +41,7 @@ class StreamTask extends GulpTask<IConfig> {
     const stream: Readable = new Readable({ objectMode: true });
 
     // Add no opt function to make it compat with through
-    stream['_read'] = () => { // tslint:disable-line:no-string-literal
+    stream['_read'] = () => { // eslint-disable-line dot-notation
       // Do Nothing
     };
 
@@ -64,7 +64,7 @@ class StreamTask extends GulpTask<IConfig> {
 }
 
 class SyncTask extends GulpTask<IConfig> {
-  constructor() {
+  public constructor() {
     super('sync', {});
   }
 
@@ -74,7 +74,7 @@ class SyncTask extends GulpTask<IConfig> {
 }
 
 class SyncWithReturnTask extends GulpTask<IConfig> {
-  constructor() {
+  public constructor() {
     super('sync-with-return', {});
   }
 
@@ -84,7 +84,7 @@ class SyncWithReturnTask extends GulpTask<IConfig> {
 }
 
 class CallbackTask extends GulpTask<IConfig> {
-  constructor() {
+  public constructor() {
     super('schema-task', {});
   }
 
@@ -101,7 +101,7 @@ interface ISimpleConfig {
 class SchemaTask extends GulpTask<ISimpleConfig> {
   public name: string = '';
 
-  constructor() {
+  public constructor() {
     super(
       'schema-task',
       {

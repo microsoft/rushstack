@@ -16,7 +16,7 @@ import { mockBuildConfig } from './mockBuildConfig';
 /* tslint:disable:no-unused-expression */
 
 // disable the exit watching
-global['dontWatchExit'] = true; // tslint:disable-line:no-string-literal
+global['dontWatchExit'] = true; // eslint-disable-line dot-notation
 
 describe('serial', () => {
   it('can run a set of tasks in serial', (done) => {
@@ -112,7 +112,8 @@ describe('parallel', () => {
 
   it('can read the current config', (done) => {
     const config: IBuildConfig = getConfig();
-    expect(config).to.be.not.null;
+    // eslint-disable-next-line
+    expect(config).not.to.be.null;
     done();
   });
 
@@ -141,16 +142,16 @@ function createTask(
   executionCallback: (message: string) => void,
   shouldFail?: boolean): IExecutable {
   return {
-    execute: (buildConfig): Promise<void> => new Promise<void>((done, error) => {
+    execute: (buildConfig): Promise<void> => new Promise<void>((resolve, reject) => {
       executionCallback(`executing ${name}`);
 
       setTimeout(() => {
         executionCallback(`complete ${name}`);
 
         if (shouldFail) {
-          error('Failure');
+          reject('Failure');
         } else {
-          done();
+          resolve();
         }
       }, 10);
     })

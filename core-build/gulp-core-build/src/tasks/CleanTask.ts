@@ -17,7 +17,7 @@ export class CleanTask extends GulpTask<void> {
   /**
    * Instantiates a new CleanTask with the name 'clean'
    */
-  constructor() {
+  public constructor() {
     super('clean');
   }
 
@@ -53,7 +53,7 @@ export class CleanTask extends GulpTask<void> {
 
     // Create dictionary of unique paths. (Could be replaced with ES6 set.)
     cleanPaths.forEach(cleanPath => {
-      if (!!cleanPath) {
+      if (cleanPath) {
         uniquePaths[cleanPath] = cleanPath;
       }
     });
