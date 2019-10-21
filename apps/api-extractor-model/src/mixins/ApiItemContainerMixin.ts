@@ -154,7 +154,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
 
     public addMember(member: ApiItem): void {
       if (this[_membersByContainerKey].has(member.containerKey)) {
-        throw new Error('Another member has already been added with the same name and containerKey');
+        throw new Error(`Another member has already been added with the same name (${member.name}) and containerKey (${member.containterKey})`);
       }
 
       const existingParent: ApiItem | undefined = member.parent;
