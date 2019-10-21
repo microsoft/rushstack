@@ -82,7 +82,7 @@ export class LoadThemedStylesLoader {
     ].join('\n');
   }
 
-  constructor() {
+  public constructor() {
     throw new Error('Constructing "LoadThemedStylesLoader" is not supported.');
   }
 }

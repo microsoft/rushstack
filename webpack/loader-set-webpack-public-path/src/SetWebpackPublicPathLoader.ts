@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { merge } from 'lodash';
-const loaderUtils = require('loader-utils'); // tslint:disable-line:typedef
+const loaderUtils = require('loader-utils'); // eslint-disable-line
 
 import {
   IInternalOptions,
@@ -17,7 +17,7 @@ export interface ISetWebpackPublicPathLoaderOptions extends ISetWebpackPublicPat
 }
 
 export class SetWebpackPublicPathLoader {
-  private static staticOptions: ISetWebpackPublicPathLoaderOptions = {
+  private static _staticOptions: ISetWebpackPublicPathLoaderOptions = {
     systemJs: false,
     scriptName: undefined,
     urlPrefix: undefined,
@@ -29,23 +29,23 @@ export class SetWebpackPublicPathLoader {
   }
 
   public static setOptions(options: ISetWebpackPublicPathLoaderOptions): void {
-    this.staticOptions = options || {};
+    this._staticOptions = options || {};
   }
 
   public static pitch(remainingRequest: string): string {
-    /* tslint:disable:no-any */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const self: any = this;
-    /* tslint:enable:no-any */
 
-    const options: IInternalOptions = SetWebpackPublicPathLoader.getOptions(self);
+
+    const options: IInternalOptions = SetWebpackPublicPathLoader._getOptions(self);
     return getSetPublicPathCode(options, self.emitWarning);
   }
 
-  private static getOptions(context: any): IInternalOptions { // eslint-disable-line @typescript-eslint/no-explicit-any
+  private static _getOptions(context: any): IInternalOptions { // eslint-disable-line @typescript-eslint/no-explicit-any
     const queryOptions: ISetWebpackPublicPathLoaderOptions = loaderUtils.getOptions(context);
 
     const options: ISetWebpackPublicPathLoaderOptions & IInternalOptions =
-      merge(merge({}, SetWebpackPublicPathLoader.staticOptions), queryOptions);
+      merge(merge({}, SetWebpackPublicPathLoader._staticOptions), queryOptions);
 
     if (options.systemJs || options.publicPath) {
       // If ?systemJs or ?publicPath=... is set inline, override regexName
@@ -61,7 +61,7 @@ export class SetWebpackPublicPathLoader {
     return options;
   }
 
-  constructor() {
+  public constructor() {
     throw new Error('Constructing "LoadThemedStylesLoader" is not supported.');
   }
 }

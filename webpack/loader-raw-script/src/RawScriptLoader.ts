@@ -18,6 +18,4 @@ const loaderFn: (content: string) => string = (content: string) => {
   return lines.join(EOL);
 };
 
-/* tslint:disable:export-name */
 export = loaderFn;
-/* tslint:enable:export-name */

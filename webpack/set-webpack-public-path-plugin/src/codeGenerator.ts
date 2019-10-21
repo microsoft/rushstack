@@ -23,7 +23,7 @@ const varName: string = 'publicPath';
 
 export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (warning: string) => void): string {
   if (!options.webpackPublicPathVariable) {
-    throw '"webpackPublicPathVariable" option must be defined.';
+    throw new Error('"webpackPublicPathVariable" option must be defined.');
   }
 
   let lines: string[] = [];
@@ -165,7 +165,7 @@ export function getGlobalRegisterCode(debug: boolean = false): string {
 
 function joinLines(lines: string[], linePrefix?: string): string {
   return lines.map((line: string) => {
-    if (!!line) {
+    if (line) {
       return `${linePrefix || ''}${line}`;
     } else {
       return line;

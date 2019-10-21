@@ -22,9 +22,8 @@ describe('RawScriptLoader', () => {
 
   it('correctly sets exported objects', () => {
     const testScript: string = 'var x = 123; this.exportedObject = x;';
-    /* tslint:disable:no-eval */
+    // eslint-disable-next-line no-eval
     const exports: { exportedObject: number } = eval(wrapResult(RawScriptLoader(testScript)));
-    /* tslint:enable:no-eval */
     assert.equal(exports.exportedObject, 123);
   });
 });
