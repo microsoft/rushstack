@@ -24,7 +24,7 @@
     "@types/jju": "1.4.1",
     "@types/z-schema": "3.16.31",
     "gulp": "~4.0.2",
-    "@microsoft/node-library-build": "6.1.2",
-    "@microsoft/rush-stack-compiler-3.4": "0.1.15"
+    "@microsoft/node-library-build": "6.3.0",
+    "@microsoft/rush-stack-compiler-3.4": "0.3.0"
   }
 }
