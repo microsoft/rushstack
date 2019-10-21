@@ -72,15 +72,6 @@ export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor
   abstract class MixedClass extends baseClass implements ApiTypeParameterListMixin {
     public readonly [_typeParameters]: TypeParameter[];
 
-    /** @override */
-    public static onDeserializeInto(options: Partial<IApiTypeParameterListMixinOptions>, context: DeserializerContext,
-      jsonObject: IApiTypeParameterListMixinJson): void {
-
-      baseClass.onDeserializeInto(options, context, jsonObject);
-
-      options.typeParameters = jsonObject.typeParameters || [];
-    }
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public constructor(...args: any[]) {
       super(...args);
@@ -106,6 +97,15 @@ export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor
       } else {
         throw new InternalError('ApiTypeParameterListMixin expects a base class that inherits from ApiDeclaredItem');
       }
+    }
+
+    /** @override */
+    public static onDeserializeInto(options: Partial<IApiTypeParameterListMixinOptions>, context: DeserializerContext,
+      jsonObject: IApiTypeParameterListMixinJson): void {
+
+      baseClass.onDeserializeInto(options, context, jsonObject);
+
+      options.typeParameters = jsonObject.typeParameters || [];
     }
 
     public get typeParameters(): ReadonlyArray<TypeParameter> {

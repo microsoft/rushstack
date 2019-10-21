@@ -22,6 +22,10 @@ export class ChangeFiles {
   private _files: string[];
   private _changesPath: string;
 
+  public constructor(changesPath: string) {
+    this._changesPath = changesPath;
+  }
+
   /**
    * Validate if the newly added change files match the changed packages.
    */
@@ -92,10 +96,6 @@ export class ChangeFiles {
       }
     });
     return changes;
-  }
-
-  public constructor(changesPath: string) {
-    this._changesPath = changesPath;
   }
 
   /**

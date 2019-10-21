@@ -46,12 +46,12 @@ export interface IApiConstructorOptions extends
  */
 export class ApiConstructor extends ApiParameterListMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
 
-  public static getContainerKey(overloadIndex: number): string {
-    return `|${ApiItemKind.Constructor}|${overloadIndex}`;
-  }
-
   public constructor(options: IApiConstructorOptions) {
     super(options);
+  }
+
+  public static getContainerKey(overloadIndex: number): string {
+    return `|${ApiItemKind.Constructor}|${overloadIndex}`;
   }
 
   /** @override */

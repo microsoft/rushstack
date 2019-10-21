@@ -58,6 +58,14 @@ export function ApiStaticMixin<TBaseClass extends IApiItemConstructor>(baseClass
   abstract class MixedClass extends baseClass implements ApiStaticMixin {
     public [_isStatic]: boolean;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public constructor(...args: any[]) {
+      super(...args);
+
+      const options: IApiStaticMixinOptions = args[0];
+      this[_isStatic] = options.isStatic;
+    }
+
     /** @override */
     public static onDeserializeInto(options: Partial<IApiStaticMixinOptions>, context: DeserializerContext,
       jsonObject: IApiStaticMixinJson): void {
@@ -65,14 +73,6 @@ export function ApiStaticMixin<TBaseClass extends IApiItemConstructor>(baseClass
       baseClass.onDeserializeInto(options, context, jsonObject);
 
       options.isStatic = jsonObject.isStatic;
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public constructor(...args: any[]) {
-      super(...args);
-
-      const options: IApiStaticMixinOptions = args[0];
-      this[_isStatic] = options.isStatic;
     }
 
     public get isStatic(): boolean {

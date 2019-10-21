@@ -40,6 +40,10 @@ export interface ILoadThemedStylesLoaderOptions {
 export class LoadThemedStylesLoader {
   private static _loadedThemedStylesPath: string = loadedThemedStylesPath;
 
+  public constructor() {
+    throw new Error('Constructing "LoadThemedStylesLoader" is not supported.');
+  }
+
   public static set loadedThemedStylesPath(value: string) {
     LoadThemedStylesLoader._loadedThemedStylesPath = value;
   }
@@ -82,7 +86,4 @@ export class LoadThemedStylesLoader {
     ].join('\n');
   }
 
-  public constructor() {
-    throw new Error('Constructing "LoadThemedStylesLoader" is not supported.');
-  }
 }

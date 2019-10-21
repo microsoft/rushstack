@@ -74,6 +74,8 @@ export class JsonSchema {
   private _validator: Validator | undefined = undefined;
   private _schemaObject: JsonObject | undefined = undefined;
 
+  private constructor() { }
+
   /**
    * Registers a JsonSchema that will be loaded from a file on disk.
    * @remarks
@@ -279,9 +281,6 @@ export class JsonSchema {
       };
       errorCallback(args);
     }
-  }
-
-  private constructor() {
   }
 
   private _ensureLoaded(): string {

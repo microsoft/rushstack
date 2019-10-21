@@ -74,6 +74,65 @@ export class PackageJsonEditor {
   private readonly _devDependencies: Map<string, PackageJsonDependency>;
   private _modified: boolean;
 
+  private constructor(filepath: string, data: IPackageJson) {
+    this._filePath = filepath;
+    this._data = data;
+    this._modified = false;
+
+    this._dependencies = new Map<string, PackageJsonDependency>();
+    this._devDependencies = new Map<string, PackageJsonDependency>();
+
+    const dependencies: { [key: string]: string } = data.dependencies || {};
+    const optionalDependencies: { [key: string]: string } = data.optionalDependencies || {};
+    const peerDependencies: { [key: string]: string } = data.peerDependencies || {};
+
+    const devDependencies: { [key: string]: string } = data.devDependencies || {};
+
+    const _onChange: () => void = this._onChange.bind(this);
+
+    try {
+      Object.keys(dependencies || {}).forEach((packageName: string) => {
+        if (Object.prototype.hasOwnProperty.call(optionalDependencies, packageName)) {
+          throw new Error(`The package "${packageName}" cannot be listed in both `
+            + `"dependencies" and "optionalDependencies"`);
+        }
+        if (Object.prototype.hasOwnProperty.call(peerDependencies, packageName)) {
+          throw new Error(`The package "${packageName}" cannot be listed in both `
+            + `"dependencies" and "peerDependencies"`);
+        }
+
+        this._dependencies.set(packageName,
+          new PackageJsonDependency(packageName, dependencies[packageName], DependencyType.Regular, _onChange));
+      });
+
+      Object.keys(optionalDependencies || {}).forEach((packageName: string) => {
+        if (Object.prototype.hasOwnProperty.call(peerDependencies, packageName)) {
+          throw new Error(`The package "${packageName}" cannot be listed in both `
+            + `"optionalDependencies" and "peerDependencies"`);
+        }
+        this._dependencies.set(packageName,
+          new PackageJsonDependency(packageName, optionalDependencies[packageName], DependencyType.Optional, _onChange)
+        );
+      });
+
+      Object.keys(peerDependencies || {}).forEach((packageName: string) => {
+        this._dependencies.set(packageName,
+          new PackageJsonDependency(packageName, peerDependencies[packageName], DependencyType.Peer, _onChange));
+      });
+
+      Object.keys(devDependencies || {}).forEach((packageName: string) => {
+        this._devDependencies.set(packageName,
+          new PackageJsonDependency(packageName, devDependencies[packageName], DependencyType.Dev, _onChange));
+      });
+
+      Sort.sortMapKeys(this._dependencies);
+      Sort.sortMapKeys(this._devDependencies);
+
+    } catch (e) {
+      throw new Error(`Error loading "${filepath}": ${e.message}`);
+    }
+  }
+
   public static load(filePath: string): PackageJsonEditor {
     return new PackageJsonEditor(filePath, JsonFile.load(filePath));
   }
@@ -139,65 +198,6 @@ export class PackageJsonEditor {
       return true;
     }
     return false;
-  }
-
-  private constructor(filepath: string, data: IPackageJson) {
-    this._filePath = filepath;
-    this._data = data;
-    this._modified = false;
-
-    this._dependencies = new Map<string, PackageJsonDependency>();
-    this._devDependencies = new Map<string, PackageJsonDependency>();
-
-    const dependencies: { [key: string]: string } = data.dependencies || {};
-    const optionalDependencies: { [key: string]: string } = data.optionalDependencies || {};
-    const peerDependencies: { [key: string]: string } = data.peerDependencies || {};
-
-    const devDependencies: { [key: string]: string } = data.devDependencies || {};
-
-    const _onChange: () => void = this._onChange.bind(this);
-
-    try {
-      Object.keys(dependencies || {}).forEach((packageName: string) => {
-        if (Object.prototype.hasOwnProperty.call(optionalDependencies, packageName)) {
-          throw new Error(`The package "${packageName}" cannot be listed in both `
-            + `"dependencies" and "optionalDependencies"`);
-        }
-        if (Object.prototype.hasOwnProperty.call(peerDependencies, packageName)) {
-          throw new Error(`The package "${packageName}" cannot be listed in both `
-            + `"dependencies" and "peerDependencies"`);
-        }
-
-        this._dependencies.set(packageName,
-          new PackageJsonDependency(packageName, dependencies[packageName], DependencyType.Regular, _onChange));
-      });
-
-      Object.keys(optionalDependencies || {}).forEach((packageName: string) => {
-        if (Object.prototype.hasOwnProperty.call(peerDependencies, packageName)) {
-          throw new Error(`The package "${packageName}" cannot be listed in both `
-            + `"optionalDependencies" and "peerDependencies"`);
-        }
-        this._dependencies.set(packageName,
-          new PackageJsonDependency(packageName, optionalDependencies[packageName], DependencyType.Optional, _onChange)
-        );
-      });
-
-      Object.keys(peerDependencies || {}).forEach((packageName: string) => {
-        this._dependencies.set(packageName,
-          new PackageJsonDependency(packageName, peerDependencies[packageName], DependencyType.Peer, _onChange));
-      });
-
-      Object.keys(devDependencies || {}).forEach((packageName: string) => {
-        this._devDependencies.set(packageName,
-          new PackageJsonDependency(packageName, devDependencies[packageName], DependencyType.Dev, _onChange));
-      });
-
-      Sort.sortMapKeys(this._dependencies);
-      Sort.sortMapKeys(this._devDependencies);
-
-    } catch (e) {
-      throw new Error(`Error loading "${filepath}": ${e.message}`);
-    }
   }
 
   private _onChange(): void {

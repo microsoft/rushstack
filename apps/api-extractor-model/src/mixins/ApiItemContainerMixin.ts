@@ -116,18 +116,6 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
     // that share a common ApiItemKind.  Examples include overloaded constructors or index signatures.
     public [_membersByKind]: Map<string, ApiItem[]> | undefined;  // key is ApiItemKind
 
-    /** @override */
-    public static onDeserializeInto(options: Partial<IApiItemContainerMixinOptions>,
-      context: DeserializerContext, jsonObject: IApiItemContainerJson): void {
-
-      baseClass.onDeserializeInto(options, context, jsonObject);
-
-      options.members = [];
-      for (const memberObject of jsonObject.members) {
-        options.members.push(ApiItem.deserialize(memberObject, context));
-      }
-    }
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public constructor(...args: any[]) {
       super(...args);
@@ -140,6 +128,18 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
         for (const member of options.members) {
           this.addMember(member);
         }
+      }
+    }
+
+    /** @override */
+    public static onDeserializeInto(options: Partial<IApiItemContainerMixinOptions>,
+      context: DeserializerContext, jsonObject: IApiItemContainerJson): void {
+
+      baseClass.onDeserializeInto(options, context, jsonObject);
+
+      options.members = [];
+      for (const memberObject of jsonObject.members) {
+        options.members.push(ApiItem.deserialize(memberObject, context));
       }
     }
 

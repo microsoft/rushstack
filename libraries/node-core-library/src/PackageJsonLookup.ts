@@ -43,6 +43,15 @@ export class PackageJsonLookup {
   // packageJsonPath --> packageName
   private _packageJsonCache: Map<string, IPackageJson>;
 
+  public constructor(parameters?: IPackageJsonLookupParameters) {
+    if (parameters) {
+      if (parameters.loadExtraFields) {
+        this._loadExtraFields = parameters.loadExtraFields;
+      }
+    }
+    this.clearCache();
+  }
+
   /**
    * A helper for loading the caller's own package.json file.
    *
@@ -83,15 +92,6 @@ export class PackageJsonLookup {
       || 'package.json';
     throw new Error(`PackageJsonLookup.loadOwnPackageJson() failed because the "version" field is missing in`
       + ` ${errorPath}`);
-  }
-
-  public constructor(parameters?: IPackageJsonLookupParameters) {
-    if (parameters) {
-      if (parameters.loadExtraFields) {
-        this._loadExtraFields = parameters.loadExtraFields;
-      }
-    }
-    this.clearCache();
   }
 
   /**

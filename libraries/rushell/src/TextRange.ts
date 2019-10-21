@@ -44,6 +44,13 @@ export class TextRange {
    */
   public readonly buffer: string;
 
+  private constructor(buffer: string, pos: number, end: number) {
+    this.buffer = buffer;
+    this.pos = pos;
+    this.end = end;
+    this._validateBounds();
+  }
+
   /**
    * Constructs a TextRange that corresponds to an entire string object.
    */
@@ -152,13 +159,6 @@ export class TextRange {
     }
 
     return { line, column };
-  }
-
-  private constructor(buffer: string, pos: number, end: number) {
-    this.buffer = buffer;
-    this.pos = pos;
-    this.end = end;
-    this._validateBounds();
   }
 
   private _validateBounds(): TextRange {

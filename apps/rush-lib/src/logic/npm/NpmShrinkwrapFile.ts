@@ -26,6 +26,22 @@ interface INpmShrinkwrapJson {
 export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   private _shrinkwrapJson: INpmShrinkwrapJson;
 
+  private constructor(shrinkwrapJson: INpmShrinkwrapJson) {
+    super();
+    this._shrinkwrapJson = shrinkwrapJson;
+
+    // Normalize the data
+    if (!this._shrinkwrapJson.version) {
+      this._shrinkwrapJson.version = '';
+    }
+    if (!this._shrinkwrapJson.name) {
+      this._shrinkwrapJson.name = '';
+    }
+    if (!this._shrinkwrapJson.dependencies) {
+      this._shrinkwrapJson.dependencies = { };
+    }
+  }
+
   public static loadFromFile(shrinkwrapJsonFilename: string): NpmShrinkwrapFile | undefined {
     let data: string | undefined = undefined;
     try {
@@ -95,19 +111,4 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     return new DependencySpecifier(dependencySpecifier.packageName, dependencyJson.version);
   }
 
-  private constructor(shrinkwrapJson: INpmShrinkwrapJson) {
-    super();
-    this._shrinkwrapJson = shrinkwrapJson;
-
-    // Normalize the data
-    if (!this._shrinkwrapJson.version) {
-      this._shrinkwrapJson.version = '';
-    }
-    if (!this._shrinkwrapJson.name) {
-      this._shrinkwrapJson.name = '';
-    }
-    if (!this._shrinkwrapJson.dependencies) {
-      this._shrinkwrapJson.dependencies = { };
-    }
-  }
 }

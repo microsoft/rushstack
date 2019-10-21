@@ -61,15 +61,6 @@ export function ApiReturnTypeMixin<TBaseClass extends IApiItemConstructor>(baseC
   abstract class MixedClass extends baseClass implements ApiReturnTypeMixin {
     public [_returnTypeExcerpt]: Excerpt;
 
-    /** @override */
-    public static onDeserializeInto(options: Partial<IApiReturnTypeMixinOptions>, context: DeserializerContext,
-      jsonObject: IApiReturnTypeMixinJson): void {
-
-      baseClass.onDeserializeInto(options, context, jsonObject);
-
-      options.returnTypeTokenRange = jsonObject.returnTypeTokenRange;
-    }
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public constructor(...args: any[]) {
       super(...args);
@@ -81,6 +72,15 @@ export function ApiReturnTypeMixin<TBaseClass extends IApiItemConstructor>(baseC
       } else {
         throw new InternalError('ApiReturnTypeMixin expects a base class that inherits from ApiDeclaredItem');
       }
+    }
+
+    /** @override */
+    public static onDeserializeInto(options: Partial<IApiReturnTypeMixinOptions>, context: DeserializerContext,
+      jsonObject: IApiReturnTypeMixinJson): void {
+
+      baseClass.onDeserializeInto(options, context, jsonObject);
+
+      options.returnTypeTokenRange = jsonObject.returnTypeTokenRange;
     }
 
     public get returnTypeExcerpt(): Excerpt {

@@ -63,6 +63,11 @@ export class PackageMetadataManager {
   private readonly _packageMetadataByPackageJsonPath: Map<string, PackageMetadata>
     = new Map<string, PackageMetadata>();
 
+  public constructor(packageJsonLookup: PackageJsonLookup, messageRouter: MessageRouter) {
+    this._packageJsonLookup = packageJsonLookup;
+    this._messageRouter = messageRouter;
+  }
+
   // This feature is still being standardized: https://github.com/microsoft/tsdoc/issues/7
   // In the future we will use the @microsoft/tsdoc library to read this file.
   private static _resolveTsdocMetadataPathFromPackageJson(packageFolder: string,
@@ -147,11 +152,6 @@ export class PackageMetadataManager {
       convertLineEndings: NewlineKind.CrLf,
       ensureFolderExists: true
     });
-  }
-
-  public constructor(packageJsonLookup: PackageJsonLookup, messageRouter: MessageRouter) {
-    this._packageJsonLookup = packageJsonLookup;
-    this._messageRouter = messageRouter;
   }
 
   /**

@@ -66,13 +66,14 @@ export interface IApiConstructSignatureOptions extends
 export class ApiConstructSignature extends ApiTypeParameterListMixin(ApiParameterListMixin(ApiReleaseTagMixin(
   ApiReturnTypeMixin(ApiDeclaredItem)))) {
 
+  public constructor(options: IApiConstructSignatureOptions) {
+    super(options);
+  }
+
   public static getContainerKey(overloadIndex: number): string {
     return `|${ApiItemKind.ConstructSignature}|${overloadIndex}`;
   }
 
-  public constructor(options: IApiConstructSignatureOptions) {
-    super(options);
-  }
 
   /** @override */
   public get kind(): ApiItemKind {

@@ -24,6 +24,10 @@ export class SetWebpackPublicPathLoader {
     publicPath: undefined
   };
 
+  public constructor() {
+    throw new Error('Constructing "LoadThemedStylesLoader" is not supported.');
+  }
+
   public static getGlobalRegisterCode(debug: boolean = false): string {
     return getGlobalRegisterCode(debug);
   }
@@ -59,9 +63,5 @@ export class SetWebpackPublicPathLoader {
     }
 
     return options;
-  }
-
-  public constructor() {
-    throw new Error('Constructing "LoadThemedStylesLoader" is not supported.');
   }
 }

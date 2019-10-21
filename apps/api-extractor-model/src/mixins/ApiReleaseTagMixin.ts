@@ -64,6 +64,14 @@ export function ApiReleaseTagMixin<TBaseClass extends IApiItemConstructor>(baseC
   abstract class MixedClass extends baseClass implements ApiReleaseTagMixin {
     public [_releaseTag]: ReleaseTag;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public constructor(...args: any[]) {
+      super(...args);
+
+      const options: IApiReleaseTagMixinOptions = args[0];
+      this[_releaseTag] = options.releaseTag;
+    }
+
     /** @override */
     public static onDeserializeInto(options: Partial<IApiReleaseTagMixinOptions>, context: DeserializerContext,
       jsonObject: IApiReleaseTagMixinJson): void {
@@ -76,14 +84,6 @@ export function ApiReleaseTagMixin<TBaseClass extends IApiItemConstructor>(baseC
       }
 
       options.releaseTag = deserializedReleaseTag;
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public constructor(...args: any[]) {
-      super(...args);
-
-      const options: IApiReleaseTagMixinOptions = args[0];
-      this[_releaseTag] = options.releaseTag;
     }
 
     public get releaseTag(): ReleaseTag {

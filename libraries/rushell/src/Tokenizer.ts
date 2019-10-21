@@ -65,14 +65,6 @@ export class Tokenizer {
   public readonly input: TextRange;
   private _currentIndex: number;
 
-  private static _isSpace(c: string | undefined): boolean {
-    // You can empirically test whether shell treats a given character as whitespace like this:
-    // echo $(echo -e a '\u0009' b)
-    // If you get "a b" it means the tab character (Unicode 0009) is being collapsed away.
-    // If you get "a   b" then the invisible character is being padded like a normal letter.
-    return c === ' ' || c === '\t';
-  }
-
   public constructor(input: TextRange | string) {
     if (typeof(input) === 'string') {
       this.input = TextRange.fromString(input);
@@ -80,6 +72,14 @@ export class Tokenizer {
       this.input = input;
     }
     this._currentIndex = this.input.pos;
+  }
+
+  private static _isSpace(c: string | undefined): boolean {
+    // You can empirically test whether shell treats a given character as whitespace like this:
+    // echo $(echo -e a '\u0009' b)
+    // If you get "a b" it means the tab character (Unicode 0009) is being collapsed away.
+    // If you get "a   b" then the invisible character is being padded like a normal letter.
+    return c === ' ' || c === '\t';
   }
 
   public get currentIndex(): number {

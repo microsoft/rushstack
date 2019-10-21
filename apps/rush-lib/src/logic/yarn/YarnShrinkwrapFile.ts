@@ -84,6 +84,57 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   private _shrinkwrapJson: IYarnShrinkwrapJson;
   private _tempProjectNames: string[];
 
+  private constructor(shrinkwrapJson: IYarnShrinkwrapJson) {
+    super();
+    this._shrinkwrapJson = shrinkwrapJson;
+    this._tempProjectNames = [];
+
+    const seenEntries: Set<string> = new Set();
+
+    for (const key of Object.keys(this._shrinkwrapJson)) {
+      // Example key:
+      const packageNameAndSemVer: IPackageNameAndSemVer = YarnShrinkwrapFile._decodePackageNameAndSemVer(key);
+
+      // If it starts with @rush-temp, then include it:
+      if (PackageName.getScope(packageNameAndSemVer.packageName) === RushConstants.rushTempNpmScope) {
+        if (!/^file:/i.test(packageNameAndSemVer.semVerRange)) {
+          // Sanity check to make sure this is a real package.
+          // (Nobody should ever have an actual dependency on an "@rush-temp/" package.
+          throw new Error('Unexpected package/semver expression found in the Yarn shrinkwrap file (yarn.lock): '
+            + JSON.stringify(key));
+        }
+
+        if (!seenEntries.add(packageNameAndSemVer.packageName)) {
+          // Sanity check -- this should never happen
+          throw new Error('Duplicate @rush-temp package found in the Yarn shrinkwrap file (yarn.lock): '
+            + JSON.stringify(key));
+        }
+
+        this._tempProjectNames.push(packageNameAndSemVer.packageName);
+
+        const entry: IYarnShrinkwrapEntry = this._shrinkwrapJson[key];
+
+        // Yarn fails installation if the integrity hash does not match a "file://" reference to a tarball.
+        // This is incorrect:  Normally a mismatched integrity hash does indicate a corrupted download,
+        // since an NPM registry normally guarantees that a specific version number cannot be republished
+        // with different content.  But this is NOT true for a "file://" reference, and there are valid
+        // reasons why someone would update the file.  (PNPM handles this correctly, by simply reinstalling
+        // the tarball if its hash has changed.)
+        //
+        // As a workaround, we can simply remove the hashes from the shrinkwrap file.  We will convert this:
+        //   "file:./projects/my-project.tgz#80cefe05fd715e65219d1ed481209dc4023408aa"
+        // ..to this:
+        //   "file:./projects/my-project.tgz"
+        const indexOfHash: number = entry.resolved.indexOf('#');
+        if (indexOfHash >= 0) {
+          entry.resolved = entry.resolved.substring(0, indexOfHash);
+        }
+      }
+    }
+
+    this._tempProjectNames.sort();  // make the result deterministic
+  }
+
   public static loadFromFile(shrinkwrapFilename: string): YarnShrinkwrapFile | undefined {
     let shrinkwrapString: string;
     let shrinkwrapJson: lockfile.ParseResult;
@@ -177,56 +228,5 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
     tempProjectName: string): DependencySpecifier | undefined {
 
     throw new InternalError('Not implemented');
-  }
-
-  private constructor(shrinkwrapJson: IYarnShrinkwrapJson) {
-    super();
-    this._shrinkwrapJson = shrinkwrapJson;
-    this._tempProjectNames = [];
-
-    const seenEntries: Set<string> = new Set();
-
-    for (const key of Object.keys(this._shrinkwrapJson)) {
-      // Example key:
-      const packageNameAndSemVer: IPackageNameAndSemVer = YarnShrinkwrapFile._decodePackageNameAndSemVer(key);
-
-      // If it starts with @rush-temp, then include it:
-      if (PackageName.getScope(packageNameAndSemVer.packageName) === RushConstants.rushTempNpmScope) {
-        if (!/^file:/i.test(packageNameAndSemVer.semVerRange)) {
-          // Sanity check to make sure this is a real package.
-          // (Nobody should ever have an actual dependency on an "@rush-temp/" package.
-          throw new Error('Unexpected package/semver expression found in the Yarn shrinkwrap file (yarn.lock): '
-            + JSON.stringify(key));
-        }
-
-        if (!seenEntries.add(packageNameAndSemVer.packageName)) {
-          // Sanity check -- this should never happen
-          throw new Error('Duplicate @rush-temp package found in the Yarn shrinkwrap file (yarn.lock): '
-            + JSON.stringify(key));
-        }
-
-        this._tempProjectNames.push(packageNameAndSemVer.packageName);
-
-        const entry: IYarnShrinkwrapEntry = this._shrinkwrapJson[key];
-
-        // Yarn fails installation if the integrity hash does not match a "file://" reference to a tarball.
-        // This is incorrect:  Normally a mismatched integrity hash does indicate a corrupted download,
-        // since an NPM registry normally guarantees that a specific version number cannot be republished
-        // with different content.  But this is NOT true for a "file://" reference, and there are valid
-        // reasons why someone would update the file.  (PNPM handles this correctly, by simply reinstalling
-        // the tarball if its hash has changed.)
-        //
-        // As a workaround, we can simply remove the hashes from the shrinkwrap file.  We will convert this:
-        //   "file:./projects/my-project.tgz#80cefe05fd715e65219d1ed481209dc4023408aa"
-        // ..to this:
-        //   "file:./projects/my-project.tgz"
-        const indexOfHash: number = entry.resolved.indexOf('#');
-        if (indexOfHash >= 0) {
-          entry.resolved = entry.resolved.substring(0, indexOfHash);
-        }
-      }
-    }
-
-    this._tempProjectNames.sort();  // make the result deterministic
   }
 }

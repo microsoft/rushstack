@@ -37,6 +37,16 @@ export class VersionMismatchFinder {
   private _mismatches: Map<string, Map<string, VersionMismatchFinderEntity[]>>;
   private _projects: VersionMismatchFinderEntity[];
 
+  public constructor(
+    projects: VersionMismatchFinderEntity[],
+    allowedAlternativeVersions?: Map<string, ReadonlyArray<string>>
+  ) {
+    this._projects = projects;
+    this._mismatches = new Map<string, Map<string, VersionMismatchFinderEntity[]>>();
+    this._allowedAlternativeVersion = allowedAlternativeVersions || new Map<string, ReadonlyArray<string>>();
+    this._analyze();
+  }
+
   public static rushCheck(
     rushConfiguration: RushConfiguration,
     options: IVersionMismatchFinderRushCheckOptions = {}
@@ -105,17 +115,7 @@ export class VersionMismatchFinder {
     }
   }
 
-  public constructor(
-    projects: VersionMismatchFinderEntity[],
-    allowedAlternativeVersions?: Map<string, ReadonlyArray<string>>
-  ) {
-    this._projects = projects;
-    this._mismatches = new Map<string, Map<string, VersionMismatchFinderEntity[]>>();
-    this._allowedAlternativeVersion = allowedAlternativeVersions || new Map<string, ReadonlyArray<string>>();
-    this._analyze();
-  }
-
-  public get numberOfMismatches(): number {
+    public get numberOfMismatches(): number {
     return this._mismatches.size;
   }
 

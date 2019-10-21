@@ -66,6 +66,10 @@ export class ApiItem {
   private _canonicalReference: DeclarationReference | undefined;
   private _parent: ApiItem | undefined;
 
+  public constructor(options: IApiItemOptions) {
+    // ("options" is not used here, but part of the inheritance pattern)
+  }
+
   public static deserialize(jsonObject: IApiItemJson, context: DeserializerContext): ApiItem {
     // The Deserializer class is coupled with a ton of other classes, so  we delay loading it
     // to avoid ES5 circular imports.
@@ -78,10 +82,6 @@ export class ApiItem {
   public static onDeserializeInto(options: Partial<IApiItemOptions>,  context: DeserializerContext,
     jsonObject: IApiItemJson): void {
     // (implemented by subclasses)
-  }
-
-  public constructor(options: IApiItemOptions) {
-    // ("options" is not used here, but part of the inheritance pattern)
   }
 
   /** @virtual */

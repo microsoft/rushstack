@@ -103,16 +103,6 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(ba
     public readonly [_overloadIndex]: number;
     public readonly [_parameters]: Parameter[];
 
-    /** @override */
-    public static onDeserializeInto(options: Partial<IApiParameterListMixinOptions>, context: DeserializerContext,
-      jsonObject: IApiParameterListJson): void {
-
-      baseClass.onDeserializeInto(options, context, jsonObject);
-
-      options.overloadIndex = jsonObject.overloadIndex;
-      options.parameters = jsonObject.parameters || [];
-    }
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public constructor(...args: any[]) {
       super(...args);
@@ -138,6 +128,16 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(ba
       } else {
         throw new InternalError('ApiReturnTypeMixin expects a base class that inherits from ApiDeclaredItem');
       }
+    }
+
+    /** @override */
+    public static onDeserializeInto(options: Partial<IApiParameterListMixinOptions>, context: DeserializerContext,
+      jsonObject: IApiParameterListJson): void {
+
+      baseClass.onDeserializeInto(options, context, jsonObject);
+
+      options.overloadIndex = jsonObject.overloadIndex;
+      options.parameters = jsonObject.parameters || [];
     }
 
     public get overloadIndex(): number {

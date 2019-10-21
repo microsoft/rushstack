@@ -25,6 +25,11 @@ export class DocumenterConfig {
    */
   public static readonly FILENAME: string = 'api-documenter.json';
 
+  private constructor(filePath: string, configFile: IConfigFile) {
+    this.configFilePath = filePath;
+    this.configFile = configFile;
+  }
+
   /**
    * Load and validate an api-documenter.json file.
    */
@@ -32,10 +37,5 @@ export class DocumenterConfig {
     const configFile: IConfigFile = JsonFile.loadAndValidate(configFilePath, DocumenterConfig.jsonSchema);
 
     return new DocumenterConfig(path.resolve(configFilePath), configFile);
-  }
-
-  private constructor(filePath: string, configFile: IConfigFile) {
-    this.configFilePath = filePath;
-    this.configFile = configFile;
   }
 }

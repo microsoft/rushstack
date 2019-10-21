@@ -18,6 +18,20 @@ interface IParserTestInstance {
 }
 
 /**
+ * Configure the `child_process` `spawn` mock for these tests. This relies on the mock implementation
+ * in `__mocks__/child_process.js`.
+ */
+function setSpawnMock(options?: ISpawnMockConfig): jest.Mock {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const cpMocked: ChildProcessModuleMock = require('child_process');
+  cpMocked.__setSpawnMockConfig(options);
+
+  const spawnMock: jest.Mock = cpMocked.spawn;
+  spawnMock.mockName('spawn');
+  return spawnMock;
+}
+
+/**
  * Helper to set up a test instance for RushCommandLineParser.
  */
 function getCommandLineParserInstance(repoName: string, taskName: string): IParserTestInstance {
@@ -43,20 +57,6 @@ function getCommandLineParserInstance(repoName: string, taskName: string): IPars
     parser,
     spawnMock
   };
-}
-
-/**
- * Configure the `child_process` `spawn` mock for these tests. This relies on the mock implementation
- * in `__mocks__/child_process.js`.
- */
-function setSpawnMock(options?: ISpawnMockConfig): jest.Mock {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const cpMocked: ChildProcessModuleMock = require('child_process');
-  cpMocked.__setSpawnMockConfig(options);
-
-  const spawnMock: jest.Mock = cpMocked.spawn;
-  spawnMock.mockName('spawn');
-  return spawnMock;
 }
 
 // Ordinals into the `mock.calls` array referencing each of the arguments to `spawn`

@@ -57,25 +57,6 @@ export abstract class VersionPolicy {
   private _versionFormatForPublish: VersionFormatForPublish;
 
   /**
-   * Loads from version policy json
-   *
-   * @param versionPolicyJson - version policy Json
-   *
-   * @internal
-   */
-  public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined {
-    const definition: VersionPolicyDefinitionName = VersionPolicyDefinitionName[versionPolicyJson.definitionName];
-    if (definition === VersionPolicyDefinitionName.lockStepVersion) {
-       // tslint:disable-next-line:no-use-before-declare
-      return new LockStepVersionPolicy(versionPolicyJson as ILockStepVersionJson);
-    } else if (definition === VersionPolicyDefinitionName.individualVersion) {
-      // tslint:disable-next-line:no-use-before-declare
-      return new IndividualVersionPolicy(versionPolicyJson as IIndividualVersionJson);
-    }
-    return undefined;
-  }
-
-  /**
    * @internal
    */
   public constructor(versionPolicyJson: IVersionPolicyJson) {
@@ -86,6 +67,25 @@ export abstract class VersionPolicy {
     const jsonDependencies: IVersionPolicyDependencyJson = versionPolicyJson.dependencies || { };
     this._versionFormatForCommit = jsonDependencies.versionFormatForCommit || VersionFormatForCommit.original;
     this._versionFormatForPublish = jsonDependencies.versionFormatForPublish || VersionFormatForPublish.original;
+  }
+
+  /**
+   * Loads from version policy json
+   *
+   * @param versionPolicyJson - version policy Json
+   *
+   * @internal
+   */
+  public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined {
+    const definition: VersionPolicyDefinitionName = VersionPolicyDefinitionName[versionPolicyJson.definitionName];
+    if (definition === VersionPolicyDefinitionName.lockStepVersion) {
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      return new LockStepVersionPolicy(versionPolicyJson as ILockStepVersionJson);
+    } else if (definition === VersionPolicyDefinitionName.individualVersion) {
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      return new IndividualVersionPolicy(versionPolicyJson as IIndividualVersionJson);
+    }
+    return undefined;
   }
 
   /**

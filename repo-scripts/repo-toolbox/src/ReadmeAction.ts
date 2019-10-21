@@ -7,16 +7,16 @@ import { RushConfiguration, RushConfigurationProject } from '@microsoft/rush-lib
 import { CommandLineAction } from '@microsoft/ts-command-line';
 
 export class ReadmeAction extends CommandLineAction {
-  private static _isPublished(project: RushConfigurationProject): boolean {
-    return project.shouldPublish || !!project.versionPolicyName;
-  }
-
   public constructor() {
     super({
       actionName: 'readme',
       summary: 'Generates README.md project table based on rush.json inventory',
       documentation: 'Use this to update the repo\'s README.md'
     });
+  }
+
+  private static _isPublished(project: RushConfigurationProject): boolean {
+    return project.shouldPublish || !!project.versionPolicyName;
   }
 
   protected onExecute(): Promise<void> { // abstract

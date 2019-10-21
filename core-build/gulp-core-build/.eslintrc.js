@@ -4,4 +4,8 @@ require("@rushstack/eslint-config/patch-eslint6");
 module.exports = {
   extends: [ "@rushstack/eslint-config" ],
   parserOptions: { tsconfigRootDir: __dirname },
+  rules: {
+    // This predates the new ESLint ruleset; not worth fixing
+    "@typescript-eslint/no-use-before-define": "off"
+  }
 };

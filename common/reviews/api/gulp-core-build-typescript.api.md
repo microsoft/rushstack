@@ -7,6 +7,7 @@
 import { ConsoleTerminalProvider } from '@microsoft/node-core-library';
 import { GulpTask } from '@microsoft/gulp-core-build';
 import { IBuildConfig } from '@microsoft/gulp-core-build';
+import { JsonObject } from '@microsoft/node-core-library';
 import { Terminal } from '@microsoft/node-core-library';
 import { TerminalProviderSeverity } from '@microsoft/node-core-library';
 import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.1';
@@ -46,7 +47,7 @@ export class LintCmdTask extends RSCTask<ILintCmdTaskConfig> {
     // (undocumented)
     executeTask(): Promise<void>;
     // (undocumented)
-    loadSchema(): Object;
+    loadSchema(): JsonObject;
 }
 
 // @public (undocumented)
@@ -58,7 +59,7 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
     // (undocumented)
     executeTask(): Promise<void>;
     // (undocumented)
-    loadSchema(): Object;
+    loadSchema(): JsonObject;
     // (undocumented)
     protected _onData(data: Buffer): void;
     }
@@ -72,7 +73,7 @@ export class TslintCmdTask extends RSCTask<ITslintCmdTaskConfig> {
     // (undocumented)
     executeTask(): Promise<void>;
     // (undocumented)
-    loadSchema(): Object;
+    loadSchema(): JsonObject;
 }
 
 

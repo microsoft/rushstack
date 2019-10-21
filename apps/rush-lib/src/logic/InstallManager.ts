@@ -132,6 +132,24 @@ export class InstallManager {
 
   private _options: IInstallManagerOptions;
 
+  public constructor(
+    rushConfiguration: RushConfiguration,
+    rushGlobalFolder: RushGlobalFolder,
+    purgeManager: PurgeManager,
+    options: IInstallManagerOptions
+  ) {
+    this._rushConfiguration = rushConfiguration;
+    this._rushGlobalFolder = rushGlobalFolder;
+    this._commonTempFolderRecycler = purgeManager.commonTempFolderRecycler;
+    this._options = options;
+
+    this._commonNodeModulesMarker = new LastInstallFlag(this._rushConfiguration.commonTempFolder, {
+      node: process.versions.node,
+      packageManager: rushConfiguration.packageManager,
+      packageManagerVersion: rushConfiguration.packageManagerToolVersion
+    });
+  }
+
   /**
    * Returns a map of all direct dependencies that only have a single semantic version specifier.
    * Returns a map: dependency name --> version specifier
@@ -247,24 +265,6 @@ export class InstallManager {
 
   public get commonNodeModulesMarker(): LastInstallFlag {
     return this._commonNodeModulesMarker;
-  }
-
-  public constructor(
-    rushConfiguration: RushConfiguration,
-    rushGlobalFolder: RushGlobalFolder,
-    purgeManager: PurgeManager,
-    options: IInstallManagerOptions
-  ) {
-    this._rushConfiguration = rushConfiguration;
-    this._rushGlobalFolder = rushGlobalFolder;
-    this._commonTempFolderRecycler = purgeManager.commonTempFolderRecycler;
-    this._options = options;
-
-    this._commonNodeModulesMarker = new LastInstallFlag(this._rushConfiguration.commonTempFolder, {
-      node: process.versions.node,
-      packageManager: rushConfiguration.packageManager,
-      packageManagerVersion: rushConfiguration.packageManagerToolVersion
-    });
   }
 
   public async doInstall(): Promise<void> {

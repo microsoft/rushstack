@@ -8,6 +8,14 @@ import { TypeScriptMessageFormatter } from './TypeScriptMessageFormatter';
 import { TypeScriptInternals } from './TypeScriptInternals';
 
 export class TypeScriptHelpers {
+  // Matches TypeScript's encoded names for well-known ECMAScript symbols like
+  // "__@iterator" or "__@toStringTag".
+  private static readonly _wellKnownSymbolNameRegExp: RegExp = /^__@(\w+)$/;
+
+  // Matches TypeScript's encoded names for late-bound symbols derived from `unique symbol` declarations
+  // which have the form of "__@<variableName>@<symbolId>", i.e. "__@someSymbol@12345".
+  private static readonly _uniqueSymbolNameRegExp: RegExp = /^__@.*@\d+$/;
+
   /**
    * This traverses any symbol aliases to find the original place where an item was defined.
    * For example, suppose a class is defined as "export default class MyClass { }"
@@ -210,10 +218,6 @@ export class TypeScriptHelpers {
     return highest;
   }
 
-  // Matches TypeScript's encoded names for well-known ECMAScript symbols like
-  // "__@iterator" or "__@toStringTag".
-  private static readonly _wellKnownSymbolNameRegExp: RegExp = /^__@(\w+)$/;
-
   /**
    * Decodes the names that the compiler generates for a built-in ECMAScript symbol.
    *
@@ -230,10 +234,6 @@ export class TypeScriptHelpers {
     }
     return undefined;
   }
-
-  // Matches TypeScript's encoded names for late-bound symbols derived from `unique symbol` declarations
-  // which have the form of "__@<variableName>@<symbolId>", i.e. "__@someSymbol@12345".
-  private static readonly _uniqueSymbolNameRegExp: RegExp = /^__@.*@\d+$/;
 
   /**
    * Returns whether the provided name was generated for a TypeScript `unique symbol`.

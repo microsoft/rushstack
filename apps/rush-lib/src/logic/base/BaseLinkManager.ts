@@ -26,6 +26,10 @@ export interface IBaseLinkManagerCreateSymlinkOptions extends IFileSystemCreateL
 export abstract class BaseLinkManager {
   protected _rushConfiguration: RushConfiguration;
 
+  public constructor(rushConfiguration: RushConfiguration) {
+    this._rushConfiguration = rushConfiguration;
+  }
+
   protected static _createSymlink(options: IBaseLinkManagerCreateSymlinkOptions): void {
     const newLinkFolder: string = path.dirname(options.newLinkPath);
     FileSystem.ensureFolder(newLinkFolder);
@@ -177,10 +181,6 @@ export abstract class BaseLinkManager {
         BaseLinkManager._createSymlinksForDependencies(child);
       }
     }
-  }
-
-  public constructor(rushConfiguration: RushConfiguration) {
-    this._rushConfiguration = rushConfiguration;
   }
 
   /**

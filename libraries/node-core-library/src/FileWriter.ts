@@ -38,6 +38,10 @@ export interface IFileWriterFlags {
 export class FileWriter {
   private _fileDescriptor: number | undefined;
 
+  private constructor(fileDescriptor: number) {
+    this._fileDescriptor = fileDescriptor;
+  }
+
   /**
    * Opens a new file handle to the file at the specified path and given mode.
    * Behind the scenes it uses `fs.openSync()`.
@@ -88,9 +92,5 @@ export class FileWriter {
       this._fileDescriptor = undefined;
       fsx.closeSync(fd);
     }
-  }
-
-  private constructor(fileDescriptor: number) {
-    this._fileDescriptor = fileDescriptor;
   }
 }

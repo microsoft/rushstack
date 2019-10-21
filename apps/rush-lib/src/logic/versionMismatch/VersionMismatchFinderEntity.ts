@@ -17,14 +17,14 @@ export abstract class VersionMismatchFinderEntity {
   public readonly cyclicDependencyProjects: Set<string>;
   public readonly skipRushCheck: boolean | undefined;
 
-  public abstract filePath: string;
-  public abstract allDependencies: ReadonlyArray<PackageJsonDependency>;
-
   public constructor(options: IVersionMismatchFinderEntityOptions) {
     this.friendlyName = options.friendlyName;
     this.cyclicDependencyProjects = options.cyclicDependencyProjects;
     this.skipRushCheck = options.skipRushCheck;
   }
+
+  public abstract filePath: string;
+  public abstract allDependencies: ReadonlyArray<PackageJsonDependency>;
 
   public abstract tryGetDependency(packageName: string): PackageJsonDependency | undefined;
   public abstract tryGetDevDependency(packageName: string): PackageJsonDependency | undefined;

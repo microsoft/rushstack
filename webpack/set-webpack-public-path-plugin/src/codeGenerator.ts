@@ -21,6 +21,32 @@ export interface IInternalOptions extends ISetWebpackPublicPathOptions {
 
 const varName: string = 'publicPath';
 
+function joinLines(lines: string[], linePrefix?: string): string {
+  return lines.map((line: string) => {
+    if (line) {
+      return `${linePrefix || ''}${line}`;
+    } else {
+      return line;
+    }
+  }).join(EOL).replace(new RegExp(`${EOL}${EOL}+`, 'g'), `${EOL}${EOL}`);
+}
+
+function escapeSingleQuotes(str: string): string | undefined {
+  if (str) {
+    return str.replace('\'', '\\\'');
+  } else {
+    return undefined;
+  }
+}
+
+function appendSlashAndEscapeSingleQuotes(str: string): string | undefined {
+  if (str && str.substr(-1) !== '/') {
+    str = str + '/';
+  }
+
+  return escapeSingleQuotes(str);
+}
+
 export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (warning: string) => void): string {
   if (!options.webpackPublicPathVariable) {
     throw new Error('"webpackPublicPathVariable" option must be defined.');
@@ -161,30 +187,4 @@ export function getGlobalRegisterCode(debug: boolean = false): string {
 
     return `${EOL}${minifyOutput.code}`;
   }
-}
-
-function joinLines(lines: string[], linePrefix?: string): string {
-  return lines.map((line: string) => {
-    if (line) {
-      return `${linePrefix || ''}${line}`;
-    } else {
-      return line;
-    }
-  }).join(EOL).replace(new RegExp(`${EOL}${EOL}+`, 'g'), `${EOL}${EOL}`);
-}
-
-function escapeSingleQuotes(str: string): string | undefined {
-  if (str) {
-    return str.replace('\'', '\\\'');
-  } else {
-    return undefined;
-  }
-}
-
-function appendSlashAndEscapeSingleQuotes(str: string): string | undefined {
-  if (str && str.substr(-1) !== '/') {
-    str = str + '/';
-  }
-
-  return escapeSingleQuotes(str);
 }

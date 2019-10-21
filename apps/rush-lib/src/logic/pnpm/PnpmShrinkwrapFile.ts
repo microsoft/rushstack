@@ -153,6 +153,26 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
   private _shrinkwrapJson: IPnpmShrinkwrapYaml;
 
+  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, shrinkwrapFilename: string) {
+    super();
+    this._shrinkwrapJson = shrinkwrapJson;
+    this.shrinkwrapFilename = shrinkwrapFilename;
+
+    // Normalize the data
+    if (!this._shrinkwrapJson.registry) {
+      this._shrinkwrapJson.registry = '';
+    }
+    if (!this._shrinkwrapJson.dependencies) {
+      this._shrinkwrapJson.dependencies = { };
+    }
+    if (!this._shrinkwrapJson.specifiers) {
+      this._shrinkwrapJson.specifiers = { };
+    }
+    if (!this._shrinkwrapJson.packages) {
+      this._shrinkwrapJson.packages = { };
+    }
+  }
+
   public static loadFromFile(shrinkwrapYamlFilename: string): PnpmShrinkwrapFile | undefined {
     try {
       if (!FileSystem.exists(shrinkwrapYamlFilename)) {
@@ -371,26 +391,6 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     const dependencyKey: string = packageDescription.dependencies[packageName];
     return this._parsePnpmDependencyKey(packageName, dependencyKey);
-  }
-
-  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, shrinkwrapFilename: string) {
-    super();
-    this._shrinkwrapJson = shrinkwrapJson;
-    this.shrinkwrapFilename = shrinkwrapFilename;
-
-    // Normalize the data
-    if (!this._shrinkwrapJson.registry) {
-      this._shrinkwrapJson.registry = '';
-    }
-    if (!this._shrinkwrapJson.dependencies) {
-      this._shrinkwrapJson.dependencies = { };
-    }
-    if (!this._shrinkwrapJson.specifiers) {
-      this._shrinkwrapJson.specifiers = { };
-    }
-    if (!this._shrinkwrapJson.packages) {
-      this._shrinkwrapJson.packages = { };
-    }
   }
 
   /**

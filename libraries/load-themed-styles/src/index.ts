@@ -3,6 +3,8 @@
  * to use if that slot is not specified by the theme.
  */
 
+/* eslint-disable @typescript-eslint/no-use-before-define */
+
 // Declaring a global here in case that the execution environment is Node.js (without importing the
 // entire node.js d.ts for now)
 declare let global: any; // eslint-disable-line @typescript-eslint/no-explicit-any
