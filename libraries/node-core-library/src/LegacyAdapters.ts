@@ -3,11 +3,13 @@
 
 /**
  * Callback used by {@link LegacyAdapters}.
+ * @public
  */
 export type LegacyCallback<TResult, TError> = (error: TError, result: TResult) => void;
 
 /**
  * Helper functions used when interacting with APIs that do not follow modern coding practices.
+ * @public
  */
 export class LegacyAdapters {
   /**
