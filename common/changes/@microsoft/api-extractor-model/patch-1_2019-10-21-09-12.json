@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "Clarified an error message",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model",
+  "email": "robin.stevens@scz.be"
+}
