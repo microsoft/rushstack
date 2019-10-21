@@ -7,21 +7,16 @@ import * as TSLint from 'tslint';
 
 import { CmdRunner } from './CmdRunner';
 import { ToolPaths } from './ToolPaths';
+import { ILintRunnerConfig } from './ILintRunnerConfig';
 import {
   RushStackCompilerBase,
-  IRushStackCompilerBaseOptions,
   WriteFileIssueFunction
 } from './RushStackCompilerBase';
 
 /**
  * @public
  */
-export interface ITslintRunnerConfig extends IRushStackCompilerBaseOptions {
-  /**
-   * If true, displays warnings as errors. Defaults to false.
-   */
-  displayAsError?: boolean;
-}
+export interface ITslintRunnerConfig extends ILintRunnerConfig { }
 
 /**
  * @beta

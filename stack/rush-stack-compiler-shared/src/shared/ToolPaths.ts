@@ -9,6 +9,7 @@ import * as path from 'path';
  */
 export class ToolPaths {
   private static _typescriptPackagePath: string | undefined;
+  private static _eslintPackagePath: string | undefined;
   private static _tslintPackagePath: string | undefined;
 
   public static get typescriptPackagePath(): string {
@@ -25,6 +26,22 @@ export class ToolPaths {
 
   public static get typescriptPackageJson(): IPackageJson {
     return JsonFile.load(path.join(ToolPaths.typescriptPackagePath, 'package.json'));
+  }
+
+  public static get eslintPackagePath(): string {
+    if (!ToolPaths._eslintPackagePath) {
+      ToolPaths._eslintPackagePath = ToolPaths._getPackagePath('eslint');
+
+      if (!ToolPaths._eslintPackagePath) {
+        throw new Error('Unable to find "eslint" package.');
+      }
+    }
+
+    return ToolPaths._eslintPackagePath;
+  }
+
+  public static get eslintPackageJson(): IPackageJson {
+    return JsonFile.load(path.join(ToolPaths.eslintPackagePath, 'package.json'));
   }
 
   public static get tslintPackagePath(): string {

@@ -1,5 +1,5 @@
 {
-  "name": "node-library-build-test",
+  "name": "node-library-build-tslint-test",
   "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",

@@ -20,7 +20,7 @@ export interface IApiExtractorTaskConfig extends IRSCTaskConfig {
  * The ApiExtractorTask uses the api-extractor tool to analyze a project for public APIs. api-extractor will detect
  * common problems and generate a report of the exported public API. The task uses the entry point of a project to
  * find the aliased exports of the project. An api-extractor.ts file is generated for the project in the temp folder.
- * @beta
+ * @public
  */
 export class ApiExtractorTask extends RSCTask<IApiExtractorTaskConfig>  {
   constructor() {

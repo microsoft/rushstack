@@ -24,6 +24,11 @@ export class ApiExtractorRunner extends RushStackCompilerBase {
 }
 
 // @public (undocumented)
+export interface ILintRunnerConfig extends IRushStackCompilerBaseOptions {
+    displayAsError?: boolean;
+}
+
+// @public (undocumented)
 export interface IRushStackCompilerBaseOptions {
     // (undocumented)
     fileError: WriteFileIssueFunction;
@@ -32,14 +37,20 @@ export interface IRushStackCompilerBaseOptions {
 }
 
 // @public (undocumented)
-export interface ITslintRunnerConfig extends IRushStackCompilerBaseOptions {
-    displayAsError?: boolean;
+export interface ITslintRunnerConfig extends ILintRunnerConfig {
 }
 
 // @beta (undocumented)
 export interface ITypescriptCompilerOptions extends IRushStackCompilerBaseOptions {
     customArgs?: string[];
 }
+
+// @beta (undocumented)
+export class LintRunner extends RushStackCompilerBase<ILintRunnerConfig> {
+    constructor(taskOptions: ILintRunnerConfig, rootPath: string, terminalProvider: ITerminalProvider);
+    // (undocumented)
+    invoke(): Promise<void>;
+    }
 
 // @beta (undocumented)
 export abstract class RushStackCompilerBase<TOptions extends IRushStackCompilerBaseOptions = IRushStackCompilerBaseOptions> {
@@ -83,6 +94,10 @@ export class ToolPackages {
 
 // @beta (undocumented)
 export class ToolPaths {
+    // (undocumented)
+    static readonly eslintPackageJson: IPackageJson;
+    // (undocumented)
+    static readonly eslintPackagePath: string;
     // (undocumented)
     static readonly tslintPackageJson: IPackageJson;
     // (undocumented)

@@ -147,6 +147,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/eslint-config",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "@typescript-eslint/eslint-plugin",
       "allowedCategories": [ "libraries" ]
     },

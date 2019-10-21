@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/node-library-build",
+      "comment": "Add support for ESLint+TypeScript",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/node-library-build",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

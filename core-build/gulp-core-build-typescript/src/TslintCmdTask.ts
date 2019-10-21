@@ -21,7 +21,7 @@ export interface ITslintCmdTaskConfig extends IRSCTaskConfig {
 }
 
 /**
- * @beta
+ * @public
  */
 export class TslintCmdTask extends RSCTask<ITslintCmdTaskConfig> {
   constructor() {
