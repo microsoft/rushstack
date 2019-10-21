@@ -34,7 +34,7 @@ export class LintCmdTask extends RSCTask<ILintCmdTaskConfig> {
   }
 
   public loadSchema(): Object {
-    return JsonFile.load(path.resolve(__dirname, 'schemas', 'tslint-cmd.schema.json'));
+    return JsonFile.load(path.resolve(__dirname, 'schemas', 'lint-cmd.schema.json'));
   }
 
   public executeTask(): Promise<void> {
