@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-stack-compiler-3.3",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.4.0",
+      "date": "Mon, 21 Oct 2019 05:22:43 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for ESLint+TypeScript"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.6",
       "tag": "@microsoft/rush-stack-compiler-3.3_v0.3.6",
       "date": "Fri, 18 Oct 2019 15:15:01 GMT",

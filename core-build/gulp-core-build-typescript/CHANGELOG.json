@@ -2,6 +2,23 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "8.3.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.3.0",
+      "date": "Mon, 21 Oct 2019 05:22:43 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for ESLint+TypeScript"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.1\" from `0.7.6` to `0.8.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "8.2.6",
       "tag": "@microsoft/gulp-core-build-typescript_v8.2.6",
       "date": "Fri, 18 Oct 2019 15:15:01 GMT",

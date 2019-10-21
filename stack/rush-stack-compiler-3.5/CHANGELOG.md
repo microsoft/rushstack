@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush-stack-compiler-3.5
 
-This log was last generated on Fri, 18 Oct 2019 15:15:01 GMT and should not be manually modified.
+This log was last generated on Mon, 21 Oct 2019 05:22:43 GMT and should not be manually modified.
+
+## 0.3.0
+Mon, 21 Oct 2019 05:22:43 GMT
+
+### Minor changes
+
+- Add support for ESLint+TypeScript
 
 ## 0.2.6
 Fri, 18 Oct 2019 15:15:01 GMT
