@@ -40,7 +40,7 @@ export class LintCmdTask extends RSCTask<ILintCmdTaskConfig> {
   public executeTask(): Promise<void> {
     this.initializeRushStackCompiler();
 
-    const tslintRunner: TLintRunner = new this._rushStackCompiler.LintRunner(
+    const lintRunner: TLintRunner = new this._rushStackCompiler.LintRunner(
       {
         displayAsError: this.taskConfig.displayAsError,
 
@@ -51,6 +51,6 @@ export class LintCmdTask extends RSCTask<ILintCmdTaskConfig> {
       this._terminalProvider
     );
 
-    return tslintRunner.invoke();
+    return lintRunner.invoke();
   }
 }
