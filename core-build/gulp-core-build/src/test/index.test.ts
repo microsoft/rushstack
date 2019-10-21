@@ -13,8 +13,6 @@ import {
 } from '../index';
 import { mockBuildConfig } from './mockBuildConfig';
 
-/* tslint:disable:no-unused-expression */
-
 // disable the exit watching
 global['dontWatchExit'] = true; // eslint-disable-line dot-notation
 

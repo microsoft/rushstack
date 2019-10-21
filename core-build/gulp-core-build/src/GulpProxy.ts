@@ -4,7 +4,6 @@
 import gulp = require('gulp');
 import Orchestrator = require('orchestrator');
 
-/* tslint:disable:max-line-length */
 /**
  * A helper utility for gulp which can be extended to provide additional features to gulp vinyl streams
  */

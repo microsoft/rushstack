@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* tslint:disable:max-line-length */
-
 if (process.argv.indexOf('--no-color') === -1) {
   process.argv.push('--color');
 }

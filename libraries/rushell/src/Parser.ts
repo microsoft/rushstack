@@ -11,8 +11,6 @@ import {
   AstText
 } from './AstNode';
 
-// tslint:disable:no-constant-condition
-
 export class Parser {
   private readonly _tokenizer: Tokenizer;
   private _peekedToken: Token | undefined;

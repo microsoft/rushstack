@@ -203,7 +203,6 @@ export class TaskSelector {
     const script: string | undefined = this._getScriptCommand(rushProject, this._options.commandToRun);
 
     if (script === undefined && !this._options.ignoreMissingScript) {
-      // tslint:disable-next-line:max-line-length
       throw new Error(`The project [${rushProject.packageName}] does not define a '${this._options.commandToRun}' command in the 'scripts' section of its package.json`);
     }
 

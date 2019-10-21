@@ -210,7 +210,6 @@ export class PnpmLinkManager extends BaseLinkManager {
     const folderNameInLocalInstallationRoot: string = uriEncode(Text.replaceAll(absolutePathToTgzFile, path.sep, '/')) +
       folderNameSuffix;
 
-    // tslint:disable-next-line:max-line-length
     // e.g.: C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules
 
     const pathToLocalInstallation: string = this._getPathToLocalInstallation(folderNameInLocalInstallationRoot);
@@ -306,7 +305,6 @@ export class PnpmLinkManager extends BaseLinkManager {
 
     // FYI dependencyName might contain an NPM scope, here it gets converted into a filesystem folder name
     // e.g. if the dependency is supi:
-    // tslint:disable-next-line:max-line-length
     // "C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules\supi"
     const dependencyLocalInstallationSymlink: string = path.join(
       pathToLocalInstallation,

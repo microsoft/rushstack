@@ -148,18 +148,14 @@ function afterStreamFlushed(streamName: string, callback: () => void): void {
     const stream: NodeJS.WritableStream = process[streamName];
     const outputWritten: boolean = stream.write('');
     if (outputWritten) {
-      /* tslint:disable:ban-native-functions */
       setTimeout(() => {
         callback();
       }, 250);
-      /* tslint:enable:ban-native-functions */
     } else {
       stream.once('drain', () => {
-        /* tslint:disable:ban-native-functions */
         setTimeout(() => {
           callback();
         }, 250);
-        /* tslint:enable:ban-native-functions */
       });
     }
   }
@@ -284,7 +280,6 @@ function wireUpProcessErrorHandling(shouldWarningsFailBuild: boolean): void {
 
     if (shouldWarningsFailBuild) {
       const oldStdErr: Function = process.stderr.write;
-      // tslint:disable-next-line:no-function-expression
       process.stderr.write = function (text: string | Buffer): boolean {
         if (text.toString()) {
           wroteToStdErr = true;

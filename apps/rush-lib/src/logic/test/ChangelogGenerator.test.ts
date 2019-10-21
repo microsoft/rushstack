@@ -136,7 +136,6 @@ describe('updateIndividualChangelog', () => {
       rushConfiguration
     )!;
 
-    /* tslint:disable-next-line:no-unused-expression */
     expect(actualResult).not.toBeDefined();
   });
 

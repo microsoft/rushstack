@@ -104,7 +104,7 @@ describe('getPackageDeps', () => {
     done();
   });
 
-  it('can handle adding one file', (done) => { // tslint:disable-line
+  it('can handle adding one file', (done) => {
     const tempFilePath: string = path.join(TEST_PROJECT_PATH, 'a.txt');
 
     FileSystem.writeFile(tempFilePath, 'a');
@@ -136,7 +136,7 @@ describe('getPackageDeps', () => {
 
   });
 
-  it('can handle adding two files', (done) => { // tslint:disable-line
+  it('can handle adding two files', (done) => {
     const tempFilePath1: string = path.join(TEST_PROJECT_PATH, 'a.txt');
     const tempFilePath2: string = path.join(TEST_PROJECT_PATH, 'b.txt');
 

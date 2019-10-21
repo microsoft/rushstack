@@ -6,4 +6,4 @@ import { ToolboxCommandLine } from './ToolboxCommandLine';
 console.log('repo-toolbox\n');
 
 const commandLine: ToolboxCommandLine = new ToolboxCommandLine();
-commandLine.execute(); // tslint:disable-line:no-floating-promises
+commandLine.execute();

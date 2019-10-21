@@ -231,7 +231,7 @@ export class ApiItem {
             // These functional forms don't have a proper name, so we don't append the "()" suffix
             break;
           default:
-            if (ApiParameterListMixin.isBaseClassOf(current)) { // tslint:disable-line:no-use-before-declare
+            if (ApiParameterListMixin.isBaseClassOf(current)) {
               reversedParts.push('()');
             }
         }

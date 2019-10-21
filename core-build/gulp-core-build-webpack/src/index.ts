@@ -12,5 +12,5 @@ export {
 /**
  * @public
  */
-export const webpack: WebpackTask = new WebpackTask(); // tslint:disable-line:export-name
-export default webpack; // tslint:disable-line:export-name
+export const webpack: WebpackTask = new WebpackTask();
+export default webpack;

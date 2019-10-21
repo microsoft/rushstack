@@ -4,7 +4,6 @@
 import { IApiDocumenterPluginManifest } from '@microsoft/api-documenter';
 import { RushStackFeature } from './RushStackFeature';
 
-// tslint:disable-next-line:export-name
 export const apiDocumenterPluginManifest: IApiDocumenterPluginManifest = {
   manifestVersion: 1000,
   features: [

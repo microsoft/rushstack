@@ -379,7 +379,6 @@ export class AstSymbolTable {
     return referencedAstEntity;
   }
 
-  // tslint:disable-next-line:no-unused-variable
   private _fetchAstDeclaration(node: ts.Node, isExternal: boolean): AstDeclaration | undefined {
     if (!AstDeclaration.isSupportedSyntaxKind(node.kind)) {
       return undefined;

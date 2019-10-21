@@ -133,7 +133,7 @@ function _tryTrustCertificate(certificatePath: string, parentTask: GulpTask<{}>)
         return true;
       }
 
-    case 'darwin': // tslint:disable-line:no-switch-case-fall-through
+    case 'darwin':
       parentTask.log( 'Attempting to trust a dev certificate. This self-signed certificate only points to localhost ' +
                       'and will be stored in your local user profile to be used by other instances of ' +
                       'gulp-core-build-serve. If you do not consent to trust this certificate, do not enter your ' +
@@ -165,7 +165,7 @@ function _tryTrustCertificate(certificatePath: string, parentTask: GulpTask<{}>)
         }
       }
 
-    default: // tslint:disable-line:no-switch-case-fall-through
+    default:
       // Linux + others: Have the user manually trust the cert if they want to
       parentTask.log( 'Automatic certificate trust is only implemented for gulp-core-build-serve on Windows and ' +
                       'macOS. To trust the development certificate, add this certificate to your trusted root ' +
@@ -275,7 +275,7 @@ export function untrustCertificate<TGulpTask>(parentTask: GulpTask<TGulpTask>): 
         return true;
       }
 
-    case 'darwin': // tslint:disable-line:no-switch-case-fall-through
+    case 'darwin':
       parentTask.logVerbose('Trying to find the signature of the dev cert');
 
       const macFindCertificateResult: child_process.SpawnSyncReturns<string> =
@@ -321,7 +321,7 @@ export function untrustCertificate<TGulpTask>(parentTask: GulpTask<TGulpTask>): 
         return false;
       }
 
-    default: // tslint:disable-line:no-switch-case-fall-through
+    default:
       // Linux + others: Have the user manually untrust the cert
       parentTask.log( 'Automatic certificate untrust is only implemented for gulp-core-build-serve on Windows and ' +
                       'macOS. To untrust the development certificate, remove this certificate from your trusted ' +
