@@ -74,7 +74,6 @@ export class ApiConstructSignature extends ApiTypeParameterListMixin(ApiParamete
     return `|${ApiItemKind.ConstructSignature}|${overloadIndex}`;
   }
 
-
   /** @override */
   public get kind(): ApiItemKind {
     return ApiItemKind.ConstructSignature;

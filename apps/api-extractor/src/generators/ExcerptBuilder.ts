@@ -121,7 +121,7 @@ export class ExcerptBuilder {
 
       if (span.kind === ts.SyntaxKind.Identifier) {
         const name: ts.Identifier = span.node as ts.Identifier;
-        if (!ExcerptBuilder._isDeclaration(name)) {
+        if (!ExcerptBuilder._isDeclarationName(name)) {
           canonicalReference = state.referenceGenerator.getDeclarationReferenceForIdentifier(name);
         }
       }
@@ -212,6 +212,10 @@ export class ExcerptBuilder {
     }
     excerptTokens.push(excerptToken);
     state.disableMergingForNextToken = false;
+  }
+
+  private static _isDeclarationName(name: ts.Identifier): boolean {
+    return ExcerptBuilder._isDeclaration(name.parent) && name.parent.name === name;
   }
 
   private static _isDeclaration(node: ts.Node): node is ts.NamedDeclaration {
