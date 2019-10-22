@@ -61,7 +61,7 @@ describe('LoadThemedStylesLoader', () => {
     loaderResult = loaderResult.replace(/require\(\"!!/, 'require("');
     loaderResult = wrapResult(loaderResult);
 
-    const returnedModule: { exports: string } = eval(loaderResult); // tslint:disable-line:no-eval
+    const returnedModule: { exports: string } = eval(loaderResult); // eslint-disable-line no-eval
 
     assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1);
     assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1);
@@ -79,7 +79,7 @@ describe('LoadThemedStylesLoader', () => {
     loaderResult = loaderResult.replace(/require\(\"!!/, 'require("');
     loaderResult = wrapResult(loaderResult);
 
-    const returnedModule: { exports: string } = eval(loaderResult); // tslint:disable-line:no-eval
+    const returnedModule: { exports: string } = eval(loaderResult); // eslint-disable-line no-eval
 
     assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('styles') !== -1);
     assert.equal(LoadThemedStylesMock.loadedData.length, 1);
@@ -94,7 +94,7 @@ describe('LoadThemedStylesLoader', () => {
     loaderResult = loaderResult.replace(/require\(\"!!/, 'require("');
     loaderResult = wrapResult(loaderResult);
 
-    const returnedModule: { exports: string } = eval(loaderResult); // tslint:disable-line:no-eval
+    const returnedModule: { exports: string } = eval(loaderResult); // eslint-disable-line no-eval
 
     assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1);
     assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1);
@@ -113,7 +113,7 @@ describe('LoadThemedStylesLoader', () => {
     loaderResult = loaderResult.replace(/require\(\"!!/, 'require("');
     loaderResult = wrapResult(loaderResult);
 
-    const returnedModule: { exports: string } = eval(loaderResult); // tslint:disable-line:no-eval
+    const returnedModule: { exports: string } = eval(loaderResult); // eslint-disable-line no-eval
 
     assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1);
     assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1);
@@ -131,7 +131,7 @@ describe('LoadThemedStylesLoader', () => {
     loaderResult = loaderResult.replace(/require\(\"!!/, 'require("');
     loaderResult = wrapResult(loaderResult);
 
-    const returnedModule: { exports: string } = eval(loaderResult); // tslint:disable-line:no-eval
+    const returnedModule: { exports: string } = eval(loaderResult); // eslint-disable-line no-eval
 
     assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1);
     assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1);

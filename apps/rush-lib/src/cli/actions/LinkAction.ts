@@ -11,7 +11,7 @@ import { BaseRushAction } from './BaseRushAction';
 export class LinkAction extends BaseRushAction {
   private _force: CommandLineFlagParameter;
 
-  constructor(parser: RushCommandLineParser) {
+  public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'link',
       summary: 'Create node_modules symlinks for all projects',

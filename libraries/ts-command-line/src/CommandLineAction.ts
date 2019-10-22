@@ -56,7 +56,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
 
   private _argumentParser: argparse.ArgumentParser | undefined;
 
-  constructor(options: ICommandLineActionOptions) {
+  public constructor(options: ICommandLineActionOptions) {
     super();
 
     if (!CommandLineAction._actionNameRegExp.test(options.actionName)) {

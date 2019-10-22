@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile, JsonObject } from '@microsoft/node-core-library';
 import { LintRunner as TLintRunner } from '@microsoft/rush-stack-compiler-3.1';
 
 import {
@@ -24,7 +24,7 @@ export interface ILintCmdTaskConfig extends IRSCTaskConfig {
  * @public
  */
 export class LintCmdTask extends RSCTask<ILintCmdTaskConfig> {
-  constructor() {
+  public constructor() {
     super(
       'lint',
       {
@@ -33,7 +33,7 @@ export class LintCmdTask extends RSCTask<ILintCmdTaskConfig> {
     );
   }
 
-  public loadSchema(): Object {
+  public loadSchema(): JsonObject {
     return JsonFile.load(path.resolve(__dirname, 'schemas', 'lint-cmd.schema.json'));
   }
 

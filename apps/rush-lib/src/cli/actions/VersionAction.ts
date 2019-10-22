@@ -37,7 +37,7 @@ export class VersionAction extends BaseRushAction {
 
   private _versionManager: VersionManager;
 
-  constructor(parser: RushCommandLineParser) {
+  public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'version',
       summary: '(EXPERIMENTAL) Manage package versions in the repo.',

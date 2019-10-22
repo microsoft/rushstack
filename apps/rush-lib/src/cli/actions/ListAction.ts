@@ -9,7 +9,7 @@ export class ListAction extends BaseRushAction {
   private _path: CommandLineFlagParameter;
   private _fullPath: CommandLineFlagParameter;
 
-  constructor(parser: RushCommandLineParser) {
+  public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'list',
       summary: 'List package information for all projects in the repo',

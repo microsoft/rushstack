@@ -24,7 +24,7 @@ export class AddAction extends BaseRushAction {
   private _skipUpdateFlag: CommandLineFlagParameter;
   private _packageName: CommandLineStringParameter;
 
-  constructor(parser: RushCommandLineParser) {
+  public constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
       'Adds a specified package as a dependency of the current project (as determined by the current working directory)'
       + ' and then runs "rush update". If no version is specified, a version will be automatically detected (typically'
@@ -111,7 +111,7 @@ export class AddAction extends BaseRushAction {
 
     let version: string | undefined = undefined;
     let packageName: string | undefined = this._packageName.value!;
-    const parts: Array<string> = packageName.split('@');
+    const parts: string[] = packageName.split('@');
 
     if (parts[0] === '') {
       // this is a scoped package

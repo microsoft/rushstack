@@ -44,6 +44,14 @@ export class PnpmProjectDependencyManifest {
   private readonly _pnpmShrinkwrapFile: PnpmShrinkwrapFile;
   private readonly _project: RushConfigurationProject;
 
+  public constructor(options: IPnpmProjectDependencyManifestOptions) {
+    this._pnpmShrinkwrapFile = options.pnpmShrinkwrapFile;
+    this._project = options.project;
+    this._projectDependencyManifestFilename = PnpmProjectDependencyManifest.getFilePathForProject(this._project);
+
+    this._projectDependencyManifestFile = new Map<string, string>();
+  }
+
   /**
    * Get the fully-qualified path to the project/.rush/temp/shrinkwrap-deps.json
    * for the specified project.
@@ -53,14 +61,6 @@ export class PnpmProjectDependencyManifest {
       project.projectRushTempFolder,
       RushConstants.projectDependencyManifestFilename
     );
-  }
-
-  public constructor(options: IPnpmProjectDependencyManifestOptions) {
-    this._pnpmShrinkwrapFile = options.pnpmShrinkwrapFile;
-    this._project = options.project;
-    this._projectDependencyManifestFilename = PnpmProjectDependencyManifest.getFilePathForProject(this._project);
-
-    this._projectDependencyManifestFile = new Map<string, string>();
   }
 
   public addDependency(pkg: BasePackage, parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml): void {

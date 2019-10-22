@@ -23,6 +23,22 @@ export class ParseError extends Error {
    */
   public readonly innerError: Error | undefined;
 
+  public constructor(message: string, range: TextRange, innerError?: Error) {
+    super(ParseError._formatMessage(message, range));
+
+    // Boilerplate for extending a system class
+    //
+    // https://github.com/microsoft/TypeScript-wiki/blob/master/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    //
+    // IMPORTANT: The prototype must also be set on any classes which extend this one
+    (this as any).__proto__ = ParseError.prototype; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+    this.unformattedMessage = message;
+
+    this.range = range;
+    this.innerError = innerError;
+  }
+
   /**
    * Generates a line/column prefix.  Example with line=2 and column=5
    * and message="An error occurred":
@@ -44,20 +60,4 @@ export class ParseError extends Error {
     return message;
   }
 
-  public constructor(message: string, range: TextRange, innerError?: Error) {
-    super(ParseError._formatMessage(message, range));
-
-    // Boilerplate for extending a system class
-    //
-    // tslint:disable-next-line:max-line-length
-    // https://github.com/microsoft/TypeScript-wiki/blob/master/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
-    //
-    // IMPORTANT: The prototype must also be set on any classes which extend this one
-    (this as any).__proto__ = ParseError.prototype; // tslint:disable-line:no-any
-
-    this.unformattedMessage = message;
-
-    this.range = range;
-    this.innerError = innerError;
-  }
 }

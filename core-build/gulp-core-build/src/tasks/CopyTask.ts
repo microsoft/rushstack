@@ -3,6 +3,7 @@
 
 import { GulpTask } from './GulpTask';
 import * as Gulp from 'gulp';
+import { JsonObject } from '@microsoft/node-core-library';
 
 /**
  * Configuration for CopyTask
@@ -34,7 +35,7 @@ export class CopyTask extends GulpTask<ICopyConfig> {
   /**
    * Instantiates a CopyTask with an empty configuration
    */
-  constructor() {
+  public constructor() {
     super(
       'copy',
       {
@@ -47,7 +48,7 @@ export class CopyTask extends GulpTask<ICopyConfig> {
   /**
    * Loads the z-schema object for this task
    */
-  public loadSchema(): Object {
+  public loadSchema(): JsonObject {
     return require('./copy.schema.json');
   }
 
@@ -57,13 +58,14 @@ export class CopyTask extends GulpTask<ICopyConfig> {
   public executeTask(
     gulp: typeof Gulp,
     completeCallback: (error?: string | Error) => void
-  ): Promise<Object> | NodeJS.ReadWriteStream | void {
-    /* tslint:disable:typedef */
+  ): Promise<any> | NodeJS.ReadWriteStream | void { // eslint-disable-line @typescript-eslint/no-explicit-any
+    /* eslint-disable */
     const flatten = require('gulp-flatten');
     const gulpif = require('gulp-if');
     const merge = require('merge2');
+    /* eslint-enable */
+
     const { copyTo, shouldFlatten } = this.taskConfig;
-    /* tslint:enable:typedef */
 
     const allStreams: NodeJS.ReadWriteStream[] = [];
 

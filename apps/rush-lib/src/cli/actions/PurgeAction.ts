@@ -15,7 +15,7 @@ import { UnlinkManager } from '../../logic/UnlinkManager';
 export class PurgeAction extends BaseRushAction {
   private _unsafeParameter: CommandLineFlagParameter;
 
-  constructor(parser: RushCommandLineParser) {
+  public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'purge',
       summary: 'For diagnostic purposes, use this command to delete caches and other temporary files used by Rush',

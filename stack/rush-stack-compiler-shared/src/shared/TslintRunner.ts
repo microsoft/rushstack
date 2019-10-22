@@ -24,7 +24,7 @@ export interface ITslintRunnerConfig extends ILintRunnerConfig { }
 export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
   private _cmdRunner: CmdRunner;
 
-  constructor(taskOptions: ITslintRunnerConfig, rootPath: string, terminalProvider: ITerminalProvider) {
+  public constructor(taskOptions: ITslintRunnerConfig, rootPath: string, terminalProvider: ITerminalProvider) {
     super(taskOptions, rootPath, terminalProvider);
     this._cmdRunner = new CmdRunner(
       this._standardBuildFolders,

@@ -5,10 +5,10 @@
 
 import * as Webpack from 'webpack';
 
-// tslint:disable:variable-name
+// eslint-disable-next-line
 const ConstDependency: IConstDependency = require('webpack/lib/dependencies/ConstDependency');
+// eslint-disable-next-line
 const ParserHelpers: IParserHelper = require('webpack/lib/ParserHelpers');
-// tslint:enable:variable-name
 
 const EXPRESSION_NAME: string = 'resolveChunk';
 const PLUGIN_NAME: string = 'resolve-chunk-plugin';

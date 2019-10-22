@@ -5,7 +5,8 @@ import * as path from 'path';
 import { IBuildConfig } from '@microsoft/gulp-core-build';
 import {
   JsonFile,
-  FileSystem
+  FileSystem,
+  JsonObject
 } from '@microsoft/node-core-library';
 import { ExtractorConfig, IExtractorInvokeOptions } from '@microsoft/api-extractor';
 import { ApiExtractorRunner as TApiExtractorRunner } from '@microsoft/rush-stack-compiler-3.1';
@@ -23,14 +24,14 @@ export interface IApiExtractorTaskConfig extends IRSCTaskConfig {
  * @public
  */
 export class ApiExtractorTask extends RSCTask<IApiExtractorTaskConfig>  {
-  constructor() {
+  public constructor() {
     super(
       'api-extractor',
       {}
     );
   }
 
-  public loadSchema(): Object {
+  public loadSchema(): JsonObject {
     return JsonFile.load(path.resolve(__dirname, 'schemas', 'api-extractor.schema.json'));
   }
 

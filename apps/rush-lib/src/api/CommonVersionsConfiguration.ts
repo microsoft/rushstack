@@ -62,6 +62,31 @@ export class CommonVersionsConfiguration {
   private _allowedAlternativeVersions: ProtectableMap<string, string[]>;
   private _modified: boolean;
 
+  private constructor(commonVersionsJson: ICommonVersionsJson | undefined, filePath: string) {
+    this._preferredVersions = new ProtectableMap<string, string>(
+      { onSet: this._onSetPreferredVersions.bind(this) });
+
+    this._xstitchPreferredVersions = new ProtectableMap<string, string>(
+      { onSet: this._onSetPreferredVersions.bind(this) });
+
+    this._allowedAlternativeVersions = new ProtectableMap<string, string[]>(
+      { onSet: this._onSetAllowedAlternativeVersions.bind(this) });
+
+    if (commonVersionsJson) {
+      try {
+        CommonVersionsConfiguration._deserializeTable(this.preferredVersions,
+          commonVersionsJson.preferredVersions);
+        CommonVersionsConfiguration._deserializeTable(this.xstitchPreferredVersions,
+          commonVersionsJson.xstitchPreferredVersions);
+        CommonVersionsConfiguration._deserializeTable(this.allowedAlternativeVersions,
+          commonVersionsJson.allowedAlternativeVersions);
+      } catch (e) {
+        throw new Error(`Error loading "${path.basename(filePath)}": ${e.message}`);
+      }
+    }
+    this._filePath = filePath;
+  }
+
   /**
    * Loads the common-versions.json data from the specified file path.
    * If the file has not been created yet, then an empty object is returned.
@@ -178,31 +203,6 @@ export class CommonVersionsConfiguration {
     MapExtensions.mergeFromMap(allPreferredVersions, this.preferredVersions);
     MapExtensions.mergeFromMap(allPreferredVersions, this.xstitchPreferredVersions);
     return allPreferredVersions;
-  }
-
-  private constructor(commonVersionsJson: ICommonVersionsJson | undefined, filePath: string) {
-    this._preferredVersions = new ProtectableMap<string, string>(
-      { onSet: this._onSetPreferredVersions.bind(this) });
-
-    this._xstitchPreferredVersions = new ProtectableMap<string, string>(
-      { onSet: this._onSetPreferredVersions.bind(this) });
-
-    this._allowedAlternativeVersions = new ProtectableMap<string, string[]>(
-      { onSet: this._onSetAllowedAlternativeVersions.bind(this) });
-
-    if (commonVersionsJson) {
-      try {
-        CommonVersionsConfiguration._deserializeTable(this.preferredVersions,
-          commonVersionsJson.preferredVersions);
-        CommonVersionsConfiguration._deserializeTable(this.xstitchPreferredVersions,
-          commonVersionsJson.xstitchPreferredVersions);
-        CommonVersionsConfiguration._deserializeTable(this.allowedAlternativeVersions,
-          commonVersionsJson.allowedAlternativeVersions);
-      } catch (e) {
-        throw new Error(`Error loading "${path.basename(filePath)}": ${e.message}`);
-      }
-    }
-    this._filePath = filePath;
   }
 
   private _onSetPreferredVersions(source: ProtectableMap<string, string>, key: string, value: string): string {

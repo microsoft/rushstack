@@ -28,7 +28,7 @@ export interface IGlobalScriptActionOptions extends IBaseScriptActionOptions {
 export class GlobalScriptAction extends BaseScriptAction {
   private _shellCommand: string;
 
-  constructor(
+  public constructor(
     options: IGlobalScriptActionOptions
   ) {
     super(options);

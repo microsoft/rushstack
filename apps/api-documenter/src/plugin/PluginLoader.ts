@@ -27,6 +27,7 @@ export class PluginLoader {
         });
 
         // Load the package
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const entryPoint: object | undefined = require(resolvedEntryPointPath);
 
         if (!entryPoint) {
@@ -34,7 +35,7 @@ export class PluginLoader {
         }
 
         const manifest: IApiDocumenterPluginManifest
-          // tslint:disable-next-line:no-string-literal
+          // eslint-disable-next-line dot-notation
           = entryPoint['apiDocumenterPluginManifest'] as IApiDocumenterPluginManifest;
 
         if (!manifest) {

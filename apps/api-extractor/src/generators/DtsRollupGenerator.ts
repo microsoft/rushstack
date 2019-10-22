@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* tslint:disable:no-bitwise */
+/* eslint-disable no-bitwise */
 
 import * as ts from 'typescript';
 import { FileSystem, NewlineKind, InternalError } from '@microsoft/node-core-library';
@@ -71,7 +71,6 @@ export class DtsRollupGenerator {
 
     // Emit the triple slash directives
     for (const typeDirectiveReference of collector.dtsTypeReferenceDirectives) {
-      // tslint:disable-next-line:max-line-length
       // https://github.com/microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
       stringWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
     }

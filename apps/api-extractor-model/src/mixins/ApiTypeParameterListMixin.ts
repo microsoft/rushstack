@@ -47,7 +47,7 @@ const _typeParameters: unique symbol = Symbol('ApiTypeParameterListMixin._typePa
  *
  * @public
  */
-// tslint:disable-next-line:interface-name
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface ApiTypeParameterListMixin extends ApiItem {
   /**
    * The type parameters.
@@ -67,22 +67,13 @@ export interface ApiTypeParameterListMixin extends ApiItem {
  * @public
  */
 export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiTypeParameterListMixin) { // tslint:disable-line:no-any
+  TBaseClass & (new (...args: any[]) => ApiTypeParameterListMixin) { // eslint-disable-line @typescript-eslint/no-explicit-any
 
   abstract class MixedClass extends baseClass implements ApiTypeParameterListMixin {
     public readonly [_typeParameters]: TypeParameter[];
 
-    /** @override */
-    public static onDeserializeInto(options: Partial<IApiTypeParameterListMixinOptions>, context: DeserializerContext,
-      jsonObject: IApiTypeParameterListMixinJson): void {
-
-      baseClass.onDeserializeInto(options, context, jsonObject);
-
-      options.typeParameters = jsonObject.typeParameters || [];
-    }
-
-    // tslint:disable-next-line:no-any
-    constructor(...args: any[]) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public constructor(...args: any[]) {
       super(...args);
 
       const options: IApiTypeParameterListMixinOptions = args[0];
@@ -106,6 +97,15 @@ export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor
       } else {
         throw new InternalError('ApiTypeParameterListMixin expects a base class that inherits from ApiDeclaredItem');
       }
+    }
+
+    /** @override */
+    public static onDeserializeInto(options: Partial<IApiTypeParameterListMixinOptions>, context: DeserializerContext,
+      jsonObject: IApiTypeParameterListMixinJson): void {
+
+      baseClass.onDeserializeInto(options, context, jsonObject);
+
+      options.typeParameters = jsonObject.typeParameters || [];
     }
 
     public get typeParameters(): ReadonlyArray<TypeParameter> {

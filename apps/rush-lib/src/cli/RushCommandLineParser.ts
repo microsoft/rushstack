@@ -53,7 +53,7 @@ export class RushCommandLineParser extends CommandLineParser {
   private _debugParameter: CommandLineFlagParameter;
   private _rushOptions: IRushCommandLineParserOptions;
 
-  constructor(options?: Partial<IRushCommandLineParserOptions>) {
+  public constructor(options?: Partial<IRushCommandLineParserOptions>) {
     super({
       toolFilename: 'rush',
       toolDescription: 'Rush makes life easier for JavaScript developers who develop, build, and publish'

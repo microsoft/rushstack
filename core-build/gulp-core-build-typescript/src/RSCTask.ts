@@ -31,7 +31,7 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
   // containing "@microsoft/rush-stack-compiler-*"
   private static _rushStackCompilerPackagePathCache: Map<string, string> = new Map<string, string>();
 
-  private static __packageJsonLookup: PackageJsonLookup | undefined; // tslint:disable-line:variable-name
+  private static __packageJsonLookup: PackageJsonLookup | undefined;
 
   private static get _packageJsonLookup(): PackageJsonLookup {
     if (!RSCTask.__packageJsonLookup) {
@@ -95,7 +95,7 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
       taskName,
       {
         allowBuiltinCompiler: false,
-        ...(defaultConfig as any) // tslint:disable-line:no-any (the spread operator isn't working here for some reason)
+        ...defaultConfig
       } as TTaskConfig
     );
   }

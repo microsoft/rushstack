@@ -7,7 +7,7 @@ import { BuildAction } from './BuildAction';
 import { CleanAction } from './CleanAction';
 
 export class RushStackCommandLine extends CommandLineParser {
-  constructor() {
+  public constructor() {
     super({
       toolFilename: 'rush-stack',
       toolDescription: ''

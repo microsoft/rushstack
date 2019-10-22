@@ -24,7 +24,7 @@ export class AsyncRecycler {
   private _movedFolderCount: number;
   private _deleting: boolean;
 
-  constructor(recyclerFolder: string) {
+  public constructor(recyclerFolder: string) {
     this._recyclerFolder = path.resolve(recyclerFolder);
     this._movedFolderCount = 0;
     this._deleting = false;

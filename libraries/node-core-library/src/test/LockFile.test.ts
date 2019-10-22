@@ -7,7 +7,7 @@ import { FileSystem } from '../FileSystem';
 import { FileWriter } from '../FileWriter';
 
 function setLockFileGetProcessStartTime(fn: (process: number) => string | undefined): void {
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (LockFile as any)._getStartTime = fn;
 }
 

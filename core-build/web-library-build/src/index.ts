@@ -44,7 +44,7 @@ const sourceMatch: string[] = [
   '!src/**/*.scss.ts'
 ];
 
-// tslint:disable-next-line:no-string-literal
+// eslint-disable-next-line dot-notation
 const PRODUCTION: boolean = !!getConfig().args['production'] || !!getConfig().args['ship'];
 setConfig({
   production: PRODUCTION,

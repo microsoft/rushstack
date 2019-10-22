@@ -124,9 +124,7 @@ export class Utilities {
    * Node.js equivalent of performance.now().
    */
   public static getTimeInMs(): number {
-    let seconds: number;
-    let nanoseconds: number;
-    [seconds, nanoseconds] = process.hrtime();
+    const [seconds, nanoseconds] = process.hrtime();
     return seconds * 1000 + nanoseconds / 1000000;
   }
 
@@ -156,8 +154,7 @@ export class Utilities {
     let looped: boolean = false;
 
     let result: TResult;
-    // tslint:disable-next-line:no-constant-condition
-    while (true) {
+    for (;;) {
       try {
         result = fn();
         break;
@@ -369,8 +366,7 @@ export class Utilities {
 
     let attemptNumber: number = 1;
 
-    // tslint:disable-next-line:no-constant-condition
-    while (true) {
+    for (;;) {
       try {
         Utilities.executeCommand(command, args, workingDirectory, environment, suppressOutput);
       } catch (error) {
@@ -570,7 +566,7 @@ export class Utilities {
 
   private static _executeLifecycleCommandInternal<TCommandResult>(
     command: string,
-    spawnFunction: (command: String, args: string[], spawnOptions: child_process.SpawnOptions) => TCommandResult,
+    spawnFunction: (command: string, args: string[], spawnOptions: child_process.SpawnOptions) => TCommandResult,
     options: ILifecycleCommandOptions
   ): TCommandResult {
     let shellCommand: string = process.env.comspec || 'cmd';
@@ -647,7 +643,7 @@ export class Utilities {
     //
     // More about this feature: https://github.com/npm/npm/pull/12356
     if (options.initCwd) {
-      environment['INIT_CWD'] = options.initCwd; // tslint:disable-line:no-string-literal
+      environment['INIT_CWD'] = options.initCwd; // eslint-disable-line dot-notation
     }
 
     if (options.pathOptions) {
@@ -724,7 +720,7 @@ export class Utilities {
     let result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(escapedCommand,
       escapedArgs, options);
 
-    if (result.error && (result.error as any).errno === 'ENOENT') { // tslint:disable-line:no-any
+    if (result.error && (result.error as any).errno === 'ENOENT') { // eslint-disable-line @typescript-eslint/no-explicit-any
       // This is a workaround for GitHub issue #25330
       // https://github.com/nodejs/node-v0.x-archive/issues/25330
       result = child_process.spawnSync(command + '.cmd', args, options);

@@ -325,7 +325,7 @@ export class Executable {
     } else {
       // For Unix, check whether any of the POSIX execute bits are set
       try {
-        // tslint:disable-next-line:no-bitwise
+        // eslint-disable-next-line no-bitwise
         if ((FileSystem.getPosixModeBits(filePath) & PosixModeBits.AllExecute) === 0) {
           return false; // not executable
         }

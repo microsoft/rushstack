@@ -13,7 +13,7 @@ import { InitAction } from './InitAction';
 export class ApiExtractorCommandLine extends CommandLineParser {
   private _debugParameter: CommandLineFlagParameter;
 
-  constructor() {
+  public constructor() {
     super({
       toolFilename: 'api-extractor',
       toolDescription: 'API Extractor helps you build better TypeScript libraries.  It analyzes the main entry'

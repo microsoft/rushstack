@@ -29,7 +29,7 @@ describe('VersionManager', () => {
       rushConfiguration.versionPolicyConfiguration);
   });
 
-  /* tslint:disable:no-string-literal */
+  /* eslint-disable dot-notation */
   describe('ensure', () => {
     it('fixes lock step versions', () => {
       versionManager.ensure('testPolicy1');
@@ -94,5 +94,5 @@ describe('VersionManager', () => {
       expect(_getChanges(changeFiles, 'b')).not.toBeDefined();
     });
   });
-  /* tslint:enable:no-string-literal */
+  /* eslint-enable dot-notation */
 });

@@ -36,12 +36,12 @@ export interface IApiPropertySignatureOptions extends IApiPropertyItemOptions {
  */
 export class ApiPropertySignature extends ApiPropertyItem {
 
-  public static getContainerKey(name: string): string {
-    return `${name}|${ApiItemKind.PropertySignature}`;
-  }
-
   public constructor(options: IApiPropertySignatureOptions) {
     super(options);
+  }
+
+  public static getContainerKey(name: string): string {
+    return `${name}|${ApiItemKind.PropertySignature}`;
   }
 
   /** @override */

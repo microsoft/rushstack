@@ -14,7 +14,7 @@ import { untrustCertificate } from './certificates';
  *  the certificate and private key are deleted from the user's home directory.
  */
 export class UntrustCertTask extends GulpTask<void> {
-  constructor() {
+  public constructor() {
     super('untrust-cert');
   }
 

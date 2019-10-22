@@ -137,7 +137,7 @@ export class FileSystem {
     static move(options: IFileSystemMoveOptions): void;
     static readFile(filePath: string, options?: IFileSystemReadFileOptions): string;
     static readFileToBuffer(filePath: string): Buffer;
-    static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): Array<string>;
+    static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[];
     static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void;
     static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
 }
@@ -355,23 +355,26 @@ export interface ITerminalProvider {
 
 // @public
 export class JsonFile {
-    static load(jsonFilename: string): any;
-    static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): any;
-    static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): any;
-    static save(jsonObject: Object, jsonFilename: string, options?: IJsonFileSaveOptions): boolean;
-    static stringify(jsonObject: Object, options?: IJsonFileStringifyOptions): string;
-    static updateString(previousJson: string, newJsonObject: Object, options?: IJsonFileStringifyOptions): string;
-    static validateNoUndefinedMembers(jsonObject: Object): void;
+    static load(jsonFilename: string): JsonObject;
+    static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): JsonObject;
+    static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): JsonObject;
+    static save(jsonObject: JsonObject, jsonFilename: string, options?: IJsonFileSaveOptions): boolean;
+    static stringify(jsonObject: JsonObject, options?: IJsonFileStringifyOptions): string;
+    static updateString(previousJson: string, newJsonObject: JsonObject, options?: IJsonFileStringifyOptions): string;
+    static validateNoUndefinedMembers(jsonObject: JsonObject): void;
     }
+
+// @public
+export type JsonObject = any;
 
 // @public
 export class JsonSchema {
     ensureCompiled(): void;
     static fromFile(filename: string, options?: IJsonSchemaFromFileOptions): JsonSchema;
-    static fromLoadedObject(schemaObject: Object): JsonSchema;
+    static fromLoadedObject(schemaObject: JsonObject): JsonSchema;
     readonly shortName: string;
-    validateObject(jsonObject: Object, filenameForErrors: string, options?: IJsonSchemaValidateOptions): void;
-    validateObjectWithCallback(jsonObject: Object, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): void;
+    validateObject(jsonObject: JsonObject, filenameForErrors: string, options?: IJsonSchemaValidateOptions): void;
+    validateObjectWithCallback(jsonObject: JsonObject, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): void;
     }
 
 // @public

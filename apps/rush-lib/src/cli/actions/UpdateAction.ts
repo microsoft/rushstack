@@ -11,7 +11,7 @@ export class UpdateAction extends BaseInstallAction {
   private _fullParameter: CommandLineFlagParameter;
   private _recheckParameter: CommandLineFlagParameter;
 
-  constructor(parser: RushCommandLineParser) {
+  public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'update',
       summary: 'Install package dependencies for all projects in the repo,'

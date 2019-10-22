@@ -178,7 +178,7 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
   const excludedHashes: { [key: string]: boolean } = {};
 
   if (excludedPaths) {
-    excludedPaths.forEach(path => excludedHashes[path] = true);
+    excludedPaths.forEach((path) => { excludedHashes[path] = true });
   }
 
   const changes: IPackageDeps = {

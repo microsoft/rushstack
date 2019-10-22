@@ -28,6 +28,7 @@
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.4": "0.3.0",
     "@microsoft/node-library-build": "6.3.0",
+    "@rushstack/eslint-config": "0.4.0",
     "@types/clean-css": "4.2.1",
     "@types/glob": "5.0.30",
     "@types/jest": "23.3.11",

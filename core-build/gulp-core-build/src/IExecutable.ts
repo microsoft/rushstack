@@ -40,5 +40,6 @@ export interface IExecutable {
   /**
    * Optional method to indicate directory matches to clean up when the clean task is run.
    */
-  getCleanMatch?: (config: IBuildConfig, taskConfig?: any) => string[]; /* tslint:disable-line:no-any */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getCleanMatch?: (config: IBuildConfig, taskConfig?: any) => string[];
 }

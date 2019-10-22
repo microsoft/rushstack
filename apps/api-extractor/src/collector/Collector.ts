@@ -82,7 +82,7 @@ export class Collector {
   private readonly _dtsTypeReferenceDirectives: Set<string> = new Set<string>();
   private readonly _dtsLibReferenceDirectives: Set<string> = new Set<string>();
 
-  constructor(options: ICollectorOptions) {
+  public constructor(options: ICollectorOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
 
     this._program = options.program;

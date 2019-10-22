@@ -33,12 +33,12 @@ export class SpanModification {
    */
   public sortKey: string | undefined;
 
-  private readonly span: Span;
+  private readonly _span: Span;
   private _prefix: string | undefined;
   private _suffix: string | undefined;
 
   public constructor(span: Span) {
-    this.span = span;
+    this._span = span;
     this.reset();
   }
 
@@ -46,7 +46,7 @@ export class SpanModification {
    * Allows the Span.prefix text to be changed.
    */
   public get prefix(): string {
-    return this._prefix !== undefined ? this._prefix : this.span.prefix;
+    return this._prefix !== undefined ? this._prefix : this._span.prefix;
   }
 
   public set prefix(value: string) {
@@ -57,7 +57,7 @@ export class SpanModification {
    * Allows the Span.suffix text to be changed.
    */
   public get suffix(): string {
-    return this._suffix !== undefined ? this._suffix : this.span.suffix;
+    return this._suffix !== undefined ? this._suffix : this._span.suffix;
   }
 
   public set suffix(value: string) {

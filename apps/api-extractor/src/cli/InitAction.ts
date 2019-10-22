@@ -11,7 +11,7 @@ import { ExtractorConfig } from '../api/ExtractorConfig';
 
 export class InitAction extends CommandLineAction {
 
-  constructor(parser: ApiExtractorCommandLine) {
+  public constructor(parser: ApiExtractorCommandLine) {
     super({
       actionName: 'init',
       summary: `Create an ${ExtractorConfig.FILENAME} config file`,

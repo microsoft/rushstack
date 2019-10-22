@@ -2,7 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
-const sudo: (args: string[], options: Object) => child_process.ChildProcess = require('sudo');
+// eslint-disable-next-line
+const sudo: (args: string[], options: any) => child_process.ChildProcess = require('sudo');
+// eslint-disable-next-line
 const deasync: { sleep: (ms: number) => void } = require('deasync');
 
 export interface ISudoSyncResult {
@@ -36,6 +38,8 @@ export function runSudoSync(params: string[]): ISudoSyncResult {
   });
 
   // Because we're running with sudo, we can't run synchronously, so synchronize by polling.
+
+  // eslint-disable-next-line no-unmodified-loop-condition
   while (code === undefined) {
     deasync.sleep(100);
   }

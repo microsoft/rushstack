@@ -29,7 +29,7 @@ export class RunAction extends CommandLineAction {
   private _diagnosticsParameter: CommandLineFlagParameter;
   private _typescriptCompilerFolder: CommandLineStringParameter;
 
-  constructor(parser: ApiExtractorCommandLine) {
+  public constructor(parser: ApiExtractorCommandLine) {
     super({
       actionName: 'run',
       summary: 'Invoke API Extractor on a project',

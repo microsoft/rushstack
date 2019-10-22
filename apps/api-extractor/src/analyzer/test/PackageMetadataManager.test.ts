@@ -3,7 +3,27 @@ import * as path from 'path';
 import { PackageMetadataManager } from '../PackageMetadataManager';
 import { FileSystem, PackageJsonLookup, INodePackageJson } from '@microsoft/node-core-library';
 
-/* tslint:disable:typedef */
+const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
+
+function resolveInTestPackage(testPackageName: string, ...args: string[]): string {
+  return path.resolve(__dirname, 'test-data/tsdoc-metadata-path-inference', testPackageName, ...args);
+}
+
+function getPackageMetadata(testPackageName: string): { packageFolder: string, packageJson: INodePackageJson } {
+  const packageFolder: string = resolveInTestPackage(testPackageName);
+  const packageJson: INodePackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(packageFolder);
+  if (!packageJson) {
+    throw new Error('There should be a package.json file in the test package');
+  }
+  return { packageFolder, packageJson };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function firstArgument(mockFn: jest.Mock): any {
+  return mockFn.mock.calls[0][0];
+}
+
+/* eslint-disable @typescript-eslint/typedef */
 
 describe('PackageMetadataManager', () => {
   describe('.writeTsdocMetadataFile()', () => {
@@ -115,24 +135,4 @@ describe('PackageMetadataManager', () => {
   });
 });
 
-/* tslint:enable:typedef */
-
-const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-
-function resolveInTestPackage(testPackageName: string, ...args: string[]): string {
-  return path.resolve(__dirname, 'test-data/tsdoc-metadata-path-inference', testPackageName, ...args);
-}
-
-function getPackageMetadata(testPackageName: string): { packageFolder: string, packageJson: INodePackageJson } {
-  const packageFolder: string = resolveInTestPackage(testPackageName);
-  const packageJson: INodePackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(packageFolder);
-  if (!packageJson) {
-    throw new Error('There should be a package.json file in the test package');
-  }
-  return { packageFolder, packageJson };
-}
-
-// tslint:disable-next-line:no-any
-function firstArgument(mockFn: jest.Mock): any {
-  return mockFn.mock.calls[0][0];
-}
+/* eslint-enable @typescript-eslint/typedef */

@@ -7,7 +7,7 @@ import { MarkdownDocumenter } from '../documenters/MarkdownDocumenter';
 import { ApiModel } from '@microsoft/api-extractor-model';
 
 export class MarkdownAction extends BaseAction {
-  constructor(parser: ApiDocumenterCommandLine) {
+  public constructor(parser: ApiDocumenterCommandLine) {
     super({
       actionName: 'markdown',
       summary: 'Generate documentation as Markdown files (*.md)',

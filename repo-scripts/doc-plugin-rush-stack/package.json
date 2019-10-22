@@ -19,6 +19,7 @@
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.4": "0.3.0",
     "@microsoft/node-library-build": "6.3.0",
+    "@rushstack/eslint-config": "0.4.0",
     "@types/js-yaml": "3.12.1",
     "@types/node": "8.10.54",
     "gulp": "~4.0.2"

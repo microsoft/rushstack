@@ -5,16 +5,15 @@ import { GulpTask } from '@microsoft/gulp-core-build';
 import gulpType = require('gulp');
 
 export class PostProcessSourceMaps extends GulpTask<void> {
-  constructor() {
+  public constructor() {
     super('post-process');
   }
 
   public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream | void {
     if (this.buildConfig.args.hasOwnProperty('vscode')) {
 
-      /* tslint:disable:typedef */
+      // eslint-disable-next-line
       const replace = require('gulp-replace');
-      /* tslint:enable:typedef */
 
       return gulp.src(['dist/*!(.min).js.map'])
         .pipe(replace('webpack:///./', ''))

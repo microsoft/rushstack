@@ -5,6 +5,7 @@
 ```ts
 
 import { IPackageJson } from '@microsoft/node-core-library';
+import { JsonObject } from '@microsoft/node-core-library';
 
 // @public
 export class ApprovedPackagesConfiguration {
@@ -150,7 +151,7 @@ export interface ITryFindRushJsonLocationOptions {
 
 // @internal
 export class _LastInstallFlag {
-    constructor(folderPath: string, state?: Object);
+    constructor(folderPath: string, state?: JsonObject);
     clear(): void;
     create(): void;
     isValid(): boolean;
@@ -350,6 +351,8 @@ export class _RushGlobalFolder {
 
 // @beta
 export abstract class VersionPolicy {
+    // Warning: (ae-forgotten-export) The symbol "IVersionPolicyJson" needs to be exported by the entry point index.d.ts
+    // 
     // @internal
     constructor(versionPolicyJson: IVersionPolicyJson);
     abstract bump(bumpType?: BumpType, identifier?: string): void;
@@ -359,8 +362,6 @@ export abstract class VersionPolicy {
     readonly isLockstepped: boolean;
     // @internal
     abstract readonly _json: IVersionPolicyJson;
-    // Warning: (ae-forgotten-export) The symbol "IVersionPolicyJson" needs to be exported by the entry point index.d.ts
-    // 
     // @internal
     static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined;
     readonly policyName: string;

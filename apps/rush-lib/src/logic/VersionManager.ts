@@ -24,15 +24,19 @@ import { PublishUtilities } from './PublishUtilities';
 import { ChangeManager } from './ChangeManager';
 
 export class VersionManager {
+  private _rushConfiguration: RushConfiguration;
+  private _userEmail: string;
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
   private _updatedProjects: Map<string, IPackageJson>;
   private _changeFiles: Map<string, ChangeFile>;
 
-  constructor(
-    private _rushConfiguration: RushConfiguration,
-    private _userEmail: string,
+  public constructor(
+    _rushConfiguration: RushConfiguration,
+    _userEmail: string,
     _versionPolicyConfiguration?: VersionPolicyConfiguration
   ) {
+    this._rushConfiguration = _rushConfiguration;
+    this._userEmail = _userEmail;
     this._versionPolicyConfiguration = _versionPolicyConfiguration
       ? _versionPolicyConfiguration
       : this._rushConfiguration.versionPolicyConfiguration;
