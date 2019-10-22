@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add support for NPM_TOKEN environment variable to improve security when usiassing credentials token to rush publiofsho rush publishng ruush publishsh publish",
+      "comment": "Add support for NPM_TOKEN environment variable to improve security of rush publish",
       "type": "none"
     }
   ],
