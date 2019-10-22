@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { StringBuilder, Text, Sort, FileSystem } from '@microsoft/node-core-library';
-import { RushConfiguration, RushConfigurationProject } from '@microsoft/rush-lib';
+import { RushConfiguration, RushConfigurationProject, LockStepVersionPolicy } from '@microsoft/rush-lib';
 import { CommandLineAction } from '@microsoft/ts-command-line';
 
 export class ReadmeAction extends CommandLineAction {
@@ -56,8 +56,21 @@ export class ReadmeAction extends CommandLineAction {
       builder.append(`| [![npm version](https://badge.fury.io/js/${escapedScopedName}.svg)]`
         + `(https://badge.fury.io/js/${escapedScopedName}) `);
 
+      let hasChangeLog: boolean = true;
+      if (project.versionPolicy instanceof LockStepVersionPolicy) {
+        if (project.versionPolicy.mainProject) {
+          if (project.versionPolicy.mainProject !== project.packageName) {
+            hasChangeLog = false;
+          }
+        }
+      }
+
       // | [changelog](./apps/api-extractor/CHANGELOG.md)
-      builder.append(`| [changelog](./${folderPath}/CHANGELOG.md) `);
+      if (hasChangeLog) {
+        builder.append(`| [changelog](./${folderPath}/CHANGELOG.md) `);
+      } else {
+        builder.append(`| `);
+      }
 
       // | [@microsoft/api-extractor](https://www.npmjs.com/package/@microsoft/api-extractor)
       builder.append(`| [${scopedName}](https://www.npmjs.com/package/${scopedName}) `);
