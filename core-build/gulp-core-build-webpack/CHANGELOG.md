@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-webpack
 
-This log was last generated on Mon, 21 Oct 2019 05:22:43 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Oct 2019 06:24:44 GMT and should not be manually modified.
+
+## 3.7.3
+Tue, 22 Oct 2019 06:24:44 GMT
+
+### Patches
+
+- Refactor some code as part of migration from TSLint to ESLint
 
 ## 3.7.2
 Mon, 21 Oct 2019 05:22:43 GMT

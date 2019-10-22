@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Mon, 21 Oct 2019 05:22:43 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Oct 2019 06:24:44 GMT and should not be manually modified.
+
+## 8.3.1
+Tue, 22 Oct 2019 06:24:44 GMT
+
+### Patches
+
+- Refactor some code as part of migration from TSLint to ESLint
 
 ## 8.3.0
 Mon, 21 Oct 2019 05:22:43 GMT

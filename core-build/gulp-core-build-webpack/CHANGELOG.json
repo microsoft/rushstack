@@ -2,6 +2,32 @@
   "name": "@microsoft/gulp-core-build-webpack",
   "entries": [
     {
+      "version": "3.7.3",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.7.3",
+      "date": "Tue, 22 Oct 2019 06:24:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Refactor some code as part of migration from TSLint to ESLint"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.12.1` to `3.12.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.0` to `6.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.3.0` to `0.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.4.0` to `0.4.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.7.2",
       "tag": "@microsoft/gulp-core-build-webpack_v3.7.2",
       "date": "Mon, 21 Oct 2019 05:22:43 GMT",

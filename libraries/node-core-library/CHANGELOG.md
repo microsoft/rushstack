@@ -1,6 +1,17 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Sun, 29 Sep 2019 23:56:29 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Oct 2019 06:24:44 GMT and should not be manually modified.
+
+## 3.16.0
+Tue, 22 Oct 2019 06:24:44 GMT
+
+### Minor changes
+
+- Add JsonObject type
+
+### Patches
+
+- Refactor some code as part of migration from TSLint to ESLint
 
 ## 3.15.1
 Sun, 29 Sep 2019 23:56:29 GMT

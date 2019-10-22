@@ -2,6 +2,24 @@
   "name": "@microsoft/loader-raw-script",
   "entries": [
     {
+      "version": "1.2.185",
+      "tag": "@microsoft/loader-raw-script_v1.2.185",
+      "date": "Tue, 22 Oct 2019 06:24:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.3.0` to `0.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.4.0` to `0.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.0` to `6.3.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.184",
       "tag": "@microsoft/loader-raw-script_v1.2.184",
       "date": "Mon, 21 Oct 2019 05:22:43 GMT",
