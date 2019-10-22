@@ -108,6 +108,7 @@ export class PublishAction extends BaseRushAction {
       parameterLongName: '--npm-auth-token',
       parameterShortName: '-n',
       argumentName: 'TOKEN',
+      environmentVariable: 'NPM_TOKEN',
       description:
       'Provide the default scope NPM auth token to be passed into npm publish for global package publishing.'
     });
@@ -487,7 +488,7 @@ export class PublishAction extends BaseRushAction {
     }
 
     if (this._npmAuthToken.value) {
-      args.push(`--${registry}:_authToken=${this._npmAuthToken.value}`);
+      args.push(`--${registry}:_authToken=\$\{${this._npmAuthToken.environmentVariable}\}`);
     }
   }
 }
