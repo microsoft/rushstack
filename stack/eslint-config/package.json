@@ -1,19 +1,22 @@
 {
   "name": "@rushstack/eslint-config",
   "version": "0.4.0",
-  "description": "Base set of ESLint rules for scalable TypeScript projects.",
+  "description": "A TypeScript ESLint ruleset designed for large teams and projects",
   "license": "MIT",
   "repository": {
     "url": "https://github.com/microsoft/rushstack/tree/master/stack/eslint-config"
   },
+  "homepage": "https://rushstack.io",
   "scripts": {
     "build": ""
   },
   "keywords": [
     "eslint",
     "eslint-config",
+    "monorepo",
     "rush",
-    "rushstack",
+    "scalable",
+    "scale",
     "typescript"
   ],
   "peerDependencies": {

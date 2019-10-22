@@ -5,7 +5,8 @@
   "description": "Used to execute various operations specific to this repo",
   "license": "MIT",
   "scripts": {
-    "build": "gulp test --clean"
+    "build": "gulp test --clean",
+    "readme": "node ./lib/start.js readme"
   },
   "dependencies": {
     "@microsoft/node-core-library": "3.15.1",
