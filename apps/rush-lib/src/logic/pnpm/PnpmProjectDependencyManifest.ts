@@ -194,9 +194,12 @@ export class PnpmProjectDependencyManifest {
         const topLevelDependencySpecifier: DependencySpecifier | undefined =
           this._pnpmShrinkwrapFile.getTopLevelDependencyVersion(peerDependencyName);
         if (!topLevelDependencySpecifier || !semver.valid(topLevelDependencySpecifier.versionSpecifier)) {
-          throw new InternalError(
-            `Could not find peer dependency '${peerDependencyName}' that satisfies version '${dependencySemVer}'`
-          );
+          const errMsg: string = `Could not find peer dependency '${peerDependencyName}' that satisfies version '${dependencySemVer}'`
+          if (this._project.rushConfiguration.pnpmOptions && this._project.rushConfiguration.pnpmOptions.strictPeerDependencies) {
+            throw new InternalError(errMsg);
+          }
+          console.log(`${errMsg}, skipping...`);
+          continue;
         }
 
         this._addDependencyInternal(
