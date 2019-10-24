@@ -201,6 +201,7 @@ export class PublishUtilities {
 
     if (args.includes('publish')) {
       // Replace environment variable tokens that look like "${VAR_NAME}"
+      // This can be moved outside if we want to hide all environment variables
       const regex: RegExp = /\$\{([^\}]+)\}/g;
       commandOutput = commandOutput.replace(regex, '***');
     }
