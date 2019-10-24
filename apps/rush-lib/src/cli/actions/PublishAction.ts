@@ -488,6 +488,7 @@ export class PublishAction extends BaseRushAction {
     }
 
     if (this._npmAuthToken.value) {
+      env['NPM_TOKEN'] = this._npmAuthToken.value;
       args.push(`--${registry}:_authToken=\$\{${this._npmAuthToken.environmentVariable}\}`);
     }
   }

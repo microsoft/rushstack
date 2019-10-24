@@ -197,8 +197,16 @@ export class PublishUtilities {
       relativeDirectory = `(${relativeDirectory})`;
     }
 
+    let commandOutput: string = args.join(' ');
+
+    if (args.includes('publish')) {
+      // Replace environment variable tokens that look like "${VAR_NAME}"
+      const regex: RegExp = /\$\{([^\}]+)\}/g;
+      commandOutput = commandOutput.replace(regex, '***');
+    }
+
     console.log(
-      `${EOL}* ${shouldExecute ? 'EXECUTING' : 'DRYRUN'}: ${command} ${args.join(' ')} ${relativeDirectory}`
+      `${EOL}* ${shouldExecute ? 'EXECUTING' : 'DRYRUN'}: ${command} ${commandOutput} ${relativeDirectory}`
     );
 
     if (shouldExecute) {
