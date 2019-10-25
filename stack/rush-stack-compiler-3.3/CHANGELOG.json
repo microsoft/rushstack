@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-stack-compiler-3.3",
   "entries": [
     {
+      "version": "0.4.2",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.4.2",
+      "date": "Fri, 25 Oct 2019 15:08:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where ESLint output would fail to parse when a large project is built on a Mac."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.1",
       "tag": "@microsoft/rush-stack-compiler-3.3_v0.4.1",
       "date": "Tue, 22 Oct 2019 06:24:44 GMT",

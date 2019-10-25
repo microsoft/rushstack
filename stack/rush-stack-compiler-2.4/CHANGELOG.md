@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush-stack-compiler-2.4
 
-This log was last generated on Tue, 22 Oct 2019 06:24:44 GMT and should not be manually modified.
+This log was last generated on Fri, 25 Oct 2019 15:08:54 GMT and should not be manually modified.
+
+## 0.8.2
+Fri, 25 Oct 2019 15:08:54 GMT
+
+### Patches
+
+- Fix an issue where ESLint output would fail to parse when a large project is built on a Mac.
 
 ## 0.8.1
 Tue, 22 Oct 2019 06:24:44 GMT
