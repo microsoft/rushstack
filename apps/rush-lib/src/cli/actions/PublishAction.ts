@@ -487,8 +487,20 @@ export class PublishAction extends BaseRushAction {
       registry = registryUrl.substring(registryUrl.indexOf('//'));
     }
 
-    if (this._npmAuthToken.value) {
-      env['NPM_TOKEN'] = this._npmAuthToken.value; // eslint-disable-line dot-notation
+    /**
+    * To avoid leaking secret to build logs, do not directly pass an NPM authorization token when publishing.
+    * Rush prevents the publish command from displaying NPM authentication tokens from the output.
+    * Please use environment variables to secure youre NPM authentication token, and make sure to secure any
+    * token being used on CI systems.
+    * 
+    * TODO: Update CI Scripts, remove auth tokens or it will be expanded when evaluated
+    * 
+    */
+    if (this._npmAuthToken.environmentVariable){
+      if (this._npmAuthToken.value) {
+        const npmToken: string = this._npmAuthToken.value;
+        env[this._npmAuthToken.environmentVariable] = npmToken;
+      }
       args.push(`--${registry}:_authToken=\$\{${this._npmAuthToken.environmentVariable}\}`);
     }
   }

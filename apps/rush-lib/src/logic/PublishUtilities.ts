@@ -197,17 +197,17 @@ export class PublishUtilities {
       relativeDirectory = `(${relativeDirectory})`;
     }
 
-    let commandOutput: string = args.join(' ');
+    let commandArgs: string = args.join(' ');
 
     if (args.includes('publish')) {
-      // Replace environment variable tokens that look like "${VAR_NAME}"
-      // This can be moved outside if we want to hide all environment variables
-      const regex: RegExp = /\$\{([^\}]+)\}/g;
-      commandOutput = commandOutput.replace(regex, '***');
+      // Remove token from printing to output
+      // TODO: Find the best approach
+      const regex: RegExp = /=.*?\s/;
+      commandArgs = commandArgs.replace(regex, ' ');
     }
 
     console.log(
-      `${EOL}* ${shouldExecute ? 'EXECUTING' : 'DRYRUN'}: ${command} ${commandOutput} ${relativeDirectory}`
+      `${EOL}* ${shouldExecute ? 'EXECUTING' : 'DRYRUN'}: ${command} ${commandArgs} ${relativeDirectory}`
     );
 
     if (shouldExecute) {
