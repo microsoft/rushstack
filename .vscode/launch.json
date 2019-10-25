@@ -2,6 +2,18 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"type": "node",
+			"request": "launch",
+			"name": "rush add",
+			"program": "${workspaceFolder}/apps/rush-lib/lib/start.js",
+			"args": [
+							"add",
+							"-p",
+							"project-b"
+			],
+			"cwd": "C:/Users/zhas/Desktop/sp-client/apps/project-a"
+		},
+		{
 			"name": "Launch",
 			"type": "node",
 			"request": "launch",

@@ -46,7 +46,7 @@
      * The default value is false to avoid legacy compatibility issues.
      * It is strongly recommended to set strictPeerDependencies=true.
      */
-    "strictPeerDependencies": true,
+    "strictPeerDependencies": true
 
 
     /**
@@ -338,6 +338,11 @@
     // },
     //
     // "apps" folder (alphabetical order)
+    {
+      "packageName": "project-b",
+      "projectFolder": "C:/Users/zhas/Desktop/sp-client/apps/project-b",
+      "reviewCategory": "third-party"
+    },
     {
       "packageName": "@microsoft/api-extractor",
       "projectFolder": "apps/api-extractor",
