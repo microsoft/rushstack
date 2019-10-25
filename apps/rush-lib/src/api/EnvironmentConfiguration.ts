@@ -178,7 +178,7 @@ export class EnvironmentConfiguration {
     const endsWithSlash: boolean = folderPath.charAt(folderPath.length - 1) === path.sep;
     const parsedPath: path.ParsedPath = path.parse(folderPath);
     const pathRoot: string = parsedPath.root;
-    const pathWithoutRoot: String = parsedPath.dir.substr(pathRoot.length);
+    const pathWithoutRoot: string = parsedPath.dir.substr(pathRoot.length);
     const pathParts: string[] = [...pathWithoutRoot.split(path.sep), parsedPath.name].filter((part) => !!part);
 
     // Starting with all path sections, and eliminating one from the end during each loop iteration,

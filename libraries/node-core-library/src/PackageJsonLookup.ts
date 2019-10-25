@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* tslint:disable:no-constant-condition */
-
 import * as path from 'path';
 import { JsonFile } from './JsonFile';
 import { IPackageJson, INodePackageJson } from './IPackageJson';
@@ -42,6 +40,15 @@ export class PackageJsonLookup {
   // Cached the return values for getPackageName():
   // packageJsonPath --> packageName
   private _packageJsonCache: Map<string, IPackageJson>;
+
+  public constructor(parameters?: IPackageJsonLookupParameters) {
+    if (parameters) {
+      if (parameters.loadExtraFields) {
+        this._loadExtraFields = parameters.loadExtraFields;
+      }
+    }
+    this.clearCache();
+  }
 
   /**
    * A helper for loading the caller's own package.json file.
@@ -83,15 +90,6 @@ export class PackageJsonLookup {
       || 'package.json';
     throw new Error(`PackageJsonLookup.loadOwnPackageJson() failed because the "version" field is missing in`
       + ` ${errorPath}`);
-  }
-
-  constructor(parameters?: IPackageJsonLookupParameters) {
-    if (parameters) {
-      if (parameters.loadExtraFields) {
-        this._loadExtraFields = parameters.loadExtraFields;
-      }
-    }
-    this.clearCache();
   }
 
   /**

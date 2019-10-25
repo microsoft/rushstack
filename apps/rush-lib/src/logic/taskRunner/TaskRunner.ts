@@ -44,7 +44,7 @@ export class TaskRunner {
   private _completedTasks: number;
   private _terminal: Terminal;
 
-  constructor(orderedTasks: ITask[], options: ITaskRunnerOptions) {
+  public constructor(orderedTasks: ITask[], options: ITaskRunnerOptions) {
     const {
       quietMode,
       parallelism,
@@ -366,7 +366,7 @@ export class TaskRunner {
     const headSize: number = 10;
     const tailSize: number = 20;
     const margin: number = 10;
-    const lines: Array<string> = text.split(/\s*\r?\n/).filter(line => line);
+    const lines: string[] = text.split(/\s*\r?\n/).filter(line => line);
     if (lines.length < headSize + tailSize + margin) {
       return lines.join(os.EOL);
     }

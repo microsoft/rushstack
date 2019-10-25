@@ -35,7 +35,7 @@ export abstract class RushStackCompilerBase<
   protected _fileError: WriteFileIssueFunction;
   protected _fileWarning: WriteFileIssueFunction;
 
-  constructor(taskOptions: TOptions, rootPath: string, terminalProvider: ITerminalProvider) {
+  public constructor(taskOptions: TOptions, rootPath: string, terminalProvider: ITerminalProvider) {
     this._taskOptions = taskOptions;
     this._standardBuildFolders = new StandardBuildFolders(rootPath);
     this._terminal = new Terminal(terminalProvider);

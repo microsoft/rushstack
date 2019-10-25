@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// tslint:disable:no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as ts from 'typescript';
 
@@ -10,7 +10,7 @@ export class TypeScriptInternals {
   public static getImmediateAliasedSymbol(symbol: ts.Symbol, typeChecker: ts.TypeChecker): ts.Symbol {
     // Compiler internal:
     // https://github.com/microsoft/TypeScript/blob/v3.2.2/src/compiler/checker.ts
-    return (typeChecker as any).getImmediateAliasedSymbol(symbol); // tslint:disable-line:no-any
+    return (typeChecker as any).getImmediateAliasedSymbol(symbol); // eslint-disable-line @typescript-eslint/no-explicit-any
   }
 
   /**
@@ -36,7 +36,7 @@ export class TypeScriptInternals {
    * for a computed property based on its type, rather than by the Binder).
    */
   public static isLateBoundSymbol(symbol: ts.Symbol): boolean {
-    // tslint:disable-next-line:no-bitwise
+    // eslint-disable-next-line no-bitwise
     if (symbol.flags & ts.SymbolFlags.Transient &&
         (symbol as any).checkFlags === (ts as any).CheckFlags.Late) {
       return true;

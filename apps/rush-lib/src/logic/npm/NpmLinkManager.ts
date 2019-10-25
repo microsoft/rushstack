@@ -142,8 +142,7 @@ export class NpmLinkManager extends BaseLinkManager {
       cyclicSubtreeRoot: undefined
     });
 
-    // tslint:disable-next-line:no-constant-condition
-    while (true) {
+    for (;;) {
       const queueItem: IQueueItem | undefined = queue.shift();
       if (!queueItem) {
         break;

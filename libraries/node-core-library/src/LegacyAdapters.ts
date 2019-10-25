@@ -3,11 +3,13 @@
 
 /**
  * Callback used by {@link LegacyAdapters}.
+ * @public
  */
 export type LegacyCallback<TResult, TError> = (error: TError, result: TResult) => void;
 
 /**
  * Helper functions used when interacting with APIs that do not follow modern coding practices.
+ * @public
  */
 export class LegacyAdapters {
   /**
@@ -81,14 +83,14 @@ export class LegacyAdapters {
   /**
    * Normalizes an object into an `Error` object.
    */
-  public static scrubError(error: Error | string | any): Error { // tslint:disable-line:no-any
+  public static scrubError(error: Error | string | any): Error { // eslint-disable-line @typescript-eslint/no-explicit-any
     if (error instanceof Error) {
       return error;
     } else if (typeof error === 'string') {
       return new Error(error);
     } else {
       const errorObject: Error = new Error('An error occurred.');
-      (errorObject as any).errorData = error; // tslint:disable-line:no-any
+      (errorObject as any).errorData = error; // eslint-disable-line @typescript-eslint/no-explicit-any
       return errorObject;
     }
   }

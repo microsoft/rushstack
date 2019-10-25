@@ -57,6 +57,19 @@ export abstract class VersionPolicy {
   private _versionFormatForPublish: VersionFormatForPublish;
 
   /**
+   * @internal
+   */
+  public constructor(versionPolicyJson: IVersionPolicyJson) {
+    this._policyName = versionPolicyJson.policyName;
+    this._definitionName = VersionPolicyDefinitionName[versionPolicyJson.definitionName];
+    this._exemptFromRushChange = versionPolicyJson.exemptFromRushChange || false;
+
+    const jsonDependencies: IVersionPolicyDependencyJson = versionPolicyJson.dependencies || { };
+    this._versionFormatForCommit = jsonDependencies.versionFormatForCommit || VersionFormatForCommit.original;
+    this._versionFormatForPublish = jsonDependencies.versionFormatForPublish || VersionFormatForPublish.original;
+  }
+
+  /**
    * Loads from version policy json
    *
    * @param versionPolicyJson - version policy Json
@@ -66,26 +79,13 @@ export abstract class VersionPolicy {
   public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined {
     const definition: VersionPolicyDefinitionName = VersionPolicyDefinitionName[versionPolicyJson.definitionName];
     if (definition === VersionPolicyDefinitionName.lockStepVersion) {
-       // tslint:disable-next-line:no-use-before-declare
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       return new LockStepVersionPolicy(versionPolicyJson as ILockStepVersionJson);
     } else if (definition === VersionPolicyDefinitionName.individualVersion) {
-      // tslint:disable-next-line:no-use-before-declare
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       return new IndividualVersionPolicy(versionPolicyJson as IIndividualVersionJson);
     }
     return undefined;
-  }
-
-  /**
-   * @internal
-   */
-  constructor(versionPolicyJson: IVersionPolicyJson) {
-    this._policyName = versionPolicyJson.policyName;
-    this._definitionName = VersionPolicyDefinitionName[versionPolicyJson.definitionName];
-    this._exemptFromRushChange = versionPolicyJson.exemptFromRushChange || false;
-
-    const jsonDependencies: IVersionPolicyDependencyJson = versionPolicyJson.dependencies || { };
-    this._versionFormatForCommit = jsonDependencies.versionFormatForCommit || VersionFormatForCommit.original;
-    this._versionFormatForPublish = jsonDependencies.versionFormatForPublish || VersionFormatForPublish.original;
   }
 
   /**
@@ -210,7 +210,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
   /**
    * @internal
    */
-  constructor(versionPolicyJson: ILockStepVersionJson) {
+  public constructor(versionPolicyJson: ILockStepVersionJson) {
     super(versionPolicyJson);
     this._version = new semver.SemVer(versionPolicyJson.version);
     this._nextBump = BumpType[versionPolicyJson.nextBump];
@@ -336,7 +336,7 @@ export class IndividualVersionPolicy extends VersionPolicy {
   /**
    * @internal
    */
-  constructor(versionPolicyJson: IIndividualVersionJson) {
+  public constructor(versionPolicyJson: IIndividualVersionJson) {
     super(versionPolicyJson);
     this._lockedMajor = versionPolicyJson.lockedMajor;
   }

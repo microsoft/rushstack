@@ -12,13 +12,6 @@ import { MarkdownDocumenterAccessor } from './MarkdownDocumenterAccessor';
  * @public
  */
 export class MarkdownDocumenterFeatureContext {
-  /** @internal */
-  public constructor(options: MarkdownDocumenterFeatureContext) {
-    this.apiModel = options.apiModel;
-    this.outputFolder = options.outputFolder;
-    this.documenter = options.documenter;
-  }
-
   /**
    * Provides access to the `ApiModel` for the documentation being generated.
    */
@@ -33,6 +26,13 @@ export class MarkdownDocumenterFeatureContext {
    * Exposes functionality of the documenter.
    */
   public readonly documenter: MarkdownDocumenterAccessor;
+
+  /** @internal */
+  public constructor(options: MarkdownDocumenterFeatureContext) {
+    this.apiModel = options.apiModel;
+    this.outputFolder = options.outputFolder;
+    this.documenter = options.documenter;
+  }
 }
 
 /**

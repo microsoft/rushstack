@@ -61,20 +61,6 @@ export class ApiClass extends ApiItemContainerMixin(ApiNameMixin(ApiTypeParamete
 
   private readonly _implementsTypes: HeritageType[] = [];
 
-  public static getContainerKey(name: string): string {
-    return `${name}|${ApiItemKind.Class}`;
-  }
-
-  /** @override */
-  public static onDeserializeInto(options: Partial<IApiClassOptions>, context: DeserializerContext,
-    jsonObject: IApiClassJson): void {
-
-    super.onDeserializeInto(options, context, jsonObject);
-
-    options.extendsTokenRange = jsonObject.extendsTokenRange;
-    options.implementsTokenRanges = jsonObject.implementsTokenRanges;
-  }
-
   public constructor(options: IApiClassOptions) {
     super(options);
 
@@ -87,6 +73,20 @@ export class ApiClass extends ApiItemContainerMixin(ApiNameMixin(ApiTypeParamete
     for (const implementsTokenRange of options.implementsTokenRanges) {
       this._implementsTypes.push(new HeritageType(this.buildExcerpt(implementsTokenRange)));
     }
+  }
+
+  public static getContainerKey(name: string): string {
+    return `${name}|${ApiItemKind.Class}`;
+  }
+
+  /** @override */
+  public static onDeserializeInto(options: Partial<IApiClassOptions>, context: DeserializerContext,
+    jsonObject: IApiClassJson): void {
+
+    super.onDeserializeInto(options, context, jsonObject);
+
+    options.extendsTokenRange = jsonObject.extendsTokenRange;
+    options.implementsTokenRanges = jsonObject.implementsTokenRanges;
   }
 
   /** @override */

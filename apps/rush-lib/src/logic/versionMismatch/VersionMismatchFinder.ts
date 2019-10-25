@@ -37,6 +37,16 @@ export class VersionMismatchFinder {
   private _mismatches: Map<string, Map<string, VersionMismatchFinderEntity[]>>;
   private _projects: VersionMismatchFinderEntity[];
 
+  public constructor(
+    projects: VersionMismatchFinderEntity[],
+    allowedAlternativeVersions?: Map<string, ReadonlyArray<string>>
+  ) {
+    this._projects = projects;
+    this._mismatches = new Map<string, Map<string, VersionMismatchFinderEntity[]>>();
+    this._allowedAlternativeVersion = allowedAlternativeVersions || new Map<string, ReadonlyArray<string>>();
+    this._analyze();
+  }
+
   public static rushCheck(
     rushConfiguration: RushConfiguration,
     options: IVersionMismatchFinderRushCheckOptions = {}
@@ -105,31 +115,21 @@ export class VersionMismatchFinder {
     }
   }
 
-  constructor(
-    projects: VersionMismatchFinderEntity[],
-    allowedAlternativeVersions?: Map<string, ReadonlyArray<string>>
-  ) {
-    this._projects = projects;
-    this._mismatches = new Map<string, Map<string, VersionMismatchFinderEntity[]>>();
-    this._allowedAlternativeVersion = allowedAlternativeVersions || new Map<string, ReadonlyArray<string>>();
-    this._analyze();
-  }
-
-  public get numberOfMismatches(): number {
+    public get numberOfMismatches(): number {
     return this._mismatches.size;
   }
 
-  public getMismatches(): Array<string> {
+  public getMismatches(): string[] {
     return this._getKeys(this._mismatches);
   }
 
-  public getVersionsOfMismatch(mismatch: string): Array<string> | undefined {
+  public getVersionsOfMismatch(mismatch: string): string[] | undefined {
     return this._mismatches.has(mismatch)
       ? this._getKeys(this._mismatches.get(mismatch))
       : undefined;
   }
 
-  public getConsumersOfMismatch(mismatch: string, version: string): Array<VersionMismatchFinderEntity> | undefined {
+  public getConsumersOfMismatch(mismatch: string, version: string): VersionMismatchFinderEntity[] | undefined {
     const mismatchedPackage: Map<string, VersionMismatchFinderEntity[]> | undefined = this._mismatches.get(mismatch);
     if (!mismatchedPackage) {
       return undefined;
@@ -206,11 +206,11 @@ export class VersionMismatchFinder {
     return Boolean(allowedAlternatives && allowedAlternatives.indexOf(version) > -1);
   }
 
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _getKeys(iterable: Map<string, any> | undefined): string[] {
     const keys: string[] = [];
     if (iterable) {
-      // tslint:disable-next-line:no-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       iterable.forEach((value: any, key: string) => {
         keys.push(key);
       });

@@ -42,12 +42,12 @@ export interface IApiEnumOptions extends
  */
 export class ApiEnum extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
 
-  public static getContainerKey(name: string): string {
-    return `${name}|${ApiItemKind.Enum}`;
-  }
-
   public constructor(options: IApiEnumOptions) {
     super(options);
+  }
+
+  public static getContainerKey(name: string): string {
+    return `${name}|${ApiItemKind.Enum}`;
   }
 
   /** @override */

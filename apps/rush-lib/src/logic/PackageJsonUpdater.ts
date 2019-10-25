@@ -173,7 +173,7 @@ export class PackageJsonUpdater {
       };
       this.updateProject(currentProjectUpdate);
 
-      const otherPackageUpdates: Array<IUpdateProjectOptions> = [];
+      const otherPackageUpdates: IUpdateProjectOptions[] = [];
 
       if (this._rushConfiguration.ensureConsistentVersions || updateOtherPackages) {
         // we need to do a mismatch check
@@ -181,7 +181,7 @@ export class PackageJsonUpdater {
           variant: variant
         });
 
-        const mismatches: Array<string> = mismatchFinder.getMismatches().filter((mismatch) => {
+        const mismatches: string[] = mismatchFinder.getMismatches().filter((mismatch) => {
           return !projects.find((proj) => proj.packageName === mismatch);
         });
         if (mismatches.length) {
@@ -192,7 +192,7 @@ export class PackageJsonUpdater {
           }
 
           // otherwise we need to go update a bunch of other projects
-          const mismatchedVersions: Array<string> | undefined = mismatchFinder.getVersionsOfMismatch(packageName);
+          const mismatchedVersions: string[] | undefined = mismatchFinder.getVersionsOfMismatch(packageName);
           if (mismatchedVersions) {
             for (const mismatchedVersion of mismatchedVersions) {
               for (const consumer of mismatchFinder.getConsumersOfMismatch(packageName, mismatchedVersion)!) {
@@ -235,7 +235,7 @@ export class PackageJsonUpdater {
   /**
    * Updates several projects' package.json files
    */
-  public updateProjects(projectUpdates: Array<IUpdateProjectOptions>): void {
+  public updateProjects(projectUpdates: IUpdateProjectOptions[]): void {
     for (const update of projectUpdates) {
       this.updateProject(update);
     }
@@ -312,7 +312,7 @@ export class PackageJsonUpdater {
       console.log();
       console.log(`Querying registry for all versions of "${packageName}"...`);
 
-      let commandArgs: Array<string>;
+      let commandArgs: string[];
       if (this._rushConfiguration.packageManager === 'yarn') {
         commandArgs = ['info', packageName, 'versions', '--json'];
       } else {
@@ -326,7 +326,7 @@ export class PackageJsonUpdater {
           this._rushConfiguration.commonTempFolder
         );
 
-      let versionList: Array<string>;
+      let versionList: string[];
       if (this._rushConfiguration.packageManager === 'yarn') {
         versionList = JSON.parse(allVersions).data;
       } else {
@@ -355,7 +355,7 @@ export class PackageJsonUpdater {
       }
       console.log(`Querying NPM registry for latest version of "${packageName}"...`);
 
-      let commandArgs: Array<string>;
+      let commandArgs: string[];
       if (this._rushConfiguration.packageManager === 'yarn') {
         commandArgs = ['info', packageName, 'dist-tags.latest', '--silent'];
       } else {

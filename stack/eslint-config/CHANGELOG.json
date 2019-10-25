@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "0.4.1",
+      "tag": "@rushstack/eslint-config_v0.4.1",
+      "date": "Tue, 22 Oct 2019 06:24:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update documentation"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.0",
       "tag": "@rushstack/eslint-config_v0.4.0",
       "date": "Tue, 15 Oct 2019 01:22:16 GMT",

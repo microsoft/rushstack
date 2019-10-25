@@ -20,7 +20,7 @@ interface IConfig {
 let testArray: string[] = [];
 
 class PromiseTask extends GulpTask<IConfig> {
-  constructor() {
+  public constructor() {
     super('promise', {});
   }
 
@@ -33,15 +33,15 @@ class PromiseTask extends GulpTask<IConfig> {
 }
 
 class StreamTask extends GulpTask<IConfig> {
-  constructor() {
+  public constructor() {
     super('stream', {});
   }
 
-  public executeTask(gulp: typeof Gulp): any { // tslint:disable-line:no-any
+  public executeTask(gulp: typeof Gulp): any { // eslint-disable-line @typescript-eslint/no-explicit-any
     const stream: Readable = new Readable({ objectMode: true });
 
     // Add no opt function to make it compat with through
-    stream['_read'] = () => { // tslint:disable-line:no-string-literal
+    stream['_read'] = () => { // eslint-disable-line dot-notation
       // Do Nothing
     };
 
@@ -64,7 +64,7 @@ class StreamTask extends GulpTask<IConfig> {
 }
 
 class SyncTask extends GulpTask<IConfig> {
-  constructor() {
+  public constructor() {
     super('sync', {});
   }
 
@@ -74,7 +74,7 @@ class SyncTask extends GulpTask<IConfig> {
 }
 
 class SyncWithReturnTask extends GulpTask<IConfig> {
-  constructor() {
+  public constructor() {
     super('sync-with-return', {});
   }
 
@@ -84,7 +84,7 @@ class SyncWithReturnTask extends GulpTask<IConfig> {
 }
 
 class CallbackTask extends GulpTask<IConfig> {
-  constructor() {
+  public constructor() {
     super('schema-task', {});
   }
 
@@ -101,7 +101,7 @@ interface ISimpleConfig {
 class SchemaTask extends GulpTask<ISimpleConfig> {
   public name: string = '';
 
-  constructor() {
+  public constructor() {
     super(
       'schema-task',
       {
@@ -186,7 +186,7 @@ describe('GulpTask', () => {
   it(`throws validation error is config does not conform to schema file`, (done) => {
     const schemaTask: SchemaTask = new SchemaTask();
 
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (schemaTask as any)._getConfigFilePath = (): string => {
       return path.join(__dirname, 'other-schema-task.config.json');
     };

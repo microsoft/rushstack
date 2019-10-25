@@ -3,13 +3,15 @@
 
 import { GulpTask } from '@microsoft/gulp-core-build';
 import { IBuildConfig } from '@microsoft/gulp-core-build/lib/IBuildConfig';
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem, JsonObject } from '@microsoft/node-core-library';
 import * as Gulp from 'gulp';
 import * as colors from 'colors';
 import * as HttpType from 'http';
 import * as HttpsType from 'https';
 import * as pathType from 'path';
 import * as ExpressType from 'express';
+
+/* eslint-disable @typescript-eslint/no-var-requires */
 
 import {
   ICertificate
@@ -92,7 +94,7 @@ interface IApiMap {
 }
 
 export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig & TExtendedConfig> {
-  constructor(extendedName?: string, extendedConfig?: TExtendedConfig) {
+  public constructor(extendedName?: string, extendedConfig?: TExtendedConfig) {
     super(
       extendedName || 'serve',
       {
@@ -102,25 +104,26 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
         port: 4321,
         hostname: 'localhost',
         tryCreateDevCertificate: false,
-        ...(extendedConfig as Object)
+        ...(extendedConfig as any) // eslint-disable-line @typescript-eslint/no-explicit-any
       } as IServeTaskConfig & TExtendedConfig
     );
   }
 
-  public loadSchema(): Object {
+  public loadSchema(): JsonObject {
     return require('./serve.schema.json');
   }
 
   public executeTask(gulp: typeof Gulp, completeCallback?: (error?: string) => void): void {
 
-    /* tslint:disable:typedef */
+    /* eslint-disable @typescript-eslint/typedef */
     const gulpConnect = require('gulp-connect');
     const open = require('gulp-open');
     const http = require('http');
     const https = require('https');
-    /* tslint:enable:typedef */
+    /* eslint-enable @typescript-eslint/typedef */
 
     const path: typeof pathType = require('path');
+
     const openBrowser: boolean = (process.argv.indexOf('--nobrowser') === -1);
     const portArgumentIndex: number = process.argv.indexOf('--port');
     let { port, initialPage }: IServeTaskConfig = this.taskConfig;
@@ -205,9 +208,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
   }
 
   private _logRequestsMiddleware(req: HttpType.IncomingMessage, res: HttpType.ServerResponse, next?: () => void): void {
-    /* tslint:disable:no-any */
-    const ipAddress: string = (req as any).ip;
-    /* tslint:enable:no-any */
+    const ipAddress: string = (req as any).ip; // eslint-disable-line @typescript-eslint/no-explicit-any
     let resourceColor: (text: string) => string = colors.cyan;
 
     if (req && req.url) {
@@ -280,7 +281,8 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
           }
         }
       } else {
-        const { ensureCertificate } = require('./certificates'); // tslint:disable-line
+        // eslint-disable-next-line
+        const { ensureCertificate } = require('./certificates');
         const devCertificate: ICertificate = ensureCertificate(this.taskConfig.tryCreateDevCertificate, this);
         if (devCertificate.pemCertificate && devCertificate.pemKey) {
           result.cert = devCertificate.pemCertificate;

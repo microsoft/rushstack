@@ -12,7 +12,7 @@ export class BxlModulesGenerator {
   private _rushConfiguration: RushConfiguration;
   private _buildXLRoot: string;
 
-  constructor(rushConfiguration: RushConfiguration, buildXLRoot: string) {
+  public constructor(rushConfiguration: RushConfiguration, buildXLRoot: string) {
     this._rushConfiguration = rushConfiguration;
     this._buildXLRoot = this._normalizePathSeparator(buildXLRoot);
   }

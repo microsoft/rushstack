@@ -36,7 +36,7 @@ const _returnTypeExcerpt: unique symbol = Symbol('ApiReturnTypeMixin._returnType
  *
  * @public
  */
-// tslint:disable-next-line:interface-name
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface ApiReturnTypeMixin extends ApiItem {
   /**
    * An {@link Excerpt} that describes the type of the function's return value.
@@ -56,22 +56,13 @@ export interface ApiReturnTypeMixin extends ApiItem {
  * @public
  */
 export function ApiReturnTypeMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiReturnTypeMixin) { // tslint:disable-line:no-any
+  TBaseClass & (new (...args: any[]) => ApiReturnTypeMixin) { // eslint-disable-line @typescript-eslint/no-explicit-any
 
   abstract class MixedClass extends baseClass implements ApiReturnTypeMixin {
     public [_returnTypeExcerpt]: Excerpt;
 
-    /** @override */
-    public static onDeserializeInto(options: Partial<IApiReturnTypeMixinOptions>, context: DeserializerContext,
-      jsonObject: IApiReturnTypeMixinJson): void {
-
-      baseClass.onDeserializeInto(options, context, jsonObject);
-
-      options.returnTypeTokenRange = jsonObject.returnTypeTokenRange;
-    }
-
-    // tslint:disable-next-line:no-any
-    constructor(...args: any[]) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public constructor(...args: any[]) {
       super(...args);
 
       const options: IApiReturnTypeMixinOptions = args[0];
@@ -81,6 +72,15 @@ export function ApiReturnTypeMixin<TBaseClass extends IApiItemConstructor>(baseC
       } else {
         throw new InternalError('ApiReturnTypeMixin expects a base class that inherits from ApiDeclaredItem');
       }
+    }
+
+    /** @override */
+    public static onDeserializeInto(options: Partial<IApiReturnTypeMixinOptions>, context: DeserializerContext,
+      jsonObject: IApiReturnTypeMixinJson): void {
+
+      baseClass.onDeserializeInto(options, context, jsonObject);
+
+      options.returnTypeTokenRange = jsonObject.returnTypeTokenRange;
     }
 
     public get returnTypeExcerpt(): Excerpt {

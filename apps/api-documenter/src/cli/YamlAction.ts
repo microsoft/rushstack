@@ -15,7 +15,7 @@ import { ApiModel } from '@microsoft/api-extractor-model';
 export class YamlAction extends BaseAction {
   private _officeParameter: CommandLineFlagParameter;
 
-  constructor(parser: ApiDocumenterCommandLine) {
+  public constructor(parser: ApiDocumenterCommandLine) {
     super({
       actionName: 'yaml',
       summary: 'Generate documentation as universal reference YAML files (*.yml)',

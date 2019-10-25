@@ -9,7 +9,7 @@ import { Text, NewlineKind, Encoding } from './Text';
 import { PosixModeBits } from './PosixModeBits';
 
 // The PosixModeBits are intended to be used with bitwise operations.
-// tslint:disable:no-bitwise
+/* eslint-disable no-bitwise */
 
 /**
  * The options for FileSystem.readFolder()
@@ -214,7 +214,7 @@ export class FileSystem {
    * @param times - The times that the object should be updated to reflect.
    */
   public static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void {
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fsx.utimesSync(path, times.accessedTime as any, times.modifiedTime as any);
   }
 
@@ -301,7 +301,7 @@ export class FileSystem {
    * @param folderPath - The absolute or relative path to the folder which should be read.
    * @param options - Optional settings that can change the behavior. Type: `IReadFolderOptions`
    */
-  public static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): Array<string> {
+  public static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[] {
     options = {
       absolutePaths: false,
       ...options
@@ -311,7 +311,7 @@ export class FileSystem {
       throw new Error(`Folder does not exist: "${folderPath}"`);
     }
 
-    const fileNames: Array<string> = fsx.readdirSync(folderPath);
+    const fileNames: string[] = fsx.readdirSync(folderPath);
 
     if (options.absolutePaths) {
       return fileNames.map(fileName => pathUtilities.resolve(folderPath, fileName));

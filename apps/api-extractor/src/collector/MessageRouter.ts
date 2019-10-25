@@ -249,10 +249,10 @@ export class MessageRouter {
    * @returns a JSON serializable object (possibly including `null` values)
    *          or `undefined` if the input cannot be represented as JSON
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static buildJsonDumpObject(input: any): any | undefined {
     if (input === null || input === undefined) {
-      // tslint:disable-next-line:no-null-keyword
+      // eslint-disable-next-line no-restricted-syntax
       return null; // JSON uses null instead of undefined
     }
 
@@ -263,10 +263,10 @@ export class MessageRouter {
         return input;
       case 'object':
         if (Array.isArray(input)) {
-          // tslint:disable-next-line:no-any
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const outputArray: any[] = [];
           for (const element of input) {
-            // tslint:disable-next-line:no-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const serializedElement: any = MessageRouter.buildJsonDumpObject(element);
             if (serializedElement !== undefined) {
               outputArray.push(serializedElement);
@@ -277,10 +277,10 @@ export class MessageRouter {
 
         const outputObject: object = { };
         for (const key of Object.getOwnPropertyNames(input)) {
-          // tslint:disable-next-line:no-any
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const value: any = input[key];
 
-          // tslint:disable-next-line:no-any
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const serializedValue: any = MessageRouter.buildJsonDumpObject(value);
 
           if (serializedValue !== undefined) {

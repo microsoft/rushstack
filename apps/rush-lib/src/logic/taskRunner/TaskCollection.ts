@@ -24,7 +24,7 @@ export class TaskCollection {
   private _quietMode: boolean;
   private _terminal: Terminal;
 
-  constructor(options: ITaskCollectionOptions) {
+  public constructor(options: ITaskCollectionOptions) {
     const {
       quietMode,
       terminal = new Terminal(new ConsoleTerminalProvider())
@@ -148,12 +148,14 @@ export class TaskCollection {
 
     // If no dependents, we are in a "root"
     if (task.dependents.size === 0) {
-      return task.criticalPathLength = 0;
+      task.criticalPathLength = 0;
+      return task.criticalPathLength;
     } else {
       // Otherwise we are as long as the longest package + 1
       const depsLengths: number[] = [];
       task.dependents.forEach(dep => depsLengths.push(this._calculateCriticalPaths(dep)));
-      return task.criticalPathLength = Math.max(...depsLengths) + 1;
+      task.criticalPathLength = Math.max(...depsLengths) + 1;
+      return task.criticalPathLength;
     }
   }
 }

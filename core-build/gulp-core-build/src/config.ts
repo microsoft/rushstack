@@ -26,9 +26,8 @@ export function getFlagValue(name: string, defaultValue?: boolean): boolean {
   return configValue === 'true' || configValue === true;
 }
 
-/* tslint:disable:no-any */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function _firstDefinedValue(...values: (string | boolean | undefined)[]): any {
-/* tslint:enable:no-any */
   for (const value of values) {
     if (value !== undefined) {
       return value;

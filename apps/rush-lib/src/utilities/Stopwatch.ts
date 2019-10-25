@@ -22,6 +22,13 @@ export class Stopwatch {
 
   private _getTime: () => number;
 
+  public constructor(getTime: () => number = Utilities.getTimeInMs) {
+    this._startTime = undefined;
+    this._endTime = undefined;
+    this._getTime = getTime;
+    this._state = StopwatchState.Stopped;
+  }
+
   /**
    * Static helper function which creates a stopwatch which is immediately started
    */
@@ -29,14 +36,7 @@ export class Stopwatch {
     return new Stopwatch().start();
   }
 
-  constructor(getTime: () => number = Utilities.getTimeInMs) {
-    this._startTime = undefined;
-    this._endTime = undefined;
-    this._getTime = getTime;
-    this._state = StopwatchState.Stopped;
-  }
-
-  public get state(): StopwatchState {
+    public get state(): StopwatchState {
     return this._state;
   }
 

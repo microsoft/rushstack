@@ -61,6 +61,16 @@ export class NpmPackage extends BasePackage {
    */
   public dependencies: IPackageDependency[];
 
+  private constructor(name: string,
+    version: string | undefined,
+    dependencies: IPackageDependency[],
+    folderPath: string) {
+
+    super(name, version, folderPath, undefined);
+    this.dependencies = dependencies.slice(0); // clone the array
+    this.parent = undefined;
+  }
+
   /**
    * Used by "npm link" when creating a Package object that represents symbolic links to be created.
    */
@@ -178,8 +188,7 @@ export class NpmPackage extends BasePackage {
     let currentParent: NpmPackage = this;
     let parentForCreate: NpmPackage | undefined = undefined;
 
-    // tslint:disable-next-line:no-constant-condition
-    while (true) {
+    for (;;) {
       // Does any child match?
       for (const child of currentParent.children) {
         // The package.json name can differ from the installation folder name, in the case of an NPM package alias
@@ -222,13 +231,4 @@ export class NpmPackage extends BasePackage {
     return this.resolveOrCreate(dependencyName).found as NpmPackage;
   }
 
-  private constructor(name: string,
-    version: string | undefined,
-    dependencies: IPackageDependency[],
-    folderPath: string) {
-
-    super(name, version, folderPath, undefined);
-    this.dependencies = dependencies.slice(0); // clone the array
-    this.parent = undefined;
-  }
 }

@@ -40,7 +40,7 @@ describe('PackageChangeAnalyzer', () => {
       getCommittedShrinkwrapFilename(): string {
         return 'common/config/rush/pnpm-lock.yaml';
       }
-    } as any; // tslint:disable-line:no-any
+    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     const packageChangeAnalyzer: PackageChangeAnalyzer = new PackageChangeAnalyzer(rushConfiguration);
     const packageDeps: IPackageDeps | undefined = packageChangeAnalyzer.getPackageDepsHash(packageA);
@@ -67,7 +67,7 @@ describe('PackageChangeAnalyzer', () => {
         packageName: packageB,
         projectRelativeFolder: packageBPath
       }]
-    } as any; // tslint:disable-line:no-any
+    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     let packageDeps: IPackageDeps = PackageChangeAnalyzer.instance.getPackageDepsHash(packageA);
     expect(packageDeps).toEqual({

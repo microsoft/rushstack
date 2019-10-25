@@ -43,12 +43,12 @@ export interface IApiNamespaceOptions extends
  */
 export class ApiNamespace extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
 
-  public static getContainerKey(name: string): string {
-    return `${name}|${ApiItemKind.Namespace}`;
-  }
-
   public constructor(options: IApiNamespaceOptions) {
     super(options);
+  }
+
+  public static getContainerKey(name: string): string {
+    return `${name}|${ApiItemKind.Namespace}`;
   }
 
   /** @override */

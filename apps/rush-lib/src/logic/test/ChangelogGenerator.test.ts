@@ -136,7 +136,6 @@ describe('updateIndividualChangelog', () => {
       rushConfiguration
     )!;
 
-    /* tslint:disable-next-line:no-unused-expression */
     expect(actualResult).not.toBeDefined();
   });
 
@@ -253,7 +252,7 @@ describe('updateChangelogs', () => {
     rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
   });
 
-  /* tslint:disable:no-string-literal */
+  /* eslint-disable dot-notation */
   it('skips changes logs if the project version is not changed.', () => {
     const changeHash: IChangeInfoHash = {};
     // Package a does not have version change.
@@ -340,5 +339,5 @@ describe('updateChangelogs', () => {
     expect(updatedChangeLogs[0].name).toEqual('a');
     expect(updatedChangeLogs[1].name).toEqual('b');
   });
-  /* tslint:enable:no-string-literal */
+  /* eslint-enable dot-notation */
 });

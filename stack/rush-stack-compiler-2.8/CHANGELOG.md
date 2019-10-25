@@ -1,6 +1,30 @@
 # Change Log - @microsoft/rush-stack-compiler-2.8
 
-This log was last generated on Sun, 06 Oct 2019 00:27:40 GMT and should not be manually modified.
+This log was last generated on Fri, 25 Oct 2019 15:08:54 GMT and should not be manually modified.
+
+## 0.3.2
+Fri, 25 Oct 2019 15:08:54 GMT
+
+### Patches
+
+- Fix an issue where ESLint output would fail to parse when a large project is built on a Mac.
+
+## 0.3.1
+Tue, 22 Oct 2019 06:24:44 GMT
+
+*Version update only*
+
+## 0.3.0
+Mon, 21 Oct 2019 05:22:43 GMT
+
+### Minor changes
+
+- Add support for ESLint+TypeScript
+
+## 0.2.6
+Fri, 18 Oct 2019 15:15:01 GMT
+
+*Version update only*
 
 ## 0.2.5
 Sun, 06 Oct 2019 00:27:40 GMT

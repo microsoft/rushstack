@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.15.1",
+  "rushVersion": "5.16.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -444,8 +444,14 @@
       "shouldPublish": false
     },
     {
-      "packageName": "node-library-build-test",
-      "projectFolder": "build-tests/node-library-build-test",
+      "packageName": "node-library-build-eslint-test",
+      "projectFolder": "build-tests/node-library-build-eslint-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "node-library-build-tslint-test",
+      "projectFolder": "build-tests/node-library-build-tslint-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },

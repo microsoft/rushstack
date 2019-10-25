@@ -3,4 +3,4 @@
 
 import { LoadThemedStylesLoader } from './LoadThemedStylesLoader';
 
-export = LoadThemedStylesLoader; // tslint:disable-line:export-name
+export = LoadThemedStylesLoader;

@@ -14,7 +14,7 @@ import {
   setConfig,
   getConfig
 } from '@microsoft/gulp-core-build';
-import { apiExtractor, tscCmd, tslintCmd } from '@microsoft/gulp-core-build-typescript';
+import { apiExtractor, tscCmd, lintCmd } from '@microsoft/gulp-core-build-typescript';
 import { sass } from '@microsoft/gulp-core-build-sass';
 import { webpack } from '@microsoft/gulp-core-build-webpack';
 import { serve, reload } from '@microsoft/gulp-core-build-serve';
@@ -44,7 +44,7 @@ const sourceMatch: string[] = [
   '!src/**/*.scss.ts'
 ];
 
-// tslint:disable-next-line:no-string-literal
+// eslint-disable-next-line dot-notation
 const PRODUCTION: boolean = !!getConfig().args['production'] || !!getConfig().args['ship'];
 setConfig({
   production: PRODUCTION,
@@ -57,7 +57,7 @@ setConfig({
  */
 export const buildTasks: IExecutable = task(
   'build',
-  serial(preCopy, sass, parallel(tslintCmd, tscCmd), apiExtractor, postCopy)
+  serial(preCopy, sass, parallel(lintCmd, tscCmd), apiExtractor, postCopy)
 );
 
 /**
