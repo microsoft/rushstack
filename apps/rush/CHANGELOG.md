@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 17 Oct 2019 00:41:01 GMT and should not be manually modified.
+This log was last generated on Fri, 25 Oct 2019 20:15:59 GMT and should not be manually modified.
+
+## 5.16.1
+Fri, 25 Oct 2019 20:15:59 GMT
+
+### Updates
+
+- Log to console instead of throwing when an unmet peer dependency is encountered during linking, and strictPeerDependencies is false
+- Refactor some code as part of migration from TSLint to ESLint
 
 ## 5.16.0
 Thu, 17 Oct 2019 00:41:01 GMT
