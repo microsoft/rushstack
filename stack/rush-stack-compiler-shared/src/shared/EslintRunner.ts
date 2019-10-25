@@ -79,17 +79,26 @@ export class EslintRunner extends RushStackCompilerBase<ILintRunnerConfig> {
       'src/**/*.{ts,tsx}'
     ];
 
+    const stdoutBuffer: string[] = [];
+
     return this._cmdRunner.runCmd({
       args: args,
+      // ESLint errors are logged to stdout
+      onError: (data: Buffer) => {
+        this._terminal.writeErrorLine(`Unexpected STDERR output from ESLint: ${data.toString()}`)
+      },
       onData: (data: Buffer) => {
-        const dataStr: string = data.toString().trim();
-        const eslintErrorLogFn: WriteFileIssueFunction = this._taskOptions.displayAsError
-          ? this._taskOptions.fileError
-          : this._taskOptions.fileWarning;
+        stdoutBuffer.push(data.toString());
+      },
+      onClose: (code: number, hasErrors: boolean, resolve: () => void, reject: (error: Error) => void) => {
+        const dataStr: string = stdoutBuffer.join('');
 
-        // ESLint errors are logged to stdout
         try {
           const eslintFileResults: IEslintFileResult[] = JSON.parse(dataStr);
+
+          const eslintErrorLogFn: WriteFileIssueFunction = this._taskOptions.displayAsError
+            ? this._taskOptions.fileError
+            : this._taskOptions.fileWarning;
           for (const eslintFileResult of eslintFileResults) {
             const pathFromRoot: string = path.relative(this._standardBuildFolders.projectFolderPath,
               eslintFileResult.filePath);
@@ -109,8 +118,7 @@ export class EslintRunner extends RushStackCompilerBase<ILintRunnerConfig> {
           // displayAsError value
           this._terminal.writeErrorLine(dataStr);
         }
-      },
-      onClose: (code: number, hasErrors: boolean, resolve: () => void, reject: (error: Error) => void) => {
+
         if (this._taskOptions.displayAsError && (code !== 0 || hasErrors)) {
           reject(new Error(`exited with code ${code}`));
         } else {
