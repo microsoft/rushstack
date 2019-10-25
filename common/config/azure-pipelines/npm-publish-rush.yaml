@@ -1,3 +1,5 @@
+pool:
+  vmImage: 'ubuntu-latest'
 variables:
   NodeVersion: 10
   VersionPolicy: rush
