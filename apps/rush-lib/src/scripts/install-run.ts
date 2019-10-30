@@ -65,8 +65,8 @@ function _parsePackageSpecifier(rawPackageSpecifier: string): IPackageSpecifier 
  *
  * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities._syncNpmrc()
  */
-function _syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string): void {
-  const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, '.npmrc');
+function _syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string, useNpmrcPublish?: boolean): void {
+  const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, !useNpmrcPublish ? '.npmrc' : '.npmrc-publish');
   const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
   try {
     if (fs.existsSync(sourceNpmrcPath)) {

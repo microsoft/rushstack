@@ -510,8 +510,8 @@ export class Utilities {
    *
    * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _syncNpmrc() FROM scripts/install-run.ts
    */
-  public static syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string): void {
-    const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, '.npmrc');
+  public static syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string, useNpmrcPublish?: boolean): void {
+    const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, !useNpmrcPublish ? '.npmrc' : '.npmrc-publish');
     const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
     try {
       if (FileSystem.exists(sourceNpmrcPath)) {
