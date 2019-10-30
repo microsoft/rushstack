@@ -108,7 +108,6 @@ export class PublishAction extends BaseRushAction {
       parameterLongName: '--npm-auth-token',
       parameterShortName: '-n',
       argumentName: 'TOKEN',
-      environmentVariable: 'NPM_TOKEN',
       description:
       'Provide the default scope NPM auth token to be passed into npm publish for global package publishing.'
     });
@@ -370,8 +369,22 @@ export class PublishAction extends BaseRushAction {
   private _npmPublish(packageName: string, packagePath: string): void {
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
     const args: string[] = ['publish'];
+    const userConfig: string = (process.platform === 'win32') ? 'USERPROFILE' : 'HOME';
+    let redirectUserConfig: boolean = false;
 
     if (this.rushConfiguration.projectsByName.get(packageName)!.shouldPublish) {
+      redirectUserConfig = PublishUtilities.syncNpmrcPublish(
+        this.rushConfiguration.commonRushConfigFolder,
+        this.rushConfiguration.commonTempFolder
+        );
+
+      if (redirectUserConfig) {
+        const tempNmprcPublishFolder: string = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
+        env[userConfig] = tempNmprcPublishFolder;
+      } else {
+        env[userConfig] = this.rushConfiguration.commonTempFolder;
+      }
+
       this._addSharedNpmConfig(env, args);
 
       if (this._npmTag.value) {
@@ -487,21 +500,8 @@ export class PublishAction extends BaseRushAction {
       registry = registryUrl.substring(registryUrl.indexOf('//'));
     }
 
-    /**
-    * To avoid leaking secret to build logs, do not directly pass an NPM authorization token when publishing.
-    * Rush prevents the publish command from displaying NPM authentication tokens from the output.
-    * Please use environment variables to secure youre NPM authentication token, and make sure to secure any
-    * token being used on CI systems.
-    * 
-    * TODO: Update CI Scripts, remove auth tokens or it will be expanded when evaluated
-    * 
-    */
-    if (this._npmAuthToken.environmentVariable){
-      if (this._npmAuthToken.value) {
-        const npmToken: string = this._npmAuthToken.value;
-        env[this._npmAuthToken.environmentVariable] = npmToken;
-      }
-      args.push(`--${registry}:_authToken=\$\{${this._npmAuthToken.environmentVariable}\}`);
+    if (this._npmAuthToken.value) {
+      args.push(`--${registry}:_authToken=${this._npmAuthToken.value}`);
     }
   }
 }
