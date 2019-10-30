@@ -183,6 +183,19 @@ export class PublishUtilities {
     return env;
   }
 
+  public static syncNpmrcPublish(sourceNpmrcPublishFolder: string, targetNpmrcPublishFolder: string): boolean {
+    const srcNpmrcPublishPath: string = path.join(sourceNpmrcPublishFolder, '.npmrc-publish')
+    const targetNmprcPublishFolder: string = path.join(targetNpmrcPublishFolder, 'publish-home');
+
+    if (Utilities.fileExists(srcNpmrcPublishPath)) {
+      // "common\config\rush\.npmrc-publish" --> "common\temp\publish-home\.npmrc"
+      Utilities.createFolderWithRetry(targetNmprcPublishFolder);
+      Utilities.syncNpmrc(sourceNpmrcPublishFolder, targetNmprcPublishFolder, true);
+      return true;
+    }
+    return false;  
+  }
+
   public static execCommand(
     shouldExecute: boolean,
     command: string,
