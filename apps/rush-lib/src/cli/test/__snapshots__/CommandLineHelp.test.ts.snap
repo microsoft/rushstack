@@ -404,9 +404,7 @@ Optional arguments:
                         not be tagged.
   -n TOKEN, --npm-auth-token TOKEN
                         Provide the default scope NPM auth token to be passed 
-                        into npm publish for global package publishing. This 
-                        parameter may alternatively specified via the 
-                        NPM_TOKEN environment variable.
+                        into npm publish for global package publishing.
   -t TAG, --tag TAG     The tag option to pass to npm publish. By default NPM 
                         will publish using the 'latest' tag, even if the 
                         package is older than the current latest, so in 

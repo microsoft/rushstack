@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add environment variable support for npm authentication configuration",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "darsi-an@users.noreply.github.com"
+}
