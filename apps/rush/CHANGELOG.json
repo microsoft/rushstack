@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.16.1",
+      "tag": "@microsoft/rush_v5.16.1",
+      "date": "Fri, 25 Oct 2019 20:15:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Log to console instead of throwing when an unmet peer dependency is encountered during linking, and strictPeerDependencies is false"
+          },
+          {
+            "comment": "Refactor some code as part of migration from TSLint to ESLint"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.16.0",
       "tag": "@microsoft/rush_v5.16.0",
       "date": "Thu, 17 Oct 2019 00:41:01 GMT",
