@@ -355,6 +355,14 @@ export class PackageJsonUpdater {
       }
       console.log(`Querying NPM registry for latest version of "${packageName}"...`);
 
+      //if the project exists in the local
+      const rushConfigProjects: RushConfigurationProject[] = this._rushConfiguration.projects;
+      rushConfigProjects.forEach(rushConfigProject => {
+        if(rushConfigProject.packageName === packageName) {
+          selectedVersion = rushConfigProject.packageJson.version;
+        }
+      });
+
       let commandArgs: string[];
       if (this._rushConfiguration.packageManager === 'yarn') {
         commandArgs = ['info', packageName, 'dist-tags.latest', '--silent'];
@@ -362,11 +370,13 @@ export class PackageJsonUpdater {
         commandArgs = ['view', `${packageName}@latest`, 'version'];
       }
 
-      selectedVersion = Utilities.executeCommandAndCaptureOutput(
-        this._rushConfiguration.packageManagerToolFilename,
-        commandArgs,
-        this._rushConfiguration.commonTempFolder
-      ).trim();
+      if (selectedVersion === undefined) {
+        selectedVersion = Utilities.executeCommandAndCaptureOutput(
+          this._rushConfiguration.packageManagerToolFilename,
+          commandArgs,
+          this._rushConfiguration.commonTempFolder
+        ).trim();
+      }
 
       console.log();
 
