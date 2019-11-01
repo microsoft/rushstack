@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "rush add now can add unpublished locally-linked projects",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "zhas@microsoft.com"
+}

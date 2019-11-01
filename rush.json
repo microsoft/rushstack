@@ -339,11 +339,6 @@
     //
     // "apps" folder (alphabetical order)
     {
-      "packageName": "project-b",
-      "projectFolder": "C:/Users/zhas/Desktop/sp-client/apps/project-b",
-      "reviewCategory": "third-party"
-    },
-    {
       "packageName": "@microsoft/api-extractor",
       "projectFolder": "apps/api-extractor",
       "reviewCategory": "libraries",
