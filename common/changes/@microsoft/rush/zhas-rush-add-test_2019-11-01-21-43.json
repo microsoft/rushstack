@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "rush add now can add unpublished locally-linked projects",
+      "comment": "Fix an issue with Rush add, where Rush was unable to add unpublished local projects as dependencies.",
       "type": "none"
     }
   ],

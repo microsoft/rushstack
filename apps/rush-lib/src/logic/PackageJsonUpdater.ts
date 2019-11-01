@@ -306,46 +306,64 @@ export class PackageJsonUpdater {
 
     await installManager.ensureLocalPackageManager();
     let selectedVersion: string | undefined;
+    const rushConfigProjects: RushConfigurationProject[] = this._rushConfiguration.projects;
 
     if (initialSpec && initialSpec !== 'latest') {
       console.log(colors.gray('Finding versions that satisfy the selector: ') + initialSpec);
       console.log();
-      console.log(`Querying registry for all versions of "${packageName}"...`);
 
-      let commandArgs: string[];
-      if (this._rushConfiguration.packageManager === 'yarn') {
-        commandArgs = ['info', packageName, 'versions', '--json'];
-      } else {
-        commandArgs = ['view', packageName, 'versions', '--json'];
-      }
-
-      const allVersions: string =
-        Utilities.executeCommandAndCaptureOutput(
-          this._rushConfiguration.packageManagerToolFilename,
-          commandArgs,
-          this._rushConfiguration.commonTempFolder
-        );
-
-      let versionList: string[];
-      if (this._rushConfiguration.packageManager === 'yarn') {
-        versionList = JSON.parse(allVersions).data;
-      } else {
-        versionList = JSON.parse(allVersions);
-      }
-
-      console.log(colors.gray(`Found ${versionList.length} available versions.`));
-
-      for (const version of versionList) {
-        if (semver.satisfies(version, initialSpec)) {
-          selectedVersion = initialSpec;
-          console.log(`Found a version that satisfies ${initialSpec}: ${colors.cyan(version)}`);
-          break;
+      // determine if the package is a project in the local repository and if the version exists
+      for (const rushConfigProject of rushConfigProjects) {
+        const rushConfigProjectVersion: string = rushConfigProject.packageJson.version;
+        if(rushConfigProject.packageName === packageName && rushConfigProject.cyclicDependencyProjects.size === 0) {
+          if(initialSpec === rushConfigProjectVersion) {
+            selectedVersion = rushConfigProjectVersion;
+            break;
+          } else {
+            throw new Error(`Unable to find a version of "${packageName}" that satisfies`
+            + ` the version specifier "${initialSpec}"`);
+          }
         }
       }
 
-      if (!selectedVersion) {
-        throw new Error(`Unable to find a version of "${packageName}" that satisfies`
-          + ` the version specifier "${initialSpec}"`);
+      if(selectedVersion === undefined) {
+        console.log(`Querying registry for all versions of "${packageName}"...`);
+
+        let commandArgs: string[];
+        if (this._rushConfiguration.packageManager === 'yarn') {
+          commandArgs = ['info', packageName, 'versions', '--json'];
+        } else {
+          commandArgs = ['view', packageName, 'versions', '--json'];
+        }
+
+        const allVersions: string =
+          Utilities.executeCommandAndCaptureOutput(
+            this._rushConfiguration.packageManagerToolFilename,
+            commandArgs,
+            this._rushConfiguration.commonTempFolder
+          );
+
+        let versionList: string[];
+        if (this._rushConfiguration.packageManager === 'yarn') {
+          versionList = JSON.parse(allVersions).data;
+        } else {
+          versionList = JSON.parse(allVersions);
+        }
+
+        console.log(colors.gray(`Found ${versionList.length} available versions.`));
+
+        for (const version of versionList) {
+          if (semver.satisfies(version, initialSpec)) {
+            selectedVersion = initialSpec;
+            console.log(`Found a version that satisfies ${initialSpec}: ${colors.cyan(version)}`);
+            break;
+          }
+        }
+
+        if (!selectedVersion) {
+          throw new Error(`Unable to find a version of "${packageName}" that satisfies`
+            + ` the version specifier "${initialSpec}"`);
+        }
       }
     } else {
       if (!this._rushConfiguration.ensureConsistentVersions) {
@@ -353,24 +371,27 @@ export class PackageJsonUpdater {
           + ` so we will assign the latest version.`));
         console.log();
       }
-      console.log(`Querying NPM registry for latest version of "${packageName}"...`);
 
-      //if the project exists in the local
-      const rushConfigProjects: RushConfigurationProject[] = this._rushConfiguration.projects;
-      rushConfigProjects.forEach(rushConfigProject => {
-        if(rushConfigProject.packageName === packageName) {
-          selectedVersion = rushConfigProject.packageJson.version;
+      // determine if the package is a project in the local repository
+      for (const rushConfigProject of rushConfigProjects) {
+        if(rushConfigProject.packageName === packageName && rushConfigProject.cyclicDependencyProjects.size === 0) {
+          if(selectedVersion === undefined) {
+            selectedVersion = rushConfigProject.packageJson.version;
+            break;
+          }
         }
-      });
-
-      let commandArgs: string[];
-      if (this._rushConfiguration.packageManager === 'yarn') {
-        commandArgs = ['info', packageName, 'dist-tags.latest', '--silent'];
-      } else {
-        commandArgs = ['view', `${packageName}@latest`, 'version'];
       }
 
       if (selectedVersion === undefined) {
+        console.log(`Querying NPM registry for latest version of "${packageName}"...`);
+
+        let commandArgs: string[];
+        if (this._rushConfiguration.packageManager === 'yarn') {
+          commandArgs = ['info', packageName, 'dist-tags.latest', '--silent'];
+        } else {
+          commandArgs = ['view', `${packageName}@latest`, 'version'];
+        }
+
         selectedVersion = Utilities.executeCommandAndCaptureOutput(
           this._rushConfiguration.packageManagerToolFilename,
           commandArgs,
