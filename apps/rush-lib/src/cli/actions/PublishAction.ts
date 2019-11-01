@@ -370,18 +370,23 @@ export class PublishAction extends BaseRushAction {
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
     const args: string[] = ['publish'];
     const userConfig: string = (process.platform === 'win32') ? 'USERPROFILE' : 'HOME';
-    let redirectUserConfig: boolean = false;
 
     if (this.rushConfiguration.projectsByName.get(packageName)!.shouldPublish) {
-      redirectUserConfig = PublishUtilities.syncNpmrcPublish(
+      const srcNpmrcPublishPath: string = path.join(this.rushConfiguration.commonRushConfigFolder, '.npmrc-publish');
+      const targetNmprcPublishFolder: string = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
+
+      // Check if .npmrc-publish file exists to use for publishing
+      if (FileSystem.exists(srcNpmrcPublishPath)) {
+        // Sync "common\config\rush\.npmrc-publish" --> "common\temp\publish-home\.npmrc"
+        PublishUtilities.syncNpmrcPublish(
         this.rushConfiguration.commonRushConfigFolder,
         this.rushConfiguration.commonTempFolder
         );
 
-      if (redirectUserConfig) {
-        const tempNmprcPublishFolder: string = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
-        env[userConfig] = tempNmprcPublishFolder;
+        // Update userconfig, NPM will use config in "common\temp\publish-home\.npmrc"
+        env[userConfig] = targetNmprcPublishFolder;
       } else {
+        // Update userconfig, NPM will use config in "common\temp\.npmrc"
         env[userConfig] = this.rushConfiguration.commonTempFolder;
       }
 
