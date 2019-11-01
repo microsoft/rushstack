@@ -3,7 +3,7 @@
 
 /**
  * This file contains a set of helper functions that are unit tested and used with the PublishAction,
- * which itself it a thin wrapper around these helpers.
+ * which itself is a thin wrapper around these helpers.
  */
 
 import { EOL } from 'os';
@@ -182,18 +182,17 @@ export class PublishUtilities {
     });
     return env;
   }
+  
+  /**
+   * A helper function that uses utilities.syncNpmrc() to validate environment variables in .npmrc-publish
+   * Errors wil be written to file if environment variable is not set
+   */
+  public static syncNpmrcPublish(sourceNpmrcFolder: string, destNpmrcFolder: string): void {
+    const targetNpmrcPublishFolder: string = path.join(destNpmrcFolder, 'publish-home');
+    Utilities.createFolderWithRetry(targetNpmrcPublishFolder);
 
-  public static syncNpmrcPublish(sourceNpmrcPublishFolder: string, targetNpmrcPublishFolder: string): boolean {
-    const srcNpmrcPublishPath: string = path.join(sourceNpmrcPublishFolder, '.npmrc-publish')
-    const targetNmprcPublishFolder: string = path.join(targetNpmrcPublishFolder, 'publish-home');
-
-    if (Utilities.fileExists(srcNpmrcPublishPath)) {
-      // "common\config\rush\.npmrc-publish" --> "common\temp\publish-home\.npmrc"
-      Utilities.createFolderWithRetry(targetNmprcPublishFolder);
-      Utilities.syncNpmrc(sourceNpmrcPublishFolder, targetNmprcPublishFolder, true);
-      return true;
-    }
-    return false;  
+    // Use Utilities.syncNpmrc to copy down the committed .npmrc-publish file, if there is one
+    Utilities.syncNpmrc(sourceNpmrcFolder, targetNpmrcPublishFolder, true);
   }
 
   public static execCommand(
