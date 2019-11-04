@@ -151,6 +151,7 @@ export class PackageJsonUpdater {
     );
 
     const version: string = await this._getNormalizedVersionSpec(
+      projects,
       installManager,
       packageName,
       initialVersion,
@@ -268,6 +269,7 @@ export class PackageJsonUpdater {
    * Selects an appropriate version number for a particular package, given an optional initial SemVer spec.
    * If ensureConsistentVersions, tries to pick a version that will be consistent.
    * Otherwise, will choose the latest semver matching the initialSpec and append the proper range style.
+   * @param projects - the project which will have its package.json updated
    * @param packageName - the name of the package to be used
    * @param initialSpec - a semver pattern that should be used to find the latest version matching the spec
    * @param implicitlyPinnedVersion - the implicitly preferred (aka common/primary) version of the package in use
@@ -275,6 +277,7 @@ export class PackageJsonUpdater {
    *   the selected version.
    */
   private async _getNormalizedVersionSpec(
+    projects: RushConfigurationProject[],
     installManager: InstallManager,
     packageName: string,
     initialSpec: string | undefined,
@@ -315,9 +318,9 @@ export class PackageJsonUpdater {
       // determine if the package is a project in the local repository and if the version exists
       for (const rushConfigProject of rushConfigProjects) {
         const rushConfigProjectVersion: string = rushConfigProject.packageJson.version;
-        if(rushConfigProject.packageName === packageName && rushConfigProject.cyclicDependencyProjects.size === 0) {
-          if(initialSpec === rushConfigProjectVersion) {
-            selectedVersion = rushConfigProjectVersion;
+        if(rushConfigProject.packageName === packageName && !projects[0].cyclicDependencyProjects.has(packageName)) {
+          if(semver.satisfies(rushConfigProjectVersion, initialSpec)) {
+            selectedVersion = initialSpec;
             break;
           } else {
             throw new Error(`Unable to find a version of "${packageName}" that satisfies`
@@ -374,7 +377,7 @@ export class PackageJsonUpdater {
 
       // determine if the package is a project in the local repository
       for (const rushConfigProject of rushConfigProjects) {
-        if(rushConfigProject.packageName === packageName && rushConfigProject.cyclicDependencyProjects.size === 0) {
+        if(rushConfigProject.packageName === packageName && !projects[0].cyclicDependencyProjects.has(packageName)) {
           if(selectedVersion === undefined) {
             selectedVersion = rushConfigProject.packageJson.version;
             break;
