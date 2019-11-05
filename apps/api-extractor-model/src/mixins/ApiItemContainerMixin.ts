@@ -11,7 +11,7 @@ import {
 } from '../items/ApiItem';
 import { ApiNameMixin } from './ApiNameMixin';
 import { DeserializerContext } from '../model/DeserializerContext';
-import { InternalError } from '@microsoft/node-core-library';
+import { InternalError, LegacyAdapters } from '@microsoft/node-core-library';
 
 /**
  * Constructor options for {@link (ApiItemContainerMixin:interface)}.
@@ -145,7 +145,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
 
     public get members(): ReadonlyArray<ApiItem> {
       if (!this[_membersSorted]) {
-        this[_members].sort((x, y) => x.getSortKey().localeCompare(y.getSortKey()));
+        LegacyAdapters.sortStable(this[_members], (x, y) => x.getSortKey().localeCompare(y.getSortKey()));
         this[_membersSorted] = true;
       }
 

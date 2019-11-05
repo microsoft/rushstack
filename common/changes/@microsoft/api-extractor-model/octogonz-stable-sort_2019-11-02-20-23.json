@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "Fix an issue where API reports sometimes were ordered differently depending on the version of NodeJS (GitHub #1552)",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
