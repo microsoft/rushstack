@@ -284,9 +284,10 @@ export class PackageJsonUpdater {
    * Check if the project is local project
    * If it is found in rush.json and is not a cyclic dependency, return true
    * Otherwise, return false
-   * @param projects - the projects which will have their package.json's updated
-   * @param packageName - the name of the package to be used
    * @param initialSpec - a semver pattern that should be used to find the latest version matching the spec
+   * @param packageName - the name of the package to be used
+   * @param projects - the projects which will have their package.json's updated
+   * @param rushConfigProjects - the projects which are in the rush.json
    */
   public isLocalProject(
     initialSpec: string | undefined,
@@ -365,8 +366,11 @@ export class PackageJsonUpdater {
       if(version !== undefined) {
         selectedVersion = version
       } else {
-        throw new Error(`Unable to find a version of "${packageName}" that satisfies`
-              + ` the version specifier "${initialSpec}"`);
+        throw new Error(`The dependency being added ("${packageName}") is a project in the local Rush repository,
+        but the version specifier provided (${initialSpec}) does not match the local project version (${version}).
+        Correct the version specifier, omit a version specifier, or include "${packageName}" as a cyclicDependencyProject in rush.json
+        if it is intended for "${packageName}"
+        to come from an external feed and not from the local Rush repository."`);
       }
 
       if(selectedVersion === undefined) {
