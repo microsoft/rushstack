@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-extractor-model",
-  "version": "7.5.3",
+  "version": "7.5.4",
   "description": "A helper library for loading and saving the .api.json files created by API Extractor",
   "repository": {
     "type": "git",
@@ -14,7 +14,7 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@microsoft/node-core-library": "3.16.0",
+    "@microsoft/node-core-library": "3.17.0",
     "@microsoft/tsdoc": "0.12.14"
   },
   "devDependencies": {
