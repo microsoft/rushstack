@@ -2,6 +2,18 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.17.0",
+      "tag": "@microsoft/node-core-library_v3.17.0",
+      "date": "Tue, 05 Nov 2019 06:49:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new API LegacyAdapters.stableSort(), and update the Sort API to be stable"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.16.0",
       "tag": "@microsoft/node-core-library_v3.16.0",
       "date": "Tue, 22 Oct 2019 06:24:44 GMT",

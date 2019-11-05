@@ -3,7 +3,8 @@
 
 import {
   Terminal,
-  ConsoleTerminalProvider
+  ConsoleTerminalProvider,
+  Sort
 } from '@microsoft/node-core-library';
 
 import { ITask, ITaskDefinition } from './ITask';
@@ -105,9 +106,7 @@ export class TaskCollection {
     });
 
     // Sort the queue in descending order, nothing will mess with the order
-    buildQueue.sort((taskA: ITask, taskB: ITask): number => {
-      return taskB.criticalPathLength! - taskA.criticalPathLength!;
-    });
+    Sort.sortBy(buildQueue, (task: ITask): number => -task.criticalPathLength!);
 
     return buildQueue;
   }

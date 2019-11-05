@@ -4,7 +4,7 @@
 import * as colors from 'colors';
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
-import { Sort, InternalError } from '@microsoft/node-core-library';
+import { Sort, InternalError, LegacyAdapters } from '@microsoft/node-core-library';
 import { AedocDefinitions } from '@microsoft/api-extractor-model';
 
 import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
@@ -563,7 +563,7 @@ export class MessageRouter {
    * Sorts an array of messages according to a reasonable ordering
    */
   private _sortMessagesForOutput(messages: ExtractorMessage[]): void {
-    messages.sort((a, b) => {
+    LegacyAdapters.sortStable(messages, (a, b) => {
       let diff: number;
       // First sort by file name
       diff = Sort.compareByValue(a.sourceFilePath, b.sourceFilePath);

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Tue, 22 Oct 2019 06:24:44 GMT and should not be manually modified.
+This log was last generated on Tue, 05 Nov 2019 06:49:28 GMT and should not be manually modified.
+
+## 3.17.0
+Tue, 05 Nov 2019 06:49:28 GMT
+
+### Minor changes
+
+- Add new API LegacyAdapters.stableSort(), and update the Sort API to be stable
 
 ## 3.16.0
 Tue, 22 Oct 2019 06:24:44 GMT
