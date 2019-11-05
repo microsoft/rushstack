@@ -1,6 +1,11 @@
 # Change Log - @microsoft/rush-stack-compiler-2.8
 
-This log was last generated on Tue, 05 Nov 2019 01:08:39 GMT and should not be manually modified.
+This log was last generated on Tue, 05 Nov 2019 06:49:29 GMT and should not be manually modified.
+
+## 0.3.4
+Tue, 05 Nov 2019 06:49:29 GMT
+
+*Version update only*
 
 ## 0.3.3
 Tue, 05 Nov 2019 01:08:39 GMT

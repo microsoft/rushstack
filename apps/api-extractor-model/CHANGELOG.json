@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.5.4",
+      "tag": "@microsoft/api-extractor-model_v7.5.4",
+      "date": "Tue, 05 Nov 2019 06:49:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where API reports sometimes were ordered differently depending on the version of NodeJS (GitHub #1552)"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.16.0` to `3.17.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.5.3",
       "tag": "@microsoft/api-extractor-model_v7.5.3",
       "date": "Tue, 05 Nov 2019 01:08:39 GMT",
