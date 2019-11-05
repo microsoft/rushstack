@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.5.3",
+      "tag": "@microsoft/api-extractor-model_v7.5.3",
+      "date": "Tue, 05 Nov 2019 01:08:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Clarified an error message"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.5.2",
       "tag": "@microsoft/api-extractor-model_v7.5.2",
       "date": "Tue, 22 Oct 2019 06:24:44 GMT",
