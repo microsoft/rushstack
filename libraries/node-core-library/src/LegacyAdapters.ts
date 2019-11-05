@@ -102,7 +102,7 @@ export class LegacyAdapters {
 
   /**
    * Prior to Node 11.x, the `Array.sort()` algorithm is not guaranteed to be stable.
-   * If you need a stable sort, you can use the `sortStable()` as a workaround.
+   * If you need a stable sort, you can use `sortStable()` as a workaround.
    *
    * @remarks
    * On NodeJS 11.x and later, this method simply calls the native `Array.sort()`.
