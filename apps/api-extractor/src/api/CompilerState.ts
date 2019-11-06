@@ -36,7 +36,7 @@ export class CompilerState {
   /**
    * The TypeScript compiler's `Program` object, which represents a complete scope of analysis.
    */
-  public readonly program: ts.Program;
+  public readonly program: unknown;
 
   private constructor(properties: CompilerState) {
     this.program = properties.program;
