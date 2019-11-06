@@ -7,7 +7,6 @@ import * as tsdoc from '@microsoft/tsdoc';
 import { Sort, InternalError, LegacyAdapters } from '@microsoft/node-core-library';
 import { AedocDefinitions } from '@microsoft/api-extractor-model';
 
-import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import {

@@ -11,7 +11,6 @@ import {
 
 import { ExtractorConfig } from './ExtractorConfig';
 import { IExtractorInvokeOptions } from './Extractor';
-import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 
 /**
  * Options for {@link CompilerState.create}
