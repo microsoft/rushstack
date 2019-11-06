@@ -268,7 +268,7 @@ export class PackageJsonUpdater {
   /**
    * Check if the package is the cyclic dependency in the project dependencies in package.json
    */
-  public isCyclicDependency(
+  private isCyclicDependency(
     packageName: string,
     projects: RushConfigurationProject[]
   ): boolean {
@@ -281,31 +281,23 @@ export class PackageJsonUpdater {
   }
 
   /**
-   * Check if the project is local project
-   * If it is found in rush.json and is not a cyclic dependency, return true
-   * Otherwise, return false
+   * This function returns a specific version of local dependency.
+   * It will return undefined if the dependency is not found in the local.
    * @param initialSpec - a semver pattern that should be used to find the latest version matching the spec
    * @param packageName - the name of the package to be used
    * @param projects - the projects which will have their package.json's updated
    * @param rushConfigProjects - the projects which are in the rush.json
    */
-  public isLocalProject(
-    initialSpec: string | undefined,
+  public getLocalDependency(
+  //  initialSpec: string | undefined,
     packageName: string,
     projects: RushConfigurationProject[],
     rushConfigProjects: RushConfigurationProject[],
-  ): string | undefined {
+  ): RushConfigurationProject | undefined {
     for (const rushConfigProject of rushConfigProjects) {
-      const rushConfigProjectVersion: string = rushConfigProject.packageJson.version;
       const isCyclicDependency: boolean = this.isCyclicDependency(packageName, projects);
       if(rushConfigProject.packageName === packageName && (!isCyclicDependency)) {
-        if(initialSpec !== undefined) {
-          if(semver.satisfies(rushConfigProjectVersion, initialSpec)) {
-            return initialSpec;
-          }
-        } else {
-          return rushConfigProjectVersion;
-        }
+        return rushConfigProject;
       }
     }
     return undefined;
@@ -362,18 +354,19 @@ export class PackageJsonUpdater {
       console.log();
 
     // determine if the package is a project in the local repository and if the version exists
-      const version: string | undefined = this.isLocalProject(initialSpec, packageName, projects, rushConfigProjects);
-      if(version !== undefined) {
-        selectedVersion = version
+      const localProject: RushConfigurationProject | undefined = this.getLocalDependency(packageName, projects, rushConfigProjects);
+      if(localProject !== undefined) {
+        const version = localProject.packageJson.version;
+        if(semver.satisfies(version, initialSpec)) {
+          selectedVersion = version;
+        } else {
+          throw new Error(`The dependency being added ("${packageName}") is a project in the local Rush repository,`
+          .concat(`but the version specifier provided (${initialSpec}) does not match the local project version (${version}).`)
+          .concat(`Correct the version specifier, omit a version specifier, or include "${packageName}" as a cyclicDependencyProject in rush.json for  ${localProject}`)
+          .concat(`if it is intended for "${packageName}"`)
+          .concat(`to come from an external feed and not from the local Rush repository.`));
+        }
       } else {
-        throw new Error(`The dependency being added ("${packageName}") is a project in the local Rush repository,
-        but the version specifier provided (${initialSpec}) does not match the local project version (${version}).
-        Correct the version specifier, omit a version specifier, or include "${packageName}" as a cyclicDependencyProject in rush.json
-        if it is intended for "${packageName}"
-        to come from an external feed and not from the local Rush repository."`);
-      }
-
-      if(selectedVersion === undefined) {
         console.log(`Querying registry for all versions of "${packageName}"...`);
 
         let commandArgs: string[];
@@ -419,12 +412,10 @@ export class PackageJsonUpdater {
         console.log();
       }
 
-      const version: string | undefined = this.isLocalProject(initialSpec, packageName, projects, rushConfigProjects);
-      if(version !== undefined) {
-        selectedVersion = version
-      }
-
-      if (selectedVersion === undefined) {
+      const localProject: RushConfigurationProject | undefined = this.getLocalDependency(packageName, projects, rushConfigProjects);
+      if(localProject !== undefined) {
+        selectedVersion = localProject.packageJson.version;
+      } else {
         console.log(`Querying NPM registry for latest version of "${packageName}"...`);
 
         let commandArgs: string[];
