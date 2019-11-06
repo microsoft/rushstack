@@ -6,13 +6,12 @@
 
 import { INodePackageJson } from '@microsoft/node-core-library';
 import { JsonSchema } from '@microsoft/node-core-library';
-import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 
 // @public
 export class CompilerState {
     static create(extractorConfig: ExtractorConfig, options?: ICompilerStateCreateOptions): CompilerState;
-    readonly program: ts.Program;
+    readonly program: unknown;
 }
 
 // @public

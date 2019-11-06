@@ -9,7 +9,7 @@
     "build": "node build.js"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "7.5.4",
+    "@microsoft/api-extractor": "7.5.5",
     "@microsoft/node-core-library": "3.17.0",
     "@microsoft/teams-js": "1.3.0-beta.4",
     "@types/jest": "23.3.11",
