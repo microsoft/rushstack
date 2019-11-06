@@ -40,7 +40,7 @@
     "lodash": "~4.17.15",
     "resolve": "1.8.1",
     "source-map": "~0.6.1",
-    "typescript": "~3.5.3"
+    "typescript": "~3.7.2"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "6.3.2",

@@ -7,7 +7,6 @@ import * as tsdoc from '@microsoft/tsdoc';
 import { Sort, InternalError, LegacyAdapters } from '@microsoft/node-core-library';
 import { AedocDefinitions } from '@microsoft/api-extractor-model';
 
-import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import {
@@ -169,7 +168,7 @@ export class MessageRouter {
         return;  // ignore noise
     }
 
-    const messageText: string = TypeScriptMessageFormatter.format(diagnostic.messageText);
+    const messageText: string = `${diagnostic.messageText}`;
     const options: IExtractorMessageOptions = {
       category: ExtractorMessageCategory.Compiler,
       messageId: `TS${diagnostic.code}`,

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import * as ts from 'typescript';
 import {
   FileSystem,
   NewlineKind,
@@ -208,13 +209,13 @@ export class Extractor {
       messageRouter.logDiagnosticFooter();
 
       messageRouter.logDiagnosticHeader('Compiler options');
-      const serializedOptions: object = MessageRouter.buildJsonDumpObject(compilerState.program.getCompilerOptions());
+      const serializedOptions: object = MessageRouter.buildJsonDumpObject((compilerState.program as ts.Program).getCompilerOptions());
       messageRouter.logDiagnostic(JSON.stringify(serializedOptions, undefined, 2));
       messageRouter.logDiagnosticFooter();
     }
 
     const collector: Collector = new Collector({
-      program: compilerState.program,
+      program: compilerState.program as ts.Program,
       messageRouter,
       extractorConfig: extractorConfig
     });
