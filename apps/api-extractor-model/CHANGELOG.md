@@ -1,6 +1,20 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Tue, 22 Oct 2019 06:24:44 GMT and should not be manually modified.
+This log was last generated on Tue, 05 Nov 2019 06:49:28 GMT and should not be manually modified.
+
+## 7.5.4
+Tue, 05 Nov 2019 06:49:28 GMT
+
+### Patches
+
+- Fix an issue where API reports sometimes were ordered differently depending on the version of NodeJS (GitHub #1552)
+
+## 7.5.3
+Tue, 05 Nov 2019 01:08:39 GMT
+
+### Patches
+
+- Clarified an error message
 
 ## 7.5.2
 Tue, 22 Oct 2019 06:24:44 GMT

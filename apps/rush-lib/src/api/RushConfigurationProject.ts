@@ -168,6 +168,13 @@ export class RushConfigurationProject {
   }
 
   /**
+   * The Rush configuration for the monorepo that the project belongs to.
+   */
+  public get rushConfiguration(): RushConfiguration {
+    return this._rushConfiguration;
+  }
+
+  /**
    * The review category name, or undefined if no category was assigned.
    * This name must be one of the valid choices listed in RushConfiguration.reviewCategories.
    */

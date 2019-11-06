@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Refactor some code as part of migration from TSLint to ESLint",
+      "comment": "Fix an issue where certain operations did not use a stable sort when executed on older versions of NodeJS",
       "type": "none"
     }
   ],

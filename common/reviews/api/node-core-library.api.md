@@ -389,7 +389,8 @@ export class LegacyAdapters {
     // (undocumented)
     static convertCallbackToPromise<TResult, TError, TArg1, TArg2, TArg3, TArg4>(fn: (arg1: TArg1, arg2: TArg2, arg3: TArg3, arg4: TArg4, cb: LegacyCallback<TResult, TError>) => void, arg1: TArg1, arg2: TArg2, arg3: TArg3, arg4: TArg4): Promise<TResult>;
     static scrubError(error: Error | string | any): Error;
-}
+    static sortStable<T>(array: T[], compare?: (a: T, b: T) => number): void;
+    }
 
 // @public
 export type LegacyCallback<TResult, TError> = (error: TError, result: TResult) => void;
