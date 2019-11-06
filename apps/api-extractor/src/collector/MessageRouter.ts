@@ -168,7 +168,7 @@ export class MessageRouter {
         return;  // ignore noise
     }
 
-    const messageText: string = `${diagnostic.messageText};`;
+    const messageText: string = `${diagnostic.messageText}`;
     const options: IExtractorMessageOptions = {
       category: ExtractorMessageCategory.Compiler,
       messageId: `TS${diagnostic.code}`,
