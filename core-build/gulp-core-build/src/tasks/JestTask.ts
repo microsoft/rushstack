@@ -167,8 +167,7 @@ export class JestTask extends GulpTask<IJestConfig> {
           }
           completeCallback();
         }
-      },
-      (err) => {
+      }).catch((err) => {
         process.stdout.isTTY = oldTTY;
         completeCallback(err);
       });
