@@ -268,7 +268,7 @@ export class PackageJsonUpdater {
   /**
    * Check if the package is the cyclic dependency in the project dependencies in package.json
    */
-  private isCyclicDependency(
+  private _isCyclicDependency(
     packageName: string,
     projects: RushConfigurationProject[]
   ): boolean {
@@ -295,7 +295,7 @@ export class PackageJsonUpdater {
     rushConfigProjects: RushConfigurationProject[],
   ): RushConfigurationProject | undefined {
     for (const rushConfigProject of rushConfigProjects) {
-      const isCyclicDependency: boolean = this.isCyclicDependency(packageName, projects);
+      const isCyclicDependency: boolean = this._isCyclicDependency(packageName, projects);
       if(rushConfigProject.packageName === packageName && (!isCyclicDependency)) {
         return rushConfigProject;
       }
@@ -356,7 +356,7 @@ export class PackageJsonUpdater {
     // determine if the package is a project in the local repository and if the version exists
       const localProject: RushConfigurationProject | undefined = this.getLocalDependency(packageName, projects, rushConfigProjects);
       if(localProject !== undefined) {
-        const version = localProject.packageJson.version;
+        const version: string = localProject.packageJson.version;
         if(semver.satisfies(version, initialSpec)) {
           selectedVersion = version;
         } else {
