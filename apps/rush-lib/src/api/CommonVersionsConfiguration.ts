@@ -175,8 +175,8 @@ export class CommonVersionsConfiguration {
    * package managers, this tended to reduce duplication of indirect dependencies.  However, it can sometimes cause
    * trouble for indirect dependencies with incompatible peerDependencies ranges.
    *
-   * If the value is `undefined`, then the default value is `true`.  As of Rush 5.17 the default is `false` if you
-   * are using the PNPM package manager.
+   * If the value is `undefined`, then the default value is `true`.  As of Rush 5.17, the default is false
+   * if you are using PNPM 4.x or newer.
    */
   public get implicitlyPreferredVersions(): boolean | undefined {
     return this._implicitlyPreferredVersions;

@@ -556,12 +556,18 @@ export class InstallManager {
     // dependency name --> version specifier
     const allPreferredVersions: Map<string, string> = new Map<string, string>();
 
-    // Should we calculate implicitly preferred versions?
-    //
-    // Default to false for PNPM.  Default to true for other package managers.
-    let useImplicitlyPinnedVersions: boolean = this._rushConfiguration.packageManager !== "pnpm";
+    // Should we add implicitly preferred versions?
+    let useImplicitlyPinnedVersions: boolean;
     if (this._rushConfiguration.commonVersions.implicitlyPreferredVersions !== undefined) {
+      // Use the manually configured setting
       useImplicitlyPinnedVersions = this._rushConfiguration.commonVersions.implicitlyPreferredVersions;
+    } else if (this._rushConfiguration.packageManager === "pnpm" &&
+      semver.major(this._rushConfiguration.packageManagerToolVersion) >= 4) {
+      // Default to false for PNPM 4.x or newer.
+      useImplicitlyPinnedVersions = false;
+    } else {
+      // Default to true for other package managers.
+      useImplicitlyPinnedVersions = true;
     }
 
     if (useImplicitlyPinnedVersions) {
