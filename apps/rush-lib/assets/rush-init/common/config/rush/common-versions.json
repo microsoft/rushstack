@@ -34,6 +34,9 @@
    * trouble for indirect dependencies with incompatible peerDependencies ranges.
    *
    * The default value is true.  As of Rush 5.17 the default is false if you are using the PNPM package manager.
+   *
+   * After modifying this field, it's recommended to run "rush update --full" so that the package manager
+   * will recalculate all version selections.
    */
   /*[LINE "HYPOTHETICAL"]*/ "implicitlyPreferredVersions": false,
 
