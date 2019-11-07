@@ -67,6 +67,7 @@ export class CommonVersionsConfiguration {
     readonly allowedAlternativeVersions: Map<string, ReadonlyArray<string>>;
     readonly filePath: string;
     getAllPreferredVersions(): Map<string, string>;
+    readonly implicitlyPreferredVersions: boolean | undefined;
     static loadFromFile(jsonFilename: string): CommonVersionsConfiguration;
     readonly preferredVersions: Map<string, string>;
     save(): boolean;
