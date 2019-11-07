@@ -553,15 +553,25 @@ export class InstallManager {
       version: '0.0.0'
     };
 
-    // Find the implicitly preferred versions
-    // These are any first-level dependencies for which we only consume a single version range
-    // (e.g. every package that depends on react uses an identical specifier)
-
     // dependency name --> version specifier
-    const allPreferredVersions: Map<string, string> =
-      InstallManager.collectImplicitlyPreferredVersions(this._rushConfiguration, {
-        variant
-      });
+    const allPreferredVersions: Map<string, string> = new Map<string, string>();
+
+    // Should we calculate implicitly preferred versions?
+    //
+    // Default to false for PNPM.  Default to true for other package managers.
+    let useImplicitlyPinnedVersions: boolean = this._rushConfiguration.packageManager !== "pnpm";
+    if (this._rushConfiguration.commonVersions.implicitlyPreferredVersions !== undefined) {
+      useImplicitlyPinnedVersions = this._rushConfiguration.commonVersions.implicitlyPreferredVersions;
+    }
+
+    if (useImplicitlyPinnedVersions) {
+      // Add in the implicitly preferred versions.
+      // These are any first-level dependencies for which we only consume a single version range
+      // (e.g. every package that depends on react uses an identical specifier)
+      const implicitlyPreferredVersions: Map<string, string> =
+        InstallManager.collectImplicitlyPreferredVersions(this._rushConfiguration, { variant });
+      MapExtensions.mergeFromMap(allPreferredVersions, implicitlyPreferredVersions);
+    }
 
     // Add in the explicitly preferred versions.
     // Note that these take precedence over implicitly preferred versions.
