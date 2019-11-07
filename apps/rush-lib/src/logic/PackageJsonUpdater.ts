@@ -281,15 +281,13 @@ export class PackageJsonUpdater {
   }
 
   /**
-   * This function returns a specific version of local dependency.
+   * This function returns a specific local dependency.
    * It will return undefined if the dependency is not found in the local.
-   * @param initialSpec - a semver pattern that should be used to find the latest version matching the spec
    * @param packageName - the name of the package to be used
    * @param projects - the projects which will have their package.json's updated
    * @param rushConfigProjects - the projects which are in the rush.json
    */
   public getLocalDependency(
-  //  initialSpec: string | undefined,
     packageName: string,
     projects: RushConfigurationProject[],
     rushConfigProjects: RushConfigurationProject[],
