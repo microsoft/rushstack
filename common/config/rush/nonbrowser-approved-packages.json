@@ -7,10 +7,6 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "timsort",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "@microsoft/api-extractor",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -384,7 +380,7 @@
     },
     {
       "name": "jest",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "jest-cli",
@@ -524,6 +520,10 @@
     },
     {
       "name": "through2",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "timsort",
       "allowedCategories": [ "libraries" ]
     },
     {
