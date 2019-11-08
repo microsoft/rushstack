@@ -360,7 +360,7 @@ export class PackageJsonUpdater {
         } else {
           throw new Error(`The dependency being added ("${packageName}") is a project in the local Rush repository,`
           .concat(`but the version specifier provided (${initialSpec}) does not match the local project version (${version}).`)
-          .concat(`Correct the version specifier, omit a version specifier, or include "${packageName}" as a cyclicDependencyProject in rush.json for  ${localProject}`)
+          .concat(`Correct the version specifier, omit a version specifier, or include "${packageName}" as a cyclicDependencyProject`)
           .concat(`if it is intended for "${packageName}"`)
           .concat(`to come from an external feed and not from the local Rush repository.`));
         }
