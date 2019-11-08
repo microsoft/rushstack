@@ -23,7 +23,6 @@
     "@rushstack/eslint-config": "0.4.1",
     "@types/jest": "23.3.11",
     "@types/node": "8.10.54",
-    "gulp": "~4.0.2",
-    "tslint-microsoft-contrib": "~5.2.1"
+    "gulp": "~4.0.2"
   }
 }
