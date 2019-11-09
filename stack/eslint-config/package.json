@@ -24,13 +24,14 @@
     "typescript": ">=3.0.0"
   },
   "dependencies": {
-    "@typescript-eslint/eslint-plugin": "2.3.3",
-    "@typescript-eslint/experimental-utils": "2.3.3",
-    "@typescript-eslint/parser": "2.3.3",
-    "@typescript-eslint/typescript-estree": "2.3.3",
+    "@typescript-eslint/eslint-plugin": "2.6.1",
+    "@typescript-eslint/experimental-utils": "2.6.1",
+    "@typescript-eslint/parser": "2.6.1",
+    "@typescript-eslint/typescript-estree": "2.6.1",
     "eslint-plugin-promise": "~4.2.1",
     "eslint-plugin-react": "~7.16.0",
-    "eslint-plugin-security": "~1.4.0"
+    "eslint-plugin-security": "~1.4.0",
+    "eslint-plugin-tsdoc": "~0.1.2"
   },
   "devDependencies": {
     "eslint": "~6.5.1",

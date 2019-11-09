@@ -259,6 +259,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "eslint-plugin-tsdoc",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "express",
       "allowedCategories": [ "libraries" ]
     },
