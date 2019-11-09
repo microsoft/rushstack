@@ -8,7 +8,8 @@ module.exports = {
   plugins: [
     "@typescript-eslint/eslint-plugin",
     "eslint-plugin-promise",
-    "eslint-plugin-security"
+    "eslint-plugin-security",
+    "eslint-plugin-tsdoc"
   ],
 
   overrides: [
