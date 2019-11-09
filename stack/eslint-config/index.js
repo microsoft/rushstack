@@ -473,6 +473,9 @@ module.exports = {
         // "Use strict" is redundant when using the TypeScript compiler.
         "strict": ["error", "never"],
 
+        // We're still experimenting with this plugin, so for now it is off by default.
+        "tsdoc/syntax": "off",
+
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         "use-isnan": "error",
 
