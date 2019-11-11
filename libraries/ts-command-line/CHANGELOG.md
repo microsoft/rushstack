@@ -1,6 +1,11 @@
 # Change Log - @microsoft/ts-command-line
 
-This log was last generated on Tue, 22 Oct 2019 06:24:44 GMT and should not be manually modified.
+This log was last generated on Mon, 11 Nov 2019 16:07:56 GMT and should not be manually modified.
+
+## 4.3.5
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
 
 ## 4.3.4
 Tue, 22 Oct 2019 06:24:44 GMT
