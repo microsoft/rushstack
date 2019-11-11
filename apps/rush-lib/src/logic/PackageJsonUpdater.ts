@@ -266,42 +266,6 @@ export class PackageJsonUpdater {
   }
 
   /**
-   * Check if the package is the cyclic dependency in the project dependencies in package.json
-   */
-  private _isCyclicDependency(
-    packageName: string,
-    projects: RushConfigurationProject[]
-  ): boolean {
-    for (const project of projects) {
-      if(project.cyclicDependencyProjects.has(packageName)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * This function returns a specific local dependency.
-   * It will return undefined if the dependency is not found in the local.
-   * @param packageName - the name of the package to be used
-   * @param projects - the projects which will have their package.json's updated
-   * @param rushConfigProjects - the projects which are in the rush.json
-   */
-  public getLocalDependency(
-    packageName: string,
-    projects: RushConfigurationProject[],
-    rushConfigProjects: RushConfigurationProject[],
-  ): RushConfigurationProject | undefined {
-    for (const rushConfigProject of rushConfigProjects) {
-      const isCyclicDependency: boolean = this._isCyclicDependency(packageName, projects);
-      if(rushConfigProject.packageName === packageName && (!isCyclicDependency)) {
-        return rushConfigProject;
-      }
-    }
-    return undefined;
-  }
-
-  /**
    * Selects an appropriate version number for a particular package, given an optional initial SemVer spec.
    * If ensureConsistentVersions, tries to pick a version that will be consistent.
    * Otherwise, will choose the latest semver matching the initialSpec and append the proper range style.
@@ -328,6 +292,9 @@ export class PackageJsonUpdater {
     }
     console.log();
 
+    // determine if the package is a project in the local repository and if the version exists
+    const localProject: RushConfigurationProject | undefined = this._tryGetLocalProject(packageName, projects);
+
     // if ensureConsistentVersions => reuse the pinned version
     // else, query the registry and use the latest that satisfies semver spec
     if (initialSpec && implicitlyPinnedVersion && initialSpec === implicitlyPinnedVersion) {
@@ -345,24 +312,23 @@ export class PackageJsonUpdater {
 
     await installManager.ensureLocalPackageManager();
     let selectedVersion: string | undefined;
-    const rushConfigProjects: RushConfigurationProject[] = this._rushConfiguration.projects;
 
     if (initialSpec && initialSpec !== 'latest') {
       console.log(colors.gray('Finding versions that satisfy the selector: ') + initialSpec);
       console.log();
 
-    // determine if the package is a project in the local repository and if the version exists
-      const localProject: RushConfigurationProject | undefined = this.getLocalDependency(packageName, projects, rushConfigProjects);
-      if(localProject !== undefined) {
+      if (localProject !== undefined) {
         const version: string = localProject.packageJson.version;
-        if(semver.satisfies(version, initialSpec)) {
+        if (semver.satisfies(version, initialSpec)) {
           selectedVersion = version;
         } else {
-          throw new Error(`The dependency being added ("${packageName}") is a project in the local Rush repository,`
-          .concat(`but the version specifier provided (${initialSpec}) does not match the local project version (${version}).`)
-          .concat(`Correct the version specifier, omit a version specifier, or include "${packageName}" as a cyclicDependencyProject`)
-          .concat(`if it is intended for "${packageName}"`)
-          .concat(`to come from an external feed and not from the local Rush repository.`));
+          throw new Error(
+            `The dependency being added ("${packageName}") is a project in the local Rush repository, ` +
+            `but the version specifier provided (${initialSpec}) does not match the local project's version ` +
+            `(${version}). Correct the version specifier, omit a version specifier, or include "${packageName}" as a ` +
+            `cyclicDependencyProject if it is intended for "${packageName}" to come from an external feed and not ` +
+            'from the local Rush repository.'
+          );
         }
       } else {
         console.log(`Querying registry for all versions of "${packageName}"...`);
@@ -410,8 +376,7 @@ export class PackageJsonUpdater {
         console.log();
       }
 
-      const localProject: RushConfigurationProject | undefined = this.getLocalDependency(packageName, projects, rushConfigProjects);
-      if(localProject !== undefined) {
+      if (localProject !== undefined) {
         selectedVersion = localProject.packageJson.version;
       } else {
         console.log(`Querying NPM registry for latest version of "${packageName}"...`);
@@ -464,5 +429,102 @@ export class PackageJsonUpdater {
         throw new Error(`Unexpected SemVerStyle ${rangeStyle}.`);
       }
     }
+  }
+
+  /**
+   * Check if the project specified by package name is listed as a cyclic dependency for any of the
+   * specified projects.
+   */
+  private _isCyclicDependency(
+    packageName: string,
+    ...projects: RushConfigurationProject[]
+  ): boolean {
+    for (const project of projects) {
+      if (project.cyclicDependencyProjects.has(packageName)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private _collectAllDownstreamDependencies(project: RushConfigurationProject): Set<RushConfigurationProject> {
+    const allProjectDownstreamDependencies: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
+
+    const collectDependencies: (rushProject: RushConfigurationProject) => void = (
+      rushProject: RushConfigurationProject
+    ) => {
+      for (const downstreamDependencyProject of rushProject.downstreamDependencyProjects) {
+        const foundProject: RushConfigurationProject | undefined = this._rushConfiguration.projectsByName.get(
+          downstreamDependencyProject
+        );
+
+        if (!foundProject) {
+          continue;
+        }
+
+        if (foundProject.cyclicDependencyProjects.has(rushProject.packageName)) {
+          continue;
+        }
+
+        if (!allProjectDownstreamDependencies.has(foundProject)) {
+          allProjectDownstreamDependencies.add(foundProject)
+          collectDependencies(foundProject);
+        }
+      }
+    }
+
+    collectDependencies(project);
+    return allProjectDownstreamDependencies;
+  }
+
+  /**
+   * Given a package name, this function returns a {@see RushConfigurationProject} if the package is a project
+   * in the local Rush repo and is not marked as cyclic for any of the projects.
+   *
+   * @remarks
+   * This function throws an error if adding the discovered local project as a dependency
+   * would create a dependency cycle, or if it would be added to multiple projects.
+   */
+  private _tryGetLocalProject(
+    packageName: string,
+    projects: RushConfigurationProject[]
+  ): RushConfigurationProject | undefined {
+    const foundProject: RushConfigurationProject | undefined = this._rushConfiguration.projectsByName.get(
+      packageName
+    );
+
+    if (foundProject === undefined) {
+      return undefined;
+    }
+
+    if (projects.length > 1) {
+      throw new Error(`Adding a local project as a dependency to multiple projects is not supported.`);
+    }
+
+    const project: RushConfigurationProject = projects[0];
+
+    if (this._isCyclicDependency(foundProject.packageName, project)) {
+      return undefined;
+    }
+
+    // Are we attempting to add this project to itself?
+    if (project === foundProject) {
+      throw new Error(
+        'Unable to add a project as a dependency of itself unless the dependency is listed as a cyclic dependency ' +
+        `in rush.json. This command attempted to add "${foundProject.packageName}" as a dependency of itself.`
+      );
+    }
+
+    // Are we attempting to create a cycle?
+    const downstreamDependencies: Set<RushConfigurationProject> = this._collectAllDownstreamDependencies(project);
+    if (downstreamDependencies.has(foundProject)) {
+      throw new Error(
+        `Adding "${foundProject.packageName}" as a direct or indirect dependency to ` +
+        `"${project.packageName}" would create a dependency cycle.`
+      );
+    }
+
+    return foundProject;
   }
 }
