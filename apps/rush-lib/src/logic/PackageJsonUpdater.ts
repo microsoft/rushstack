@@ -482,7 +482,9 @@ export class PackageJsonUpdater {
     }
 
     if (projects.length > 1) {
-      throw new Error(`Adding a local project as a dependency to multiple projects is not supported.`);
+      throw new Error(
+        `"rush add" does not support adding a local project as a dependency to multiple projects at once.`
+      );
     }
 
     const project: RushConfigurationProject = projects[0];
@@ -503,7 +505,7 @@ export class PackageJsonUpdater {
     const downstreamDependencies: Set<RushConfigurationProject> = this._collectAllDownstreamDependencies(project);
     if (downstreamDependencies.has(foundProject)) {
       throw new Error(
-        `Adding "${foundProject.packageName}" as a direct or indirect dependency to ` +
+        `Adding "${foundProject.packageName}" as a direct or indirect dependency of ` +
         `"${project.packageName}" would create a dependency cycle.`
       );
     }
