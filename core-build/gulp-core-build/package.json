@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build",
-  "version": "3.12.3",
+  "version": "3.12.4",
   "description": "Core gulp build tasks for building typescript, html, less, etc.",
   "repository": {
     "type": "git",
@@ -13,7 +13,7 @@
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "3.17.0",
+    "@microsoft/node-core-library": "3.17.1",
     "@types/chalk": "0.4.31",
     "@types/gulp": "4.0.6",
     "@types/node": "8.10.54",
@@ -52,7 +52,7 @@
   "devDependencies": {
     "@microsoft/node-library-build": "6.3.2",
     "@microsoft/rush-stack-compiler-3.4": "0.3.2",
-    "@rushstack/eslint-config": "0.4.1",
+    "@rushstack/eslint-config": "0.4.2",
     "@types/chai": "3.4.34",
     "@types/mocha": "5.2.5",
     "@types/z-schema": "3.16.31",

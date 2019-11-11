@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/stream-collator",
-  "version": "3.1.12",
+  "version": "3.1.13",
   "description": "Display intelligible realtime output from your asynchronous streams",
   "repository": {
     "type": "git",
@@ -16,14 +16,14 @@
     "colors": "~1.2.1"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.4": "0.3.5",
+    "@microsoft/rush-stack-compiler-3.4": "0.3.6",
     "@types/chai": "3.4.34",
     "@types/mocha": "5.2.5",
     "@types/node": "8.10.54",
     "chai": "~3.5.0",
     "gulp": "~4.0.2",
     "mocha": "^5.2.0",
-    "@microsoft/node-library-build": "6.3.5",
-    "@rushstack/eslint-config": "0.4.1"
+    "@microsoft/node-library-build": "6.3.6",
+    "@rushstack/eslint-config": "0.4.2"
   }
 }
