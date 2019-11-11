@@ -61,6 +61,7 @@
     "@types/semver": "5.3.33",
     "@types/tar": "4.0.0",
     "@types/z-schema": "3.16.31",
-    "gulp": "~4.0.2"
+    "gulp": "~4.0.2",
+    "jest": "~23.6.0"
   }
 }

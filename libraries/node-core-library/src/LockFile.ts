@@ -19,7 +19,7 @@ const procStatStartTimePos: number = 22;
 
 /**
  * Parses the process start time from the contents of a linux /proc/[pid]/stat file.
- * @param stat The contents of a linux /proc/[pid]/stat file.
+ * @param stat - The contents of a linux /proc/[pid]/stat file.
  * @returns The process start time in jiffies, or undefined if stat has an unexpected format.
  */
 export function getProcessStartTimeFromProcStat (stat: string): string | undefined {

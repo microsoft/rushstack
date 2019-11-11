@@ -28,6 +28,7 @@
     "end-of-stream": "~1.1.0",
     "glob-escape": "~0.0.1",
     "globby": "~5.0.0",
+    "glob": "~7.0.5",
     "gulp": "~4.0.2",
     "gulp-flatten": "~0.2.0",
     "gulp-if": "^2.0.1",
