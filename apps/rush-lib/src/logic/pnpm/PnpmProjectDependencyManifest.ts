@@ -12,7 +12,8 @@ import {
 import {
   PnpmShrinkwrapFile,
   IPnpmShrinkwrapDependencyYaml,
-  parsePnpmDependencyKey
+  parsePnpmDependencyKey,
+  IPeerDependenciesMetaYaml
 } from './PnpmShrinkwrapFile';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../RushConstants';
@@ -193,6 +194,21 @@ export class PnpmProjectDependencyManifest {
         // if it's been hoisted up as a top-level dependency
         const topLevelDependencySpecifier: DependencySpecifier | undefined =
           this._pnpmShrinkwrapFile.getTopLevelDependencyVersion(peerDependencyName);
+
+        if (!topLevelDependencySpecifier) {
+          // If it's an optional dependency, then it's okay if it's missing
+          if (shrinkwrapEntry.peerDependenciesMeta
+            && shrinkwrapEntry.peerDependenciesMeta.hasOwnProperty(peerDependencyName)) {
+            const peerDependenciesMetaYaml: IPeerDependenciesMetaYaml
+              = shrinkwrapEntry.peerDependenciesMeta[peerDependencyName];
+            if (peerDependenciesMetaYaml.optional) {
+              // We can safely ignore this missing dependency because it was marked as optional
+              continue;
+            }
+          }
+
+        }
+
         if (!topLevelDependencySpecifier || !semver.valid(topLevelDependencySpecifier.versionSpecifier)) {
           const errorMessage: string =
             `Could not find peer dependency '${peerDependencyName}' that satisfies version '${dependencySemVer}'`
