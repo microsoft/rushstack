@@ -431,23 +431,6 @@ export class PackageJsonUpdater {
     }
   }
 
-  /**
-   * Check if the project specified by package name is listed as a cyclic dependency for any of the
-   * specified projects.
-   */
-  private _isCyclicDependency(
-    packageName: string,
-    ...projects: RushConfigurationProject[]
-  ): boolean {
-    for (const project of projects) {
-      if (project.cyclicDependencyProjects.has(packageName)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
   private _collectAllDownstreamDependencies(project: RushConfigurationProject): Set<RushConfigurationProject> {
     const allProjectDownstreamDependencies: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
 
@@ -504,7 +487,7 @@ export class PackageJsonUpdater {
 
     const project: RushConfigurationProject = projects[0];
 
-    if (this._isCyclicDependency(foundProject.packageName, project)) {
+    if (project.cyclicDependencyProjects.has(foundProject.packageName)) {
       return undefined;
     }
 
