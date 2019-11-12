@@ -195,48 +195,18 @@ export class PnpmProjectDependencyManifest {
         const topLevelDependencySpecifier: DependencySpecifier | undefined =
           this._pnpmShrinkwrapFile.getTopLevelDependencyVersion(peerDependencyName);
 
+        // Sometimes peer dependencies are hoisted but are not represented in the shrinkwrap file
+        // (such as when implicitlyPreferredVersions is false) so we need to find the correct key
+        // and add it ourselves
         if (!topLevelDependencySpecifier) {
-          // If it's an optional dependency, then it's okay if it's missing
-          if (shrinkwrapEntry.peerDependenciesMeta
-            && shrinkwrapEntry.peerDependenciesMeta.hasOwnProperty(peerDependencyName)) {
-            const peerDependenciesMetaYaml: IPeerDependenciesMetaYaml
-              = shrinkwrapEntry.peerDependenciesMeta[peerDependencyName];
-            if (peerDependenciesMetaYaml.optional) {
-              // We can safely ignore this missing dependency because it was marked as optional
-              continue;
-            }
-          }
-
-          // If it's one of the peer dependencies, then see if it got "hoisted"
-          // Parse "2.7.0_eslint@6.6.0+typescript@3.6.4" --> "eslint@6.6.0+typescript@3.6.4"
-          const split1: RegExpExecArray | null = /^[^_]+_([^_]+)$/.exec(specifier);
-          let added: boolean = false;
-          if (split1) {
-            const rhs: string = split1[1];
-            // Parse "eslint@6.6.0+typescript@3.6.4" --> ["eslint@6.6.0", "typescript@3.6.4"]
-            const parts: string[] = rhs.split("+");
-            for (const part of parts) {
-              // Parse "eslint@6.6.0" --> "eslint", "6.6.0"
-              const split2: RegExpExecArray | null = /^([^+@]+)@([^+@]+)$/.exec(part);
-              if (split2) {
-                const peerName: string = split2[1];
-                if (peerName === peerDependencyName) {
-                  const peerVersion: string = split2[2];
-                  const peerKey: string = `/${peerName}/${peerVersion}`;
-                  if (peerKey) {
-                    this._addDependencyInternal(
-                      peerName,
-                      peerKey,
-                      shrinkwrapEntry
-                    );
-                    added = true;
-                    break;
-                  }
-                }
-              }
-            }
-          }
-          if (added) {
+          const peerDependencyKeys: { [peerDependencyName: string]: string } =
+            this._parsePeerDependencyKeysFromSpecifier(specifier);
+          if (peerDependencyKeys.hasOwnProperty(peerDependencyName)) {
+            this._addDependencyInternal(
+              peerDependencyName,
+              peerDependencyKeys[peerDependencyName],
+              shrinkwrapEntry
+            );
             continue;
           }
         }
@@ -244,11 +214,19 @@ export class PnpmProjectDependencyManifest {
         if (!topLevelDependencySpecifier || !semver.valid(topLevelDependencySpecifier.versionSpecifier)) {
           const errorMessage: string =
             `Could not find peer dependency '${peerDependencyName}' that satisfies version '${dependencySemVer}'`
-          if (this._project.rushConfiguration.pnpmOptions && this._project.rushConfiguration.pnpmOptions.strictPeerDependencies) {
-            throw new InternalError(errorMessage);
+          if (
+            !this._project.rushConfiguration.pnpmOptions ||
+            !this._project.rushConfiguration.pnpmOptions.strictPeerDependencies ||
+            (
+              shrinkwrapEntry.peerDependenciesMeta &&
+              shrinkwrapEntry.peerDependenciesMeta.hasOwnProperty(peerDependencyName) &&
+              shrinkwrapEntry.peerDependenciesMeta[peerDependencyName].optional
+            )
+          ) {
+            console.log(`${errorMessage}, skipping...`);
+            continue;
           }
-          console.log(`${errorMessage}, skipping...`);
-          continue;
+          throw new InternalError(errorMessage);
         }
 
         this._addDependencyInternal(
@@ -258,5 +236,28 @@ export class PnpmProjectDependencyManifest {
         );
       }
     }
+  }
+
+  private _parsePeerDependencyKeysFromSpecifier(specifier: string): { [peerDependencyName: string]: string } {
+    const parsedPeerDependencyKeys: { [peerDependencyName: string]: string } = {};
+
+    const split1: RegExpExecArray | null = /^[^_]+_([^_]+)$/.exec(specifier);
+    if (split1) {
+      const combinedPeerDependencies: string = split1[1];
+      // Parse "eslint@6.6.0+typescript@3.6.4" --> ["eslint@6.6.0", "typescript@3.6.4"]
+      const peerDependencies: string[] = combinedPeerDependencies.split("+");
+      for (const peerDependencySpecifier of peerDependencies) {
+        // Parse "eslint@6.6.0" --> "eslint", "6.6.0"
+        const split2: RegExpExecArray | null = /^([^+@]+)@([^+@]+)$/.exec(peerDependencySpecifier);
+        if (split2) {
+          const peerDependencyName: string = split2[1];
+          const peerDependencyVersion: string = split2[2];
+          const peerDependencyKey: string = `/${peerDependencyName}/${peerDependencyVersion}`;
+          parsedPeerDependencyKeys[peerDependencyName] = peerDependencyKey;
+        }
+      }
+    }
+
+    return parsedPeerDependencyKeys;
   }
 }
