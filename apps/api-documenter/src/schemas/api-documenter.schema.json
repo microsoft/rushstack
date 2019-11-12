@@ -17,6 +17,13 @@
       ]
     },
 
+    "newlineKind": {
+      "description": "Specifies what type of newlines API Documenter should use when writing output files.  By default, the output files will be written with Windows-style newlines.  To use POSIX-style newlines, specify \"lf\" instead. To use the OS's default newline kind, specify \"os\".",
+      "type": "string",
+      "enum": ["crlf", "lf", "os"],
+      "default": "crlf"
+    },
+
     "plugins": {
       "description": "Specifies plugin packages to be loaded",
       "type": "array"
