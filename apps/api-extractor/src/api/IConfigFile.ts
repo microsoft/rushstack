@@ -368,9 +368,12 @@ export interface IConfigFile {
   tsdocMetadata?: IConfigTsdocMetadata;
 
   /**
-   * Specifies the type of newline to use in all generated files.
+   * Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files
+   * will be written with Windows-style newlines.  To use POSIX-style newlines, specify "lf" instead.
+   * To use the OS's default newline kind, specify "os".
+   * @defaultValue 'crlf'
    */
-  newlineKind?: 'CrLf' | 'Lf' | 'OsDefault';
+  newlineKind?: 'crlf' | 'lf' | 'os';
 
   /**
    * {@inheritDoc IExtractorMessagesConfig}

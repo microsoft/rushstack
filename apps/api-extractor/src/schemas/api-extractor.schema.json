@@ -143,10 +143,10 @@
     },
 
     "newlineKind": {
-      "description": "Specifies the type of newline to use in all generated files.",
+      "description": "Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files will be written with Windows-style newlines.  To use POSIX-style newlines, specify \"lf\" instead. To use the OS's default newline kind, specify \"os\".",
       "type": "string",
-      "enum": ["CrLf", "Lf", "OsDefault"],
-      "default": "CrLf"
+      "enum": ["crlf", "lf", "os"],
+      "default": "crlf"
     },
 
     "messages": {

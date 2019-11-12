@@ -197,7 +197,10 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigTsdocMetadata.tsdocMetadataFilePath} */
   public readonly tsdocMetadataFilePath: string;
 
-  /** {@inheritDoc IConfigFile.newlineKind} */
+  /**
+   * Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files
+   * will be written with Windows-style newlines.
+   */
   public readonly newlineKind: NewlineKind;
 
   /** {@inheritDoc IConfigFile.messages} */
@@ -661,10 +664,10 @@ export class ExtractorConfig {
 
       let newlineKind: NewlineKind;
       switch (configObject.newlineKind) {
-        case 'Lf':
+        case 'lf':
           newlineKind = NewlineKind.Lf;
           break;
-        case 'OsDefault':
+        case 'os':
           newlineKind = NewlineKind.OsDefault;
           break;
         default:

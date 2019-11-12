@@ -264,13 +264,13 @@
   },
 
   /**
-   * Specifies the type of newline to use in all generated files.
+   * Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files
+   * will be written with Windows-style newlines.  To use POSIX-style newlines, specify "lf" instead.
+   * To use the OS's default newline kind, specify "os".
    *
-   * Supported values are "CrLf", "Lf", or "OsDefault".
-   *
-   * DEFAULT VALUE: "CrLf"
+   * DEFAULT VALUE: "crlf"
    */
-  // "newlineKind": "CrLf",
+  // "newlineKind": "crlf",
 
   /**
    * Configures how API Extractor reports error and warning messages produced during analysis.

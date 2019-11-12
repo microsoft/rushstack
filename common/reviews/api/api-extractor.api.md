@@ -186,7 +186,7 @@ export interface IConfigFile {
     extends?: string;
     mainEntryPointFilePath: string;
     messages?: IExtractorMessagesConfig;
-    newlineKind?: 'CrLf' | 'Lf' | 'OsDefault';
+    newlineKind?: 'crlf' | 'lf' | 'os';
     projectFolder?: string;
     testMode?: boolean;
     // @beta
