@@ -264,6 +264,15 @@
   },
 
   /**
+   * Specifies the type of newline to use in all generated files.
+   *
+   * Supported values are "CrLf", "Lf", or "OsDefault".
+   *
+   * DEFAULT VALUE: "CrLf"
+   */
+  // "newlineKind": "CrLf",
+
+  /**
    * Configures how API Extractor reports error and warning messages produced during analysis.
    *
    * There are three sources of messages:  compiler messages, API Extractor messages, and TSDoc messages.

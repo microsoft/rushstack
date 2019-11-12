@@ -154,7 +154,8 @@ export class ApiReportGenerator {
     // Write the closing delimiter for the Markdown code fence
     stringWriter.writeLine('\n```');
 
-    return stringWriter.toString();
+    // Remove any trailing spaces
+    return stringWriter.toString().replace(/ +$/gm, '');
   }
 
   /**

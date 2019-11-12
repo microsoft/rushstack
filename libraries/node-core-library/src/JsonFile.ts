@@ -27,7 +27,7 @@ export type JsonObject = any;
  */
 export interface IJsonFileStringifyOptions {
   /**
-   * If true, then `\n` will be used for newlines instead of the default `\r\n`.
+   * If provided, the specified newline type will be used instead of the default `\r\n`.
    */
   newlineConversion?: NewlineKind;
 
@@ -162,6 +162,8 @@ export class JsonFile {
           return Text.convertToCrLf(stringified);
         case NewlineKind.Lf:
           return Text.convertToLf(stringified);
+        case NewlineKind.OsDefault:
+          return Text.convertToOsDefault(stringified);
       }
     }
 

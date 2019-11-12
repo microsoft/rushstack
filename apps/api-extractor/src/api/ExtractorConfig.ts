@@ -14,7 +14,8 @@ import {
   PackageName,
   Text,
   InternalError,
-  Path
+  Path,
+  NewlineKind
 } from '@microsoft/node-core-library';
 import {
   IConfigFile,
@@ -111,6 +112,7 @@ interface IExtractorConfigParameters {
   omitTrimmingComments: boolean;
   tsdocMetadataEnabled: boolean;
   tsdocMetadataFilePath: string;
+  newlineKind: string;
   messages: IExtractorMessagesConfig;
   testMode: boolean;
 }
@@ -194,6 +196,9 @@ export class ExtractorConfig {
   public readonly tsdocMetadataEnabled: boolean;
   /** {@inheritDoc IConfigTsdocMetadata.tsdocMetadataFilePath} */
   public readonly tsdocMetadataFilePath: string;
+
+  /** {@inheritDoc IConfigFile.newlineKind} */
+  public readonly newlineKind: NewlineKind;
 
   /** {@inheritDoc IConfigFile.messages} */
   public readonly messages: IExtractorMessagesConfig;
@@ -654,6 +659,19 @@ export class ExtractorConfig {
         omitTrimmingComments = !!configObject.dtsRollup.omitTrimmingComments;
       }
 
+      let newlineKind: NewlineKind;
+      switch (configObject.newlineKind) {
+        case 'Lf':
+          newlineKind = NewlineKind.Lf;
+          break;
+        case 'OsDefault':
+          newlineKind = NewlineKind.OsDefault;
+          break;
+        default:
+          newlineKind = NewlineKind.CrLf;
+          break;
+      }
+
       return new ExtractorConfig({
         projectFolder: projectFolder,
         packageJson,
@@ -675,6 +693,7 @@ export class ExtractorConfig {
         omitTrimmingComments,
         tsdocMetadataEnabled,
         tsdocMetadataFilePath,
+        newlineKind,
         messages: configObject.messages || { },
         testMode: !!configObject.testMode
       });

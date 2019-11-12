@@ -30,13 +30,13 @@ export interface IFileSystemReadFolderOptions {
 export interface IFileSystemWriteFileOptions {
   /**
    * If true, will ensure the folder is created before writing the file.
-   * Defaults to `false`.
+   * @defaultValue false
    */
   ensureFolderExists?: boolean;
 
   /**
    * If specified, will normalize line endings to the specified style of newline.
-   * Defaults to `NewlineKind.None`.
+   * @defaultValue undefined
    */
   convertLineEndings?: NewlineKind;
 
@@ -54,13 +54,13 @@ export interface IFileSystemWriteFileOptions {
 export interface IFileSystemReadFileOptions {
   /**
    * If specified, will change the encoding of the file that will be written.
-   * Defaults to `"utf8"`.
+   * @defaultValue Encoding.Utf8
    */
   encoding?: Encoding;
 
   /**
    * If specified, will normalize line endings to the specified style of newline.
-   * Defaults to `NewlineKind.None`.
+   * @defaultValue undefined
    */
   convertLineEndings?: NewlineKind;
 }
@@ -83,13 +83,14 @@ export interface IFileSystemMoveOptions {
   destinationPath: string;
 
   /**
-   * If true, will overwrite the file if it already exists. Defaults to true.
+   * If true, will overwrite the file if it already exists.
+   * @defaultValue true
    */
   overwrite?: boolean;
 
   /**
    * If true, will ensure the folder is created before writing the file.
-   * Defaults to `false`.
+   * @defaultValue false
    */
   ensureFolderExists?: boolean;
 }
@@ -119,7 +120,7 @@ export interface IFileSystemCopyFileOptions {
 export interface IFileSystemDeleteFileOptions {
   /**
    * If true, will throw an exception if the file did not exist before `deleteFile()` was called.
-   * Defaults to `false`.
+   * @defaultValue false
    */
   throwIfNotExists?: boolean;
 }
@@ -525,6 +526,8 @@ export class FileSystem {
         return Text.convertToCrLf(text);
       case NewlineKind.Lf:
         return Text.convertToLf(text);
+      case NewlineKind.OsDefault:
+        return Text.convertToOsDefault(text);
       default:
         return text;
     }

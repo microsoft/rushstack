@@ -6,6 +6,7 @@
 
 import { INodePackageJson } from '@microsoft/node-core-library';
 import { JsonSchema } from '@microsoft/node-core-library';
+import { NewlineKind } from '@microsoft/node-core-library';
 import * as tsdoc from '@microsoft/tsdoc';
 
 // @public
@@ -52,6 +53,7 @@ export class ExtractorConfig {
     static loadFileAndPrepare(configJsonFilePath: string): ExtractorConfig;
     readonly mainEntryPointFilePath: string;
     readonly messages: IExtractorMessagesConfig;
+    readonly newlineKind: NewlineKind;
     readonly omitTrimmingComments: boolean;
     readonly overrideTsconfig: {} | undefined;
     readonly packageFolder: string | undefined;
@@ -184,6 +186,7 @@ export interface IConfigFile {
     extends?: string;
     mainEntryPointFilePath: string;
     messages?: IExtractorMessagesConfig;
+    newlineKind?: 'CrLf' | 'Lf' | 'OsDefault';
     projectFolder?: string;
     testMode?: boolean;
     // @beta

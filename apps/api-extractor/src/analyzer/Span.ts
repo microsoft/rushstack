@@ -489,7 +489,7 @@ export class Span {
   }
 
   private _getTrimmed(text: string): string {
-    const trimmed: string = text.replace(/[\r\n]/g, '\\n');
+    const trimmed: string = text.replace(/\r?\n/g, '\\n');
 
     if (trimmed.length > 100) {
       return trimmed.substr(0, 97) + '...';

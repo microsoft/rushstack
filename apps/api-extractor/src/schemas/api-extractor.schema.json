@@ -142,6 +142,13 @@
       "additionalProperties": false
     },
 
+    "newlineKind": {
+      "description": "Specifies the type of newline to use in all generated files.",
+      "type": "string",
+      "enum": ["CrLf", "Lf", "OsDefault"],
+      "default": "CrLf"
+    },
+
     "messages": {
       "description": "Configures how API Extractor reports error and warning messages produced during analysis.",
       "type": "object",

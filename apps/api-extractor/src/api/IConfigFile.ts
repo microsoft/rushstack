@@ -368,6 +368,11 @@ export interface IConfigFile {
   tsdocMetadata?: IConfigTsdocMetadata;
 
   /**
+   * Specifies the type of newline to use in all generated files.
+   */
+  newlineKind?: 'CrLf' | 'Lf' | 'OsDefault';
+
+  /**
    * {@inheritDoc IExtractorMessagesConfig}
    */
   messages?: IExtractorMessagesConfig;
