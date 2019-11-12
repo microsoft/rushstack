@@ -12,8 +12,7 @@ import {
 import {
   PnpmShrinkwrapFile,
   IPnpmShrinkwrapDependencyYaml,
-  parsePnpmDependencyKey,
-  IPeerDependenciesMetaYaml
+  parsePnpmDependencyKey
 } from './PnpmShrinkwrapFile';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../RushConstants';
