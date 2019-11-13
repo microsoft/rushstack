@@ -132,7 +132,7 @@ export class PackageMetadataManager {
   /**
    * Writes the TSDoc metadata file to the specified output file.
    */
-  public static writeTsdocMetadataFile(tsdocMetadataPath: string, newlineKind: NewlineKind = NewlineKind.CrLf): void {
+  public static writeTsdocMetadataFile(tsdocMetadataPath: string, newlineKind: NewlineKind): void {
     const fileObject: JsonObject = {
       tsdocVersion: '0.12',
       toolPackages: [

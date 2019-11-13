@@ -537,9 +537,9 @@ export enum TerminalProviderSeverity {
 
 // @public
 export class Text {
+    static convertTo(input: string, newlineKind: NewlineKind): string;
     static convertToCrLf(input: string): string;
     static convertToLf(input: string): string;
-    static convertToOsDefault(input: string): string;
     static ensureTrailingNewline(s: string, newlineKind?: NewlineKind): string;
     static padEnd(s: string, minimumLength: number, paddingCharacter?: string): string;
     static padStart(s: string, minimumLength: number, paddingCharacter?: string): string;

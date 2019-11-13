@@ -157,14 +157,7 @@ export class JsonFile {
     stringified = Text.ensureTrailingNewline(stringified);
 
     if (options && options.newlineConversion) {
-      switch (options.newlineConversion) {
-        case NewlineKind.CrLf:
-          return Text.convertToCrLf(stringified);
-        case NewlineKind.Lf:
-          return Text.convertToLf(stringified);
-        case NewlineKind.OsDefault:
-          return Text.convertToOsDefault(stringified);
-      }
+      stringified = Text.convertTo(stringified, options.newlineConversion);
     }
 
     return stringified;

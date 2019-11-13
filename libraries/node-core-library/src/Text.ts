@@ -76,10 +76,11 @@ export class Text {
   }
 
   /**
-   * Converts all newlines in the provided string to use the default newline type for this operating system.
+   * Converts all newlines in the provided string to use the specified newline type.
    */
-  public static convertToOsDefault(input: string): string {
-    return input.replace(Text._newLineRegEx, os.EOL);
+  public static convertTo(input: string, newlineKind: NewlineKind): string {
+    const newline: string = newlineKind === NewlineKind.OsDefault ? os.EOL : newlineKind as string;
+    return input.replace(Text._newLineRegEx, newline);
   }
 
   /**

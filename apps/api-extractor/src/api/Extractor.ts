@@ -332,7 +332,8 @@ export class Extractor {
 
     if (extractorConfig.tsdocMetadataEnabled) {
       // Write the tsdoc-metadata.json file for this project
-      PackageMetadataManager.writeTsdocMetadataFile(extractorConfig.tsdocMetadataFilePath);
+      PackageMetadataManager.writeTsdocMetadataFile(
+        extractorConfig.tsdocMetadataFilePath, extractorConfig.newlineKind);
     }
 
     // Show all the messages that we collected during analysis

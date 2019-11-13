@@ -51,7 +51,7 @@ export class DtsRollupGenerator {
    * @param dtsFilename    - The *.d.ts output filename
    */
   public static writeTypingsFile(
-    collector: Collector, dtsFilename: string, dtsKind: DtsRollupKind, newlineKind: NewlineKind = NewlineKind.CrLf
+    collector: Collector, dtsFilename: string, dtsKind: DtsRollupKind, newlineKind: NewlineKind
   ): void {
     const stringWriter: StringWriter = new StringWriter();
 

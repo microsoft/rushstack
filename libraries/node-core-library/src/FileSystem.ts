@@ -18,7 +18,7 @@ import { PosixModeBits } from './PosixModeBits';
 export interface IFileSystemReadFolderOptions {
   /**
    * If true, returns the absolute paths of the files in the folder.
-   * Defaults to `false`.
+   * @defaultValue false
    */
   absolutePaths?: boolean;
 }
@@ -36,13 +36,13 @@ export interface IFileSystemWriteFileOptions {
 
   /**
    * If specified, will normalize line endings to the specified style of newline.
-   * @defaultValue undefined
+   * @defaultValue `undefined` which means no conversion will be performed
    */
   convertLineEndings?: NewlineKind;
 
   /**
    * If specified, will change the encoding of the file that will be written.
-   * Defaults to `"utf8"`.
+   * @defaultValue "utf8"
    */
   encoding?: Encoding;
 }
@@ -60,7 +60,7 @@ export interface IFileSystemReadFileOptions {
 
   /**
    * If specified, will normalize line endings to the specified style of newline.
-   * @defaultValue undefined
+   * @defaultValue `undefined` which means no conversion will be performed
    */
   convertLineEndings?: NewlineKind;
 }
@@ -370,7 +370,9 @@ export class FileSystem {
       FileSystem.ensureFolder(folderPath);
     }
 
-    contents = FileSystem._convertLineEndings(contents.toString(), options.convertLineEndings);
+    if (options.convertLineEndings) {
+      contents = Text.convertTo(contents.toString(), options.convertLineEndings);
+    }
 
     fsx.writeFileSync(filePath, contents, { encoding: options.encoding });
   }
@@ -397,7 +399,9 @@ export class FileSystem {
       FileSystem.ensureFolder(folderPath);
     }
 
-    contents = FileSystem._convertLineEndings(contents.toString(), options.convertLineEndings);
+    if (options.convertLineEndings) {
+      contents = Text.convertTo(contents.toString(), options.convertLineEndings);
+    }
 
     fsx.appendFileSync(filePath, contents, { encoding: options.encoding });
   }
@@ -415,8 +419,11 @@ export class FileSystem {
       ...options
     };
 
-    const contents: string = FileSystem.readFileToBuffer(filePath).toString(options.encoding);
-    return FileSystem._convertLineEndings(contents, options.convertLineEndings);
+    let contents: string = FileSystem.readFileToBuffer(filePath).toString(options.encoding);
+    if (options.convertLineEndings) {
+      contents = Text.convertTo(contents, options.convertLineEndings);
+    }
+    return contents;
   }
 
   /**
@@ -513,23 +520,5 @@ export class FileSystem {
    */
   public static getRealPath(linkPath: string): string {
     return fsx.realpathSync(linkPath);
-  }
-
-  /**
-   * A helper function that converts line endings on a string.
-   * @param text - The text to be normalized.
-   * @param lineEndings - The style of line endings to use.
-   */
-  private static _convertLineEndings(text: string, lineEndings: NewlineKind | undefined): string {
-    switch (lineEndings) {
-      case NewlineKind.CrLf:
-        return Text.convertToCrLf(text);
-      case NewlineKind.Lf:
-        return Text.convertToLf(text);
-      case NewlineKind.OsDefault:
-        return Text.convertToOsDefault(text);
-      default:
-        return text;
-    }
   }
 }
