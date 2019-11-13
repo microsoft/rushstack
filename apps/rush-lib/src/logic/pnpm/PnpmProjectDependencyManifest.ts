@@ -237,6 +237,11 @@ export class PnpmProjectDependencyManifest {
     }
   }
 
+  /**
+   * The version specifier for a dependency can sometimes come in the form of
+   * '{semVer}_peerDep1@1.2.3+peerDep2@4.5.6'. This is parsed and returned as a dictionary mapping
+   * the peer dependency to it's appropriate PNPM dependency key.
+   */
   private _parsePeerDependencyKeysFromSpecifier(specifier: string): { [peerDependencyName: string]: string } {
     const parsedPeerDependencyKeys: { [peerDependencyName: string]: string } = {};
 
