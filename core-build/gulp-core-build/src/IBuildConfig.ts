@@ -33,6 +33,11 @@ export interface IBuildConfig {
   rootPath: string;
 
   /**
+   * Additional static paths to serve
+   */
+  staticPaths?: { path: string, url: string }[];
+
+  /**
    * Package output folder in which publishable output should be dropped.
    * Defaults to package.json directories/packagePath value.
    */
