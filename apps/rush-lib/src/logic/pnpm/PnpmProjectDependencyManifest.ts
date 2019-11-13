@@ -211,8 +211,6 @@ export class PnpmProjectDependencyManifest {
         }
 
         if (!topLevelDependencySpecifier || !semver.valid(topLevelDependencySpecifier.versionSpecifier)) {
-          const errorMessage: string =
-            `Could not find peer dependency '${peerDependencyName}' that satisfies version '${dependencySemVer}'`
           if (
             !this._project.rushConfiguration.pnpmOptions ||
             !this._project.rushConfiguration.pnpmOptions.strictPeerDependencies ||
@@ -222,10 +220,12 @@ export class PnpmProjectDependencyManifest {
               shrinkwrapEntry.peerDependenciesMeta[peerDependencyName].optional
             )
           ) {
-            console.log(`${errorMessage}, skipping...`);
+            // We couldn't find the peer dependency, but we determined it's by design, skip this dependency...
             continue;
           }
-          throw new InternalError(errorMessage);
+          throw new InternalError(
+            `Could not find peer dependency '${peerDependencyName}' that satisfies version '${dependencySemVer}'`
+          );
         }
 
         this._addDependencyInternal(
