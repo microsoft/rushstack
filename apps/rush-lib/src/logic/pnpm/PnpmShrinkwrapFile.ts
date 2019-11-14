@@ -15,6 +15,10 @@ const SHRINKWRAP_YAML_FORMAT: yaml.DumpOptions = {
   sortKeys: true
 };
 
+export interface IPeerDependenciesMetaYaml {
+  optional?: boolean;
+}
+
 export interface IPnpmShrinkwrapDependencyYaml {
   /** Information about the resolved package */
   resolution: {
@@ -29,6 +33,11 @@ export interface IPnpmShrinkwrapDependencyYaml {
   optionalDependencies: { [dependency: string]: string };
   /** The list of peer dependencies and the resolved version */
   peerDependencies: { [dependency: string]: string };
+  /**
+   * Used to indicate optional peer dependencies, as described in this RFC:
+   * https://github.com/yarnpkg/rfcs/blob/master/accepted/0000-optional-peer-dependencies.md
+   */
+  peerDependenciesMeta: { [dependency: string]: IPeerDependenciesMetaYaml };
 }
 
 /**

@@ -561,12 +561,8 @@ export class InstallManager {
     if (this._rushConfiguration.commonVersions.implicitlyPreferredVersions !== undefined) {
       // Use the manually configured setting
       useImplicitlyPinnedVersions = this._rushConfiguration.commonVersions.implicitlyPreferredVersions;
-    } else if (this._rushConfiguration.packageManager === "pnpm" &&
-      semver.major(this._rushConfiguration.packageManagerToolVersion) >= 4) {
-      // Default to false for PNPM 4.x or newer.
-      useImplicitlyPinnedVersions = false;
     } else {
-      // Default to true for other package managers.
+      // Default to true.
       useImplicitlyPinnedVersions = true;
     }
 
