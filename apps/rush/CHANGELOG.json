@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.17.0",
+      "tag": "@microsoft/rush_v5.17.0",
+      "date": "Thu, 14 Nov 2019 22:52:48 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new setting \"implicitlyPreferredVersions\" in common-versions.json that can be used to solve some installation failures involving peer dependencies"
+          },
+          {
+            "comment": "Improve the generation of shrinkwrap-deps.json to consider optional peer dependencies and implicitlyPreferredVersions=false"
+          },
+          {
+            "comment": "Fix an issue where certain operations did not use a stable sort when executed on older versions of NodeJS"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.16.1",
       "tag": "@microsoft/rush_v5.16.1",
       "date": "Fri, 25 Oct 2019 20:15:59 GMT",

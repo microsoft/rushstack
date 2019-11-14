@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 25 Oct 2019 20:15:59 GMT and should not be manually modified.
+This log was last generated on Thu, 14 Nov 2019 22:52:48 GMT and should not be manually modified.
+
+## 5.17.0
+Thu, 14 Nov 2019 22:52:48 GMT
+
+### Updates
+
+- Add a new setting "implicitlyPreferredVersions" in common-versions.json that can be used to solve some installation failures involving peer dependencies
+- Improve the generation of shrinkwrap-deps.json to consider optional peer dependencies and implicitlyPreferredVersions=false
+- Fix an issue where certain operations did not use a stable sort when executed on older versions of NodeJS
 
 ## 5.16.1
 Fri, 25 Oct 2019 20:15:59 GMT
