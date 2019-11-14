@@ -245,17 +245,17 @@ export class PnpmProjectDependencyManifest {
   private _parsePeerDependencyKeysFromSpecifier(specifier: string): { [peerDependencyName: string]: string } {
     const parsedPeerDependencyKeys: { [peerDependencyName: string]: string } = {};
 
-    const split1: RegExpExecArray | null = /^[^_]+_(.+)$/.exec(specifier);
-    if (split1) {
-      const combinedPeerDependencies: string = split1[1];
+    const specifierMatches: RegExpExecArray | null = /^[^_]+_(.+)$/.exec(specifier);
+    if (specifierMatches) {
+      const combinedPeerDependencies: string = specifierMatches[1];
       // Parse "eslint@6.6.0+typescript@3.6.4" --> ["eslint@6.6.0", "typescript@3.6.4"]
       const peerDependencies: string[] = combinedPeerDependencies.split("+");
       for (const peerDependencySpecifier of peerDependencies) {
         // Parse "eslint@6.6.0" --> "eslint", "6.6.0"
-        const split2: RegExpExecArray | null = /^([^+@]+)@(.+)$/.exec(peerDependencySpecifier);
-        if (split2) {
-          const peerDependencyName: string = split2[1];
-          const peerDependencyVersion: string = split2[2];
+        const peerMatches: RegExpExecArray | null = /^([^+@]+)@(.+)$/.exec(peerDependencySpecifier);
+        if (peerMatches) {
+          const peerDependencyName: string = peerMatches[1];
+          const peerDependencyVersion: string = peerMatches[2];
           const peerDependencyKey: string = `/${peerDependencyName}/${peerDependencyVersion}`;
           parsedPeerDependencyKeys[peerDependencyName] = peerDependencyKey;
         }
