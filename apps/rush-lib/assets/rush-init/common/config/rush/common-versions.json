@@ -33,7 +33,7 @@
    * package managers, this tended to reduce duplication of indirect dependencies.  However, it can sometimes cause
    * trouble for indirect dependencies with incompatible peerDependencies ranges.
    *
-   * The default value is true.  As of Rush 5.17, the default is false if you are using PNPM 4.x or newer.
+   * The default value is true.
    *
    * After modifying this field, it's recommended to run "rush update --full" so that the package manager
    * will recalculate all version selections.
