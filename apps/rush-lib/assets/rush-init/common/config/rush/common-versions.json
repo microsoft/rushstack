@@ -33,7 +33,8 @@
    * package managers, this tended to reduce duplication of indirect dependencies.  However, it can sometimes cause
    * trouble for indirect dependencies with incompatible peerDependencies ranges.
    *
-   * The default value is true.
+   * The default value is true.  If you're encountering installation errors related to peer dependencies,
+   * it's recommended to set this to false.
    *
    * After modifying this field, it's recommended to run "rush update --full" so that the package manager
    * will recalculate all version selections.

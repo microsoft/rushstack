@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix dependency mapping when implicitlyPreferredVersions is false",
+      "comment": "Improve the generation of shrinkwrap-deps.json to consider optional peer dependencies and implicitlyPreferredVersions=false",
       "type": "none"
     }
   ],

@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add a new setting \"implicitlyPreferredVersions\" in common-versions.json; for PNPM this defaults to \"false\" which changes how package versions are solved -- see documentation for details",
+      "comment": "Add a new setting \"implicitlyPreferredVersions\" in common-versions.json that can be used to solve some installation failures involving peer dependencies",
       "type": "none"
     }
   ],
