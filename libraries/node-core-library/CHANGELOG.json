@@ -2,6 +2,18 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.18.0",
+      "tag": "@microsoft/node-core-library_v3.18.0",
+      "date": "Fri, 15 Nov 2019 04:50:50 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add NewlineKind.OsDefault and fix some comments"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.17.1",
       "tag": "@microsoft/node-core-library_v3.17.1",
       "date": "Mon, 11 Nov 2019 16:07:56 GMT",

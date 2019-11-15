@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Mon, 11 Nov 2019 16:07:56 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Nov 2019 04:50:50 GMT and should not be manually modified.
+
+## 7.6.0
+Fri, 15 Nov 2019 04:50:50 GMT
+
+### Minor changes
+
+- Make newline type for generated files configurable
 
 ## 7.5.8
 Mon, 11 Nov 2019 16:07:56 GMT
