@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-extractor",
-  "version": "7.5.6",
+  "version": "7.6.0",
   "description": "Analyze the exported API for a TypeScript library and generate reviews, documentation, and .d.ts rollups",
   "keywords": [
     "typescript",
@@ -32,8 +32,8 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@microsoft/api-extractor-model": "7.5.5",
-    "@microsoft/node-core-library": "3.17.1",
+    "@microsoft/api-extractor-model": "7.5.6",
+    "@microsoft/node-core-library": "3.18.0",
     "@microsoft/ts-command-line": "4.3.5",
     "@microsoft/tsdoc": "0.12.14",
     "colors": "~1.2.1",

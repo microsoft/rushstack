@@ -7,7 +7,7 @@
 import { Lib2Class } from 'api-extractor-lib2-test/lib/index';
 
 // Warning: (ae-forgotten-export) The symbol "Lib1Class" needs to be exported by the entry point index.d.ts
-// 
+//
 // @public (undocumented)
 export function f(arg1: Lib1Class, arg2: Lib2Class): void;
 
