@@ -17,6 +17,11 @@
       ]
     },
 
+    "documentNamespaces": {
+      "description": "Include documentation for namespaces and add them to the TOC. This will also affect file layout as namespaced items will be nested under a directory for the namespace instead of just within the package. This setting currently only affects the 'docfx' output target.",
+      "type": "boolean"
+    },
+
     "plugins": {
       "description": "Specifies plugin packages to be loaded",
       "type": "array"
@@ -26,7 +31,7 @@
       "description": "Configures how the table of contents is generated.",
       "type": "object",
       "additionalProperties": true
-    },
+    }
   },
 
   "additionalProperties": false

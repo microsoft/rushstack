@@ -77,6 +77,15 @@ export interface IConfigFile {
    */
   outputTarget: 'docfx' | 'markdown';
 
+  /**
+   * Include documentation for namespaces and add them to the TOC.
+   * This will also affect file layout as namespaced items will be nested
+   * under a directory for the namespace instead of just within the package.
+   *
+   * This setting currently only affects the 'docfx' output target.
+   */
+  documentNamespaces?: boolean;
+
   /** {@inheritDoc IConfigPlugin} */
   plugins?: IConfigPlugin[];
 

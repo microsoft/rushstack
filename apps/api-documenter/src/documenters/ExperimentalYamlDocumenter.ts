@@ -19,7 +19,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
   private _catchAllPointer: IYamlTocItem;
 
   public constructor(apiModel: ApiModel, documenterConfig: DocumenterConfig) {
-    super(apiModel);
+    super(apiModel, documenterConfig.configFile.documentNamespaces);
     this._config = documenterConfig.configFile.tableOfContents!;
 
     this._tocPointerMap = {};
@@ -36,18 +36,25 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
   private _buildTocItems2(apiItems: ReadonlyArray<ApiItem>): IYamlTocItem[] {
     const tocItems: IYamlTocItem[] = [];
     for (const apiItem of apiItems) {
-      if (this._shouldEmbed(apiItem.kind)) {
-        // Don't generate table of contents items for embedded definitions
-        continue;
-      }
+      let tocItem: IYamlTocItem;
+      if (apiItem.kind === ApiItemKind.Namespace && !this.documentNamespaces) {
+        tocItem = {
+          name: this._getTocItemName(apiItem)
+        };
+      } else {
+        if (this._shouldEmbed(apiItem.kind)) {
+          // Don't generate table of contents items for embedded definitions
+          continue;
+        }
 
-      const tocItem: IYamlTocItem = {
-        name: this._getTocItemName(apiItem),
-        uid: this._getUid(apiItem)
-      };
+        tocItem = {
+          name: this._getTocItemName(apiItem),
+          uid: this._getUid(apiItem)
+        };
 
-      if (apiItem.kind !== ApiItemKind.Package) {
-        this._filterItem(apiItem, tocItem);
+        if (apiItem.kind !== ApiItemKind.Package) {
+          this._filterItem(apiItem, tocItem);
+        }
       }
 
       tocItems.push(tocItem);
