@@ -18,7 +18,7 @@ export class BxlModule {
   private _projectFolder: string;
   private _rushJsonPath: string;
 
-  constructor(name: string, projectFolder: string, rushJsonPath: string, moduleFolder: string) {
+  public constructor(name: string, projectFolder: string, rushJsonPath: string, moduleFolder: string) {
     this._name = name;
     this._projectFolder = projectFolder;
     this._rushJsonPath = rushJsonPath;

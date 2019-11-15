@@ -1,13 +1,13 @@
 {
   "name": "@microsoft/web-library-build",
-  "version": "7.2.1",
+  "version": "7.3.7",
   "description": "",
   "engines": {
     "npm": "3.10.8"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/core-build/web-library-build"
+    "url": "https://github.com/microsoft/rushstack/tree/master/core-build/web-library-build"
   },
   "scripts": {
     "build": "gulp --clean"
@@ -15,18 +15,19 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.12.0",
-    "@microsoft/gulp-core-build-sass": "4.8.1",
-    "@microsoft/gulp-core-build-serve": "3.5.1",
-    "@microsoft/gulp-core-build-typescript": "8.2.1",
-    "@microsoft/gulp-core-build-webpack": "3.6.1",
+    "@microsoft/gulp-core-build": "3.12.5",
+    "@microsoft/gulp-core-build-sass": "4.8.14",
+    "@microsoft/gulp-core-build-serve": "3.5.14",
+    "@microsoft/gulp-core-build-typescript": "8.3.7",
+    "@microsoft/gulp-core-build-webpack": "3.7.9",
     "@types/gulp": "4.0.6",
     "@types/node": "8.10.54",
     "gulp": "~4.0.2",
     "gulp-replace": "^0.5.4"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.2.1",
-    "@microsoft/rush-stack-compiler-3.4": "0.2.1"
+    "@microsoft/node-library-build": "6.3.7",
+    "@microsoft/rush-stack-compiler-3.4": "0.3.7",
+    "@rushstack/eslint-config": "0.4.2"
   }
 }

@@ -121,7 +121,7 @@ export class ExcerptBuilder {
 
       if (span.kind === ts.SyntaxKind.Identifier) {
         const name: ts.Identifier = span.node as ts.Identifier;
-        if (!isDeclarationName(name)) {
+        if (!ExcerptBuilder._isDeclarationName(name)) {
           canonicalReference = state.referenceGenerator.getDeclarationReferenceForIdentifier(name);
         }
       }
@@ -214,35 +214,35 @@ export class ExcerptBuilder {
     state.disableMergingForNextToken = false;
   }
 
-}
-
-function isDeclaration(node: ts.Node): node is ts.NamedDeclaration {
-  switch (node.kind) {
-    case ts.SyntaxKind.FunctionDeclaration:
-    case ts.SyntaxKind.FunctionExpression:
-    case ts.SyntaxKind.VariableDeclaration:
-    case ts.SyntaxKind.Parameter:
-    case ts.SyntaxKind.EnumDeclaration:
-    case ts.SyntaxKind.ClassDeclaration:
-    case ts.SyntaxKind.ClassExpression:
-    case ts.SyntaxKind.ModuleDeclaration:
-    case ts.SyntaxKind.MethodDeclaration:
-    case ts.SyntaxKind.MethodSignature:
-    case ts.SyntaxKind.PropertyDeclaration:
-    case ts.SyntaxKind.PropertySignature:
-    case ts.SyntaxKind.GetAccessor:
-    case ts.SyntaxKind.SetAccessor:
-    case ts.SyntaxKind.InterfaceDeclaration:
-    case ts.SyntaxKind.TypeAliasDeclaration:
-    case ts.SyntaxKind.TypeParameter:
-    case ts.SyntaxKind.EnumMember:
-    case ts.SyntaxKind.BindingElement:
-      return true;
-    default:
-      return false;
+  private static _isDeclarationName(name: ts.Identifier): boolean {
+    return ExcerptBuilder._isDeclaration(name.parent) && name.parent.name === name;
   }
-}
 
-function isDeclarationName(name: ts.Identifier): boolean {
-  return isDeclaration(name.parent) && name.parent.name === name;
+  private static _isDeclaration(node: ts.Node): node is ts.NamedDeclaration {
+    switch (node.kind) {
+      case ts.SyntaxKind.FunctionDeclaration:
+      case ts.SyntaxKind.FunctionExpression:
+      case ts.SyntaxKind.VariableDeclaration:
+      case ts.SyntaxKind.Parameter:
+      case ts.SyntaxKind.EnumDeclaration:
+      case ts.SyntaxKind.ClassDeclaration:
+      case ts.SyntaxKind.ClassExpression:
+      case ts.SyntaxKind.ModuleDeclaration:
+      case ts.SyntaxKind.MethodDeclaration:
+      case ts.SyntaxKind.MethodSignature:
+      case ts.SyntaxKind.PropertyDeclaration:
+      case ts.SyntaxKind.PropertySignature:
+      case ts.SyntaxKind.GetAccessor:
+      case ts.SyntaxKind.SetAccessor:
+      case ts.SyntaxKind.InterfaceDeclaration:
+      case ts.SyntaxKind.TypeAliasDeclaration:
+      case ts.SyntaxKind.TypeParameter:
+      case ts.SyntaxKind.EnumMember:
+      case ts.SyntaxKind.BindingElement:
+        return true;
+      default:
+        return false;
+    }
+  }
+
 }

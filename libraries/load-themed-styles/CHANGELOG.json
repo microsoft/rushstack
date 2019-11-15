@@ -2,6 +2,217 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.10.21",
+      "tag": "@microsoft/load-themed-styles_v1.10.21",
+      "date": "Fri, 15 Nov 2019 04:50:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.3.6` to `0.3.7`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.6` to `6.3.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.20",
+      "tag": "@microsoft/load-themed-styles_v1.10.20",
+      "date": "Mon, 11 Nov 2019 16:07:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.3.5` to `0.3.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.4.1` to `0.4.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.5` to `6.3.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.19",
+      "tag": "@microsoft/load-themed-styles_v1.10.19",
+      "date": "Wed, 06 Nov 2019 22:44:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.3.4` to `0.3.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.4` to `6.3.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.18",
+      "tag": "@microsoft/load-themed-styles_v1.10.18",
+      "date": "Tue, 05 Nov 2019 06:49:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.3.3` to `0.3.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.3` to `6.3.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.17",
+      "tag": "@microsoft/load-themed-styles_v1.10.17",
+      "date": "Tue, 05 Nov 2019 01:08:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.3.2` to `0.3.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.2` to `6.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.16",
+      "tag": "@microsoft/load-themed-styles_v1.10.16",
+      "date": "Fri, 25 Oct 2019 15:08:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.3.1` to `0.3.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.1` to `6.3.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.15",
+      "tag": "@microsoft/load-themed-styles_v1.10.15",
+      "date": "Tue, 22 Oct 2019 06:24:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.3.0` to `0.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.4.0` to `0.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.0` to `6.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.14",
+      "tag": "@microsoft/load-themed-styles_v1.10.14",
+      "date": "Mon, 21 Oct 2019 05:22:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.6` to `0.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.6` to `6.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.13",
+      "tag": "@microsoft/load-themed-styles_v1.10.13",
+      "date": "Fri, 18 Oct 2019 15:15:01 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.5` to `0.2.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.5` to `6.2.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.12",
+      "tag": "@microsoft/load-themed-styles_v1.10.12",
+      "date": "Sun, 06 Oct 2019 00:27:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Enable styles projection to child window for load-themed-styles"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.4` to `0.2.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.4` to `6.2.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.11",
+      "tag": "@microsoft/load-themed-styles_v1.10.11",
+      "date": "Fri, 04 Oct 2019 00:15:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.3` to `0.2.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.3` to `6.2.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.10",
+      "tag": "@microsoft/load-themed-styles_v1.10.10",
+      "date": "Sun, 29 Sep 2019 23:56:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update repository URL"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.2` to `0.2.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.2` to `6.2.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.9",
+      "tag": "@microsoft/load-themed-styles_v1.10.9",
+      "date": "Wed, 25 Sep 2019 15:15:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.2.1` to `0.2.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.2.1` to `6.2.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.10.8",
       "tag": "@microsoft/load-themed-styles_v1.10.8",
       "date": "Tue, 24 Sep 2019 02:58:49 GMT",

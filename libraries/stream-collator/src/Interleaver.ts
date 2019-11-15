@@ -46,6 +46,8 @@ export class Interleaver {
   private static _activeTask: string = undefined;
   private static _stdout: { write: (text: string) => void } = process.stdout;
 
+  private constructor() { }
+
   /**
    * Resets the default output stream
    */
@@ -171,6 +173,4 @@ export class Interleaver {
     }
     this._stdout.write(colors.red(taskInfo.stderr.join('')));
   }
-
-  private constructor() { }
 }

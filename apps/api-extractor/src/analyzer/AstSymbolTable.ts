@@ -85,7 +85,7 @@ export class AstSymbolTable {
     = new Map<ts.Identifier, AstEntity | undefined>();
 
   public constructor(program: ts.Program, typeChecker: ts.TypeChecker, packageJsonLookup: PackageJsonLookup,
-    messageRouter: MessageRouter) {
+    bundledPackageNames: Set<string>, messageRouter: MessageRouter) {
 
     this._program = program;
     this._typeChecker = typeChecker;
@@ -94,6 +94,7 @@ export class AstSymbolTable {
     this._exportAnalyzer = new ExportAnalyzer(
       this._program,
       this._typeChecker,
+      bundledPackageNames,
       {
         analyze: this.analyze.bind(this),
         fetchAstSymbol: this._fetchAstSymbol.bind(this)
@@ -378,7 +379,6 @@ export class AstSymbolTable {
     return referencedAstEntity;
   }
 
-  // tslint:disable-next-line:no-unused-variable
   private _fetchAstDeclaration(node: ts.Node, isExternal: boolean): AstDeclaration | undefined {
     if (!AstDeclaration.isSupportedSyntaxKind(node.kind)) {
       return undefined;
@@ -420,7 +420,7 @@ export class AstSymbolTable {
 
     const arbitraryDeclaration: ts.Declaration = followedSymbol.declarations[0];
 
-    // tslint:disable-next-line:no-bitwise
+    // eslint-disable-next-line no-bitwise
     if (followedSymbol.flags & (ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral | ts.SymbolFlags.Transient)
       && !TypeScriptInternals.isLateBoundSymbol(followedSymbol)) {
       return undefined;

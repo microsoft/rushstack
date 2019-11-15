@@ -101,6 +101,11 @@ export interface IApiPackageSaveOptions extends IJsonFileSaveOptions {
  * @public
  */
 export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumentedItem)) {
+
+  public constructor(options: IApiPackageOptions) {
+    super(options);
+  }
+
   public static loadFromJsonFile(apiJsonFilename: string): ApiPackage {
     const jsonObject: IApiPackageJson = JsonFile.load(apiJsonFilename);
 
@@ -151,10 +156,6 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
     });
 
     return ApiItem.deserialize(jsonObject, context) as ApiPackage;
-  }
-
-  public constructor(options: IApiPackageOptions) {
-    super(options);
   }
 
   /** @override */

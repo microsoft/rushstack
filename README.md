@@ -1,23 +1,105 @@
-# web-build-tools
+<table><tr><td>
+<a href="https://rushstack.io/"><img src="https://rushstack.io/images/rushstack.svg" width="300px" /></a>
+<p align="center"><a href="https://rushstack.io/">https://rushstack.io/</a></p>
+</td></tr></table>
 
-[![Join the chat at https://gitter.im/web-build-tools](https://badges.gitter.im/web-build-tools.svg)](https://gitter.im/web-build-tools?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/web-build-tools](https://badges.gitter.im/web-build-tools.svg)](https://gitter.im/web-build-tools?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) &nbsp; [![Build Status](https://dev.azure.com/RushStack/GitHubProjects/_apis/build/status/rushstack/rushstack%20CI%20Build?branchName=master)](https://dev.azure.com/RushStack/GitHubProjects/_build/latest?definitionId=3&branchName=master)
 
-[![Build Status](https://dev.azure.com/RushStack/Gearbox%20GitHub%20Projects/_apis/build/status/web-build-tools/web-build-tools%20CI%20Build?branchName=master)](https://dev.azure.com/RushStack/Gearbox%20GitHub%20Projects/_build/latest?definitionId=3&branchName=master)
-
-_**This repo hosts a collection of tools and libraries used to build web projects at Microsoft.**_
-
-- **[CURRENT NEWS](https://github.com/Microsoft/web-build-tools/wiki)**:  See what's happening with the **web-build-tools** projects!
-
-Highlighted projects:
-
-- **[API Extractor](https://api-extractor.com/)** helps you build better TypeScript libraries.  It standardizes your exported API surface, generates your online API reference, and makes it easy to detect and review changes that will impact your API contract.
-
-- **[Gulp Core Build](https://github.com/Microsoft/web-build-tools/wiki/Gulp-Core-Build)**: If you maintain lots of projects, **gulp-core-build** gets you out of the business of maintaining lots of Gulpfiles.  It defines reusable "rigs" that you customize using simple config files with well-defined JSON schemas.
-
-- **[Rush](https://rushjs.io/)**: Want to consolidate all your web projects in one big repo?  Rush is a fast and reliable solution for installing, linking, building, publishing, checking, change log authoring, and anything else that involves a "package.json" file.
+The home for various projects maintained by the Rush Stack community, whose mission is to develop reusable tooling
+for large scale TypeScript monorepos.
 
 
-# Contributing
+## Documentation Links
+
+- [What is Rush Stack?](https://rushstack.io/) - learn about the mission behind these projects
+- [API reference](https://rushstack.io/pages/api/) - browse API documentation for NPM packages
+- [Gitter chat room](https://gitter.im/web-build-tools/web-build-tools) - chat with the Rush Stack developers
+- [Rush](https://rushjs.io/) - a build orchestrator for large scale TypeScript monorepos
+- [API Extractor](https://api-extractor.com/) - create .d.ts rollups and track your TypeScript API signatures
+- [API Documenter](https://api-extractor.com/pages/setup/generating_docs/) - use TSDoc comments to publish an API documentation website
+
+
+## Published Packages
+
+<!-- the table below was generated using the ./repo-scripts/repo-toolbox script -->
+
+| Folder | Version | Changelog | Package |
+| ------ | ------- | --------- | ------- |
+| [/apps/api-documenter](./apps/api-documenter/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-documenter.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-documenter) | [changelog](./apps/api-documenter/CHANGELOG.md) | [@microsoft/api-documenter](https://www.npmjs.com/package/@microsoft/api-documenter) |
+| [/apps/api-extractor](./apps/api-extractor/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-extractor.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-extractor) | [changelog](./apps/api-extractor/CHANGELOG.md) | [@microsoft/api-extractor](https://www.npmjs.com/package/@microsoft/api-extractor) |
+| [/apps/api-extractor-model](./apps/api-extractor-model/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-extractor-model.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-extractor-model) | [changelog](./apps/api-extractor-model/CHANGELOG.md) | [@microsoft/api-extractor-model](https://www.npmjs.com/package/@microsoft/api-extractor-model) |
+| [/apps/rush](./apps/rush/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush.svg)](https://badge.fury.io/js/%40microsoft%2Frush) | [changelog](./apps/rush/CHANGELOG.md) | [@microsoft/rush](https://www.npmjs.com/package/@microsoft/rush) |
+| [/apps/rush-buildxl](./apps/rush-buildxl/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-buildxl.svg)](https://badge.fury.io/js/%40microsoft%2Frush-buildxl) | | [@microsoft/rush-buildxl](https://www.npmjs.com/package/@microsoft/rush-buildxl) |
+| [/apps/rush-lib](./apps/rush-lib/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-lib.svg)](https://badge.fury.io/js/%40microsoft%2Frush-lib) | | [@microsoft/rush-lib](https://www.npmjs.com/package/@microsoft/rush-lib) |
+| [/core-build/gulp-core-build](./core-build/gulp-core-build/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build) | [changelog](./core-build/gulp-core-build/CHANGELOG.md) | [@microsoft/gulp-core-build](https://www.npmjs.com/package/@microsoft/gulp-core-build) |
+| [/core-build/gulp-core-build-mocha](./core-build/gulp-core-build-mocha/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-mocha.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-mocha) | [changelog](./core-build/gulp-core-build-mocha/CHANGELOG.md) | [@microsoft/gulp-core-build-mocha](https://www.npmjs.com/package/@microsoft/gulp-core-build-mocha) |
+| [/core-build/gulp-core-build-sass](./core-build/gulp-core-build-sass/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-sass.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-sass) | [changelog](./core-build/gulp-core-build-sass/CHANGELOG.md) | [@microsoft/gulp-core-build-sass](https://www.npmjs.com/package/@microsoft/gulp-core-build-sass) |
+| [/core-build/gulp-core-build-serve](./core-build/gulp-core-build-serve/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-serve.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-serve) | [changelog](./core-build/gulp-core-build-serve/CHANGELOG.md) | [@microsoft/gulp-core-build-serve](https://www.npmjs.com/package/@microsoft/gulp-core-build-serve) |
+| [/core-build/gulp-core-build-typescript](./core-build/gulp-core-build-typescript/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-typescript.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-typescript) | [changelog](./core-build/gulp-core-build-typescript/CHANGELOG.md) | [@microsoft/gulp-core-build-typescript](https://www.npmjs.com/package/@microsoft/gulp-core-build-typescript) |
+| [/core-build/gulp-core-build-webpack](./core-build/gulp-core-build-webpack/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-webpack.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-webpack) | [changelog](./core-build/gulp-core-build-webpack/CHANGELOG.md) | [@microsoft/gulp-core-build-webpack](https://www.npmjs.com/package/@microsoft/gulp-core-build-webpack) |
+| [/core-build/node-library-build](./core-build/node-library-build/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fnode-library-build.svg)](https://badge.fury.io/js/%40microsoft%2Fnode-library-build) | [changelog](./core-build/node-library-build/CHANGELOG.md) | [@microsoft/node-library-build](https://www.npmjs.com/package/@microsoft/node-library-build) |
+| [/core-build/web-library-build](./core-build/web-library-build/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fweb-library-build.svg)](https://badge.fury.io/js/%40microsoft%2Fweb-library-build) | [changelog](./core-build/web-library-build/CHANGELOG.md) | [@microsoft/web-library-build](https://www.npmjs.com/package/@microsoft/web-library-build) |
+| [/libraries/load-themed-styles](./libraries/load-themed-styles/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fload-themed-styles.svg)](https://badge.fury.io/js/%40microsoft%2Fload-themed-styles) | [changelog](./libraries/load-themed-styles/CHANGELOG.md) | [@microsoft/load-themed-styles](https://www.npmjs.com/package/@microsoft/load-themed-styles) |
+| [/libraries/node-core-library](./libraries/node-core-library/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fnode-core-library.svg)](https://badge.fury.io/js/%40microsoft%2Fnode-core-library) | [changelog](./libraries/node-core-library/CHANGELOG.md) | [@microsoft/node-core-library](https://www.npmjs.com/package/@microsoft/node-core-library) |
+| [/libraries/package-deps-hash](./libraries/package-deps-hash/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fpackage-deps-hash.svg)](https://badge.fury.io/js/%40microsoft%2Fpackage-deps-hash) | [changelog](./libraries/package-deps-hash/CHANGELOG.md) | [@microsoft/package-deps-hash](https://www.npmjs.com/package/@microsoft/package-deps-hash) |
+| [/libraries/stream-collator](./libraries/stream-collator/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fstream-collator.svg)](https://badge.fury.io/js/%40microsoft%2Fstream-collator) | [changelog](./libraries/stream-collator/CHANGELOG.md) | [@microsoft/stream-collator](https://www.npmjs.com/package/@microsoft/stream-collator) |
+| [/libraries/ts-command-line](./libraries/ts-command-line/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fts-command-line.svg)](https://badge.fury.io/js/%40microsoft%2Fts-command-line) | [changelog](./libraries/ts-command-line/CHANGELOG.md) | [@microsoft/ts-command-line](https://www.npmjs.com/package/@microsoft/ts-command-line) |
+| [/stack/eslint-config](./stack/eslint-config/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Feslint-config.svg)](https://badge.fury.io/js/%40rushstack%2Feslint-config) | [changelog](./stack/eslint-config/CHANGELOG.md) | [@rushstack/eslint-config](https://www.npmjs.com/package/@rushstack/eslint-config) |
+| [/stack/rush-stack](./stack/rush-stack/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-stack.svg)](https://badge.fury.io/js/%40microsoft%2Frush-stack) | [changelog](./stack/rush-stack/CHANGELOG.md) | [@microsoft/rush-stack](https://www.npmjs.com/package/@microsoft/rush-stack) |
+| [/stack/rush-stack-compiler-2.4](./stack/rush-stack-compiler-2.4/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-2.4.svg)](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-2.4) | [changelog](./stack/rush-stack-compiler-2.4/CHANGELOG.md) | [@microsoft/rush-stack-compiler-2.4](https://www.npmjs.com/package/@microsoft/rush-stack-compiler-2.4) |
+| [/stack/rush-stack-compiler-2.7](./stack/rush-stack-compiler-2.7/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-2.7.svg)](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-2.7) | [changelog](./stack/rush-stack-compiler-2.7/CHANGELOG.md) | [@microsoft/rush-stack-compiler-2.7](https://www.npmjs.com/package/@microsoft/rush-stack-compiler-2.7) |
+| [/stack/rush-stack-compiler-2.8](./stack/rush-stack-compiler-2.8/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-2.8.svg)](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-2.8) | [changelog](./stack/rush-stack-compiler-2.8/CHANGELOG.md) | [@microsoft/rush-stack-compiler-2.8](https://www.npmjs.com/package/@microsoft/rush-stack-compiler-2.8) |
+| [/stack/rush-stack-compiler-2.9](./stack/rush-stack-compiler-2.9/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-2.9.svg)](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-2.9) | [changelog](./stack/rush-stack-compiler-2.9/CHANGELOG.md) | [@microsoft/rush-stack-compiler-2.9](https://www.npmjs.com/package/@microsoft/rush-stack-compiler-2.9) |
+| [/stack/rush-stack-compiler-3.0](./stack/rush-stack-compiler-3.0/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-3.0.svg)](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-3.0) | [changelog](./stack/rush-stack-compiler-3.0/CHANGELOG.md) | [@microsoft/rush-stack-compiler-3.0](https://www.npmjs.com/package/@microsoft/rush-stack-compiler-3.0) |
+| [/stack/rush-stack-compiler-3.1](./stack/rush-stack-compiler-3.1/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-3.1.svg)](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-3.1) | [changelog](./stack/rush-stack-compiler-3.1/CHANGELOG.md) | [@microsoft/rush-stack-compiler-3.1](https://www.npmjs.com/package/@microsoft/rush-stack-compiler-3.1) |
+| [/stack/rush-stack-compiler-3.2](./stack/rush-stack-compiler-3.2/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-3.2.svg)](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-3.2) | [changelog](./stack/rush-stack-compiler-3.2/CHANGELOG.md) | [@microsoft/rush-stack-compiler-3.2](https://www.npmjs.com/package/@microsoft/rush-stack-compiler-3.2) |
+| [/stack/rush-stack-compiler-3.3](./stack/rush-stack-compiler-3.3/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-3.3.svg)](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-3.3) | [changelog](./stack/rush-stack-compiler-3.3/CHANGELOG.md) | [@microsoft/rush-stack-compiler-3.3](https://www.npmjs.com/package/@microsoft/rush-stack-compiler-3.3) |
+| [/stack/rush-stack-compiler-3.4](./stack/rush-stack-compiler-3.4/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-3.4.svg)](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-3.4) | [changelog](./stack/rush-stack-compiler-3.4/CHANGELOG.md) | [@microsoft/rush-stack-compiler-3.4](https://www.npmjs.com/package/@microsoft/rush-stack-compiler-3.4) |
+| [/stack/rush-stack-compiler-3.5](./stack/rush-stack-compiler-3.5/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-3.5.svg)](https://badge.fury.io/js/%40microsoft%2Frush-stack-compiler-3.5) | [changelog](./stack/rush-stack-compiler-3.5/CHANGELOG.md) | [@microsoft/rush-stack-compiler-3.5](https://www.npmjs.com/package/@microsoft/rush-stack-compiler-3.5) |
+| [/webpack/loader-load-themed-styles](./webpack/loader-load-themed-styles/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Floader-load-themed-styles.svg)](https://badge.fury.io/js/%40microsoft%2Floader-load-themed-styles) | [changelog](./webpack/loader-load-themed-styles/CHANGELOG.md) | [@microsoft/loader-load-themed-styles](https://www.npmjs.com/package/@microsoft/loader-load-themed-styles) |
+| [/webpack/loader-raw-script](./webpack/loader-raw-script/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Floader-raw-script.svg)](https://badge.fury.io/js/%40microsoft%2Floader-raw-script) | [changelog](./webpack/loader-raw-script/CHANGELOG.md) | [@microsoft/loader-raw-script](https://www.npmjs.com/package/@microsoft/loader-raw-script) |
+| [/webpack/loader-set-webpack-public-path](./webpack/loader-set-webpack-public-path/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Floader-set-webpack-public-path.svg)](https://badge.fury.io/js/%40microsoft%2Floader-set-webpack-public-path) | [changelog](./webpack/loader-set-webpack-public-path/CHANGELOG.md) | [@microsoft/loader-set-webpack-public-path](https://www.npmjs.com/package/@microsoft/loader-set-webpack-public-path) |
+| [/webpack/resolve-chunk-plugin](./webpack/resolve-chunk-plugin/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fresolve-chunk-plugin.svg)](https://badge.fury.io/js/%40microsoft%2Fresolve-chunk-plugin) | [changelog](./webpack/resolve-chunk-plugin/CHANGELOG.md) | [@microsoft/resolve-chunk-plugin](https://www.npmjs.com/package/@microsoft/resolve-chunk-plugin) |
+| [/webpack/set-webpack-public-path-plugin](./webpack/set-webpack-public-path-plugin/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fset-webpack-public-path-plugin.svg)](https://badge.fury.io/js/%40microsoft%2Fset-webpack-public-path-plugin) | [changelog](./webpack/set-webpack-public-path-plugin/CHANGELOG.md) | [@microsoft/set-webpack-public-path-plugin](https://www.npmjs.com/package/@microsoft/set-webpack-public-path-plugin) |
+
+
+## Unpublished Local Projects
+
+<!-- the table below was generated using the ./repo-scripts/repo-toolbox script -->
+
+| Folder | Description |
+| ------ | -----------|
+| [/build-tests/api-documenter-test](./build-tests/api-documenter-test/) | Building this project is a regression test for api-documenter |
+| [/build-tests/api-extractor-lib1-test](./build-tests/api-extractor-lib1-test/) | Building this project is a regression test for api-extractor |
+| [/build-tests/api-extractor-lib2-test](./build-tests/api-extractor-lib2-test/) | Building this project is a regression test for api-extractor |
+| [/build-tests/api-extractor-lib3-test](./build-tests/api-extractor-lib3-test/) | Building this project is a regression test for api-extractor |
+| [/build-tests/api-extractor-scenarios](./build-tests/api-extractor-scenarios/) | Building this project is a regression test for api-extractor |
+| [/build-tests/api-extractor-test-01](./build-tests/api-extractor-test-01/) | Building this project is a regression test for api-extractor |
+| [/build-tests/api-extractor-test-02](./build-tests/api-extractor-test-02/) | Building this project is a regression test for api-extractor |
+| [/build-tests/api-extractor-test-03](./build-tests/api-extractor-test-03/) | Building this project is a regression test for api-extractor |
+| [/build-tests/api-extractor-test-04](./build-tests/api-extractor-test-04/) | Building this project is a regression test for api-extractor |
+| [/build-tests/node-library-build-eslint-test](./build-tests/node-library-build-eslint-test/) |  |
+| [/build-tests/node-library-build-tslint-test](./build-tests/node-library-build-tslint-test/) |  |
+| [/build-tests/rush-stack-compiler-2.4-library-test](./build-tests/rush-stack-compiler-2.4-library-test/) |  |
+| [/build-tests/rush-stack-compiler-2.7-library-test](./build-tests/rush-stack-compiler-2.7-library-test/) |  |
+| [/build-tests/rush-stack-compiler-2.8-library-test](./build-tests/rush-stack-compiler-2.8-library-test/) |  |
+| [/build-tests/rush-stack-compiler-2.9-library-test](./build-tests/rush-stack-compiler-2.9-library-test/) |  |
+| [/build-tests/rush-stack-compiler-3.0-library-test](./build-tests/rush-stack-compiler-3.0-library-test/) |  |
+| [/build-tests/rush-stack-compiler-3.1-library-test](./build-tests/rush-stack-compiler-3.1-library-test/) |  |
+| [/build-tests/rush-stack-compiler-3.2-library-test](./build-tests/rush-stack-compiler-3.2-library-test/) |  |
+| [/build-tests/rush-stack-compiler-3.3-library-test](./build-tests/rush-stack-compiler-3.3-library-test/) |  |
+| [/build-tests/rush-stack-compiler-3.4-library-test](./build-tests/rush-stack-compiler-3.4-library-test/) |  |
+| [/build-tests/rush-stack-compiler-3.5-library-test](./build-tests/rush-stack-compiler-3.5-library-test/) |  |
+| [/build-tests/rush-stack-library-test](./build-tests/rush-stack-library-test/) |  |
+| [/build-tests/web-library-build-test](./build-tests/web-library-build-test/) |  |
+| [/libraries/rushell](./libraries/rushell/) | Execute shell commands using a consistent syntax on every platform |
+| [/repo-scripts/doc-plugin-rush-stack](./repo-scripts/doc-plugin-rush-stack/) | API Documenter plugin used with the rushstack.io website |
+| [/repo-scripts/generate-api-docs](./repo-scripts/generate-api-docs/) | Used to generate API docs for the rushstack.io website |
+| [/repo-scripts/repo-toolbox](./repo-scripts/repo-toolbox/) | Used to execute various operations specific to this repo |
+| [/stack/rush-stack-compiler-shared](./stack/rush-stack-compiler-shared/) |  |
+
+
+## Contributor Notice
 
 This repo welcomes contributions and suggestions.  Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
@@ -30,181 +112,3 @@ provided by the bot. You will only need to do this once across all repos using o
 This repo has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
-
-
-# Project Inventory
-
-## Apps
-
-### [@microsoft/api-extractor](./apps/api-extractor/README.md)
-
-Validate, document, and review the exported API for a TypeScript library.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-extractor.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-extractor)
-[![Dependencies](https://david-dm.org/Microsoft/api-extractor.svg)](https://david-dm.org/Microsoft/api-extractor)
-
-### [@microsoft/api-documenter](./apps/api-documenter/README.md)
-
-Read JSON files from **api-extractor**, generate documentation pages.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-extractor.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-documenter)
-[![Dependencies](https://david-dm.org/Microsoft/api-extractor.svg)](https://david-dm.org/Microsoft/api-documenter)
-
-### [@microsoft/rush](./apps/rush/README.md)
-
-The professional solution for consolidating all your JavaScript projects in one Git repo.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Frush.svg)](https://badge.fury.io/js/%40microsoft%2Frush)
-[![Dependencies](https://david-dm.org/Microsoft/rush.svg)](https://david-dm.org/Microsoft/rush)
-
-### [@microsoft/rush-lib](./apps/rush-lib/README.md)
-
-A library for scripts that interact with the Rush tool.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Frush-lib.svg)](https://badge.fury.io/js/%40microsoft%2Frush-lib)
-[![Dependencies](https://david-dm.org/Microsoft/rush-lib.svg)](https://david-dm.org/Microsoft/rush-lib)
-
-
-## Core Build: Tasks
-
-### [@microsoft/gulp-core-build](./core-build/gulp-core-build/README.md)
-
-Defines the build task model, config file parser, and rig framework for the **Gulp Core Build** system, along with some essential build tasks.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build)
-[![Dependencies](https://david-dm.org/Microsoft/gulp-core-build.svg)](https://david-dm.org/Microsoft/gulp-core-build)
-
-### [@microsoft/gulp-core-build-mocha](./core-build/gulp-core-build-mocha/README.md)
-
-A build task for running unit tests using `mocha` + `chai`. This setup is useful for unit testing build tools, as it runs in the NodeJS process rather than in a browser.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-mocha.svg)](https://badge.fury.io/js/gulp-core-build-mocha)
-[![Dependencies](https://david-dm.org/Microsoft/gulp-core-build-mocha.svg)](https://david-dm.org/Microsoft/gulp-core-build-mocha)
-
-### [@microsoft/gulp-core-build-sass](./core-build/gulp-core-build-sass/README.md)
-
-A build task which processes scss files using SASS, runs them through `postcss`, and produces CommonJS/AMD modules which are injected using the `@microsoft/load-themed-styles` package.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-sass.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-sass)
-[![Dependencies](https://david-dm.org/Microsoft/gulp-core-build-sass.svg)](https://david-dm.org/Microsoft/gulp-core-build-sass)
-
-### [@microsoft/gulp-core-build-serve](./core-build/gulp-core-build-serve/README.md)
-
-A build task for testing/serving web content on the localhost, and live reloading it when things change.  This drives the `gulp serve` experience.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-serve.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-serve)
-[![Dependencies](https://david-dm.org/Microsoft/gulp-core-build-serve.svg)](https://david-dm.org/Microsoft/gulp-core-build-serve)
-
-### [@microsoft/gulp-core-build-typescript](./core-build/gulp-core-build-typescript/README.md)
-
-Build tasks for invoking the TypeScript compiler, `tslint`, and [api-extractor](https://github.com/Microsoft/web-build-tools/wiki/API-Extractor).
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-typescript.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-typescript)
-[![Dependencies](https://david-dm.org/Microsoft/gulp-core-build-typescript.svg)](https://david-dm.org/Microsoft/gulp-core-build-typescript)
-
-### [@microsoft/gulp-core-build-webpack](./core-build/gulp-core-build-webpack/README.md)
-
-A build task which introduces the ability to bundle various source files into a set of bundles using `webpack`.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-webpack.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-webpack)
-[![Dependencies](https://david-dm.org/Microsoft/gulp-core-build-webpack.svg)](https://david-dm.org/Microsoft/gulp-core-build-webpack)
-
-## Core Build: Rigs
-
-### [@microsoft/node-library-build](./core-build/node-library-build/README.md)
-
-A **Gulp Core Build** rig which provides basic functionality for building and unit testing TypeScript projects intended to run under NodeJS.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fnode-library-build.svg)](https://badge.fury.io/js/%40microsoft%2Fnode-library-build)
-[![Dependencies](https://david-dm.org/Microsoft/node-library-build.svg)](https://david-dm.org/Microsoft/node-library-build)
-
-### [@microsoft/web-library-build](./core-build/web-library-build/README.md)
-
-A **Gulp Core Build** rig for building web libraries. It includes build tasks for processing css, typescript, serving, and running browser tests using jest.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fweb-library-build.svg)](https://badge.fury.io/js/%40microsoft%2Fweb-library-build)
-[![Dependencies](https://david-dm.org/Microsoft/web-library-build.svg)](https://david-dm.org/Microsoft/web-library-build)
-
-
-## Libraries
-
-### [@microsoft/load-themed-styles](./libraries/load-themed-styles/README.md)
-
-Loads a string of style rules, but supports detokenizing theme constants built within it.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fload-themed-styles.svg)](https://badge.fury.io/js/%40microsoft%2Fload-themed-styles)
-[![Dependencies](https://david-dm.org/Microsoft/load-themed-styles.svg)](https://david-dm.org/Microsoft/load-themed-styles)
-
-
-### [@microsoft/node-core-library](./libraries/node-core-library/README.md)
-
-Essential libraries that every NodeJS toolchain project should use.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fnode-core-library.svg)](https://badge.fury.io/js/%40microsoft%2Fnode-core-library)
-[![Dependencies](https://david-dm.org/Microsoft/node-core-library.svg)](https://david-dm.org/Microsoft/node-core-library)
-
-### [@microsoft/package-deps-hash](./libraries/package-deps-hash/README.md)
-
-`package-deps-hash` is mainly used by Rush.  It generates a JSON file containing the Git hashes of all input files used to build a given package.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fpackage-deps-hash.svg)](https://badge.fury.io/js/%40microsoft%2Fpackage-deps-hash)
-[![Dependencies](https://david-dm.org/Microsoft/package-deps-hash.svg)](https://david-dm.org/Microsoft/package-deps-hash)
-
-### [@microsoft/stream-collator](./libraries/stream-collator/README.md)
-
-Oftentimes, when working with multiple parallel asynchronous processes, it is helpful to ensure that their
-outputs are not mixed together, as this can cause readability issues in the console or log. The
-stream-collator manages the output of these streams carefully, such that no two streams are writing
-at the same time.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fstream-collator.svg)](https://badge.fury.io/js/%40microsoft%2Fstream-collator)
-[![Dependencies](https://david-dm.org/Microsoft/stream-collator.svg)](https://david-dm.org/Microsoft/stream-collator)
-
-### [@microsoft/ts-command-line](./libraries/ts-command-line/README.md)
-
-An object-oriented command-line parser for TypeScript projects,
-based on the [argparse](https://www.npmjs.com/package/argparse)
-engine.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fts-command-line.svg)](https://badge.fury.io/js/%40microsoft%2Fts-command-line)
-[![Dependencies](https://david-dm.org/Microsoft/ts-command-line.svg)](https://david-dm.org/Microsoft/ts-command-line)
-
-
-## Webpack Loaders and Plugins
-
-### [@microsoft/set-webpack-public-path-plugin](./webpack/set-webpack-public-path-plugin/README.md)
-
-`set-webpack-public-path-plugin` is a plugin used to set the webpack public path variable.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fset-webpack-public-path-plugin.svg)](https://badge.fury.io/js/%40microsoft%2Fset-webpack-public-path-plugin)
-[![Dependencies](https://david-dm.org/Microsoft/set-webpack-public-path-plugin.svg)](https://david-dm.org/Microsoft/set-webpack-public-path-plugin)
-
-### [@microsoft/resolve-chunk-plugin](./webpack/resolve-chunk-plugin/README.md)
-
-`resolve-chunk-plugin` is a plugin that looks for calls to `resolveChunk` with a chunk
-name, and returns the chunk ID.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fresolve-chunk-plugin.svg)](https://badge.fury.io/js/%40microsoft%2Fresolve-chunk-plugin)
-[![Dependencies](https://david-dm.org/Microsoft/resolve-chunk-plugin.svg)](https://david-dm.org/Microsoft/resolve-chunk-plugin)
-
-### [@microsoft/loader-set-webpack-public-path](./webpack/loader-set-webpack-public-path/README.md)
-
-`loader-set-webpack-public-path` is a loader used to set the webpack public path variable. It's similar to `set-webpack-public-path-plugin`.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Floader-set-webpack-public-path.svg)](https://badge.fury.io/js/%40microsoft%2Floader-set-webpack-public-path)
-[![Dependencies](https://david-dm.org/Microsoft/loader-set-webpack-public-path.svg)](https://david-dm.org/Microsoft/loader-set-webpack-public-path)
-
-### [@microsoft/loader-load-themed-styles](./webpack/loader-load-themed-styles/README.md)
-
-`loader-load-themed-styles` is a loader used for loading themed CSS styles.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Floader-load-themed-styles.svg)](https://badge.fury.io/js/%40microsoft%2Floader-load-themed-styles)
-[![Dependencies](https://david-dm.org/Microsoft/loader-load-themed-styles.svg)](https://david-dm.org/Microsoft/loader-load-themed-styles)
-
-### [@microsoft/loader-raw-script](./webpack/loader-raw-script/README.md)
-
-`loader-raw-script` is a loader used for loading scripts with an `eval` statement.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Floader-raw-script.svg)](https://badge.fury.io/js/%40microsoft%2Floader-raw-script)
-[![Dependencies](https://david-dm.org/Microsoft/loader-raw-script.svg)](https://david-dm.org/Microsoft/loader-raw-script)
-

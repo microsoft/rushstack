@@ -1,20 +1,20 @@
 {
   "name": "@microsoft/gulp-core-build-typescript",
-  "version": "8.2.1",
+  "version": "8.3.7",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/core-build/gulp-core-build-typescript"
+    "url": "https://github.com/microsoft/rushstack/tree/master/core-build/gulp-core-build-typescript"
   },
   "scripts": {
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.12.0",
-    "@microsoft/node-core-library": "3.15.0",
+    "@microsoft/gulp-core-build": "3.12.5",
+    "@microsoft/node-core-library": "3.18.0",
     "@types/node": "8.10.54",
     "decomment": "~0.9.1",
     "glob": "~7.0.5",
@@ -22,14 +22,14 @@
     "resolve": "1.8.1"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "7.4.4",
-    "@microsoft/node-library-build": "6.1.2",
-    "@microsoft/rush-stack-compiler-3.1": "0.7.1",
-    "@microsoft/rush-stack-compiler-3.4": "0.1.15",
+    "@microsoft/api-extractor": "7.6.0",
+    "@microsoft/node-library-build": "6.3.2",
+    "@microsoft/rush-stack-compiler-3.1": "0.8.7",
+    "@microsoft/rush-stack-compiler-3.4": "0.3.2",
+    "@rushstack/eslint-config": "0.4.2",
     "@types/glob": "5.0.30",
     "@types/resolve": "0.0.8",
     "gulp": "~4.0.2",
-    "tslint-microsoft-contrib": "~5.2.1",
     "typescript": "~3.2.4"
   }
 }

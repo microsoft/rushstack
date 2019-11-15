@@ -26,7 +26,7 @@ export class ChangeManager {
   private _rushConfiguration: RushConfiguration;
   private _lockStepProjectsToExclude: Set<string> | undefined;
 
-  constructor(
+  public constructor(
     rushConfiguration: RushConfiguration,
     lockStepProjectsToExclude?: Set<string> | undefined
   ) {

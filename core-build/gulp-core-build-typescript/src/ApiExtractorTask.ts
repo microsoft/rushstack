@@ -5,7 +5,8 @@ import * as path from 'path';
 import { IBuildConfig } from '@microsoft/gulp-core-build';
 import {
   JsonFile,
-  FileSystem
+  FileSystem,
+  JsonObject
 } from '@microsoft/node-core-library';
 import { ExtractorConfig, IExtractorInvokeOptions } from '@microsoft/api-extractor';
 import { ApiExtractorRunner as TApiExtractorRunner } from '@microsoft/rush-stack-compiler-3.1';
@@ -20,17 +21,17 @@ export interface IApiExtractorTaskConfig extends IRSCTaskConfig {
  * The ApiExtractorTask uses the api-extractor tool to analyze a project for public APIs. api-extractor will detect
  * common problems and generate a report of the exported public API. The task uses the entry point of a project to
  * find the aliased exports of the project. An api-extractor.ts file is generated for the project in the temp folder.
- * @beta
+ * @public
  */
 export class ApiExtractorTask extends RSCTask<IApiExtractorTaskConfig>  {
-  constructor() {
+  public constructor() {
     super(
       'api-extractor',
       {}
     );
   }
 
-  public loadSchema(): Object {
+  public loadSchema(): JsonObject {
     return JsonFile.load(path.resolve(__dirname, 'schemas', 'api-extractor.schema.json'));
   }
 

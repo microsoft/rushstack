@@ -51,6 +51,12 @@ export class ApiVariable extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem
    */
   public readonly variableTypeExcerpt: Excerpt;
 
+  public constructor(options: IApiVariableOptions) {
+    super(options);
+
+    this.variableTypeExcerpt = this.buildExcerpt(options.variableTypeTokenRange);
+  }
+
   /** @override */
   public static onDeserializeInto(options: Partial<IApiVariableOptions>, context: DeserializerContext,
     jsonObject: IApiVariableJson): void {
@@ -62,12 +68,6 @@ export class ApiVariable extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem
 
   public static getContainerKey(name: string): string {
     return `${name}|${ApiItemKind.Variable}`;
-  }
-
-  public constructor(options: IApiVariableOptions) {
-    super(options);
-
-    this.variableTypeExcerpt = this.buildExcerpt(options.variableTypeTokenRange);
   }
 
   /** @override */

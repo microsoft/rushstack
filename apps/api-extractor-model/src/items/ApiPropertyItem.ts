@@ -34,6 +34,12 @@ export class ApiPropertyItem extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclared
    */
   public readonly propertyTypeExcerpt: Excerpt;
 
+  public constructor(options: IApiPropertyItemOptions) {
+    super(options);
+
+    this.propertyTypeExcerpt = this.buildExcerpt(options.propertyTypeTokenRange);
+  }
+
   /** @override */
   public static onDeserializeInto(options: Partial<IApiPropertyItemOptions>, context: DeserializerContext,
     jsonObject: IApiPropertyItemJson): void {
@@ -41,12 +47,6 @@ export class ApiPropertyItem extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclared
     super.onDeserializeInto(options, context, jsonObject);
 
     options.propertyTypeTokenRange = jsonObject.propertyTypeTokenRange;
-  }
-
-  public constructor(options: IApiPropertyItemOptions) {
-    super(options);
-
-    this.propertyTypeExcerpt = this.buildExcerpt(options.propertyTypeTokenRange);
   }
 
   /**

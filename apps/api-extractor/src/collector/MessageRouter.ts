@@ -4,10 +4,9 @@
 import * as colors from 'colors';
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
-import { Sort, InternalError } from '@microsoft/node-core-library';
+import { Sort, InternalError, LegacyAdapters } from '@microsoft/node-core-library';
 import { AedocDefinitions } from '@microsoft/api-extractor-model';
 
-import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import {
@@ -169,7 +168,7 @@ export class MessageRouter {
         return;  // ignore noise
     }
 
-    const messageText: string = TypeScriptMessageFormatter.format(diagnostic.messageText);
+    const messageText: string = `${diagnostic.messageText}`;
     const options: IExtractorMessageOptions = {
       category: ExtractorMessageCategory.Compiler,
       messageId: `TS${diagnostic.code}`,
@@ -249,10 +248,10 @@ export class MessageRouter {
    * @returns a JSON serializable object (possibly including `null` values)
    *          or `undefined` if the input cannot be represented as JSON
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static buildJsonDumpObject(input: any): any | undefined {
     if (input === null || input === undefined) {
-      // tslint:disable-next-line:no-null-keyword
+      // eslint-disable-next-line no-restricted-syntax
       return null; // JSON uses null instead of undefined
     }
 
@@ -263,10 +262,10 @@ export class MessageRouter {
         return input;
       case 'object':
         if (Array.isArray(input)) {
-          // tslint:disable-next-line:no-any
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const outputArray: any[] = [];
           for (const element of input) {
-            // tslint:disable-next-line:no-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const serializedElement: any = MessageRouter.buildJsonDumpObject(element);
             if (serializedElement !== undefined) {
               outputArray.push(serializedElement);
@@ -277,10 +276,10 @@ export class MessageRouter {
 
         const outputObject: object = { };
         for (const key of Object.getOwnPropertyNames(input)) {
-          // tslint:disable-next-line:no-any
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const value: any = input[key];
 
-          // tslint:disable-next-line:no-any
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const serializedValue: any = MessageRouter.buildJsonDumpObject(value);
 
           if (serializedValue !== undefined) {
@@ -563,7 +562,7 @@ export class MessageRouter {
    * Sorts an array of messages according to a reasonable ordering
    */
   private _sortMessagesForOutput(messages: ExtractorMessage[]): void {
-    messages.sort((a, b) => {
+    LegacyAdapters.sortStable(messages, (a, b) => {
       let diff: number;
       // First sort by file name
       diff = Sort.compareByValue(a.sourceFilePath, b.sourceFilePath);

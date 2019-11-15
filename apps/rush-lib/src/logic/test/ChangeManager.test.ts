@@ -17,7 +17,7 @@ describe('ChangeManager', () => {
     changeManager = new ChangeManager(rushConfiguration);
   });
 
-  /* tslint:disable:no-string-literal */
+  /* eslint-disable dot-notation */
   it('can apply changes to the package.json files in the dictionary', () => {
     changeManager.load(path.join(__dirname, 'multipleChanges'));
     changeManager.apply(false);
@@ -166,5 +166,5 @@ describe('ChangeManager', () => {
     expect(changeManager.allPackages.get('cyclic-dep-2')!.packageJson.dependencies!['cyclic-dep-1']).toEqual(
       '1.0.0-' + suffix);
   });
-  /* tslint:enable:no-string-literal */
+  /* eslint-enable dot-notation */
 });

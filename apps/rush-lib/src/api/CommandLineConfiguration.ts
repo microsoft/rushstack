@@ -28,20 +28,6 @@ export class CommandLineConfiguration {
   public readonly parameters: ParameterJson[] = [];
 
   /**
-   * Loads the configuration from the specified file.  If the file does not exist,
-   * then an empty default instance is returned.  If the file contains errors, then
-   * an exception is thrown.
-   */
-  public static loadFromFileOrDefault(jsonFilename: string): CommandLineConfiguration {
-    let commandLineJson: ICommandLineJson | undefined = undefined;
-    if (FileSystem.exists(jsonFilename)) {
-      commandLineJson = JsonFile.loadAndValidate(jsonFilename, CommandLineConfiguration._jsonSchema);
-    }
-
-    return new CommandLineConfiguration(commandLineJson);
-  }
-
-  /**
    * Use CommandLineConfiguration.loadFromFile()
    */
   private constructor(commandLineJson: ICommandLineJson | undefined) {
@@ -72,5 +58,19 @@ export class CommandLineConfiguration {
       }
 
     }
+  }
+
+  /**
+   * Loads the configuration from the specified file.  If the file does not exist,
+   * then an empty default instance is returned.  If the file contains errors, then
+   * an exception is thrown.
+   */
+  public static loadFromFileOrDefault(jsonFilename: string): CommandLineConfiguration {
+    let commandLineJson: ICommandLineJson | undefined = undefined;
+    if (FileSystem.exists(jsonFilename)) {
+      commandLineJson = JsonFile.loadAndValidate(jsonFilename, CommandLineConfiguration._jsonSchema);
+    }
+
+    return new CommandLineConfiguration(commandLineJson);
   }
 }

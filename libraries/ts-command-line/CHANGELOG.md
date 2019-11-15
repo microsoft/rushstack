@@ -1,6 +1,30 @@
 # Change Log - @microsoft/ts-command-line
 
-This log was last generated on Tue, 24 Sep 2019 02:58:49 GMT and should not be manually modified.
+This log was last generated on Mon, 11 Nov 2019 16:07:56 GMT and should not be manually modified.
+
+## 4.3.5
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 4.3.4
+Tue, 22 Oct 2019 06:24:44 GMT
+
+*Version update only*
+
+## 4.3.3
+Fri, 18 Oct 2019 15:15:00 GMT
+
+### Patches
+
+- Fix Choice parameter error when only one alternative value is provided
+
+## 4.3.2
+Sun, 29 Sep 2019 23:56:29 GMT
+
+### Patches
+
+- Update repository URL
 
 ## 4.3.1
 Tue, 24 Sep 2019 02:58:49 GMT

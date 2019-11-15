@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.13.0",
+  "rushVersion": "5.16.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -202,7 +202,7 @@
      * your PR branch, and in this situation "rush change" will also automatically invoke "git fetch"
      * to retrieve the latest activity for the remote master branch.
      */
-    "url": "https://github.com/Microsoft/web-build-tools.git"
+    "url": "https://github.com/microsoft/rushstack.git"
   },
 
   /**
@@ -439,8 +439,14 @@
       "shouldPublish": false
     },
     {
-      "packageName": "node-library-build-test",
-      "projectFolder": "build-tests/node-library-build-test",
+      "packageName": "node-library-build-eslint-test",
+      "projectFolder": "build-tests/node-library-build-eslint-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "node-library-build-tslint-test",
+      "projectFolder": "build-tests/node-library-build-tslint-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -581,12 +587,6 @@
 
     // "libraries" folder (alphabetical order)
     {
-      "packageName": "@microsoft/eslint-config-scalable-ts",
-      "projectFolder": "libraries/eslint-config-scalable-ts",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
       "packageName": "@microsoft/load-themed-styles",
       "projectFolder": "libraries/load-themed-styles",
       "reviewCategory": "libraries",
@@ -644,8 +644,20 @@
       "reviewCategory": "libraries",
       "shouldPublish": false
     },
+    {
+      "packageName": "repo-toolbox",
+      "projectFolder": "repo-scripts/repo-toolbox",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
 
     // "stack" folder (alphabetical order)
+    {
+      "packageName": "@rushstack/eslint-config",
+      "projectFolder": "stack/eslint-config",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
     {
       "packageName": "@microsoft/rush-stack",
       "projectFolder": "stack/rush-stack",

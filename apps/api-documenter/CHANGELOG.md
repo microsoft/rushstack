@@ -1,6 +1,79 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 24 Sep 2019 02:58:49 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Nov 2019 04:50:50 GMT and should not be manually modified.
+
+## 7.6.0
+Fri, 15 Nov 2019 04:50:50 GMT
+
+### Minor changes
+
+- Make newline type for generated files configurable
+
+## 7.5.8
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 7.5.7
+Wed, 06 Nov 2019 22:44:18 GMT
+
+*Version update only*
+
+## 7.5.6
+Tue, 05 Nov 2019 06:49:28 GMT
+
+*Version update only*
+
+## 7.5.5
+Tue, 05 Nov 2019 01:08:39 GMT
+
+*Version update only*
+
+## 7.5.4
+Fri, 25 Oct 2019 15:08:54 GMT
+
+*Version update only*
+
+## 7.5.3
+Tue, 22 Oct 2019 06:24:44 GMT
+
+*Version update only*
+
+## 7.5.2
+Mon, 21 Oct 2019 05:22:43 GMT
+
+*Version update only*
+
+## 7.5.1
+Fri, 18 Oct 2019 15:15:00 GMT
+
+*Version update only*
+
+## 7.5.0
+Sun, 06 Oct 2019 00:27:39 GMT
+
+### Minor changes
+
+- For the markdown target, reorder the "Remarks" section to appear before the members for classes, interfaces, namespaces, and packages (GitHub #1550)
+
+## 7.4.9
+Fri, 04 Oct 2019 00:15:22 GMT
+
+*Version update only*
+
+## 7.4.8
+Sun, 29 Sep 2019 23:56:29 GMT
+
+### Patches
+
+- Update repository URL
+
+## 7.4.7
+Wed, 25 Sep 2019 15:15:31 GMT
+
+### Patches
+
+- Disambiguate output files for items with colliding names
 
 ## 7.4.6
 Tue, 24 Sep 2019 02:58:49 GMT

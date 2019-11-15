@@ -60,6 +60,14 @@ export class ApiInterface extends ApiItemContainerMixin(ApiNameMixin(ApiTypePara
 
   private readonly _extendsTypes: HeritageType[] = [];
 
+  public constructor(options: IApiInterfaceOptions) {
+    super(options);
+
+    for (const extendsTokenRange of options.extendsTokenRanges) {
+      this._extendsTypes.push(new HeritageType(this.buildExcerpt(extendsTokenRange)));
+    }
+  }
+
   public static getContainerKey(name: string): string {
     return `${name}|${ApiItemKind.Interface}`;
   }
@@ -71,14 +79,6 @@ export class ApiInterface extends ApiItemContainerMixin(ApiNameMixin(ApiTypePara
     super.onDeserializeInto(options, context, jsonObject);
 
     options.extendsTokenRanges = jsonObject.extendsTokenRanges;
-  }
-
-  public constructor(options: IApiInterfaceOptions) {
-    super(options);
-
-    for (const extendsTokenRange of options.extendsTokenRanges) {
-      this._extendsTypes.push(new HeritageType(this.buildExcerpt(extendsTokenRange)));
-    }
   }
 
   /** @override */

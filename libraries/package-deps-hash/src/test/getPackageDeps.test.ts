@@ -33,7 +33,7 @@ describe('parseGitLsTree', () => {
   });
 
   it('can handle a submodule', (done) => {
-    const filename: string = 'web-build-tools';
+    const filename: string = 'rushstack';
     const hash: string = 'c5880bf5b0c6c1f2e2c43c95beeb8f0a808e8bac';
 
     const output: string = `160000 commit ${hash}\t${filename}`;
@@ -104,7 +104,7 @@ describe('getPackageDeps', () => {
     done();
   });
 
-  it('can handle adding one file', (done) => { // tslint:disable-line
+  it('can handle adding one file', (done) => {
     const tempFilePath: string = path.join(TEST_PROJECT_PATH, 'a.txt');
 
     FileSystem.writeFile(tempFilePath, 'a');
@@ -136,7 +136,7 @@ describe('getPackageDeps', () => {
 
   });
 
-  it('can handle adding two files', (done) => { // tslint:disable-line
+  it('can handle adding two files', (done) => {
     const tempFilePath1: string = path.join(TEST_PROJECT_PATH, 'a.txt');
     const tempFilePath2: string = path.join(TEST_PROJECT_PATH, 'b.txt');
 

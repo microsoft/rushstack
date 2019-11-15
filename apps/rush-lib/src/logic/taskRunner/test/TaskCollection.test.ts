@@ -60,7 +60,7 @@ describe('TaskCollection', () => {
     });
 
     it('respectsDependencyOrder', () => {
-      const result: Array<string> = [];
+      const result: string[] = [];
       taskCollection.addTask(createDummyTask('two', () => result.push('2')));
       taskCollection.addTask(createDummyTask('one', () => result.push('1')));
       taskCollection.addDependencies('two', ['one']);

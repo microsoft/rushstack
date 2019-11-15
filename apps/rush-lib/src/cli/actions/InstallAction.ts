@@ -6,7 +6,7 @@ import { IInstallManagerOptions } from '../../logic/InstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 
 export class InstallAction extends BaseInstallAction {
-  constructor(parser: RushCommandLineParser) {
+  public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'install',
       summary: 'Install package dependencies for all projects in the repo according to the shrinkwrap file',

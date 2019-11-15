@@ -50,16 +50,16 @@ export interface IApiPropertyOptions extends IApiPropertyItemOptions,
  */
 export class ApiProperty extends ApiStaticMixin(ApiPropertyItem) {
 
+  public constructor(options: IApiPropertyOptions) {
+    super(options);
+  }
+
   public static getContainerKey(name: string, isStatic: boolean): string {
     if (isStatic) {
       return `${name}|${ApiItemKind.Property}|static`;
     } else {
       return `${name}|${ApiItemKind.Property}|instance`;
     }
-  }
-
-  public constructor(options: IApiPropertyOptions) {
-    super(options);
   }
 
   /** @override */

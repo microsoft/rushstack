@@ -3,7 +3,7 @@
 
 import {
   ApiItem,
-  ApiItem_onParentChanged,
+  apiItem_onParentChanged,
   IApiItemJson,
   IApiItemOptions,
   IApiItemConstructor,
@@ -11,7 +11,7 @@ import {
 } from '../items/ApiItem';
 import { ApiNameMixin } from './ApiNameMixin';
 import { DeserializerContext } from '../model/DeserializerContext';
-import { InternalError } from '@microsoft/node-core-library';
+import { InternalError, LegacyAdapters } from '@microsoft/node-core-library';
 
 /**
  * Constructor options for {@link (ApiItemContainerMixin:interface)}.
@@ -51,7 +51,7 @@ const _membersByKind: unique symbol = Symbol('ApiItemContainerMixin._membersByKi
  *
  * @public
  */
-// tslint:disable-next-line:interface-name
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface ApiItemContainerMixin extends ApiItem {
   /**
    * Returns the members of this container, sorted alphabetically.
@@ -101,7 +101,7 @@ export interface ApiItemContainerMixin extends ApiItem {
  * @public
  */
 export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiItemContainerMixin) { // tslint:disable-line:no-any
+  TBaseClass & (new (...args: any[]) => ApiItemContainerMixin) { // eslint-disable-line @typescript-eslint/no-explicit-any
 
   abstract class MixedClass extends baseClass implements ApiItemContainerMixin {
     public readonly [_members]: ApiItem[];
@@ -116,20 +116,8 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
     // that share a common ApiItemKind.  Examples include overloaded constructors or index signatures.
     public [_membersByKind]: Map<string, ApiItem[]> | undefined;  // key is ApiItemKind
 
-    /** @override */
-    public static onDeserializeInto(options: Partial<IApiItemContainerMixinOptions>,
-      context: DeserializerContext, jsonObject: IApiItemContainerJson): void {
-
-      baseClass.onDeserializeInto(options, context, jsonObject);
-
-      options.members = [];
-      for (const memberObject of jsonObject.members) {
-        options.members.push(ApiItem.deserialize(memberObject, context));
-      }
-    }
-
-    // tslint:disable-next-line:no-any
-    constructor(...args: any[]) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public constructor(...args: any[]) {
       super(...args);
       const options: IApiItemContainerMixinOptions = args[0] as IApiItemContainerMixinOptions;
 
@@ -143,9 +131,21 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
       }
     }
 
+    /** @override */
+    public static onDeserializeInto(options: Partial<IApiItemContainerMixinOptions>,
+      context: DeserializerContext, jsonObject: IApiItemContainerJson): void {
+
+      baseClass.onDeserializeInto(options, context, jsonObject);
+
+      options.members = [];
+      for (const memberObject of jsonObject.members) {
+        options.members.push(ApiItem.deserialize(memberObject, context));
+      }
+    }
+
     public get members(): ReadonlyArray<ApiItem> {
       if (!this[_membersSorted]) {
-        this[_members].sort((x, y) => x.getSortKey().localeCompare(y.getSortKey()));
+        LegacyAdapters.sortStable(this[_members], (x, y) => x.getSortKey().localeCompare(y.getSortKey()));
         this[_membersSorted] = true;
       }
 
@@ -154,7 +154,8 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
 
     public addMember(member: ApiItem): void {
       if (this[_membersByContainerKey].has(member.containerKey)) {
-        throw new Error('Another member has already been added with the same name and containerKey');
+        throw new Error(`Another member has already been added with the same name (${member.displayName})` +
+          ` and containerKey (${member.containerKey})`);
       }
 
       const existingParent: ApiItem | undefined = member.parent;
@@ -168,7 +169,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
       this[_membersSorted] = false;
       this[_membersByContainerKey].set(member.containerKey, member);
 
-      member[ApiItem_onParentChanged](this);
+      member[apiItem_onParentChanged](this);
     }
 
     public tryGetMemberByKey(containerKey: string): ApiItem | undefined {

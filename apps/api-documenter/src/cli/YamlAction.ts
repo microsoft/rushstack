@@ -16,7 +16,7 @@ export class YamlAction extends BaseAction {
   private _officeParameter: CommandLineFlagParameter;
   private _namespacesParameter: CommandLineFlagParameter;
 
-  constructor(parser: ApiDocumenterCommandLine) {
+  public constructor(parser: ApiDocumenterCommandLine) {
     super({
       actionName: 'yaml',
       summary: 'Generate documentation as universal reference YAML files (*.yml)',

@@ -31,6 +31,11 @@ export interface IApiDocumentedItemJson extends IApiItemJson {
 export class ApiDocumentedItem extends ApiItem {
   private _tsdocComment: tsdoc.DocComment | undefined;
 
+  public constructor(options: IApiDocumentedItemOptions) {
+    super(options);
+    this._tsdocComment = options.docComment;
+  }
+
   /** @override */
   public static onDeserializeInto(options: Partial<IApiDocumentedItemOptions>, context: DeserializerContext,
     jsonObject: IApiItemJson): void {
@@ -50,11 +55,6 @@ export class ApiDocumentedItem extends ApiItem {
 
       options.docComment = parserContext.docComment;
     }
-  }
-
-  public constructor(options: IApiDocumentedItemOptions) {
-    super(options);
-    this._tsdocComment = options.docComment;
   }
 
   public get tsdocComment(): tsdoc.DocComment | undefined {

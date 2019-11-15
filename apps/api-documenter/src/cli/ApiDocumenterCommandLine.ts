@@ -7,7 +7,7 @@ import { YamlAction } from './YamlAction';
 import { GenerateAction } from './GenerateAction';
 
 export class ApiDocumenterCommandLine extends CommandLineParser {
-  constructor() {
+  public constructor() {
     super({
       toolFilename: 'api-documenter',
       toolDescription: 'Reads *.api.json files produced by api-extractor, '

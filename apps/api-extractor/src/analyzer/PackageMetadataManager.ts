@@ -8,7 +8,8 @@ import {
   FileSystem,
   JsonFile,
   NewlineKind,
-  INodePackageJson
+  INodePackageJson,
+  JsonObject
 } from '@microsoft/node-core-library';
 import { Extractor } from '../api/Extractor';
 import { MessageRouter } from '../collector/MessageRouter';
@@ -62,7 +63,12 @@ export class PackageMetadataManager {
   private readonly _packageMetadataByPackageJsonPath: Map<string, PackageMetadata>
     = new Map<string, PackageMetadata>();
 
-  // This feature is still being standardized: https://github.com/Microsoft/tsdoc/issues/7
+  public constructor(packageJsonLookup: PackageJsonLookup, messageRouter: MessageRouter) {
+    this._packageJsonLookup = packageJsonLookup;
+    this._messageRouter = messageRouter;
+  }
+
+  // This feature is still being standardized: https://github.com/microsoft/tsdoc/issues/7
   // In the future we will use the @microsoft/tsdoc library to read this file.
   private static _resolveTsdocMetadataPathFromPackageJson(packageFolder: string,
     packageJson: INodePackageJson): string {
@@ -126,8 +132,8 @@ export class PackageMetadataManager {
   /**
    * Writes the TSDoc metadata file to the specified output file.
    */
-  public static writeTsdocMetadataFile(tsdocMetadataPath: string): void {
-    const fileObject: Object = {
+  public static writeTsdocMetadataFile(tsdocMetadataPath: string, newlineKind: NewlineKind): void {
+    const fileObject: JsonObject = {
       tsdocVersion: '0.12',
       toolPackages: [
         {
@@ -143,14 +149,9 @@ export class PackageMetadataManager {
       JsonFile.stringify(fileObject);
 
     FileSystem.writeFile(tsdocMetadataPath, fileContent, {
-      convertLineEndings: NewlineKind.CrLf,
+      convertLineEndings: newlineKind,
       ensureFolderExists: true
     });
-  }
-
-  public constructor(packageJsonLookup: PackageJsonLookup, messageRouter: MessageRouter) {
-    this._packageJsonLookup = packageJsonLookup;
-    this._messageRouter = messageRouter;
   }
 
   /**

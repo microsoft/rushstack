@@ -7,7 +7,7 @@ import { BasicTasks } from '../logic/BasicTasks';
 import { BuildContext } from '../logic/BuildContext';
 
 export class BuildAction extends CommandLineAction {
-  constructor(parser: RushStackCommandLine) {
+  public constructor(parser: RushStackCommandLine) {
     super({
       actionName: 'build',
       summary: 'Build the current project',

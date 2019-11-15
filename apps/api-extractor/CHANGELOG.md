@@ -1,6 +1,74 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 24 Sep 2019 02:58:49 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Nov 2019 04:50:50 GMT and should not be manually modified.
+
+## 7.6.0
+Fri, 15 Nov 2019 04:50:50 GMT
+
+### Minor changes
+
+- Make newline type for generated files configurable
+
+## 7.5.6
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 7.5.5
+Wed, 06 Nov 2019 22:44:18 GMT
+
+### Patches
+
+- Add support for TypeScript 3.7
+
+## 7.5.4
+Tue, 05 Nov 2019 06:49:28 GMT
+
+### Patches
+
+- Fix an issue where API reports sometimes were ordered differently depending on the version of NodeJS (GitHub #1552)
+
+## 7.5.3
+Tue, 05 Nov 2019 01:08:39 GMT
+
+*Version update only*
+
+## 7.5.2
+Tue, 22 Oct 2019 06:24:44 GMT
+
+*Version update only*
+
+## 7.5.1
+Fri, 18 Oct 2019 15:15:01 GMT
+
+*Version update only*
+
+## 7.5.0
+Sun, 06 Oct 2019 00:27:39 GMT
+
+### Minor changes
+
+- Allow separate release tags for overloaded functions and methods
+- Add new api-extractor.json config setting "bundledPackages"
+
+## 7.4.7
+Fri, 04 Oct 2019 00:15:22 GMT
+
+### Patches
+
+- Fix an issue where IExtractorConfigPrepareOptions.packageJson was ignored (GitHub #1559)
+
+## 7.4.6
+Sun, 29 Sep 2019 23:56:29 GMT
+
+### Patches
+
+- Update repository URL
+
+## 7.4.5
+Wed, 25 Sep 2019 15:15:31 GMT
+
+*Version update only*
 
 ## 7.4.4
 Tue, 24 Sep 2019 02:58:49 GMT

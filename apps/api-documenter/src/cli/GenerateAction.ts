@@ -13,7 +13,7 @@ import { FileSystem } from '@microsoft/node-core-library';
 import { MarkdownDocumenter } from '../documenters/MarkdownDocumenter';
 
 export class GenerateAction extends BaseAction {
-  constructor(parser: ApiDocumenterCommandLine) {
+  public constructor(parser: ApiDocumenterCommandLine) {
     super({
       actionName: 'generate',
       summary: 'EXPERIMENTAL',

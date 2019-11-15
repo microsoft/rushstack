@@ -2,6 +2,77 @@
   "name": "@microsoft/gulp-core-build-mocha",
   "entries": [
     {
+      "version": "3.7.5",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.7.5",
+      "date": "Fri, 15 Nov 2019 04:50:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.12.4` to `3.12.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.7.4",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.7.4",
+      "date": "Mon, 11 Nov 2019 16:07:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.12.3` to `3.12.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.4.1` to `0.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.7.3",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.7.3",
+      "date": "Tue, 05 Nov 2019 06:49:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.12.2` to `3.12.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.7.2",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.7.2",
+      "date": "Tue, 22 Oct 2019 06:24:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.12.1` to `3.12.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.4.0` to `0.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.7.1",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.7.1",
+      "date": "Sun, 29 Sep 2019 23:56:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update repository URL"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.12.0` to `3.12.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.7.0",
       "tag": "@microsoft/gulp-core-build-mocha_v3.7.0",
       "date": "Mon, 23 Sep 2019 15:14:55 GMT",

@@ -5,12 +5,13 @@
 ```ts
 
 import { IPackageJson } from '@microsoft/node-core-library';
+import { JsonObject } from '@microsoft/node-core-library';
 
 // @public
 export class ApprovedPackagesConfiguration {
     constructor(jsonFilename: string);
     // (undocumented)
-    addOrUpdatePackage(packageName: string, reviewCategory: string): void;
+    addOrUpdatePackage(packageName: string, reviewCategory: string): boolean;
     clear(): void;
     // (undocumented)
     getItemByName(packageName: string): ApprovedPackagesItem | undefined;
@@ -66,6 +67,7 @@ export class CommonVersionsConfiguration {
     readonly allowedAlternativeVersions: Map<string, ReadonlyArray<string>>;
     readonly filePath: string;
     getAllPreferredVersions(): Map<string, string>;
+    readonly implicitlyPreferredVersions: boolean | undefined;
     static loadFromFile(jsonFilename: string): CommonVersionsConfiguration;
     readonly preferredVersions: Map<string, string>;
     save(): boolean;
@@ -110,6 +112,18 @@ export class EventHooks {
     get(event: Event): string[];
     }
 
+// @beta
+export class ExperimentsConfiguration {
+    // @internal
+    constructor(jsonFileName: string);
+    readonly configuration: Readonly<IExperimentsJson>;
+    }
+
+// @beta
+export interface IExperimentsJson {
+    legacyIncrementalBuildDependencyDetection?: boolean;
+}
+
 // @public
 export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
@@ -138,7 +152,7 @@ export interface ITryFindRushJsonLocationOptions {
 
 // @internal
 export class _LastInstallFlag {
-    constructor(folderPath: string, state?: Object);
+    constructor(folderPath: string, state?: JsonObject);
     clear(): void;
     create(): void;
     isValid(): boolean;
@@ -250,6 +264,8 @@ export class RushConfiguration {
     readonly ensureConsistentVersions: boolean;
     // @beta
     readonly eventHooks: EventHooks;
+    // @beta
+    readonly experimentsConfiguration: ExperimentsConfiguration;
     findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
     findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
     getCommittedShrinkwrapFilename(variant?: string | undefined): string;
@@ -317,6 +333,7 @@ export class RushConfigurationProject {
     readonly projectRelativeFolder: string;
     readonly projectRushTempFolder: string;
     readonly reviewCategory: string;
+    readonly rushConfiguration: RushConfiguration;
     readonly shouldPublish: boolean;
     readonly skipRushCheck: boolean;
     readonly tempProjectName: string;
@@ -336,6 +353,8 @@ export class _RushGlobalFolder {
 
 // @beta
 export abstract class VersionPolicy {
+    // Warning: (ae-forgotten-export) The symbol "IVersionPolicyJson" needs to be exported by the entry point index.d.ts
+    // 
     // @internal
     constructor(versionPolicyJson: IVersionPolicyJson);
     abstract bump(bumpType?: BumpType, identifier?: string): void;
@@ -345,8 +364,6 @@ export abstract class VersionPolicy {
     readonly isLockstepped: boolean;
     // @internal
     abstract readonly _json: IVersionPolicyJson;
-    // Warning: (ae-forgotten-export) The symbol "IVersionPolicyJson" needs to be exported by the entry point index.d.ts
-    // 
     // @internal
     static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined;
     readonly policyName: string;

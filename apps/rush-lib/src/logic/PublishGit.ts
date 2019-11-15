@@ -6,7 +6,7 @@ import { PublishUtilities } from './PublishUtilities';
 export class PublishGit {
   private _targetBranch: string | undefined;
 
-  constructor(targetBranch: string | undefined) {
+  public constructor(targetBranch: string | undefined) {
 
     this._targetBranch = targetBranch;
   }

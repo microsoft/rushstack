@@ -2,6 +2,111 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.5.6",
+      "tag": "@microsoft/api-extractor-model_v7.5.6",
+      "date": "Fri, 15 Nov 2019 04:50:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.17.1` to `3.18.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.5.5",
+      "tag": "@microsoft/api-extractor-model_v7.5.5",
+      "date": "Mon, 11 Nov 2019 16:07:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.17.0` to `3.17.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.4.1` to `0.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.5.4",
+      "tag": "@microsoft/api-extractor-model_v7.5.4",
+      "date": "Tue, 05 Nov 2019 06:49:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where API reports sometimes were ordered differently depending on the version of NodeJS (GitHub #1552)"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.16.0` to `3.17.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.5.3",
+      "tag": "@microsoft/api-extractor-model_v7.5.3",
+      "date": "Tue, 05 Nov 2019 01:08:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Clarified an error message"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.5.2",
+      "tag": "@microsoft/api-extractor-model_v7.5.2",
+      "date": "Tue, 22 Oct 2019 06:24:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Refactor some code as part of migration from TSLint to ESLint"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.15.1` to `3.16.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.4.0` to `0.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.5.1",
+      "tag": "@microsoft/api-extractor-model_v7.5.1",
+      "date": "Sun, 29 Sep 2019 23:56:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update repository URL"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.15.0` to `3.15.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.5.0",
+      "tag": "@microsoft/api-extractor-model_v7.5.0",
+      "date": "Wed, 25 Sep 2019 15:15:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add ApiItem.getMergedSiblings() API"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.4.2",
       "tag": "@microsoft/api-extractor-model_v7.4.2",
       "date": "Mon, 23 Sep 2019 15:14:55 GMT",

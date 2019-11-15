@@ -1,6 +1,75 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Tue, 24 Sep 2019 02:58:49 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Nov 2019 04:50:50 GMT and should not be manually modified.
+
+## 1.10.21
+Fri, 15 Nov 2019 04:50:50 GMT
+
+*Version update only*
+
+## 1.10.20
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 1.10.19
+Wed, 06 Nov 2019 22:44:18 GMT
+
+*Version update only*
+
+## 1.10.18
+Tue, 05 Nov 2019 06:49:29 GMT
+
+*Version update only*
+
+## 1.10.17
+Tue, 05 Nov 2019 01:08:39 GMT
+
+*Version update only*
+
+## 1.10.16
+Fri, 25 Oct 2019 15:08:54 GMT
+
+*Version update only*
+
+## 1.10.15
+Tue, 22 Oct 2019 06:24:44 GMT
+
+*Version update only*
+
+## 1.10.14
+Mon, 21 Oct 2019 05:22:43 GMT
+
+*Version update only*
+
+## 1.10.13
+Fri, 18 Oct 2019 15:15:01 GMT
+
+*Version update only*
+
+## 1.10.12
+Sun, 06 Oct 2019 00:27:39 GMT
+
+### Patches
+
+- Enable styles projection to child window for load-themed-styles
+
+## 1.10.11
+Fri, 04 Oct 2019 00:15:22 GMT
+
+*Version update only*
+
+## 1.10.10
+Sun, 29 Sep 2019 23:56:29 GMT
+
+### Patches
+
+- Update repository URL
+
+## 1.10.9
+Wed, 25 Sep 2019 15:15:31 GMT
+
+*Version update only*
 
 ## 1.10.8
 Tue, 24 Sep 2019 02:58:49 GMT

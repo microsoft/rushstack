@@ -51,7 +51,7 @@ export class InitAction extends BaseConfiglessRushAction {
   // template section name --> whether it should be commented out
   private _commentedBySectionName: Map<string, boolean> = new Map<string, boolean>();
 
-  constructor(parser: RushCommandLineParser) {
+  public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'init',
       summary: 'Initializes a new repository to be managed by Rush',
@@ -150,6 +150,7 @@ export class InitAction extends BaseConfiglessRushAction {
       'common/config/rush/[dot]npmrc',
       'common/config/rush/command-line.json',
       'common/config/rush/common-versions.json',
+      'common/config/rush/experiments.json',
       'common/config/rush/pnpmfile.js',
       'common/config/rush/version-policies.json'
     ];
@@ -282,7 +283,7 @@ export class InitAction extends BaseConfiglessRushAction {
 
       // Check for variable expansions
       // Example:  [%RUSH_VERSION%]
-      while (match = transformedLine.match(InitAction._variableMacroRegExp)) {
+      while ((match = transformedLine.match(InitAction._variableMacroRegExp))) {
         const variableName: string = match[1];
         const replacement: string = this._expandMacroVariable(variableName);
         transformedLine = transformedLine.replace(InitAction._variableMacroRegExp, replacement);

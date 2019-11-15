@@ -11,7 +11,6 @@ import {
 
 import { ExtractorConfig } from './ExtractorConfig';
 import { IExtractorInvokeOptions } from './Extractor';
-import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 
 /**
  * Options for {@link CompilerState.create}
@@ -37,7 +36,7 @@ export class CompilerState {
   /**
    * The TypeScript compiler's `Program` object, which represents a complete scope of analysis.
    */
-  public readonly program: ts.Program;
+  public readonly program: unknown;
 
   private constructor(properties: CompilerState) {
     this.program = properties.program;
@@ -83,7 +82,7 @@ export class CompilerState {
     const program: ts.Program = ts.createProgram(analysisFilePaths, commandLine.options, compilerHost);
 
     if (commandLine.errors.length > 0) {
-      const errorText: string = TypeScriptMessageFormatter.format(commandLine.errors[0].messageText);
+      const errorText: string = `${commandLine.errors[0].messageText}`;
       throw new Error(`Error parsing tsconfig.json content: ${errorText}`);
     }
 

@@ -10,7 +10,8 @@ import { splitStyles } from '@microsoft/load-themed-styles';
 import {
   FileSystem,
   JsonFile,
-  LegacyAdapters
+  LegacyAdapters,
+  JsonObject
 } from '@microsoft/node-core-library';
 import * as glob from 'glob';
 import * as nodeSass from 'node-sass';
@@ -89,7 +90,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     autoprefixer({ browsers: ['> 1%', 'last 2 versions', 'ie >= 10'] })
   ];
 
-  constructor() {
+  public constructor() {
     super(
       'sass',
       {
@@ -107,7 +108,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     );
   }
 
-  public loadSchema(): Object {
+  public loadSchema(): JsonObject {
     return JsonFile.load(path.join(__dirname, 'sass.schema.json'));
   }
 
@@ -182,7 +183,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       return postcss(plugins).process(result.css.toString(), options) as PromiseLike<postcss.Result>;
     }).then((result: postcss.Result) => {
       let cleanCssOptions: CleanCss.Options = { level: 1, returnPromise: true };
-      if (!!this.taskConfig.cleanCssOptions) {
+      if (this.taskConfig.cleanCssOptions) {
         cleanCssOptions = { ...this.taskConfig.cleanCssOptions, returnPromise: true };
       }
       cleanCssOptions.sourceMap = !!result.map;
@@ -221,7 +222,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
           `require(${JSON.stringify(`./${path.basename(cssOutputPathAbsolute)}`)});`,
           stylesExportString
         ]);
-      } else if (!!content) {
+      } else if (content) {
         lines = lines.concat([
           'import { loadStyles } from \'@microsoft/load-themed-styles\';',
           '',
@@ -295,7 +296,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
     if (this.taskConfig.moduleExportName === '') {
       exportString = 'export = styles;';
-    } else if (!!this.taskConfig.moduleExportName) {
+    } else if (this.taskConfig.moduleExportName) {
       // exportString = `export const ${this.taskConfig.moduleExportName} = styles;`;
     }
 

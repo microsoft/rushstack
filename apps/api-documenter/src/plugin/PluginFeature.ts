@@ -11,12 +11,12 @@
  */
 export class PluginFeatureInitialization {
   /** @internal */
+  public _context: PluginFeatureContext;
+
+  /** @internal */
   public constructor() {
     // reserved for future use
   }
-
-  /** @internal */
-  public _context: PluginFeatureContext;
 }
 
 /**

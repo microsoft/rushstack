@@ -53,8 +53,17 @@ interface IAstModuleReference {
  * generating .d.ts rollups.
  */
 export class ExportAnalyzer {
+  // Captures "@a/b" or "d" from these examples:
+  //   @a/b
+  //   @a/b/c
+  //   d
+  //   d/
+  //   d/e
+  private static _modulePathRegExp: RegExp = /^((?:@[^@\/\s]+\/)?[^@\/\s]+)(?:.*)$/;
+
   private readonly _program: ts.Program;
   private readonly _typeChecker: ts.TypeChecker;
+  private readonly _bundledPackageNames: Set<string>;
   private readonly _astSymbolTable: IAstSymbolTable;
 
   private readonly _astModulesByModuleSymbol: Map<ts.Symbol, AstModule>
@@ -65,9 +74,11 @@ export class ExportAnalyzer {
 
   private readonly _astImportsByKey: Map<string, AstImport> = new Map<string, AstImport>();
 
-  public constructor(program: ts.Program, typeChecker: ts.TypeChecker, astSymbolTable: IAstSymbolTable) {
+  public constructor(program: ts.Program, typeChecker: ts.TypeChecker, bundledPackageNames: Set<string>,
+    astSymbolTable: IAstSymbolTable) {
     this._program = program;
     this._typeChecker = typeChecker;
+    this._bundledPackageNames = bundledPackageNames;
     this._astSymbolTable = astSymbolTable;
   }
 
@@ -93,7 +104,7 @@ export class ExportAnalyzer {
       if (moduleReference !== undefined) {
         // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
         // but ignore:  "../folder/LocalFile"
-        if (!ts.isExternalModuleNameRelative(moduleReference.moduleSpecifier)) {
+        if (this._isExternalModulePath(moduleReference.moduleSpecifier)) {
           externalModulePath = moduleReference.moduleSpecifier;
         }
       }
@@ -182,7 +193,7 @@ export class ExportAnalyzer {
       // But there is also an elaborate case where the source file contains one or more "module" declarations,
       // and our moduleReference took us to one of those.
 
-      // tslint:disable-next-line:no-bitwise
+      // eslint-disable-next-line no-bitwise
       if ((moduleReference.moduleSpecifierSymbol.flags & ts.SymbolFlags.Alias) !== 0) {
         // Follow the import/export declaration to one hop the exported item inside the target module
         let followedSymbol: ts.Symbol | undefined = TypeScriptInternals.getImmediateAliasedSymbol(
@@ -198,7 +209,7 @@ export class ExportAnalyzer {
           const parent: ts.Symbol | undefined = TypeScriptInternals.getSymbolParent(followedSymbol);
           if (parent !== undefined) {
             // Make sure the thing we found is a module
-            // tslint:disable-next-line:no-bitwise
+            // eslint-disable-next-line no-bitwise
             if ((parent.flags & ts.SymbolFlags.ValueModule) !== 0) {
               // Record that that this is an ambient module that can also be imported from
               this._importableAmbientSourceFiles.add(sourceFile);
@@ -229,6 +240,34 @@ export class ExportAnalyzer {
       entryPointAstModule.astModuleExportInfo = astModuleExportInfo;
     }
     return entryPointAstModule.astModuleExportInfo;
+  }
+
+  /**
+   * Returns true if the module specifier refers to an external package.  Ignores packages listed in the
+   * "bundledPackages" setting from the api-extractor.json config file.
+   *
+   * @remarks
+   * Examples:
+   *
+   * - NO:  `./file1`
+   * - YES: `library1/path/path`
+   * - YES: `@my-scope/my-package`
+   */
+  private _isExternalModulePath(moduleSpecifier: string): boolean {
+    if (ts.isExternalModuleNameRelative(moduleSpecifier)) {
+      return false;
+    }
+
+    const match: RegExpExecArray | null = ExportAnalyzer._modulePathRegExp.exec(moduleSpecifier);
+    if (match) {
+      // Extract "@my-scope/my-package" from "@my-scope/my-package/path/module"
+      const packageName: string = match[1];
+      if (this._bundledPackageNames.has(packageName)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /**
@@ -294,7 +333,7 @@ export class ExportAnalyzer {
     if (referringModuleIsExternal) {
       current = TypeScriptHelpers.followAliases(symbol, this._typeChecker);
     } else {
-      while (true) { // tslint:disable-line:no-constant-condition
+      for (; ;) {
         // Is this symbol an import/export that we need to follow to find the real declaration?
         for (const declaration of current.declarations || []) {
 
@@ -309,7 +348,7 @@ export class ExportAnalyzer {
           }
         }
 
-        if (!(current.flags & ts.SymbolFlags.Alias)) { // tslint:disable-line:no-bitwise
+        if (!(current.flags & ts.SymbolFlags.Alias)) { // eslint-disable-line no-bitwise
           break;
         }
 
@@ -409,7 +448,7 @@ export class ExportAnalyzer {
 
         if (externalModulePath === undefined) {
           // The implementation here only works when importing from an external module.
-          // The full solution is tracked by: https://github.com/Microsoft/web-build-tools/issues/1029
+          // The full solution is tracked by: https://github.com/microsoft/rushstack/issues/1029
           throw new Error('"import * as ___ from ___;" is not supported yet for local files.'
             + '\nFailure in: ' + importDeclaration.getSourceFile().fileName);
         }
@@ -617,7 +656,7 @@ export class ExportAnalyzer {
 
     // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
     // but ignore:  "../folder/LocalFile"
-    if (!ts.isExternalModuleNameRelative(moduleSpecifier)) {
+    if (this._isExternalModulePath(moduleSpecifier)) {
       return moduleSpecifier;
     }
 

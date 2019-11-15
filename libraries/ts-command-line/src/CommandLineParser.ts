@@ -26,15 +26,14 @@ export interface ICommandLineParserOptions {
 export class CommandLineParserExitError extends Error {
   public readonly exitCode: number;
 
-  constructor(exitCode: number, message: string) {
+  public constructor(exitCode: number, message: string) {
     super(message);
 
     // Manually set the prototype, as we can no longer extend built-in classes like Error, Array, Map, etc
-    // tslint:disable-next-line:max-line-length
-    // https://github.com/Microsoft/TypeScript-wiki/blob/master/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    // https://github.com/microsoft/TypeScript-wiki/blob/master/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
     //
     // Note: the prototype must also be set on any classes which extend this one
-    (this as any).__proto__ = CommandLineParserExitError.prototype; // tslint:disable-line:no-any
+    (this as any).__proto__ = CommandLineParserExitError.prototype; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     this.exitCode = exitCode;
   }
@@ -86,7 +85,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   private _actionsByName: Map<string, CommandLineAction>;
   private _executed: boolean = false;
 
-  constructor(options: ICommandLineParserOptions) {
+  public constructor(options: ICommandLineParserOptions) {
     super();
 
     this._options = options;

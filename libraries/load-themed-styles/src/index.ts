@@ -3,9 +3,11 @@
  * to use if that slot is not specified by the theme.
  */
 
+/* eslint-disable @typescript-eslint/no-use-before-define */
+
 // Declaring a global here in case that the execution environment is Node.js (without importing the
 // entire node.js d.ts for now)
-declare var global: any; // tslint:disable-line:no-any
+declare let global: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export interface IThemingInstruction {
   theme?: string;
@@ -13,7 +15,7 @@ export interface IThemingInstruction {
   rawString?: string;
 }
 
-export type ThemableArray = Array<IThemingInstruction>;
+export type ThemableArray = IThemingInstruction[];
 
 export interface ITheme {
   [key: string]: string;
@@ -62,6 +64,10 @@ interface IStyleRecord {
   themableStyle: ThemableArray;
 }
 
+interface ICustomEvent<T> extends Event {
+  args?: T;
+}
+
 /**
  * object returned from resolveThemableArray function
  */
@@ -97,7 +103,7 @@ export const enum ClearStyleOptions {
 
 // Store the theming state in __themeState__ global scope for reuse in the case of duplicate
 // load-themed-styles hosted on the page.
-const _root: any = (typeof window === 'undefined') ? global : window; // tslint:disable-line:no-any
+const _root: any = (typeof window === 'undefined') ? global : window; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 // Nonce string to inject into script tag if one provided. This is used in CSP (Content Security Policy).
 const _styleNonce: string = _root && _root.CSPSettings && _root.CSPSettings.nonce;
@@ -107,7 +113,6 @@ const _themeState: IThemeState = initializeThemeState();
 /**
  * Matches theming tokens. For example, "[theme: themeSlotName, default: #FFF]" (including the quotes).
  */
-// tslint:disable-next-line:max-line-length
 const _themeTokenRegex: RegExp = /[\'\"]\[theme:\s*(\w+)\s*(?:\,\s*default:\s*([\\"\']?[\.\,\(\)\#\-\s\w]*[\.\,\(\)\#\-\w][\"\']?))?\s*\][\'\"]/g;
 
 const now: () => number =
@@ -345,8 +350,8 @@ export function splitStyles(styles: string): ThemableArray {
   const result: ThemableArray = [];
   if (styles) {
     let pos: number = 0; // Current position in styles.
-    let tokenMatch: RegExpExecArray | null; // tslint:disable-line:no-null-keyword
-    while (tokenMatch = _themeTokenRegex.exec(styles)) {
+    let tokenMatch: RegExpExecArray | null; // eslint-disable-line no-restricted-syntax
+    while ((tokenMatch = _themeTokenRegex.exec(styles))) {
       const matchIndex: number = tokenMatch.index;
       if (matchIndex > pos) {
         result.push({
@@ -389,6 +394,7 @@ function registerStyles(styleArray: ThemableArray): void {
     themable
   } = resolveThemableArray(styleArray);
 
+  styleElement.setAttribute('data-load-themed-styles', 'true');
   styleElement.type = 'text/css';
   if (_styleNonce) {
     styleElement.setAttribute('nonce', _styleNonce);
@@ -396,6 +402,13 @@ function registerStyles(styleArray: ThemableArray): void {
   styleElement.appendChild(document.createTextNode(styleString));
   _themeState.perf.count++;
   head.appendChild(styleElement);
+
+  const ev: ICustomEvent<{ newStyle: HTMLStyleElement}> = document.createEvent('HTMLEvents');
+  ev.initEvent('styleinsert', true /* bubbleEvent */, false /* cancelable */);
+  ev.args = {
+    newStyle: styleElement
+  };
+  document.dispatchEvent(ev);
 
   const record: IStyleRecord = {
     styleElement: styleElement,

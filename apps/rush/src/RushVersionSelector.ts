@@ -21,7 +21,7 @@ export class RushVersionSelector {
   private _rushGlobalFolder: _RushGlobalFolder;
   private _currentPackageVersion: string;
 
-  constructor(currentPackageVersion: string) {
+  public constructor(currentPackageVersion: string) {
     this._rushGlobalFolder = new _RushGlobalFolder();
     this._currentPackageVersion = currentPackageVersion;
   }
@@ -68,7 +68,7 @@ export class RushVersionSelector {
                 // the package at all, we can reasonably assume it's good for all the repositories.
                 // In particular, we'll assume that two different NPM registries cannot have two
                 // different implementations of the same version of the same package.
-                // This was needed for: https://github.com/Microsoft/web-build-tools/issues/691
+                // This was needed for: https://github.com/microsoft/rushstack/issues/691
                 commonRushConfigFolder: configuration ? configuration.commonRushConfigFolder : undefined,
                 suppressOutput: true
               });
@@ -111,6 +111,7 @@ export class RushVersionSelector {
         ));
       } else {
         // For newer rush-lib, RushCommandSelector can test whether "rushx" is supported or not
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const rushCliEntrypoint: { } = require(path.join(
           expectedRushPath,
           'node_modules',

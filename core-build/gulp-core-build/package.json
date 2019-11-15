@@ -1,10 +1,10 @@
 {
   "name": "@microsoft/gulp-core-build",
-  "version": "3.12.0",
+  "version": "3.12.5",
   "description": "Core gulp build tasks for building typescript, html, less, etc.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/core-build/gulp-core-build"
+    "url": "https://github.com/microsoft/rushstack/tree/master/core-build/gulp-core-build"
   },
   "scripts": {
     "build": "gulp --clean"
@@ -13,7 +13,7 @@
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "3.15.0",
+    "@microsoft/node-core-library": "3.18.0",
     "@types/chalk": "0.4.31",
     "@types/gulp": "4.0.6",
     "@types/node": "8.10.54",
@@ -28,6 +28,7 @@
     "end-of-stream": "~1.1.0",
     "glob-escape": "~0.0.1",
     "globby": "~5.0.0",
+    "glob": "~7.0.5",
     "gulp": "~4.0.2",
     "gulp-flatten": "~0.2.0",
     "gulp-if": "^2.0.1",
@@ -49,10 +50,11 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@types/mocha": "5.2.5",
+    "@microsoft/node-library-build": "6.3.2",
+    "@microsoft/rush-stack-compiler-3.4": "0.3.2",
+    "@rushstack/eslint-config": "0.4.2",
     "@types/chai": "3.4.34",
-    "@microsoft/node-library-build": "6.1.2",
-    "@microsoft/rush-stack-compiler-3.4": "0.1.15",
+    "@types/mocha": "5.2.5",
     "@types/z-schema": "3.16.31",
     "chai": "~3.5.0"
   }

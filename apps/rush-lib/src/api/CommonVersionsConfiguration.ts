@@ -42,6 +42,8 @@ interface ICommonVersionsJson {
 
   preferredVersions?: ICommonVersionsJsonVersionMap;
 
+  implicitlyPreferredVersions?: boolean;
+
   xstitchPreferredVersions?: ICommonVersionsJsonVersionMap;
 
   allowedAlternativeVersions?: ICommonVersionsJsonVersionsMap;
@@ -58,9 +60,41 @@ export class CommonVersionsConfiguration {
 
   private _filePath: string;
   private _preferredVersions: ProtectableMap<string, string>;
+  private _implicitlyPreferredVersions: boolean | undefined;
   private _xstitchPreferredVersions: ProtectableMap<string, string>;
   private _allowedAlternativeVersions: ProtectableMap<string, string[]>;
   private _modified: boolean;
+
+  private constructor(commonVersionsJson: ICommonVersionsJson | undefined, filePath: string) {
+    this._preferredVersions = new ProtectableMap<string, string>(
+      { onSet: this._onSetPreferredVersions.bind(this) });
+
+    if (commonVersionsJson && commonVersionsJson.implicitlyPreferredVersions !== undefined) {
+      this._implicitlyPreferredVersions = commonVersionsJson.implicitlyPreferredVersions;
+    } else {
+      this._implicitlyPreferredVersions = undefined;
+    }
+
+    this._xstitchPreferredVersions = new ProtectableMap<string, string>(
+      { onSet: this._onSetPreferredVersions.bind(this) });
+
+    this._allowedAlternativeVersions = new ProtectableMap<string, string[]>(
+      { onSet: this._onSetAllowedAlternativeVersions.bind(this) });
+
+    if (commonVersionsJson) {
+      try {
+        CommonVersionsConfiguration._deserializeTable(this.preferredVersions,
+          commonVersionsJson.preferredVersions);
+        CommonVersionsConfiguration._deserializeTable(this.xstitchPreferredVersions,
+          commonVersionsJson.xstitchPreferredVersions);
+        CommonVersionsConfiguration._deserializeTable(this.allowedAlternativeVersions,
+          commonVersionsJson.allowedAlternativeVersions);
+      } catch (e) {
+        throw new Error(`Error loading "${path.basename(filePath)}": ${e.message}`);
+      }
+    }
+    this._filePath = filePath;
+  }
 
   /**
    * Loads the common-versions.json data from the specified file path.
@@ -118,28 +152,33 @@ export class CommonVersionsConfiguration {
   }
 
   /**
-   * A table that specifies a "preferred version" for a dependency package.
+   * A table that specifies a "preferred version" for a given NPM package.  This feature is typically used
+   * to hold back an indirect dependency to a specific older version, or to reduce duplication of indirect dependencies.
    *
    * @remarks
-   * The "preferred version" is typically used to hold an indirect dependency back to a specific
-   * version, however generally it can be any SemVer range specifier (e.g. "~1.2.3"), and it
-   * will narrow any (compatible) SemVer range specifier.
+   * The "preferredVersions" value can be any SemVer range specifier (e.g. `~1.2.3`).  Rush injects these values into
+   * the "dependencies" field of the top-level common/temp/package.json, which influences how the package manager
+   * will calculate versions.  The specific effect depends on your package manager.  Generally it will have no
+   * effect on an incompatible or already constrained SemVer range.  If you are using PNPM, similar effects can be
+   * achieved using the pnpmfile.js hook.  See the Rush documentation for more details.
    *
-   * For example, suppose local project `A` depends on an external package `B`, and `B` asks
-   * for `C@^1.0.0`, which normally would select `C@1.5.0`.  If we specify `C@~1.2.3` as our preferred version,
-   * and it selects `C@1.2.9`, then that will be installed for B instead of `C@1.5.0`.  Whereas if the
-   * preferred version was `C@~2.0.0` then it would have no effect, because this is incompatible
-   * with `C@^1.0.0`.  A compatible parent dependency will take precedence over the preferred version;
-   * for example if `A` had a direct dependency on `C@1.2.2`, then `B` would get `C@1.2.2` regardless of the
-   * preferred version.
-   *
-   * Rush's implementation relies on the package manager's heuristic for avoiding duplicates by
-   * trying to reuse dependencies requested by a parent in the graph:  The preferred versions
-   * are simply injected into the fake common/temp/package.json file that acts as the root
-   * for all local projects in the Rush repo.
+   * After modifying this field, it's recommended to run `rush update --full` so that the package manager
+   * will recalculate all version selections.
    */
   public get preferredVersions(): Map<string, string> {
     return this._preferredVersions.protectedView;
+  }
+
+  /**
+   * When set to true, for all projects in the repo, all dependencies will be automatically added as preferredVersions,
+   * except in cases where different projects specify different version ranges for a given dependency.  For older
+   * package managers, this tended to reduce duplication of indirect dependencies.  However, it can sometimes cause
+   * trouble for indirect dependencies with incompatible peerDependencies ranges.
+   *
+   * If the value is `undefined`, then the default value is `true`.
+   */
+  public get implicitlyPreferredVersions(): boolean | undefined {
+    return this._implicitlyPreferredVersions;
   }
 
   /**
@@ -178,31 +217,6 @@ export class CommonVersionsConfiguration {
     MapExtensions.mergeFromMap(allPreferredVersions, this.preferredVersions);
     MapExtensions.mergeFromMap(allPreferredVersions, this.xstitchPreferredVersions);
     return allPreferredVersions;
-  }
-
-  private constructor(commonVersionsJson: ICommonVersionsJson | undefined, filePath: string) {
-    this._preferredVersions = new ProtectableMap<string, string>(
-      { onSet: this._onSetPreferredVersions.bind(this) });
-
-    this._xstitchPreferredVersions = new ProtectableMap<string, string>(
-      { onSet: this._onSetPreferredVersions.bind(this) });
-
-    this._allowedAlternativeVersions = new ProtectableMap<string, string[]>(
-      { onSet: this._onSetAllowedAlternativeVersions.bind(this) });
-
-    if (commonVersionsJson) {
-      try {
-        CommonVersionsConfiguration._deserializeTable(this.preferredVersions,
-          commonVersionsJson.preferredVersions);
-        CommonVersionsConfiguration._deserializeTable(this.xstitchPreferredVersions,
-          commonVersionsJson.xstitchPreferredVersions);
-        CommonVersionsConfiguration._deserializeTable(this.allowedAlternativeVersions,
-          commonVersionsJson.allowedAlternativeVersions);
-      } catch (e) {
-        throw new Error(`Error loading "${path.basename(filePath)}": ${e.message}`);
-      }
-    }
-    this._filePath = filePath;
   }
 
   private _onSetPreferredVersions(source: ProtectableMap<string, string>, key: string, value: string): string {

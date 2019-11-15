@@ -44,7 +44,7 @@ export enum ApiJsonSchemaVersion {
   /**
    * Used to assign `IApiPackageMetadataJson.oldestForwardsCompatibleVersion`.
    *
-   * This value must be <= `ApiJsonSchemaVersion.LATEST`.  It must be reset to the `LATEST` value
+   * This value must be \<= `ApiJsonSchemaVersion.LATEST`.  It must be reset to the `LATEST` value
    * if the older library would not be able to deserialize your new file format.  Adding a nonessential field
    * is generally okay.  Removing, modifying, or reinterpreting existing fields is NOT safe.
    */

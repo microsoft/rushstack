@@ -7,22 +7,27 @@ import * as path from 'path';
 import * as semver from 'semver';
 import { FileConstants } from '@microsoft/node-core-library';
 
-type ShrinkwrapDep = { [name: string]: { version: string } };
-type PackageDep = { [name: string]: string };
+interface IShrinkwrapDep {
+  [name: string]: { version: string }
+};
+
+interface IPackageDep {
+  [name: string]: string
+};
 
 /**
  * Partial representation of the contents of a `package.json` file
  */
 interface INpmPackage {
-  dependencies: PackageDep;
-  devDependencies: PackageDep;
+  dependencies: IPackageDep;
+  devDependencies: IPackageDep;
 }
 
 /**
  * Partial representation of the contents of an `npm-shrinkwrap.json` file
  */
 interface INpmShrinkwrap {
-  dependencies: ShrinkwrapDep;
+  dependencies: IShrinkwrapDep;
 }
 
 /**
@@ -38,7 +43,7 @@ export class ValidateShrinkwrapTask extends GulpTask<void> {
   /**
    * Instantiates an instance of the ValidateShrinkwrap task
    */
-  constructor() {
+  public constructor() {
     super('validate-shrinkwrap');
   }
 
@@ -58,7 +63,9 @@ export class ValidateShrinkwrapTask extends GulpTask<void> {
       return;
     }
 
+    // eslint-disable-next-line
     const packageJson: INpmPackage = require(pathToPackageJson);
+    // eslint-disable-next-line
     const shrinkwrapJson: INpmShrinkwrap = require(pathToShrinkwrap);
 
     this._validate(packageJson.dependencies, shrinkwrapJson.dependencies);
@@ -67,7 +74,7 @@ export class ValidateShrinkwrapTask extends GulpTask<void> {
     return;
   }
 
-  private _validate(packageDep: PackageDep, shrinkwrapDep: ShrinkwrapDep): void {
+  private _validate(packageDep: IPackageDep, shrinkwrapDep: IShrinkwrapDep): void {
     for (const pkg in packageDep) {
       if (!shrinkwrapDep.hasOwnProperty(pkg)) {
         this.logError(`Failed to find package ${pkg} in shrinkwrap file`);

@@ -1,6 +1,51 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Mon, 23 Sep 2019 15:14:55 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Nov 2019 04:50:50 GMT and should not be manually modified.
+
+## 7.5.6
+Fri, 15 Nov 2019 04:50:50 GMT
+
+*Version update only*
+
+## 7.5.5
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 7.5.4
+Tue, 05 Nov 2019 06:49:28 GMT
+
+### Patches
+
+- Fix an issue where API reports sometimes were ordered differently depending on the version of NodeJS (GitHub #1552)
+
+## 7.5.3
+Tue, 05 Nov 2019 01:08:39 GMT
+
+### Patches
+
+- Clarified an error message
+
+## 7.5.2
+Tue, 22 Oct 2019 06:24:44 GMT
+
+### Patches
+
+- Refactor some code as part of migration from TSLint to ESLint
+
+## 7.5.1
+Sun, 29 Sep 2019 23:56:29 GMT
+
+### Patches
+
+- Update repository URL
+
+## 7.5.0
+Wed, 25 Sep 2019 15:15:31 GMT
+
+### Minor changes
+
+- Add ApiItem.getMergedSiblings() API
 
 ## 7.4.2
 Mon, 23 Sep 2019 15:14:55 GMT

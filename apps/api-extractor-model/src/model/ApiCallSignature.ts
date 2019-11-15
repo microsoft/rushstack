@@ -53,12 +53,12 @@ export interface IApiCallSignatureOptions extends
 export class ApiCallSignature extends ApiTypeParameterListMixin(ApiParameterListMixin(ApiReleaseTagMixin(
   ApiReturnTypeMixin(ApiDeclaredItem)))) {
 
-  public static getContainerKey(overloadIndex: number): string {
-    return `|${ApiItemKind.CallSignature}|${overloadIndex}`;
-  }
-
   public constructor(options: IApiCallSignatureOptions) {
     super(options);
+  }
+
+  public static getContainerKey(overloadIndex: number): string {
+    return `|${ApiItemKind.CallSignature}|${overloadIndex}`;
   }
 
   /** @override */

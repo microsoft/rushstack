@@ -69,13 +69,23 @@ export interface IConfigPlugin {
 }
 
 /**
- * This interface represents the api-extractor.json file format.
+ * This interface represents the api-documenter.json file format.
  */
 export interface IConfigFile {
   /**
    * Specifies the output target.
    */
   outputTarget: 'docfx' | 'markdown';
+
+  /**
+   * Specifies what type of newlines API Documenter should use when writing output files.
+   *
+   * @remarks
+   * By default, the output files will be written with Windows-style newlines.
+   * To use POSIX-style newlines, specify "lf" instead.
+   * To use the OS's default newline kind, specify "os".
+   */
+  newlineKind?: 'crlf' | 'lf' | 'os';
 
   /**
    * Include documentation for namespaces and add them to the TOC.

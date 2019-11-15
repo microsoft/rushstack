@@ -44,12 +44,12 @@ export interface IApiMethodSignatureOptions extends
 export class ApiMethodSignature extends ApiNameMixin(ApiTypeParameterListMixin(ApiParameterListMixin(
   ApiReleaseTagMixin(ApiReturnTypeMixin(ApiDeclaredItem))))) {
 
-  public static getContainerKey(name: string, overloadIndex: number): string {
-    return `${name}|${ApiItemKind.MethodSignature}|${overloadIndex}`;
-  }
-
   public constructor(options: IApiMethodSignatureOptions) {
     super(options);
+  }
+
+  public static getContainerKey(name: string, overloadIndex: number): string {
+    return `${name}|${ApiItemKind.MethodSignature}|${overloadIndex}`;
   }
 
   /** @override */

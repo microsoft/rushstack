@@ -14,7 +14,8 @@ import {
   PackageName,
   Text,
   InternalError,
-  Path
+  Path,
+  NewlineKind
 } from '@microsoft/node-core-library';
 import {
   IConfigFile,
@@ -95,6 +96,7 @@ interface IExtractorConfigParameters {
   packageJson: INodePackageJson | undefined;
   packageFolder: string | undefined;
   mainEntryPointFilePath: string;
+  bundledPackages: string[];
   tsconfigFilePath: string;
   overrideTsconfig: { } | undefined;
   skipLibCheck: boolean;
@@ -110,6 +112,7 @@ interface IExtractorConfigParameters {
   omitTrimmingComments: boolean;
   tsdocMetadataEnabled: boolean;
   tsdocMetadataFilePath: string;
+  newlineKind: string;
   messages: IExtractorMessagesConfig;
   testMode: boolean;
 }
@@ -153,6 +156,9 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigFile.mainEntryPointFilePath} */
   public readonly mainEntryPointFilePath: string;
 
+  /** {@inheritDoc IConfigFile.bundledPackages} */
+  public readonly bundledPackages: string[];
+
   /** {@inheritDoc IConfigCompiler.tsconfigFilePath} */
   public readonly tsconfigFilePath: string;
 
@@ -191,6 +197,12 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigTsdocMetadata.tsdocMetadataFilePath} */
   public readonly tsdocMetadataFilePath: string;
 
+  /**
+   * Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files
+   * will be written with Windows-style newlines.
+   */
+  public readonly newlineKind: NewlineKind;
+
   /** {@inheritDoc IConfigFile.messages} */
   public readonly messages: IExtractorMessagesConfig;
 
@@ -202,6 +214,7 @@ export class ExtractorConfig {
     this.packageJson = parameters.packageJson;
     this.packageFolder = parameters.packageFolder;
     this.mainEntryPointFilePath = parameters.mainEntryPointFilePath;
+    this.bundledPackages = parameters.bundledPackages;
     this.tsconfigFilePath = parameters.tsconfigFilePath;
     this.overrideTsconfig = parameters.overrideTsconfig;
     this.skipLibCheck = parameters.skipLibCheck;
@@ -461,7 +474,9 @@ export class ExtractorConfig {
         throw new Error('The "packageJsonFullPath" setting must be an absolute path');
       }
 
-      if (!options.packageJson) {
+      if (options.packageJson) {
+        packageJson = options.packageJson;
+      } else {
         const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
         packageJson = packageJsonLookup.loadNodePackageJson(packageJsonFullPath);
       }
@@ -541,6 +556,13 @@ export class ExtractorConfig {
 
       if (!FileSystem.exists(mainEntryPointFilePath)) {
         throw new Error('The "mainEntryPointFilePath" path does not exist: ' + mainEntryPointFilePath);
+      }
+
+      const bundledPackages: string[] = configObject.bundledPackages || [];
+      for (const bundledPackage of bundledPackages) {
+        if (!PackageName.isValidName(bundledPackage)) {
+          throw new Error(`The "bundledPackages" list contains an invalid package name: "${bundledPackage}"`);
+        }
       }
 
       const tsconfigFilePath: string = ExtractorConfig._resolvePathWithTokens('tsconfigFilePath',
@@ -640,11 +662,25 @@ export class ExtractorConfig {
         omitTrimmingComments = !!configObject.dtsRollup.omitTrimmingComments;
       }
 
+      let newlineKind: NewlineKind;
+      switch (configObject.newlineKind) {
+        case 'lf':
+          newlineKind = NewlineKind.Lf;
+          break;
+        case 'os':
+          newlineKind = NewlineKind.OsDefault;
+          break;
+        default:
+          newlineKind = NewlineKind.CrLf;
+          break;
+      }
+
       return new ExtractorConfig({
         projectFolder: projectFolder,
         packageJson,
         packageFolder,
         mainEntryPointFilePath,
+        bundledPackages,
         tsconfigFilePath,
         overrideTsconfig: configObject.compiler.overrideTsconfig,
         skipLibCheck: !!configObject.compiler.skipLibCheck,
@@ -660,6 +696,7 @@ export class ExtractorConfig {
         omitTrimmingComments,
         tsdocMetadataEnabled,
         tsdocMetadataFilePath,
+        newlineKind,
         messages: configObject.messages || { },
         testMode: !!configObject.testMode
       });

@@ -13,7 +13,7 @@ import { BaseConfiglessRushAction } from './BaseRushAction';
 import { FileSystem } from '@microsoft/node-core-library';
 
 export class ScanAction extends BaseConfiglessRushAction {
-  constructor(parser: RushCommandLineParser) {
+  public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'scan',
       summary: 'Scan the current project folder and display a report of imported packages.',

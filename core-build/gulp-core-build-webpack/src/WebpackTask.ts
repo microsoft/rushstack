@@ -17,9 +17,10 @@ export interface IWebpackTaskConfig {
   configPath: string;
 
   /**
-   * Webpack config object. If a path is specified by "configPath," and it is valid, this option is ignored.
+   * Webpack config object, or array of config objects for multi-compiler.
+   * If a path is specified by "configPath," and it is valid, this option is ignored.
    */
-  config?: Webpack.Configuration;
+  config?: Webpack.Configuration | Webpack.Configuration[];
 
   /**
    * An array of regular expressions or regular expression strings. If a warning matches any of them, it
@@ -51,15 +52,15 @@ export interface IWebpackResources {
 export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TExtendedConfig> {
   private _resources: IWebpackResources;
 
-  constructor(extendedName?: string, extendedConfig?: TExtendedConfig) {
+  public constructor(extendedName?: string, extendedConfig?: TExtendedConfig) {
     super(
       extendedName || 'webpack',
       {
         configPath: './webpack.config.js',
         suppressWarnings: [],
         printStats: true,
-        ...(extendedConfig as Object)
-      } as any // tslint:disable-line:no-any
+        ...extendedConfig
+      } as any // eslint-disable-line @typescript-eslint/no-explicit-any
     );
   }
 
@@ -76,20 +77,19 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
   public isEnabled(buildConfig: IBuildConfig): boolean {
     return (
       super.isEnabled(buildConfig) &&
-      this.taskConfig.configPath !== null // tslint:disable-line:no-null-keyword
+      this.taskConfig.configPath !== null // eslint-disable-line no-restricted-syntax
     );
   }
 
-  public loadSchema(): Object {
+  public loadSchema(): any { // eslint-disable-line @typescript-eslint/no-explicit-any
     return require('./webpack.schema.json');
   }
 
   public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): void {
     const shouldInitWebpack: boolean = (process.argv.indexOf('--initwebpack') > -1);
 
-    /* tslint:disable:typedef */
+    // eslint-disable-next-line
     const path = require('path');
-    /* tslint:enabled:typedef */
 
     if (shouldInitWebpack) {
       this.log(
@@ -99,7 +99,7 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
       this.copyFile(path.resolve(__dirname, 'webpack.config.js'));
       completeCallback();
     } else {
-      let webpackConfig: Object;
+      let webpackConfig: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
       if (this.taskConfig.configPath && this.fileExists(this.taskConfig.configPath)) {
         try {
@@ -118,8 +118,8 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
 
       if (webpackConfig) {
         const webpack: typeof Webpack = this.taskConfig.webpack || require('webpack');
-        const startTime = new Date().getTime();
-        const outputDir = this.buildConfig.distFolder;
+        const startTime: number = new Date().getTime();
+        const outputDir: string = this.buildConfig.distFolder;
 
         webpack(
           webpackConfig,
@@ -128,11 +128,10 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
               this.buildConfig.properties = {};
             }
 
-            /* tslint:disable:no-string-literal */
+            // eslint-disable-next-line dot-notation
             this.buildConfig.properties['webpackStats'] = stats;
-            /* tslint:enable:no-string-literal */
 
-            const statsResult = stats.toJson({
+            const statsResult: Webpack.Stats.ToJsonOutput = stats.toJson({
               hash: false,
               source: false
             });
@@ -143,14 +142,14 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
 
             if (statsResult.warnings && statsResult.warnings.length) {
               const unsuppressedWarnings: string[] = [];
-              const warningSuppressionRegexes = (this.taskConfig.suppressWarnings || []).map((regex: string) => {
+              const warningSuppressionRegexes: RegExp[] = (this.taskConfig.suppressWarnings || []).map((regex: string) => {
                 return new RegExp(regex);
               });
 
               statsResult.warnings.forEach((warning: string) => {
-                let suppressed = false;
-                for (let i = 0; i < warningSuppressionRegexes.length; i++) {
-                  const suppressionRegex = warningSuppressionRegexes[i];
+                let suppressed: boolean = false;
+                for (let i: number = 0; i < warningSuppressionRegexes.length; i++) {
+                  const suppressionRegex: RegExp = warningSuppressionRegexes[i];
                   if (warning.match(suppressionRegex)) {
                     suppressed = true;
                     break;
@@ -167,8 +166,8 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
               }
             }
 
-            const duration = (new Date().getTime() - startTime);
-            const statsResultChildren = statsResult.children ? statsResult.children : [statsResult];
+            const duration: number = (new Date().getTime() - startTime);
+            const statsResultChildren: Webpack.Stats.ToJsonOutput[] = statsResult.children ? statsResult.children : [statsResult];
 
             statsResultChildren.forEach(child => {
               if (child.chunks) {
@@ -176,7 +175,7 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
                   if (chunk.files && this.taskConfig.printStats) {
                     chunk.files.forEach(file => (
                       this.log(`Bundled: '${colors.cyan(path.basename(file))}', ` +
-                                `size: ${colors.magenta(chunk.size)} bytes, ` +
+                                `size: ${colors.magenta(chunk.size.toString())} bytes, ` +
                                 `took ${colors.magenta(duration.toString(10))} ms.`)
                     )); // end file
                   }
@@ -190,7 +189,7 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
     }
   }
 
-  private _logMissingConfigWarning() {
+  private _logMissingConfigWarning(): void {
     this.logWarning(
       'No webpack config has been provided. ' +
       'Run again using --initwebpack to create a default config, ' +

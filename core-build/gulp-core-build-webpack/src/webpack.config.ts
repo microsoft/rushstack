@@ -1,6 +1,6 @@
 import * as Webpack from 'webpack';
 // @ts-ignore
-import * as WebpackDevServer from 'webpack-dev-server';
+import * as WebpackDevServer from 'webpack-dev-server'; // eslint-disable-line
 import { WebpackTask } from './WebpackTask';
 import * as path from 'path';
 
@@ -10,6 +10,7 @@ const webpack: typeof Webpack = webpackTask.resources.webpack;
 
 const isProduction: boolean = webpackTask.buildConfig.production;
 
+// eslint-disable-next-line
 const packageJSON: { name: string } = require('./package.json');
 
 const webpackConfiguration: Webpack.Configuration = {
@@ -40,7 +41,7 @@ const webpackConfiguration: Webpack.Configuration = {
       amd: 'react-dom',
       commonjs: 'react-dom'
     }
-  } as any, // tslint:disable-line:no-any
+  } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
 
   plugins: [
     // new WebpackNotifierPlugin()

@@ -164,10 +164,10 @@ typescript.setConfig({
 
 # Related projects
 
-[@microsoft/gulp-core-build](https://github.com/Microsoft/gulp-core-build) - An abstraction around gulp that adds simplified serial/parallel task execution and a formal base task interface.
+[@microsoft/gulp-core-build](https://github.com/microsoft/gulp-core-build) - An abstraction around gulp that adds simplified serial/parallel task execution and a formal base task interface.
 
-[typescript](https://github.com/Microsoft/typescript) - The TypeScript compiler.
+[typescript](https://github.com/microsoft/typescript) - The TypeScript compiler.
 
 # License
 
-[MIT](https://github.com/Microsoft/gulp-core-build-typescript/blob/master/LICENSE)
+[MIT](https://github.com/microsoft/gulp-core-build-typescript/blob/master/LICENSE)

@@ -78,17 +78,23 @@ export class ApprovedPackagesConfiguration {
     return this._itemsByName.get(packageName);
   }
 
-  public addOrUpdatePackage(packageName: string, reviewCategory: string): void {
+  public addOrUpdatePackage(packageName: string, reviewCategory: string): boolean {
+    let changed: boolean = false;
+
     let item: ApprovedPackagesItem | undefined = this._itemsByName.get(packageName);
     if (!item) {
       item = new ApprovedPackagesItem();
       item.packageName = packageName;
       this._addItem(item);
+      changed = true;
     }
 
-    if (reviewCategory) {
+    if (reviewCategory && !item.allowedCategories.has(reviewCategory)) {
       item.allowedCategories.add(reviewCategory);
+      changed = true;
     }
+
+    return changed;
   }
 
   /**
@@ -130,7 +136,8 @@ export class ApprovedPackagesConfiguration {
     // Update the JSON structure that we already loaded, preserving any existing state
     // (which passed schema validation).
 
-    this._loadedJson.$schema = JsonSchemaUrls.approvedPackages,
+    // eslint-disable-next-line dot-notation
+    this._loadedJson['$schema'] = JsonSchemaUrls.approvedPackages;
 
     this._loadedJson.packages = [];
 

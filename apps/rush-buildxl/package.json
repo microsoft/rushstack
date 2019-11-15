@@ -1,10 +1,10 @@
 {
   "name": "@microsoft/rush-buildxl",
-  "version": "5.13.0",
+  "version": "5.17.0",
   "description": "An experimental tool that connects Rush and BuildXL",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/apps/rush-buildxl"
+    "url": "https://github.com/microsoft/rushstack/tree/master/apps/rush-buildxl"
   },
   "engines": {
     "node": ">=5.6.0"
@@ -19,13 +19,14 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "3.15.0",
-    "@microsoft/rush-lib": "5.13.0",
-    "@microsoft/ts-command-line": "4.3.1"
+    "@microsoft/node-core-library": "3.18.0",
+    "@microsoft/rush-lib": "5.17.0",
+    "@microsoft/ts-command-line": "4.3.5"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.2.1",
-    "@microsoft/rush-stack-compiler-3.4": "0.2.1",
+    "@microsoft/node-library-build": "6.3.7",
+    "@microsoft/rush-stack-compiler-3.4": "0.3.7",
+    "@rushstack/eslint-config": "0.4.2",
     "@types/jest": "23.3.11",
     "@types/node": "8.10.54",
     "gulp": "~4.0.2"

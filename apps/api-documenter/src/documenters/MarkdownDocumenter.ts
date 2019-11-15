@@ -207,6 +207,17 @@ export class MarkdownDocumenter {
       }
     }
 
+    let appendRemarks: boolean = true;
+    switch (apiItem.kind) {
+      case ApiItemKind.Class:
+      case ApiItemKind.Interface:
+      case ApiItemKind.Namespace:
+      case ApiItemKind.Package:
+        this._writeRemarksSection(output, apiItem);
+        appendRemarks = false;
+        break;
+    }
+
     switch (apiItem.kind) {
       case ApiItemKind.Class:
         this._writeClassTables(output, apiItem as ApiClass);
@@ -244,31 +255,8 @@ export class MarkdownDocumenter {
         throw new Error('Unsupported API item kind: ' + apiItem.kind);
     }
 
-    if (apiItem instanceof ApiDocumentedItem) {
-      const tsdocComment: DocComment | undefined = apiItem.tsdocComment;
-
-      if (tsdocComment) {
-        // Write the @remarks block
-        if (tsdocComment.remarksBlock) {
-          output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Remarks' }));
-          this._appendSection(output, tsdocComment.remarksBlock.content);
-        }
-
-        // Write the @example blocks
-        const exampleBlocks: DocBlock[] = tsdocComment.customBlocks.filter(x => x.blockTag.tagNameWithUpperCase
-          === StandardTags.example.tagNameWithUpperCase);
-
-        let exampleNumber: number = 1;
-        for (const exampleBlock of exampleBlocks) {
-          const heading: string = exampleBlocks.length > 1 ? `Example ${exampleNumber}` : 'Example';
-
-          output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: heading }));
-
-          this._appendSection(output, exampleBlock.content);
-
-          ++exampleNumber;
-        }
-      }
+    if (appendRemarks) {
+    this._writeRemarksSection(output, apiItem);
     }
 
     const filename: string = path.join(this._outputFolder, this._getFilenameForApiItem(apiItem));
@@ -297,8 +285,37 @@ export class MarkdownDocumenter {
     }
 
     FileSystem.writeFile(filename, pageContent, {
-      convertLineEndings: NewlineKind.CrLf
+      convertLineEndings: this._documenterConfig ? this._documenterConfig.newlineKind : NewlineKind.CrLf
     });
+  }
+
+  private _writeRemarksSection(output: DocSection, apiItem: ApiItem): void {
+    if (apiItem instanceof ApiDocumentedItem) {
+      const tsdocComment: DocComment | undefined = apiItem.tsdocComment;
+
+      if (tsdocComment) {
+        // Write the @remarks block
+        if (tsdocComment.remarksBlock) {
+          output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Remarks' }));
+          this._appendSection(output, tsdocComment.remarksBlock.content);
+        }
+
+        // Write the @example blocks
+        const exampleBlocks: DocBlock[] = tsdocComment.customBlocks.filter(x => x.blockTag.tagNameWithUpperCase
+          === StandardTags.example.tagNameWithUpperCase);
+
+        let exampleNumber: number = 1;
+        for (const exampleBlock of exampleBlocks) {
+          const heading: string = exampleBlocks.length > 1 ? `Example ${exampleNumber}` : 'Example';
+
+          output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: heading }));
+
+          this._appendSection(output, exampleBlock.content);
+
+          ++exampleNumber;
+        }
+      }
+    }
   }
 
   /**

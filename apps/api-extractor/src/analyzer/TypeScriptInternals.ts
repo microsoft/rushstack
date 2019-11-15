@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// tslint:disable:no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as ts from 'typescript';
 
@@ -9,8 +9,8 @@ export class TypeScriptInternals {
 
   public static getImmediateAliasedSymbol(symbol: ts.Symbol, typeChecker: ts.TypeChecker): ts.Symbol {
     // Compiler internal:
-    // https://github.com/Microsoft/TypeScript/blob/v3.2.2/src/compiler/checker.ts
-    return (typeChecker as any).getImmediateAliasedSymbol(symbol); // tslint:disable-line:no-any
+    // https://github.com/microsoft/TypeScript/blob/v3.2.2/src/compiler/checker.ts
+    return (typeChecker as any).getImmediateAliasedSymbol(symbol); // eslint-disable-line @typescript-eslint/no-explicit-any
   }
 
   /**
@@ -36,7 +36,7 @@ export class TypeScriptInternals {
    * for a computed property based on its type, rather than by the Binder).
    */
   public static isLateBoundSymbol(symbol: ts.Symbol): boolean {
-    // tslint:disable-next-line:no-bitwise
+    // eslint-disable-next-line no-bitwise
     if (symbol.flags & ts.SymbolFlags.Transient &&
         (symbol as any).checkFlags === (ts as any).CheckFlags.Late) {
       return true;
@@ -49,7 +49,7 @@ export class TypeScriptInternals {
    */
   public static getJSDocCommentRanges(node: ts.Node, text: string): ts.CommentRange[] | undefined {
     // Compiler internal:
-    // https://github.com/Microsoft/TypeScript/blob/v2.4.2/src/compiler/utilities.ts#L616
+    // https://github.com/microsoft/TypeScript/blob/v2.4.2/src/compiler/utilities.ts#L616
 
     return (ts as any).getJSDocCommentRanges.apply(this, arguments);
   }
@@ -59,7 +59,7 @@ export class TypeScriptInternals {
    */
   public static getTextOfIdentifierOrLiteral(node: ts.Identifier | ts.StringLiteralLike | ts.NumericLiteral): string {
     // Compiler internal:
-    // https://github.com/Microsoft/TypeScript/blob/v3.2.2/src/compiler/utilities.ts#L2721
+    // https://github.com/microsoft/TypeScript/blob/v3.2.2/src/compiler/utilities.ts#L2721
 
     return (ts as any).getTextOfIdentifierOrLiteral(node);
   }
@@ -72,7 +72,7 @@ export class TypeScriptInternals {
     | undefined {
 
     // Compiler internal:
-    // https://github.com/Microsoft/TypeScript/blob/v3.2.2/src/compiler/utilities.ts#L218
+    // https://github.com/microsoft/TypeScript/blob/v3.2.2/src/compiler/utilities.ts#L218
 
     return (ts as any).getResolvedModule(sourceFile, moduleNameText);
   }

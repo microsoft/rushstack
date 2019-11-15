@@ -11,7 +11,7 @@ export class BxlConfig {
   private _modules: BxlModule[];
   private _commonRushConfigFolder: string;
 
-  constructor(bxlRoot: string, modulesFolder: string, modules: BxlModule[], commonRushConfigFolder: string) {
+  public constructor(bxlRoot: string, modulesFolder: string, modules: BxlModule[], commonRushConfigFolder: string) {
     this._bxlRoot = bxlRoot;
     this._modulesFolder = modulesFolder;
     this._modules = modules;

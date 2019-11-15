@@ -1,6 +1,75 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Tue, 24 Sep 2019 02:58:49 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Nov 2019 04:50:50 GMT and should not be manually modified.
+
+## 3.5.14
+Fri, 15 Nov 2019 04:50:50 GMT
+
+*Version update only*
+
+## 3.5.13
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 3.5.12
+Wed, 06 Nov 2019 22:44:18 GMT
+
+*Version update only*
+
+## 3.5.11
+Tue, 05 Nov 2019 06:49:28 GMT
+
+*Version update only*
+
+## 3.5.10
+Tue, 05 Nov 2019 01:08:39 GMT
+
+*Version update only*
+
+## 3.5.9
+Fri, 25 Oct 2019 15:08:54 GMT
+
+*Version update only*
+
+## 3.5.8
+Tue, 22 Oct 2019 06:24:44 GMT
+
+### Patches
+
+- Refactor some code as part of migration from TSLint to ESLint
+
+## 3.5.7
+Mon, 21 Oct 2019 05:22:43 GMT
+
+*Version update only*
+
+## 3.5.6
+Fri, 18 Oct 2019 15:15:01 GMT
+
+*Version update only*
+
+## 3.5.5
+Sun, 06 Oct 2019 00:27:39 GMT
+
+*Version update only*
+
+## 3.5.4
+Fri, 04 Oct 2019 00:15:22 GMT
+
+*Version update only*
+
+## 3.5.3
+Sun, 29 Sep 2019 23:56:29 GMT
+
+### Patches
+
+- Update repository URL
+
+## 3.5.2
+Wed, 25 Sep 2019 15:15:31 GMT
+
+*Version update only*
 
 ## 3.5.1
 Tue, 24 Sep 2019 02:58:49 GMT

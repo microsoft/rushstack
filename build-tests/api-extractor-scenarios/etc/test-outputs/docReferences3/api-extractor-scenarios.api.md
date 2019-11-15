@@ -20,7 +20,7 @@ export interface A {
 }
 
 // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "api-extractor-scenarios" does not have an export "MyNamespace"
-// 
+//
 // @public
 export function failWithAmbiguity(): void;
 

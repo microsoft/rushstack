@@ -1,7 +1,11 @@
 {
+  "projectFolder": "<lookup>",
+
   // ("mainEntryPointFilePath" is required)
 
-  "projectFolder": "<lookup>",
+  "bundledPackages": [ ],
+
+  "newlineKind": "crlf",
 
   "compiler": {
     "tsconfigFilePath": "<projectFolder>/tsconfig.json",
@@ -53,6 +57,10 @@
         "addToApiReportFile": true
       },
       "ae-internal-missing-underscore": {
+        "logLevel": "warning",
+        "addToApiReportFile": true
+      },
+      "ae-internal-mixed-release-tag": {
         "logLevel": "warning",
         "addToApiReportFile": true
       },

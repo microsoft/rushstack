@@ -2,10 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import { FileSystem } from '@microsoft/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Utilities } from '../utilities/Utilities';
-import { FileSystem } from '@microsoft/node-core-library';
+import { PnpmProjectDependencyManifest } from './pnpm/PnpmProjectDependencyManifest';
 
 /**
  * This class implements the logic for "rush unlink"
@@ -18,31 +19,45 @@ export class UnlinkManager {
   }
 
   /**
-   * Delete flag file and all the existing node_modules
-   * symlinks
+   * Delete flag file and all the existing node_modules symlinks and all
+   * project/.rush/temp/shrinkwrap-deps.json files
+   *
+   * Returns true if anything was deleted.
    */
   public unlink(): boolean {
     this._deleteFlagFile();
-    return this._deleteSymlinks();
+    return this._deleteProjectFiles();
   }
 
   /**
-   * Delete all the node_modules symlinks of configured Rush
-   * projects
+   * Delete:
+   *  - all the node_modules symlinks of configured Rush projects
+   *  - all of the project/.rush/temp/shrinkwrap-deps.json files of configured Rush projects
+   *
+   * Returns true if anything was deleted
    * */
-  private _deleteSymlinks(): boolean {
-    let didDeleteSymlinks: boolean = false;
+  private _deleteProjectFiles(): boolean {
+    let didDeleteAnything: boolean = false;
 
     for (const rushProject of this._rushConfiguration.projects) {
       const localModuleFolder: string = path.join(rushProject.projectFolder, 'node_modules');
       if (FileSystem.exists(localModuleFolder)) {
-        console.log('Purging ' + localModuleFolder);
+        console.log(`Purging ${localModuleFolder}`);
         Utilities.dangerouslyDeletePath(localModuleFolder);
-        didDeleteSymlinks = true;
+        didDeleteAnything = true;
+      }
+
+      const projectDependencyManifestFilePath: string = PnpmProjectDependencyManifest.getFilePathForProject(
+        rushProject
+      );
+      if (FileSystem.exists(projectDependencyManifestFilePath)) {
+        console.log(`Deleting ${projectDependencyManifestFilePath}`);
+        FileSystem.deleteFile(projectDependencyManifestFilePath);
+        didDeleteAnything = true;
       }
     }
 
-    return didDeleteSymlinks;
+    return didDeleteAnything;
   }
 
   /**

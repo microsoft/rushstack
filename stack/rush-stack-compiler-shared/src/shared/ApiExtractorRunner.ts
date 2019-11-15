@@ -27,20 +27,20 @@ export class ApiExtractorRunner extends RushStackCompilerBase {
   private _extractorConfig: ExtractorConfig;
   private _extractorOptions: IExtractorInvokeOptions;
 
-  constructor(
+  public constructor(
     extractorConfig: ExtractorConfig,
     extractorOptions: IExtractorInvokeOptions,
     rootPath: string,
     terminalProvider: ITerminalProvider
   ) // Remove in the next major version
-  constructor(
+  public constructor(
     options: IRushStackCompilerBaseOptions,
     extractorConfig: ExtractorConfig,
     extractorOptions: IExtractorInvokeOptions,
     rootPath: string,
     terminalProvider: ITerminalProvider
   )
-  constructor(
+  public constructor(
     arg1: IRushStackCompilerBaseOptions| ExtractorConfig,
     arg2: ExtractorConfig| IExtractorInvokeOptions,
     arg3: IExtractorInvokeOptions| string,

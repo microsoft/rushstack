@@ -1,6 +1,77 @@
 # Change Log - @microsoft/rush-stack-compiler-3.0
 
-This log was last generated on Tue, 24 Sep 2019 02:58:49 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Nov 2019 04:50:50 GMT and should not be manually modified.
+
+## 0.8.7
+Fri, 15 Nov 2019 04:50:50 GMT
+
+*Version update only*
+
+## 0.8.6
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 0.8.5
+Wed, 06 Nov 2019 22:44:18 GMT
+
+*Version update only*
+
+## 0.8.4
+Tue, 05 Nov 2019 06:49:29 GMT
+
+*Version update only*
+
+## 0.8.3
+Tue, 05 Nov 2019 01:08:39 GMT
+
+*Version update only*
+
+## 0.8.2
+Fri, 25 Oct 2019 15:08:54 GMT
+
+### Patches
+
+- Fix an issue where ESLint output would fail to parse when a large project is built on a Mac.
+
+## 0.8.1
+Tue, 22 Oct 2019 06:24:44 GMT
+
+*Version update only*
+
+## 0.8.0
+Mon, 21 Oct 2019 05:22:43 GMT
+
+### Minor changes
+
+- Add support for ESLint+TypeScript
+
+## 0.7.6
+Fri, 18 Oct 2019 15:15:01 GMT
+
+*Version update only*
+
+## 0.7.5
+Sun, 06 Oct 2019 00:27:40 GMT
+
+*Version update only*
+
+## 0.7.4
+Fri, 04 Oct 2019 00:15:22 GMT
+
+*Version update only*
+
+## 0.7.3
+Sun, 29 Sep 2019 23:56:29 GMT
+
+### Patches
+
+- Update repository URL
+
+## 0.7.2
+Wed, 25 Sep 2019 15:15:31 GMT
+
+*Version update only*
 
 ## 0.7.1
 Tue, 24 Sep 2019 02:58:49 GMT

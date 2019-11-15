@@ -95,7 +95,7 @@ export class ProtectableMap<K, V> {
   /**
    * Performs an operation for each (key, value) entries in the map.
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public forEach(callbackfn: (value: V, key: K, map: Map<K, V>) => void, thisArg?: any): void {
     this._protectedView.forEach(callbackfn);
   }

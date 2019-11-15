@@ -1,6 +1,65 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 11 Sep 2019 21:41:34 GMT and should not be manually modified.
+This log was last generated on Thu, 14 Nov 2019 22:52:48 GMT and should not be manually modified.
+
+## 5.17.0
+Thu, 14 Nov 2019 22:52:48 GMT
+
+### Updates
+
+- Add a new setting "implicitlyPreferredVersions" in common-versions.json that can be used to solve some installation failures involving peer dependencies
+- Improve the generation of shrinkwrap-deps.json to consider optional peer dependencies and implicitlyPreferredVersions=false
+- Fix an issue where certain operations did not use a stable sort when executed on older versions of NodeJS
+
+## 5.16.1
+Fri, 25 Oct 2019 20:15:59 GMT
+
+### Updates
+
+- Log to console instead of throwing when an unmet peer dependency is encountered during linking, and strictPeerDependencies is false
+- Refactor some code as part of migration from TSLint to ESLint
+
+## 5.16.0
+Thu, 17 Oct 2019 00:41:01 GMT
+
+### Updates
+
+- Support PNPM 4 on Rush
+- Add support for "rush add" for repos using the Yarn package manager.
+
+## 5.15.1
+Thu, 10 Oct 2019 23:47:19 GMT
+
+### Updates
+
+- Fix an issue where build commands can fail because git commands used to track changes can be too long.
+- Fix compatibility issue where PNPM 4 requires --no-prefer-frozen-lockfile instead of --no-prefer-frozen-shrinkwrap
+
+## 5.15.0
+Tue, 08 Oct 2019 22:58:33 GMT
+
+### Updates
+
+- Improve 'rush build' to avoid rebuilding unnecessarily when the package-lock.json file has changed (pnpm only).
+
+## 5.14.0
+Wed, 02 Oct 2019 01:18:02 GMT
+
+### Updates
+
+- Add an --all flag to "rush add" to add a dependency to all projects.
+- Add options to rush change to allow creating changefiles for all changed projects.
+- Rush update now prints a message when the approved packages files are out-of-date, and rush install exits with an error if they are out-of-date.
+- Include peerDependencies in the approved packages files.
+- Make detection of changefiles and changes in projects safer.
+- Update repository URL
+
+## 5.13.1
+Fri, 27 Sep 2019 22:34:50 GMT
+
+### Updates
+
+- Improve support for pnpm lockfile version 5.1. Also fixes a regression in Rush 5.12.0 in which rush install can fail on pnpm 3.5+ with the error message "ERROR: Invalid Version"
 
 ## 5.13.0
 Wed, 11 Sep 2019 21:41:34 GMT

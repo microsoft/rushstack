@@ -1,6 +1,43 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Mon, 23 Sep 2019 15:14:55 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Nov 2019 04:50:50 GMT and should not be manually modified.
+
+## 3.18.0
+Fri, 15 Nov 2019 04:50:50 GMT
+
+### Minor changes
+
+- Add NewlineKind.OsDefault and fix some comments
+
+## 3.17.1
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 3.17.0
+Tue, 05 Nov 2019 06:49:28 GMT
+
+### Minor changes
+
+- Add new API LegacyAdapters.stableSort(), and update the Sort API to be stable
+
+## 3.16.0
+Tue, 22 Oct 2019 06:24:44 GMT
+
+### Minor changes
+
+- Add JsonObject type
+
+### Patches
+
+- Refactor some code as part of migration from TSLint to ESLint
+
+## 3.15.1
+Sun, 29 Sep 2019 23:56:29 GMT
+
+### Patches
+
+- Update repository URL
 
 ## 3.15.0
 Mon, 23 Sep 2019 15:14:55 GMT

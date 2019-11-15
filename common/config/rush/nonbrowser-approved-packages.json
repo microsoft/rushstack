@@ -147,6 +147,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/eslint-config",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "@typescript-eslint/eslint-plugin",
       "allowedCategories": [ "libraries" ]
     },
@@ -252,6 +256,10 @@
     },
     {
       "name": "eslint-plugin-security",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "eslint-plugin-tsdoc",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -376,7 +384,7 @@
     },
     {
       "name": "jest",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "jest-cli",
@@ -516,6 +524,10 @@
     },
     {
       "name": "through2",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "timsort",
       "allowedCategories": [ "libraries" ]
     },
     {

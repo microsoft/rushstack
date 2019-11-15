@@ -26,6 +26,12 @@ export {
   ITypescriptCompilerOptions
 } from './TypescriptCompiler';
 export {
+  ILintRunnerConfig
+} from './ILintRunnerConfig';
+export {
+  LintRunner
+} from './LintRunner';
+export {
   ITslintRunnerConfig,
   TslintRunner
 } from './TslintRunner';

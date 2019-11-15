@@ -11,7 +11,6 @@ import { Span } from '../analyzer/Span';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
-import { SymbolMetadata } from '../collector/SymbolMetadata';
 import { AstImport } from '../analyzer/AstImport';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { ExtractorMessage } from '../api/ExtractorMessage';
@@ -19,6 +18,8 @@ import { StringWriter } from './StringWriter';
 import { DtsEmitHelpers } from './DtsEmitHelpers';
 
 export class ApiReportGenerator {
+  private static _TrimSpacesRegExp: RegExp = / +$/gm;
+
   /**
    * Compares the contents of two API files that were created using ApiFileGenerator,
    * and returns true if they are equivalent.  Note that these files are not normally edited
@@ -155,7 +156,8 @@ export class ApiReportGenerator {
     // Write the closing delimiter for the Markdown code fence
     stringWriter.writeLine('\n```');
 
-    return stringWriter.toString();
+    // Remove any trailing spaces
+    return stringWriter.toString().replace(ApiReportGenerator._TrimSpacesRegExp, '');
   }
 
   /**
@@ -165,7 +167,7 @@ export class ApiReportGenerator {
     astDeclaration: AstDeclaration, insideTypeLiteral: boolean): void {
 
     // Should we process this declaration at all?
-    if ((astDeclaration.modifierFlags & ts.ModifierFlags.Private) !== 0) { // tslint:disable-line:no-bitwise
+    if ((astDeclaration.modifierFlags & ts.ModifierFlags.Private) !== 0) { // eslint-disable-line no-bitwise
       span.modification.skipAll();
       return;
     }
@@ -372,14 +374,11 @@ export class ApiReportGenerator {
       ApiReportGenerator._writeLineAsComments(stringWriter, 'Warning: ' + message.formatMessageWithoutLocation());
     }
 
-    const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
-    const symbolMetadata: SymbolMetadata = collector.fetchMetadata(astDeclaration.astSymbol);
-
     const footerParts: string[] = [];
-
-    if (!symbolMetadata.releaseTagSameAsParent) {
-      if (symbolMetadata.releaseTag !== ReleaseTag.None) {
-        footerParts.push(ReleaseTag.getTagName(symbolMetadata.releaseTag));
+    const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
+    if (!declarationMetadata.releaseTagSameAsParent) {
+      if (declarationMetadata.effectiveReleaseTag !== ReleaseTag.None) {
+        footerParts.push(ReleaseTag.getTagName(declarationMetadata.effectiveReleaseTag));
       }
     }
 

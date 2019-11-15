@@ -27,9 +27,9 @@ export interface ITypescriptCompilerOptions extends IRushStackCompilerBaseOption
  */
 export class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompilerOptions> {
   private _cmdRunner: CmdRunner;
-  constructor(rootPath: string, terminalProvider: ITerminalProvider) // Remove in the next major version
-  constructor(taskOptions: ITypescriptCompilerOptions, rootPath: string, terminalProvider: ITerminalProvider)
-  constructor(
+  public constructor(rootPath: string, terminalProvider: ITerminalProvider) // Remove in the next major version
+  public constructor(taskOptions: ITypescriptCompilerOptions, rootPath: string, terminalProvider: ITerminalProvider)
+  public constructor(
     arg1: ITypescriptCompilerOptions | string,
     arg2: string | ITerminalProvider,
     arg3?: ITerminalProvider
@@ -79,7 +79,7 @@ export class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompile
         const dataLines: (string | undefined)[] = data.toString().split('\n');
         for (const dataLine of dataLines) {
           const trimmedLine: string = (dataLine || '').trim();
-          if (!!trimmedLine) {
+          if (trimmedLine) {
             if (trimmedLine.match(/\serror\s/i)) {
               // If the line looks like an error, log it as an error
               this._terminal.writeErrorLine(trimmedLine);
