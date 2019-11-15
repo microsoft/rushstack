@@ -14,7 +14,8 @@ import {
   PackageName,
   Text,
   InternalError,
-  Path
+  Path,
+  NewlineKind
 } from '@microsoft/node-core-library';
 import {
   IConfigFile,
@@ -111,6 +112,7 @@ interface IExtractorConfigParameters {
   omitTrimmingComments: boolean;
   tsdocMetadataEnabled: boolean;
   tsdocMetadataFilePath: string;
+  newlineKind: string;
   messages: IExtractorMessagesConfig;
   testMode: boolean;
 }
@@ -194,6 +196,12 @@ export class ExtractorConfig {
   public readonly tsdocMetadataEnabled: boolean;
   /** {@inheritDoc IConfigTsdocMetadata.tsdocMetadataFilePath} */
   public readonly tsdocMetadataFilePath: string;
+
+  /**
+   * Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files
+   * will be written with Windows-style newlines.
+   */
+  public readonly newlineKind: NewlineKind;
 
   /** {@inheritDoc IConfigFile.messages} */
   public readonly messages: IExtractorMessagesConfig;
@@ -654,6 +662,19 @@ export class ExtractorConfig {
         omitTrimmingComments = !!configObject.dtsRollup.omitTrimmingComments;
       }
 
+      let newlineKind: NewlineKind;
+      switch (configObject.newlineKind) {
+        case 'lf':
+          newlineKind = NewlineKind.Lf;
+          break;
+        case 'os':
+          newlineKind = NewlineKind.OsDefault;
+          break;
+        default:
+          newlineKind = NewlineKind.CrLf;
+          break;
+      }
+
       return new ExtractorConfig({
         projectFolder: projectFolder,
         packageJson,
@@ -675,6 +696,7 @@ export class ExtractorConfig {
         omitTrimmingComments,
         tsdocMetadataEnabled,
         tsdocMetadataFilePath,
+        newlineKind,
         messages: configObject.messages || { },
         testMode: !!configObject.testMode
       });

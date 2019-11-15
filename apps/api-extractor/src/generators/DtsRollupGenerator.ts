@@ -50,13 +50,15 @@ export class DtsRollupGenerator {
    *
    * @param dtsFilename    - The *.d.ts output filename
    */
-  public static writeTypingsFile(collector: Collector, dtsFilename: string, dtsKind: DtsRollupKind): void {
+  public static writeTypingsFile(
+    collector: Collector, dtsFilename: string, dtsKind: DtsRollupKind, newlineKind: NewlineKind
+  ): void {
     const stringWriter: StringWriter = new StringWriter();
 
     DtsRollupGenerator._generateTypingsFileContent(collector, stringWriter, dtsKind);
 
     FileSystem.writeFile(dtsFilename, stringWriter.toString(), {
-      convertLineEndings: NewlineKind.CrLf,
+      convertLineEndings: newlineKind,
       ensureFolderExists: true
     });
   }
@@ -238,7 +240,7 @@ export class DtsRollupGenerator {
             // (which may possibly contain multiple variable declarations), so it's not part of the Span.
             // Instead we need to manually inject it.
             let originalComment: string = declarationMetadata.tsdocParserContext.sourceRange.toString();
-            if (!/[\r\n]\s*$/.test(originalComment)) {
+            if (!/\r?\n\s*$/.test(originalComment)) {
               originalComment += '\n';
             }
             span.modification.prefix = originalComment + span.modification.prefix;

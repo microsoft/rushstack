@@ -264,6 +264,15 @@
   },
 
   /**
+   * Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files
+   * will be written with Windows-style newlines.  To use POSIX-style newlines, specify "lf" instead.
+   * To use the OS's default newline kind, specify "os".
+   *
+   * DEFAULT VALUE: "crlf"
+   */
+  // "newlineKind": "crlf",
+
+  /**
    * Configures how API Extractor reports error and warning messages produced during analysis.
    *
    * There are three sources of messages:  compiler messages, API Extractor messages, and TSDoc messages.

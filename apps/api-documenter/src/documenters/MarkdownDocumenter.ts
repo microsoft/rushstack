@@ -285,7 +285,7 @@ export class MarkdownDocumenter {
     }
 
     FileSystem.writeFile(filename, pageContent, {
-      convertLineEndings: NewlineKind.CrLf
+      convertLineEndings: this._documenterConfig ? this._documenterConfig.newlineKind : NewlineKind.CrLf
     });
   }
 

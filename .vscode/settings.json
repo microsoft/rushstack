@@ -6,16 +6,20 @@
   // When enabled, will trim trailing whitespace when you save a file.
   "files.trimTrailingWhitespace": true,
   // Controls if the editor should automatically close brackets after opening them
-  "editor.autoClosingBrackets": false,
+  "editor.autoClosingBrackets": "never",
   // Configure glob patterns for excluding files and folders in searches. Inherits all glob patterns from the file.exclude setting.
   "search.exclude": {
     "**/node_modules": true,
     "**/bower_components": true,
-    "dist": true,
-    "lib": true,
-    "lib-amd": true,
-    "temp": true,
+    "**/dist": true,
+    "**/lib": true,
+    "**/lib-amd": true,
     "**/test/**/temp": false,
-    "coverage": true
+    "**/temp": true,
+    "**/coverage": true
+  },
+  "files.associations": {
+    "**/package.json": "json",
+    "**/*.json": "jsonc"
   }
 }

@@ -414,7 +414,8 @@ export class MapExtensions {
 // @public
 export const enum NewlineKind {
     CrLf = "\r\n",
-    Lf = "\n"
+    Lf = "\n",
+    OsDefault = "os"
 }
 
 // @public
@@ -536,6 +537,7 @@ export enum TerminalProviderSeverity {
 
 // @public
 export class Text {
+    static convertTo(input: string, newlineKind: NewlineKind): string;
     static convertToCrLf(input: string): string;
     static convertToLf(input: string): string;
     static ensureTrailingNewline(s: string, newlineKind?: NewlineKind): string;

@@ -18,6 +18,8 @@ import { StringWriter } from './StringWriter';
 import { DtsEmitHelpers } from './DtsEmitHelpers';
 
 export class ApiReportGenerator {
+  private static _TrimSpacesRegExp: RegExp = / +$/gm;
+
   /**
    * Compares the contents of two API files that were created using ApiFileGenerator,
    * and returns true if they are equivalent.  Note that these files are not normally edited
@@ -154,7 +156,8 @@ export class ApiReportGenerator {
     // Write the closing delimiter for the Markdown code fence
     stringWriter.writeLine('\n```');
 
-    return stringWriter.toString();
+    // Remove any trailing spaces
+    return stringWriter.toString().replace(ApiReportGenerator._TrimSpacesRegExp, '');
   }
 
   /**
