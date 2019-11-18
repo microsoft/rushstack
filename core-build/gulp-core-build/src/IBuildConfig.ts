@@ -39,7 +39,7 @@ export interface IBuildConfig {
    *    * Relative paths are relative to the directory where the server was
    * started (usually `process.cwd()`)
    * * `url`: The URL path relative to the server (domain) root.
-   *    * For example: in <https://localhost:4321/common/temp>, the `url` would be
+   *    * For example: in https://localhost:4321/common/temp, the `url` would be
    * '/common/temp'
    */
   staticPaths?: { path: string, url: string }[];
