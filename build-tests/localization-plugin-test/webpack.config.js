@@ -27,7 +27,8 @@ module.exports = function(env) {
       extensions: ['.js', '.jsx', '.json', '.ts', '.tsx']
     },
     entry: {
-      'localization-test': path.join(__dirname, 'src', 'index.ts')
+      'localization-test-A': path.join(__dirname, 'src', 'indexA.ts'),
+      'localization-test-B': path.join(__dirname, 'src', 'indexB.ts'),
     },
     output: {
       path: path.join(__dirname, 'dist'),
