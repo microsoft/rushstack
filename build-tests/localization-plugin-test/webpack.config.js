@@ -78,9 +78,9 @@ module.exports = function(env) {
       new BundleAnalyzerPlugin({
         openAnalyzer: false,
         analyzerMode: 'static',
-        reportFilename: path.join(__dirname, 'temp', 'stats.html'),
+        reportFilename: path.resolve(__dirname, 'temp', 'stats.html'),
         generateStatsFile: true,
-        statsFilename: path.join(__dirname, 'temp', 'stats.json'),
+        statsFilename: path.resolve(__dirname, 'temp', 'stats.json'),
         logLevel: 'error'
       })
     ]
