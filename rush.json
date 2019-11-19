@@ -854,7 +854,7 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@microsoft/localization-plugin",
+      "packageName": "@rushstack/localization-plugin",
       "projectFolder": "webpack/localization-plugin",
       "reviewCategory": "libraries"
     },

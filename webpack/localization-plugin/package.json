@@ -1,6 +1,6 @@
 {
-  "name": "@microsoft/localization-plugin",
-  "version": "0.1.0",
+  "name": "@rushstack/localization-plugin",
+  "version": "0.0.0",
   "description": "This plugin facilitates localization with Webpack.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",

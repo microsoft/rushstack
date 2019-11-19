@@ -51,7 +51,7 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "@microsoft/localization-plugin",
+      "name": "@rushstack/localization-plugin",
       "allowedCategories": [ "tests" ]
     },
     {
