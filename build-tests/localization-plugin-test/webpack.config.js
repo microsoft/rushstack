@@ -3,7 +3,7 @@
 const path = require('path');
 const webpack = require('webpack');
 
-const { LocalizationPlugin } = require('@microsoft/localization-plugin');
+const { LocalizationPlugin } = require('@rushstack/localization-plugin');
 
 module.exports = function(env) {
   const configuration = {
@@ -69,6 +69,9 @@ module.exports = function(env) {
         },
         defaultLocale: {
           usePassthroughLocale: true
+        },
+        serveLocale: {
+          locale: 'en-us'
         }
       })
     ]

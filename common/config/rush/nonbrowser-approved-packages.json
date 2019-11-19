@@ -39,6 +39,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "webpack-dev-server",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@microsoft/gulp-core-build-typescript",
       "allowedCategories": [ "libraries" ]
     },
@@ -49,10 +53,6 @@
     {
       "name": "@microsoft/load-themed-styles",
       "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
-      "name": "@rushstack/localization-plugin",
-      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@microsoft/node-core-library",
@@ -169,6 +169,10 @@
     {
       "name": "@rushstack/eslint-plugin",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/localization-plugin",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@typescript-eslint/eslint-plugin",

@@ -22,6 +22,4 @@ LocJsonPreprocessor.preprocessLocJsonFiles({
 });
 
 // Run Webpack
-executeCommand('node node_modules/webpack-cli/bin/cli');
-
-console.log(`==> Finished build.js for ${path.basename(process.cwd())}`);
+executeCommand('node node_modules/webpack-dev-server/bin/webpack-dev-server');

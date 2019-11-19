@@ -4,14 +4,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "node build.js"
+    "build": "node build.js",
+    "serve": "node serve.js"
   },
   "dependencies": {
-    "webpack": "~4.31.0",
     "@rushstack/localization-plugin": "0.0.0",
     "fs-extra": "~7.0.1",
     "@microsoft/rush-stack-compiler-3.5": "0.4.2",
+    "ts-loader": "6.0.0",
+    "webpack": "~4.31.0",
     "webpack-cli": "~3.3.2",
-    "ts-loader": "6.0.0"
+    "webpack-dev-server": "~3.9.0"
   }
 }
