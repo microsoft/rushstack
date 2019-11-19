@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { JsonFile } from '@microsoft/node-core-library';
 import * as Webpack from 'webpack';
 import * as path from 'path';
 import * as lodash from 'lodash';
@@ -38,6 +39,8 @@ export interface ILocalizationPluginOptions {
   defaultLocale: IDefaultLocaleOptions;
   serveLocale: IDefaultLocaleOptions;
   filesToIgnore?: string[];
+  localizationStatsDropPath?: string;
+  localizationStatsCallback?: (stats: ILocalizationStats) => void;
 }
 
 /**
@@ -52,6 +55,11 @@ const PLUGIN_NAME: string = 'localization';
 const LOCALE_FILENAME_PLACEHOLDER: string = '[locale]';
 const LOCALE_FILENAME_PLACEHOLDER_REGEX: RegExp = new RegExp(lodash.escapeRegExp(LOCALE_FILENAME_PLACEHOLDER), 'g');
 const STRING_PLACEHOLDER_PREFIX: string = '-LOCALIZED-STRING-f12dy0i7-n4bo-dqwj-39gf-sasqehjmihz9';
+
+interface IProcessAssetResult {
+  filename: string;
+  asset: IAsset;
+}
 
 interface IAsset {
   size(): number;
@@ -68,6 +76,19 @@ interface ISingleLocaleConfigOptions {
   localeName: string;
   resolvedStrings: Map<string, Map<string, string>>;
   passthroughLocale: boolean;
+}
+
+export interface ILocalizationStatsEntrypoint {
+  localizedAssets: { [locale: string]: string };
+}
+
+export interface ILocalizationStatsChunkGroup {
+  localizedAssets: { [locale: string]: string };
+}
+
+export interface ILocalizationStats {
+  entrypoints: { [name: string]: ILocalizationStatsEntrypoint };
+  namedChunkGroups: { [name: string]: ILocalizationStatsChunkGroup };
 }
 
 /**
@@ -163,6 +184,11 @@ export class LocalizationPlugin implements Webpack.Plugin {
         });
 
         compiler.hooks.emit.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {
+          const localizationStats: ILocalizationStats = {
+            entrypoints: {},
+            namedChunkGroups: {}
+          };
+
           for (const chunkGroup of compilation.chunkGroups) {
             const children: Webpack.compilation.Chunk[] = chunkGroup.getChildren();
             if (
@@ -180,26 +206,54 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
               return;
             }
-          }
 
-          for (const assetName in compilation.assets) {
-            if (compilation.assets.hasOwnProperty(assetName) && assetName.indexOf(LOCALE_FILENAME_PLACEHOLDER) !== -1) {
-              const asset: IAsset = compilation.assets[assetName];
-              const resultingAssets: { [assetName: string]: IAsset } = this._processAsset(
-                compilation,
-                assetName,
-                asset
-              );
+            const chunkFiles: string[] = chunkGroup.getFiles();
+            for (const chunkFileName of chunkFiles) {
+              if (chunkFileName.match(LOCALE_FILENAME_PLACEHOLDER_REGEX)) {
+                const asset: IAsset = compilation.assets[chunkFileName];
+                const resultingAssets: Map<string, IProcessAssetResult> = this._processAsset(
+                  compilation,
+                  chunkFileName,
+                  asset
+                );
 
-              // Delete the existing asset because it's been renamed
-              delete compilation.assets[assetName];
+                // Delete the existing asset because it's been renamed
+                delete compilation.assets[chunkFileName];
 
-              for (const newAssetName in resultingAssets) {
-                if (resultingAssets.hasOwnProperty(newAssetName)) {
-                  const newAsset: IAsset = resultingAssets[newAssetName];
-                  compilation.assets[newAssetName] = newAsset;
+                const localizedChunkAssets: { [locale: string]: string } = {};
+                for (const [locale, newAsset] of resultingAssets) {
+                  compilation.assets[newAsset.filename] = newAsset.asset;
+                  localizedChunkAssets[locale] = newAsset.filename;
+                }
+
+                if (chunkGroup.getParents().length > 0) {
+                  // This is a secondary chunk
+                  localizationStats.namedChunkGroups[chunkGroup.name] = {
+                    localizedAssets: localizedChunkAssets
+                  };
+                } else {
+                  // This is an entrypoint
+                  localizationStats.entrypoints[chunkGroup.name] = {
+                    localizedAssets: localizedChunkAssets
+                  };
                 }
               }
+            }
+          }
+
+          if (this._options.localizationStatsDropPath) {
+            const resolvedLocalizationStatsDropPath: string = path.resolve(
+              compiler.outputPath,
+              this._options.localizationStatsDropPath
+            );
+            JsonFile.save(localizationStats, resolvedLocalizationStatsDropPath);
+          }
+
+          if (this._options.localizationStatsCallback) {
+            try {
+              this._options.localizationStatsCallback(localizationStats);
+            } catch (e) {
+              /* swallow errors from the callback */
             }
           }
         });
@@ -211,7 +265,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     compilation: Webpack.compilation.Compilation,
     assetName: string,
     asset: IAsset
-  ): { [assetName: string]: IAsset } {
+  ): Map<string, IProcessAssetResult> {
     interface IReconstructionElement {
       kind: 'static' | 'localized';
     }
@@ -228,7 +282,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     }
 
     const placeholderRegex: RegExp = new RegExp(`${lodash.escapeRegExp(STRING_PLACEHOLDER_PREFIX)}_(\\d+)`, 'g');
-    const result: { [assetName: string]: IAsset } = {};
+    const result: Map<string, IProcessAssetResult> = new Map<string, IProcessAssetResult>();
     const assetSource: string = asset.source();
 
     const reconstructionSeries: IReconstructionElement[] = [];
@@ -269,7 +323,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     };
     reconstructionSeries.push(lastElement);
 
-    this._locales.forEach((locale) => {
+    for (const locale of this._locales) {
       const reconstruction: string[] = [];
 
       let sizeDiff: number = 0;
@@ -292,15 +346,20 @@ export class LocalizationPlugin implements Webpack.Plugin {
       }
 
       // TODO:
-      //  - Ensure stats.json is correct
       //  - Fixup source maps
       const resultFilename: string = assetName.replace(LOCALE_FILENAME_PLACEHOLDER_REGEX, locale);
       const newAssetSource: string = reconstruction.join('');
       const newAssetSize: number = asset.size() + sizeDiff;
       newAsset.source = () => newAssetSource;
       newAsset.size = () => newAssetSize;
-      result[resultFilename] = newAsset;
-    });
+      result.set(
+        locale,
+        {
+          filename: resultFilename,
+          asset: newAsset
+        }
+      );
+    }
 
     return result;
   }
@@ -402,9 +461,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     {
       this._locJsonFilesToIgnore = new Set<string>();
       for (const locJsonFilePath of this._options.filesToIgnore || []) {
-        let normalizedLocJsonFilePath: string = path.isAbsolute(locJsonFilePath)
-          ? locJsonFilePath
-          : path.resolve(configuration.context!, locJsonFilePath);
+        let normalizedLocJsonFilePath: string = path.resolve(configuration.context!, locJsonFilePath);
         normalizedLocJsonFilePath = normalizedLocJsonFilePath.toUpperCase();
         this._locJsonFilesToIgnore.add(normalizedLocJsonFilePath);
       }
@@ -460,9 +517,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
           const locale: ILocale = localizedStrings[localeName];
           for (const locJsonFilePath in locale) {
             if (locale.hasOwnProperty(locJsonFilePath)) {
-              let normalizedLocJsonFilePath: string = path.isAbsolute(locJsonFilePath)
-                ? locJsonFilePath
-                : path.resolve(configuration.context!, locJsonFilePath);
+              let normalizedLocJsonFilePath: string = path.resolve(configuration.context!, locJsonFilePath);
               normalizedLocJsonFilePath = normalizedLocJsonFilePath.toUpperCase();
 
               if (this._locJsonFilesToIgnore.has(normalizedLocJsonFilePath)) {

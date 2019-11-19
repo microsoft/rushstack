@@ -74,7 +74,8 @@ module.exports = function(env) {
         },
         serveLocale: {
           locale: 'en-us'
-        }
+        },
+        localizationStatsDropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
       }),
       new BundleAnalyzerPlugin({
         openAnalyzer: false,
