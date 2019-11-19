@@ -4,6 +4,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 const { LocalizationPlugin } = require('@rushstack/localization-plugin');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 module.exports = function(env) {
   const configuration = {
@@ -15,7 +16,7 @@ module.exports = function(env) {
           loader: require.resolve('ts-loader'),
           exclude: /(node_modules)/,
           options: {
-            compiler: require.resolve('@microsoft/rush-stack-compiler-3.4/node_modules/typescript'),
+            compiler: require.resolve('@microsoft/rush-stack-compiler-3.5/node_modules/typescript'),
             logLevel: 'ERROR',
             configFile: path.resolve(__dirname, 'tsconfig.json')
           }
@@ -73,6 +74,14 @@ module.exports = function(env) {
         serveLocale: {
           locale: 'en-us'
         }
+      }),
+      new BundleAnalyzerPlugin({
+        openAnalyzer: false,
+        analyzerMode: 'static',
+        reportFilename: path.join(__dirname, 'temp', 'stats.html'),
+        generateStatsFile: true,
+        statsFilename: path.join(__dirname, 'temp', 'stats.json'),
+        logLevel: 'error'
       })
     ]
   };

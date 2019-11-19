@@ -206,6 +206,7 @@ dependencies:
   uglify-js: 3.0.28
   vinyl: 2.2.0
   webpack: 4.31.0
+  webpack-bundle-analyzer: 3.6.0
   webpack-cli: 3.3.10
   webpack-dev-server: 3.9.0
   wordwrap: 1.0.0
@@ -1966,6 +1967,17 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha512-pbnl5XzGBdrFU/wT4jqmJVPn2B6UHPBOhzMQkY/SPUPB6QtUXtmBHBIwCbXJol93mOpGMnQyP/+BB19q04xj7g==
+  /bfj/6.1.2:
+    dependencies:
+      bluebird: 3.7.2
+      check-types: 8.0.3
+      hoopy: 0.1.4
+      tryer: 1.0.1
+    dev: false
+    engines:
+      node: '>= 6.0.0'
+    resolution:
+      integrity: sha512-BmBJa4Lip6BPRINSZ0BPEIfB1wUY/9rwbwvIHQA1KjX9om29B6id0wnWXq7m3bn5JrUVjeOTnVuhPT1FiHwPGw==
   /big.js/3.2.0:
     dev: false
     resolution:
@@ -2393,6 +2405,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA==
+  /check-types/8.0.3:
+    dev: false
+    resolution:
+      integrity: sha512-YpeKZngUmG65rLudJ4taU7VLkOCTMhNl/u4ctNC56LQS/zJTyNH0Lrtwm1tfTsbLlwvlfsA2d1c8vCf/Kh2KwQ==
   /chokidar/1.7.0:
     dependencies:
       anymatch: 1.3.2
@@ -3293,6 +3309,13 @@ packages:
     dev: false
     resolution:
       integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
+  /ejs/2.7.4:
+    dev: false
+    engines:
+      node: '>=0.10.0'
+    requiresBuild: true
+    resolution:
+      integrity: sha512-7vmuyh5+kuUyJKePhQfRQBhXV5Ce+RnaeeQArKu1EAMpL3WbgMt5WG6uQZpEVvYSSsxMXRKOewtDk9RaTKXRlA==
   /electron-to-chromium/1.3.340:
     dev: false
     resolution:
@@ -4107,6 +4130,12 @@ packages:
     dev: false
     resolution:
       integrity: sha1-jnVIqW08wjJ+5eZ0FocjozO7oqA=
+  /filesize/3.6.1:
+    dev: false
+    engines:
+      node: '>= 0.4.0'
+    resolution:
+      integrity: sha512-7KjR1vv6qnicaPMi1iiTcI85CyYwRO/PSFCu6SvqL8jN2Wjt/NIYQTFtFs7fSDCYOstUkEWIQGFUg5YZQfjlcg==
   /fill-range/2.2.4:
     dependencies:
       is-number: 2.1.0
@@ -4899,6 +4928,15 @@ packages:
       node: '>= 0.10'
     resolution:
       integrity: sha1-4oxNRdBey77YGDY86PnFkmIp/+U=
+  /gzip-size/5.1.1:
+    dependencies:
+      duplexer: 0.1.1
+      pify: 4.0.1
+    dev: false
+    engines:
+      node: '>=6'
+    resolution:
+      integrity: sha512-FNHi6mmoHvs1mxZAds4PpdCS6QG8B4C1krxJsMutgxl5t3+GlRTzzI3NEkifXx2pVsOvJdOGSmIgDhQ55FwdPA==
   /handle-thing/2.0.0:
     dev: false
     resolution:
@@ -5058,6 +5096,12 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha512-eSmmWE5bZTK2Nou4g0AI3zZ9rswp7GRKoKXS1BLUkvPviOqs4YTN1djQIqrXy9k5gEtdLPy86JjRwsNM9tnDcA==
+  /hoopy/0.1.4:
+    dev: false
+    engines:
+      node: '>= 6.0.0'
+    resolution:
+      integrity: sha512-HRcs+2mr52W0K+x8RzcLzuPPmVIKMSv97RGHy0Ea9y/mpcaK+xTrjICA04KAHi4GRzxliNqNJEFYWHghy3rSfQ==
   /hosted-git-info/2.8.5:
     dev: false
     resolution:
@@ -7911,6 +7955,11 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-BnQoIw/WdEOyeUsiu6UotoZ5YtQ=
+  /opener/1.5.1:
+    dev: false
+    hasBin: true
+    resolution:
+      integrity: sha512-goYSy5c2UXE4Ra1xixabeVh1guIX/ZV/YokJksb6q2lubWu6UbvPQ20p542/sFIll1nl8JnCyK9oBaOcCWXwvA==
   /opn/5.2.0:
     dependencies:
       is-wsl: 1.1.0
@@ -10370,6 +10419,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-0z3j8R7MCjy10kc/g+qg7Ln3alJTodw9aDuVWZa3uiWqfuBMKeAeP2ocWcxoyM3D73yz3Jt/Pu4qPr4wHSdB/Q==
+  /tryer/1.0.1:
+    dev: false
+    resolution:
+      integrity: sha512-c3zayb8/kWWpycWYg87P71E1S1ZL6b6IJxfb5fvsUgsf0S2MVGaDhDXXjDMpdCpfWXqptc+4mXwmiy1ypXqRAA==
   /ts-jest/22.4.6:
     dependencies:
       babel-core: 6.26.3
@@ -10984,6 +11037,27 @@ packages:
     dev: false
     resolution:
       integrity: sha512-YQ+BmxuTgd6UXZW3+ICGfyqRyHXVlD5GtQr5+qjiNW7bF0cqrzX500HVXPBOvgXb5YnzDd+h0zqyv61KUD7+Sg==
+  /webpack-bundle-analyzer/3.6.0:
+    dependencies:
+      acorn: 6.4.0
+      acorn-walk: 6.2.0
+      bfj: 6.1.2
+      chalk: 2.4.2
+      commander: 2.20.3
+      ejs: 2.7.4
+      express: 4.16.4
+      filesize: 3.6.1
+      gzip-size: 5.1.1
+      lodash: 4.17.15
+      mkdirp: 0.5.1
+      opener: 1.5.1
+      ws: 6.2.1
+    dev: false
+    engines:
+      node: '>= 6.14.4'
+    hasBin: true
+    resolution:
+      integrity: sha512-orUfvVYEfBMDXgEKAKVvab5iQ2wXneIEorGNsyuOyVYpjYrI7CUOhhXNDd3huMwQ3vNNWWlGP+hzflMFYNzi2g==
   /webpack-cli/3.3.10:
     dependencies:
       chalk: 2.4.2
@@ -12006,12 +12080,13 @@ packages:
       ts-loader: 6.0.0
       typescript: 3.1.6
       webpack: 4.31.0
+      webpack-bundle-analyzer: 3.6.0
       webpack-cli: 3.3.10_webpack@4.31.0
       webpack-dev-server: 3.9.0_webpack@4.31.0
     dev: false
     name: '@rush-temp/localization-plugin-test'
     resolution:
-      integrity: sha512-OjFstHcCpeu1WAzLQGSj4PKiNCGrqtBL03FpCZ4gji5F7lGyNtI0kbnLcoe6Lpnpm0ctZZRqWFRefH7RJk3nqQ==
+      integrity: sha512-B//55VWLuH/XwAdiIp6HdG8KDBfcA78LV7vb6X7SsqCKmqDEYkmcqG8THDpnWZLHegfgCd4Rwffl9zq6ENY77Q==
       tarball: 'file:projects/localization-plugin-test.tgz'
     version: 0.0.0
   'file:projects/localization-plugin.tgz':
@@ -12841,6 +12916,7 @@ specifiers:
   uglify-js: ~3.0.28
   vinyl: ~2.2.0
   webpack: ~4.31.0
+  webpack-bundle-analyzer: ~3.6.0
   webpack-cli: ~3.3.2
   webpack-dev-server: ~3.9.0
   wordwrap: ~1.0.0

@@ -599,6 +599,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "webpack-bundle-analyzer",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "wordwrap",
       "allowedCategories": [ "libraries" ]
     },
