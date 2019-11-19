@@ -57,7 +57,7 @@ interface IAsset {
   source(): string;
 }
 
-interface IMainTemplate extends Webpack.compilation.MainTemplate {
+interface IExtendedMainTemplate {
   hooks: {
     localVars: Tapable.SyncHook<string, Webpack.compilation.Chunk, string>;
   };
@@ -104,7 +104,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
         return;
       }
 
-      (compilation.mainTemplate as IMainTemplate).hooks.localVars.tap(
+      (compilation.mainTemplate as unknown as IExtendedMainTemplate).hooks.localVars.tap(
         PLUGIN_NAME,
         (source: string, chunk: Webpack.compilation.Chunk, hash: string) => {
           return source.replace(LOCALE_FILENAME_PLACEHOLDER_REGEX, this._localeNamePlaceholder.value);
@@ -293,10 +293,11 @@ export class LocalizationPlugin implements Webpack.Plugin {
       if (
         !configuration.output ||
         !configuration.output.filename ||
+        (typeof configuration.output.filename !== 'string') ||
         configuration.output.filename.indexOf(LOCALE_FILENAME_PLACEHOLDER) === -1
       ) {
         errors.push(new Error(
-          'The configuration.output.filename property must be provided and must include ' +
+          'The configuration.output.filename property must be provided, must be a string, and must include ' +
           `the ${LOCALE_FILENAME_PLACEHOLDER} placeholder`
         ));
       }
@@ -309,7 +310,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
       for (const locJsonFilePath of this._options.filesToIgnore || []) {
         let normalizedLocJsonFilePath: string = path.isAbsolute(locJsonFilePath)
           ? locJsonFilePath
-          : path.resolve(configuration.context, locJsonFilePath);
+          : path.resolve(configuration.context!, locJsonFilePath);
         normalizedLocJsonFilePath = normalizedLocJsonFilePath.toUpperCase();
         this._locJsonFilesToIgnore.add(normalizedLocJsonFilePath);
       }
@@ -363,7 +364,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
             if (locale.hasOwnProperty(locJsonFilePath)) {
               let normalizedLocJsonFilePath: string = path.isAbsolute(locJsonFilePath)
                 ? locJsonFilePath
-                : path.resolve(configuration.context, locJsonFilePath);
+                : path.resolve(configuration.context!, locJsonFilePath);
               normalizedLocJsonFilePath = normalizedLocJsonFilePath.toUpperCase();
 
               if (this._locJsonFilesToIgnore.has(normalizedLocJsonFilePath)) {
@@ -383,10 +384,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
               }
 
               locFilePathsInLocale.add(normalizedLocJsonFilePath);
-
-              if (!this._locJsonFiles.has(normalizedLocJsonFilePath)) {
-                this._locJsonFiles.add(normalizedLocJsonFilePath);
-              }
+              this._locJsonFiles.add(normalizedLocJsonFilePath);
 
               const locJsonFileData: ILocJsonFileData = locale[locJsonFilePath];
 

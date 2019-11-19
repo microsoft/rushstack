@@ -15,14 +15,13 @@ module.exports = function(env) {
           loader: require.resolve('ts-loader'),
           exclude: /(node_modules)/,
           options: {
-            compiler: require.resolve('@microsoft/rush-stack-compiler-3.2/node_modules/typescript'),
+            compiler: require.resolve('@microsoft/rush-stack-compiler-3.4/node_modules/typescript'),
             logLevel: 'ERROR',
             configFile: path.resolve(__dirname, 'tsconfig.json')
           }
         }
       ]
     },
-    context: path.resolve(__dirname, 'src'),
     resolve: {
       extensions: ['.js', '.jsx', '.json', '.ts', '.tsx']
     },
@@ -42,26 +41,26 @@ module.exports = function(env) {
       new LocalizationPlugin({
         localizedStrings: {
           "en-us": {
-            "./strings1.loc.json": {
+            "./src/strings1.loc.json": {
               "string1": "the first string"
             },
-            "./strings2.loc.json": {
+            "./src/strings2.loc.json": {
               "string1": "the second string"
             },
-            "./strings3.loc.json": {
+            "./src/strings3.loc.json": {
               "string1": "the third string",
               "string2": "the fourth string",
               "string3": "UNUSED STRING!"
             }
           },
           "es-es": {
-            "./strings1.loc.json": {
+            "./src/strings1.loc.json": {
               "string1": "la primera cadena"
             },
-            "./strings2.loc.json": {
+            "./src/strings2.loc.json": {
               "string1": "la segunda cadena"
             },
-            "./strings3.loc.json": {
+            "./src/strings3.loc.json": {
               "string1": "la tercera cadena",
               "string2": "la cuarta cadena",
               "string3": "UNUSED STRING!"
