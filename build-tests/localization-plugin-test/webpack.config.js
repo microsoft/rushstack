@@ -45,7 +45,7 @@ module.exports = function(env) {
             "./src/strings1.loc.json": {
               "string1": "the first string"
             },
-            "./src/strings2.loc.json": {
+            "./src/chunks/strings2.loc.json": {
               "string1": "the second string"
             },
             "./src/strings3.loc.json": {
@@ -58,7 +58,7 @@ module.exports = function(env) {
             "./src/strings1.loc.json": {
               "string1": "la primera cadena"
             },
-            "./src/strings2.loc.json": {
+            "./src/chunks/strings2.loc.json": {
               "string1": "la segunda cadena"
             },
             "./src/strings3.loc.json": {
