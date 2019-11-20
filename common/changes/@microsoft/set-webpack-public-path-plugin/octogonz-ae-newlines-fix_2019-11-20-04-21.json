@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/set-webpack-public-path-plugin",
-      "comment": "Remove `@types/webpack` from devDependencies",
+      "comment": "Convert `@types/webpack` to a peer dependency",
       "type": "patch"
     }
   ],
