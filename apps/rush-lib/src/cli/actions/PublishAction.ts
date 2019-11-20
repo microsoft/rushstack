@@ -230,9 +230,6 @@ export class PublishAction extends BaseRushAction {
     if (this._releaseFolder.value && !this._pack.value) {
       throw new Error(`--release-folder can only be used with --pack`);
     }
-    if (this._registryUrl.value && this._pack.value) {
-      throw new Error(`--registry cannot be used with --pack`);
-    }
     if (this._applyGitTagsOnPack.value && !this._pack.value) {
       throw new Error(`${this._applyGitTagsOnPack.longName} must be used `
       + `with ${this._pack.longName}`);
