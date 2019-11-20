@@ -25,7 +25,9 @@
     "typescript": "~3.4.3",
 
     // Workaround for https://github.com/microsoft/rushstack/issues/1466
-    "eslint": "~6.5.1"
+    "eslint": "~6.5.1",
+
+    "@types/webpack": "4.39.8"
   },
 
   /**
