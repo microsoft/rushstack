@@ -1,6 +1,13 @@
 # Change Log - @microsoft/set-webpack-public-path-plugin
 
-This log was last generated on Fri, 15 Nov 2019 04:50:50 GMT and should not be manually modified.
+This log was last generated on Wed, 20 Nov 2019 06:14:28 GMT and should not be manually modified.
+
+## 2.2.15
+Wed, 20 Nov 2019 06:14:28 GMT
+
+### Patches
+
+- Convert `@types/webpack` to a peer dependency
 
 ## 2.2.14
 Fri, 15 Nov 2019 04:50:50 GMT

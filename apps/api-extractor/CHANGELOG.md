@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 15 Nov 2019 04:50:50 GMT and should not be manually modified.
+This log was last generated on Wed, 20 Nov 2019 06:14:28 GMT and should not be manually modified.
+
+## 7.6.1
+Wed, 20 Nov 2019 06:14:28 GMT
+
+### Patches
+
+- Fix an issue where the newlineKind setting wasn't being applied correctly
 
 ## 7.6.0
 Fri, 15 Nov 2019 04:50:50 GMT

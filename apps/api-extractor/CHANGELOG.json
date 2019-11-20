@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.6.1",
+      "tag": "@microsoft/api-extractor_v7.6.1",
+      "date": "Wed, 20 Nov 2019 06:14:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the newlineKind setting wasn't being applied correctly"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.6.0",
       "tag": "@microsoft/api-extractor_v7.6.0",
       "date": "Fri, 15 Nov 2019 04:50:50 GMT",
