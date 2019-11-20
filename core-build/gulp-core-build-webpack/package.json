@@ -18,7 +18,7 @@
     "@types/node": "8.10.54",
     "colors": "~1.2.1",
     "gulp": "~4.0.2",
-    "webpack": "~3.11.0"
+    "webpack": "~4.31.0"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "6.3.7",
