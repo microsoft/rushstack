@@ -12,15 +12,13 @@
   "scripts": {
     "build": "gulp test --clean"
   },
-  "dependencies": {
-    "@types/webpack": "^4.0.0"
-  },
   "devDependencies": {
     "@microsoft/node-library-build": "6.3.7",
     "@microsoft/rush-stack-compiler-3.4": "0.3.7",
     "@rushstack/eslint-config": "0.4.2",
     "@types/mocha": "5.2.5",
     "@types/node": "8.10.54",
+    "@types/webpack": "4.39.8",
     "chai": "~3.5.0",
     "gulp": "~4.0.2",
     "mocha": "^5.2.0"
