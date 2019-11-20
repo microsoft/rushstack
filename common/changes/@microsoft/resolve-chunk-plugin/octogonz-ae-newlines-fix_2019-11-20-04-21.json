@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/resolve-chunk-plugin",
+      "comment": "Convert `@types/webpack` to a peer dependency",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/resolve-chunk-plugin",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
