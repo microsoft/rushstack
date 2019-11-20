@@ -13,9 +13,11 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@types/webpack": "^4.0.0",
     "lodash": "~4.17.15",
     "uglify-js": "~3.0.28"
+  },
+  "peerDependencies": {
+    "@types/webpack": "*"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "6.3.7",
@@ -26,6 +28,7 @@
     "@types/node": "8.10.54",
     "@types/tapable": "1.0.4",
     "@types/uglify-js": "2.6.29",
+    "@types/webpack": "4.39.8",
     "chai": "~3.5.0",
     "gulp": "~4.0.2",
     "mocha": "^5.2.0"
