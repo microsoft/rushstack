@@ -112,7 +112,7 @@ interface IExtractorConfigParameters {
   omitTrimmingComments: boolean;
   tsdocMetadataEnabled: boolean;
   tsdocMetadataFilePath: string;
-  newlineKind: string;
+  newlineKind: NewlineKind;
   messages: IExtractorMessagesConfig;
   testMode: boolean;
 }
@@ -230,6 +230,7 @@ export class ExtractorConfig {
     this.omitTrimmingComments = parameters.omitTrimmingComments;
     this.tsdocMetadataEnabled = parameters.tsdocMetadataEnabled;
     this.tsdocMetadataFilePath = parameters.tsdocMetadataFilePath;
+    this.newlineKind = parameters.newlineKind;
     this.messages = parameters.messages;
     this.testMode = parameters.testMode;
   }
