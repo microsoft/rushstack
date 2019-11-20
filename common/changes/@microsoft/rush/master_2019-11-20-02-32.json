@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/rush",
       "comment": "Removing registry check from --pack, since --pack might need to run view against a registry to check if a package exists",
-      "type": "none"
+      "type": "patch"
     }
   ],
   "packageName": "@microsoft/rush",
