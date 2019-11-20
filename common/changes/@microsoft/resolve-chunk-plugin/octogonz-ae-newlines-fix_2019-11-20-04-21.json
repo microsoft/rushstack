@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/resolve-chunk-plugin",
+      "comment": "Remove `@types/webpack` from devDependencies",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/resolve-chunk-plugin",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
