@@ -2,6 +2,23 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.17.1",
+      "tag": "@microsoft/rush_v5.17.1",
+      "date": "Thu, 21 Nov 2019 00:50:15 GMT",
+      "comments": {
+        "undefined": [
+          {
+            "comment": "Remove an error thrown when the --registry and --pack arguments are used on rush publish, because --registry might be required to check if a package has already been published against a custom registry."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Fix an issue with Rush add, where Rush was unable to add unpublished local projects as dependencies."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.17.0",
       "tag": "@microsoft/rush_v5.17.0",
       "date": "Thu, 14 Nov 2019 22:52:48 GMT",

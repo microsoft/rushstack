@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 14 Nov 2019 22:52:48 GMT and should not be manually modified.
+This log was last generated on Thu, 21 Nov 2019 00:50:15 GMT and should not be manually modified.
+
+## 5.17.1
+Thu, 21 Nov 2019 00:50:15 GMT
+
+### Updates
+
+- Fix an issue with Rush add, where Rush was unable to add unpublished local projects as dependencies.
 
 ## 5.17.0
 Thu, 14 Nov 2019 22:52:48 GMT
