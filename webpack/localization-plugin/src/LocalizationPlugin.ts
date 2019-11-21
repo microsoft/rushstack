@@ -7,24 +7,37 @@ import * as path from 'path';
 import * as lodash from 'lodash';
 import * as Tapable from 'tapable';
 
+/**
+ * @public
+ */
 export interface ILocJsonFileData {
   [stringName: string]: string;
 }
 
+/**
+ * @public
+ */
 export interface ILocale {
   [locJsonFilePath: string]: ILocJsonFileData;
 }
 
+/**
+ * @public
+ */
 export interface ILocales {
   [locale: string]: ILocale;
 }
 
+/**
+ * @public
+ */
 export interface IDefaultLocaleOptions {
   locale?: string;
   usePassthroughLocale?: boolean;
 
   /**
-   * If {@see usePassthroughLocale} is set, use this name for the passthrough locale. Defaults to "passthrough"
+   * If {@link IDefaultLocaleOptions.usePassthroughLocale} is set, use this name for the passthrough locale.
+   * Defaults to "passthrough"
    */
   passthroughLocaleName?: string;
 }
@@ -78,14 +91,23 @@ interface ISingleLocaleConfigOptions {
   passthroughLocale: boolean;
 }
 
+/**
+ * @public
+ */
 export interface ILocalizationStatsEntrypoint {
   localizedAssets: { [locale: string]: string };
 }
 
+/**
+ * @public
+ */
 export interface ILocalizationStatsChunkGroup {
   localizedAssets: { [locale: string]: string };
 }
 
+/**
+ * @public
+ */
 export interface ILocalizationStats {
   entrypoints: { [name: string]: ILocalizationStatsEntrypoint };
   namedChunkGroups: { [name: string]: ILocalizationStatsChunkGroup };

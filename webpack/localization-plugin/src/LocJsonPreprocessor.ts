@@ -12,12 +12,20 @@ import { EOL } from 'os';
 
 import { ILocJsonFile } from './interfaces';
 
+/**
+ * @public
+ */
 export interface ILocJsonPreprocessorOptions {
   srcFolder: string;
   generatedTsFolder: string;
   filesToIgnore?: string[];
 }
 
+/**
+ * This is a simple tool that generates .d.ts files for .loc.json files.
+ *
+ * @public
+ */
 export class LocJsonPreprocessor {
   public static preprocessLocJsonFiles(options: ILocJsonPreprocessorOptions): void {
     const {
