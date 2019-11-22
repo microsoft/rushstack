@@ -324,18 +324,20 @@ export class PublishAction extends BaseRushAction {
             return;
           }
 
-          // Do not tag packages that already exist. This will fail with a fatal error.
-          if (this._packageExists(packageConfig)) {
+          // Do not create a new tag if one already exists, this will result in a fatal error
+          if (git.hasTag(packageConfig)) {
+            console.log(`Not tagging ${packageName}@${packageConfig.packageJson.version}. A tag already exists for this version.`);
             return;
           }
 
-          git.addTag(!!this._publish.value && !this._registryUrl.value, packageName, packageConfig.packageJson.version);
+          git.addTag(!!this._publish.value, packageName, packageConfig.packageJson.version);
           updated = true;
         };
 
         if (this._pack.value) {
           // packs to tarball instead of publishing to NPM repository
           this._npmPack(packageName, packageConfig);
+          // Do not tag packages that already exist. This will fail with a fatal error.
           applyTag(this._applyGitTagsOnPack.value);
         } else if (this._force.value || !this._packageExists(packageConfig)) {
           // Publish to npm repository
