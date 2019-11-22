@@ -1,0 +1,168 @@
+### YamlMime:UniversalReference
+items:
+  - uid: 'api-documenter-test!IDocInterface6:interface'
+    summary: Interface without inline tag to test custom TOC with injection
+    name: IDocInterface6
+    fullName: IDocInterface6
+    langs:
+      - typeScript
+    type: interface
+    package: api-documenter-test!
+    children:
+      - 'api-documenter-test!IDocInterface6#arrayProperty:member'
+      - 'api-documenter-test!IDocInterface6#genericReferenceMethod:member(1)'
+      - 'api-documenter-test!IDocInterface6#intersectionProperty:member'
+      - 'api-documenter-test!IDocInterface6#regularProperty:member'
+      - 'api-documenter-test!IDocInterface6#tupleProperty:member'
+      - 'api-documenter-test!IDocInterface6#typeReferenceProperty:member'
+      - 'api-documenter-test!IDocInterface6#unionProperty:member'
+  - uid: 'api-documenter-test!IDocInterface6#arrayProperty:member'
+    name: arrayProperty
+    fullName: arrayProperty
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: 'arrayProperty: IDocInterface1[];'
+      return:
+        type:
+          - 'api-documenter-test!IDocInterface6#arrayProperty~0:complex'
+  - uid: 'api-documenter-test!IDocInterface6#genericReferenceMethod:member(1)'
+    name: genericReferenceMethod(x)
+    fullName: genericReferenceMethod(x)
+    langs:
+      - typeScript
+    type: method
+    syntax:
+      content: 'genericReferenceMethod<T>(x: T): T;'
+      return:
+        type:
+          - T
+        description: ''
+      parameters:
+        - id: x
+          description: ''
+          type:
+            - T
+      typeParameters:
+        - id: T
+  - uid: 'api-documenter-test!IDocInterface6#intersectionProperty:member'
+    name: intersectionProperty
+    fullName: intersectionProperty
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: 'intersectionProperty: IDocInterface1 & IDocInterface2;'
+      return:
+        type:
+          - 'api-documenter-test!IDocInterface6#intersectionProperty~0:complex'
+  - uid: 'api-documenter-test!IDocInterface6#regularProperty:member'
+    summary: Property of type number that does something
+    name: regularProperty
+    fullName: regularProperty
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: 'regularProperty: number;'
+      return:
+        type:
+          - number
+  - uid: 'api-documenter-test!IDocInterface6#tupleProperty:member'
+    name: tupleProperty
+    fullName: tupleProperty
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: 'tupleProperty: [IDocInterface1, IDocInterface2];'
+      return:
+        type:
+          - 'api-documenter-test!IDocInterface6#tupleProperty~0:complex'
+  - uid: 'api-documenter-test!IDocInterface6#typeReferenceProperty:member'
+    name: typeReferenceProperty
+    fullName: typeReferenceProperty
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: 'typeReferenceProperty: Generic<IDocInterface1>;'
+      return:
+        type:
+          - 'api-documenter-test!IDocInterface6#typeReferenceProperty~0:complex'
+  - uid: 'api-documenter-test!IDocInterface6#unionProperty:member'
+    name: unionProperty
+    fullName: unionProperty
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: 'unionProperty: IDocInterface1 | IDocInterface2;'
+      return:
+        type:
+          - 'api-documenter-test!IDocInterface6#unionProperty~0:complex'
+references:
+  - uid: 'api-documenter-test!IDocInterface6#arrayProperty~0:complex'
+    name: 'IDocInterface1[]'
+    fullName: 'IDocInterface1[]'
+    spec.typeScript:
+      - uid: 'api-documenter-test!IDocInterface1:interface'
+        name: IDocInterface1
+        fullName: IDocInterface1
+      - name: '[]'
+        fullName: '[]'
+  - uid: 'api-documenter-test!IDocInterface6#intersectionProperty~0:complex'
+    name: IDocInterface1 & IDocInterface2
+    fullName: IDocInterface1 & IDocInterface2
+    spec.typeScript:
+      - uid: 'api-documenter-test!IDocInterface1:interface'
+        name: IDocInterface1
+        fullName: IDocInterface1
+      - name: ' & '
+        fullName: ' & '
+      - uid: 'api-documenter-test!IDocInterface2:interface'
+        name: IDocInterface2
+        fullName: IDocInterface2
+  - uid: 'api-documenter-test!IDocInterface6#tupleProperty~0:complex'
+    name: '[IDocInterface1, IDocInterface2]'
+    fullName: '[IDocInterface1, IDocInterface2]'
+    spec.typeScript:
+      - name: '['
+        fullName: '['
+      - uid: 'api-documenter-test!IDocInterface1:interface'
+        name: IDocInterface1
+        fullName: IDocInterface1
+      - name: ', '
+        fullName: ', '
+      - uid: 'api-documenter-test!IDocInterface2:interface'
+        name: IDocInterface2
+        fullName: IDocInterface2
+      - name: ']'
+        fullName: ']'
+  - uid: 'api-documenter-test!IDocInterface6#typeReferenceProperty~0:complex'
+    name: Generic<IDocInterface1>
+    fullName: Generic<IDocInterface1>
+    spec.typeScript:
+      - uid: 'api-documenter-test!Generic:class'
+        name: Generic
+        fullName: Generic
+      - name: <
+        fullName: <
+      - uid: 'api-documenter-test!IDocInterface1:interface'
+        name: IDocInterface1
+        fullName: IDocInterface1
+      - name: '>'
+        fullName: '>'
+  - uid: 'api-documenter-test!IDocInterface6#unionProperty~0:complex'
+    name: IDocInterface1 | IDocInterface2
+    fullName: IDocInterface1 | IDocInterface2
+    spec.typeScript:
+      - uid: 'api-documenter-test!IDocInterface1:interface'
+        name: IDocInterface1
+        fullName: IDocInterface1
+      - name: ' | '
+        fullName: ' | '
+      - uid: 'api-documenter-test!IDocInterface2:interface'
+        name: IDocInterface2
+        fullName: IDocInterface2

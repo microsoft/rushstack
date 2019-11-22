@@ -1,0 +1,30 @@
+### YamlMime:UniversalReference
+items:
+  - uid: 'api-documenter-test!IDocInterface2:interface'
+    name: IDocInterface2
+    fullName: IDocInterface2
+    langs:
+      - typeScript
+    type: interface
+    extends:
+      - 'api-documenter-test!IDocInterface1:interface'
+    package: api-documenter-test!
+    children:
+      - 'api-documenter-test!IDocInterface2#deprecatedExample:member(1)'
+  - uid: 'api-documenter-test!IDocInterface2#deprecatedExample:member(1)'
+    deprecated:
+      content: Use `otherThing()` instead.
+    name: deprecatedExample()
+    fullName: deprecatedExample()
+    langs:
+      - typeScript
+    type: method
+    syntax:
+      content: 'deprecatedExample(): void;'
+      return:
+        type:
+          - void
+        description: ''
+references:
+  - uid: 'api-documenter-test!IDocInterface1:interface'
+    name: IDocInterface1

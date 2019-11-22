@@ -1,0 +1,104 @@
+### YamlMime:UniversalReference
+items:
+  - uid: api-documenter-test!
+    summary: |-
+      api-extractor-test-05
+
+      This project tests various documentation generation scenarios and doc comment syntaxes.
+    name: api-documenter-test
+    fullName: api-documenter-test
+    langs:
+      - typeScript
+    type: package
+    children:
+      - 'api-documenter-test!DocBaseClass:class'
+      - 'api-documenter-test!DocClass1:class'
+      - 'api-documenter-test!DocClassInterfaceMerge:class'
+      - 'api-documenter-test!DocClassInterfaceMerge:interface'
+      - 'api-documenter-test!DocEnum:enum'
+      - 'api-documenter-test!Generic:class'
+      - 'api-documenter-test!globalFunction:function(1)'
+      - 'api-documenter-test!IDocInterface1:interface'
+      - 'api-documenter-test!IDocInterface2:interface'
+      - 'api-documenter-test!IDocInterface3:interface'
+      - 'api-documenter-test!IDocInterface4:interface'
+      - 'api-documenter-test!IDocInterface5:interface'
+      - 'api-documenter-test!IDocInterface6:interface'
+      - 'api-documenter-test!OuterNamespace.InnerNamespace.nestedFunction:function(1)'
+      - 'api-documenter-test!SystemEvent:class'
+      - 'api-documenter-test!yamlReferenceUniquenessTest:function(1)'
+  - uid: 'api-documenter-test!globalFunction:function(1)'
+    summary: An exported function
+    name: globalFunction(x)
+    fullName: globalFunction(x)
+    langs:
+      - typeScript
+    type: function
+    syntax:
+      content: 'export declare function globalFunction(x: number): number;'
+      return:
+        type:
+          - number
+        description: ''
+      parameters:
+        - id: x
+          description: ''
+          type:
+            - number
+  - uid: 'api-documenter-test!OuterNamespace.InnerNamespace.nestedFunction:function(1)'
+    summary: A function inside a namespace
+    name: OuterNamespace.InnerNamespace.nestedFunction(x)
+    fullName: OuterNamespace.InnerNamespace.nestedFunction(x)
+    langs:
+      - typeScript
+    type: function
+    syntax:
+      content: 'function nestedFunction(x: number): number;'
+      return:
+        type:
+          - number
+        description: ''
+      parameters:
+        - id: x
+          description: ''
+          type:
+            - number
+  - uid: 'api-documenter-test!yamlReferenceUniquenessTest:function(1)'
+    name: yamlReferenceUniquenessTest()
+    fullName: yamlReferenceUniquenessTest()
+    langs:
+      - typeScript
+    type: function
+    syntax:
+      content: 'export declare function yamlReferenceUniquenessTest(): IDocInterface1;'
+      return:
+        type:
+          - 'api-documenter-test!IDocInterface1:interface'
+        description: ''
+references:
+  - uid: 'api-documenter-test!DocBaseClass:class'
+    name: DocBaseClass
+  - uid: 'api-documenter-test!DocClass1:class'
+    name: DocClass1
+  - uid: 'api-documenter-test!DocClassInterfaceMerge:class'
+    name: DocClassInterfaceMerge
+  - uid: 'api-documenter-test!DocClassInterfaceMerge:interface'
+    name: DocClassInterfaceMerge
+  - uid: 'api-documenter-test!DocEnum:enum'
+    name: DocEnum
+  - uid: 'api-documenter-test!Generic:class'
+    name: Generic
+  - uid: 'api-documenter-test!IDocInterface1:interface'
+    name: IDocInterface1
+  - uid: 'api-documenter-test!IDocInterface2:interface'
+    name: IDocInterface2
+  - uid: 'api-documenter-test!IDocInterface3:interface'
+    name: IDocInterface3
+  - uid: 'api-documenter-test!IDocInterface4:interface'
+    name: IDocInterface4
+  - uid: 'api-documenter-test!IDocInterface5:interface'
+    name: IDocInterface5
+  - uid: 'api-documenter-test!IDocInterface6:interface'
+    name: IDocInterface6
+  - uid: 'api-documenter-test!SystemEvent:class'
+    name: SystemEvent

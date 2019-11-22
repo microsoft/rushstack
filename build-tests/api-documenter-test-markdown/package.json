@@ -1,0 +1,19 @@
+{
+  "name": "api-documenter-test-markdown",
+  "description": "Building this project is a regression test for the markdown output of api-documenter",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "devDependencies": {
+    "@microsoft/api-extractor": "7.6.0",
+    "@microsoft/api-documenter": "7.6.0",
+    "@types/jest": "23.3.11",
+    "@types/node": "8.10.54",
+    "fs-extra": "~7.0.1",
+    "typescript": "~3.1.6"
+  }
+}

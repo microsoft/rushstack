@@ -385,8 +385,14 @@
 
     // "build-tests" folder (alphabetical order)
     {
-      "packageName": "api-documenter-test",
-      "projectFolder": "build-tests/api-documenter-test",
+      "packageName": "api-documenter-test-markdown",
+      "projectFolder": "build-tests/api-documenter-test-markdown",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "api-documenter-test-yaml",
+      "projectFolder": "build-tests/api-documenter-test-yaml",
       "reviewCategory": "tests",
       "shouldPublish": false
     },

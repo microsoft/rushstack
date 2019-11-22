@@ -1,0 +1,30 @@
+### YamlMime:UniversalReference
+items:
+  - uid: 'api-documenter-test!SystemEvent:class'
+    summary: A class used to exposed events.
+    name: SystemEvent
+    fullName: SystemEvent
+    langs:
+      - typeScript
+    type: class
+    package: api-documenter-test!
+    children:
+      - 'api-documenter-test!SystemEvent#addHandler:member(1)'
+  - uid: 'api-documenter-test!SystemEvent#addHandler:member(1)'
+    summary: Adds an handler for the event.
+    name: addHandler(handler)
+    fullName: addHandler(handler)
+    langs:
+      - typeScript
+    type: method
+    syntax:
+      content: 'addHandler(handler: () => void): void;'
+      return:
+        type:
+          - void
+        description: ''
+      parameters:
+        - id: handler
+          description: ''
+          type:
+            - () => void

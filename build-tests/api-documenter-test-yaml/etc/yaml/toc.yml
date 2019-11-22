@@ -1,0 +1,37 @@
+items:
+  - name: SharePoint Framework reference
+    href: ~/overview/sharepoint.md
+    items:
+      - name: api-documenter-test
+        uid: api-documenter-test!
+        items:
+          - name: DocBaseClass
+            uid: 'api-documenter-test!DocBaseClass:class'
+          - name: DocClass1
+            uid: 'api-documenter-test!DocClass1:class'
+          - name: DocClassInterfaceMerge (Class)
+            uid: 'api-documenter-test!DocClassInterfaceMerge:class'
+          - name: DocClassInterfaceMerge (Interface)
+            uid: 'api-documenter-test!DocClassInterfaceMerge:interface'
+          - name: DocEnum
+            uid: 'api-documenter-test!DocEnum:enum'
+          - name: EcmaSmbols
+          - name: Generic
+            uid: 'api-documenter-test!Generic:class'
+          - name: IDocInterface1
+            uid: 'api-documenter-test!IDocInterface1:interface'
+          - name: IDocInterface2
+            uid: 'api-documenter-test!IDocInterface2:interface'
+          - name: IDocInterface3
+            uid: 'api-documenter-test!IDocInterface3:interface'
+          - name: IDocInterface4
+            uid: 'api-documenter-test!IDocInterface4:interface'
+          - name: IDocInterface5
+            uid: 'api-documenter-test!IDocInterface5:interface'
+          - name: IDocInterface6
+            uid: 'api-documenter-test!IDocInterface6:interface'
+          - name: OuterNamespace
+            items:
+              - name: InnerNamespace
+          - name: SystemEvent
+            uid: 'api-documenter-test!SystemEvent:class'
