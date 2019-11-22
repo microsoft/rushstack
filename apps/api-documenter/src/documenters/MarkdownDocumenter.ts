@@ -65,8 +65,8 @@ import { MarkdownDocumenterAccessor } from '../plugin/MarkdownDocumenterAccessor
  */
 export class MarkdownDocumenter {
   private readonly _apiModel: ApiModel;
-  private readonly _documenterConfig: DocumenterConfig | undefined;
-  private readonly _tsdocConfiguration: TSDocConfiguration;
+  protected readonly _documenterConfig: DocumenterConfig | undefined;
+  protected readonly _tsdocConfiguration: TSDocConfiguration;
   private readonly _markdownEmitter: CustomMarkdownEmitter;
   private _outputFolder: string;
   private readonly _pluginLoader: PluginLoader;
@@ -107,7 +107,7 @@ export class MarkdownDocumenter {
     }
   }
 
-  private _writeApiItemPage(apiItem: ApiItem): void {
+  protected _writeApiItemPage(apiItem: ApiItem): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
     const output: DocSection = new DocSection({ configuration: this._tsdocConfiguration });
 
@@ -352,7 +352,7 @@ export class MarkdownDocumenter {
   /**
    * GENERATE PAGE: PACKAGE or NAMESPACE
    */
-  private _writePackageOrNamespaceTables(output: DocSection, apiContainer: ApiPackage | ApiNamespace): void {
+  protected _writePackageOrNamespaceTables(output: DocSection, apiContainer: ApiPackage | ApiNamespace): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     const classesTable: DocTable = new DocTable({ configuration,
@@ -741,7 +741,7 @@ export class MarkdownDocumenter {
     }
   }
 
-  private _createTitleCell(apiItem: ApiItem): DocTableCell {
+  protected _createTitleCell(apiItem: ApiItem): DocTableCell {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     return new DocTableCell({ configuration }, [
@@ -763,7 +763,7 @@ export class MarkdownDocumenter {
    * We mostly assume that the input is an ApiDocumentedItem, but it's easier to perform this as a runtime
    * check than to have each caller perform a type cast.
    */
-  private _createDescriptionCell(apiItem: ApiItem): DocTableCell {
+  protected _createDescriptionCell(apiItem: ApiItem): DocTableCell {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     const section: DocSection = new DocSection({ configuration });
