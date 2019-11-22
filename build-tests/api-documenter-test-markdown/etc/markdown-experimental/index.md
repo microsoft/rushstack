@@ -8,6 +8,5 @@
 
 |  Package | Description |
 |  --- | --- |
-|  [api-documenter-test](./api-documenter-test.md) | api-extractor-test-05<!-- -->This project tests various documentation generation scenarios and doc comment syntaxes. |
 |  [api-documenter-test-markdown](./api-documenter-test-markdown.md) | api-extractor-test-05<!-- -->This project tests various documentation generation scenarios and doc comment syntaxes. |
 

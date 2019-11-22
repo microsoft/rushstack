@@ -1,0 +1,10 @@
+### YamlMime:UniversalReference
+items:
+  - uid: 'api-documenter-test-yaml!DocClassInterfaceMerge:interface'
+    summary: Interface that merges with class
+    name: DocClassInterfaceMerge
+    fullName: DocClassInterfaceMerge
+    langs:
+      - typeScript
+    type: interface
+    package: api-documenter-test-yaml!
