@@ -324,13 +324,15 @@ export class PublishAction extends BaseRushAction {
             return;
           }
 
+          const packageVersion: string = packageConfig.packageJson.version;
+
           // Do not create a new tag if one already exists, this will result in a fatal error
           if (git.hasTag(packageConfig)) {
-            console.log(`Not tagging ${packageName}@${packageConfig.packageJson.version}. A tag already exists for this version.`);
+            console.log(`Not tagging ${packageName}@${packageVersion}. A tag already exists for this version.`);
             return;
           }
 
-          git.addTag(!!this._publish.value, packageName, packageConfig.packageJson.version);
+          git.addTag(!!this._publish.value, packageName, packageVersion);
           updated = true;
         };
 

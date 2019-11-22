@@ -54,7 +54,10 @@ export class PublishGit {
   }
 
   public hasTag(packageConfig: RushConfigurationProject): boolean {
-    const tagName: string = PublishUtilities.createTagname(packageConfig.packageName, packageConfig.packageJson.version);
+    const tagName: string = PublishUtilities.createTagname(
+      packageConfig.packageName,
+      packageConfig.packageJson.version
+    );
     const tagOutput: string = Utilities.executeCommandAndCaptureOutput(
       'git',
       ['tag', '-l', tagName],
