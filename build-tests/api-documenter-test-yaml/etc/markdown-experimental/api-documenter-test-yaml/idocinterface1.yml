@@ -1,0 +1,26 @@
+### YamlMime:UniversalReference
+items:
+  - uid: 'api-documenter-test-yaml!IDocInterface1:interface'
+    name: IDocInterface1
+    fullName: IDocInterface1
+    langs:
+      - typeScript
+    type: interface
+    package: api-documenter-test-yaml!
+    children:
+      - 'api-documenter-test-yaml!IDocInterface1#regularProperty:member'
+  - uid: 'api-documenter-test-yaml!IDocInterface1#regularProperty:member'
+    summary: Does something
+    name: regularProperty
+    fullName: regularProperty
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: 'regularProperty: SystemEvent;'
+      return:
+        type:
+          - 'api-documenter-test-yaml!SystemEvent:class'
+references:
+  - uid: 'api-documenter-test-yaml!SystemEvent:class'
+    name: SystemEvent

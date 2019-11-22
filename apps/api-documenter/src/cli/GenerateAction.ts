@@ -10,7 +10,7 @@ import { ExperimentalYamlDocumenter } from '../documenters/ExperimentalYamlDocum
 
 import { ApiModel } from '@microsoft/api-extractor-model';
 import { FileSystem } from '@microsoft/node-core-library';
-import { MarkdownDocumenter } from '../documenters/MarkdownDocumenter';
+import { ExperimentalMarkdownDocumenter } from '../documenters/ExperimentalMarkdownDocumenter';
 
 export class GenerateAction extends BaseAction {
   public constructor(parser: ApiDocumenterCommandLine) {
@@ -41,7 +41,7 @@ export class GenerateAction extends BaseAction {
     const apiModel: ApiModel = this.buildApiModel();
 
     if (documenterConfig.configFile.outputTarget === 'markdown') {
-      const markdownDocumenter: MarkdownDocumenter = new MarkdownDocumenter(apiModel, documenterConfig);
+      const markdownDocumenter: ExperimentalMarkdownDocumenter = new ExperimentalMarkdownDocumenter(apiModel, documenterConfig);
       markdownDocumenter.generateFiles(this.outputFolder);
     } else {
       const yamlDocumenter: ExperimentalYamlDocumenter = new ExperimentalYamlDocumenter(apiModel, documenterConfig);

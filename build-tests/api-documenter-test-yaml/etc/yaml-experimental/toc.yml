@@ -1,0 +1,51 @@
+items:
+  - name: Test api-documenter
+    href: ~/homepage/homepage.md
+  - name: Test Sample for AD
+    href: api-documenter-test
+    extended: true
+    items:
+      - name: Classes
+        items:
+          - name: DocBaseClass
+            items:
+              - name: DocBaseClass
+                uid: 'api-documenter-test-yaml!DocBaseClass:class'
+              - name: IDocInterface1
+                uid: 'api-documenter-test-yaml!IDocInterface1:interface'
+              - name: IDocInterface2
+                uid: 'api-documenter-test-yaml!IDocInterface2:interface'
+          - name: DocClass1
+            items:
+              - name: DocClass1
+                uid: 'api-documenter-test-yaml!DocClass1:class'
+              - name: IDocInterface3
+                uid: 'api-documenter-test-yaml!IDocInterface3:interface'
+              - name: IDocInterface4
+                uid: 'api-documenter-test-yaml!IDocInterface4:interface'
+      - name: Interfaces
+        items:
+          - name: Interface5
+            items:
+              - name: IDocInterface5
+                uid: 'api-documenter-test-yaml!IDocInterface5:interface'
+          - name: Interface6
+            items:
+              - name: InjectedCustomInterface
+                uid: customUid
+              - name: IDocInterface6
+                uid: 'api-documenter-test-yaml!IDocInterface6:interface'
+      - name: References
+        items:
+          - name: InjectedCustomItem
+            uid: customUrl
+          - name: DocClassInterfaceMerge (Class)
+            uid: 'api-documenter-test-yaml!DocClassInterfaceMerge:class'
+          - name: DocClassInterfaceMerge (Interface)
+            uid: 'api-documenter-test-yaml!DocClassInterfaceMerge:interface'
+          - name: DocEnum
+            uid: 'api-documenter-test-yaml!DocEnum:enum'
+          - name: Generic
+            uid: 'api-documenter-test-yaml!Generic:class'
+          - name: SystemEvent
+            uid: 'api-documenter-test-yaml!SystemEvent:class'
