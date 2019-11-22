@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Adding ExperimentalMarkdownDocumenter to make use of custom categories.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter",
+  "email": "paperbd@users.noreply.github.com"
+}
