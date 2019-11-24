@@ -39,8 +39,8 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     'Word': '/office/dev/add-ins/reference/requirement-sets/word-api-requirement-sets'
   };
 
-  public constructor(apiModel: ApiModel, inputFolder: string) {
-    super(apiModel);
+  public constructor(apiModel: ApiModel, inputFolder: string, newDocfxNamespaces?: boolean) {
+    super(apiModel, newDocfxNamespaces);
 
     const snippetsFilePath: string = path.join(inputFolder, 'snippets.yaml');
 

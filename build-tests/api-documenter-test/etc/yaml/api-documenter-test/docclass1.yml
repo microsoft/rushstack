@@ -15,6 +15,8 @@ items:
     type: class
     extends:
       - 'api-documenter-test!DocBaseClass:class'
+    inheritance:
+      - type: 'api-documenter-test!DocBaseClass:class'
     implements:
       - 'api-documenter-test!IDocInterface1:interface'
       - 'api-documenter-test!IDocInterface2:interface'

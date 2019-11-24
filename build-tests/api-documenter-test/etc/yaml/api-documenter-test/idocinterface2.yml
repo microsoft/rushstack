@@ -8,6 +8,8 @@ items:
     type: interface
     extends:
       - 'api-documenter-test!IDocInterface1:interface'
+    inheritance:
+      - type: 'api-documenter-test!IDocInterface1:interface'
     package: api-documenter-test!
     children:
       - 'api-documenter-test!IDocInterface2#deprecatedExample:member(1)'

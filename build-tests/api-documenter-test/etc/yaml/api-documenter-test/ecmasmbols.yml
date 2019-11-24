@@ -1,0 +1,25 @@
+### YamlMime:UniversalReference
+items:
+  - uid: 'api-documenter-test!EcmaSmbols:namespace'
+    summary: A namespace containing an ECMAScript symbol
+    name: EcmaSmbols
+    fullName: EcmaSmbols
+    langs:
+      - typeScript
+    type: namespace
+    package: api-documenter-test!
+    children:
+      - 'api-documenter-test!EcmaSmbols.example:var'
+  - uid: 'api-documenter-test!EcmaSmbols.example:var'
+    summary: An ECMAScript symbol
+    name: example
+    fullName: EcmaSmbols.example
+    langs:
+      - typeScript
+    namespace: 'api-documenter-test!EcmaSmbols:namespace'
+    type: variable
+    syntax:
+      content: 'example: unique symbol'
+      return:
+        type:
+          - unique symbol

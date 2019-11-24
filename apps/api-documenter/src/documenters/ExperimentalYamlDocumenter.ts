@@ -19,7 +19,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
   private _catchAllPointer: IYamlTocItem;
 
   public constructor(apiModel: ApiModel, documenterConfig: DocumenterConfig) {
-    super(apiModel);
+    super(apiModel, documenterConfig.configFile.newDocfxNamespaces);
     this._config = documenterConfig.configFile.tableOfContents!;
 
     this._tocPointerMap = {};
@@ -37,9 +37,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
     const tocItems: IYamlTocItem[] = [];
     for (const apiItem of apiItems) {
       let tocItem: IYamlTocItem;
-
-      if (apiItem.kind === ApiItemKind.Namespace) {
-        // Namespaces don't have nodes yet
+      if (apiItem.kind === ApiItemKind.Namespace && !this.newDocfxNamespaces) {
         tocItem = {
           name: this._getTocItemName(apiItem)
         };
@@ -61,14 +59,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
 
       tocItems.push(tocItem);
 
-      let children: ReadonlyArray<ApiItem>;
-      if (apiItem.kind === ApiItemKind.Package) {
-        // Skip over the entry point, since it's not part of the documentation hierarchy
-        children = apiItem.members[0].members;
-      } else {
-        children = apiItem.members;
-      }
-
+      const children: ApiItem[] = this._getLogicalChildren(apiItem);
       const childItems: IYamlTocItem[] = this._buildTocItems2(children);
       if (childItems.length > 0) {
         tocItem.items = childItems;

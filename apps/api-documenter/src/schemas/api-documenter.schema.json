@@ -24,6 +24,11 @@
       "default": "crlf"
     },
 
+    "newDocfxNamespaces": {
+      "description": "This enables an experimental feature that will be officially released with the next major version of API Documenter.  It requires DocFX 2.46 or newer.  It enables documentation for namespaces and adds them to the table of contents.  This will also affect file layout as namespaced items will be nested under a directory for the namespace instead of just within the package.",
+      "type": "boolean"
+    },
+
     "plugins": {
       "description": "Specifies plugin packages to be loaded",
       "type": "array"
@@ -33,7 +38,7 @@
       "description": "Configures how the table of contents is generated.",
       "type": "object",
       "additionalProperties": true
-    },
+    }
   },
 
   "additionalProperties": false
