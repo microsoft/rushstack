@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/loader-raw-script",
-  "version": "1.2.192",
+  "version": "1.2.193",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -16,13 +16,13 @@
     "loader-utils": "~1.1.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.4": "0.3.8",
+    "@microsoft/rush-stack-compiler-3.4": "0.3.9",
     "@rushstack/eslint-config": "0.4.2",
     "@types/mocha": "5.2.5",
     "@types/node": "8.10.54",
     "chai": "~3.5.0",
     "gulp": "~4.0.2",
     "mocha": "^5.2.0",
-    "@microsoft/node-library-build": "6.3.8"
+    "@microsoft/node-library-build": "6.3.9"
   }
 }
