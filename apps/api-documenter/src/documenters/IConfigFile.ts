@@ -88,13 +88,15 @@ export interface IConfigFile {
   newlineKind?: 'crlf' | 'lf' | 'os';
 
   /**
-   * Include documentation for namespaces and add them to the TOC.
-   * This will also affect file layout as namespaced items will be nested
+   * This enables an experimental feature that will be officially released with the next major version
+   * of API Documenter.  It requires DocFX 2.46 or newer.  It enables documentation for namespaces and
+   * adds them to the table of contents.  This will also affect file layout as namespaced items will be nested
    * under a directory for the namespace instead of just within the package.
    *
-   * This setting currently only affects the 'docfx' output target.
+   * This setting currently only affects the 'docfx' output target.  It is equivalent to the `--new-docfx-namespaces`
+   * command-line parameter.
    */
-  documentNamespaces?: boolean;
+  newDocfxNamespaces?: boolean;
 
   /** {@inheritDoc IConfigPlugin} */
   plugins?: IConfigPlugin[];

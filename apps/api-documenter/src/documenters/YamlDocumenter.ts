@@ -88,7 +88,7 @@ interface INameOptions {
  * Writes documentation in the Universal Reference YAML file format, as defined by typescript.schema.json.
  */
 export class YamlDocumenter {
-  protected readonly documentNamespaces: boolean;
+  protected readonly newDocfxNamespaces: boolean;
   private readonly _apiModel: ApiModel;
   private readonly _markdownEmitter: CustomMarkdownEmitter;
 
@@ -96,9 +96,9 @@ export class YamlDocumenter {
   private _yamlReferences: IYamlReferences | undefined;
   private _outputFolder: string;
 
-  public constructor(apiModel: ApiModel, documentNamespaces: boolean = false) {
+  public constructor(apiModel: ApiModel, newDocfxNamespaces: boolean = false) {
     this._apiModel = apiModel;
-    this.documentNamespaces = documentNamespaces;
+    this.newDocfxNamespaces = newDocfxNamespaces;
     this._markdownEmitter = new CustomMarkdownEmitter(this._apiModel);
     this._apiItemsByCanonicalReference = new Map<string, ApiItem>();
 
@@ -191,7 +191,7 @@ export class YamlDocumenter {
         this._recordYamlReference(
           this._ensureYamlReferences(),
           this._getUid(apiItem),
-          this._getYamlItemName(apiItem, { includeNamespace: !this.documentNamespaces, includeSignature: true }),
+          this._getYamlItemName(apiItem, { includeNamespace: !this.newDocfxNamespaces, includeSignature: true }),
           this._getYamlItemName(apiItem, { includeNamespace: true, includeSignature: true }));
       }
     }
@@ -204,10 +204,10 @@ export class YamlDocumenter {
     if (apiItem.kind === ApiItemKind.Package) {
       // Skip over the entry point, since it's not part of the documentation hierarchy
       this._flattenNamespaces(apiItem.members[0].members, children,
-        this.documentNamespaces ? FlattenMode.NestedNamespacesAndChildren : FlattenMode.NestedChildren);
+        this.newDocfxNamespaces ? FlattenMode.NestedNamespacesAndChildren : FlattenMode.NestedChildren);
     } else {
       this._flattenNamespaces(apiItem.members, children,
-        this.documentNamespaces ? FlattenMode.ImmediateChildren : FlattenMode.NestedChildren);
+        this.newDocfxNamespaces ? FlattenMode.ImmediateChildren : FlattenMode.NestedChildren);
     }
     return children;
   }
@@ -285,7 +285,7 @@ export class YamlDocumenter {
     const tocItems: IYamlTocItem[] = [];
     for (const apiItem of apiItems) {
       let tocItem: IYamlTocItem;
-      if (apiItem.kind === ApiItemKind.Namespace && !this.documentNamespaces) {
+      if (apiItem.kind === ApiItemKind.Namespace && !this.newDocfxNamespaces) {
         tocItem = {
           name: this._getTocItemName(apiItem)
         };
@@ -336,7 +336,7 @@ export class YamlDocumenter {
       case ApiItemKind.Enum:
         return false;
       case ApiItemKind.Namespace:
-        return !this.documentNamespaces;
+        return !this.newDocfxNamespaces;
     }
     return true;
   }
@@ -394,14 +394,14 @@ export class YamlDocumenter {
     }
 
     yamlItem.name = this._getYamlItemName(apiItem, { includeSignature: true,
-      includeNamespace: !this.documentNamespaces });
+      includeNamespace: !this.newDocfxNamespaces });
     yamlItem.fullName = this._getYamlItemName(apiItem, { includeSignature: true, includeNamespace: true });
     yamlItem.langs = [ 'typeScript' ];
 
     // Add the namespace of the item if it is contained in one.
     // Do not add the namespace parent of a namespace as they are flattened in the documentation.
     if (apiItem.kind !== ApiItemKind.Namespace && apiItem.parent && apiItem.parent.kind === ApiItemKind.Namespace &&
-      this.documentNamespaces) {
+      this.newDocfxNamespaces) {
       yamlItem.namespace = apiItem.parent.canonicalReference.toString();
     }
 

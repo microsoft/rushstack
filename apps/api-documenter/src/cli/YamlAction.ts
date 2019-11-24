@@ -14,7 +14,7 @@ import { ApiModel } from '@microsoft/api-extractor-model';
 
 export class YamlAction extends BaseAction {
   private _officeParameter: CommandLineFlagParameter;
-  private _namespacesParameter: CommandLineFlagParameter;
+  private _newDocfxNamespacesParameter: CommandLineFlagParameter;
 
   public constructor(parser: ApiDocumenterCommandLine) {
     super({
@@ -33,10 +33,11 @@ export class YamlAction extends BaseAction {
       parameterLongName: '--office',
       description: `Enables some additional features specific to Office Add-ins`
     });
-    this._namespacesParameter = this.defineFlagParameter({
-      parameterLongName: '--namespaces',
-      description: `Include documentation for namespaces and add them to the TOC.`
-        + ` This will also affect file layout as namespaced items will be nested`
+    this._newDocfxNamespacesParameter = this.defineFlagParameter({
+      parameterLongName: '--new-docfx-namespaces',
+      description: `This enables an experimental feature that will be officially released with the next major version`
+        + ` of API Documenter.  It requires DocFX 2.46 or newer.  It enables documentation for namespaces and`
+        + ` adds them to the table of contents.  This will also affect file layout as namespaced items will be nested`
         + ` under a directory for the namespace instead of just within the package.`
     });
   }
@@ -45,8 +46,8 @@ export class YamlAction extends BaseAction {
     const apiModel: ApiModel = this.buildApiModel();
 
     const yamlDocumenter: YamlDocumenter = this._officeParameter.value
-       ? new OfficeYamlDocumenter(apiModel, this.inputFolder, this._namespacesParameter.value)
-       : new YamlDocumenter(apiModel, this._namespacesParameter.value);
+       ? new OfficeYamlDocumenter(apiModel, this.inputFolder, this._newDocfxNamespacesParameter.value)
+       : new YamlDocumenter(apiModel, this._newDocfxNamespacesParameter.value);
 
     yamlDocumenter.generateFiles(this.outputFolder);
     return Promise.resolve();

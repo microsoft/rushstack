@@ -2,10 +2,10 @@
   "changes": [
     {
       "packageName": "@microsoft/api-documenter",
-      "comment": "Include namespaces in YAML output",
+      "comment": "Add a new command-line option --new-docfx-namespaces to improve how namespaces are represented when generating YAML for DocFX",
       "type": "minor"
     }
   ],
   "packageName": "@microsoft/api-documenter",
-  "email": "ron.buckton@microsoft.com"
+  "email": "rbuckton@users.noreply.github.com"
 }

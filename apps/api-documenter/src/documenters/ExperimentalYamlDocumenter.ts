@@ -19,7 +19,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
   private _catchAllPointer: IYamlTocItem;
 
   public constructor(apiModel: ApiModel, documenterConfig: DocumenterConfig) {
-    super(apiModel, documenterConfig.configFile.documentNamespaces);
+    super(apiModel, documenterConfig.configFile.newDocfxNamespaces);
     this._config = documenterConfig.configFile.tableOfContents!;
 
     this._tocPointerMap = {};
@@ -37,7 +37,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
     const tocItems: IYamlTocItem[] = [];
     for (const apiItem of apiItems) {
       let tocItem: IYamlTocItem;
-      if (apiItem.kind === ApiItemKind.Namespace && !this.documentNamespaces) {
+      if (apiItem.kind === ApiItemKind.Namespace && !this.newDocfxNamespaces) {
         tocItem = {
           name: this._getTocItemName(apiItem)
         };
