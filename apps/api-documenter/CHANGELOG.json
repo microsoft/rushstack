@@ -2,6 +2,32 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.7.0",
+      "tag": "@microsoft/api-documenter_v7.7.0",
+      "date": "Sun, 24 Nov 2019 00:54:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a new command-line option --new-docfx-namespaces to improve how namespaces are represented when generating YAML for DocFX"
+          },
+          {
+            "comment": "Added support for `@throws`"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.5.6` to `7.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.3.8` to `0.3.9`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.8` to `6.3.9`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.6.1",
       "tag": "@microsoft/api-documenter_v7.6.1",
       "date": "Wed, 20 Nov 2019 06:14:28 GMT",

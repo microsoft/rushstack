@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Fri, 15 Nov 2019 04:50:50 GMT and should not be manually modified.
+This log was last generated on Sun, 24 Nov 2019 00:54:04 GMT and should not be manually modified.
+
+## 7.6.0
+Sun, 24 Nov 2019 00:54:04 GMT
+
+### Minor changes
+
+- Added support for `@throws`
 
 ## 7.5.6
 Fri, 15 Nov 2019 04:50:50 GMT
