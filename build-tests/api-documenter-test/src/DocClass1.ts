@@ -158,6 +158,11 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
    * This is an overloaded function.
    * @param a - the first string
    * @param b - the second string
+   *
+   * @throws `Error`
+   *  The first throws line
+   *
+   * @throws The second throws line
    */
   exampleFunction(a: string, b: string): string;
 

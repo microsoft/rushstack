@@ -234,6 +234,7 @@ export class MarkdownDocumenter {
       case ApiItemKind.MethodSignature:
       case ApiItemKind.Function:
         this._writeParameterTables(output, apiItem as ApiParameterListMixin);
+        this._writeThrowsSection(output, apiItem);
         break;
       case ApiItemKind.Namespace:
         this._writePackageOrNamespaceTables(output, apiItem as ApiNamespace);
@@ -313,6 +314,27 @@ export class MarkdownDocumenter {
           this._appendSection(output, exampleBlock.content);
 
           ++exampleNumber;
+        }
+      }
+    }
+  }
+
+  private _writeThrowsSection(output: DocSection, apiItem: ApiItem): void {
+    if (apiItem instanceof ApiDocumentedItem) {
+      const tsdocComment: DocComment | undefined = apiItem.tsdocComment;
+
+      if (tsdocComment) {
+        // Write the @throws blocks
+        const throwsBlocks: DocBlock[] = tsdocComment.customBlocks.filter(x => x.blockTag.tagNameWithUpperCase
+          === StandardTags.throws.tagNameWithUpperCase);
+
+        if (throwsBlocks.length > 0) {
+          const heading: string = 'Exceptions';
+          output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: heading }));
+
+          for (const throwsBlock of throwsBlocks) {
+            this._appendSection(output, throwsBlock.content);
+          }
         }
       }
     }
