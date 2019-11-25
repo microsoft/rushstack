@@ -132,6 +132,10 @@ export class ApiModelGenerator {
         this._processApiFunction(astDeclaration, exportedName, parentApiItem);
         break;
 
+      case ts.SyntaxKind.GetAccessor:
+        this._processApiProperty(astDeclaration, exportedName, parentApiItem);
+        break;
+
       case ts.SyntaxKind.IndexSignature:
         this._processApiIndexSignature(astDeclaration, exportedName, parentApiItem);
         break;

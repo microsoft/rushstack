@@ -525,6 +525,18 @@ export class Collector {
       if (effectiveReleaseTag > maxEffectiveReleaseTag) {
         maxEffectiveReleaseTag = effectiveReleaseTag;
       }
+
+      // For a getter/setter pair, make the setter ancillary to the getter
+      if (astDeclaration.declaration.kind === ts.SyntaxKind.SetAccessor) {
+        for (const getterAstDeclaration of astDeclaration.astSymbol.astDeclarations) {
+          if (getterAstDeclaration.declaration.kind === ts.SyntaxKind.GetAccessor) {
+            const getterMetadata: DeclarationMetadata = getterAstDeclaration.metadata as DeclarationMetadata;
+
+            // Associate it with the getter
+            getterMetadata.addAncillaryDeclaration(astDeclaration);
+          }
+        }
+      }
     }
 
     const symbolMetadata: SymbolMetadata = new SymbolMetadata();
