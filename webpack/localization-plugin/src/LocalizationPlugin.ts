@@ -211,6 +211,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
             namedChunkGroups: {}
           };
 
+          const alreadyProcessedAssets: Set<string> = new Set<string>();
+
           for (const chunkGroup of compilation.chunkGroups) {
             const children: Webpack.compilation.Chunk[] = chunkGroup.getChildren();
             if (
@@ -231,7 +233,13 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
             const chunkFiles: string[] = chunkGroup.getFiles();
             for (const chunkFileName of chunkFiles) {
-              if (chunkFileName.match(LOCALE_FILENAME_PLACEHOLDER_REGEX)) {
+              if (
+                chunkFileName.match(LOCALE_FILENAME_PLACEHOLDER_REGEX) && // Ensure this is expected to be localized
+                chunkFileName.endsWith('.js') && // Ensure this is a JS file
+                !alreadyProcessedAssets.has(chunkFileName) // Ensure this isn't a vendor chunk we've already processed
+              ) {
+                alreadyProcessedAssets.add(chunkFileName);
+
                 const asset: IAsset = compilation.assets[chunkFileName];
                 const resultingAssets: Map<string, IProcessAssetResult> = this._processAsset(
                   compilation,
