@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.17.2",
+      "tag": "@microsoft/rush_v5.17.2",
+      "date": "Tue, 26 Nov 2019 00:53:52 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Resolve an issue where git tags were not being applied when using pack or publish with --include-all"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.17.1",
       "tag": "@microsoft/rush_v5.17.1",
       "date": "Thu, 21 Nov 2019 00:50:15 GMT",
