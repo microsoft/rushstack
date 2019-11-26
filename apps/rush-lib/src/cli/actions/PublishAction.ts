@@ -339,7 +339,6 @@ export class PublishAction extends BaseRushAction {
         if (this._pack.value) {
           // packs to tarball instead of publishing to NPM repository
           this._npmPack(packageName, packageConfig);
-          // Do not tag packages that already exist. This will fail with a fatal error.
           applyTag(this._applyGitTagsOnPack.value);
         } else if (this._force.value || !this._packageExists(packageConfig)) {
           // Publish to npm repository
