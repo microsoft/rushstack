@@ -118,7 +118,7 @@ export class Collector {
 
     this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup,
       bundledPackageNames, this.messageRouter);
-    this.astReferenceResolver = new AstReferenceResolver(this.astSymbolTable, this.workingPackage);
+    this.astReferenceResolver = new AstReferenceResolver(this);
   }
 
   /**
