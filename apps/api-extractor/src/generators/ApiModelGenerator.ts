@@ -98,7 +98,13 @@ export class ApiModelGenerator {
       return; // trim out private declarations
     }
 
-    const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration).effectiveReleaseTag;
+    const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
+    if (declarationMetadata.isAncillary) {
+      // Skip ancillary declarations; we will process them with the main declaration
+      return;
+    }
+
+    const releaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
     if (releaseTag === ReleaseTag.Internal || releaseTag === ReleaseTag.Alpha) {
       return; // trim out items marked as "@internal" or "@alpha"
     }
@@ -206,11 +212,7 @@ export class ApiModelGenerator {
 
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, callSignature.parameters);
 
-      const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
-        referenceGenerator: this._referenceGenerator,
-        startingNode: astDeclaration.declaration,
-        nodesToCapture
-      });
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
       const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
       const releaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
@@ -245,11 +247,7 @@ export class ApiModelGenerator {
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture,
         constructorDeclaration.parameters);
 
-      const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
-        referenceGenerator: this._referenceGenerator,
-        startingNode: astDeclaration.declaration,
-        nodesToCapture
-      });
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
       const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
       const releaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
@@ -300,12 +298,7 @@ export class ApiModelGenerator {
         }
       }
 
-      const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
-        referenceGenerator: this._referenceGenerator,
-        startingNode: astDeclaration.declaration,
-        stopBeforeChildKind: ts.SyntaxKind.FirstPunctuation,  // FirstPunctuation = "{"
-        nodesToCapture
-      });
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
       const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
       const releaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
@@ -349,11 +342,7 @@ export class ApiModelGenerator {
 
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, constructSignature.parameters);
 
-      const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
-        referenceGenerator: this._referenceGenerator,
-        startingNode: astDeclaration.declaration,
-        nodesToCapture
-      });
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
       const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
       const releaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
@@ -381,11 +370,7 @@ export class ApiModelGenerator {
     let apiEnum: ApiEnum | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiEnum;
 
     if (apiEnum === undefined) {
-      const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
-        referenceGenerator: this._referenceGenerator,
-        startingNode: astDeclaration.declaration,
-        stopBeforeChildKind: ts.SyntaxKind.FirstPunctuation  // FirstPunctuation = "{"
-      });
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, []);
       const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
       const releaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
@@ -413,11 +398,7 @@ export class ApiModelGenerator {
       const initializerTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: enumMember.initializer, tokenRange: initializerTokenRange });
 
-      const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
-        referenceGenerator: this._referenceGenerator,
-        startingNode: astDeclaration.declaration,
-        nodesToCapture
-      });
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
       const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
       const releaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
@@ -459,11 +440,7 @@ export class ApiModelGenerator {
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture,
         functionDeclaration.parameters);
 
-      const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
-        referenceGenerator: this._referenceGenerator,
-        startingNode: astDeclaration.declaration,
-        nodesToCapture
-      });
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
       const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
       const releaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
@@ -505,11 +482,7 @@ export class ApiModelGenerator {
 
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, indexSignature.parameters);
 
-      const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
-        referenceGenerator: this._referenceGenerator,
-        startingNode: astDeclaration.declaration,
-        nodesToCapture
-      });
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
       const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
       const releaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
@@ -555,12 +528,7 @@ export class ApiModelGenerator {
         }
       }
 
-      const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
-        referenceGenerator: this._referenceGenerator,
-        startingNode: astDeclaration.declaration,
-        stopBeforeChildKind: ts.SyntaxKind.FirstPunctuation,  // FirstPunctuation = "{"
-        nodesToCapture
-      });
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
       const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
       const releaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
@@ -604,11 +572,7 @@ export class ApiModelGenerator {
 
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, methodDeclaration.parameters);
 
-      const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
-        referenceGenerator: this._referenceGenerator,
-        startingNode: astDeclaration.declaration,
-        nodesToCapture
-      });
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
       const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
       const releaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
@@ -656,11 +620,7 @@ export class ApiModelGenerator {
 
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, methodSignature.parameters);
 
-      const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
-        referenceGenerator: this._referenceGenerator,
-        startingNode: astDeclaration.declaration,
-        nodesToCapture
-      });
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
       const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
       const releaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
@@ -689,11 +649,7 @@ export class ApiModelGenerator {
     let apiNamespace: ApiNamespace | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiNamespace;
 
     if (apiNamespace === undefined) {
-      const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
-        referenceGenerator: this._referenceGenerator,
-        startingNode: astDeclaration.declaration,
-        stopBeforeChildKind: ts.SyntaxKind.ModuleBlock  // ModuleBlock = the "{ ... }" block
-      });
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, []);
       const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
       const releaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
@@ -725,11 +681,7 @@ export class ApiModelGenerator {
       const propertyTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: propertyDeclaration.type, tokenRange: propertyTypeTokenRange });
 
-      const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
-        referenceGenerator: this._referenceGenerator,
-        startingNode: astDeclaration.declaration,
-        nodesToCapture
-      });
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
       const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
       const releaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
@@ -759,11 +711,7 @@ export class ApiModelGenerator {
       const propertyTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: propertySignature.type, tokenRange: propertyTypeTokenRange });
 
-      const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
-        referenceGenerator: this._referenceGenerator,
-        startingNode: astDeclaration.declaration,
-        nodesToCapture
-      });
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
       const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
       const releaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
@@ -804,11 +752,7 @@ export class ApiModelGenerator {
       const typeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: typeAliasDeclaration.type, tokenRange: typeTokenRange });
 
-      const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
-        referenceGenerator: this._referenceGenerator,
-        startingNode: astDeclaration.declaration,
-        nodesToCapture
-      });
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
       const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
       const releaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
@@ -844,11 +788,7 @@ export class ApiModelGenerator {
       const variableTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: variableDeclaration.type, tokenRange: variableTypeTokenRange });
 
-      const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
-        referenceGenerator: this._referenceGenerator,
-        startingNode: astDeclaration.declaration,
-        nodesToCapture
-      });
+      const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
       const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = declarationMetadata.tsdocComment;
       const releaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
@@ -857,6 +797,28 @@ export class ApiModelGenerator {
 
       parentApiItem.addMember(apiVariable);
     }
+  }
+
+  /**
+   * @param nodesToCapture - A list of child nodes whose token ranges we want to capture
+   */
+  private _buildExcerptTokens(astDeclaration: AstDeclaration,
+    nodesToCapture: IExcerptBuilderNodeToCapture[]): IExcerptToken[] {
+
+    const excerptTokens: IExcerptToken[] = [];
+
+    // Build the main declaration
+    ExcerptBuilder.addDeclaration(excerptTokens, astDeclaration, nodesToCapture, this._referenceGenerator);
+
+    const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
+
+    // Add any ancillary declarations
+    for (const ancillaryDeclaration of declarationMetadata.ancillaryDeclarations) {
+      ExcerptBuilder.addBlankLine(excerptTokens);
+      ExcerptBuilder.addDeclaration(excerptTokens, ancillaryDeclaration, nodesToCapture, this._referenceGenerator);
+    }
+
+    return excerptTokens;
   }
 
   private _captureTypeParameters(nodesToCapture: IExcerptBuilderNodeToCapture[], typeParameterNodes:
