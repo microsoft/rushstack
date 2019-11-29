@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-stack-compiler-3.6",
   "entries": [
     {
+      "version": "0.1.1",
+      "tag": "@microsoft/rush-stack-compiler-3.6_v0.1.1",
+      "date": "Fri, 29 Nov 2019 16:07:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "updates repo url to proper path in package.json"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.0",
       "tag": "@microsoft/rush-stack-compiler-3.6_v0.1.0",
       "date": "Tue, 26 Nov 2019 00:36:34 GMT",
