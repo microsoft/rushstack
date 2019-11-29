@@ -119,9 +119,11 @@ export const enum ExtractorMessageId {
     InternalMissingUnderscore = "ae-internal-missing-underscore",
     InternalMixedReleaseTag = "ae-internal-mixed-release-tag",
     MisplacedPackageTag = "ae-misplaced-package-tag",
+    MissingGetter = "ae-missing-getter",
     MissingReleaseTag = "ae-missing-release-tag",
     PreapprovedBadReleaseTag = "ae-preapproved-bad-release-tag",
     PreapprovedUnsupportedType = "ae-preapproved-unsupported-type",
+    SetterWithDocs = "ae-setter-with-docs",
     UnresolvedInheritDocBase = "ae-unresolved-inheritdoc-base",
     UnresolvedInheritDocReference = "ae-unresolved-inheritdoc-reference",
     UnresolvedLink = "ae-unresolved-link"

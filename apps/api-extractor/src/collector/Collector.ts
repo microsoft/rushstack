@@ -528,13 +528,23 @@ export class Collector {
 
       // For a getter/setter pair, make the setter ancillary to the getter
       if (astDeclaration.declaration.kind === ts.SyntaxKind.SetAccessor) {
+        let foundGetter: boolean = false;
         for (const getterAstDeclaration of astDeclaration.astSymbol.astDeclarations) {
           if (getterAstDeclaration.declaration.kind === ts.SyntaxKind.GetAccessor) {
             const getterMetadata: DeclarationMetadata = getterAstDeclaration.metadata as DeclarationMetadata;
 
             // Associate it with the getter
             getterMetadata.addAncillaryDeclaration(astDeclaration);
+
+            foundGetter = true;
           }
+        }
+
+        if (!foundGetter) {
+          this.messageRouter.addAnalyzerIssue(
+            ExtractorMessageId.MissingGetter,
+            `The property "${astDeclaration.astSymbol.localName}" has a setter but no getter.`,
+            astDeclaration);
         }
       }
     }

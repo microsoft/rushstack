@@ -85,7 +85,17 @@ export const enum ExtractorMessageId {
   /**
    * "The `@link` reference could not be resolved".
    */
-  UnresolvedLink = 'ae-unresolved-link'
+  UnresolvedLink = 'ae-unresolved-link',
+
+  /**
+   * "The doc comment for the property ___ must appear on the getter, not the setter.".
+   */
+  SetterWithDocs = 'ae-setter-with-docs',
+
+  /**
+   * "The property ___ has a setter but no getter.".
+   */
+  MissingGetter = 'ae-missing-getter',
 }
 
 export const allExtractorMessageIds: Set<string> = new Set<string>([
@@ -102,5 +112,7 @@ export const allExtractorMessageIds: Set<string> = new Set<string>([
   'ae-unresolved-inheritdoc-reference',
   'ae-unresolved-inheritdoc-base',
   'ae-cyclic-inherit-doc',
-  'ae-unresolved-link'
+  'ae-unresolved-link',
+  'ae-setter-with-docs',
+  'ae-missing-getter'
 ]);
