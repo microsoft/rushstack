@@ -3,7 +3,11 @@ items:
   - uid: 'api-documenter-test!DocClass1:class'
     summary: This is an example class.
     remarks: >-
-      These are some remarks.
+      [Link to overload 1](xref:api-documenter-test!DocClass1#exampleFunction:member(1))
+
+
+      [Link to overload 2](xref:api-documenter-test!DocClass1#exampleFunction:member(2))
+
 
 
       The constructor for this class is marked as internal. Third-party code should not call the constructor directly or

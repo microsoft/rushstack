@@ -99,7 +99,7 @@
         {
           "kind": "Class",
           "canonicalReference": "api-documenter-test!DocClass1:class",
-          "docComment": "/**\n * This is an example class.\n *\n * @remarks\n *\n * These are some remarks.\n *\n * The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `DocClass1` class.\n *\n * @defaultValue\n *\n * a default value for this function\n *\n * {@docCategory DocClass1}\n *\n * @public\n */\n",
+          "docComment": "/**\n * This is an example class.\n *\n * @remarks\n *\n * {@link DocClass1.(exampleFunction:1) | Link to overload 1}\n *\n * {@link DocClass1.(exampleFunction:2) | Link to overload 2}\n *\n * {@docCategory DocClass1}\n *\n * The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `DocClass1` class.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
