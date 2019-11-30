@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DocDeclarationReference } from '@microsoft/tsdoc';
+import { DocDeclarationReference, SelectorKind } from '@microsoft/tsdoc';
 import { ApiItem } from '../items/ApiItem';
 import { ApiModel } from './ApiModel';
 import { ApiPackage } from './ApiPackage';
 import { ApiEntryPoint } from './ApiEntryPoint';
 import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
+import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 
 /**
  * Result object for {@link ApiModel.resolveDeclarationReference}.
@@ -108,7 +109,31 @@ export class ModelReferenceResolver {
         return result;
       }
       if (foundMembers.length > 1) {
-        // TODO: Support TSDoc selectors
+        if (memberReference.selector && memberReference.selector.selectorKind === SelectorKind.Index) {
+          const selectedMembers: ApiItem[] = [];
+
+          const selectorOverloadIndex: number = parseInt(memberReference.selector.selector);
+          for (const foundMember of foundMembers) {
+            if (ApiParameterListMixin.isBaseClassOf(foundMember)) {
+              if (foundMember.overloadIndex === selectorOverloadIndex) {
+                selectedMembers.push(foundMember);
+              }
+            }
+          }
+
+          if (selectedMembers.length === 0) {
+            result.errorMessage = `An overload for ${JSON.stringify(identifier)} was not found that matches`
+              + ` the TSDoc selector ":${selectorOverloadIndex}"`;
+            return result;
+          }
+
+          if (selectedMembers.length === 1) {
+            result.resolvedApiItem = selectedMembers[0];
+            return result;
+          }
+        }
+
+        // TODO: Support other TSDoc selectors
         result.errorMessage = `The member reference ${JSON.stringify(identifier)} was ambiguous` ;
         return result;
       }
