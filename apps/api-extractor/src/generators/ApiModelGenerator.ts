@@ -42,13 +42,11 @@ import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 
 export class ApiModelGenerator {
   private readonly _collector: Collector;
-  private readonly _cachedOverloadIndexesByDeclaration: Map<AstDeclaration, number>;
   private readonly _apiModel: ApiModel;
   private readonly _referenceGenerator: DeclarationReferenceGenerator;
 
   public constructor(collector: Collector) {
     this._collector = collector;
-    this._cachedOverloadIndexesByDeclaration = new Map<AstDeclaration, number>();
     this._apiModel = new ApiModel();
     this._referenceGenerator = new DeclarationReferenceGenerator(
       collector.packageJsonLookup,
@@ -193,7 +191,7 @@ export class ApiModelGenerator {
   private _processApiCallSignature(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
 
-    const overloadIndex: number = this._getOverloadIndex(astDeclaration);
+    const overloadIndex: number = this._collector.getOverloadIndex(astDeclaration);
     const containerKey: string = ApiCallSignature.getContainerKey(overloadIndex);
 
     let apiCallSignature: ApiCallSignature | undefined = parentApiItem.tryGetMemberByKey(containerKey) as
@@ -234,7 +232,7 @@ export class ApiModelGenerator {
   private _processApiConstructor(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
 
-    const overloadIndex: number = this._getOverloadIndex(astDeclaration);
+    const overloadIndex: number = this._collector.getOverloadIndex(astDeclaration);
     const containerKey: string = ApiConstructor.getContainerKey(overloadIndex);
 
     let apiConstructor: ApiConstructor | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiConstructor;
@@ -322,7 +320,7 @@ export class ApiModelGenerator {
   private _processApiConstructSignature(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
 
-    const overloadIndex: number = this._getOverloadIndex(astDeclaration);
+    const overloadIndex: number = this._collector.getOverloadIndex(astDeclaration);
     const containerKey: string = ApiConstructSignature.getContainerKey(overloadIndex);
 
     let apiConstructSignature: ApiConstructSignature | undefined = parentApiItem.tryGetMemberByKey(containerKey) as
@@ -420,7 +418,7 @@ export class ApiModelGenerator {
 
     const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
 
-    const overloadIndex: number = this._getOverloadIndex(astDeclaration);
+    const overloadIndex: number = this._collector.getOverloadIndex(astDeclaration);
     const containerKey: string = ApiFunction.getContainerKey(name, overloadIndex);
 
     let apiFunction: ApiFunction | undefined = parentApiItem.tryGetMemberByKey(containerKey) as
@@ -466,7 +464,7 @@ export class ApiModelGenerator {
   private _processApiIndexSignature(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
 
-    const overloadIndex: number = this._getOverloadIndex(astDeclaration);
+    const overloadIndex: number = this._collector.getOverloadIndex(astDeclaration);
     const containerKey: string = ApiIndexSignature.getContainerKey(overloadIndex);
 
     let apiIndexSignature: ApiIndexSignature | undefined = parentApiItem.tryGetMemberByKey(containerKey) as
@@ -554,7 +552,7 @@ export class ApiModelGenerator {
     const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
 
     const isStatic: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Static) !== 0;
-    const overloadIndex: number = this._getOverloadIndex(astDeclaration);
+    const overloadIndex: number = this._collector.getOverloadIndex(astDeclaration);
     const containerKey: string = ApiMethod.getContainerKey(name, isStatic, overloadIndex);
 
     let apiMethod: ApiMethod | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiMethod;
@@ -601,7 +599,7 @@ export class ApiModelGenerator {
 
     const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
 
-    const overloadIndex: number = this._getOverloadIndex(astDeclaration);
+    const overloadIndex: number = this._collector.getOverloadIndex(astDeclaration);
     const containerKey: string = ApiMethodSignature.getContainerKey(name, overloadIndex);
 
     let apiMethodSignature: ApiMethodSignature | undefined = parentApiItem.tryGetMemberByKey(containerKey) as
@@ -856,35 +854,5 @@ export class ApiModelGenerator {
       });
     }
     return parameters;
-  }
-
-  private _getOverloadIndex(astDeclaration: AstDeclaration): number {
-    const allDeclarations: ReadonlyArray<AstDeclaration> = astDeclaration.astSymbol.astDeclarations;
-    if (allDeclarations.length === 1) {
-      return 1; // trivial case
-    }
-
-    let overloadIndex: number | undefined = this._cachedOverloadIndexesByDeclaration.get(astDeclaration);
-
-    if (overloadIndex === undefined) {
-      // TSDoc index selectors are positive integers counting from 1
-      let nextIndex: number = 1;
-      for (const other of allDeclarations) {
-        // Filter out other declarations that are not overloads.  For example, an overloaded function can also
-        // be a namespace.
-        if (other.declaration.kind === astDeclaration.declaration.kind) {
-          this._cachedOverloadIndexesByDeclaration.set(other, nextIndex);
-          ++nextIndex;
-        }
-      }
-      overloadIndex = this._cachedOverloadIndexesByDeclaration.get(astDeclaration);
-    }
-
-    if (overloadIndex === undefined) {
-      // This should never happen
-      throw new Error('Error calculating overload index for declaration');
-    }
-
-    return overloadIndex;
   }
 }
