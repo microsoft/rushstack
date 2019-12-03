@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 21 Nov 2019 00:50:15 GMT and should not be manually modified.
+This log was last generated on Tue, 26 Nov 2019 00:53:52 GMT and should not be manually modified.
+
+## 5.17.2
+Tue, 26 Nov 2019 00:53:52 GMT
+
+### Updates
+
+- Resolve an issue where git tags were not being applied when using pack or publish with --include-all
 
 ## 5.17.1
 Thu, 21 Nov 2019 00:50:15 GMT

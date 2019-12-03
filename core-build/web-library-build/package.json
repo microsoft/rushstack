@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/web-library-build",
-  "version": "7.3.8",
+  "version": "7.3.9",
   "description": "",
   "engines": {
     "npm": "3.10.8"
@@ -16,18 +16,18 @@
   "typings": "lib/index.d.ts",
   "dependencies": {
     "@microsoft/gulp-core-build": "3.12.5",
-    "@microsoft/gulp-core-build-sass": "4.8.15",
-    "@microsoft/gulp-core-build-serve": "3.5.15",
-    "@microsoft/gulp-core-build-typescript": "8.3.8",
-    "@microsoft/gulp-core-build-webpack": "4.0.0",
+    "@microsoft/gulp-core-build-sass": "4.8.16",
+    "@microsoft/gulp-core-build-serve": "3.5.16",
+    "@microsoft/gulp-core-build-typescript": "8.3.9",
+    "@microsoft/gulp-core-build-webpack": "4.0.1",
     "@types/gulp": "4.0.6",
     "@types/node": "8.10.54",
     "gulp": "~4.0.2",
     "gulp-replace": "^0.5.4"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.3.8",
-    "@microsoft/rush-stack-compiler-3.4": "0.3.8",
+    "@microsoft/node-library-build": "6.3.9",
+    "@microsoft/rush-stack-compiler-3.4": "0.3.9",
     "@rushstack/eslint-config": "0.4.2"
   }
 }

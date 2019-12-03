@@ -1,6 +1,14 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Wed, 20 Nov 2019 06:14:28 GMT and should not be manually modified.
+This log was last generated on Sun, 24 Nov 2019 00:54:04 GMT and should not be manually modified.
+
+## 7.7.0
+Sun, 24 Nov 2019 00:54:04 GMT
+
+### Minor changes
+
+- Add a new command-line option --new-docfx-namespaces to improve how namespaces are represented when generating YAML for DocFX
+- Added support for `@throws`
 
 ## 7.6.1
 Wed, 20 Nov 2019 06:14:28 GMT

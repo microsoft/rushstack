@@ -85,7 +85,7 @@ export class EslintRunner extends RushStackCompilerBase<ILintRunnerConfig> {
       args: args,
       // ESLint errors are logged to stdout
       onError: (data: Buffer) => {
-        this._terminal.writeErrorLine(`Unexpected STDERR output from ESLint: ${data.toString()}`)
+        this._terminal.writeErrorLine(`Unexpected STDERR output from ESLint: ${data.toString()}`);
       },
       onData: (data: Buffer) => {
         stdoutBuffer.push(data.toString());
