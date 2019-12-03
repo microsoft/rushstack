@@ -10,8 +10,7 @@
  * @packageDocumentation
  */
 
-class Lib1ForgottenExport {
-}
+import { Lib1ForgottenExport } from './Lib1ForgottenExport';
 
 /** @public */
 export class Lib1Class extends Lib1ForgottenExport {
