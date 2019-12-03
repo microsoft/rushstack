@@ -92,7 +92,7 @@ export declare class ClassWithAccessModifiers {
     /** Doc comment */
     private privateMethod;
     /** Doc comment */
-    private readonly privateGetter;
+    private get privateGetter();
     /** Doc comment */
     private privateSetter;
     /** Doc comment */
@@ -102,7 +102,7 @@ export declare class ClassWithAccessModifiers {
     /** Doc comment */
     protected protectedField: number;
     /** Doc comment */
-    protected readonly protectedGetter: string;
+    protected get protectedGetter(): string;
     /** Doc comment */
     protected protectedSetter(x: string): void;
     /** Doc comment */
@@ -116,11 +116,11 @@ export declare class ClassWithAccessModifiers {
  */
 export declare class ClassWithSymbols {
     readonly [unexportedCustomSymbol]: number;
-    readonly [locallyExportedCustomSymbol]: string;
+    get [locallyExportedCustomSymbol](): string;
     [fullyExportedCustomSymbol](): void;
-    readonly [ANamespace.locallyExportedCustomSymbol]: string;
+    get [ANamespace.locallyExportedCustomSymbol](): string;
     [ANamespace.fullyExportedCustomSymbol](): void;
-    readonly [Symbol.toStringTag]: string;
+    get [Symbol.toStringTag](): string;
 }
 
 /**

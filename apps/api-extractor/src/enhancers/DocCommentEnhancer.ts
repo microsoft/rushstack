@@ -127,8 +127,20 @@ export class DocCommentEnhancer {
         );
 
       }
+      return;
+    }
 
-    } else if (metadata.tsdocComment) {
+    if (astDeclaration.declaration.kind === ts.SyntaxKind.SetAccessor) {
+      if (metadata.tsdocComment) {
+        this._collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.SetterWithDocs,
+          `The doc comment for the property "${astDeclaration.astSymbol.localName}"`
+          + ` must appear on the getter, not the setter.`,
+          astDeclaration);
+      }
+      return;
+    }
+
+    if (metadata.tsdocComment) {
       // Require the summary to contain at least 10 non-spacing characters
       metadata.needsDocumentation = !tsdoc.PlainTextEmitter.hasAnyTextContent(
         metadata.tsdocComment.summarySection, 10);

@@ -404,7 +404,8 @@ export class ApiReportGenerator {
       }
     }
 
-    if (declarationMetadata.needsDocumentation) {
+    // Note that ancillary declarations aren't supposed to have documentation
+    if (declarationMetadata.needsDocumentation && !declarationMetadata.isAncillary) {
       footerParts.push('(undocumented)');
     }
 

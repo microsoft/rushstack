@@ -355,6 +355,32 @@
             },
             {
               "kind": "Property",
+              "canonicalReference": "api-documenter-test!DocClass1#readonlyProperty:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "get readonlyProperty(): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "readonlyProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
               "canonicalReference": "api-documenter-test!DocClass1#regularProperty:member",
               "docComment": "/**\n * This is a regular property that happens to use the SystemEvent type.\n */\n",
               "excerptTokens": [
@@ -466,6 +492,36 @@
               "overloadIndex": 1,
               "parameters": [],
               "name": "tableExample"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "api-documenter-test!DocClass1#writeableProperty:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "get writeableProperty(): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                },
+                {
+                  "kind": "Content",
+                  "text": "\n\nset writeableProperty(value: string);"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "writeableProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
             }
           ],
           "extendsTokenRange": {
