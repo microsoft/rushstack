@@ -339,7 +339,7 @@ export class Collector {
 
     if (overloadIndex === undefined) {
       // This should never happen
-      throw new Error('Error calculating overload index for declaration');
+      throw new InternalError('Error calculating overload index for declaration');
     }
 
     return overloadIndex;
