@@ -140,8 +140,10 @@ export interface IDocInterface4 {
  * This is an example class.
  *
  * @remarks
- * These are some remarks.
- * @defaultValue a default value for this function
+ * {@link DocClass1.(exampleFunction:1)|Link to overload 1}
+ *
+ * {@link DocClass1.(exampleFunction:2)|Link to overload 2}
+ *
  * @public
  * {@docCategory DocClass1}
  */

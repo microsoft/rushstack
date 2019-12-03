@@ -133,7 +133,9 @@ export class AstReferenceResolver {
   private _selectDeclaration(astDeclarations: ReadonlyArray<AstDeclaration>,
     memberReference: tsdoc.DocMemberReference, astSymbolName: string): AstDeclaration | ResolverFailure {
 
-    if (memberReference.selector === undefined) {
+    const memberSelector: tsdoc.DocMemberSelector | undefined = memberReference.selector;
+
+    if (memberSelector === undefined) {
       if (astDeclarations.length === 1) {
         return astDeclarations[0];
       } else {
@@ -149,11 +151,20 @@ export class AstReferenceResolver {
       }
     }
 
-    const selectorName: string = memberReference.selector.selector;
-
-    if (memberReference.selector.selectorKind !== tsdoc.SelectorKind.System) {
-      return new ResolverFailure(`The selector "${selectorName}" is not a supported selector type`);
+    switch (memberSelector.selectorKind) {
+      case tsdoc.SelectorKind.System:
+        return this._selectUsingSystemSelector(astDeclarations, memberSelector, astSymbolName);
+      case tsdoc.SelectorKind.Index:
+        return this._selectUsingIndexSelector(astDeclarations, memberSelector, astSymbolName);
     }
+
+    return new ResolverFailure(`The selector "${memberSelector.selector}" is not a supported selector type`);
+  }
+
+  private _selectUsingSystemSelector(astDeclarations: ReadonlyArray<AstDeclaration>,
+    memberSelector: tsdoc.DocMemberSelector, astSymbolName: string): AstDeclaration | ResolverFailure {
+
+    const selectorName: string = memberSelector.selector;
 
     let selectorSyntaxKind: ts.SyntaxKind;
 
@@ -198,6 +209,37 @@ export class AstReferenceResolver {
 
       return new ResolverFailure(`More than one declaration "${astSymbolName}" matches the`
         + ` TSDoc selector "${selectorName}"`);
+    }
+    return matches[0];
+  }
+
+  private _selectUsingIndexSelector(astDeclarations: ReadonlyArray<AstDeclaration>,
+    memberSelector: tsdoc.DocMemberSelector, astSymbolName: string): AstDeclaration | ResolverFailure {
+
+    const selectorOverloadIndex: number = parseInt(memberSelector.selector);
+
+    const matches: AstDeclaration[] = [];
+    for (const astDeclaration of astDeclarations) {
+      const overloadIndex: number = this._collector.getOverloadIndex(astDeclaration);
+      if (overloadIndex === selectorOverloadIndex) {
+        matches.push(astDeclaration);
+      }
+    }
+
+    if (matches.length === 0) {
+      return new ResolverFailure(`An overload for "${astSymbolName}" was not found that matches the`
+        + ` TSDoc selector ":${selectorOverloadIndex}"`);
+    }
+    if (matches.length > 1) {
+      // If we found multiple matches, but the extra ones are all ancillary declarations,
+      // then return the main declaration.
+      const nonAncillaryMatch: AstDeclaration | undefined = this._tryDisambiguateAncillaryMatches(matches);
+      if (nonAncillaryMatch) {
+        return nonAncillaryMatch;
+      }
+
+      return new ResolverFailure(`More than one declaration for "${astSymbolName}" matches the`
+      + ` TSDoc selector ":${selectorOverloadIndex}"`);
     }
     return matches[0];
   }

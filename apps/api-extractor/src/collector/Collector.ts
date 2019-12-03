@@ -82,6 +82,9 @@ export class Collector {
   private readonly _dtsTypeReferenceDirectives: Set<string> = new Set<string>();
   private readonly _dtsLibReferenceDirectives: Set<string> = new Set<string>();
 
+  // Used by getOverloadIndex()
+  private readonly _cachedOverloadIndexesByDeclaration: Map<AstDeclaration, number>;
+
   public constructor(options: ICollectorOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
 
@@ -119,6 +122,8 @@ export class Collector {
     this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup,
       bundledPackageNames, this.messageRouter);
     this.astReferenceResolver = new AstReferenceResolver(this);
+
+    this._cachedOverloadIndexesByDeclaration = new Map<AstDeclaration, number>();
   }
 
   /**
@@ -304,6 +309,40 @@ export class Collector {
     }
 
     return parts.join('');
+  }
+
+  /**
+   * For function-like signatures, this returns the TSDoc "overload index" which can be used to identify
+   * a specific overload.
+   */
+  public getOverloadIndex(astDeclaration: AstDeclaration): number {
+    const allDeclarations: ReadonlyArray<AstDeclaration> = astDeclaration.astSymbol.astDeclarations;
+    if (allDeclarations.length === 1) {
+      return 1; // trivial case
+    }
+
+    let overloadIndex: number | undefined = this._cachedOverloadIndexesByDeclaration.get(astDeclaration);
+
+    if (overloadIndex === undefined) {
+      // TSDoc index selectors are positive integers counting from 1
+      let nextIndex: number = 1;
+      for (const other of allDeclarations) {
+        // Filter out other declarations that are not overloads.  For example, an overloaded function can also
+        // be a namespace.
+        if (other.declaration.kind === astDeclaration.declaration.kind) {
+          this._cachedOverloadIndexesByDeclaration.set(other, nextIndex);
+          ++nextIndex;
+        }
+      }
+      overloadIndex = this._cachedOverloadIndexesByDeclaration.get(astDeclaration);
+    }
+
+    if (overloadIndex === undefined) {
+      // This should never happen
+      throw new InternalError('Error calculating overload index for declaration');
+    }
+
+    return overloadIndex;
   }
 
   private _createCollectorEntity(astEntity: AstEntity, exportedName: string | undefined): void {

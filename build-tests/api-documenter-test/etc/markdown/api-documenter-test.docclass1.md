@@ -14,7 +14,10 @@ export declare class DocClass1 extends DocBaseClass implements IDocInterface1, I
 
 ## Remarks
 
-These are some remarks.
+[Link to overload 1](./api-documenter-test.docclass1.examplefunction.md)
+
+[Link to overload 2](./api-documenter-test.docclass1.examplefunction_1.md)
+
 
 The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `DocClass1` class.
 
