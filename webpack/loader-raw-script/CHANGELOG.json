@@ -2,6 +2,21 @@
   "name": "@microsoft/loader-raw-script",
   "entries": [
     {
+      "version": "1.2.194",
+      "tag": "@microsoft/loader-raw-script_v1.2.194",
+      "date": "Tue, 03 Dec 2019 03:17:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.3.9` to `0.3.10`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.9` to `6.3.10`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.193",
       "tag": "@microsoft/loader-raw-script_v1.2.193",
       "date": "Sun, 24 Nov 2019 00:54:04 GMT",

@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.7.0",
+      "tag": "@microsoft/api-extractor-model_v7.7.0",
+      "date": "Tue, 03 Dec 2019 03:17:43 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Improve declaration reference syntax to allow linking to overloaded functions/methods"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.6.0",
       "tag": "@microsoft/api-extractor-model_v7.6.0",
       "date": "Sun, 24 Nov 2019 00:54:04 GMT",

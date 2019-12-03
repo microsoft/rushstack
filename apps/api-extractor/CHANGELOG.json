@@ -2,6 +2,26 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.7.0",
+      "tag": "@microsoft/api-extractor_v7.7.0",
+      "date": "Tue, 03 Dec 2019 03:17:43 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Improve declaration reference syntax to allow linking to overloaded functions/methods"
+          },
+          {
+            "comment": "Fix an issue with TypeScript 3.7, which now emits separate signatures for property getters/setters"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.6.0` to `7.7.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.6.2",
       "tag": "@microsoft/api-extractor_v7.6.2",
       "date": "Sun, 24 Nov 2019 00:54:04 GMT",
