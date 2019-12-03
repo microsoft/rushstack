@@ -176,6 +176,16 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
     return x;
   }
 
+  public get readonlyProperty(): string {
+    return 'hello';
+  }
+
+  public get writeableProperty(): string {
+    return 'hello';
+  }
+  public set writeableProperty(value: string) {
+  }
+
   /**
    * This event is fired whenever the object is modified.
    * @eventProperty

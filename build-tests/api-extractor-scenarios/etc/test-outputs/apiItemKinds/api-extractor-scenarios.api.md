@@ -57,6 +57,11 @@ export enum RegularEnum {
 export class SimpleClass {
     // (undocumented)
     member(): void;
+    // (undocumented)
+    get readonlyProperty(): string;
+    // (undocumented)
+    get writeableProperty(): string;
+    set writeableProperty(value: string);
 }
 
 // @public (undocumented)

@@ -8,6 +8,10 @@
 //
 // @public (undocumented)
 export class Lib1Class extends Lib1ForgottenExport {
+    // (undocumented)
+    readonly readonlyProperty: string;
+    // (undocumented)
+    writeableProperty: string;
 }
 
 // @alpha (undocumented)
