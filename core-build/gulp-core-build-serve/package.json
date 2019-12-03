@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-serve",
-  "version": "3.5.16",
+  "version": "3.5.17",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -26,8 +26,8 @@
     "sudo": "~1.0.3"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.4": "0.3.9",
-    "@microsoft/node-library-build": "6.3.9",
+    "@microsoft/rush-stack-compiler-3.4": "0.3.10",
+    "@microsoft/node-library-build": "6.3.10",
     "@rushstack/eslint-config": "0.4.2",
     "@types/express": "4.11.0",
     "@types/express-serve-static-core": "4.11.0",

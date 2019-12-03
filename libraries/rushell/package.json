@@ -17,8 +17,8 @@
     "@microsoft/node-core-library": "3.18.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.4": "0.3.9",
-    "@microsoft/node-library-build": "6.3.9",
+    "@microsoft/rush-stack-compiler-3.4": "0.3.10",
+    "@microsoft/node-library-build": "6.3.10",
     "@rushstack/eslint-config": "0.4.2",
     "@types/jest": "23.3.11",
     "@types/node": "8.10.54",
