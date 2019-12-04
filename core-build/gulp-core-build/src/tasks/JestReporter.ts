@@ -27,7 +27,11 @@ class JestReporter extends (DEFAULT_REPORTER as { new (globalConfig: Jest.Global
       return;
     }
 
-    const outputFilePath: string = this._options.outputFilePath;
+    const outputFilePath: string | undefined = this._options.outputFilePath;
+    if (!outputFilePath) {
+      throw new Error('Jest NUnit output was enabled but no outputFilePath was provided');
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const testResults: TestResults = new TestResults(results);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -37,7 +41,7 @@ class JestReporter extends (DEFAULT_REPORTER as { new (globalConfig: Jest.Global
 }
 
 interface IReporterOptions {
-  outputFilePath: string,
+  outputFilePath?: string,
   writeNUnitResults?: boolean
 }
 
