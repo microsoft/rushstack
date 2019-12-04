@@ -198,6 +198,7 @@ export interface IJestConfig {
     modulePathIgnorePatterns?: string[];
     testMatch?: string[];
     testPathIgnorePatterns?: string[];
+    writeNUnitResults?: boolean;
 }
 
 // @public

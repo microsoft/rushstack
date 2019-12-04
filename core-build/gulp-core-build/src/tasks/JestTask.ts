@@ -62,6 +62,11 @@ export interface IJestConfig {
    * Same as Jest CLI option testMatch
    */
   testMatch?: string[];
+
+  /**
+   * Indicate whether writing NUnit results is enabled when using the default reporter
+   */
+  writeNUnitResults?: boolean;
 }
 
 const DEFAULT_JEST_CONFIG_FILE_NAME: string = 'jest.config.json';
@@ -136,7 +141,15 @@ export class JestTask extends GulpTask<IJestConfig> {
       moduleDirectories: this.taskConfig.moduleDirectories ?
         this.taskConfig.moduleDirectories :
         ['node_modules', this.buildConfig.libFolder],
-      reporters: [path.join(__dirname, 'JestReporter.js')],
+      reporters: [
+        [
+          path.join(__dirname, 'JestReporter.js'),
+          {
+            outputFilePath: path.join(this.buildConfig.tempFolder, 'jest-results', 'test-results.xml'),
+            writeNUnitResults: this.taskConfig.writeNUnitResults
+          }
+        ]
+      ],
       rootDir: this.buildConfig.rootPath,
       testMatch: this.taskConfig.testMatch ?
         this.taskConfig.testMatch : ['**/*.test.js?(x)'],
