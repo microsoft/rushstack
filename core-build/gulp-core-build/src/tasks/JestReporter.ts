@@ -10,9 +10,11 @@ import { default as DEFAULT_REPORTER } from 'jest-cli/build/reporters/default_re
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 class JestReporter extends (DEFAULT_REPORTER as { new (globalConfig: Jest.GlobalConfig): any }) {
+  private _options: IReporterOptions | undefined;
 
-  public constructor(globalConfig: Jest.GlobalConfig) {
+  public constructor(globalConfig: Jest.GlobalConfig, options?: IReporterOptions) {
     super(globalConfig);
+    this._options = options;
   }
 
   public log(message: string): void {
@@ -21,30 +23,22 @@ class JestReporter extends (DEFAULT_REPORTER as { new (globalConfig: Jest.Global
 
   public onRunComplete(contexts: Set<Jest.Context>, results: Jest.AggregatedResult): void {
     super.onRunComplete(contexts, results);
-
-    // Since multiple reporters can be used, we need to look through the reporters list to
-    // find this one. We also want to check if writing the output file was enabled on the
-    // configuration and that we have an output file path
-    for (const reporter of (this._globalConfig.reporters as (string | ReporterConfig)[])) {
-      const reporterConfig: ReporterConfig | undefined = reporter as ReporterConfig;
-      if (
-        reporterConfig &&
-        reporterConfig[0].lastIndexOf('JestReporter') >= 0 &&
-        reporterConfig[1].writeNUnitResults &&
-        reporterConfig[1].outputFile
-      ) {
-        const outputFile: string = reporterConfig[1].outputFile;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const testResults: TestResults = new TestResults(results);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const data: string = xml(testResults, { declaration: true, indent: '  ' });
-        FileSystem.writeFile(outputFile, data, { ensureFolderExists: true });
-        break;
-      }
+    if (!this._options || !this._options.writeNUnitResults) {
+      return;
     }
+
+    const outputFilePath: string = this._options.outputFilePath;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const testResults: TestResults = new TestResults(results);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data: string = xml(testResults, { declaration: true, indent: '  ' });
+    FileSystem.writeFile(outputFilePath, data, { ensureFolderExists: true });
   }
 }
 
-type ReporterConfig = [string, { outputFile: string, writeNUnitResults?: boolean }]
+interface IReporterOptions {
+  outputFilePath: string,
+  writeNUnitResults?: boolean
+}
 
 module.exports = JestReporter;
