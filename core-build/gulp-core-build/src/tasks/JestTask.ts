@@ -145,8 +145,7 @@ export class JestTask extends GulpTask<IJestConfig> {
         [
           path.join(__dirname, 'JestReporter.js'),
           {
-            outputPath: path.join(this.buildConfig.tempFolder, 'jest-results'),
-            outputFilename: 'test-results.xml',
+            outputFile: path.join(this.buildConfig.tempFolder, 'jest-results', 'test-results.xml'),
             writeNUnitResults: this.taskConfig.writeNUnitResults
           }
         ]

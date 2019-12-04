@@ -1,10 +1,8 @@
 import { FileSystem } from '@microsoft/node-core-library';
-import * as path from 'path';
 import * as xml from 'xml';
 import * as Jest from 'jest-cli';
-import TestResults = require('jest-nunit-reporter/src/Testresults');
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const DEFAULT_REPORTER: any = require('jest-cli/build/reporters/default_reporter').default;
+import * as TestResults from 'jest-nunit-reporter/src/Testresults';
+import { default as DEFAULT_REPORTER } from 'jest-cli/build/reporters/default_reporter';
 
 /**
  * Jest logs message to stderr. This class is to override that behavior so that
@@ -12,15 +10,9 @@ const DEFAULT_REPORTER: any = require('jest-cli/build/reporters/default_reporter
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 class JestReporter extends (DEFAULT_REPORTER as { new (globalConfig: Jest.GlobalConfig): any }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private _globalConfig: Jest.GlobalConfig;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public constructor(globalConfig: Jest.GlobalConfig) {
     super(globalConfig);
-    this._globalConfig = globalConfig;
-
-    this._err = this._out;
   }
 
   public log(message: string): void {
@@ -30,31 +22,29 @@ class JestReporter extends (DEFAULT_REPORTER as { new (globalConfig: Jest.Global
   public onRunComplete(contexts: Set<Jest.Context>, results: Jest.AggregatedResult): void {
     super.onRunComplete(contexts, results);
 
-    let outputPath: string | undefined = undefined;
-    let filename: string | undefined = undefined;
-
+    // Since multiple reporters can be used, we need to look through the reporters list to
+    // find this one. We also want to check if writing the output file was enabled on the
+    // configuration and that we have an output file path
     for (const reporter of (this._globalConfig.reporters as (string | ReporterConfig)[])) {
       const reporterConfig: ReporterConfig | undefined = reporter as ReporterConfig;
-      if (reporterConfig && reporterConfig[0].lastIndexOf('JestReporter') >= 0) {
-        if (!reporterConfig[1].writeNUnitResults) {
-          return;
-        }
-
-        outputPath = reporterConfig[1].outputPath;
-        filename = reporterConfig[1].outputFilename;
+      if (
+        reporterConfig &&
+        reporterConfig[0].lastIndexOf('JestReporter') >= 0 &&
+        reporterConfig[1].writeNUnitResults &&
+        reporterConfig[1].outputFile
+      ) {
+        const outputFile: string = reporterConfig[1].outputFile;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const testResults: TestResults = new TestResults(results);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data: string = xml(testResults, { declaration: true, indent: '  ' });
+        FileSystem.writeFile(outputFile, data, { ensureFolderExists: true });
+        break;
       }
-    }
-
-    if (!!outputPath && !!filename) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const testResults: any = new TestResults(results);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data: any = xml(testResults, { declaration: true, indent: '  ' });
-      FileSystem.writeFile(path.join(outputPath, filename), data, { ensureFolderExists: true });
     }
   }
 }
 
-type ReporterConfig = [string, { outputPath: string, outputFilename: string, writeNUnitResults?: boolean }]
+type ReporterConfig = [string, { outputFile: string, writeNUnitResults?: boolean }]
 
 module.exports = JestReporter;
