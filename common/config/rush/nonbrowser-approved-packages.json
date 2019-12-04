@@ -403,6 +403,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jest-nunit-reporter",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jest-resolve",
       "allowedCategories": [ "libraries" ]
     },
@@ -572,6 +576,10 @@
     },
     {
       "name": "wordwrap",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "xml",
       "allowedCategories": [ "libraries" ]
     },
     {
