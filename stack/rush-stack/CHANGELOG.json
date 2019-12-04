@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-stack",
   "entries": [
     {
+      "version": "0.1.125",
+      "tag": "@microsoft/rush-stack_v0.1.125",
+      "date": "Wed, 04 Dec 2019 23:17:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.10` to `6.3.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.124",
       "tag": "@microsoft/rush-stack_v0.1.124",
       "date": "Tue, 03 Dec 2019 03:17:44 GMT",

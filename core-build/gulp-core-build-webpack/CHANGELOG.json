@@ -2,6 +2,21 @@
   "name": "@microsoft/gulp-core-build-webpack",
   "entries": [
     {
+      "version": "4.0.3",
+      "tag": "@microsoft/gulp-core-build-webpack_v4.0.3",
+      "date": "Wed, 04 Dec 2019 23:17:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.12.5` to `3.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.10` to `6.3.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.0.2",
       "tag": "@microsoft/gulp-core-build-webpack_v4.0.2",
       "date": "Tue, 03 Dec 2019 03:17:44 GMT",

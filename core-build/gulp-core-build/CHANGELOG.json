@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.13.0",
+      "tag": "@microsoft/gulp-core-build_v3.13.0",
+      "date": "Wed, 04 Dec 2019 23:17:55 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add ability to write Jest results as an NUnit compatible file"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.12.5",
       "tag": "@microsoft/gulp-core-build_v3.12.5",
       "date": "Fri, 15 Nov 2019 04:50:50 GMT",
