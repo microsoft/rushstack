@@ -3,7 +3,7 @@
 <p align="center"><a href="https://rushstack.io/">https://rushstack.io/</a></p>
 </td></tr></table>
 
-[![Join the chat at https://gitter.im/web-build-tools](https://badges.gitter.im/web-build-tools.svg)](https://gitter.im/web-build-tools?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) &nbsp; [![Build Status](https://dev.azure.com/RushStack/GitHubProjects/_apis/build/status/rushstack/rushstack%20CI%20Build?branchName=master)](https://dev.azure.com/RushStack/GitHubProjects/_build/latest?definitionId=3&branchName=master)
+[![Join the chat at https://gitter.im/rushstack](https://badges.gitter.im/rushstack.svg)](https://gitter.im/rushstack?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) &nbsp; [![Build Status](https://dev.azure.com/RushStack/GitHubProjects/_apis/build/status/rushstack/rushstack%20CI%20Build?branchName=master)](https://dev.azure.com/RushStack/GitHubProjects/_build/latest?definitionId=3&branchName=master)
 
 The home for various projects maintained by the Rush Stack community, whose mission is to develop reusable tooling
 for large scale TypeScript monorepos.
@@ -13,7 +13,7 @@ for large scale TypeScript monorepos.
 
 - [What is Rush Stack?](https://rushstack.io/) - learn about the mission behind these projects
 - [API reference](https://rushstack.io/pages/api/) - browse API documentation for NPM packages
-- [Gitter chat room](https://gitter.im/web-build-tools/web-build-tools) - chat with the Rush Stack developers
+- [Gitter chat room](https://gitter.im/rushstack/rushstack) - chat with the Rush Stack developers
 - [Rush](https://rushjs.io/) - a build orchestrator for large scale TypeScript monorepos
 - [API Extractor](https://api-extractor.com/) - create .d.ts rollups and track your TypeScript API signatures
 - [API Documenter](https://api-extractor.com/pages/setup/generating_docs/) - use TSDoc comments to publish an API documentation website
