@@ -168,6 +168,14 @@ export interface ICurrentVariantJson {
 }
 
 /**
+ * The paths used when resolving `pnpmStorePath`
+ */
+interface IPnpmOptionsRootPaths {
+  commonTempFolder: string;
+  projectRoot: string;
+}
+
+/**
  * Options that are only used when the PNPM package manager is selected.
  *
  * @remarks
@@ -227,9 +235,9 @@ export class PnpmOptionsConfiguration {
   public readonly resolutionStrategy: ResolutionStrategy;
 
   /** @internal */
-  public constructor(json: IPnpmOptionsJson, commonTempFolder: string) {
+  public constructor(json: IPnpmOptionsJson, rootPaths: IPnpmOptionsRootPaths) {
     this.pnpmStore = json.pnpmStore || 'local';
-    this.pnpmStorePath = path.resolve(path.join(commonTempFolder, 'pnpm-store'));
+    this.pnpmStorePath = path.resolve(path.join(rootPaths.commonTempFolder, 'pnpm-store'));
     switch (this.pnpmStore) {
       case 'global': {
         this.pnpmStorePath = '';
@@ -420,7 +428,10 @@ export class RushConfiguration {
     );
     this._experimentsConfiguration = new ExperimentsConfiguration(experimentsConfigFile);
 
-    this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || {}, this._commonTempFolder);
+    this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || {}, {
+      commonTempFolder: this._commonTempFolder,
+      projectRoot: this._rushJsonFolder
+    });
     this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || {});
 
     // TODO: Add an actual "packageManager" field in rush.json
