@@ -51,6 +51,10 @@ export const enum EnvironmentVariableNames {
   /**
    * When using PNPM as the package manager, and `pnpmOptions.pnpmStore` = 'path', this variable
    * will be used to define the path that PNPM will use as the store directory.
+   * 
+   * If a relative path is used, then the store path will be resolved relative to the process's
+   * current working directory.  The best way to use this environment variable is with absolute
+   * paths.
    */
   RUSH_PNPM_STORE_PATH = 'RUSH_PNPM_STORE_PATH'
 }
