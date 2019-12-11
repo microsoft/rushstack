@@ -979,12 +979,15 @@ export class InstallManager {
           } catch (error) {
             // All the install attempts failed.
 
-            if (this._rushConfiguration.packageManager === 'pnpm') {
+            if (
+              this._rushConfiguration.packageManager === 'pnpm' &&
+              this._rushConfiguration.pnpmOptions.pnpmStore === 'local'
+            ) {
               // If the installation has failed even after the retries, then pnpm store may
               // have got into a corrupted, irrecoverable state. Delete the store so that a
               // future install can create the store afresh.
               console.log(colors.yellow(`Deleting the "pnpm-store" folder`));
-              this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
+              this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.pnpmOptions.pnpmStorePath);
             }
 
             throw error;
@@ -1164,7 +1167,16 @@ export class InstallManager {
         args.push('--verbose');
       }
     } else if (this._rushConfiguration.packageManager === 'pnpm') {
-      args.push('--store', this._rushConfiguration.pnpmStoreFolder);
+      // Only explicitly define the store path if `pnpmStore` is using the default, or has been set to
+      // 'local' or 'path'.  If `pnpmStore` = 'global', then allow PNPM to use the system's default
+      // path.
+      switch (this._rushConfiguration.pnpmOptions.pnpmStore) {
+        case 'local':
+        case 'path': {
+          args.push('--store', this._rushConfiguration.pnpmOptions.pnpmStorePath);
+          break;
+        }
+      }
 
       // we are using the --no-lock flag for now, which unfortunately prints a warning, but should be OK
       // since rush already has its own install lock file which will invalidate the cache for us.
