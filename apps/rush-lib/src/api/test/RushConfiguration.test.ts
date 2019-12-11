@@ -229,13 +229,14 @@ describe('RushConfiguration', () => {
     describe('Loading repo/rush-pnpm-local.json', () => {
       const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'repo', 'rush-pnpm-local.json');
       const EXPECT_STORE_PATH: string = path.resolve(__dirname, 'repo', 'common', 'temp', 'pnpm-store');
-      
+
       it(`loads the correct path when pnpmStore = "local"`, (done: jest.DoneCallback) => {
         const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
 
         expect(rushConfiguration.packageManager).toEqual('pnpm');
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
         expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(EXPECT_STORE_PATH);
+        expect(path.isAbsolute(rushConfiguration.pnpmOptions.pnpmStorePath)).toEqual(true);
 
         done();
       });
@@ -248,6 +249,7 @@ describe('RushConfiguration', () => {
         expect(rushConfiguration.packageManager).toEqual('pnpm');
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
         expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(EXPECT_STORE_PATH);
+        expect(path.isAbsolute(rushConfiguration.pnpmOptions.pnpmStorePath)).toEqual(true);
 
         done();
       });
@@ -283,7 +285,7 @@ describe('RushConfiguration', () => {
     describe('Loading repo/rush-pnpm-path.json', () => {
       const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'repo', 'rush-pnpm-path.json');
       it(`loads the correct path when pnpmStore = "path"`, (done: jest.DoneCallback) => {
-        
+
         expect(process.env[PNPM_STORE_PATH_ENV]).not.toBeDefined();
 
         const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
@@ -292,6 +294,7 @@ describe('RushConfiguration', () => {
         expect(rushConfiguration.packageManager).toEqual('pnpm');
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('path');
         expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(expectedValue);
+        expect(path.isAbsolute(rushConfiguration.pnpmOptions.pnpmStorePath)).toEqual(true);
 
         done();
       });
@@ -305,6 +308,7 @@ describe('RushConfiguration', () => {
         expect(rushConfiguration.packageManager).toEqual('pnpm');
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('path');
         expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(expectedValue);
+        expect(path.isAbsolute(rushConfiguration.pnpmOptions.pnpmStorePath)).toEqual(true);
 
         done();
       });
