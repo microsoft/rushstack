@@ -244,9 +244,10 @@ export class PnpmOptionsConfiguration {
         break;
       }
       case 'path': {
-        this.pnpmStorePath = EnvironmentConfiguration.pnpmStorePathOverride
-        || json.pnpmStorePath
-        || this.pnpmStorePath;
+        this.pnpmStorePath = path.resolve(EnvironmentConfiguration.pnpmStorePathOverride
+          || (json.pnpmStorePath && path.join(rootPaths.projectRoot,  json.pnpmStorePath))
+          || this.pnpmStorePath
+        );
         break;
       }
     }
