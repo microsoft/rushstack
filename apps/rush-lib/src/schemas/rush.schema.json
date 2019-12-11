@@ -57,6 +57,15 @@
       "description": "Options that are only used when the PNPM pacakge manager is selected.",
       "type": "object",
       "properties": {
+        "pnpmStore": {
+          "description": "Specifies the location of the PNPM store.  There are three possible values:\n\n\"local\" - uuse the \"pnpm-store\" folder in the current configured temp folder: \"common/temp/pnpm-store\" by default.\n\"global\" - use PNPM's global store, which has the benefit of being shared across multiple repo folders, but the disadvantage of less isolation for builds (e.g. bugs or incompatibilities when two repos use different releases of PNPM)\n\"path\" - use the location specified by \"pnpmStorePath\" or environment variable RUSH_PNPM_STORE_PATH\n\nThe default value is \"local\".",
+          "type": "string",
+          "enum": ["local", "global", "path"]
+        },
+        "pnpmStorePath": {
+          "description": "This setting is only used when the \"pnpmStore\" setting is \"path\".  It specifies a custom path for the PNPM store, resolved relative to the root folder containing rush.json.\n\nThis value will be overridden if using the RUSH_PNPM_STORE_PATH environment variable.\n\nIt is not recommended to store an absolute path in the rush.json file.  For machine-specific overrides, use the RUSH_PNPM_STORE_PATH environment variable instead.",
+          "type": "string"
+        },
         "strictPeerDependencies": {
           "description": "If true, then Rush will add the \"--strict-peer-dependencies\" option when invoking PNPM. This causes \"rush install\" to fail if there are unsatisfied peer dependencies, which is an invalid state that can cause build failures or incompatible dependency versions. (For historical reasons, JavaScript package managers generally do not treat this invalid state as an error.) The default value is false.",
           "type": "boolean"
