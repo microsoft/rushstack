@@ -103,6 +103,8 @@ export interface IRushRepositoryJson {
  * Part of IRushConfigurationJson.
  */
 export interface IPnpmOptionsJson {
+  pnpmStore?: StoreOptions;
+  pnpmStorePath?: string;
   strictPeerDependencies?: boolean;
   resolutionStrategy?: ResolutionStrategy;
 }
@@ -176,6 +178,26 @@ export interface ICurrentVariantJson {
  */
 export class PnpmOptionsConfiguration {
   /**
+   * The method used to resolve the store used by PNPM.
+   * 
+   * @remarks
+   * Available options:
+   *  - local: Use the standard Rush store path: common/temp/pnpm-store
+   *  - global: Use PNPM's global store path
+   *  - path: Use path stored in `pnpmStorePath`
+   */
+  public readonly pnpmStore: StoreOptions;
+
+  /**
+   * The path for PNPM to use as the store directory.
+   * 
+   * @remarks
+   * Only used if `pnpmStore` = 'path'.  Will be overridden by
+   * RUSH_PNPM_STORE_PATH.
+   */
+  public readonly pnpmStorePath: string;
+
+  /**
    * If true, then Rush will add the "--strict-peer-dependencies" option when invoking PNPM.
    *
    * @remarks
@@ -205,7 +227,21 @@ export class PnpmOptionsConfiguration {
   public readonly resolutionStrategy: ResolutionStrategy;
 
   /** @internal */
-  public constructor(json: IPnpmOptionsJson) {
+  public constructor(json: IPnpmOptionsJson, commonTempFolder: string) {
+    this.pnpmStore = json.pnpmStore || 'local';
+    this.pnpmStorePath = path.resolve(path.join(commonTempFolder, 'pnpm-store'));
+    switch (this.pnpmStore) {
+      case 'global': {
+        this.pnpmStorePath = '';
+        break;
+      }
+      case 'path': {
+        this.pnpmStorePath = EnvironmentConfiguration.pnpmStorePathOverride
+        || json.pnpmStorePath
+        || this.pnpmStorePath;
+        break;
+      }
+    }
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
   }
@@ -253,6 +289,12 @@ export interface ITryFindRushJsonLocationOptions {
 }
 
 /**
+ * This represents the available PNPM store options
+ * @public
+ */
+export type StoreOptions = 'local' | 'global' | 'path';
+
+/**
  * This represents the available PNPM resolution strategies as a string
  * @public
  */
@@ -277,7 +319,6 @@ export class RushConfiguration {
   private _packageManagerWrapper: PackageManager;
   private _npmCacheFolder: string;
   private _npmTmpFolder: string;
-  private _pnpmStoreFolder: string;
   private _yarnCacheFolder: string;
   private _shrinkwrapFilename: string;
   private _tempShrinkwrapFilename: string;
@@ -362,7 +403,6 @@ export class RushConfiguration {
 
     this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
     this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
-    this._pnpmStoreFolder = path.resolve(path.join(this._commonTempFolder, 'pnpm-store'));
     this._yarnCacheFolder = path.resolve(path.join(this._commonTempFolder, 'yarn-cache'));
 
     this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
@@ -380,7 +420,7 @@ export class RushConfiguration {
     );
     this._experimentsConfiguration = new ExperimentsConfiguration(experimentsConfigFile);
 
-    this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || {});
+    this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || {}, this._commonTempFolder);
     this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || {});
 
     // TODO: Add an actual "packageManager" field in rush.json
@@ -851,15 +891,6 @@ export class RushConfiguration {
    */
   public get npmTmpFolder(): string {
     return this._npmTmpFolder;
-  }
-
-  /**
-   * The local folder where PNPM stores a global installation for every installed package
-   *
-   * Example: `C:\MyRepo\common\temp\pnpm-store`
-   */
-  public get pnpmStoreFolder(): string {
-    return this._pnpmStoreFolder;
   }
 
   /**
