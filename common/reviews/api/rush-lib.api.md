@@ -90,6 +90,7 @@ export const enum DependencyType {
 export const enum EnvironmentVariableNames {
     RUSH_ABSOLUTE_SYMLINKS = "RUSH_ABSOLUTE_SYMLINKS",
     RUSH_ALLOW_UNSUPPORTED_NODEJS = "RUSH_ALLOW_UNSUPPORTED_NODEJS",
+    RUSH_PNPM_STORE_PATH = "RUSH_PNPM_STORE_PATH",
     RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
     RUSH_TEMP_FOLDER = "RUSH_TEMP_FOLDER",
     RUSH_VARIANT = "RUSH_VARIANT"
@@ -155,7 +156,7 @@ export class _LastInstallFlag {
     constructor(folderPath: string, state?: JsonObject);
     clear(): void;
     create(): void;
-    isValid(): boolean;
+    isValid(abortOnInvalid?: boolean): boolean;
     readonly path: string;
     }
 
@@ -232,7 +233,10 @@ export class PnpmOptionsConfiguration {
     // Warning: (ae-forgotten-export) The symbol "IPnpmOptionsJson" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    constructor(json: IPnpmOptionsJson);
+    constructor(json: IPnpmOptionsJson, rootPaths: IPnpmOptionsRootPaths);
+    // Warning: (ae-forgotten-export) The symbol "StoreOptions" needs to be exported by the entry point index.d.ts
+    readonly pnpmStore: StoreOptions;
+    readonly pnpmStorePath: string;
     readonly resolutionStrategy: ResolutionStrategy;
     readonly strictPeerDependencies: boolean;
 }
@@ -288,7 +292,6 @@ export class RushConfiguration {
     // @beta
     readonly packageManagerWrapper: PackageManager;
     readonly pnpmOptions: PnpmOptionsConfiguration;
-    readonly pnpmStoreFolder: string;
     readonly projectFolderMaxDepth: number;
     readonly projectFolderMinDepth: number;
     // (undocumented)
