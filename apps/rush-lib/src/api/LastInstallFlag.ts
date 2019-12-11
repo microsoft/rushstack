@@ -64,6 +64,9 @@ export class LastInstallFlag {
 
   /**
    * Returns true if the file exists and the contents match the current state
+   * @param abortOnInvalid - If the current state is not equal to the previous
+   * state, and an error is defined for the condition that causes inequality, then abort with
+   * the defined error message
    */
   public isValid(abortOnInvalid: boolean = false): boolean {
     if (!FileSystem.exists(this._path)) {
