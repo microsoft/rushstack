@@ -60,8 +60,9 @@ describe('RushConfiguration', () => {
       rushConfiguration.npmCacheFolder, './repo/common/temp/npm-cache');
     assertPathProperty('npmTmpFolder',
       rushConfiguration.npmTmpFolder, './repo/common/temp/npm-tmp');
-    assertPathProperty('pnpmStoreFolder',
-      rushConfiguration.pnpmStoreFolder, './repo/common/temp/pnpm-store');
+    expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
+    assertPathProperty('pnpmStorePath',
+      rushConfiguration.pnpmOptions.pnpmStorePath, './repo/common/temp/pnpm-store');
     assertPathProperty('packageManagerToolFilename',
       rushConfiguration.packageManagerToolFilename, './repo/common/temp/npm-local/node_modules/.bin/npm');
     assertPathProperty('rushJsonFolder',
@@ -126,8 +127,9 @@ describe('RushConfiguration', () => {
       rushConfiguration.npmCacheFolder, './repo/common/temp/npm-cache');
     assertPathProperty('npmTmpFolder',
       rushConfiguration.npmTmpFolder, './repo/common/temp/npm-tmp');
-    assertPathProperty('pnpmStoreFolder',
-      rushConfiguration.pnpmStoreFolder, './repo/common/temp/pnpm-store');
+    expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
+    assertPathProperty('pnpmStorePath',
+      rushConfiguration.pnpmOptions.pnpmStorePath, './repo/common/temp/pnpm-store');
     assertPathProperty('packageManagerToolFilename',
       rushConfiguration.packageManagerToolFilename, './repo/common/temp/pnpm-local/node_modules/.bin/pnpm');
     assertPathProperty('rushJsonFolder',
@@ -200,7 +202,7 @@ describe('RushConfiguration', () => {
     assertPathProperty('commonTempFolder', rushConfiguration.commonTempFolder, expectedValue);
     assertPathProperty('npmCacheFolder', rushConfiguration.npmCacheFolder, path.join(expectedValue, 'npm-cache'));
     assertPathProperty('npmTmpFolder', rushConfiguration.npmTmpFolder, path.join(expectedValue, 'npm-tmp'));
-    assertPathProperty('pnpmStoreFolder', rushConfiguration.pnpmStoreFolder, path.join(expectedValue, 'pnpm-store'));
+    assertPathProperty('pnpmStorePath', rushConfiguration.pnpmOptions.pnpmStorePath, path.join(expectedValue, 'pnpm-store'));
     assertPathProperty(
       'packageManagerToolFilename',
       rushConfiguration.packageManagerToolFilename,
