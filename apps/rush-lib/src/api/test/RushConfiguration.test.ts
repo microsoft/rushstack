@@ -8,6 +8,7 @@ import { RushConfiguration } from '../RushConfiguration';
 import { ApprovedPackagesPolicy } from '../ApprovedPackagesPolicy';
 import { RushConfigurationProject } from '../RushConfigurationProject';
 import { Utilities } from '../../utilities/Utilities';
+import { EnvironmentConfiguration } from '../EnvironmentConfiguration';
 
 function normalizePathForComparison(pathToNormalize: string): string {
   return Text.replaceAll(pathToNormalize, '\\', '/').toUpperCase();
@@ -27,6 +28,7 @@ describe('RushConfiguration', () => {
 
     process.env['USERPROFILE'] = _oldEnv['USERPROFILE']; // eslint-disable-line dot-notation
     process.env['HOME'] = _oldEnv['HOME']; // eslint-disable-line dot-notation
+
   });
 
   afterEach(() => {
@@ -83,10 +85,10 @@ describe('RushConfiguration', () => {
     const approvedPackagesPolicy: ApprovedPackagesPolicy = rushConfiguration.approvedPackagesPolicy;
     expect(approvedPackagesPolicy.enabled).toEqual(true);
     expect(Utilities.getSetAsArray(approvedPackagesPolicy.reviewCategories)).toEqual(
-      [ 'first-party', 'third-party', 'prototype' ]);
+      ['first-party', 'third-party', 'prototype']);
 
     expect(Utilities.getSetAsArray(approvedPackagesPolicy.ignoredNpmScopes)).toEqual(
-      [ '@types', '@internal' ]);
+      ['@types', '@internal']);
 
     expect(approvedPackagesPolicy.browserApprovedPackages.items[0].packageName).toEqual('example');
     expect(approvedPackagesPolicy.browserApprovedPackages.items[0].allowedCategories.size).toEqual(3);
@@ -97,7 +99,7 @@ describe('RushConfiguration', () => {
     const project1: RushConfigurationProject = rushConfiguration.getProjectByName('project1')!;
     expect(project1).toBeDefined();
 
-    expect(project1.packageName).toEqual( 'project1');
+    expect(project1.packageName).toEqual('project1');
     assertPathProperty('project1.projectFolder', project1.projectFolder, './repo/project1');
     expect(project1.tempProjectName).toEqual('@rush-temp/project1');
     expect(project1.unscopedTempProjectName).toEqual('project1');
@@ -149,9 +151,9 @@ describe('RushConfiguration', () => {
     const approvedPackagesPolicy: ApprovedPackagesPolicy = rushConfiguration.approvedPackagesPolicy;
     expect(approvedPackagesPolicy.enabled).toBe(true);
     expect(Utilities.getSetAsArray(approvedPackagesPolicy.reviewCategories)).toEqual(
-      [ 'first-party', 'third-party', 'prototype' ]);
+      ['first-party', 'third-party', 'prototype']);
     expect(Utilities.getSetAsArray(approvedPackagesPolicy.ignoredNpmScopes)).toEqual(
-      [ '@types', '@internal' ]);
+      ['@types', '@internal']);
 
     expect(approvedPackagesPolicy.browserApprovedPackages.items[0].packageName).toEqual('example');
     expect(approvedPackagesPolicy.browserApprovedPackages.items[0].allowedCategories.size).toEqual(3);
@@ -202,6 +204,8 @@ describe('RushConfiguration', () => {
     assertPathProperty('commonTempFolder', rushConfiguration.commonTempFolder, expectedValue);
     assertPathProperty('npmCacheFolder', rushConfiguration.npmCacheFolder, path.join(expectedValue, 'npm-cache'));
     assertPathProperty('npmTmpFolder', rushConfiguration.npmTmpFolder, path.join(expectedValue, 'npm-tmp'));
+
+    expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
     assertPathProperty('pnpmStorePath', rushConfiguration.pnpmOptions.pnpmStorePath, path.join(expectedValue, 'pnpm-store'));
     assertPathProperty(
       'packageManagerToolFilename',
@@ -214,4 +218,106 @@ describe('RushConfiguration', () => {
       path.join(expectedValue, 'rush-link.json')
     );
   });
+
+  describe('PNPM Store Paths', () => {
+    afterEach(() => {
+      EnvironmentConfiguration['_pnpmStorePathOverride'] = undefined;
+    })
+
+    const PNPM_STORE_PATH_ENV: string = 'RUSH_PNPM_STORE_PATH';
+
+    describe('Loading repo/rush-pnpm-local.json', () => {
+      const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'repo', 'rush-pnpm-local.json');
+      const EXPECT_STORE_PATH: string = path.resolve(__dirname, 'repo', 'common', 'temp', 'pnpm-store');
+      
+      it(`loads the correct path when pnpmStore = "local"`, (done: jest.DoneCallback) => {
+        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+
+        expect(rushConfiguration.packageManager).toEqual('pnpm');
+        expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
+        expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(EXPECT_STORE_PATH);
+
+        done();
+      });
+
+      it('loads the correct path when environment variable is defined', (done: jest.DoneCallback) => {
+        process.env[PNPM_STORE_PATH_ENV] = '/var/temp';
+
+        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+
+        expect(rushConfiguration.packageManager).toEqual('pnpm');
+        expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
+        expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(EXPECT_STORE_PATH);
+
+        done();
+      });
+    })
+
+    describe('Loading repo/rush-pnpm-global.json', () => {
+      const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'repo', 'rush-pnpm-global.json');
+      const EXPECT_STORE_PATH: string = "";
+
+      it(`loads the correct path when pnpmStore = "global"`, (done: jest.DoneCallback) => {
+        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+
+        expect(rushConfiguration.packageManager).toEqual('pnpm');
+        expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('global');
+        expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(EXPECT_STORE_PATH);
+
+        done();
+      });
+
+      it('loads the correct path when environment variable is defined', (done: jest.DoneCallback) => {
+        process.env[PNPM_STORE_PATH_ENV] = '/var/temp';
+
+        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+
+        expect(rushConfiguration.packageManager).toEqual('pnpm');
+        expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('global');
+        expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(EXPECT_STORE_PATH);
+
+        done();
+      });
+    })
+
+    describe('Loading repo/rush-pnpm-path.json', () => {
+      const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'repo', 'rush-pnpm-path.json');
+      it(`loads the correct path when pnpmStore = "path"`, (done: jest.DoneCallback) => {
+        
+        expect(process.env[PNPM_STORE_PATH_ENV]).not.toBeDefined();
+
+        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+        const expectedValue: string = path.resolve(rushConfiguration.rushJsonFolder, 'pnpm-store');
+
+        expect(rushConfiguration.packageManager).toEqual('pnpm');
+        expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('path');
+        expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(expectedValue);
+
+        done();
+      });
+
+      it('loads the correct path when environment variable is defined', (done: jest.DoneCallback) => {
+        const expectedValue: string = path.resolve('/pnpm-store');
+        process.env[PNPM_STORE_PATH_ENV] = expectedValue;
+
+        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+
+        expect(rushConfiguration.packageManager).toEqual('pnpm');
+        expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('path');
+        expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(expectedValue);
+
+        done();
+      });
+    })
+
+    it(`throws an error when invalid pnpmStore is defined`, (done: jest.DoneCallback) => {
+      const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'repo', 'rush-pnpm-invalid-store.json');
+      expect(() => {
+        //@ts-ignore
+        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME); // eslint-disable-line @typescript-eslint/no-unused-vars
+      }).toThrow();
+
+      done();
+    });
+  })
 });
