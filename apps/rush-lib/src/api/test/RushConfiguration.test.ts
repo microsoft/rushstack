@@ -300,7 +300,7 @@ describe('RushConfiguration', () => {
       });
 
       it('loads the correct path when environment variable is defined', (done: jest.DoneCallback) => {
-        const expectedValue: string = path.resolve('/pnpm-store');
+        const expectedValue: string = path.resolve('/var/temp/pnpm-store');
         process.env[PNPM_STORE_PATH_ENV] = expectedValue;
 
         const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
