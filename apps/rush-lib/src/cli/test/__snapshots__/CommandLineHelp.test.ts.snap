@@ -451,8 +451,8 @@ Optional arguments:
                         without --pack.
   -c COMMITID, --commit COMMITID
                         Used in conjunction with git tagging -- apply git 
-                        tags at the specific commitspecified. If not passed, 
-                        the current HEAD will be tagged.
+                        tags at the commit hash specified. If not passed, the 
+                        current HEAD will be tagged.
 "
 `;
 
