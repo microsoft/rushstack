@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add a --commit flag to publish action to specify the git commit hash to tag at when publishing.",
+      "comment": "Add a --commit flag to specify the git commit hash to tag when publishing.",
       "type": "none"
     }
   ],
