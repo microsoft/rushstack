@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/load-themed-styles",
+      "comment": "adds es6 library for load-theme-styles",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/load-themed-styles",
+  "email": "kchau@microsoft.com"
+}
