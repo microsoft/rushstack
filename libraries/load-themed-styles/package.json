@@ -10,6 +10,7 @@
     "build": "gulp --clean"
   },
   "main": "lib/index.js",
+  "module": "lib-es6/index.js",
   "typings": "lib/index.d.ts",
   "keywords": [],
   "devDependencies": {
