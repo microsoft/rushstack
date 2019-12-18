@@ -192,7 +192,7 @@ export class PublishAction extends BaseRushAction {
       parameterShortName: '-c',
       argumentName: 'COMMITID',
       description: `Used in conjunction with git tagging -- apply git tags at the commit hash` +
-       ` specified. If not passed, the current HEAD will be tagged.`
+       ` specified. If not provided, the current HEAD will be tagged.`
     });
   }
 
