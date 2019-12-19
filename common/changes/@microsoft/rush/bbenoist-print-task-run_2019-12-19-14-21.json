@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Don't use the `build` verb when printing task failures",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "bbenoist@users.noreply.github.com"
+}
