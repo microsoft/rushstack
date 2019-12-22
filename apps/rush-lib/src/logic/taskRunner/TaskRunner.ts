@@ -105,7 +105,7 @@ export class TaskRunner {
       this._printTaskStatus();
 
       if (this._hasAnyFailures) {
-        return Promise.reject(new Error('Project(s) failed to build'));
+        return Promise.reject(new Error('Project(s) failed'));
       } else if (this._hasAnyWarnings && !this._allowWarningsInSuccessfulBuild) {
         this._terminal.writeWarningLine('Project(s) succeeded with warnings');
         return Promise.reject(new AlreadyReportedError());
@@ -195,7 +195,7 @@ export class TaskRunner {
    * Marks a task as having failed and marks each of its dependents as blocked
    */
   private _markTaskAsFailed(task: ITask): void {
-    this._terminal.writeErrorLine(`${os.EOL}${this._getCurrentCompletedTaskString()}[${task.name}] failed to build!`);
+    this._terminal.writeErrorLine(`${os.EOL}${this._getCurrentCompletedTaskString()}[${task.name}] failed!`);
     task.status = TaskStatus.Failure;
     task.dependents.forEach((dependent: ITask) => {
       this._markTaskAsBlocked(dependent, task);
