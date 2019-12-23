@@ -190,7 +190,7 @@ export class PublishAction extends BaseRushAction {
     this._commitId = this.defineStringParameter({
       parameterLongName: '--commit',
       parameterShortName: '-c',
-      argumentName: 'COMMITID',
+      argumentName: 'COMMIT_ID',
       description: `Used in conjunction with git tagging -- apply git tags at the commit hash` +
        ` specified. If not provided, the current HEAD will be tagged.`
     });
