@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "add --json to serialize output in json format",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "zhas@microsoft.com"
+}
