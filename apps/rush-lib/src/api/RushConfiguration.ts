@@ -37,7 +37,8 @@ const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
  * To avoid confusion/mistakes, any extra files will be reported as an error.
  */
 const knownRushConfigFilenames: string[] = [
-  '.npmrc',".npmrc-publish",
+  '.npmrc',
+  '.npmrc-publish',
   RushConstants.pinnedVersionsFilename,
   RushConstants.commonVersionsFilename,
   RushConstants.browserApprovedPackagesFilename,

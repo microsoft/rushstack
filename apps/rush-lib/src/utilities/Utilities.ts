@@ -497,9 +497,8 @@ export class Utilities {
   }
 
   /**
-   * As a workaround, syncNpmrc() copies the .npmrc file to the target folder, and also trims
-   * unusable lines from the .npmrc file.  If the source .npmrc file not exist, then syncNpmrc()
-   * will delete an .npmrc that is found in the target folder.
+   * As a workaround, copyAndTrimNpmrcFile() copies the .npmrc file to the target folder, and also trims
+   * unusable lines from the .npmrc file.
    *
    * Why are we trimming the .npmrc lines?  NPM allows environment variables to be specified in
    * the .npmrc file to provide different authentication tokens for different registry.
@@ -508,44 +507,54 @@ export class Utilities {
    * we'd prefer to skip that line and continue looking in other places such as the user's
    * home directory.
    *
+   * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _copyNpmrcFile() FROM scripts/install-run.ts
+   */
+  public static copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string): void {
+    console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`);
+    let npmrcFileLines: string[] = FileSystem.readFile(sourceNpmrcPath).split('\n');
+    npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
+    const resultLines: string[] = [];
+    // Trim out lines that reference environment variables that aren't defined
+    for (const line of npmrcFileLines) {
+      // This finds environment variable tokens that look like "${VAR_NAME}"
+      const regex: RegExp = /\$\{([^\}]+)\}/g;
+      const environmentVariables: string[] | null = line.match(regex);
+      let lineShouldBeTrimmed: boolean = false;
+      if (environmentVariables) {
+        for (const token of environmentVariables) {
+          // Remove the leading "${" and the trailing "}" from the token
+          const environmentVariableName: string = token.substring(2, token.length - 1);
+          if (!process.env[environmentVariableName]) {
+            lineShouldBeTrimmed = true;
+            break;
+          }
+        }
+      }
+
+      if (lineShouldBeTrimmed) {
+        // Example output:
+        // "; MISSING ENVIRONMENT VARIABLE: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
+        resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
+      } else {
+        resultLines.push(line);
+      }
+    }
+
+    FileSystem.writeFile(targetNpmrcPath, resultLines.join(os.EOL));
+  }
+
+  /**
+   * syncNpmrc() copies the .npmrc file to the target folder, and also trims unusable lines from the .npmrc file.
+   * If the source .npmrc file not exist, then syncNpmrc() will delete an .npmrc that is found in the target folder.
+   *
    * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _syncNpmrc() FROM scripts/install-run.ts
    */
-  public static syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string, useNpmrcPublish?: boolean): void {
-    const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, !useNpmrcPublish ? '.npmrc' : '.npmrc-publish');
+  public static syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string): void {
+    const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, '.npmrc');
     const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
     try {
       if (FileSystem.exists(sourceNpmrcPath)) {
-        console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`);
-        let npmrcFileLines: string[] = FileSystem.readFile(sourceNpmrcPath).split('\n');
-        npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
-        const resultLines: string[] = [];
-        // Trim out lines that reference environment variables that aren't defined
-        for (const line of npmrcFileLines) {
-          // This finds environment variable tokens that look like "${VAR_NAME}"
-          const regex: RegExp = /\$\{([^\}]+)\}/g;
-          const environmentVariables: string[] | null = line.match(regex);
-          let lineShouldBeTrimmed: boolean = false;
-          if (environmentVariables) {
-            for (const token of environmentVariables) {
-              // Remove the leading "${" and the trailing "}" from the token
-              const environmentVariableName: string = token.substring(2, token.length - 1);
-              if (!process.env[environmentVariableName]) {
-                lineShouldBeTrimmed = true;
-                break;
-              }
-            }
-          }
-
-          if (lineShouldBeTrimmed) {
-            // Example output:
-            // "; MISSING ENVIRONMENT VARIABLE: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
-            resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
-          } else {
-            resultLines.push(line);
-          }
-        }
-
-        FileSystem.writeFile(targetNpmrcPath, resultLines.join(os.EOL));
+        Utilities.copyAndTrimNpmrcFile(sourceNpmrcPath, targetNpmrcPath);
       } else if (FileSystem.exists(targetNpmrcPath)) {
         // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
         console.log(`Deleting ${targetNpmrcPath}`);

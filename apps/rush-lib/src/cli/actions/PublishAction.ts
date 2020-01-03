@@ -28,6 +28,7 @@ import { VersionControl } from '../../utilities/VersionControl';
 import { PolicyValidator } from '../../logic/policy/PolicyValidator';
 import { VersionPolicy } from '../../api/VersionPolicy';
 import { DEFAULT_PACKAGE_UPDATE_MESSAGE } from './VersionAction';
+import { Utilities } from '../../utilities/Utilities';
 
 export class PublishAction extends BaseRushAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -372,19 +373,25 @@ export class PublishAction extends BaseRushAction {
     const userConfig: string = (process.platform === 'win32') ? 'USERPROFILE' : 'HOME';
 
     if (this.rushConfiguration.projectsByName.get(packageName)!.shouldPublish) {
-      const srcNpmrcPublishPath: string = path.join(this.rushConfiguration.commonRushConfigFolder, '.npmrc-publish');
-      const targetNmprcPublishFolder: string = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
+      // Example: "common\config\rush\.npmrc-publish"
+      const sourceNpmrcPublishPath: string = path.join(this.rushConfiguration.commonRushConfigFolder, '.npmrc-publish');
+
+      // Example: "common\temp\publish-home"
+      const targetNpmrcPublishFolder: string = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
+
+      // Example: "common\temp\publish-home\.npmrc"
+      const targetNpmrcPublishPath: string = path.join(targetNpmrcPublishFolder, '.npmrc');
 
       // Check if .npmrc-publish file exists to use for publishing
-      if (FileSystem.exists(srcNpmrcPublishPath)) {
+      if (FileSystem.exists(sourceNpmrcPublishPath)) {
         // Sync "common\config\rush\.npmrc-publish" --> "common\temp\publish-home\.npmrc"
-        PublishUtilities.syncNpmrcPublish(
-        this.rushConfiguration.commonRushConfigFolder,
-        this.rushConfiguration.commonTempFolder
-        );
+        Utilities.createFolderWithRetry(targetNpmrcPublishFolder);
+
+        // Use Utilities.syncNpmrc to copy down the committed .npmrc-publish file, if there is one
+        Utilities.copyAndTrimNpmrcFile(sourceNpmrcPublishPath, targetNpmrcPublishPath);
 
         // Update userconfig, NPM will use config in "common\temp\publish-home\.npmrc"
-        env[userConfig] = targetNmprcPublishFolder;
+        env[userConfig] = targetNpmrcPublishFolder;
       } else {
         // Update userconfig, NPM will use config in "common\temp\.npmrc"
         env[userConfig] = this.rushConfiguration.commonTempFolder;

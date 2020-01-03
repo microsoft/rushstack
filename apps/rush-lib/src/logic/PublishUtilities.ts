@@ -182,18 +182,6 @@ export class PublishUtilities {
     });
     return env;
   }
-  
-  /**
-   * A helper function that uses utilities.syncNpmrc() to validate environment variables in .npmrc-publish
-   * Errors wil be written to file if environment variable is not set
-   */
-  public static syncNpmrcPublish(sourceNpmrcFolder: string, destNpmrcFolder: string): void {
-    const targetNpmrcPublishFolder: string = path.join(destNpmrcFolder, 'publish-home');
-    Utilities.createFolderWithRetry(targetNpmrcPublishFolder);
-
-    // Use Utilities.syncNpmrc to copy down the committed .npmrc-publish file, if there is one
-    Utilities.syncNpmrc(sourceNpmrcFolder, targetNpmrcPublishFolder, true);
-  }
 
   public static execCommand(
     shouldExecute: boolean,
