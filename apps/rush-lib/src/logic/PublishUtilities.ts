@@ -13,7 +13,8 @@ import * as semver from 'semver';
 import {
   IPackageJson,
   JsonFile,
-  FileConstants
+  FileConstants,
+  Text
 } from '@microsoft/node-core-library';
 
 import {
@@ -183,12 +184,17 @@ export class PublishUtilities {
     return env;
   }
 
+  /**
+   * @param secretSubstring -- if specified, a substring to be replaced by `<<SECRET>>` to avoid printing secrets
+   * on the console
+   */
   public static execCommand(
     shouldExecute: boolean,
     command: string,
     args: string[] = [],
     workingDirectory: string = process.cwd(),
-    environment?: IEnvironment
+    environment?: IEnvironment,
+    secretSubstring?: string
   ): void {
 
     let relativeDirectory: string = path.relative(process.cwd(), workingDirectory);
@@ -199,11 +205,9 @@ export class PublishUtilities {
 
     let commandArgs: string = args.join(' ');
 
-    if (args.includes('publish')) {
-      // Remove token from printing to output
-      // TODO: Find the best approach
-      const regex: RegExp = /=.*?\s/;
-      commandArgs = commandArgs.replace(regex, ' ');
+    if (secretSubstring && secretSubstring.length > 0) {
+      // Avoid printing the NPM publish token on the console when displaying the commandArgs
+      commandArgs = Text.replaceAll(commandArgs, secretSubstring, '<<SECRET>>');
     }
 
     console.log(

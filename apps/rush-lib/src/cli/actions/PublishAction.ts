@@ -419,12 +419,16 @@ export class PublishAction extends BaseRushAction {
       const packageManagerToolFilename: string = this.rushConfiguration.packageManager === 'yarn'
         ? 'npm' : this.rushConfiguration.packageManagerToolFilename;
 
+      // If the auth token was specified via the command line, avoid printing it on the console
+      const secretSubstring: string | undefined = this._npmAuthToken.value;
+
       PublishUtilities.execCommand(
         !!this._publish.value,
         packageManagerToolFilename,
         args,
         packagePath,
-        env);
+        env,
+        secretSubstring);
     }
   }
 
