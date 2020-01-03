@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add environment variable support for npm authentication configuration",
+      "comment": "Improve security by enabling the \"rush publish\" auth token to be specified via an environment variable in common/config/rush/.npmrc-publish",
       "type": "none"
     }
   ],
