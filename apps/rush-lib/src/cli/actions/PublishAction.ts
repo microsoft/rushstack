@@ -205,7 +205,7 @@ export class PublishAction extends BaseRushAction {
       }
 
       this._validate();
-
+      this._addNpmPublishHome();
       if (this._includeAll.value) {
         this._publishAll(allPackages);
       } else {
@@ -370,33 +370,8 @@ export class PublishAction extends BaseRushAction {
   private _npmPublish(packageName: string, packagePath: string): void {
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
     const args: string[] = ['publish'];
-    const userConfig: string = (process.platform === 'win32') ? 'USERPROFILE' : 'HOME';
 
     if (this.rushConfiguration.projectsByName.get(packageName)!.shouldPublish) {
-      // Example: "common\config\rush\.npmrc-publish"
-      const sourceNpmrcPublishPath: string = path.join(this.rushConfiguration.commonRushConfigFolder, '.npmrc-publish');
-
-      // Example: "common\temp\publish-home"
-      const targetNpmrcPublishFolder: string = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
-
-      // Example: "common\temp\publish-home\.npmrc"
-      const targetNpmrcPublishPath: string = path.join(targetNpmrcPublishFolder, '.npmrc');
-
-      // Check if .npmrc-publish file exists to use for publishing
-      if (FileSystem.exists(sourceNpmrcPublishPath)) {
-        // Sync "common\config\rush\.npmrc-publish" --> "common\temp\publish-home\.npmrc"
-        Utilities.createFolderWithRetry(targetNpmrcPublishFolder);
-
-        // Use Utilities.syncNpmrc to copy down the committed .npmrc-publish file, if there is one
-        Utilities.copyAndTrimNpmrcFile(sourceNpmrcPublishPath, targetNpmrcPublishPath);
-
-        // Update userconfig, NPM will use config in "common\temp\publish-home\.npmrc"
-        env[userConfig] = targetNpmrcPublishFolder;
-      } else {
-        // Update userconfig, NPM will use config in "common\temp\.npmrc"
-        env[userConfig] = this.rushConfiguration.commonTempFolder;
-      }
-
       this._addSharedNpmConfig(env, args);
 
       if (this._npmTag.value) {
@@ -508,8 +483,45 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
+  private _addNpmPublishHome(): void {
+    // Example: "common\config\rush\.npmrc-publish"
+    const sourceNpmrcPublishPath: string = path.join(this.rushConfiguration.commonRushConfigFolder, '.npmrc-publish');
+  
+    // Example: "common\temp\publish-home"
+    const targetNpmrcPublishFolder: string = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
+
+    // Example: "common\temp\publish-home\.npmrc"
+    const targetNpmrcPublishPath: string = path.join(targetNpmrcPublishFolder, '.npmrc');
+
+    // Check if .npmrc-publish file exists to use for publishing
+    if (FileSystem.exists(sourceNpmrcPublishPath)) {
+      // Sync "common\config\rush\.npmrc-publish" --> "common\temp\publish-home\.npmrc"
+      Utilities.createFolderWithRetry(targetNpmrcPublishFolder);
+
+      // Use Utilities.syncNpmrc to copy down the committed .npmrc-publish file, if there is one
+      Utilities.copyAndTrimNpmrcFile(sourceNpmrcPublishPath, targetNpmrcPublishPath);
+    } 
+  }
+
   private _addSharedNpmConfig(env: { [key: string]: string | undefined }, args: string[]): void {
+    const userConfig: string = (process.platform === 'win32') ? 'USERPROFILE' : 'HOME';
     let registry: string = '//registry.npmjs.org/';
+
+    // Example: "common\temp\publish-home"
+    const targetNpmrcPublishFolder: string = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
+
+    // Example: "common\temp\publish-home\.npmrc"
+    const targetNpmrcPublishPath: string = path.join(targetNpmrcPublishFolder, '.npmrc');
+
+    // Check if .npmrc file exists in "common\temp\publish-home"
+    if (FileSystem.exists(targetNpmrcPublishPath)) {
+      // Update userconfig, NPM will use config in "common\temp\publish-home\.npmrc"
+      env[userConfig] = targetNpmrcPublishFolder;
+    } else {
+      // Update userconfig, NPM will use config in "common\temp\.npmrc"
+      env[userConfig] = this.rushConfiguration.commonTempFolder;
+    }
+
     if (this._registryUrl.value) {
       const registryUrl: string = this._registryUrl.value;
       env['npm_config_registry'] = registryUrl; // eslint-disable-line dot-notation
