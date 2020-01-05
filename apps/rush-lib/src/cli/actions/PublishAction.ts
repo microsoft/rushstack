@@ -486,21 +486,29 @@ export class PublishAction extends BaseRushAction {
   private _addNpmPublishHome(): void {
     // Example: "common\config\rush\.npmrc-publish"
     const sourceNpmrcPublishPath: string = path.join(this.rushConfiguration.commonRushConfigFolder, '.npmrc-publish');
-  
+
     // Example: "common\temp\publish-home"
     const targetNpmrcPublishFolder: string = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
 
     // Example: "common\temp\publish-home\.npmrc"
     const targetNpmrcPublishPath: string = path.join(targetNpmrcPublishFolder, '.npmrc');
 
-    // Check if .npmrc-publish file exists to use for publishing
-    if (FileSystem.exists(sourceNpmrcPublishPath)) {
-      // Sync "common\config\rush\.npmrc-publish" --> "common\temp\publish-home\.npmrc"
-      Utilities.createFolderWithRetry(targetNpmrcPublishFolder);
+    try {
+      // Check if .npmrc-publish file exists to use for publishing
+      if (FileSystem.exists(sourceNpmrcPublishPath)) {
+        // Sync "common\config\rush\.npmrc-publish" --> "common\temp\publish-home\.npmrc"
+        Utilities.createFolderWithRetry(targetNpmrcPublishFolder);
 
-      // Use Utilities.syncNpmrc to copy down the committed .npmrc-publish file, if there is one
-      Utilities.copyAndTrimNpmrcFile(sourceNpmrcPublishPath, targetNpmrcPublishPath);
-    } 
+        // Copy down the committed .npmrc-publish file, if there is one
+        Utilities.copyAndTrimNpmrcFile(sourceNpmrcPublishPath, targetNpmrcPublishPath);
+      } else if (FileSystem.exists(targetNpmrcPublishPath)) {
+        // If the source .npmrc-publish doesn't exist and there is one in the target, delete the one in the target
+        console.log(`Deleting ${targetNpmrcPublishPath}`);
+        FileSystem.deleteFile(targetNpmrcPublishPath);
+      }
+    } catch (e) {
+      throw new Error(`Error syncing .npmrc-publish file: ${e}`);
+    }
   }
 
   private _addSharedNpmConfig(env: { [key: string]: string | undefined }, args: string[]): void {
@@ -517,11 +525,9 @@ export class PublishAction extends BaseRushAction {
     if (FileSystem.exists(targetNpmrcPublishPath)) {
       // Update userconfig, NPM will use config in "common\temp\publish-home\.npmrc"
       env[userConfig] = targetNpmrcPublishFolder;
-    } else {
-      // Update userconfig, NPM will use config in "common\temp\.npmrc"
-      env[userConfig] = this.rushConfiguration.commonTempFolder;
     }
 
+    // Check if registryUrl and token are specified via command-line
     if (this._registryUrl.value) {
       const registryUrl: string = this._registryUrl.value;
       env['npm_config_registry'] = registryUrl; // eslint-disable-line dot-notation
