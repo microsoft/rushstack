@@ -11282,6 +11282,7 @@ packages:
       '@microsoft/node-library-build': 6.3.11
       '@microsoft/rush-stack-compiler-3.5': 0.3.11
       '@types/node': 8.10.54
+      eslint: 6.5.1
       gulp: 4.0.2
       tslint: 5.12.1
       tslint-microsoft-contrib: 5.2.1_tslint@5.12.1
@@ -11289,7 +11290,7 @@ packages:
     dev: false
     name: '@rush-temp/rush-stack-compiler-3.6'
     resolution:
-      integrity: sha512-sWKGS8fkH5xNssT02o1JUptTpGS2NzMnbpcDPtSgZ23yQU5dXmotSFJykAvd32ogQlQv2wfDNtYFk4Qpqn5eTg==
+      integrity: sha512-6gbsg+OwcnHiATkQgUuOVd3AH4j3bAvFlub+43hChsXKY+q4F9iKBknnTh0SuWp1xOlDsrE5t+3tUpJH7zC6Kw==
       tarball: 'file:projects/rush-stack-compiler-3.6.tgz'
     version: 0.0.0
   'file:projects/rush-stack-compiler-3.7-library-test.tgz':
@@ -11307,6 +11308,7 @@ packages:
       '@microsoft/node-library-build': 6.3.11
       '@microsoft/rush-stack-compiler-3.5': 0.3.11
       '@types/node': 8.10.54
+      eslint: 6.5.1
       gulp: 4.0.2
       tslint: 5.12.1
       tslint-microsoft-contrib: 5.2.1_tslint@5.12.1
@@ -11314,7 +11316,7 @@ packages:
     dev: false
     name: '@rush-temp/rush-stack-compiler-3.7'
     resolution:
-      integrity: sha512-ovp5B0b+9HdUhZmqend5AykRMitouh5o52V/buZ9VuAvSKxWn3FVyzjC+6iEhYv33s0CvBqI+ibJKE13Ahu+5g==
+      integrity: sha512-f7sLRV2HvhMFVnTvRKkT/bMRMGLkz67dmLPZIgghSy8X22BJ71Rz635VfogXTM9QgiPG5s+GO0l2r5iF09rJLQ==
       tarball: 'file:projects/rush-stack-compiler-3.7.tgz'
     version: 0.0.0
   'file:projects/rush-stack-compiler-shared.tgz':
