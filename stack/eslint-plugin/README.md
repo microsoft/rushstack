@@ -2,9 +2,8 @@
 
 This plugin implements supplementary rules for use with the `@rushstack/eslint-config` package,
 which provides a TypeScript ESLint ruleset tailored for large teams and projects.
-Please see [that project's documentation]([@rushstack/eslint-config](
-https://www.npmjs.com/package/@rushstack/eslint-config)) for details.  To learn about Rush Stack,
-please visit: [https://rushstack.io/](https://rushstack.io/)
+Please see [that project's documentation](https://www.npmjs.com/package/@rushstack/eslint-config)
+for details.  To learn about Rush Stack, please visit: [https://rushstack.io/](https://rushstack.io/)
 
 ## `@rushstack/no-null`
 

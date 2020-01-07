@@ -32,7 +32,8 @@ module.exports = {
       },
 
       rules: {
-        // See Rush Stack docs
+        // The @rushstack rules are documented in the package README:
+        // https://www.npmjs.com/package/@rushstack/eslint-plugin
         "@rushstack/no-null": "error",
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
