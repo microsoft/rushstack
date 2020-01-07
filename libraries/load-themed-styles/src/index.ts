@@ -350,7 +350,7 @@ export function splitStyles(styles: string): ThemableArray {
   const result: ThemableArray = [];
   if (styles) {
     let pos: number = 0; // Current position in styles.
-    let tokenMatch: RegExpExecArray | null; // eslint-disable-line no-restricted-syntax
+    let tokenMatch: RegExpExecArray | null; // eslint-disable-line @rushstack/no-null
     while ((tokenMatch = _themeTokenRegex.exec(styles))) {
       const matchIndex: number = tokenMatch.index;
       if (matchIndex > pos) {

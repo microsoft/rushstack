@@ -5,7 +5,8 @@
   "main": "lib/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "gulp test --clean"
+    "build": "gulp test --clean",
+    "lint": "node ../../common/temp/node_modules/eslint/bin/eslint -f unix \"src/**/*.{ts,tsx}\""
   },
   "devDependencies": {
     "@microsoft/node-library-build": "6.3.11",
