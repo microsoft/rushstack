@@ -6,6 +6,7 @@ module.exports = {
   parser: "",
 
   plugins: [
+    "@rushstack/eslint-plugin",
     "@typescript-eslint/eslint-plugin",
     "eslint-plugin-promise",
     "eslint-plugin-security",
@@ -31,6 +32,9 @@ module.exports = {
       },
 
       rules: {
+        // See Rush Stack docs
+        "@rushstack/no-null": "error",
+
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         "@typescript-eslint/adjacent-overload-signatures": "error",
 
@@ -486,25 +490,9 @@ module.exports = {
         // How it works:    https://eslint.org/docs/rules/no-restricted-syntax
         // AST visualizer:  https://astexplorer.net/
         // Debugger:        http://estools.github.io/esquery/
-        "no-restricted-syntax": [
-          "error",
-          // RATIONALE:       Most programming languages have a "null" or "nil" value that serves several purposes:
-          //                  (1) the initial value for an uninitialized variable, (2) the value of x.y or x["y"]
-          //                  when x has no such key, and (3) a special token that developers can assign to indicate
-          //                  an unknown or empty state.  In JavaScript, the "undefined" value fulfills all three
-          //                  roles.  JavaScript's "null" value is a redundant secondary token that only fulfills #3,
-          //                  even though its name confusingly implies otherwise.  The "null" value was arguably
-          //                  a mistake in the original JavaScript language design, but it cannot be banned entirely
-          //                  because it is returned by some entrenched system APIs such as JSON.parse(), and also
-          //                  some popular NPM packages.  To avoid requiring lint suppressions when interacting with
-          //                  these legacy APIs, this rule prohibits "null" as a literal value, but not in type
-          //                  annotations.  Comparisons with "null" are also allowed.  In other words, this rule
-          //                  aims to tolerate preexisting null values but prevents new ones from being introduced.
-          {
-            "selector": ":not(BinaryExpression:matches([operator='!=='], [operator='==='])) > Literal[value=null]",
-            "message": "Usage of \"null\" is deprecated except when received from legacy APIs; use \"undefined\" instead"
-          }
-        ],
+        //
+        // "no-restricted-syntax": [
+        // ],
       }
     }
   ]
