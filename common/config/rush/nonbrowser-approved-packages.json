@@ -104,7 +104,7 @@
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.5",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.6",
@@ -157,6 +157,10 @@
     {
       "name": "@rushstack/eslint-config",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@rushstack/eslint-plugin",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@typescript-eslint/eslint-plugin",
