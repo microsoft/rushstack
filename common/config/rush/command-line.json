@@ -25,7 +25,9 @@
     //   /**
     //    * (Required) The name that will be typed as part of the command line.  This is also the name
     //    * of the "scripts" hook in the project's package.json file.
-    //    * The name should be comprised of lower case words separated by hyphens.
+    //    * The name should be comprised of lower case words separated by hyphens or colons. The name should include an
+    //    * English verb (e.g. "deploy"). Use a hyphen to separate words (e.g. "upload-docs"). A group of related commands
+    //    * can be prefixed with a colon (e.g. "docs:generate", "docs:deploy", "docs:serve", etc).
     //    */
     //   "name": "my-bulk-command",
     // 
@@ -63,11 +65,41 @@
     //   "enableParallelism": false,
     // 
     //   /**
+    //    * Normally projects will be processed according to their dependency order: a given project will not start
+    //    * processing the command until all of its dependencies have completed.  This restriction doesn't apply for
+    //    * certain operations, for example a "clean" task that deletes output files.  In this case
+    //    * you can set "ignoreDependencyOrder" to true to increase parallelism.
+    //    */
+    //   "ignoreDependencyOrder": false,
+    // 
+    //   /**
     //    * Normally Rush requires that each project's package.json has a "scripts" entry matching
     //    * the custom command name.  To disable this check, set "ignoreMissingScript" to true;
     //    * projects with a missing definition will be skipped.
     //    */
-    //   "ignoreMissingScript": false
+    //   "ignoreMissingScript": false,
+    // 
+    //   /**
+    //    * When invoking shell scripts, Rush uses a heuristic to distinguish errors from warnings:
+    //    * - If the shell script returns a nonzero process exit code, Rush interprets this as "one or more errors".
+    //    * Error output is displayed in red, and it prevents Rush from attempting to process any downstream projects.
+    //    * - If the shell script returns a zero process exit code but writes something to its stderr stream,
+    //    * Rush interprets this as "one or more warnings". Warning output is printed in yellow, but does NOT prevent
+    //    * Rush from processing downstream projects.
+    //    *
+    //    * Thus, warnings do not interfere with local development, but they will cause a CI job to fail, because
+    //    * the Rush process itself returns a nonzero exit code if there are any warnings or errors. This is by design.
+    //    * In an active monorepo, we've found that if you allow any warnings in your master branch, it inadvertently
+    //    * teaches developers to ignore warnings, which quickly leads to a situation where so many "expected" warnings
+    //    * have accumulated that warnings no longer serve any useful purpose.
+    //    *
+    //    * Sometimes a poorly behaved task will write output to stderr even though its operation was successful.
+    //    * In that case, it's strongly recommended to fix the task.  However, as a workaround you can set
+    //    * allowWarningsInSuccessfulBuild=true, which causes Rush to return a nonzero exit code for errors only.
+    //    *
+    //    * Note: The default value is false. In Rush 5.7.x and earlier, the default value was true.
+    //    */
+    //   "allowWarningsInSuccessfulBuild": false
     // },
     // 
     // {
