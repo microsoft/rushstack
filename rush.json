@@ -345,7 +345,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -355,7 +355,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -543,7 +543,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -553,7 +553,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -575,7 +575,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -611,7 +611,7 @@
      "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -639,7 +639,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
 
@@ -693,7 +693,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -703,7 +703,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -713,7 +713,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -723,7 +723,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -733,7 +733,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -743,7 +743,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -753,7 +753,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -763,7 +763,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -773,7 +773,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -783,7 +783,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -793,7 +793,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -803,7 +803,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
