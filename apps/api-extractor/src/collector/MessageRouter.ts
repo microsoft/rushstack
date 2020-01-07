@@ -251,7 +251,7 @@ export class MessageRouter {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static buildJsonDumpObject(input: any): any | undefined {
     if (input === null || input === undefined) {
-      // eslint-disable-next-line no-restricted-syntax
+      // eslint-disable-next-line @rushstack/no-null
       return null; // JSON uses null instead of undefined
     }
 

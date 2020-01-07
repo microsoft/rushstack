@@ -45,10 +45,10 @@ export class Sort {
     }
 
     // Null is smaller than anything except undefined
-    if (x === null) { // eslint-disable-line no-restricted-syntax
+    if (x === null) { // eslint-disable-line @rushstack/no-null
       return -1;
     }
-    if (y === null) { // eslint-disable-line no-restricted-syntax
+    if (y === null) { // eslint-disable-line @rushstack/no-null
       return 1;
     }
 
