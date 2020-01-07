@@ -21,8 +21,8 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.3.2",
-    "@microsoft/rush-stack-compiler-3.4": "0.3.2",
+    "@microsoft/node-library-build": "6.3.11",
+    "@microsoft/rush-stack-compiler-3.5": "0.3.11",
     "@rushstack/eslint-config": "0.4.2",
     "@types/fs-extra": "5.0.4",
     "@types/jest": "23.3.11",

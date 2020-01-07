@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.16.0",
+  "rushVersion": "5.17.2",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -57,19 +57,35 @@
      * be incompatible with certain packages, for example the "@types" packages from DefinitelyTyped.  Rush's default
      * is "fewer-dependencies", which causes PNPM to avoid installing a newer version if an already installed version
      * can be reused; this is more similar to NPM's algorithm.
+     *
+     * After modifying this field, it's recommended to run "rush update --full" so that the package manager
+     * will recalculate all version selections.
      */
     // "resolutionStrategy": "fast"
   },
 
   /**
-   * Older releases of the NodeJS engine may be missing features required by your system.
+   * Older releases of the Node.js engine may be missing features required by your system.
    * Other releases may have bugs.  In particular, the "latest" version will not be a
    * Long Term Support (LTS) version and is likely to have regressions.
    *
-   * Specify a SemVer range to ensure developers use a NodeJS version that is appropriate
+   * Specify a SemVer range to ensure developers use a Node.js version that is appropriate
    * for your repo.
    */
   "nodeSupportedVersionRange": ">=8.9.4 <9.0.0 || >=10.13.0 <11.0.0 || >=12.0.0 <13.0.0",
+
+  /**
+  * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
+  * spend six months in a stabilization period before the first Long Term Support (LTS) version.
+  * For example, 8.9.0 was the first LTS version of Node.js 8.  Pre-LTS versions are not recommended
+  * for production usage because they frequently have bugs.  They may cause Rush itself
+  * to malfunction.
+  *
+  * Rush normally prints a warning if it detects a pre-LTS Node.js version.  If you are testing
+  * pre-LTS versions in preparation for supporting the first LTS version, you can use this setting
+  * to disable Rush's warning.
+  */
+  // "suppressNodeLtsWarning": false,
 
   /**
    * If you would like the version specifiers for your dependencies to be consistent, then
@@ -100,7 +116,7 @@
    * occasionally, but if that's painful, it's a warning sign that your development style may
    * discourage refactoring.  Reorganizing the categories should be an enlightening discussion
    * that brings people together, and maybe also identifies poor coding practices (e.g. file
-   * references that reach into other project's folders without using NodeJS module resolution).
+   * references that reach into other project's folders without using Node.js module resolution).
    *
    * The defaults are projectFolderMinDepth=1 and projectFolderMaxDepth=2.
    *
@@ -255,7 +271,7 @@
     //    * The folder name for this variant.
     //    */
     //   "variantName": "old-sdk",
-    //
+    // 
     //   /**
     //    * An informative description
     //    */
@@ -294,19 +310,19 @@
     //    * The NPM package name of the project (must match package.json)
     //    */
     //   "packageName": "my-app",
-    //
+    // 
     //   /**
     //    * The path to the project folder, relative to the rush.json config file.
     //    */
     //   "projectFolder": "apps/my-app",
-    //
+    // 
     //   /**
     //    * An optional category for usage in the "browser-approved-packages.json"
     //    * and "nonbrowser-approved-packages.json" files.  The value must be one of the
     //    * strings from the "reviewCategories" defined above.
     //    */
     //   "reviewCategory": "production",
-    //
+    // 
     //   /**
     //    * A list of local projects that appear as devDependencies for this project, but cannot be
     //    * locally linked because it would create a cyclic dependency; instead, the last published
@@ -315,20 +331,20 @@
     //   "cyclicDependencyProjects": [
     //     // "my-toolchain"
     //   ],
-    //
+    // 
     //   /**
     //    * If true, then this project will be ignored by the "rush check" command.
     //    * The default value is false.
     //    */
     //   // "skipRushCheck": false,
-    //
+    // 
     //   /**
     //    * A flag indicating that changes to this project will be published to npm, which affects
     //    * the Rush change and publish workflows. The default value is false.
     //    * NOTE: "versionPolicyName" and "shouldPublish" are alternatives; you cannot specify them both.
     //    */
     //   // "shouldPublish": false,
-    //
+    // 
     //   /**
     //    * An optional version policy associated with the project.  Version policies are defined
     //    * in "version-policies.json" file.  See the "rush publish" documentation for more info.
@@ -336,7 +352,7 @@
     //    */
     //   // "versionPolicyName": ""
     // },
-    //
+    // 
     // "apps" folder (alphabetical order)
     {
       "packageName": "@microsoft/api-extractor",
@@ -345,7 +361,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -355,7 +371,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -543,7 +559,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -553,7 +569,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -575,7 +591,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -611,7 +627,7 @@
      "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -639,7 +655,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
 
@@ -693,7 +709,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -703,7 +719,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -713,7 +729,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -723,7 +739,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -733,7 +749,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -743,7 +759,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -753,7 +769,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -763,7 +779,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -773,7 +789,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -783,7 +799,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -793,7 +809,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {
@@ -803,7 +819,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
+        "@microsoft/rush-stack-compiler-3.5"
       ]
     },
     {

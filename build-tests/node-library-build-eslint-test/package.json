@@ -16,6 +16,6 @@
     "@types/node": "8.10.54",
     "chai": "~3.5.0",
     "gulp": "~4.0.2",
-    "@microsoft/rush-stack-compiler-3.4": "0.3.10"
+    "@microsoft/rush-stack-compiler-3.5": "0.3.11"
   }
 }
