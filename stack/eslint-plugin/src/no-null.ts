@@ -18,10 +18,10 @@ const noNullRule: TSESLint.RuleModule<MessageIds,Options> = {
     },
     schema: [ ],
     docs: {
-      description: 'Prevents usage of JavaScript\'s "null" keyword.',
+      description: 'Prevent usage of JavaScript\'s "null" keyword',
       category: 'Stylistic Issues',
       recommended: "error",
-      url: 'https://www.npmjs.com/package/@rushstack/eslint-config'
+      url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
     }
   },
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {

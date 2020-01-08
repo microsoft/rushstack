@@ -21,10 +21,11 @@ const noUntypedUnderscoreRule: TSESLint.RuleModule<MessageIds,Options> = {
     },
     schema: [ ],
     docs: {
-      description: 'Prevents usage of JavaScript\'s "null" keyword.',
+      description: 'Prevent TypeScript code from accessing legacy JavaScript members'
+        + ' whose name has an underscore prefix',
       category: 'Stylistic Issues',
-      recommended: "error",
-      url: 'https://www.npmjs.com/package/@rushstack/eslint-config'
+      recommended: false,
+      url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
     }
   },
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {
