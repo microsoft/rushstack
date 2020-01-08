@@ -1,0 +1,18 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "ESLint",
+            "program": "${workspaceFolder}/node_modules/@microsoft/rush-stack-compiler-3.5/bin/rush-eslint",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "--debug", "-f", "unix", "src/**/*.{ts,tsx}"
+            ]
+        }
+    ]
+}
