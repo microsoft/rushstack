@@ -5,7 +5,7 @@ which provides a TypeScript ESLint ruleset tailored for large teams and projects
 Please see [that project's documentation](https://www.npmjs.com/package/@rushstack/eslint-config)
 for details.  To learn about Rush Stack, please visit: [https://rushstack.io/](https://rushstack.io/)
 
-### `@rushstack/no-null`
+## `@rushstack/no-null`
 
 Prevent usage of JavaScript's `null` keyword.
 
@@ -49,23 +49,24 @@ if (x === null) {  // comparisons are okay
 }
 ```
 
-### `@rushstack/no-untyped-underscore` (Opt-in)
+## `@rushstack/no-untyped-underscore` (Opt-in)
 
 Prevent TypeScript code from accessing legacy JavaScript members whose name has an underscore prefix.
 
 #### Rule Details
 
 JavaScript does not provide a straightforward way to restrict access to object members, so API names commonly
-use an underscore prefix to indicate a private member (e.g. `exampleObject._privateMember`).  However, inexperienced
-developers may not be aware of this convention.  In TypeScript we can generally solve this problem by marking the types
-as `private` or omitting them from the typings.  However, when migrating a large legacy code base to TypeScript,
-it may be difficult to author typings for every legacy API.  For this case, you can enable the
-`@rushstack/no-untyped-underscore` rule.
+indicate a private member by using an underscore prefix (e.g. `exampleObject._privateMember`).  For inexperienced
+developers who may be unfamiliar with this convention, in TypeScript we can mark the APIs as `private` or omit them
+from the typings.  However, when migrating a large code base to TypeScript, it may be difficult to declare types
+for every legacy API.  In this situation, the `@rushstack/no-untyped-underscore` rule can help.
 
-This rule reports access to members whose name has an underscore prefix, EXCEPT in cases where:
+This rule detects expressions that access a member with an underscore prefix, EXCEPT in cases where:
 
-- The containing object has a type which declares the member; OR
-- The untyped expression uses privileged names like `this._example` or `that._example` or `super._example`; OR
+- The object is typed:  specifically, `exampleObject` has a TypeScript type that declares `_privateMember`; OR
+- The object expression uses: the `this` or `super` keywords; OR
+- The object expression is a variable named `that`.  (In older ES5 code, `that` was commonly used as an alias
+ for `this` in unbound contexts.)
 
 #### Examples
 
@@ -73,20 +74,23 @@ The following patterns are considered problems when `@rushstack/no-untyped-under
 
 ```ts
 let x: any;
-x._privateMember = 123;  // error
+x._privateMember = 123;  // error, because x is untyped
 
 let x: { [key: string]: number };
-x._privateMember = 123;  // error
+x._privateMember = 123;  // error, because _privateMember is not a declared member of x's type
 ```
 
 The following patterns are NOT considered problems:
 
 ```ts
 let x: { _privateMember: any };
-x._privateMember = 123;  // okay because _privateMember is declared by x's type
+x._privateMember = 123;  // okay, because _privateMember is declared by x's type
+
+let x = { _privateMember: 0 };
+x._privateMember = 123;  // okay, because _privateMember is part of the inferred type
 
 enum E {
     _PrivateMember
 }
-let e: E._PrivateMember = E._PrivateMember; // okay because _PrivateMember is declared by E
+let e: E._PrivateMember = E._PrivateMember; // okay, because _PrivateMember is declared by E
 ```
