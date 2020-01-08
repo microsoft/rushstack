@@ -26,9 +26,9 @@ const noNullRule: TSESLint.RuleModule<MessageIds,Options> = {
   },
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {
     return {
-      Literal: function(node: TSESTree.Node) {
+      Literal: function(node: TSESTree.Literal) {
         // Is it a "null" literal?
-        if (node.type === 'Literal' && node.value === null) {
+        if (node.value === null) {
 
           // Does the "null" appear in a comparison such as "if (x === null)"?
           let isComparison: boolean = false;
