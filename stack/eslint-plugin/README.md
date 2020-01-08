@@ -49,9 +49,9 @@ if (x === null) {  // comparisons are okay
 }
 ```
 
-### `@rushstack/no-untyped-underscore`
+### `@rushstack/no-untyped-underscore` (Opt-in)
 
-(Optional) Prevent TypeScript code from accessing legacy JavaScript members whose name has an underscore prefix.
+Prevent TypeScript code from accessing legacy JavaScript members whose name has an underscore prefix.
 
 #### Rule Details
 
