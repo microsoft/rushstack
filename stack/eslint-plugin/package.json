@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/eslint-plugin",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "An ESLint plugin providing supplementary rules for use with the @rushstack/eslint-config package",
   "repository": {
     "url": "https://github.com/microsoft/rushstack/tree/master/stack/eslint-plugin"
