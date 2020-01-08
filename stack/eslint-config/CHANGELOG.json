@@ -2,6 +2,23 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "0.5.0",
+      "tag": "@rushstack/eslint-config_v0.5.0",
+      "date": "Wed, 08 Jan 2020 00:11:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Replace \"no-restricted-syntax\" rule with an equivalent rule \"@rushstack/no-null\""
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" from `0.0.0` to `0.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.2",
       "tag": "@rushstack/eslint-config_v0.4.2",
       "date": "Mon, 11 Nov 2019 16:07:56 GMT",

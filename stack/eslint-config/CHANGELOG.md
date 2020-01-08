@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Mon, 11 Nov 2019 16:07:56 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Jan 2020 00:11:31 GMT and should not be manually modified.
+
+## 0.5.0
+Wed, 08 Jan 2020 00:11:31 GMT
+
+### Minor changes
+
+- Replace "no-restricted-syntax" rule with an equivalent rule "@rushstack/no-null"
 
 ## 0.4.2
 Mon, 11 Nov 2019 16:07:56 GMT
