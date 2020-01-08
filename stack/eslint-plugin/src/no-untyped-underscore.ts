@@ -3,8 +3,10 @@
 
 import {
   TSESTree,
-  TSESLint
+  TSESLint,
+  ParserServices
 } from '@typescript-eslint/experimental-utils';
+import * as ts from 'typescript';
 
 type MessageIds = 'error-untyped-underscore';
 type Options = [ ];
@@ -26,36 +28,73 @@ const noUntypedUnderscoreRule: TSESLint.RuleModule<MessageIds,Options> = {
     }
   },
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {
+
+    const parserServices: ParserServices | undefined = context.parserServices;
+    if (!parserServices ||
+      !parserServices.program ||
+      !parserServices.esTreeNodeToTSNodeMap) {
+        throw new Error('This rule requires your ESLint configuration to define the "parserOptions.project"'
+          + ' property for "@typescript-eslint/parser".',);
+    }
+
+    const typeChecker: ts.TypeChecker = parserServices.program.getTypeChecker();
+
     return {
       MemberExpression: function(node: TSESTree.MemberExpression) {
         // Is it an expression like "x.y"?
-        let match: boolean = true;
 
         // Ignore expressions such as "super.y", "this.y", and "that.y"
         const memberObject: TSESTree.LeftHandSideExpression = node.object;
         if (memberObject) {
           if (memberObject.type === 'Super' || memberObject.type === 'ThisExpression') {
-            match = false;
-          } else {
-            if (memberObject.type === 'Identifier') {
-              if (memberObject.name === 'this' || memberObject.name == 'that') {
-                match = false;
-              }
+            return; // no match
+          }
+          if (memberObject.type === 'Identifier') {
+            if (memberObject.name === 'this' || memberObject.name == 'that') {
+              return; // no match
             }
           }
         }
 
         // Does the member name start with an underscore?  (e.g. "x._y")
-        if (match && node.property && node.property.type === 'Identifier') {
+        if (node.property && node.property.type === 'Identifier') {
           const memberName: string = node.property.name;
           if (memberName && memberName[0] === '_') {
-            context.report({
-              node,
-              messageId: 'error-untyped-underscore',
-              data: {
-                memberName: memberName
+
+            // Do we have type information for the property (e.g. "_y")?
+            //
+            // Examples where propertyType is defined:
+            //
+            //    let x: { _y: any };
+            //    let x: {
+            //      _y: boolean;
+            //      [key: string]: number;
+            //    };
+            //
+            // Examples with propertyType=undefined:
+            //    let x: any;
+            //    let x: { [key: string]: number };
+            //
+            let propertyType: ts.Symbol | undefined = undefined;
+
+            const memberObjectNode: ts.Node | undefined = parserServices.esTreeNodeToTSNodeMap!.get(node.object);
+            if (memberObjectNode) {
+              const memberObjectType: ts.Type | undefined = typeChecker.getTypeAtLocation(memberObjectNode);
+              if (memberObjectType) {
+                propertyType = memberObjectType.getProperty(memberName);
               }
-            });
+            }
+
+            // TypeScript's type system already sufficiently restricts access to private members.
+            // Thus, this ESLint rule only considers untyped code such as a legacy JavaScript API.
+            if (!propertyType) {
+              context.report({
+                node,
+                messageId: 'error-untyped-underscore',
+                data: { memberName: memberName }
+              });
+            }
+
           }
         }
       }
