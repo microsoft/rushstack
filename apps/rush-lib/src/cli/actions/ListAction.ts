@@ -4,11 +4,18 @@ import { CommandLineFlagParameter } from "@microsoft/ts-command-line";
 import { RushConfigurationProject } from "../../api/RushConfigurationProject";
 import * as Table from "cli-table";
 
+export interface IJsonEntity {
+  name: string;
+  version: string;
+  path: string;
+}
+
 export class ListAction extends BaseRushAction {
   private _version: CommandLineFlagParameter;
   private _path: CommandLineFlagParameter;
   private _fullPath: CommandLineFlagParameter;
   private _jsonFlag: CommandLineFlagParameter;
+  private _objects: string[] = [];
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -20,6 +27,10 @@ export class ListAction extends BaseRushAction {
         "current rush config.",
       parser
     });
+  }
+
+  public setJsonObject(name: string, version: string, path: string): IJsonEntity {
+    return {name: name, version: version, path: path};
   }
 
   protected onDefineParameters(): void {
@@ -49,14 +60,13 @@ export class ListAction extends BaseRushAction {
 
     this._jsonFlag = this.defineFlagParameter({
       parameterLongName: "--json",
-      description: "If specified,  a json file of result will be generated."
+      description: "If specified, output will be in JSON format."
     });
   }
 
   protected run(): Promise<void> {
     return Promise.resolve().then(() => {
-      const allPackages: Map<string, RushConfigurationProject> = this
-        .rushConfiguration.projectsByName;
+      const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
       if (this._version.value || this._path.value || this._fullPath.value) {
         this._printListTable(allPackages);
       } else if (this._jsonFlag.value) {
@@ -70,9 +80,11 @@ export class ListAction extends BaseRushAction {
   private _serializeToJson(
     allPackages: Map<string, RushConfigurationProject>
   ): void {
+    let i: number = 0;
     allPackages.forEach((_config: RushConfigurationProject, name: string) => {
-      console.log(JSON.stringify(name));
+     this._objects[i++] = JSON.stringify(this.setJsonObject(name, _config.packageJson.version,  _config.projectFolder));
     });
+    console.log(this._objects);
   }
 
   private _printList(allPackages: Map<string, RushConfigurationProject>): void {
