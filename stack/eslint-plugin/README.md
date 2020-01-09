@@ -63,7 +63,7 @@ for every legacy API.  In this situation, the `@rushstack/no-untyped-underscore`
 
 This rule detects expressions that access a member with an underscore prefix, EXCEPT in cases where:
 
-- The object is typed:  specifically, `exampleObject` has a TypeScript type that declares `_privateMember`; OR
+- The object is typed: specifically, `exampleObject` has a TypeScript type that declares `_privateMember`; OR
 - The object expression uses: the `this` or `super` keywords; OR
 - The object expression is a variable named `that`.  (In older ES5 code, `that` was commonly used as an alias
  for `this` in unbound contexts.)
