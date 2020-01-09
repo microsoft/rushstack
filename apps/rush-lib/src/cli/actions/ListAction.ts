@@ -1,8 +1,8 @@
-import { BaseRushAction } from "./BaseRushAction";
-import { RushCommandLineParser } from "../RushCommandLineParser";
-import { CommandLineFlagParameter } from "@microsoft/ts-command-line";
-import { RushConfigurationProject } from "../../api/RushConfigurationProject";
-import * as Table from "cli-table";
+import { BaseRushAction } from './BaseRushAction';
+import { RushCommandLineParser } from '../RushCommandLineParser';
+import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import * as Table from 'cli-table';
 
 export interface IJsonEntity {
   name: string;
@@ -19,12 +19,12 @@ export class ListAction extends BaseRushAction {
 
   public constructor(parser: RushCommandLineParser) {
     super({
-      actionName: "list",
-      summary: "List package information for all projects in the repo",
+      actionName: 'list',
+      summary: 'List package information for all projects in the repo',
       documentation:
-        "List package names, and optionally version (--version) and " +
-        "path (--path) or full path (--full-path), for projects in the " +
-        "current rush config.",
+        'List package names, and optionally version (--version) and ' +
+        'path (--path) or full path (--full-path), for projects in the ' +
+        'current rush config.',
       parser
     });
   }
@@ -35,32 +35,32 @@ export class ListAction extends BaseRushAction {
 
   protected onDefineParameters(): void {
     this._version = this.defineFlagParameter({
-      parameterLongName: "--version",
-      parameterShortName: "-v",
+      parameterLongName: '--version',
+      parameterShortName: '-v',
       description:
-        "If this flag is specified, the project version will be " +
-        "displayed in a column along with the package name."
+        'If this flag is specified, the project version will be ' +
+        'displayed in a column along with the package name.'
     });
 
     this._path = this.defineFlagParameter({
-      parameterLongName: "--path",
-      parameterShortName: "-p",
+      parameterLongName: '--path',
+      parameterShortName: '-p',
       description:
-        "If this flag is specified, the project path will be " +
-        "displayed in a column along with the package name."
+        'If this flag is specified, the project path will be ' +
+        'displayed in a column along with the package name.'
     });
 
     this._fullPath = this.defineFlagParameter({
-      parameterLongName: "--full-path",
-      parameterShortName: "-f",
+      parameterLongName: '--full-path',
+      parameterShortName: '-f',
       description:
-        "If this flag is specified, the project full path will " +
-        "be displayed in a column along with the package name."
+        'If this flag is specified, the project full path will ' +
+        'be displayed in a column along with the package name.'
     });
 
     this._jsonFlag = this.defineFlagParameter({
-      parameterLongName: "--json",
-      description: "If specified, output will be in JSON format."
+      parameterLongName: '--json',
+      description: 'If specified, output will be in JSON format.'
     });
   }
 
@@ -96,15 +96,15 @@ export class ListAction extends BaseRushAction {
   private _printListTable(
     allPackages: Map<string, RushConfigurationProject>
   ): void {
-    const tableHeader: string[] = ["Project"];
+    const tableHeader: string[] = ['Project'];
     if (this._version.value) {
-      tableHeader.push("Version");
+      tableHeader.push('Version');
     }
     if (this._path.value) {
-      tableHeader.push("Path");
+      tableHeader.push('Path');
     }
     if (this._fullPath.value) {
-      tableHeader.push("Full Path");
+      tableHeader.push('Full Path');
     }
     const table: Table = new Table({
       head: tableHeader
