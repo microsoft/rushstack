@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 08 Jan 2020 00:11:31 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Jan 2020 06:44:12 GMT and should not be manually modified.
+
+## 7.7.2
+Thu, 09 Jan 2020 06:44:12 GMT
+
+### Patches
+
+- Fix an error "Cannot read property 'externalModuleIndicator' of undefined" (GitHub #1652)
 
 ## 7.7.1
 Wed, 08 Jan 2020 00:11:31 GMT
