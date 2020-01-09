@@ -51,7 +51,7 @@ export class DeclarationReferenceGenerator {
     ): DeclarationReference | undefined {
     return this._symbolToDeclarationReference(symbol, meaning, /*includeModuleSymbols*/ false);
   }
-  
+
   private static _isInExpressionContext(node: ts.Node): boolean {
     switch (node.parent.kind) {
       case ts.SyntaxKind.TypeQuery: return true;
@@ -177,39 +177,41 @@ export class DeclarationReferenceGenerator {
 
   private _symbolToDeclarationReference(symbol: ts.Symbol, meaning: ts.SymbolFlags, includeModuleSymbols: boolean
     ): DeclarationReference | undefined {
-    if (symbol.flags & ts.SymbolFlags.ExportValue) {
-      symbol = this._typeChecker.getExportSymbolOfSymbol(symbol);
+
+    let followedSymbol: ts.Symbol = symbol;
+    if (followedSymbol.flags & ts.SymbolFlags.ExportValue) {
+      followedSymbol = this._typeChecker.getExportSymbolOfSymbol(followedSymbol);
     }
-    if (symbol.flags & ts.SymbolFlags.Alias) {
-      symbol = this._typeChecker.getAliasedSymbol(symbol);
+    if (followedSymbol.flags & ts.SymbolFlags.Alias) {
+      followedSymbol = this._typeChecker.getAliasedSymbol(followedSymbol);
     }
 
-    if (DeclarationReferenceGenerator._isExternalModuleSymbol(symbol)) {
+    if (DeclarationReferenceGenerator._isExternalModuleSymbol(followedSymbol)) {
       if (!includeModuleSymbols) {
         return undefined;
       }
       const sourceFile: ts.SourceFile | undefined =
-        symbol.declarations
-        && symbol.declarations[0]
-        && symbol.declarations[0].getSourceFile();
+        followedSymbol.declarations
+        && followedSymbol.declarations[0]
+        && followedSymbol.declarations[0].getSourceFile();
       return new DeclarationReference(this._sourceFileToModuleSource(sourceFile));
     }
 
     // Do not generate a declaration reference for a type parameter.
-    if (symbol.flags & ts.SymbolFlags.TypeParameter) {
+    if (followedSymbol.flags & ts.SymbolFlags.TypeParameter) {
       return undefined;
     }
 
-    const parent: ts.Symbol | undefined = TypeScriptInternals.getSymbolParent(symbol);
+    const parent: ts.Symbol | undefined = TypeScriptInternals.getSymbolParent(followedSymbol);
     let parentRef: DeclarationReference | undefined;
     if (parent) {
       parentRef = this._symbolToDeclarationReference(parent, ts.SymbolFlags.Namespace, /*includeModuleSymbols*/ true);
     } else {
       // this may be a local symbol in a module...
       const sourceFile: ts.SourceFile | undefined =
-        symbol.declarations
-        && symbol.declarations[0]
-        && symbol.declarations[0].getSourceFile();
+        followedSymbol.declarations
+        && followedSymbol.declarations[0]
+        && followedSymbol.declarations[0].getSourceFile();
       if (ts.isExternalModule(sourceFile)) {
         parentRef = new DeclarationReference(this._sourceFileToModuleSource(sourceFile));
       } else {
@@ -221,17 +223,17 @@ export class DeclarationReferenceGenerator {
       return undefined;
     }
 
-    let localName: string = symbol.name;
-    if (symbol.escapedName === ts.InternalSymbolName.Constructor) {
+    let localName: string = followedSymbol.name;
+    if (followedSymbol.escapedName === ts.InternalSymbolName.Constructor) {
       localName = 'constructor';
     } else {
-      const wellKnownName: string | undefined = TypeScriptHelpers.tryDecodeWellKnownSymbolName(symbol.escapedName);
+      const wellKnownName: string | undefined = TypeScriptHelpers.tryDecodeWellKnownSymbolName(followedSymbol.escapedName);
       if (wellKnownName) {
         // TypeScript binds well-known ECMAScript symbols like 'Symbol.iterator' as '__@iterator'.
         // This converts a string like '__@iterator' into the property name '[Symbol.iterator]'.
         localName = wellKnownName;
-      } else if (TypeScriptHelpers.isUniqueSymbolName(symbol.escapedName)) {
-        for (const decl of symbol.declarations || []) {
+      } else if (TypeScriptHelpers.isUniqueSymbolName(followedSymbol.escapedName)) {
+        for (const decl of followedSymbol.declarations || []) {
           const declName: ts.DeclarationName | undefined = ts.getNameOfDeclaration(decl);
           if (declName && ts.isComputedPropertyName(declName)) {
             const lateName: string | undefined = TypeScriptHelpers.tryGetLateBoundName(declName);
@@ -244,7 +246,7 @@ export class DeclarationReferenceGenerator {
       }
     }
 
-    let navigation: Navigation | 'global' = DeclarationReferenceGenerator._getNavigationToSymbol(symbol);
+    let navigation: Navigation | 'global' = DeclarationReferenceGenerator._getNavigationToSymbol(followedSymbol);
     if (navigation === 'global') {
       if (parentRef.source !== GlobalSource.instance) {
         parentRef = new DeclarationReference(GlobalSource.instance);
@@ -254,7 +256,7 @@ export class DeclarationReferenceGenerator {
 
     return parentRef
       .addNavigationStep(navigation, localName)
-      .withMeaning(DeclarationReferenceGenerator._getMeaningOfSymbol(symbol, meaning));
+      .withMeaning(DeclarationReferenceGenerator._getMeaningOfSymbol(followedSymbol, meaning));
   }
 
   private _getPackageName(sourceFile: ts.SourceFile): string {
