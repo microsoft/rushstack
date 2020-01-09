@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/package-deps-hash",
-  "version": "2.3.15",
+  "version": "2.3.16",
   "description": "",
   "main": "lib/index.js",
   "typings": "dist/package-deps-hash.d.ts",
@@ -13,10 +13,10 @@
     "build": "gulp test --clean"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.3.12",
-    "@microsoft/node-library-build": "6.3.12",
-    "@microsoft/node-core-library": "3.18.1",
-    "@rushstack/eslint-config": "0.5.0",
+    "@microsoft/rush-stack-compiler-3.5": "0.3.13",
+    "@microsoft/node-library-build": "6.3.13",
+    "@microsoft/node-core-library": "3.18.2",
+    "@rushstack/eslint-config": "0.5.1",
     "@types/chai": "3.4.34",
     "@types/mocha": "5.2.5",
     "@types/node": "8.10.54",
@@ -24,6 +24,6 @@
     "gulp": "~4.0.2"
   },
   "dependencies": {
-    "@microsoft/node-core-library": "3.18.1"
+    "@microsoft/node-core-library": "3.18.2"
   }
 }
