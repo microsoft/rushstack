@@ -22,7 +22,7 @@ const noUntypedUnderscoreRule: TSESLint.RuleModule<MessageIds,Options> = {
     schema: [ ],
     docs: {
       description: 'Prevent TypeScript code from accessing legacy JavaScript members'
-        + ' whose name has an underscore prefix',
+        + ' whose names have an underscore prefix',
       category: 'Stylistic Issues',
       recommended: false,
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
