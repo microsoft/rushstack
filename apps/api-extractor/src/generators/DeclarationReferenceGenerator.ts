@@ -212,7 +212,7 @@ export class DeclarationReferenceGenerator {
         followedSymbol.declarations
         && followedSymbol.declarations[0]
         && followedSymbol.declarations[0].getSourceFile();
-      if (ts.isExternalModule(sourceFile)) {
+      if (sourceFile && ts.isExternalModule(sourceFile)) {
         parentRef = new DeclarationReference(this._sourceFileToModuleSource(sourceFile));
       } else {
         parentRef = new DeclarationReference(GlobalSource.instance);
