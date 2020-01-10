@@ -18,6 +18,7 @@ import { AstSymbol } from '../analyzer/AstSymbol';
 import { SymbolMetadata } from '../collector/SymbolMetadata';
 import { StringWriter } from './StringWriter';
 import { DtsEmitHelpers } from './DtsEmitHelpers';
+import { SignatureMetadata } from '../collector/SignatureMetadata';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()
@@ -234,12 +235,12 @@ export class DtsRollupGenerator {
             span.modification.prefix = 'export ' + span.modification.prefix;
           }
 
-          const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
-          if (declarationMetadata.tsdocParserContext) {
+          const signatureMetadata: SignatureMetadata = collector.fetchSignatureMetadata(astDeclaration);
+          if (signatureMetadata.tsdocParserContext) {
             // Typically the comment for a variable declaration is attached to the outer variable statement
             // (which may possibly contain multiple variable declarations), so it's not part of the Span.
             // Instead we need to manually inject it.
-            let originalComment: string = declarationMetadata.tsdocParserContext.sourceRange.toString();
+            let originalComment: string = signatureMetadata.tsdocParserContext.sourceRange.toString();
             if (!/\r?\n\s*$/.test(originalComment)) {
               originalComment += '\n';
             }

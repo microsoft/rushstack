@@ -39,6 +39,7 @@ import { ExcerptBuilder, IExcerptBuilderNodeToCapture } from './ExcerptBuilder';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { DeclarationReferenceGenerator } from './DeclarationReferenceGenerator';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import { SignatureMetadata } from '../collector/SignatureMetadata';
 
 export class ApiModelGenerator {
   private readonly _collector: Collector;
@@ -75,7 +76,8 @@ export class ApiModelGenerator {
     for (const entity of this._collector.entities) {
       if (entity.exported) {
         if (entity.astEntity instanceof AstSymbol) {
-          for (const astDeclaration of entity.astEntity.astDeclarations) {
+          // Skip ancillary declarations; we will process them with the main declaration
+          for (const astDeclaration of this._collector.getNonAncillaryDeclarations(entity.astEntity)) {
             this._processDeclaration(astDeclaration, entity.nameForEmit, apiEntryPoint);
           }
         } else {
@@ -97,11 +99,6 @@ export class ApiModelGenerator {
     }
 
     const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
-    if (declarationMetadata.isAncillary) {
-      // Skip ancillary declarations; we will process them with the main declaration
-      return;
-    }
-
     const releaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
     if (releaseTag === ReleaseTag.Internal || releaseTag === ReleaseTag.Alpha) {
       return; // trim out items marked as "@internal" or "@alpha"
@@ -808,10 +805,10 @@ export class ApiModelGenerator {
     // Build the main declaration
     ExcerptBuilder.addDeclaration(excerptTokens, astDeclaration, nodesToCapture, this._referenceGenerator);
 
-    const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
+    const signatureMetadata: SignatureMetadata = this._collector.fetchSignatureMetadata(astDeclaration);
 
     // Add any ancillary declarations
-    for (const ancillaryDeclaration of declarationMetadata.ancillaryDeclarations) {
+    for (const ancillaryDeclaration of signatureMetadata.ancillaryDeclarations) {
       ExcerptBuilder.addBlankLine(excerptTokens);
       ExcerptBuilder.addDeclaration(excerptTokens, ancillaryDeclaration, nodesToCapture, this._referenceGenerator);
     }

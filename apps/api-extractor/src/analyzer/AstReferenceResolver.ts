@@ -10,7 +10,7 @@ import { WorkingPackage } from '../collector/WorkingPackage';
 import { AstModule } from './AstModule';
 import { AstImport } from './AstImport';
 import { Collector } from '../collector/Collector';
-import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import { SignatureMetadata } from '../collector/SignatureMetadata';
 
 /**
  * Used by `AstReferenceResolver` to report a failed resolution.
@@ -252,8 +252,8 @@ export class AstReferenceResolver {
     let result: AstDeclaration | undefined = undefined;
 
     for (const match of matches) {
-      const metadata: DeclarationMetadata = this._collector.fetchMetadata(match);
-      if (!metadata.isAncillary) {
+      const signatureMetadata: SignatureMetadata = this._collector.fetchSignatureMetadata(match);
+      if (!signatureMetadata.isAncillary) {
         if (result) {
           return undefined; // more than one match
         }

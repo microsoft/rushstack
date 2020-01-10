@@ -111,7 +111,7 @@ export class AstSymbol {
    * Additional information that is calculated later by the `Collector`.  The actual type is `SymbolMetadata`,
    * but we declare it as `unknown` because consumers must obtain this object by calling `Collector.fetchMetadata()`.
    */
-  public metadata: unknown;
+  public symbolMetadata: unknown;
 
   private readonly _astDeclarations: AstDeclaration[];
 

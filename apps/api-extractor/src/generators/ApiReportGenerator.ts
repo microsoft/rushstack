@@ -374,47 +374,48 @@ export class ApiReportGenerator {
       ApiReportGenerator._writeLineAsComments(stringWriter, 'Warning: ' + message.formatMessageWithoutLocation());
     }
 
-    const footerParts: string[] = [];
-    const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
-    if (!declarationMetadata.releaseTagSameAsParent) {
-      if (declarationMetadata.effectiveReleaseTag !== ReleaseTag.None) {
-        footerParts.push(ReleaseTag.getTagName(declarationMetadata.effectiveReleaseTag));
-      }
-    }
-
-    if (declarationMetadata.isSealed) {
-      footerParts.push('@sealed');
-    }
-
-    if (declarationMetadata.isVirtual) {
-      footerParts.push('@virtual');
-    }
-
-    if (declarationMetadata.isOverride) {
-      footerParts.push('@override');
-    }
-
-    if (declarationMetadata.isEventProperty) {
-      footerParts.push('@eventProperty');
-    }
-
-    if (declarationMetadata.tsdocComment) {
-      if (declarationMetadata.tsdocComment.deprecatedBlock) {
-        footerParts.push('@deprecated');
-      }
-    }
-
-    // Note that ancillary declarations aren't supposed to have documentation
-    if (declarationMetadata.needsDocumentation && !declarationMetadata.isAncillary) {
-      footerParts.push('(undocumented)');
-    }
-
-    if (footerParts.length > 0) {
-      if (messagesToReport.length > 0) {
-        ApiReportGenerator._writeLineAsComments(stringWriter, ''); // skip a line after the warnings
+    if (!collector.isAncillaryDeclaration(astDeclaration)) {
+      const footerParts: string[] = [];
+      const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
+      if (!declarationMetadata.releaseTagSameAsParent) {
+        if (declarationMetadata.effectiveReleaseTag !== ReleaseTag.None) {
+          footerParts.push(ReleaseTag.getTagName(declarationMetadata.effectiveReleaseTag));
+        }
       }
 
-      ApiReportGenerator._writeLineAsComments(stringWriter, footerParts.join(' '));
+      if (declarationMetadata.isSealed) {
+        footerParts.push('@sealed');
+      }
+
+      if (declarationMetadata.isVirtual) {
+        footerParts.push('@virtual');
+      }
+
+      if (declarationMetadata.isOverride) {
+        footerParts.push('@override');
+      }
+
+      if (declarationMetadata.isEventProperty) {
+        footerParts.push('@eventProperty');
+      }
+
+      if (declarationMetadata.tsdocComment) {
+        if (declarationMetadata.tsdocComment.deprecatedBlock) {
+          footerParts.push('@deprecated');
+        }
+      }
+
+      if (declarationMetadata.needsDocumentation) {
+        footerParts.push('(undocumented)');
+      }
+
+      if (footerParts.length > 0) {
+        if (messagesToReport.length > 0) {
+          ApiReportGenerator._writeLineAsComments(stringWriter, ''); // skip a line after the warnings
+        }
+
+        ApiReportGenerator._writeLineAsComments(stringWriter, footerParts.join(' '));
+      }
     }
 
     return stringWriter.toString();

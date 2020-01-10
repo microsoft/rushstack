@@ -49,10 +49,10 @@ export class AstDeclaration {
   public readonly modifierFlags: ts.ModifierFlags;
 
   /**
-   * Additional information that is calculated later by the `Collector`.  The actual type is `DeclarationMetadata`,
-   * but we declare it as `unknown` because consumers must obtain this object by calling `Collector.fetchMetadata()`.
+   * Additional information that is calculated later by the `Collector`.  The actual type is `SignatureMetadata`,
+   * but we declare it as `unknown` because it's not meant to be accessed outside the `Collector`.
    */
-  public metadata: unknown;
+  public signatureMetadata: unknown;
 
   // NOTE: This array becomes immutable after astSymbol.analyze() sets astSymbol.analyzed=true
   private readonly _analyzedChildren: AstDeclaration[] = [];

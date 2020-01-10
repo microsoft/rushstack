@@ -14,7 +14,6 @@ export interface _IInternalThing {
 export class MyClass {
     // @internal (undocumented)
     get _thing(): _IInternalThing;
-    // Warning: (ae-incompatible-release-tags) The symbol "_thing" is marked as @public, but its signature references "_IInternalThing" which is marked as @internal
     set _thing(value: _IInternalThing);
 }
 

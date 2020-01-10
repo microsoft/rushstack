@@ -4,14 +4,11 @@
 import * as tsdoc from '@microsoft/tsdoc';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 import { VisitorState } from './VisitorState';
-import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { InternalError } from '@microsoft/node-core-library';
 
 /**
  * Constructor parameters for `DeclarationMetadata`.
  */
 export interface IDeclarationMetadataOptions {
-  tsdocParserContext: tsdoc.ParserContext | undefined;
   declaredReleaseTag: ReleaseTag;
   effectiveReleaseTag: ReleaseTag;
   releaseTagSameAsParent: boolean;
@@ -24,15 +21,13 @@ export interface IDeclarationMetadataOptions {
 
 /**
  * Stores the Collector's additional analysis for an `AstDeclaration`.  This object is assigned to
- * `AstDeclaration.metadata` but consumers must always obtain it by calling `Collector.fetchMetadata().
+ * `AstDeclaration.signatureMetadata.declarationMetadata` but consumers must always obtain it by
+ * calling `Collector.fetchMetadata().
+ *
+ * Note that ancillary declarations share their `DeclarationMetadata` with the main declaration,
+ * whereas a separate `SignatureMetadata` object is created for each `AstDeclaration`.
  */
 export class DeclarationMetadata {
-  /**
-   * The ParserContext from when the TSDoc comment was parsed from the source code.
-   * If the source code did not contain a doc comment, then this will be undefined.
-   */
-  public readonly tsdocParserContext: tsdoc.ParserContext | undefined;
-
   /**
    * This is the release tag that was explicitly specified in the original doc comment, if any.
    */
@@ -59,8 +54,8 @@ export class DeclarationMetadata {
   public readonly isPreapproved: boolean;
 
   /**
-   * This is the original TSDoc comment parsed from the source code.
-   * It may be modified (or constructed artificially) by the DocCommentEnhancer.
+   * This is the TSDoc comment for the declaration.  It may be modified (or constructed artificially) by
+   * the DocCommentEnhancer.
    */
   public tsdocComment: tsdoc.DocComment | undefined;
 
@@ -69,22 +64,7 @@ export class DeclarationMetadata {
 
   public docCommentEnhancerVisitorState: VisitorState = VisitorState.Unvisited;
 
-  /**
-   * If true, then this declaration is treated as part of another declaration.
-   */
-  public isAncillary: boolean = false;
-
-  /**
-   * A list of other declarations that are treated as being part of this declaration.  For example, a property
-   * getter/setter pair will be treated as a single API item, with the setter being treated as ancillary to the getter.
-   *
-   * If the `ancillaryDeclarations` array is non-empty, then `isAncillary` will be false for this declaration,
-   * and `isAncillary` will be true for all the array items.
-   */
-  public ancillaryDeclarations: AstDeclaration[] = [];
-
   public constructor(options: IDeclarationMetadataOptions) {
-    this.tsdocParserContext = options.tsdocParserContext;
     this.declaredReleaseTag = options.declaredReleaseTag;
     this.effectiveReleaseTag = options.effectiveReleaseTag;
     this.releaseTagSameAsParent = options.releaseTagSameAsParent;
@@ -93,28 +73,5 @@ export class DeclarationMetadata {
     this.isSealed = options.isSealed;
     this.isVirtual = options.isVirtual;
     this.isPreapproved = options.isPreapproved;
-  }
-
-  public addAncillaryDeclaration(otherDeclaration: AstDeclaration): void {
-    const otherMetadata: DeclarationMetadata = otherDeclaration.metadata as DeclarationMetadata;
-
-    if (!otherMetadata) {
-      throw new InternalError('addAncillaryDeclaration() cannot be called before the declaration metadata is solved');
-    }
-
-    if (this.ancillaryDeclarations.indexOf(otherDeclaration) >= 0) {
-      return;  // already added
-    }
-
-    if (this.isAncillary) {
-      throw new InternalError('Invalid call to addAncillaryDeclaration() because the target is ancillary itself');
-    }
-
-    if (otherMetadata.isAncillary) {
-      throw new InternalError('Invalid call to addAncillaryDeclaration() because source is already ancillary to another declaration');
-    }
-
-    otherMetadata.isAncillary = true;
-    this.ancillaryDeclarations.push(otherDeclaration);
   }
 }
