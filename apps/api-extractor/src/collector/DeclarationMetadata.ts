@@ -7,23 +7,36 @@ import { VisitorState } from './VisitorState';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { InternalError } from '@microsoft/node-core-library';
 
-export class DeclarationMetadata {
-  /**
-   * This is the original TSDoc comment parsed from the source code.
-   * It may be modified (or constructed artificially) by the DocCommentEnhancer.
-   */
-  public tsdocComment: tsdoc.DocComment | undefined = undefined;
+/**
+ * Constructor parameters for `DeclarationMetadata`.
+ */
+export interface IDeclarationMetadataOptions {
+  tsdocParserContext: tsdoc.ParserContext | undefined;
+  declaredReleaseTag: ReleaseTag;
+  effectiveReleaseTag: ReleaseTag;
+  releaseTagSameAsParent: boolean;
+  isEventProperty: boolean;
+  isOverride: boolean;
+  isSealed: boolean;
+  isVirtual: boolean;
+  isPreapproved: boolean;
+}
 
+/**
+ * Stores the Collector's additional analysis for an `AstDeclaration`.  This object is assigned to
+ * `AstDeclaration.metadata` but consumers must always obtain it by calling `Collector.fetchMetadata().
+ */
+export class DeclarationMetadata {
   /**
    * The ParserContext from when the TSDoc comment was parsed from the source code.
    * If the source code did not contain a doc comment, then this will be undefined.
    */
-  public tsdocParserContext: tsdoc.ParserContext | undefined = undefined;
+  public readonly tsdocParserContext: tsdoc.ParserContext | undefined;
 
   /**
    * This is the release tag that was explicitly specified in the original doc comment, if any.
    */
-  public declaredReleaseTag: ReleaseTag = ReleaseTag.None;
+  public readonly declaredReleaseTag: ReleaseTag;
 
   /**
    * The "effective" release tag is a normalized value that is based on `declaredReleaseTag`,
@@ -31,22 +44,28 @@ export class DeclarationMetadata {
    * When actually trimming .d.ts files or generating docs, API Extractor uses the "effective" value
    * instead of the "declared" value.
    */
-  public effectiveReleaseTag: ReleaseTag = ReleaseTag.None;
+  public readonly effectiveReleaseTag: ReleaseTag;
+
+  // If true, then it would be redundant to show this release tag
+  public readonly releaseTagSameAsParent: boolean;
 
   // NOTE: In the future, the Collector may infer or error-correct some of these states.
   // Generators should rely on these instead of tsdocComment.modifierTagSet.
-  public isEventProperty: boolean = false;
-  public isOverride: boolean = false;
-  public isSealed: boolean = false;
-  public isVirtual: boolean = false;
+  public readonly isEventProperty: boolean;
+  public readonly isOverride: boolean;
+  public readonly isSealed: boolean;
+  public readonly isVirtual: boolean;
 
-  public isPreapproved: boolean = false;
+  public readonly isPreapproved: boolean;
+
+  /**
+   * This is the original TSDoc comment parsed from the source code.
+   * It may be modified (or constructed artificially) by the DocCommentEnhancer.
+   */
+  public tsdocComment: tsdoc.DocComment | undefined;
 
   // Assigned by DocCommentEnhancer
   public needsDocumentation: boolean = true;
-
-  // If true, then it would be redundant to show this release tag
-  public releaseTagSameAsParent: boolean = false;
 
   public docCommentEnhancerVisitorState: VisitorState = VisitorState.Unvisited;
 
@@ -63,6 +82,18 @@ export class DeclarationMetadata {
    * and `isAncillary` will be true for all the array items.
    */
   public ancillaryDeclarations: AstDeclaration[] = [];
+
+  public constructor(options: IDeclarationMetadataOptions) {
+    this.tsdocParserContext = options.tsdocParserContext;
+    this.declaredReleaseTag = options.declaredReleaseTag;
+    this.effectiveReleaseTag = options.effectiveReleaseTag;
+    this.releaseTagSameAsParent = options.releaseTagSameAsParent;
+    this.isEventProperty = options.isEventProperty;
+    this.isOverride = options.isOverride;
+    this.isSealed = options.isSealed;
+    this.isVirtual = options.isVirtual;
+    this.isPreapproved = options.isPreapproved;
+  }
 
   public addAncillaryDeclaration(otherDeclaration: AstDeclaration): void {
     const otherMetadata: DeclarationMetadata = otherDeclaration.metadata as DeclarationMetadata;

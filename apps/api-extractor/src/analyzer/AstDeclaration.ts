@@ -49,7 +49,8 @@ export class AstDeclaration {
   public readonly modifierFlags: ts.ModifierFlags;
 
   /**
-   * Additional information applied later by the Collector.
+   * Additional information that is calculated later by the `Collector`.  The actual type is `DeclarationMetadata`,
+   * but we declare it as `unknown` because consumers must obtain this object by calling `Collector.fetchMetadata()`.
    */
   public metadata: unknown;
 

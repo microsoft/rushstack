@@ -23,7 +23,7 @@ import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { WorkingPackage } from './WorkingPackage';
 import { PackageDocComment } from '../aedoc/PackageDocComment';
-import { DeclarationMetadata } from './DeclarationMetadata';
+import { DeclarationMetadata, IDeclarationMetadataOptions } from './DeclarationMetadata';
 import { SymbolMetadata } from './SymbolMetadata';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 import { MessageRouter } from './MessageRouter';
@@ -588,16 +588,24 @@ export class Collector {
       }
     }
 
-    const symbolMetadata: SymbolMetadata = new SymbolMetadata();
-    symbolMetadata.maxEffectiveReleaseTag = maxEffectiveReleaseTag;
-
     // Update this last when we're sure no exceptions were thrown
-    astSymbol.metadata = symbolMetadata;
+    astSymbol.metadata = new SymbolMetadata({
+      maxEffectiveReleaseTag
+    });
   }
 
   private _calculateMetadataForDeclaration(astDeclaration: AstDeclaration): void {
-    const declarationMetadata: DeclarationMetadata = new DeclarationMetadata();
-    astDeclaration.metadata = declarationMetadata;
+    const options: IDeclarationMetadataOptions = {
+      tsdocParserContext: undefined,
+      declaredReleaseTag: ReleaseTag.None,
+      effectiveReleaseTag: ReleaseTag.None,
+      isEventProperty: false,
+      isOverride: false,
+      isSealed: false,
+      isVirtual: false,
+      isPreapproved: false,
+      releaseTagSameAsParent: false
+    };
 
     const parserContext: tsdoc.ParserContext | undefined = this._parseTsdocForAstDeclaration(astDeclaration);
     if (parserContext) {
@@ -640,15 +648,14 @@ export class Collector {
         }
       }
 
-      declarationMetadata.tsdocParserContext = parserContext;
-      declarationMetadata.tsdocComment = parserContext.docComment;
+      options.tsdocParserContext = parserContext;
 
-      declarationMetadata.declaredReleaseTag = declaredReleaseTag;
+      options.declaredReleaseTag = declaredReleaseTag;
 
-      declarationMetadata.isEventProperty = modifierTagSet.isEventProperty();
-      declarationMetadata.isOverride = modifierTagSet.isOverride();
-      declarationMetadata.isSealed = modifierTagSet.isSealed();
-      declarationMetadata.isVirtual = modifierTagSet.isVirtual();
+      options.isEventProperty = modifierTagSet.isEventProperty();
+      options.isOverride = modifierTagSet.isOverride();
+      options.isSealed = modifierTagSet.isSealed();
+      options.isVirtual = modifierTagSet.isVirtual();
 
       if (modifierTagSet.hasTag(AedocDefinitions.preapprovedTag)) {
         // This feature only makes sense for potentially big declarations.
@@ -658,7 +665,7 @@ export class Collector {
           case ts.SyntaxKind.InterfaceDeclaration:
           case ts.SyntaxKind.ModuleDeclaration:
             if (declaredReleaseTag === ReleaseTag.Internal) {
-              declarationMetadata.isPreapproved = true;
+              options.isPreapproved = true;
             } else {
               this.messageRouter.addAnalyzerIssue(
                 ExtractorMessageId.PreapprovedBadReleaseTag,
@@ -683,17 +690,17 @@ export class Collector {
     // This needs to be set regardless of whether or not a parserContext exists
     if (astDeclaration.parent) {
       const parentDeclarationMetadata: DeclarationMetadata = this.fetchMetadata(astDeclaration.parent);
-      declarationMetadata.effectiveReleaseTag = declarationMetadata.declaredReleaseTag === ReleaseTag.None
+      options.effectiveReleaseTag = options.declaredReleaseTag === ReleaseTag.None
         ? parentDeclarationMetadata.effectiveReleaseTag
-        : declarationMetadata.declaredReleaseTag;
+        : options.declaredReleaseTag;
 
-      declarationMetadata.releaseTagSameAsParent =
-        parentDeclarationMetadata.effectiveReleaseTag === declarationMetadata.effectiveReleaseTag;
+        options.releaseTagSameAsParent =
+        parentDeclarationMetadata.effectiveReleaseTag === options.effectiveReleaseTag;
     } else {
-      declarationMetadata.effectiveReleaseTag = declarationMetadata.declaredReleaseTag;
+      options.effectiveReleaseTag = options.declaredReleaseTag;
     }
 
-    if (declarationMetadata.effectiveReleaseTag === ReleaseTag.None) {
+    if (options.effectiveReleaseTag === ReleaseTag.None) {
       if (!astDeclaration.astSymbol.isExternal) { // for now, don't report errors for external code
         // Don't report missing release tags for forgotten exports
         const astSymbol: AstSymbol = astDeclaration.astSymbol;
@@ -712,8 +719,15 @@ export class Collector {
         }
       }
 
-      declarationMetadata.effectiveReleaseTag = ReleaseTag.Public;
+      options.effectiveReleaseTag = ReleaseTag.Public;
     }
+
+    const metadata: DeclarationMetadata = new DeclarationMetadata(options);
+    if (parserContext) {
+      metadata.tsdocComment = parserContext.docComment;
+    }
+
+    astDeclaration.metadata = metadata;
   }
 
   private _parseTsdocForAstDeclaration(astDeclaration: AstDeclaration): tsdoc.ParserContext | undefined {

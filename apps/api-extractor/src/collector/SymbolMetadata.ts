@@ -3,8 +3,23 @@
 
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 
+/**
+ * Constructor parameters for `SymbolMetadata`.
+ */
+export interface ISymbolMetadataOptions {
+  maxEffectiveReleaseTag: ReleaseTag;
+}
+
+/**
+ * Stores the Collector's additional analysis for an `AstSymbol`.  This object is assigned to `AstSymbol.metadata`
+ * but consumers must always obtain it by calling `Collector.fetchMetadata().
+ */
 export class SymbolMetadata {
   // For all declarations associated with this symbol, this is the
   // `DeclarationMetadata.effectiveReleaseTag` value that is most public.
-  public maxEffectiveReleaseTag: ReleaseTag = ReleaseTag.None;
+  public readonly maxEffectiveReleaseTag: ReleaseTag;
+
+  public constructor (options: ISymbolMetadataOptions) {
+    this.maxEffectiveReleaseTag = options.maxEffectiveReleaseTag;
+  }
 }
