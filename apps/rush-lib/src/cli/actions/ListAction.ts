@@ -8,6 +8,7 @@ export interface IJsonEntity {
   name: string;
   version: string;
   path: string;
+  fullPath: string;
 }
 
 export class ListAction extends BaseRushAction {
@@ -16,6 +17,7 @@ export class ListAction extends BaseRushAction {
   private _fullPath: CommandLineFlagParameter;
   private _jsonFlag: CommandLineFlagParameter;
   private _objects: string[] = [];
+  private _count: number = 0;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -27,10 +29,6 @@ export class ListAction extends BaseRushAction {
         'current rush config.',
       parser
     });
-  }
-
-  public setJsonObject(name: string, version: string, path: string): IJsonEntity {
-    return {name: name, version: version, path: path};
   }
 
   protected onDefineParameters(): void {
@@ -64,30 +62,36 @@ export class ListAction extends BaseRushAction {
     });
   }
 
-  protected run(): Promise<void> {
+  protected async run(): Promise<void> {
     return Promise.resolve().then(() => {
       const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
-      if (this._version.value || this._path.value || this._fullPath.value) {
+      if (this._jsonFlag.value) {
+        this._printJson(allPackages);
+      } else if (this._version.value || this._path.value || this._fullPath.value) {
         this._printListTable(allPackages);
-      } else if (this._jsonFlag.value) {
-        this._serializeToJson(allPackages);
       } else {
         this._printList(allPackages);
       }
     });
   }
 
-  private _serializeToJson(
+  private _printJson(
     allPackages: Map<string, RushConfigurationProject>
   ): void {
-    let i: number = 0;
     allPackages.forEach((_config: RushConfigurationProject, name: string) => {
-     this._objects[i++] = JSON.stringify(this.setJsonObject(name, _config.packageJson.version,  _config.projectFolder));
+     this._objects[this._count++] = JSON.stringify({
+       name: name,
+       version: _config.packageJson.version,
+       path: _config.projectRelativeFolder,
+       fullPath: _config.projectFolder
+     });
     });
     console.log(this._objects);
   }
 
-  private _printList(allPackages: Map<string, RushConfigurationProject>): void {
+  private _printList(
+    allPackages: Map<string, RushConfigurationProject>
+  ): void {
     allPackages.forEach((_config: RushConfigurationProject, name: string) => {
       console.log(name);
     });
