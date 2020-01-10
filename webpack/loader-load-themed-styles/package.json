@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/loader-load-themed-styles",
-  "version": "1.7.207",
+  "version": "1.7.208",
   "description": "This simple loader wraps the loading of CSS in script equivalent to `require('load-themed-styles').loadStyles( /* css text */ )`. It is designed to be a replacement for style-loader.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,7 +13,7 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@microsoft/load-themed-styles": "1.10.28",
+    "@microsoft/load-themed-styles": "1.10.29",
     "loader-utils": "~1.1.0"
   },
   "devDependencies": {
