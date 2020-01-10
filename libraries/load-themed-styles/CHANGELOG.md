@@ -1,6 +1,13 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Thu, 09 Jan 2020 06:44:13 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Jan 2020 03:07:47 GMT and should not be manually modified.
+
+## 1.10.29
+Fri, 10 Jan 2020 03:07:47 GMT
+
+### Patches
+
+- Removed type attribute from style tags to align with WHATWG HTML guidelines
 
 ## 1.10.28
 Thu, 09 Jan 2020 06:44:13 GMT

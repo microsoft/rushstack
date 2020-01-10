@@ -2,6 +2,18 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.10.29",
+      "tag": "@microsoft/load-themed-styles_v1.10.29",
+      "date": "Fri, 10 Jan 2020 03:07:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Removed type attribute from style tags to align with WHATWG HTML guidelines"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.10.28",
       "tag": "@microsoft/load-themed-styles_v1.10.28",
       "date": "Thu, 09 Jan 2020 06:44:13 GMT",
