@@ -2,6 +2,27 @@
   "name": "@microsoft/loader-set-webpack-public-path",
   "entries": [
     {
+      "version": "3.3.20",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.3.20",
+      "date": "Thu, 09 Jan 2020 06:44:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `2.2.19` to `2.2.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.3.12` to `0.3.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.0` to `0.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.12` to `6.3.13`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.3.19",
       "tag": "@microsoft/loader-set-webpack-public-path_v3.3.19",
       "date": "Wed, 08 Jan 2020 00:11:31 GMT",

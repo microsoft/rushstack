@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/node-core-library",
-  "version": "3.18.1",
+  "version": "3.18.2",
   "description": "Core libraries that every NodeJS toolchain project should use",
   "main": "lib/index.js",
   "typings": "dist/node-core-library.d.ts",
@@ -23,7 +23,7 @@
   "devDependencies": {
     "@microsoft/node-library-build": "6.3.11",
     "@microsoft/rush-stack-compiler-3.5": "0.3.11",
-    "@rushstack/eslint-config": "0.5.0",
+    "@rushstack/eslint-config": "0.5.1",
     "@types/fs-extra": "5.0.4",
     "@types/jest": "23.3.11",
     "@types/jju": "1.4.1",

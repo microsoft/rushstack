@@ -47,6 +47,7 @@ export class PublishAction extends BaseRushAction {
   private _prereleaseToken: PrereleaseToken;
   private _versionPolicy: CommandLineStringParameter;
   private _applyGitTagsOnPack: CommandLineFlagParameter;
+  private _commitId: CommandLineStringParameter;
 
   private _releaseFolder: CommandLineStringParameter;
   private _pack: CommandLineFlagParameter;
@@ -185,6 +186,13 @@ export class PublishAction extends BaseRushAction {
       parameterLongName: '--apply-git-tags-on-pack',
       description: `If specified with --publish and --pack, git tags will be applied for packages` +
       ` as if a publish was being run without --pack.`
+    });
+    this._commitId = this.defineStringParameter({
+      parameterLongName: '--commit',
+      parameterShortName: '-c',
+      argumentName: 'COMMIT_ID',
+      description: `Used in conjunction with git tagging -- apply git tags at the commit hash` +
+       ` specified. If not provided, the current HEAD will be tagged.`
     });
   }
 
@@ -332,7 +340,7 @@ export class PublishAction extends BaseRushAction {
             return;
           }
 
-          git.addTag(!!this._publish.value, packageName, packageVersion);
+          git.addTag(!!this._publish.value, packageName, packageVersion, this._commitId.value);
           updated = true;
         };
 
@@ -361,7 +369,7 @@ export class PublishAction extends BaseRushAction {
         change.changeType > ChangeType.dependency &&
         this.rushConfiguration.projectsByName.get(change.packageName)!.shouldPublish
       ) {
-        git.addTag(!!this._publish.value && !this._registryUrl.value, change.packageName, change.newVersion!);
+        git.addTag(!!this._publish.value && !this._registryUrl.value, change.packageName, change.newVersion!, this._commitId.value);
       }
     }
   }

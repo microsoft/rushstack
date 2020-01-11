@@ -395,7 +395,6 @@ function registerStyles(styleArray: ThemableArray): void {
   } = resolveThemableArray(styleArray);
 
   styleElement.setAttribute('data-load-themed-styles', 'true');
-  styleElement.type = 'text/css';
   if (_styleNonce) {
     styleElement.setAttribute('nonce', _styleNonce);
   }
