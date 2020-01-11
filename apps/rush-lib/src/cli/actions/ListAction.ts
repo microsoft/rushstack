@@ -4,19 +4,12 @@ import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import * as Table from 'cli-table';
 
-export interface IJsonEntity {
-  name: string;
-  version: string;
-  path: string;
-  fullPath: string;
-}
-
 export class ListAction extends BaseRushAction {
   private _version: CommandLineFlagParameter;
   private _path: CommandLineFlagParameter;
   private _fullPath: CommandLineFlagParameter;
   private _jsonFlag: CommandLineFlagParameter;
-  private _objects: string[] = [];
+  private _objects: JSON[] = [];
   private _count: number = 0;
 
   public constructor(parser: RushCommandLineParser) {
@@ -79,14 +72,18 @@ export class ListAction extends BaseRushAction {
     allPackages: Map<string, RushConfigurationProject>
   ): void {
     allPackages.forEach((_config: RushConfigurationProject, name: string) => {
-     this._objects[this._count++] = JSON.stringify({
+     const jsonString: string = JSON.stringify({
        name: name,
        version: _config.packageJson.version,
-       path: _config.projectRelativeFolder,
-       fullPath: _config.projectFolder
-     });
+       path: _config.projectRelativeFolder, fullPath: _config.projectFolder});
+     this._objects[this._count++] = JSON.parse(jsonString);
     });
-    console.log(this._objects);
+
+    const projectList: string = JSON.stringify({
+      projects: this._objects
+    });
+
+    console.log(JSON.parse(projectList));
   }
 
   private _printList(
