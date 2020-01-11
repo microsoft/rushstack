@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.7.5",
+      "tag": "@microsoft/api-documenter_v7.7.5",
+      "date": "Sat, 11 Jan 2020 05:18:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.13` to `6.3.14`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.7.4",
       "tag": "@microsoft/api-documenter_v7.7.4",
       "date": "Thu, 09 Jan 2020 06:44:12 GMT",
