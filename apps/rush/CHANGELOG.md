@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 26 Nov 2019 00:53:52 GMT and should not be manually modified.
+This log was last generated on Sat, 11 Jan 2020 05:38:55 GMT and should not be manually modified.
+
+## 5.18.0
+Sat, 11 Jan 2020 05:38:55 GMT
+
+### Updates
+
+- Don't use the `build` verb when printing task failures
+- Add a --commit command-line argument to the publish command to allow the git commit to be explicitly provided for tagging.
+- Update GitHub project URL in some resource files
+- fix typo in version-policies.json
 
 ## 5.17.2
 Tue, 26 Nov 2019 00:53:52 GMT
