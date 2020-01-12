@@ -99,7 +99,7 @@ export class JestTask extends GulpTask<IJestConfig> {
       cache: true,
       collectCoverageFrom: ['lib/**/*.js?(x)', '!lib/**/test/**'],
       coverage: true,
-      coverageReporters: ['json', 'html'],
+      coverageReporters: ['json' /*, 'html' */], // Remove HTML reporter temporarily until the Handlebars issue is fixed
       testPathIgnorePatterns: ['<rootDir>/(src|lib-amd|lib-es6|coverage|build|docs|node_modules)/'],
       // Some unit tests rely on data folders that look like packages.  This confuses jest-hast-map
       // when it tries to scan for package.json files.

@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.13.3",
+      "tag": "@microsoft/gulp-core-build_v3.13.3",
+      "date": "Sat, 11 Jan 2020 05:18:23 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Temporarily disable the HTML Jest reporter in the default config because of an issue with Handlebars."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.13.2",
       "tag": "@microsoft/gulp-core-build_v3.13.2",
       "date": "Thu, 09 Jan 2020 06:44:13 GMT",

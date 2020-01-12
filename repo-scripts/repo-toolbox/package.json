@@ -10,12 +10,12 @@
   },
   "dependencies": {
     "@microsoft/node-core-library": "3.18.2",
-    "@microsoft/rush-lib": "5.17.2",
+    "@microsoft/rush-lib": "5.18.0",
     "@microsoft/ts-command-line": "4.3.7"
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.5": "0.3.13",
-    "@microsoft/node-library-build": "6.3.13",
+    "@microsoft/node-library-build": "6.3.14",
     "@rushstack/eslint-config": "0.5.1",
     "@types/node": "8.10.54",
     "gulp": "~4.0.2"
