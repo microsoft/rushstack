@@ -21,8 +21,7 @@ export interface IDeclarationMetadataOptions {
 
 /**
  * Stores the Collector's additional analysis for an `AstDeclaration`.  This object is assigned to
- * `AstDeclaration.signatureMetadata.declarationMetadata` but consumers must always obtain it by
- * calling `Collector.fetchMetadata().
+ * `AstDeclaration.declarationMetadata` but consumers must always obtain it by calling `Collector.fetchMetadata().
  *
  * Note that ancillary declarations share their `DeclarationMetadata` with the main declaration,
  * whereas a separate `SignatureMetadata` object is created for each `AstDeclaration`.

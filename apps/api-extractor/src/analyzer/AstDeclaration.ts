@@ -54,6 +54,14 @@ export class AstDeclaration {
    */
   public signatureMetadata: unknown;
 
+  /**
+   * Additional information that is calculated later by the `Collector`.  The actual type is `DeclarationMetadata`,
+   * but we declare it as `unknown` because it's not meant to be accessed outside the `Collector`.
+   * Stores non-ancillary state.  If `SignatureMetadata.isAncillary=true`, then this property will point to
+   * the main declaration's object.
+   */
+  public declarationMetadata: unknown;
+
   // NOTE: This array becomes immutable after astSymbol.analyze() sets astSymbol.analyzed=true
   private readonly _analyzedChildren: AstDeclaration[] = [];
 

@@ -3,7 +3,6 @@
 
 import * as tsdoc from '@microsoft/tsdoc';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { DeclarationMetadata } from './DeclarationMetadata';
 
 /**
  * Stores the Collector's additional analysis for a specific `AstDeclaration` signature.  This object is assigned to
@@ -35,11 +34,6 @@ export abstract class SignatureMetadata {
    * and `isAncillary` will be true for all the array items.
    */
   public abstract readonly ancillaryDeclarations: ReadonlyArray<AstDeclaration>;
-
-  /**
-   * Stores non-ancillary state.  If `isAncillary=true`, then this property will point to the main declaration's object.
-   */
-  public abstract readonly declarationMetadata: DeclarationMetadata | undefined;
 }
 
 /**
@@ -51,6 +45,4 @@ export class InternalSignatureMetadata extends SignatureMetadata {
   public isAncillary: boolean = false;
 
   public ancillaryDeclarations: AstDeclaration[] = [];
-
-  public declarationMetadata: DeclarationMetadata | undefined = undefined;
 }

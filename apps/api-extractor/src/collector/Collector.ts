@@ -279,8 +279,11 @@ export class Collector {
       }
       return symbolOrDeclaration.symbolMetadata as SymbolMetadata;
     } else {
-      // Fetching the SignatureMetadata always constructs the DeclarationMetadata
-      return this.fetchSignatureMetadata(symbolOrDeclaration).declarationMetadata!;
+      if (symbolOrDeclaration.declarationMetadata === undefined) {
+        // Fetching the SymbolMetadata always constructs the DeclarationMetadata
+        this._fetchSymbolMetadata(symbolOrDeclaration.astSymbol);
+      }
+      return symbolOrDeclaration.declarationMetadata as DeclarationMetadata;
     }
   }
 
@@ -591,8 +594,7 @@ export class Collector {
 
     for (const astDeclaration of astSymbol.astDeclarations) {
       // We know we solved this above
-      const signatureMetadata: SignatureMetadata = astDeclaration.signatureMetadata as SignatureMetadata;
-      const declarationMetadata: DeclarationMetadata = signatureMetadata.declarationMetadata!;
+      const declarationMetadata: DeclarationMetadata = astDeclaration.declarationMetadata as DeclarationMetadata;
 
       const effectiveReleaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
 
@@ -668,7 +670,7 @@ export class Collector {
         + ' to another declaration');
     }
 
-    if (mainMetadata.declarationMetadata || ancillaryMetadata.declarationMetadata) {
+    if (mainAstDeclaration.declarationMetadata || ancillaryAstDeclaration.declarationMetadata) {
       throw new InternalError('Invalid call to _addAncillaryDeclaration() because the declaration metadata'
         + ' has already been constructed');
     }
@@ -814,13 +816,11 @@ export class Collector {
       declarationMetadata.tsdocComment = parserContext.docComment;
     }
 
-    signatureMetadata.declarationMetadata = declarationMetadata;
+    astDeclaration.declarationMetadata = declarationMetadata;
 
     // Lastly, share the result with any ancillary declarations
     for (const ancillaryDeclaration of signatureMetadata.ancillaryDeclarations) {
-      const ancillarySignatureMetadata: InternalSignatureMetadata
-        = ancillaryDeclaration.signatureMetadata as InternalSignatureMetadata;
-      ancillarySignatureMetadata.declarationMetadata = declarationMetadata;
+      ancillaryDeclaration.declarationMetadata = declarationMetadata;
     }
   }
 
