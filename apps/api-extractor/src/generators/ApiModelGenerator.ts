@@ -39,7 +39,7 @@ import { ExcerptBuilder, IExcerptBuilderNodeToCapture } from './ExcerptBuilder';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { DeclarationReferenceGenerator } from './DeclarationReferenceGenerator';
 import { ApiItemMetadata } from '../collector/ApiItemMetadata';
-import { SignatureMetadata } from '../collector/SignatureMetadata';
+import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 
 export class ApiModelGenerator {
   private readonly _collector: Collector;
@@ -805,10 +805,10 @@ export class ApiModelGenerator {
     // Build the main declaration
     ExcerptBuilder.addDeclaration(excerptTokens, astDeclaration, nodesToCapture, this._referenceGenerator);
 
-    const signatureMetadata: SignatureMetadata = this._collector.fetchSignatureMetadata(astDeclaration);
+    const declarationMetadata: DeclarationMetadata = this._collector.fetchDeclarationMetadata(astDeclaration);
 
     // Add any ancillary declarations
-    for (const ancillaryDeclaration of signatureMetadata.ancillaryDeclarations) {
+    for (const ancillaryDeclaration of declarationMetadata.ancillaryDeclarations) {
       ExcerptBuilder.addBlankLine(excerptTokens);
       ExcerptBuilder.addDeclaration(excerptTokens, ancillaryDeclaration, nodesToCapture, this._referenceGenerator);
     }

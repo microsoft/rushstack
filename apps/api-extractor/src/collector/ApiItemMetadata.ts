@@ -24,7 +24,7 @@ export interface IApiItemMetadataOptions {
  * `AstDeclaration.apiItemMetadata` but consumers must always obtain it by calling `Collector.fetchMetadata().
  *
  * Note that ancillary declarations share their `ApiItemMetadata` with the main declaration,
- * whereas a separate `SignatureMetadata` object is created for each `AstDeclaration`.
+ * whereas a separate `DeclarationMetadata` object is created for each `AstDeclaration`.
  */
 export class ApiItemMetadata {
   /**

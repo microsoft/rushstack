@@ -6,12 +6,12 @@ import { AstDeclaration } from '../analyzer/AstDeclaration';
 
 /**
  * Stores the Collector's additional analysis for a specific `AstDeclaration` signature.  This object is assigned to
- * `AstDeclaration.signatureMetadata` but consumers must always obtain it by calling `Collector.fetchSignatureMetadata().
+ * `AstDeclaration.declarationMetadata` but consumers must always obtain it by calling `Collector.fetchDeclarationMetadata().
  *
  * Note that ancillary declarations share their `ApiItemMetadata` with the main declaration,
- * whereas a separate `SignatureMetadata` object is created for each `AstDeclaration`.
+ * whereas a separate `DeclarationMetadata` object is created for each `AstDeclaration`.
  */
-export abstract class SignatureMetadata {
+export abstract class DeclarationMetadata {
   /**
    * The ParserContext from when the TSDoc comment was parsed from the source code.
    * If the source code did not contain a doc comment, then this will be undefined.
@@ -37,9 +37,9 @@ export abstract class SignatureMetadata {
 }
 
 /**
- * Used internally by the `Collector` to build up `SignatureMetadata`.
+ * Used internally by the `Collector` to build up `DeclarationMetadata`.
  */
-export class InternalSignatureMetadata extends SignatureMetadata {
+export class InternalDeclarationMetadata extends DeclarationMetadata {
   public tsdocParserContext: tsdoc.ParserContext | undefined = undefined;
 
   public isAncillary: boolean = false;

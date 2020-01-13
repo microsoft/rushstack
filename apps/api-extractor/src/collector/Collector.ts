@@ -23,7 +23,7 @@ import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { WorkingPackage } from './WorkingPackage';
 import { PackageDocComment } from '../aedoc/PackageDocComment';
-import { SignatureMetadata, InternalSignatureMetadata } from './SignatureMetadata';
+import { DeclarationMetadata, InternalDeclarationMetadata } from './DeclarationMetadata';
 import { ApiItemMetadata, IApiItemMetadataOptions } from './ApiItemMetadata';
 import { SymbolMetadata } from './SymbolMetadata';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
@@ -287,12 +287,12 @@ export class Collector {
     }
   }
 
-  public fetchSignatureMetadata(astDeclaration: AstDeclaration): SignatureMetadata {
-    if (astDeclaration.signatureMetadata === undefined) {
-      // Fetching the SymbolMetadata always constructs the SignatureMetadata
+  public fetchDeclarationMetadata(astDeclaration: AstDeclaration): DeclarationMetadata {
+    if (astDeclaration.declarationMetadata === undefined) {
+      // Fetching the SymbolMetadata always constructs the DeclarationMetadata
       this._fetchSymbolMetadata(astDeclaration.astSymbol);
     }
-    return astDeclaration.signatureMetadata as SignatureMetadata;
+    return astDeclaration.declarationMetadata as DeclarationMetadata;
   }
 
   public tryFetchMetadataForAstEntity(astEntity: AstEntity): SymbolMetadata | undefined {
@@ -306,15 +306,15 @@ export class Collector {
   }
 
   public isAncillaryDeclaration(astDeclaration: AstDeclaration): boolean {
-    const signatureMetadata: SignatureMetadata = this.fetchSignatureMetadata(astDeclaration);
-    return signatureMetadata.isAncillary;
+    const declarationMetadata: DeclarationMetadata = this.fetchDeclarationMetadata(astDeclaration);
+    return declarationMetadata.isAncillary;
   }
 
   public getNonAncillaryDeclarations(astSymbol: AstSymbol): ReadonlyArray<AstDeclaration> {
     const result: AstDeclaration[] = [];
     for (const astDeclaration of astSymbol.astDeclarations) {
-      const signatureMetadata: SignatureMetadata = this.fetchSignatureMetadata(astDeclaration);
-      if (!signatureMetadata.isAncillary) {
+      const declarationMetadata: DeclarationMetadata = this.fetchDeclarationMetadata(astDeclaration);
+      if (!declarationMetadata.isAncillary) {
         result.push(astDeclaration);
       }
     }
@@ -581,8 +581,8 @@ export class Collector {
       this._fetchSymbolMetadata(astSymbol.parentAstSymbol);
     }
 
-    // Construct the SignatureMetadata objects, and detect any ancillary declarations
-    this._calculateSignatureMetadataForDeclarations(astSymbol);
+    // Construct the DeclarationMetadata objects, and detect any ancillary declarations
+    this._calculateDeclarationMetadataForDeclarations(astSymbol);
 
     // Calculate the ApiItemMetadata objects
     for (const astDeclaration of astSymbol.astDeclarations) {
@@ -609,17 +609,17 @@ export class Collector {
     });
   }
 
-  private _calculateSignatureMetadataForDeclarations(astSymbol: AstSymbol): void {
-    // Initialize SignatureMetadata for each declaration
+  private _calculateDeclarationMetadataForDeclarations(astSymbol: AstSymbol): void {
+    // Initialize DeclarationMetadata for each declaration
     for (const astDeclaration of astSymbol.astDeclarations) {
-      if (astDeclaration.signatureMetadata) {
-        throw new InternalError('AstDeclaration.signatureMetadata is not expected to have been initialized yet');
+      if (astDeclaration.declarationMetadata) {
+        throw new InternalError('AstDeclaration.declarationMetadata is not expected to have been initialized yet');
       }
 
-      const metadata: InternalSignatureMetadata = new InternalSignatureMetadata();
+      const metadata: InternalDeclarationMetadata = new InternalDeclarationMetadata();
       metadata.tsdocParserContext = this._parseTsdocForAstDeclaration(astDeclaration);
 
-      astDeclaration.signatureMetadata = metadata;
+      astDeclaration.declarationMetadata = metadata;
     }
 
     // Detect ancillary declarations
@@ -649,8 +649,8 @@ export class Collector {
   }
 
   private _addAncillaryDeclaration(mainAstDeclaration: AstDeclaration, ancillaryAstDeclaration: AstDeclaration): void {
-    const mainMetadata: InternalSignatureMetadata = mainAstDeclaration.signatureMetadata as InternalSignatureMetadata;
-    const ancillaryMetadata: InternalSignatureMetadata = ancillaryAstDeclaration.signatureMetadata as InternalSignatureMetadata;
+    const mainMetadata: InternalDeclarationMetadata = mainAstDeclaration.declarationMetadata as InternalDeclarationMetadata;
+    const ancillaryMetadata: InternalDeclarationMetadata = ancillaryAstDeclaration.declarationMetadata as InternalDeclarationMetadata;
 
     if (mainMetadata.ancillaryDeclarations.indexOf(ancillaryAstDeclaration) >= 0) {
       return;  // already added
@@ -680,8 +680,8 @@ export class Collector {
   }
 
   private _calculateApiItemMetadata(astDeclaration: AstDeclaration): void {
-    const signatureMetadata: InternalSignatureMetadata = astDeclaration.signatureMetadata as InternalSignatureMetadata;
-    if (signatureMetadata.isAncillary) {
+    const declarationMetadata: InternalDeclarationMetadata = astDeclaration.declarationMetadata as InternalDeclarationMetadata;
+    if (declarationMetadata.isAncillary) {
       // We never calculate ApiItemMetadata for an ancillary declaration; instead, it is assigned when
       // the main declaration is processed.
       return;
@@ -698,7 +698,7 @@ export class Collector {
       releaseTagSameAsParent: false
     };
 
-    const parserContext: tsdoc.ParserContext | undefined = signatureMetadata.tsdocParserContext;
+    const parserContext: tsdoc.ParserContext | undefined = declarationMetadata.tsdocParserContext;
     if (parserContext) {
       const modifierTagSet: tsdoc.StandardModifierTagSet = parserContext.docComment.modifierTagSet;
 
@@ -819,7 +819,7 @@ export class Collector {
     astDeclaration.apiItemMetadata = apiItemMetadata;
 
     // Lastly, share the result with any ancillary declarations
-    for (const ancillaryDeclaration of signatureMetadata.ancillaryDeclarations) {
+    for (const ancillaryDeclaration of declarationMetadata.ancillaryDeclarations) {
       ancillaryDeclaration.apiItemMetadata = apiItemMetadata;
     }
   }
