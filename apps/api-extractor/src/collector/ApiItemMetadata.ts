@@ -21,10 +21,10 @@ export interface IApiItemMetadataOptions {
 
 /**
  * Stores the Collector's additional analysis for an `AstDeclaration`.  This object is assigned to
- * `AstDeclaration.apiItemMetadata` but consumers must always obtain it by calling `Collector.fetchMetadata().
+ * `AstDeclaration.apiItemMetadata` but consumers must always obtain it by calling `Collector.fetchApiItemMetadata().
  *
  * Note that ancillary declarations share their `ApiItemMetadata` with the main declaration,
- * whereas a separate `DeclarationMetadata` object is created for each `AstDeclaration`.
+ * whereas a separate `DeclarationMetadata` object is created for each declaration.
  */
 export class ApiItemMetadata {
   /**

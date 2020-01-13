@@ -25,7 +25,7 @@ export class ValidationEnhancer {
             ValidationEnhancer._checkReferences(collector, astDeclaration, alreadyWarnedSymbols);
           });
 
-          const symbolMetadata: SymbolMetadata = collector.fetchMetadata(entity.astEntity);
+          const symbolMetadata: SymbolMetadata = collector.fetchSymbolMetadata(entity.astEntity);
           ValidationEnhancer._checkForInternalUnderscore(collector, entity, entity.astEntity, symbolMetadata);
           ValidationEnhancer._checkForInconsistentReleaseTags(collector, entity.astEntity, symbolMetadata);
         }
@@ -70,7 +70,7 @@ export class ValidationEnhancer {
         //     /** @internal */
         //     public static _Y(): void { }   // <==== different from parent
         //   }
-        const parentSymbolMetadata: SymbolMetadata = collector.fetchMetadata(astSymbol);
+        const parentSymbolMetadata: SymbolMetadata = collector.fetchSymbolMetadata(astSymbol);
         if (parentSymbolMetadata.maxEffectiveReleaseTag > ReleaseTag.Internal) {
           needsUnderscore = true;
         }
@@ -117,7 +117,7 @@ export class ValidationEnhancer {
     let anyInternalReleaseTags: boolean = false;
 
     for (const astDeclaration of astSymbol.astDeclarations) {
-      const apiItemMetadata: ApiItemMetadata = collector.fetchMetadata(astDeclaration);
+      const apiItemMetadata: ApiItemMetadata = collector.fetchApiItemMetadata(astDeclaration);
       const effectiveReleaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
 
       switch (astDeclaration.declaration.kind) {
@@ -162,7 +162,7 @@ export class ValidationEnhancer {
     astDeclaration: AstDeclaration,
     alreadyWarnedSymbols: Set<AstSymbol>
   ): void {
-    const apiItemMetadata: ApiItemMetadata = collector.fetchMetadata(astDeclaration);
+    const apiItemMetadata: ApiItemMetadata = collector.fetchApiItemMetadata(astDeclaration);
     const declarationReleaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
 
     for (const referencedEntity of astDeclaration.referencedAstEntities) {
@@ -178,7 +178,7 @@ export class ValidationEnhancer {
           const collectorEntity: CollectorEntity | undefined = collector.tryGetCollectorEntity(rootSymbol);
 
           if (collectorEntity && collectorEntity.exported) {
-            const referencedMetadata: SymbolMetadata = collector.fetchMetadata(referencedEntity);
+            const referencedMetadata: SymbolMetadata = collector.fetchSymbolMetadata(referencedEntity);
             const referencedReleaseTag: ReleaseTag = referencedMetadata.maxEffectiveReleaseTag;
 
             if (ReleaseTag.compare(declarationReleaseTag, referencedReleaseTag) > 0) {

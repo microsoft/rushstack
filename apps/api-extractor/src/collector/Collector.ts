@@ -231,7 +231,7 @@ export class Collector {
       this._createEntityForIndirectReferences(exportedAstEntity, alreadySeenAstSymbols);
 
       if (exportedAstEntity instanceof AstSymbol) {
-        this.fetchMetadata(exportedAstEntity);
+        this.fetchSymbolMetadata(exportedAstEntity);
       }
     }
 
@@ -270,21 +270,11 @@ export class Collector {
     return this._entitiesByAstEntity.get(astEntity);
   }
 
-  public fetchMetadata(astSymbol: AstSymbol): SymbolMetadata;
-  public fetchMetadata(astDeclaration: AstDeclaration): ApiItemMetadata;
-  public fetchMetadata(symbolOrDeclaration: AstSymbol | AstDeclaration): SymbolMetadata | ApiItemMetadata {
-    if (symbolOrDeclaration instanceof AstSymbol) {
-      if (symbolOrDeclaration.symbolMetadata === undefined) {
-        this._fetchSymbolMetadata(symbolOrDeclaration);
-      }
-      return symbolOrDeclaration.symbolMetadata as SymbolMetadata;
-    } else {
-      if (symbolOrDeclaration.apiItemMetadata === undefined) {
-        // Fetching the SymbolMetadata always constructs the ApiItemMetadata
-        this._fetchSymbolMetadata(symbolOrDeclaration.astSymbol);
-      }
-      return symbolOrDeclaration.apiItemMetadata as ApiItemMetadata;
+  public fetchSymbolMetadata(astSymbol: AstSymbol): SymbolMetadata {
+    if (astSymbol.symbolMetadata === undefined) {
+      this._fetchSymbolMetadata(astSymbol);
     }
+    return astSymbol.symbolMetadata as SymbolMetadata;
   }
 
   public fetchDeclarationMetadata(astDeclaration: AstDeclaration): DeclarationMetadata {
@@ -295,12 +285,20 @@ export class Collector {
     return astDeclaration.declarationMetadata as DeclarationMetadata;
   }
 
+  public fetchApiItemMetadata(astDeclaration: AstDeclaration): ApiItemMetadata {
+    if (astDeclaration.apiItemMetadata === undefined) {
+      // Fetching the SymbolMetadata always constructs the ApiItemMetadata
+      this._fetchSymbolMetadata(astDeclaration.astSymbol);
+    }
+    return astDeclaration.apiItemMetadata as ApiItemMetadata;
+  }
+
   public tryFetchMetadataForAstEntity(astEntity: AstEntity): SymbolMetadata | undefined {
     if (astEntity instanceof AstSymbol) {
-      return this.fetchMetadata(astEntity);
+      return this.fetchSymbolMetadata(astEntity);
     }
     if (astEntity.astSymbol) { // astImport
-      return this.fetchMetadata(astEntity.astSymbol);
+      return this.fetchSymbolMetadata(astEntity.astSymbol);
     }
     return undefined;
   }
@@ -778,7 +776,7 @@ export class Collector {
 
     // This needs to be set regardless of whether or not a parserContext exists
     if (astDeclaration.parent) {
-      const parentApiItemMetadata: ApiItemMetadata = this.fetchMetadata(astDeclaration.parent);
+      const parentApiItemMetadata: ApiItemMetadata = this.fetchApiItemMetadata(astDeclaration.parent);
       options.effectiveReleaseTag = options.declaredReleaseTag === ReleaseTag.None
         ? parentApiItemMetadata.effectiveReleaseTag
         : options.declaredReleaseTag;

@@ -106,7 +106,7 @@ export class ApiReportGenerator {
 
             const span: Span = new Span(astDeclaration.declaration);
 
-            const apiItemMetadata: ApiItemMetadata = collector.fetchMetadata(astDeclaration);
+            const apiItemMetadata: ApiItemMetadata = collector.fetchApiItemMetadata(astDeclaration);
             if (apiItemMetadata.isPreapproved) {
               ApiReportGenerator._modifySpanForPreapproved(span);
             } else {
@@ -376,7 +376,7 @@ export class ApiReportGenerator {
 
     if (!collector.isAncillaryDeclaration(astDeclaration)) {
       const footerParts: string[] = [];
-      const apiItemMetadata: ApiItemMetadata = collector.fetchMetadata(astDeclaration);
+      const apiItemMetadata: ApiItemMetadata = collector.fetchApiItemMetadata(astDeclaration);
       if (!apiItemMetadata.releaseTagSameAsParent) {
         if (apiItemMetadata.effectiveReleaseTag !== ReleaseTag.None) {
           footerParts.push(ReleaseTag.getTagName(apiItemMetadata.effectiveReleaseTag));

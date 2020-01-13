@@ -6,10 +6,11 @@ import { AstDeclaration } from '../analyzer/AstDeclaration';
 
 /**
  * Stores the Collector's additional analysis for a specific `AstDeclaration` signature.  This object is assigned to
- * `AstDeclaration.declarationMetadata` but consumers must always obtain it by calling `Collector.fetchDeclarationMetadata().
+ * `AstDeclaration.declarationMetadata` but consumers must always obtain it by calling
+ * `Collector.fetchDeclarationMetadata().
  *
  * Note that ancillary declarations share their `ApiItemMetadata` with the main declaration,
- * whereas a separate `DeclarationMetadata` object is created for each `AstDeclaration`.
+ * whereas a separate `DeclarationMetadata` object is created for each declaration.
  */
 export abstract class DeclarationMetadata {
   /**

@@ -38,7 +38,7 @@ export class DocCommentEnhancer {
   }
 
   private _analyzeDeclaration(astDeclaration: AstDeclaration): void {
-    const metadata: ApiItemMetadata = this._collector.fetchMetadata(astDeclaration);
+    const metadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
     if (metadata.docCommentEnhancerVisitorState === VisitorState.Visited) {
       return;
     }
@@ -92,10 +92,10 @@ export class DocCommentEnhancer {
         ]);
       }
 
-      const apiItemMetadata: ApiItemMetadata = this._collector.fetchMetadata(astDeclaration);
+      const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       if (apiItemMetadata.effectiveReleaseTag === ReleaseTag.Internal) {
         // If the constructor is marked as internal, then add a boilerplate notice for the containing class
-        const classMetadata: ApiItemMetadata = this._collector.fetchMetadata(classDeclaration);
+        const classMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(classDeclaration);
 
         if (!classMetadata.tsdocComment) {
           classMetadata.tsdocComment = new tsdoc.DocComment({ configuration });
@@ -217,7 +217,7 @@ export class DocCommentEnhancer {
 
     this._analyzeDeclaration(referencedAstDeclaration);
 
-    const referencedMetadata: ApiItemMetadata = this._collector.fetchMetadata(referencedAstDeclaration);
+    const referencedMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(referencedAstDeclaration);
 
     if (referencedMetadata.tsdocComment) {
       this._copyInheritedDocs(docComment, referencedMetadata.tsdocComment);

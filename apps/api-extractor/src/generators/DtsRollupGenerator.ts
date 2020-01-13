@@ -116,7 +116,7 @@ export class DtsRollupGenerator {
       if (entity.astEntity instanceof AstSymbol) {
         // Emit all the declarations for this entry
         for (const astDeclaration of entity.astEntity.astDeclarations || []) {
-          const apiItemMetadata: ApiItemMetadata = collector.fetchMetadata(astDeclaration);
+          const apiItemMetadata: ApiItemMetadata = collector.fetchApiItemMetadata(astDeclaration);
 
           if (
             !!apiItemMetadata &&
@@ -279,7 +279,7 @@ export class DtsRollupGenerator {
         let trimmed: boolean = false;
         if (AstDeclaration.isSupportedSyntaxKind(child.kind)) {
           childAstDeclaration = collector.astSymbolTable.getChildAstDeclarationByNode(child.node, astDeclaration);
-          const releaseTag: ReleaseTag = collector.fetchMetadata(childAstDeclaration).effectiveReleaseTag;
+          const releaseTag: ReleaseTag = collector.fetchApiItemMetadata(childAstDeclaration).effectiveReleaseTag;
 
           if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
             let nodeToTrim: Span = child;
