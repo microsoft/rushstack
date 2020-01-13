@@ -365,7 +365,7 @@ Optional arguments:
                    displayed in a column along with the package name.
   -f, --full-path  If this flag is specified, the project full path will be 
                    displayed in a column along with the package name.
-  --json           If specified, output will be in JSON format.
+  --json           If this flag is specified, output will be in JSON format.
 "
 `;
 

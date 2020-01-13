@@ -9,8 +9,6 @@ export class ListAction extends BaseRushAction {
   private _path: CommandLineFlagParameter;
   private _fullPath: CommandLineFlagParameter;
   private _jsonFlag: CommandLineFlagParameter;
-  private _objects: JSON[] = [];
-  private _count: number = 0;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -51,12 +49,11 @@ export class ListAction extends BaseRushAction {
 
     this._jsonFlag = this.defineFlagParameter({
       parameterLongName: '--json',
-      description: 'If specified, output will be in JSON format.'
+      description: 'If this flag is specified, output will be in JSON format.'
     });
   }
 
   protected async run(): Promise<void> {
-    return Promise.resolve().then(() => {
       const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
       if (this._jsonFlag.value) {
         this._printJson(allPackages);
@@ -65,25 +62,22 @@ export class ListAction extends BaseRushAction {
       } else {
         this._printList(allPackages);
       }
-    });
   }
 
   private _printJson(
     allPackages: Map<string, RushConfigurationProject>
   ): void {
+    const objects: string[] = [];
     allPackages.forEach((_config: RushConfigurationProject, name: string) => {
      const jsonString: string = JSON.stringify({
        name: name,
        version: _config.packageJson.version,
-       path: _config.projectRelativeFolder, fullPath: _config.projectFolder});
-     this._objects[this._count++] = JSON.parse(jsonString);
+       path: _config.projectRelativeFolder,
+       fullPath: _config.projectFolder});
+     objects.push(jsonString);
     });
 
-    const projectList: string = JSON.stringify({
-      projects: this._objects
-    });
-
-    console.log(JSON.parse(projectList));
+    console.log(objects);
   }
 
   private _printList(
