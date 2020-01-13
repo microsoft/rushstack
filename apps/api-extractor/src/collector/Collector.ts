@@ -24,7 +24,7 @@ import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { WorkingPackage } from './WorkingPackage';
 import { PackageDocComment } from '../aedoc/PackageDocComment';
 import { SignatureMetadata, InternalSignatureMetadata } from './SignatureMetadata';
-import { DeclarationMetadata, IDeclarationMetadataOptions } from './DeclarationMetadata';
+import { ApiItemMetadata, IApiItemMetadataOptions } from './ApiItemMetadata';
 import { SymbolMetadata } from './SymbolMetadata';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 import { MessageRouter } from './MessageRouter';
@@ -271,19 +271,19 @@ export class Collector {
   }
 
   public fetchMetadata(astSymbol: AstSymbol): SymbolMetadata;
-  public fetchMetadata(astDeclaration: AstDeclaration): DeclarationMetadata;
-  public fetchMetadata(symbolOrDeclaration: AstSymbol | AstDeclaration): SymbolMetadata | DeclarationMetadata {
+  public fetchMetadata(astDeclaration: AstDeclaration): ApiItemMetadata;
+  public fetchMetadata(symbolOrDeclaration: AstSymbol | AstDeclaration): SymbolMetadata | ApiItemMetadata {
     if (symbolOrDeclaration instanceof AstSymbol) {
       if (symbolOrDeclaration.symbolMetadata === undefined) {
         this._fetchSymbolMetadata(symbolOrDeclaration);
       }
       return symbolOrDeclaration.symbolMetadata as SymbolMetadata;
     } else {
-      if (symbolOrDeclaration.declarationMetadata === undefined) {
-        // Fetching the SymbolMetadata always constructs the DeclarationMetadata
+      if (symbolOrDeclaration.apiItemMetadata === undefined) {
+        // Fetching the SymbolMetadata always constructs the ApiItemMetadata
         this._fetchSymbolMetadata(symbolOrDeclaration.astSymbol);
       }
-      return symbolOrDeclaration.declarationMetadata as DeclarationMetadata;
+      return symbolOrDeclaration.apiItemMetadata as ApiItemMetadata;
     }
   }
 
@@ -584,9 +584,9 @@ export class Collector {
     // Construct the SignatureMetadata objects, and detect any ancillary declarations
     this._calculateSignatureMetadataForDeclarations(astSymbol);
 
-    // Calculate the DeclarationMetadata objects
+    // Calculate the ApiItemMetadata objects
     for (const astDeclaration of astSymbol.astDeclarations) {
-      this._calculateDeclarationMetadata(astDeclaration);
+      this._calculateApiItemMetadata(astDeclaration);
     }
 
     // The most public effectiveReleaseTag for all declarations
@@ -594,9 +594,9 @@ export class Collector {
 
     for (const astDeclaration of astSymbol.astDeclarations) {
       // We know we solved this above
-      const declarationMetadata: DeclarationMetadata = astDeclaration.declarationMetadata as DeclarationMetadata;
+      const apiItemMetadata: ApiItemMetadata = astDeclaration.apiItemMetadata as ApiItemMetadata;
 
-      const effectiveReleaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
+      const effectiveReleaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
 
       if (effectiveReleaseTag > maxEffectiveReleaseTag) {
         maxEffectiveReleaseTag = effectiveReleaseTag;
@@ -670,8 +670,8 @@ export class Collector {
         + ' to another declaration');
     }
 
-    if (mainAstDeclaration.declarationMetadata || ancillaryAstDeclaration.declarationMetadata) {
-      throw new InternalError('Invalid call to _addAncillaryDeclaration() because the declaration metadata'
+    if (mainAstDeclaration.apiItemMetadata || ancillaryAstDeclaration.apiItemMetadata) {
+      throw new InternalError('Invalid call to _addAncillaryDeclaration() because the metadata'
         + ' has already been constructed');
     }
 
@@ -679,15 +679,15 @@ export class Collector {
     mainMetadata.ancillaryDeclarations.push(ancillaryAstDeclaration);
   }
 
-  private _calculateDeclarationMetadata(astDeclaration: AstDeclaration): void {
+  private _calculateApiItemMetadata(astDeclaration: AstDeclaration): void {
     const signatureMetadata: InternalSignatureMetadata = astDeclaration.signatureMetadata as InternalSignatureMetadata;
     if (signatureMetadata.isAncillary) {
-      // We never calculate DeclarationMetadata for an ancillary declaration; instead, it is assigned when
+      // We never calculate ApiItemMetadata for an ancillary declaration; instead, it is assigned when
       // the main declaration is processed.
       return;
     }
 
-    const options: IDeclarationMetadataOptions = {
+    const options: IApiItemMetadataOptions = {
       declaredReleaseTag: ReleaseTag.None,
       effectiveReleaseTag: ReleaseTag.None,
       isEventProperty: false,
@@ -778,13 +778,13 @@ export class Collector {
 
     // This needs to be set regardless of whether or not a parserContext exists
     if (astDeclaration.parent) {
-      const parentDeclarationMetadata: DeclarationMetadata = this.fetchMetadata(astDeclaration.parent);
+      const parentApiItemMetadata: ApiItemMetadata = this.fetchMetadata(astDeclaration.parent);
       options.effectiveReleaseTag = options.declaredReleaseTag === ReleaseTag.None
-        ? parentDeclarationMetadata.effectiveReleaseTag
+        ? parentApiItemMetadata.effectiveReleaseTag
         : options.declaredReleaseTag;
 
         options.releaseTagSameAsParent =
-        parentDeclarationMetadata.effectiveReleaseTag === options.effectiveReleaseTag;
+        parentApiItemMetadata.effectiveReleaseTag === options.effectiveReleaseTag;
     } else {
       options.effectiveReleaseTag = options.declaredReleaseTag;
     }
@@ -811,16 +811,16 @@ export class Collector {
       options.effectiveReleaseTag = ReleaseTag.Public;
     }
 
-    const declarationMetadata: DeclarationMetadata = new DeclarationMetadata(options);
+    const apiItemMetadata: ApiItemMetadata = new ApiItemMetadata(options);
     if (parserContext) {
-      declarationMetadata.tsdocComment = parserContext.docComment;
+      apiItemMetadata.tsdocComment = parserContext.docComment;
     }
 
-    astDeclaration.declarationMetadata = declarationMetadata;
+    astDeclaration.apiItemMetadata = apiItemMetadata;
 
     // Lastly, share the result with any ancillary declarations
     for (const ancillaryDeclaration of signatureMetadata.ancillaryDeclarations) {
-      ancillaryDeclaration.declarationMetadata = declarationMetadata;
+      ancillaryDeclaration.apiItemMetadata = apiItemMetadata;
     }
   }
 

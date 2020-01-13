@@ -16,7 +16,7 @@ export interface ISymbolMetadataOptions {
  */
 export class SymbolMetadata {
   // For all declarations associated with this symbol, this is the
-  // `DeclarationMetadata.effectiveReleaseTag` value that is most public.
+  // `ApiItemMetadata.effectiveReleaseTag` value that is most public.
   public readonly maxEffectiveReleaseTag: ReleaseTag;
 
   public constructor (options: ISymbolMetadataOptions) {

@@ -7,7 +7,7 @@ import * as ts from 'typescript';
 import { Collector } from '../collector/Collector';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import { SymbolMetadata } from '../collector/SymbolMetadata';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
@@ -117,8 +117,8 @@ export class ValidationEnhancer {
     let anyInternalReleaseTags: boolean = false;
 
     for (const astDeclaration of astSymbol.astDeclarations) {
-      const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
-      const effectiveReleaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
+      const apiItemMetadata: ApiItemMetadata = collector.fetchMetadata(astDeclaration);
+      const effectiveReleaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
 
       switch (astDeclaration.declaration.kind) {
         case ts.SyntaxKind.FunctionDeclaration:
@@ -162,8 +162,8 @@ export class ValidationEnhancer {
     astDeclaration: AstDeclaration,
     alreadyWarnedSymbols: Set<AstSymbol>
   ): void {
-    const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
-    const declarationReleaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
+    const apiItemMetadata: ApiItemMetadata = collector.fetchMetadata(astDeclaration);
+    const declarationReleaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
 
     for (const referencedEntity of astDeclaration.referencedAstEntities) {
 

@@ -13,7 +13,7 @@ import { Span, SpanModification } from '../analyzer/Span';
 import { AstImport } from '../analyzer/AstImport';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { SymbolMetadata } from '../collector/SymbolMetadata';
 import { StringWriter } from './StringWriter';
@@ -116,11 +116,11 @@ export class DtsRollupGenerator {
       if (entity.astEntity instanceof AstSymbol) {
         // Emit all the declarations for this entry
         for (const astDeclaration of entity.astEntity.astDeclarations || []) {
-          const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
+          const apiItemMetadata: ApiItemMetadata = collector.fetchMetadata(astDeclaration);
 
           if (
-            !!declarationMetadata &&
-            !this._shouldIncludeReleaseTag(declarationMetadata.effectiveReleaseTag, dtsKind)
+            !!apiItemMetadata &&
+            !this._shouldIncludeReleaseTag(apiItemMetadata.effectiveReleaseTag, dtsKind)
           ) {
               if (!collector.extractorConfig.omitTrimmingComments) {
                 stringWriter.writeLine();

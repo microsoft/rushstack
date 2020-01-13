@@ -7,7 +7,7 @@ import * as tsdoc from '@microsoft/tsdoc';
 import { Collector } from '../collector/Collector';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import { AedocDefinitions, ReleaseTag } from '@microsoft/api-extractor-model';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import { VisitorState } from '../collector/VisitorState';
@@ -38,7 +38,7 @@ export class DocCommentEnhancer {
   }
 
   private _analyzeDeclaration(astDeclaration: AstDeclaration): void {
-    const metadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
+    const metadata: ApiItemMetadata = this._collector.fetchMetadata(astDeclaration);
     if (metadata.docCommentEnhancerVisitorState === VisitorState.Visited) {
       return;
     }
@@ -64,7 +64,7 @@ export class DocCommentEnhancer {
     metadata.docCommentEnhancerVisitorState = VisitorState.Visited;
   }
 
-  private _analyzeNeedsDocumentation(astDeclaration: AstDeclaration, metadata: DeclarationMetadata): void {
+  private _analyzeNeedsDocumentation(astDeclaration: AstDeclaration, metadata: ApiItemMetadata): void {
 
     if (astDeclaration.declaration.kind === ts.SyntaxKind.Constructor) {
       // Constructors always do pretty much the same thing, so it's annoying to require people to write
@@ -92,10 +92,10 @@ export class DocCommentEnhancer {
         ]);
       }
 
-      const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
-      if (declarationMetadata.effectiveReleaseTag === ReleaseTag.Internal) {
+      const apiItemMetadata: ApiItemMetadata = this._collector.fetchMetadata(astDeclaration);
+      if (apiItemMetadata.effectiveReleaseTag === ReleaseTag.Internal) {
         // If the constructor is marked as internal, then add a boilerplate notice for the containing class
-        const classMetadata: DeclarationMetadata = this._collector.fetchMetadata(classDeclaration);
+        const classMetadata: ApiItemMetadata = this._collector.fetchMetadata(classDeclaration);
 
         if (!classMetadata.tsdocComment) {
           classMetadata.tsdocComment = new tsdoc.DocComment({ configuration });
@@ -149,7 +149,7 @@ export class DocCommentEnhancer {
     }
   }
 
-  private _checkForBrokenLinks(astDeclaration: AstDeclaration, metadata: DeclarationMetadata): void {
+  private _checkForBrokenLinks(astDeclaration: AstDeclaration, metadata: ApiItemMetadata): void {
     if (!metadata.tsdocComment) {
       return;
     }
@@ -217,7 +217,7 @@ export class DocCommentEnhancer {
 
     this._analyzeDeclaration(referencedAstDeclaration);
 
-    const referencedMetadata: DeclarationMetadata = this._collector.fetchMetadata(referencedAstDeclaration);
+    const referencedMetadata: ApiItemMetadata = this._collector.fetchMetadata(referencedAstDeclaration);
 
     if (referencedMetadata.tsdocComment) {
       this._copyInheritedDocs(docComment, referencedMetadata.tsdocComment);

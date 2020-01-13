@@ -6,9 +6,9 @@ import { ReleaseTag } from '@microsoft/api-extractor-model';
 import { VisitorState } from './VisitorState';
 
 /**
- * Constructor parameters for `DeclarationMetadata`.
+ * Constructor parameters for `ApiItemMetadata`.
  */
-export interface IDeclarationMetadataOptions {
+export interface IApiItemMetadataOptions {
   declaredReleaseTag: ReleaseTag;
   effectiveReleaseTag: ReleaseTag;
   releaseTagSameAsParent: boolean;
@@ -21,12 +21,12 @@ export interface IDeclarationMetadataOptions {
 
 /**
  * Stores the Collector's additional analysis for an `AstDeclaration`.  This object is assigned to
- * `AstDeclaration.declarationMetadata` but consumers must always obtain it by calling `Collector.fetchMetadata().
+ * `AstDeclaration.apiItemMetadata` but consumers must always obtain it by calling `Collector.fetchMetadata().
  *
- * Note that ancillary declarations share their `DeclarationMetadata` with the main declaration,
+ * Note that ancillary declarations share their `ApiItemMetadata` with the main declaration,
  * whereas a separate `SignatureMetadata` object is created for each `AstDeclaration`.
  */
-export class DeclarationMetadata {
+export class ApiItemMetadata {
   /**
    * This is the release tag that was explicitly specified in the original doc comment, if any.
    */
@@ -63,7 +63,7 @@ export class DeclarationMetadata {
 
   public docCommentEnhancerVisitorState: VisitorState = VisitorState.Unvisited;
 
-  public constructor(options: IDeclarationMetadataOptions) {
+  public constructor(options: IApiItemMetadataOptions) {
     this.declaredReleaseTag = options.declaredReleaseTag;
     this.effectiveReleaseTag = options.effectiveReleaseTag;
     this.releaseTagSameAsParent = options.releaseTagSameAsParent;

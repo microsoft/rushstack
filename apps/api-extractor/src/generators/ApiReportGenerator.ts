@@ -10,7 +10,7 @@ import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { Span } from '../analyzer/Span';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import { AstImport } from '../analyzer/AstImport';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { ExtractorMessage } from '../api/ExtractorMessage';
@@ -106,8 +106,8 @@ export class ApiReportGenerator {
 
             const span: Span = new Span(astDeclaration.declaration);
 
-            const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
-            if (declarationMetadata.isPreapproved) {
+            const apiItemMetadata: ApiItemMetadata = collector.fetchMetadata(astDeclaration);
+            if (apiItemMetadata.isPreapproved) {
               ApiReportGenerator._modifySpanForPreapproved(span);
             } else {
               ApiReportGenerator._modifySpan(collector, span, entity, astDeclaration, false);
@@ -376,36 +376,36 @@ export class ApiReportGenerator {
 
     if (!collector.isAncillaryDeclaration(astDeclaration)) {
       const footerParts: string[] = [];
-      const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
-      if (!declarationMetadata.releaseTagSameAsParent) {
-        if (declarationMetadata.effectiveReleaseTag !== ReleaseTag.None) {
-          footerParts.push(ReleaseTag.getTagName(declarationMetadata.effectiveReleaseTag));
+      const apiItemMetadata: ApiItemMetadata = collector.fetchMetadata(astDeclaration);
+      if (!apiItemMetadata.releaseTagSameAsParent) {
+        if (apiItemMetadata.effectiveReleaseTag !== ReleaseTag.None) {
+          footerParts.push(ReleaseTag.getTagName(apiItemMetadata.effectiveReleaseTag));
         }
       }
 
-      if (declarationMetadata.isSealed) {
+      if (apiItemMetadata.isSealed) {
         footerParts.push('@sealed');
       }
 
-      if (declarationMetadata.isVirtual) {
+      if (apiItemMetadata.isVirtual) {
         footerParts.push('@virtual');
       }
 
-      if (declarationMetadata.isOverride) {
+      if (apiItemMetadata.isOverride) {
         footerParts.push('@override');
       }
 
-      if (declarationMetadata.isEventProperty) {
+      if (apiItemMetadata.isEventProperty) {
         footerParts.push('@eventProperty');
       }
 
-      if (declarationMetadata.tsdocComment) {
-        if (declarationMetadata.tsdocComment.deprecatedBlock) {
+      if (apiItemMetadata.tsdocComment) {
+        if (apiItemMetadata.tsdocComment.deprecatedBlock) {
           footerParts.push('@deprecated');
         }
       }
 
-      if (declarationMetadata.needsDocumentation) {
+      if (apiItemMetadata.needsDocumentation) {
         footerParts.push('(undocumented)');
       }
 
