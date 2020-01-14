@@ -339,7 +339,7 @@ export class InstallManager {
     // This will be used by bulk scripts to determine the correct Shrinkwrap file to track.
     const currentVariantJsonFilename: string = this._rushConfiguration.currentVariantJsonFilename;
     const currentVariantJson: ICurrentVariantJson = {
-      variant: options.variant || null // eslint-disable-line no-restricted-syntax
+      variant: options.variant || null // eslint-disable-line @rushstack/no-null
     };
 
     // Determine if the variant is already current by updating current-variant.json.

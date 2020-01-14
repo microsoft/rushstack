@@ -2,6 +2,69 @@
   "name": "@microsoft/resolve-chunk-plugin",
   "entries": [
     {
+      "version": "2.0.158",
+      "tag": "@microsoft/resolve-chunk-plugin_v2.0.158",
+      "date": "Tue, 14 Jan 2020 01:34:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.14` to `6.3.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.3.13` to `0.3.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.157",
+      "tag": "@microsoft/resolve-chunk-plugin_v2.0.157",
+      "date": "Sat, 11 Jan 2020 05:18:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.13` to `6.3.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.156",
+      "tag": "@microsoft/resolve-chunk-plugin_v2.0.156",
+      "date": "Thu, 09 Jan 2020 06:44:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.12` to `6.3.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.3.12` to `0.3.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.0` to `0.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.155",
+      "tag": "@microsoft/resolve-chunk-plugin_v2.0.155",
+      "date": "Wed, 08 Jan 2020 00:11:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.11` to `6.3.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.3.11` to `0.3.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.4.2` to `0.5.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.154",
       "tag": "@microsoft/resolve-chunk-plugin_v2.0.154",
       "date": "Wed, 04 Dec 2019 23:17:55 GMT",

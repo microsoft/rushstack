@@ -10,7 +10,7 @@ import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { Span } from '../analyzer/Span';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import { AstImport } from '../analyzer/AstImport';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { ExtractorMessage } from '../api/ExtractorMessage';
@@ -106,8 +106,8 @@ export class ApiReportGenerator {
 
             const span: Span = new Span(astDeclaration.declaration);
 
-            const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
-            if (declarationMetadata.isPreapproved) {
+            const apiItemMetadata: ApiItemMetadata = collector.fetchApiItemMetadata(astDeclaration);
+            if (apiItemMetadata.isPreapproved) {
               ApiReportGenerator._modifySpanForPreapproved(span);
             } else {
               ApiReportGenerator._modifySpan(collector, span, entity, astDeclaration, false);
@@ -374,47 +374,48 @@ export class ApiReportGenerator {
       ApiReportGenerator._writeLineAsComments(stringWriter, 'Warning: ' + message.formatMessageWithoutLocation());
     }
 
-    const footerParts: string[] = [];
-    const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
-    if (!declarationMetadata.releaseTagSameAsParent) {
-      if (declarationMetadata.effectiveReleaseTag !== ReleaseTag.None) {
-        footerParts.push(ReleaseTag.getTagName(declarationMetadata.effectiveReleaseTag));
-      }
-    }
-
-    if (declarationMetadata.isSealed) {
-      footerParts.push('@sealed');
-    }
-
-    if (declarationMetadata.isVirtual) {
-      footerParts.push('@virtual');
-    }
-
-    if (declarationMetadata.isOverride) {
-      footerParts.push('@override');
-    }
-
-    if (declarationMetadata.isEventProperty) {
-      footerParts.push('@eventProperty');
-    }
-
-    if (declarationMetadata.tsdocComment) {
-      if (declarationMetadata.tsdocComment.deprecatedBlock) {
-        footerParts.push('@deprecated');
-      }
-    }
-
-    // Note that ancillary declarations aren't supposed to have documentation
-    if (declarationMetadata.needsDocumentation && !declarationMetadata.isAncillary) {
-      footerParts.push('(undocumented)');
-    }
-
-    if (footerParts.length > 0) {
-      if (messagesToReport.length > 0) {
-        ApiReportGenerator._writeLineAsComments(stringWriter, ''); // skip a line after the warnings
+    if (!collector.isAncillaryDeclaration(astDeclaration)) {
+      const footerParts: string[] = [];
+      const apiItemMetadata: ApiItemMetadata = collector.fetchApiItemMetadata(astDeclaration);
+      if (!apiItemMetadata.releaseTagSameAsParent) {
+        if (apiItemMetadata.effectiveReleaseTag !== ReleaseTag.None) {
+          footerParts.push(ReleaseTag.getTagName(apiItemMetadata.effectiveReleaseTag));
+        }
       }
 
-      ApiReportGenerator._writeLineAsComments(stringWriter, footerParts.join(' '));
+      if (apiItemMetadata.isSealed) {
+        footerParts.push('@sealed');
+      }
+
+      if (apiItemMetadata.isVirtual) {
+        footerParts.push('@virtual');
+      }
+
+      if (apiItemMetadata.isOverride) {
+        footerParts.push('@override');
+      }
+
+      if (apiItemMetadata.isEventProperty) {
+        footerParts.push('@eventProperty');
+      }
+
+      if (apiItemMetadata.tsdocComment) {
+        if (apiItemMetadata.tsdocComment.deprecatedBlock) {
+          footerParts.push('@deprecated');
+        }
+      }
+
+      if (apiItemMetadata.needsDocumentation) {
+        footerParts.push('(undocumented)');
+      }
+
+      if (footerParts.length > 0) {
+        if (messagesToReport.length > 0) {
+          ApiReportGenerator._writeLineAsComments(stringWriter, ''); // skip a line after the warnings
+        }
+
+        ApiReportGenerator._writeLineAsComments(stringWriter, footerParts.join(' '));
+      }
     }
 
     return stringWriter.toString();

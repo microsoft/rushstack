@@ -2,6 +2,48 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.13.3",
+      "tag": "@microsoft/gulp-core-build_v3.13.3",
+      "date": "Sat, 11 Jan 2020 05:18:23 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Temporarily disable the HTML Jest reporter in the default config because of an issue with Handlebars."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.13.2",
+      "tag": "@microsoft/gulp-core-build_v3.13.2",
+      "date": "Thu, 09 Jan 2020 06:44:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.18.1` to `3.18.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.0` to `0.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.13.1",
+      "tag": "@microsoft/gulp-core-build_v3.13.1",
+      "date": "Wed, 08 Jan 2020 00:11:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.18.0` to `3.18.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.4.2` to `0.5.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.13.0",
       "tag": "@microsoft/gulp-core-build_v3.13.0",
       "date": "Wed, 04 Dec 2019 23:17:55 GMT",

@@ -2,6 +2,69 @@
   "name": "@microsoft/loader-raw-script",
   "entries": [
     {
+      "version": "1.2.199",
+      "tag": "@microsoft/loader-raw-script_v1.2.199",
+      "date": "Tue, 14 Jan 2020 01:34:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.3.13` to `0.3.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.14` to `6.3.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.198",
+      "tag": "@microsoft/loader-raw-script_v1.2.198",
+      "date": "Sat, 11 Jan 2020 05:18:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.13` to `6.3.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.197",
+      "tag": "@microsoft/loader-raw-script_v1.2.197",
+      "date": "Thu, 09 Jan 2020 06:44:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.3.12` to `0.3.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.0` to `0.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.12` to `6.3.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.196",
+      "tag": "@microsoft/loader-raw-script_v1.2.196",
+      "date": "Wed, 08 Jan 2020 00:11:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.3.11` to `0.3.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.4.2` to `0.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.11` to `6.3.12`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.195",
       "tag": "@microsoft/loader-raw-script_v1.2.195",
       "date": "Wed, 04 Dec 2019 23:17:55 GMT",

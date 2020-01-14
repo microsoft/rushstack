@@ -65,7 +65,7 @@ describe('FileDeletionUtility', () => {
       );
     });
     it('it does not accept null or undefined', () => {
-      /* eslint-disable no-restricted-syntax */
+      /* eslint-disable @rushstack/no-null */
       assert.isFalse(
         FileDeletionUtility.isParentDirectory('', '/A/b.txt')
       );
@@ -84,7 +84,7 @@ describe('FileDeletionUtility', () => {
       assert.isFalse(
         FileDeletionUtility.isParentDirectory('/a/b/c/d.txt', null as any) // eslint-disable-line @typescript-eslint/no-explicit-any
       );
-      /* eslint-enable no-restricted-syntax */
+      /* eslint-enable @rushstack/no-null */
     });
   });
   describe('removeChildren', () => {

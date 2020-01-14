@@ -1,0 +1,29 @@
+{
+  "name": "@rushstack/eslint-plugin",
+  "entries": [
+    {
+      "version": "0.2.0",
+      "tag": "@rushstack/eslint-plugin_v0.2.0",
+      "date": "Thu, 09 Jan 2020 06:44:12 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new rule `@rushstack/no-untyped-underscore`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/eslint-plugin_v0.1.0",
+      "date": "Wed, 08 Jan 2020 00:11:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release"
+          }
+        ]
+      }
+    }
+  ]
+}

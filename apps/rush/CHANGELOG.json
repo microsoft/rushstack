@@ -2,6 +2,27 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.18.0",
+      "tag": "@microsoft/rush_v5.18.0",
+      "date": "Sat, 11 Jan 2020 05:38:55 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Don't use the `build` verb when printing task failures"
+          },
+          {
+            "comment": "Add a --commit command-line argument to the publish command to allow the git commit to be explicitly provided for tagging."
+          },
+          {
+            "comment": "Update GitHub project URL in some resource files"
+          },
+          {
+            "comment": "fix typo in version-policies.json"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.17.2",
       "tag": "@microsoft/rush_v5.17.2",
       "date": "Tue, 26 Nov 2019 00:53:52 GMT",

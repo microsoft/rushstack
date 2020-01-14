@@ -252,8 +252,8 @@ export class AstReferenceResolver {
     let result: AstDeclaration | undefined = undefined;
 
     for (const match of matches) {
-      const metadata: DeclarationMetadata = this._collector.fetchMetadata(match);
-      if (!metadata.isAncillary) {
+      const declarationMetadata: DeclarationMetadata = this._collector.fetchDeclarationMetadata(match);
+      if (!declarationMetadata.isAncillary) {
         if (result) {
           return undefined; // more than one match
         }

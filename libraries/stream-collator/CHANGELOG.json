@@ -2,6 +2,69 @@
   "name": "@microsoft/stream-collator",
   "entries": [
     {
+      "version": "3.1.22",
+      "tag": "@microsoft/stream-collator_v3.1.22",
+      "date": "Tue, 14 Jan 2020 01:34:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.3.13` to `0.3.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.14` to `6.3.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.21",
+      "tag": "@microsoft/stream-collator_v3.1.21",
+      "date": "Sat, 11 Jan 2020 05:18:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.13` to `6.3.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.20",
+      "tag": "@microsoft/stream-collator_v3.1.20",
+      "date": "Thu, 09 Jan 2020 06:44:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.3.12` to `0.3.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.12` to `6.3.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.0` to `0.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.19",
+      "tag": "@microsoft/stream-collator_v3.1.19",
+      "date": "Wed, 08 Jan 2020 00:11:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.3.11` to `0.3.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.11` to `6.3.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.4.2` to `0.5.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.1.18",
       "tag": "@microsoft/stream-collator_v3.1.18",
       "date": "Wed, 04 Dec 2019 23:17:55 GMT",

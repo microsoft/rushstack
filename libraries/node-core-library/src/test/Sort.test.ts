@@ -9,7 +9,7 @@ test('Sort.compareByValue', () => {
 });
 
 test('Sort.compareByValue cases', () => {
-  const values: unknown[] = [undefined, null, -1, 1]; // eslint-disable-line no-restricted-syntax
+  const values: unknown[] = [undefined, null, -1, 1]; // eslint-disable-line @rushstack/no-null
   const results: string[] = [];
   for (let i: number = 0; i < values.length; ++i) {
     for (let j: number = 0; j < values.length; ++j) {
