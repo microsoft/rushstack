@@ -1,8 +1,8 @@
-import { BaseRushAction } from "./BaseRushAction";
-import { RushCommandLineParser } from "../RushCommandLineParser";
-import { CommandLineFlagParameter } from "@microsoft/ts-command-line";
-import { RushConfigurationProject } from "../../api/RushConfigurationProject";
-import * as Table from "cli-table";
+import { BaseRushAction } from './BaseRushAction';
+import { RushCommandLineParser } from '../RushCommandLineParser';
+import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import * as Table from 'cli-table';
 
 export class ListAction extends BaseRushAction {
   private _version: CommandLineFlagParameter;
@@ -12,70 +12,77 @@ export class ListAction extends BaseRushAction {
 
   public constructor(parser: RushCommandLineParser) {
     super({
-      actionName: "list",
-      summary: "List package information for all projects in the repo",
+      actionName: 'list',
+      summary: 'List package information for all projects in the repo',
       documentation:
-        "List package names, and optionally version (--version) and " +
-        "path (--path) or full path (--full-path), for projects in the " +
-        "current rush config.",
+        'List package names, and optionally version (--version) and ' +
+        'path (--path) or full path (--full-path), for projects in the ' +
+        'current rush config.',
       parser
     });
   }
 
   protected onDefineParameters(): void {
     this._version = this.defineFlagParameter({
-      parameterLongName: "--version",
-      parameterShortName: "-v",
+      parameterLongName: '--version',
+      parameterShortName: '-v',
       description:
-        "If this flag is specified, the project version will be " +
-        "displayed in a column along with the package name."
+        'If this flag is specified, the project version will be ' +
+        'displayed in a column along with the package name.'
     });
 
     this._path = this.defineFlagParameter({
-      parameterLongName: "--path",
-      parameterShortName: "-p",
+      parameterLongName: '--path',
+      parameterShortName: '-p',
       description:
-        "If this flag is specified, the project path will be " +
-        "displayed in a column along with the package name."
+        'If this flag is specified, the project path will be ' +
+        'displayed in a column along with the package name.'
     });
 
     this._fullPath = this.defineFlagParameter({
-      parameterLongName: "--full-path",
-      parameterShortName: "-f",
+      parameterLongName: '--full-path',
+      parameterShortName: '-f',
       description:
-        "If this flag is specified, the project full path will " +
-        "be displayed in a column along with the package name."
+        'If this flag is specified, the project full path will ' +
+        'be displayed in a column along with the package name.'
     });
 
     this._jsonFlag = this.defineFlagParameter({
-      parameterLongName: "--json",
-      description: "If specified,  a json file of result will be generated."
+      parameterLongName: '--json',
+      description: 'If this flag is specified, output will be in JSON format.'
     });
   }
 
-  protected run(): Promise<void> {
-    return Promise.resolve().then(() => {
-      const allPackages: Map<string, RushConfigurationProject> = this
-        .rushConfiguration.projectsByName;
-      if (this._version.value || this._path.value || this._fullPath.value) {
+  protected async run(): Promise<void> {
+      const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
+      if (this._jsonFlag.value) {
+        this._printJson(allPackages);
+      } else if (this._version.value || this._path.value || this._fullPath.value) {
         this._printListTable(allPackages);
-      } else if (this._jsonFlag.value) {
-        this._serializeToJson(allPackages);
       } else {
         this._printList(allPackages);
       }
-    });
   }
 
-  private _serializeToJson(
+  private _printJson(
     allPackages: Map<string, RushConfigurationProject>
   ): void {
+    const objects: string[] = [];
     allPackages.forEach((_config: RushConfigurationProject, name: string) => {
-      console.log(JSON.stringify(name));
+     const jsonString: string = JSON.stringify({
+       name: name,
+       version: _config.packageJson.version,
+       path: _config.projectRelativeFolder,
+       fullPath: _config.projectFolder});
+     objects.push(jsonString);
     });
+
+    console.log(objects);
   }
 
-  private _printList(allPackages: Map<string, RushConfigurationProject>): void {
+  private _printList(
+    allPackages: Map<string, RushConfigurationProject>
+  ): void {
     allPackages.forEach((_config: RushConfigurationProject, name: string) => {
       console.log(name);
     });
@@ -84,15 +91,15 @@ export class ListAction extends BaseRushAction {
   private _printListTable(
     allPackages: Map<string, RushConfigurationProject>
   ): void {
-    const tableHeader: string[] = ["Project"];
+    const tableHeader: string[] = ['Project'];
     if (this._version.value) {
-      tableHeader.push("Version");
+      tableHeader.push('Version');
     }
     if (this._path.value) {
-      tableHeader.push("Path");
+      tableHeader.push('Path');
     }
     if (this._fullPath.value) {
-      tableHeader.push("Full Path");
+      tableHeader.push('Full Path');
     }
     const table: Table = new Table({
       head: tableHeader

@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "add --json to serialize output in json format",
+      "comment": "Add a --json flag to provide the project last as JSON",
       "type": "none"
     }
   ],
