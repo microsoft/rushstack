@@ -669,7 +669,7 @@ export class Collector {
     }
 
     if (mainAstDeclaration.apiItemMetadata || ancillaryAstDeclaration.apiItemMetadata) {
-      throw new InternalError('Invalid call to _addAncillaryDeclaration() because the metadata'
+      throw new InternalError('Invalid call to _addAncillaryDeclaration() because the API item metadata'
         + ' has already been constructed');
     }
 

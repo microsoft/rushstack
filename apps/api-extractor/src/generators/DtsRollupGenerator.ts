@@ -118,15 +118,12 @@ export class DtsRollupGenerator {
         for (const astDeclaration of entity.astEntity.astDeclarations || []) {
           const apiItemMetadata: ApiItemMetadata = collector.fetchApiItemMetadata(astDeclaration);
 
-          if (
-            !!apiItemMetadata &&
-            !this._shouldIncludeReleaseTag(apiItemMetadata.effectiveReleaseTag, dtsKind)
-          ) {
-              if (!collector.extractorConfig.omitTrimmingComments) {
-                stringWriter.writeLine();
-                stringWriter.writeLine(`/* Excluded declaration from this release type: ${entity.nameForEmit} */`);
-              }
-              continue;
+          if (!this._shouldIncludeReleaseTag(apiItemMetadata.effectiveReleaseTag, dtsKind)) {
+            if (!collector.extractorConfig.omitTrimmingComments) {
+              stringWriter.writeLine();
+              stringWriter.writeLine(`/* Excluded declaration from this release type: ${entity.nameForEmit} */`);
+            }
+            continue;
           } else {
             const span: Span = new Span(astDeclaration.declaration);
             DtsRollupGenerator._modifySpan(collector, span, entity, astDeclaration, dtsKind);

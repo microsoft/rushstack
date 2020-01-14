@@ -12,7 +12,7 @@ export interface ISymbolMetadataOptions {
 
 /**
  * Stores the Collector's additional analysis for an `AstSymbol`.  This object is assigned to `AstSymbol.metadata`
- * but consumers must always obtain it by calling `Collector.fetchSymbolMetadata().
+ * but consumers must always obtain it by calling `Collector.fetchSymbolMetadata()`.
  */
 export class SymbolMetadata {
   // For all declarations associated with this symbol, this is the

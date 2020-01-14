@@ -50,15 +50,15 @@ export class AstDeclaration {
 
   /**
    * Additional information that is calculated later by the `Collector`.  The actual type is `DeclarationMetadata`,
-   * but we declare it as `unknown` because it's not meant to be accessed outside the `Collector`.
+   * but we declare it as `unknown` because consumers must obtain this object by calling
+   * `Collector.fetchDeclarationMetadata()`.
    */
   public declarationMetadata: unknown;
 
   /**
    * Additional information that is calculated later by the `Collector`.  The actual type is `ApiItemMetadata`,
-   * but we declare it as `unknown` because it's not meant to be accessed outside the `Collector`.
-   * Stores non-ancillary state.  If `DeclarationMetadata.isAncillary=true`, then this property will point to
-   * the main declaration's object.
+   * but we declare it as `unknown` because consumers must obtain this object by calling
+   * `Collector.fetchApiItemMetadata()`.
    */
   public apiItemMetadata: unknown;
 
