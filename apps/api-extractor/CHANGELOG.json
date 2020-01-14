@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.7.3",
+      "tag": "@microsoft/api-extractor_v7.7.3",
+      "date": "Tue, 14 Jan 2020 01:34:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where \"ae-incompatible-release-tags\" was sometimes reported incorectly for property setters (GitHub #1681)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.7.2",
       "tag": "@microsoft/api-extractor_v7.7.2",
       "date": "Thu, 09 Jan 2020 06:44:12 GMT",

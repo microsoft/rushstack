@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 09 Jan 2020 06:44:12 GMT and should not be manually modified.
+This log was last generated on Tue, 14 Jan 2020 01:34:15 GMT and should not be manually modified.
+
+## 7.7.3
+Tue, 14 Jan 2020 01:34:15 GMT
+
+### Patches
+
+- Fix an issue where "ae-incompatible-release-tags" was sometimes reported incorectly for property setters (GitHub #1681)
 
 ## 7.7.2
 Thu, 09 Jan 2020 06:44:12 GMT
