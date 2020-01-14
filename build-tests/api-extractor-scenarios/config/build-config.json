@@ -2,6 +2,7 @@
   "scenarioFolderNames": [
     "ambientNameConflict",
     "ambientNameConflict2",
+    "ancillaryDeclarations",
     "apiItemKinds",
     "bundledPackages",
     "circularImport",

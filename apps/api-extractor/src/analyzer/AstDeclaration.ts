@@ -49,9 +49,18 @@ export class AstDeclaration {
   public readonly modifierFlags: ts.ModifierFlags;
 
   /**
-   * Additional information applied later by the Collector.
+   * Additional information that is calculated later by the `Collector`.  The actual type is `DeclarationMetadata`,
+   * but we declare it as `unknown` because consumers must obtain this object by calling
+   * `Collector.fetchDeclarationMetadata()`.
    */
-  public metadata: unknown;
+  public declarationMetadata: unknown;
+
+  /**
+   * Additional information that is calculated later by the `Collector`.  The actual type is `ApiItemMetadata`,
+   * but we declare it as `unknown` because consumers must obtain this object by calling
+   * `Collector.fetchApiItemMetadata()`.
+   */
+  public apiItemMetadata: unknown;
 
   // NOTE: This array becomes immutable after astSymbol.analyze() sets astSymbol.analyzed=true
   private readonly _analyzedChildren: AstDeclaration[] = [];
