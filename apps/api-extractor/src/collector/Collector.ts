@@ -680,6 +680,16 @@ export class Collector {
   private _calculateApiItemMetadata(astDeclaration: AstDeclaration): void {
     const declarationMetadata: InternalDeclarationMetadata = astDeclaration.declarationMetadata as InternalDeclarationMetadata;
     if (declarationMetadata.isAncillary) {
+
+      if (astDeclaration.declaration.kind === ts.SyntaxKind.SetAccessor) {
+        if (declarationMetadata.tsdocParserContext) {
+          this.messageRouter.addAnalyzerIssue(ExtractorMessageId.SetterWithDocs,
+            `The doc comment for the property "${astDeclaration.astSymbol.localName}"`
+            + ` must appear on the getter, not the setter.`,
+            astDeclaration);
+        }
+      }
+
       // We never calculate ApiItemMetadata for an ancillary declaration; instead, it is assigned when
       // the main declaration is processed.
       return;

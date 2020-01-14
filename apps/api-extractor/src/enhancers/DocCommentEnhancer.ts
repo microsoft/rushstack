@@ -30,14 +30,14 @@ export class DocCommentEnhancer {
       if (entity.astEntity instanceof AstSymbol) {
         if (entity.exported) {
           entity.astEntity.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
-            this._analyzeDeclaration(astDeclaration);
+            this._analyzeApiItem(astDeclaration);
           });
         }
       }
     }
   }
 
-  private _analyzeDeclaration(astDeclaration: AstDeclaration): void {
+  private _analyzeApiItem(astDeclaration: AstDeclaration): void {
     const metadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
     if (metadata.docCommentEnhancerVisitorState === VisitorState.Visited) {
       return;
@@ -130,16 +130,6 @@ export class DocCommentEnhancer {
       return;
     }
 
-    if (astDeclaration.declaration.kind === ts.SyntaxKind.SetAccessor) {
-      if (metadata.tsdocComment) {
-        this._collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.SetterWithDocs,
-          `The doc comment for the property "${astDeclaration.astSymbol.localName}"`
-          + ` must appear on the getter, not the setter.`,
-          astDeclaration);
-      }
-      return;
-    }
-
     if (metadata.tsdocComment) {
       // Require the summary to contain at least 10 non-spacing characters
       metadata.needsDocumentation = !tsdoc.PlainTextEmitter.hasAnyTextContent(
@@ -215,7 +205,7 @@ export class DocCommentEnhancer {
       return;
     }
 
-    this._analyzeDeclaration(referencedAstDeclaration);
+    this._analyzeApiItem(referencedAstDeclaration);
 
     const referencedMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(referencedAstDeclaration);
 
