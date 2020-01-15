@@ -4,6 +4,18 @@ import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import * as Table from 'cli-table';
 
+
+export interface IJsonEntry {
+  name: string,
+  version: string,
+  path: string,
+  fullPath: string
+}
+
+export interface IJsonOutput {
+  projects: IJsonEntry[]
+}
+
 export class ListAction extends BaseRushAction {
   private _version: CommandLineFlagParameter;
   private _path: CommandLineFlagParameter;
@@ -54,30 +66,34 @@ export class ListAction extends BaseRushAction {
   }
 
   protected async run(): Promise<void> {
-      const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
-      if (this._jsonFlag.value) {
-        this._printJson(allPackages);
-      } else if (this._version.value || this._path.value || this._fullPath.value) {
-        this._printListTable(allPackages);
-      } else {
-        this._printList(allPackages);
-      }
+    const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
+    if (this._jsonFlag.value) {
+      this._printJson(allPackages);
+    } else if (this._version.value || this._path.value || this._fullPath.value) {
+      this._printListTable(allPackages);
+    } else {
+      this._printList(allPackages);
+    }
   }
 
   private _printJson(
     allPackages: Map<string, RushConfigurationProject>
   ): void {
-    const objects: string[] = [];
+    const projects: IJsonEntry[] = [];
     allPackages.forEach((_config: RushConfigurationProject, name: string) => {
-     const jsonString: string = JSON.stringify({
-       name: name,
-       version: _config.packageJson.version,
-       path: _config.projectRelativeFolder,
-       fullPath: _config.projectFolder});
-     objects.push(jsonString);
+      const jsonString: IJsonEntry = {
+        name: name,
+        version: _config.packageJson.version,
+        path: _config.projectRelativeFolder,
+        fullPath: _config.projectFolder
+      };
+      projects.push(jsonString);
     });
 
-    console.log(objects);
+    const output: IJsonOutput = { // The IJsonOutput interface will need to be defined
+      projects
+    };
+    console.log(JSON.stringify(output, undefined, 2));
   }
 
   private _printList(
