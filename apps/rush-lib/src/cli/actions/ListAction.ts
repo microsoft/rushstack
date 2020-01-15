@@ -6,14 +6,14 @@ import * as Table from 'cli-table';
 
 
 export interface IJsonEntry {
-  name: string,
-  version: string,
-  path: string,
-  fullPath: string
+  name: string;
+  version: string;
+  path: string;
+  fullPath: string;
 }
 
 export interface IJsonOutput {
-  projects: IJsonEntry[]
+  projects: IJsonEntry[];
 }
 
 export class ListAction extends BaseRushAction {
@@ -81,16 +81,16 @@ export class ListAction extends BaseRushAction {
   ): void {
     const projects: IJsonEntry[] = [];
     allPackages.forEach((_config: RushConfigurationProject, name: string) => {
-      const jsonString: IJsonEntry = {
+      const project: IJsonEntry = {
         name: name,
         version: _config.packageJson.version,
         path: _config.projectRelativeFolder,
         fullPath: _config.projectFolder
       };
-      projects.push(jsonString);
+      projects.push(project);
     });
 
-    const output: IJsonOutput = { // The IJsonOutput interface will need to be defined
+    const output: IJsonOutput = {
       projects
     };
     console.log(JSON.stringify(output, undefined, 2));
