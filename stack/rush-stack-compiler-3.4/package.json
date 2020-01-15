@@ -22,7 +22,7 @@
     "@microsoft/api-extractor": "7.7.4",
     "@microsoft/node-core-library": "3.18.3",
     "@rushstack/eslint-config": "0.5.2",
-    "@types/node": "8.10.54",
+    "@types/node": "10.17.13",
     "eslint": "~6.5.1",
     "tslint": "~5.12.1",
     "tslint-microsoft-contrib": "~5.2.1",

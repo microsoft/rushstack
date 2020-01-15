@@ -17,7 +17,7 @@
     "@microsoft/load-themed-styles": "1.10.32",
     "@microsoft/node-core-library": "3.18.3",
     "@types/gulp": "4.0.6",
-    "@types/node": "8.10.54",
+    "@types/node": "10.17.13",
     "autoprefixer": "~9.7.4",
     "clean-css": "4.2.1",
     "glob": "~7.0.5",
