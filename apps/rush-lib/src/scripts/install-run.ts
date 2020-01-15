@@ -433,7 +433,7 @@ export function installAndRun(
     }
   );
 
-  return result.status;
+  return result.status || 1; // If result.status is null, the process was terminated from a signal
 }
 
 export function runWithErrorAndStatusCode(fn: () => number): void {

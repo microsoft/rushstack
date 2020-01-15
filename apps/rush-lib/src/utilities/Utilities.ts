@@ -410,7 +410,8 @@ export class Utilities {
     if (options.handleOutput) {
       Utilities._processResult(result);
     }
-    return result.status;
+
+    return result.status || 1; // If result.status is null, the process was terminated from a signal
   }
 
   /**
