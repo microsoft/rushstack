@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Upgrade Node typings to Node 10",
+      "type": "minor",
+      "packageName": "@microsoft/api-documenter"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter",
+  "email": "iclanton@users.noreply.github.com"
+}
