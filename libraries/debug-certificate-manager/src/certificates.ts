@@ -1,13 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/// <reference path="./NodeForgeExtensions.d.ts" />
-
-import { GulpTask } from '@microsoft/gulp-core-build';
 import { FileSystem } from '@microsoft/node-core-library';
-import * as forgeType from 'node-forge';
-// eslint-disable-next-line
-const forge: typeof forgeType & IForgeExtensions = require('node-forge');
+import * as forge from 'node-forge';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import { EOL } from 'os';
@@ -19,16 +14,29 @@ const serialNumber: string = '731c321744e34650a202e3ef91c3c1b9';
 const friendlyName: string = 'gulp-core-build-serve Development Certificate';
 const macKeychain: string = '/Library/Keychains/System.keychain';
 
-let _certutilExePath: string;
+let _certutilExePath: string | undefined;
 
+/**
+ * @public
+ */
 export interface ICertificate {
-  pemCertificate: string;
-  pemKey: string;
+  pemCertificate: string | undefined;
+  pemKey: string | undefined;
+}
+
+/**
+ * @public
+ */
+export interface ILogging {
+  log: (string) => void;
+  logError: (string) => void;
+  logWarning: (string) => void;
+  logVerbose: (string) => void;
 }
 
 function _createDevelopmentCertificate(): ICertificate {
-  const keys: forgeType.pki.KeyPair = forge.pki.rsa.generateKeyPair(2048);
-  const certificate: IForgeCertificate = forge.pki.createCertificate();
+  const keys: forge.pki.KeyPair = forge.pki.rsa.generateKeyPair(2048);
+  const certificate: forge.pki.Certificate = forge.pki.createCertificate();
   certificate.publicKey = keys.publicKey;
 
   certificate.serialNumber = serialNumber;
@@ -37,7 +45,7 @@ function _createDevelopmentCertificate(): ICertificate {
   certificate.validity.notBefore = now;
   certificate.validity.notAfter.setFullYear(certificate.validity.notBefore.getFullYear() + 3); // Three years from now
 
-  const attrs: IAttr[] = [{
+  const attrs: forge.pki.CertificateField[] = [{
     name: 'commonName',
     value: 'localhost'
   }];
@@ -79,7 +87,7 @@ function _createDevelopmentCertificate(): ICertificate {
   };
 }
 
-function _ensureCertUtilExePath(parentTask: GulpTask<{}>): string {
+function _ensureCertUtilExePath(parentTask: ILogging): string | undefined {
   if (!_certutilExePath) {
     const where: child_process.SpawnSyncReturns<string> = child_process.spawnSync('where', ['certutil']);
 
@@ -96,10 +104,10 @@ function _ensureCertUtilExePath(parentTask: GulpTask<{}>): string {
   return _certutilExePath;
 }
 
-function _tryTrustCertificate(certificatePath: string, parentTask: GulpTask<{}>): boolean {
+function _tryTrustCertificate(certificatePath: string, parentTask: ILogging): boolean {
   switch (process.platform) {
     case 'win32':
-      const certutilExePath: string = _ensureCertUtilExePath(parentTask);
+      const certutilExePath: string | undefined = _ensureCertUtilExePath(parentTask);
       if (!certutilExePath) {
         // Unable to find the cert utility
         return false;
@@ -174,9 +182,9 @@ function _tryTrustCertificate(certificatePath: string, parentTask: GulpTask<{}>)
   }
 }
 
-function _trySetFriendlyName(certificatePath: string, parentTask: GulpTask<{}>): boolean {
+function _trySetFriendlyName(certificatePath: string, parentTask: ILogging): boolean {
   if (process.platform === 'win32') {
-    const certutilExePath: string = _ensureCertUtilExePath(parentTask);
+    const certutilExePath: string | undefined = _ensureCertUtilExePath(parentTask);
     if (!certutilExePath) {
       // Unable to find the cert utility
       return false;
@@ -221,7 +229,7 @@ function _trySetFriendlyName(certificatePath: string, parentTask: GulpTask<{}>):
   }
 }
 
-function _ensureCertificateInternal(parentTask: GulpTask<{}>): void {
+function _ensureCertificateInternal(parentTask: ILogging): void {
   const certificateStore: CertificateStore = CertificateStore.instance;
   const generatedCertificate: ICertificate = _createDevelopmentCertificate();
 
@@ -230,7 +238,11 @@ function _ensureCertificateInternal(parentTask: GulpTask<{}>): void {
   const tempDirName: string = path.join(__dirname, '..', 'temp');
 
   const tempCertificatePath: string = path.join(tempDirName, `${certificateName}.cer`);
-  FileSystem.writeFile(tempCertificatePath, generatedCertificate.pemCertificate, {
+  let pemFileContents: string | undefined = generatedCertificate.pemCertificate;
+  if (!pemFileContents) {
+    pemFileContents = "";
+  }
+  FileSystem.writeFile(tempCertificatePath, pemFileContents, {
     ensureFolderExists: true
   });
 
@@ -251,14 +263,17 @@ function _ensureCertificateInternal(parentTask: GulpTask<{}>): void {
 }
 
 function _certificateHasSubjectAltName(certificateData: string): boolean {
-  const certificate: IForgeCertificate = forge.pki.certificateFromPem(certificateData);
+  const certificate: forge.pki.Certificate = forge.pki.certificateFromPem(certificateData);
   return !!certificate.getExtension('subjectAltName');
 }
 
-export function untrustCertificate<TGulpTask>(parentTask: GulpTask<TGulpTask>): boolean {
+/**
+ * @public
+ */
+export function untrustCertificate(parentTask: ILogging): boolean {
   switch (process.platform) {
     case 'win32':
-      const certutilExePath: string = _ensureCertUtilExePath(parentTask);
+      const certutilExePath: string | undefined = _ensureCertUtilExePath(parentTask);
       if (!certutilExePath) {
         // Unable to find the cert utility
         return false;
@@ -288,15 +303,15 @@ export function untrustCertificate<TGulpTask>(parentTask: GulpTask<TGulpTask>): 
 
       const outputLines: string[] = macFindCertificateResult.stdout.toString().split(EOL);
       let found: boolean = false;
-      let shaHash: string = undefined;
+      let shaHash: string = "";
       for (let i: number = 0; i < outputLines.length; i++) {
         const line: string = outputLines[i];
-        const shaMatch: string[] = line.match(/^SHA-1 hash: (.+)$/);
+        const shaMatch: string[] | null = line.match(/^SHA-1 hash: (.+)$/);
         if (shaMatch) {
           shaHash = shaMatch[1];
         }
 
-        const snbrMatch: string[] = line.match(/^\s*"snbr"<blob>=0x([^\s]+).+$/);
+        const snbrMatch: string[] | null = line.match(/^\s*"snbr"<blob>=0x([^\s]+).+$/);
         if (snbrMatch && (snbrMatch[1] || '').toLowerCase() === serialNumber) {
           found = true;
           break;
@@ -332,12 +347,13 @@ export function untrustCertificate<TGulpTask>(parentTask: GulpTask<TGulpTask>): 
 }
 
 /**
- * Get the dev certificate from the store, or, optionally, generate a new one and trust it if one doesn't exist in the
- *  store.
+ * @public
+ * Get the dev certificate from the store, or, optionally, generate a new one
+ * and trust it if one doesn't exist in the store.
  */
-export function ensureCertificate<TGulpTask>(
+export function ensureCertificate(
   canGenerateNewCertificate: boolean,
-  parentTask: GulpTask<TGulpTask>
+  parentTask: ILogging
 ): ICertificate {
   const certificateStore: CertificateStore = CertificateStore.instance;
 

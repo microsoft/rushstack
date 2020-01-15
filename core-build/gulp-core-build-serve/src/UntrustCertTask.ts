@@ -3,8 +3,8 @@
 
 import { GulpTask } from '@microsoft/gulp-core-build';
 import * as Gulp from 'gulp';
-import { CertificateStore } from './CertificateStore';
-import { untrustCertificate } from './certificates';
+import { CertificateStore } from '@microsoft/debug-certificate-manager';
+import { untrustCertificate } from '@microsoft/debug-certificate-manager';
 
 /**
  * On Windows, this task removes the certificate with the expected serial number from the user's

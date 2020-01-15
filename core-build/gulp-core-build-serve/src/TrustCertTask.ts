@@ -6,7 +6,7 @@ import * as Gulp from 'gulp';
 import {
   ICertificate,
   ensureCertificate
-} from './certificates';
+} from '@microsoft/debug-certificate-manager';
 
 /**
  * This task generates and trusts a development certificate. The certificate is self-signed

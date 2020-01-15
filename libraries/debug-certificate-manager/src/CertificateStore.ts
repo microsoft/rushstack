@@ -6,6 +6,9 @@ import { homedir } from 'os';
 
 import { FileSystem } from '@microsoft/node-core-library';
 
+/**
+ * @public
+ */
 export class CertificateStore {
   private static _instance: CertificateStore;
 
@@ -23,14 +26,14 @@ export class CertificateStore {
   private _certificatePath: string;
   private _keyPath: string;
 
-  private _certificateData: string;
-  private _keyData: string;
+  private _certificateData: string | undefined;
+  private _keyData: string | undefined;
 
   public get certificatePath(): string {
     return this._certificatePath;
   }
 
-  public get certificateData(): string {
+  public get certificateData(): string | undefined {
     if (!this._certificateData) {
       if (FileSystem.exists(this._certificatePath)) {
         this._certificateData = FileSystem.readFile(this._certificatePath);
@@ -42,7 +45,7 @@ export class CertificateStore {
     return this._certificateData;
   }
 
-  public set certificateData(certificate: string) {
+  public set certificateData(certificate: string | undefined) {
     if (certificate) {
       FileSystem.writeFile(this._certificatePath, certificate);
     } else if (FileSystem.exists(this._certificatePath)) {
@@ -52,7 +55,7 @@ export class CertificateStore {
     this._certificateData = certificate;
   }
 
-  public get keyData(): string {
+  public get keyData(): string | undefined {
     if (!this._keyData) {
       if (FileSystem.exists(this._keyPath)) {
         this._keyData = FileSystem.readFile(this._keyPath);
@@ -64,7 +67,7 @@ export class CertificateStore {
     return this._keyData;
   }
 
-  public set keyData(key: string) {
+  public set keyData(key: string | undefined) {
     if (key) {
       FileSystem.writeFile(this._keyPath, key);
     } else if (FileSystem.exists(this._keyPath)) {

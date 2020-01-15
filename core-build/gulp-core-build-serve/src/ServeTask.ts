@@ -15,7 +15,7 @@ import * as ExpressType from 'express';
 
 import {
   ICertificate
-} from './certificates';
+} from '@microsoft/debug-certificate-manager';
 
 /**
  * @remarks
