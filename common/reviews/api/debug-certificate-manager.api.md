@@ -17,7 +17,7 @@ export class CertificateStore {
     }
 
 // @public
-export function ensureCertificate(canGenerateNewCertificate: boolean, parentTask: ILogging): ICertificate;
+export function ensureCertificate(canGenerateNewCertificate: boolean, parentLogger: ILogging): ICertificate;
 
 // @public (undocumented)
 export interface ICertificate {
@@ -39,8 +39,8 @@ export interface ILogging {
     logWarning: (string: any) => void;
 }
 
-// @public (undocumented)
-export function untrustCertificate(parentTask: ILogging): boolean;
+// @public
+export function untrustCertificate(parentLogger: ILogging): boolean;
 
 
 // (No @packageDocumentation comment for this package)

@@ -22,7 +22,7 @@ export class CertificateStore {
   }
 
   private _userProfilePath: string;
-  private _gcbServeDataPath: string;
+  private _serveDataPath: string;
   private _certificatePath: string;
   private _keyPath: string;
 
@@ -84,10 +84,10 @@ export class CertificateStore {
       throw new Error('Unable to determine the current user\'s home directory');
     }
 
-    this._gcbServeDataPath = path.join(this._userProfilePath, '.gcb-serve-data');
-    FileSystem.ensureFolder(this._gcbServeDataPath);
+    this._serveDataPath = path.join(this._userProfilePath, '.rushstack-serve-data');
+    FileSystem.ensureFolder(this._serveDataPath);
 
-    this._certificatePath = path.join(this._gcbServeDataPath, 'gcb-serve.cer');
-    this._keyPath = path.join(this._gcbServeDataPath, 'gcb-serve.key');
+    this._certificatePath = path.join(this._serveDataPath, 'rushstack-serve.pem');
+    this._keyPath = path.join(this._serveDataPath, 'rushstack-serve.key');
   }
 }
