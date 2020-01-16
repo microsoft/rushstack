@@ -13,11 +13,12 @@ import { Span, SpanModification } from '../analyzer/Span';
 import { AstImport } from '../analyzer/AstImport';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { SymbolMetadata } from '../collector/SymbolMetadata';
 import { StringWriter } from './StringWriter';
 import { DtsEmitHelpers } from './DtsEmitHelpers';
+import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()
@@ -115,17 +116,14 @@ export class DtsRollupGenerator {
       if (entity.astEntity instanceof AstSymbol) {
         // Emit all the declarations for this entry
         for (const astDeclaration of entity.astEntity.astDeclarations || []) {
-          const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
+          const apiItemMetadata: ApiItemMetadata = collector.fetchApiItemMetadata(astDeclaration);
 
-          if (
-            !!declarationMetadata &&
-            !this._shouldIncludeReleaseTag(declarationMetadata.effectiveReleaseTag, dtsKind)
-          ) {
-              if (!collector.extractorConfig.omitTrimmingComments) {
-                stringWriter.writeLine();
-                stringWriter.writeLine(`/* Excluded declaration from this release type: ${entity.nameForEmit} */`);
-              }
-              continue;
+          if (!this._shouldIncludeReleaseTag(apiItemMetadata.effectiveReleaseTag, dtsKind)) {
+            if (!collector.extractorConfig.omitTrimmingComments) {
+              stringWriter.writeLine();
+              stringWriter.writeLine(`/* Excluded declaration from this release type: ${entity.nameForEmit} */`);
+            }
+            continue;
           } else {
             const span: Span = new Span(astDeclaration.declaration);
             DtsRollupGenerator._modifySpan(collector, span, entity, astDeclaration, dtsKind);
@@ -234,7 +232,7 @@ export class DtsRollupGenerator {
             span.modification.prefix = 'export ' + span.modification.prefix;
           }
 
-          const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
+          const declarationMetadata: DeclarationMetadata = collector.fetchDeclarationMetadata(astDeclaration);
           if (declarationMetadata.tsdocParserContext) {
             // Typically the comment for a variable declaration is attached to the outer variable statement
             // (which may possibly contain multiple variable declarations), so it's not part of the Span.
@@ -278,7 +276,7 @@ export class DtsRollupGenerator {
         let trimmed: boolean = false;
         if (AstDeclaration.isSupportedSyntaxKind(child.kind)) {
           childAstDeclaration = collector.astSymbolTable.getChildAstDeclarationByNode(child.node, astDeclaration);
-          const releaseTag: ReleaseTag = collector.fetchMetadata(childAstDeclaration).effectiveReleaseTag;
+          const releaseTag: ReleaseTag = collector.fetchApiItemMetadata(childAstDeclaration).effectiveReleaseTag;
 
           if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
             let nodeToTrim: Span = child;
