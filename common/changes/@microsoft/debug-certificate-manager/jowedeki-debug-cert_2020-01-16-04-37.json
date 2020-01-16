@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/debug-certificate-manager",
+      "comment": "Extract debug certificate logic into separate package.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/debug-certificate-manager",
+  "email": "halfnibble@users.noreply.github.com"
+}
