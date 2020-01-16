@@ -34,7 +34,7 @@ const noNullRule: TSESLint.RuleModule<MessageIds,Options> = {
           let isComparison: boolean = false;
           if (node.parent && node.parent.type === 'BinaryExpression') {
             const operator: string = node.parent.operator;
-            isComparison = operator === '!==' || operator === '===';
+            isComparison = operator === '!==' || operator === '===' || operator === '!=' || operator === '==';
           }
 
           if (!isComparison) {

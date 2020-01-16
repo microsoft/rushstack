@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-plugin",
+      "comment": "Allow null in == and != conditionals for no-null eslint rule",
+      "type": "major"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin",
+  "email": "cspotcode@gmail.com"
+}
