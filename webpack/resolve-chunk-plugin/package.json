@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/resolve-chunk-plugin",
-  "version": "2.0.158",
+  "version": "2.0.159",
   "description": "This is a webpack plugin that looks for calls to \"resolveChunk\" with a chunk name, and returns the chunk ID.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -16,9 +16,9 @@
     "@types/webpack": "*"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.3.15",
-    "@microsoft/rush-stack-compiler-3.5": "0.3.14",
-    "@rushstack/eslint-config": "0.5.1",
+    "@microsoft/node-library-build": "6.3.16",
+    "@microsoft/rush-stack-compiler-3.5": "0.3.15",
+    "@rushstack/eslint-config": "0.5.2",
     "@types/mocha": "5.2.5",
     "@types/node": "8.10.54",
     "@types/webpack": "4.39.8",
