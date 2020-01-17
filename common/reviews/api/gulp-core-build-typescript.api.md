@@ -4,21 +4,20 @@
 
 ```ts
 
-import { ConsoleTerminalProvider } from '@microsoft/node-core-library';
+import { GCBTerminalProvider } from '@microsoft/gulp-core-build';
 import { GulpTask } from '@microsoft/gulp-core-build';
 import { IBuildConfig } from '@microsoft/gulp-core-build';
 import { JsonObject } from '@microsoft/node-core-library';
 import { Terminal } from '@microsoft/node-core-library';
-import { TerminalProviderSeverity } from '@microsoft/node-core-library';
 import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.1';
 
 // Warning: (ae-forgotten-export) The symbol "ApiExtractorTask" needs to be exported by the entry point index.d.ts
-// 
+//
 // @public (undocumented)
 export const apiExtractor: ApiExtractorTask;
 
 // Warning: (ae-forgotten-export) The symbol "IRSCTaskConfig" needs to be exported by the entry point index.d.ts
-// 
+//
 // @public (undocumented)
 export interface ILintCmdTaskConfig extends IRSCTaskConfig {
     displayAsError?: boolean;
@@ -40,7 +39,7 @@ export interface ITslintCmdTaskConfig extends IRSCTaskConfig {
 export const lintCmd: LintCmdTask;
 
 // Warning: (ae-forgotten-export) The symbol "RSCTask" needs to be exported by the entry point index.d.ts
-// 
+//
 // @public (undocumented)
 export class LintCmdTask extends RSCTask<ILintCmdTaskConfig> {
     constructor();

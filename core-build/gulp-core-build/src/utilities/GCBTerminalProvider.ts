@@ -1,12 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { GulpTask } from '@microsoft/gulp-core-build';
+import { GulpTask } from '../tasks/GulpTask';
 import {
   TerminalProviderSeverity,
   ConsoleTerminalProvider
 } from '@microsoft/node-core-library';
 
+/**
+ * @public
+ */
 export class GCBTerminalProvider<TTask = {}> extends ConsoleTerminalProvider {
   private _gcbTask: GulpTask<TTask>;
 

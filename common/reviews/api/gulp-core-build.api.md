@@ -4,10 +4,12 @@
 
 ```ts
 
+import { ConsoleTerminalProvider } from '@microsoft/node-core-library';
 import gulp = require('gulp');
 import * as gulp_2 from 'gulp';
 import { JsonObject } from '@microsoft/node-core-library';
 import Orchestrator = require('orchestrator');
+import { TerminalProviderSeverity } from '@microsoft/node-core-library';
 
 // @public
 export function addSuppression(suppression: string | RegExp): void;
@@ -69,6 +71,13 @@ export function fileWarning(taskName: string, filePath: string, line: number, co
 
 // @public
 export function functionalTestRun(name: string, result: TestResultState, duration: number): void;
+
+// @public (undocumented)
+export class GCBTerminalProvider<TTask = {}> extends ConsoleTerminalProvider {
+    constructor(gcbTask: GulpTask<TTask>);
+    // (undocumented)
+    write(data: string, severity: TerminalProviderSeverity): void;
+}
 
 // @public
 export class GenerateShrinkwrapTask extends GulpTask<void> {
@@ -208,7 +217,7 @@ export function initialize(gulp: typeof gulp_2): void;
 export function _isJestEnabled(rootFolder: string): boolean;
 
 // Warning: (ae-incompatible-release-tags) The symbol "jest" is marked as @public, but its signature references "JestTask" which is marked as @alpha
-// 
+//
 // @public (undocumented)
 export const jest: JestTask;
 
