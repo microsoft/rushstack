@@ -10,7 +10,7 @@ import * as Gulp from 'gulp';
 import {
   CertificateStore,
   untrustCertificate
-} from '@microsoft/debug-certificate-manager';
+} from '@rushstack/debug-certificate-manager';
 
 /**
  * On Windows, this task removes the certificate with the expected serial number from the user's

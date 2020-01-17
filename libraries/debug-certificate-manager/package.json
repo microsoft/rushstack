@@ -1,5 +1,5 @@
 {
-  "name": "@microsoft/debug-certificate-manager",
+  "name": "@rushstack/debug-certificate-manager",
   "version": "0.1.0",
   "description": "Cross-platform functionality to create debug ssl certificates.",
   "main": "lib/index.js",

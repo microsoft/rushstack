@@ -615,7 +615,7 @@
 
     // "libraries" folder (alphabetical order)
     {
-      "packageName": "@microsoft/debug-certificate-manager",
+      "packageName": "@rushstack/debug-certificate-manager",
       "projectFolder": "libraries/debug-certificate-manager",
       "reviewCategory": "libraries",
       "shouldPublish": true

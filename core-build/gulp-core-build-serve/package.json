@@ -13,7 +13,7 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/debug-certificate-manager": "~0.1.0",
+    "@rushstack/debug-certificate-manager": "~0.1.0",
     "@microsoft/gulp-core-build": "3.13.4",
     "@microsoft/node-core-library": "3.18.3",
     "@types/node": "8.10.54",

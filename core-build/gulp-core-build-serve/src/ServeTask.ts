@@ -16,7 +16,7 @@ import * as ExpressType from 'express';
 import {
   ICertificate,
   ensureCertificate
-} from '@microsoft/debug-certificate-manager';
+} from '@rushstack/debug-certificate-manager';
 
 /**
  * @remarks

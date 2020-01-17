@@ -9,7 +9,7 @@ import * as Gulp from 'gulp';
 import {
   ICertificate,
   ensureCertificate
-} from '@microsoft/debug-certificate-manager';
+} from '@rushstack/debug-certificate-manager';
 import { Terminal } from '@microsoft/node-core-library';
 
 /**
