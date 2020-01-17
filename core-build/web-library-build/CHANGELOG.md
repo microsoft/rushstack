@@ -1,6 +1,11 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Tue, 14 Jan 2020 01:34:15 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Jan 2020 01:08:23 GMT and should not be manually modified.
+
+## 7.3.18
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
 
 ## 7.3.17
 Tue, 14 Jan 2020 01:34:15 GMT
