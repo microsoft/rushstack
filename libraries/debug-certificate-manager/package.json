@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Cross-platform functionality to create debug ssl certificates.",
   "main": "lib/index.js",
-  "typings": "dist/node-core-library.d.ts",
+  "typings": "dist/debug-certificate-manager.d.ts",
   "license": "MIT",
   "repository": {
     "url": "https://github.com/microsoft/rushstack/tree/master/libraries/debug-certificate-manager"

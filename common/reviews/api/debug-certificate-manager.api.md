@@ -4,20 +4,21 @@
 
 ```ts
 
+import { Terminal } from '@microsoft/node-core-library';
+
 // @public (undocumented)
 export class CertificateStore {
+    constructor();
     // (undocumented)
     certificateData: string | undefined;
     // (undocumented)
     readonly certificatePath: string;
     // (undocumented)
-    static readonly instance: CertificateStore;
-    // (undocumented)
     keyData: string | undefined;
     }
 
 // @public
-export function ensureCertificate(canGenerateNewCertificate: boolean, parentLogger: ILogging): ICertificate;
+export function ensureCertificate(canGenerateNewCertificate: boolean, terminal: Terminal): ICertificate;
 
 // @public (undocumented)
 export interface ICertificate {
@@ -27,20 +28,8 @@ export interface ICertificate {
     pemKey: string | undefined;
 }
 
-// @public (undocumented)
-export interface ILogging {
-    // (undocumented)
-    log: (string: any) => void;
-    // (undocumented)
-    logError: (string: any) => void;
-    // (undocumented)
-    logVerbose: (string: any) => void;
-    // (undocumented)
-    logWarning: (string: any) => void;
-}
-
 // @public
-export function untrustCertificate(parentLogger: ILogging): boolean;
+export function untrustCertificate(terminal: Terminal): boolean;
 
 
 // (No @packageDocumentation comment for this package)

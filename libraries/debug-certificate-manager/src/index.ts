@@ -3,7 +3,6 @@
 
 export {
   ICertificate,
-  ILogging,
   ensureCertificate,
   untrustCertificate
 } from './certificates';

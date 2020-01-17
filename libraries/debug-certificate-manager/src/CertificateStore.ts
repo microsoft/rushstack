@@ -10,17 +10,6 @@ import { FileSystem } from '@microsoft/node-core-library';
  * @public
  */
 export class CertificateStore {
-  private static _instance: CertificateStore;
-
-  public static get instance(): CertificateStore {
-    if (!CertificateStore._instance) {
-      CertificateStore._instance = new CertificateStore();
-      CertificateStore._instance._initialize();
-    }
-
-    return CertificateStore._instance;
-  }
-
   private _userProfilePath: string;
   private _serveDataPath: string;
   private _certificatePath: string;
@@ -28,6 +17,20 @@ export class CertificateStore {
 
   private _certificateData: string | undefined;
   private _keyData: string | undefined;
+
+  public constructor() {
+    const unresolvedUserFolder: string = homedir();
+    this._userProfilePath = path.resolve(unresolvedUserFolder);
+    if (!FileSystem.exists(this._userProfilePath)) {
+      throw new Error('Unable to determine the current user\'s home directory');
+    }
+
+    this._serveDataPath = path.join(this._userProfilePath, '.rushstack');
+    FileSystem.ensureFolder(this._serveDataPath);
+
+    this._certificatePath = path.join(this._serveDataPath, 'rushstack-serve.pem');
+    this._keyPath = path.join(this._serveDataPath, 'rushstack-serve.key');
+  }
 
   public get certificatePath(): string {
     return this._certificatePath;
@@ -75,19 +78,5 @@ export class CertificateStore {
     }
 
     this._keyData = key;
-  }
-
-  private _initialize(): void {
-    const unresolvedUserFolder: string = homedir();
-    this._userProfilePath = path.resolve(unresolvedUserFolder);
-    if (!FileSystem.exists(this._userProfilePath)) {
-      throw new Error('Unable to determine the current user\'s home directory');
-    }
-
-    this._serveDataPath = path.join(this._userProfilePath, '.rushstack-serve-data');
-    FileSystem.ensureFolder(this._serveDataPath);
-
-    this._certificatePath = path.join(this._serveDataPath, 'rushstack-serve.pem');
-    this._keyPath = path.join(this._serveDataPath, 'rushstack-serve.key');
   }
 }

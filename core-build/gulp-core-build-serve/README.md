@@ -121,7 +121,7 @@ The certificate is generated and self-signed with a unique private key and an at
 it (Windows and macOS only). If the user does not agree to trust the certificate, provides invalid root
 credentials, or something else goes wrong, the `TrustCertTask` will fail and the `ServeTask` will serve
 with the default, non-trusted certificate. If trust succeeds, the certificate and the private key are
-dropped in the `.rushstack-serve-data` directory in the user's home folder in `PEM` format. On platforms
+dropped in the `.rushstack` directory in the user's home folder in `PEM` format. On platforms
 other than Windows and macOS, the certificate and key are always dropped in that directory, and the user
 must trust the certificate manually.
 
@@ -134,6 +134,6 @@ signature is found by its serial number and then the certificate is deleted from
 signature. Regardless of whether the untrust succeeds or not, the certificate and key are deleted
 from the user's home directory.
 
-To manually untrust the certificate, delete the files in the `.rushstack-serve-data` directory under your
+To manually untrust the certificate, delete the files in the `.rushstack` directory under your
 home directory and untrust the certificate with the
 `73 1c 32 17 44 e3 46 50 a2 02 e3 ef 91 c3 c1 b9` serial number.

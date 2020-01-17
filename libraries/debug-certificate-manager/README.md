@@ -12,13 +12,13 @@ This library contains utilities for managing debug certificates in a development
 [![Build Status](https://travis-ci.org/Microsoft/debug-certificate-manager.svg?branch=master)](https://travis-ci.org/Microsoft/debug-certificate-manager) [![Dependencies](https://david-dm.org/Microsoft/debug-certificate-manager.svg)](https://david-dm.org/Microsoft/debug-certificate-manager)
 
 
-## CertificateStore
+## `CertificateStore`
 
-The CertificateStore class follows a singleton pattern and provides accessors and mutators for the certificate data stored in `.rushstack-serve-data`.
+The CertificateStore class follows a singleton pattern and provides accessors and mutators for the certificate data stored in `.rushstack`.
 
 Retrieve an instance with `CertificateStore.instance`.
 
-## ensureCertificate
+## `ensureCertificate`
 
 Get the dev certificate from the store, or optionally, generate a new one and trust it if one does not exist in the store. Returns a certificate object following the `ICertificate` interface.
 
@@ -29,7 +29,7 @@ export interface ICertificate {
 }
 ```
 
-## untrustCertificate
+## `untrustCertificate`
 
 Attempts to locate a previously generated debug certificate and untrust it. Returns a `boolean` value to denote success.
 

@@ -4,7 +4,7 @@
 import { CertificateStore } from '../index';
 
 test('Verify CertificateStore singleton is created.', () => {
-  const certificateStore: CertificateStore = CertificateStore.instance;
+  const certificateStore: CertificateStore = new CertificateStore();
   expect(certificateStore).toHaveProperty('certificateData');
   expect(certificateStore).toHaveProperty('keyData');
 });
