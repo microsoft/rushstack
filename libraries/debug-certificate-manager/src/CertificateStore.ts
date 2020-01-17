@@ -7,6 +7,7 @@ import { homedir } from 'os';
 import { FileSystem } from '@microsoft/node-core-library';
 
 /**
+ * Store to retrieve and save debug certificate data.
  * @public
  */
 export class CertificateStore {
@@ -32,10 +33,16 @@ export class CertificateStore {
     this._keyPath = path.join(this._serveDataPath, 'rushstack-serve.key');
   }
 
+  /**
+   * Path to the saved debug certificate
+   */
   public get certificatePath(): string {
     return this._certificatePath;
   }
 
+  /**
+   * Debug certificate pem file contents.
+   */
   public get certificateData(): string | undefined {
     if (!this._certificateData) {
       if (FileSystem.exists(this._certificatePath)) {
@@ -58,6 +65,9 @@ export class CertificateStore {
     this._certificateData = certificate;
   }
 
+  /**
+   * Key used to sign the debug pem certificate.
+   */
   public get keyData(): string | undefined {
     if (!this._keyData) {
       if (FileSystem.exists(this._keyPath)) {

@@ -6,32 +6,25 @@
 
 import { Terminal } from '@microsoft/node-core-library';
 
-// @public (undocumented)
+// @public
 export class CertificateStore {
     constructor();
-    // (undocumented)
     certificateData: string | undefined;
-    // (undocumented)
     readonly certificatePath: string;
-    // (undocumented)
     keyData: string | undefined;
     }
 
 // @public
 export function ensureCertificate(canGenerateNewCertificate: boolean, terminal: Terminal): ICertificate;
 
-// @public (undocumented)
+// @public
 export interface ICertificate {
-    // (undocumented)
     pemCertificate: string | undefined;
-    // (undocumented)
     pemKey: string | undefined;
 }
 
 // @public
 export function untrustCertificate(terminal: Terminal): boolean;
 
-
-// (No @packageDocumentation comment for this package)
 
 ```

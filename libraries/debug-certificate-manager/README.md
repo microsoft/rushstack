@@ -14,13 +14,21 @@ This library contains utilities for managing debug certificates in a development
 
 ## `CertificateStore`
 
-The CertificateStore class follows a singleton pattern and provides accessors and mutators for the certificate data stored in `.rushstack`.
+The CertificateStore class provides accessors and mutators for the debug certificate data stored in `.rushstack`.
 
-Retrieve an instance with `CertificateStore.instance`.
+Retrive certificate data from the store:
+```typescript
+const certificateStore: CertificateStore = new CertificateStore();
+return {
+  pemCertificate: certificateStore.certificateData,
+  pemKey: certificateStore.keyData
+};
+```
+Set data using the same property names `certificateData: string | undefined` and `keyData: string | undefined`.
 
 ## `ensureCertificate`
 
-Get the dev certificate from the store, or optionally, generate a new one and trust it if one does not exist in the store. Returns a certificate object following the `ICertificate` interface.
+Get a dev certificate from the store, or optionally, generate a new one and trust it if one does not exist in the store. Returns a certificate object following the `ICertificate` interface.
 
 ```typescript
 export interface ICertificate {

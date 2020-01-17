@@ -17,10 +17,19 @@ const macKeychain: string = '/Library/Keychains/System.keychain';
 let _certutilExePath: string | undefined;
 
 /**
+ * The interface for a debug certificate instance
+ *
  * @public
  */
 export interface ICertificate {
+  /**
+   * Generated pem certificate contents
+   */
   pemCertificate: string | undefined;
+
+  /**
+   * Private key used to sign the pem certificate
+   */
   pemKey: string | undefined;
 }
 
@@ -270,8 +279,9 @@ function _certificateHasSubjectAltName(certificateData: string): boolean {
 }
 
 /**
- * @public
  * Attempt to locate a previously generated debug certificate and untrust it.
+ *
+ * @public
  */
 export function untrustCertificate(terminal: Terminal): boolean {
   const certificateStore: CertificateStore = new CertificateStore();
@@ -354,9 +364,10 @@ export function untrustCertificate(terminal: Terminal): boolean {
 }
 
 /**
- * @public
- * Get the dev certificate from the store, or optionally, generate a new one
+ * Get a dev certificate from the store, or optionally, generate a new one
  * and trust it if one doesn't exist in the store.
+ *
+ * @public
  */
 export function ensureCertificate(
   canGenerateNewCertificate: boolean,
