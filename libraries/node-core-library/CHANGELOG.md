@@ -1,6 +1,11 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Thu, 09 Jan 2020 06:44:13 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Jan 2020 01:08:23 GMT and should not be manually modified.
+
+## 3.18.3
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
 
 ## 3.18.2
 Thu, 09 Jan 2020 06:44:13 GMT

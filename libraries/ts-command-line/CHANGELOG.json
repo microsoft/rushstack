@@ -2,6 +2,18 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "4.3.8",
+      "tag": "@microsoft/ts-command-line_v4.3.8",
+      "date": "Fri, 17 Jan 2020 01:08:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.1` to `0.5.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.3.7",
       "tag": "@microsoft/ts-command-line_v4.3.7",
       "date": "Thu, 09 Jan 2020 06:44:13 GMT",
