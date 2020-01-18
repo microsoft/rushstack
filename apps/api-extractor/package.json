@@ -48,7 +48,7 @@
     "@rushstack/eslint-config": "0.5.2",
     "@types/jest": "23.3.11",
     "@types/lodash": "4.14.116",
-    "@types/node": "8.10.54",
+    "@types/node": "10.17.13",
     "gulp": "~4.0.2"
   }
 }

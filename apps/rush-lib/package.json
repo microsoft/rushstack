@@ -56,7 +56,7 @@
     "@types/js-yaml": "3.12.1",
     "@types/lodash": "4.14.116",
     "@types/minimatch": "2.0.29",
-    "@types/node": "8.10.54",
+    "@types/node": "10.17.13",
     "@types/node-fetch": "1.6.9",
     "@types/semver": "5.3.33",
     "@types/tar": "4.0.0",
