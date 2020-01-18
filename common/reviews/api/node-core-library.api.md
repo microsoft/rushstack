@@ -393,7 +393,7 @@ export class LegacyAdapters {
     }
 
 // @public
-export type LegacyCallback<TResult, TError> = (error: TError, result: TResult) => void;
+export type LegacyCallback<TResult, TError> = (error: TError | null | undefined, result: TResult) => void;
 
 // @public
 export class LockFile {

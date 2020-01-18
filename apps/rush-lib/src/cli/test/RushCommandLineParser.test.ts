@@ -4,10 +4,26 @@
 import './mockRushCommandLineParser';
 
 import * as path from 'path';
-import { ChildProcessModuleMock, ISpawnMockConfig } from 'child_process';
 import { FileSystem } from '@microsoft/node-core-library';
 import { Interleaver } from '@microsoft/stream-collator';
 import { RushCommandLineParser } from '../RushCommandLineParser';
+
+/**
+ * See `__mocks__/child_process.js`.
+ */
+interface ISpawnMockConfig {
+  emitError: boolean;
+  returnCode: number;
+}
+
+interface ChildProcessModuleMock {
+  /**
+   * Initialize the `spawn` mock behavior.
+   */
+  __setSpawnMockConfig(config?: ISpawnMockConfig): void;
+
+  spawn: jest.Mock;
+}
 
 /**
  * Interface definition for a test instance for the RushCommandLineParser.
