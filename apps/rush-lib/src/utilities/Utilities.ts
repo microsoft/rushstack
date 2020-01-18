@@ -411,7 +411,11 @@ export class Utilities {
       Utilities._processResult(result);
     }
 
-    return result.status || 1; // If result.status is null, the process was terminated from a signal
+    if (result.status) {
+      return result.status;
+    } else {
+      throw result.error || new Error('An unknown error occurred.');
+    }
   }
 
   /**
