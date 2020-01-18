@@ -7,6 +7,13 @@
 import { Terminal } from '@microsoft/node-core-library';
 
 // @public
+export class CertificateManager {
+    constructor();
+    ensureCertificate(canGenerateNewCertificate: boolean, terminal: Terminal): ICertificate;
+    untrustCertificate(terminal: Terminal): boolean;
+}
+
+// @public
 export class CertificateStore {
     constructor();
     certificateData: string | undefined;
@@ -15,16 +22,10 @@ export class CertificateStore {
     }
 
 // @public
-export function ensureCertificate(canGenerateNewCertificate: boolean, terminal: Terminal): ICertificate;
-
-// @public
 export interface ICertificate {
     pemCertificate: string | undefined;
     pemKey: string | undefined;
 }
-
-// @public
-export function untrustCertificate(terminal: Terminal): boolean;
 
 
 ```

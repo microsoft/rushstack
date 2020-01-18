@@ -8,7 +8,7 @@ import {
 import * as Gulp from 'gulp';
 import {
   ICertificate,
-  ensureCertificate
+  CertificateManager
 } from '@rushstack/debug-certificate-manager';
 import { Terminal } from '@microsoft/node-core-library';
 
@@ -30,7 +30,8 @@ export class TrustCertTask extends GulpTask<void> {
   }
 
   public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): void {
-    const certificate: ICertificate = ensureCertificate(true, this._terminal);
+    const certificateManager: CertificateManager = new CertificateManager();
+    const certificate: ICertificate = certificateManager.ensureCertificate(true, this._terminal);
 
     if (certificate.pemCertificate && certificate.pemKey) {
       completeCallback();

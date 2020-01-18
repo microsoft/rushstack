@@ -15,7 +15,7 @@ import * as ExpressType from 'express';
 
 import {
   ICertificate,
-  ensureCertificate
+  CertificateManager
 } from '@rushstack/debug-certificate-manager';
 
 /**
@@ -297,7 +297,8 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
           }
         }
       } else {
-        const devCertificate: ICertificate = ensureCertificate(
+        const certificateManager: CertificateManager = new CertificateManager();
+        const devCertificate: ICertificate = certificateManager.ensureCertificate(
           this.taskConfig.tryCreateDevCertificate,
           this._terminal
         );

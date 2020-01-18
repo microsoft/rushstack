@@ -9,15 +9,15 @@
  *
  * This package provides the following utilities:
  * - `CertificateStore` to handle retrieving and saving a debug certificate.
- * - `ensureCertificate` will find or optionally create a debug certificate and trust it.
- * - `untrustCertificate` will untrust a debug certificate.
+ * - `CertificateManager` is a utility class containing the following public methods:
+ * | - `ensureCertificate` will find or optionally create a debug certificate and trust it.
+ * | - `untrustCertificate` will untrust a debug certificate.
  *
  * @packageDocumentation
  */
 
 export {
   ICertificate,
-  ensureCertificate,
-  untrustCertificate
-} from './certificates';
+  CertificateManager
+} from './CertificateManager';
 export { CertificateStore } from './CertificateStore';

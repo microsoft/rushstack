@@ -9,7 +9,7 @@ import { Terminal } from '@microsoft/node-core-library';
 import * as Gulp from 'gulp';
 import {
   CertificateStore,
-  untrustCertificate
+  CertificateManager
 } from '@rushstack/debug-certificate-manager';
 
 /**
@@ -31,7 +31,8 @@ export class UntrustCertTask extends GulpTask<void> {
   }
 
   public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): void {
-    const untrustCertResult: boolean = untrustCertificate(this._terminal);
+    const certificateManager: CertificateManager = new CertificateManager();
+    const untrustCertResult: boolean = certificateManager.untrustCertificate(this._terminal);
     const certificateStore: CertificateStore = new CertificateStore();
 
     // Clear out the certificate store
