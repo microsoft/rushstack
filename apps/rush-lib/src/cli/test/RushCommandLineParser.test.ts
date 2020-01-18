@@ -16,7 +16,7 @@ interface ISpawnMockConfig {
   returnCode: number;
 }
 
-interface ChildProcessModuleMock {
+interface IChildProcessModuleMock {
   /**
    * Initialize the `spawn` mock behavior.
    */
@@ -39,7 +39,7 @@ interface IParserTestInstance {
  */
 function setSpawnMock(options?: ISpawnMockConfig): jest.Mock {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const cpMocked: ChildProcessModuleMock = require('child_process');
+  const cpMocked: IChildProcessModuleMock = require('child_process');
   cpMocked.__setSpawnMockConfig(options);
 
   const spawnMock: jest.Mock = cpMocked.spawn;
