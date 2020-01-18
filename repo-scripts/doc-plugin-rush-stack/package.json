@@ -21,7 +21,7 @@
     "@microsoft/node-library-build": "6.3.16",
     "@rushstack/eslint-config": "0.5.2",
     "@types/js-yaml": "3.12.1",
-    "@types/node": "8.10.54",
+    "@types/node": "10.17.13",
     "gulp": "~4.0.2"
   }
 }

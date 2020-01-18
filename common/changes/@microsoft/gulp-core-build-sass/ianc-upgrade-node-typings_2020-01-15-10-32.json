@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Upgrade Node typings to Node 10",
+      "type": "minor",
+      "packageName": "@microsoft/gulp-core-build-sass"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-sass",
+  "email": "iclanton@users.noreply.github.com"
+}

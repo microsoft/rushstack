@@ -31,7 +31,7 @@
     "@rushstack/eslint-config": "0.5.2",
     "@types/jest": "23.3.11",
     "@types/js-yaml": "3.12.1",
-    "@types/node": "8.10.54",
+    "@types/node": "10.17.13",
     "@types/resolve": "0.0.8",
     "gulp": "~4.0.2",
     "jest": "~23.6.0"

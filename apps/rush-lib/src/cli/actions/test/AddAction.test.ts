@@ -11,7 +11,7 @@ import { RushCommandLineParser } from '../../RushCommandLineParser';
 describe('AddAction', () => {
   describe(`basic "rush add" tests`, () => {
     let doRushAddMock: jest.SpyInstance;
-    let oldExitCode: number;
+    let oldExitCode: number | undefined;
     let oldArgs: string[];
 
     beforeEach(() => {

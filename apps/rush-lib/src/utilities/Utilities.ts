@@ -410,7 +410,12 @@ export class Utilities {
     if (options.handleOutput) {
       Utilities._processResult(result);
     }
-    return result.status;
+
+    if (result.status) {
+      return result.status;
+    } else {
+      throw result.error || new Error('An unknown error occurred.');
+    }
   }
 
   /**
