@@ -2,6 +2,23 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "4.3.9",
+      "tag": "@microsoft/ts-command-line_v4.3.9",
+      "date": "Sun, 19 Jan 2020 02:26:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade Node typings to Node 10"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.2` to `0.5.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.3.8",
       "tag": "@microsoft/ts-command-line_v4.3.8",
       "date": "Fri, 17 Jan 2020 01:08:23 GMT",

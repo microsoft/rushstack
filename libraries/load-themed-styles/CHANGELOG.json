@@ -2,6 +2,24 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.10.33",
+      "tag": "@microsoft/load-themed-styles_v1.10.33",
+      "date": "Sun, 19 Jan 2020 02:26:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.3.15` to `0.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.2` to `0.5.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.3.16` to `6.4.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.10.32",
       "tag": "@microsoft/load-themed-styles_v1.10.32",
       "date": "Fri, 17 Jan 2020 01:08:23 GMT",

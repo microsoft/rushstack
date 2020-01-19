@@ -2,6 +2,26 @@
   "name": "@microsoft/gulp-core-build-mocha",
   "entries": [
     {
+      "version": "3.8.0",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.8.0",
+      "date": "Sun, 19 Jan 2020 02:26:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade Node typings to Node 10"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.13.4` to `3.14.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.2` to `0.5.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.7.10",
       "tag": "@microsoft/gulp-core-build-mocha_v3.7.10",
       "date": "Fri, 17 Jan 2020 01:08:23 GMT",

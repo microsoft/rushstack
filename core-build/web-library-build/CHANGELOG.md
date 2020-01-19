@@ -1,6 +1,13 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Fri, 17 Jan 2020 01:08:23 GMT and should not be manually modified.
+This log was last generated on Sun, 19 Jan 2020 02:26:53 GMT and should not be manually modified.
+
+## 7.4.0
+Sun, 19 Jan 2020 02:26:53 GMT
+
+### Minor changes
+
+- Upgrade Node typings to Node 10
 
 ## 7.3.18
 Fri, 17 Jan 2020 01:08:23 GMT
