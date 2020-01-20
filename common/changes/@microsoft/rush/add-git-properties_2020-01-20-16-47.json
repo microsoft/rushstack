@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support of defaultBranch and defaultOrigin as repo configuration properties",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "jabher@users.noreply.github.com"
+}
