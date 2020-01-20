@@ -7,10 +7,7 @@ import {
   Executable,
   Path
 } from '@microsoft/node-core-library';
-
-const DEFAULT_BRANCH: string = 'master';
-const DEFAULT_REMOTE: string = 'origin';
-const DEFAULT_FULLY_QUALIFIED_BRANCH: string = `${DEFAULT_REMOTE}/${DEFAULT_BRANCH}`;
+import {RushConfiguration} from '..';
 
 export class VersionControl {
   public static getRepositoryRootPath(): string | undefined {
@@ -83,14 +80,14 @@ export class VersionControl {
    * master branch 'origin/master'.
    * If there are more than one matches, returns the first remote's master branch.
    *
-   * @param repositoryUrl - repository url
+   * @param rushConfiguration - rush configuration
    */
-  public static getRemoteMasterBranch(repositoryUrl?: string): string {
-    if (repositoryUrl) {
+  public static getRemoteMasterBranch(rushConfiguration: RushConfiguration): string {
+    if (rushConfiguration.repositoryUrl) {
       const output: string = child_process
         .execSync(`git remote`)
         .toString();
-      const normalizedRepositoryUrl: string = repositoryUrl.toUpperCase();
+      const normalizedRepositoryUrl: string = rushConfiguration.repositoryUrl.toUpperCase();
       const matchingRemotes: string[] = output.split('\n').filter((remoteName) => {
         if (remoteName) {
           const remoteUrl: string = child_process.execSync(`git remote get-url ${remoteName}`)
@@ -124,20 +121,20 @@ export class VersionControl {
           );
         }
 
-        return `${matchingRemotes[0]}/${DEFAULT_BRANCH}`;
+        return `${matchingRemotes[0]}/${rushConfiguration.repositoryDefaultBranch}`;
       } else {
         console.log(colors.yellow(
-          `Unable to find a git remote matching the repository URL (${repositoryUrl}). ` +
+          `Unable to find a git remote matching the repository URL (${rushConfiguration.repositoryUrl}). ` +
           'Detected changes are likely to be incorrect.'
         ));
 
-        return DEFAULT_FULLY_QUALIFIED_BRANCH;
+        return rushConfiguration.repositoryDefaultFullyQualifiedRemote;
       }
     } else {
       console.log(colors.yellow(
         'A git remote URL has not been specified in rush.json. Setting the baseline remote URL is recommended.'
       ));
-      return DEFAULT_FULLY_QUALIFIED_BRANCH;
+      return rushConfiguration.repositoryDefaultFullyQualifiedRemote;
     }
   }
 
