@@ -2,6 +2,26 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.7.4",
+      "tag": "@microsoft/api-extractor-model_v7.7.4",
+      "date": "Sun, 19 Jan 2020 02:26:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade Node typings to Node 10"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.18.3` to `3.19.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.2` to `0.5.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.7.3",
       "tag": "@microsoft/api-extractor-model_v7.7.3",
       "date": "Fri, 17 Jan 2020 01:08:23 GMT",
