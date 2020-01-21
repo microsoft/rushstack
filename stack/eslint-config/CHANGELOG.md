@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Sun, 19 Jan 2020 02:26:53 GMT and should not be manually modified.
+This log was last generated on Tue, 21 Jan 2020 21:56:13 GMT and should not be manually modified.
+
+## 0.5.4
+Tue, 21 Jan 2020 21:56:13 GMT
+
+### Patches
+
+- Upgrade eslint-plugin-tsdoc to enable comments in tsdoc.json and more efficient loading
 
 ## 0.5.3
 Sun, 19 Jan 2020 02:26:53 GMT
