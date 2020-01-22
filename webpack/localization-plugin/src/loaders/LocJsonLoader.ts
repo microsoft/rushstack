@@ -12,14 +12,13 @@ export interface ILocJsonLoaderOptions {
   pluginInstance: LocalizationPlugin;
 }
 
-// tslint:disable-next-line:no-function-expression
 export default function (this: loader.LoaderContext, content: string): string {
   const { pluginInstance } = loaderUtils.getOptions(this) as ILocJsonLoaderOptions;
   const locJsonFilePath: string = this.resourcePath;
   const locJsonFileData: ILocJsonFile = jju.parse(content);
 
   const resultObject: { [stringName: string]: string } = {};
-  for (const stringName in locJsonFileData) { // tslint:disable-line:forin
+  for (const stringName in locJsonFileData) { // eslint-disable-line guard-for-in
     const stringKey: string = `${locJsonFilePath.toUpperCase()}?${stringName}`;
     if (pluginInstance.stringKeys.has(stringKey)) {
       resultObject[stringName] = pluginInstance.stringKeys.get(stringKey)!.value;

@@ -65,7 +65,7 @@ export class LocJsonPreprocessor {
       ];
 
       const locJsonFile: ILocJsonFile = JsonFile.loadAndValidate(locJsonFilePath, locJsonSchema);
-      for (const stringName in locJsonFile) { // tslint:disable-line:forin
+      for (const stringName in locJsonFile) { // eslint-disable-line guard-for-in
         const { comment } = locJsonFile[stringName];
 
         if (comment.trim()) {

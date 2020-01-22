@@ -20,7 +20,6 @@ export interface ILocJsonLoaderOptions {
   passthroughLocale: boolean;
 }
 
-// tslint:disable-next-line:no-function-expression
 export default function (this: loader.LoaderContext, content: string): string {
   const {
     resolvedStrings,
@@ -38,7 +37,7 @@ export default function (this: loader.LoaderContext, content: string): string {
       ));
   } else {
     const locJsonFileData: ILocJsonFile = jju.parse(content);
-    for (const stringName in locJsonFileData) { // tslint:disable-line:forin
+    for (const stringName in locJsonFileData) {
       if (!stringMap.has(stringName)) {
         this.emitError(new Error(
           `String "${stringName}" in file ${locJsonFilePath} was not provided in the LocalizationPlugin configuration.`

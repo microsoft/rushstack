@@ -3,7 +3,6 @@
 
 import { loader } from 'webpack';
 
-// tslint:disable-next-line:no-function-expression
 export default function (this: loader.LoaderContext, content: string): string {
   const locJsonFilePath: string = this.resourcePath;
   this.emitError(new Error(

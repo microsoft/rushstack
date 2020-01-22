@@ -142,7 +142,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
    */
   private _resolvedLocalizedStrings: Map<string, Map<string, Map<string, string>>>;
 
-  constructor(options: ILocalizationPluginOptions) {
+  public constructor(options: ILocalizationPluginOptions) {
     this._options = options;
   }
 
@@ -319,7 +319,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
     let lastIndex: number = 0;
     let regexResult: RegExpExecArray | null;
-    while (regexResult = placeholderRegex.exec(assetSource)) {
+    while (regexResult = placeholderRegex.exec(assetSource)) { // eslint-disable-line no-cond-assign
       const staticElement: IStaticReconstructionElement = {
         kind: 'static',
         staticString: assetSource.substring(lastIndex, regexResult.index)
@@ -472,7 +472,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     const errors: Error[] = [];
 
     // START configuration
-    {
+    { // eslint-disable-line no-lone-blocks
       if (
         !configuration.output ||
         !configuration.output.filename ||
@@ -488,7 +488,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     // END configuration
 
     // START options.filesToIgnore
-    {
+    { // eslint-disable-line no-lone-blocks
       this._locJsonFilesToIgnore = new Set<string>();
       for (const locJsonFilePath of this._options.filesToIgnore || []) {
         let normalizedLocJsonFilePath: string = path.resolve(configuration.context!, locJsonFilePath);
@@ -499,7 +499,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     // END options.filesToIgnore
 
     // START options.localizedStrings
-    {
+    { // eslint-disable-line no-lone-blocks
       const { localizedStrings } = this._options;
 
       const localeNameRegex: RegExp = /[a-z-]/i;
@@ -632,7 +632,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     // END options.localizedStrings
 
     // START options.defaultLocale
-    {
+    { // eslint-disable-line no-lone-blocks
       if (
         !this._options.defaultLocale ||
         (!this._options.defaultLocale.locale && !this._options.defaultLocale.usePassthroughLocale)
