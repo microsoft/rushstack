@@ -128,13 +128,13 @@ export class VersionControl {
           'Detected changes are likely to be incorrect.'
         ));
 
-        return rushConfiguration.repositoryDefaultFullyQualifiedRemote;
+        return rushConfiguration.repositoryDefaultFullyQualifiedRemoteBranch;
       }
     } else {
       console.log(colors.yellow(
         'A git remote URL has not been specified in rush.json. Setting the baseline remote URL is recommended.'
       ));
-      return rushConfiguration.repositoryDefaultFullyQualifiedRemote;
+      return rushConfiguration.repositoryDefaultFullyQualifiedRemoteBranch;
     }
   }
 
