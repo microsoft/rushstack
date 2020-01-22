@@ -7,7 +7,7 @@ import {
   Executable,
   Path
 } from '@microsoft/node-core-library';
-import { RushConfiguration } from '../RushConfiguration';
+import { RushConfiguration } from '../api/RushConfiguration';
 
 export class VersionControl {
   public static getRepositoryRootPath(): string | undefined {
