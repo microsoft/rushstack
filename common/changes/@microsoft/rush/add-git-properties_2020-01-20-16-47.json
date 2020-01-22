@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add support of defaultBranch and defaultOrigin as repo configuration properties",
+      "comment": "Make the default branch and default remote configurable.",
       "type": "none"
     }
   ],
