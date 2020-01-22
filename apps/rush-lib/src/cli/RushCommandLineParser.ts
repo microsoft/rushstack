@@ -230,6 +230,10 @@ export class RushCommandLineParser extends CommandLineParser {
       case RushConstants.bulkCommandKind:
         this.addAction(new BulkScriptAction({
           actionName: command.name,
+
+          // To remain compatible with existing repos, `rebuild` defaults to calling the `build` command in each repo.
+          commandToRun: RushConstants.rebuildCommandName ? 'build' : undefined,
+
           summary: command.summary,
           documentation: command.description || command.summary,
           safeForSimultaneousRushProcesses: command.safeForSimultaneousRushProcesses,
