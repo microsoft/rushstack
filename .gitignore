@@ -64,7 +64,6 @@ common/temp/
 
 # Common toolchain intermediate files
 temp
-
 lib
 lib-amd
 lib-es6
