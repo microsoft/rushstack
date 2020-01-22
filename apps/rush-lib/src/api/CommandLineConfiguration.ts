@@ -29,6 +29,38 @@ export class CommandLineConfiguration {
   public readonly parameters: ParameterJson[] = [];
 
   /**
+   * Use CommandLineConfiguration.loadFromFile()
+   */
+  private constructor(commandLineJson: ICommandLineJson | undefined) {
+    if (commandLineJson) {
+      if (commandLineJson.commands) {
+        for (const command of commandLineJson.commands) {
+          this.commands.push(command);
+        }
+      }
+
+      if (commandLineJson.parameters) {
+        for (const parameter of commandLineJson.parameters) {
+          this.parameters.push(parameter);
+
+          // Do some basic validation
+          switch (parameter.parameterKind) {
+            case 'choice':
+              const alternativeNames: string[] = parameter.alternatives.map(x => x.name);
+
+              if (parameter.defaultValue && alternativeNames.indexOf(parameter.defaultValue) < 0) {
+                throw new Error(`In ${RushConstants.commandLineFilename}, the parameter "${parameter.longName}",`
+                  + ` specifies a default value "${parameter.defaultValue}"`
+                  + ` which is not one of the defined alternatives: "${alternativeNames.toString()}"`);
+              }
+              break;
+          }
+        }
+      }
+    }
+  }
+
+  /**
    * Loads the configuration from the specified file and applies any ommited default build
    * settings.  If the file does not exist, then an empty default instance is returned.
    * If the file contains errors, then an exception is thrown.
@@ -87,37 +119,5 @@ export class CommandLineConfiguration {
     }
 
     return new CommandLineConfiguration(commandLineJson);
-  }
-
-  /**
-   * Use CommandLineConfiguration.loadFromFile()
-   */
-  private constructor(commandLineJson: ICommandLineJson | undefined) {
-    if (commandLineJson) {
-      if (commandLineJson.commands) {
-        for (const command of commandLineJson.commands) {
-          this.commands.push(command);
-        }
-      }
-
-      if (commandLineJson.parameters) {
-        for (const parameter of commandLineJson.parameters) {
-          this.parameters.push(parameter);
-
-          // Do some basic validation
-          switch (parameter.parameterKind) {
-            case 'choice':
-              const alternativeNames: string[] = parameter.alternatives.map(x => x.name);
-
-              if (parameter.defaultValue && alternativeNames.indexOf(parameter.defaultValue) < 0) {
-                throw new Error(`In ${RushConstants.commandLineFilename}, the parameter "${parameter.longName}",`
-                  + ` specifies a default value "${parameter.defaultValue}"`
-                  + ` which is not one of the defined alternatives: "${alternativeNames.toString()}"`);
-              }
-              break;
-          }
-        }
-      }
-    }
   }
 }

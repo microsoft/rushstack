@@ -232,7 +232,7 @@ describe('RushCommandLineParser', () => {
               // Use regex for task name in case spaces were prepended or appended to spawned command
               const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
 
-              // tslint:disable-next-line: no-any
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const firstSpawn: any[] = instance.spawnMock.mock.calls[0];
               expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(expect.arrayContaining([
                 expect.stringMatching(expectedBuildTaskRegexp)
@@ -240,7 +240,7 @@ describe('RushCommandLineParser', () => {
               expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
               expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
 
-              // tslint:disable-next-line: no-any
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
               expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(expect.arrayContaining([
                 expect.stringMatching(expectedBuildTaskRegexp)
@@ -265,7 +265,7 @@ describe('RushCommandLineParser', () => {
               // Use regex for task name in case spaces were prepended or appended to spawned command
               const expectedBuildTaskRegexp: RegExp = /fake_REbuild_task_but_works_with_mock/;
 
-              // tslint:disable-next-line: no-any
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const firstSpawn: any[] = instance.spawnMock.mock.calls[0];
               expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(expect.arrayContaining([
                 expect.stringMatching(expectedBuildTaskRegexp)
@@ -273,7 +273,7 @@ describe('RushCommandLineParser', () => {
               expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
               expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
 
-              // tslint:disable-next-line: no-any
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
               expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(expect.arrayContaining([
                 expect.stringMatching(expectedBuildTaskRegexp)
