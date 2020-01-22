@@ -22,7 +22,7 @@
     "@types/node": "10.17.13",
     "@types/tapable": "1.0.4",
     "loader-utils": "~1.1.0",
-    "glob": "~7.1.4",
+    "glob": "~7.0.5",
     "jju": "~1.4.0",
     "@microsoft/node-core-library": "3.19.2",
     "lodash": "~4.17.15"
