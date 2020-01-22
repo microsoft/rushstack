@@ -23,10 +23,51 @@ import {
  */
 export class CommandLineConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/command-line.schema.json'));
+    path.join(__dirname, '../schemas/command-line.schema.json')
+  );
 
   public readonly commands: CommandJson[] = [];
   public readonly parameters: ParameterJson[] = [];
+
+  public static readonly defaultBuildCommandJson: CommandJson = {
+    commandKind: 'bulk',
+    name: 'build',
+    summary: '(EXPERIMENTAL) Build all projects that haven\'t been built, or have changed since they were last'
+    + ' built.',
+    description: 'This command is similar to "rush rebuild", except that "rush build" performs'
+    + ' an incremental build. In other words, it only builds projects whose source files have changed'
+    + ' since the last successful build. The analysis requires a Git working tree, and only considers'
+    + ' source files that are tracked by Git and whose path is under the project folder. (For more details'
+    + ' about this algorithm, see the documentation for the "package-deps-hash" NPM package.) The incremental'
+    + ' build state is tracked in a per-project folder called ".rush/temp" which should NOT be added to Git. The'
+    + ' build command is tracked by the "arguments" field in the "package-deps_build.json" file contained'
+    + ' therein; a full rebuild is forced whenever the command has changed (e.g. "--production" or not).',
+    enableParallelism: true,
+    ignoreMissingScript: false,
+    ignoreDependencyOrder: false,
+    incremental: true,
+    allowWarningsInSuccessfulBuild: false,
+    safeForSimultaneousRushProcesses: false
+  };
+
+  public static readonly defaultRebuildCommandJson: CommandJson = {
+    commandKind: 'bulk',
+    name: 'rebuild',
+    summary: 'Clean and rebuild the entire set of projects',
+    description: 'This command assumes that the package.json file for each project contains'
+    + ' a "scripts" entry for "npm run build" that performs a full clean build.'
+    + ' Rush invokes this script to build each project that is registered in rush.json.'
+    + ' Projects are built in parallel where possible, but always respecting the dependency'
+    + ' graph for locally linked projects.  The number of simultaneous processes will be'
+    + ' based on the number of machine cores unless overridden by the --parallelism flag.'
+    + ' (For an incremental build, see "rush build" instead of "rush rebuild".)',
+    enableParallelism: true,
+    ignoreMissingScript: false,
+    ignoreDependencyOrder: false,
+    incremental: false,
+    allowWarningsInSuccessfulBuild: false,
+    safeForSimultaneousRushProcesses: false
+  };
 
   /**
    * Use CommandLineConfiguration.loadFromFile()
@@ -70,30 +111,9 @@ export class CommandLineConfiguration {
     if (FileSystem.exists(jsonFilename)) {
       commandLineJson = JsonFile.load(jsonFilename);
 
-      const defaultBuildSettings: CommandJson[] =
-        [{
-          commandKind: 'bulk',
-          name: 'build',
-          summary: '(EXPERIMENTAL) Build all projects that haven\'t been built, or have changed since they were last'
-          + ' built.',
-          enableParallelism: true,
-          ignoreMissingScript: false,
-          ignoreDependencyOrder: false,
-          incremental: true,
-          allowWarningsInSuccessfulBuild: false,
-          safeForSimultaneousRushProcesses: false
-        },
-        {
-          commandKind: 'bulk',
-          name: 'rebuild',
-          summary: 'Clean and rebuild the entire set of projects',
-          enableParallelism: true,
-          ignoreMissingScript: false,
-          ignoreDependencyOrder: false,
-          incremental: false,
-          allowWarningsInSuccessfulBuild: false,
-          safeForSimultaneousRushProcesses: false
-        }
+      const defaultBuildSettings: CommandJson[] = [
+        CommandLineConfiguration.defaultBuildCommandJson,
+        CommandLineConfiguration.defaultRebuildCommandJson
       ];
 
       const applyDefaults: boolean = commandLineJson ? lodash.some(commandLineJson.commands, (command) => {
