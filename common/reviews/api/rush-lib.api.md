@@ -296,7 +296,7 @@ export class RushConfiguration {
     // (undocumented)
     readonly projectsByName: Map<string, RushConfigurationProject>;
     readonly repositoryDefaultBranch: string;
-    readonly repositoryDefaultFullyQualifiedRemote: string;
+    readonly repositoryDefaultFullyQualifiedRemoteBranch: string;
     readonly repositoryDefaultRemote: string;
     readonly repositoryUrl: string;
     readonly rushJsonFile: string;
