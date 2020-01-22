@@ -1043,7 +1043,7 @@ export class RushConfiguration {
   }
 
   /**
-   * The default fully-qualified git remote of the repository. This helps "rush change" find the right remote to compare against.
+   * The default fully-qualified git remote branch of the repository. This helps "rush change" find the right branch to compare against.
    */
   public get repositoryDefaultFullyQualifiedRemoteBranch(): string {
     return `${this.repositoryDefaultRemote}/${this.repositoryDefaultBranch}`;
