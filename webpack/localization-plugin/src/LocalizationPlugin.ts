@@ -309,9 +309,10 @@ export class LocalizationPlugin implements Webpack.Plugin {
       kind: 'localized';
       values: { [locale: string]: string };
       size: number;
+      quotemarkCharacter: string | undefined;
     }
 
-    const placeholderRegex: RegExp = new RegExp(`${lodash.escapeRegExp(STRING_PLACEHOLDER_PREFIX)}_(\\d+)`, 'g');
+    const placeholderRegex: RegExp = new RegExp(`${lodash.escapeRegExp(STRING_PLACEHOLDER_PREFIX)}_(.+)_(\\d+)`, 'g');
     const result: Map<string, IProcessAssetResult> = new Map<string, IProcessAssetResult>();
     const assetSource: string = asset.source();
 
@@ -326,7 +327,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
       };
       reconstructionSeries.push(staticElement);
 
-      const [placeholder, placeholderSerialNumber] = regexResult;
+      const [placeholder, quotemark, placeholderSerialNumber] = regexResult;
 
       const values: { [locale: string]: string } | undefined = this._stringPlaceholderMap.get(placeholderSerialNumber);
       if (!values) {
@@ -340,7 +341,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
         const localizedElement: ILocalizedReconstructionElement = {
           kind: 'localized',
           values: values,
-          size: placeholder.length
+          size: placeholder.length,
+          quotemarkCharacter: quotemark !== '"' ? quotemark : undefined
         };
         reconstructionSeries.push(localizedElement);
         lastIndex = regexResult.index + placeholder.length;
@@ -362,7 +364,12 @@ export class LocalizationPlugin implements Webpack.Plugin {
           reconstruction.push((element as IStaticReconstructionElement).staticString);
         } else {
           const localizedElement: ILocalizedReconstructionElement = element as ILocalizedReconstructionElement;
-          const newValue: string = localizedElement.values[locale];
+          let newValue: string = localizedElement.values[locale];
+          if (localizedElement.quotemarkCharacter) {
+            // Replace the quotemark character with the correctly-escaped character
+            newValue = newValue.replace(/\"/g, localizedElement.quotemarkCharacter)
+          }
+
           reconstruction.push(newValue);
           sizeDiff += (newValue.length - localizedElement.size);
         }
@@ -718,7 +725,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
     const suffix: string = (this._stringPlaceholderCounter++).toString();
     return {
-      value: `${STRING_PLACEHOLDER_PREFIX}_${suffix}`,
+      value: `${STRING_PLACEHOLDER_PREFIX}_"_${suffix}`,
       suffix: suffix
     };
   }

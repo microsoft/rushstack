@@ -39,10 +39,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "webpack-dev-server",
-      "allowedCategories": [ "tests" ]
-    },
-    {
       "name": "@microsoft/gulp-core-build-typescript",
       "allowedCategories": [ "libraries" ]
     },
@@ -128,7 +124,7 @@
     },
     {
       "name": "@microsoft/set-webpack-public-path-plugin",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/sp-tslint-rules",
@@ -595,11 +591,15 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "webpack-bundle-analyzer",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "webpack-cli",
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "webpack-bundle-analyzer",
+      "name": "webpack-dev-server",
       "allowedCategories": [ "tests" ]
     },
     {

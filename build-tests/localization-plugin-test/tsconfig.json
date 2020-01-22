@@ -4,6 +4,9 @@
     "rootDirs": [
       "./src",
       "./temp/loc-json-ts/"
+    ],
+    "types": [
+      "webpack-env"
     ]
   }
 }

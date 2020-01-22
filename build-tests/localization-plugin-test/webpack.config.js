@@ -4,6 +4,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 const { LocalizationPlugin } = require('@rushstack/localization-plugin');
+const { SetPublicPathPlugin } = require('@microsoft/set-webpack-public-path-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 module.exports = function(env) {
@@ -53,6 +54,9 @@ module.exports = function(env) {
               "string1": "the third string",
               "string2": "the fourth string",
               "string3": "UNUSED STRING!"
+            },
+            "./src/strings4.loc.json": {
+              "string1": "\"String with quotemarks\""
             }
           },
           "es-es": {
@@ -66,6 +70,9 @@ module.exports = function(env) {
               "string1": "la tercera cadena",
               "string2": "la cuarta cadena",
               "string3": "UNUSED STRING!"
+            },
+            "./src/strings4.loc.json": {
+              "string1": "\"Cadena con comillas\""
             }
           }
         },
@@ -84,6 +91,12 @@ module.exports = function(env) {
         generateStatsFile: true,
         statsFilename: path.resolve(__dirname, 'temp', 'stats.json'),
         logLevel: 'error'
+      }),
+      new SetPublicPathPlugin({
+        scriptName: {
+          name: '[name]_[locale]_[contenthash].js',
+          isTokenized: true
+        }
       })
     ]
   };
