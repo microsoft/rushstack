@@ -10,7 +10,7 @@ import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { Span } from '../analyzer/Span';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import { AstImport } from '../analyzer/AstImport';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { ExtractorMessage } from '../api/ExtractorMessage';
@@ -18,6 +18,8 @@ import { StringWriter } from './StringWriter';
 import { DtsEmitHelpers } from './DtsEmitHelpers';
 
 export class ApiReportGenerator {
+  private static _TrimSpacesRegExp: RegExp = / +$/gm;
+
   /**
    * Compares the contents of two API files that were created using ApiFileGenerator,
    * and returns true if they are equivalent.  Note that these files are not normally edited
@@ -104,8 +106,8 @@ export class ApiReportGenerator {
 
             const span: Span = new Span(astDeclaration.declaration);
 
-            const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
-            if (declarationMetadata.isPreapproved) {
+            const apiItemMetadata: ApiItemMetadata = collector.fetchApiItemMetadata(astDeclaration);
+            if (apiItemMetadata.isPreapproved) {
               ApiReportGenerator._modifySpanForPreapproved(span);
             } else {
               ApiReportGenerator._modifySpan(collector, span, entity, astDeclaration, false);
@@ -154,7 +156,8 @@ export class ApiReportGenerator {
     // Write the closing delimiter for the Markdown code fence
     stringWriter.writeLine('\n```');
 
-    return stringWriter.toString();
+    // Remove any trailing spaces
+    return stringWriter.toString().replace(ApiReportGenerator._TrimSpacesRegExp, '');
   }
 
   /**
@@ -164,7 +167,7 @@ export class ApiReportGenerator {
     astDeclaration: AstDeclaration, insideTypeLiteral: boolean): void {
 
     // Should we process this declaration at all?
-    if ((astDeclaration.modifierFlags & ts.ModifierFlags.Private) !== 0) { // tslint:disable-line:no-bitwise
+    if ((astDeclaration.modifierFlags & ts.ModifierFlags.Private) !== 0) { // eslint-disable-line no-bitwise
       span.modification.skipAll();
       return;
     }
@@ -371,46 +374,48 @@ export class ApiReportGenerator {
       ApiReportGenerator._writeLineAsComments(stringWriter, 'Warning: ' + message.formatMessageWithoutLocation());
     }
 
-    const footerParts: string[] = [];
-    const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
-    if (!declarationMetadata.releaseTagSameAsParent) {
-      if (declarationMetadata.effectiveReleaseTag !== ReleaseTag.None) {
-        footerParts.push(ReleaseTag.getTagName(declarationMetadata.effectiveReleaseTag));
-      }
-    }
-
-    if (declarationMetadata.isSealed) {
-      footerParts.push('@sealed');
-    }
-
-    if (declarationMetadata.isVirtual) {
-      footerParts.push('@virtual');
-    }
-
-    if (declarationMetadata.isOverride) {
-      footerParts.push('@override');
-    }
-
-    if (declarationMetadata.isEventProperty) {
-      footerParts.push('@eventProperty');
-    }
-
-    if (declarationMetadata.tsdocComment) {
-      if (declarationMetadata.tsdocComment.deprecatedBlock) {
-        footerParts.push('@deprecated');
-      }
-    }
-
-    if (declarationMetadata.needsDocumentation) {
-      footerParts.push('(undocumented)');
-    }
-
-    if (footerParts.length > 0) {
-      if (messagesToReport.length > 0) {
-        ApiReportGenerator._writeLineAsComments(stringWriter, ''); // skip a line after the warnings
+    if (!collector.isAncillaryDeclaration(astDeclaration)) {
+      const footerParts: string[] = [];
+      const apiItemMetadata: ApiItemMetadata = collector.fetchApiItemMetadata(astDeclaration);
+      if (!apiItemMetadata.releaseTagSameAsParent) {
+        if (apiItemMetadata.effectiveReleaseTag !== ReleaseTag.None) {
+          footerParts.push(ReleaseTag.getTagName(apiItemMetadata.effectiveReleaseTag));
+        }
       }
 
-      ApiReportGenerator._writeLineAsComments(stringWriter, footerParts.join(' '));
+      if (apiItemMetadata.isSealed) {
+        footerParts.push('@sealed');
+      }
+
+      if (apiItemMetadata.isVirtual) {
+        footerParts.push('@virtual');
+      }
+
+      if (apiItemMetadata.isOverride) {
+        footerParts.push('@override');
+      }
+
+      if (apiItemMetadata.isEventProperty) {
+        footerParts.push('@eventProperty');
+      }
+
+      if (apiItemMetadata.tsdocComment) {
+        if (apiItemMetadata.tsdocComment.deprecatedBlock) {
+          footerParts.push('@deprecated');
+        }
+      }
+
+      if (apiItemMetadata.needsDocumentation) {
+        footerParts.push('(undocumented)');
+      }
+
+      if (footerParts.length > 0) {
+        if (messagesToReport.length > 0) {
+          ApiReportGenerator._writeLineAsComments(stringWriter, ''); // skip a line after the warnings
+        }
+
+        ApiReportGenerator._writeLineAsComments(stringWriter, footerParts.join(' '));
+      }
     }
 
     return stringWriter.toString();

@@ -306,7 +306,7 @@ export class PublishUtilities {
       );
     } else {
       console.log(
-        `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: update ` + `for ${change.packageName} at ${newVersion}`
+        `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: update for ${change.packageName} at ${newVersion}`
       );
     }
 

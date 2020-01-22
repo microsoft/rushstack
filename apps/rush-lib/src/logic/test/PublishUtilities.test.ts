@@ -15,7 +15,7 @@ import {
 } from '../PublishUtilities';
 import { ChangeFiles } from '../ChangeFiles';
 
-/* tslint:disable:no-string-literal */
+/* eslint-disable dot-notation */
 
 describe('findChangeRequests', () => {
   let packagesRushConfiguration: RushConfiguration;
@@ -75,7 +75,6 @@ describe('findChangeRequests', () => {
   });
 
   it('returns 4 changes when hotfixing a root package', () => {
-    // tslint:disable-next-line no-any
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       packagesRushConfiguration.projectsByName,
       packagesRushConfiguration,
@@ -282,13 +281,11 @@ describe('sortChangeRequests', () => {
 
 describe('isRangeDependency', () => {
   it('can test ranges', () => {
-    /* tslint:disable:no-unused-expression */
     expect(PublishUtilities.isRangeDependency('>=1.0.0 <2.0.0')).toEqual(true);
     expect(PublishUtilities.isRangeDependency('>=1.0.0-pr.1 <2.0.0')).toEqual(true);
     expect(PublishUtilities.isRangeDependency('1.0.0')).toEqual(false);
     expect(PublishUtilities.isRangeDependency('^1.0.0')).toEqual(false);
     expect(PublishUtilities.isRangeDependency('~1.0.0')).toEqual(false);
-    /* tslint:enable:no-unused-expression */
   });
 });
 

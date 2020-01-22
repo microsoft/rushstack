@@ -1,5 +1,5 @@
 {
-	"title": "Universal Reference YAML Schema for TypeScript",
+	"title": "Universal Reference YAML Schema for DocFX",
 	"$schema": "http://json-schema.org/draft-04/schema#",
 	"type": "object",
 	"additionalProperties": false,
@@ -17,45 +17,45 @@
 			"uniqueItems": true
 		},
 		"references": {
+			"description": "References to other items.",
 			"type": "array",
 			"items": {
 				"$ref": "#/definitions/reference"
 			},
 			"minItems": 1,
 			"uniqueItems": true
+		},
+		"shouldSkipMarkup": {
+			"type": "boolean"
 		}
 	},
 	"definitions":{
-		"deprecated": {
-			"type": "object",
-			"additionalProperties": false,
-			"properties": {
-				"content": {
-					"description": "The string following the default obsolete message. Supports markdown.",
-					"type": "string"
-				}
-			}
-		},
-		"exception": {
-			"type": "object",
-			"additionalProperties": false,
-			"properties": {
-				"description": {
-					"type": "string"
-				},
-				"type": {
-					"type": "string"
-				}
-			}
-		},
 		"item": {
+			"description": "Represents basic API elements such as classes, interfaces, members, etc.",
 			"type": "object",
 			"additionalProperties": false,
 			"required": [
 				"uid"
 			],
 			"properties": {
+				"uid": {
+					"description": "A value that uniquely identifies this item among all other documentation elements. (ex: Microsoft.FSharp.Linq.RuntimeHelpers.AnonymousObject`2)",
+					"type": "string"
+				},
+				"commentId": {
+					"description": "A Roslyn comment ID.",
+					"type": "string"
+				},
+				"id": {
+					"description": "An ID for the item.",
+					"type": "string"
+				},
+				"parent": {
+					"description": "A UID reference to the parent of this item.",
+					"type": "string"
+				},
 				"children": {
+					"description": "A list of UID references to the children of this item.",
 					"type": "array",
 					"items": {
 						"type": "string"
@@ -63,10 +63,87 @@
 					"minItems": 1,
 					"uniqueItems": true
 				},
-				"deprecated": {
-					"$ref": "#/definitions/deprecated"
+				"href": {
+					"description": "A link URL for the item.",
+					"type": "string"
+				},
+				"langs": {
+					"description": "The development languages supported by this item",
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"name": {
+					"description": "The local name of the item (ex: AnonymousObject<T1,T2>). This name should generally not be namespace qualified and should not include parent type information.",
+					"type": "string"
+				},
+				"nameWithType": {
+					"description": "The name of the item including its parent type (ex: Colors.Red). This name should generally not be namespace qualified.",
+					"type": "string"
+				},
+				"fullName": {
+					"description": "The full-qualified name of the item (ex: Microsoft.FSharp.Linq.RuntimeHelpers.AnonymousObject<T1,T2>).",
+					"type": "string"
+				},
+				"type": {
+					"description": "The type of source element this item represents",
+					"enum": [ "class", "constructor", "enum", "field", "function", "interface", "method", "package", "property", "event", "typealias", "variable", "namespace" ]
+				},
+				"source": {
+					"description": "The source details for the item",
+					"$ref": "#/definitions/source"
+				},
+				"documentation": {
+					"description": "Overrides the source details for the item.",
+					"$ref": "#/definitions/source"
+				},
+				"assemblies": {
+					"description": "The names of managed assemblies that contain this item.",
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"namespace": {
+					"description": "The UID of the namespace that contains this item.",
+					"type": "string"
+				},
+				"summary": {
+					"description": "The summary for the item. Markdown is permitted",
+					"type": "string"
+				},
+				"remarks": {
+					"description": "The remarks for the item. Markdown is permitted",
+					"type": "string"
+				},
+				"examples": {
+					"description": "The examples for the item. Markdown is permitted",
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"syntax": {
+					"description": "The syntax for this item.",
+					"$ref": "#/definitions/syntax"
+				},
+				"overridden": {
+					"description": "The UID of the member this item overrides.",
+					"type": "string"
+				},
+				"overload": {
+					"description": "The UID of the member this item overloads.",
+					"type": "string"
 				},
 				"exceptions": {
+					"description": "The exceptions thrown by this item.",
 					"type": "array",
 					"items": {
 						"$ref": "#/definitions/exception"
@@ -74,7 +151,39 @@
 					"minItems": 1,
 					"uniqueItems": true
 				},
-				"extends": {
+				"seealso": {
+					"description": "Links to additional content related to this item.",
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/link"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"seealsoContent": {
+					"description": "Additional information about other content related to this item. Markdown is permitted.",
+					"type": "string"
+				},
+				"see": {
+					"description": "Links to additional content related to this item.",
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/link"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"inheritance": {
+					"description": "The inheritance tree for this item. Multiple inherited is permitted if the underlying language supports it.",
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/inheritance"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"derivedClasses": {
+					"description": "A list of UIDs for items derived from this item.",
 					"type": "array",
 					"items": {
 						"type": "string"
@@ -82,11 +191,51 @@
 					"minItems": 1,
 					"uniqueItems": true
 				},
-				"fullName": {
-					"type": "string",
-					"description": "The full friendly name of the object. (ex: Microsoft.FSharp.Linq.RuntimeHelpers.AnonymousObject<T1,T2>)"
-				},
 				"implements": {
+					"description": "A list of UIDs for the items this item implements.",
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"inheritedMembers": {
+					"description": "A list of UIDs for the members this item inherits.",
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"extensionMethods": {
+					"description": "A list of UIDs for extension methods for this item.",
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"conceptual": {
+					"description": "The conceptual text for this item.",
+					"type": "string"
+				},
+				"platform": {
+					"description": "The platforms supported by this item.",
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+
+				"deprecated": {
+					"$ref": "#/definitions/deprecated"
+				},
+				"extends": {
 					"type": "array",
 					"items": {
 						"type": "string"
@@ -97,7 +246,21 @@
 				"isPreview": {
 					"type": "boolean"
 				},
-				"langs": {
+				"numericValue": {
+					"type": "string",
+					"description": "Used for Enum fields"
+				},
+				"package": {
+					"type": "string"
+				}
+			},
+			"patternProperties": {
+				"^parent\\.": {
+					"description": "A UID reference to the parent of this item for a specific development language.",
+					"type": "string"
+				},
+				"^children\\.": {
+					"description": "A list of UID references to the children of this item for a specific development language.",
 					"type": "array",
 					"items": {
 						"type": "string"
@@ -105,35 +268,188 @@
 					"minItems": 1,
 					"uniqueItems": true
 				},
-				"name": {
-					"type": "string",
-					"description": "The name of the object. (ex: AnonymousObject<T1,T2>)"
-				},
-				"numericValue": {
-					"type": "string",
-					"description": "Used for Enum fields"
-				},
-				"package": {
+				"^name\\.": {
+					"description": "The local name of the item (ex: AnonymousObject<T1,T2>) for a specific development language. This name should generally not be namespace qualified and should not include parent type information.",
 					"type": "string"
 				},
-				"source": {
+				"^nameWithType\\.": {
+					"description": "The name of the item including its parent type (ex: Colors.Red) for a specific development language. This name should generally not be namespace qualified.",
+					"type": "string"
+				},
+				"^fullName\\.": {
+					"description": "The full-qualified name of the item (ex: Microsoft.FSharp.Linq.RuntimeHelpers.AnonymousObject<T1,T2>) for a specific development language.",
+					"type": "string"
+				},
+				"^source\\.": {
+					"description": "The source details for the item for a specific development language.",
 					"$ref": "#/definitions/source"
 				},
-				"summary": {
+				"^assemblies\\.": {
+					"description": "The names of managed assemblies that contain this item for a specific development language.",
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"^namespace\\.": {
+					"description": "The UID of the namespace that contains this item for a specific development language.",
 					"type": "string"
 				},
-				"remarks": {
+				"^overridden\\.": {
+					"description": "The UID of the member this item overrides for a specific development language.",
 					"type": "string"
 				},
-				"syntax": {
-					"$ref": "#/definitions/syntax"
+				"^overload\\.": {
+					"description": "The UID of the member this item overloads for a specific development language.",
+					"type": "string"
 				},
-				"type": {
-					"enum": [ "class", "constructor", "enum", "field", "function", "interface", "method", "package", "property", "event", "typealias", "variable" ]
+				"^exceptions\\.": {
+					"description": "The exceptions thrown by this item for a specific development language.",
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/exception"
+					},
+					"minItems": 1,
+					"uniqueItems": true
 				},
-				"uid": {
-					"type": "string",
-					"description": "The fully qualified name of the object. (ex: Microsoft.FSharp.Linq.RuntimeHelpers.AnonymousObject`2)"
+				"^inheritance\\.": {
+					"description": "The inheritance tree for this item for a specific development language. Multiple inherited is permitted if the underlying language supports it.",
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/inheritance"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"^derivedClasses\\.": {
+					"description": "A list of UIDs for items derived from this item for a specific development language.",
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"^implements\\.": {
+					"description": "A list of UIDs for the items this item implements for a specific development language.",
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"^inheritedMembers\\.": {
+					"description": "A list of UIDs for the members this item inherits for a specific development language.",
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"^extensionMethods\\.": {
+					"description": "A list of UIDs for extension methods for this item for a specific development language.",
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"^platform\\.": {
+					"description": "The platforms supported by this item for a specific development language.",
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				}
+			}
+		},
+		"source": {
+			"type": "object",
+			"properties": {
+				"remote": {
+					"$ref": "#/definitions/remote"
+				},
+				"basePath": {
+					"type": "string"
+				},
+				"id": {
+					"type": "string"
+				},
+				"href": {
+					"type": "string"
+				},
+				"path": {
+					"type": "string"
+				},
+				"startLine": {
+					"type": "integer"
+				},
+				"endLine": {
+					"type": "integer"
+				},
+				"content": {
+					"type": "string"
+				},
+				"isExternal": {
+					"type": "boolean"
+				}
+			}
+		},
+		"remote": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"path": {
+					"type": "string"
+				},
+				"branch": {
+					"type": "string"
+				},
+				"repo": {
+					"type": "string"
+				}
+			}
+		},
+		"syntax": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"content": {
+					"type": "string"
+				},
+				"parameters": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/parameter"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"typeParameters": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/parameter"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"return": {
+					"$ref": "#/definitions/return"
+				}
+			},
+			"patternProperties": {
+				"^content\\.": {
+					"type": "string"
+				},
+				"^return\\.": {
+					"$ref": "#/definitions/return"
 				}
 			}
 		},
@@ -141,9 +457,6 @@
 			"type": "object",
 			"additionalProperties": false,
 			"properties": {
-				"description": {
-					"type": "string"
-				},
 				"id": {
 					"type": "string"
 				},
@@ -152,6 +465,82 @@
 					"items": {
 						"type": "string"
 					}
+				},
+				"description": {
+					"type": "string"
+				},
+				"optional": {
+					"type": "boolean"
+				},
+				"defaultValue": {
+					"type": "string"
+				}
+			}
+		},
+		"return": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"type": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"description": {
+					"type": "string"
+				}
+			}
+		},
+		"exception": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"type": {
+					"type": "string"
+				},
+				"description": {
+					"type": "string"
+				}
+			}
+		},
+		"link": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": [ "linkType", "linkId" ],
+			"properties": {
+				"linkType": {
+					"enum": [ "CRef", "HRef" ]
+				},
+				"linkId": {
+					"type": "string"
+				},
+				"commentId": {
+					"type": "string"
+				},
+				"altText": {
+					"type": "string"
+				}
+			}
+		},
+		"inheritance": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": [ "type" ],
+			"properties": {
+				"type": {
+					"type": "string"
+				},
+				"inheritance": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/inheritance"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"level": {
+					"type": "number"
 				}
 			}
 		},
@@ -162,13 +551,42 @@
 				"uid": {
 					"type": "string"
 				},
+				"commentId": {
+					"type": "string"
+				},
+				"parent": {
+					"type": "string"
+				},
+				"definition": {
+					"type": "string"
+				},
+				"isExternal": {
+					"type": "boolean"
+				},
+				"href": {
+					"type": "string"
+				},
 				"name": {
+					"type": "string"
+				},
+				"nameWithType": {
 					"type": "string"
 				},
 				"fullName": {
 					"type": "string"
+				}
+			},
+			"patternProperties": {
+				"^name\\.": {
+					"type": "string"
 				},
-				"spec.typeScript": {
+				"^nameWithType\\.": {
+					"type": "string"
+				},
+				"^fullName\\.": {
+					"type": "string"
+				},
+				"^spec\\.": {
 					"type": "array",
 					"items": {
 						"$ref": "#/definitions/spec"
@@ -186,83 +604,28 @@
 				"name": {
 					"type": "string"
 				},
+				"nameWithType": {
+					"type": "string"
+				},
 				"fullName": {
 					"type": "string"
-				}
-			}
-		},
-		"remote": {
-			"type": "object",
-			"additionalProperties": false,
-			"properties": {
-				"branch": {
-					"type": "string"
 				},
-				"path": {
-					"type": "string"
+				"isExternal": {
+					"type": "boolean"
 				},
-				"repo": {
+				"href": {
 					"type": "string"
 				}
 			}
 		},
-		"return": {
-			"type": "object",
-			"additionalProperties": false,
-			"properties": {
-				"description": {
-					"type": "string"
-				},
-				"type": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				}
-			}
-		},
-		"source": {
-			"type": "object",
-			"properties": {
-				"id": {
-					"type": "string"
-				},
-				"path": {
-					"type": "string"
-				},
-				"remote": {
-					"$ref": "#/definitions/remote"
-				},
-				"startLine": {
-					"type": "integer"
-				}
-			}
-		},
-		"syntax": {
+
+		"deprecated": {
 			"type": "object",
 			"additionalProperties": false,
 			"properties": {
 				"content": {
+					"description": "The string following the default obsolete message. Supports markdown.",
 					"type": "string"
-				},
-				"typeParameters": {
-					"type": "array",
-					"items": {
-						"$ref": "#/definitions/parameter"
-					},
-					"minItems": 1,
-					"uniqueItems": true
-				},
-				"parameters": {
-					"type": "array",
-					"items": {
-						"$ref": "#/definitions/parameter"
-					},
-					"minItems": 1,
-					"uniqueItems": true
-				},
-				"return": {
-					"$ref": "#/definitions/return"
 				}
 			}
 		}

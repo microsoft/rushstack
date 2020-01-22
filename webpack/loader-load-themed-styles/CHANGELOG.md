@@ -1,6 +1,118 @@
 # Change Log - @microsoft/loader-load-themed-styles
 
-This log was last generated on Sun, 06 Oct 2019 00:27:39 GMT and should not be manually modified.
+This log was last generated on Tue, 21 Jan 2020 21:56:13 GMT and should not be manually modified.
+
+## 1.8.1
+Tue, 21 Jan 2020 21:56:13 GMT
+
+*Version update only*
+
+## 1.8.0
+Sun, 19 Jan 2020 02:26:52 GMT
+
+### Minor changes
+
+- Upgrade Node typings to Node 10
+
+## 1.7.211
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 1.7.210
+Tue, 14 Jan 2020 01:34:15 GMT
+
+*Version update only*
+
+## 1.7.209
+Sat, 11 Jan 2020 05:18:23 GMT
+
+*Version update only*
+
+## 1.7.208
+Fri, 10 Jan 2020 03:07:47 GMT
+
+*Version update only*
+
+## 1.7.207
+Thu, 09 Jan 2020 06:44:13 GMT
+
+*Version update only*
+
+## 1.7.206
+Wed, 08 Jan 2020 00:11:31 GMT
+
+*Version update only*
+
+## 1.7.205
+Mon, 23 Dec 2019 16:08:05 GMT
+
+*Version update only*
+
+## 1.7.204
+Wed, 04 Dec 2019 23:17:55 GMT
+
+*Version update only*
+
+## 1.7.203
+Tue, 03 Dec 2019 03:17:44 GMT
+
+*Version update only*
+
+## 1.7.202
+Sun, 24 Nov 2019 00:54:04 GMT
+
+*Version update only*
+
+## 1.7.201
+Wed, 20 Nov 2019 06:14:28 GMT
+
+*Version update only*
+
+## 1.7.200
+Fri, 15 Nov 2019 04:50:50 GMT
+
+*Version update only*
+
+## 1.7.199
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 1.7.198
+Wed, 06 Nov 2019 22:44:18 GMT
+
+*Version update only*
+
+## 1.7.197
+Tue, 05 Nov 2019 06:49:29 GMT
+
+*Version update only*
+
+## 1.7.196
+Tue, 05 Nov 2019 01:08:39 GMT
+
+*Version update only*
+
+## 1.7.195
+Fri, 25 Oct 2019 15:08:54 GMT
+
+*Version update only*
+
+## 1.7.194
+Tue, 22 Oct 2019 06:24:44 GMT
+
+*Version update only*
+
+## 1.7.193
+Mon, 21 Oct 2019 05:22:43 GMT
+
+*Version update only*
+
+## 1.7.192
+Fri, 18 Oct 2019 15:15:01 GMT
+
+*Version update only*
 
 ## 1.7.191
 Sun, 06 Oct 2019 00:27:39 GMT

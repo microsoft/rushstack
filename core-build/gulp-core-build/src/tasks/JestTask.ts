@@ -6,7 +6,7 @@ import { IBuildConfig } from '../IBuildConfig';
 import * as Gulp from 'gulp';
 import * as Jest from 'jest-cli';
 import * as globby from 'globby';
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem, JsonObject } from '@microsoft/node-core-library';
 
 /**
  * Configuration for JestTask
@@ -62,6 +62,11 @@ export interface IJestConfig {
    * Same as Jest CLI option testMatch
    */
   testMatch?: string[];
+
+  /**
+   * Indicate whether writing NUnit results is enabled when using the default reporter
+   */
+  writeNUnitResults?: boolean;
 }
 
 const DEFAULT_JEST_CONFIG_FILE_NAME: string = 'jest.config.json';
@@ -76,8 +81,9 @@ export function _isJestEnabled(rootFolder: string): boolean {
   if (!FileSystem.exists(taskConfigFile)) {
     return false;
   }
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const taskConfig: {} = require(taskConfigFile);
-  // tslint:disable-next-line:no-string-literal
+  // eslint-disable-next-line dot-notation
   return !!taskConfig['isEnabled'];
 }
 
@@ -87,13 +93,13 @@ export function _isJestEnabled(rootFolder: string): boolean {
  */
 export class JestTask extends GulpTask<IJestConfig> {
 
-  constructor() {
+  public constructor() {
     super('jest',
     {
       cache: true,
       collectCoverageFrom: ['lib/**/*.js?(x)', '!lib/**/test/**'],
       coverage: true,
-      coverageReporters: ['json', 'html'],
+      coverageReporters: ['json' /*, 'html' */], // Remove HTML reporter temporarily until the Handlebars issue is fixed
       testPathIgnorePatterns: ['<rootDir>/(src|lib-amd|lib-es6|coverage|build|docs|node_modules)/'],
       // Some unit tests rely on data folders that look like packages.  This confuses jest-hast-map
       // when it tries to scan for package.json files.
@@ -108,7 +114,7 @@ export class JestTask extends GulpTask<IJestConfig> {
   /**
    * Loads the z-schema object for this task
    */
-  public loadSchema(): Object {
+  public loadSchema(): JsonObject {
     return require('./jest.schema.json');
   }
 
@@ -121,7 +127,7 @@ export class JestTask extends GulpTask<IJestConfig> {
 
     this._copySnapshots(this.buildConfig.srcFolder, this.buildConfig.libFolder);
 
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const jestConfig: any = {
       ci: this.buildConfig.production,
       cache: !!this.taskConfig.cache,
@@ -130,14 +136,22 @@ export class JestTask extends GulpTask<IJestConfig> {
       coverage: this.taskConfig.coverage,
       coverageReporters: this.taskConfig.coverageReporters,
       coverageDirectory: path.join(this.buildConfig.tempFolder, 'coverage'),
-      maxWorkers: !!this.taskConfig.maxWorkers ?
+      maxWorkers: this.taskConfig.maxWorkers ?
         this.taskConfig.maxWorkers : 1,
-      moduleDirectories: !!this.taskConfig.moduleDirectories ?
+      moduleDirectories: this.taskConfig.moduleDirectories ?
         this.taskConfig.moduleDirectories :
         ['node_modules', this.buildConfig.libFolder],
-      reporters: [path.join(__dirname, 'JestReporter.js')],
+      reporters: [
+        [
+          path.join(__dirname, 'JestReporter.js'),
+          {
+            outputFilePath: path.join(this.buildConfig.tempFolder, 'jest-results', 'test-results.xml'),
+            writeNUnitResults: this.taskConfig.writeNUnitResults
+          }
+        ]
+      ],
       rootDir: this.buildConfig.rootPath,
-      testMatch: !!this.taskConfig.testMatch ?
+      testMatch: this.taskConfig.testMatch ?
         this.taskConfig.testMatch : ['**/*.test.js?(x)'],
       testPathIgnorePatterns: this.taskConfig.testPathIgnorePatterns,
       modulePathIgnorePatterns: this.taskConfig.modulePathIgnorePatterns,
@@ -166,8 +180,7 @@ export class JestTask extends GulpTask<IJestConfig> {
           }
           completeCallback();
         }
-      },
-      (err) => {
+      }).catch((err) => {
         process.stdout.isTTY = oldTTY;
         completeCallback(err);
       });

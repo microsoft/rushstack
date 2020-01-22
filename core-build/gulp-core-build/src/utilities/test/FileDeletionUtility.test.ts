@@ -7,7 +7,6 @@ import { FileDeletionUtility } from './../FileDeletionUtility';
 describe('FileDeletionUtility', () => {
   describe('constructor', () => {
     it('can be constructed', () => {
-      // tslint:disable-next-line:no-unused-variable
       const test: FileDeletionUtility = new FileDeletionUtility();
       assert.isNotNull(test);
     });
@@ -66,7 +65,7 @@ describe('FileDeletionUtility', () => {
       );
     });
     it('it does not accept null or undefined', () => {
-      /* tslint:disable:no-null-keyword */
+      /* eslint-disable @rushstack/no-null */
       assert.isFalse(
         FileDeletionUtility.isParentDirectory('', '/A/b.txt')
       );
@@ -74,7 +73,7 @@ describe('FileDeletionUtility', () => {
         FileDeletionUtility.isParentDirectory(undefined, '/a/b.txt')
       );
       assert.isFalse(
-        FileDeletionUtility.isParentDirectory(null as any, '/a/b/c/d.txt') // tslint:disable-line:no-any
+        FileDeletionUtility.isParentDirectory(null as any, '/a/b/c/d.txt') // eslint-disable-line @typescript-eslint/no-explicit-any
       );
       assert.isFalse(
         FileDeletionUtility.isParentDirectory('/A/b.txt', '')
@@ -83,9 +82,9 @@ describe('FileDeletionUtility', () => {
         FileDeletionUtility.isParentDirectory('/a/b.txt', undefined)
       );
       assert.isFalse(
-        FileDeletionUtility.isParentDirectory('/a/b/c/d.txt', null as any) // tslint:disable-line:no-any
+        FileDeletionUtility.isParentDirectory('/a/b/c/d.txt', null as any) // eslint-disable-line @typescript-eslint/no-explicit-any
       );
-      /* tslint:enable:no-null-keyword */
+      /* eslint-enable @rushstack/no-null */
     });
   });
   describe('removeChildren', () => {

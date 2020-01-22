@@ -1,6 +1,63 @@
 # Change Log - @microsoft/gulp-core-build-mocha
 
-This log was last generated on Sun, 29 Sep 2019 23:56:29 GMT and should not be manually modified.
+This log was last generated on Tue, 21 Jan 2020 21:56:14 GMT and should not be manually modified.
+
+## 3.8.1
+Tue, 21 Jan 2020 21:56:14 GMT
+
+*Version update only*
+
+## 3.8.0
+Sun, 19 Jan 2020 02:26:52 GMT
+
+### Minor changes
+
+- Upgrade Node typings to Node 10
+
+## 3.7.10
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 3.7.9
+Sat, 11 Jan 2020 05:18:23 GMT
+
+*Version update only*
+
+## 3.7.8
+Thu, 09 Jan 2020 06:44:13 GMT
+
+*Version update only*
+
+## 3.7.7
+Wed, 08 Jan 2020 00:11:31 GMT
+
+*Version update only*
+
+## 3.7.6
+Wed, 04 Dec 2019 23:17:55 GMT
+
+*Version update only*
+
+## 3.7.5
+Fri, 15 Nov 2019 04:50:50 GMT
+
+*Version update only*
+
+## 3.7.4
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 3.7.3
+Tue, 05 Nov 2019 06:49:28 GMT
+
+*Version update only*
+
+## 3.7.2
+Tue, 22 Oct 2019 06:24:44 GMT
+
+*Version update only*
 
 ## 3.7.1
 Sun, 29 Sep 2019 23:56:29 GMT

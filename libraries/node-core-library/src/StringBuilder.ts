@@ -43,7 +43,7 @@ export interface IStringBuilder {
 export class StringBuilder implements IStringBuilder {
   private _chunks: string[];
 
-  constructor() {
+  public constructor() {
     this._chunks = [];
   }
 

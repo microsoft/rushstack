@@ -1,6 +1,110 @@
 # Change Log - @microsoft/resolve-chunk-plugin
 
-This log was last generated on Sun, 06 Oct 2019 00:27:39 GMT and should not be manually modified.
+This log was last generated on Tue, 21 Jan 2020 21:56:14 GMT and should not be manually modified.
+
+## 2.1.1
+Tue, 21 Jan 2020 21:56:14 GMT
+
+*Version update only*
+
+## 2.1.0
+Sun, 19 Jan 2020 02:26:52 GMT
+
+### Minor changes
+
+- Upgrade Node typings to Node 10
+
+## 2.0.159
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 2.0.158
+Tue, 14 Jan 2020 01:34:16 GMT
+
+*Version update only*
+
+## 2.0.157
+Sat, 11 Jan 2020 05:18:24 GMT
+
+*Version update only*
+
+## 2.0.156
+Thu, 09 Jan 2020 06:44:13 GMT
+
+*Version update only*
+
+## 2.0.155
+Wed, 08 Jan 2020 00:11:31 GMT
+
+*Version update only*
+
+## 2.0.154
+Wed, 04 Dec 2019 23:17:55 GMT
+
+*Version update only*
+
+## 2.0.153
+Tue, 03 Dec 2019 03:17:44 GMT
+
+*Version update only*
+
+## 2.0.152
+Sun, 24 Nov 2019 00:54:04 GMT
+
+*Version update only*
+
+## 2.0.151
+Wed, 20 Nov 2019 06:14:28 GMT
+
+### Patches
+
+- Convert `@types/webpack` to a peer dependency
+
+## 2.0.150
+Fri, 15 Nov 2019 04:50:50 GMT
+
+*Version update only*
+
+## 2.0.149
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 2.0.148
+Wed, 06 Nov 2019 22:44:18 GMT
+
+*Version update only*
+
+## 2.0.147
+Tue, 05 Nov 2019 06:49:29 GMT
+
+*Version update only*
+
+## 2.0.146
+Tue, 05 Nov 2019 01:08:39 GMT
+
+*Version update only*
+
+## 2.0.145
+Fri, 25 Oct 2019 15:08:54 GMT
+
+*Version update only*
+
+## 2.0.144
+Tue, 22 Oct 2019 06:24:44 GMT
+
+*Version update only*
+
+## 2.0.143
+Mon, 21 Oct 2019 05:22:43 GMT
+
+*Version update only*
+
+## 2.0.142
+Fri, 18 Oct 2019 15:15:01 GMT
+
+*Version update only*
 
 ## 2.0.141
 Sun, 06 Oct 2019 00:27:39 GMT

@@ -3,7 +3,7 @@
 
 import * as child_process from 'child_process';
 import * as path from 'path';
-import { JsonFile, Text, FileSystem } from '@microsoft/node-core-library';
+import { JsonFile, Text, FileSystem, JsonObject } from '@microsoft/node-core-library';
 import { ITaskWriter } from '@microsoft/stream-collator';
 import { IPackageDeps } from '@microsoft/package-deps-hash';
 
@@ -28,6 +28,22 @@ export interface IProjectTaskOptions {
   packageDepsFilename: string;
 }
 
+function _areShallowEqual(object1: JsonObject, object2: JsonObject, writer: ITaskWriter): boolean {
+  for (const n in object1) {
+    if (!(n in object2) || object1[n] !== object2[n]) {
+      writer.writeLine(`Found mismatch: "${n}": "${object1[n]}" !== "${object2[n]}"`);
+      return false;
+    }
+  }
+  for (const n in object2) {
+    if (!(n in object1)) {
+      writer.writeLine(`Found new prop in obj2: "${n}" value="${object2[n]}"`);
+      return false;
+    }
+  }
+  return true;
+}
+
 /**
  * A TaskRunner task which cleans and builds a project
  */
@@ -46,7 +62,7 @@ export class ProjectTask implements ITaskDefinition {
   private _packageChangeAnalyzer: PackageChangeAnalyzer;
   private _packageDepsFilename: string;
 
-  constructor(options: IProjectTaskOptions) {
+  public constructor(options: IProjectTaskOptions) {
     this._rushProject = options.rushProject;
     this._rushConfiguration = options.rushConfiguration;
     this._commandToRun = options.commandToRun;
@@ -205,11 +221,13 @@ export class ProjectTask implements ITaskDefinition {
     try {
       const logFilename: string = path.basename(this._rushProject.projectFolder);
 
+      // eslint-disable-next-line no-control-regex
       const stdout: string = writer.getStdOutput().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
       if (stdout) {
         FileSystem.writeFile(path.join(this._rushProject.projectFolder, logFilename + '.build.log'), stdout);
       }
 
+      // eslint-disable-next-line no-control-regex
       const stderr: string = writer.getStdError().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
       if (stderr) {
         FileSystem.writeFile(path.join(this._rushProject.projectFolder, logFilename + '.build.error.log'), stderr);
@@ -218,22 +236,6 @@ export class ProjectTask implements ITaskDefinition {
       console.log(`Error writing logs to disk: ${e}`);
     }
   }
-}
-
-function _areShallowEqual(object1: Object, object2: Object, writer: ITaskWriter): boolean {
-  for (const n in object1) {
-    if (!(n in object2) || object1[n] !== object2[n]) {
-      writer.writeLine(`Found mismatch: "${n}": "${object1[n]}" !== "${object2[n]}"`);
-      return false;
-    }
-  }
-  for (const n in object2) {
-    if (!(n in object1)) {
-      writer.writeLine(`Found new prop in obj2: "${n}" value="${object2[n]}"`);
-      return false;
-    }
-  }
-  return true;
 }
 
 /**

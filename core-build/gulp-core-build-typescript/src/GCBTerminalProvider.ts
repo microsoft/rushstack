@@ -10,7 +10,7 @@ import {
 export class GCBTerminalProvider<TTask = {}> extends ConsoleTerminalProvider {
   private _gcbTask: GulpTask<TTask>;
 
-  constructor(gcbTask: GulpTask<TTask>) {
+  public constructor(gcbTask: GulpTask<TTask>) {
     super({ verboseEnabled: true });
 
     this._gcbTask = gcbTask;

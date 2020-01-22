@@ -44,7 +44,7 @@ export class TaskRunner {
   private _completedTasks: number;
   private _terminal: Terminal;
 
-  constructor(orderedTasks: ITask[], options: ITaskRunnerOptions) {
+  public constructor(orderedTasks: ITask[], options: ITaskRunnerOptions) {
     const {
       quietMode,
       parallelism,
@@ -105,7 +105,7 @@ export class TaskRunner {
       this._printTaskStatus();
 
       if (this._hasAnyFailures) {
-        return Promise.reject(new Error('Project(s) failed to build'));
+        return Promise.reject(new Error('Project(s) failed'));
       } else if (this._hasAnyWarnings && !this._allowWarningsInSuccessfulBuild) {
         this._terminal.writeWarningLine('Project(s) succeeded with warnings');
         return Promise.reject(new AlreadyReportedError());
@@ -195,7 +195,7 @@ export class TaskRunner {
    * Marks a task as having failed and marks each of its dependents as blocked
    */
   private _markTaskAsFailed(task: ITask): void {
-    this._terminal.writeErrorLine(`${os.EOL}${this._getCurrentCompletedTaskString()}[${task.name}] failed to build!`);
+    this._terminal.writeErrorLine(`${os.EOL}${this._getCurrentCompletedTaskString()}[${task.name}] failed!`);
     task.status = TaskStatus.Failure;
     task.dependents.forEach((dependent: ITask) => {
       this._markTaskAsBlocked(dependent, task);
@@ -366,7 +366,7 @@ export class TaskRunner {
     const headSize: number = 10;
     const tailSize: number = 20;
     const margin: number = 10;
-    const lines: Array<string> = text.split(/\s*\r?\n/).filter(line => line);
+    const lines: string[] = text.split(/\s*\r?\n/).filter(line => line);
     if (lines.length < headSize + tailSize + margin) {
       return lines.join(os.EOL);
     }

@@ -10,7 +10,7 @@ import { GenerateAction } from './actions/GenerateAction';
 export class RushBuildXLCommandLineParser extends CommandLineParser {
   private _terminal: Terminal;
 
-  constructor(terminal: Terminal) {
+  public constructor(terminal: Terminal) {
     super({
       toolFilename: 'rush-buildlx',
       toolDescription: 'This experimental tool allows Rush to interact with BuildXL.'

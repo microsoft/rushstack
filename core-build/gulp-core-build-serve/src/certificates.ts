@@ -6,6 +6,7 @@
 import { GulpTask } from '@microsoft/gulp-core-build';
 import { FileSystem } from '@microsoft/node-core-library';
 import * as forgeType from 'node-forge';
+// eslint-disable-next-line
 const forge: typeof forgeType & IForgeExtensions = require('node-forge');
 import * as path from 'path';
 import * as child_process from 'child_process';
@@ -83,7 +84,7 @@ function _ensureCertUtilExePath(parentTask: GulpTask<{}>): string {
     const where: child_process.SpawnSyncReturns<string> = child_process.spawnSync('where', ['certutil']);
 
     const whereErr: string = where.stderr.toString();
-    if (!!whereErr) {
+    if (whereErr) {
       parentTask.logError(`Error finding certUtil command: "${whereErr}"`);
       _certutilExePath = undefined;
     } else {
@@ -132,7 +133,7 @@ function _tryTrustCertificate(certificatePath: string, parentTask: GulpTask<{}>)
         return true;
       }
 
-    case 'darwin': // tslint:disable-line:no-switch-case-fall-through
+    case 'darwin':
       parentTask.log( 'Attempting to trust a dev certificate. This self-signed certificate only points to localhost ' +
                       'and will be stored in your local user profile to be used by other instances of ' +
                       'gulp-core-build-serve. If you do not consent to trust this certificate, do not enter your ' +
@@ -164,7 +165,7 @@ function _tryTrustCertificate(certificatePath: string, parentTask: GulpTask<{}>)
         }
       }
 
-    default: // tslint:disable-line:no-switch-case-fall-through
+    default:
       // Linux + others: Have the user manually trust the cert if they want to
       parentTask.log( 'Automatic certificate trust is only implemented for gulp-core-build-serve on Windows and ' +
                       'macOS. To trust the development certificate, add this certificate to your trusted root ' +
@@ -220,42 +221,38 @@ function _trySetFriendlyName(certificatePath: string, parentTask: GulpTask<{}>):
   }
 }
 
-/**
- * Get the dev certificate from the store, or, optionally, generate a new one and trust it if one doesn't exist in the
- *  store.
- */
-export function ensureCertificate<TGulpTask>(
-  canGenerateNewCertificate: boolean,
-  parentTask: GulpTask<TGulpTask>
-): ICertificate {
+function _ensureCertificateInternal(parentTask: GulpTask<{}>): void {
   const certificateStore: CertificateStore = CertificateStore.instance;
+  const generatedCertificate: ICertificate = _createDevelopmentCertificate();
 
-  if (certificateStore.certificateData && certificateStore.keyData) {
-    if (!_certificateHasSubjectAltName(certificateStore.certificateData)) {
-      let warningMessage: string = 'The existing development certificate is missing the subjectAltName ' +
-                                    'property and will not work with the latest versions of some browsers. ';
+  const now: Date = new Date();
+  const certificateName: string = now.getTime().toString();
+  const tempDirName: string = path.join(__dirname, '..', 'temp');
 
-      if (canGenerateNewCertificate) {
-        warningMessage += ' Attempting to untrust the certificate and generate a new one.';
-      } else {
-        warningMessage += ' Untrust the certificate and generate a new one.';
-      }
+  const tempCertificatePath: string = path.join(tempDirName, `${certificateName}.cer`);
+  FileSystem.writeFile(tempCertificatePath, generatedCertificate.pemCertificate, {
+    ensureFolderExists: true
+  });
 
-      parentTask.logWarning(warningMessage);
+  if (_tryTrustCertificate(tempCertificatePath, parentTask)) {
+    certificateStore.certificateData = generatedCertificate.pemCertificate;
+    certificateStore.keyData = generatedCertificate.pemKey;
 
-      if (canGenerateNewCertificate) {
-        untrustCertificate(parentTask);
-        _ensureCertificateInternal(parentTask);
-      }
+    if (!_trySetFriendlyName(tempCertificatePath, parentTask)) { // Try to set the friendly name, and warn if we can't
+      parentTask.logWarning('Unable to set the certificate\'s friendly name.');
     }
-  } else if (canGenerateNewCertificate) {
-    _ensureCertificateInternal(parentTask);
+  } else {
+    // Clear out the existing store data, if any exists
+    certificateStore.certificateData = undefined;
+    certificateStore.keyData = undefined;
   }
 
-  return {
-    pemCertificate: certificateStore.certificateData,
-    pemKey: certificateStore.keyData
-  };
+  FileSystem.deleteFile(tempCertificatePath);
+}
+
+function _certificateHasSubjectAltName(certificateData: string): boolean {
+  const certificate: IForgeCertificate = forge.pki.certificateFromPem(certificateData);
+  return !!certificate.getExtension('subjectAltName');
 }
 
 export function untrustCertificate<TGulpTask>(parentTask: GulpTask<TGulpTask>): boolean {
@@ -278,7 +275,7 @@ export function untrustCertificate<TGulpTask>(parentTask: GulpTask<TGulpTask>): 
         return true;
       }
 
-    case 'darwin': // tslint:disable-line:no-switch-case-fall-through
+    case 'darwin':
       parentTask.logVerbose('Trying to find the signature of the dev cert');
 
       const macFindCertificateResult: child_process.SpawnSyncReturns<string> =
@@ -324,7 +321,7 @@ export function untrustCertificate<TGulpTask>(parentTask: GulpTask<TGulpTask>): 
         return false;
       }
 
-    default: // tslint:disable-line:no-switch-case-fall-through
+    default:
       // Linux + others: Have the user manually untrust the cert
       parentTask.log( 'Automatic certificate untrust is only implemented for gulp-core-build-serve on Windows and ' +
                       'macOS. To untrust the development certificate, remove this certificate from your trusted ' +
@@ -334,36 +331,40 @@ export function untrustCertificate<TGulpTask>(parentTask: GulpTask<TGulpTask>): 
   }
 }
 
-function _ensureCertificateInternal(parentTask: GulpTask<{}>): void {
+/**
+ * Get the dev certificate from the store, or, optionally, generate a new one and trust it if one doesn't exist in the
+ *  store.
+ */
+export function ensureCertificate<TGulpTask>(
+  canGenerateNewCertificate: boolean,
+  parentTask: GulpTask<TGulpTask>
+): ICertificate {
   const certificateStore: CertificateStore = CertificateStore.instance;
-  const generatedCertificate: ICertificate = _createDevelopmentCertificate();
 
-  const now: Date = new Date();
-  const certificateName: string = now.getTime().toString();
-  const tempDirName: string = path.join(__dirname, '..', 'temp');
+  if (certificateStore.certificateData && certificateStore.keyData) {
+    if (!_certificateHasSubjectAltName(certificateStore.certificateData)) {
+      let warningMessage: string = 'The existing development certificate is missing the subjectAltName ' +
+                                    'property and will not work with the latest versions of some browsers. ';
 
-  const tempCertificatePath: string = path.join(tempDirName, `${certificateName}.cer`);
-  FileSystem.writeFile(tempCertificatePath, generatedCertificate.pemCertificate, {
-    ensureFolderExists: true
-  });
+      if (canGenerateNewCertificate) {
+        warningMessage += ' Attempting to untrust the certificate and generate a new one.';
+      } else {
+        warningMessage += ' Untrust the certificate and generate a new one.';
+      }
 
-  if (_tryTrustCertificate(tempCertificatePath, parentTask)) {
-    certificateStore.certificateData = generatedCertificate.pemCertificate;
-    certificateStore.keyData = generatedCertificate.pemKey;
+      parentTask.logWarning(warningMessage);
 
-    if (!_trySetFriendlyName(tempCertificatePath, parentTask)) { // Try to set the friendly name, and warn if we can't
-      parentTask.logWarning('Unable to set the certificate\'s friendly name.');
+      if (canGenerateNewCertificate) {
+        untrustCertificate(parentTask);
+        _ensureCertificateInternal(parentTask);
+      }
     }
-  } else {
-    // Clear out the existing store data, if any exists
-    certificateStore.certificateData = undefined;
-    certificateStore.keyData = undefined;
+  } else if (canGenerateNewCertificate) {
+    _ensureCertificateInternal(parentTask);
   }
 
-  FileSystem.deleteFile(tempCertificatePath);
-}
-
-function _certificateHasSubjectAltName(certificateData: string): boolean {
-  const certificate: IForgeCertificate = forge.pki.certificateFromPem(certificateData);
-  return !!certificate.getExtension('subjectAltName');
+  return {
+    pemCertificate: certificateStore.certificateData,
+    pemKey: certificateStore.keyData
+  };
 }

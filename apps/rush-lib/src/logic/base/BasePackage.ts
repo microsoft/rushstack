@@ -108,6 +108,31 @@ export class BasePackage {
   public children: BasePackage[];
   private _childrenByName: Map<string, BasePackage>;
 
+  protected constructor(name: string,
+    version: string | undefined,
+    folderPath: string,
+    packageJson: IRushTempPackageJson | undefined) {
+
+    this.name = name;
+    this.packageJson = packageJson;
+    this.version = version;
+    this.folderPath = folderPath;
+
+    // Extract `@alias-scope/alias-name` from  `C:\node_modules\@alias-scope\alias-name`
+    const pathParts: string[] = folderPath.split(/[\\\/]/);
+    this.installedName = pathParts[pathParts.length - 1];
+    if (pathParts.length >= 2) {
+      // Is there an NPM scope?
+      const parentFolder: string = pathParts[pathParts.length - 2];
+      if (parentFolder[0] === '@') {
+        this.installedName = parentFolder + '/' + this.installedName;
+      }
+    }
+
+    this.children = [];
+    this._childrenByName = new Map<string, BasePackage>();
+  }
+
   /**
    * Used by link managers, creates a virtual Package object that represents symbolic links
    * which will be created later
@@ -173,30 +198,5 @@ export class BasePackage {
     for (const child of this.children) {
       child.printTree(indent + '  ');
     }
-  }
-
-  protected constructor(name: string,
-    version: string | undefined,
-    folderPath: string,
-    packageJson: IRushTempPackageJson | undefined) {
-
-    this.name = name;
-    this.packageJson = packageJson;
-    this.version = version;
-    this.folderPath = folderPath;
-
-    // Extract `@alias-scope/alias-name` from  `C:\node_modules\@alias-scope\alias-name`
-    const pathParts: string[] = folderPath.split(/[\\\/]/);
-    this.installedName = pathParts[pathParts.length - 1];
-    if (pathParts.length >= 2) {
-      // Is there an NPM scope?
-      const parentFolder: string = pathParts[pathParts.length - 2];
-      if (parentFolder[0] === '@') {
-        this.installedName = parentFolder + '/' + this.installedName;
-      }
-    }
-
-    this.children = [];
-    this._childrenByName = new Map<string, BasePackage>();
   }
 }

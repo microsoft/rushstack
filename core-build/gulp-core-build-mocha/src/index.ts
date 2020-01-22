@@ -10,4 +10,4 @@ export const instrument: InstrumentTask = new InstrumentTask();
 /** @public */
 export const mocha: MochaTask = new MochaTask();
 
-export default serial(instrument, mocha) as IExecutable; // tslint:disable-line:export-name no-any
+export default serial(instrument, mocha) as IExecutable;

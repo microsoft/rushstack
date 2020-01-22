@@ -26,9 +26,14 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
     malformedEvent: SystemEvent;
     // @eventProperty
     readonly modifiedEvent: SystemEvent;
+    // (undocumented)
+    get readonlyProperty(): string;
     regularProperty: SystemEvent;
     static sumWithExample(x: number, y: number): number;
     tableExample(): void;
+    // (undocumented)
+    get writeableProperty(): string;
+    set writeableProperty(value: string);
 }
 
 // @public
@@ -57,6 +62,9 @@ export type ExampleTypeAlias = Promise<boolean>;
 // @public
 export class Generic<T> {
 }
+
+// @public (undocumented)
+export type GenericTypeAlias<T> = T[];
 
 // @public
 export function globalFunction(x: number): number;
@@ -130,6 +138,9 @@ export namespace OuterNamespace {
 export class SystemEvent {
     addHandler(handler: () => void): void;
 }
+
+// @public (undocumented)
+export type TypeAlias = number;
 
 // @public (undocumented)
 export function yamlReferenceUniquenessTest(): IDocInterface1;

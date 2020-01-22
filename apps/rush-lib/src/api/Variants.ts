@@ -6,11 +6,11 @@ import {
 /**
  * Namespace for utilities relating to the Variants feature.
  */
-export namespace Variants {
+export class Variants {
   /**
    * Provides the parameter configuration for '--variant'.
    */
-  export const VARIANT_PARAMETER: ICommandLineStringDefinition = {
+  public static readonly VARIANT_PARAMETER: ICommandLineStringDefinition = {
     parameterLongName: '--variant',
     argumentName: 'VARIANT',
     description: 'Run command using a variant installation configuration',

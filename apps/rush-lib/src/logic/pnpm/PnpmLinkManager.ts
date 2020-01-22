@@ -5,6 +5,7 @@ import * as os from 'os';
 import * as path from 'path';
 import uriEncode = require('strict-uri-encode');
 import pnpmLinkBins from '@pnpm/link-bins';
+import * as semver from 'semver';
 
 import {
   JsonFile,
@@ -30,6 +31,10 @@ import { PnpmProjectDependencyManifest } from './PnpmProjectDependencyManifest';
 const DEBUG: boolean = false;
 
 export class PnpmLinkManager extends BaseLinkManager {
+
+  private readonly _pnpmVersion: semver.SemVer
+    = new semver.SemVer(this._rushConfiguration.packageManagerToolVersion);
+
   protected _linkProjects(): Promise<void> {
     try {
       const rushLinkJson: IRushLinkJson = {
@@ -205,15 +210,9 @@ export class PnpmLinkManager extends BaseLinkManager {
     const folderNameInLocalInstallationRoot: string = uriEncode(Text.replaceAll(absolutePathToTgzFile, path.sep, '/')) +
       folderNameSuffix;
 
-    // tslint:disable-next-line:max-line-length
     // e.g.: C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules
-    const pathToLocalInstallation: string = path.join(
-      this._rushConfiguration.commonTempFolder,
-      RushConstants.nodeModulesFolderName,
-      '.local',
-      folderNameInLocalInstallationRoot,
-      RushConstants.nodeModulesFolderName
-    );
+
+    const pathToLocalInstallation: string = this._getPathToLocalInstallation(folderNameInLocalInstallationRoot);
 
     const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined =
       pnpmShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(tempProjectDependencyKey);
@@ -276,6 +275,23 @@ export class PnpmLinkManager extends BaseLinkManager {
       .then(() => { /* empty block */ });
   }
 
+  private _getPathToLocalInstallation(folderNameInLocalInstallationRoot: string): string {
+    // See https://github.com/pnpm/pnpm/releases/tag/v4.0.0
+    if (this._pnpmVersion.major >= 4) {
+      return path.join(this._rushConfiguration.commonTempFolder,
+        RushConstants.nodeModulesFolderName,
+        '.pnpm',
+        'local',
+        folderNameInLocalInstallationRoot,
+        RushConstants.nodeModulesFolderName);
+    } else {
+      return path.join(this._rushConfiguration.commonTempFolder,
+        RushConstants.nodeModulesFolderName,
+        '.local',
+        folderNameInLocalInstallationRoot,
+        RushConstants.nodeModulesFolderName);
+    }
+  }
   private _createLocalPackageForDependency(
     pnpmProjectDependencyManifest: PnpmProjectDependencyManifest,
     project: RushConfigurationProject,
@@ -289,7 +305,6 @@ export class PnpmLinkManager extends BaseLinkManager {
 
     // FYI dependencyName might contain an NPM scope, here it gets converted into a filesystem folder name
     // e.g. if the dependency is supi:
-    // tslint:disable-next-line:max-line-length
     // "C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules\supi"
     const dependencyLocalInstallationSymlink: string = path.join(
       pathToLocalInstallation,
@@ -312,7 +327,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     if (!version) {
       if (!isOptional) {
         throw new InternalError(
-          'Cannot find shrinkwrap entry dependency "${dependencyName}" for temp project: ' +
+          `Cannot find shrinkwrap entry dependency "${dependencyName}" for temp project: ` +
           `${project.tempProjectName}`);
       }
       return;

@@ -42,13 +42,12 @@ export interface IApiIndexSignatureOptions extends
  * @public
  */
 export class ApiIndexSignature extends ApiParameterListMixin(ApiReleaseTagMixin(ApiReturnTypeMixin(ApiDeclaredItem))) {
+  public constructor(options: IApiIndexSignatureOptions) {
+    super(options);
+  }
 
   public static getContainerKey(overloadIndex: number): string {
     return `|${ApiItemKind.IndexSignature}|${overloadIndex}`;
-  }
-
-  public constructor(options: IApiIndexSignatureOptions) {
-    super(options);
   }
 
   /** @override */

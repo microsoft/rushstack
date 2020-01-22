@@ -11,7 +11,7 @@ import { PosixModeBits } from '../PosixModeBits';
 import { Text } from '../Text';
 
 // The PosixModeBits are intended to be used with bitwise operations.
-// tslint:disable:no-bitwise
+/* eslint-disable no-bitwise */
 
 // Use src/test/test-data instead of lib/test/test-data
 const executableFolder: string = path.join(__dirname, '..', '..', 'src', 'test', 'test-data', 'executable');

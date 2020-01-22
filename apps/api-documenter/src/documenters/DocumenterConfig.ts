@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonSchema, JsonFile } from '@microsoft/node-core-library';
+import { JsonSchema, JsonFile, NewlineKind } from '@microsoft/node-core-library';
 import { IConfigFile } from './IConfigFile';
 
 /**
@@ -15,6 +15,12 @@ export class DocumenterConfig {
   public readonly configFile: IConfigFile;
 
   /**
+   * Specifies what type of newlines API Documenter should use when writing output files.  By default, the output files
+   * will be written with Windows-style newlines.
+   */
+  public readonly newlineKind: NewlineKind;
+
+  /**
    * The JSON Schema for API Extractor config file (api-extractor.schema.json).
    */
   public static readonly jsonSchema: JsonSchema = JsonSchema.fromFile(
@@ -25,6 +31,23 @@ export class DocumenterConfig {
    */
   public static readonly FILENAME: string = 'api-documenter.json';
 
+  private constructor(filePath: string, configFile: IConfigFile) {
+    this.configFilePath = filePath;
+    this.configFile = configFile;
+
+    switch (configFile.newlineKind) {
+      case 'lf':
+        this.newlineKind = NewlineKind.Lf;
+        break;
+      case 'os':
+        this.newlineKind = NewlineKind.OsDefault;
+        break;
+      default:
+        this.newlineKind = NewlineKind.CrLf;
+        break;
+    }
+  }
+
   /**
    * Load and validate an api-documenter.json file.
    */
@@ -32,10 +55,5 @@ export class DocumenterConfig {
     const configFile: IConfigFile = JsonFile.loadAndValidate(configFilePath, DocumenterConfig.jsonSchema);
 
     return new DocumenterConfig(path.resolve(configFilePath), configFile);
-  }
-
-  private constructor(filePath: string, configFile: IConfigFile) {
-    this.configFilePath = filePath;
-    this.configFile = configFile;
   }
 }

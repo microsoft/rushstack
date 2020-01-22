@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* eslint max-lines: off */
+
 import * as glob from 'glob';
 import * as colors from 'colors';
 import * as fetch from 'node-fetch';
@@ -45,7 +47,7 @@ import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
 
 // The PosixModeBits are intended to be used with bitwise operations.
-// tslint:disable:no-bitwise
+/* eslint-disable no-bitwise */
 
 const MAX_INSTALL_ATTEMPTS: number = 2;
 
@@ -59,7 +61,8 @@ import { PackageManagerName } from '../api/packageManager/PackageManager';
 import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
 import { DependencySpecifier } from './DependencySpecifier';
 
-export interface CreateOptions { // tslint:disable-line:interface-name
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
+export interface CreateOptions {
   /**
    * "Set to true to omit writing mtime values for entries. Note that this prevents using other
    * mtime-based features like tar.update or the keepNewer option with the resulting tar archive."
@@ -86,7 +89,7 @@ export interface IInstallManagerOptions {
    */
   noLink: boolean;
   /**
-   * Whether to delete the shrinkwrap file before installation, i.e. so that all dependenices
+   * Whether to delete the shrinkwrap file before installation, i.e. so that all dependencies
    * will be upgraded to the latest SemVer-compatible version.
    */
   fullUpgrade: boolean;
@@ -128,6 +131,24 @@ export class InstallManager {
   private _commonTempFolderRecycler: AsyncRecycler;
 
   private _options: IInstallManagerOptions;
+
+  public constructor(
+    rushConfiguration: RushConfiguration,
+    rushGlobalFolder: RushGlobalFolder,
+    purgeManager: PurgeManager,
+    options: IInstallManagerOptions
+  ) {
+    this._rushConfiguration = rushConfiguration;
+    this._rushGlobalFolder = rushGlobalFolder;
+    this._commonTempFolderRecycler = purgeManager.commonTempFolderRecycler;
+    this._options = options;
+
+    this._commonNodeModulesMarker = new LastInstallFlag(this._rushConfiguration.commonTempFolder, {
+      node: process.versions.node,
+      packageManager: rushConfiguration.packageManager,
+      packageManagerVersion: rushConfiguration.packageManagerToolVersion
+    });
+  }
 
   /**
    * Returns a map of all direct dependencies that only have a single semantic version specifier.
@@ -246,24 +267,6 @@ export class InstallManager {
     return this._commonNodeModulesMarker;
   }
 
-  constructor(
-    rushConfiguration: RushConfiguration,
-    rushGlobalFolder: RushGlobalFolder,
-    purgeManager: PurgeManager,
-    options: IInstallManagerOptions
-  ) {
-    this._rushConfiguration = rushConfiguration;
-    this._rushGlobalFolder = rushGlobalFolder;
-    this._commonTempFolderRecycler = purgeManager.commonTempFolderRecycler;
-    this._options = options;
-
-    this._commonNodeModulesMarker = new LastInstallFlag(this._rushConfiguration.commonTempFolder, {
-      node: process.versions.node,
-      packageManager: rushConfiguration.packageManager,
-      packageManagerVersion: rushConfiguration.packageManagerToolVersion
-    });
-  }
-
   public async doInstall(): Promise<void> {
     const options: IInstallManagerOptions = this._options;
 
@@ -275,7 +278,7 @@ export class InstallManager {
     const hookDestination: string | undefined = Git.getHooksFolder();
 
     if (FileSystem.exists(hookSource) && hookDestination) {
-      const hookFilenames: Array<string> = FileSystem.readFolder(hookSource);
+      const hookFilenames: string[] = FileSystem.readFolder(hookSource);
       if (hookFilenames.length > 0) {
         console.log(os.EOL + colors.bold('Found files in the "common/git-hooks" folder.'));
 
@@ -336,7 +339,7 @@ export class InstallManager {
     // This will be used by bulk scripts to determine the correct Shrinkwrap file to track.
     const currentVariantJsonFilename: string = this._rushConfiguration.currentVariantJsonFilename;
     const currentVariantJson: ICurrentVariantJson = {
-      variant: options.variant || null // tslint:disable-line:no-null-keyword
+      variant: options.variant || null // eslint-disable-line @rushstack/no-null
     };
 
     // Determine if the variant is already current by updating current-variant.json.
@@ -550,15 +553,27 @@ export class InstallManager {
       version: '0.0.0'
     };
 
-    // Find the implicitly preferred versions
-    // These are any first-level dependencies for which we only consume a single version range
-    // (e.g. every package that depends on react uses an identical specifier)
-
     // dependency name --> version specifier
-    const allPreferredVersions: Map<string, string> =
-      InstallManager.collectImplicitlyPreferredVersions(this._rushConfiguration, {
-        variant
-      });
+    const allPreferredVersions: Map<string, string> = new Map<string, string>();
+
+    // Should we add implicitly preferred versions?
+    let useImplicitlyPinnedVersions: boolean;
+    if (this._rushConfiguration.commonVersions.implicitlyPreferredVersions !== undefined) {
+      // Use the manually configured setting
+      useImplicitlyPinnedVersions = this._rushConfiguration.commonVersions.implicitlyPreferredVersions;
+    } else {
+      // Default to true.
+      useImplicitlyPinnedVersions = true;
+    }
+
+    if (useImplicitlyPinnedVersions) {
+      // Add in the implicitly preferred versions.
+      // These are any first-level dependencies for which we only consume a single version range
+      // (e.g. every package that depends on react uses an identical specifier)
+      const implicitlyPreferredVersions: Map<string, string> =
+        InstallManager.collectImplicitlyPreferredVersions(this._rushConfiguration, { variant });
+      MapExtensions.mergeFromMap(allPreferredVersions, implicitlyPreferredVersions);
+    }
 
     // Add in the explicitly preferred versions.
     // Note that these take precedence over implicitly preferred versions.
@@ -740,8 +755,6 @@ export class InstallManager {
       FileSystem.deleteFile(this._rushConfiguration.tempShrinkwrapFilename);
 
       if (this._rushConfiguration.packageManager === 'pnpm') {
-        const commonNodeModulesFolder: string = path.join(this._rushConfiguration.commonTempFolder, 'node_modules');
-
         // Workaround for https://github.com/pnpm/pnpm/issues/1890
         //
         // When "rush update --full" is run, rush deletes common/temp/pnpm-lock.yaml so that
@@ -750,10 +763,11 @@ export class InstallManager {
         // new lockfile. Deleting this file in addition to deleting common/temp/pnpm-lock.yaml
         // ensures that a new lockfile will be generated with "rush update --full".
 
-        // Note that there is period in the file name: common/temp/node_modules/.pnpm-lock.yaml
-        const pnpmShrinkwrapInNodeModulesFolder: string = path.join(commonNodeModulesFolder, '.'
-          + this._rushConfiguration.shrinkwrapFilename);
-        FileSystem.deleteFile(pnpmShrinkwrapInNodeModulesFolder);
+        const pnpmPackageManager: PnpmPackageManager =
+          (this._rushConfiguration.packageManagerWrapper as PnpmPackageManager);
+
+        FileSystem.deleteFile(path.join(this._rushConfiguration.commonTempFolder,
+          pnpmPackageManager.internalShrinkwrapRelativePath));
       }
     }
 

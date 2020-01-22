@@ -1,6 +1,63 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 08 Oct 2019 22:58:33 GMT and should not be manually modified.
+This log was last generated on Sat, 11 Jan 2020 05:38:55 GMT and should not be manually modified.
+
+## 5.18.0
+Sat, 11 Jan 2020 05:38:55 GMT
+
+### Updates
+
+- Don't use the `build` verb when printing task failures
+- Add a --commit command-line argument to the publish command to allow the git commit to be explicitly provided for tagging.
+- Update GitHub project URL in some resource files
+- fix typo in version-policies.json
+
+## 5.17.2
+Tue, 26 Nov 2019 00:53:52 GMT
+
+### Updates
+
+- Resolve an issue where git tags were not being applied when using pack or publish with --include-all
+
+## 5.17.1
+Thu, 21 Nov 2019 00:50:15 GMT
+
+### Updates
+
+- Fix an issue with Rush add, where Rush was unable to add unpublished local projects as dependencies.
+
+## 5.17.0
+Thu, 14 Nov 2019 22:52:48 GMT
+
+### Updates
+
+- Add a new setting "implicitlyPreferredVersions" in common-versions.json that can be used to solve some installation failures involving peer dependencies
+- Improve the generation of shrinkwrap-deps.json to consider optional peer dependencies and implicitlyPreferredVersions=false
+- Fix an issue where certain operations did not use a stable sort when executed on older versions of NodeJS
+
+## 5.16.1
+Fri, 25 Oct 2019 20:15:59 GMT
+
+### Updates
+
+- Log to console instead of throwing when an unmet peer dependency is encountered during linking, and strictPeerDependencies is false
+- Refactor some code as part of migration from TSLint to ESLint
+
+## 5.16.0
+Thu, 17 Oct 2019 00:41:01 GMT
+
+### Updates
+
+- Support PNPM 4 on Rush
+- Add support for "rush add" for repos using the Yarn package manager.
+
+## 5.15.1
+Thu, 10 Oct 2019 23:47:19 GMT
+
+### Updates
+
+- Fix an issue where build commands can fail because git commands used to track changes can be too long.
+- Fix compatibility issue where PNPM 4 requires --no-prefer-frozen-lockfile instead of --no-prefer-frozen-shrinkwrap
 
 ## 5.15.0
 Tue, 08 Oct 2019 22:58:33 GMT

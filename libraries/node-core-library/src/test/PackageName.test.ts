@@ -36,7 +36,7 @@ describe('PackageName', () => {
       );
 
       expect(
-        PackageName.tryParse(undefined as any) // tslint:disable-line:no-any
+        PackageName.tryParse(undefined as any) // eslint-disable-line @typescript-eslint/no-explicit-any
       ).toEqual(
         {
           scope: '',

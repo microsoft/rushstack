@@ -7,7 +7,7 @@ interface IAttr {
 }
 
 interface IForgeCertificate {
-  publicKey: any; // tslint:disable-line:no-any
+  publicKey: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   validity: {
     notBefore: Date;
@@ -20,11 +20,11 @@ interface IForgeCertificate {
 
   setIssuer(attrs: IAttr[]): void;
 
-  setExtensions(extensions: any[]): void; // tslint:disable-line:no-any
+  setExtensions(extensions: any[]): void; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-  getExtension(extensionName: string): any; // tslint:disable-line:no-any
+  getExtension(extensionName: string): any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-  sign(privateKey: string, algorithm: IForgeSignatureAlgorithm): void; // tslint:disable-line:no-any
+  sign(privateKey: string, algorithm: IForgeSignatureAlgorithm): void; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 interface IForgeSignatureAlgorithm {

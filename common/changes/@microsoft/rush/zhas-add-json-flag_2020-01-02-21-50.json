@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a --json flag to provide the project last as JSON",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "zhas@microsoft.com"
+}

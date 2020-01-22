@@ -11,4 +11,14 @@ export abstract class AbstractClass {
 export class SimpleClass {
   public member(): void {
   }
+
+  public get readonlyProperty(): string {
+    return 'hello';
+  }
+
+  public get writeableProperty(): string {
+    return 'hello';
+  }
+  public set writeableProperty(value: string) {
+  }
 }

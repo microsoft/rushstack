@@ -51,6 +51,12 @@ export class ApiEnumMember extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredIt
    */
   public readonly initializerExcerpt: Excerpt;
 
+  public constructor(options: IApiEnumMemberOptions) {
+    super(options);
+
+    this.initializerExcerpt = this.buildExcerpt(options.initializerTokenRange);
+  }
+
   public static getContainerKey(name: string): string {
     // No prefix needed, because ApiEnumMember is the only possible member of an ApiEnum
     return name;
@@ -63,12 +69,6 @@ export class ApiEnumMember extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredIt
     super.onDeserializeInto(options, context, jsonObject);
 
     options.initializerTokenRange = jsonObject.initializerTokenRange;
-  }
-
-  public constructor(options: IApiEnumMemberOptions) {
-    super(options);
-
-    this.initializerExcerpt = this.buildExcerpt(options.initializerTokenRange);
   }
 
   /** @override */

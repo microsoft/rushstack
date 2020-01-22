@@ -31,7 +31,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
   private _apiSetUrlDefault: string = '/office/dev/add-ins/reference/javascript-api-for-office';
 
   // Hash set of API Set URLs based on product.
-  private _apiSetUrls: Object = {
+  private _apiSetUrls: Record<string, string> = {
     'Excel': '/office/dev/add-ins/reference/requirement-sets/excel-api-requirement-sets',
     'OneNote': '/office/dev/add-ins/reference/requirement-sets/onenote-api-requirement-sets',
     'Visio': '/office/dev/add-ins/reference/overview/visio-javascript-reference-overview',
@@ -39,8 +39,8 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     'Word': '/office/dev/add-ins/reference/requirement-sets/word-api-requirement-sets'
   };
 
-  public constructor(apiModel: ApiModel, inputFolder: string) {
-    super(apiModel);
+  public constructor(apiModel: ApiModel, inputFolder: string, newDocfxNamespaces?: boolean) {
+    super(apiModel, newDocfxNamespaces);
 
     const snippetsFilePath: string = path.join(inputFolder, 'snippets.yaml');
 

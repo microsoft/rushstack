@@ -33,7 +33,7 @@ export default class CSSModules implements ICSSModules {
    * That is used in {@link ./SassTask#SassTask}
    * But will default the process' current working dir.
    */
-  constructor(rootPath?: string) {
+  public constructor(rootPath?: string) {
     this._classMap = {};
     if (rootPath) {
       this._rootPath = rootPath;

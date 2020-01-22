@@ -44,7 +44,7 @@ export interface IParsedPackageNameOrError extends IParsedPackageName {
 export class PackageName {
   // encodeURIComponent() escapes all characters except:  A-Z a-z 0-9 - _ . ! ~ * ' ( )
   // However, these are disallowed because they are shell characters:       ! ~ * ' ( )
-  private static readonly invalidNameCharactersRegExp: RegExp = /[^A-Za-z0-9\-_\.]/;
+  private static readonly _invalidNameCharactersRegExp: RegExp = /[^A-Za-z0-9\-_\.]/;
 
   /**
    * This attempts to parse a package name that may include a scope component.
@@ -125,7 +125,7 @@ export class PackageName {
 
     // "The name ends up being part of a URL, an argument on the command line, and a folder name.
     // Therefore, the name can't contain any non-URL-safe characters"
-    const match: RegExpMatchArray | null = nameWithoutScopeSymbols.match(PackageName.invalidNameCharactersRegExp);
+    const match: RegExpMatchArray | null = nameWithoutScopeSymbols.match(PackageName._invalidNameCharactersRegExp);
     if (match) {
       result.error = `The package name "${packageName}" contains an invalid character: "${match[0]}"`;
       return result;

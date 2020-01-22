@@ -63,12 +63,12 @@ export const enum ExtractorMessageId {
   PreapprovedBadReleaseTag = 'ae-preapproved-bad-release-tag',
 
   /**
-   * "The `@inheritDoc` reference could not be resolved".
+   * "The `@inheritDoc` reference could not be resolved."
    */
   UnresolvedInheritDocReference = 'ae-unresolved-inheritdoc-reference',
 
   /**
-   * "The `@inheritDoc` tag needs a TSDoc declaration reference; signature matching is not supported yet".
+   * "The `@inheritDoc` tag needs a TSDoc declaration reference; signature matching is not supported yet."
    *
    * @privateRemarks
    * In the future, we will implement signature matching so that you can write `{@inheritDoc}` and API Extractor
@@ -78,14 +78,24 @@ export const enum ExtractorMessageId {
   UnresolvedInheritDocBase = 'ae-unresolved-inheritdoc-base',
 
   /**
-   * "The `@inheritDoc` tag for ___ refers to its own declaration".
+   * "The `@inheritDoc` tag for ___ refers to its own declaration."
    */
   CyclicInheritDoc = 'ae-cyclic-inherit-doc',
 
   /**
-   * "The `@link` reference could not be resolved".
+   * "The `@link` reference could not be resolved."
    */
-  UnresolvedLink = 'ae-unresolved-link'
+  UnresolvedLink = 'ae-unresolved-link',
+
+  /**
+   * "The doc comment for the property ___ must appear on the getter, not the setter."
+   */
+  SetterWithDocs = 'ae-setter-with-docs',
+
+  /**
+   * "The property ___ has a setter but no getter."
+   */
+  MissingGetter = 'ae-missing-getter',
 }
 
 export const allExtractorMessageIds: Set<string> = new Set<string>([
@@ -102,5 +112,7 @@ export const allExtractorMessageIds: Set<string> = new Set<string>([
   'ae-unresolved-inheritdoc-reference',
   'ae-unresolved-inheritdoc-base',
   'ae-cyclic-inherit-doc',
-  'ae-unresolved-link'
+  'ae-unresolved-link',
+  'ae-setter-with-docs',
+  'ae-missing-getter'
 ]);

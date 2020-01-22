@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/load-themed-styles",
-  "version": "1.10.12",
+  "version": "1.10.34",
   "description": "Loads themed styles.",
   "license": "MIT",
   "repository": {
@@ -10,15 +10,17 @@
     "build": "gulp --clean"
   },
   "main": "lib/index.js",
+  "module": "lib-es6/index.js",
   "typings": "lib/index.d.ts",
   "keywords": [],
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.4": "0.2.5",
+    "@microsoft/rush-stack-compiler-3.5": "0.4.1",
+    "@rushstack/eslint-config": "0.5.4",
     "@types/chai": "3.4.34",
     "@types/mocha": "5.2.5",
     "@types/webpack-env": "1.13.0",
     "chai": "~3.5.0",
     "gulp": "~4.0.2",
-    "@microsoft/node-library-build": "6.2.5"
+    "@microsoft/node-library-build": "6.4.1"
   }
 }

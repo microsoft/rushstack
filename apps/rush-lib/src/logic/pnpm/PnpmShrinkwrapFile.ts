@@ -15,6 +15,10 @@ const SHRINKWRAP_YAML_FORMAT: yaml.DumpOptions = {
   sortKeys: true
 };
 
+export interface IPeerDependenciesMetaYaml {
+  optional?: boolean;
+}
+
 export interface IPnpmShrinkwrapDependencyYaml {
   /** Information about the resolved package */
   resolution: {
@@ -29,6 +33,11 @@ export interface IPnpmShrinkwrapDependencyYaml {
   optionalDependencies: { [dependency: string]: string };
   /** The list of peer dependencies and the resolved version */
   peerDependencies: { [dependency: string]: string };
+  /**
+   * Used to indicate optional peer dependencies, as described in this RFC:
+   * https://github.com/yarnpkg/rfcs/blob/master/accepted/0000-optional-peer-dependencies.md
+   */
+  peerDependenciesMeta: { [dependency: string]: IPeerDependenciesMetaYaml };
 }
 
 /**
@@ -152,6 +161,26 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public readonly shrinkwrapFilename: string;
 
   private _shrinkwrapJson: IPnpmShrinkwrapYaml;
+
+  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, shrinkwrapFilename: string) {
+    super();
+    this._shrinkwrapJson = shrinkwrapJson;
+    this.shrinkwrapFilename = shrinkwrapFilename;
+
+    // Normalize the data
+    if (!this._shrinkwrapJson.registry) {
+      this._shrinkwrapJson.registry = '';
+    }
+    if (!this._shrinkwrapJson.dependencies) {
+      this._shrinkwrapJson.dependencies = { };
+    }
+    if (!this._shrinkwrapJson.specifiers) {
+      this._shrinkwrapJson.specifiers = { };
+    }
+    if (!this._shrinkwrapJson.packages) {
+      this._shrinkwrapJson.packages = { };
+    }
+  }
 
   public static loadFromFile(shrinkwrapYamlFilename: string): PnpmShrinkwrapFile | undefined {
     try {
@@ -371,26 +400,6 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     const dependencyKey: string = packageDescription.dependencies[packageName];
     return this._parsePnpmDependencyKey(packageName, dependencyKey);
-  }
-
-  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, shrinkwrapFilename: string) {
-    super();
-    this._shrinkwrapJson = shrinkwrapJson;
-    this.shrinkwrapFilename = shrinkwrapFilename;
-
-    // Normalize the data
-    if (!this._shrinkwrapJson.registry) {
-      this._shrinkwrapJson.registry = '';
-    }
-    if (!this._shrinkwrapJson.dependencies) {
-      this._shrinkwrapJson.dependencies = { };
-    }
-    if (!this._shrinkwrapJson.specifiers) {
-      this._shrinkwrapJson.specifiers = { };
-    }
-    if (!this._shrinkwrapJson.packages) {
-      this._shrinkwrapJson.packages = { };
-    }
   }
 
   /**

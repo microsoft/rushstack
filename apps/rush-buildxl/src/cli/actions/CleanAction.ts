@@ -12,7 +12,7 @@ import { RushConfiguration } from '@microsoft/rush-lib';
 export class CleanAction extends CommandLineAction {
   private _terminal: Terminal;
 
-  constructor(terminal: Terminal) {
+  public constructor(terminal: Terminal) {
     super({
       actionName: 'clean',
       summary: 'Cleans up generated BuildXL configuration for the current Rush repository.',

@@ -26,6 +26,7 @@ export {
 } from './IPackageJson';
 export { InternalError } from './InternalError';
 export {
+  JsonObject,
   JsonFile,
   IJsonFileSaveOptions,
   IJsonFileStringifyOptions

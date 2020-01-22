@@ -193,7 +193,7 @@ export class ExportAnalyzer {
       // But there is also an elaborate case where the source file contains one or more "module" declarations,
       // and our moduleReference took us to one of those.
 
-      // tslint:disable-next-line:no-bitwise
+      // eslint-disable-next-line no-bitwise
       if ((moduleReference.moduleSpecifierSymbol.flags & ts.SymbolFlags.Alias) !== 0) {
         // Follow the import/export declaration to one hop the exported item inside the target module
         let followedSymbol: ts.Symbol | undefined = TypeScriptInternals.getImmediateAliasedSymbol(
@@ -209,7 +209,7 @@ export class ExportAnalyzer {
           const parent: ts.Symbol | undefined = TypeScriptInternals.getSymbolParent(followedSymbol);
           if (parent !== undefined) {
             // Make sure the thing we found is a module
-            // tslint:disable-next-line:no-bitwise
+            // eslint-disable-next-line no-bitwise
             if ((parent.flags & ts.SymbolFlags.ValueModule) !== 0) {
               // Record that that this is an ambient module that can also be imported from
               this._importableAmbientSourceFiles.add(sourceFile);
@@ -333,7 +333,7 @@ export class ExportAnalyzer {
     if (referringModuleIsExternal) {
       current = TypeScriptHelpers.followAliases(symbol, this._typeChecker);
     } else {
-      while (true) { // tslint:disable-line:no-constant-condition
+      for (; ;) {
         // Is this symbol an import/export that we need to follow to find the real declaration?
         for (const declaration of current.declarations || []) {
 
@@ -348,7 +348,7 @@ export class ExportAnalyzer {
           }
         }
 
-        if (!(current.flags & ts.SymbolFlags.Alias)) { // tslint:disable-line:no-bitwise
+        if (!(current.flags & ts.SymbolFlags.Alias)) { // eslint-disable-line no-bitwise
           break;
         }
 

@@ -125,7 +125,7 @@ interface IStartupCodeOptions {
 export class SetPublicPathPlugin implements Webpack.Plugin {
   public options: ISetWebpackPublicPathPluginOptions;
 
-  constructor(options: ISetWebpackPublicPathPluginOptions) {
+  public constructor(options: ISetWebpackPublicPathPluginOptions) {
     this.options = options;
   }
 
@@ -169,7 +169,8 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
         );
       });
     } else {
-      compiler.plugin('compilation', (compilation: IV3Compilation, params: Object): void => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      compiler.plugin('compilation', (compilation: IV3Compilation, params: any): void => {
         compilation.mainTemplate.plugin('startup', (source: string, chunk: IV3Chunk, hash: string) => {
           let assetOrChunkFound: boolean = this.options.skipDetection || chunk.chunks.length > 0;
           if (!assetOrChunkFound) {

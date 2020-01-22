@@ -3,6 +3,8 @@
 
   "mainEntryPointFilePath": "<projectFolder>/lib/index.d.ts",
 
+  "newlineKind": "crlf",
+
   "apiReport": {
     "enabled": true,
   },

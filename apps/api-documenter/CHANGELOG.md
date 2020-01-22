@@ -1,6 +1,113 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Sun, 06 Oct 2019 00:27:39 GMT and should not be manually modified.
+This log was last generated on Tue, 21 Jan 2020 21:56:13 GMT and should not be manually modified.
+
+## 7.7.9
+Tue, 21 Jan 2020 21:56:13 GMT
+
+*Version update only*
+
+## 7.7.8
+Sun, 19 Jan 2020 02:26:52 GMT
+
+### Patches
+
+- Upgrade Node typings to Node 10
+
+## 7.7.7
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 7.7.6
+Tue, 14 Jan 2020 01:34:15 GMT
+
+*Version update only*
+
+## 7.7.5
+Sat, 11 Jan 2020 05:18:23 GMT
+
+*Version update only*
+
+## 7.7.4
+Thu, 09 Jan 2020 06:44:12 GMT
+
+*Version update only*
+
+## 7.7.3
+Wed, 08 Jan 2020 00:11:30 GMT
+
+*Version update only*
+
+## 7.7.2
+Wed, 04 Dec 2019 23:17:55 GMT
+
+*Version update only*
+
+## 7.7.1
+Tue, 03 Dec 2019 03:17:43 GMT
+
+*Version update only*
+
+## 7.7.0
+Sun, 24 Nov 2019 00:54:04 GMT
+
+### Minor changes
+
+- Add a new command-line option --new-docfx-namespaces to improve how namespaces are represented when generating YAML for DocFX
+- Added support for `@throws`
+
+## 7.6.1
+Wed, 20 Nov 2019 06:14:28 GMT
+
+*Version update only*
+
+## 7.6.0
+Fri, 15 Nov 2019 04:50:50 GMT
+
+### Minor changes
+
+- Make newline type for generated files configurable
+
+## 7.5.8
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 7.5.7
+Wed, 06 Nov 2019 22:44:18 GMT
+
+*Version update only*
+
+## 7.5.6
+Tue, 05 Nov 2019 06:49:28 GMT
+
+*Version update only*
+
+## 7.5.5
+Tue, 05 Nov 2019 01:08:39 GMT
+
+*Version update only*
+
+## 7.5.4
+Fri, 25 Oct 2019 15:08:54 GMT
+
+*Version update only*
+
+## 7.5.3
+Tue, 22 Oct 2019 06:24:44 GMT
+
+*Version update only*
+
+## 7.5.2
+Mon, 21 Oct 2019 05:22:43 GMT
+
+*Version update only*
+
+## 7.5.1
+Fri, 18 Oct 2019 15:15:00 GMT
+
+*Version update only*
 
 ## 7.5.0
 Sun, 06 Oct 2019 00:27:39 GMT

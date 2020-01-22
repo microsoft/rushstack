@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 // The PosixModeBits are intended to be used with bitwise operations.
-// tslint:disable:no-bitwise
+/* eslint-disable no-bitwise */
 
 /**
  * An integer value used to specify file permissions for POSIX-like operating systems.

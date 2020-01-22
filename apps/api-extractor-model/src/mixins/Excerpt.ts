@@ -6,9 +6,14 @@ import { Text } from '@microsoft/node-core-library';
 
 /** @public */
 export const enum ExcerptTokenKind {
+  /**
+   * Generic text without any special properties
+   */
   Content = 'Content',
 
-  // Soon we will support hyperlinks to other API declarations
+  /**
+   * A reference to an API declaration
+   */
   Reference = 'Reference'
 }
 

@@ -53,7 +53,7 @@ export class RushCommandLineParser extends CommandLineParser {
   private _debugParameter: CommandLineFlagParameter;
   private _rushOptions: IRushCommandLineParserOptions;
 
-  constructor(options?: Partial<IRushCommandLineParserOptions>) {
+  public constructor(options?: Partial<IRushCommandLineParserOptions>) {
     super({
       toolFilename: 'rush',
       toolDescription: 'Rush makes life easier for JavaScript developers who develop, build, and publish'
@@ -355,7 +355,7 @@ export class RushCommandLineParser extends CommandLineParser {
     // performs nontrivial work that can throw an exception.  Either the Rush class would need
     // to handle reporting for those exceptions, or else _populateActions() should be moved
     // to a RushCommandLineParser lifecycle stage that can handle it.
-    if (process.exitCode > 0) {
+    if (!process.exitCode || process.exitCode > 0) {
       process.exit(process.exitCode);
     } else {
       process.exit(1);

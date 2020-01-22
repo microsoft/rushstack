@@ -1,6 +1,102 @@
 # Change Log - @microsoft/rush-stack-compiler-3.4
 
-This log was last generated on Sun, 06 Oct 2019 00:27:40 GMT and should not be manually modified.
+This log was last generated on Tue, 21 Jan 2020 21:56:14 GMT and should not be manually modified.
+
+## 0.4.1
+Tue, 21 Jan 2020 21:56:14 GMT
+
+*Version update only*
+
+## 0.4.0
+Sun, 19 Jan 2020 02:26:52 GMT
+
+### Minor changes
+
+- Upgrade Node typings to Node 10
+
+## 0.3.14
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 0.3.13
+Tue, 14 Jan 2020 01:34:16 GMT
+
+*Version update only*
+
+## 0.3.12
+Thu, 09 Jan 2020 06:44:13 GMT
+
+*Version update only*
+
+## 0.3.11
+Wed, 08 Jan 2020 00:11:31 GMT
+
+*Version update only*
+
+## 0.3.10
+Tue, 03 Dec 2019 03:17:44 GMT
+
+*Version update only*
+
+## 0.3.9
+Sun, 24 Nov 2019 00:54:04 GMT
+
+*Version update only*
+
+## 0.3.8
+Wed, 20 Nov 2019 06:14:28 GMT
+
+*Version update only*
+
+## 0.3.7
+Fri, 15 Nov 2019 04:50:50 GMT
+
+*Version update only*
+
+## 0.3.6
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 0.3.5
+Wed, 06 Nov 2019 22:44:18 GMT
+
+*Version update only*
+
+## 0.3.4
+Tue, 05 Nov 2019 06:49:29 GMT
+
+*Version update only*
+
+## 0.3.3
+Tue, 05 Nov 2019 01:08:39 GMT
+
+*Version update only*
+
+## 0.3.2
+Fri, 25 Oct 2019 15:08:54 GMT
+
+### Patches
+
+- Fix an issue where ESLint output would fail to parse when a large project is built on a Mac.
+
+## 0.3.1
+Tue, 22 Oct 2019 06:24:44 GMT
+
+*Version update only*
+
+## 0.3.0
+Mon, 21 Oct 2019 05:22:43 GMT
+
+### Minor changes
+
+- Add support for ESLint+TypeScript
+
+## 0.2.6
+Fri, 18 Oct 2019 15:15:01 GMT
+
+*Version update only*
 
 ## 0.2.5
 Sun, 06 Oct 2019 00:27:40 GMT

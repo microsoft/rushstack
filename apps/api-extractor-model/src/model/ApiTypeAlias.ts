@@ -69,6 +69,12 @@ export class ApiTypeAlias extends ApiTypeParameterListMixin(ApiNameMixin(ApiRele
    */
   public readonly typeExcerpt: Excerpt;
 
+  public constructor(options: IApiTypeAliasOptions) {
+    super(options);
+
+    this.typeExcerpt = this.buildExcerpt(options.typeTokenRange);
+  }
+
   /** @override */
   public static onDeserializeInto(options: Partial<IApiTypeAliasOptions>, context: DeserializerContext,
     jsonObject: IApiTypeAliasJson): void {
@@ -80,12 +86,6 @@ export class ApiTypeAlias extends ApiTypeParameterListMixin(ApiNameMixin(ApiRele
 
   public static getContainerKey(name: string): string {
     return `${name}|${ApiItemKind.TypeAlias}`;
-  }
-
-  public constructor(options: IApiTypeAliasOptions) {
-    super(options);
-
-    this.typeExcerpt = this.buildExcerpt(options.typeTokenRange);
   }
 
   /** @override */

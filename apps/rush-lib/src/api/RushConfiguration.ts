@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* eslint max-lines: off */
+
 import * as path from 'path';
 import * as fs from 'fs';
 import * as semver from 'semver';
@@ -305,6 +307,237 @@ export class RushConfiguration {
 
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
   private _experimentsConfiguration: ExperimentsConfiguration;
+
+  /**
+   * Use RushConfiguration.loadFromConfigurationFile() or Use RushConfiguration.loadFromDefaultLocation()
+   * instead.
+   */
+  private constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string) {
+    EnvironmentConfiguration.initialize();
+
+    if (rushConfigurationJson.nodeSupportedVersionRange) {
+      if (!semver.validRange(rushConfigurationJson.nodeSupportedVersionRange)) {
+        throw new Error('Error parsing the node-semver expression in the "nodeSupportedVersionRange"'
+          + ` field from rush.json: "${rushConfigurationJson.nodeSupportedVersionRange}"`);
+      }
+      if (!semver.satisfies(process.version, rushConfigurationJson.nodeSupportedVersionRange)) {
+        const message: string = `Your dev environment is running Node.js version ${process.version} which does`
+          + ` not meet the requirements for building this repository.  (The rush.json configuration`
+          + ` requires nodeSupportedVersionRange="${rushConfigurationJson.nodeSupportedVersionRange}")`;
+        if (EnvironmentConfiguration.allowUnsupportedNodeVersion) {
+          console.warn(message);
+        } else {
+          throw new Error(message);
+        }
+      }
+    }
+
+    this._rushJsonFile = rushJsonFilename;
+    this._rushJsonFolder = path.dirname(rushJsonFilename);
+
+    this._commonFolder = path.resolve(path.join(this._rushJsonFolder, RushConstants.commonFolderName));
+
+    this._commonRushConfigFolder = path.join(this._commonFolder, 'config', 'rush');
+
+    this._commonTempFolder = EnvironmentConfiguration.rushTempFolderOverride ||
+      path.join(this._commonFolder, RushConstants.rushTempFolderName);
+
+    this._commonScriptsFolder = path.join(this._commonFolder, 'scripts');
+
+    this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
+    this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
+    this._pnpmStoreFolder = path.resolve(path.join(this._commonTempFolder, 'pnpm-store'));
+    this._yarnCacheFolder = path.resolve(path.join(this._commonTempFolder, 'yarn-cache'));
+
+    this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
+
+    this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
+    this._currentVariantJsonFilename = path.join(this._commonTempFolder, 'current-variant.json');
+
+    this._suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
+
+    this._ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
+
+    const experimentsConfigFile: string = path.join(
+      this._commonRushConfigFolder,
+      RushConstants.experimentsFilename
+    );
+    this._experimentsConfiguration = new ExperimentsConfiguration(experimentsConfigFile);
+
+    this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || {});
+    this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || {});
+
+    // TODO: Add an actual "packageManager" field in rush.json
+    const packageManagerFields: string[] = [];
+
+    if (rushConfigurationJson.npmVersion) {
+      this._packageManager = 'npm';
+      packageManagerFields.push('npmVersion');
+    }
+    if (rushConfigurationJson.pnpmVersion) {
+      this._packageManager = 'pnpm';
+      packageManagerFields.push('pnpmVersion');
+    }
+    if (rushConfigurationJson.yarnVersion) {
+      this._packageManager = 'yarn';
+      packageManagerFields.push('yarnVersion');
+    }
+
+    if (packageManagerFields.length === 0) {
+      throw new Error(`The rush.json configuration must specify one of: npmVersion, pnpmVersion, or yarnVersion`);
+    }
+
+    if (packageManagerFields.length > 1) {
+      throw new Error(`The rush.json configuration cannot specify both ${packageManagerFields[0]}`
+        + ` and ${packageManagerFields[1]} `);
+    }
+
+    if (this._packageManager === 'npm') {
+      this._packageManagerToolVersion = rushConfigurationJson.npmVersion!;
+      this._packageManagerWrapper = new NpmPackageManager(this._packageManagerToolVersion);
+    } else if (this._packageManager === 'pnpm') {
+      this._packageManagerToolVersion = rushConfigurationJson.pnpmVersion!;
+      this._packageManagerWrapper = new PnpmPackageManager(this._packageManagerToolVersion);
+    } else {
+      this._packageManagerToolVersion = rushConfigurationJson.yarnVersion!;
+      this._packageManagerWrapper = new YarnPackageManager(this._packageManagerToolVersion);
+    }
+
+    this._shrinkwrapFilename = this._packageManagerWrapper.shrinkwrapFilename;
+
+    this._tempShrinkwrapFilename = path.join(
+        this._commonTempFolder, this._shrinkwrapFilename
+    );
+    this._packageManagerToolFilename = path.resolve(path.join(
+        this._commonTempFolder, `${this.packageManager}-local`, 'node_modules', '.bin', `${this.packageManager}`
+    ));
+
+    /// From "C:\repo\common\temp\pnpm-lock.yaml" --> "C:\repo\common\temp\pnpm-lock-preinstall.yaml"
+    const parsedPath: path.ParsedPath = path.parse(this._tempShrinkwrapFilename);
+    this._tempShrinkwrapPreinstallFilename = path.join(parsedPath.dir,
+      parsedPath.name + '-preinstall' + parsedPath.ext);
+
+    RushConfiguration._validateCommonRushConfigFolder(
+        this._commonRushConfigFolder,
+        this.packageManager,
+        this._shrinkwrapFilename
+    );
+
+    this._projectFolderMinDepth = rushConfigurationJson.projectFolderMinDepth !== undefined
+      ? rushConfigurationJson.projectFolderMinDepth : 1;
+    if (this._projectFolderMinDepth < 1) {
+      throw new Error('Invalid projectFolderMinDepth; the minimum possible value is 1');
+    }
+
+    this._projectFolderMaxDepth = rushConfigurationJson.projectFolderMaxDepth !== undefined
+      ? rushConfigurationJson.projectFolderMaxDepth : 2;
+    if (this._projectFolderMaxDepth < this._projectFolderMinDepth) {
+      throw new Error('The projectFolderMaxDepth cannot be smaller than the projectFolderMinDepth');
+    }
+
+    this._approvedPackagesPolicy = new ApprovedPackagesPolicy(this, rushConfigurationJson);
+
+    this._gitAllowedEmailRegExps = [];
+    this._gitSampleEmail = '';
+    if (rushConfigurationJson.gitPolicy) {
+      if (rushConfigurationJson.gitPolicy.sampleEmail) {
+        this._gitSampleEmail = rushConfigurationJson.gitPolicy.sampleEmail;
+      }
+
+      if (rushConfigurationJson.gitPolicy.allowedEmailRegExps) {
+        this._gitAllowedEmailRegExps = rushConfigurationJson.gitPolicy.allowedEmailRegExps;
+
+        if (this._gitSampleEmail.trim().length < 1) {
+          throw new Error('The rush.json file is missing the "sampleEmail" option, ' +
+            'which is required when using "allowedEmailRegExps"');
+        }
+      }
+
+      if (rushConfigurationJson.gitPolicy.versionBumpCommitMessage) {
+        this._gitVersionBumpCommitMessage = rushConfigurationJson.gitPolicy.versionBumpCommitMessage;
+      }
+    }
+
+    this._hotfixChangeEnabled = false;
+    if (rushConfigurationJson.hotfixChangeEnabled) {
+      this._hotfixChangeEnabled = rushConfigurationJson.hotfixChangeEnabled;
+    }
+
+    if (rushConfigurationJson.repository) {
+      this._repositoryUrl = rushConfigurationJson.repository.url;
+    }
+
+    this._telemetryEnabled = !!rushConfigurationJson.telemetryEnabled;
+    if (rushConfigurationJson.eventHooks) {
+      this._eventHooks = new EventHooks(rushConfigurationJson.eventHooks);
+    }
+
+    const versionPolicyConfigFile: string = path.join(
+      this._commonRushConfigFolder,
+      RushConstants.versionPoliciesFilename
+    );
+    this._versionPolicyConfiguration = new VersionPolicyConfiguration(versionPolicyConfigFile);
+
+    this._projects = [];
+    this._projectsByName = new Map<string, RushConfigurationProject>();
+
+    // We sort the projects array in alphabetical order.  This ensures that the packages
+    // are processed in a deterministic order by the various Rush algorithms.
+    const sortedProjectJsons: IRushConfigurationProjectJson[] = rushConfigurationJson.projects.slice(0);
+    sortedProjectJsons.sort(
+      (a: IRushConfigurationProjectJson, b: IRushConfigurationProjectJson) => a.packageName.localeCompare(b.packageName)
+    );
+
+    const tempNamesByProject: Map<IRushConfigurationProjectJson, string>
+      = RushConfiguration._generateTempNamesForProjects(sortedProjectJsons);
+
+    for (const projectJson of sortedProjectJsons) {
+      const tempProjectName: string | undefined = tempNamesByProject.get(projectJson);
+      if (tempProjectName) {
+        const project: RushConfigurationProject = new RushConfigurationProject(projectJson, this, tempProjectName);
+        this._projects.push(project);
+        if (this._projectsByName.get(project.packageName)) {
+          throw new Error(`The project name "${project.packageName}" was specified more than once`
+            + ` in the rush.json configuration file.`);
+        }
+        this._projectsByName.set(project.packageName, project);
+      }
+    }
+
+    for (const project of this._projects) {
+      project.cyclicDependencyProjects.forEach((cyclicDependencyProject: string) => {
+        if (!this.getProjectByName(cyclicDependencyProject)) {
+          throw new Error(`In rush.json, the "${cyclicDependencyProject}" project does not exist,`
+            + ` but was referenced by the cyclicDependencyProjects for ${project.packageName}`);
+        }
+      });
+
+      // Compute the downstream dependencies within the list of Rush projects.
+      this._populateDownstreamDependencies(project.packageJson.dependencies, project.packageName);
+      this._populateDownstreamDependencies(project.packageJson.devDependencies, project.packageName);
+      this._versionPolicyConfiguration.validate(this._projectsByName);
+    }
+
+    const variants: {
+      [variantName: string]: boolean;
+    } = {};
+
+    if (rushConfigurationJson.variants) {
+      for (const variantOptions of rushConfigurationJson.variants) {
+        const {
+          variantName
+        } = variantOptions;
+
+        if (variants[variantName]) {
+          throw new Error(`Duplicate variant named '${variantName}' specified in configuration.`);
+        }
+
+        variants[variantName] = true;
+      }
+    }
+
+    this._variants = variants;
+  }
 
   /**
    * Loads the configuration data from an Rush.json configuration file and returns
@@ -1013,237 +1246,6 @@ export class RushConfiguration {
       }
     }
     return undefined;
-  }
-
-  /**
-   * Use RushConfiguration.loadFromConfigurationFile() or Use RushConfiguration.loadFromDefaultLocation()
-   * instead.
-   */
-  private constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string) {
-    EnvironmentConfiguration.initialize();
-
-    if (rushConfigurationJson.nodeSupportedVersionRange) {
-      if (!semver.validRange(rushConfigurationJson.nodeSupportedVersionRange)) {
-        throw new Error('Error parsing the node-semver expression in the "nodeSupportedVersionRange"'
-          + ` field from rush.json: "${rushConfigurationJson.nodeSupportedVersionRange}"`);
-      }
-      if (!semver.satisfies(process.version, rushConfigurationJson.nodeSupportedVersionRange)) {
-        const message: string = `Your dev environment is running Node.js version ${process.version} which does`
-          + ` not meet the requirements for building this repository.  (The rush.json configuration`
-          + ` requires nodeSupportedVersionRange="${rushConfigurationJson.nodeSupportedVersionRange}")`;
-        if (EnvironmentConfiguration.allowUnsupportedNodeVersion) {
-          console.warn(message);
-        } else {
-          throw new Error(message);
-        }
-      }
-    }
-
-    this._rushJsonFile = rushJsonFilename;
-    this._rushJsonFolder = path.dirname(rushJsonFilename);
-
-    this._commonFolder = path.resolve(path.join(this._rushJsonFolder, RushConstants.commonFolderName));
-
-    this._commonRushConfigFolder = path.join(this._commonFolder, 'config', 'rush');
-
-    this._commonTempFolder = EnvironmentConfiguration.rushTempFolderOverride ||
-      path.join(this._commonFolder, RushConstants.rushTempFolderName);
-
-    this._commonScriptsFolder = path.join(this._commonFolder, 'scripts');
-
-    this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
-    this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
-    this._pnpmStoreFolder = path.resolve(path.join(this._commonTempFolder, 'pnpm-store'));
-    this._yarnCacheFolder = path.resolve(path.join(this._commonTempFolder, 'yarn-cache'));
-
-    this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
-
-    this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
-    this._currentVariantJsonFilename = path.join(this._commonTempFolder, 'current-variant.json');
-
-    this._suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
-
-    this._ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
-
-    const experimentsConfigFile: string = path.join(
-      this._commonRushConfigFolder,
-      RushConstants.experimentsFilename
-    );
-    this._experimentsConfiguration = new ExperimentsConfiguration(experimentsConfigFile);
-
-    this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || {});
-    this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || {});
-
-    // TODO: Add an actual "packageManager" field in rush.json
-    const packageManagerFields: string[] = [];
-
-    if (rushConfigurationJson.npmVersion) {
-      this._packageManager = 'npm';
-      packageManagerFields.push('npmVersion');
-    }
-    if (rushConfigurationJson.pnpmVersion) {
-      this._packageManager = 'pnpm';
-      packageManagerFields.push('pnpmVersion');
-    }
-    if (rushConfigurationJson.yarnVersion) {
-      this._packageManager = 'yarn';
-      packageManagerFields.push('yarnVersion');
-    }
-
-    if (packageManagerFields.length === 0) {
-      throw new Error(`The rush.json configuration must specify one of: npmVersion, pnpmVersion, or yarnVersion`);
-    }
-
-    if (packageManagerFields.length > 1) {
-      throw new Error(`The rush.json configuration cannot specify both ${packageManagerFields[0]}`
-        + ` and ${packageManagerFields[1]} `);
-    }
-
-    if (this._packageManager === 'npm') {
-      this._packageManagerToolVersion = rushConfigurationJson.npmVersion!;
-      this._packageManagerWrapper = new NpmPackageManager(this._packageManagerToolVersion);
-    } else if (this._packageManager === 'pnpm') {
-      this._packageManagerToolVersion = rushConfigurationJson.pnpmVersion!;
-      this._packageManagerWrapper = new PnpmPackageManager(this._packageManagerToolVersion);
-    } else {
-      this._packageManagerToolVersion = rushConfigurationJson.yarnVersion!;
-      this._packageManagerWrapper = new YarnPackageManager(this._packageManagerToolVersion);
-    }
-
-    this._shrinkwrapFilename = this._packageManagerWrapper.shrinkwrapFilename;
-
-    this._tempShrinkwrapFilename = path.join(
-        this._commonTempFolder, this._shrinkwrapFilename
-    );
-    this._packageManagerToolFilename = path.resolve(path.join(
-        this._commonTempFolder, `${this.packageManager}-local`, 'node_modules', '.bin', `${this.packageManager}`
-    ));
-
-    /// From "C:\repo\common\temp\pnpm-lock.yaml" --> "C:\repo\common\temp\pnpm-lock-preinstall.yaml"
-    const parsedPath: path.ParsedPath = path.parse(this._tempShrinkwrapFilename);
-    this._tempShrinkwrapPreinstallFilename = path.join(parsedPath.dir,
-      parsedPath.name + '-preinstall' + parsedPath.ext);
-
-    RushConfiguration._validateCommonRushConfigFolder(
-        this._commonRushConfigFolder,
-        this.packageManager,
-        this._shrinkwrapFilename
-    );
-
-    this._projectFolderMinDepth = rushConfigurationJson.projectFolderMinDepth !== undefined
-      ? rushConfigurationJson.projectFolderMinDepth : 1;
-    if (this._projectFolderMinDepth < 1) {
-      throw new Error('Invalid projectFolderMinDepth; the minimum possible value is 1');
-    }
-
-    this._projectFolderMaxDepth = rushConfigurationJson.projectFolderMaxDepth !== undefined
-      ? rushConfigurationJson.projectFolderMaxDepth : 2;
-    if (this._projectFolderMaxDepth < this._projectFolderMinDepth) {
-      throw new Error('The projectFolderMaxDepth cannot be smaller than the projectFolderMinDepth');
-    }
-
-    this._approvedPackagesPolicy = new ApprovedPackagesPolicy(this, rushConfigurationJson);
-
-    this._gitAllowedEmailRegExps = [];
-    this._gitSampleEmail = '';
-    if (rushConfigurationJson.gitPolicy) {
-      if (rushConfigurationJson.gitPolicy.sampleEmail) {
-        this._gitSampleEmail = rushConfigurationJson.gitPolicy.sampleEmail;
-      }
-
-      if (rushConfigurationJson.gitPolicy.allowedEmailRegExps) {
-        this._gitAllowedEmailRegExps = rushConfigurationJson.gitPolicy.allowedEmailRegExps;
-
-        if (this._gitSampleEmail.trim().length < 1) {
-          throw new Error('The rush.json file is missing the "sampleEmail" option, ' +
-            'which is required when using "allowedEmailRegExps"');
-        }
-      }
-
-      if (rushConfigurationJson.gitPolicy.versionBumpCommitMessage) {
-        this._gitVersionBumpCommitMessage = rushConfigurationJson.gitPolicy.versionBumpCommitMessage;
-      }
-    }
-
-    this._hotfixChangeEnabled = false;
-    if (rushConfigurationJson.hotfixChangeEnabled) {
-      this._hotfixChangeEnabled = rushConfigurationJson.hotfixChangeEnabled;
-    }
-
-    if (rushConfigurationJson.repository) {
-      this._repositoryUrl = rushConfigurationJson.repository.url;
-    }
-
-    this._telemetryEnabled = !!rushConfigurationJson.telemetryEnabled;
-    if (rushConfigurationJson.eventHooks) {
-      this._eventHooks = new EventHooks(rushConfigurationJson.eventHooks);
-    }
-
-    const versionPolicyConfigFile: string = path.join(
-      this._commonRushConfigFolder,
-      RushConstants.versionPoliciesFilename
-    );
-    this._versionPolicyConfiguration = new VersionPolicyConfiguration(versionPolicyConfigFile);
-
-    this._projects = [];
-    this._projectsByName = new Map<string, RushConfigurationProject>();
-
-    // We sort the projects array in alphabetical order.  This ensures that the packages
-    // are processed in a deterministic order by the various Rush algorithms.
-    const sortedProjectJsons: IRushConfigurationProjectJson[] = rushConfigurationJson.projects.slice(0);
-    sortedProjectJsons.sort(
-      (a: IRushConfigurationProjectJson, b: IRushConfigurationProjectJson) => a.packageName.localeCompare(b.packageName)
-    );
-
-    const tempNamesByProject: Map<IRushConfigurationProjectJson, string>
-      = RushConfiguration._generateTempNamesForProjects(sortedProjectJsons);
-
-    for (const projectJson of sortedProjectJsons) {
-      const tempProjectName: string | undefined = tempNamesByProject.get(projectJson);
-      if (tempProjectName) {
-        const project: RushConfigurationProject = new RushConfigurationProject(projectJson, this, tempProjectName);
-        this._projects.push(project);
-        if (this._projectsByName.get(project.packageName)) {
-          throw new Error(`The project name "${project.packageName}" was specified more than once`
-            + ` in the rush.json configuration file.`);
-        }
-        this._projectsByName.set(project.packageName, project);
-      }
-    }
-
-    for (const project of this._projects) {
-      project.cyclicDependencyProjects.forEach((cyclicDependencyProject: string) => {
-        if (!this.getProjectByName(cyclicDependencyProject)) {
-          throw new Error(`In rush.json, the "${cyclicDependencyProject}" project does not exist,`
-            + ` but was referenced by the cyclicDependencyProjects for ${project.packageName}`);
-        }
-      });
-
-      // Compute the downstream dependencies within the list of Rush projects.
-      this._populateDownstreamDependencies(project.packageJson.dependencies, project.packageName);
-      this._populateDownstreamDependencies(project.packageJson.devDependencies, project.packageName);
-      this._versionPolicyConfiguration.validate(this._projectsByName);
-    }
-
-    const variants: {
-      [variantName: string]: boolean;
-    } = {};
-
-    if (rushConfigurationJson.variants) {
-      for (const variantOptions of rushConfigurationJson.variants) {
-        const {
-          variantName
-        } = variantOptions;
-
-        if (variants[variantName]) {
-          throw new Error(`Duplicate variant named '${variantName}' specified in configuration.`);
-        }
-
-        variants[variantName] = true;
-      }
-    }
-
-    this._variants = variants;
   }
 
   private _populateDownstreamDependencies(

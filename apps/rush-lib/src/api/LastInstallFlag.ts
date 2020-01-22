@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as _ from 'lodash';
-import { FileSystem, JsonFile } from '@microsoft/node-core-library';
+import { FileSystem, JsonFile, JsonObject } from '@microsoft/node-core-library';
 
 export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
 
@@ -13,14 +13,14 @@ export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
  */
 export class LastInstallFlag {
   private _path: string;
-  private _state: Object;
+  private _state: JsonObject;
 
   /**
    * Creates a new LastInstall flag
    * @param folderPath - the folder that this flag is managing
    * @param state - optional, the state that should be managed or compared
   */
-  constructor(folderPath: string, state: Object = {}) {
+  public constructor(folderPath: string, state: JsonObject = {}) {
     this._path = path.join(folderPath, LAST_INSTALL_FLAG_FILE_NAME);
     this._state = state;
   }
@@ -33,7 +33,7 @@ export class LastInstallFlag {
       return false;
     }
     try {
-      const contents: Object = JsonFile.load(this._path);
+      const contents: JsonObject = JsonFile.load(this._path);
       return _.isEqual(contents, this._state);
     } catch (error) {
       return false;

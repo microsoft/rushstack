@@ -5,6 +5,8 @@
 
   "bundledPackages": [ ],
 
+  "newlineKind": "crlf",
+
   "compiler": {
     "tsconfigFilePath": "<projectFolder>/tsconfig.json",
     "skipLibCheck": false

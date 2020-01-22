@@ -52,7 +52,7 @@ export class RushConfigurationProject {
   private readonly _rushConfiguration: RushConfiguration;
 
   /** @internal */
-  constructor(
+  public constructor(
     projectJson: IRushConfigurationProjectJson,
     rushConfiguration: RushConfiguration,
     tempProjectName: string
@@ -165,6 +165,13 @@ export class RushConfigurationProject {
    */
   public get projectRushTempFolder(): string {
     return this._projectRushTempFolder;
+  }
+
+  /**
+   * The Rush configuration for the monorepo that the project belongs to.
+   */
+  public get rushConfiguration(): RushConfiguration {
+    return this._rushConfiguration;
   }
 
   /**

@@ -4,6 +4,19 @@ import { ITaskWriter } from '@microsoft/stream-collator';
 import { TaskStatus } from '../TaskStatus';
 import { ITaskDefinition, ITask } from '../ITask';
 import { StringBufferTerminalProvider, Terminal } from '@microsoft/node-core-library';
+import { Utilities } from '../../../utilities/Utilities';
+
+// The TaskRunner prints "x.xx seconds" in TestRunner.test.ts.snap; ensure that the Stopwatch timing is deterministic
+jest.mock('../../../utilities/Utilities');
+const mockGetTimeInMs: jest.Mock<unknown> = jest.fn();
+Utilities.getTimeInMs = mockGetTimeInMs;
+
+let mockTimeInMs: number = 0;
+mockGetTimeInMs.mockImplementation(() => {
+  console.log('CALLED mockGetTimeInMs');
+  mockTimeInMs += 100;
+  return mockTimeInMs;
+});
 
 function createTaskRunner(taskRunnerOptions: ITaskRunnerOptions, taskDefinition: ITaskDefinition): TaskRunner {
   const task: ITask = taskDefinition as ITask;

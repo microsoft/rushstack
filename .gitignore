@@ -55,21 +55,24 @@ jspm_packages/
 # next.js build output
 .next
 
+# OS X temporary files
+.DS_Store
+
+# Rush temporary files
+common/temp/
+**/.rush/temp/
+
 # Common toolchain intermediate files
+temp
 lib
 lib-amd
 lib-es6
 dist
-temp
 *.scss.ts
 *.sass.ts
 
-# Rush files
-common/temp/**
-.rush/temp/**
+# Visual Studio Code
+.vscode
 
 # Remove eventually
 package-deps.json
-
-# OS X
-.DS_Store

@@ -6,6 +6,7 @@
 
 import gulp = require('gulp');
 import * as gulp_2 from 'gulp';
+import { JsonObject } from '@microsoft/node-core-library';
 import Orchestrator = require('orchestrator');
 
 // @public
@@ -41,21 +42,21 @@ export class CopyStaticAssetsTask extends GulpTask<ICopyStaticAssetsTaskConfig> 
     // (undocumented)
     executeTask(gulp: typeof gulp_2, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream;
     // (undocumented)
-    loadSchema(): Object;
+    loadSchema(): JsonObject;
 }
 
 // @public
 export class CopyTask extends GulpTask<ICopyConfig> {
     constructor();
-    executeTask(gulp: typeof gulp_2, completeCallback: (error?: string | Error) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
-    loadSchema(): Object;
+    executeTask(gulp: typeof gulp_2, completeCallback: (error?: string | Error) => void): Promise<any> | NodeJS.ReadWriteStream | void;
+    loadSchema(): JsonObject;
 }
 
 // @public
 export function coverageData(coverage: number, threshold: number, filePath: string): void;
 
 // @public
-export function error(...args: Array<string>): void;
+export function error(...args: string[]): void;
 
 // @public
 export function fileError(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
@@ -93,14 +94,14 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
     enabled: boolean;
     execute(config: IBuildConfig): Promise<void>;
     // Warning: (ae-forgotten-export) The symbol "GulpProxy" needs to be exported by the entry point index.d.ts
-    abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (error?: string | Error) => void): Promise<Object | void> | NodeJS.ReadWriteStream | void;
+    abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (error?: string | Error) => void): Promise<any | void> | NodeJS.ReadWriteStream | void;
     fileError(filePath: string, line: number, column: number, errorCode: string, message: string): void;
     fileExists(localPath: string): boolean;
     fileWarning(filePath: string, line: number, column: number, warningCode: string, message: string): void;
     getCleanMatch(buildConfig: IBuildConfig, taskConfig?: TTaskConfig): string[];
     protected _getConfigFilePath(): string;
     isEnabled(buildConfig: IBuildConfig): boolean;
-    protected loadSchema(): Object | undefined;
+    protected loadSchema(): JsonObject | undefined;
     log(message: string): void;
     logError(message: string): void;
     logVerbose(message: string): void;
@@ -108,10 +109,10 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
     mergeConfig(taskConfig: Partial<TTaskConfig>): void;
     name: string;
     onRegister(): void;
-    readJSONSync(localPath: string): Object | undefined;
+    readJSONSync(localPath: string): JsonObject | undefined;
     replaceConfig(taskConfig: TTaskConfig): void;
     resolvePath(localPath: string): string;
-    readonly schema: Object | undefined;
+    readonly schema: JsonObject | undefined;
     setConfig(taskConfig: Partial<TTaskConfig>): void;
     taskConfig: TTaskConfig;
 }
@@ -172,7 +173,7 @@ export interface ICopyStaticAssetsTaskConfig {
 // @public
 export interface ICustomGulpTask {
     // (undocumented)
-    (gulp: typeof gulp_2 | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
+    (gulp: typeof gulp_2 | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: any) => void): Promise<object> | NodeJS.ReadWriteStream | void;
 }
 
 // @public (undocumented)
@@ -197,6 +198,7 @@ export interface IJestConfig {
     modulePathIgnorePatterns?: string[];
     testMatch?: string[];
     testPathIgnorePatterns?: string[];
+    writeNUnitResults?: boolean;
 }
 
 // @public
@@ -217,11 +219,11 @@ export class JestTask extends GulpTask<IJestConfig> {
     executeTask(gulp: typeof gulp_2, completeCallback: (error?: string | Error) => void): void;
     // (undocumented)
     isEnabled(buildConfig: IBuildConfig): boolean;
-    loadSchema(): Object;
+    loadSchema(): JsonObject;
 }
 
 // @public
-export function log(...args: Array<string>): void;
+export function log(...args: string[]): void;
 
 // @public
 export function logSummary(value: string): void;
@@ -230,7 +232,7 @@ export function logSummary(value: string): void;
 export function mergeConfig(config: Partial<IBuildConfig>): void;
 
 // @public
-export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
+export function parallel(...tasks: (IExecutable[] | IExecutable)[]): IExecutable;
 
 // @public
 export function replaceConfig(config: IBuildConfig): void;
@@ -239,7 +241,7 @@ export function replaceConfig(config: IBuildConfig): void;
 export function reset(): void;
 
 // @public
-export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
+export function serial(...tasks: (IExecutable[] | IExecutable)[]): IExecutable;
 
 // @public
 export function setConfig(config: Partial<IBuildConfig>): void;
@@ -269,10 +271,10 @@ export class ValidateShrinkwrapTask extends GulpTask<void> {
     }
 
 // @public
-export function verbose(...args: Array<string>): void;
+export function verbose(...args: string[]): void;
 
 // @public
-export function warn(...args: Array<string>): void;
+export function warn(...args: string[]): void;
 
 // @public
 export function watch(watchMatch: string | string[], taskExecutable: IExecutable): IExecutable;

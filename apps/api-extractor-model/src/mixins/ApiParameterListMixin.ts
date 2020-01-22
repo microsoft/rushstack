@@ -49,7 +49,7 @@ const _parameters: unique symbol = Symbol('ApiParameterListMixin._parameters');
  *
  * @public
  */
-// tslint:disable-next-line:interface-name
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface ApiParameterListMixin extends ApiItem {
   /**
    * When a function has multiple overloaded declarations, this zero-based integer index can be used to unqiuely
@@ -97,24 +97,14 @@ export interface ApiParameterListMixin extends ApiItem {
  * @public
  */
 export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiParameterListMixin) { // tslint:disable-line:no-any
+  TBaseClass & (new (...args: any[]) => ApiParameterListMixin) { // eslint-disable-line @typescript-eslint/no-explicit-any
 
   abstract class MixedClass extends baseClass implements ApiParameterListMixin {
     public readonly [_overloadIndex]: number;
     public readonly [_parameters]: Parameter[];
 
-    /** @override */
-    public static onDeserializeInto(options: Partial<IApiParameterListMixinOptions>, context: DeserializerContext,
-      jsonObject: IApiParameterListJson): void {
-
-      baseClass.onDeserializeInto(options, context, jsonObject);
-
-      options.overloadIndex = jsonObject.overloadIndex;
-      options.parameters = jsonObject.parameters || [];
-    }
-
-    // tslint:disable-next-line:no-any
-    constructor(...args: any[]) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public constructor(...args: any[]) {
       super(...args);
 
       const options: IApiParameterListMixinOptions = args[0];
@@ -138,6 +128,16 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(ba
       } else {
         throw new InternalError('ApiReturnTypeMixin expects a base class that inherits from ApiDeclaredItem');
       }
+    }
+
+    /** @override */
+    public static onDeserializeInto(options: Partial<IApiParameterListMixinOptions>, context: DeserializerContext,
+      jsonObject: IApiParameterListJson): void {
+
+      baseClass.onDeserializeInto(options, context, jsonObject);
+
+      options.overloadIndex = jsonObject.overloadIndex;
+      options.parameters = jsonObject.parameters || [];
     }
 
     public get overloadIndex(): number {

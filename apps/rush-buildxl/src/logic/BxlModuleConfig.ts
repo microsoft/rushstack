@@ -10,7 +10,7 @@ export class BxlModuleConfig {
   private _moduleFilePath: string;
   private _moduleFolder: string;
 
-  constructor(name: string, moduleFolder: string, moduleFilePath: string) {
+  public constructor(name: string, moduleFolder: string, moduleFilePath: string) {
     this._name = name;
     this._moduleFolder = moduleFolder;
     this._moduleFilePath = moduleFilePath;

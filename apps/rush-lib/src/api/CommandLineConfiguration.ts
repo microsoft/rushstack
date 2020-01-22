@@ -118,7 +118,6 @@ export class CommandLineConfiguration {
           }
         }
       }
-
     }
   }
 }

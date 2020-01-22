@@ -10,7 +10,7 @@ import { BxlModulesGenerator } from '../../logic/BxlModulesGenerator';
 export class GenerateAction extends CommandLineAction {
   private _terminal: Terminal;
 
-  constructor(terminal: Terminal) {
+  public constructor(terminal: Terminal) {
     super({
       actionName: 'generate',
       summary: 'Generates a BuildXL configuration for the current Rush repository.',

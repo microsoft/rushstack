@@ -1,13 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* tslint:disable:no-bitwise */
+/* eslint-disable no-bitwise */
 
 import * as ts from 'typescript';
 import { TypeScriptMessageFormatter } from './TypeScriptMessageFormatter';
 import { TypeScriptInternals } from './TypeScriptInternals';
 
 export class TypeScriptHelpers {
+  // Matches TypeScript's encoded names for well-known ECMAScript symbols like
+  // "__@iterator" or "__@toStringTag".
+  private static readonly _wellKnownSymbolNameRegExp: RegExp = /^__@(\w+)$/;
+
+  // Matches TypeScript's encoded names for late-bound symbols derived from `unique symbol` declarations
+  // which have the form of "__@<variableName>@<symbolId>", i.e. "__@someSymbol@12345".
+  private static readonly _uniqueSymbolNameRegExp: RegExp = /^__@.*@\d+$/;
+
   /**
    * This traverses any symbol aliases to find the original place where an item was defined.
    * For example, suppose a class is defined as "export default class MyClass { }"
@@ -21,7 +29,7 @@ export class TypeScriptHelpers {
    */
   public static followAliases(symbol: ts.Symbol, typeChecker: ts.TypeChecker): ts.Symbol {
     let current: ts.Symbol = symbol;
-    while (true) { // tslint:disable-line:no-constant-condition
+    for (;;) {
       if (!(current.flags & ts.SymbolFlags.Alias)) {
         break;
       }
@@ -84,7 +92,7 @@ export class TypeScriptHelpers {
       // is acting as a module or not).
       const sourceFile: ts.SourceFile = firstDeclaration.getSourceFile();
 
-      if (!!typeChecker.getSymbolAtLocation(sourceFile)) {
+      if (typeChecker.getSymbolAtLocation(sourceFile)) {
         return false;
       }
     }
@@ -199,7 +207,7 @@ export class TypeScriptHelpers {
     let current: ts.Node | undefined = node;
     let highest: T | undefined = undefined;
 
-    while (true) { // tslint:disable-line:no-constant-condition
+    for (;;) {
       current = TypeScriptHelpers.findFirstParent<T>(current, kindToMatch);
       if (!current) {
         break;
@@ -209,10 +217,6 @@ export class TypeScriptHelpers {
 
     return highest;
   }
-
-  // Matches TypeScript's encoded names for well-known ECMAScript symbols like
-  // "__@iterator" or "__@toStringTag".
-  private static readonly _wellKnownSymbolNameRegExp: RegExp = /^__@(\w+)$/;
 
   /**
    * Decodes the names that the compiler generates for a built-in ECMAScript symbol.
@@ -230,10 +234,6 @@ export class TypeScriptHelpers {
     }
     return undefined;
   }
-
-  // Matches TypeScript's encoded names for late-bound symbols derived from `unique symbol` declarations
-  // which have the form of "__@<variableName>@<symbolId>", i.e. "__@someSymbol@12345".
-  private static readonly _uniqueSymbolNameRegExp: RegExp = /^__@.*@\d+$/;
 
   /**
    * Returns whether the provided name was generated for a TypeScript `unique symbol`.

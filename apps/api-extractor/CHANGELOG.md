@@ -1,6 +1,103 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sun, 06 Oct 2019 00:27:39 GMT and should not be manually modified.
+This log was last generated on Tue, 21 Jan 2020 21:56:13 GMT and should not be manually modified.
+
+## 7.7.6
+Tue, 21 Jan 2020 21:56:13 GMT
+
+*Version update only*
+
+## 7.7.5
+Sun, 19 Jan 2020 02:26:52 GMT
+
+### Patches
+
+- Upgrade Node typings to Node 10
+
+## 7.7.4
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 7.7.3
+Tue, 14 Jan 2020 01:34:15 GMT
+
+### Patches
+
+- Fix an issue where "ae-incompatible-release-tags" was sometimes reported incorectly for property setters (GitHub #1681)
+
+## 7.7.2
+Thu, 09 Jan 2020 06:44:12 GMT
+
+### Patches
+
+- Fix an error "Cannot read property 'externalModuleIndicator' of undefined" (GitHub #1652)
+
+## 7.7.1
+Wed, 08 Jan 2020 00:11:31 GMT
+
+*Version update only*
+
+## 7.7.0
+Tue, 03 Dec 2019 03:17:43 GMT
+
+### Minor changes
+
+- Improve declaration reference syntax to allow linking to overloaded functions/methods
+- Fix an issue with TypeScript 3.7, which now emits separate signatures for property getters/setters
+
+## 7.6.2
+Sun, 24 Nov 2019 00:54:04 GMT
+
+*Version update only*
+
+## 7.6.1
+Wed, 20 Nov 2019 06:14:28 GMT
+
+### Patches
+
+- Fix an issue where the newlineKind setting wasn't being applied correctly
+
+## 7.6.0
+Fri, 15 Nov 2019 04:50:50 GMT
+
+### Minor changes
+
+- Make newline type for generated files configurable
+
+## 7.5.6
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 7.5.5
+Wed, 06 Nov 2019 22:44:18 GMT
+
+### Patches
+
+- Add support for TypeScript 3.7
+
+## 7.5.4
+Tue, 05 Nov 2019 06:49:28 GMT
+
+### Patches
+
+- Fix an issue where API reports sometimes were ordered differently depending on the version of NodeJS (GitHub #1552)
+
+## 7.5.3
+Tue, 05 Nov 2019 01:08:39 GMT
+
+*Version update only*
+
+## 7.5.2
+Tue, 22 Oct 2019 06:24:44 GMT
+
+*Version update only*
+
+## 7.5.1
+Fri, 18 Oct 2019 15:15:01 GMT
+
+*Version update only*
 
 ## 7.5.0
 Sun, 06 Oct 2019 00:27:39 GMT

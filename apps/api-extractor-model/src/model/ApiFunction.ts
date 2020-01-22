@@ -47,12 +47,12 @@ export interface IApiFunctionOptions extends
 export class ApiFunction extends ApiNameMixin(ApiTypeParameterListMixin(ApiParameterListMixin(ApiReleaseTagMixin(
   ApiReturnTypeMixin(ApiDeclaredItem))))) {
 
-  public static getContainerKey(name: string, overloadIndex: number): string {
-    return `${name}|${ApiItemKind.Function}|${overloadIndex}`;
-  }
-
   public constructor(options: IApiFunctionOptions) {
     super(options);
+  }
+
+  public static getContainerKey(name: string, overloadIndex: number): string {
+    return `${name}|${ApiItemKind.Function}|${overloadIndex}`;
   }
 
   /** @override */

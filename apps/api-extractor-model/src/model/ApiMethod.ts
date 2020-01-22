@@ -49,16 +49,16 @@ export interface IApiMethodOptions extends
 export class ApiMethod extends ApiNameMixin(ApiTypeParameterListMixin(ApiParameterListMixin(
   ApiReleaseTagMixin(ApiReturnTypeMixin(ApiStaticMixin(ApiDeclaredItem)))))) {
 
+  public constructor(options: IApiMethodOptions) {
+    super(options);
+  }
+
   public static getContainerKey(name: string, isStatic: boolean, overloadIndex: number): string {
     if (isStatic) {
       return `${name}|${ApiItemKind.Method}|static|${overloadIndex}`;
     } else {
       return `${name}|${ApiItemKind.Method}|instance|${overloadIndex}`;
     }
-  }
-
-  public constructor(options: IApiMethodOptions) {
-    super(options);
   }
 
   /** @override */

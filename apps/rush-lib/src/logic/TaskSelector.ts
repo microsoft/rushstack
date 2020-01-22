@@ -35,7 +35,7 @@ export class TaskSelector {
   private _options: ITaskSelectorConstructor;
   private _packageChangeAnalyzer: PackageChangeAnalyzer;
 
-  constructor(options: ITaskSelectorConstructor) {
+  public constructor(options: ITaskSelectorConstructor) {
     this._options = options;
 
     this._packageChangeAnalyzer = new PackageChangeAnalyzer(options.rushConfiguration);
@@ -203,7 +203,6 @@ export class TaskSelector {
     const script: string | undefined = this._getScriptCommand(rushProject, this._options.commandToRun);
 
     if (script === undefined && !this._options.ignoreMissingScript) {
-      // tslint:disable-next-line:max-line-length
       throw new Error(`The project [${rushProject.packageName}] does not define a '${this._options.commandToRun}' command in the 'scripts' section of its package.json`);
     }
 
@@ -218,14 +217,13 @@ export class TaskSelector {
   }
 
   private _getScriptCommand(rushProject: RushConfigurationProject, script: string): string | undefined {
-    // tslint:disable-next-line:no-string-literal
     if (!rushProject.packageJson.scripts) {
       return undefined;
     }
 
     const rawCommand: string = rushProject.packageJson.scripts[script];
 
-    // tslint:disable-next-line:no-null-keyword
+    // eslint-disable-next-line @rushstack/no-null
     if (rawCommand === undefined || rawCommand === null) {
       return undefined;
     }

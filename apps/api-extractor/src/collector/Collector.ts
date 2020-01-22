@@ -23,7 +23,8 @@ import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { WorkingPackage } from './WorkingPackage';
 import { PackageDocComment } from '../aedoc/PackageDocComment';
-import { DeclarationMetadata } from './DeclarationMetadata';
+import { DeclarationMetadata, InternalDeclarationMetadata } from './DeclarationMetadata';
+import { ApiItemMetadata, IApiItemMetadataOptions } from './ApiItemMetadata';
 import { SymbolMetadata } from './SymbolMetadata';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 import { MessageRouter } from './MessageRouter';
@@ -82,7 +83,10 @@ export class Collector {
   private readonly _dtsTypeReferenceDirectives: Set<string> = new Set<string>();
   private readonly _dtsLibReferenceDirectives: Set<string> = new Set<string>();
 
-  constructor(options: ICollectorOptions) {
+  // Used by getOverloadIndex()
+  private readonly _cachedOverloadIndexesByDeclaration: Map<AstDeclaration, number>;
+
+  public constructor(options: ICollectorOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
 
     this._program = options.program;
@@ -118,7 +122,9 @@ export class Collector {
 
     this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup,
       bundledPackageNames, this.messageRouter);
-    this.astReferenceResolver = new AstReferenceResolver(this.astSymbolTable, this.workingPackage);
+    this.astReferenceResolver = new AstReferenceResolver(this);
+
+    this._cachedOverloadIndexesByDeclaration = new Map<AstDeclaration, number>();
   }
 
   /**
@@ -225,7 +231,7 @@ export class Collector {
       this._createEntityForIndirectReferences(exportedAstEntity, alreadySeenAstSymbols);
 
       if (exportedAstEntity instanceof AstSymbol) {
-        this.fetchMetadata(exportedAstEntity);
+        this.fetchSymbolMetadata(exportedAstEntity);
       }
     }
 
@@ -264,25 +270,53 @@ export class Collector {
     return this._entitiesByAstEntity.get(astEntity);
   }
 
-  public fetchMetadata(astSymbol: AstSymbol): SymbolMetadata;
-  public fetchMetadata(astDeclaration: AstDeclaration): DeclarationMetadata;
-  public fetchMetadata(symbolOrDeclaration: AstSymbol | AstDeclaration): SymbolMetadata | DeclarationMetadata {
-    if (symbolOrDeclaration.metadata === undefined) {
-      const astSymbol: AstSymbol = symbolOrDeclaration instanceof AstSymbol
-        ? symbolOrDeclaration : symbolOrDeclaration.astSymbol;
+  public fetchSymbolMetadata(astSymbol: AstSymbol): SymbolMetadata {
+    if (astSymbol.symbolMetadata === undefined) {
       this._fetchSymbolMetadata(astSymbol);
     }
-    return symbolOrDeclaration.metadata as SymbolMetadata | DeclarationMetadata;
+    return astSymbol.symbolMetadata as SymbolMetadata;
+  }
+
+  public fetchDeclarationMetadata(astDeclaration: AstDeclaration): DeclarationMetadata {
+    if (astDeclaration.declarationMetadata === undefined) {
+      // Fetching the SymbolMetadata always constructs the DeclarationMetadata
+      this._fetchSymbolMetadata(astDeclaration.astSymbol);
+    }
+    return astDeclaration.declarationMetadata as DeclarationMetadata;
+  }
+
+  public fetchApiItemMetadata(astDeclaration: AstDeclaration): ApiItemMetadata {
+    if (astDeclaration.apiItemMetadata === undefined) {
+      // Fetching the SymbolMetadata always constructs the ApiItemMetadata
+      this._fetchSymbolMetadata(astDeclaration.astSymbol);
+    }
+    return astDeclaration.apiItemMetadata as ApiItemMetadata;
   }
 
   public tryFetchMetadataForAstEntity(astEntity: AstEntity): SymbolMetadata | undefined {
     if (astEntity instanceof AstSymbol) {
-      return this.fetchMetadata(astEntity);
+      return this.fetchSymbolMetadata(astEntity);
     }
     if (astEntity.astSymbol) { // astImport
-      return this.fetchMetadata(astEntity.astSymbol);
+      return this.fetchSymbolMetadata(astEntity.astSymbol);
     }
     return undefined;
+  }
+
+  public isAncillaryDeclaration(astDeclaration: AstDeclaration): boolean {
+    const declarationMetadata: DeclarationMetadata = this.fetchDeclarationMetadata(astDeclaration);
+    return declarationMetadata.isAncillary;
+  }
+
+  public getNonAncillaryDeclarations(astSymbol: AstSymbol): ReadonlyArray<AstDeclaration> {
+    const result: AstDeclaration[] = [];
+    for (const astDeclaration of astSymbol.astDeclarations) {
+      const declarationMetadata: DeclarationMetadata = this.fetchDeclarationMetadata(astDeclaration);
+      if (!declarationMetadata.isAncillary) {
+        result.push(astDeclaration);
+      }
+    }
+    return result;
   }
 
   /**
@@ -304,6 +338,40 @@ export class Collector {
     }
 
     return parts.join('');
+  }
+
+  /**
+   * For function-like signatures, this returns the TSDoc "overload index" which can be used to identify
+   * a specific overload.
+   */
+  public getOverloadIndex(astDeclaration: AstDeclaration): number {
+    const allDeclarations: ReadonlyArray<AstDeclaration> = astDeclaration.astSymbol.astDeclarations;
+    if (allDeclarations.length === 1) {
+      return 1; // trivial case
+    }
+
+    let overloadIndex: number | undefined = this._cachedOverloadIndexesByDeclaration.get(astDeclaration);
+
+    if (overloadIndex === undefined) {
+      // TSDoc index selectors are positive integers counting from 1
+      let nextIndex: number = 1;
+      for (const other of allDeclarations) {
+        // Filter out other declarations that are not overloads.  For example, an overloaded function can also
+        // be a namespace.
+        if (other.declaration.kind === astDeclaration.declaration.kind) {
+          this._cachedOverloadIndexesByDeclaration.set(other, nextIndex);
+          ++nextIndex;
+        }
+      }
+      overloadIndex = this._cachedOverloadIndexesByDeclaration.get(astDeclaration);
+    }
+
+    if (overloadIndex === undefined) {
+      // This should never happen
+      throw new InternalError('Error calculating overload index for declaration');
+    }
+
+    return overloadIndex;
   }
 
   private _createCollectorEntity(astEntity: AstEntity, exportedName: string | undefined): void {
@@ -501,17 +569,22 @@ export class Collector {
   }
 
   private _fetchSymbolMetadata(astSymbol: AstSymbol): void {
-    if (astSymbol.metadata) {
+    if (astSymbol.symbolMetadata) {
       return;
     }
 
-    // When we solve an astSymbol, then we always also solve all of its parents and all of its declarations
-    if (astSymbol.parentAstSymbol && astSymbol.parentAstSymbol.metadata === undefined) {
+    // When we solve an astSymbol, then we always also solve all of its parents and all of its declarations.
+    // The parent is solved first.
+    if (astSymbol.parentAstSymbol && astSymbol.parentAstSymbol.symbolMetadata === undefined) {
       this._fetchSymbolMetadata(astSymbol.parentAstSymbol);
     }
 
+    // Construct the DeclarationMetadata objects, and detect any ancillary declarations
+    this._calculateDeclarationMetadataForDeclarations(astSymbol);
+
+    // Calculate the ApiItemMetadata objects
     for (const astDeclaration of astSymbol.astDeclarations) {
-      this._calculateMetadataForDeclaration(astDeclaration);
+      this._calculateApiItemMetadata(astDeclaration);
     }
 
     // The most public effectiveReleaseTag for all declarations
@@ -519,26 +592,121 @@ export class Collector {
 
     for (const astDeclaration of astSymbol.astDeclarations) {
       // We know we solved this above
-      const declarationMetadata: DeclarationMetadata = astDeclaration.metadata as DeclarationMetadata;
-      const effectiveReleaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
+      const apiItemMetadata: ApiItemMetadata = astDeclaration.apiItemMetadata as ApiItemMetadata;
+
+      const effectiveReleaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
 
       if (effectiveReleaseTag > maxEffectiveReleaseTag) {
         maxEffectiveReleaseTag = effectiveReleaseTag;
       }
     }
 
-    const symbolMetadata: SymbolMetadata = new SymbolMetadata();
-    symbolMetadata.maxEffectiveReleaseTag = maxEffectiveReleaseTag;
-
     // Update this last when we're sure no exceptions were thrown
-    astSymbol.metadata = symbolMetadata;
+    astSymbol.symbolMetadata = new SymbolMetadata({
+      maxEffectiveReleaseTag
+    });
   }
 
-  private _calculateMetadataForDeclaration(astDeclaration: AstDeclaration): void {
-    const declarationMetadata: DeclarationMetadata = new DeclarationMetadata();
-    astDeclaration.metadata = declarationMetadata;
+  private _calculateDeclarationMetadataForDeclarations(astSymbol: AstSymbol): void {
+    // Initialize DeclarationMetadata for each declaration
+    for (const astDeclaration of astSymbol.astDeclarations) {
+      if (astDeclaration.declarationMetadata) {
+        throw new InternalError('AstDeclaration.declarationMetadata is not expected to have been initialized yet');
+      }
 
-    const parserContext: tsdoc.ParserContext | undefined = this._parseTsdocForAstDeclaration(astDeclaration);
+      const metadata: InternalDeclarationMetadata = new InternalDeclarationMetadata();
+      metadata.tsdocParserContext = this._parseTsdocForAstDeclaration(astDeclaration);
+
+      astDeclaration.declarationMetadata = metadata;
+    }
+
+    // Detect ancillary declarations
+    for (const astDeclaration of astSymbol.astDeclarations) {
+
+      // For a getter/setter pair, make the setter ancillary to the getter
+      if (astDeclaration.declaration.kind === ts.SyntaxKind.SetAccessor) {
+        let foundGetter: boolean = false;
+        for (const getterAstDeclaration of astDeclaration.astSymbol.astDeclarations) {
+          if (getterAstDeclaration.declaration.kind === ts.SyntaxKind.GetAccessor) {
+            // Associate it with the getter
+            this._addAncillaryDeclaration(getterAstDeclaration, astDeclaration);
+
+            foundGetter = true;
+          }
+        }
+
+        if (!foundGetter) {
+          this.messageRouter.addAnalyzerIssue(
+            ExtractorMessageId.MissingGetter,
+            `The property "${astDeclaration.astSymbol.localName}" has a setter but no getter.`,
+            astDeclaration);
+        }
+      }
+
+    }
+  }
+
+  private _addAncillaryDeclaration(mainAstDeclaration: AstDeclaration, ancillaryAstDeclaration: AstDeclaration): void {
+    const mainMetadata: InternalDeclarationMetadata = mainAstDeclaration.declarationMetadata as InternalDeclarationMetadata;
+    const ancillaryMetadata: InternalDeclarationMetadata = ancillaryAstDeclaration.declarationMetadata as InternalDeclarationMetadata;
+
+    if (mainMetadata.ancillaryDeclarations.indexOf(ancillaryAstDeclaration) >= 0) {
+      return;  // already added
+    }
+
+    if (mainAstDeclaration.astSymbol !== ancillaryAstDeclaration.astSymbol) {
+      throw new InternalError('Invalid call to _addAncillaryDeclaration() because declarations do not'
+        + ' belong to the same symbol');
+    }
+
+    if (mainMetadata.isAncillary) {
+      throw new InternalError('Invalid call to _addAncillaryDeclaration() because the target is ancillary itself');
+    }
+
+    if (ancillaryMetadata.isAncillary) {
+      throw new InternalError('Invalid call to _addAncillaryDeclaration() because source is already ancillary'
+        + ' to another declaration');
+    }
+
+    if (mainAstDeclaration.apiItemMetadata || ancillaryAstDeclaration.apiItemMetadata) {
+      throw new InternalError('Invalid call to _addAncillaryDeclaration() because the API item metadata'
+        + ' has already been constructed');
+    }
+
+    ancillaryMetadata.isAncillary = true;
+    mainMetadata.ancillaryDeclarations.push(ancillaryAstDeclaration);
+  }
+
+  private _calculateApiItemMetadata(astDeclaration: AstDeclaration): void {
+    const declarationMetadata: InternalDeclarationMetadata = astDeclaration.declarationMetadata as InternalDeclarationMetadata;
+    if (declarationMetadata.isAncillary) {
+
+      if (astDeclaration.declaration.kind === ts.SyntaxKind.SetAccessor) {
+        if (declarationMetadata.tsdocParserContext) {
+          this.messageRouter.addAnalyzerIssue(ExtractorMessageId.SetterWithDocs,
+            `The doc comment for the property "${astDeclaration.astSymbol.localName}"`
+            + ` must appear on the getter, not the setter.`,
+            astDeclaration);
+        }
+      }
+
+      // We never calculate ApiItemMetadata for an ancillary declaration; instead, it is assigned when
+      // the main declaration is processed.
+      return;
+    }
+
+    const options: IApiItemMetadataOptions = {
+      declaredReleaseTag: ReleaseTag.None,
+      effectiveReleaseTag: ReleaseTag.None,
+      isEventProperty: false,
+      isOverride: false,
+      isSealed: false,
+      isVirtual: false,
+      isPreapproved: false,
+      releaseTagSameAsParent: false
+    };
+
+    const parserContext: tsdoc.ParserContext | undefined = declarationMetadata.tsdocParserContext;
     if (parserContext) {
       const modifierTagSet: tsdoc.StandardModifierTagSet = parserContext.docComment.modifierTagSet;
 
@@ -579,15 +747,12 @@ export class Collector {
         }
       }
 
-      declarationMetadata.tsdocParserContext = parserContext;
-      declarationMetadata.tsdocComment = parserContext.docComment;
+      options.declaredReleaseTag = declaredReleaseTag;
 
-      declarationMetadata.declaredReleaseTag = declaredReleaseTag;
-
-      declarationMetadata.isEventProperty = modifierTagSet.isEventProperty();
-      declarationMetadata.isOverride = modifierTagSet.isOverride();
-      declarationMetadata.isSealed = modifierTagSet.isSealed();
-      declarationMetadata.isVirtual = modifierTagSet.isVirtual();
+      options.isEventProperty = modifierTagSet.isEventProperty();
+      options.isOverride = modifierTagSet.isOverride();
+      options.isSealed = modifierTagSet.isSealed();
+      options.isVirtual = modifierTagSet.isVirtual();
 
       if (modifierTagSet.hasTag(AedocDefinitions.preapprovedTag)) {
         // This feature only makes sense for potentially big declarations.
@@ -597,7 +762,7 @@ export class Collector {
           case ts.SyntaxKind.InterfaceDeclaration:
           case ts.SyntaxKind.ModuleDeclaration:
             if (declaredReleaseTag === ReleaseTag.Internal) {
-              declarationMetadata.isPreapproved = true;
+              options.isPreapproved = true;
             } else {
               this.messageRouter.addAnalyzerIssue(
                 ExtractorMessageId.PreapprovedBadReleaseTag,
@@ -621,18 +786,18 @@ export class Collector {
 
     // This needs to be set regardless of whether or not a parserContext exists
     if (astDeclaration.parent) {
-      const parentDeclarationMetadata: DeclarationMetadata = this.fetchMetadata(astDeclaration.parent);
-      declarationMetadata.effectiveReleaseTag = declarationMetadata.declaredReleaseTag === ReleaseTag.None
-        ? parentDeclarationMetadata.effectiveReleaseTag
-        : declarationMetadata.declaredReleaseTag;
+      const parentApiItemMetadata: ApiItemMetadata = this.fetchApiItemMetadata(astDeclaration.parent);
+      options.effectiveReleaseTag = options.declaredReleaseTag === ReleaseTag.None
+        ? parentApiItemMetadata.effectiveReleaseTag
+        : options.declaredReleaseTag;
 
-      declarationMetadata.releaseTagSameAsParent =
-        parentDeclarationMetadata.effectiveReleaseTag === declarationMetadata.effectiveReleaseTag;
+        options.releaseTagSameAsParent =
+        parentApiItemMetadata.effectiveReleaseTag === options.effectiveReleaseTag;
     } else {
-      declarationMetadata.effectiveReleaseTag = declarationMetadata.declaredReleaseTag;
+      options.effectiveReleaseTag = options.declaredReleaseTag;
     }
 
-    if (declarationMetadata.effectiveReleaseTag === ReleaseTag.None) {
+    if (options.effectiveReleaseTag === ReleaseTag.None) {
       if (!astDeclaration.astSymbol.isExternal) { // for now, don't report errors for external code
         // Don't report missing release tags for forgotten exports
         const astSymbol: AstSymbol = astDeclaration.astSymbol;
@@ -651,7 +816,19 @@ export class Collector {
         }
       }
 
-      declarationMetadata.effectiveReleaseTag = ReleaseTag.Public;
+      options.effectiveReleaseTag = ReleaseTag.Public;
+    }
+
+    const apiItemMetadata: ApiItemMetadata = new ApiItemMetadata(options);
+    if (parserContext) {
+      apiItemMetadata.tsdocComment = parserContext.docComment;
+    }
+
+    astDeclaration.apiItemMetadata = apiItemMetadata;
+
+    // Lastly, share the result with any ancillary declarations
+    for (const ancillaryDeclaration of declarationMetadata.ancillaryDeclarations) {
+      ancillaryDeclaration.apiItemMetadata = apiItemMetadata;
     }
   }
 

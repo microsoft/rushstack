@@ -31,10 +31,21 @@ export interface IApiDeclaredItemJson extends IApiDocumentedItemJson {
  *
  * @public
  */
-// tslint:disable-next-line:interface-name
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export class ApiDeclaredItem extends ApiDocumentedItem {
   private _excerptTokens: ExcerptToken[];
   private _excerpt: Excerpt;
+
+  public constructor(options: IApiDeclaredItemOptions) {
+    super(options);
+
+    this._excerptTokens = options.excerptTokens.map(token => {
+      const canonicalReference: DeclarationReference | undefined = token.canonicalReference === undefined ? undefined :
+        DeclarationReference.parse(token.canonicalReference);
+      return new ExcerptToken(token.kind, token.text, canonicalReference);
+    });
+    this._excerpt = new Excerpt(this.excerptTokens, { startIndex: 0, endIndex: this.excerptTokens.length });
+  }
 
   /** @override */
   public static onDeserializeInto(options: Partial<IApiDeclaredItemOptions>, context: DeserializerContext,
@@ -43,17 +54,6 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
     super.onDeserializeInto(options, context, jsonObject);
 
     options.excerptTokens = jsonObject.excerptTokens;
-  }
-
-  public constructor(options: IApiDeclaredItemOptions) {
-    super(options);
-
-    this._excerptTokens = options.excerptTokens.map(x => {
-      const canonicalReference: DeclarationReference | undefined = x.canonicalReference === undefined ? undefined :
-        DeclarationReference.parse(x.canonicalReference);
-      return new ExcerptToken(x.kind, x.text, canonicalReference);
-    });
-    this._excerpt = new Excerpt(this.excerptTokens, { startIndex: 0, endIndex: this.excerptTokens.length });
   }
 
   /**

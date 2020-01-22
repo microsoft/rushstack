@@ -19,7 +19,7 @@ const procStatStartTimePos: number = 22;
 
 /**
  * Parses the process start time from the contents of a linux /proc/[pid]/stat file.
- * @param stat The contents of a linux /proc/[pid]/stat file.
+ * @param stat - The contents of a linux /proc/[pid]/stat file.
  * @returns The process start time in jiffies, or undefined if stat has an unexpected format.
  */
 export function getProcessStartTimeFromProcStat (stat: string): string | undefined {
@@ -141,6 +141,16 @@ export function getProcessStartTime(pid: number): string | undefined {
  */
 export class LockFile {
   private static _getStartTime: (pid: number) => string | undefined = getProcessStartTime;
+
+  private _fileWriter: FileWriter | undefined;
+  private _filePath: string;
+  private _dirtyWhenAcquired: boolean;
+
+  private constructor(_fileWriter: FileWriter | undefined, _filePath: string, _dirtyWhenAcquired: boolean) {
+    this._fileWriter = _fileWriter;
+    this._filePath = _filePath;
+    this._dirtyWhenAcquired = _dirtyWhenAcquired;
+  }
 
   /**
    * Returns the path to the lockfile, should it be created successfully.
@@ -409,11 +419,5 @@ export class LockFile {
    */
   public get isReleased(): boolean {
     return this._fileWriter === undefined;
-  }
-
-  private constructor(
-    private _fileWriter: FileWriter | undefined,
-    private _filePath: string,
-    private _dirtyWhenAcquired: boolean) {
   }
 }

@@ -234,7 +234,7 @@ export class ApiInterface extends ApiInterface_base {
 // @public
 export class ApiItem {
     // @internal
-    [ApiItem_onParentChanged](parent: ApiItem | undefined): void;
+    [apiItem_onParentChanged](parent: ApiItem | undefined): void;
     constructor(options: IApiItemOptions);
     // @virtual
     protected buildCanonicalReference(): DeclarationReference;
@@ -627,9 +627,7 @@ export class ExcerptToken {
 
 // @public (undocumented)
 export const enum ExcerptTokenKind {
-    // (undocumented)
     Content = "Content",
-    // (undocumented)
     Reference = "Reference"
 }
 
