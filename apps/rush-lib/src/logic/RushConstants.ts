@@ -154,4 +154,24 @@ export class RushConstants {
    * and indirect dependencies. This is used to detect if a project's dependencies have changed since the last build.
    */
   public static readonly projectDependencyManifestFilename: string = 'shrinkwrap-deps.json';
+
+  /**
+   * The value of the "commandKind" property for a bulk command in command-line.json
+   */
+  public static readonly bulkCommandKind: 'bulk' = 'bulk';
+
+  /**
+   * The value of the "commandKind" property for a global command in command-line.json
+   */
+  public static readonly globalCommandKind: 'global' = 'global';
+
+  /**
+   * The name of the incremental build command.
+   */
+  public static readonly buildCommandName: string = 'build';
+
+  /**
+   * The name of the non-incremental build command.
+   */
+  public static readonly rebuildCommandName: string = 'rebuild';
 }

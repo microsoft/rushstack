@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as lodash from 'lodash';
 
 import {
   JsonFile,
@@ -30,8 +29,8 @@ export class CommandLineConfiguration {
   public readonly parameters: ParameterJson[] = [];
 
   public static readonly defaultBuildCommandJson: CommandJson = {
-    commandKind: 'bulk',
-    name: 'build',
+    commandKind: RushConstants.bulkCommandKind,
+    name: RushConstants.buildCommandName,
     summary: '(EXPERIMENTAL) Build all projects that haven\'t been built, or have changed since they were last'
     + ' built.',
     description: 'This command is similar to "rush rebuild", except that "rush build" performs'
@@ -51,8 +50,8 @@ export class CommandLineConfiguration {
   };
 
   public static readonly defaultRebuildCommandJson: CommandJson = {
-    commandKind: 'bulk',
-    name: 'rebuild',
+    commandKind: RushConstants.bulkCommandKind,
+    name: RushConstants.rebuildCommandName,
     summary: 'Clean and rebuild the entire set of projects',
     description: 'This command assumes that the package.json file for each project contains'
     + ' a "scripts" entry for "npm run build" that performs a full clean build.'
@@ -102,7 +101,7 @@ export class CommandLineConfiguration {
   }
 
   /**
-   * Loads the configuration from the specified file and applies any ommited default build
+   * Loads the configuration from the specified file and applies any omitted default build
    * settings.  If the file does not exist, then an empty default instance is returned.
    * If the file contains errors, then an exception is thrown.
    */
@@ -111,29 +110,38 @@ export class CommandLineConfiguration {
     if (FileSystem.exists(jsonFilename)) {
       commandLineJson = JsonFile.load(jsonFilename);
 
-      const defaultBuildSettings: CommandJson[] = [
-        CommandLineConfiguration.defaultBuildCommandJson,
-        CommandLineConfiguration.defaultRebuildCommandJson
-      ];
-
-      const applyDefaults: boolean = commandLineJson ? lodash.some(commandLineJson.commands, (command) => {
-        return command.commandKind === 'bulk' && (command.name === 'build' || command.name === 'rebuild');
-      }) : false;
-
       // merge commands specified in command-line.json and default (re)build settings
       // Ensure both build commands are included and preserve any other commands specified
-      if (commandLineJson) {
-        if (applyDefaults) {
-          const mergedBuildSettings: CommandJson[] = lodash({}) // Start with an empty object
-          .merge(
-            lodash(defaultBuildSettings).groupBy('name').value(),
-            lodash(commandLineJson.commands).groupBy('name').value()
-            )
-            .values()
-            .flatten()
-            .value();
-          commandLineJson.commands = mergedBuildSettings;
+      if (commandLineJson && commandLineJson.commands) {
+        for (let i: number = 0; i < commandLineJson.commands.length; i++) {
+          const command: CommandJson = commandLineJson.commands[i];
+
+          // Determine if we have a set of default parameters
+          let commandDefaultParameters: CommandJson | {} = {};
+          switch (command.commandKind) {
+            case RushConstants.bulkCommandKind: {
+              switch (command.name) {
+                case RushConstants.buildCommandName: {
+                  commandDefaultParameters = CommandLineConfiguration.defaultBuildCommandJson
+                  break;
+                }
+
+                case RushConstants.rebuildCommandName: {
+                  commandDefaultParameters = CommandLineConfiguration.defaultRebuildCommandJson;
+                  break;
+                }
+              }
+              break;
+            }
+          }
+
+          // Merge the default parameters into the repo-specified parameters
+          commandLineJson.commands[i] = {
+            ...commandDefaultParameters,
+            ...command
+          }
         }
+
         CommandLineConfiguration._jsonSchema.validateObject(commandLineJson, jsonFilename);
       }
     }

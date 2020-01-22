@@ -195,11 +195,11 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   private _addDefaultBuildActions(commandLineConfiguration?: CommandLineConfiguration): void {
-    if (!this.tryGetAction('build')) {
+    if (!this.tryGetAction(RushConstants.buildCommandName)) {
       this._addCommandLineConfigAction(commandLineConfiguration, CommandLineConfiguration.defaultBuildCommandJson);
     }
 
-    if (!this.tryGetAction('rebuild')) {
+    if (!this.tryGetAction(RushConstants.rebuildCommandName)) {
       this._addCommandLineConfigAction(commandLineConfiguration, CommandLineConfiguration.defaultRebuildCommandJson);
     }
   }
@@ -227,7 +227,7 @@ export class RushCommandLineParser extends CommandLineParser {
     this._validateCommandLineConfigCommand(command);
 
     switch (command.commandKind) {
-      case 'bulk':
+      case RushConstants.bulkCommandKind:
         this.addAction(new BulkScriptAction({
           actionName: command.name,
           summary: command.summary,
@@ -244,7 +244,8 @@ export class RushCommandLineParser extends CommandLineParser {
           allowWarningsInSuccessfulBuild: !!command.allowWarningsInSuccessfulBuild
         }));
         break;
-      case 'global':
+
+      case RushConstants.globalCommandKind:
         this.addAction(new GlobalScriptAction({
           actionName: command.name,
           summary: command.summary,
@@ -287,13 +288,14 @@ export class RushCommandLineParser extends CommandLineParser {
 
   private _validateCommandLineConfigCommand(command: CommandJson): void {
     // There are some restrictions on the 'build' and 'rebuild' commands.
-    if (command.name !== 'build' && command.name !== 'rebuild') {
+    if (command.name !== RushConstants.buildCommandName && command.name !== RushConstants.rebuildCommandName) {
       return;
     }
 
-    if (command.commandKind === 'global') {
+    if (command.commandKind === RushConstants.globalCommandKind) {
       throw new Error(`${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
-        `the command kind "global". This command can only be designated as a command kind "bulk".`);
+        `the command kind "${RushConstants.globalCommandKind}". This command can only be designated as a command ` +
+        `kind "${RushConstants.bulkCommandKind}".`);
     }
     if (command.safeForSimultaneousRushProcesses) {
       throw new Error(`${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
