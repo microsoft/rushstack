@@ -2,6 +2,18 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.19.2",
+      "tag": "@microsoft/node-core-library_v3.19.2",
+      "date": "Thu, 23 Jan 2020 01:07:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with a missing type in LegacyAdapters"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.19.1",
       "tag": "@microsoft/node-core-library_v3.19.1",
       "date": "Tue, 21 Jan 2020 21:56:14 GMT",
