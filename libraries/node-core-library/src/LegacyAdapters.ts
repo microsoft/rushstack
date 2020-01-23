@@ -8,7 +8,7 @@ import * as semver from 'semver';
  * Callback used by {@link LegacyAdapters}.
  * @public
  */
-export type LegacyCallback<TResult, TError> = (error: TError, result: TResult) => void;
+export type LegacyCallback<TResult, TError> = (error: TError | null | undefined, result: TResult) => void;
 
 /**
  * Helper functions used when interacting with APIs that do not follow modern coding practices.
@@ -59,7 +59,7 @@ export class LegacyAdapters {
     arg4?: TArg4
   ): Promise<TResult> {
     return new Promise((resolve: (result: TResult) => void, reject: (error: Error) => void) => {
-      const cb: LegacyCallback<TResult, TError> = (error: TError, result: TResult) => {
+      const cb: LegacyCallback<TResult, TError> = (error: TError | null | undefined, result: TResult) => {
         if (error) {
           reject(LegacyAdapters.scrubError(error));
         } else {

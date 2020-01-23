@@ -5,10 +5,5 @@
       "jest",
       "node"
     ]
-  },
-  "include": [
-    "./typings/tsd.d.ts",
-    "./src/**/*.ts",
-    "./src/**/*.tsx"
-  ]
+  }
 }

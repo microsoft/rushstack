@@ -45,11 +45,11 @@ interface IQueueItem {
 
 export class NpmLinkManager extends BaseLinkManager {
   protected _linkProjects(): Promise<void> {
-    return LegacyAdapters.convertCallbackToPromise<readPackageTree.PackageNode, Error, string>(
+    return LegacyAdapters.convertCallbackToPromise<readPackageTree.Node, Error, string>(
       readPackageTree,
       this._rushConfiguration.commonTempFolder
     ).then(
-      (npmPackage: readPackageTree.PackageNode) => {
+      (npmPackage: readPackageTree.Node) => {
         const commonRootPackage: NpmPackage = NpmPackage.createFromNpm(npmPackage);
 
         const commonPackageLookup: PackageLookup = new PackageLookup();
