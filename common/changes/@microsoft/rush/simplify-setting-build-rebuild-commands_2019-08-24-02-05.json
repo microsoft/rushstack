@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Update to support simplified build and rebuild settings",
+      "comment": "Improve command-line.json handling so that the \"rush build\" and \"rush rebuild\" commands can be extended without having to duplicate the built-in options (GitHub #1375)",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
