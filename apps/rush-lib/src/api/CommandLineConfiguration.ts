@@ -116,17 +116,17 @@ export class CommandLineConfiguration {
           const command: CommandJson = commandLineJson.commands[i];
 
           // Determine if we have a set of default parameters
-          let commandDefaultParameters: CommandJson | {} = {};
+          let commandDefaultDefinition: CommandJson | {} = {};
           switch (command.commandKind) {
             case RushConstants.bulkCommandKind: {
               switch (command.name) {
                 case RushConstants.buildCommandName: {
-                  commandDefaultParameters = CommandLineConfiguration.defaultBuildCommandJson
+                  commandDefaultDefinition = CommandLineConfiguration.defaultBuildCommandJson
                   break;
                 }
 
                 case RushConstants.rebuildCommandName: {
-                  commandDefaultParameters = CommandLineConfiguration.defaultRebuildCommandJson;
+                  commandDefaultDefinition = CommandLineConfiguration.defaultRebuildCommandJson;
                   break;
                 }
               }
@@ -136,7 +136,7 @@ export class CommandLineConfiguration {
 
           // Merge the default parameters into the repo-specified parameters
           commandLineJson.commands[i] = {
-            ...commandDefaultParameters,
+            ...commandDefaultDefinition,
             ...command
           }
         }

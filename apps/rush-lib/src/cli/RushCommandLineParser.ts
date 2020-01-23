@@ -231,7 +231,8 @@ export class RushCommandLineParser extends CommandLineParser {
         this.addAction(new BulkScriptAction({
           actionName: command.name,
 
-          // To remain compatible with existing repos, `rebuild` defaults to calling the `build` command in each repo.
+          // The rush rebuild and rush build command invoke the same NPM script because they share the same
+          // package-deps-hash state.
           commandToRun: command.name === RushConstants.rebuildCommandName ? 'build' : undefined,
 
           summary: command.summary,
