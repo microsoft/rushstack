@@ -14,7 +14,7 @@ This library contains utilities for managing debug certificates in a development
 
 ## `CertificateStore`
 
-The CertificateStore class provides accessors and mutators for the debug certificate data stored in `.rushstack`.
+The `CertificateStore` class provides accessors and mutators for the debug certificate data stored in `.rushstack`.
 
 Retrive certificate data from the store:
 ```typescript
