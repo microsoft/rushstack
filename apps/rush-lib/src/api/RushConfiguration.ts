@@ -83,6 +83,8 @@ export interface IRushRepositoryJson {
    * The remote url of the repository. This helps "rush change" find the right remote to compare against.
    */
   url: string;
+  defaultBranch: string;
+  defaultRemote: string;
 }
 
 /**
@@ -293,6 +295,8 @@ export class RushConfiguration {
 
   // Repository info
   private _repositoryUrl: string;
+  private _repositoryDefaultBranch: string;
+  private _repositoryDefaultRemote: string;
 
   private _pnpmOptions: PnpmOptionsConfiguration;
   private _yarnOptions: YarnOptionsConfiguration;
@@ -465,6 +469,8 @@ export class RushConfiguration {
 
     if (rushConfigurationJson.repository) {
       this._repositoryUrl = rushConfigurationJson.repository.url;
+      this._repositoryDefaultBranch = rushConfigurationJson.repository.defaultBranch || "master";
+      this._repositoryDefaultRemote = rushConfigurationJson.repository.defaultRemote || "origin";
     }
 
     this._telemetryEnabled = !!rushConfigurationJson.telemetryEnabled;
@@ -1020,6 +1026,27 @@ export class RushConfiguration {
    */
   public get repositoryUrl(): string {
     return this._repositoryUrl;
+  }
+
+  /**
+   * The default git branch of the repository. This helps "rush change" find the right remote to compare against.
+   */
+  public get repositoryDefaultBranch(): string {
+    return this._repositoryDefaultBranch;
+  }
+
+  /**
+   * The default git remote of the repository. This helps "rush change" find the right remote to compare against.
+   */
+  public get repositoryDefaultRemote(): string {
+    return this._repositoryDefaultRemote;
+  }
+
+  /**
+   * The default fully-qualified git remote branch of the repository. This helps "rush change" find the right branch to compare against.
+   */
+  public get repositoryDefaultFullyQualifiedRemoteBranch(): string {
+    return `${this.repositoryDefaultRemote}/${this.repositoryDefaultBranch}`;
   }
 
   /**

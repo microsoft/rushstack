@@ -308,7 +308,7 @@ export class ChangeAction extends BaseRushAction {
   private get _targetBranch(): string {
     if (!this._targetBranchName) {
       this._targetBranchName = (
-        this._targetBranchParameter.value || VersionControl.getRemoteMasterBranch(this.rushConfiguration.repositoryUrl)
+        this._targetBranchParameter.value || VersionControl.getRemoteMasterBranch(this.rushConfiguration)
       );
     }
 
