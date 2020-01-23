@@ -183,7 +183,7 @@ describe('RushCommandLineParser', () => {
       });
 
       describe(`'rebuild' action`, () => {
-        it(`executes the package's 'rebuild' (not 'build') script`, () => {
+        it(`executes the package's 'build' script`, () => {
           const repoName: string = 'overrideRebuildAndRunRebuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'rebuild');
 
@@ -195,7 +195,7 @@ describe('RushCommandLineParser', () => {
               expect(packageCount).toEqual(2);
 
               // Use regex for task name in case spaces were prepended or appended to spawned command
-              const expectedBuildTaskRegexp: RegExp = /fake_REbuild_task_but_works_with_mock/;
+              const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
 
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const firstSpawn: any[] = instance.spawnMock.mock.calls[0];
@@ -252,7 +252,7 @@ describe('RushCommandLineParser', () => {
       });
 
       describe(`'rebuild' action`, () => {
-        it(`executes the package's 'rebuild' (not 'build') script`, () => {
+        it(`executes the package's 'build' script`, () => {
           const repoName: string = 'overrideAndDefaultRebuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'rebuild');
           expect.assertions(8);
@@ -263,7 +263,7 @@ describe('RushCommandLineParser', () => {
               expect(packageCount).toEqual(2);
 
               // Use regex for task name in case spaces were prepended or appended to spawned command
-              const expectedBuildTaskRegexp: RegExp = /fake_REbuild_task_but_works_with_mock/;
+              const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
 
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const firstSpawn: any[] = instance.spawnMock.mock.calls[0];
