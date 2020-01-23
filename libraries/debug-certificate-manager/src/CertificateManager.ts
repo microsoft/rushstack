@@ -10,7 +10,7 @@ import { FileSystem, Terminal } from '@microsoft/node-core-library';
 import { runSudoSync, ISudoSyncResult } from './sudoSync';
 import { CertificateStore } from './CertificateStore';
 
-const serialNumber: string = '731c321744e34650a202e3ef91c3c1b9';
+const serialNumber: string = '731c321744e34650a202e3ef91c3c1b0';
 const friendlyName: string = 'debug-certificate-manager Development Certificate';
 const macKeychain: string = '/Library/Keychains/System.keychain';
 
@@ -116,7 +116,6 @@ export class CertificateManager {
 
         const macFindCertificateResult: child_process.SpawnSyncReturns<string> =
           child_process.spawnSync('security', ['find-certificate', '-c', 'localhost', '-a', '-Z', macKeychain]);
-
         if (macFindCertificateResult.status !== 0) {
           terminal.writeErrorLine(`Error finding the dev certificate: ${macFindCertificateResult.output.join(' ')}`);
           return false;
@@ -216,11 +215,11 @@ export class CertificateManager {
 
     // convert a Forge certificate to PEM
     const pem: string = forge.pki.certificateToPem(certificate);
-    const privateKey: string = forge.pki.privateKeyToPem(keys.privateKey);
+    const pemKey: string = forge.pki.privateKeyToPem(keys.privateKey);
 
     return {
       pemCertificate: pem,
-      pemKey: privateKey
+      pemKey: pemKey
     };
   }
 

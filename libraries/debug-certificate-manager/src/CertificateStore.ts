@@ -13,7 +13,6 @@ import { FileSystem } from '@microsoft/node-core-library';
 export class CertificateStore {
   private _userProfilePath: string;
   private _serveDataPath: string;
-  private _legacyDataPath: string;
   private _certificatePath: string;
   private _keyPath: string;
 
@@ -32,12 +31,6 @@ export class CertificateStore {
 
     this._certificatePath = path.join(this._serveDataPath, 'rushstack-serve.pem');
     this._keyPath = path.join(this._serveDataPath, 'rushstack-serve.key');
-
-    // Transition to the new save directory if the old one exists.
-    this._legacyDataPath = path.join(this._userProfilePath, '.gcb-serve-data');
-    if (FileSystem.exists(this._legacyDataPath)) {
-      this._updateLegacyDataPath();
-    }
   }
 
   /**
@@ -95,24 +88,5 @@ export class CertificateStore {
     }
 
     this._keyData = key;
-  }
-
-  private _updateLegacyDataPath(): void {
-    const legacyCertificatePath: string = path.join(this._legacyDataPath, 'gcb-serve.cer');
-    const legacyKeyPath: string = path.join(this._legacyDataPath, 'gcb-serve.key');
-
-    if (FileSystem.exists(legacyCertificatePath)) {
-      const certificateData: string = FileSystem.readFile(legacyCertificatePath);
-      this.certificateData = certificateData;
-      FileSystem.deleteFile(legacyCertificatePath);
-    }
-
-    if (FileSystem.exists(legacyKeyPath)) {
-      const keyData: string = FileSystem.readFile(legacyKeyPath);
-      this.keyData = keyData;
-      FileSystem.deleteFile(legacyKeyPath);
-    }
-
-    FileSystem.deleteFolder(this._legacyDataPath);
   }
 }

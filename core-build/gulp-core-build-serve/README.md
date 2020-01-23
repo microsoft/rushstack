@@ -136,4 +136,4 @@ from the user's home directory.
 
 To manually untrust the certificate, delete the files in the `.rushstack` directory under your
 home directory and untrust the certificate with the
-`73 1c 32 17 44 e3 46 50 a2 02 e3 ef 91 c3 c1 b9` serial number.
+`73 1c 32 17 44 e3 46 50 a2 02 e3 ef 91 c3 c1 b0` serial number.
