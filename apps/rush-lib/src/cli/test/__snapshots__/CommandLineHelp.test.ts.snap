@@ -40,8 +40,8 @@ Positional arguments:
     import-strings
                   Imports translated strings into each project.
     deploy        Deploys the build
-    build         (EXPERIMENTAL) Build all projects that haven't been built, 
-                  or have changed since they were last built.
+    build         Build all projects that haven't been built, or have changed 
+                  since they were last built.
     rebuild       Clean and rebuild the entire set of projects
 
 Optional arguments:
