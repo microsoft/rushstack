@@ -31,8 +31,7 @@ export class CommandLineConfiguration {
   public static readonly defaultBuildCommandJson: CommandJson = {
     commandKind: RushConstants.bulkCommandKind,
     name: RushConstants.buildCommandName,
-    summary: '(EXPERIMENTAL) Build all projects that haven\'t been built, or have changed since they were last'
-    + ' built.',
+    summary: 'Build all projects that haven\'t been built, or have changed since they were last built.',
     description: 'This command is similar to "rush rebuild", except that "rush build" performs'
     + ' an incremental build. In other words, it only builds projects whose source files have changed'
     + ' since the last successful build. The analysis requires a Git working tree, and only considers'
