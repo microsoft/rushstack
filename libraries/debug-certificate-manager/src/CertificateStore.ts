@@ -6,31 +6,44 @@ import { homedir } from 'os';
 
 import { FileSystem } from '@microsoft/node-core-library';
 
+/**
+ * Store to retrieve and save debug certificate data.
+ * @public
+ */
 export class CertificateStore {
-  private static _instance: CertificateStore;
-
-  public static get instance(): CertificateStore {
-    if (!CertificateStore._instance) {
-      CertificateStore._instance = new CertificateStore();
-      CertificateStore._instance._initialize();
-    }
-
-    return CertificateStore._instance;
-  }
-
   private _userProfilePath: string;
-  private _gcbServeDataPath: string;
+  private _serveDataPath: string;
   private _certificatePath: string;
   private _keyPath: string;
 
-  private _certificateData: string;
-  private _keyData: string;
+  private _certificateData: string | undefined;
+  private _keyData: string | undefined;
 
+  public constructor() {
+    const unresolvedUserFolder: string = homedir();
+    this._userProfilePath = path.resolve(unresolvedUserFolder);
+    if (!FileSystem.exists(this._userProfilePath)) {
+      throw new Error('Unable to determine the current user\'s home directory');
+    }
+
+    this._serveDataPath = path.join(this._userProfilePath, '.rushstack');
+    FileSystem.ensureFolder(this._serveDataPath);
+
+    this._certificatePath = path.join(this._serveDataPath, 'rushstack-serve.pem');
+    this._keyPath = path.join(this._serveDataPath, 'rushstack-serve.key');
+  }
+
+  /**
+   * Path to the saved debug certificate
+   */
   public get certificatePath(): string {
     return this._certificatePath;
   }
 
-  public get certificateData(): string {
+  /**
+   * Debug certificate pem file contents.
+   */
+  public get certificateData(): string | undefined {
     if (!this._certificateData) {
       if (FileSystem.exists(this._certificatePath)) {
         this._certificateData = FileSystem.readFile(this._certificatePath);
@@ -42,7 +55,7 @@ export class CertificateStore {
     return this._certificateData;
   }
 
-  public set certificateData(certificate: string) {
+  public set certificateData(certificate: string | undefined) {
     if (certificate) {
       FileSystem.writeFile(this._certificatePath, certificate);
     } else if (FileSystem.exists(this._certificatePath)) {
@@ -52,7 +65,10 @@ export class CertificateStore {
     this._certificateData = certificate;
   }
 
-  public get keyData(): string {
+  /**
+   * Key used to sign the debug pem certificate.
+   */
+  public get keyData(): string | undefined {
     if (!this._keyData) {
       if (FileSystem.exists(this._keyPath)) {
         this._keyData = FileSystem.readFile(this._keyPath);
@@ -64,7 +80,7 @@ export class CertificateStore {
     return this._keyData;
   }
 
-  public set keyData(key: string) {
+  public set keyData(key: string | undefined) {
     if (key) {
       FileSystem.writeFile(this._keyPath, key);
     } else if (FileSystem.exists(this._keyPath)) {
@@ -72,19 +88,5 @@ export class CertificateStore {
     }
 
     this._keyData = key;
-  }
-
-  private _initialize(): void {
-    const unresolvedUserFolder: string = homedir();
-    this._userProfilePath = path.resolve(unresolvedUserFolder);
-    if (!FileSystem.exists(this._userProfilePath)) {
-      throw new Error('Unable to determine the current user\'s home directory');
-    }
-
-    this._gcbServeDataPath = path.join(this._userProfilePath, '.gcb-serve-data');
-    FileSystem.ensureFolder(this._gcbServeDataPath);
-
-    this._certificatePath = path.join(this._gcbServeDataPath, 'gcb-serve.cer');
-    this._keyPath = path.join(this._gcbServeDataPath, 'gcb-serve.key');
   }
 }

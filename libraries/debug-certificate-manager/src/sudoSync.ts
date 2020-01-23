@@ -32,7 +32,7 @@ export function runSudoSync(params: string[]): ISudoSyncResult {
     stdout.push(data.toString());
   });
 
-  let code: number = undefined;
+  let code: number | undefined;
   sudoResult.on('close', (exitCode: number) => {
     code = exitCode;
   });

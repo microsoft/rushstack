@@ -15,6 +15,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/debug-certificate-manager",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@microsoft/decorators",
       "allowedCategories": [ "libraries" ]
     },

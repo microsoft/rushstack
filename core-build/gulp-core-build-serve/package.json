@@ -15,14 +15,13 @@
   "dependencies": {
     "@microsoft/gulp-core-build": "3.14.2",
     "@microsoft/node-core-library": "3.19.2",
+    "@rushstack/debug-certificate-manager": "0.1.0",
     "@types/node": "10.17.13",
     "colors": "~1.2.1",
-    "deasync": "~0.1.7",
     "express": "~4.16.2",
     "gulp": "~4.0.2",
     "gulp-connect": "~5.5.0",
     "gulp-open": "~3.0.1",
-    "node-forge": "~0.7.1",
     "sudo": "~1.0.3"
   },
   "devDependencies": {
@@ -33,7 +32,6 @@
     "@types/express-serve-static-core": "4.11.0",
     "@types/gulp": "4.0.6",
     "@types/mime": "0.0.29",
-    "@types/node-forge": "0.6.8",
     "@types/orchestrator": "0.0.30",
     "@types/serve-static": "1.13.1",
     "@types/through2": "2.0.32",

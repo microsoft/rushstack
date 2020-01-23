@@ -41,6 +41,7 @@ export {
   log,
   logSummary
 } from './logging';
+export { GCBTerminalProvider } from './utilities/GCBTerminalProvider';
 export * from './tasks/CopyTask';
 export * from './tasks/GenerateShrinkwrapTask';
 export * from './tasks/GulpTask';
