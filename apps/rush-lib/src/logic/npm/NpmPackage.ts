@@ -89,13 +89,13 @@ export class NpmPackage extends BasePackage {
    */
   public static createVirtualTempPackage(packageJsonFilename: string, installFolderName: string): NpmPackage {
     const packageJson: IPackageJson = JsonFile.load(packageJsonFilename);
-    const npmPackage: readPackageTree.PackageNode = {
+    const npmPackage: readPackageTree.Node = {
       children: [],
-      error: undefined,
+      error: null, // eslint-disable-line @rushstack/no-null
       id: 0,
       isLink: false,
       package: packageJson,
-      parent: undefined,
+      parent: null, // eslint-disable-line @rushstack/no-null
       path: installFolderName,
       realpath: installFolderName
     };
@@ -106,7 +106,7 @@ export class NpmPackage extends BasePackage {
    * Recursive constructs a tree of NpmPackage objects using information returned
    * by the "read-package-tree" library.
    */
-  public static createFromNpm(npmPackage: readPackageTree.PackageNode): NpmPackage {
+  public static createFromNpm(npmPackage: readPackageTree.Node): NpmPackage {
     if (npmPackage.error) {
       throw new Error(`Failed to parse package.json for ${path.basename(npmPackage.path)}:`
         + ` ${npmPackage.error.message}`);

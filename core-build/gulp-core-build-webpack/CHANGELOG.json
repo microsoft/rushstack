@@ -2,6 +2,45 @@
   "name": "@microsoft/gulp-core-build-webpack",
   "entries": [
     {
+      "version": "4.1.2",
+      "tag": "@microsoft/gulp-core-build-webpack_v4.1.2",
+      "date": "Thu, 23 Jan 2020 01:07:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.14.1` to `3.14.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.1` to `6.4.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.1` to `0.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.1.1",
+      "tag": "@microsoft/gulp-core-build-webpack_v4.1.1",
+      "date": "Tue, 21 Jan 2020 21:56:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.14.0` to `3.14.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.0` to `6.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.0` to `0.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.3` to `0.5.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.1.0",
       "tag": "@microsoft/gulp-core-build-webpack_v4.1.0",
       "date": "Sun, 19 Jan 2020 02:26:52 GMT",

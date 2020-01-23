@@ -312,7 +312,7 @@ export class Utilities {
       maxLineLength = Utilities.getConsoleWidth();
     }
 
-    const wrap: (textToWrap: string) => string = wordwrap.soft(indent, maxLineLength);
+    const wrap: (textToWrap: string) => string = wordwrap(indent, maxLineLength, { mode: 'soft' });
     return wrap(text);
   }
 

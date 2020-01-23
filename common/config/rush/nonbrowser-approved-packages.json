@@ -215,7 +215,7 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "builtins",
+      "name": "builtin-modules",
       "allowedCategories": [ "libraries" ]
     },
     {
