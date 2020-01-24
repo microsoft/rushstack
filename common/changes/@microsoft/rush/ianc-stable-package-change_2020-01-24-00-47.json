@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Modify package.json files in-place to reduce unexpected file change diffs",
+      "comment": "Update package.json files without reformatting or reordering properties and fields during \"rush add\", \"rush version\" and \"rush publish\".",
       "type": "none"
     }
   ],
