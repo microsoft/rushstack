@@ -8,7 +8,7 @@
     "build": "gulp test --clean"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.4.2",
+    "@microsoft/node-library-build": "6.4.3",
     "@types/chai": "3.4.34",
     "@types/mocha": "5.2.5",
     "@types/node": "10.17.13",

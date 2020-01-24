@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/package-deps-hash",
-  "version": "2.4.2",
+  "version": "2.4.3",
   "description": "",
   "main": "lib/index.js",
   "typings": "dist/package-deps-hash.d.ts",
@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.5": "0.4.2",
-    "@microsoft/node-library-build": "6.4.2",
+    "@microsoft/node-library-build": "6.4.3",
     "@microsoft/node-core-library": "3.19.2",
     "@rushstack/eslint-config": "0.5.4",
     "@types/chai": "3.4.34",
