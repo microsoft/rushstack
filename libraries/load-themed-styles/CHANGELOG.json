@@ -2,6 +2,18 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.10.36",
+      "tag": "@microsoft/load-themed-styles_v1.10.36",
+      "date": "Fri, 24 Jan 2020 00:27:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.2` to `6.4.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.10.35",
       "tag": "@microsoft/load-themed-styles_v1.10.35",
       "date": "Thu, 23 Jan 2020 01:07:56 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Thu, 23 Jan 2020 01:07:56 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Jan 2020 00:27:39 GMT and should not be manually modified.
+
+## 8.4.3
+Fri, 24 Jan 2020 00:27:39 GMT
+
+### Patches
+
+- Extract GCBTerminalProvider to gulp-core-build.
 
 ## 8.4.2
 Thu, 23 Jan 2020 01:07:56 GMT

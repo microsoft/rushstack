@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Thu, 23 Jan 2020 01:07:56 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Jan 2020 00:27:39 GMT and should not be manually modified.
+
+## 3.15.0
+Fri, 24 Jan 2020 00:27:39 GMT
+
+### Minor changes
+
+- Add GCBTerminalProvider for use in GulpTasks.
 
 ## 3.14.2
 Thu, 23 Jan 2020 01:07:56 GMT
