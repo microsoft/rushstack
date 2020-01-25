@@ -8,12 +8,6 @@ steps:
   displayName: 'git config email'
 - script: 'git config --local user.name Rushbot'
   displayName: 'git config name'
-- script: |
-    node common/scripts/install-run-rush.js -h
-    cd common/temp/install-run/@microsoft+rush@5.17.2/
-    rm -r node_modules/mkdirp
-    npm install mkdirp@~0.5.0
-  displayName: 'Fix Rush dependency'
 - script: 'node common/scripts/install-run-rush.js change --verify'
   displayName: 'Verify Change Logs'
 - script: 'node common/scripts/install-run-rush.js install'
