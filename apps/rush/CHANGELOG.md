@@ -1,6 +1,19 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 11 Jan 2020 05:38:55 GMT and should not be manually modified.
+This log was last generated on Sat, 25 Jan 2020 04:19:23 GMT and should not be manually modified.
+
+## 5.19.0
+Sat, 25 Jan 2020 04:19:23 GMT
+
+### Updates
+
+- Make the default branch and default remote configurable.
+- Fix an issue where the Rush process terminates without any error message during installation/linking, due to a dependency package that broke its SemVer contract (GitHub #1713)
+- Update package.json files without reformatting or reordering properties and fields during "rush add", "rush version" and "rush publish".
+- Upgrade Node typings to Node 10
+- Update the "rush init" .gitignore file to ignore .rush/temp and .DS_Store folders
+- Improve command-line.json handling so that the "rush build" and "rush rebuild" commands can be extended without having to duplicate the built-in options (GitHub #1375)
+- Add a --json flag for "rush list" to facilitate automation
 
 ## 5.18.0
 Sat, 11 Jan 2020 05:38:55 GMT

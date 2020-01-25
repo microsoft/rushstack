@@ -2,6 +2,36 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.19.0",
+      "tag": "@microsoft/rush_v5.19.0",
+      "date": "Sat, 25 Jan 2020 04:19:23 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Make the default branch and default remote configurable."
+          },
+          {
+            "comment": "Fix an issue where the Rush process terminates without any error message during installation/linking, due to a dependency package that broke its SemVer contract (GitHub #1713)"
+          },
+          {
+            "comment": "Update package.json files without reformatting or reordering properties and fields during \"rush add\", \"rush version\" and \"rush publish\"."
+          },
+          {
+            "comment": "Upgrade Node typings to Node 10"
+          },
+          {
+            "comment": "Update the \"rush init\" .gitignore file to ignore .rush/temp and .DS_Store folders"
+          },
+          {
+            "comment": "Improve command-line.json handling so that the \"rush build\" and \"rush rebuild\" commands can be extended without having to duplicate the built-in options (GitHub #1375)"
+          },
+          {
+            "comment": "Add a --json flag for \"rush list\" to facilitate automation"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.18.0",
       "tag": "@microsoft/rush_v5.18.0",
       "date": "Sat, 11 Jan 2020 05:38:55 GMT",
