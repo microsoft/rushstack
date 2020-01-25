@@ -433,7 +433,7 @@ export function installAndRun(
     }
   );
 
-  if (result.status) {
+  if (result.status !== null) {
     return result.status;
   } else {
     throw result.error || new Error('An unknown error occurred.');
