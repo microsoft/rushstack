@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.19.1",
+      "tag": "@microsoft/rush_v5.19.1",
+      "date": "Sat, 25 Jan 2020 05:15:10 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue with install-run.js, where successful executions exit with a nonzero exit code."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.19.0",
       "tag": "@microsoft/rush_v5.19.0",
       "date": "Sat, 25 Jan 2020 04:19:23 GMT",

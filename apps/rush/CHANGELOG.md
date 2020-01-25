@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 25 Jan 2020 04:19:23 GMT and should not be manually modified.
+This log was last generated on Sat, 25 Jan 2020 05:15:10 GMT and should not be manually modified.
+
+## 5.19.1
+Sat, 25 Jan 2020 05:15:10 GMT
+
+### Updates
+
+- Fix an issue with install-run.js, where successful executions exit with a nonzero exit code.
 
 ## 5.19.0
 Sat, 25 Jan 2020 04:19:23 GMT
