@@ -5,7 +5,10 @@ import * as path from 'path';
 import * as semver from 'semver';
 
 import { LockFile } from '@microsoft/node-core-library';
-import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
+import {
+  IPackageSelector,
+  Utilities
+} from '@microsoft/rush-lib/lib/utilities/Utilities';
 import {
   _LastInstallFlag,
   _RushGlobalFolder,
@@ -27,13 +30,13 @@ export class RushVersionSelector {
   }
 
   public ensureRushVersionInstalled(
-    version: string,
+    rushVersion: string,
     configuration: MinimalRushConfiguration | undefined,
     executeOptions: ILaunchOptions
   ): Promise<void> {
 
-    const isLegacyRushVersion: boolean = semver.lt(version, '4.0.0');
-    const expectedRushPath: string = path.join(this._rushGlobalFolder.nodeSpecificPath, `rush-${version}`);
+    const isLegacyRushVersion: boolean = semver.lt(rushVersion, '4.0.0');
+    const expectedRushPath: string = path.join(this._rushGlobalFolder.nodeSpecificPath, `rush-${rushVersion}`);
 
     const installMarker: _LastInstallFlag = new _LastInstallFlag(
       expectedRushPath,
@@ -45,9 +48,9 @@ export class RushVersionSelector {
     if (!installMarker.isValid()) {
       installPromise = installPromise.then(() => {
         // Need to install Rush
-        console.log(`Rush version ${version} is not currently installed. Installing...`);
+        console.log(`Rush version ${rushVersion} is not currently installed. Installing...`);
 
-        const resourceName: string = `rush-${version}`;
+        const resourceName: string = `rush-${rushVersion}`;
 
         console.log(`Trying to acquire lock for ${resourceName}`);
 
@@ -57,10 +60,24 @@ export class RushVersionSelector {
             if (installMarker.isValid()) {
               console.log('Another process performed the installation.');
             } else {
-              Utilities.installPackageInDirectory({
+              const packages: IPackageSelector[] = [{
+                name: isLegacyRushVersion ? '@microsoft/rush' : '@microsoft/rush-lib',
+                version: rushVersion
+              }];
+
+              if (semver.lt(rushVersion, '5.19.0')) {
+                // Versions of Rush before 5.19.0 indirectly depended on "mkdirp": "*", which was broken
+                // in version 1.0.0. To make installs of older versions of Rush work, provide a hint to the package
+                // manager that a known-good version of "mkdirp" should be installed.
+                packages.push({
+                  name: 'mkdirp',
+                  version: '0.5.1'
+                });
+              }
+
+              Utilities.installPackagesInDirectory({
+                packages,
                 directory: expectedRushPath,
-                packageName: isLegacyRushVersion ? '@microsoft/rush' : '@microsoft/rush-lib',
-                version: version,
                 tempPackageTitle: 'rush-local-install',
                 maxInstallAttempts: MAX_INSTALL_ATTEMPTS,
                 // This is using a local configuration to install a package in a shared global location.
@@ -73,7 +90,7 @@ export class RushVersionSelector {
                 suppressOutput: true
               });
 
-              console.log(`Successfully installed Rush version ${version} in ${expectedRushPath}.`);
+              console.log(`Successfully installed Rush version ${rushVersion} in ${expectedRushPath}.`);
 
               // If we've made it here without exception, write the flag file
               installMarker.create();
@@ -85,10 +102,10 @@ export class RushVersionSelector {
     }
 
     return installPromise.then(() => {
-      if (semver.lt(version, '3.0.20')) {
+      if (semver.lt(rushVersion, '3.0.20')) {
         // In old versions, requiring the entry point invoked the command-line parser immediately,
         // so fail if "rushx" was used
-        RushCommandSelector.failIfNotInvokedAsRush(version);
+        RushCommandSelector.failIfNotInvokedAsRush(rushVersion);
         require(path.join(
           expectedRushPath,
           'node_modules',
@@ -97,10 +114,10 @@ export class RushVersionSelector {
           'lib',
           'rush'
         ));
-      } else if (semver.lt(version, '4.0.0')) {
+      } else if (semver.lt(rushVersion, '4.0.0')) {
         // In old versions, requiring the entry point invoked the command-line parser immediately,
         // so fail if "rushx" was used
-        RushCommandSelector.failIfNotInvokedAsRush(version);
+        RushCommandSelector.failIfNotInvokedAsRush(rushVersion);
         require(path.join(
           expectedRushPath,
           'node_modules',
