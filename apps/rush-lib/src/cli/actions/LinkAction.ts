@@ -32,8 +32,8 @@ export class LinkAction extends BaseRushAction {
     });
   }
 
-  protected run(): Promise<void> {
+  protected async run(): Promise<void> {
     const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
-    return linkManager.createSymlinksForProjects(this._force.value);
+    await linkManager.createSymlinksForProjects(this._force.value);
   }
 }

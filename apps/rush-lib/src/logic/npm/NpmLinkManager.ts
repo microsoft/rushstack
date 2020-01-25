@@ -44,30 +44,30 @@ interface IQueueItem {
 }
 
 export class NpmLinkManager extends BaseLinkManager {
-  protected _linkProjects(): Promise<void> {
-    return LegacyAdapters.convertCallbackToPromise<readPackageTree.Node, Error, string>(
-      readPackageTree,
-      this._rushConfiguration.commonTempFolder
-    ).then(
-      (npmPackage: readPackageTree.Node) => {
-        const commonRootPackage: NpmPackage = NpmPackage.createFromNpm(npmPackage);
-
-        const commonPackageLookup: PackageLookup = new PackageLookup();
-        commonPackageLookup.loadTree(commonRootPackage);
-
-        const rushLinkJson: IRushLinkJson = {
-          localLinks: {}
-        };
-
-        for (const rushProject of this._rushConfiguration.projects) {
-          console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-          this._linkProject(rushProject, commonRootPackage, commonPackageLookup, rushLinkJson);
-        }
-
-        console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
-        JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
-      }
+  protected async _linkProjects(): Promise<void> {
+    const npmPackage: readPackageTree.Node = (
+      await LegacyAdapters.convertCallbackToPromise<readPackageTree.Node, Error, string>(
+        readPackageTree,
+        this._rushConfiguration.commonTempFolder
+      )
     );
+
+    const commonRootPackage: NpmPackage = NpmPackage.createFromNpm(npmPackage);
+
+    const commonPackageLookup: PackageLookup = new PackageLookup();
+    commonPackageLookup.loadTree(commonRootPackage);
+
+    const rushLinkJson: IRushLinkJson = {
+      localLinks: {}
+    };
+
+    for (const rushProject of this._rushConfiguration.projects) {
+      console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
+      this._linkProject(rushProject, commonRootPackage, commonPackageLookup, rushLinkJson);
+    }
+
+    console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
+    JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
   }
 
   /**
