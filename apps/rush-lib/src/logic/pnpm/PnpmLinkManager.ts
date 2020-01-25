@@ -6,6 +6,7 @@ import * as path from 'path';
 import uriEncode = require('strict-uri-encode');
 import pnpmLinkBins from '@pnpm/link-bins';
 import * as semver from 'semver';
+import * as colors from 'colors';
 
 import {
   JsonFile,
@@ -32,41 +33,30 @@ const DEBUG: boolean = false;
 
 export class PnpmLinkManager extends BaseLinkManager {
 
-  private readonly _pnpmVersion: semver.SemVer
-    = new semver.SemVer(this._rushConfiguration.packageManagerToolVersion);
+  private readonly _pnpmVersion: semver.SemVer = new semver.SemVer(this._rushConfiguration.packageManagerToolVersion);
 
-  protected _linkProjects(): Promise<void> {
-    try {
-      const rushLinkJson: IRushLinkJson = {
-        localLinks: {}
-      };
+  protected async _linkProjects(): Promise<void> {
+    const rushLinkJson: IRushLinkJson = {
+      localLinks: {}
+    };
 
-      // Use shrinkwrap from temp as the committed shrinkwrap may not always be up to date
-      // See https://github.com/microsoft/rushstack/issues/1273#issuecomment-492779995
-      const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
-        this._rushConfiguration.tempShrinkwrapFilename
-      );
+    // Use shrinkwrap from temp as the committed shrinkwrap may not always be up to date
+    // See https://github.com/microsoft/rushstack/issues/1273#issuecomment-492779995
+    const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
+      this._rushConfiguration.tempShrinkwrapFilename
+    );
 
-      if (!pnpmShrinkwrapFile) {
-        throw new InternalError(`Cannot load shrinkwrap at "${this._rushConfiguration.tempShrinkwrapFilename}"`);
-      }
-
-      let promise: Promise<void> = Promise.resolve();
-
-      for (const rushProject of this._rushConfiguration.projects) {
-        promise = promise.then(() => {
-          console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-          return this._linkProject(rushProject, rushLinkJson, pnpmShrinkwrapFile);
-        });
-      }
-
-      return promise.then(() => {
-        console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
-        JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
-      });
-    } catch (error) {
-      return Promise.reject(error);
+    if (!pnpmShrinkwrapFile) {
+      throw new InternalError(`Cannot load shrinkwrap at "${this._rushConfiguration.tempShrinkwrapFilename}"`);
     }
+
+    for (const rushProject of this._rushConfiguration.projects) {
+      console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
+      await this._linkProject(rushProject, rushLinkJson, pnpmShrinkwrapFile);
+    }
+
+    console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
+    JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
   }
 
   /**
@@ -74,7 +64,7 @@ export class PnpmLinkManager extends BaseLinkManager {
    * @param project             The local project that we will create symlinks for
    * @param rushLinkJson        The common/temp/rush-link.json output file
    */
-  private _linkProject(
+  private async _linkProject(
     project: RushConfigurationProject,
     rushLinkJson: IRushLinkJson,
     pnpmShrinkwrapFile: PnpmShrinkwrapFile
@@ -270,9 +260,13 @@ export class PnpmLinkManager extends BaseLinkManager {
     const projectFolder: string = path.join(localPackage.folderPath, 'node_modules');
     const projectBinFolder: string = path.join(localPackage.folderPath, 'node_modules', '.bin');
 
-    // Return type is Promise<void[]> because the API returns Promise.all()
-    return pnpmLinkBins(projectFolder, projectBinFolder)
-      .then(() => { /* empty block */ });
+    await pnpmLinkBins(
+      projectFolder,
+      projectBinFolder,
+      {
+        warn: (msg: string) => console.warn(colors.yellow(msg))
+      }
+    );
   }
 
   private _getPathToLocalInstallation(folderNameInLocalInstallationRoot: string): string {

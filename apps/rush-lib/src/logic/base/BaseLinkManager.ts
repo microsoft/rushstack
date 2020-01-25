@@ -188,11 +188,11 @@ export abstract class BaseLinkManager {
    * @param force - Normally the operation will be skipped if the links are already up to date;
    *   if true, this option forces the links to be recreated.
    */
-  public createSymlinksForProjects(force: boolean): Promise<void> {
+  public async createSymlinksForProjects(force: boolean): Promise<void> {
     if (!force) {
       if (FileSystem.exists(this._rushConfiguration.rushLinkJsonFilename)) {
         console.log(colors.green(`Skipping linking -- everything is already up to date.`));
-        return Promise.resolve();
+        return;
       }
     }
 
@@ -203,12 +203,11 @@ export abstract class BaseLinkManager {
     // a full "rush link" is required next time
     Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
 
-    return this._linkProjects()
-      .then(() => {
-        stopwatch.stop();
-        console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
-        console.log(os.EOL + 'Next you should probably run "rush build" or "rush rebuild"');
-      });
+    await this._linkProjects()
+
+    stopwatch.stop();
+    console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
+    console.log(os.EOL + 'Next you should probably run "rush build" or "rush rebuild"');
   }
 
   protected abstract _linkProjects(): Promise<void>;
