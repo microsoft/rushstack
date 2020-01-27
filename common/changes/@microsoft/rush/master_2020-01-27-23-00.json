@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fixing \"too many params\" and \"unable to find ref v<version>\" issues in git tagging while publishing.",
+      "comment": "Fixes \"too many params\" and \"unable to find ref v<version>\" issues in git tagging while publishing.",
       "type": "none"
     }
   ],
