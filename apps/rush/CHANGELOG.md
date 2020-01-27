@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 25 Jan 2020 05:15:10 GMT and should not be manually modified.
+This log was last generated on Mon, 27 Jan 2020 23:08:46 GMT and should not be manually modified.
+
+## 5.19.2
+Mon, 27 Jan 2020 23:08:46 GMT
+
+### Updates
+
+- Fix an issue where the rushx command will always report error.
 
 ## 5.19.1
 Sat, 25 Jan 2020 05:15:10 GMT

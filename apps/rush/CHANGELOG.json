@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.19.2",
+      "tag": "@microsoft/rush_v5.19.2",
+      "date": "Mon, 27 Jan 2020 23:08:46 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where the rushx command will always report error."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.19.1",
       "tag": "@microsoft/rush_v5.19.1",
       "date": "Sat, 25 Jan 2020 05:15:10 GMT",
