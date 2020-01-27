@@ -50,7 +50,7 @@ export class PublishGit {
     PublishUtilities.execCommand(
       !!this._targetBranch && shouldExecute,
       'git',
-      ['tag', '-a', tagName, '-m', `"${packageName} v${packageVersion}"`, ...(commitId ? [commitId] : [])]);
+      ['tag', '-a', tagName, '-m', `${packageName} v${packageVersion}`, ...(commitId ? [commitId] : [])]);
   }
 
   public hasTag(packageConfig: RushConfigurationProject): boolean {
