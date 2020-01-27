@@ -1,4 +1,4 @@
-const fsx = require('fs-extra');
+const { FileSystem } = require('@microsoft/node-core-library');
 const child_process = require('child_process');
 const path = require('path');
 const process = require('process');
@@ -12,9 +12,9 @@ function executeCommand(command) {
 
 // Clean the old build outputs
 console.log(`==> Starting build.js for ${path.basename(process.cwd())}`);
-fsx.emptyDirSync('dist');
-fsx.emptyDirSync('lib');
-fsx.emptyDirSync('temp');
+FileSystem.ensureEmptyFolder('dist');
+FileSystem.ensureEmptyFolder('lib');
+FileSystem.ensureEmptyFolder('temp');
 
 LocJsonPreprocessor.preprocessLocJsonFiles({
   srcFolder: path.resolve(__dirname, 'src'),
