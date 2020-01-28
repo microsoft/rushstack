@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.7.7",
+      "tag": "@microsoft/api-extractor-model_v7.7.7",
+      "date": "Tue, 28 Jan 2020 02:23:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.19.2` to `3.19.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.7.6",
       "tag": "@microsoft/api-extractor-model_v7.7.6",
       "date": "Thu, 23 Jan 2020 01:07:56 GMT",

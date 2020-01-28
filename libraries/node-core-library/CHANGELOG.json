@@ -2,6 +2,18 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.19.3",
+      "tag": "@microsoft/node-core-library_v3.19.3",
+      "date": "Tue, 28 Jan 2020 02:23:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a typing issue that prevented LegacyAdapters from being used with the new glob typings."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.19.2",
       "tag": "@microsoft/node-core-library_v3.19.2",
       "date": "Thu, 23 Jan 2020 01:07:56 GMT",
