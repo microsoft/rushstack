@@ -857,7 +857,7 @@
       "packageName": "@rushstack/localization-plugin",
       "projectFolder": "webpack/localization-plugin",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": false
     },
     {
       "packageName": "@microsoft/loader-raw-script",
