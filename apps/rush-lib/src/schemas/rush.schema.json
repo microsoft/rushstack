@@ -158,11 +158,11 @@
           "type": "string"
         },
         "defaultBranch": {
-          "description": "The default git branch name. If a value is provided, \"rush change\" will use it as a remote git branch to compare against. The default value is \"master\"",
+          "description": "The default branch name. This tells \"rush change\" which remote branch to compare against. The default value is \"master\"",
           "type": "string"
         },
         "defaultRemote": {
-          "description": "The default git remote name. If a value is provided, \"rush change\" will use it as a git remote to compare against. The default value is \"origin\"",
+          "description": "The default remote. This tells \"rush change\" which remote to compare against if the remote URL is not set or if a remote matching the provided remote URL is not found.",
           "type": "string"
         }
       },
