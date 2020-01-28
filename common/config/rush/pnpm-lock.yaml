@@ -3,7 +3,7 @@ dependencies:
   '@microsoft/rush-stack-compiler-3.5': 0.3.11
   '@microsoft/teams-js': 1.3.0-beta.4
   '@microsoft/tsdoc': 0.12.14
-  '@pnpm/link-bins': 5.1.0
+  '@pnpm/link-bins': 5.1.1
   '@rush-temp/api-documenter': 'file:projects/api-documenter.tgz'
   '@rush-temp/api-documenter-test': 'file:projects/api-documenter-test.tgz'
   '@rush-temp/api-extractor': 'file:projects/api-extractor.tgz'
@@ -387,8 +387,9 @@ packages:
       node: '>=8.15'
     resolution:
       integrity: sha512-csAZ7TEl83BD/PzUpLvGNWGUb8ouaDCGyPgDwc+pAJSovg++FKDB0CdoF+VPgBstYen2p+7OOMpEAJHAYK0Ccw==
-  /@pnpm/link-bins/5.1.0:
+  /@pnpm/link-bins/5.1.1:
     dependencies:
+      '@pnpm/error': 1.0.0
       '@pnpm/package-bins': 4.0.2
       '@pnpm/read-modules-dir': 2.0.1
       '@pnpm/read-package-json': 3.0.2
@@ -406,7 +407,7 @@ packages:
     engines:
       node: '>=10'
     resolution:
-      integrity: sha512-18ZizEGWSbqxGFtK8JHQ5Ce+qHXGp6C+R3nEzdmmBBh5NQ1QyFJSqS6nEhc7cXaSuWAnVlXNhjurvfrWR+eTiw==
+      integrity: sha512-KqE371T1MIHu8mHAquy8Cu8jn93Vf0abGGrxVn5MTeLQjfOJ84XVS/nyyfVLlKyTqy0VA+doLa4KrTHHIplyWw==
   /@pnpm/package-bins/4.0.2:
     dependencies:
       '@pnpm/types': 5.0.0
@@ -1663,7 +1664,7 @@ packages:
   /autoprefixer/9.7.4:
     dependencies:
       browserslist: 4.8.5
-      caniuse-lite: 1.0.30001022
+      caniuse-lite: 1.0.30001023
       chalk: 2.4.2
       normalize-range: 0.1.2
       num2fraction: 1.2.2
@@ -2108,7 +2109,7 @@ packages:
       integrity: sha512-Z942RysHXmJrhqk88FmKBVq/v5tqmSkDz7p54G/MGyjMnCFFnC79XWNbg+Vta8W6Wb2qtSZTSxIGkJrRpCFEiA==
   /browserslist/4.8.5:
     dependencies:
-      caniuse-lite: 1.0.30001022
+      caniuse-lite: 1.0.30001023
       electron-to-chromium: 1.3.340
       node-releases: 1.1.47
     dev: false
@@ -2252,10 +2253,10 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-1UVjW+HjPFQmScaRc+Xeas+uNN0=
-  /caniuse-lite/1.0.30001022:
+  /caniuse-lite/1.0.30001023:
     dev: false
     resolution:
-      integrity: sha512-FjwPPtt/I07KyLPkBQ0g7/XuZg6oUkYBVnPHNj3VHJbOjmmJ/GdSo/GUY6MwINEQvjhP6WZVbX8Tvms8xh0D5A==
+      integrity: sha512-C5TDMiYG11EOhVOA62W1p3UsJ2z4DsHtMBQtjzp3ZsUglcQn62WOUgW0y795c7A5uZ+GCEIvzkMatLIlAsbNTA==
   /capture-exit/1.2.0:
     dependencies:
       rsvp: 3.6.2
@@ -11144,7 +11145,7 @@ packages:
     dev: false
     name: '@rush-temp/repo-toolbox'
     resolution:
-      integrity: sha512-9m0KqGMfnsSfLI83TBKoubvzVhHPPt5oqpo5N3iIvQiSFycQTXH27dsKoX47HMjPat4aYhKksBSVq1kQyv6hyw==
+      integrity: sha512-S0GU6glBBFNKJjhR1Ql/4m/bl7BiFDtq4pjjSKxh8x9199+clP0ryLtu4eHbGVXzSj3tFRXtgGAnkfXwwpZz/g==
       tarball: 'file:projects/repo-toolbox.tgz'
     version: 0.0.0
   'file:projects/resolve-chunk-plugin.tgz':
@@ -11169,12 +11170,12 @@ packages:
     dev: false
     name: '@rush-temp/rush-buildxl'
     resolution:
-      integrity: sha512-z7R7YD0TgtgMU4tjOhe0mJah4Gj8Sx5Igr3QEsD8Bh16QI0xd39mPP5ZCrnSCP2GxhHdwTmiuDV9lYVBYQy1fQ==
+      integrity: sha512-SWYn1PHvNjlPZdXIN6slUqFtgI99OIJyFVBUf34XTmCJSE8YzgO9Sy4Aqz3aGzbyyaGRQwHsb+IN6aFUAvfjag==
       tarball: 'file:projects/rush-buildxl.tgz'
     version: 0.0.0
   'file:projects/rush-lib.tgz':
     dependencies:
-      '@pnpm/link-bins': 5.1.0
+      '@pnpm/link-bins': 5.1.1
       '@types/glob': 5.0.30
       '@types/inquirer': 0.0.43
       '@types/jest': 23.3.11
@@ -11571,7 +11572,7 @@ packages:
     dev: false
     name: '@rush-temp/rush'
     resolution:
-      integrity: sha512-z9jB/vJX21RD1gNfpDYlsAe6/Jtf/l7NOpeVLJq+0kP2vk40fX83Dj2rUcFlwtyr8aYOrH9bxt4MatgAWRncDA==
+      integrity: sha512-ZpFMxDRYB7u6hiMKzExx7TenBO6K9v537TLBzuE3Zy89RFfsRiIMxZfIB5LuROv+Ms5H5nziRqVBhRyWLgKwag==
       tarball: 'file:projects/rush.tgz'
     version: 0.0.0
   'file:projects/rushell.tgz':
