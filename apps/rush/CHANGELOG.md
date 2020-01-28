@@ -1,6 +1,11 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 28 Jan 2020 01:08:26 GMT and should not be manually modified.
+This log was last generated on Tue, 28 Jan 2020 01:35:53 GMT and should not be manually modified.
+
+## 5.19.3
+Tue, 28 Jan 2020 01:35:53 GMT
+
+*Version update only*
 
 ## 5.19.2
 Tue, 28 Jan 2020 01:08:26 GMT
