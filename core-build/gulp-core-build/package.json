@@ -57,6 +57,7 @@
     "@microsoft/rush-stack-compiler-3.5": "0.3.11",
     "@rushstack/eslint-config": "0.5.4",
     "@types/chai": "3.4.34",
+    "@types/glob": "7.1.1",
     "@types/mocha": "5.2.5",
     "@types/z-schema": "3.16.31",
     "chai": "~3.5.0"

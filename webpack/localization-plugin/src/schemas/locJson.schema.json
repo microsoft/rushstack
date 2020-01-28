@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Localizable JSON file",
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    }
+  },
+  "patternProperties": {
+    "^[A-Za-z_][0-9A-Za-z_]*$": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string"
+        },
+        "comment": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "value" ]
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}

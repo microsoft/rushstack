@@ -1,0 +1,22 @@
+{
+  "name": "localization-plugin-test",
+  "description": "Building this project exercises @microsoft/localization-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "node build.js",
+    "serve": "node serve.js"
+  },
+  "dependencies": {
+    "@microsoft/set-webpack-public-path-plugin": "2.3.3",
+    "@microsoft/node-core-library": "3.19.2",
+    "@rushstack/localization-plugin": "0.0.0",
+    "@types/webpack-env": "1.13.0",
+    "@microsoft/rush-stack-compiler-3.5": "0.4.2",
+    "ts-loader": "6.0.0",
+    "webpack": "~4.31.0",
+    "webpack-bundle-analyzer": "~3.6.0",
+    "webpack-cli": "~3.3.2",
+    "webpack-dev-server": "~3.9.0"
+  }
+}

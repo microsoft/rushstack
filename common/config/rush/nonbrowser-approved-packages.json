@@ -124,7 +124,7 @@
     },
     {
       "name": "@microsoft/set-webpack-public-path-plugin",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/sp-tslint-rules",
@@ -165,6 +165,10 @@
     {
       "name": "@rushstack/eslint-plugin",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/localization-plugin",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@typescript-eslint/eslint-plugin",
@@ -559,6 +563,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "ts-loader",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "tslint",
       "allowedCategories": [ "libraries" ]
     },
@@ -580,7 +588,19 @@
     },
     {
       "name": "webpack",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "webpack-bundle-analyzer",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "webpack-cli",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "webpack-dev-server",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "wordwrap",

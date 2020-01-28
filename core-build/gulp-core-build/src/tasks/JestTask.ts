@@ -5,7 +5,7 @@ import { GulpTask} from './GulpTask';
 import { IBuildConfig } from '../IBuildConfig';
 import * as Gulp from 'gulp';
 import * as Jest from 'jest-cli';
-import * as globby from 'globby';
+import * as glob from 'glob';
 import { FileSystem, JsonObject } from '@microsoft/node-core-library';
 
 /**
@@ -187,8 +187,8 @@ export class JestTask extends GulpTask<IJestConfig> {
   }
 
   private _copySnapshots(srcRoot: string, destRoot: string): void {
-    const pattern: string = path.join(srcRoot, '**/__snapshots__/*.snap');
-    globby.sync(pattern).forEach(snapFile => {
+    const pattern: string = path.join(srcRoot, '**', '__snapshots__', '*.snap');
+    glob.sync(pattern).forEach(snapFile => {
       const destination: string = snapFile.replace(srcRoot, destRoot);
       if (this._copyIfMatchExtension(snapFile, destination, '.test.tsx.snap')) {
         this.logVerbose(`Snapshot file ${snapFile} is copied to match extension ".test.tsx.snap".`);
