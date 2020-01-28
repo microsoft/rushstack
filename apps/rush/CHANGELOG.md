@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 25 Jan 2020 05:15:10 GMT and should not be manually modified.
+This log was last generated on Tue, 28 Jan 2020 01:08:26 GMT and should not be manually modified.
+
+## 5.19.2
+Tue, 28 Jan 2020 01:08:26 GMT
+
+### Updates
+
+- Fix an issue where the rushx command will always report error.
+- Fixes "too many params" and "unable to find ref v<version>" issues in git tagging while publishing.
 
 ## 5.19.1
 Sat, 25 Jan 2020 05:15:10 GMT

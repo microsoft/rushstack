@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.19.2",
+      "tag": "@microsoft/rush_v5.19.2",
+      "date": "Tue, 28 Jan 2020 01:08:26 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where the rushx command will always report error."
+          },
+          {
+            "comment": "Fixes \"too many params\" and \"unable to find ref v<version>\" issues in git tagging while publishing."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.19.1",
       "tag": "@microsoft/rush_v5.19.1",
       "date": "Sat, 25 Jan 2020 05:15:10 GMT",
