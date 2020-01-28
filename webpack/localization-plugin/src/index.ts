@@ -12,7 +12,7 @@ export {
  ILocalizationStatsEntrypoint,
  LocalizationPlugin,
  IStringPlaceholder as _IStringPlaceholder
-}from './LocalizationPlugin';
+} from './LocalizationPlugin';
 
 export {
   ILocJsonPreprocessorOptions,
