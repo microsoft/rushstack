@@ -39,6 +39,7 @@ for large scale TypeScript monorepos.
 | [/core-build/gulp-core-build-webpack](./core-build/gulp-core-build-webpack/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-webpack.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-webpack) | [changelog](./core-build/gulp-core-build-webpack/CHANGELOG.md) | [@microsoft/gulp-core-build-webpack](https://www.npmjs.com/package/@microsoft/gulp-core-build-webpack) |
 | [/core-build/node-library-build](./core-build/node-library-build/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fnode-library-build.svg)](https://badge.fury.io/js/%40microsoft%2Fnode-library-build) | [changelog](./core-build/node-library-build/CHANGELOG.md) | [@microsoft/node-library-build](https://www.npmjs.com/package/@microsoft/node-library-build) |
 | [/core-build/web-library-build](./core-build/web-library-build/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fweb-library-build.svg)](https://badge.fury.io/js/%40microsoft%2Fweb-library-build) | [changelog](./core-build/web-library-build/CHANGELOG.md) | [@microsoft/web-library-build](https://www.npmjs.com/package/@microsoft/web-library-build) |
+| [/libraries/debug-certificate-manager](./libraries/debug-certificate-manager/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fdebug-certificate-manager.svg)](https://badge.fury.io/js/%40rushstack%2Fdebug-certificate-manager) | [changelog](./libraries/debug-certificate-manager/CHANGELOG.md) | [@rushstack/debug-certificate-manager](https://www.npmjs.com/package/@rushstack/debug-certificate-manager) |
 | [/libraries/load-themed-styles](./libraries/load-themed-styles/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fload-themed-styles.svg)](https://badge.fury.io/js/%40microsoft%2Fload-themed-styles) | [changelog](./libraries/load-themed-styles/CHANGELOG.md) | [@microsoft/load-themed-styles](https://www.npmjs.com/package/@microsoft/load-themed-styles) |
 | [/libraries/node-core-library](./libraries/node-core-library/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fnode-core-library.svg)](https://badge.fury.io/js/%40microsoft%2Fnode-core-library) | [changelog](./libraries/node-core-library/CHANGELOG.md) | [@microsoft/node-core-library](https://www.npmjs.com/package/@microsoft/node-core-library) |
 | [/libraries/package-deps-hash](./libraries/package-deps-hash/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fpackage-deps-hash.svg)](https://badge.fury.io/js/%40microsoft%2Fpackage-deps-hash) | [changelog](./libraries/package-deps-hash/CHANGELOG.md) | [@microsoft/package-deps-hash](https://www.npmjs.com/package/@microsoft/package-deps-hash) |
@@ -81,6 +82,7 @@ for large scale TypeScript monorepos.
 | [/build-tests/api-extractor-test-02](./build-tests/api-extractor-test-02/) | Building this project is a regression test for api-extractor |
 | [/build-tests/api-extractor-test-03](./build-tests/api-extractor-test-03/) | Building this project is a regression test for api-extractor |
 | [/build-tests/api-extractor-test-04](./build-tests/api-extractor-test-04/) | Building this project is a regression test for api-extractor |
+| [/build-tests/localization-plugin-test](./build-tests/localization-plugin-test/) | Building this project exercises @microsoft/localization-plugin |
 | [/build-tests/node-library-build-eslint-test](./build-tests/node-library-build-eslint-test/) |  |
 | [/build-tests/node-library-build-tslint-test](./build-tests/node-library-build-tslint-test/) |  |
 | [/build-tests/rush-stack-compiler-2.4-library-test](./build-tests/rush-stack-compiler-2.4-library-test/) |  |
@@ -102,6 +104,7 @@ for large scale TypeScript monorepos.
 | [/repo-scripts/generate-api-docs](./repo-scripts/generate-api-docs/) | Used to generate API docs for the rushstack.io website |
 | [/repo-scripts/repo-toolbox](./repo-scripts/repo-toolbox/) | Used to execute various operations specific to this repo |
 | [/stack/rush-stack-compiler-shared](./stack/rush-stack-compiler-shared/) |  |
+| [/webpack/localization-plugin](./webpack/localization-plugin/) | This plugin facilitates localization with Webpack. |
 
 
 ## Contributor Notice
