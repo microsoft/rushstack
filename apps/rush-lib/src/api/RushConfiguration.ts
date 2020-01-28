@@ -31,6 +31,8 @@ import { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { ExperimentsConfiguration } from './ExperimentsConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
+const DEFAULT_BRANCH: string = 'master';
+const DEFAULT_REMOTE: string = 'origin';
 
 /**
  * A list of known config filenames that are expected to appear in the "./common/config/rush" folder.
@@ -82,9 +84,18 @@ export interface IRushRepositoryJson {
   /**
    * The remote url of the repository. This helps "rush change" find the right remote to compare against.
    */
-  url: string;
-  defaultBranch: string;
-  defaultRemote: string;
+  url?: string;
+
+  /**
+   * The default branch name. This tells "rush change" which remote branch to compare against.
+   */
+  defaultBranch?: string;
+
+  /**
+   * The default remote. This tells "rush change" which remote to compare against if the remote URL is not set
+   * or if a remote matching the provided remote URL is not found.
+   */
+  defaultRemote?: string;
 }
 
 /**
@@ -294,7 +305,7 @@ export class RushConfiguration {
   private _hotfixChangeEnabled: boolean;
 
   // Repository info
-  private _repositoryUrl: string;
+  private _repositoryUrl: string | undefined;
   private _repositoryDefaultBranch: string;
   private _repositoryDefaultRemote: string;
 
@@ -467,11 +478,14 @@ export class RushConfiguration {
       this._hotfixChangeEnabled = rushConfigurationJson.hotfixChangeEnabled;
     }
 
-    if (rushConfigurationJson.repository) {
-      this._repositoryUrl = rushConfigurationJson.repository.url;
-      this._repositoryDefaultBranch = rushConfigurationJson.repository.defaultBranch || "master";
-      this._repositoryDefaultRemote = rushConfigurationJson.repository.defaultRemote || "origin";
+
+    if (!rushConfigurationJson.repository) {
+      rushConfigurationJson.repository = {};
     }
+
+    this._repositoryUrl = rushConfigurationJson.repository.url;
+    this._repositoryDefaultBranch = rushConfigurationJson.repository.defaultBranch || DEFAULT_BRANCH;
+    this._repositoryDefaultRemote = rushConfigurationJson.repository.defaultRemote || DEFAULT_REMOTE;
 
     this._telemetryEnabled = !!rushConfigurationJson.telemetryEnabled;
     if (rushConfigurationJson.eventHooks) {
@@ -1024,19 +1038,20 @@ export class RushConfiguration {
   /**
    * The remote url of the repository. This helps "rush change" find the right remote to compare against.
    */
-  public get repositoryUrl(): string {
+  public get repositoryUrl(): string | undefined {
     return this._repositoryUrl;
   }
 
   /**
-   * The default git branch of the repository. This helps "rush change" find the right remote to compare against.
+   * The default branch name. This tells "rush change" which remote branch to compare against.
    */
   public get repositoryDefaultBranch(): string {
     return this._repositoryDefaultBranch;
   }
 
   /**
-   * The default git remote of the repository. This helps "rush change" find the right remote to compare against.
+   * The default remote. This tells "rush change" which remote to compare against if the remote URL is not set
+   * or if a remote matching the provided remote URL is not found.
    */
   public get repositoryDefaultRemote(): string {
     return this._repositoryDefaultRemote;

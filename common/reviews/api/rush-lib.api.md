@@ -298,7 +298,7 @@ export class RushConfiguration {
     readonly repositoryDefaultBranch: string;
     readonly repositoryDefaultFullyQualifiedRemoteBranch: string;
     readonly repositoryDefaultRemote: string;
-    readonly repositoryUrl: string;
+    readonly repositoryUrl: string | undefined;
     readonly rushJsonFile: string;
     readonly rushJsonFolder: string;
     readonly rushLinkJsonFilename: string;
