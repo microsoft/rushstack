@@ -19,7 +19,7 @@ export default function (this: loader.LoaderContext, content: string): string {
 
   const resultObject: { [stringName: string]: string } = {};
   for (const stringName in locJsonFileData) { // eslint-disable-line guard-for-in
-    const stringKey: string = `${locJsonFilePath.toUpperCase()}?${stringName}`;
+    const stringKey: string = `${locJsonFilePath}?${stringName}`;
     if (pluginInstance.stringKeys.has(stringKey)) {
       resultObject[stringName] = pluginInstance.stringKeys.get(stringKey)!.value;
     } else {

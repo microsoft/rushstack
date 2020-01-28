@@ -406,7 +406,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
       configuration,
       (rules: Webpack.RuleSetRule[]) => {
         rules.push({
-          test: (filePath: string) => this._locJsonFiles.has(filePath.toUpperCase()),
+          test: (filePath: string) => this._locJsonFiles.has(filePath),
           loader: path.resolve(__dirname, 'loaders', 'LocJsonLoader.js'),
           options: {
             pluginInstance: this
@@ -436,7 +436,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
       configuration,
       (rules: Webpack.RuleSetRule[]) => {
         rules.push({
-          test: (filePath: string) => this._locJsonFiles.has(filePath.toUpperCase()),
+          test: (filePath: string) => this._locJsonFiles.has(filePath),
           loader: path.resolve(__dirname, 'loaders', 'SingleLocaleLoader.js'),
           options: {
             resolvedStrings: options.resolvedStrings,
@@ -466,8 +466,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
     configuration.module.rules.push({
       test: {
         and: [
-          (filePath: string) => !this._locJsonFiles.has(filePath.toUpperCase()),
-          (filePath: string) => !this._locJsonFilesToIgnore.has(filePath.toUpperCase()),
+          (filePath: string) => !this._locJsonFiles.has(filePath),
+          (filePath: string) => !this._locJsonFilesToIgnore.has(filePath),
           /\.loc\.json$/i
         ]
       },
@@ -498,8 +498,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     { // eslint-disable-line no-lone-blocks
       this._locJsonFilesToIgnore = new Set<string>();
       for (const locJsonFilePath of this._options.filesToIgnore || []) {
-        let normalizedLocJsonFilePath: string = path.resolve(configuration.context!, locJsonFilePath);
-        normalizedLocJsonFilePath = normalizedLocJsonFilePath.toUpperCase();
+        const normalizedLocJsonFilePath: string = path.resolve(configuration.context!, locJsonFilePath);
         this._locJsonFilesToIgnore.add(normalizedLocJsonFilePath);
       }
     }
@@ -526,7 +525,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
       for (const localeName in localizedStrings) {
         if (localizedStrings.hasOwnProperty(localeName)) {
-          const normalizedLocaleName: string = localeName.toUpperCase();
+          const normalizedLocaleName: string = localeName;
           if (normalizedLocales.has(normalizedLocaleName)) {
             errors.push(Error(
               `The locale "${localeName}" appears multiple times. ` +
@@ -554,8 +553,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
           const locale: ILocale = localizedStrings[localeName];
           for (const locJsonFilePath in locale) {
             if (locale.hasOwnProperty(locJsonFilePath)) {
-              let normalizedLocJsonFilePath: string = path.resolve(configuration.context!, locJsonFilePath);
-              normalizedLocJsonFilePath = normalizedLocJsonFilePath.toUpperCase();
+              const normalizedLocJsonFilePath: string = path.resolve(configuration.context!, locJsonFilePath);
 
               if (this._locJsonFilesToIgnore.has(normalizedLocJsonFilePath)) {
                 errors.push(new Error(

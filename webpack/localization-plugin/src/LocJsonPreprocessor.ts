@@ -35,9 +35,9 @@ export class LocJsonPreprocessor {
 
     const filesToIgnore: Set<string> = new Set<string>((options.filesToIgnore || []).map((fileToIgnore) => {
       if (path.isAbsolute(fileToIgnore)) {
-        return fileToIgnore.toUpperCase();
+        return fileToIgnore;
       } else {
-        return path.resolve(srcFolder, fileToIgnore).toUpperCase();
+        return path.resolve(srcFolder, fileToIgnore);
       }
     }));
 
@@ -55,7 +55,7 @@ export class LocJsonPreprocessor {
     for (let locJsonFilePath of locJsonFiles) {
       locJsonFilePath = path.resolve(locJsonFilePath);
 
-      if (filesToIgnore.has(locJsonFilePath.toUpperCase())) {
+      if (filesToIgnore.has(locJsonFilePath)) {
         continue;
       }
 

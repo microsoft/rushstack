@@ -26,11 +26,9 @@ export default function (this: loader.LoaderContext, content: string): string {
     passthroughLocale
   } = loaderUtils.getOptions(this) as ILocJsonLoaderOptions;
   const locJsonFilePath: string = this.resourcePath;
-  const normalizedLocJsonFilePath: string = locJsonFilePath.toUpperCase();
-
   const resultObject: { [stringName: string]: string } = {};
 
-  const stringMap: Map<string, string> | undefined = resolvedStrings.get(normalizedLocJsonFilePath);
+  const stringMap: Map<string, string> | undefined = resolvedStrings.get(locJsonFilePath);
   if (!stringMap) {
     this.emitError(new Error(
       `Strings for file ${locJsonFilePath} were not provided in the LocalizationPlugin configuration.`
