@@ -373,12 +373,7 @@ function installAndRun(packageName, packageVersion, packageBinName, packageBinAr
         cwd: process.cwd(),
         env: process.env
     });
-    if (result.status !== null) {
-        return result.status;
-    }
-    else {
-        throw result.error || new Error('An unknown error occurred.');
-    }
+    return result.status;
 }
 exports.installAndRun = installAndRun;
 function runWithErrorAndStatusCode(fn) {
