@@ -57,6 +57,10 @@ module.exports = function(env) {
             },
             "./src/strings4.loc.json": {
               "string1": "\"String with quotemarks\""
+            },
+            "./src/strings5.resx": {
+              "string1": "The first RESX string",
+              "stringWithQuotes": "\"RESX string with quotemarks\""
             }
           },
           "es-es": {
@@ -73,6 +77,10 @@ module.exports = function(env) {
             },
             "./src/strings4.loc.json": {
               "string1": "\"Cadena con comillas\""
+            },
+            "./src/strings5.resx": {
+              "string1": "La primera cadena RESX",
+              "stringWithQuotes": "\"Cadena RESX con comillas\""
             }
           }
         },
