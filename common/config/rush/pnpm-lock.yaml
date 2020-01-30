@@ -171,6 +171,7 @@ dependencies:
   jju: 1.4.0
   js-yaml: 3.13.1
   jsdom: 11.11.0
+  json-loader: 0.5.7
   loader-utils: 1.1.0
   lodash: 4.17.15
   lodash.merge: 4.6.2
@@ -6553,6 +6554,10 @@ packages:
     hasBin: true
     resolution:
       integrity: sha1-RsP+yMGJKxKwgz25vHYiF226s0s=
+  /json-loader/0.5.7:
+    dev: false
+    resolution:
+      integrity: sha512-QLPs8Dj7lnf3e3QYS1zkCo+4ZwqOiF9d/nZnYozTISxXWCfNs9yuky5rJw4/W34s7POaNlbZmQGaB5NiXCbP4w==
   /json-parse-better-errors/1.0.2:
     dev: false
     resolution:
@@ -11945,13 +11950,14 @@ packages:
       glob: 7.0.6
       gulp: 4.0.2
       jju: 1.4.0
+      json-loader: 0.5.7
       loader-utils: 1.1.0
       lodash: 4.17.15
       xmldoc: 1.1.2
     dev: false
     name: '@rush-temp/localization-plugin'
     resolution:
-      integrity: sha512-Mgj0J4SvGz3DtRWXa2q5Uf9w5daEbwGvDKrJ6bvqLKha0abfWKfPjZXL58/IwnlbkZiaAYxN3e5kjDtIEnE6LA==
+      integrity: sha512-rr9QzX4+jRiZn1EZEWKlzQgb2bybEZELifkuozrc77ak3IezQSVd/0RwYoppNM+lmgp9of0OJXBakttfmMmIFg==
       tarball: 'file:projects/localization-plugin.tgz'
     version: 0.0.0
   'file:projects/node-core-library.tgz':
@@ -12726,6 +12732,7 @@ specifiers:
   jju: ~1.4.0
   js-yaml: ~3.13.1
   jsdom: ~11.11.0
+  json-loader: ~0.5.7
   loader-utils: ~1.1.0
   lodash: ~4.17.15
   lodash.merge: ~4.6.2

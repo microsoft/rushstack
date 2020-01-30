@@ -6,25 +6,26 @@ import {
   XmlDocument,
   XmlElement
 } from 'xmldoc';
-import { ILocalizedString, ILocFile } from '../interfaces';
+import {
+  ILocalizedString,
+  ILocFile
+} from '../interfaces';
+import { ILoggingFunctions } from './Logging';
 
 const STRING_NAME_RESX: RegExp = /^[A-z_][A-z0-9_]*$/;
 
-export interface ILogger {
-  logError: (message: string) => void;
-  logWarning: (message: string) => void;
-  logFileError: (message: string, filePath: string, line?: number, position?: number) => void;
-  logFileWarning: (message: string, filePath: string, line?: number, position?: number) => void;
-}
-
-export interface IResxReaderOptions extends ILogger {
+export interface IResxReaderOptions extends ILoggingFunctions {
   resxFilePath: string;
 }
 
 export class ResxReader {
   public static readResxFileAsLocFile(options: IResxReaderOptions): ILocFile {
-    const fileContents: string = FileSystem.readFile(options.resxFilePath);
-    const xmlDocument: XmlDocument = new XmlDocument(fileContents);
+    const resxContents: string = FileSystem.readFile(options.resxFilePath);
+    return ResxReader.readResxAsLocFile(resxContents, options);
+  }
+
+  public static readResxAsLocFile(resxContents: string, options: IResxReaderOptions): ILocFile {
+    const xmlDocument: XmlDocument = new XmlDocument(resxContents);
 
     if (xmlDocument.name !== 'root') {
       ResxReader._logErrorWithLocation(

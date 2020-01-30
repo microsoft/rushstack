@@ -125,8 +125,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
   public stringKeys: Map<string, IStringPlaceholder>;
 
   private _options: ILocalizationPluginOptions;
-  private _locJsonFiles: Set<string>;
-  private _locJsonFilesToIgnore: Set<string>;
+  private _locFiles: Set<string>;
+  private _filesToIgnore: Set<string>;
   private _stringPlaceholderCounter: number;
   private _stringPlaceholderMap: Map<string, { [locale: string]: string }>;
   private _passthroughStringsMap: Map<string, string>;
@@ -406,7 +406,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
       configuration,
       (rules: Webpack.RuleSetRule[]) => {
         rules.push({
-          test: (filePath: string) => this._locJsonFiles.has(filePath),
+          test: (filePath: string) => this._locFiles.has(filePath),
           loader: path.resolve(__dirname, 'loaders', 'LocJsonLoader.js'),
           options: {
             pluginInstance: this
@@ -436,12 +436,38 @@ export class LocalizationPlugin implements Webpack.Plugin {
       configuration,
       (rules: Webpack.RuleSetRule[]) => {
         rules.push({
-          test: (filePath: string) => this._locJsonFiles.has(filePath),
+          test: {
+            and: [
+              (filePath: string) => this._locFiles.has(filePath),
+              /\.loc\.json$/i
+            ]
+          },
           loader: path.resolve(__dirname, 'loaders', 'SingleLocaleLoader.js'),
           options: {
             resolvedStrings: options.resolvedStrings,
             passthroughLocale: options.passthroughLocale
           }
+        });
+
+        rules.push({
+          test: {
+            and: [
+              (filePath: string) => this._locFiles.has(filePath),
+              /\.resx$/i
+            ]
+          },
+          use: [
+            {
+              loader: require.resolve('json-loader')
+            },
+            {
+              loader: path.resolve(__dirname, 'loaders', 'SingleLocaleLoader.js'),
+              options: {
+                resolvedStrings: options.resolvedStrings,
+                passthroughLocale: options.passthroughLocale
+              }
+            }
+          ]
         });
       }
     );
@@ -466,12 +492,17 @@ export class LocalizationPlugin implements Webpack.Plugin {
     configuration.module.rules.push({
       test: {
         and: [
-          (filePath: string) => !this._locJsonFiles.has(filePath),
-          (filePath: string) => !this._locJsonFilesToIgnore.has(filePath),
-          /\.loc\.json$/i
+          (filePath: string) => !this._locFiles.has(filePath),
+          (filePath: string) => !this._filesToIgnore.has(filePath),
+          {
+            or: [
+              /\.loc\.json$/i,
+              /\.resx$/i
+            ]
+          }
         ]
       },
-      loader: path.resolve(__dirname, 'loaders', 'LocJsonWarningLoader.js')
+      loader: path.resolve(__dirname, 'loaders', 'MissingLocDataWarningLoader.js')
     });
   }
 
@@ -496,10 +527,10 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
     // START options.filesToIgnore
     { // eslint-disable-line no-lone-blocks
-      this._locJsonFilesToIgnore = new Set<string>();
+      this._filesToIgnore = new Set<string>();
       for (const locJsonFilePath of this._options.filesToIgnore || []) {
         const normalizedLocJsonFilePath: string = path.resolve(configuration.context!, locJsonFilePath);
-        this._locJsonFilesToIgnore.add(normalizedLocJsonFilePath);
+        this._filesToIgnore.add(normalizedLocJsonFilePath);
       }
     }
     // END options.filesToIgnore
@@ -510,7 +541,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
       const localeNameRegex: RegExp = /[a-z-]/i;
       const definedStringsInLocJsonFiles: Map<string, Set<string>> = new Map<string, Set<string>>();
-      this._locJsonFiles = new Set<string>();
+      this._locFiles = new Set<string>();
       this.stringKeys = new Map<string, IStringPlaceholder>();
       this._stringPlaceholderMap = new Map<string, { [locale: string]: string }>();
       const normalizedLocales: Set<string> = new Set<string>();
@@ -555,9 +586,9 @@ export class LocalizationPlugin implements Webpack.Plugin {
             if (locale.hasOwnProperty(locJsonFilePath)) {
               const normalizedLocJsonFilePath: string = path.resolve(configuration.context!, locJsonFilePath);
 
-              if (this._locJsonFilesToIgnore.has(normalizedLocJsonFilePath)) {
+              if (this._filesToIgnore.has(normalizedLocJsonFilePath)) {
                 errors.push(new Error(
-                  `The .loc.json file path "${locJsonFilePath}" is listed both in the filesToIgnore object and in ` +
+                  `The localization file path "${locJsonFilePath}" is listed both in the filesToIgnore object and in ` +
                   'strings data.'
                 ));
                 return errors;
@@ -565,14 +596,14 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
               if (locFilePathsInLocale.has(normalizedLocJsonFilePath)) {
                 errors.push(new Error(
-                  `The .loc.json file path "${locJsonFilePath}" appears multiple times in locale ${localeName}. ` +
+                  `The localization file path "${locJsonFilePath}" appears multiple times in locale ${localeName}. ` +
                   'There may be multiple instances with different casing.'
                 ));
                 return errors;
               }
 
               locFilePathsInLocale.add(normalizedLocJsonFilePath);
-              this._locJsonFiles.add(normalizedLocJsonFilePath);
+              this._locFiles.add(normalizedLocJsonFilePath);
 
               const stringsMap: Map<string, string> = new Map<string, string>();
               filesMap.set(normalizedLocJsonFilePath, stringsMap);

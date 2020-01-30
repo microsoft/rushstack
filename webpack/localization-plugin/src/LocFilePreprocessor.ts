@@ -4,7 +4,6 @@
 import {
   FileSystem,
   JsonFile,
-  JsonSchema,
   Terminal,
   ConsoleTerminalProvider
 } from '@microsoft/node-core-library';
@@ -13,7 +12,12 @@ import * as path from 'path';
 import { EOL } from 'os';
 
 import { ILocFile } from './interfaces';
-import { ResxReader, ILogger } from './utilities/ResxReader';
+import { ResxReader } from './utilities/ResxReader';
+import { Constants } from './utilities/Constants';
+import {
+  Logging,
+  ILoggingFunctions
+} from './utilities/Logging';
 
 /**
  * @public
@@ -32,7 +36,7 @@ export interface ILocFilePreprocessorOptions {
  */
 export class LocFilePreprocessor {
   private _options: ILocFilePreprocessorOptions;
-  private _loggingOptions: ILogger;
+  private _loggingOptions: ILoggingFunctions;
 
   public constructor(options: ILocFilePreprocessorOptions) {
     this._options = {
@@ -40,51 +44,14 @@ export class LocFilePreprocessor {
       ...options
     };
 
-    if (this._options.terminal) {
+    if (!this._options.terminal) {
       this._options.terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: true }));
     }
 
-    function logWithLocation(
-      loggingFn: typeof Terminal.prototype.writeErrorLine,
-      message: string,
-      filePath: string,
-      line?: number,
-      position?: number
-    ): void {
-      let location: string;
-      if (position !== undefined) {
-        location = `${filePath}(${line},${position})`;
-      } else if (line !== undefined) {
-        location = `${filePath}(${line})`;
-      } else {
-        location = filePath;
-      }
-
-      loggingFn(`${location}: ${message}`);
-    }
-
-    this._loggingOptions = {
-      logError: (message: string) => this._options.terminal.writeErrorLine(message),
-      logWarning: (message: string) => this._options.terminal.writeWarningLine(message),
-      logFileError: (message: string, filePath: string, line?: number, position?: number) => {
-        logWithLocation(
-          this._options.terminal.writeErrorLine.bind(this._options.terminal),
-          message,
-          filePath,
-          line,
-          position
-        );
-      },
-      logFileWarning: (message: string, filePath: string, line?: number, position?: number) => {
-        logWithLocation(
-          this._options.terminal.writeWarningLine.bind(this._options.terminal),
-          message,
-          filePath,
-          line,
-          position
-        );
-      }
-    }
+    this._loggingOptions = Logging.getLoggingFunctions({
+      writeError: this._options.terminal.writeErrorLine.bind(this._options.terminal),
+      writeWarning: this._options.terminal.writeWarningLine.bind(this._options.terminal)
+    });
   }
 
   public generateTypings(): void {
@@ -106,7 +73,6 @@ export class LocFilePreprocessor {
       }
     );
 
-    const locJsonSchema: JsonSchema = JsonSchema.fromFile(path.resolve(__dirname, 'schemas', 'locJson.schema.json'));
     for (let locJsonFilePath of locJsonFiles) {
       locJsonFilePath = path.resolve(locJsonFilePath);
 
@@ -114,7 +80,7 @@ export class LocFilePreprocessor {
         continue;
       }
 
-      const locFileData: ILocFile = JsonFile.loadAndValidate(locJsonFilePath, locJsonSchema);
+      const locFileData: ILocFile = JsonFile.loadAndValidate(locJsonFilePath, Constants.LOC_JSON_SCHEMA);
       this._generateTypingsForLocFile(locJsonFilePath, locFileData);
     }
 
