@@ -10,14 +10,25 @@ import { ILocalizedString, ILocFile } from '../interfaces';
 
 const STRING_NAME_RESX: RegExp = /^[A-z_][A-z0-9_]*$/;
 
+export interface ILogger {
+  logError: (message: string) => void;
+  logWarning: (message: string) => void;
+  logFileError: (message: string, filePath: string, line?: number, position?: number) => void;
+  logFileWarning: (message: string, filePath: string, line?: number, position?: number) => void;
+}
+
+export interface IResxReaderOptions extends ILogger {
+  resxFilePath: string;
+}
+
 export class ResxReader {
-  public static readResxFileAsLocFile(resxFilePath: string): ILocFile {
-    const fileContents: string = FileSystem.readFile(resxFilePath);
+  public static readResxFileAsLocFile(options: IResxReaderOptions): ILocFile {
+    const fileContents: string = FileSystem.readFile(options.resxFilePath);
     const xmlDocument: XmlDocument = new XmlDocument(fileContents);
 
     if (xmlDocument.name !== 'root') {
-      ResxReader._throwResxExceptionWithLocation(
-        resxFilePath,
+      ResxReader._logErrorWithLocation(
+        options,
         `Expected RESX to have a "root" element, found "${xmlDocument.name}"`,
         xmlDocument
       );
@@ -32,22 +43,24 @@ export class ResxReader {
             case 'data': {
               const stringName: string = childNode.attr.name;
               if (!stringName) {
-                ResxReader._throwResxExceptionWithLocation(
-                  resxFilePath,
+                ResxReader._logErrorWithLocation(
+                  options,
                   'Unexpected missing or empty string name',
                   childNode
                 );
-              }
-
-              if (!STRING_NAME_RESX.test(stringName)) {
-                ResxReader._throwResxExceptionWithLocation(
-                  resxFilePath,
+              } else if (!STRING_NAME_RESX.test(stringName)) {
+                ResxReader._logErrorWithLocation(
+                  options,
                   `Invalid string name "${stringName}"`,
                   childNode
                 );
-              }
+              } else {
+                const locString: ILocalizedString | undefined = ResxReader._readDataElement(options, childNode);
 
-              locFile[stringName] = ResxReader._readDataElement(resxFilePath, childNode);
+                if (locString) {
+                  locFile[stringName] = locString;
+                }
+              }
 
               break;
             }
@@ -58,8 +71,8 @@ export class ResxReader {
               break;
 
             default:
-              ResxReader._throwResxExceptionWithLocation(
-                resxFilePath,
+              ResxReader._logErrorWithLocation(
+                options,
                 `Unexpected RESX element ${childNode.name}`,
                 childNode
               );
@@ -70,23 +83,28 @@ export class ResxReader {
 
         case 'text': {
           if (childNode.text.trim() !== '') {
-            ResxReader._throwResxException(resxFilePath, 'Found unexpected non-empty text node in RESX');
+            ResxReader._logErrorWithLocation(options, 'Found unexpected non-empty text node in RESX');
           }
+
+          break;
         }
 
         case 'comment':
           break;
 
         default:
-          ResxReader._throwResxException(resxFilePath, `Unexpected ${childNode.type} child in RESX`);
+          ResxReader._logErrorWithLocation(options, `Unexpected ${childNode.type} child in RESX`);
+          break;
       }
     }
 
     return locFile;
   }
 
-  private static _readDataElement(resxFilePath: string, dataElement: XmlElement): ILocalizedString {
-    let comment: string | undefined = undefined
+  private static _readDataElement(options: IResxReaderOptions, dataElement: XmlElement): ILocalizedString | undefined {
+    let foundCommentElement: boolean = false;
+    let foundValueElement: boolean = false;
+    let comment: string | undefined = undefined;
     let value: string | undefined = undefined;
 
     for (const childNode of dataElement.children) {
@@ -94,36 +112,42 @@ export class ResxReader {
         case 'element': {
           switch (childNode.name) {
             case 'value': {
-              if (value !== undefined) {
-                ResxReader._throwResxExceptionWithLocation(
-                  resxFilePath,
+              if (foundValueElement) {
+                ResxReader._logErrorWithLocation(
+                  options,
                   'Duplicate <value> element found',
                   childNode
                 );
+              } else {
+                foundValueElement = true;
+                value = ResxReader._readTextElement(options, childNode);
               }
 
-              value = ResxReader._readTextElement(resxFilePath, childNode);
               break;
             }
 
             case 'comment': {
-              if (comment !== undefined) {
-                ResxReader._throwResxExceptionWithLocation(
-                  resxFilePath,
+              if (foundCommentElement) {
+                ResxReader._logErrorWithLocation(
+                  options,
                   'Duplicate <comment> element found',
                   childNode
                 );
+              } else {
+                foundCommentElement = true;
+                comment = ResxReader._readTextElement(options, childNode);
               }
 
-              comment = ResxReader._readTextElement(resxFilePath, childNode);
+              break;
             }
 
             default:
-              ResxReader._throwResxExceptionWithLocation(
-                resxFilePath,
+              ResxReader._logErrorWithLocation(
+                options,
                 `Unexpected RESX element ${childNode.name}`,
                 childNode
               );
+              break;
           }
 
           break;
@@ -131,20 +155,22 @@ export class ResxReader {
 
         case 'text': {
           if (childNode.text.trim() !== '') {
-            ResxReader._throwResxExceptionWithLocation(
-              resxFilePath,
+            ResxReader._logErrorWithLocation(
+              options,
               'Found unexpected non-empty text node in RESX <data> element',
               dataElement
             );
           }
+
+          break;
         }
 
         case 'comment':
           break;
 
         default:
-          ResxReader._throwResxExceptionWithLocation(
-            resxFilePath,
+          ResxReader._logErrorWithLocation(
+            options,
             `Unexpected ${childNode.type} child in RESX <data> element`,
             dataElement
           );
@@ -152,34 +178,28 @@ export class ResxReader {
     }
 
     if (value === undefined) {
-      ResxReader._throwResxExceptionWithLocation(
-        resxFilePath,
-        'Missing <value> element in <data> element',
-        dataElement
-      );
-    } else if (comment === undefined) {
-      ResxReader._throwResxExceptionWithLocation(
-        resxFilePath,
-        'Missing <comment> element in <data> element',
+      ResxReader._logErrorWithLocation(
+        options,
+        'Missing string value in <data> element',
         dataElement
       );
     } else {
+      if (comment === undefined) {
+        ResxReader._logWarningWithLocation(
+          options,
+          'Missing string comment in <data> element',
+          dataElement
+        );
+      }
+
       return {
         value,
-        comment
+        comment: comment ||  ''
       };
     }
   }
 
-  private static _readTextElement(resxFilePath: string, element: XmlElement): string {
-    if (element.children.length !== 1) {
-      ResxReader._throwResxExceptionWithLocation(
-        resxFilePath,
-        'Expected text or CDATA',
-        element
-      );
-    }
-
+  private static _readTextElement(options: IResxReaderOptions, element: XmlElement): string | undefined {
     let foundText: string | undefined = undefined;
 
     for (const childNode of element.children) {
@@ -187,55 +207,63 @@ export class ResxReader {
         case 'cdata':
         case 'text': {
           if (foundText !== undefined) {
-            ResxReader._throwResxExceptionWithLocation(
-              resxFilePath,
+            ResxReader._logErrorWithLocation(
+              options,
               'More than one child node found containing text content',
               element
             );
+            break;
           }
 
           foundText = childNode.type === 'text' ? childNode.text.trim() : childNode.cdata;
+          break;
         }
 
         case 'comment':
           break;
 
         case 'element':
-          ResxReader._throwResxExceptionWithLocation(
-            resxFilePath,
+          ResxReader._logErrorWithLocation(
+            options,
             `Unexpected element`,
             childNode
           );
+          break;
 
         default:
-          ResxReader._throwResxExceptionWithLocation(
-            resxFilePath,
+          ResxReader._logErrorWithLocation(
+            options,
             `Unexpected ${element.type} child`,
             element
           );
+          break;
       }
     }
 
-    if (foundText === undefined) {
-      ResxReader._throwResxExceptionWithLocation(
-        resxFilePath,
-        'Did not find a content node',
-        element
-      );
+    return foundText;
+  }
+
+  private static _logErrorWithLocation(
+    options: IResxReaderOptions,
+    message: string,
+    element?: XmlElement | XmlDocument
+  ): void {
+    if (element) {
+      options.logFileError(message, options.resxFilePath, element.line, element.position);
     } else {
-      return foundText;
+      options.logFileError(message, options.resxFilePath);
     }
   }
 
-  private static _throwResxException(resxFilePath: string, message: string): never {
-    throw new Error(`${resxFilePath}: ${message}`);
-  }
-
-  private static _throwResxExceptionWithLocation(
-    resxFilePath: string,
+  private static _logWarningWithLocation(
+    options: IResxReaderOptions,
     message: string,
-    element: XmlElement | XmlDocument
-  ): never {
-    throw new Error(`${resxFilePath}(${element.line},${element.position}): ${message}`);
+    element?: XmlElement | XmlDocument
+  ): void {
+    if (element) {
+      options.logFileWarning(message, options.resxFilePath, element.line, element.position);
+    } else {
+      options.logFileWarning(message, options.resxFilePath);
+    }
   }
 }
