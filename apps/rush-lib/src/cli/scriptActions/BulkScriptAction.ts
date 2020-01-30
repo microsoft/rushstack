@@ -167,8 +167,8 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterLongName: '--to',
       parameterShortName: '-t',
       argumentName: 'PROJECT1',
-      description: 'Run command in the specified project and all of its dependencies. To include ' +
-        'the project in the working directory, include "."'
+      description: 'Run command in the specified project and all of its dependencies. "." can be used as shorthand ' +
+        'to specify the project in the current working directory.'
     });
     this._fromVersionPolicy =  this.defineStringListParameter({
       parameterLongName: '--from-version-policy',
@@ -186,7 +186,7 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterShortName: '-f',
       argumentName: 'PROJECT2',
       description: 'Run command in all projects that directly or indirectly depend on the specified project. ' +
-        ' To include the project in the working directory, include "."'
+        '"." can be used as shorthand to specify the project in the current working directory.'
     });
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
