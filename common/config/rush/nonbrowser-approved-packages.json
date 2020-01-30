@@ -15,10 +15,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@rushstack/debug-certificate-manager",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "@microsoft/decorators",
       "allowedCategories": [ "libraries" ]
     },
@@ -156,6 +152,10 @@
     },
     {
       "name": "@pnpm/logger",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/debug-certificate-manager",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -608,6 +608,10 @@
     },
     {
       "name": "xml",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "xmldoc",
       "allowedCategories": [ "libraries" ]
     },
     {

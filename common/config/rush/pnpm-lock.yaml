@@ -123,6 +123,7 @@ dependencies:
   '@types/webpack-dev-server': 3.1.7
   '@types/webpack-env': 1.13.0
   '@types/wordwrap': 1.0.0
+  '@types/xmldoc': 1.1.4
   '@types/yargs': 0.0.34
   '@types/z-schema': 3.16.31
   '@typescript-eslint/eslint-plugin': 2.3.3_5b3b7d3a75edb27abc53579646941536
@@ -211,6 +212,7 @@ dependencies:
   webpack-dev-server: 3.9.0_webpack@4.31.0
   wordwrap: 1.0.0
   xml: 1.0.1
+  xmldoc: 1.1.2
   yargs: 4.6.0
   z-schema: 3.18.4
 lockfileVersion: 5.1
@@ -941,6 +943,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-XknqsI3sxtVduA/zP475wjMPH/qaZB6teY+AGvZkNUPhwxAac/QuKt6fpJCY9iO6ZpDhBmu9iOHgLXK78hoEDA==
+  /@types/xmldoc/1.1.4:
+    dev: false
+    resolution:
+      integrity: sha512-a/ONNCf9itbmzEz1ohx0Fv5TLJzXIPQTapxFu+DlYlDtn9UcAa1OhnrOOMwbU8125hFjrkJKL3qllD7vO5Bivw==
   /@types/yargs/0.0.34:
     dev: false
     resolution:
@@ -11284,6 +11290,12 @@ packages:
     dev: false
     resolution:
       integrity: sha1-eLpyAgApxbyHuKgaPPzXS0ovweU=
+  /xmldoc/1.1.2:
+    dependencies:
+      sax: 1.2.4
+    dev: false
+    resolution:
+      integrity: sha512-ruPC/fyPNck2BD1dpz0AZZyrEwMOrWTO5lDdIXS91rs3wtm4j+T8Rp2o+zoOYkkAxJTZRPOSnOGei1egoRmKMQ==
   /xtend/4.0.2:
     dev: false
     engines:
@@ -11929,15 +11941,17 @@ packages:
       '@types/node': 10.17.13
       '@types/tapable': 1.0.4
       '@types/webpack': 4.39.8
+      '@types/xmldoc': 1.1.4
       glob: 7.0.6
       gulp: 4.0.2
       jju: 1.4.0
       loader-utils: 1.1.0
       lodash: 4.17.15
+      xmldoc: 1.1.2
     dev: false
     name: '@rush-temp/localization-plugin'
     resolution:
-      integrity: sha512-o7pSDyAbV/IdpudKnXSF2w2BnXd3m9iiR8nLxlW8MqyNiJlRGH05CTrQrc+BUxn8TQltm777px4mMCo+ApxqlQ==
+      integrity: sha512-Mgj0J4SvGz3DtRWXa2q5Uf9w5daEbwGvDKrJ6bvqLKha0abfWKfPjZXL58/IwnlbkZiaAYxN3e5kjDtIEnE6LA==
       tarball: 'file:projects/localization-plugin.tgz'
     version: 0.0.0
   'file:projects/node-core-library.tgz':
@@ -12538,6 +12552,7 @@ packages:
       integrity: sha512-Y0jpVk6MZhJHjmgn8/qcb/6Udr/Qjnc6+47U7z+rHCd+H/vrQMaKGwurptk7Hrdg12JKEIji9dQKYhdnDGrjIw==
       tarball: 'file:projects/web-library-build.tgz'
     version: 0.0.0
+registry: ''
 specifiers:
   '@microsoft/node-library-build': 6.3.11
   '@microsoft/rush-stack-compiler-3.5': 0.3.11
@@ -12663,6 +12678,7 @@ specifiers:
   '@types/webpack-dev-server': 3.1.7
   '@types/webpack-env': 1.13.0
   '@types/wordwrap': 1.0.0
+  '@types/xmldoc': 1.1.4
   '@types/yargs': 0.0.34
   '@types/z-schema': 3.16.31
   '@typescript-eslint/eslint-plugin': 2.3.3
@@ -12751,5 +12767,6 @@ specifiers:
   webpack-dev-server: ~3.9.0
   wordwrap: ~1.0.0
   xml: ~1.0.1
+  xmldoc: ~1.1.2
   yargs: ~4.6.0
   z-schema: ~3.18.3

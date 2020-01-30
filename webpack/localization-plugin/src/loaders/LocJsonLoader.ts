@@ -6,7 +6,7 @@ import * as loaderUtils from 'loader-utils';
 import * as jju from 'jju';
 
 import { LocalizationPlugin } from '../LocalizationPlugin';
-import { ILocJsonFile } from '../interfaces';
+import { ILocFile } from '../interfaces';
 
 export interface ILocJsonLoaderOptions {
   pluginInstance: LocalizationPlugin;
@@ -15,7 +15,7 @@ export interface ILocJsonLoaderOptions {
 export default function (this: loader.LoaderContext, content: string): string {
   const { pluginInstance } = loaderUtils.getOptions(this) as ILocJsonLoaderOptions;
   const locJsonFilePath: string = this.resourcePath;
-  const locJsonFileData: ILocJsonFile = jju.parse(content);
+  const locJsonFileData: ILocFile = jju.parse(content);
 
   const resultObject: { [stringName: string]: string } = {};
   for (const stringName in locJsonFileData) { // eslint-disable-line guard-for-in

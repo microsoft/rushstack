@@ -5,7 +5,7 @@ import { loader } from 'webpack';
 import * as loaderUtils from 'loader-utils';
 import * as jju from 'jju';
 
-import { ILocJsonFile } from '../interfaces';
+import { ILocFile } from '../interfaces';
 
 export interface ILocJsonLoaderOptions {
   /**
@@ -34,7 +34,7 @@ export default function (this: loader.LoaderContext, content: string): string {
       `Strings for file ${locJsonFilePath} were not provided in the LocalizationPlugin configuration.`
       ));
   } else {
-    const locJsonFileData: ILocJsonFile = jju.parse(content);
+    const locJsonFileData: ILocFile = jju.parse(content);
     for (const stringName in locJsonFileData) {
       if (!stringMap.has(stringName)) {
         this.emitError(new Error(
