@@ -50,7 +50,6 @@ export interface IDefaultLocaleOptions {
 export interface ILocalizationPluginOptions {
   localizedStrings: ILocales;
   defaultLocale: IDefaultLocaleOptions;
-  serveLocale: IDefaultLocaleOptions;
   filesToIgnore?: string[];
   localizationStatsDropPath?: string;
   localizationStatsCallback?: (stats: ILocalizationStats) => void;
@@ -133,8 +132,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
   private _locales: Set<string>;
   private _localeNamePlaceholder: IStringPlaceholder;
   private _defaultLocale: string;
-  private _serveLocale: string;
-  private _usePassthroughForServe: boolean | undefined;
+
   /**
    * The outermost map's keys are the locale names.
    * The middle map's keys are the resolved, uppercased file names.
@@ -153,22 +151,23 @@ export class LocalizationPlugin implements Webpack.Plugin {
       throw new Error('The localization plugin requires webpack 4');
     }
 
-    // https://github.com/webpack/webpack-dev-server/pull/1929/files#diff-15fb51940da53816af13330d8ce69b4eR66
-    const isWebpackDevServer: boolean = process.env.WEBPACK_DEV_SERVER === 'true';
-
-    const errors: Error[] = this._initializeAndValidateOptions(compiler.options, isWebpackDevServer);
+    const errors: Error[] = this._initializeAndValidateOptions(compiler.options);
 
     if (errors.length > 0) {
       compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {
         compilation.errors.push(...errors);
       });
 
-      this._amendWebpackConfiguration(compiler.options);
+      this._amendWebpackConfigurationForInPlaceLocFiles(compiler.options);
 
       return;
     }
 
-    if (this._locales.size === 1) {
+    // https://github.com/webpack/webpack-dev-server/pull/1929/files#diff-15fb51940da53816af13330d8ce69b4eR66
+    const isWebpackDevServer: boolean = process.env.WEBPACK_DEV_SERVER === 'true';
+    if (isWebpackDevServer) {
+        this._amendWebpackConfigurationForInPlaceLocFiles(compiler.options);
+    } else if (this._locales.size === 1) {
       const singleLocale: string = Array.from(this._locales.keys())[0];
       const resolvedStrings: Map<string, Map<string, string>> = this._resolvedLocalizedStrings.get(singleLocale)!;
       this._amendWebpackConfigurationForSingleLocale(
@@ -176,19 +175,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
         {
           localeName: singleLocale,
           passthroughLocale: false,
-          resolvedStrings
-        }
-      );
-    } else if (isWebpackDevServer) {
-      const firstLocaleName: string = Array.from(this._locales.keys())[0];
-      const singleLocale: string = this._usePassthroughForServe ? firstLocaleName : this._serveLocale;
-
-      const resolvedStrings: Map<string, Map<string, string>> = this._resolvedLocalizedStrings.get(singleLocale)!;
-      this._amendWebpackConfigurationForSingleLocale(
-        compiler.options,
-        {
-          localeName: this._serveLocale || firstLocaleName,
-          passthroughLocale: !!this._usePassthroughForServe,
           resolvedStrings
         }
       );
@@ -402,17 +388,17 @@ export class LocalizationPlugin implements Webpack.Plugin {
   }
 
   private _amendWebpackConfigurationForMultiLocale(configuration: Webpack.Configuration): void {
-    this._amendWebpackConfiguration(
+    this._addRulesAndWarningLoaderToConfiguration(
       configuration,
-      (rules: Webpack.RuleSetRule[]) => {
-        rules.push({
+      [
+        {
           test: (filePath: string) => this._locFiles.has(filePath),
           loader: path.resolve(__dirname, 'loaders', 'LocJsonLoader.js'),
           options: {
             pluginInstance: this
           }
-        });
-      }
+        }
+      ]
     );
   }
 
@@ -432,24 +418,26 @@ export class LocalizationPlugin implements Webpack.Plugin {
       );
     }
 
-    this._amendWebpackConfiguration(
+    const loader: string = path.resolve(__dirname, 'loaders', 'SingleLocaleLoader.js');
+    const loaderOptions: Webpack.RuleSetQuery = {
+      resolvedStrings: options.resolvedStrings,
+      passthroughLocale: options.passthroughLocale
+    };
+
+    this._addRulesAndWarningLoaderToConfiguration(
       configuration,
-      (rules: Webpack.RuleSetRule[]) => {
-        rules.push({
+      [
+        {
           test: {
             and: [
               (filePath: string) => this._locFiles.has(filePath),
               /\.loc\.json$/i
             ]
           },
-          loader: path.resolve(__dirname, 'loaders', 'SingleLocaleLoader.js'),
-          options: {
-            resolvedStrings: options.resolvedStrings,
-            passthroughLocale: options.passthroughLocale
-          }
-        });
-
-        rules.push({
+          loader: loader,
+          options: loaderOptions
+        },
+        {
           test: {
             and: [
               (filePath: string) => this._locFiles.has(filePath),
@@ -457,26 +445,66 @@ export class LocalizationPlugin implements Webpack.Plugin {
             ]
           },
           use: [
+            require.resolve('json-loader'),
             {
-              loader: require.resolve('json-loader')
-            },
-            {
-              loader: path.resolve(__dirname, 'loaders', 'SingleLocaleLoader.js'),
-              options: {
-                resolvedStrings: options.resolvedStrings,
-                passthroughLocale: options.passthroughLocale
-              }
+              loader: loader,
+              options: loaderOptions
             }
           ]
-        });
-      }
+        }
+      ]
     );
   }
 
-  private _amendWebpackConfiguration(
+  private _amendWebpackConfigurationForInPlaceLocFiles(configuration: Webpack.Configuration): void {
+    const loader: string = path.resolve(__dirname, 'loaders', 'InPlaceLocFileLoader.js');
+
+    this._addRulesToConfiguration(
+      configuration,
+      [
+        {
+          test: /\.loc\.json$/i,
+          loader: loader
+        },
+        {
+          test: /\.resx$/i,
+          use: [
+            require.resolve('json-loader'),
+            loader
+          ]
+        }
+      ]
+    );
+  }
+
+  private _addRulesAndWarningLoaderToConfiguration(
     configuration: Webpack.Configuration,
-    beforeWarningLoader: (rules: Webpack.RuleSetRule[]) => void = () => { /* no-op */ }
+    rules: Webpack.RuleSetRule[]
   ): void {
+    this._addRulesToConfiguration(
+      configuration,
+      [
+        ...rules,
+        {
+          test: {
+            and: [
+              (filePath: string) => !this._locFiles.has(filePath),
+              (filePath: string) => !this._filesToIgnore.has(filePath),
+              {
+                or: [
+                  /\.loc\.json$/i,
+                  /\.resx$/i
+                ]
+              }
+            ]
+          },
+          loader: path.resolve(__dirname, 'loaders', 'MissingLocDataWarningLoader.js')
+        }
+      ]
+    );
+  }
+
+  private _addRulesToConfiguration(configuration: Webpack.Configuration, rules: Webpack.RuleSetRule[]): void {
     if (!configuration.module) {
       configuration.module = {
         rules: []
@@ -487,26 +515,10 @@ export class LocalizationPlugin implements Webpack.Plugin {
       configuration.module.rules = [];
     }
 
-    beforeWarningLoader(configuration.module.rules);
-
-    configuration.module.rules.push({
-      test: {
-        and: [
-          (filePath: string) => !this._locFiles.has(filePath),
-          (filePath: string) => !this._filesToIgnore.has(filePath),
-          {
-            or: [
-              /\.loc\.json$/i,
-              /\.resx$/i
-            ]
-          }
-        ]
-      },
-      loader: path.resolve(__dirname, 'loaders', 'MissingLocDataWarningLoader.js')
-    });
+    configuration.module.rules.push(...rules);
   }
 
-  private _initializeAndValidateOptions(configuration: Webpack.Configuration, isWebpackDevServer: boolean): Error[] {
+  private _initializeAndValidateOptions(configuration: Webpack.Configuration): Error[] {
     const errors: Error[] = [];
 
     // START configuration
@@ -707,42 +719,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
       }
     }
     // END options.defaultLocale
-
-    // START options.serveLocale
-    if (isWebpackDevServer) {
-      if (
-        !this._options.serveLocale ||
-        (!this._options.serveLocale.locale && !this._options.serveLocale.usePassthroughLocale)
-      ) {
-        if (this._locales.size === 1) {
-          this._serveLocale = this._locales.entries[0];
-        } else {
-          errors.push(new Error(
-            'Either options.serveLocale.locale must be provided or options.serveLocale.usePassthroughLocale ' +
-            'must be set to true if more than one locale\'s data is provided. An arbitrary locale will be used.'
-          ));
-        }
-      } else {
-        const { locale, usePassthroughLocale, passthroughLocaleName } = this._options.serveLocale;
-        if (locale && usePassthroughLocale) {
-          errors.push(new Error(
-            'Either options.serveLocale.locale must be provided or options.serveLocale.usePassthroughLocale ' +
-            'must be set to true, but not both. An arbitrary locale will be used.'
-          ));
-        } else if (usePassthroughLocale) {
-          this._serveLocale = passthroughLocaleName || 'passthrough';
-          this._usePassthroughForServe = true;
-        } else if (locale) {
-          this._serveLocale = locale;
-          if (!this._locales.has(locale)) {
-            errors.push(new Error(`The specified serve locale "${locale}" was not provided in the localized data`));
-          }
-        } else {
-          errors.push(new Error('Unknown error occurred processing serve locale.'));
-        }
-      }
-    }
-    // END options.serveLocale
 
     return errors;
   }

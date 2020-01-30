@@ -3,12 +3,9 @@
 
 import { loader } from 'webpack';
 import * as loaderUtils from 'loader-utils';
-import * as jju from 'jju';
 
 import { ILocFile } from '../interfaces';
-import { Constants } from '../utilities/Constants';
-import { ResxReader } from '../utilities/ResxReader';
-import { Logging } from '../utilities/Logging';
+import { LocFileParser } from '../utilities/LocFileParser';
 
 export interface ISingleLocaleLoaderOptions {
   /**
@@ -37,23 +34,11 @@ export default function (this: loader.LoaderContext, content: string): string {
       `Strings for file ${locFilePath} were not provided in the LocalizationPlugin configuration.`
     ));
   } else {
-    let locJsonFileData: ILocFile;
-    if (/\.resx$/i.test(locFilePath)) {
-      locJsonFileData = ResxReader.readResxAsLocFile(
-        content,
-        {
-          ...Logging.getLoggingFunctions({ writeError: this.emitError, writeWarning: this.emitWarning }),
-          resxFilePath: locFilePath
-        }
-      );
-    } else {
-      locJsonFileData = jju.parse(content);
-      try {
-        Constants.LOC_JSON_SCHEMA.validateObject(locJsonFileData, locFilePath);
-      } catch (e) {
-        this.emitError(`The loc file is invalid. Error: ${e}`);
-      }
-    }
+    const locJsonFileData: ILocFile = LocFileParser.parseLocFile({
+      filePath: locFilePath,
+      loggerOptions: { writeError: this.emitError, writeWarning: this.emitWarning },
+      content
+    });
 
     for (const stringName in locJsonFileData) {
       if (!stringMap.has(stringName)) {

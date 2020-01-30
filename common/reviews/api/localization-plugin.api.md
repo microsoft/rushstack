@@ -40,8 +40,6 @@ export interface ILocalizationPluginOptions {
     localizationStatsDropPath?: string;
     // (undocumented)
     localizedStrings: ILocales;
-    // (undocumented)
-    serveLocale: IDefaultLocaleOptions;
 }
 
 // @public (undocumented)
