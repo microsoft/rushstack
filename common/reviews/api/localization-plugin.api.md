@@ -4,6 +4,7 @@
 
 ```ts
 
+import { Terminal } from '@microsoft/node-core-library';
 import * as Webpack from 'webpack';
 
 // @public (undocumented)
@@ -72,19 +73,21 @@ export interface ILocalizationStatsEntrypoint {
 }
 
 // @public (undocumented)
-export interface ILocJsonFileData {
-    // (undocumented)
-    [stringName: string]: string;
-}
-
-// @public (undocumented)
-export interface ILocJsonPreprocessorOptions {
+export interface ILocFilePreprocessorOptions {
     // (undocumented)
     filesToIgnore?: string[];
     // (undocumented)
     generatedTsFolder: string;
     // (undocumented)
     srcFolder: string;
+    // (undocumented)
+    terminal: Terminal;
+}
+
+// @public (undocumented)
+export interface ILocJsonFileData {
+    // (undocumented)
+    [stringName: string]: string;
 }
 
 // @internal (undocumented)
@@ -105,10 +108,11 @@ export class LocalizationPlugin implements Webpack.Plugin {
     }
 
 // @public
-export class LocJsonPreprocessor {
+export class LocFilePreprocessor {
+    constructor(options: ILocFilePreprocessorOptions);
     // (undocumented)
-    static preprocessLocJsonFiles(options: ILocJsonPreprocessorOptions): void;
-}
+    generateTypings(): void;
+    }
 
 
 // (No @packageDocumentation comment for this package)
