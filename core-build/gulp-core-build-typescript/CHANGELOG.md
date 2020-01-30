@@ -1,6 +1,110 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Tue, 22 Oct 2019 06:24:44 GMT and should not be manually modified.
+This log was last generated on Tue, 28 Jan 2020 02:23:44 GMT and should not be manually modified.
+
+## 8.4.4
+Tue, 28 Jan 2020 02:23:44 GMT
+
+*Version update only*
+
+## 8.4.3
+Fri, 24 Jan 2020 00:27:39 GMT
+
+### Patches
+
+- Extract GCBTerminalProvider to gulp-core-build.
+
+## 8.4.2
+Thu, 23 Jan 2020 01:07:56 GMT
+
+*Version update only*
+
+## 8.4.1
+Tue, 21 Jan 2020 21:56:13 GMT
+
+*Version update only*
+
+## 8.4.0
+Sun, 19 Jan 2020 02:26:52 GMT
+
+### Minor changes
+
+- Upgrade Node typings to Node 10
+
+## 8.3.16
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 8.3.15
+Tue, 14 Jan 2020 01:34:15 GMT
+
+*Version update only*
+
+## 8.3.14
+Sat, 11 Jan 2020 05:18:24 GMT
+
+*Version update only*
+
+## 8.3.13
+Thu, 09 Jan 2020 06:44:12 GMT
+
+*Version update only*
+
+## 8.3.12
+Wed, 08 Jan 2020 00:11:31 GMT
+
+*Version update only*
+
+## 8.3.11
+Wed, 04 Dec 2019 23:17:55 GMT
+
+*Version update only*
+
+## 8.3.10
+Tue, 03 Dec 2019 03:17:43 GMT
+
+*Version update only*
+
+## 8.3.9
+Sun, 24 Nov 2019 00:54:04 GMT
+
+*Version update only*
+
+## 8.3.8
+Wed, 20 Nov 2019 06:14:28 GMT
+
+*Version update only*
+
+## 8.3.7
+Fri, 15 Nov 2019 04:50:50 GMT
+
+*Version update only*
+
+## 8.3.6
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 8.3.5
+Wed, 06 Nov 2019 22:44:18 GMT
+
+*Version update only*
+
+## 8.3.4
+Tue, 05 Nov 2019 06:49:28 GMT
+
+*Version update only*
+
+## 8.3.3
+Tue, 05 Nov 2019 01:08:39 GMT
+
+*Version update only*
+
+## 8.3.2
+Fri, 25 Oct 2019 15:08:54 GMT
+
+*Version update only*
 
 ## 8.3.1
 Tue, 22 Oct 2019 06:24:44 GMT

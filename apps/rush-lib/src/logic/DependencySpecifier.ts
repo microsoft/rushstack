@@ -33,7 +33,7 @@ export class DependencySpecifier {
    * remote - An HTTP url to a .tar.gz, .tar or .tgz file
    * alias - A package alias such as "npm:other-package@^1.2.3"
    */
-  public readonly specifierType: npmPackageArg.SpecType;
+  public readonly specifierType: string;
 
   /**
    * If `specifierType` is `alias`, then this is the parsed target dependency.
@@ -46,7 +46,10 @@ export class DependencySpecifier {
     this.packageName = packageName;
     this.versionSpecifier = versionSpecifier;
 
-    const result: npmPackageArg.IResult = npmPackageArg.resolve(packageName, versionSpecifier);
+    const result: npmPackageArg.AliasResult = npmPackageArg.resolve(
+      packageName,
+      versionSpecifier
+    ) as npmPackageArg.AliasResult;
 
     this.specifierType = result.type;
 

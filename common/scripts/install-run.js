@@ -47,133 +47,6 @@ function _parsePackageSpecifier(rawPackageSpecifier) {
     return { name, version };
 }
 /**
- * Resolve a package specifier to a static version
- */
-function _resolvePackageVersion(rushCommonFolder, { name, version }) {
-    if (!version) {
-        version = '*'; // If no version is specified, use the latest version
-    }
-    if (version.match(/^[a-zA-Z0-9\-\+\.]+$/)) {
-        // If the version contains only characters that we recognize to be used in static version specifiers,
-        // pass the version through
-        return version;
-    }
-    else {
-        // version resolves to
-        try {
-            const rushTempFolder = _getRushTempFolder(rushCommonFolder);
-            const sourceNpmrcFolder = path.join(rushCommonFolder, 'config', 'rush');
-            _syncNpmrc(sourceNpmrcFolder, rushTempFolder);
-            const npmPath = getNpmPath();
-            // This returns something that looks like:
-            //  @microsoft/rush@3.0.0 '3.0.0'
-            //  @microsoft/rush@3.0.1 '3.0.1'
-            //  ...
-            //  @microsoft/rush@3.0.20 '3.0.20'
-            //  <blank line>
-            const npmVersionSpawnResult = childProcess.spawnSync(npmPath, ['view', `${name}@${version}`, 'version', '--no-update-notifier'], {
-                cwd: rushTempFolder,
-                stdio: []
-            });
-            if (npmVersionSpawnResult.status !== 0) {
-                throw new Error(`"npm view" returned error code ${npmVersionSpawnResult.status}`);
-            }
-            const npmViewVersionOutput = npmVersionSpawnResult.stdout.toString();
-            const versionLines = npmViewVersionOutput.split('\n').filter((line) => !!line);
-            const latestVersion = versionLines[versionLines.length - 1];
-            if (!latestVersion) {
-                throw new Error('No versions found for the specified version range.');
-            }
-            const versionMatches = latestVersion.match(/^.+\s\'(.+)\'$/);
-            if (!versionMatches) {
-                throw new Error(`Invalid npm output ${latestVersion}`);
-            }
-            return versionMatches[1];
-        }
-        catch (e) {
-            throw new Error(`Unable to resolve version ${version} of package ${name}: ${e}`);
-        }
-    }
-}
-let _npmPath = undefined;
-/**
- * Get the absolute path to the npm executable
- */
-function getNpmPath() {
-    if (!_npmPath) {
-        try {
-            if (os.platform() === 'win32') {
-                // We're on Windows
-                const whereOutput = childProcess.execSync('where npm', { stdio: [] }).toString();
-                const lines = whereOutput.split(os.EOL).filter((line) => !!line);
-                // take the last result, we are looking for a .cmd command
-                // see https://github.com/microsoft/rushstack/issues/759
-                _npmPath = lines[lines.length - 1];
-            }
-            else {
-                // We aren't on Windows - assume we're on *NIX or Darwin
-                _npmPath = childProcess.execSync('which npm', { stdio: [] }).toString();
-            }
-        }
-        catch (e) {
-            throw new Error(`Unable to determine the path to the NPM tool: ${e}`);
-        }
-        _npmPath = _npmPath.trim();
-        if (!fs.existsSync(_npmPath)) {
-            throw new Error('The NPM executable does not exist');
-        }
-    }
-    return _npmPath;
-}
-exports.getNpmPath = getNpmPath;
-let _rushJsonFolder;
-/**
- * Find the absolute path to the folder containing rush.json
- */
-function findRushJsonFolder() {
-    if (!_rushJsonFolder) {
-        let basePath = __dirname;
-        let tempPath = __dirname;
-        do {
-            const testRushJsonPath = path.join(basePath, exports.RUSH_JSON_FILENAME);
-            if (fs.existsSync(testRushJsonPath)) {
-                _rushJsonFolder = basePath;
-                break;
-            }
-            else {
-                basePath = tempPath;
-            }
-        } while (basePath !== (tempPath = path.dirname(basePath))); // Exit the loop when we hit the disk root
-        if (!_rushJsonFolder) {
-            throw new Error('Unable to find rush.json.');
-        }
-    }
-    return _rushJsonFolder;
-}
-exports.findRushJsonFolder = findRushJsonFolder;
-/**
- * Create missing directories under the specified base directory, and return the resolved directory.
- *
- * Does not support "." or ".." path segments.
- * Assumes the baseFolder exists.
- */
-function _ensureAndJoinPath(baseFolder, ...pathSegments) {
-    let joinedPath = baseFolder;
-    try {
-        for (let pathSegment of pathSegments) {
-            pathSegment = pathSegment.replace(/[\\\/]/g, '+');
-            joinedPath = path.join(joinedPath, pathSegment);
-            if (!fs.existsSync(joinedPath)) {
-                fs.mkdirSync(joinedPath);
-            }
-        }
-    }
-    catch (e) {
-        throw new Error(`Error building local installation folder (${path.join(baseFolder, ...pathSegments)}): ${e}`);
-    }
-    return joinedPath;
-}
-/**
  * As a workaround, _syncNpmrc() copies the .npmrc file to the target folder, and also trims
  * unusable lines from the .npmrc file.  If the source .npmrc file not exist, then _syncNpmrc()
  * will delete an .npmrc that is found in the target folder.
@@ -231,6 +104,150 @@ function _syncNpmrc(sourceNpmrcFolder, targetNpmrcFolder) {
         throw new Error(`Error syncing .npmrc file: ${e}`);
     }
 }
+let _npmPath = undefined;
+/**
+ * Get the absolute path to the npm executable
+ */
+function getNpmPath() {
+    if (!_npmPath) {
+        try {
+            if (os.platform() === 'win32') {
+                // We're on Windows
+                const whereOutput = childProcess.execSync('where npm', { stdio: [] }).toString();
+                const lines = whereOutput.split(os.EOL).filter((line) => !!line);
+                // take the last result, we are looking for a .cmd command
+                // see https://github.com/microsoft/rushstack/issues/759
+                _npmPath = lines[lines.length - 1];
+            }
+            else {
+                // We aren't on Windows - assume we're on *NIX or Darwin
+                _npmPath = childProcess.execSync('which npm', { stdio: [] }).toString();
+            }
+        }
+        catch (e) {
+            throw new Error(`Unable to determine the path to the NPM tool: ${e}`);
+        }
+        _npmPath = _npmPath.trim();
+        if (!fs.existsSync(_npmPath)) {
+            throw new Error('The NPM executable does not exist');
+        }
+    }
+    return _npmPath;
+}
+exports.getNpmPath = getNpmPath;
+function _ensureFolder(folderPath) {
+    if (!fs.existsSync(folderPath)) {
+        const parentDir = path.dirname(folderPath);
+        _ensureFolder(parentDir);
+        fs.mkdirSync(folderPath);
+    }
+}
+/**
+ * Create missing directories under the specified base directory, and return the resolved directory.
+ *
+ * Does not support "." or ".." path segments.
+ * Assumes the baseFolder exists.
+ */
+function _ensureAndJoinPath(baseFolder, ...pathSegments) {
+    let joinedPath = baseFolder;
+    try {
+        for (let pathSegment of pathSegments) {
+            pathSegment = pathSegment.replace(/[\\\/]/g, '+');
+            joinedPath = path.join(joinedPath, pathSegment);
+            if (!fs.existsSync(joinedPath)) {
+                fs.mkdirSync(joinedPath);
+            }
+        }
+    }
+    catch (e) {
+        throw new Error(`Error building local installation folder (${path.join(baseFolder, ...pathSegments)}): ${e}`);
+    }
+    return joinedPath;
+}
+function _getRushTempFolder(rushCommonFolder) {
+    const rushTempFolder = process.env[RUSH_TEMP_FOLDER_ENV_VARIABLE_NAME];
+    if (rushTempFolder !== undefined) {
+        _ensureFolder(rushTempFolder);
+        return rushTempFolder;
+    }
+    else {
+        return _ensureAndJoinPath(rushCommonFolder, 'temp');
+    }
+}
+/**
+ * Resolve a package specifier to a static version
+ */
+function _resolvePackageVersion(rushCommonFolder, { name, version }) {
+    if (!version) {
+        version = '*'; // If no version is specified, use the latest version
+    }
+    if (version.match(/^[a-zA-Z0-9\-\+\.]+$/)) {
+        // If the version contains only characters that we recognize to be used in static version specifiers,
+        // pass the version through
+        return version;
+    }
+    else {
+        // version resolves to
+        try {
+            const rushTempFolder = _getRushTempFolder(rushCommonFolder);
+            const sourceNpmrcFolder = path.join(rushCommonFolder, 'config', 'rush');
+            _syncNpmrc(sourceNpmrcFolder, rushTempFolder);
+            const npmPath = getNpmPath();
+            // This returns something that looks like:
+            //  @microsoft/rush@3.0.0 '3.0.0'
+            //  @microsoft/rush@3.0.1 '3.0.1'
+            //  ...
+            //  @microsoft/rush@3.0.20 '3.0.20'
+            //  <blank line>
+            const npmVersionSpawnResult = childProcess.spawnSync(npmPath, ['view', `${name}@${version}`, 'version', '--no-update-notifier'], {
+                cwd: rushTempFolder,
+                stdio: []
+            });
+            if (npmVersionSpawnResult.status !== 0) {
+                throw new Error(`"npm view" returned error code ${npmVersionSpawnResult.status}`);
+            }
+            const npmViewVersionOutput = npmVersionSpawnResult.stdout.toString();
+            const versionLines = npmViewVersionOutput.split('\n').filter((line) => !!line);
+            const latestVersion = versionLines[versionLines.length - 1];
+            if (!latestVersion) {
+                throw new Error('No versions found for the specified version range.');
+            }
+            const versionMatches = latestVersion.match(/^.+\s\'(.+)\'$/);
+            if (!versionMatches) {
+                throw new Error(`Invalid npm output ${latestVersion}`);
+            }
+            return versionMatches[1];
+        }
+        catch (e) {
+            throw new Error(`Unable to resolve version ${version} of package ${name}: ${e}`);
+        }
+    }
+}
+let _rushJsonFolder;
+/**
+ * Find the absolute path to the folder containing rush.json
+ */
+function findRushJsonFolder() {
+    if (!_rushJsonFolder) {
+        let basePath = __dirname;
+        let tempPath = __dirname;
+        do {
+            const testRushJsonPath = path.join(basePath, exports.RUSH_JSON_FILENAME);
+            if (fs.existsSync(testRushJsonPath)) {
+                _rushJsonFolder = basePath;
+                break;
+            }
+            else {
+                basePath = tempPath;
+            }
+        } while (basePath !== (tempPath = path.dirname(basePath))); // Exit the loop when we hit the disk root
+        if (!_rushJsonFolder) {
+            throw new Error('Unable to find rush.json.');
+        }
+    }
+    return _rushJsonFolder;
+}
+exports.findRushJsonFolder = findRushJsonFolder;
 /**
  * Detects if the package in the specified directory is installed
  */
@@ -333,23 +350,6 @@ function _writeFlagFile(packageInstallFolder) {
         throw new Error(`Unable to create installed.flag file in ${packageInstallFolder}`);
     }
 }
-function _getRushTempFolder(rushCommonFolder) {
-    const rushTempFolder = process.env[RUSH_TEMP_FOLDER_ENV_VARIABLE_NAME];
-    if (rushTempFolder !== undefined) {
-        _ensureFolder(rushTempFolder);
-        return rushTempFolder;
-    }
-    else {
-        return _ensureAndJoinPath(rushCommonFolder, 'temp');
-    }
-}
-function _ensureFolder(folderPath) {
-    if (!fs.existsSync(folderPath)) {
-        const parentDir = path.dirname(folderPath);
-        _ensureFolder(parentDir);
-        fs.mkdirSync(folderPath);
-    }
-}
 function installAndRun(packageName, packageVersion, packageBinName, packageBinArgs) {
     const rushJsonFolder = findRushJsonFolder();
     const rushCommonFolder = path.join(rushJsonFolder, 'common');
@@ -373,7 +373,12 @@ function installAndRun(packageName, packageVersion, packageBinName, packageBinAr
         cwd: process.cwd(),
         env: process.env
     });
-    return result.status;
+    if (result.status !== null) {
+        return result.status;
+    }
+    else {
+        throw result.error || new Error('An unknown error occurred.');
+    }
 }
 exports.installAndRun = installAndRun;
 function runWithErrorAndStatusCode(fn) {

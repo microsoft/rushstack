@@ -450,6 +450,62 @@
               "overloadIndex": 1,
               "parameters": [],
               "name": "member"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "api-extractor-scenarios!SimpleClass#readonlyProperty:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "get readonlyProperty(): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "readonlyProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "api-extractor-scenarios!SimpleClass#writeableProperty:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "get writeableProperty(): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                },
+                {
+                  "kind": "Content",
+                  "text": "\n\nset writeableProperty(value: string);"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "writeableProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
             }
           ],
           "implementsTokenRanges": []

@@ -330,7 +330,7 @@ export class VersionManager {
       // Update package.json
       if (rushProject) {
         const packagePath: string = path.join(rushProject.projectFolder, FileConstants.PackageJson);
-        JsonFile.save(newPackageJson, packagePath);
+        JsonFile.save(newPackageJson, packagePath, { updateExistingFile: true });
       }
     });
   }

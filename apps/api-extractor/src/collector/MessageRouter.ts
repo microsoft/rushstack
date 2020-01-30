@@ -4,10 +4,9 @@
 import * as colors from 'colors';
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
-import { Sort, InternalError } from '@microsoft/node-core-library';
+import { Sort, InternalError, LegacyAdapters } from '@microsoft/node-core-library';
 import { AedocDefinitions } from '@microsoft/api-extractor-model';
 
-import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import {
@@ -169,7 +168,7 @@ export class MessageRouter {
         return;  // ignore noise
     }
 
-    const messageText: string = TypeScriptMessageFormatter.format(diagnostic.messageText);
+    const messageText: string = `${diagnostic.messageText}`;
     const options: IExtractorMessageOptions = {
       category: ExtractorMessageCategory.Compiler,
       messageId: `TS${diagnostic.code}`,
@@ -252,7 +251,7 @@ export class MessageRouter {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static buildJsonDumpObject(input: any): any | undefined {
     if (input === null || input === undefined) {
-      // eslint-disable-next-line no-restricted-syntax
+      // eslint-disable-next-line @rushstack/no-null
       return null; // JSON uses null instead of undefined
     }
 
@@ -563,7 +562,7 @@ export class MessageRouter {
    * Sorts an array of messages according to a reasonable ordering
    */
   private _sortMessagesForOutput(messages: ExtractorMessage[]): void {
-    messages.sort((a, b) => {
+    LegacyAdapters.sortStable(messages, (a, b) => {
       let diff: number;
       // First sort by file name
       diff = Sort.compareByValue(a.sourceFilePath, b.sourceFilePath);

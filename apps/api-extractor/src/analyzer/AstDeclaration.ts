@@ -49,9 +49,18 @@ export class AstDeclaration {
   public readonly modifierFlags: ts.ModifierFlags;
 
   /**
-   * Additional information applied later by the Collector.
+   * Additional information that is calculated later by the `Collector`.  The actual type is `DeclarationMetadata`,
+   * but we declare it as `unknown` because consumers must obtain this object by calling
+   * `Collector.fetchDeclarationMetadata()`.
    */
-  public metadata: unknown;
+  public declarationMetadata: unknown;
+
+  /**
+   * Additional information that is calculated later by the `Collector`.  The actual type is `ApiItemMetadata`,
+   * but we declare it as `unknown` because consumers must obtain this object by calling
+   * `Collector.fetchApiItemMetadata()`.
+   */
+  public apiItemMetadata: unknown;
 
   // NOTE: This array becomes immutable after astSymbol.analyze() sets astSymbol.analyzed=true
   private readonly _analyzedChildren: AstDeclaration[] = [];
@@ -234,6 +243,8 @@ export class AstDeclaration {
       case ts.SyntaxKind.EnumDeclaration:
       case ts.SyntaxKind.EnumMember:
       case ts.SyntaxKind.FunctionDeclaration:   // Example: "(x: number): number"
+      case ts.SyntaxKind.GetAccessor:
+      case ts.SyntaxKind.SetAccessor:
       case ts.SyntaxKind.IndexSignature:        // Example: "[key: string]: string"
       case ts.SyntaxKind.InterfaceDeclaration:
       case ts.SyntaxKind.MethodDeclaration:
@@ -244,6 +255,9 @@ export class AstDeclaration {
       case ts.SyntaxKind.TypeAliasDeclaration:  // Example: "type Shape = Circle | Square"
       case ts.SyntaxKind.VariableDeclaration:
         return true;
+
+      // NOTE: Prior to TypeScript 3.7, in the emitted .d.ts files, the compiler would merge a GetAccessor/SetAccessor
+      // pair into a single PropertyDeclaration.
 
       // NOTE: In contexts where a source file is treated as a module, we do create "nominal analysis"
       // AstSymbol objects corresponding to a ts.SyntaxKind.SourceFile node.  However, a source file

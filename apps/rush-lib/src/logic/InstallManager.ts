@@ -12,7 +12,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import * as tar from 'tar';
-import globEscape = require('glob-escape');
+import * as globEscape from 'glob-escape';
 import {
   JsonFile,
   LockFile,
@@ -339,7 +339,7 @@ export class InstallManager {
     // This will be used by bulk scripts to determine the correct Shrinkwrap file to track.
     const currentVariantJsonFilename: string = this._rushConfiguration.currentVariantJsonFilename;
     const currentVariantJson: ICurrentVariantJson = {
-      variant: options.variant || null // eslint-disable-line no-restricted-syntax
+      variant: options.variant || null // eslint-disable-line @rushstack/no-null
     };
 
     // Determine if the variant is already current by updating current-variant.json.
@@ -553,15 +553,27 @@ export class InstallManager {
       version: '0.0.0'
     };
 
-    // Find the implicitly preferred versions
-    // These are any first-level dependencies for which we only consume a single version range
-    // (e.g. every package that depends on react uses an identical specifier)
-
     // dependency name --> version specifier
-    const allPreferredVersions: Map<string, string> =
-      InstallManager.collectImplicitlyPreferredVersions(this._rushConfiguration, {
-        variant
-      });
+    const allPreferredVersions: Map<string, string> = new Map<string, string>();
+
+    // Should we add implicitly preferred versions?
+    let useImplicitlyPinnedVersions: boolean;
+    if (this._rushConfiguration.commonVersions.implicitlyPreferredVersions !== undefined) {
+      // Use the manually configured setting
+      useImplicitlyPinnedVersions = this._rushConfiguration.commonVersions.implicitlyPreferredVersions;
+    } else {
+      // Default to true.
+      useImplicitlyPinnedVersions = true;
+    }
+
+    if (useImplicitlyPinnedVersions) {
+      // Add in the implicitly preferred versions.
+      // These are any first-level dependencies for which we only consume a single version range
+      // (e.g. every package that depends on react uses an identical specifier)
+      const implicitlyPreferredVersions: Map<string, string> =
+        InstallManager.collectImplicitlyPreferredVersions(this._rushConfiguration, { variant });
+      MapExtensions.mergeFromMap(allPreferredVersions, implicitlyPreferredVersions);
+    }
 
     // Add in the explicitly preferred versions.
     // Note that these take precedence over implicitly preferred versions.

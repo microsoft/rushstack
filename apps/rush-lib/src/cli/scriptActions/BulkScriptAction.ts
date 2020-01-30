@@ -20,7 +20,11 @@ import { TaskSelector } from '../../logic/TaskSelector';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
-import { FileSystem } from '@microsoft/node-core-library';
+import {
+  FileSystem,
+  PackageJsonLookup,
+  IPackageJson
+} from '@microsoft/node-core-library';
 import { TaskRunner } from '../../logic/taskRunner/TaskRunner';
 import { TaskCollection } from '../../logic/taskRunner/TaskCollection';
 import { Utilities } from '../../utilities/Utilities';
@@ -163,7 +167,8 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterLongName: '--to',
       parameterShortName: '-t',
       argumentName: 'PROJECT1',
-      description: 'Run command in the specified project and all of its dependencies'
+      description: 'Run command in the specified project and all of its dependencies. "." can be used as shorthand ' +
+        'to specify the project in the current working directory.'
     });
     this._fromVersionPolicy =  this.defineStringListParameter({
       parameterLongName: '--from-version-policy',
@@ -180,7 +185,8 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterLongName: '--from',
       parameterShortName: '-f',
       argumentName: 'PROJECT2',
-      description: 'Run command in all projects that directly or indirectly depend on the specified project'
+      description: 'Run command in all projects that directly or indirectly depend on the specified project. ' +
+        '"." can be used as shorthand to specify the project in the current working directory.'
     });
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
@@ -199,13 +205,44 @@ export class BulkScriptAction extends BaseScriptAction {
     this.defineScriptParameters();
   }
 
-  private _mergeProjectsWithVersionPolicy(flags: CommandLineStringListParameter,
-    versionPolicies: CommandLineStringListParameter): string[] {
+  private _mergeProjectsWithVersionPolicy(
+    projectsParameters: CommandLineStringListParameter,
+    versionPoliciesParameters: CommandLineStringListParameter
+  ): string[] {
+    const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
-    const projects: string[] = [...flags.values];
-    if (versionPolicies.values && versionPolicies.values.length > 0) {
+    const projects: string[] = [];
+    for (const projectParameter of projectsParameters.values) {
+      if (projectParameter === '.') {
+        const packageJson: IPackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(process.cwd());
+        if (packageJson) {
+          const projectName: string = packageJson.name;
+          if (this.rushConfiguration.projectsByName.has(projectName)) {
+            projects.push(projectName);
+          } else {
+            console.log(colors.red(
+              'Rush is not currently running in a project directory specified in rush.json. ' +
+              `The "." value for the ${this._toFlag.longName} parameter or the ${this._fromFlag.longName} parameter ` +
+              'is not allowed.'
+            ));
+            throw new AlreadyReportedError();
+          }
+        } else {
+          console.log(colors.red(
+            'Rush is not currently running in a project directory. ' +
+            `The "." value for the ${this._toFlag.longName} parameter or the ${this._fromFlag.longName} parameter ` +
+            'is not allowed.'
+          ));
+          throw new AlreadyReportedError();
+        }
+      } else {
+        projects.push(projectParameter);
+      }
+    }
+
+    if (versionPoliciesParameters.values && versionPoliciesParameters.values.length > 0) {
       this.rushConfiguration.projects.forEach(project => {
-        const matches: boolean = versionPolicies.values.some(policyName => {
+        const matches: boolean = versionPoliciesParameters.values.some(policyName => {
           return project.versionPolicyName === policyName;
         });
         if (matches) {
@@ -213,6 +250,7 @@ export class BulkScriptAction extends BaseScriptAction {
         }
       });
     }
+
     return projects;
   }
 

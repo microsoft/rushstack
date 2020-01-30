@@ -193,7 +193,36 @@ export class PnpmProjectDependencyManifest {
         // if it's been hoisted up as a top-level dependency
         const topLevelDependencySpecifier: DependencySpecifier | undefined =
           this._pnpmShrinkwrapFile.getTopLevelDependencyVersion(peerDependencyName);
+
+        // Sometimes peer dependencies are hoisted but are not represented in the shrinkwrap file
+        // (such as when implicitlyPreferredVersions is false) so we need to find the correct key
+        // and add it ourselves
+        if (!topLevelDependencySpecifier) {
+          const peerDependencyKeys: { [peerDependencyName: string]: string } =
+            this._parsePeerDependencyKeysFromSpecifier(specifier);
+          if (peerDependencyKeys.hasOwnProperty(peerDependencyName)) {
+            this._addDependencyInternal(
+              peerDependencyName,
+              peerDependencyKeys[peerDependencyName],
+              shrinkwrapEntry
+            );
+            continue;
+          }
+        }
+
         if (!topLevelDependencySpecifier || !semver.valid(topLevelDependencySpecifier.versionSpecifier)) {
+          if (
+            !this._project.rushConfiguration.pnpmOptions ||
+            !this._project.rushConfiguration.pnpmOptions.strictPeerDependencies ||
+            (
+              shrinkwrapEntry.peerDependenciesMeta &&
+              shrinkwrapEntry.peerDependenciesMeta.hasOwnProperty(peerDependencyName) &&
+              shrinkwrapEntry.peerDependenciesMeta[peerDependencyName].optional
+            )
+          ) {
+            // We couldn't find the peer dependency, but we determined it's by design, skip this dependency...
+            continue;
+          }
           throw new InternalError(
             `Could not find peer dependency '${peerDependencyName}' that satisfies version '${dependencySemVer}'`
           );
@@ -206,5 +235,33 @@ export class PnpmProjectDependencyManifest {
         );
       }
     }
+  }
+
+  /**
+   * The version specifier for a dependency can sometimes come in the form of
+   * '{semVer}_peerDep1@1.2.3+peerDep2@4.5.6'. This is parsed and returned as a dictionary mapping
+   * the peer dependency to it's appropriate PNPM dependency key.
+   */
+  private _parsePeerDependencyKeysFromSpecifier(specifier: string): { [peerDependencyName: string]: string } {
+    const parsedPeerDependencyKeys: { [peerDependencyName: string]: string } = {};
+
+    const specifierMatches: RegExpExecArray | null = /^[^_]+_(.+)$/.exec(specifier);
+    if (specifierMatches) {
+      const combinedPeerDependencies: string = specifierMatches[1];
+      // Parse "eslint@6.6.0+typescript@3.6.4" --> ["eslint@6.6.0", "typescript@3.6.4"]
+      const peerDependencies: string[] = combinedPeerDependencies.split("+");
+      for (const peerDependencySpecifier of peerDependencies) {
+        // Parse "eslint@6.6.0" --> "eslint", "6.6.0"
+        const peerMatches: RegExpExecArray | null = /^([^+@]+)@(.+)$/.exec(peerDependencySpecifier);
+        if (peerMatches) {
+          const peerDependencyName: string = peerMatches[1];
+          const peerDependencyVersion: string = peerMatches[2];
+          const peerDependencyKey: string = `/${peerDependencyName}/${peerDependencyVersion}`;
+          parsedPeerDependencyKeys[peerDependencyName] = peerDependencyKey;
+        }
+      }
+    }
+
+    return parsedPeerDependencyKeys;
   }
 }

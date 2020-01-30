@@ -23,3 +23,9 @@ exampleFunction(a: string, b: string): string;
 
 `string`
 
+## Exceptions
+
+`Error` The first throws line
+
+The second throws line
+

@@ -2,6 +2,164 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.19.4",
+      "tag": "@microsoft/rush_v5.19.4",
+      "date": "Tue, 28 Jan 2020 03:57:30 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where a missing \"repository\" property in rush.json would cause \"rush change\" to throw."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.19.3",
+      "tag": "@microsoft/rush_v5.19.3",
+      "date": "Tue, 28 Jan 2020 01:35:53 GMT",
+      "comments": {}
+    },
+    {
+      "version": "5.19.2",
+      "tag": "@microsoft/rush_v5.19.2",
+      "date": "Tue, 28 Jan 2020 01:08:26 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where the rushx command will always report error."
+          },
+          {
+            "comment": "Fixes \"too many params\" and \"unable to find ref v<version>\" issues in git tagging while publishing."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.19.1",
+      "tag": "@microsoft/rush_v5.19.1",
+      "date": "Sat, 25 Jan 2020 05:15:10 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue with install-run.js, where successful executions exit with a nonzero exit code."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.19.0",
+      "tag": "@microsoft/rush_v5.19.0",
+      "date": "Sat, 25 Jan 2020 04:19:23 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Make the default branch and default remote configurable."
+          },
+          {
+            "comment": "Fix an issue where the Rush process terminates without any error message during installation/linking, due to a dependency package that broke its SemVer contract (GitHub #1713)"
+          },
+          {
+            "comment": "Update package.json files without reformatting or reordering properties and fields during \"rush add\", \"rush version\" and \"rush publish\"."
+          },
+          {
+            "comment": "Upgrade Node typings to Node 10"
+          },
+          {
+            "comment": "Update the \"rush init\" .gitignore file to ignore .rush/temp and .DS_Store folders"
+          },
+          {
+            "comment": "Improve command-line.json handling so that the \"rush build\" and \"rush rebuild\" commands can be extended without having to duplicate the built-in options (GitHub #1375)"
+          },
+          {
+            "comment": "Add a --json flag for \"rush list\" to facilitate automation"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.18.0",
+      "tag": "@microsoft/rush_v5.18.0",
+      "date": "Sat, 11 Jan 2020 05:38:55 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Don't use the `build` verb when printing task failures"
+          },
+          {
+            "comment": "Add a --commit command-line argument to the publish command to allow the git commit to be explicitly provided for tagging."
+          },
+          {
+            "comment": "Update GitHub project URL in some resource files"
+          },
+          {
+            "comment": "fix typo in version-policies.json"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.17.2",
+      "tag": "@microsoft/rush_v5.17.2",
+      "date": "Tue, 26 Nov 2019 00:53:52 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Resolve an issue where git tags were not being applied when using pack or publish with --include-all"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.17.1",
+      "tag": "@microsoft/rush_v5.17.1",
+      "date": "Thu, 21 Nov 2019 00:50:15 GMT",
+      "comments": {
+        "undefined": [
+          {
+            "comment": "Remove an error thrown when the --registry and --pack arguments are used on rush publish, because --registry might be required to check if a package has already been published against a custom registry."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Fix an issue with Rush add, where Rush was unable to add unpublished local projects as dependencies."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.17.0",
+      "tag": "@microsoft/rush_v5.17.0",
+      "date": "Thu, 14 Nov 2019 22:52:48 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new setting \"implicitlyPreferredVersions\" in common-versions.json that can be used to solve some installation failures involving peer dependencies"
+          },
+          {
+            "comment": "Improve the generation of shrinkwrap-deps.json to consider optional peer dependencies and implicitlyPreferredVersions=false"
+          },
+          {
+            "comment": "Fix an issue where certain operations did not use a stable sort when executed on older versions of NodeJS"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.16.1",
+      "tag": "@microsoft/rush_v5.16.1",
+      "date": "Fri, 25 Oct 2019 20:15:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Log to console instead of throwing when an unmet peer dependency is encountered during linking, and strictPeerDependencies is false"
+          },
+          {
+            "comment": "Refactor some code as part of migration from TSLint to ESLint"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.16.0",
       "tag": "@microsoft/rush_v5.16.0",
       "date": "Thu, 17 Oct 2019 00:41:01 GMT",

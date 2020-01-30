@@ -56,6 +56,7 @@ export class AedocDefinitions {
           StandardTags.remarks,
           StandardTags.returns,
           StandardTags.sealed,
+          StandardTags.throws,
           StandardTags.virtual
         ],
         true

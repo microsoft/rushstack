@@ -1,6 +1,81 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Tue, 22 Oct 2019 06:24:44 GMT and should not be manually modified.
+This log was last generated on Tue, 28 Jan 2020 02:23:44 GMT and should not be manually modified.
+
+## 7.7.7
+Tue, 28 Jan 2020 02:23:44 GMT
+
+*Version update only*
+
+## 7.7.6
+Thu, 23 Jan 2020 01:07:56 GMT
+
+*Version update only*
+
+## 7.7.5
+Tue, 21 Jan 2020 21:56:14 GMT
+
+*Version update only*
+
+## 7.7.4
+Sun, 19 Jan 2020 02:26:52 GMT
+
+### Patches
+
+- Upgrade Node typings to Node 10
+
+## 7.7.3
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 7.7.2
+Thu, 09 Jan 2020 06:44:13 GMT
+
+*Version update only*
+
+## 7.7.1
+Wed, 08 Jan 2020 00:11:31 GMT
+
+*Version update only*
+
+## 7.7.0
+Tue, 03 Dec 2019 03:17:43 GMT
+
+### Minor changes
+
+- Improve declaration reference syntax to allow linking to overloaded functions/methods
+
+## 7.6.0
+Sun, 24 Nov 2019 00:54:04 GMT
+
+### Minor changes
+
+- Added support for `@throws`
+
+## 7.5.6
+Fri, 15 Nov 2019 04:50:50 GMT
+
+*Version update only*
+
+## 7.5.5
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 7.5.4
+Tue, 05 Nov 2019 06:49:28 GMT
+
+### Patches
+
+- Fix an issue where API reports sometimes were ordered differently depending on the version of NodeJS (GitHub #1552)
+
+## 7.5.3
+Tue, 05 Nov 2019 01:08:39 GMT
+
+### Patches
+
+- Clarified an error message
 
 ## 7.5.2
 Tue, 22 Oct 2019 06:24:44 GMT

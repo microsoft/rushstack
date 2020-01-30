@@ -5,7 +5,7 @@ import { GulpTask} from './GulpTask';
 import { IBuildConfig } from '../IBuildConfig';
 import * as Gulp from 'gulp';
 import * as Jest from 'jest-cli';
-import * as globby from 'globby';
+import * as glob from 'glob';
 import { FileSystem, JsonObject } from '@microsoft/node-core-library';
 
 /**
@@ -62,6 +62,11 @@ export interface IJestConfig {
    * Same as Jest CLI option testMatch
    */
   testMatch?: string[];
+
+  /**
+   * Indicate whether writing NUnit results is enabled when using the default reporter
+   */
+  writeNUnitResults?: boolean;
 }
 
 const DEFAULT_JEST_CONFIG_FILE_NAME: string = 'jest.config.json';
@@ -94,7 +99,7 @@ export class JestTask extends GulpTask<IJestConfig> {
       cache: true,
       collectCoverageFrom: ['lib/**/*.js?(x)', '!lib/**/test/**'],
       coverage: true,
-      coverageReporters: ['json', 'html'],
+      coverageReporters: ['json' /*, 'html' */], // Remove HTML reporter temporarily until the Handlebars issue is fixed
       testPathIgnorePatterns: ['<rootDir>/(src|lib-amd|lib-es6|coverage|build|docs|node_modules)/'],
       // Some unit tests rely on data folders that look like packages.  This confuses jest-hast-map
       // when it tries to scan for package.json files.
@@ -136,7 +141,15 @@ export class JestTask extends GulpTask<IJestConfig> {
       moduleDirectories: this.taskConfig.moduleDirectories ?
         this.taskConfig.moduleDirectories :
         ['node_modules', this.buildConfig.libFolder],
-      reporters: [path.join(__dirname, 'JestReporter.js')],
+      reporters: [
+        [
+          path.join(__dirname, 'JestReporter.js'),
+          {
+            outputFilePath: path.join(this.buildConfig.tempFolder, 'jest-results', 'test-results.xml'),
+            writeNUnitResults: this.taskConfig.writeNUnitResults
+          }
+        ]
+      ],
       rootDir: this.buildConfig.rootPath,
       testMatch: this.taskConfig.testMatch ?
         this.taskConfig.testMatch : ['**/*.test.js?(x)'],
@@ -167,16 +180,15 @@ export class JestTask extends GulpTask<IJestConfig> {
           }
           completeCallback();
         }
-      },
-      (err) => {
+      }).catch((err) => {
         process.stdout.isTTY = oldTTY;
         completeCallback(err);
       });
   }
 
   private _copySnapshots(srcRoot: string, destRoot: string): void {
-    const pattern: string = path.join(srcRoot, '**/__snapshots__/*.snap');
-    globby.sync(pattern).forEach(snapFile => {
+    const pattern: string = path.join(srcRoot, '**', '__snapshots__', '*.snap');
+    glob.sync(pattern).forEach(snapFile => {
       const destination: string = snapFile.replace(srcRoot, destRoot);
       if (this._copyIfMatchExtension(snapFile, destination, '.test.tsx.snap')) {
         this.logVerbose(`Snapshot file ${snapFile} is copied to match extension ".test.tsx.snap".`);

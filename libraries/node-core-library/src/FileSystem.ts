@@ -18,7 +18,7 @@ import { PosixModeBits } from './PosixModeBits';
 export interface IFileSystemReadFolderOptions {
   /**
    * If true, returns the absolute paths of the files in the folder.
-   * Defaults to `false`.
+   * @defaultValue false
    */
   absolutePaths?: boolean;
 }
@@ -30,19 +30,19 @@ export interface IFileSystemReadFolderOptions {
 export interface IFileSystemWriteFileOptions {
   /**
    * If true, will ensure the folder is created before writing the file.
-   * Defaults to `false`.
+   * @defaultValue false
    */
   ensureFolderExists?: boolean;
 
   /**
    * If specified, will normalize line endings to the specified style of newline.
-   * Defaults to `NewlineKind.None`.
+   * @defaultValue `undefined` which means no conversion will be performed
    */
   convertLineEndings?: NewlineKind;
 
   /**
    * If specified, will change the encoding of the file that will be written.
-   * Defaults to `"utf8"`.
+   * @defaultValue "utf8"
    */
   encoding?: Encoding;
 }
@@ -54,13 +54,13 @@ export interface IFileSystemWriteFileOptions {
 export interface IFileSystemReadFileOptions {
   /**
    * If specified, will change the encoding of the file that will be written.
-   * Defaults to `"utf8"`.
+   * @defaultValue Encoding.Utf8
    */
   encoding?: Encoding;
 
   /**
    * If specified, will normalize line endings to the specified style of newline.
-   * Defaults to `NewlineKind.None`.
+   * @defaultValue `undefined` which means no conversion will be performed
    */
   convertLineEndings?: NewlineKind;
 }
@@ -83,13 +83,14 @@ export interface IFileSystemMoveOptions {
   destinationPath: string;
 
   /**
-   * If true, will overwrite the file if it already exists. Defaults to true.
+   * If true, will overwrite the file if it already exists.
+   * @defaultValue true
    */
   overwrite?: boolean;
 
   /**
    * If true, will ensure the folder is created before writing the file.
-   * Defaults to `false`.
+   * @defaultValue false
    */
   ensureFolderExists?: boolean;
 }
@@ -119,7 +120,7 @@ export interface IFileSystemCopyFileOptions {
 export interface IFileSystemDeleteFileOptions {
   /**
    * If true, will throw an exception if the file did not exist before `deleteFile()` was called.
-   * Defaults to `false`.
+   * @defaultValue false
    */
   throwIfNotExists?: boolean;
 }
@@ -369,7 +370,9 @@ export class FileSystem {
       FileSystem.ensureFolder(folderPath);
     }
 
-    contents = FileSystem._convertLineEndings(contents.toString(), options.convertLineEndings);
+    if (options.convertLineEndings) {
+      contents = Text.convertTo(contents.toString(), options.convertLineEndings);
+    }
 
     fsx.writeFileSync(filePath, contents, { encoding: options.encoding });
   }
@@ -396,7 +399,9 @@ export class FileSystem {
       FileSystem.ensureFolder(folderPath);
     }
 
-    contents = FileSystem._convertLineEndings(contents.toString(), options.convertLineEndings);
+    if (options.convertLineEndings) {
+      contents = Text.convertTo(contents.toString(), options.convertLineEndings);
+    }
 
     fsx.appendFileSync(filePath, contents, { encoding: options.encoding });
   }
@@ -414,8 +419,11 @@ export class FileSystem {
       ...options
     };
 
-    const contents: string = FileSystem.readFileToBuffer(filePath).toString(options.encoding);
-    return FileSystem._convertLineEndings(contents, options.convertLineEndings);
+    let contents: string = FileSystem.readFileToBuffer(filePath).toString(options.encoding);
+    if (options.convertLineEndings) {
+      contents = Text.convertTo(contents, options.convertLineEndings);
+    }
+    return contents;
   }
 
   /**
@@ -512,21 +520,5 @@ export class FileSystem {
    */
   public static getRealPath(linkPath: string): string {
     return fsx.realpathSync(linkPath);
-  }
-
-  /**
-   * A helper function that converts line endings on a string.
-   * @param text - The text to be normalized.
-   * @param lineEndings - The style of line endings to use.
-   */
-  private static _convertLineEndings(text: string, lineEndings: NewlineKind | undefined): string {
-    switch (lineEndings) {
-      case NewlineKind.CrLf:
-        return Text.convertToCrLf(text);
-      case NewlineKind.Lf:
-        return Text.convertToLf(text);
-      default:
-        return text;
-    }
   }
 }

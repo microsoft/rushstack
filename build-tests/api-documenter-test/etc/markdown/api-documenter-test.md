@@ -61,4 +61,6 @@ This project tests various documentation generation scenarios and doc comment sy
 |  Type Alias | Description |
 |  --- | --- |
 |  [ExampleTypeAlias](./api-documenter-test.exampletypealias.md) | A type alias |
+|  [GenericTypeAlias](./api-documenter-test.generictypealias.md) |  |
+|  [TypeAlias](./api-documenter-test.typealias.md) |  |
 

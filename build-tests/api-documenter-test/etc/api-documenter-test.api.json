@@ -99,7 +99,7 @@
         {
           "kind": "Class",
           "canonicalReference": "api-documenter-test!DocClass1:class",
-          "docComment": "/**\n * This is an example class.\n *\n * @remarks\n *\n * These are some remarks.\n *\n * The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `DocClass1` class.\n *\n * @defaultValue\n *\n * a default value for this function\n *\n * {@docCategory DocClass1}\n *\n * @public\n */\n",
+          "docComment": "/**\n * This is an example class.\n *\n * @remarks\n *\n * {@link DocClass1.(exampleFunction:1) | Link to overload 1}\n *\n * {@link DocClass1.(exampleFunction:2) | Link to overload 2}\n *\n * {@docCategory DocClass1}\n *\n * The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `DocClass1` class.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -171,7 +171,7 @@
             {
               "kind": "Method",
               "canonicalReference": "api-documenter-test!DocClass1#exampleFunction:member(1)",
-              "docComment": "/**\n * This is an overloaded function.\n *\n * @param a - the first string\n *\n * @param b - the second string\n */\n",
+              "docComment": "/**\n * This is an overloaded function.\n *\n * @param a - the first string\n *\n * @param b - the second string\n *\n * @throws\n *\n * `Error` The first throws line\n *\n * @throws\n *\n * The second throws line\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -355,6 +355,32 @@
             },
             {
               "kind": "Property",
+              "canonicalReference": "api-documenter-test!DocClass1#readonlyProperty:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "get readonlyProperty(): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "readonlyProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
               "canonicalReference": "api-documenter-test!DocClass1#regularProperty:member",
               "docComment": "/**\n * This is a regular property that happens to use the SystemEvent type.\n */\n",
               "excerptTokens": [
@@ -466,6 +492,36 @@
               "overloadIndex": 1,
               "parameters": [],
               "name": "tableExample"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "api-documenter-test!DocClass1#writeableProperty:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "get writeableProperty(): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                },
+                {
+                  "kind": "Content",
+                  "text": "\n\nset writeableProperty(value: string);"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "writeableProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
             }
           ],
           "extendsTokenRange": {
@@ -684,6 +740,44 @@
           "name": "Generic",
           "members": [],
           "implementsTokenRanges": []
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "api-documenter-test!GenericTypeAlias:type",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type GenericTypeAlias<T> = "
+            },
+            {
+              "kind": "Content",
+              "text": "T[]"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "GenericTypeAlias",
+          "typeParameters": [
+            {
+              "typeParameterName": "T",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
         },
         {
           "kind": "Function",
@@ -1632,6 +1726,31 @@
             }
           ],
           "implementsTokenRanges": []
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "api-documenter-test!TypeAlias:type",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type TypeAlias = "
+            },
+            {
+              "kind": "Content",
+              "text": "number"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "TypeAlias",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
         },
         {
           "kind": "Function",

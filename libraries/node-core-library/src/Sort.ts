@@ -1,8 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { LegacyAdapters } from './LegacyAdapters';
+
 /**
  * Operations for sorting collections.
+ *
+ * @remarks
+ * NOTE: Prior to Node 11.x, the `Array.sort()` algorithm is not guaranteed to be stable.  For maximum
+ * compatibility, consider using {@link LegacyAdapters.sortStable} instead of `Array.sort()`.
  *
  * @public
  */
@@ -39,10 +45,10 @@ export class Sort {
     }
 
     // Null is smaller than anything except undefined
-    if (x === null) { // eslint-disable-line no-restricted-syntax
+    if (x === null) { // eslint-disable-line @rushstack/no-null
       return -1;
     }
-    if (y === null) { // eslint-disable-line no-restricted-syntax
+    if (y === null) { // eslint-disable-line @rushstack/no-null
       return 1;
     }
 
@@ -60,6 +66,7 @@ export class Sort {
 
   /**
    * Sorts the array according to a key which is obtained from the array elements.
+   * The result is guaranteed to be a stable sort.
    *
    * @example
    *
@@ -71,7 +78,7 @@ export class Sort {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static sortBy<T>(array: T[], keySelector: (element: T) => any, comparer: (x: any, y: any) => number
     = Sort.compareByValue): void {
-    array.sort((x, y) => comparer(keySelector(x), keySelector(y)));
+    LegacyAdapters.sortStable(array, (x, y) => comparer(keySelector(x), keySelector(y)));
   }
 
   /**
@@ -115,7 +122,8 @@ export class Sort {
   }
 
   /**
-   * Sorts the entries in a Map object according to the keys.
+   * Sorts the entries in a Map object according to the map keys.
+   * The result is guaranteed to be a stable sort.
    *
    * @example
    *
@@ -145,7 +153,8 @@ export class Sort {
   }
 
   /**
-   * Sorts the entries in a Set object according to the keys.
+   * Sorts the entries in a Set object according to the specified keys.
+   * The result is guaranteed to be a stable sort.
    *
    * @example
    *
@@ -169,7 +178,7 @@ export class Sort {
       return;
     }
 
-    array.sort((x, y) => keyComparer(keySelector(x), keySelector(y)));
+    LegacyAdapters.sortStable(array, (x, y) => keyComparer(keySelector(x), keySelector(y)));
 
     set.clear();
     for (const item of array) {
@@ -178,7 +187,7 @@ export class Sort {
   }
 
   /**
-   * Sorts the entries in a Set object according to the keys.
+   * Sorts the entries in a Set object.  The result is guaranteed to be a stable sort.
    *
    * @example
    *
@@ -200,7 +209,7 @@ export class Sort {
       return;
     }
 
-    array.sort((x, y) => comparer(x, y));
+    LegacyAdapters.sortStable(array, (x, y) => comparer(x, y));
 
     set.clear();
     for (const item of array) {

@@ -215,12 +215,24 @@
      * determined from Git alone, since the "pull request" feature is not a Git concept.  Ideally
      * Rush would use a vendor-specific protocol to query the information from GitHub, Azure DevOps, etc.
      * But to keep things simple, "rush change" simply assumes that your PR is against the "master" branch
-     * of the Git remote indicated by the respository.url setting in rush.json.  If you are working in
+     * of the Git remote indicated by the repository.url setting in rush.json.  If you are working in
      * a GitHub "fork" of the real repo, this setting will be different from the repository URL of your
      * your PR branch, and in this situation "rush change" will also automatically invoke "git fetch"
      * to retrieve the latest activity for the remote master branch.
      */
-    /*[LINE "HYPOTHETICAL"]*/ "url": "https://github.com/microsoft/rush-example"
+    /*[LINE "HYPOTHETICAL"]*/ "url": "https://github.com/microsoft/rush-example",
+
+    /**
+     * The default branch name. This tells "rush change" which remote branch to compare against.
+     * The default value is "master"
+     */
+    /*[LINE "HYPOTHETICAL"]*/ "defaultBranch": "master",
+
+    /**
+     * The default remote. This tells "rush change" which remote to compare against if the remote URL is
+     * not set or if a remote matching the provided remote URL is not found.
+     */
+    /*[LINE "HYPOTHETICAL"]*/ "defaultRemote": "origin"
   },
 
   /**

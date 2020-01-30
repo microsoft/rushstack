@@ -2,6 +2,83 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "0.5.4",
+      "tag": "@rushstack/eslint-config_v0.5.4",
+      "date": "Tue, 21 Jan 2020 21:56:13 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade eslint-plugin-tsdoc to enable comments in tsdoc.json and more efficient loading"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.3",
+      "tag": "@rushstack/eslint-config_v0.5.3",
+      "date": "Sun, 19 Jan 2020 02:26:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" from `0.3.0` to `0.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.2",
+      "tag": "@rushstack/eslint-config_v0.5.2",
+      "date": "Fri, 17 Jan 2020 01:08:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" from `0.2.0` to `0.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.1",
+      "tag": "@rushstack/eslint-config_v0.5.1",
+      "date": "Thu, 09 Jan 2020 06:44:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" from `0.1.0` to `0.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.0",
+      "tag": "@rushstack/eslint-config_v0.5.0",
+      "date": "Wed, 08 Jan 2020 00:11:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Replace \"no-restricted-syntax\" rule with an equivalent rule \"@rushstack/no-null\""
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" from `0.0.0` to `0.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.2",
+      "tag": "@rushstack/eslint-config_v0.4.2",
+      "date": "Mon, 11 Nov 2019 16:07:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add eslint-plugin-tsdoc; update plugin versions"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.1",
       "tag": "@rushstack/eslint-config_v0.4.1",
       "date": "Tue, 22 Oct 2019 06:24:44 GMT",

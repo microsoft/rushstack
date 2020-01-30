@@ -156,6 +156,14 @@
         "url": {
           "description": "The remote url of the repository. If a value is provided, \"rush change\" will use it to find the right remote to compare against.",
           "type": "string"
+        },
+        "defaultBranch": {
+          "description": "The default branch name. This tells \"rush change\" which remote branch to compare against. The default value is \"master\"",
+          "type": "string"
+        },
+        "defaultRemote": {
+          "description": "The default remote. This tells \"rush change\" which remote to compare against if the remote URL is not set or if a remote matching the provided remote URL is not found.",
+          "type": "string"
         }
       },
       "additionalProperties": false

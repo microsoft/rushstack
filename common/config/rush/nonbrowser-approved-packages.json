@@ -15,6 +15,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/debug-certificate-manager",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@microsoft/decorators",
       "allowedCategories": [ "libraries" ]
     },
@@ -104,6 +108,14 @@
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.5",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-3.6",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-3.7",
       "allowedCategories": [ "tests" ]
     },
     {
@@ -112,7 +124,7 @@
     },
     {
       "name": "@microsoft/set-webpack-public-path-plugin",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/sp-tslint-rules",
@@ -149,6 +161,14 @@
     {
       "name": "@rushstack/eslint-config",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@rushstack/eslint-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/localization-plugin",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@typescript-eslint/eslint-plugin",
@@ -199,7 +219,7 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "builtins",
+      "name": "builtin-modules",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -256,6 +276,10 @@
     },
     {
       "name": "eslint-plugin-security",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "eslint-plugin-tsdoc",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -380,7 +404,7 @@
     },
     {
       "name": "jest",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "jest-cli",
@@ -388,6 +412,10 @@
     },
     {
       "name": "jest-environment-jsdom",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-nunit-reporter",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -523,12 +551,20 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "timsort",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "true-case-path",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "ts-jest",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "ts-loader",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "tslint",
@@ -552,10 +588,26 @@
     },
     {
       "name": "webpack",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "webpack-bundle-analyzer",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "webpack-cli",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "webpack-dev-server",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "wordwrap",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "xml",
       "allowedCategories": [ "libraries" ]
     },
     {

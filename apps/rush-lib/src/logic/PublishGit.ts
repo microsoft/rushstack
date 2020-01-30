@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { PublishUtilities } from './PublishUtilities';
+import { Utilities } from '../utilities/Utilities';
+import { RushConfigurationProject } from '../api/RushConfigurationProject';
 
 export class PublishGit {
   private _targetBranch: string | undefined;
@@ -42,13 +44,29 @@ export class PublishGit {
       workingDirectory ? workingDirectory : process.cwd());
   }
 
-  public addTag(shouldExecute: boolean, packageName: string, packageVersion: string): void {
+  public addTag(shouldExecute: boolean, packageName: string, packageVersion: string, commitId: string | undefined): void {
     // Tagging only happens if we're publishing to real NPM and committing to git.
     const tagName: string = PublishUtilities.createTagname(packageName, packageVersion);
     PublishUtilities.execCommand(
       !!this._targetBranch && shouldExecute,
       'git',
-      ['tag', '-a', tagName, '-m', `${packageName} v${packageVersion}`]);
+      ['tag', '-a', tagName, '-m', `${packageName} v${packageVersion}`, ...(commitId ? [commitId] : [])]);
+  }
+
+  public hasTag(packageConfig: RushConfigurationProject): boolean {
+    const tagName: string = PublishUtilities.createTagname(
+      packageConfig.packageName,
+      packageConfig.packageJson.version
+    );
+    const tagOutput: string = Utilities.executeCommandAndCaptureOutput(
+      'git',
+      ['tag', '-l', tagName],
+      packageConfig.projectFolder,
+      PublishUtilities.getEnvArgs(),
+      true
+    ).replace(/(\r\n|\n|\r)/gm, '');
+
+    return tagOutput === tagName;
   }
 
   public commit(commitMessage: string): void {

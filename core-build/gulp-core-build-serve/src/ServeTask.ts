@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { GulpTask } from '@microsoft/gulp-core-build';
+import { GulpTask, GCBTerminalProvider } from '@microsoft/gulp-core-build';
 import { IBuildConfig } from '@microsoft/gulp-core-build/lib/IBuildConfig';
-import { FileSystem, JsonObject } from '@microsoft/node-core-library';
+import { FileSystem, JsonObject, Terminal } from '@microsoft/node-core-library';
 import * as Gulp from 'gulp';
 import * as colors from 'colors';
 import * as HttpType from 'http';
@@ -14,8 +14,9 @@ import * as ExpressType from 'express';
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import {
-  ICertificate
-} from './certificates';
+  ICertificate,
+  CertificateManager
+} from '@rushstack/debug-certificate-manager';
 
 /**
  * @remarks
@@ -94,6 +95,9 @@ interface IApiMap {
 }
 
 export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig & TExtendedConfig> {
+  protected _terminalProvider: GCBTerminalProvider;
+  protected _terminal: Terminal;
+
   public constructor(extendedName?: string, extendedConfig?: TExtendedConfig) {
     super(
       extendedName || 'serve',
@@ -107,6 +111,8 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
         ...(extendedConfig as any) // eslint-disable-line @typescript-eslint/no-explicit-any
       } as IServeTaskConfig & TExtendedConfig
     );
+    this._terminalProvider = new GCBTerminalProvider(this);
+    this._terminal = new Terminal(this._terminalProvider);
   }
 
   public loadSchema(): JsonObject {
@@ -207,7 +213,11 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
     completeCallback();
   }
 
-  private _logRequestsMiddleware(req: HttpType.IncomingMessage, res: HttpType.ServerResponse, next?: () => void): void {
+  private _logRequestsMiddleware(
+    req: HttpType.IncomingMessage,
+    res: HttpType.ServerResponse,
+    next?: () => void
+  ): void {
     const ipAddress: string = (req as any).ip; // eslint-disable-line @typescript-eslint/no-explicit-any
     let resourceColor: (text: string) => string = colors.cyan;
 
@@ -229,14 +239,20 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
     next();
   }
 
-  private _enableCorsMiddleware(req: HttpType.IncomingMessage, res: HttpType.ServerResponse, next?: () => void): void {
+  private _enableCorsMiddleware(
+    req: HttpType.IncomingMessage,
+    res: HttpType.ServerResponse,
+    next?: () => void
+  ): void {
     res.setHeader('Access-Control-Allow-Origin', '*');
     next();
   }
 
-  private _setJSONResponseContentTypeMiddleware(req: HttpType.IncomingMessage,
-                                                res: HttpType.ServerResponse,
-                                                next?: () => void): void {
+  private _setJSONResponseContentTypeMiddleware(
+    req: HttpType.IncomingMessage,
+    res: HttpType.ServerResponse,
+    next?: () => void
+  ): void {
     res.setHeader('content-type', 'application/json');
     next();
   }
@@ -281,17 +297,21 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
           }
         }
       } else {
-        // eslint-disable-next-line
-        const { ensureCertificate } = require('./certificates');
-        const devCertificate: ICertificate = ensureCertificate(this.taskConfig.tryCreateDevCertificate, this);
+        const certificateManager: CertificateManager = new CertificateManager();
+        const devCertificate: ICertificate = certificateManager.ensureCertificate(
+          this.taskConfig.tryCreateDevCertificate,
+          this._terminal
+        );
         if (devCertificate.pemCertificate && devCertificate.pemKey) {
           result.cert = devCertificate.pemCertificate;
           result.key = devCertificate.pemKey;
         } else {
-          this.logWarning('When serving in HTTPS mode, a PFX cert path or a cert path and a key path must be ' +
-                          'provided, or a dev certificate must be generated and trusted. If a SSL certificate isn\'t ' +
-                          'provided, a default, self-signed certificate will be used. Expect browser security ' +
-                          'warnings.');
+          this.logWarning(
+            'When serving in HTTPS mode, a PFX cert path or a cert path and a key path must be ' +
+            'provided, or a dev certificate must be generated and trusted. If a SSL certificate isn\'t ' +
+            'provided, a default, self-signed certificate will be used. Expect browser security ' +
+            'warnings.'
+          );
         }
       }
 

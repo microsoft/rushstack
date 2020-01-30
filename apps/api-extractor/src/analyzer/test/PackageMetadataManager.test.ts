@@ -1,7 +1,7 @@
 
 import * as path from 'path';
 import { PackageMetadataManager } from '../PackageMetadataManager';
-import { FileSystem, PackageJsonLookup, INodePackageJson } from '@microsoft/node-core-library';
+import { FileSystem, PackageJsonLookup, INodePackageJson, NewlineKind } from '@microsoft/node-core-library';
 
 const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
@@ -40,7 +40,7 @@ describe('PackageMetadataManager', () => {
     });
 
     it('writes the tsdoc metadata file at the provided path', () => {
-      PackageMetadataManager.writeTsdocMetadataFile('/foo/bar');
+      PackageMetadataManager.writeTsdocMetadataFile('/foo/bar', NewlineKind.CrLf);
       expect(firstArgument(mockWriteFile)).toBe('/foo/bar');
     });
   });

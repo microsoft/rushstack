@@ -365,7 +365,7 @@ export class PublishUtilities {
     });
 
     if (shouldCommit) {
-      JsonFile.save(pkg, packagePath);
+      JsonFile.save(pkg, packagePath, { updateExistingFile: true });
     }
     return pkg;
   }

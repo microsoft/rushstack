@@ -87,7 +87,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
   ];
 
   private _postCSSPlugins: postcss.AcceptedPlugin[] = [
-    autoprefixer({ browsers: ['> 1%', 'last 2 versions', 'ie >= 10'] })
+    autoprefixer({ overrideBrowserslist: ['> 1%', 'last 2 versions', 'ie >= 10'] })
   ];
 
   public constructor() {

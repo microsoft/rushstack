@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as os from 'os';
+
 /**
  * The allowed types of encodings, as supported by Node.js
  * @public
@@ -25,7 +27,12 @@ export const enum NewlineKind {
    * @remarks
    * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
    */
-  Lf = '\n'
+  Lf = '\n',
+
+  /**
+   * Default newline type for this operating system (`os.EOL`).
+   */
+  OsDefault = 'os'
 }
 
 /**
@@ -66,6 +73,14 @@ export class Text {
    */
   public static convertToLf(input: string): string {
     return input.replace(Text._newLineRegEx, '\n');
+  }
+
+  /**
+   * Converts all newlines in the provided string to use the specified newline type.
+   */
+  public static convertTo(input: string, newlineKind: NewlineKind): string {
+    const newline: string = newlineKind === NewlineKind.OsDefault ? os.EOL : newlineKind as string;
+    return input.replace(Text._newLineRegEx, newline);
   }
 
   /**

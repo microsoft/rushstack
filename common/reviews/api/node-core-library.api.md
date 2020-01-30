@@ -389,10 +389,11 @@ export class LegacyAdapters {
     // (undocumented)
     static convertCallbackToPromise<TResult, TError, TArg1, TArg2, TArg3, TArg4>(fn: (arg1: TArg1, arg2: TArg2, arg3: TArg3, arg4: TArg4, cb: LegacyCallback<TResult, TError>) => void, arg1: TArg1, arg2: TArg2, arg3: TArg3, arg4: TArg4): Promise<TResult>;
     static scrubError(error: Error | string | any): Error;
-}
+    static sortStable<T>(array: T[], compare?: (a: T, b: T) => number): void;
+    }
 
 // @public
-export type LegacyCallback<TResult, TError> = (error: TError, result: TResult) => void;
+export type LegacyCallback<TResult, TError> = (error: TError | null | undefined, result: TResult) => void;
 
 // @public
 export class LockFile {
@@ -413,7 +414,8 @@ export class MapExtensions {
 // @public
 export const enum NewlineKind {
     CrLf = "\r\n",
-    Lf = "\n"
+    Lf = "\n",
+    OsDefault = "os"
 }
 
 // @public
@@ -535,6 +537,7 @@ export enum TerminalProviderSeverity {
 
 // @public
 export class Text {
+    static convertTo(input: string, newlineKind: NewlineKind): string;
     static convertToCrLf(input: string): string;
     static convertToLf(input: string): string;
     static ensureTrailingNewline(s: string, newlineKind?: NewlineKind): string;

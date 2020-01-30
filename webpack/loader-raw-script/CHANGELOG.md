@@ -1,6 +1,108 @@
 # Change Log - @microsoft/loader-raw-script
 
-This log was last generated on Tue, 22 Oct 2019 06:24:44 GMT and should not be manually modified.
+This log was last generated on Tue, 28 Jan 2020 02:23:44 GMT and should not be manually modified.
+
+## 1.3.4
+Tue, 28 Jan 2020 02:23:44 GMT
+
+*Version update only*
+
+## 1.3.3
+Fri, 24 Jan 2020 00:27:39 GMT
+
+*Version update only*
+
+## 1.3.2
+Thu, 23 Jan 2020 01:07:56 GMT
+
+*Version update only*
+
+## 1.3.1
+Tue, 21 Jan 2020 21:56:14 GMT
+
+*Version update only*
+
+## 1.3.0
+Sun, 19 Jan 2020 02:26:52 GMT
+
+### Minor changes
+
+- Upgrade Node typings to Node 10
+
+## 1.2.200
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 1.2.199
+Tue, 14 Jan 2020 01:34:15 GMT
+
+*Version update only*
+
+## 1.2.198
+Sat, 11 Jan 2020 05:18:23 GMT
+
+*Version update only*
+
+## 1.2.197
+Thu, 09 Jan 2020 06:44:13 GMT
+
+*Version update only*
+
+## 1.2.196
+Wed, 08 Jan 2020 00:11:31 GMT
+
+*Version update only*
+
+## 1.2.195
+Wed, 04 Dec 2019 23:17:55 GMT
+
+*Version update only*
+
+## 1.2.194
+Tue, 03 Dec 2019 03:17:44 GMT
+
+*Version update only*
+
+## 1.2.193
+Sun, 24 Nov 2019 00:54:04 GMT
+
+*Version update only*
+
+## 1.2.192
+Wed, 20 Nov 2019 06:14:28 GMT
+
+*Version update only*
+
+## 1.2.191
+Fri, 15 Nov 2019 04:50:50 GMT
+
+*Version update only*
+
+## 1.2.190
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 1.2.189
+Wed, 06 Nov 2019 22:44:18 GMT
+
+*Version update only*
+
+## 1.2.188
+Tue, 05 Nov 2019 06:49:29 GMT
+
+*Version update only*
+
+## 1.2.187
+Tue, 05 Nov 2019 01:08:39 GMT
+
+*Version update only*
+
+## 1.2.186
+Fri, 25 Oct 2019 15:08:54 GMT
+
+*Version update only*
 
 ## 1.2.185
 Tue, 22 Oct 2019 06:24:44 GMT

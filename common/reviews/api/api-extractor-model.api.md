@@ -627,9 +627,7 @@ export class ExcerptToken {
 
 // @public (undocumented)
 export const enum ExcerptTokenKind {
-    // (undocumented)
     Content = "Content",
-    // (undocumented)
     Reference = "Reference"
 }
 

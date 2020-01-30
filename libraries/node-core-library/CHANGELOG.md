@@ -1,6 +1,66 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Tue, 22 Oct 2019 06:24:44 GMT and should not be manually modified.
+This log was last generated on Tue, 28 Jan 2020 02:23:44 GMT and should not be manually modified.
+
+## 3.19.3
+Tue, 28 Jan 2020 02:23:44 GMT
+
+### Patches
+
+- Fix a typing issue that prevented LegacyAdapters from being used with the new glob typings.
+
+## 3.19.2
+Thu, 23 Jan 2020 01:07:56 GMT
+
+### Patches
+
+- Fix an issue with a missing type in LegacyAdapters
+
+## 3.19.1
+Tue, 21 Jan 2020 21:56:14 GMT
+
+*Version update only*
+
+## 3.19.0
+Sun, 19 Jan 2020 02:26:52 GMT
+
+### Minor changes
+
+- Upgrade Node typings to Node 10
+
+## 3.18.3
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 3.18.2
+Thu, 09 Jan 2020 06:44:13 GMT
+
+*Version update only*
+
+## 3.18.1
+Wed, 08 Jan 2020 00:11:31 GMT
+
+*Version update only*
+
+## 3.18.0
+Fri, 15 Nov 2019 04:50:50 GMT
+
+### Minor changes
+
+- Add NewlineKind.OsDefault and fix some comments
+
+## 3.17.1
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 3.17.0
+Tue, 05 Nov 2019 06:49:28 GMT
+
+### Minor changes
+
+- Add new API LegacyAdapters.stableSort(), and update the Sort API to be stable
 
 ## 3.16.0
 Tue, 22 Oct 2019 06:24:44 GMT

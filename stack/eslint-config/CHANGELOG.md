@@ -1,6 +1,42 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Tue, 22 Oct 2019 06:24:44 GMT and should not be manually modified.
+This log was last generated on Tue, 21 Jan 2020 21:56:13 GMT and should not be manually modified.
+
+## 0.5.4
+Tue, 21 Jan 2020 21:56:13 GMT
+
+### Patches
+
+- Upgrade eslint-plugin-tsdoc to enable comments in tsdoc.json and more efficient loading
+
+## 0.5.3
+Sun, 19 Jan 2020 02:26:53 GMT
+
+*Version update only*
+
+## 0.5.2
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 0.5.1
+Thu, 09 Jan 2020 06:44:13 GMT
+
+*Version update only*
+
+## 0.5.0
+Wed, 08 Jan 2020 00:11:31 GMT
+
+### Minor changes
+
+- Replace "no-restricted-syntax" rule with an equivalent rule "@rushstack/no-null"
+
+## 0.4.2
+Mon, 11 Nov 2019 16:07:56 GMT
+
+### Patches
+
+- Add eslint-plugin-tsdoc; update plugin versions
 
 ## 0.4.1
 Tue, 22 Oct 2019 06:24:44 GMT

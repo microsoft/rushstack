@@ -4,17 +4,19 @@
 
 ```ts
 
+import { GCBTerminalProvider } from '@microsoft/gulp-core-build';
 import * as Gulp from 'gulp';
 import { GulpTask } from '@microsoft/gulp-core-build';
 import { JsonObject } from '@microsoft/node-core-library';
+import { Terminal } from '@microsoft/node-core-library';
 
 // Warning: (ae-forgotten-export) The symbol "ReloadTask" needs to be exported by the entry point index.d.ts
-// 
+//
 // @public (undocumented)
 export const reload: ReloadTask;
 
 // Warning: (ae-forgotten-export) The symbol "ServeTask" needs to be exported by the entry point index.d.ts
-// 
+//
 // @public (undocumented)
 const serve: ServeTask;
 
@@ -23,12 +25,12 @@ export default serve;
 export { serve }
 
 // Warning: (ae-forgotten-export) The symbol "TrustCertTask" needs to be exported by the entry point index.d.ts
-// 
+//
 // @public (undocumented)
 export const trustDevCert: TrustCertTask;
 
 // Warning: (ae-forgotten-export) The symbol "UntrustCertTask" needs to be exported by the entry point index.d.ts
-// 
+//
 // @public (undocumented)
 export const untrustDevCert: UntrustCertTask;
 

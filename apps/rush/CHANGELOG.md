@@ -1,6 +1,87 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 17 Oct 2019 00:41:01 GMT and should not be manually modified.
+This log was last generated on Tue, 28 Jan 2020 03:57:30 GMT and should not be manually modified.
+
+## 5.19.4
+Tue, 28 Jan 2020 03:57:30 GMT
+
+### Updates
+
+- Fix an issue where a missing "repository" property in rush.json would cause "rush change" to throw.
+
+## 5.19.3
+Tue, 28 Jan 2020 01:35:53 GMT
+
+*Version update only*
+
+## 5.19.2
+Tue, 28 Jan 2020 01:08:26 GMT
+
+### Updates
+
+- Fix an issue where the rushx command will always report error.
+- Fixes "too many params" and "unable to find ref v<version>" issues in git tagging while publishing.
+
+## 5.19.1
+Sat, 25 Jan 2020 05:15:10 GMT
+
+### Updates
+
+- Fix an issue with install-run.js, where successful executions exit with a nonzero exit code.
+
+## 5.19.0
+Sat, 25 Jan 2020 04:19:23 GMT
+
+### Updates
+
+- Make the default branch and default remote configurable.
+- Fix an issue where the Rush process terminates without any error message during installation/linking, due to a dependency package that broke its SemVer contract (GitHub #1713)
+- Update package.json files without reformatting or reordering properties and fields during "rush add", "rush version" and "rush publish".
+- Upgrade Node typings to Node 10
+- Update the "rush init" .gitignore file to ignore .rush/temp and .DS_Store folders
+- Improve command-line.json handling so that the "rush build" and "rush rebuild" commands can be extended without having to duplicate the built-in options (GitHub #1375)
+- Add a --json flag for "rush list" to facilitate automation
+
+## 5.18.0
+Sat, 11 Jan 2020 05:38:55 GMT
+
+### Updates
+
+- Don't use the `build` verb when printing task failures
+- Add a --commit command-line argument to the publish command to allow the git commit to be explicitly provided for tagging.
+- Update GitHub project URL in some resource files
+- fix typo in version-policies.json
+
+## 5.17.2
+Tue, 26 Nov 2019 00:53:52 GMT
+
+### Updates
+
+- Resolve an issue where git tags were not being applied when using pack or publish with --include-all
+
+## 5.17.1
+Thu, 21 Nov 2019 00:50:15 GMT
+
+### Updates
+
+- Fix an issue with Rush add, where Rush was unable to add unpublished local projects as dependencies.
+
+## 5.17.0
+Thu, 14 Nov 2019 22:52:48 GMT
+
+### Updates
+
+- Add a new setting "implicitlyPreferredVersions" in common-versions.json that can be used to solve some installation failures involving peer dependencies
+- Improve the generation of shrinkwrap-deps.json to consider optional peer dependencies and implicitlyPreferredVersions=false
+- Fix an issue where certain operations did not use a stable sort when executed on older versions of NodeJS
+
+## 5.16.1
+Fri, 25 Oct 2019 20:15:59 GMT
+
+### Updates
+
+- Log to console instead of throwing when an unmet peer dependency is encountered during linking, and strictPeerDependencies is false
+- Refactor some code as part of migration from TSLint to ESLint
 
 ## 5.16.0
 Thu, 17 Oct 2019 00:41:01 GMT

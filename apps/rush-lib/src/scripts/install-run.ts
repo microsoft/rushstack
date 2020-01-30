@@ -444,7 +444,11 @@ export function installAndRun(
     }
   );
 
-  return result.status;
+  if (result.status !== null) {
+    return result.status;
+  } else {
+    throw result.error || new Error('An unknown error occurred.');
+  }
 }
 
 export function runWithErrorAndStatusCode(fn: () => number): void {

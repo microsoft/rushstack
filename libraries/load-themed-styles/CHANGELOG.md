@@ -1,6 +1,120 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Tue, 22 Oct 2019 06:24:44 GMT and should not be manually modified.
+This log was last generated on Tue, 28 Jan 2020 02:23:44 GMT and should not be manually modified.
+
+## 1.10.37
+Tue, 28 Jan 2020 02:23:44 GMT
+
+*Version update only*
+
+## 1.10.36
+Fri, 24 Jan 2020 00:27:39 GMT
+
+*Version update only*
+
+## 1.10.35
+Thu, 23 Jan 2020 01:07:56 GMT
+
+*Version update only*
+
+## 1.10.34
+Tue, 21 Jan 2020 21:56:13 GMT
+
+*Version update only*
+
+## 1.10.33
+Sun, 19 Jan 2020 02:26:53 GMT
+
+*Version update only*
+
+## 1.10.32
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 1.10.31
+Tue, 14 Jan 2020 01:34:15 GMT
+
+*Version update only*
+
+## 1.10.30
+Sat, 11 Jan 2020 05:18:23 GMT
+
+*Version update only*
+
+## 1.10.29
+Fri, 10 Jan 2020 03:07:47 GMT
+
+### Patches
+
+- Removed type attribute from style tags to align with WHATWG HTML guidelines
+
+## 1.10.28
+Thu, 09 Jan 2020 06:44:13 GMT
+
+*Version update only*
+
+## 1.10.27
+Wed, 08 Jan 2020 00:11:31 GMT
+
+*Version update only*
+
+## 1.10.26
+Mon, 23 Dec 2019 16:08:05 GMT
+
+### Patches
+
+- Add a "module" entry in package.json for the es6-style library.
+
+## 1.10.25
+Wed, 04 Dec 2019 23:17:55 GMT
+
+*Version update only*
+
+## 1.10.24
+Tue, 03 Dec 2019 03:17:44 GMT
+
+*Version update only*
+
+## 1.10.23
+Sun, 24 Nov 2019 00:54:04 GMT
+
+*Version update only*
+
+## 1.10.22
+Wed, 20 Nov 2019 06:14:28 GMT
+
+*Version update only*
+
+## 1.10.21
+Fri, 15 Nov 2019 04:50:50 GMT
+
+*Version update only*
+
+## 1.10.20
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 1.10.19
+Wed, 06 Nov 2019 22:44:18 GMT
+
+*Version update only*
+
+## 1.10.18
+Tue, 05 Nov 2019 06:49:29 GMT
+
+*Version update only*
+
+## 1.10.17
+Tue, 05 Nov 2019 01:08:39 GMT
+
+*Version update only*
+
+## 1.10.16
+Fri, 25 Oct 2019 15:08:54 GMT
+
+*Version update only*
 
 ## 1.10.15
 Tue, 22 Oct 2019 06:24:44 GMT

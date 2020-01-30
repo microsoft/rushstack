@@ -9,6 +9,8 @@ import { AstDeclaration } from './AstDeclaration';
 import { WorkingPackage } from '../collector/WorkingPackage';
 import { AstModule } from './AstModule';
 import { AstImport } from './AstImport';
+import { Collector } from '../collector/Collector';
+import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 
 /**
  * Used by `AstReferenceResolver` to report a failed resolution.
@@ -38,12 +40,14 @@ export class ResolverFailure {
  * which resolves declaration references by walking the hierarchy loaded from an .api.json file.
  */
 export class AstReferenceResolver {
+  private readonly _collector: Collector;
   private readonly _astSymbolTable: AstSymbolTable;
   private readonly _workingPackage: WorkingPackage;
 
-  public constructor(astSymbolTable: AstSymbolTable, workingPackage: WorkingPackage) {
-    this._astSymbolTable = astSymbolTable;
-    this._workingPackage = workingPackage;
+  public constructor(collector: Collector) {
+    this._collector = collector;
+    this._astSymbolTable = collector.astSymbolTable;
+    this._workingPackage = collector.workingPackage;
   }
 
   public resolve(declarationReference: tsdoc.DocDeclarationReference): AstDeclaration | ResolverFailure {
@@ -129,20 +133,38 @@ export class AstReferenceResolver {
   private _selectDeclaration(astDeclarations: ReadonlyArray<AstDeclaration>,
     memberReference: tsdoc.DocMemberReference, astSymbolName: string): AstDeclaration | ResolverFailure {
 
-    if (memberReference.selector === undefined) {
+    const memberSelector: tsdoc.DocMemberSelector | undefined = memberReference.selector;
+
+    if (memberSelector === undefined) {
       if (astDeclarations.length === 1) {
         return astDeclarations[0];
       } else {
+        // If we found multiple matches, but the extra ones are all ancillary declarations,
+        // then return the main declaration.
+        const nonAncillaryMatch: AstDeclaration | undefined = this._tryDisambiguateAncillaryMatches(astDeclarations);
+        if (nonAncillaryMatch) {
+          return nonAncillaryMatch;
+        }
+
         return new ResolverFailure(`The reference is ambiguous because "${astSymbolName}"`
           + ` has more than one declaration; you need to add a TSDoc member reference selector`);
       }
     }
 
-    const selectorName: string = memberReference.selector.selector;
-
-    if (memberReference.selector.selectorKind !== tsdoc.SelectorKind.System) {
-      return new ResolverFailure(`The selector "${selectorName}" is not a supported selector type`);
+    switch (memberSelector.selectorKind) {
+      case tsdoc.SelectorKind.System:
+        return this._selectUsingSystemSelector(astDeclarations, memberSelector, astSymbolName);
+      case tsdoc.SelectorKind.Index:
+        return this._selectUsingIndexSelector(astDeclarations, memberSelector, astSymbolName);
     }
+
+    return new ResolverFailure(`The selector "${memberSelector.selector}" is not a supported selector type`);
+  }
+
+  private _selectUsingSystemSelector(astDeclarations: ReadonlyArray<AstDeclaration>,
+    memberSelector: tsdoc.DocMemberSelector, astSymbolName: string): AstDeclaration | ResolverFailure {
+
+    const selectorName: string = memberSelector.selector;
 
     let selectorSyntaxKind: ts.SyntaxKind;
 
@@ -178,9 +200,66 @@ export class AstReferenceResolver {
         + ` TSDoc selector "${selectorName}"`);
     }
     if (matches.length > 1) {
+      // If we found multiple matches, but the extra ones are all ancillary declarations,
+      // then return the main declaration.
+      const nonAncillaryMatch: AstDeclaration | undefined = this._tryDisambiguateAncillaryMatches(matches);
+      if (nonAncillaryMatch) {
+        return nonAncillaryMatch;
+      }
+
       return new ResolverFailure(`More than one declaration "${astSymbolName}" matches the`
         + ` TSDoc selector "${selectorName}"`);
     }
     return matches[0];
+  }
+
+  private _selectUsingIndexSelector(astDeclarations: ReadonlyArray<AstDeclaration>,
+    memberSelector: tsdoc.DocMemberSelector, astSymbolName: string): AstDeclaration | ResolverFailure {
+
+    const selectorOverloadIndex: number = parseInt(memberSelector.selector);
+
+    const matches: AstDeclaration[] = [];
+    for (const astDeclaration of astDeclarations) {
+      const overloadIndex: number = this._collector.getOverloadIndex(astDeclaration);
+      if (overloadIndex === selectorOverloadIndex) {
+        matches.push(astDeclaration);
+      }
+    }
+
+    if (matches.length === 0) {
+      return new ResolverFailure(`An overload for "${astSymbolName}" was not found that matches the`
+        + ` TSDoc selector ":${selectorOverloadIndex}"`);
+    }
+    if (matches.length > 1) {
+      // If we found multiple matches, but the extra ones are all ancillary declarations,
+      // then return the main declaration.
+      const nonAncillaryMatch: AstDeclaration | undefined = this._tryDisambiguateAncillaryMatches(matches);
+      if (nonAncillaryMatch) {
+        return nonAncillaryMatch;
+      }
+
+      return new ResolverFailure(`More than one declaration for "${astSymbolName}" matches the`
+      + ` TSDoc selector ":${selectorOverloadIndex}"`);
+    }
+    return matches[0];
+  }
+
+  /**
+   * This resolves an ambiguous match in the case where the extra matches are all ancillary declarations,
+   * except for one match that is the main declaration.
+   */
+  private _tryDisambiguateAncillaryMatches(matches: ReadonlyArray<AstDeclaration>): AstDeclaration | undefined {
+    let result: AstDeclaration | undefined = undefined;
+
+    for (const match of matches) {
+      const declarationMetadata: DeclarationMetadata = this._collector.fetchDeclarationMetadata(match);
+      if (!declarationMetadata.isAncillary) {
+        if (result) {
+          return undefined; // more than one match
+        }
+        result = match;
+      }
+    }
+    return result;
   }
 }

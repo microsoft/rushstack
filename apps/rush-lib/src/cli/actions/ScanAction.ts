@@ -1,16 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/// <reference path="../../../typings/builtins/builtins.d.ts" />
-
 import * as colors from 'colors';
 import * as glob from 'glob';
 import * as path from 'path';
-import builtinPackageNames = require('builtins');
+import * as builtinPackageNames from 'builtin-modules';
+import { FileSystem } from '@microsoft/node-core-library';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseConfiglessRushAction } from './BaseRushAction';
-import { FileSystem } from '@microsoft/node-core-library';
 
 export class ScanAction extends BaseConfiglessRushAction {
   public constructor(parser: RushCommandLineParser) {

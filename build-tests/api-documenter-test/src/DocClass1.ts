@@ -140,8 +140,10 @@ export interface IDocInterface4 {
  * This is an example class.
  *
  * @remarks
- * These are some remarks.
- * @defaultValue a default value for this function
+ * {@link DocClass1.(exampleFunction:1)|Link to overload 1}
+ *
+ * {@link DocClass1.(exampleFunction:2)|Link to overload 2}
+ *
  * @public
  * {@docCategory DocClass1}
  */
@@ -158,6 +160,11 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
    * This is an overloaded function.
    * @param a - the first string
    * @param b - the second string
+   *
+   * @throws `Error`
+   *  The first throws line
+   *
+   * @throws The second throws line
    */
   exampleFunction(a: string, b: string): string;
 
@@ -169,6 +176,16 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
 
   public exampleFunction(x: number | string, y?: string): string | number {
     return x;
+  }
+
+  public get readonlyProperty(): string {
+    return 'hello';
+  }
+
+  public get writeableProperty(): string {
+    return 'hello';
+  }
+  public set writeableProperty(value: string) {
   }
 
   /**

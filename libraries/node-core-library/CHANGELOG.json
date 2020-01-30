@@ -2,6 +2,131 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.19.3",
+      "tag": "@microsoft/node-core-library_v3.19.3",
+      "date": "Tue, 28 Jan 2020 02:23:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a typing issue that prevented LegacyAdapters from being used with the new glob typings."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.19.2",
+      "tag": "@microsoft/node-core-library_v3.19.2",
+      "date": "Thu, 23 Jan 2020 01:07:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with a missing type in LegacyAdapters"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.19.1",
+      "tag": "@microsoft/node-core-library_v3.19.1",
+      "date": "Tue, 21 Jan 2020 21:56:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.3` to `0.5.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.19.0",
+      "tag": "@microsoft/node-core-library_v3.19.0",
+      "date": "Sun, 19 Jan 2020 02:26:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade Node typings to Node 10"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.2` to `0.5.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.18.3",
+      "tag": "@microsoft/node-core-library_v3.18.3",
+      "date": "Fri, 17 Jan 2020 01:08:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.1` to `0.5.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.18.2",
+      "tag": "@microsoft/node-core-library_v3.18.2",
+      "date": "Thu, 09 Jan 2020 06:44:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.0` to `0.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.18.1",
+      "tag": "@microsoft/node-core-library_v3.18.1",
+      "date": "Wed, 08 Jan 2020 00:11:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.4.2` to `0.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.18.0",
+      "tag": "@microsoft/node-core-library_v3.18.0",
+      "date": "Fri, 15 Nov 2019 04:50:50 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add NewlineKind.OsDefault and fix some comments"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.17.1",
+      "tag": "@microsoft/node-core-library_v3.17.1",
+      "date": "Mon, 11 Nov 2019 16:07:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.4.1` to `0.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.17.0",
+      "tag": "@microsoft/node-core-library_v3.17.0",
+      "date": "Tue, 05 Nov 2019 06:49:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new API LegacyAdapters.stableSort(), and update the Sort API to be stable"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.16.0",
       "tag": "@microsoft/node-core-library_v3.16.0",
       "date": "Tue, 22 Oct 2019 06:24:44 GMT",

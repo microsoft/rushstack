@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-mocha",
-  "version": "3.7.2",
+  "version": "3.8.4",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,17 +13,18 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.12.2",
-    "@types/node": "8.10.54",
+    "@microsoft/gulp-core-build": "3.15.1",
+    "@types/node": "10.17.13",
     "glob": "~7.0.5",
     "gulp": "~4.0.2",
     "gulp-istanbul": "~0.10.3",
     "gulp-mocha": "~6.0.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.4": "0.3.0",
-    "@rushstack/eslint-config": "0.4.1",
-    "@types/glob": "5.0.30",
+    "@microsoft/node-library-build": "6.3.11",
+    "@microsoft/rush-stack-compiler-3.5": "0.3.11",
+    "@rushstack/eslint-config": "0.5.4",
+    "@types/glob": "7.1.1",
     "@types/gulp": "4.0.6",
     "@types/gulp-istanbul": "0.9.30",
     "@types/gulp-mocha": "0.0.32",

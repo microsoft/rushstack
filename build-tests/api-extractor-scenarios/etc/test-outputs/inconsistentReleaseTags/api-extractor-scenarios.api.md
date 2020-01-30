@@ -14,7 +14,7 @@ export interface IBeta {
 }
 
 // Warning: (ae-incompatible-release-tags) The symbol "publicFunctionReturnsBeta" is marked as @public, but its signature references "IBeta" which is marked as @beta
-// 
+//
 // @public
 export function publicFunctionReturnsBeta(): IBeta;
 

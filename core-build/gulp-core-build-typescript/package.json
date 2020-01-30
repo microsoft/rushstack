@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-typescript",
-  "version": "8.3.1",
+  "version": "8.4.4",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,24 +13,23 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.12.2",
-    "@microsoft/node-core-library": "3.16.0",
-    "@types/node": "8.10.54",
+    "@microsoft/gulp-core-build": "3.15.1",
+    "@microsoft/node-core-library": "3.19.3",
+    "@types/node": "10.17.13",
     "decomment": "~0.9.1",
     "glob": "~7.0.5",
     "glob-escape": "~0.0.1",
     "resolve": "1.8.1"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "7.5.2",
-    "@microsoft/node-library-build": "6.3.0",
-    "@microsoft/rush-stack-compiler-3.1": "0.8.1",
-    "@microsoft/rush-stack-compiler-3.4": "0.3.0",
-    "@rushstack/eslint-config": "0.4.1",
-    "@types/glob": "5.0.30",
+    "@microsoft/api-extractor": "7.7.8",
+    "@microsoft/node-library-build": "6.3.11",
+    "@microsoft/rush-stack-compiler-3.1": "0.9.3",
+    "@microsoft/rush-stack-compiler-3.5": "0.3.11",
+    "@rushstack/eslint-config": "0.5.4",
+    "@types/glob": "7.1.1",
     "@types/resolve": "0.0.8",
     "gulp": "~4.0.2",
-    "tslint-microsoft-contrib": "~5.2.1",
     "typescript": "~3.2.4"
   }
 }

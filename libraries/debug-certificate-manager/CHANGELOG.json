@@ -1,0 +1,40 @@
+{
+  "name": "@rushstack/debug-certificate-manager",
+  "entries": [
+    {
+      "version": "0.2.1",
+      "tag": "@rushstack/debug-certificate-manager_v0.2.1",
+      "date": "Tue, 28 Jan 2020 02:23:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.19.2` to `3.19.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.3` to `6.4.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.2` to `0.4.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.0",
+      "tag": "@rushstack/debug-certificate-manager_v0.2.0",
+      "date": "Fri, 24 Jan 2020 00:27:39 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Extract debug certificate logic into separate package."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.2` to `6.4.3`"
+          }
+        ]
+      }
+    }
+  ]
+}

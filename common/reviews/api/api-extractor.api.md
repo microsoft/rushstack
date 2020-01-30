@@ -6,13 +6,13 @@
 
 import { INodePackageJson } from '@microsoft/node-core-library';
 import { JsonSchema } from '@microsoft/node-core-library';
-import * as ts from 'typescript';
+import { NewlineKind } from '@microsoft/node-core-library';
 import * as tsdoc from '@microsoft/tsdoc';
 
 // @public
 export class CompilerState {
     static create(extractorConfig: ExtractorConfig, options?: ICompilerStateCreateOptions): CompilerState;
-    readonly program: ts.Program;
+    readonly program: unknown;
 }
 
 // @public
@@ -53,6 +53,7 @@ export class ExtractorConfig {
     static loadFileAndPrepare(configJsonFilePath: string): ExtractorConfig;
     readonly mainEntryPointFilePath: string;
     readonly messages: IExtractorMessagesConfig;
+    readonly newlineKind: NewlineKind;
     readonly omitTrimmingComments: boolean;
     readonly overrideTsconfig: {} | undefined;
     readonly packageFolder: string | undefined;
@@ -118,9 +119,11 @@ export const enum ExtractorMessageId {
     InternalMissingUnderscore = "ae-internal-missing-underscore",
     InternalMixedReleaseTag = "ae-internal-mixed-release-tag",
     MisplacedPackageTag = "ae-misplaced-package-tag",
+    MissingGetter = "ae-missing-getter",
     MissingReleaseTag = "ae-missing-release-tag",
     PreapprovedBadReleaseTag = "ae-preapproved-bad-release-tag",
     PreapprovedUnsupportedType = "ae-preapproved-unsupported-type",
+    SetterWithDocs = "ae-setter-with-docs",
     UnresolvedInheritDocBase = "ae-unresolved-inheritdoc-base",
     UnresolvedInheritDocReference = "ae-unresolved-inheritdoc-reference",
     UnresolvedLink = "ae-unresolved-link"
@@ -185,6 +188,7 @@ export interface IConfigFile {
     extends?: string;
     mainEntryPointFilePath: string;
     messages?: IExtractorMessagesConfig;
+    newlineKind?: 'crlf' | 'lf' | 'os';
     projectFolder?: string;
     testMode?: boolean;
     // @beta

@@ -312,7 +312,7 @@ export class Utilities {
       maxLineLength = Utilities.getConsoleWidth();
     }
 
-    const wrap: (textToWrap: string) => string = wordwrap.soft(indent, maxLineLength);
+    const wrap: (textToWrap: string) => string = wordwrap(indent, maxLineLength, { mode: 'soft' });
     return wrap(text);
   }
 
@@ -410,7 +410,12 @@ export class Utilities {
     if (options.handleOutput) {
       Utilities._processResult(result);
     }
-    return result.status;
+
+    if (result.status !== null) {
+      return result.status;
+    } else {
+      throw result.error || new Error('An unknown error occurred.');
+    }
   }
 
   /**

@@ -39,10 +39,10 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
   public constructor(options: IApiDeclaredItemOptions) {
     super(options);
 
-    this._excerptTokens = options.excerptTokens.map(x => {
-      const canonicalReference: DeclarationReference | undefined = x.canonicalReference === undefined ? undefined :
-        DeclarationReference.parse(x.canonicalReference);
-      return new ExcerptToken(x.kind, x.text, canonicalReference);
+    this._excerptTokens = options.excerptTokens.map(token => {
+      const canonicalReference: DeclarationReference | undefined = token.canonicalReference === undefined ? undefined :
+        DeclarationReference.parse(token.canonicalReference);
+      return new ExcerptToken(token.kind, token.text, canonicalReference);
     });
     this._excerpt = new Excerpt(this.excerptTokens, { startIndex: 0, endIndex: this.excerptTokens.length });
   }

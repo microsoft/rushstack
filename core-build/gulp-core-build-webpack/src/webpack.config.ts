@@ -27,10 +27,6 @@ const webpackConfiguration: Webpack.Configuration = {
     filename: `[name]${isProduction ? '.min' : ''}.js`
   },
 
-  devServer: {
-    stats: 'none'
-  },
-
   // The typings are missing the "object" option here (https://webpack.js.org/configuration/externals/#object)
   externals: {
     'react': {
