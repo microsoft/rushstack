@@ -124,7 +124,8 @@ Optional arguments:
                         CPU cores.
   -t PROJECT1, --to PROJECT1
                         Run command in the specified project and all of its 
-                        dependencies
+                        dependencies. To include the project in the working 
+                        directory, include \\".\\"
   --from-version-policy VERSION_POLICY_NAME
                         Run command in all projects with the specified 
                         version policy and all projects that directly or 
@@ -135,7 +136,9 @@ Optional arguments:
                         version policy and all of their dependencies
   -f PROJECT2, --from PROJECT2
                         Run command in all projects that directly or 
-                        indirectly depend on the specified project
+                        indirectly depend on the specified project. To 
+                        include the project in the working directory, include 
+                        \\".\\"
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   -o, --changed-projects-only
@@ -250,7 +253,8 @@ Optional arguments:
                         CPU cores.
   -t PROJECT1, --to PROJECT1
                         Run command in the specified project and all of its 
-                        dependencies
+                        dependencies. To include the project in the working 
+                        directory, include \\".\\"
   --from-version-policy VERSION_POLICY_NAME
                         Run command in all projects with the specified 
                         version policy and all projects that directly or 
@@ -261,7 +265,9 @@ Optional arguments:
                         version policy and all of their dependencies
   -f PROJECT2, --from PROJECT2
                         Run command in all projects that directly or 
-                        indirectly depend on the specified project
+                        indirectly depend on the specified project. To 
+                        include the project in the working directory, include 
+                        \\".\\"
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   --locale {en-us,fr-fr,es-es,zh-cn}
@@ -500,7 +506,8 @@ Optional arguments:
                         CPU cores.
   -t PROJECT1, --to PROJECT1
                         Run command in the specified project and all of its 
-                        dependencies
+                        dependencies. To include the project in the working 
+                        directory, include \\".\\"
   --from-version-policy VERSION_POLICY_NAME
                         Run command in all projects with the specified 
                         version policy and all projects that directly or 
@@ -511,7 +518,9 @@ Optional arguments:
                         version policy and all of their dependencies
   -f PROJECT2, --from PROJECT2
                         Run command in all projects that directly or 
-                        indirectly depend on the specified project
+                        indirectly depend on the specified project. To 
+                        include the project in the working directory, include 
+                        \\".\\"
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   -s, --ship            Perform a production build, including minification 
