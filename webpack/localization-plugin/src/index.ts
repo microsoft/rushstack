@@ -15,6 +15,6 @@ export {
 } from './LocalizationPlugin';
 
 export {
-  ILocJsonPreprocessorOptions,
-  LocJsonPreprocessor
-} from './LocJsonPreprocessor';
+  ILocFilePreprocessorOptions,
+  LocFilePreprocessor
+} from './LocFilePreprocessor';
