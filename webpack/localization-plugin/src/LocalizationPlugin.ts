@@ -10,7 +10,7 @@ import * as Tapable from 'tapable';
 /**
  * @public
  */
-export interface ILocJsonFileData {
+export interface ILocFileData {
   [stringName: string]: string;
 }
 
@@ -18,7 +18,7 @@ export interface ILocJsonFileData {
  * @public
  */
 export interface ILocale {
-  [locJsonFilePath: string]: ILocJsonFileData;
+  [locFilePath: string]: ILocFileData;
 }
 
 /**
@@ -540,9 +540,9 @@ export class LocalizationPlugin implements Webpack.Plugin {
     // START options.filesToIgnore
     { // eslint-disable-line no-lone-blocks
       this._filesToIgnore = new Set<string>();
-      for (const locJsonFilePath of this._options.filesToIgnore || []) {
-        const normalizedLocJsonFilePath: string = path.resolve(configuration.context!, locJsonFilePath);
-        this._filesToIgnore.add(normalizedLocJsonFilePath);
+      for (const filePath of this._options.filesToIgnore || []) {
+        const normalizedFilePath: string = path.resolve(configuration.context!, filePath);
+        this._filesToIgnore.add(normalizedFilePath);
       }
     }
     // END options.filesToIgnore
@@ -552,7 +552,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
       const { localizedStrings } = this._options;
 
       const localeNameRegex: RegExp = /[a-z-]/i;
-      const definedStringsInLocJsonFiles: Map<string, Set<string>> = new Map<string, Set<string>>();
+      const definedStringsInLocFiles: Map<string, Set<string>> = new Map<string, Set<string>>();
       this._locFiles = new Set<string>();
       this.stringKeys = new Map<string, IStringPlaceholder>();
       this._stringPlaceholderMap = new Map<string, { [locale: string]: string }>();
@@ -594,37 +594,37 @@ export class LocalizationPlugin implements Webpack.Plugin {
           const locFilePathsInLocale: Set<string> = new Set<string>();
 
           const locale: ILocale = localizedStrings[localeName];
-          for (const locJsonFilePath in locale) {
-            if (locale.hasOwnProperty(locJsonFilePath)) {
-              const normalizedLocJsonFilePath: string = path.resolve(configuration.context!, locJsonFilePath);
+          for (const locFilePath in locale) {
+            if (locale.hasOwnProperty(locFilePath)) {
+              const normalizedLocFilePath: string = path.resolve(configuration.context!, locFilePath);
 
-              if (this._filesToIgnore.has(normalizedLocJsonFilePath)) {
+              if (this._filesToIgnore.has(normalizedLocFilePath)) {
                 errors.push(new Error(
-                  `The localization file path "${locJsonFilePath}" is listed both in the filesToIgnore object and in ` +
+                  `The localization file path "${locFilePath}" is listed both in the filesToIgnore object and in ` +
                   'strings data.'
                 ));
                 return errors;
               }
 
-              if (locFilePathsInLocale.has(normalizedLocJsonFilePath)) {
+              if (locFilePathsInLocale.has(normalizedLocFilePath)) {
                 errors.push(new Error(
-                  `The localization file path "${locJsonFilePath}" appears multiple times in locale ${localeName}. ` +
+                  `The localization file path "${locFilePath}" appears multiple times in locale ${localeName}. ` +
                   'There may be multiple instances with different casing.'
                 ));
                 return errors;
               }
 
-              locFilePathsInLocale.add(normalizedLocJsonFilePath);
-              this._locFiles.add(normalizedLocJsonFilePath);
+              locFilePathsInLocale.add(normalizedLocFilePath);
+              this._locFiles.add(normalizedLocFilePath);
 
               const stringsMap: Map<string, string> = new Map<string, string>();
-              filesMap.set(normalizedLocJsonFilePath, stringsMap);
+              filesMap.set(normalizedLocFilePath, stringsMap);
 
-              const locJsonFileData: ILocJsonFileData = locale[locJsonFilePath];
+              const locFileData: ILocFileData = locale[locFilePath];
 
-              for (const stringName in locJsonFileData) {
-                if (locJsonFileData.hasOwnProperty(stringName)) {
-                  const stringKey: string = `${normalizedLocJsonFilePath}?${stringName}`;
+              for (const stringName in locFileData) {
+                if (locFileData.hasOwnProperty(stringName)) {
+                  const stringKey: string = `${normalizedLocFilePath}?${stringName}`;
                   if (!this.stringKeys.has(stringKey)) {
                     this.stringKeys.set(stringKey, this._getPlaceholderString());
                   }
@@ -635,15 +635,15 @@ export class LocalizationPlugin implements Webpack.Plugin {
                     this._passthroughStringsMap.set(placeholder.suffix, stringName);
                   }
 
-                  const stringValue: string = locJsonFileData[stringName];
+                  const stringValue: string = locFileData[stringName];
 
                   this._stringPlaceholderMap.get(placeholder.suffix)![localeName] = stringValue;
 
-                  if (!definedStringsInLocJsonFiles.has(stringKey)) {
-                    definedStringsInLocJsonFiles.set(stringKey, new Set<string>());
+                  if (!definedStringsInLocFiles.has(stringKey)) {
+                    definedStringsInLocFiles.set(stringKey, new Set<string>());
                   }
 
-                  definedStringsInLocJsonFiles.get(stringKey)!.add(normalizedLocaleName);
+                  definedStringsInLocFiles.get(stringKey)!.add(normalizedLocaleName);
 
                   stringsMap.set(stringName, stringValue);
                 }
@@ -654,7 +654,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
       }
 
       const issues: string[] = [];
-      definedStringsInLocJsonFiles.forEach((localesForString: Set<string>, stringKey: string) => {
+      definedStringsInLocFiles.forEach((localesForString: Set<string>, stringKey: string) => {
         if (localesForString.size !== this._locales.size) {
           const missingLocales: string[] = [];
           this._locales.forEach((locale) => {
@@ -663,9 +663,9 @@ export class LocalizationPlugin implements Webpack.Plugin {
             }
           });
 
-          const [locJsonPath, stringName] = stringKey.split('?');
+          const [locFilePath, stringName] = stringKey.split('?');
           issues.push(
-            `The string "${stringName}" in "${locJsonPath}" is missing in the ` +
+            `The string "${stringName}" in "${locFilePath}" is missing in the ` +
             `following locales: ${missingLocales.join(', ')}`
           );
         }

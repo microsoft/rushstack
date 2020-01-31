@@ -34,13 +34,13 @@ export default function (this: loader.LoaderContext, content: string): string {
       `Strings for file ${locFilePath} were not provided in the LocalizationPlugin configuration.`
     ));
   } else {
-    const locJsonFileData: ILocFile = LocFileParser.parseLocFile({
+    const locFileData: ILocFile = LocFileParser.parseLocFile({
       filePath: locFilePath,
       loggerOptions: { writeError: this.emitError, writeWarning: this.emitWarning },
       content
     });
 
-    for (const stringName in locJsonFileData) {
+    for (const stringName in locFileData) {
       if (!stringMap.has(stringName)) {
         this.emitError(new Error(
           `String "${stringName}" in file ${locFilePath} was not provided in the LocalizationPlugin configuration.`

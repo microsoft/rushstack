@@ -65,7 +65,7 @@ export class LocFilePreprocessor {
       }
     }));
 
-    const locJsonFiles: string[] = glob.sync(
+    const locJsonFilePaths: string[] = glob.sync(
       path.join('**', '*.loc.json'),
       {
         root: this._options.srcFolder,
@@ -73,7 +73,7 @@ export class LocFilePreprocessor {
       }
     );
 
-    for (let locJsonFilePath of locJsonFiles) {
+    for (let locJsonFilePath of locJsonFilePaths) {
       locJsonFilePath = path.resolve(locJsonFilePath);
 
       if (filesToIgnore.has(locJsonFilePath)) {

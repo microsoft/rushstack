@@ -3,7 +3,7 @@
 
 export {
  IDefaultLocaleOptions,
- ILocJsonFileData,
+ ILocFileData,
  ILocale,
  ILocales,
  ILocalizationPluginOptions,
