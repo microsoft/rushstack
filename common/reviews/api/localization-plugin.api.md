@@ -19,7 +19,13 @@ export interface IDefaultLocaleOptions {
 // @public (undocumented)
 export interface ILocale {
     // (undocumented)
-    [locFilePath: string]: ILocFileData;
+    [locFilePath: string]: ILocaleFileData;
+}
+
+// @public (undocumented)
+export interface ILocaleFileData {
+    // (undocumented)
+    [stringName: string]: string;
 }
 
 // @public (undocumented)
@@ -68,12 +74,6 @@ export interface ILocalizationStatsEntrypoint {
     localizedAssets: {
         [locale: string]: string;
     };
-}
-
-// @public (undocumented)
-export interface ILocFileData {
-    // (undocumented)
-    [stringName: string]: string;
 }
 
 // @public (undocumented)

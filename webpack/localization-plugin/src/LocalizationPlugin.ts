@@ -8,55 +8,16 @@ import * as lodash from 'lodash';
 import * as Tapable from 'tapable';
 
 import { Constants } from './utilities/Constants';
-import { IWebpackConfigurationUpdaterOptions, WebpackConfigurationUpdater } from './WebpackConfigurationUpdater';
-
-/**
- * @public
- */
-export interface ILocFileData {
-  [stringName: string]: string;
-}
-
-/**
- * @public
- */
-export interface ILocale {
-  [locFilePath: string]: ILocFileData;
-}
-
-/**
- * @public
- */
-export interface ILocales {
-  [locale: string]: ILocale;
-}
-
-/**
- * @public
- */
-export interface IDefaultLocaleOptions {
-  locale?: string;
-  usePassthroughLocale?: boolean;
-
-  /**
-   * If {@link IDefaultLocaleOptions.usePassthroughLocale} is set, use this name for the passthrough locale.
-   * Defaults to "passthrough"
-   */
-  passthroughLocaleName?: string;
-}
-
-/**
- * The options for localization.
- *
- * @public
- */
-export interface ILocalizationPluginOptions {
-  localizedStrings: ILocales;
-  defaultLocale: IDefaultLocaleOptions;
-  filesToIgnore?: string[];
-  localizationStatsDropPath?: string;
-  localizationStatsCallback?: (stats: ILocalizationStats) => void;
-}
+import {
+  IWebpackConfigurationUpdaterOptions,
+  WebpackConfigurationUpdater
+} from './WebpackConfigurationUpdater';
+import {
+  ILocalizationPluginOptions,
+  ILocalizationStats,
+  ILocaleFileData,
+  ILocale
+} from './interfaces';
 
 /**
  * @internal
@@ -80,28 +41,6 @@ interface IExtendedMainTemplate {
   hooks: {
     localVars: Tapable.SyncHook<string, Webpack.compilation.Chunk, string>;
   };
-}
-
-/**
- * @public
- */
-export interface ILocalizationStatsEntrypoint {
-  localizedAssets: { [locale: string]: string };
-}
-
-/**
- * @public
- */
-export interface ILocalizationStatsChunkGroup {
-  localizedAssets: { [locale: string]: string };
-}
-
-/**
- * @public
- */
-export interface ILocalizationStats {
-  entrypoints: { [name: string]: ILocalizationStatsEntrypoint };
-  namedChunkGroups: { [name: string]: ILocalizationStatsChunkGroup };
 }
 
 const PLUGIN_NAME: string = 'localization';
@@ -495,7 +434,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
               const stringsMap: Map<string, string> = new Map<string, string>();
               filesMap.set(normalizedLocFilePath, stringsMap);
 
-              const locFileData: ILocFileData = locale[locFilePath];
+              const locFileData: ILocaleFileData = locale[locFilePath];
 
               for (const stringName in locFileData) {
                 if (locFileData.hasOwnProperty(stringName)) {
