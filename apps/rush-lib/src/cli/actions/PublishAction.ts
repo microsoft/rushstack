@@ -45,16 +45,16 @@ export class PublishAction extends BaseRushAction {
   private _partialPrerelease: CommandLineFlagParameter;
   private _suffix: CommandLineStringParameter;
   private _force: CommandLineFlagParameter;
-  private _prereleaseToken: PrereleaseToken;
   private _versionPolicy: CommandLineStringParameter;
   private _applyGitTagsOnPack: CommandLineFlagParameter;
   private _commitId: CommandLineStringParameter;
-
   private _releaseFolder: CommandLineStringParameter;
   private _pack: CommandLineFlagParameter;
 
+  private _prereleaseToken: PrereleaseToken;
   private _hotfixTagOverride: string;
-
+  private _targetNpmrcPublishPath: string;
+  
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'publish',
@@ -213,7 +213,9 @@ export class PublishAction extends BaseRushAction {
       }
 
       this._validate();
+
       this._addNpmPublishHome();
+
       if (this._includeAll.value) {
         this._publishAll(allPackages);
       } else {
@@ -499,7 +501,7 @@ export class PublishAction extends BaseRushAction {
     const targetNpmrcPublishFolder: string = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
 
     // Example: "common\temp\publish-home\.npmrc"
-    const targetNpmrcPublishPath: string = path.join(targetNpmrcPublishFolder, '.npmrc');
+    this._targetNpmrcPublishPath = path.join(targetNpmrcPublishFolder, '.npmrc');
 
     try {
       // Check if .npmrc-publish file exists to use for publishing
@@ -508,11 +510,11 @@ export class PublishAction extends BaseRushAction {
         Utilities.createFolderWithRetry(targetNpmrcPublishFolder);
 
         // Copy down the committed .npmrc-publish file, if there is one
-        Utilities.copyAndTrimNpmrcFile(sourceNpmrcPublishPath, targetNpmrcPublishPath);
-      } else if (FileSystem.exists(targetNpmrcPublishPath)) {
+        Utilities.copyAndTrimNpmrcFile(sourceNpmrcPublishPath, this._targetNpmrcPublishPath);
+      } else if (FileSystem.exists(this._targetNpmrcPublishPath)) {
         // If the source .npmrc-publish doesn't exist and there is one in the target, delete the one in the target
-        console.log(`Deleting ${targetNpmrcPublishPath}`);
-        FileSystem.deleteFile(targetNpmrcPublishPath);
+        console.log(`Deleting ${this._targetNpmrcPublishPath}`);
+        FileSystem.deleteFile(this._targetNpmrcPublishPath);
       }
     } catch (e) {
       throw new Error(`Error syncing .npmrc-publish file: ${e}`);
@@ -523,15 +525,10 @@ export class PublishAction extends BaseRushAction {
     const userConfig: string = (process.platform === 'win32') ? 'USERPROFILE' : 'HOME';
     let registry: string = '//registry.npmjs.org/';
 
-    // Example: "common\temp\publish-home"
-    const targetNpmrcPublishFolder: string = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
-
-    // Example: "common\temp\publish-home\.npmrc"
-    const targetNpmrcPublishPath: string = path.join(targetNpmrcPublishFolder, '.npmrc');
-
     // Check if .npmrc file exists in "common\temp\publish-home"
-    if (FileSystem.exists(targetNpmrcPublishPath)) {
+    if (FileSystem.exists(this._targetNpmrcPublishPath)) {
       // Update userconfig, NPM will use config in "common\temp\publish-home\.npmrc"
+      const targetNpmrcPublishFolder: string = path.dirname(this._targetNpmrcPublishPath);
       env[userConfig] = targetNpmrcPublishFolder;
     }
 
