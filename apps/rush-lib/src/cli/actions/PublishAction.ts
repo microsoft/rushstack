@@ -522,14 +522,14 @@ export class PublishAction extends BaseRushAction {
   }
 
   private _addSharedNpmConfig(env: { [key: string]: string | undefined }, args: string[]): void {
-    const userConfig: string = (process.platform === 'win32') ? 'USERPROFILE' : 'HOME';
+    const userHomeEnvVariable: string = (process.platform === 'win32') ? 'USERPROFILE' : 'HOME';
     let registry: string = '//registry.npmjs.org/';
 
     // Check if .npmrc file exists in "common\temp\publish-home"
     if (FileSystem.exists(this._targetNpmrcPublishPath)) {
-      // Update userconfig, NPM will use config in "common\temp\publish-home\.npmrc"
+      // Redirect userHomeEnvVariable, NPM will use config in "common\temp\publish-home\.npmrc"
       const targetNpmrcPublishFolder: string = path.dirname(this._targetNpmrcPublishPath);
-      env[userConfig] = targetNpmrcPublishFolder;
+      env[userHomeEnvVariable] = targetNpmrcPublishFolder;
     }
 
     // Check if registryUrl and token are specified via command-line
