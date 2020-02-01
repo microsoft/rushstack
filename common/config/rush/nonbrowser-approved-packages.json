@@ -391,6 +391,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "html-webpack-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "https-proxy-agent",
       "allowedCategories": [ "libraries" ]
     },
