@@ -299,8 +299,10 @@ export class LocalizationPlugin implements Webpack.Plugin {
       quotemarkCharacter: string | undefined;
     }
 
+    const placeholderPrefix: string = Constants.STRING_PLACEHOLDER_PREFIX;
     const placeholderRegex: RegExp = new RegExp(
-      `${lodash.escapeRegExp(Constants.STRING_PLACEHOLDER_PREFIX)}_(.+)_(\\d+)`,
+      // The maximum length of quotemark escaping we can support is the length of the placeholder prefix
+      `${lodash.escapeRegExp(placeholderPrefix)}_((?:.){1,${placeholderPrefix.length}})_(\\d+)`,
       'g'
     );
     const result: Map<string, IProcessAssetResult> = new Map<string, IProcessAssetResult>();
