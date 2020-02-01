@@ -8,12 +8,12 @@ import * as jju from 'jju';
 import { LocalizationPlugin } from '../LocalizationPlugin';
 import { ILocFile } from '../interfaces';
 
-export interface ILocJsonLoaderOptions {
+export interface ILocLoaderOptions {
   pluginInstance: LocalizationPlugin;
 }
 
 export default function (this: loader.LoaderContext, content: string): string {
-  const { pluginInstance } = loaderUtils.getOptions(this) as ILocJsonLoaderOptions;
+  const { pluginInstance } = loaderUtils.getOptions(this) as ILocLoaderOptions;
   const locJsonFilePath: string = this.resourcePath;
   const locJsonFileData: ILocFile = jju.parse(content);
 

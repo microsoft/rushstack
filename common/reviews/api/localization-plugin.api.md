@@ -19,7 +19,7 @@ export interface IDefaultLocaleOptions {
 // @public (undocumented)
 export interface ILocale {
     // (undocumented)
-    [locJsonFilePath: string]: ILocJsonFileData;
+    [locFilePath: string]: ILocFileData;
 }
 
 // @public (undocumented)
@@ -71,6 +71,12 @@ export interface ILocalizationStatsEntrypoint {
 }
 
 // @public (undocumented)
+export interface ILocFileData {
+    // (undocumented)
+    [stringName: string]: string;
+}
+
+// @public (undocumented)
 export interface ILocFilePreprocessorOptions {
     // (undocumented)
     filesToIgnore?: string[];
@@ -80,12 +86,6 @@ export interface ILocFilePreprocessorOptions {
     srcFolder: string;
     // (undocumented)
     terminal: Terminal;
-}
-
-// @public (undocumented)
-export interface ILocJsonFileData {
-    // (undocumented)
-    [stringName: string]: string;
 }
 
 // @internal (undocumented)

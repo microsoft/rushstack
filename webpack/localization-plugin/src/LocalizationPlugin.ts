@@ -393,7 +393,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
       [
         {
           test: (filePath: string) => this._locFiles.has(filePath),
-          loader: path.resolve(__dirname, 'loaders', 'LocJsonLoader.js'),
+          loader: path.resolve(__dirname, 'loaders', 'LocLoader.js'),
           options: {
             pluginInstance: this
           }
