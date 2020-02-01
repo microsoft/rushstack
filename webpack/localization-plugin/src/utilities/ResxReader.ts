@@ -195,7 +195,7 @@ export class ResxReader {
 
       return {
         value,
-        comment: comment ||  ''
+        comment
       };
     }
   }

@@ -34,7 +34,7 @@ export interface ILocFile {
 
 export interface ILocalizedString {
   value: string;
-  comment: string;
+  comment?: string;
 }
 
 /**

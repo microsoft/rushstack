@@ -58,11 +58,7 @@ export class LocFilePreprocessor {
     FileSystem.ensureEmptyFolder(this._options.generatedTsFolder);
 
     const filesToIgnore: Set<string> = new Set<string>((this._options.filesToIgnore!).map((fileToIgnore) => {
-      if (path.isAbsolute(fileToIgnore)) {
-        return fileToIgnore;
-      } else {
-        return path.resolve(this._options.srcFolder, fileToIgnore);
-      }
+      return path.resolve(this._options.srcFolder, fileToIgnore);
     }));
 
     const locJsonFilePaths: string[] = glob.sync(
@@ -113,7 +109,7 @@ export class LocFilePreprocessor {
     for (const stringName in locFileData) { // eslint-disable-line guard-for-in
       const { comment } = locFileData[stringName];
 
-      if (comment.trim()) {
+      if (comment && comment.trim() !== '') {
         outputLines.push(...[
           '/**',
           ` * ${comment.replace(/\*\//g, '*\\/')}`,
