@@ -65,7 +65,7 @@ function _parsePackageSpecifier(rawPackageSpecifier: string): IPackageSpecifier 
  * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities._copyNpmrcFile()
  */
 function _copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string): void {
-  console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`);
+  console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`); // Verbose
   let npmrcFileLines: string[] = fs.readFileSync(sourceNpmrcPath).toString().split('\n');
   npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
   const resultLines: string[] = [];
@@ -112,7 +112,7 @@ function _syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string): void 
       _copyAndTrimNpmrcFile(sourceNpmrcPath, targetNpmrcPath);
     } else if (fs.existsSync(targetNpmrcPath)) {
       // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
-      console.log(`Deleting ${targetNpmrcPath}`);
+      console.log(`Deleting ${targetNpmrcPath}`); // Verbose
       fs.unlinkSync(targetNpmrcPath);
     }
   } catch (e) {
