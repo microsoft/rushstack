@@ -3,11 +3,11 @@
 
 import { loader } from 'webpack';
 import * as loaderUtils from 'loader-utils';
-import * as jju from 'jju';
 
-import { ILocJsonFile } from '../interfaces';
+import { ILocFile } from '../interfaces';
+import { LocFileParser } from '../utilities/LocFileParser';
 
-export interface ILocJsonLoaderOptions {
+export interface ISingleLocaleLoaderOptions {
   /**
    * The outer map's keys are the resolved, uppercased file names.
    * The inner map's keys are the string identifiers and its values are the string values.
@@ -24,21 +24,26 @@ export default function (this: loader.LoaderContext, content: string): string {
   const {
     resolvedStrings,
     passthroughLocale
-  } = loaderUtils.getOptions(this) as ILocJsonLoaderOptions;
-  const locJsonFilePath: string = this.resourcePath;
+  } = loaderUtils.getOptions(this) as ISingleLocaleLoaderOptions;
+  const locFilePath: string = this.resourcePath;
   const resultObject: { [stringName: string]: string } = {};
 
-  const stringMap: Map<string, string> | undefined = resolvedStrings.get(locJsonFilePath);
+  const stringMap: Map<string, string> | undefined = resolvedStrings.get(locFilePath);
   if (!stringMap) {
     this.emitError(new Error(
-      `Strings for file ${locJsonFilePath} were not provided in the LocalizationPlugin configuration.`
-      ));
+      `Strings for file ${locFilePath} were not provided in the LocalizationPlugin configuration.`
+    ));
   } else {
-    const locJsonFileData: ILocJsonFile = jju.parse(content);
-    for (const stringName in locJsonFileData) {
+    const locFileData: ILocFile = LocFileParser.parseLocFile({
+      filePath: locFilePath,
+      loggerOptions: { writeError: this.emitError, writeWarning: this.emitWarning },
+      content
+    });
+
+    for (const stringName in locFileData) {
       if (!stringMap.has(stringName)) {
         this.emitError(new Error(
-          `String "${stringName}" in file ${locJsonFilePath} was not provided in the LocalizationPlugin configuration.`
+          `String "${stringName}" in file ${locFilePath} was not provided in the LocalizationPlugin configuration.`
         ));
       } else {
         resultObject[stringName] = passthroughLocale ? stringName : stringMap.get(stringName)!;

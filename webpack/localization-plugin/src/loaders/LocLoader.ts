@@ -3,28 +3,32 @@
 
 import { loader } from 'webpack';
 import * as loaderUtils from 'loader-utils';
-import * as jju from 'jju';
 
 import { LocalizationPlugin } from '../LocalizationPlugin';
-import { ILocJsonFile } from '../interfaces';
+import { ILocFile } from '../interfaces';
+import { LocFileParser } from '../utilities/LocFileParser';
 
-export interface ILocJsonLoaderOptions {
+export interface ILocLoaderOptions {
   pluginInstance: LocalizationPlugin;
 }
 
 export default function (this: loader.LoaderContext, content: string): string {
-  const { pluginInstance } = loaderUtils.getOptions(this) as ILocJsonLoaderOptions;
-  const locJsonFilePath: string = this.resourcePath;
-  const locJsonFileData: ILocJsonFile = jju.parse(content);
+  const { pluginInstance } = loaderUtils.getOptions(this) as ILocLoaderOptions;
+  const locFilePath: string = this.resourcePath;
+  const locFileData: ILocFile = LocFileParser.parseLocFile({
+    filePath: locFilePath,
+    loggerOptions: { writeError: this.emitError, writeWarning: this.emitWarning },
+    content
+  });
 
   const resultObject: { [stringName: string]: string } = {};
-  for (const stringName in locJsonFileData) { // eslint-disable-line guard-for-in
-    const stringKey: string = `${locJsonFilePath}?${stringName}`;
+  for (const stringName in locFileData) { // eslint-disable-line guard-for-in
+    const stringKey: string = `${locFilePath}?${stringName}`;
     if (pluginInstance.stringKeys.has(stringKey)) {
       resultObject[stringName] = pluginInstance.stringKeys.get(stringKey)!.value;
     } else {
       this.emitError(new Error(
-        `String "${stringName}" in file ${locJsonFilePath} was not provided in the LocalizationPlugin configuration.`
+        `String "${stringName}" in file ${locFilePath} was not provided in the LocalizationPlugin configuration.`
       ));
     }
   }

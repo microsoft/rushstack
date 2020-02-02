@@ -15,10 +15,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@rushstack/debug-certificate-manager",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "@microsoft/decorators",
       "allowedCategories": [ "libraries" ]
     },
@@ -156,6 +152,10 @@
     },
     {
       "name": "@pnpm/logger",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/debug-certificate-manager",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -391,6 +391,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "html-webpack-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "https-proxy-agent",
       "allowedCategories": [ "libraries" ]
     },
@@ -432,6 +436,10 @@
     },
     {
       "name": "jsdom",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "json-loader",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -608,6 +616,10 @@
     },
     {
       "name": "xml",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "xmldoc",
       "allowedCategories": [ "libraries" ]
     },
     {

@@ -3,7 +3,7 @@ const child_process = require('child_process');
 const path = require('path');
 const process = require('process');
 
-const { LocJsonPreprocessor } = require('@rushstack/localization-plugin');
+const { LocFilePreprocessor } = require('@rushstack/localization-plugin');
 
 function executeCommand(command) {
   console.log('---> ' + command);
@@ -16,10 +16,11 @@ FileSystem.ensureEmptyFolder('dist');
 FileSystem.ensureEmptyFolder('lib');
 FileSystem.ensureEmptyFolder('temp');
 
-LocJsonPreprocessor.preprocessLocJsonFiles({
+const preprocessor = new LocFilePreprocessor({
   srcFolder: path.resolve(__dirname, 'src'),
   generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts')
 });
+preprocessor.generateTypings();
 
 // Run Webpack
 executeCommand('node node_modules/webpack-cli/bin/cli');

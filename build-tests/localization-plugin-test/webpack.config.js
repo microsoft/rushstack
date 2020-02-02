@@ -6,6 +6,7 @@ const webpack = require('webpack');
 const { LocalizationPlugin } = require('@rushstack/localization-plugin');
 const { SetPublicPathPlugin } = require('@microsoft/set-webpack-public-path-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = function(env) {
   const configuration = {
@@ -57,6 +58,10 @@ module.exports = function(env) {
             },
             "./src/strings4.loc.json": {
               "string1": "\"String with quotemarks\""
+            },
+            "./src/strings5.resx": {
+              "string1": "The first RESX string",
+              "stringWithQuotes": "\"RESX string with quotemarks\""
             }
           },
           "es-es": {
@@ -73,6 +78,10 @@ module.exports = function(env) {
             },
             "./src/strings4.loc.json": {
               "string1": "\"Cadena con comillas\""
+            },
+            "./src/strings5.resx": {
+              "string1": "La primera cadena RESX",
+              "stringWithQuotes": "\"Cadena RESX con comillas\""
             }
           }
         },
@@ -97,7 +106,8 @@ module.exports = function(env) {
           name: '[name]_[locale]_[contenthash].js',
           isTokenized: true
         }
-      })
+      }),
+      new HtmlWebpackPlugin()
     ]
   };
 
