@@ -103,8 +103,7 @@ module.exports = function(env) {
       }),
       new SetPublicPathPlugin({
         scriptName: {
-          name: '[name]_[locale]_[contenthash].js',
-          isTokenized: true
+          useAssetName: true
         }
       }),
       new HtmlWebpackPlugin()
