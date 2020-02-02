@@ -159,43 +159,51 @@ export class LocalizationPlugin implements Webpack.Plugin {
               return;
             }
 
-            const chunkFiles: string[] = chunkGroup.getFiles();
-            for (const chunkFileName of chunkFiles) {
-              if (
-                chunkFileName.match(Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX) && // Ensure this is expected to be localized
-                chunkFileName.endsWith('.js') && // Ensure this is a JS file
-                !alreadyProcessedAssets.has(chunkFileName) // Ensure this isn't a vendor chunk we've already processed
-              ) {
-                alreadyProcessedAssets.add(chunkFileName);
+            for (const chunk of chunkGroup.chunks) {
+              // Clone the chunk files array because we're going to modify it
+              const chunkFiles: string[] = [...chunk.files];
+              const chunkFilesSet: Set<string> = new Set(chunkFiles);
+              for (const chunkFileName of chunkFiles) {
+                if (
+                  chunkFileName.match(Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX) && // Ensure this is expected to be localized
+                  chunkFileName.endsWith('.js') && // Ensure this is a JS file
+                  !alreadyProcessedAssets.has(chunkFileName) // Ensure this isn't a vendor chunk we've already processed
+                ) {
+                  alreadyProcessedAssets.add(chunkFileName);
 
-                const asset: IAsset = compilation.assets[chunkFileName];
-                const resultingAssets: Map<string, IProcessAssetResult> = this._processAsset(
-                  compilation,
-                  chunkFileName,
-                  asset
-                );
+                  const asset: IAsset = compilation.assets[chunkFileName];
+                  const resultingAssets: Map<string, IProcessAssetResult> = this._processAsset(
+                    compilation,
+                    chunkFileName,
+                    asset
+                  );
 
-                // Delete the existing asset because it's been renamed
-                delete compilation.assets[chunkFileName];
+                  // Delete the existing asset because it's been renamed
+                  delete compilation.assets[chunkFileName];
+                  chunkFilesSet.delete(chunkFileName);
 
-                const localizedChunkAssets: { [locale: string]: string } = {};
-                for (const [locale, newAsset] of resultingAssets) {
-                  compilation.assets[newAsset.filename] = newAsset.asset;
-                  localizedChunkAssets[locale] = newAsset.filename;
-                }
+                  const localizedChunkAssets: { [locale: string]: string } = {};
+                  for (const [locale, newAsset] of resultingAssets) {
+                    compilation.assets[newAsset.filename] = newAsset.asset;
+                    localizedChunkAssets[locale] = newAsset.filename;
+                    chunkFilesSet.add(newAsset.filename);
+                  }
 
-                if (chunkGroup.getParents().length > 0) {
-                  // This is a secondary chunk
-                  localizationStats.namedChunkGroups[chunkGroup.name] = {
-                    localizedAssets: localizedChunkAssets
-                  };
-                } else {
-                  // This is an entrypoint
-                  localizationStats.entrypoints[chunkGroup.name] = {
-                    localizedAssets: localizedChunkAssets
-                  };
+                  if (chunkGroup.getParents().length > 0) {
+                    // This is a secondary chunk
+                    localizationStats.namedChunkGroups[chunkGroup.name] = {
+                      localizedAssets: localizedChunkAssets
+                    };
+                  } else {
+                    // This is an entrypoint
+                    localizationStats.entrypoints[chunkGroup.name] = {
+                      localizedAssets: localizedChunkAssets
+                    };
+                  }
                 }
               }
+
+              chunk.files = Array.from(chunkFilesSet);
             }
           }
 
@@ -243,7 +251,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     const placeholderPrefix: string = Constants.STRING_PLACEHOLDER_PREFIX;
     const placeholderRegex: RegExp = new RegExp(
       // The maximum length of quotemark escaping we can support is the length of the placeholder prefix
-      `${lodash.escapeRegExp(placeholderPrefix)}_((?:.){1,${placeholderPrefix.length}})_(\\d+)`,
+      `${placeholderPrefix}_((?:.){1,${placeholderPrefix.length}})_(\\d+)`,
       'g'
     );
     const result: Map<string, IProcessAssetResult> = new Map<string, IProcessAssetResult>();
