@@ -515,7 +515,7 @@ export class Utilities {
    * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _copyNpmrcFile() FROM scripts/install-run.ts
    */
   public static copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string): void {
-    console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`);
+    console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`); // Verbose
     let npmrcFileLines: string[] = FileSystem.readFile(sourceNpmrcPath).split('\n');
     npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
     const resultLines: string[] = [];
@@ -562,7 +562,7 @@ export class Utilities {
         Utilities.copyAndTrimNpmrcFile(sourceNpmrcPath, targetNpmrcPath);
       } else if (FileSystem.exists(targetNpmrcPath)) {
         // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
-        console.log(`Deleting ${targetNpmrcPath}`);
+        console.log(`Deleting ${targetNpmrcPath}`); // Verbose
         FileSystem.deleteFile(targetNpmrcPath);
       }
     } catch (e) {
