@@ -3,7 +3,7 @@
 
 /**
  * This file contains a set of helper functions that are unit tested and used with the PublishAction,
- * which itself it a thin wrapper around these helpers.
+ * which itself is a thin wrapper around these helpers.
  */
 
 import { EOL } from 'os';
@@ -13,7 +13,8 @@ import * as semver from 'semver';
 import {
   IPackageJson,
   JsonFile,
-  FileConstants
+  FileConstants,
+  Text
 } from '@microsoft/node-core-library';
 
 import {
@@ -183,12 +184,17 @@ export class PublishUtilities {
     return env;
   }
 
+  /**
+   * @param secretSubstring -- if specified, a substring to be replaced by `<<SECRET>>` to avoid printing secrets
+   * on the console
+   */
   public static execCommand(
     shouldExecute: boolean,
     command: string,
     args: string[] = [],
     workingDirectory: string = process.cwd(),
-    environment?: IEnvironment
+    environment?: IEnvironment,
+    secretSubstring?: string
   ): void {
 
     let relativeDirectory: string = path.relative(process.cwd(), workingDirectory);
@@ -197,8 +203,15 @@ export class PublishUtilities {
       relativeDirectory = `(${relativeDirectory})`;
     }
 
+    let commandArgs: string = args.join(' ');
+
+    if (secretSubstring && secretSubstring.length > 0) {
+      // Avoid printing the NPM publish token on the console when displaying the commandArgs
+      commandArgs = Text.replaceAll(commandArgs, secretSubstring, '<<SECRET>>');
+    }
+
     console.log(
-      `${EOL}* ${shouldExecute ? 'EXECUTING' : 'DRYRUN'}: ${command} ${args.join(' ')} ${relativeDirectory}`
+      `${EOL}* ${shouldExecute ? 'EXECUTING' : 'DRYRUN'}: ${command} ${commandArgs} ${relativeDirectory}`
     );
 
     if (shouldExecute) {

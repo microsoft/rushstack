@@ -40,6 +40,7 @@ const DEFAULT_REMOTE: string = 'origin';
  */
 const knownRushConfigFilenames: string[] = [
   '.npmrc',
+  '.npmrc-publish',
   RushConstants.pinnedVersionsFilename,
   RushConstants.commonVersionsFilename,
   RushConstants.browserApprovedPackagesFilename,

@@ -28,6 +28,7 @@ import { VersionControl } from '../../utilities/VersionControl';
 import { PolicyValidator } from '../../logic/policy/PolicyValidator';
 import { VersionPolicy } from '../../api/VersionPolicy';
 import { DEFAULT_PACKAGE_UPDATE_MESSAGE } from './VersionAction';
+import { Utilities } from '../../utilities/Utilities';
 
 export class PublishAction extends BaseRushAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -44,15 +45,16 @@ export class PublishAction extends BaseRushAction {
   private _partialPrerelease: CommandLineFlagParameter;
   private _suffix: CommandLineStringParameter;
   private _force: CommandLineFlagParameter;
-  private _prereleaseToken: PrereleaseToken;
   private _versionPolicy: CommandLineStringParameter;
   private _applyGitTagsOnPack: CommandLineFlagParameter;
   private _commitId: CommandLineStringParameter;
-
   private _releaseFolder: CommandLineStringParameter;
   private _pack: CommandLineFlagParameter;
 
+  private _prereleaseToken: PrereleaseToken;
   private _hotfixTagOverride: string;
+  private _targetNpmrcPublishFolder: string;
+  private _targetNpmrcPublishPath: string;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -64,6 +66,12 @@ export class PublishAction extends BaseRushAction {
       'changes and publish packages, you must use the --commit flag and/or the --publish flag.',
       parser
     });
+
+    // Example: "common\temp\publish-home"
+    this._targetNpmrcPublishFolder = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
+
+    // Example: "common\temp\publish-home\.npmrc"
+    this._targetNpmrcPublishPath = path.join(this._targetNpmrcPublishFolder, '.npmrc');
   }
 
   protected onDefineParameters(): void {
@@ -212,6 +220,8 @@ export class PublishAction extends BaseRushAction {
       }
 
       this._validate();
+
+      this._addNpmPublishHome();
 
       if (this._includeAll.value) {
         this._publishAll(allPackages);
@@ -401,12 +411,16 @@ export class PublishAction extends BaseRushAction {
       const packageManagerToolFilename: string = this.rushConfiguration.packageManager === 'yarn'
         ? 'npm' : this.rushConfiguration.packageManagerToolFilename;
 
+      // If the auth token was specified via the command line, avoid printing it on the console
+      const secretSubstring: string | undefined = this._npmAuthToken.value;
+
       PublishUtilities.execCommand(
         !!this._publish.value,
         packageManagerToolFilename,
         args,
         packagePath,
-        env);
+        env,
+        secretSubstring);
     }
   }
 
@@ -486,8 +500,25 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
+  private _addNpmPublishHome(): void {    
+    // Create "common\temp\publish-home" folder, if it doesn't exist
+    Utilities.createFolderWithRetry(this._targetNpmrcPublishFolder);
+
+    // Copy down the committed "common\config\rush\.npmrc-publish" file, if there is one
+    Utilities.syncNpmrc(this.rushConfiguration.commonRushConfigFolder, this._targetNpmrcPublishFolder, true);
+  }
+
   private _addSharedNpmConfig(env: { [key: string]: string | undefined }, args: string[]): void {
+    const userHomeEnvVariable: string = (process.platform === 'win32') ? 'USERPROFILE' : 'HOME';
     let registry: string = '//registry.npmjs.org/';
+
+    // Check if .npmrc file exists in "common\temp\publish-home"
+    if (FileSystem.exists(this._targetNpmrcPublishPath)) {
+      // Redirect userHomeEnvVariable, NPM will use config in "common\temp\publish-home\.npmrc"
+      env[userHomeEnvVariable] = this._targetNpmrcPublishFolder;
+    }
+
+    // Check if registryUrl and token are specified via command-line
     if (this._registryUrl.value) {
       const registryUrl: string = this._registryUrl.value;
       env['npm_config_registry'] = registryUrl; // eslint-disable-line dot-notation
