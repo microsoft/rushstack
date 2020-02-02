@@ -53,8 +53,9 @@ export class PublishAction extends BaseRushAction {
 
   private _prereleaseToken: PrereleaseToken;
   private _hotfixTagOverride: string;
+  private _targetNpmrcPublishFolder: string;
   private _targetNpmrcPublishPath: string;
-  
+
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'publish',
@@ -65,6 +66,12 @@ export class PublishAction extends BaseRushAction {
       'changes and publish packages, you must use the --commit flag and/or the --publish flag.',
       parser
     });
+
+    // Example: "common\temp\publish-home"
+    this._targetNpmrcPublishFolder = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
+
+    // Example: "common\temp\publish-home\.npmrc"
+    this._targetNpmrcPublishPath = path.join(this._targetNpmrcPublishFolder, '.npmrc');
   }
 
   protected onDefineParameters(): void {
@@ -497,17 +504,11 @@ export class PublishAction extends BaseRushAction {
     // Example: "common\config\rush\.npmrc-publish"
     const sourceNpmrcPublishPath: string = path.join(this.rushConfiguration.commonRushConfigFolder, '.npmrc-publish');
 
-    // Example: "common\temp\publish-home"
-    const targetNpmrcPublishFolder: string = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
-
-    // Example: "common\temp\publish-home\.npmrc"
-    this._targetNpmrcPublishPath = path.join(targetNpmrcPublishFolder, '.npmrc');
-
     try {
       // Check if .npmrc-publish file exists to use for publishing
       if (FileSystem.exists(sourceNpmrcPublishPath)) {
         // Sync "common\config\rush\.npmrc-publish" --> "common\temp\publish-home\.npmrc"
-        Utilities.createFolderWithRetry(targetNpmrcPublishFolder);
+        Utilities.createFolderWithRetry(this._targetNpmrcPublishFolder);
 
         // Copy down the committed .npmrc-publish file, if there is one
         Utilities.copyAndTrimNpmrcFile(sourceNpmrcPublishPath, this._targetNpmrcPublishPath);
@@ -528,8 +529,7 @@ export class PublishAction extends BaseRushAction {
     // Check if .npmrc file exists in "common\temp\publish-home"
     if (FileSystem.exists(this._targetNpmrcPublishPath)) {
       // Redirect userHomeEnvVariable, NPM will use config in "common\temp\publish-home\.npmrc"
-      const targetNpmrcPublishFolder: string = path.dirname(this._targetNpmrcPublishPath);
-      env[userHomeEnvVariable] = targetNpmrcPublishFolder;
+      env[userHomeEnvVariable] = this._targetNpmrcPublishFolder;
     }
 
     // Check if registryUrl and token are specified via command-line
