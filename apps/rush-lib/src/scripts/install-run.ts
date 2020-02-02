@@ -62,7 +62,7 @@ function _parsePackageSpecifier(rawPackageSpecifier: string): IPackageSpecifier 
  * we'd prefer to skip that line and continue looking in other places such as the user's
  * home directory.
  *
- * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _copyNpmrcFile() FROM scripts/install-run.ts
+ * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities._copyNpmrcFile()
  */
 function _copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string): void {
   console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`);
