@@ -28,19 +28,24 @@ import { SetPublicPathPlugin } from '@microsoft/set-webpack-public-path-plugin';
 
 #### `scriptName = { }`
 
-This parameter is an object that takes two properties: a string property `name`, and a boolean property `isTokenized`.
+This parameter is an object that takes three properties: a string property `name`, a boolean property `isTokenized`,
+and a boolean property `useAssetName`
+
 The `name` property is a regular expression string that is applied to all script URLs on the page. The last directory
 of the URL that matches the regular expression is used as the public path. For example, if the `name` property
 is set to `my\-bundle_?[a-zA-Z0-9-_]*\.js` and a script's URL is `https://mycdn.net/files/build_id/assets/my-bundle_10fae182eb.js`,
 the public path will be set to `https://mycdn.net/files/build_id/assets/`.
 
-If the `isTokenized` paramter is set to `true`, the regular expression string in `name` is treated as a tokenized
+If the `isTokenized` parameter is set to `true`, the regular expression string in `name` is treated as a tokenized
 string. The supported tokens are `[name]` and `[hash]`. Instances of the `[name]` substring are replaced with the
 chunk's name, and instances of the `[hash]` substring are replaced with the chunk's rendered hash. The name
 is regular expression-escaped. For example, if the `name` property is set to `[name]_?[a-zA-Z0-9-_]*\.js`,
 `isTokenized` is set to `true`, and the chunk's name is `my-bundle`, and a script's URL is
 `https://mycdn.net/files/build_id/assets/my-bundle_10fae182eb.js`, the public path will be set to
 `https://mycdn.net/files/build_id/assets/`.
+
+If the `useAssetName` property is set, the plugin will use the Webpack-produced asset name as it would the `name`
+property. `useAssetName` is exclusive to `name` and `isTokenized`.
 
 This option is exclusive to other options. If it is set, `systemJs`, `publicPath`, and `urlPrefix` will be ignored.
 
