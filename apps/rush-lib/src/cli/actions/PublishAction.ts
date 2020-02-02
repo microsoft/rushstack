@@ -500,26 +500,12 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private _addNpmPublishHome(): void {
-    // Example: "common\config\rush\.npmrc-publish"
-    const sourceNpmrcPublishPath: string = path.join(this.rushConfiguration.commonRushConfigFolder, '.npmrc-publish');
+  private _addNpmPublishHome(): void {    
+    // Create "common\temp\publish-home" folder, if it doesn't exist
+    Utilities.createFolderWithRetry(this._targetNpmrcPublishFolder);
 
-    try {
-      // Check if .npmrc-publish file exists to use for publishing
-      if (FileSystem.exists(sourceNpmrcPublishPath)) {
-        // Sync "common\config\rush\.npmrc-publish" --> "common\temp\publish-home\.npmrc"
-        Utilities.createFolderWithRetry(this._targetNpmrcPublishFolder);
-
-        // Copy down the committed .npmrc-publish file, if there is one
-        Utilities.copyAndTrimNpmrcFile(sourceNpmrcPublishPath, this._targetNpmrcPublishPath);
-      } else if (FileSystem.exists(this._targetNpmrcPublishPath)) {
-        // If the source .npmrc-publish doesn't exist and there is one in the target, delete the one in the target
-        console.log(`Deleting ${this._targetNpmrcPublishPath}`);
-        FileSystem.deleteFile(this._targetNpmrcPublishPath);
-      }
-    } catch (e) {
-      throw new Error(`Error syncing .npmrc-publish file: ${e}`);
-    }
+    // Copy down the committed "common\config\rush\.npmrc-publish" file, if there is one
+    Utilities.syncNpmrc(this.rushConfiguration.commonRushConfigFolder, this._targetNpmrcPublishFolder, true);
   }
 
   private _addSharedNpmConfig(env: { [key: string]: string | undefined }, args: string[]): void {
