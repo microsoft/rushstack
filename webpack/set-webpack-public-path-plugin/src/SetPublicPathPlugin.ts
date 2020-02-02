@@ -216,6 +216,10 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
         }
       });
     } else {
+      if (this.options.scriptName && this.options.scriptName.useAssetName) {
+        throw new Error('scriptName.useAssetName is only supported on Webpack 4');
+      }
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       compiler.plugin('compilation', (compilation: IV3Compilation, params: any): void => {
         compilation.mainTemplate.plugin('startup', (source: string, chunk: IV3Chunk, hash: string) => {
