@@ -84,13 +84,17 @@ export class LocalizationPlugin implements Webpack.Plugin {
       throw new Error('The localization plugin requires webpack 4');
     }
 
+    // https://github.com/webpack/webpack-dev-server/pull/1929/files#diff-15fb51940da53816af13330d8ce69b4eR66
+    const isWebpackDevServer: boolean = process.env.WEBPACK_DEV_SERVER === 'true';
+
     const errors: Error[] = this._initializeAndValidateOptions(compiler.options);
 
     const webpackConfigurationUpdaterOptions: IWebpackConfigurationUpdaterOptions = {
+      pluginInstance: this,
       configuration: compiler.options,
       locFiles: this._locFiles,
       filesToIgnore: this._filesToIgnore,
-      pluginInstance: this
+      localeNameOrPlaceholder: this._localeNamePlaceholder.value
     };
 
     if (errors.length > 0) {
@@ -103,8 +107,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
       return;
     }
 
-    // https://github.com/webpack/webpack-dev-server/pull/1929/files#diff-15fb51940da53816af13330d8ce69b4eR66
-    const isWebpackDevServer: boolean = process.env.WEBPACK_DEV_SERVER === 'true';
     if (isWebpackDevServer) {
       WebpackConfigurationUpdater.amendWebpackConfigurationForInPlaceLocFiles(compiler.options);
     } else if (this._locales.size === 1) {

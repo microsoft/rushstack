@@ -3,15 +3,17 @@
 
 import * as path from 'path';
 import * as Webpack from 'webpack';
+import * as SetPublicPathPluginPackageType from '@microsoft/set-webpack-public-path-plugin';
 
 import { Constants } from './utilities/Constants';
 import { LocalizationPlugin } from './LocalizationPlugin';
 
 export interface IWebpackConfigurationUpdaterOptions {
+  pluginInstance: LocalizationPlugin;
   configuration: Webpack.Configuration;
   locFiles: Set<string>;
   filesToIgnore: Set<string>;
-  pluginInstance: LocalizationPlugin
+  localeNameOrPlaceholder: string;
 }
 
 export interface ISingleLocaleConfigOptions extends IWebpackConfigurationUpdaterOptions {
@@ -28,6 +30,8 @@ export class WebpackConfigurationUpdater {
     };
 
     WebpackConfigurationUpdater._addLoadersForProvidedLocFiles(options, loader, loaderOptions);
+
+    WebpackConfigurationUpdater._tryUpdateLocaleTokenInPublicPathPlugin(options);
   }
 
   public static amendWebpackConfigurationForSingleLocale(options: ISingleLocaleConfigOptions): void {
@@ -49,6 +53,11 @@ export class WebpackConfigurationUpdater {
       passthroughLocale: options.passthroughLocale
     };
     WebpackConfigurationUpdater._addLoadersForProvidedLocFiles(options, loader, loaderOptions);
+
+    WebpackConfigurationUpdater._tryUpdateLocaleTokenInPublicPathPlugin({
+      ...options,
+      localeNameOrPlaceholder: options.localeName
+    });
   }
 
   public static amendWebpackConfigurationForInPlaceLocFiles(configuration: Webpack.Configuration): void {
@@ -70,6 +79,35 @@ export class WebpackConfigurationUpdater {
         }
       ]
     );
+  }
+
+  private static _tryUpdateLocaleTokenInPublicPathPlugin(options: IWebpackConfigurationUpdaterOptions): void {
+    let setPublicPathPlugin: typeof SetPublicPathPluginPackageType.SetPublicPathPlugin | undefined;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const pluginPackage: typeof SetPublicPathPluginPackageType = require('@microsoft/set-webpack-public-path-plugin');
+      setPublicPathPlugin = pluginPackage.SetPublicPathPlugin;
+    } catch (e) {
+      // public path plugin isn't present - ignore
+    }
+
+    if (setPublicPathPlugin && options.configuration.plugins) {
+      for (const plugin of options.configuration.plugins) {
+        if (plugin instanceof setPublicPathPlugin) {
+          if (
+            plugin.options &&
+            plugin.options.scriptName &&
+            plugin.options.scriptName.isTokenized &&
+            plugin.options.scriptName.name
+          ) {
+            plugin.options.scriptName.name = plugin.options.scriptName.name.replace(
+              /\[locale\]/g,
+              options.localeNameOrPlaceholder
+            );
+          }
+        }
+      }
+    }
   }
 
   private static _addLoadersForProvidedLocFiles(
