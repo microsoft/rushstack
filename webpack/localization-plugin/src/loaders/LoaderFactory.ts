@@ -20,7 +20,7 @@ export function loaderFactory<TOptions extends IBaseLoaderOptions>(
 ): loader.Loader {
   return function (this: loader.LoaderContext, content: string): string {
     const options: TOptions = loaderUtils.getOptions(this) as TOptions;
-    const resultObject: ILoaderResult = innerLoader(this.resourcePath, content, options);
+    const resultObject: ILoaderResult = innerLoader.call(this, this.resourcePath, content, options);
     return JSON.stringify(options.exportAsDefault ? { default: resultObject } : resultObject);
   }
 }

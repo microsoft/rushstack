@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as jju from 'jju';
+import { loader } from 'webpack';
 
 import {
   Logging,
@@ -18,6 +19,15 @@ export interface IParseLocFileOptions {
 }
 
 export class LocFileParser {
+  public static parseLocFileFromLoader(content: string, loaderContext: loader.LoaderContext): ILocFile {
+    debugger;
+    return LocFileParser.parseLocFile({
+      filePath: loaderContext.resourcePath,
+      loggerOptions: { writeError: loaderContext.emitError, writeWarning: loaderContext.emitWarning },
+      content
+    });
+  }
+
   public static parseLocFile(options: IParseLocFileOptions): ILocFile {
     if (/\.resx$/i.test(options.filePath)) {
       return ResxReader.readResxAsLocFile(
