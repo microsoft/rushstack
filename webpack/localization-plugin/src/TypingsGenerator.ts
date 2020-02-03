@@ -111,7 +111,7 @@ export class TypingsGenerator {
     });
   }
 
-  private _parseFileAndGenerateTypings(locFilePath): void {
+  private _parseFileAndGenerateTypings(locFilePath: string): void {
     const locFileData: ILocFile = LocFileParser.parseLocFile({
       filePath: locFilePath,
       content: FileSystem.readFile(locFilePath),

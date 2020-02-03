@@ -15,6 +15,9 @@ export interface IDefaultLocaleOptions {
   passthroughLocaleName?: string;
 }
 
+/**
+ * @public
+ */
 export interface ITypingsGenerationOptions {
   generatedTsFolder: string;
   sourceRoot?: string;
