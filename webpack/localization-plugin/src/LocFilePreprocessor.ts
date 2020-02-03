@@ -23,9 +23,10 @@ import {
  * @public
  */
 export interface ILocFilePreprocessorOptions {
+  terminal: Terminal;
   srcFolder: string;
   generatedTsFolder: string;
-  terminal: Terminal;
+  exportAsDefault?: boolean;
   filesToIgnore?: string[];
 }
 
@@ -106,21 +107,46 @@ export class LocFilePreprocessor {
       ''
     ];
 
+    let indent: string = '';
+    if (this._options.exportAsDefault) {
+      outputLines.push(
+        'interface IStrings {'
+      );
+
+      indent = '  ';
+    }
+
     for (const stringName in locFileData) { // eslint-disable-line guard-for-in
       const { comment } = locFileData[stringName];
 
       if (comment && comment.trim() !== '') {
-        outputLines.push(...[
-          '/**',
-          ` * ${comment.replace(/\*\//g, '*\\/')}`,
-          ' */'
-        ]);
+        outputLines.push(
+          `${indent}/**`,
+          `${indent} * ${comment.replace(/\*\//g, '*\\/')}`,
+          `${indent} */`
+        );
       }
 
-      outputLines.push(...[
-        `export declare const ${stringName}: string;`,
-        ''
-      ]);
+      if (this._options.exportAsDefault) {
+        outputLines.push(
+          `${indent}${stringName}: string;`,
+          ''
+        );
+      } else {
+        outputLines.push(
+          `export declare const ${stringName}: string;`,
+          ''
+        );
+      }
+    }
+
+    if (this._options.exportAsDefault) {
+      outputLines.push(
+        '}',
+        '',
+        'declare const strings: IStrings;',
+        'export default strings;'
+      );
     }
 
     const generatedTsFilePath: string = path.resolve(

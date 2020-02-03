@@ -1,20 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { loader } from 'webpack';
-import * as loaderUtils from 'loader-utils';
-
 import { LocalizationPlugin } from '../LocalizationPlugin';
 import { ILocFile } from '../interfaces';
 import { LocFileParser } from '../utilities/LocFileParser';
+import {
+  loaderFactory,
+  IBaseLoaderOptions
+} from './LoaderFactory';
 
-export interface ILocLoaderOptions {
+export interface ILocLoaderOptions extends IBaseLoaderOptions {
   pluginInstance: LocalizationPlugin;
+  exportAsDefault: boolean;
 }
 
-export default function (this: loader.LoaderContext, content: string): string {
-  const { pluginInstance } = loaderUtils.getOptions(this) as ILocLoaderOptions;
-  const locFilePath: string = this.resourcePath;
+export default loaderFactory((locFilePath: string, content: string, options: ILocLoaderOptions) => {
+  const { pluginInstance } = options;
   const locFileData: ILocFile = LocFileParser.parseLocFile({
     filePath: locFilePath,
     loggerOptions: { writeError: this.emitError, writeWarning: this.emitWarning },
@@ -33,5 +34,5 @@ export default function (this: loader.LoaderContext, content: string): string {
     }
   }
 
-  return JSON.stringify(resultObject);
-}
+  return resultObject;
+});

@@ -1,14 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { loader } from 'webpack';
-
 import { ILocFile } from '../interfaces';
 import { LocFileParser } from '../utilities/LocFileParser';
+import { loaderFactory } from './LoaderFactory';
 
-export default function (this: loader.LoaderContext, content: string): string {
-  const locFilePath: string = this.resourcePath;
-
+export default loaderFactory((locFilePath: string, content: string) => {
   const locFileData: ILocFile = LocFileParser.parseLocFile({
     filePath: locFilePath,
     loggerOptions: { writeError: this.emitError, writeWarning: this.emitWarning },
@@ -19,5 +16,5 @@ export default function (this: loader.LoaderContext, content: string): string {
     resultObject[stringName] = locFileData[stringName].value;
   }
 
-  return JSON.stringify(resultObject);
-}
+  return resultObject;
+});

@@ -23,6 +23,7 @@ export interface IDefaultLocaleOptions {
 export interface ILocalizationPluginOptions {
   localizedStrings: ILocales;
   defaultLocale: IDefaultLocaleOptions;
+  exportAsDefault?: boolean;
   filesToIgnore?: string[];
   localizationStatsDropPath?: string;
   localizationStatsCallback?: (stats: ILocalizationStats) => void;

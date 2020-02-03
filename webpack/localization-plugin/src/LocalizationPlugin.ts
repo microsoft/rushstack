@@ -94,7 +94,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
       configuration: compiler.options,
       locFiles: this._locFiles,
       filesToIgnore: this._filesToIgnore,
-      localeNameOrPlaceholder: this._localeNamePlaceholder.value
+      localeNameOrPlaceholder: this._localeNamePlaceholder.value,
+      exportAsDefault: !!this._options.exportAsDefault
     };
 
     if (errors.length > 0) {
@@ -102,13 +103,13 @@ export class LocalizationPlugin implements Webpack.Plugin {
         compilation.errors.push(...errors);
       });
 
-      WebpackConfigurationUpdater.amendWebpackConfigurationForInPlaceLocFiles(compiler.options);
+      WebpackConfigurationUpdater.amendWebpackConfigurationForInPlaceLocFiles(webpackConfigurationUpdaterOptions);
 
       return;
     }
 
     if (isWebpackDevServer) {
-      WebpackConfigurationUpdater.amendWebpackConfigurationForInPlaceLocFiles(compiler.options);
+      WebpackConfigurationUpdater.amendWebpackConfigurationForInPlaceLocFiles(webpackConfigurationUpdaterOptions);
     } else if (this._locales.size === 1) {
       const singleLocale: string = Array.from(this._locales.keys())[0];
       const resolvedStrings: Map<string, Map<string, string>> = this._resolvedLocalizedStrings.get(singleLocale)!;
