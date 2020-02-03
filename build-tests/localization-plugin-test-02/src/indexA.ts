@@ -1,10 +1,10 @@
 import { string1 } from './strings1.loc.json';
-import * as strings2 from './strings3.loc.json';
+import * as strings3 from './strings3.loc.json';
 import * as strings5 from './strings5.resx';
 
 console.log(string1);
 
-console.log(strings2.string2);
+console.log(strings3.string2);
 
 import(/* webpackChunkName: 'chunk-with-strings' */ './chunks/chunkWithStrings').then(({ ChunkWithStringsClass }) => {
   const chunk = new ChunkWithStringsClass();

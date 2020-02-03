@@ -1,6 +1,6 @@
 {
-  "name": "localization-plugin-test",
-  "description": "Building this project exercises @microsoft/localization-plugin",
+  "name": "localization-plugin-test-03",
+  "description": "Building this project exercises @microsoft/localization-plugin. This tests that the plugin works correctly with the exportAsDefault option set to true.",
   "version": "0.1.0",
   "private": true,
   "scripts": {

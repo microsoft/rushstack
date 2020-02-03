@@ -88,9 +88,7 @@ module.exports = function(env) {
         defaultLocale: {
           usePassthroughLocale: true
         },
-        serveLocale: {
-          locale: 'en-us'
-        },
+        exportAsDefault: true,
         localizationStatsDropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
       }),
       new BundleAnalyzerPlugin({
@@ -103,7 +101,8 @@ module.exports = function(env) {
       }),
       new SetPublicPathPlugin({
         scriptName: {
-          useAssetName: true
+          name: '[name]_[locale]_[contenthash].js',
+          isTokenized: true
         }
       }),
       new HtmlWebpackPlugin()
