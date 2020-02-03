@@ -5,27 +5,31 @@ import {
   FileSystem,
   JsonFile,
   Terminal,
-  ConsoleTerminalProvider
+  ConsoleTerminalProvider,
+  Path
 } from '@microsoft/node-core-library';
 import * as glob from 'glob';
 import * as path from 'path';
 import { EOL } from 'os';
+import * as chokidar from 'chokidar';
 
 import { ILocFile } from './interfaces';
 import { ResxReader } from './utilities/ResxReader';
 import { Constants } from './utilities/Constants';
 import {
   Logging,
-  ILoggingFunctions
+  ILoggingFunctions,
+  ILoggerOptions
 } from './utilities/Logging';
+import { LocFileParser } from './utilities/LocFileParser';
 
 /**
  * @public
  */
-export interface ILocFilePreprocessorOptions {
-  terminal: Terminal;
+export interface ITypingsGeneratorOptions {
   srcFolder: string;
   generatedTsFolder: string;
+  terminal?: Terminal;
   exportAsDefault?: boolean;
   filesToIgnore?: string[];
 }
@@ -35,24 +39,42 @@ export interface ILocFilePreprocessorOptions {
  *
  * @public
  */
-export class LocFilePreprocessor {
-  private _options: ILocFilePreprocessorOptions;
-  private _loggingOptions: ILoggingFunctions;
+export class TypingsGenerator {
+  private _options: ITypingsGeneratorOptions;
+  private _loggingFunctions: ILoggingFunctions;
+  private _loggingOptions: ILoggerOptions;
 
-  public constructor(options: ILocFilePreprocessorOptions) {
+  public constructor(options: ITypingsGeneratorOptions) {
     this._options = {
       filesToIgnore: [],
       ...options
     };
 
+    if (!this._options.generatedTsFolder) {
+      throw new Error('generatedTsFolder must be provided');
+    }
+
+    if (!this._options.srcFolder) {
+      throw new Error('srcFolder must be provided');
+    }
+
+    if (Path.isUnder(this._options.srcFolder, this._options.generatedTsFolder)) {
+      throw new Error('srcFolder must not be under generatedTsFolder');
+    }
+
+    if (Path.isUnder(this._options.generatedTsFolder, this._options.srcFolder)) {
+      throw new Error('generatedTsFolder must not be under srcFolder');
+    }
+
     if (!this._options.terminal) {
       this._options.terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: true }));
     }
 
-    this._loggingOptions = Logging.getLoggingFunctions({
+    this._loggingOptions = {
       writeError: this._options.terminal.writeErrorLine.bind(this._options.terminal),
       writeWarning: this._options.terminal.writeWarningLine.bind(this._options.terminal)
-    });
+    };
+    this._loggingFunctions = Logging.getLoggingFunctions(this._loggingOptions);
   }
 
   public generateTypings(): void {
@@ -96,9 +118,35 @@ export class LocFilePreprocessor {
         continue;
       }
 
-      const locFileData: ILocFile = ResxReader.readResxFileAsLocFile({ ...this._loggingOptions, resxFilePath });
+      const locFileData: ILocFile = ResxReader.readResxFileAsLocFile({ ...this._loggingFunctions, resxFilePath });
       this._generateTypingsForLocFile(resxFilePath, locFileData);
     }
+  }
+
+  public runWatcher(): void {
+    FileSystem.ensureEmptyFolder(this._options.generatedTsFolder);
+
+    const globBase: string = path.resolve(this._options.srcFolder, '**');
+
+    const watcher: chokidar.FSWatcher = chokidar.watch(
+      [path.join(globBase, '*.loc.json'), path.join(globBase, '*.resx')]
+    );
+    const boundGenerateTypingsFunction: (locFilePath: string) => void = this._parseFileAndGenerateTypings.bind(this);
+    watcher.on('add', boundGenerateTypingsFunction);
+    watcher.on('change', boundGenerateTypingsFunction);
+    watcher.on('unlink', (locFilePath) => {
+      const generatedTsFilePath: string = this._getTypingsFilePath(locFilePath);
+      FileSystem.deleteFile(generatedTsFilePath);
+    });
+  }
+
+  private _parseFileAndGenerateTypings(locFilePath): void {
+    const locFileData: ILocFile = LocFileParser.parseLocFile({
+      filePath: locFilePath,
+      content: FileSystem.readFile(locFilePath),
+      loggerOptions: this._loggingOptions
+    });
+    this._generateTypingsForLocFile(locFilePath, locFileData);
   }
 
   private _generateTypingsForLocFile(locFilePath: string, locFileData: ILocFile): void {
@@ -149,10 +197,14 @@ export class LocFilePreprocessor {
       );
     }
 
-    const generatedTsFilePath: string = path.resolve(
+    const generatedTsFilePath: string = this._getTypingsFilePath(locFilePath);
+    FileSystem.writeFile(generatedTsFilePath, outputLines.join(EOL), { ensureFolderExists: true });
+  }
+
+  private _getTypingsFilePath(locFilePath: string): string {
+    return path.resolve(
       this._options.generatedTsFolder,
       path.relative(this._options.srcFolder, `${locFilePath}.d.ts`)
     );
-    FileSystem.writeFile(generatedTsFilePath, outputLines.join(EOL), { ensureFolderExists: true });
   }
 }

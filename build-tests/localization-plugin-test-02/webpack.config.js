@@ -88,6 +88,10 @@ module.exports = function(env) {
         defaultLocale: {
           usePassthroughLocale: true
         },
+        typingsOptions: {
+          generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts'),
+          sourceRoot: path.resolve(__dirname, 'src')
+        },
         localizationStatsDropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
       }),
       new BundleAnalyzerPlugin({

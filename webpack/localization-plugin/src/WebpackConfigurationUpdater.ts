@@ -77,7 +77,8 @@ export class WebpackConfigurationUpdater {
       [
         {
           test: Constants.LOC_JSON_REGEX,
-          loader: loader
+          loader: loader,
+          options: loaderOptions
         },
         {
           test: Constants.RESX_REGEX,
