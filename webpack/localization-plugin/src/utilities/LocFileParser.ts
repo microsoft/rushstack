@@ -18,9 +18,15 @@ export interface IParseLocFileOptions {
   content: string;
 }
 
+interface IParseCacheEntry {
+  content: string;
+  parsedFile: ILocFile;
+}
+
+const parseCache: Map<string, IParseCacheEntry> = new Map<string, IParseCacheEntry>();
+
 export class LocFileParser {
   public static parseLocFileFromLoader(content: string, loaderContext: loader.LoaderContext): ILocFile {
-    debugger;
     return LocFileParser.parseLocFile({
       filePath: loaderContext.resourcePath,
       loggerOptions: { writeError: loaderContext.emitError, writeWarning: loaderContext.emitWarning },
@@ -29,8 +35,16 @@ export class LocFileParser {
   }
 
   public static parseLocFile(options: IParseLocFileOptions): ILocFile {
+    if (parseCache.has(options.filePath)) {
+      const entry: IParseCacheEntry = parseCache.get(options.filePath)!;
+      if (entry.content === options.content) {
+        return entry.parsedFile;
+      }
+    }
+
+    let parsedFile: ILocFile;
     if (/\.resx$/i.test(options.filePath)) {
-      return ResxReader.readResxAsLocFile(
+      parsedFile = ResxReader.readResxAsLocFile(
         options.content,
         {
           ...Logging.getLoggingFunctions(options.loggerOptions),
@@ -38,14 +52,15 @@ export class LocFileParser {
         }
       );
     } else {
-      const locJsonFileData: ILocFile = jju.parse(options.content);
+      parsedFile = jju.parse(options.content);
       try {
-        Constants.LOC_JSON_SCHEMA.validateObject(locJsonFileData, options.filePath);
+        Constants.LOC_JSON_SCHEMA.validateObject(parsedFile, options.filePath);
       } catch (e) {
         options.loggerOptions.writeError(`The loc file is invalid. Error: ${e}`);
       }
-
-      return locJsonFileData;
     }
+
+    parseCache.set(options.filePath, { content: options.content, parsedFile });
+    return parsedFile;
   }
 }

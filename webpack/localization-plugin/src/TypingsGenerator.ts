@@ -3,7 +3,6 @@
 
 import {
   FileSystem,
-  JsonFile,
   Terminal,
   ConsoleTerminalProvider,
   Path
@@ -14,13 +13,7 @@ import { EOL } from 'os';
 import * as chokidar from 'chokidar';
 
 import { ILocFile } from './interfaces';
-import { ResxReader } from './utilities/ResxReader';
-import { Constants } from './utilities/Constants';
-import {
-  Logging,
-  ILoggingFunctions,
-  ILoggerOptions
-} from './utilities/Logging';
+import { ILoggerOptions } from './utilities/Logging';
 import { LocFileParser } from './utilities/LocFileParser';
 
 /**
@@ -41,7 +34,6 @@ export interface ITypingsGeneratorOptions {
  */
 export class TypingsGenerator {
   private _options: ITypingsGeneratorOptions;
-  private _loggingFunctions: ILoggingFunctions;
   private _loggingOptions: ILoggerOptions;
 
   public constructor(options: ITypingsGeneratorOptions) {
@@ -74,7 +66,6 @@ export class TypingsGenerator {
       writeError: this._options.terminal.writeErrorLine.bind(this._options.terminal),
       writeWarning: this._options.terminal.writeWarningLine.bind(this._options.terminal)
     };
-    this._loggingFunctions = Logging.getLoggingFunctions(this._loggingOptions);
   }
 
   public generateTypings(): void {
@@ -84,42 +75,22 @@ export class TypingsGenerator {
       return path.resolve(this._options.srcFolder, fileToIgnore);
     }));
 
-    const locJsonFilePaths: string[] = glob.sync(
-      path.join('**', '*.loc.json'),
+    const locFilePaths: string[] = glob.sync(
+      path.join('**', '*+(.resx|.loc.json)'),
       {
         root: this._options.srcFolder,
         absolute: true
       }
     );
 
-    for (let locJsonFilePath of locJsonFilePaths) {
-      locJsonFilePath = path.resolve(locJsonFilePath);
+    for (let locFilePath of locFilePaths) {
+      locFilePath = path.resolve(locFilePath);
 
-      if (filesToIgnore.has(locJsonFilePath)) {
+      if (filesToIgnore.has(locFilePath)) {
         continue;
       }
 
-      const locFileData: ILocFile = JsonFile.loadAndValidate(locJsonFilePath, Constants.LOC_JSON_SCHEMA);
-      this._generateTypingsForLocFile(locJsonFilePath, locFileData);
-    }
-
-    const resxFiles: string[] = glob.sync(
-      path.join('**', '*.resx'),
-      {
-        root: this._options.srcFolder,
-        absolute: true
-      }
-    );
-
-    for (let resxFilePath of resxFiles) {
-      resxFilePath = path.resolve(resxFilePath);
-
-      if (filesToIgnore.has(resxFilePath)) {
-        continue;
-      }
-
-      const locFileData: ILocFile = ResxReader.readResxFileAsLocFile({ ...this._loggingFunctions, resxFilePath });
-      this._generateTypingsForLocFile(resxFilePath, locFileData);
+      this._parseFileAndGenerateTypings(locFilePath);
     }
   }
 
