@@ -263,10 +263,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
             .replace(/\[hash\]/g, options.chunk.renderedHash);
         }
       } else if (this.options.scriptName.useAssetName) {
-        options.chunk[SHOULD_REPLACE_ASSET_NAME_TOKEN] = (
-          this.options.scriptName &&
-          !!this.options.scriptName.useAssetName
-        );
+        options.chunk[SHOULD_REPLACE_ASSET_NAME_TOKEN] = true;
 
         moduleOptions.regexName = ASSET_NAME_TOKEN;
       }

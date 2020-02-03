@@ -31,7 +31,7 @@ function joinLines(lines: string[], linePrefix?: string): string {
   }).join(EOL).replace(new RegExp(`${EOL}${EOL}+`, 'g'), `${EOL}${EOL}`);
 }
 
-export function escapeSingleQuotes(str: string): string | undefined {
+function escapeSingleQuotes(str: string): string | undefined {
   if (str) {
     return str.replace('\'', '\\\'');
   } else {
