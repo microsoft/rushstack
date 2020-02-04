@@ -161,10 +161,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
             }
 
             for (const chunk of chunkGroup.chunks) {
-              // Clone the chunk files array because we're going to modify it
-              const chunkFiles: string[] = [...chunk.files];
-              const chunkFilesSet: Set<string> = new Set(chunkFiles);
-              for (const chunkFileName of chunkFiles) {
+              const chunkFilesSet: Set<string> = new Set(chunk.files);
+              for (const chunkFileName of chunk.files) {
                 if (
                   chunkFileName.match(Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX) && // Ensure this is expected to be localized
                   chunkFileName.endsWith('.js') && // Ensure this is a JS file

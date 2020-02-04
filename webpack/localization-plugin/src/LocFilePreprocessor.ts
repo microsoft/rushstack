@@ -110,7 +110,7 @@ export class LocFilePreprocessor {
     let indent: string = '';
     if (this._options.exportAsDefault) {
       outputLines.push(
-        'interface IStrings {'
+        'export interface IStrings {'
       );
 
       indent = '  ';

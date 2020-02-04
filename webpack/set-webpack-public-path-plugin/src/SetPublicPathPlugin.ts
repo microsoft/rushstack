@@ -164,23 +164,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
       compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {
         const v4MainTemplate: IV4MainTemplate = compilation.mainTemplate as IV4MainTemplate;
         v4MainTemplate.hooks.startup.tap(PLUGIN_NAME, (source: string, chunk: IV4Chunk, hash: string) => {
-          let assetOrChunkFound: boolean = !!this.options.skipDetection;
-
-          if (!assetOrChunkFound) {
-            for (const chunkGroup of chunk.groupsIterable) {
-              const children: Webpack.compilation.Chunk[] = chunkGroup.getChildren();
-              assetOrChunkFound = assetOrChunkFound || (children.length > 0);
-            }
-          }
-
-          if (!assetOrChunkFound) {
-            for (const innerModule of chunk.modulesIterable) {
-              if (innerModule.buildInfo.assets && Object.keys(innerModule.buildInfo.assets).length > 0) {
-                assetOrChunkFound = true;
-              }
-            }
-          }
-
+          const assetOrChunkFound: boolean = !!this.options.skipDetection || this._detectAssetsOrChunks(chunk);
           if (assetOrChunkFound) {
             return this._getStartupCode({
               source,
@@ -245,6 +229,23 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
         });
       });
     }
+  }
+
+  private _detectAssetsOrChunks(chunk: IV4Chunk): boolean {
+    for (const chunkGroup of chunk.groupsIterable) {
+      const children: Webpack.compilation.Chunk[] = chunkGroup.getChildren();
+      if (children.length > 0) {
+        return true;
+      }
+    }
+
+    for (const innerModule of chunk.modulesIterable) {
+      if (innerModule.buildInfo.assets && Object.keys(innerModule.buildInfo.assets).length > 0) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private _getStartupCode(options: IStartupCodeOptions): string {
