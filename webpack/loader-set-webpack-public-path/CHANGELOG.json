@@ -2,6 +2,18 @@
   "name": "@microsoft/loader-set-webpack-public-path",
   "entries": [
     {
+      "version": "3.4.5",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.4.5",
+      "date": "Tue, 04 Feb 2020 16:08:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `2.3.4` to `2.4.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.4.4",
       "tag": "@microsoft/loader-set-webpack-public-path_v3.4.4",
       "date": "Tue, 28 Jan 2020 02:23:44 GMT",

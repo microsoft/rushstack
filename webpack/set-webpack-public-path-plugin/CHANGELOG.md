@@ -1,6 +1,13 @@
 # Change Log - @microsoft/set-webpack-public-path-plugin
 
-This log was last generated on Tue, 28 Jan 2020 02:23:44 GMT and should not be manually modified.
+This log was last generated on Tue, 04 Feb 2020 16:08:20 GMT and should not be manually modified.
+
+## 2.4.0
+Tue, 04 Feb 2020 16:08:20 GMT
+
+### Minor changes
+
+- Add functionality to use the webpack-produced asset name to find the loaded acript.
 
 ## 2.3.4
 Tue, 28 Jan 2020 02:23:44 GMT
