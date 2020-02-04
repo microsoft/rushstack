@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/loader-set-webpack-public-path",
-  "version": "3.4.4",
+  "version": "3.4.5",
   "description": "This loader sets the webpack public path at runtime.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,7 +13,7 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@microsoft/set-webpack-public-path-plugin": "2.3.4",
+    "@microsoft/set-webpack-public-path-plugin": "2.4.0",
     "loader-utils": "~1.1.0",
     "lodash": "~4.17.15"
   },
