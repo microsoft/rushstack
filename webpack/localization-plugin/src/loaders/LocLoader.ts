@@ -11,7 +11,6 @@ import {
 
 export interface ILocLoaderOptions extends IBaseLoaderOptions {
   pluginInstance: LocalizationPlugin;
-  exportAsDefault: boolean;
 }
 
 export default loaderFactory((locFilePath: string, content: string, options: ILocLoaderOptions) => {
