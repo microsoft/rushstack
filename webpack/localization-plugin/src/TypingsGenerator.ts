@@ -38,7 +38,6 @@ export class TypingsGenerator {
 
   public constructor(options: ITypingsGeneratorOptions) {
     this._options = {
-      filesToIgnore: [],
       ...options
     };
 
@@ -56,6 +55,10 @@ export class TypingsGenerator {
 
     if (Path.isUnder(this._options.generatedTsFolder, this._options.srcFolder)) {
       throw new Error('generatedTsFolder must not be under srcFolder');
+    }
+
+    if (!this._options.filesToIgnore) {
+      this._options.filesToIgnore = [];
     }
 
     if (!this._options.terminal) {

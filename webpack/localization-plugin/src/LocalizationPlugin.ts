@@ -114,7 +114,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
       typingsPreprocessor = new TypingsGenerator({
         srcFolder: this._options.typingsOptions.sourceRoot || compiler.context,
         generatedTsFolder: this._options.typingsOptions.generatedTsFolder,
-        exportAsDefault: this._options.exportAsDefault
+        exportAsDefault: this._options.exportAsDefault,
+        filesToIgnore: this._options.filesToIgnore
       });
     } else {
       typingsPreprocessor = undefined;
