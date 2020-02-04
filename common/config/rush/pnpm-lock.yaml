@@ -12181,7 +12181,7 @@ packages:
     dev: false
     name: '@rush-temp/loader-set-webpack-public-path'
     resolution:
-      integrity: sha512-5wO3Fz8NbEcJzuQBKweWFf5Ha/qk79Evu/iYUUndupKa+pTCjIIILGoG1W5mGgl0wFwQoz2C7ivy86aSfnAgjg==
+      integrity: sha512-CatEgOFJ4rbZyLlHr3ti36Ke7J6nayXO670ydFdocOJ0ZFubPdMGn0uLLRKY/yiuUzOU0Iot4ypl3tE2eNvYOg==
       tarball: 'file:projects/loader-set-webpack-public-path.tgz'
     version: 0.0.0
   'file:projects/localization-plugin-test-01.tgz':
@@ -12196,7 +12196,7 @@ packages:
     dev: false
     name: '@rush-temp/localization-plugin-test-01'
     resolution:
-      integrity: sha512-O22GKol1q0trfJzTwsliszYg4b8fDB5vH1wr+7p6uQXDoYEyEezPndhs5zf8jyfrRFsE2n9VjMeZcrkkyGhGvw==
+      integrity: sha512-tDpvpx+2lZuHgZa4+0rppbxbeP/FwUTkkGwLRlIkeDUFUpbkC1FhOm7U4mei+WoP9EozBS2cqZkQOGpDrqUqlA==
       tarball: 'file:projects/localization-plugin-test-01.tgz'
     version: 0.0.0
   'file:projects/localization-plugin-test-02.tgz':
@@ -12211,7 +12211,7 @@ packages:
     dev: false
     name: '@rush-temp/localization-plugin-test-02'
     resolution:
-      integrity: sha512-LsTJeVsz02vr2Fypdr2T874T+pyKexZfy9sfZ4LSRcXtC+rfkQwi9tNd5YLxKr8h2BS29idSqqFV+b8xXudQnw==
+      integrity: sha512-zd9bdrUCt94qDW1bF+R8tPiWbdeefDR1GUOOiOrTARpXRPV+dYKjtToyI4EmzeYtl8dJ05DKJy7UcJQZG9u30Q==
       tarball: 'file:projects/localization-plugin-test-02.tgz'
     version: 0.0.0
   'file:projects/localization-plugin-test-03.tgz':
@@ -12226,7 +12226,7 @@ packages:
     dev: false
     name: '@rush-temp/localization-plugin-test-03'
     resolution:
-      integrity: sha512-iFTv4Wc44KTYAUFLWJrz1bkgHfszLfnPTjuOxcKF4ujBcRDZY9H6pBeXz85U5ohqJb7lEQcicOphaf/drf4t4g==
+      integrity: sha512-T0D5IIVAlExB+OnAe2pwuG9Rbygk3AoUzxSc5GQhGzZ0Wz4G+P1XxPzM9IXOKv5+glQgvPPB5/rVuEazlHOOdw==
       tarball: 'file:projects/localization-plugin-test-03.tgz'
     version: 0.0.0
   'file:projects/localization-plugin.tgz':
@@ -12246,11 +12246,12 @@ packages:
       json-loader: 0.5.7
       loader-utils: 1.1.0
       lodash: 4.17.15
+      webpack: 4.31.0_webpack@4.31.0
       xmldoc: 1.1.2
     dev: false
     name: '@rush-temp/localization-plugin'
     resolution:
-      integrity: sha512-RzPlL8xv0wEu3vWToQ0PaRyUvmUjUmzPtBlgz3rUMBicVDqIrCdAztPSYbiIHcMIPXe6TQu67+NN45TmTPw4dw==
+      integrity: sha512-q56CBbM0+Mbk/OKggfHkCdhXKiX8kSlm1ivo5vO+bTlTaQqIUv+ApB/yWb9dungRHP49d+LPsptqD3YR1aPM0g==
       tarball: 'file:projects/localization-plugin.tgz'
     version: 0.0.0
   'file:projects/node-core-library.tgz':
@@ -12851,7 +12852,6 @@ packages:
       integrity: sha512-Y0jpVk6MZhJHjmgn8/qcb/6Udr/Qjnc6+47U7z+rHCd+H/vrQMaKGwurptk7Hrdg12JKEIji9dQKYhdnDGrjIw==
       tarball: 'file:projects/web-library-build.tgz'
     version: 0.0.0
-registry: ''
 specifiers:
   '@microsoft/node-library-build': 6.3.11
   '@microsoft/rush-stack-compiler-3.5': 0.3.11

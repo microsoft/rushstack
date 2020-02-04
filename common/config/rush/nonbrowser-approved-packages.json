@@ -231,6 +231,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "chokidar",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "clean-css",
       "allowedCategories": [ "libraries" ]
     },
