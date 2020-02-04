@@ -54,14 +54,11 @@ export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (wa
 
   let lines: string[] = [];
   if (options.regexName) {
-    // Double-escape backslashes to make them show up as single backslashes in regexps.
-    const escapedRegex: string = options.regexName.replace(/\\/, '\\\\');
-
     lines = [
       `var scripts = document.getElementsByTagName('script');`
     ];
 
-    const regexInitializationSnippet: string = `new RegExp('${escapeSingleQuotes(escapedRegex)}', 'i')`;
+    const regexInitializationSnippet: string = `/${options.regexName}/i`;
     const regexVarName: string | undefined = options.regexVariable;
     if (options.regexVariable) {
       lines.push(...[

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/set-webpack-public-path-plugin",
+      "comment": "Add functionality to use the webpack-produced asset name to find the loaded acript.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/set-webpack-public-path-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

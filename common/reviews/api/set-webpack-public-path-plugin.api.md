@@ -23,8 +23,9 @@ export interface ISetWebpackPublicPathOptions {
 // @public
 export interface ISetWebpackPublicPathPluginOptions extends ISetWebpackPublicPathOptions {
     scriptName?: {
-        name: string;
-        isTokenized: boolean;
+        useAssetName?: boolean;
+        name?: string;
+        isTokenized?: boolean;
     };
 }
 
