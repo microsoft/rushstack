@@ -455,8 +455,20 @@
       "shouldPublish": false
     },
     {
-      "packageName": "localization-plugin-test",
-      "projectFolder": "build-tests/localization-plugin-test",
+      "packageName": "localization-plugin-test-01",
+      "projectFolder": "build-tests/localization-plugin-test-01",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "localization-plugin-test-02",
+      "projectFolder": "build-tests/localization-plugin-test-02",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "localization-plugin-test-03",
+      "projectFolder": "build-tests/localization-plugin-test-03",
       "reviewCategory": "tests",
       "shouldPublish": false
     },

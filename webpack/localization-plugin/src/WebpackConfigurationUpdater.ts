@@ -7,6 +7,9 @@ import * as SetPublicPathPluginPackageType from '@microsoft/set-webpack-public-p
 
 import { Constants } from './utilities/Constants';
 import { LocalizationPlugin } from './LocalizationPlugin';
+import { IBaseLoaderOptions } from './loaders/LoaderFactory';
+import { ISingleLocaleLoaderOptions } from './loaders/SingleLocaleLoader';
+import { ILocLoaderOptions } from './loaders/LocLoader';
 
 export interface IWebpackConfigurationUpdaterOptions {
   pluginInstance: LocalizationPlugin;
@@ -14,6 +17,7 @@ export interface IWebpackConfigurationUpdaterOptions {
   locFiles: Set<string>;
   filesToIgnore: Set<string>;
   localeNameOrPlaceholder: string;
+  exportAsDefault: boolean;
 }
 
 export interface ISingleLocaleConfigOptions extends IWebpackConfigurationUpdaterOptions {
@@ -25,8 +29,9 @@ export interface ISingleLocaleConfigOptions extends IWebpackConfigurationUpdater
 export class WebpackConfigurationUpdater {
   public static amendWebpackConfigurationForMultiLocale(options: IWebpackConfigurationUpdaterOptions): void {
     const loader: string = path.resolve(__dirname, 'loaders', 'LocLoader.js');
-    const loaderOptions: Webpack.RuleSetQuery = {
-      pluginInstance: options.pluginInstance
+    const loaderOptions: ILocLoaderOptions = {
+      pluginInstance: options.pluginInstance,
+      exportAsDefault: options.exportAsDefault
     };
 
     WebpackConfigurationUpdater._addLoadersForProvidedLocFiles(options, loader, loaderOptions);
@@ -48,9 +53,10 @@ export class WebpackConfigurationUpdater {
     }
 
     const loader: string = path.resolve(__dirname, 'loaders', 'SingleLocaleLoader.js');
-    const loaderOptions: Webpack.RuleSetQuery = {
+    const loaderOptions: ISingleLocaleLoaderOptions = {
       resolvedStrings: options.resolvedStrings,
-      passthroughLocale: options.passthroughLocale
+      passthroughLocale: options.passthroughLocale,
+      exportAsDefault: options.exportAsDefault
     };
     WebpackConfigurationUpdater._addLoadersForProvidedLocFiles(options, loader, loaderOptions);
 
@@ -60,11 +66,14 @@ export class WebpackConfigurationUpdater {
     });
   }
 
-  public static amendWebpackConfigurationForInPlaceLocFiles(configuration: Webpack.Configuration): void {
+  public static amendWebpackConfigurationForInPlaceLocFiles(options: IWebpackConfigurationUpdaterOptions): void {
     const loader: string = path.resolve(__dirname, 'loaders', 'InPlaceLocFileLoader.js');
+    const loaderOptions: IBaseLoaderOptions = {
+      exportAsDefault: options.exportAsDefault
+    }
 
     WebpackConfigurationUpdater._addRulesToConfiguration(
-      configuration,
+      options.configuration,
       [
         {
           test: /\.loc\.json$/i,
@@ -74,7 +83,10 @@ export class WebpackConfigurationUpdater {
           test: /\.resx$/i,
           use: [
             require.resolve('json-loader'),
-            loader
+            {
+              loader,
+              options: loaderOptions
+            }
           ]
         }
       ]
@@ -113,7 +125,7 @@ export class WebpackConfigurationUpdater {
   private static _addLoadersForProvidedLocFiles(
     options: IWebpackConfigurationUpdaterOptions,
     loader: string,
-    loaderOptions: Webpack.RuleSetQuery
+    loaderOptions: IBaseLoaderOptions
   ): void {
     WebpackConfigurationUpdater._addRulesAndWarningLoaderToConfiguration(
       options,

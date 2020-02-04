@@ -39,6 +39,8 @@ export interface ILocalizationPluginOptions {
     // (undocumented)
     defaultLocale: IDefaultLocaleOptions;
     // (undocumented)
+    exportAsDefault?: boolean;
+    // (undocumented)
     filesToIgnore?: string[];
     // (undocumented)
     localizationStatsCallback?: (stats: ILocalizationStats) => void;
@@ -78,6 +80,8 @@ export interface ILocalizationStatsEntrypoint {
 
 // @public (undocumented)
 export interface ILocFilePreprocessorOptions {
+    // (undocumented)
+    exportAsDefault?: boolean;
     // (undocumented)
     filesToIgnore?: string[];
     // (undocumented)

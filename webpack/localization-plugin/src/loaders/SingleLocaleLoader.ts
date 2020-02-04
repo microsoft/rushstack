@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { loader } from 'webpack';
-import * as loaderUtils from 'loader-utils';
-
 import { ILocFile } from '../interfaces';
 import { LocFileParser } from '../utilities/LocFileParser';
+import {
+  loaderFactory,
+  IBaseLoaderOptions
+} from './LoaderFactory';
 
-export interface ISingleLocaleLoaderOptions {
+export interface ISingleLocaleLoaderOptions extends IBaseLoaderOptions {
   /**
    * The outer map's keys are the resolved, uppercased file names.
    * The inner map's keys are the string identifiers and its values are the string values.
@@ -20,12 +21,11 @@ export interface ISingleLocaleLoaderOptions {
   passthroughLocale: boolean;
 }
 
-export default function (this: loader.LoaderContext, content: string): string {
+export default loaderFactory((locFilePath: string, content: string, options: ISingleLocaleLoaderOptions) => {
   const {
     resolvedStrings,
     passthroughLocale
-  } = loaderUtils.getOptions(this) as ISingleLocaleLoaderOptions;
-  const locFilePath: string = this.resourcePath;
+  } = options;
   const resultObject: { [stringName: string]: string } = {};
 
   const stringMap: Map<string, string> | undefined = resolvedStrings.get(locFilePath);
@@ -51,5 +51,5 @@ export default function (this: loader.LoaderContext, content: string): string {
     }
   }
 
-  return JSON.stringify(resultObject);
-}
+  return resultObject;
+});

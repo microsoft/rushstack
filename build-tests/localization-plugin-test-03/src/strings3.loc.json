@@ -1,0 +1,14 @@
+{
+  "string1": {
+    "value": "string three",
+    "comment": "the third string"
+  },
+  "string2": {
+    "value": "string four",
+    "comment": "the fourth string"
+  },
+  "string3": {
+    "value": "UNUSED STRING",
+    "comment": "UNUSED STRING"
+  }
+}
