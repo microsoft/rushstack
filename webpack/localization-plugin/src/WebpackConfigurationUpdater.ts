@@ -76,11 +76,12 @@ export class WebpackConfigurationUpdater {
       options.configuration,
       [
         {
-          test: /\.loc\.json$/i,
-          loader: loader
+          test: Constants.LOC_JSON_REGEX,
+          loader: loader,
+          options: loaderOptions
         },
         {
-          test: /\.resx$/i,
+          test: Constants.RESX_REGEX,
           use: [
             require.resolve('json-loader'),
             {
@@ -134,7 +135,7 @@ export class WebpackConfigurationUpdater {
           test: {
             and: [
               (filePath: string) => options.locFiles.has(filePath),
-              /\.loc\.json$/i
+              Constants.LOC_JSON_REGEX
             ]
           },
           loader: loader,
@@ -144,7 +145,7 @@ export class WebpackConfigurationUpdater {
           test: {
             and: [
               (filePath: string) => options.locFiles.has(filePath),
-              /\.resx$/i
+              Constants.RESX_REGEX
             ]
           },
           use: [
@@ -172,12 +173,7 @@ export class WebpackConfigurationUpdater {
             and: [
               (filePath: string) => !options.locFiles.has(filePath),
               (filePath: string) => !options.filesToIgnore.has(filePath),
-              {
-                or: [
-                  /\.loc\.json$/i,
-                  /\.resx$/i
-                ]
-              }
+              Constants.RESX_OR_LOC_JSON_REGEX
             ]
           },
           loader: path.resolve(__dirname, 'loaders', 'MissingLocDataWarningLoader.js')

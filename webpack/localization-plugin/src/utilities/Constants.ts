@@ -16,4 +16,8 @@ export class Constants {
     'g'
   );
   public static STRING_PLACEHOLDER_PREFIX: string = '-LOCALIZED-STRING-f12dy0i7-n4bo-dqwj-39gf-sasqehjmihz9';
+
+  public static RESX_REGEX: RegExp = /\.resx$/i;
+  public static LOC_JSON_REGEX: RegExp = /\.loc\.json$/i;
+  public static RESX_OR_LOC_JSON_REGEX: RegExp = /\.(resx|loc\.json)$/i;
 }

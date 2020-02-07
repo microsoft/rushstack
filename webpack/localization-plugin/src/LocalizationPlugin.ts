@@ -18,6 +18,7 @@ import {
   ILocaleFileData,
   ILocale
 } from './interfaces';
+import { TypingsGenerator } from './TypingsGenerator';
 
 /**
  * @internal
@@ -84,10 +85,41 @@ export class LocalizationPlugin implements Webpack.Plugin {
       throw new Error('The localization plugin requires webpack 4');
     }
 
-    // https://github.com/webpack/webpack-dev-server/pull/1929/files#diff-15fb51940da53816af13330d8ce69b4eR66
-    const isWebpackDevServer: boolean = process.env.WEBPACK_DEV_SERVER === 'true';
+    if (this._options.typingsOptions && compiler.context) {
+      if (
+        this._options.typingsOptions.generatedTsFolder &&
+        !path.isAbsolute(this._options.typingsOptions.generatedTsFolder)
+      ) {
+        this._options.typingsOptions.generatedTsFolder = path.resolve(
+          compiler.context,
+          this._options.typingsOptions.generatedTsFolder
+        );
+      }
+
+      if (
+        this._options.typingsOptions.sourceRoot &&
+        !path.isAbsolute(this._options.typingsOptions.sourceRoot)
+      ) {
+        this._options.typingsOptions.sourceRoot = path.resolve(
+          compiler.context,
+          this._options.typingsOptions.sourceRoot
+        );
+      }
+    }
 
     const errors: Error[] = this._initializeAndValidateOptions(compiler.options);
+
+    let typingsPreprocessor: TypingsGenerator | undefined;
+    if (this._options.typingsOptions) {
+      typingsPreprocessor = new TypingsGenerator({
+        srcFolder: this._options.typingsOptions.sourceRoot || compiler.context,
+        generatedTsFolder: this._options.typingsOptions.generatedTsFolder,
+        exportAsDefault: this._options.exportAsDefault,
+        filesToIgnore: this._options.filesToIgnore
+      });
+    } else {
+      typingsPreprocessor = undefined;
+    }
 
     const webpackConfigurationUpdaterOptions: IWebpackConfigurationUpdaterOptions = {
       pluginInstance: this,
@@ -108,9 +140,29 @@ export class LocalizationPlugin implements Webpack.Plugin {
       return;
     }
 
+    function tryInstallPreprocessor(): void {
+      if (typingsPreprocessor) {
+        compiler.hooks.beforeRun.tap(PLUGIN_NAME, () => typingsPreprocessor!.generateTypings());
+      }
+    }
+
+    // https://github.com/webpack/webpack-dev-server/pull/1929/files#diff-15fb51940da53816af13330d8ce69b4eR66
+    const isWebpackDevServer: boolean = process.env.WEBPACK_DEV_SERVER === 'true';
     if (isWebpackDevServer) {
+      if (typingsPreprocessor) {
+        compiler.hooks.watchRun.tap(PLUGIN_NAME, () => typingsPreprocessor!.runWatcher());
+
+        if (!compiler.options.plugins) {
+          compiler.options.plugins = [];
+        }
+
+        compiler.options.plugins.push(new Webpack.WatchIgnorePlugin([this._options.typingsOptions!.generatedTsFolder]));
+      }
+
       WebpackConfigurationUpdater.amendWebpackConfigurationForInPlaceLocFiles(webpackConfigurationUpdaterOptions);
     } else if (this._locales.size === 1) {
+      tryInstallPreprocessor();
+
       const singleLocale: string = Array.from(this._locales.keys())[0];
       const resolvedStrings: Map<string, Map<string, string>> = this._resolvedLocalizedStrings.get(singleLocale)!;
       WebpackConfigurationUpdater.amendWebpackConfigurationForSingleLocale(
@@ -122,6 +174,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
         }
       );
     } else {
+      tryInstallPreprocessor();
+
       WebpackConfigurationUpdater.amendWebpackConfigurationForMultiLocale(webpackConfigurationUpdaterOptions);
 
       if (errors.length === 0) {
@@ -161,10 +215,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
             }
 
             for (const chunk of chunkGroup.chunks) {
-              // Clone the chunk files array because we're going to modify it
-              const chunkFiles: string[] = [...chunk.files];
-              const chunkFilesSet: Set<string> = new Set(chunkFiles);
-              for (const chunkFileName of chunkFiles) {
+              const chunkFilesSet: Set<string> = new Set(chunk.files);
+              for (const chunkFileName of chunk.files) {
                 if (
                   chunkFileName.match(Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX) && // Ensure this is expected to be localized
                   chunkFileName.endsWith('.js') && // Ensure this is a JS file

@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { loader } from 'webpack';
+
 import { ILocFile } from '../interfaces';
 import { LocFileParser } from '../utilities/LocFileParser';
 import {
@@ -21,35 +23,38 @@ export interface ISingleLocaleLoaderOptions extends IBaseLoaderOptions {
   passthroughLocale: boolean;
 }
 
-export default loaderFactory((locFilePath: string, content: string, options: ISingleLocaleLoaderOptions) => {
-  const {
-    resolvedStrings,
-    passthroughLocale
-  } = options;
-  const resultObject: { [stringName: string]: string } = {};
+export default loaderFactory(
+  function (
+    this: loader.LoaderContext,
+    locFilePath: string,
+    content: string,
+    options: ISingleLocaleLoaderOptions
+  ) {
+    const {
+      resolvedStrings,
+      passthroughLocale
+    } = options;
+    const resultObject: { [stringName: string]: string } = {};
 
-  const stringMap: Map<string, string> | undefined = resolvedStrings.get(locFilePath);
-  if (!stringMap) {
-    this.emitError(new Error(
-      `Strings for file ${locFilePath} were not provided in the LocalizationPlugin configuration.`
-    ));
-  } else {
-    const locFileData: ILocFile = LocFileParser.parseLocFile({
-      filePath: locFilePath,
-      loggerOptions: { writeError: this.emitError, writeWarning: this.emitWarning },
-      content
-    });
+    const stringMap: Map<string, string> | undefined = resolvedStrings.get(locFilePath);
+    if (!stringMap) {
+      this.emitError(new Error(
+        `Strings for file ${locFilePath} were not provided in the LocalizationPlugin configuration.`
+      ));
+    } else {
+      const locFileData: ILocFile = LocFileParser.parseLocFileFromLoader(content, this);
 
-    for (const stringName in locFileData) {
-      if (!stringMap.has(stringName)) {
-        this.emitError(new Error(
-          `String "${stringName}" in file ${locFilePath} was not provided in the LocalizationPlugin configuration.`
-        ));
-      } else {
-        resultObject[stringName] = passthroughLocale ? stringName : stringMap.get(stringName)!;
+      for (const stringName in locFileData) {
+        if (!stringMap.has(stringName)) {
+          this.emitError(new Error(
+            `String "${stringName}" in file ${locFilePath} was not provided in the LocalizationPlugin configuration.`
+          ));
+        } else {
+          resultObject[stringName] = passthroughLocale ? stringName : stringMap.get(stringName)!;
+        }
       }
     }
-  }
 
-  return resultObject;
-});
+    return resultObject;
+  }
+);
