@@ -85,7 +85,7 @@ module.exports = function(env) {
             }
           }
         },
-        defaultLocale: {
+        passthroughLocale: {
           usePassthroughLocale: true
         },
         exportAsDefault: true,

@@ -4,12 +4,11 @@
 /**
  * @public
  */
-export interface IDefaultLocaleOptions {
-  locale?: string;
+export interface IPassthroughLocaleOptions {
   usePassthroughLocale?: boolean;
 
   /**
-   * If {@link IDefaultLocaleOptions.usePassthroughLocale} is set, use this name for the passthrough locale.
+   * If {@link IPassthroughLocaleOptions.usePassthroughLocale} is set, use this name for the passthrough locale.
    * Defaults to "passthrough"
    */
   passthroughLocaleName?: string;
@@ -29,8 +28,15 @@ export interface ITypingsGenerationOptions {
  * @public
  */
 export interface ILocalizationPluginOptions {
+  /**
+   * Use this parameter to specify the translated data.
+   */
   localizedStrings: ILocales;
-  defaultLocale: IDefaultLocaleOptions;
+
+  /**
+   * Options around including a passthrough locale.
+   */
+  passthroughLocale?: IPassthroughLocaleOptions;
   exportAsDefault?: boolean;
   filesToIgnore?: string[];
   localizationStatsDropPath?: string;

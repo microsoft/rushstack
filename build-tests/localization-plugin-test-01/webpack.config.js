@@ -44,7 +44,7 @@ module.exports = function(env) {
       new webpack.optimize.ModuleConcatenationPlugin(),
       new LocalizationPlugin({
         localizedStrings: {},
-        defaultLocale: {
+        passthroughLocale: {
           usePassthroughLocale: true
         },
         typingsOptions: {

@@ -65,7 +65,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
   private _passthroughStringsMap: Map<string, string>;
   private _locales: Set<string>;
   private _localeNamePlaceholder: IStringPlaceholder;
-  private _defaultLocale: string;
 
   /**
    * The outermost map's keys are the locale names.
@@ -369,18 +368,10 @@ export class LocalizationPlugin implements Webpack.Plugin {
         }
       }
 
-      let newAsset: IAsset;
-      if (locale === this._defaultLocale) {
-        newAsset = asset;
-      } else {
-        newAsset = lodash.clone(asset);
-      }
-
-      // TODO:
-      //  - Fixup source maps
       const resultFilename: string = assetName.replace(Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX, locale);
       const newAssetSource: string = reconstruction.join('');
       const newAssetSize: number = asset.size() + sizeDiff;
+      const newAsset: IAsset = lodash.clone(asset);
       newAsset.source = () => newAssetSource;
       newAsset.size = () => newAssetSize;
       result.set(
@@ -556,46 +547,20 @@ export class LocalizationPlugin implements Webpack.Plugin {
     }
     // END options.localizedStrings
 
-    // START options.defaultLocale
+    // START options.passthroughLocale
     { // eslint-disable-line no-lone-blocks
-      if (
-        !this._options.defaultLocale ||
-        (!this._options.defaultLocale.locale && !this._options.defaultLocale.usePassthroughLocale)
-      ) {
-        if (this._locales.size === 1) {
-          this._defaultLocale = this._locales.entries[0];
-        } else {
-          errors.push(new Error(
-            'Either options.defaultLocale.locale must be provided or options.defaultLocale.usePassthroughLocale ' +
-            'must be set to true if more than one locale\'s data is provided'
-          ));
-        }
-      } else {
-        const { locale, usePassthroughLocale, passthroughLocaleName } = this._options.defaultLocale;
-        if (locale && usePassthroughLocale) {
-          errors.push(new Error(
-            'Either options.defaultLocale.locale must be provided or options.defaultLocale.usePassthroughLocale ' +
-            'must be set to true, but not both'
-          ));
-        } else if (usePassthroughLocale) {
-          this._defaultLocale = passthroughLocaleName || 'passthrough';
-          this._locales.add(this._defaultLocale);
-          this._stringPlaceholderMap.get(this._localeNamePlaceholder.suffix)![this._defaultLocale] =
-            this._defaultLocale;
+      if (this._options.passthroughLocale) {
+        const { usePassthroughLocale, passthroughLocaleName = 'passthrough' } = this._options.passthroughLocale;
+        if (usePassthroughLocale) {
+          this._locales.add(passthroughLocaleName);
+          this._stringPlaceholderMap.get(this._localeNamePlaceholder.suffix)![passthroughLocaleName] = passthroughLocaleName;
           this._passthroughStringsMap.forEach((stringName: string, stringKey: string) => {
-            this._stringPlaceholderMap.get(stringKey)![this._defaultLocale] = stringName;
+            this._stringPlaceholderMap.get(stringKey)![passthroughLocaleName] = stringName;
           });
-        } else if (locale) {
-          this._defaultLocale = locale;
-          if (!this._locales.has(locale)) {
-            errors.push(new Error(`The specified default locale "${locale}" was not provided in the localized data`));
-          }
-        } else {
-          errors.push(new Error('Unknown error occurred processing default locale.'));
         }
       }
     }
-    // END options.defaultLocale
+    // END options.passthroughLocale
 
     return errors;
   }

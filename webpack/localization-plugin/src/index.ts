@@ -7,7 +7,7 @@ export {
 } from './LocalizationPlugin';
 
 export {
-  IDefaultLocaleOptions,
+  IPassthroughLocaleOptions,
   ILocaleFileData,
   ILocale,
   ILocales,
@@ -19,6 +19,6 @@ export {
 } from './interfaces';
 
 export {
-  ITypingsGeneratorOptions as ILocFilePreprocessorOptions,
-  TypingsGenerator as LocFilePreprocessor
+  ITypingsGeneratorOptions,
+  TypingsGenerator
 } from './TypingsGenerator';

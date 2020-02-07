@@ -85,8 +85,9 @@ module.exports = function(env) {
             }
           }
         },
-        defaultLocale: {
-          usePassthroughLocale: true
+        passthroughLocale: {
+          usePassthroughLocale: true,
+          passthroughLocaleName: 'default'
         },
         typingsOptions: {
           generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts'),

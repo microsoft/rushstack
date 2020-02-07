@@ -8,15 +8,6 @@ import { Terminal } from '@microsoft/node-core-library';
 import * as Webpack from 'webpack';
 
 // @public (undocumented)
-export interface IDefaultLocaleOptions {
-    // (undocumented)
-    locale?: string;
-    passthroughLocaleName?: string;
-    // (undocumented)
-    usePassthroughLocale?: boolean;
-}
-
-// @public (undocumented)
 export interface ILocale {
     // (undocumented)
     [locFilePath: string]: ILocaleFileData;
@@ -37,8 +28,6 @@ export interface ILocales {
 // @public
 export interface ILocalizationPluginOptions {
     // (undocumented)
-    defaultLocale: IDefaultLocaleOptions;
-    // (undocumented)
     exportAsDefault?: boolean;
     // (undocumented)
     filesToIgnore?: string[];
@@ -46,8 +35,8 @@ export interface ILocalizationPluginOptions {
     localizationStatsCallback?: (stats: ILocalizationStats) => void;
     // (undocumented)
     localizationStatsDropPath?: string;
-    // (undocumented)
     localizedStrings: ILocales;
+    passthroughLocale?: IPassthroughLocaleOptions;
     // (undocumented)
     typingsOptions?: ITypingsGenerationOptions;
 }
@@ -81,17 +70,10 @@ export interface ILocalizationStatsEntrypoint {
 }
 
 // @public (undocumented)
-export interface ILocFilePreprocessorOptions {
+export interface IPassthroughLocaleOptions {
+    passthroughLocaleName?: string;
     // (undocumented)
-    exportAsDefault?: boolean;
-    // (undocumented)
-    filesToIgnore?: string[];
-    // (undocumented)
-    generatedTsFolder: string;
-    // (undocumented)
-    srcFolder: string;
-    // (undocumented)
-    terminal?: Terminal;
+    usePassthroughLocale?: boolean;
 }
 
 // @internal (undocumented)
@@ -110,6 +92,20 @@ export interface ITypingsGenerationOptions {
     sourceRoot?: string;
 }
 
+// @public (undocumented)
+export interface ITypingsGeneratorOptions {
+    // (undocumented)
+    exportAsDefault?: boolean;
+    // (undocumented)
+    filesToIgnore?: string[];
+    // (undocumented)
+    generatedTsFolder: string;
+    // (undocumented)
+    srcFolder: string;
+    // (undocumented)
+    terminal?: Terminal;
+}
+
 // @public
 export class LocalizationPlugin implements Webpack.Plugin {
     constructor(options: ILocalizationPluginOptions);
@@ -120,8 +116,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
     }
 
 // @public
-export class LocFilePreprocessor {
-    constructor(options: ILocFilePreprocessorOptions);
+export class TypingsGenerator {
+    constructor(options: ITypingsGeneratorOptions);
     // (undocumented)
     generateTypings(): void;
     // (undocumented)
