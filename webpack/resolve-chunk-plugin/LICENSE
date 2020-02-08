@@ -1,4 +1,4 @@
-@microsoft/loader-set-webpack-public-path
+@microsoft/resolve-chunk-plugin
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 

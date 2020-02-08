@@ -30,7 +30,6 @@ dependencies:
   '@rush-temp/load-themed-styles': 'file:projects/load-themed-styles.tgz'
   '@rush-temp/loader-load-themed-styles': 'file:projects/loader-load-themed-styles.tgz'
   '@rush-temp/loader-raw-script': 'file:projects/loader-raw-script.tgz'
-  '@rush-temp/loader-set-webpack-public-path': 'file:projects/loader-set-webpack-public-path.tgz'
   '@rush-temp/localization-plugin': 'file:projects/localization-plugin.tgz'
   '@rush-temp/localization-plugin-test-01': 'file:projects/localization-plugin-test-01.tgz'
   '@rush-temp/localization-plugin-test-02': 'file:projects/localization-plugin-test-02.tgz'
@@ -12168,22 +12167,6 @@ packages:
       integrity: sha512-NAsTn/MmqLy5/PRcdiMgcopXKPi3JHfRBQCp75mbrHqXEMOwNkKywZup1g7FhIY22Vy41wz4+eDlv3vm2Y8ICQ==
       tarball: 'file:projects/loader-raw-script.tgz'
     version: 0.0.0
-  'file:projects/loader-set-webpack-public-path.tgz':
-    dependencies:
-      '@types/lodash': 4.14.116
-      '@types/mocha': 5.2.5
-      '@types/node': 10.17.13
-      chai: 3.5.0
-      gulp: 4.0.2
-      loader-utils: 1.1.0
-      lodash: 4.17.15
-      mocha: 5.2.0
-    dev: false
-    name: '@rush-temp/loader-set-webpack-public-path'
-    resolution:
-      integrity: sha512-CatEgOFJ4rbZyLlHr3ti36Ke7J6nayXO670ydFdocOJ0ZFubPdMGn0uLLRKY/yiuUzOU0Iot4ypl3tE2eNvYOg==
-      tarball: 'file:projects/loader-set-webpack-public-path.tgz'
-    version: 0.0.0
   'file:projects/localization-plugin-test-01.tgz':
     dependencies:
       '@types/webpack-env': 1.13.0
@@ -12852,6 +12835,7 @@ packages:
       integrity: sha512-Y0jpVk6MZhJHjmgn8/qcb/6Udr/Qjnc6+47U7z+rHCd+H/vrQMaKGwurptk7Hrdg12JKEIji9dQKYhdnDGrjIw==
       tarball: 'file:projects/web-library-build.tgz'
     version: 0.0.0
+registry: ''
 specifiers:
   '@microsoft/node-library-build': 6.3.11
   '@microsoft/rush-stack-compiler-3.5': 0.3.11
@@ -12884,7 +12868,6 @@ specifiers:
   '@rush-temp/load-themed-styles': 'file:./projects/load-themed-styles.tgz'
   '@rush-temp/loader-load-themed-styles': 'file:./projects/loader-load-themed-styles.tgz'
   '@rush-temp/loader-raw-script': 'file:./projects/loader-raw-script.tgz'
-  '@rush-temp/loader-set-webpack-public-path': 'file:./projects/loader-set-webpack-public-path.tgz'
   '@rush-temp/localization-plugin': 'file:./projects/localization-plugin.tgz'
   '@rush-temp/localization-plugin-test-01': 'file:./projects/localization-plugin-test-01.tgz'
   '@rush-temp/localization-plugin-test-02': 'file:./projects/localization-plugin-test-02.tgz'

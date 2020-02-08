@@ -1,6 +1,6 @@
 {
-  "name": "@microsoft/eslint-config-scalable-ts",
-  "version": "0.4.0",
+  "name": "@microsoft/loader-set-webpack-public-path",
+  "version": "4.0.0",
   "description": "(This package has been deprecated.)",
   "license": "MIT",
   "scripts": {

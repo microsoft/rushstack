@@ -7,15 +7,7 @@ function writeErrorInRed(message) {
 writeErrorInRed(`* * * * * * * * * * * THIS PACKAGE HAS BEEN DEPRECATED! * * * * * * * * * * * *`);
 
 console.error(`
-OLD NAME:  @microsoft/eslint-config-scalable-ts
-NEW NAME:  @rushstack/eslint-config
-
-Please uninstall the old package by running this command:
-
-  npm uninstall --save-dev @microsoft/eslint-config-scalable-ts
-
-Then install the new package:
-
-  npm install --save-dev @rushstack/eslint-config`);
+This package has been deprecated in favor of @microsoft/set-webpack-public-path-plugin`
+);
 
 writeErrorInRed(`* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *`);

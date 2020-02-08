@@ -860,12 +860,6 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@microsoft/loader-set-webpack-public-path",
-      "projectFolder": "webpack/loader-set-webpack-public-path",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
       "packageName": "@rushstack/localization-plugin",
       "projectFolder": "webpack/localization-plugin",
       "reviewCategory": "libraries",
