@@ -105,6 +105,7 @@ export interface IRushRepositoryJson {
 export interface IPnpmOptionsJson {
   strictPeerDependencies?: boolean;
   resolutionStrategy?: ResolutionStrategy;
+  preventManualLockfileChanges?: boolean;
 }
 
 /**
@@ -204,10 +205,23 @@ export class PnpmOptionsConfiguration {
    */
   public readonly resolutionStrategy: ResolutionStrategy;
 
+  /**
+   * If true, then rush will block "rush install" when the lockfile is manually edited.
+   *
+   * @remarks
+   * This causes "rush install" to fail when it is determined that the the lockfile was manually edited. This
+   * behavior can be ignored by providing the "--bypassPolicy" argument to "rush install". This is done to
+   * ensure that the lockfile is free from human error.
+   *
+   * The default value is false. (For now.)
+   */
+  public readonly preventManualLockfileChanges: boolean;
+
   /** @internal */
   public constructor(json: IPnpmOptionsJson) {
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
+    this.preventManualLockfileChanges = !!json.preventManualLockfileChanges
   }
 }
 

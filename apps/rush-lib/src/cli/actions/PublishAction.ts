@@ -209,7 +209,7 @@ export class PublishAction extends BaseRushAction {
    */
   protected run(): Promise<void> {
     return Promise.resolve().then(() => {
-      PolicyValidator.validatePolicy(this.rushConfiguration, false);
+      PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: false });
 
       const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
 

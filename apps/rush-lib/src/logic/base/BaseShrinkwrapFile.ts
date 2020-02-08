@@ -22,6 +22,16 @@ export abstract class BaseShrinkwrapFile {
   }
 
   /**
+   * The hash of the content of the shrinkwrap. This hash can only be updated by manually
+   * calling the updateShrinkwrapHash method.
+   *
+   * @virtual
+   */
+  public get shrinkwrapHash() : string | undefined {
+    return undefined;
+  }
+
+  /**
    * Serializes and saves the shrinkwrap file to specified location
    */
   public save(filePath: string): void {
@@ -71,6 +81,14 @@ export abstract class BaseShrinkwrapFile {
     }
 
     return this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency);
+  }
+
+  /**
+   * Update the hash of the shrinkwrap content.
+   *
+   * @virtual
+   */
+  public updateShrinkwrapHash(): void {
   }
 
   /**

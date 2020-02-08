@@ -60,6 +60,7 @@ import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { PackageManagerName } from '../api/packageManager/PackageManager';
 import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
 import { DependencySpecifier } from './DependencySpecifier';
+import { LockfilePolicy } from './policy/LockfilePolicy';
 
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface CreateOptions {
@@ -271,7 +272,7 @@ export class InstallManager {
     const options: IInstallManagerOptions = this._options;
 
     // Check the policies
-    PolicyValidator.validatePolicy(this._rushConfiguration, options.bypassPolicy);
+    PolicyValidator.validatePolicy(this._rushConfiguration, options);
 
     // Git hooks are only installed if the repo opts in by including files in /common/git-hooks
     const hookSource: string = path.join(this._rushConfiguration.commonFolder, 'git-hooks');
@@ -376,6 +377,8 @@ export class InstallManager {
       variantIsUpToDate,
       ...options
     });
+
+
 
     if (!options.noLink) {
       const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this._rushConfiguration);
@@ -748,6 +751,10 @@ export class InstallManager {
 
     if (shrinkwrapFile) {
       // If we have a (possibly incomplete) shrinkwrap file, save it as the temporary file.
+      if (LockfilePolicy.isEnabled(this._rushConfiguration)) {
+        shrinkwrapFile.updateShrinkwrapHash();
+      }
+
       shrinkwrapFile.save(this._rushConfiguration.tempShrinkwrapFilename);
       shrinkwrapFile.save(this._rushConfiguration.tempShrinkwrapPreinstallFilename);
     } else {
@@ -828,8 +835,17 @@ export class InstallManager {
         potentiallyChangedFiles.push(commonNodeModulesFolder);
 
         // Additionally, if they pulled an updated npm-shrinkwrap.json file from Git,
-        // then we can't skip this install
-        potentiallyChangedFiles.push(this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant));
+        // then we can't skip this install. We also need to ensure the hash is set if the
+        // feature is enabled
+        const shrinkwrapFilename: string =
+          this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant);
+        const shrinkwrapFile: BaseShrinkwrapFile | undefined =
+          ShrinkwrapFileFactory.getShrinkwrapFile(this._rushConfiguration.packageManager, shrinkwrapFilename);
+        if (LockfilePolicy.isEnabled(this._rushConfiguration) && !(shrinkwrapFile!.shrinkwrapHash)) {
+          shrinkwrapFile!.updateShrinkwrapHash();
+          shrinkwrapFile!.save(shrinkwrapFilename);
+        }
+        potentiallyChangedFiles.push(shrinkwrapFilename);
 
         if (this._rushConfiguration.packageManager === 'pnpm') {
           // If the repo is using pnpmfile.js, consider that also
@@ -1003,9 +1019,18 @@ export class InstallManager {
           }
 
           if (options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
+            const shrinkwrapFilename: string =
+              this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant);
             // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
-            this._syncFile(this._rushConfiguration.tempShrinkwrapFilename,
-              this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant));
+            this._syncFile(this._rushConfiguration.tempShrinkwrapFilename, shrinkwrapFilename);
+            if (LockfilePolicy.isEnabled(this._rushConfiguration)) {
+              const shrinkwrapFile: BaseShrinkwrapFile | undefined =
+                ShrinkwrapFileFactory.getShrinkwrapFile(this._rushConfiguration.packageManager, shrinkwrapFilename);
+              if (shrinkwrapFile) {
+                shrinkwrapFile.updateShrinkwrapHash();
+                shrinkwrapFile.save(shrinkwrapFilename);
+              }
+            }
           } else {
             // TODO: Validate whether the package manager updated it in a nontrivial way
           }

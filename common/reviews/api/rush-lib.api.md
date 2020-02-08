@@ -233,6 +233,7 @@ export class PnpmOptionsConfiguration {
     //
     // @internal
     constructor(json: IPnpmOptionsJson);
+    readonly preventManualLockfileChanges: boolean;
     readonly resolutionStrategy: ResolutionStrategy;
     readonly strictPeerDependencies: boolean;
 }

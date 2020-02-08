@@ -1,6 +1,7 @@
 import * as yaml from 'js-yaml';
 import * as os from 'os';
 import * as semver from 'semver';
+import * as crypto from 'crypto';
 import { FileSystem } from '@microsoft/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
@@ -160,11 +161,18 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    */
   public readonly shrinkwrapFilename: string;
 
+  private static readonly _shrinkwrapHashPrefix: string = '#shrinkwrapHash: ';
   private _shrinkwrapJson: IPnpmShrinkwrapYaml;
+  private _shrinkwrapHash: string | undefined;
 
-  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, shrinkwrapFilename: string) {
+  private constructor(
+    shrinkwrapJson: IPnpmShrinkwrapYaml,
+    shrinkwrapHash: string | undefined,
+    shrinkwrapFilename: string
+  ) {
     super();
     this._shrinkwrapJson = shrinkwrapJson;
+    this._shrinkwrapHash = shrinkwrapHash;
     this.shrinkwrapFilename = shrinkwrapFilename;
 
     // Normalize the data
@@ -190,12 +198,30 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
       // We don't use JsonFile/jju here because shrinkwrap.json is a special NPM file format
       // and typically very large, so we want to load it the same way that NPM does.
-      const parsedData: IPnpmShrinkwrapYaml = yaml.safeLoad(FileSystem.readFile(shrinkwrapYamlFilename).toString());
+      const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilename).toString();
+      const parsedData: IPnpmShrinkwrapYaml = yaml.safeLoad(shrinkwrapContent);
 
-      return new PnpmShrinkwrapFile(parsedData, shrinkwrapYamlFilename);
+      // Grab the shrinkwrap hash out of the comment where we store it.
+      const hashIndex: number = shrinkwrapContent.lastIndexOf(PnpmShrinkwrapFile._shrinkwrapHashPrefix);
+      const shrinkwrapHash: string | undefined = hashIndex >= 0
+        ? shrinkwrapContent.substr(hashIndex + PnpmShrinkwrapFile._shrinkwrapHashPrefix.length).trim()
+        : undefined;
+
+      return new PnpmShrinkwrapFile(parsedData, shrinkwrapHash, shrinkwrapYamlFilename);
     } catch (error) {
       throw new Error(`Error reading "${shrinkwrapYamlFilename}":${os.EOL}  ${error.message}`);
     }
+  }
+
+  /** @override */
+  public get shrinkwrapHash() : string | undefined {
+    return this._shrinkwrapHash;
+  }
+
+  /** @override */
+  public updateShrinkwrapHash(): void {
+    const shrinkwrapContent: string = yaml.safeDump(this._shrinkwrapJson, SHRINKWRAP_YAML_FORMAT);
+    this._shrinkwrapHash = crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
   }
 
   /** @override */
@@ -329,7 +355,17 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * @override
    */
   protected serialize(): string {
-    return yaml.safeDump(this._shrinkwrapJson, SHRINKWRAP_YAML_FORMAT);
+    let shrinkwrapContent: string = yaml.safeDump(this._shrinkwrapJson, SHRINKWRAP_YAML_FORMAT);
+    if (this._shrinkwrapHash) {
+      // We need to validate that the hashes are aligned before writing.
+      if (this._shrinkwrapHash !== crypto.createHash('sha1').update(shrinkwrapContent).digest('hex')) {
+        throw new Error('Content hash does not match');
+      }
+      shrinkwrapContent =
+        `${shrinkwrapContent}${PnpmShrinkwrapFile._shrinkwrapHashPrefix}${this._shrinkwrapHash}\n`;
+    }
+
+    return shrinkwrapContent;
   }
 
   /**
