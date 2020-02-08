@@ -362,7 +362,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         throw new Error('Content hash does not match');
       }
       shrinkwrapContent =
-        `${shrinkwrapContent}${PnpmShrinkwrapFile._shrinkwrapHashPrefix}${this._shrinkwrapHash}\n`;
+        `${shrinkwrapContent.trimRight()}\n${PnpmShrinkwrapFile._shrinkwrapHashPrefix}${this._shrinkwrapHash}\n`;
     }
 
     return shrinkwrapContent;
