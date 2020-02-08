@@ -45,6 +45,7 @@ import { Rush } from '../api/Rush';
 import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../api/PackageJsonEditor';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
+import { LockfilePolicy } from './policy/LockfilePolicy';
 
 // The PosixModeBits are intended to be used with bitwise operations.
 /* eslint-disable no-bitwise */
@@ -60,7 +61,6 @@ import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { PackageManagerName } from '../api/packageManager/PackageManager';
 import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
 import { DependencySpecifier } from './DependencySpecifier';
-import { LockfilePolicy } from './policy/LockfilePolicy';
 
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface CreateOptions {
@@ -835,17 +835,12 @@ export class InstallManager {
         potentiallyChangedFiles.push(commonNodeModulesFolder);
 
         // Additionally, if they pulled an updated npm-shrinkwrap.json file from Git,
-        // then we can't skip this install. We also need to ensure the hash is set if the
-        // feature is enabled
+        // then we can't skip this install. We also need to ensure the hash is set if
+        // the feature is enabled.
         const shrinkwrapFilename: string =
           this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant);
-        const shrinkwrapFile: BaseShrinkwrapFile | undefined =
-          ShrinkwrapFileFactory.getShrinkwrapFile(this._rushConfiguration.packageManager, shrinkwrapFilename);
-        if (LockfilePolicy.isEnabled(this._rushConfiguration) && !(shrinkwrapFile!.shrinkwrapHash)) {
-          shrinkwrapFile!.updateShrinkwrapHash();
-          shrinkwrapFile!.save(shrinkwrapFilename);
-        }
         potentiallyChangedFiles.push(shrinkwrapFilename);
+        LockfilePolicy.ensureHash(this._rushConfiguration, shrinkwrapFilename);
 
         if (this._rushConfiguration.packageManager === 'pnpm') {
           // If the repo is using pnpmfile.js, consider that also
@@ -1023,14 +1018,7 @@ export class InstallManager {
               this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant);
             // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
             this._syncFile(this._rushConfiguration.tempShrinkwrapFilename, shrinkwrapFilename);
-            if (LockfilePolicy.isEnabled(this._rushConfiguration)) {
-              const shrinkwrapFile: BaseShrinkwrapFile | undefined =
-                ShrinkwrapFileFactory.getShrinkwrapFile(this._rushConfiguration.packageManager, shrinkwrapFilename);
-              if (shrinkwrapFile) {
-                shrinkwrapFile.updateShrinkwrapHash();
-                shrinkwrapFile.save(shrinkwrapFilename);
-              }
-            }
+            LockfilePolicy.ensureHash(this._rushConfiguration, shrinkwrapFilename);
           } else {
             // TODO: Validate whether the package manager updated it in a nontrivial way
           }

@@ -69,4 +69,15 @@ export class LockfilePolicy {
       rushConfiguration.pnpmOptions &&
       rushConfiguration.pnpmOptions.preventManualLockfileChanges;
   }
+
+  public static ensureHash(rushConfiguration: RushConfiguration, shrinkwrapFilename: string): void {
+    if (LockfilePolicy.isEnabled(rushConfiguration)) {
+      const shrinkwrapFile: BaseShrinkwrapFile | undefined =
+        ShrinkwrapFileFactory.getShrinkwrapFile(rushConfiguration.packageManager, shrinkwrapFilename);
+      if (shrinkwrapFile && !shrinkwrapFile.shrinkwrapHash) {
+        shrinkwrapFile.updateShrinkwrapHash();
+        shrinkwrapFile.save(shrinkwrapFilename);
+      }
+    }
+  }
 }
