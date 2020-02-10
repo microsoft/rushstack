@@ -66,6 +66,9 @@ module.exports = function(env) {
               "./src/strings5.resx": {
                 "string1": "La primera cadena RESX",
                 "stringWithQuotes": "\"Cadena RESX con comillas\""
+              },
+              ".\\src\\chunks\\strings6.resx": {
+                "string": "cadena RESX"
               }
             }
           },
