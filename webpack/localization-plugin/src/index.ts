@@ -7,16 +7,19 @@ export {
 } from './LocalizationPlugin';
 
 export {
-  IPassthroughLocaleOptions,
-  ILocaleFileData,
+  IDefaultLocaleOptions,
   ILocaleData,
-  ILocalizedStrings,
+  ILocaleFileData,
   ILocalizationPluginOptions,
   ILocalizationStats,
   ILocalizationStatsChunkGroup,
   ILocalizationStatsEntrypoint,
-  ITypingsGenerationOptions,
-  ILocalizedData
+  ILocalizedData,
+  ILocalizedString as _ILocalizedString,
+  ILocalizedStrings,
+  ILocFile as _ILocFile,
+  IPassthroughLocaleOptions,
+  ITypingsGenerationOptions
 } from './interfaces';
 
 export {

@@ -24,16 +24,13 @@ export default loaderFactory(
   ) {
     const { pluginInstance } = options;
     const locFileData: ILocFile = LocFileParser.parseLocFileFromLoader(content, this);
+    pluginInstance.addDefaultLocFile(locFilePath, locFileData);
 
     const resultObject: { [stringName: string]: string } = {};
     for (const stringName in locFileData) { // eslint-disable-line guard-for-in
       const stringKey: string = `${locFilePath}?${stringName}`;
       if (pluginInstance.stringKeys.has(stringKey)) {
         resultObject[stringName] = pluginInstance.stringKeys.get(stringKey)!.value;
-      } else {
-        this.emitError(new Error(
-          `String "${stringName}" in file ${locFilePath} was not provided in the LocalizationPlugin configuration.`
-        ));
       }
     }
 

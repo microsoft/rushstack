@@ -25,16 +25,30 @@ export interface ITypingsGenerationOptions {
 /**
  * @public
  */
+export interface IDefaultLocaleOptions {
+  localeName: string;
+
+  fillMissingTranslationStrings?: boolean;
+}
+
+/**
+ * @public
+ */
 export interface ILocalizedData {
   /**
    * Use this parameter to specify the translated data.
    */
-  strings: ILocalizedStrings;
+  translatedStrings: ILocalizedStrings;
 
   /**
    * Options around including a passthrough locale.
    */
   passthroughLocale?: IPassthroughLocaleOptions;
+
+  /**
+   * Options for the locale used in the source localized data files.
+   */
+  defaultLocale: IDefaultLocaleOptions;
 }
 
 /**
@@ -56,10 +70,16 @@ export interface ILocalizationPluginOptions {
   typingsOptions?: ITypingsGenerationOptions;
 }
 
+/**
+ * @internal
+ */
 export interface ILocFile {
   [stringName: string]: ILocalizedString;
 }
 
+/**
+ * @internal
+ */
 export interface ILocalizedString {
   value: string;
   comment?: string;

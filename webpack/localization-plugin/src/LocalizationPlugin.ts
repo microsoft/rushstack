@@ -16,7 +16,8 @@ import {
   ILocalizationPluginOptions,
   ILocalizationStats,
   ILocaleFileData,
-  ILocaleData
+  ILocaleData,
+  ILocFile
 } from './interfaces';
 import { TypingsGenerator } from './TypingsGenerator';
 
@@ -55,23 +56,26 @@ export class LocalizationPlugin implements Webpack.Plugin {
   /**
    * @internal
    */
-  public stringKeys: Map<string, IStringPlaceholder>;
+  public stringKeys: Map<string, IStringPlaceholder> = new Map<string, IStringPlaceholder>();
 
   private _options: ILocalizationPluginOptions;
-  private _locFiles: Set<string>;
-  private _filesToIgnore: Set<string>;
-  private _stringPlaceholderCounter: number;
-  private _stringPlaceholderMap: Map<string, { [locale: string]: string }>;
-  private _passthroughStringsMap: Map<string, string>;
-  private _locales: Set<string>;
+  private _filesToIgnore: Set<string> = new Set<string>();
+  private _stringPlaceholderCounter: number = 0;
+  private _stringPlaceholderMap: Map<string, { [locale: string]: string }> = new Map<string, { [locale: string]: string }>();
+  private _passthroughStringsMap: Map<string, string> = new Map<string, string>()
+  private _locales: Set<string> = new Set<string>();
+  private _defaultLocale: string;
+  private _fillMissingTranslationStrings: boolean;
   private _localeNamePlaceholder: IStringPlaceholder;
+  private _placeholderToLocFilePathMap: Map<string, string> = new Map<string, string>();
+  private _placeholderToStringNameMap: Map<string, string> = new Map<string, string>();
 
   /**
    * The outermost map's keys are the locale names.
    * The middle map's keys are the resolved, file names.
    * The innermost map's keys are the string identifiers and its values are the string values.
    */
-  private _resolvedLocalizedStrings: Map<string, Map<string, Map<string, string>>>;
+  private _resolvedLocalizedStrings: Map<string, Map<string, Map<string, string>>> = new Map<string, Map<string, Map<string, string>>>();
 
   public constructor(options: ILocalizationPluginOptions) {
     this._options = options;
@@ -126,7 +130,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
     const webpackConfigurationUpdaterOptions: IWebpackConfigurationUpdaterOptions = {
       pluginInstance: this,
       configuration: compiler.options,
-      locFiles: this._locFiles,
       filesToIgnore: this._filesToIgnore,
       localeNameOrPlaceholder: this._localeNamePlaceholder.value,
       exportAsDefault: !!this._options.exportAsDefault
@@ -160,19 +163,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
       }
 
       WebpackConfigurationUpdater.amendWebpackConfigurationForInPlaceLocFiles(webpackConfigurationUpdaterOptions);
-    } else if (this._locales.size === 1) {
-      tryInstallPreprocessor();
-
-      const singleLocale: string = Array.from(this._locales.keys())[0];
-      const resolvedStrings: Map<string, Map<string, string>> = this._resolvedLocalizedStrings.get(singleLocale)!;
-      WebpackConfigurationUpdater.amendWebpackConfigurationForSingleLocale(
-        {
-          ...webpackConfigurationUpdaterOptions,
-          localeName: singleLocale,
-          passthroughLocale: false,
-          resolvedStrings
-        }
-      );
     } else {
       tryInstallPreprocessor();
 
@@ -280,6 +270,49 @@ export class LocalizationPlugin implements Webpack.Plugin {
     }
   }
 
+  /**
+   * @internal
+   */
+  public addDefaultLocFile(locFilePath: string, locFile: ILocFile): void {
+    const locFileData: ILocaleFileData = {};
+    for (const stringName in locFile) { // eslint-disable-line guard-for-in
+      locFileData[stringName] = locFile[stringName].value;
+    }
+
+    this._addLocFile(this._defaultLocale, locFilePath, locFileData);
+  }
+
+  private _addLocFile(localeName: string, locFilePath: string, locFileData: ILocaleFileData): void {
+    const filesMap: Map<string, Map<string, string>> = this._resolvedLocalizedStrings.get(localeName)!;
+
+    const stringsMap: Map<string, string> = new Map<string, string>();
+    filesMap.set(locFilePath, stringsMap);
+
+    for (const stringName in locFileData) {
+      if (locFileData.hasOwnProperty(stringName)) {
+        const stringKey: string = `${locFilePath}?${stringName}`;
+        if (!this.stringKeys.has(stringKey)) {
+          const placeholder: IStringPlaceholder = this._getPlaceholderString();
+          this.stringKeys.set(stringKey, placeholder);
+          this._placeholderToLocFilePathMap.set(placeholder.suffix, locFilePath);
+          this._placeholderToStringNameMap.set(placeholder.suffix, stringName);
+        }
+
+        const placeholder: IStringPlaceholder = this.stringKeys.get(stringKey)!;
+        if (!this._stringPlaceholderMap.has(placeholder.suffix)) {
+          this._stringPlaceholderMap.set(placeholder.suffix, {});
+          this._passthroughStringsMap.set(placeholder.suffix, stringName);
+        }
+
+        const stringValue: string = locFileData[stringName];
+
+        this._stringPlaceholderMap.get(placeholder.suffix)![localeName] = stringValue;
+
+        stringsMap.set(stringName, stringValue);
+      }
+    }
+  }
+
   private _processAsset(
     compilation: Webpack.compilation.Compilation,
     assetName: string,
@@ -299,6 +332,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
       values: { [locale: string]: string };
       size: number;
       quotemarkCharacter: string | undefined;
+      stringName: string;
+      locFilePath: string;
     }
 
     const placeholderPrefix: string = Constants.STRING_PLACEHOLDER_PREFIX;
@@ -336,7 +371,9 @@ export class LocalizationPlugin implements Webpack.Plugin {
           kind: 'localized',
           values: values,
           size: placeholder.length,
-          quotemarkCharacter: quotemark !== '"' ? quotemark : undefined
+          quotemarkCharacter: quotemark !== '"' ? quotemark : undefined,
+          locFilePath: this._placeholderToLocFilePathMap.get(placeholderSerialNumber)!,
+          stringName: this._placeholderToStringNameMap.get(placeholderSerialNumber)!,
         };
         reconstructionSeries.push(localizedElement);
         lastIndex = regexResult.index + placeholder.length;
@@ -349,6 +386,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     };
     reconstructionSeries.push(lastElement);
 
+    const issues: string[] = [];
     for (const locale of this._locales) {
       const reconstruction: string[] = [];
 
@@ -358,7 +396,20 @@ export class LocalizationPlugin implements Webpack.Plugin {
           reconstruction.push((element as IStaticReconstructionElement).staticString);
         } else {
           const localizedElement: ILocalizedReconstructionElement = element as ILocalizedReconstructionElement;
-          let newValue: string = localizedElement.values[locale];
+          let newValue: string | undefined = localizedElement.values[locale];
+          if (!newValue) {
+            if (this._fillMissingTranslationStrings) {
+              newValue = localizedElement.values[this._defaultLocale];
+            } else {
+              issues.push(
+                `The string "${localizedElement.stringName}" in "${localizedElement.locFilePath}" is missing in the ` +
+                `locales ${locale}`
+              );
+
+              newValue = '-- MISSING STRING --';
+            }
+          }
+
           if (localizedElement.quotemarkCharacter) {
             // Replace the quotemark character with the correctly-escaped character
             newValue = newValue.replace(/\"/g, localizedElement.quotemarkCharacter)
@@ -384,6 +435,12 @@ export class LocalizationPlugin implements Webpack.Plugin {
       );
     }
 
+    if (issues.length > 0) {
+      compilation.errors.push(Error(
+        `Issues during localized string validation:\n${issues.map((issue) => `  ${issue}`).join('\n')}`
+      ));
+    }
+
     return result;
   }
 
@@ -406,7 +463,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
     // START options.filesToIgnore
     { // eslint-disable-line no-lone-blocks
-      this._filesToIgnore = new Set<string>();
       for (const filePath of this._options.filesToIgnore || []) {
         const normalizedFilePath: string = path.resolve(configuration.context!, filePath);
         this._filesToIgnore.add(normalizedFilePath);
@@ -416,41 +472,26 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
     // START options.localizedData
     if (this._options.localizedData) {
-      const { strings } = this._options.localizedData;
-      // START options.localizedData.strings
-      if (strings) {
+      const localeNameMap: { [localeName: string]: string } = {};
+
+      // Create a special placeholder for the locale's name
+      this._localeNamePlaceholder = this._getPlaceholderString();
+      this._stringPlaceholderMap.set(this._localeNamePlaceholder.suffix, localeNameMap);
+
+      // START options.localizedData.translatedStrings
+      const { translatedStrings } = this._options.localizedData;
+      if (translatedStrings) {
         const localeNameRegex: RegExp = /[a-z-]/i;
-        const definedStringsInLocFiles: Map<string, Set<string>> = new Map<string, Set<string>>();
-        this._locFiles = new Set<string>();
-        this.stringKeys = new Map<string, IStringPlaceholder>();
-        this._stringPlaceholderMap = new Map<string, { [locale: string]: string }>();
-        const normalizedLocales: Set<string> = new Set<string>();
-        this._locales = new Set<string>();
-        this._passthroughStringsMap = new Map<string, string>();
-        this._resolvedLocalizedStrings = new Map<string, Map<string, Map<string, string>>>();
 
-        // Create a special placeholder for the locale's name
-        this._localeNamePlaceholder = this._getPlaceholderString();
-        const localeNameMap: { [localeName: string]: string } = {};
-        this._stringPlaceholderMap.set(this._localeNamePlaceholder.suffix, localeNameMap);
-
-        for (const localeName in strings) {
-          if (strings.hasOwnProperty(localeName)) {
-            const normalizedLocaleName: string = localeName;
-            if (normalizedLocales.has(normalizedLocaleName)) {
+        for (const localeName in translatedStrings) {
+          if (translatedStrings.hasOwnProperty(localeName)) {
+            if (this._locales.has(localeName)) {
               errors.push(Error(
                 `The locale "${localeName}" appears multiple times. ` +
                 'There may be multiple instances with different casing.'
               ));
               return errors;
             }
-
-            this._locales.add(localeName);
-            normalizedLocales.add(normalizedLocaleName);
-            localeNameMap[localeName] = localeName;
-
-            const filesMap: Map<string, Map<string, string>> = new Map<string, Map<string, string>>();
-            this._resolvedLocalizedStrings.set(localeName, filesMap);
 
             if (!localeName.match(localeNameRegex)) {
               errors.push(new Error(
@@ -459,20 +500,17 @@ export class LocalizationPlugin implements Webpack.Plugin {
               return errors;
             }
 
+            this._locales.add(localeName);
+            localeNameMap[localeName] = localeName;
+
+            this._resolvedLocalizedStrings.set(localeName, new Map<string, Map<string, string>>());
+
             const locFilePathsInLocale: Set<string> = new Set<string>();
 
-            const locale: ILocaleData = strings[localeName];
+            const locale: ILocaleData = translatedStrings[localeName];
             for (const locFilePath in locale) {
               if (locale.hasOwnProperty(locFilePath)) {
                 const normalizedLocFilePath: string = path.resolve(configuration.context!, locFilePath);
-
-                if (this._filesToIgnore.has(normalizedLocFilePath)) {
-                  errors.push(new Error(
-                    `The localization file path "${locFilePath}" is listed both in the filesToIgnore object and in ` +
-                    'strings data.'
-                  ));
-                  return errors;
-                }
 
                 if (locFilePathsInLocale.has(normalizedLocFilePath)) {
                   errors.push(new Error(
@@ -483,69 +521,15 @@ export class LocalizationPlugin implements Webpack.Plugin {
                 }
 
                 locFilePathsInLocale.add(normalizedLocFilePath);
-                this._locFiles.add(normalizedLocFilePath);
-
-                const stringsMap: Map<string, string> = new Map<string, string>();
-                filesMap.set(normalizedLocFilePath, stringsMap);
 
                 const locFileData: ILocaleFileData = locale[locFilePath];
-
-                for (const stringName in locFileData) {
-                  if (locFileData.hasOwnProperty(stringName)) {
-                    const stringKey: string = `${normalizedLocFilePath}?${stringName}`;
-                    if (!this.stringKeys.has(stringKey)) {
-                      this.stringKeys.set(stringKey, this._getPlaceholderString());
-                    }
-
-                    const placeholder: IStringPlaceholder = this.stringKeys.get(stringKey)!;
-                    if (!this._stringPlaceholderMap.has(placeholder.suffix)) {
-                      this._stringPlaceholderMap.set(placeholder.suffix, {});
-                      this._passthroughStringsMap.set(placeholder.suffix, stringName);
-                    }
-
-                    const stringValue: string = locFileData[stringName];
-
-                    this._stringPlaceholderMap.get(placeholder.suffix)![localeName] = stringValue;
-
-                    if (!definedStringsInLocFiles.has(stringKey)) {
-                      definedStringsInLocFiles.set(stringKey, new Set<string>());
-                    }
-
-                    definedStringsInLocFiles.get(stringKey)!.add(normalizedLocaleName);
-
-                    stringsMap.set(stringName, stringValue);
-                  }
-                }
+                this._addLocFile(localeName, normalizedLocFilePath, locFileData);
               }
             }
           }
         }
-
-        const issues: string[] = [];
-        definedStringsInLocFiles.forEach((localesForString: Set<string>, stringKey: string) => {
-          if (localesForString.size !== this._locales.size) {
-            const missingLocales: string[] = [];
-            this._locales.forEach((locale) => {
-              if (!localesForString.has(locale)) {
-                missingLocales.push(locale);
-              }
-            });
-
-            const [locFilePath, stringName] = stringKey.split('?');
-            issues.push(
-              `The string "${stringName}" in "${locFilePath}" is missing in the ` +
-              `following locales: ${missingLocales.join(', ')}`
-            );
-          }
-        });
-
-        if (issues.length > 0) {
-          errors.push(Error(
-            `Issues during localized string validation:\n${issues.map((issue) => `  ${issue}`).join('\n')}`
-          ));
-        }
       }
-      // END options.localizedData.strings
+      // END options.localizedData.translatedStrings
 
       // START options.localizedData.passthroughLocale
       if (this._options.localizedData.passthroughLocale) {
@@ -562,6 +546,27 @@ export class LocalizationPlugin implements Webpack.Plugin {
         }
       }
       // END options.localizedData.passthroughLocale
+
+      // START options.localizedData.defaultLocale
+      if (this._options.localizedData.defaultLocale) {
+        const { localeName, fillMissingTranslationStrings } = this._options.localizedData.defaultLocale;
+        if (this._options.localizedData.defaultLocale.localeName) {
+          if (this._locales.has(localeName)) {
+            throw new Error('The default locale is also specified in the translated strings.');
+          }
+
+          this._locales.add(localeName);
+          this._resolvedLocalizedStrings.set(localeName, new Map<string, Map<string, string>>());
+          localeNameMap[localeName] = localeName;
+          this._defaultLocale = localeName;
+          this._fillMissingTranslationStrings = !!fillMissingTranslationStrings;
+        } else {
+          throw new Error('Missing default locale name');
+        }
+      } else {
+        throw new Error('Missing default locale options.')
+      }
+      // END options.localizedData.defaultLocale
     } else if (!isWebpackDevServer) {
       throw new Error('Localized data must be provided unless webpack dev server is running.');
     }
@@ -571,10 +576,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
   }
 
   private _getPlaceholderString(): IStringPlaceholder {
-    if (this._stringPlaceholderCounter === undefined) {
-      this._stringPlaceholderCounter = 0;
-    }
-
     const suffix: string = (this._stringPlaceholderCounter++).toString();
     return {
       value: `${Constants.STRING_PLACEHOLDER_PREFIX}_"_${suffix}`,

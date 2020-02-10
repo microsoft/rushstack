@@ -8,6 +8,14 @@ import { Terminal } from '@microsoft/node-core-library';
 import * as Webpack from 'webpack';
 
 // @public (undocumented)
+export interface IDefaultLocaleOptions {
+    // (undocumented)
+    fillMissingTranslationStrings?: boolean;
+    // (undocumented)
+    localeName: string;
+}
+
+// @public (undocumented)
 export interface ILocaleData {
     // (undocumented)
     [locFilePath: string]: ILocaleFileData;
@@ -65,14 +73,29 @@ export interface ILocalizationStatsEntrypoint {
 
 // @public (undocumented)
 export interface ILocalizedData {
+    defaultLocale: IDefaultLocaleOptions;
     passthroughLocale?: IPassthroughLocaleOptions;
-    strings: ILocalizedStrings;
+    translatedStrings: ILocalizedStrings;
+}
+
+// @internal (undocumented)
+export interface _ILocalizedString {
+    // (undocumented)
+    comment?: string;
+    // (undocumented)
+    value: string;
 }
 
 // @public (undocumented)
 export interface ILocalizedStrings {
     // (undocumented)
     [locale: string]: ILocaleData;
+}
+
+// @internal (undocumented)
+export interface _ILocFile {
+    // (undocumented)
+    [stringName: string]: _ILocalizedString;
 }
 
 // @public (undocumented)
@@ -115,6 +138,8 @@ export interface ITypingsGeneratorOptions {
 // @public
 export class LocalizationPlugin implements Webpack.Plugin {
     constructor(options: ILocalizationPluginOptions);
+    // @internal (undocumented)
+    addDefaultLocFile(locFilePath: string, locFile: _ILocFile): void;
     // (undocumented)
     apply(compiler: Webpack.Compiler): void;
     // @internal (undocumented)

@@ -32,7 +32,7 @@ any translations.
 
 ### `localizedData = { }`
 
-#### `localizedData.strings = { }`
+#### `localizedData.translatedStrings = { }`
 
 This option is used to specify the localization data to be used in the build. This object has the following
 structure:
@@ -43,7 +43,7 @@ structure:
 For example:
 
 ```JavaScript
-strings: {
+translatedStrings: {
   "en-us": {
     "./src/strings1.loc.json": {
       "string1": "the first string"

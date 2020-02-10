@@ -8,22 +8,14 @@ import * as SetPublicPathPluginPackageType from '@microsoft/set-webpack-public-p
 import { Constants } from './utilities/Constants';
 import { LocalizationPlugin } from './LocalizationPlugin';
 import { IBaseLoaderOptions } from './loaders/LoaderFactory';
-import { ISingleLocaleLoaderOptions } from './loaders/SingleLocaleLoader';
 import { ILocLoaderOptions } from './loaders/LocLoader';
 
 export interface IWebpackConfigurationUpdaterOptions {
   pluginInstance: LocalizationPlugin;
   configuration: Webpack.Configuration;
-  locFiles: Set<string>;
   filesToIgnore: Set<string>;
   localeNameOrPlaceholder: string;
   exportAsDefault: boolean;
-}
-
-export interface ISingleLocaleConfigOptions extends IWebpackConfigurationUpdaterOptions {
-  localeName: string;
-  resolvedStrings: Map<string, Map<string, string>>;
-  passthroughLocale: boolean;
 }
 
 export class WebpackConfigurationUpdater {
@@ -37,33 +29,6 @@ export class WebpackConfigurationUpdater {
     WebpackConfigurationUpdater._addLoadersForProvidedLocFiles(options, loader, loaderOptions);
 
     WebpackConfigurationUpdater._tryUpdateLocaleTokenInPublicPathPlugin(options);
-  }
-
-  public static amendWebpackConfigurationForSingleLocale(options: ISingleLocaleConfigOptions): void {
-    // We can cheat on the validation a bit here because _initializeAndValidateOptions already validated this
-    options.configuration.output!.filename = (options.configuration.output!.filename as string).replace(
-      Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX,
-      options.localeName
-    );
-    if (options.configuration.output!.chunkFilename) {
-      options.configuration.output!.chunkFilename = (options.configuration.output!.chunkFilename as string).replace(
-        Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX,
-        options.localeName
-      );
-    }
-
-    const loader: string = path.resolve(__dirname, 'loaders', 'SingleLocaleLoader.js');
-    const loaderOptions: ISingleLocaleLoaderOptions = {
-      resolvedStrings: options.resolvedStrings,
-      passthroughLocale: options.passthroughLocale,
-      exportAsDefault: options.exportAsDefault
-    };
-    WebpackConfigurationUpdater._addLoadersForProvidedLocFiles(options, loader, loaderOptions);
-
-    WebpackConfigurationUpdater._tryUpdateLocaleTokenInPublicPathPlugin({
-      ...options,
-      localeNameOrPlaceholder: options.localeName
-    });
   }
 
   public static amendWebpackConfigurationForInPlaceLocFiles(options: IWebpackConfigurationUpdaterOptions): void {
@@ -128,13 +93,13 @@ export class WebpackConfigurationUpdater {
     loader: string,
     loaderOptions: IBaseLoaderOptions
   ): void {
-    WebpackConfigurationUpdater._addRulesAndWarningLoaderToConfiguration(
-      options,
+    WebpackConfigurationUpdater._addRulesToConfiguration(
+      options.configuration,
       [
         {
           test: {
             and: [
-              (filePath: string) => options.locFiles.has(filePath),
+              (filePath: string) => !options.filesToIgnore.has(filePath),
               Constants.LOC_JSON_REGEX
             ]
           },
@@ -144,7 +109,7 @@ export class WebpackConfigurationUpdater {
         {
           test: {
             and: [
-              (filePath: string) => options.locFiles.has(filePath),
+              (filePath: string) => !options.filesToIgnore.has(filePath),
               Constants.RESX_REGEX
             ]
           },
@@ -155,28 +120,6 @@ export class WebpackConfigurationUpdater {
               options: loaderOptions
             }
           ]
-        }
-      ]
-    );
-  }
-
-  private static _addRulesAndWarningLoaderToConfiguration(
-    options: IWebpackConfigurationUpdaterOptions,
-    rules: Webpack.RuleSetRule[]
-  ): void {
-    WebpackConfigurationUpdater._addRulesToConfiguration(
-      options.configuration,
-      [
-        ...rules,
-        {
-          test: {
-            and: [
-              (filePath: string) => !options.locFiles.has(filePath),
-              (filePath: string) => !options.filesToIgnore.has(filePath),
-              Constants.RESX_OR_LOC_JSON_REGEX
-            ]
-          },
-          loader: path.resolve(__dirname, 'loaders', 'MissingLocDataWarningLoader.js')
         }
       ]
     );
