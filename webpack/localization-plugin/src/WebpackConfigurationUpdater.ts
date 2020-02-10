@@ -7,23 +7,21 @@ import * as SetPublicPathPluginPackageType from '@microsoft/set-webpack-public-p
 
 import { Constants } from './utilities/Constants';
 import { LocalizationPlugin } from './LocalizationPlugin';
-import { IBaseLoaderOptions } from './loaders/LoaderFactory';
 import { ILocLoaderOptions } from './loaders/LocLoader';
+import { IBaseLoaderOptions } from './loaders/LoaderFactory';
 
 export interface IWebpackConfigurationUpdaterOptions {
   pluginInstance: LocalizationPlugin;
   configuration: Webpack.Configuration;
   filesToIgnore: Set<string>;
   localeNameOrPlaceholder: string;
-  exportAsDefault: boolean;
 }
 
 export class WebpackConfigurationUpdater {
   public static amendWebpackConfigurationForMultiLocale(options: IWebpackConfigurationUpdaterOptions): void {
     const loader: string = path.resolve(__dirname, 'loaders', 'LocLoader.js');
     const loaderOptions: ILocLoaderOptions = {
-      pluginInstance: options.pluginInstance,
-      exportAsDefault: options.exportAsDefault
+      pluginInstance: options.pluginInstance
     };
 
     WebpackConfigurationUpdater._addLoadersForLocFiles(options, loader, loaderOptions);
@@ -33,22 +31,24 @@ export class WebpackConfigurationUpdater {
 
   public static amendWebpackConfigurationForInPlaceLocFiles(options: IWebpackConfigurationUpdaterOptions): void {
     const loader: string = path.resolve(__dirname, 'loaders', 'InPlaceLocFileLoader.js');
-    const loaderOptions: IBaseLoaderOptions = {
-      exportAsDefault: options.exportAsDefault
-    }
+    const loaderOptions: IBaseLoaderOptions = {}
 
     WebpackConfigurationUpdater._addRulesToConfiguration(
       options.configuration,
       [
         {
           test: Constants.LOC_JSON_REGEX,
-          loader: loader,
-          options: loaderOptions
+          use: [{
+            loader: loader,
+            options: loaderOptions
+          }]
         },
         {
           test: Constants.RESX_REGEX,
-          loader: loader,
-          options: loaderOptions,
+          use: [{
+            loader: loader,
+            options: loaderOptions
+          }],
           type: 'json'
         }
       ]
@@ -99,8 +99,10 @@ export class WebpackConfigurationUpdater {
               Constants.LOC_JSON_REGEX
             ]
           },
-          loader: loader,
-          options: loaderOptions
+          use: [{
+            loader: loader,
+            options: loaderOptions
+          }]
         },
         {
           test: {
@@ -109,8 +111,10 @@ export class WebpackConfigurationUpdater {
               Constants.RESX_REGEX
             ]
           },
-          loader: loader,
-          options: loaderOptions,
+          use: [{
+            loader: loader,
+            options: loaderOptions
+          }],
           type: 'json'
         }
       ]

@@ -20,6 +20,7 @@ export interface IPassthroughLocaleOptions {
 export interface ITypingsGenerationOptions {
   generatedTsFolder: string;
   sourceRoot?: string;
+  exportAsDefault?: boolean;
 }
 
 /**
@@ -88,8 +89,6 @@ export interface ILocalizedData {
  */
 export interface ILocalizationPluginOptions {
   localizedData: ILocalizedData;
-
-  exportAsDefault?: boolean;
 
   filesToIgnore?: string[];
 

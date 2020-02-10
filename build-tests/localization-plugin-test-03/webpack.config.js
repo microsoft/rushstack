@@ -86,10 +86,10 @@ module.exports = function(env) {
             }
           }
         },
-        exportAsDefault: true,
         typingsOptions: {
           generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts'),
-          sourceRoot: path.resolve(__dirname, 'src')
+          sourceRoot: path.resolve(__dirname, 'src'),
+          exportAsDefault: true
         },
         localizationStatsDropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
       }),

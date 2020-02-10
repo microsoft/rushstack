@@ -123,7 +123,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
       typingsPreprocessor = new TypingsGenerator({
         srcFolder: this._options.typingsOptions.sourceRoot || compiler.context,
         generatedTsFolder: this._options.typingsOptions.generatedTsFolder,
-        exportAsDefault: this._options.exportAsDefault,
+        exportAsDefault: this._options.typingsOptions.exportAsDefault,
         filesToIgnore: this._options.filesToIgnore
       });
     } else {
@@ -134,8 +134,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
       pluginInstance: this,
       configuration: compiler.options,
       filesToIgnore: this._filesToIgnore,
-      localeNameOrPlaceholder: this._localeNamePlaceholder.value,
-      exportAsDefault: !!this._options.exportAsDefault
+      localeNameOrPlaceholder: this._localeNamePlaceholder.value
     };
 
     if (errors.length > 0) {

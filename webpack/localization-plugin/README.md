@@ -93,13 +93,6 @@ This option allows pseudolocales to be generated from the strings in the default
 an option with pseudolocales as keys and options for the
 [pseudolocale package](https://www.npmjs.com/package/pseudolocale) as values.
 
-### `exportAsDefault = true | false`
-
-If this option is set to `true`, loc modules will be exported wrapped in a `default` property. This
-allows strings to be imported by using the `import strings from './strings.loc.json';` syntax instead of
-the `import { string1 } from './strings.loc.json';` or the `import * as strings from './strings.loc.json';`
-syntax.
-
 ### `filesToIgnore = [ ]`
 
 This option is used to specify `.resx` and `.loc.json` files that should not be processed by this plugin.
@@ -173,6 +166,13 @@ This property is required if `typingsOptions` is set.
 
 This optional property overrides the compiler context for discovery of localization files for which
 typings should be generated.
+
+### `typingsOptions.exportAsDefault = true | false`
+
+If this option is set to `true`, loc modules typings will be exported wrapped in a `default` property. This
+allows strings to be imported by using the `import strings from './strings.loc.json';` syntax instead of
+the `import { string1 } from './strings.loc.json';` or the `import * as strings from './strings.loc.json';`
+syntax.
 
 # License
 
