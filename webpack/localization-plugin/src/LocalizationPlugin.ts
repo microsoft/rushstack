@@ -62,8 +62,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
   private _filesToIgnore: Set<string> = new Set<string>();
   private _stringPlaceholderCounter: number = 0;
   private _stringPlaceholderMap: Map<string, { [locale: string]: string }> = new Map<string, { [locale: string]: string }>();
-  private _passthroughStringsMap: Map<string, string> = new Map<string, string>()
   private _locales: Set<string> = new Set<string>();
+  private _passthroughLocaleName: string;
   private _defaultLocale: string;
   private _fillMissingTranslationStrings: boolean;
   private _localeNamePlaceholder: IStringPlaceholder;
@@ -300,8 +300,12 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
         const placeholder: IStringPlaceholder = this.stringKeys.get(stringKey)!;
         if (!this._stringPlaceholderMap.has(placeholder.suffix)) {
-          this._stringPlaceholderMap.set(placeholder.suffix, {});
-          this._passthroughStringsMap.set(placeholder.suffix, stringName);
+          this._stringPlaceholderMap.set(
+            placeholder.suffix,
+            {
+              [this._passthroughLocaleName]: stringName
+            }
+          );
         }
 
         const stringValue: string = locFileData[stringName];
@@ -403,7 +407,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
             } else {
               issues.push(
                 `The string "${localizedElement.stringName}" in "${localizedElement.locFilePath}" is missing in the ` +
-                `locales ${locale}`
+                `locale ${locale}`
               );
 
               newValue = '-- MISSING STRING --';
@@ -437,7 +441,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
     if (issues.length > 0) {
       compilation.errors.push(Error(
-        `Issues during localized string validation:\n${issues.map((issue) => `  ${issue}`).join('\n')}`
+        `localization:\n${issues.map((issue) => `  ${issue}`).join('\n')}`
       ));
     }
 
@@ -477,6 +481,20 @@ export class LocalizationPlugin implements Webpack.Plugin {
       // Create a special placeholder for the locale's name
       this._localeNamePlaceholder = this._getPlaceholderString();
       this._stringPlaceholderMap.set(this._localeNamePlaceholder.suffix, localeNameMap);
+
+      // START options.localizedData.passthroughLocale
+      if (this._options.localizedData.passthroughLocale) {
+        const {
+          usePassthroughLocale,
+          passthroughLocaleName = 'passthrough'
+        } = this._options.localizedData.passthroughLocale;
+        if (usePassthroughLocale) {
+          this._passthroughLocaleName = passthroughLocaleName;
+          this._locales.add(passthroughLocaleName);
+          this._stringPlaceholderMap.get(this._localeNamePlaceholder.suffix)![passthroughLocaleName] = passthroughLocaleName;
+        }
+      }
+      // END options.localizedData.passthroughLocale
 
       // START options.localizedData.translatedStrings
       const { translatedStrings } = this._options.localizedData;
@@ -530,22 +548,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
         }
       }
       // END options.localizedData.translatedStrings
-
-      // START options.localizedData.passthroughLocale
-      if (this._options.localizedData.passthroughLocale) {
-        const {
-          usePassthroughLocale,
-          passthroughLocaleName = 'passthrough'
-        } = this._options.localizedData.passthroughLocale;
-        if (usePassthroughLocale) {
-          this._locales.add(passthroughLocaleName);
-          this._stringPlaceholderMap.get(this._localeNamePlaceholder.suffix)![passthroughLocaleName] = passthroughLocaleName;
-          this._passthroughStringsMap.forEach((stringName: string, stringKey: string) => {
-            this._stringPlaceholderMap.get(stringKey)![passthroughLocaleName] = stringName;
-          });
-        }
-      }
-      // END options.localizedData.passthroughLocale
 
       // START options.localizedData.defaultLocale
       if (this._options.localizedData.defaultLocale) {
