@@ -32,6 +32,31 @@ export interface IDefaultLocaleOptions {
 }
 
 /**
+ * Options for the pseudolocale library.
+ *
+ * @internalRemarks
+ * Eventually this should be replaced with DefinitelyTyped types.
+ *
+ * @public
+ */
+export interface IPseudolocaleOptions {
+  prepend?: string;
+  append?: string;
+  delimiter?: string;
+  startDelimiter?: string;
+  endDelimiter?: string;
+  extend?: number;
+  override?: string;
+}
+
+/**
+ * @public
+ */
+export interface IPseudolocalesOptions {
+  [pseudoLocaleName: string]: IPseudolocaleOptions;
+}
+
+/**
  * @public
  */
 export interface ILocalizedData {
@@ -49,6 +74,11 @@ export interface ILocalizedData {
    * Options for the locale used in the source localized data files.
    */
   defaultLocale: IDefaultLocaleOptions;
+
+  /**
+   * Options for pseudo-localization.
+   */
+  pseudolocales?: IPseudolocalesOptions;
 }
 
 /**

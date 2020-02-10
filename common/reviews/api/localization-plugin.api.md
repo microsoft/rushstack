@@ -75,6 +75,7 @@ export interface ILocalizationStatsEntrypoint {
 export interface ILocalizedData {
     defaultLocale: IDefaultLocaleOptions;
     passthroughLocale?: IPassthroughLocaleOptions;
+    pseudoLocales?: IPseudolocalesOptions;
     translatedStrings: ILocalizedStrings;
 }
 
@@ -103,6 +104,30 @@ export interface IPassthroughLocaleOptions {
     passthroughLocaleName?: string;
     // (undocumented)
     usePassthroughLocale?: boolean;
+}
+
+// @public
+export interface IPseudolocaleOptions {
+    // (undocumented)
+    append?: string;
+    // (undocumented)
+    delimiter?: string;
+    // (undocumented)
+    endDelimiter?: string;
+    // (undocumented)
+    extend?: number;
+    // (undocumented)
+    override?: string;
+    // (undocumented)
+    prepend?: string;
+    // (undocumented)
+    startDelimiter?: string;
+}
+
+// @public (undocumented)
+export interface IPseudolocalesOptions {
+    // (undocumented)
+    [pseudoLocaleName: string]: IPseudolocaleOptions;
 }
 
 // @internal (undocumented)

@@ -87,6 +87,12 @@ By default, the passthrough locale's name is "passthrough."
 If `passthroughLocale.usePassthroughLocale` is set to `true`, the "passthrough" locale name can be overridden
 by setting a value on `passthroughLocale.passthroughLocaleName`.
 
+#### `localizedData.pseudolocales = { }`
+
+This option allows pseudolocales to be generated from the strings in the default locale. This option takes
+an option with pseudolocales as keys and options for the
+[pseudolocale package](https://www.npmjs.com/package/pseudolocale) as values.
+
 ### `exportAsDefault = true | false`
 
 If this option is set to `true`, loc modules will be exported wrapped in a `default` property. This

@@ -71,6 +71,16 @@ module.exports = function(env) {
           },
           passthroughLocale: {
             usePassthroughLocale: true
+          },
+          pseudoLocales: {
+            'qps-ploca': {
+              append: '',
+              prepend: ''
+            },
+            'qps-ploc': {
+              append: '##--!!]',
+              prepend: '[!!--##'
+            }
           }
         },
         exportAsDefault: true,

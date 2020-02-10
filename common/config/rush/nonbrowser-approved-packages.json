@@ -251,6 +251,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "decache",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "decomment",
       "allowedCategories": [ "libraries" ]
     },
@@ -516,6 +520,10 @@
     },
     {
       "name": "pretty-hrtime",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "pseudolocale",
       "allowedCategories": [ "libraries" ]
     },
     {

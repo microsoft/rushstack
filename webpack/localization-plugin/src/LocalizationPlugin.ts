@@ -17,9 +17,11 @@ import {
   ILocalizationStats,
   ILocaleFileData,
   ILocaleData,
-  ILocFile
+  ILocFile,
+  IPseudolocaleOptions
 } from './interfaces';
 import { TypingsGenerator } from './TypingsGenerator';
+import { Pseudolocalization } from './Pseudolocalization';
 
 /**
  * @internal
@@ -69,6 +71,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
   private _localeNamePlaceholder: IStringPlaceholder;
   private _placeholderToLocFilePathMap: Map<string, string> = new Map<string, string>();
   private _placeholderToStringNameMap: Map<string, string> = new Map<string, string>();
+  private _pseudolocalizers: Map<string, (str: string) => string> = new Map<string, (str: string) => string>()
 
   /**
    * The outermost map's keys are the locale names.
@@ -280,6 +283,18 @@ export class LocalizationPlugin implements Webpack.Plugin {
     }
 
     this._addLocFile(this._defaultLocale, locFilePath, locFileData);
+
+    this._pseudolocalizers.forEach((pseudolocalizer: (str: string) => string, pseudolocaleName: string) => {
+      const pseudolocFileData: ILocaleFileData = {};
+
+      for (const stringName in locFileData) {
+        if (locFileData.hasOwnProperty(stringName)) {
+          pseudolocFileData[stringName] = pseudolocalizer(locFileData[stringName]);
+        }
+      }
+
+      this._addLocFile(pseudolocaleName, locFilePath, pseudolocFileData);
+    });
   }
 
   private _addLocFile(localeName: string, locFilePath: string, locFileData: ILocaleFileData): void {
@@ -569,6 +584,28 @@ export class LocalizationPlugin implements Webpack.Plugin {
         throw new Error('Missing default locale options.')
       }
       // END options.localizedData.defaultLocale
+
+      // START options.localizedData.pseudoLocales
+      if (this._options.localizedData.pseudolocales) {
+        for (const pseudolocaleName in this._options.localizedData.pseudolocales) {
+          if (this._options.localizedData.pseudolocales.hasOwnProperty(pseudolocaleName)) {
+            if (this._defaultLocale === pseudolocaleName) {
+              throw new Error(`A pseudolocale (${pseudolocaleName}) name is also the default locale name.`);
+            }
+
+            if (this._locales.has(pseudolocaleName)) {
+              throw new Error(`A pseudolocale (${pseudolocaleName}) name is also specified in the translated strings.`);
+            }
+
+            const pseudoLocaleOpts: IPseudolocaleOptions = this._options.localizedData.pseudolocales[pseudolocaleName];
+            this._pseudolocalizers.set(pseudolocaleName, Pseudolocalization.getPseudolocalizer(pseudoLocaleOpts));
+            this._locales.add(pseudolocaleName);
+            this._resolvedLocalizedStrings.set(pseudolocaleName, new Map<string, Map<string, string>>());
+            localeNameMap[pseudolocaleName] = pseudolocaleName;
+          }
+        }
+      }
+      // END options.localizedData.pseudoLocales
     } else if (!isWebpackDevServer) {
       throw new Error('Localized data must be provided unless webpack dev server is running.');
     }

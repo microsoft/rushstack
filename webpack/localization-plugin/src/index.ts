@@ -18,6 +18,8 @@ export {
   ILocalizedString as _ILocalizedString,
   ILocalizedStrings,
   ILocFile as _ILocFile,
+  IPseudolocalesOptions,
+  IPseudolocaleOptions,
   IPassthroughLocaleOptions,
   ITypingsGenerationOptions
 } from './interfaces';
