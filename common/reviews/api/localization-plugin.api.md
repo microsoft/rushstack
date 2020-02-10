@@ -75,7 +75,7 @@ export interface ILocalizationStatsEntrypoint {
 export interface ILocalizedData {
     defaultLocale: IDefaultLocaleOptions;
     passthroughLocale?: IPassthroughLocaleOptions;
-    pseudoLocales?: IPseudolocalesOptions;
+    pseudolocales?: IPseudolocalesOptions;
     translatedStrings: ILocalizedStrings;
 }
 
