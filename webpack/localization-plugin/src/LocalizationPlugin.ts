@@ -209,6 +209,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
             for (const chunk of chunkGroup.chunks) {
               const chunkFilesSet: Set<string> = new Set(chunk.files);
+              const localizedChunkAssets: { [locale: string]: string } = {};
               for (const chunkFileName of chunk.files) {
                 if (
                   chunkFileName.match(Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX) && // Ensure this is expected to be localized
@@ -228,25 +229,26 @@ export class LocalizationPlugin implements Webpack.Plugin {
                   delete compilation.assets[chunkFileName];
                   chunkFilesSet.delete(chunkFileName);
 
-                  const localizedChunkAssets: { [locale: string]: string } = {};
                   for (const [locale, newAsset] of resultingAssets) {
                     compilation.assets[newAsset.filename] = newAsset.asset;
                     localizedChunkAssets[locale] = newAsset.filename;
                     chunkFilesSet.add(newAsset.filename);
                   }
-
-                  if (chunkGroup.getParents().length > 0) {
-                    // This is a secondary chunk
-                    localizationStats.namedChunkGroups[chunkGroup.name] = {
-                      localizedAssets: localizedChunkAssets
-                    };
-                  } else {
-                    // This is an entrypoint
-                    localizationStats.entrypoints[chunkGroup.name] = {
-                      localizedAssets: localizedChunkAssets
-                    };
-                  }
                 }
+              }
+
+              if (chunkGroup.getParents().length > 0) {
+                // This is a secondary chunk
+                if (chunkGroup.name) {
+                  localizationStats.namedChunkGroups[chunkGroup.name] = {
+                    localizedAssets: localizedChunkAssets
+                  };
+                }
+              } else {
+                // This is an entrypoint
+                localizationStats.entrypoints[chunkGroup.name] = {
+                  localizedAssets: localizedChunkAssets
+                };
               }
 
               chunk.files = Array.from(chunkFilesSet);
