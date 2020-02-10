@@ -32,6 +32,18 @@ any translations.
 
 ### `localizedData = { }`
 
+#### `localizedData.defaultLocale = { }`
+
+This option has a required property (`localeName`), to specify the name of the locale used in the
+`.resx` and `.loc.json` files in the source.
+
+##### `localizedData.defaultLocale.fillMissingTranslationStrings = true | false`
+
+If this option is set to `true`, strings that are missing from `localizedData.translatedStrings` will be
+provided by the default locale (the strings in the `.resx` and `.loc.json` files in the source). If
+this option is unset or set to `false`, an error will be emitted if a string is missing from
+`localizedData.translatedStrings`.
+
 #### `localizedData.translatedStrings = { }`
 
 This option is used to specify the localization data to be used in the build. This object has the following
