@@ -9,13 +9,14 @@ export {
 export {
   IPassthroughLocaleOptions,
   ILocaleFileData,
-  ILocale,
-  ILocales,
+  ILocaleData,
+  ILocalizedStrings,
   ILocalizationPluginOptions,
   ILocalizationStats,
   ILocalizationStatsChunkGroup,
   ILocalizationStatsEntrypoint,
-  ITypingsGenerationOptions
+  ITypingsGenerationOptions,
+  ILocalizedData
 } from './interfaces';
 
 export {

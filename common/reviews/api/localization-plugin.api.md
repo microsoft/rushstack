@@ -8,7 +8,7 @@ import { Terminal } from '@microsoft/node-core-library';
 import * as Webpack from 'webpack';
 
 // @public (undocumented)
-export interface ILocale {
+export interface ILocaleData {
     // (undocumented)
     [locFilePath: string]: ILocaleFileData;
 }
@@ -17,12 +17,6 @@ export interface ILocale {
 export interface ILocaleFileData {
     // (undocumented)
     [stringName: string]: string;
-}
-
-// @public (undocumented)
-export interface ILocales {
-    // (undocumented)
-    [locale: string]: ILocale;
 }
 
 // @public
@@ -35,8 +29,8 @@ export interface ILocalizationPluginOptions {
     localizationStatsCallback?: (stats: ILocalizationStats) => void;
     // (undocumented)
     localizationStatsDropPath?: string;
-    localizedStrings: ILocales;
-    passthroughLocale?: IPassthroughLocaleOptions;
+    // (undocumented)
+    localizedData: ILocalizedData;
     // (undocumented)
     typingsOptions?: ITypingsGenerationOptions;
 }
@@ -67,6 +61,18 @@ export interface ILocalizationStatsEntrypoint {
     localizedAssets: {
         [locale: string]: string;
     };
+}
+
+// @public (undocumented)
+export interface ILocalizedData {
+    passthroughLocale?: IPassthroughLocaleOptions;
+    strings: ILocalizedStrings;
+}
+
+// @public (undocumented)
+export interface ILocalizedStrings {
+    // (undocumented)
+    [locale: string]: ILocaleData;
 }
 
 // @public (undocumented)

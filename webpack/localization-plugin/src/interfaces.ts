@@ -23,24 +23,36 @@ export interface ITypingsGenerationOptions {
 }
 
 /**
- * The options for localization.
- *
  * @public
  */
-export interface ILocalizationPluginOptions {
+export interface ILocalizedData {
   /**
    * Use this parameter to specify the translated data.
    */
-  localizedStrings: ILocales;
+  strings: ILocalizedStrings;
 
   /**
    * Options around including a passthrough locale.
    */
   passthroughLocale?: IPassthroughLocaleOptions;
+}
+
+/**
+ * The options for localization.
+ *
+ * @public
+ */
+export interface ILocalizationPluginOptions {
+  localizedData: ILocalizedData;
+
   exportAsDefault?: boolean;
+
   filesToIgnore?: string[];
+
   localizationStatsDropPath?: string;
+
   localizationStatsCallback?: (stats: ILocalizationStats) => void;
+
   typingsOptions?: ITypingsGenerationOptions;
 }
 
@@ -63,15 +75,15 @@ export interface ILocaleFileData {
 /**
  * @public
  */
-export interface ILocale {
+export interface ILocaleData {
   [locFilePath: string]: ILocaleFileData;
 }
 
 /**
  * @public
  */
-export interface ILocales {
-  [locale: string]: ILocale;
+export interface ILocalizedStrings {
+  [locale: string]: ILocaleData;
 }
 
 

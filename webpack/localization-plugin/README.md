@@ -30,7 +30,9 @@ any translations.
 
 ## Options
 
-### `localizedStrings = { }`
+### `localizedData = { }`
+
+#### `localizedData.strings = { }`
 
 This option is used to specify the localization data to be used in the build. This object has the following
 structure:
@@ -41,7 +43,7 @@ structure:
 For example:
 
 ```JavaScript
-localizedStrings: {
+strings: {
   "en-us": {
     "./src/strings1.loc.json": {
       "string1": "the first string"
@@ -55,7 +57,7 @@ localizedStrings: {
 }
 ```
 
-### `passthroughLocale = { }`
+#### `localizedData.passthroughLocale = { }`
 
 This option is used to specify how and if a passthrough locale should be generated. A passthrough locale
 is a generated locale in which each string's value is its name. This is useful for debugging and for identifying
@@ -63,12 +65,12 @@ cases where a locale is missing.
 
 This option takes two optional properties:
 
-#### `passthroughLocale.usePassthroughLocale = true | false`
+##### `localizedData.passthroughLocale.usePassthroughLocale = true | false`
 
 If `passthroughLocale.usePassthroughLocale` is set to `true`, a passthrough locale will be included in the output.
 By default, the passthrough locale's name is "passthrough."
 
-#### `passthroughLocale.passthroughLocaleName = '...'`
+##### `localizedData.passthroughLocale.passthroughLocaleName = '...'`
 
 If `passthroughLocale.usePassthroughLocale` is set to `true`, the "passthrough" locale name can be overridden
 by setting a value on `passthroughLocale.passthroughLocaleName`.
