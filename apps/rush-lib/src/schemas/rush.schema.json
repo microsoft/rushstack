@@ -67,7 +67,7 @@
           "enum": ["fewer-dependencies", "fast"]
         },
         "preventManualLockfileChanges": {
-          "description": "If true, then rush will block \"rush install\" when the lockfile has been manually edited.",
+          "description": "If true, then Rush will block \"rush install\" when the shrinkwrap file has been manually edited.",
           "type": "boolean"
         }
       },

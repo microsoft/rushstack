@@ -206,10 +206,10 @@ export class PnpmOptionsConfiguration {
   public readonly resolutionStrategy: ResolutionStrategy;
 
   /**
-   * If true, then rush will block "rush install" when the lockfile has been manually edited.
+   * If true, then rush will block "`rush install`" when the shrinkwrap file has been manually edited.
    *
    * @remarks
-   * This causes "rush install" to fail when it is determined that the the lockfile was manually edited. This
+   * This causes "`rush install`" to fail when it is determined that the the shrinkwrap file was manually edited. This
    * behavior can be ignored by providing the "--bypassPolicy" argument to "rush install". This is done to
    * ensure that the lockfile is free from human error.
    *
