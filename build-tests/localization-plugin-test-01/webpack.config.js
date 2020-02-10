@@ -43,9 +43,13 @@ module.exports = function(env) {
     plugins: [
       new webpack.optimize.ModuleConcatenationPlugin(),
       new LocalizationPlugin({
-        localizedStrings: {},
-        passthroughLocale: {
-          usePassthroughLocale: true
+        localizedData: {
+          defaultLocale: {
+            localeName: 'en-us'
+          },
+          passthroughLocale: {
+            usePassthroughLocale: true
+          }
         },
         typingsOptions: {
           generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts'),

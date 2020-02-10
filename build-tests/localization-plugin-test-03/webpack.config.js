@@ -43,50 +43,35 @@ module.exports = function(env) {
     plugins: [
       new webpack.optimize.ModuleConcatenationPlugin(),
       new LocalizationPlugin({
-        localizedStrings: {
-          "en-us": {
-            "./src/strings1.loc.json": {
-              "string1": "the first string"
-            },
-            "./src/chunks/strings2.loc.json": {
-              "string1": "the second string"
-            },
-            "./src/strings3.loc.json": {
-              "string1": "the third string",
-              "string2": "the fourth string",
-              "string3": "UNUSED STRING!"
-            },
-            "./src/strings4.loc.json": {
-              "string1": "\"String with quotemarks\""
-            },
-            "./src/strings5.resx": {
-              "string1": "The first RESX string",
-              "stringWithQuotes": "\"RESX string with quotemarks\""
+        localizedData: {
+          defaultLocale: {
+            localeName: 'en-us'
+          },
+          translatedStrings: {
+            "es-es": {
+              "./src/strings1.loc.json": {
+                "string1": "la primera cadena"
+              },
+              "./src/chunks/strings2.loc.json": {
+                "string1": "la segunda cadena"
+              },
+              "./src/strings3.loc.json": {
+                "string1": "la tercera cadena",
+                "string2": "la cuarta cadena",
+                "string3": "UNUSED STRING!"
+              },
+              "./src/strings4.loc.json": {
+                "string1": "\"Cadena con comillas\""
+              },
+              "./src/strings5.resx": {
+                "string1": "La primera cadena RESX",
+                "stringWithQuotes": "\"Cadena RESX con comillas\""
+              }
             }
           },
-          "es-es": {
-            "./src/strings1.loc.json": {
-              "string1": "la primera cadena"
-            },
-            "./src/chunks/strings2.loc.json": {
-              "string1": "la segunda cadena"
-            },
-            "./src/strings3.loc.json": {
-              "string1": "la tercera cadena",
-              "string2": "la cuarta cadena",
-              "string3": "UNUSED STRING!"
-            },
-            "./src/strings4.loc.json": {
-              "string1": "\"Cadena con comillas\""
-            },
-            "./src/strings5.resx": {
-              "string1": "La primera cadena RESX",
-              "stringWithQuotes": "\"Cadena RESX con comillas\""
-            }
+          passthroughLocale: {
+            usePassthroughLocale: true
           }
-        },
-        passthroughLocale: {
-          usePassthroughLocale: true
         },
         exportAsDefault: true,
         typingsOptions: {
