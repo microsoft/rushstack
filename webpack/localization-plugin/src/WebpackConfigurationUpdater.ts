@@ -26,7 +26,7 @@ export class WebpackConfigurationUpdater {
       exportAsDefault: options.exportAsDefault
     };
 
-    WebpackConfigurationUpdater._addLoadersForProvidedLocFiles(options, loader, loaderOptions);
+    WebpackConfigurationUpdater._addLoadersForLocFiles(options, loader, loaderOptions);
 
     WebpackConfigurationUpdater._tryUpdateLocaleTokenInPublicPathPlugin(options);
   }
@@ -47,13 +47,9 @@ export class WebpackConfigurationUpdater {
         },
         {
           test: Constants.RESX_REGEX,
-          use: [
-            require.resolve('json-loader'),
-            {
-              loader,
-              options: loaderOptions
-            }
-          ]
+          loader: loader,
+          options: loaderOptions,
+          type: 'json'
         }
       ]
     );
@@ -88,7 +84,7 @@ export class WebpackConfigurationUpdater {
     }
   }
 
-  private static _addLoadersForProvidedLocFiles(
+  private static _addLoadersForLocFiles(
     options: IWebpackConfigurationUpdaterOptions,
     loader: string,
     loaderOptions: IBaseLoaderOptions
@@ -113,13 +109,9 @@ export class WebpackConfigurationUpdater {
               Constants.RESX_REGEX
             ]
           },
-          use: [
-            require.resolve('json-loader'),
-            {
-              loader: loader,
-              options: loaderOptions
-            }
-          ]
+          loader: loader,
+          options: loaderOptions,
+          type: 'json'
         }
       ]
     );

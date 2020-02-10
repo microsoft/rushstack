@@ -443,10 +443,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "json-loader",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "loader-utils",
       "allowedCategories": [ "libraries" ]
     },
