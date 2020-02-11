@@ -16,6 +16,14 @@ export interface IDefaultLocaleOptions {
 }
 
 /**
+ * @public
+ */
+export interface ITypingsGenerationOptions {
+  generatedTsFolder: string;
+  sourceRoot?: string;
+}
+
+/**
  * The options for localization.
  *
  * @public
@@ -27,6 +35,7 @@ export interface ILocalizationPluginOptions {
   filesToIgnore?: string[];
   localizationStatsDropPath?: string;
   localizationStatsCallback?: (stats: ILocalizationStats) => void;
+  typingsOptions?: ITypingsGenerationOptions;
 }
 
 export interface ILocFile {

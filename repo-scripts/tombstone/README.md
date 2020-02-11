@@ -1,5 +1,3 @@
-# @microsoft/eslint-config-scalable-ts
+# @microsoft/loader-set-webpack-public-path
 
-This package has been renamed to
-[@rushstack/eslint-config](https://www.npmjs.com/package/@rushstack/eslint-config).
-Please use that package instead.
+This package has been deprecated in favor of [@microsoft/set-webpack-public-path-plugin](https://www.npmjs.com/package/@microsoft/set-webpack-public-path-plugin).

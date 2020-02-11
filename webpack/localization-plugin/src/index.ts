@@ -14,10 +14,11 @@ export {
   ILocalizationPluginOptions,
   ILocalizationStats,
   ILocalizationStatsChunkGroup,
-  ILocalizationStatsEntrypoint
+  ILocalizationStatsEntrypoint,
+  ITypingsGenerationOptions
 } from './interfaces';
 
 export {
-  ILocFilePreprocessorOptions,
-  LocFilePreprocessor
-} from './LocFilePreprocessor';
+  ITypingsGeneratorOptions as ILocFilePreprocessorOptions,
+  TypingsGenerator as LocFilePreprocessor
+} from './TypingsGenerator';

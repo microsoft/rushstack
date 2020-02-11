@@ -30,7 +30,6 @@ dependencies:
   '@rush-temp/load-themed-styles': 'file:projects/load-themed-styles.tgz'
   '@rush-temp/loader-load-themed-styles': 'file:projects/loader-load-themed-styles.tgz'
   '@rush-temp/loader-raw-script': 'file:projects/loader-raw-script.tgz'
-  '@rush-temp/loader-set-webpack-public-path': 'file:projects/loader-set-webpack-public-path.tgz'
   '@rush-temp/localization-plugin': 'file:projects/localization-plugin.tgz'
   '@rush-temp/localization-plugin-test-01': 'file:projects/localization-plugin-test-01.tgz'
   '@rush-temp/localization-plugin-test-02': 'file:projects/localization-plugin-test-02.tgz'
@@ -137,6 +136,7 @@ dependencies:
   autoprefixer: 9.7.4
   builtin-modules: 3.1.0
   chai: 3.5.0
+  chokidar: 3.3.1
   clean-css: 4.2.1
   cli-table: 0.3.1
   colors: 1.2.5
@@ -1375,6 +1375,15 @@ packages:
     dev: false
     resolution:
       integrity: sha512-5teOsQWABXHHBFP9y3skS5P3d/WfWXpv3FUpy+LorMrNYaT9pI4oLMQX7jzQ2KklNpGpWHzdCXTDT2Y3XGlZBw==
+  /anymatch/3.1.1:
+    dependencies:
+      normalize-path: 3.0.0
+      picomatch: 2.2.1
+    dev: false
+    engines:
+      node: '>= 8'
+    resolution:
+      integrity: sha512-mM8522psRCqzV+6LhomX5wgp25YVibjh8Wj23I5RPkPppSVSjyKD2A2mBJmWGa+KN7f2D6LNh9jkBCeyLktzjg==
   /append-buffer/1.0.2:
     dependencies:
       buffer-equal: 1.0.0
@@ -1954,6 +1963,12 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha512-Un7MIEDdUC5gNpcGDV97op1Ywk748MpHcFTHoYs6qnj1Z3j7I53VG3nwZhKzoBZmbdRNnb6WRdFlwl7tSDuZGw==
+  /binary-extensions/2.0.0:
+    dev: false
+    engines:
+      node: '>=8'
+    resolution:
+      integrity: sha512-Phlt0plgpIIBOGTT/ehfFnbNlfsDEiqmzE2KRXoX1bLIlir4X/MR+zSyBEkL05ffWgnRSf/DXv+WrUAVr93/ow==
   /binaryextensions/1.0.1:
     dev: false
     resolution:
@@ -2415,6 +2430,22 @@ packages:
       fsevents: 1.2.11
     resolution:
       integrity: sha512-ZmZUazfOzf0Nve7duiCKD23PFSCs4JPoYyccjUFF3aQkQadqBhfzhjkwBH2mNOG9cTBwhamM37EIsIkZw3nRgg==
+  /chokidar/3.3.1:
+    dependencies:
+      anymatch: 3.1.1
+      braces: 3.0.2
+      glob-parent: 5.1.0
+      is-binary-path: 2.1.0
+      is-glob: 4.0.1
+      normalize-path: 3.0.0
+      readdirp: 3.3.0
+    dev: false
+    engines:
+      node: '>= 8.10.0'
+    optionalDependencies:
+      fsevents: 2.1.2
+    resolution:
+      integrity: sha512-4QYCEWOcK3OJrxwvyyAOxFuhpvOVCYkr33LPfFNBjAD/w3sEzWsp2BUOkI4l9bHvWioAd0rc6NlHUOEaWkTeqg==
   /chownr/1.1.3:
     dev: false
     resolution:
@@ -4471,6 +4502,13 @@ packages:
     requiresBuild: true
     resolution:
       integrity: sha512-+ux3lx6peh0BpvY0JebGyZoiR4D+oYzdPZMKJwkZ+sFkNJzpL7tXc/wehS49gUAxg3tmMHPHZkA8JU2rhhgDHw==
+  /fsevents/2.1.2:
+    dev: false
+    engines:
+      node: ^8.16.0 || ^10.6.0 || >=11.0.0
+    optional: true
+    resolution:
+      integrity: sha512-R4wDiBwZ0KzpgOWetKDug1FZcYhqYnUYKtfZYt4mD5SBz76q0KR4Q9o7GIPamsVPGmW3EYPPJ0dOOjvx32ldZA==
   /fstream/1.0.12:
     dependencies:
       graceful-fs: 4.2.3
@@ -5560,6 +5598,14 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-dfFmQrSA8YenEcgUFh/TpKdlWJg=
+  /is-binary-path/2.1.0:
+    dependencies:
+      binary-extensions: 2.0.0
+    dev: false
+    engines:
+      node: '>=8'
+    resolution:
+      integrity: sha512-ZMERYes6pDydyuGidse7OsHxtbI7WVeUEozgR/g7rd0xUimYNlvZRE/K2MgZTjWy725IfelLeVcEM97mmtRGXw==
   /is-buffer/1.1.6:
     dev: false
     resolution:
@@ -9056,6 +9102,14 @@ packages:
       node: '>=0.10'
     resolution:
       integrity: sha512-1JU/8q+VgFZyxwrJ+SVIOsh+KywWGpds3NTqikiKpDMZWScmAYyKIgqkO+ARvNWJfXeXR1zxz7aHF4u4CyH6vQ==
+  /readdirp/3.3.0:
+    dependencies:
+      picomatch: 2.2.1
+    dev: false
+    engines:
+      node: '>=8.10.0'
+    resolution:
+      integrity: sha512-zz0pAkSPOXXm1viEwygWIPSPkcBYjW1xU5j/JBh5t9bGCJwa6f9+BJa6VaB2g+b55yVrmXzqkyLf4xaWYM0IkQ==
   /realpath-native/1.1.0:
     dependencies:
       util.promisify: 1.0.1
@@ -12113,22 +12167,6 @@ packages:
       integrity: sha512-NAsTn/MmqLy5/PRcdiMgcopXKPi3JHfRBQCp75mbrHqXEMOwNkKywZup1g7FhIY22Vy41wz4+eDlv3vm2Y8ICQ==
       tarball: 'file:projects/loader-raw-script.tgz'
     version: 0.0.0
-  'file:projects/loader-set-webpack-public-path.tgz':
-    dependencies:
-      '@types/lodash': 4.14.116
-      '@types/mocha': 5.2.5
-      '@types/node': 10.17.13
-      chai: 3.5.0
-      gulp: 4.0.2
-      loader-utils: 1.1.0
-      lodash: 4.17.15
-      mocha: 5.2.0
-    dev: false
-    name: '@rush-temp/loader-set-webpack-public-path'
-    resolution:
-      integrity: sha512-5wO3Fz8NbEcJzuQBKweWFf5Ha/qk79Evu/iYUUndupKa+pTCjIIILGoG1W5mGgl0wFwQoz2C7ivy86aSfnAgjg==
-      tarball: 'file:projects/loader-set-webpack-public-path.tgz'
-    version: 0.0.0
   'file:projects/localization-plugin-test-01.tgz':
     dependencies:
       '@types/webpack-env': 1.13.0
@@ -12141,7 +12179,7 @@ packages:
     dev: false
     name: '@rush-temp/localization-plugin-test-01'
     resolution:
-      integrity: sha512-O22GKol1q0trfJzTwsliszYg4b8fDB5vH1wr+7p6uQXDoYEyEezPndhs5zf8jyfrRFsE2n9VjMeZcrkkyGhGvw==
+      integrity: sha512-tDpvpx+2lZuHgZa4+0rppbxbeP/FwUTkkGwLRlIkeDUFUpbkC1FhOm7U4mei+WoP9EozBS2cqZkQOGpDrqUqlA==
       tarball: 'file:projects/localization-plugin-test-01.tgz'
     version: 0.0.0
   'file:projects/localization-plugin-test-02.tgz':
@@ -12156,7 +12194,7 @@ packages:
     dev: false
     name: '@rush-temp/localization-plugin-test-02'
     resolution:
-      integrity: sha512-LsTJeVsz02vr2Fypdr2T874T+pyKexZfy9sfZ4LSRcXtC+rfkQwi9tNd5YLxKr8h2BS29idSqqFV+b8xXudQnw==
+      integrity: sha512-zd9bdrUCt94qDW1bF+R8tPiWbdeefDR1GUOOiOrTARpXRPV+dYKjtToyI4EmzeYtl8dJ05DKJy7UcJQZG9u30Q==
       tarball: 'file:projects/localization-plugin-test-02.tgz'
     version: 0.0.0
   'file:projects/localization-plugin-test-03.tgz':
@@ -12171,7 +12209,7 @@ packages:
     dev: false
     name: '@rush-temp/localization-plugin-test-03'
     resolution:
-      integrity: sha512-iFTv4Wc44KTYAUFLWJrz1bkgHfszLfnPTjuOxcKF4ujBcRDZY9H6pBeXz85U5ohqJb7lEQcicOphaf/drf4t4g==
+      integrity: sha512-T0D5IIVAlExB+OnAe2pwuG9Rbygk3AoUzxSc5GQhGzZ0Wz4G+P1XxPzM9IXOKv5+glQgvPPB5/rVuEazlHOOdw==
       tarball: 'file:projects/localization-plugin-test-03.tgz'
     version: 0.0.0
   'file:projects/localization-plugin.tgz':
@@ -12184,17 +12222,19 @@ packages:
       '@types/tapable': 1.0.4
       '@types/webpack': 4.39.8
       '@types/xmldoc': 1.1.4
+      chokidar: 3.3.1
       glob: 7.0.6
       gulp: 4.0.2
       jju: 1.4.0
       json-loader: 0.5.7
       loader-utils: 1.1.0
       lodash: 4.17.15
+      webpack: 4.31.0_webpack@4.31.0
       xmldoc: 1.1.2
     dev: false
     name: '@rush-temp/localization-plugin'
     resolution:
-      integrity: sha512-rr9QzX4+jRiZn1EZEWKlzQgb2bybEZELifkuozrc77ak3IezQSVd/0RwYoppNM+lmgp9of0OJXBakttfmMmIFg==
+      integrity: sha512-q56CBbM0+Mbk/OKggfHkCdhXKiX8kSlm1ivo5vO+bTlTaQqIUv+ApB/yWb9dungRHP49d+LPsptqD3YR1aPM0g==
       tarball: 'file:projects/localization-plugin.tgz'
     version: 0.0.0
   'file:projects/node-core-library.tgz':
@@ -12828,7 +12868,6 @@ specifiers:
   '@rush-temp/load-themed-styles': 'file:./projects/load-themed-styles.tgz'
   '@rush-temp/loader-load-themed-styles': 'file:./projects/loader-load-themed-styles.tgz'
   '@rush-temp/loader-raw-script': 'file:./projects/loader-raw-script.tgz'
-  '@rush-temp/loader-set-webpack-public-path': 'file:./projects/loader-set-webpack-public-path.tgz'
   '@rush-temp/localization-plugin': 'file:./projects/localization-plugin.tgz'
   '@rush-temp/localization-plugin-test-01': 'file:./projects/localization-plugin-test-01.tgz'
   '@rush-temp/localization-plugin-test-02': 'file:./projects/localization-plugin-test-02.tgz'
@@ -12935,6 +12974,7 @@ specifiers:
   autoprefixer: ~9.7.4
   builtin-modules: ~3.1.0
   chai: ~3.5.0
+  chokidar: ~3.3.1
   clean-css: 4.2.1
   cli-table: ~0.3.1
   colors: ~1.2.1

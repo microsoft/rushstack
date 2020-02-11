@@ -48,6 +48,8 @@ export interface ILocalizationPluginOptions {
     localizationStatsDropPath?: string;
     // (undocumented)
     localizedStrings: ILocales;
+    // (undocumented)
+    typingsOptions?: ITypingsGenerationOptions;
 }
 
 // @public (undocumented)
@@ -89,7 +91,7 @@ export interface ILocFilePreprocessorOptions {
     // (undocumented)
     srcFolder: string;
     // (undocumented)
-    terminal: Terminal;
+    terminal?: Terminal;
 }
 
 // @internal (undocumented)
@@ -98,6 +100,14 @@ export interface _IStringPlaceholder {
     suffix: string;
     // (undocumented)
     value: string;
+}
+
+// @public (undocumented)
+export interface ITypingsGenerationOptions {
+    // (undocumented)
+    generatedTsFolder: string;
+    // (undocumented)
+    sourceRoot?: string;
 }
 
 // @public
@@ -114,7 +124,9 @@ export class LocFilePreprocessor {
     constructor(options: ILocFilePreprocessorOptions);
     // (undocumented)
     generateTypings(): void;
-    }
+    // (undocumented)
+    runWatcher(): void;
+}
 
 
 // (No @packageDocumentation comment for this package)
