@@ -71,7 +71,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
   private _localeNamePlaceholder: IStringPlaceholder;
   private _placeholderToLocFilePathMap: Map<string, string> = new Map<string, string>();
   private _placeholderToStringNameMap: Map<string, string> = new Map<string, string>();
-  private _pseudolocalizers: Map<string, (str: string) => string> = new Map<string, (str: string) => string>()
+  private _pseudolocalizers: Map<string, (str: string) => string> = new Map<string, (str: string) => string>();
 
   /**
    * The outermost map's keys are the locale names.
@@ -469,6 +469,18 @@ export class LocalizationPlugin implements Webpack.Plugin {
   private _initializeAndValidateOptions(configuration: Webpack.Configuration, isWebpackDevServer: boolean): Error[] {
     const errors: Error[] = [];
 
+    function ensureValidLocaleName(localeName: string): boolean {
+      const LOCALE_NAME_REGEX: RegExp = /[a-z-]/i;
+      if (!localeName.match(LOCALE_NAME_REGEX)) {
+        errors.push(new Error(
+          `Invalid locale name: ${localeName}. Locale names may only contain letters and hyphens.`
+        ));
+        return false;
+      } else {
+        return true;
+      }
+    }
+
     // START configuration
     if (
       !configuration.output ||
@@ -517,8 +529,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
       // START options.localizedData.translatedStrings
       const { translatedStrings } = this._options.localizedData;
       if (translatedStrings) {
-        const localeNameRegex: RegExp = /[a-z-]/i;
-
         for (const localeName in translatedStrings) {
           if (translatedStrings.hasOwnProperty(localeName)) {
             if (this._locales.has(localeName)) {
@@ -529,10 +539,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
               return errors;
             }
 
-            if (!localeName.match(localeNameRegex)) {
-              errors.push(new Error(
-                 `Invalid locale name: ${localeName}. Locale names may only contain letters and hyphens.`
-              ));
+            if (!ensureValidLocaleName(localeName)) {
               return errors;
             }
 
@@ -572,7 +579,10 @@ export class LocalizationPlugin implements Webpack.Plugin {
         const { localeName, fillMissingTranslationStrings } = this._options.localizedData.defaultLocale;
         if (this._options.localizedData.defaultLocale.localeName) {
           if (this._locales.has(localeName)) {
-            throw new Error('The default locale is also specified in the translated strings.');
+            errors.push(new Error('The default locale is also specified in the translated strings.'));
+            return errors;
+          } else if (!ensureValidLocaleName(localeName)) {
+            return errors;
           }
 
           this._locales.add(localeName);
@@ -581,10 +591,12 @@ export class LocalizationPlugin implements Webpack.Plugin {
           this._defaultLocale = localeName;
           this._fillMissingTranslationStrings = !!fillMissingTranslationStrings;
         } else {
-          throw new Error('Missing default locale name');
+          errors.push(new Error('Missing default locale name'));
+          return errors;
         }
       } else {
-        throw new Error('Missing default locale options.')
+        errors.push(new Error('Missing default locale options.'));
+        return errors;
       }
       // END options.localizedData.defaultLocale
 
@@ -593,11 +605,15 @@ export class LocalizationPlugin implements Webpack.Plugin {
         for (const pseudolocaleName in this._options.localizedData.pseudolocales) {
           if (this._options.localizedData.pseudolocales.hasOwnProperty(pseudolocaleName)) {
             if (this._defaultLocale === pseudolocaleName) {
-              throw new Error(`A pseudolocale (${pseudolocaleName}) name is also the default locale name.`);
+              errors.push(new Error(`A pseudolocale (${pseudolocaleName}) name is also the default locale name.`));
+              return errors;
             }
 
             if (this._locales.has(pseudolocaleName)) {
-              throw new Error(`A pseudolocale (${pseudolocaleName}) name is also specified in the translated strings.`);
+              errors.push(new Error(
+                `A pseudolocale (${pseudolocaleName}) name is also specified in the translated strings.`
+              ));
+              return errors;
             }
 
             const pseudoLocaleOpts: IPseudolocaleOptions = this._options.localizedData.pseudolocales[pseudolocaleName];
