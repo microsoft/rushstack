@@ -161,7 +161,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    */
   public readonly shrinkwrapFilename: string;
 
-  private static readonly _shrinkwrapHashPrefix: string = '# lockfile hash: ';
+  private static readonly _shrinkwrapHashPrefix: string = '# shrinkwrap hash: ';
   private _shrinkwrapJson: IPnpmShrinkwrapYaml;
   private _shrinkwrapHash: string | undefined;
 

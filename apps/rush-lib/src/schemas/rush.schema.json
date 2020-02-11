@@ -66,8 +66,8 @@
           "type": "string",
           "enum": ["fewer-dependencies", "fast"]
         },
-        "preventManualLockfileChanges": {
-          "description": "If true, then Rush will block \"rush install\" when the shrinkwrap file has been manually edited.",
+        "preventManualShrinkwrapChanges": {
+          "description": "If true, then \"rush install\" will report an error if manual modifications were made to the PNPM shrinkwrap file without running `rush update` afterwards. To temporarily disable this validation when invoking \"rush install\", use the \"--bypassPolicy\" command-line parameter. The default value is false.",
           "type": "boolean"
         }
       },

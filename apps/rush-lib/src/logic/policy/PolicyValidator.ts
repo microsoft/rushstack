@@ -3,7 +3,7 @@
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { GitEmailPolicy } from './GitEmailPolicy';
-import { LockfilePolicy } from './LockfilePolicy';
+import { ShrinkwrapFilePolicy } from './ShrinkwrapFilePolicy';
 
 export interface IPolicyValidatorOptions {
   bypassPolicy?: boolean,
@@ -19,6 +19,6 @@ export class PolicyValidator {
     }
 
     GitEmailPolicy.validate(rushConfiguration);
-    LockfilePolicy.validate(rushConfiguration, options);
+    ShrinkwrapFilePolicy.validate(rushConfiguration, options);
   }
 }

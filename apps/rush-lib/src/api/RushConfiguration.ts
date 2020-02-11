@@ -105,7 +105,7 @@ export interface IRushRepositoryJson {
 export interface IPnpmOptionsJson {
   strictPeerDependencies?: boolean;
   resolutionStrategy?: ResolutionStrategy;
-  preventManualLockfileChanges?: boolean;
+  preventManualShrinkwrapChanges?: boolean;
 }
 
 /**
@@ -206,22 +206,29 @@ export class PnpmOptionsConfiguration {
   public readonly resolutionStrategy: ResolutionStrategy;
 
   /**
-   * If true, then rush will block "`rush install`" when the shrinkwrap file has been manually edited.
+   * If true, then `"`rush install`"` will report an error if manual modifications
+   * were made to the PNPM shrinkwrap file without running `rush update` afterwards.
    *
    * @remarks
-   * This causes "`rush install`" to fail when it is determined that the the shrinkwrap file was manually edited. This
-   * behavior can be ignored by providing the "--bypassPolicy" argument to "rush install". This is done to
-   * ensure that the lockfile is free from human error.
+   * This feature protects against accidental inconsistencies that may be introduced
+   * if a person manually edits the PNPM shrinkwrap file (`pnpm-lock.yaml`).  When this
+   * feature is enabled, `rush update` will append a hash to the file as a YAML comment,
+   * and then `rush update` will validate the hash.  Note that this does not prohibit
+   * manual modifications, but merely requires the person to invoke `rush update`
+   * afterwards, ensuring that PNPM can report or repair any potential inconsistencies.
+   *
+   * To temporarily disable this validation when invoking `rush install`, use the
+   * `--bypassPolicy` command-line parameter.
    *
    * The default value is false.
    */
-  public readonly preventManualLockfileChanges: boolean;
+  public readonly preventManualShrinkwrapChanges: boolean;
 
   /** @internal */
   public constructor(json: IPnpmOptionsJson) {
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
-    this.preventManualLockfileChanges = !!json.preventManualLockfileChanges
+    this.preventManualShrinkwrapChanges = !!json.preventManualShrinkwrapChanges
   }
 }
 

@@ -45,7 +45,7 @@ import { Rush } from '../api/Rush';
 import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../api/PackageJsonEditor';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
-import { LockfilePolicy } from './policy/LockfilePolicy';
+import { ShrinkwrapFilePolicy } from './policy/ShrinkwrapFilePolicy';
 
 // The PosixModeBits are intended to be used with bitwise operations.
 /* eslint-disable no-bitwise */
@@ -377,8 +377,6 @@ export class InstallManager {
       variantIsUpToDate,
       ...options
     });
-
-
 
     if (!options.noLink) {
       const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this._rushConfiguration);
@@ -751,7 +749,7 @@ export class InstallManager {
 
     if (shrinkwrapFile) {
       // If we have a (possibly incomplete) shrinkwrap file, save it as the temporary file.
-      if (LockfilePolicy.isEnabled(this._rushConfiguration)) {
+      if (ShrinkwrapFilePolicy.isEnabled(this._rushConfiguration)) {
         shrinkwrapFile.updateShrinkwrapHash();
       }
 
@@ -840,7 +838,7 @@ export class InstallManager {
         const shrinkwrapFilename: string =
           this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant);
         potentiallyChangedFiles.push(shrinkwrapFilename);
-        LockfilePolicy.ensureHash(this._rushConfiguration, shrinkwrapFilename);
+        ShrinkwrapFilePolicy.ensureHash(this._rushConfiguration, shrinkwrapFilename);
 
         if (this._rushConfiguration.packageManager === 'pnpm') {
           // If the repo is using pnpmfile.js, consider that also
@@ -1018,7 +1016,7 @@ export class InstallManager {
               this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant);
             // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
             this._syncFile(this._rushConfiguration.tempShrinkwrapFilename, shrinkwrapFilename);
-            LockfilePolicy.ensureHash(this._rushConfiguration, shrinkwrapFilename);
+            ShrinkwrapFilePolicy.ensureHash(this._rushConfiguration, shrinkwrapFilename);
           } else {
             // TODO: Validate whether the package manager updated it in a nontrivial way
           }
