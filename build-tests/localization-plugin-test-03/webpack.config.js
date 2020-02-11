@@ -91,7 +91,9 @@ module.exports = function(env) {
           sourceRoot: path.resolve(__dirname, 'src'),
           exportAsDefault: true
         },
-        localizationStatsDropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
+        localizationStats: {
+          dropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
+        }
       }),
       new BundleAnalyzerPlugin({
         openAnalyzer: false,

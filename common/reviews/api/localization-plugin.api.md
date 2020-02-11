@@ -30,13 +30,9 @@ export interface ILocaleFileData {
 // @public
 export interface ILocalizationPluginOptions {
     // (undocumented)
-    exportAsDefault?: boolean;
-    // (undocumented)
     filesToIgnore?: string[];
     // (undocumented)
-    localizationStatsCallback?: (stats: ILocalizationStats) => void;
-    // (undocumented)
-    localizationStatsDropPath?: string;
+    localizationStats?: ILocalizationStatsOptions;
     // (undocumented)
     localizedData: ILocalizedData;
     // (undocumented)
@@ -69,6 +65,14 @@ export interface ILocalizationStatsEntrypoint {
     localizedAssets: {
         [locale: string]: string;
     };
+}
+
+// @public (undocumented)
+export interface ILocalizationStatsOptions {
+    // (undocumented)
+    callback?: (stats: ILocalizationStats) => void;
+    // (undocumented)
+    dropPath?: string;
 }
 
 // @public (undocumented)
@@ -140,6 +144,8 @@ export interface _IStringPlaceholder {
 
 // @public (undocumented)
 export interface ITypingsGenerationOptions {
+    // (undocumented)
+    exportAsDefault?: boolean;
     // (undocumented)
     generatedTsFolder: string;
     // (undocumented)

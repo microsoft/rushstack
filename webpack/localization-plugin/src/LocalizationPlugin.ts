@@ -254,19 +254,21 @@ export class LocalizationPlugin implements Webpack.Plugin {
             }
           }
 
-          if (this._options.localizationStatsDropPath) {
-            const resolvedLocalizationStatsDropPath: string = path.resolve(
-              compiler.outputPath,
-              this._options.localizationStatsDropPath
-            );
-            JsonFile.save(localizationStats, resolvedLocalizationStatsDropPath);
-          }
+          if (this._options.localizationStats) {
+            if (this._options.localizationStats.dropPath) {
+              const resolvedLocalizationStatsDropPath: string = path.resolve(
+                compiler.outputPath,
+                this._options.localizationStats.dropPath
+              );
+              JsonFile.save(localizationStats, resolvedLocalizationStatsDropPath, { ensureFolderExists: true });
+            }
 
-          if (this._options.localizationStatsCallback) {
-            try {
-              this._options.localizationStatsCallback(localizationStats);
-            } catch (e) {
-              /* swallow errors from the callback */
+            if (this._options.localizationStats.callback) {
+              try {
+                this._options.localizationStats.callback(localizationStats);
+              } catch (e) {
+                /* swallow errors from the callback */
+              }
             }
           }
         });

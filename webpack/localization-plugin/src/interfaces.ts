@@ -83,6 +83,15 @@ export interface ILocalizedData {
 }
 
 /**
+ * @public
+ */
+export interface ILocalizationStatsOptions {
+  dropPath?: string;
+
+  callback?: (stats: ILocalizationStats) => void;
+}
+
+/**
  * The options for localization.
  *
  * @public
@@ -92,9 +101,7 @@ export interface ILocalizationPluginOptions {
 
   filesToIgnore?: string[];
 
-  localizationStatsDropPath?: string;
-
-  localizationStatsCallback?: (stats: ILocalizationStats) => void;
+  localizationStats?: ILocalizationStatsOptions;
 
   typingsOptions?: ITypingsGenerationOptions;
 }

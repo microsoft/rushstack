@@ -14,13 +14,14 @@ export {
   ILocalizationStats,
   ILocalizationStatsChunkGroup,
   ILocalizationStatsEntrypoint,
+  ILocalizationStatsOptions,
   ILocalizedData,
   ILocalizedString as _ILocalizedString,
   ILocalizedStrings,
   ILocFile as _ILocFile,
-  IPseudolocalesOptions,
-  IPseudolocaleOptions,
   IPassthroughLocaleOptions,
+  IPseudolocaleOptions,
+  IPseudolocalesOptions,
   ITypingsGenerationOptions
 } from './interfaces';
 

@@ -101,7 +101,9 @@ if translations aren't provided for an intercepted file. To avoid that error, li
 by this plugin in this property. Files should be specified as either absolute paths or paths relative
 to the Webpack compilation context.
 
-### `localizationStatsDropPath = '...'`
+### `localizationStats = { }`
+
+#### `localizationStats.dropPath = '...'`
 
 This option is used to designate a path at which a JSON file describing the localized assets produced should be
 written. If this property is omitted, the stats file won't be written.
@@ -142,10 +144,10 @@ The file has the following format:
 
 ```
 
-### `localizationStatsCallback = (stats) => { ... }`
+#### `localizationStats.callback = (stats) => { ... }`
 
 This option is used to specify a callback to be called with the stats data that would be dropped at
-[`localizationStatsDropPath`](#localizationStatsDropPath--) after compilation completes.
+[`localizationStats.dropPath`](#localizationStats.DropPath--) after compilation completes.
 
 ### `typingsOptions = { }`
 
