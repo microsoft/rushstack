@@ -206,7 +206,7 @@ export class PnpmOptionsConfiguration {
   public readonly resolutionStrategy: ResolutionStrategy;
 
   /**
-   * If true, then `"`rush install`"` will report an error if manual modifications
+   * If true, then `rush install` will report an error if manual modifications
    * were made to the PNPM shrinkwrap file without running `rush update` afterwards.
    *
    * @remarks
