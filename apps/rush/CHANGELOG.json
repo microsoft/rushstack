@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.20.0",
+      "tag": "@microsoft/rush_v5.20.0",
+      "date": "Wed, 12 Feb 2020 21:51:19 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Support \".\" as a value for the --to and --from parameters to build to the current project."
+          },
+          {
+            "comment": "Improve security by allowing the \"rush publish\" authentication token to be specified via an environment variable."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.19.4",
       "tag": "@microsoft/rush_v5.19.4",
       "date": "Tue, 28 Jan 2020 03:57:30 GMT",
