@@ -97,6 +97,14 @@ export interface ILocalizedStrings {
     [locale: string]: ILocaleData;
 }
 
+// @public (undocumented)
+export interface ILocalizedWebpackChunk extends Webpack.compilation.Chunk {
+    // (undocumented)
+    localizedFiles?: {
+        [locale: string]: string;
+    };
+}
+
 // @internal (undocumented)
 export interface _ILocFile {
     // (undocumented)

@@ -26,6 +26,10 @@ export {
 } from './interfaces';
 
 export {
+  ILocalizedWebpackChunk
+} from './webpackInterfaces';
+
+export {
   ITypingsGeneratorOptions,
   TypingsGenerator
 } from './TypingsGenerator';

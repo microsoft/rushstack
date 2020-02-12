@@ -20,6 +20,9 @@ import {
   ILocFile,
   IPseudolocaleOptions
 } from './interfaces';
+import {
+  ILocalizedWebpackChunk
+} from './webpackInterfaces';
 import { TypingsGenerator } from './TypingsGenerator';
 import { Pseudolocalization } from './Pseudolocalization';
 
@@ -206,7 +209,9 @@ export class LocalizationPlugin implements Webpack.Plugin {
               return;
             }
 
-            for (const chunk of chunkGroup.chunks) {
+            const chunks: ILocalizedWebpackChunk[] = chunkGroup.chunks;
+
+            for (const chunk of chunks) {
               const chunkFilesSet: Set<string> = new Set(chunk.files);
               const localizedChunkAssets: { [locale: string]: string } = {};
               for (const chunkFileName of chunk.files) {
@@ -251,6 +256,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
               }
 
               chunk.files = Array.from(chunkFilesSet);
+              chunk.localizedFiles = localizedChunkAssets;
             }
           }
 
