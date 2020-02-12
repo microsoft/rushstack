@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix broken init command caused by early RushConfiguration access",
+      "comment": "",
       "type": "none"
     }
   ],
