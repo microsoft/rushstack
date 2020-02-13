@@ -4,6 +4,7 @@
 
 ```ts
 
+import { loader } from 'webpack';
 import { Terminal } from '@microsoft/node-core-library';
 import * as Webpack from 'webpack';
 
@@ -111,6 +112,24 @@ export interface _ILocFile {
     [stringName: string]: _ILocalizedString;
 }
 
+// @internal (undocumented)
+export interface _ILoggerOptions {
+    // (undocumented)
+    writeError: (message: string) => void;
+    // (undocumented)
+    writeWarning: (message: string) => void;
+}
+
+// @internal (undocumented)
+export interface _IParseLocFileOptions {
+    // (undocumented)
+    content: string;
+    // (undocumented)
+    filePath: string;
+    // (undocumented)
+    loggerOptions: _ILoggerOptions;
+}
+
 // @public (undocumented)
 export interface IPassthroughLocaleOptions {
     passthroughLocaleName?: string;
@@ -184,6 +203,14 @@ export class LocalizationPlugin implements Webpack.Plugin {
     // @internal (undocumented)
     stringKeys: Map<string, _IStringPlaceholder>;
     }
+
+// @internal (undocumented)
+export class _LocFileParser {
+    // (undocumented)
+    static parseLocFile(options: _IParseLocFileOptions): _ILocFile;
+    // (undocumented)
+    static parseLocFileFromLoader(content: string, loaderContext: loader.LoaderContext): _ILocFile;
+}
 
 // @public
 export class TypingsGenerator {

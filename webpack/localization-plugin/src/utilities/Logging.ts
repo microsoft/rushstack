@@ -8,6 +8,9 @@ export interface ILoggingFunctions {
   logFileWarning: (message: string, filePath: string, line?: number, position?: number) => void;
 }
 
+/**
+ * @internal
+ */
 export interface ILoggerOptions {
   writeError: (message: string) => void;
   writeWarning: (message: string) => void;

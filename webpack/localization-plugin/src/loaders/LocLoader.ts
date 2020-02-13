@@ -4,7 +4,7 @@
 import { loader } from 'webpack';
 
 import { LocalizationPlugin } from '../LocalizationPlugin';
-import { ILocFile } from '../interfaces';
+import { ILocalizationFile } from '../interfaces';
 import { LocFileParser } from '../utilities/LocFileParser';
 import {
   loaderFactory,
@@ -23,7 +23,7 @@ export default loaderFactory(
     options: ILocLoaderOptions
   ) {
     const { pluginInstance } = options;
-    const locFileData: ILocFile = LocFileParser.parseLocFileFromLoader(content, this);
+    const locFileData: ILocalizationFile = LocFileParser.parseLocFileFromLoader(content, this);
     pluginInstance.addDefaultLocFile(locFilePath, locFileData);
 
     const resultObject: { [stringName: string]: string } = {};

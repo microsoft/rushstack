@@ -10,6 +10,7 @@ export {
   IDefaultLocaleOptions,
   ILocaleData,
   ILocaleFileData,
+  ILocalizationFile as _ILocFile,
   ILocalizationPluginOptions,
   ILocalizationStats,
   ILocalizationStatsChunkGroup,
@@ -18,12 +19,20 @@ export {
   ILocalizedData,
   ILocalizedString as _ILocalizedString,
   ILocalizedStrings,
-  ILocFile as _ILocFile,
   IPassthroughLocaleOptions,
   IPseudolocaleOptions,
   IPseudolocalesOptions,
   ITypingsGenerationOptions
 } from './interfaces';
+
+export {
+  LocFileParser as _LocFileParser,
+  IParseLocFileOptions as _IParseLocFileOptions
+} from './utilities/LocFileParser';
+
+export {
+  ILoggerOptions as _ILoggerOptions
+} from './utilities/Logging';
 
 export {
   ILocalizedWebpackChunk

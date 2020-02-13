@@ -109,7 +109,7 @@ export interface ILocalizationPluginOptions {
 /**
  * @internal
  */
-export interface ILocFile {
+export interface ILocalizationFile {
   [stringName: string]: ILocalizedString;
 }
 

@@ -17,7 +17,7 @@ import {
   ILocalizationStats,
   ILocaleFileData,
   ILocaleData,
-  ILocFile,
+  ILocalizationFile,
   IPseudolocaleOptions
 } from './interfaces';
 import {
@@ -285,7 +285,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
   /**
    * @internal
    */
-  public addDefaultLocFile(locFilePath: string, locFile: ILocFile): void {
+  public addDefaultLocFile(locFilePath: string, locFile: ILocalizationFile): void {
     const locFileData: ILocaleFileData = {};
     for (const stringName in locFile) { // eslint-disable-line guard-for-in
       locFileData[stringName] = locFile[stringName].value;
