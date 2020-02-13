@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add option to validate the lockfile was not manually edited, failing \"rush install\" if changes are detected.",
+      "comment": "Add a new rush.json setting \"preventManualShrinkwrapChanges\" which prevents against accidental mistakes in pnpm-lock.yaml.",
       "type": "none"
     }
   ],
