@@ -83,8 +83,7 @@ const PLUGIN_NAME: string = 'localization';
 
 const PLACEHOLDER_PREFIX: string = Constants.STRING_PLACEHOLDER_PREFIX;
 const PLACEHOLDER_REGEX: RegExp = new RegExp(
-  // The maximum length of quotemark escaping we can support is the length of the placeholder prefix
-  `${PLACEHOLDER_PREFIX}_((?:[^_]){1,${PLACEHOLDER_PREFIX.length}})_(\\d+)`,
+  `${PLACEHOLDER_PREFIX}(\\+(?:[^+]){2,})?\\+_(\\d+)`,
   'g'
 );
 
@@ -227,8 +226,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
               } else {
                 return assetPath;
               }
-
-              // return source.replace(Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX, this._localeNamePlaceholder.value);
             }
           );
 
@@ -304,6 +301,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
             const localizedChunkAssets: ILocaleElementMap = {};
             let alreadyProcessedAFileInThisChunk: boolean = false;
             for (const chunkFileName of chunk.files) {
+              debugger;
               if (
                 chunkFileName.indexOf(this._localeNamePlaceholder.value) !== -1 && // Ensure this is expected to be localized
                 chunkFileName.endsWith('.js') && // Ensure this is a JS file
@@ -563,7 +561,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
       };
       reconstructionSeries.push(staticElement);
 
-      const [placeholder, quotemark, placeholderSerialNumber] = regexResult;
+      const [placeholder, capturedQuotemark, placeholderSerialNumber] = regexResult;
 
       let localizedReconstructionElement: IReconstructionElement;
       if (placeholderSerialNumber === this._localeNamePlaceholder.suffix) {
@@ -590,6 +588,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
           };
           localizedReconstructionElement = brokenLocalizedElement;
         } else {
+          const quotemark: string = capturedQuotemark.substr(1, (capturedQuotemark.length - 1) / 2);
           const localizedElement: ILocalizedReconstructionElement = {
             kind: 'localized',
             values: values,
@@ -855,7 +854,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
   private _getPlaceholderString(): IStringPlaceholder {
     const suffix: string = (this._stringPlaceholderCounter++).toString();
     return {
-      value: `${Constants.STRING_PLACEHOLDER_PREFIX}_"_${suffix}`,
+      value: `${Constants.STRING_PLACEHOLDER_PREFIX}+""+_${suffix}`,
       suffix: suffix
     };
   }

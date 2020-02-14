@@ -15,7 +15,7 @@ export class Constants {
     lodash.escapeRegExp(Constants.LOCALE_FILENAME_PLACEHOLDER),
     'gi'
   );
-  public static STRING_PLACEHOLDER_PREFIX: string = '-LOCALIZED-STRING-f12dy0i7-n4bo-dqwj-39gf-sasqehjmihz9';
+  public static STRING_PLACEHOLDER_PREFIX: string = '_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9';
 
   public static RESX_REGEX: RegExp = /\.resx$/i;
   public static LOC_JSON_REGEX: RegExp = /\.loc\.json$/i;
