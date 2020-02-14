@@ -13,7 +13,7 @@ export class Constants {
   public static LOCALE_FILENAME_PLACEHOLDER: string = '[locale]';
   public static LOCALE_FILENAME_PLACEHOLDER_REGEX: RegExp = new RegExp(
     lodash.escapeRegExp(Constants.LOCALE_FILENAME_PLACEHOLDER),
-    'g'
+    'gi'
   );
   public static STRING_PLACEHOLDER_PREFIX: string = '-LOCALIZED-STRING-f12dy0i7-n4bo-dqwj-39gf-sasqehjmihz9';
 

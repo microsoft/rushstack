@@ -9,6 +9,7 @@ export {
 export {
   IDefaultLocaleOptions,
   ILocaleData,
+  ILocaleElementMap,
   ILocaleFileData,
   ILocalizationFile as _ILocFile,
   ILocalizationPluginOptions,

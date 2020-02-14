@@ -99,6 +99,11 @@ export interface ILocalizationStatsOptions {
 export interface ILocalizationPluginOptions {
   localizedData: ILocalizedData;
 
+  /**
+   * The value to replace the [locale] token with for chunks without localized strings. Defaults to "none"
+   */
+  noStringsLocaleName?: string;
+
   filesToIgnore?: string[];
 
   localizationStats?: ILocalizationStatsOptions;
@@ -142,19 +147,25 @@ export interface ILocalizedStrings {
   [locale: string]: ILocaleData;
 }
 
+/**
+ * @public
+ */
+export interface ILocaleElementMap {
+  [locale: string]: string
+}
 
 /**
  * @public
  */
 export interface ILocalizationStatsEntrypoint {
-  localizedAssets: { [locale: string]: string };
+  localizedAssets: ILocaleElementMap;
 }
 
 /**
  * @public
  */
 export interface ILocalizationStatsChunkGroup {
-  localizedAssets: { [locale: string]: string };
+  localizedAssets: ILocaleElementMap;
 }
 
 /**

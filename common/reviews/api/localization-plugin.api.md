@@ -23,6 +23,12 @@ export interface ILocaleData {
 }
 
 // @public (undocumented)
+export interface ILocaleElementMap {
+    // (undocumented)
+    [locale: string]: string;
+}
+
+// @public (undocumented)
 export interface ILocaleFileData {
     // (undocumented)
     [stringName: string]: string;
@@ -36,6 +42,7 @@ export interface ILocalizationPluginOptions {
     localizationStats?: ILocalizationStatsOptions;
     // (undocumented)
     localizedData: ILocalizedData;
+    noStringsLocaleName?: string;
     // (undocumented)
     typingsOptions?: ITypingsGenerationOptions;
 }
@@ -55,17 +62,13 @@ export interface ILocalizationStats {
 // @public (undocumented)
 export interface ILocalizationStatsChunkGroup {
     // (undocumented)
-    localizedAssets: {
-        [locale: string]: string;
-    };
+    localizedAssets: ILocaleElementMap;
 }
 
 // @public (undocumented)
 export interface ILocalizationStatsEntrypoint {
     // (undocumented)
-    localizedAssets: {
-        [locale: string]: string;
-    };
+    localizedAssets: ILocaleElementMap;
 }
 
 // @public (undocumented)

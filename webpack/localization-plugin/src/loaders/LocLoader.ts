@@ -10,6 +10,7 @@ import {
   loaderFactory,
   IBaseLoaderOptions
 } from './LoaderFactory';
+import { EntityMarker } from '../utilities/EntityMarker';
 
 export interface ILocLoaderOptions extends IBaseLoaderOptions {
   pluginInstance: LocalizationPlugin;
@@ -31,8 +32,12 @@ export default loaderFactory(
       const stringKey: string = `${locFilePath}?${stringName}`;
       if (pluginInstance.stringKeys.has(stringKey)) {
         resultObject[stringName] = pluginInstance.stringKeys.get(stringKey)!.value;
+      } else {
+        throw new Error(`Unexpected - missing placeholder for string key "${stringKey}"`);
       }
     }
+
+    EntityMarker.markEntity(this._module, true);
 
     return resultObject;
   }

@@ -18,13 +18,15 @@ import {
   ILocaleFileData,
   ILocaleData,
   ILocalizationFile,
-  IPseudolocaleOptions
+  IPseudolocaleOptions,
+  ILocaleElementMap
 } from './interfaces';
 import {
   ILocalizedWebpackChunk
 } from './webpackInterfaces';
 import { TypingsGenerator } from './TypingsGenerator';
 import { Pseudolocalization } from './Pseudolocalization';
+import { EntityMarker } from './utilities/EntityMarker';
 
 /**
  * @internal
@@ -46,11 +48,45 @@ interface IAsset {
 
 interface IExtendedMainTemplate {
   hooks: {
-    localVars: Tapable.SyncHook<string, Webpack.compilation.Chunk, string>;
+    assetPath: Tapable.SyncHook<string, IAssetPathOptions>;
   };
 }
 
+interface IExtendedConfiguration extends Webpack.compilation.Compilation {
+  options: Webpack.Configuration;
+}
+
+interface IExtendedChunkGroup extends Webpack.compilation.ChunkGroup {
+  getChildren(): Webpack.compilation.Chunk[];
+}
+
+interface IExtendedChunk extends Webpack.compilation.Chunk {
+  filenameTemplate: string;
+}
+
+interface IAssetPathOptions {
+  chunk: {};
+  contentHashType: string;
+}
+
+interface IProcessStringResult {
+  source: string;
+  size: number;
+}
+
+interface IProcessStringResultSet {
+  localizedResults: Map<string, IProcessStringResult>;
+  issues: string[];
+}
+
 const PLUGIN_NAME: string = 'localization';
+
+const PLACEHOLDER_PREFIX: string = Constants.STRING_PLACEHOLDER_PREFIX;
+const PLACEHOLDER_REGEX: RegExp = new RegExp(
+  // The maximum length of quotemark escaping we can support is the length of the placeholder prefix
+  `${PLACEHOLDER_PREFIX}_((?:[^_]){1,${PLACEHOLDER_PREFIX.length}})_(\\d+)`,
+  'g'
+);
 
 /**
  * This plugin facilitates localization in webpack.
@@ -66,12 +102,14 @@ export class LocalizationPlugin implements Webpack.Plugin {
   private _options: ILocalizationPluginOptions;
   private _filesToIgnore: Set<string> = new Set<string>();
   private _stringPlaceholderCounter: number = 0;
-  private _stringPlaceholderMap: Map<string, { [locale: string]: string }> = new Map<string, { [locale: string]: string }>();
+  private _stringPlaceholderMap: Map<string, ILocaleElementMap> = new Map<string, ILocaleElementMap>();
   private _locales: Set<string> = new Set<string>();
   private _passthroughLocaleName: string;
   private _defaultLocale: string;
+  private _noStringsLocaleName: string;
   private _fillMissingTranslationStrings: boolean;
   private _localeNamePlaceholder: IStringPlaceholder;
+  private _jsonpScriptNameLocalePlaceholder: IStringPlaceholder;
   private _placeholderToLocFilePathMap: Map<string, string> = new Map<string, string>();
   private _placeholderToStringNameMap: Map<string, string> = new Map<string, string>();
   private _pseudolocalizers: Map<string, (str: string) => string> = new Map<string, (str: string) => string>();
@@ -174,11 +212,78 @@ export class LocalizationPlugin implements Webpack.Plugin {
       WebpackConfigurationUpdater.amendWebpackConfigurationForMultiLocale(webpackConfigurationUpdaterOptions);
 
       if (errors.length === 0) {
-        compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {
-          (compilation.mainTemplate as unknown as IExtendedMainTemplate).hooks.localVars.tap(
+        compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: IExtendedConfiguration) => {
+          (compilation.mainTemplate as unknown as IExtendedMainTemplate).hooks.assetPath.tap(
             PLUGIN_NAME,
-            (source: string, chunk: Webpack.compilation.Chunk, hash: string) => {
-              return source.replace(Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX, this._localeNamePlaceholder.value);
+            (assetPath: string, options: IAssetPathOptions) => {
+              if (
+                options.contentHashType === 'javascript' &&
+                assetPath.match(Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX)
+              ) {
+                return assetPath.replace(
+                  Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX,
+                  `" + ${this._jsonpScriptNameLocalePlaceholder.value} + "`
+                  );
+              } else {
+                return assetPath;
+              }
+
+              // return source.replace(Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX, this._localeNamePlaceholder.value);
+            }
+          );
+
+          compilation.hooks.optimizeChunks.tap(
+            PLUGIN_NAME,
+            (chunks: IExtendedChunk[], chunkGroups: IExtendedChunkGroup[]) => {
+              let chunksHaveAnyChildren: boolean = false;
+              for (const chunkGroup of chunkGroups) {
+                const children: Webpack.compilation.Chunk[] = chunkGroup.getChildren();
+                if (children.length > 0) {
+                  chunksHaveAnyChildren = true;
+                  break;
+                }
+              }
+
+              if (
+                chunksHaveAnyChildren && (
+                  !compilation.options.output ||
+                  !compilation.options.output.chunkFilename ||
+                  compilation.options.output.chunkFilename.indexOf(Constants.LOCALE_FILENAME_PLACEHOLDER) === -1
+                )
+              ) {
+                compilation.errors.push(new Error(
+                  'The configuration.output.chunkFilename property must be provided and must include ' +
+                  `the ${Constants.LOCALE_FILENAME_PLACEHOLDER} placeholder`
+                ));
+
+                return;
+              }
+
+              for (const chunk of chunks) {
+                let chunkHasAnyLocModules: boolean = false;
+                for (const module of chunk.getModules()) {
+                  if (EntityMarker.getMark(module)) {
+                    chunkHasAnyLocModules = true;
+                    break;
+                  }
+                }
+
+                const replacementValue: string = chunkHasAnyLocModules
+                  ? this._localeNamePlaceholder.value
+                  : this._noStringsLocaleName;
+                EntityMarker.markEntity(chunk, chunkHasAnyLocModules);
+                if (chunk.hasRuntime()) {
+                  chunk.filenameTemplate = (compilation.options.output!.filename as string).replace(
+                    Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX,
+                    replacementValue
+                  );
+                } else {
+                  chunk.filenameTemplate = compilation.options.output!.chunkFilename!.replace(
+                    Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX,
+                    replacementValue
+                  );
+                }
+              }
             }
           );
         });
@@ -191,73 +296,60 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
           const alreadyProcessedAssets: Set<string> = new Set<string>();
 
-          for (const chunkGroup of compilation.chunkGroups) {
-            const children: Webpack.compilation.Chunk[] = chunkGroup.getChildren();
-            if (
-              (children.length > 0) && // Chunks found
-              (
-                !compiler.options.output ||
-                !compiler.options.output.chunkFilename ||
-                compiler.options.output.chunkFilename.indexOf(Constants.LOCALE_FILENAME_PLACEHOLDER) === -1
-              )
-            ) {
-              compilation.errors.push(new Error(
-                'The configuration.output.chunkFilename property must be provided and must include ' +
-                `the ${Constants.LOCALE_FILENAME_PLACEHOLDER} placeholder`
-              ));
+          for (const untypedChunk of compilation.chunks) {
+            const chunk: ILocalizedWebpackChunk = untypedChunk;
+            const chunkFilesSet: Set<string> = new Set(chunk.files);
+            const localizedChunkAssets: ILocaleElementMap = {};
+            let alreadyProcessedAFileInThisChunk: boolean = false;
+            for (const chunkFileName of chunk.files) {
+              if (
+                chunkFileName.indexOf(this._localeNamePlaceholder.value) !== -1 && // Ensure this is expected to be localized
+                chunkFileName.endsWith('.js') && // Ensure this is a JS file
+                !alreadyProcessedAssets.has(chunkFileName) // Ensure this isn't a vendor chunk we've already processed
+              ) {
+                if (alreadyProcessedAFileInThisChunk) {
+                  throw new Error(`Found more than one JS file in chunk "${chunk.name}". This is not expected.`);
+                }
 
-              return;
-            }
+                alreadyProcessedAFileInThisChunk = true;
+                alreadyProcessedAssets.add(chunkFileName);
 
-            const chunks: ILocalizedWebpackChunk[] = chunkGroup.chunks;
+                const asset: IAsset = compilation.assets[chunkFileName];
+                const resultingAssets: Map<string, IProcessAssetResult> = this._processAsset(
+                  compilation,
+                  chunkFileName,
+                  asset,
+                  chunk
+                );
 
-            for (const chunk of chunks) {
-              const chunkFilesSet: Set<string> = new Set(chunk.files);
-              const localizedChunkAssets: { [locale: string]: string } = {};
-              for (const chunkFileName of chunk.files) {
-                if (
-                  chunkFileName.match(Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX) && // Ensure this is expected to be localized
-                  chunkFileName.endsWith('.js') && // Ensure this is a JS file
-                  !alreadyProcessedAssets.has(chunkFileName) // Ensure this isn't a vendor chunk we've already processed
-                ) {
-                  alreadyProcessedAssets.add(chunkFileName);
+                // Delete the existing asset because it's been renamed
+                delete compilation.assets[chunkFileName];
+                chunkFilesSet.delete(chunkFileName);
 
-                  const asset: IAsset = compilation.assets[chunkFileName];
-                  const resultingAssets: Map<string, IProcessAssetResult> = this._processAsset(
-                    compilation,
-                    chunkFileName,
-                    asset
-                  );
-
-                  // Delete the existing asset because it's been renamed
-                  delete compilation.assets[chunkFileName];
-                  chunkFilesSet.delete(chunkFileName);
-
-                  for (const [locale, newAsset] of resultingAssets) {
-                    compilation.assets[newAsset.filename] = newAsset.asset;
-                    localizedChunkAssets[locale] = newAsset.filename;
-                    chunkFilesSet.add(newAsset.filename);
-                  }
+                for (const [locale, newAsset] of resultingAssets) {
+                  compilation.assets[newAsset.filename] = newAsset.asset;
+                  localizedChunkAssets[locale] = newAsset.filename;
+                  chunkFilesSet.add(newAsset.filename);
                 }
               }
+            }
 
-              if (chunkGroup.getParents().length > 0) {
-                // This is a secondary chunk
-                if (chunkGroup.name) {
-                  localizationStats.namedChunkGroups[chunkGroup.name] = {
-                    localizedAssets: localizedChunkAssets
-                  };
-                }
-              } else {
-                // This is an entrypoint
-                localizationStats.entrypoints[chunkGroup.name] = {
+            if (chunk.hasRuntime()) {
+              // This is an entrypoint
+              localizationStats.entrypoints[chunk.name] = {
+                localizedAssets: localizedChunkAssets
+              };
+            } else {
+              // This is a secondary chunk
+              if (chunk.name) {
+                localizationStats.namedChunkGroups[chunk.name] = {
                   localizedAssets: localizedChunkAssets
                 };
               }
-
-              chunk.files = Array.from(chunkFilesSet);
-              chunk.localizedFiles = localizedChunkAssets;
             }
+
+            chunk.files = Array.from(chunkFilesSet);
+            chunk.localizedFiles = localizedChunkAssets;
           }
 
           if (this._options.localizationStats) {
@@ -344,10 +436,97 @@ export class LocalizationPlugin implements Webpack.Plugin {
   private _processAsset(
     compilation: Webpack.compilation.Compilation,
     assetName: string,
-    asset: IAsset
+    asset: IAsset,
+    chunk: Webpack.compilation.Chunk
   ): Map<string, IProcessAssetResult> {
+    const assetSource: string = asset.source();
+
+    const getJsonpFn: () => ((locale: string) => string) = () => {
+      const idsWithStrings: Set<string> = new Set<string>();
+      const idsWithoutStrings: Set<string> = new Set<string>();
+
+      const asyncChunks: Set<Webpack.compilation.Chunk> = chunk.getAllAsyncChunks();
+      for (const asyncChunk of asyncChunks) {
+        if (EntityMarker.getMark(asyncChunk)) {
+          idsWithStrings.add(asyncChunk.id);
+        } else {
+          idsWithoutStrings.add(asyncChunk.id);
+        }
+      }
+
+      if (idsWithStrings.size === 0) {
+        return () => JSON.stringify(this._noStringsLocaleName);
+      } else if (idsWithoutStrings.size === 0) {
+        return (locale: string) => JSON.stringify(locale);
+      } else {
+        // Generate an array [<locale>, <nostrings locale>] and an object that is used as an indexer into that
+        // object that maps chunk IDs to 0s for chunks with localized strings and 1s for chunks without localized
+        // strings
+        //
+        // This can be improved in the future. We can maybe sort the chunks such that the chunks below a certain ID
+        // number are localized and the those above are not.
+        const chunkMapping: { [chunkId: string]: number } = {};
+        for (const idWithStrings of idsWithStrings) {
+          chunkMapping[idWithStrings] = 0;
+        }
+
+        for (const idWithoutStrings of idsWithoutStrings) {
+          chunkMapping[idWithoutStrings] = 1;
+        }
+
+        return (locale: string) => {
+          return `(${JSON.stringify([locale, this._noStringsLocaleName])})[${JSON.stringify(chunkMapping)}[chunkId]]`;
+        }
+      }
+    };
+
+    const processedResult: IProcessStringResultSet = this._processString(
+      assetSource,
+      asset.size(),
+      chunk.hasRuntime() ? getJsonpFn() : undefined
+    );
+    const filenameResult: IProcessStringResultSet = this._processString(assetName, assetName.length);
+
+    const result: Map<string, IProcessAssetResult> = new Map<string, IProcessAssetResult>();
+    for (const [locale, { source, size }] of processedResult.localizedResults) {
+      const newAsset: IAsset = lodash.clone(asset);
+      newAsset.source = () => source;
+      newAsset.size = () => size;
+
+      result.set(
+        locale,
+        {
+          filename: filenameResult.localizedResults.get(locale)!.source,
+          asset: newAsset
+        }
+      );
+    }
+
+    const issues: string[] = [
+      ...processedResult.issues,
+      ...filenameResult.issues
+    ];
+
+    if (issues.length > 0) {
+      compilation.errors.push(Error(
+        `localization:\n${issues.map((issue) => `  ${issue}`).join('\n')}`
+      ));
+    }
+
+    return result;
+  }
+
+  private _processString(
+    source: string,
+    initialSize: number,
+    jsonpFunction: ((locale: string) => string) | undefined = undefined
+  ): IProcessStringResultSet {
+    if (!jsonpFunction) {
+      jsonpFunction = () => { throw new Error('JSONP placeholder replacement is unsupported in this context') };
+    }
+
     interface IReconstructionElement {
-      kind: 'static' | 'localized';
+      kind: 'static' | 'localized' | 'dynamic';
     }
 
     interface IStaticReconstructionElement extends IReconstructionElement {
@@ -357,116 +536,140 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
     interface ILocalizedReconstructionElement extends IReconstructionElement {
       kind: 'localized';
-      values: { [locale: string]: string };
+      values: ILocaleElementMap;
       size: number;
       quotemarkCharacter: string | undefined;
       stringName: string;
       locFilePath: string;
     }
 
-    const placeholderPrefix: string = Constants.STRING_PLACEHOLDER_PREFIX;
-    const placeholderRegex: RegExp = new RegExp(
-      // The maximum length of quotemark escaping we can support is the length of the placeholder prefix
-      `${placeholderPrefix}_((?:.){1,${placeholderPrefix.length}})_(\\d+)`,
-      'g'
-    );
-    const result: Map<string, IProcessAssetResult> = new Map<string, IProcessAssetResult>();
-    const assetSource: string = asset.source();
+    interface IDynamicReconstructionElement extends IReconstructionElement {
+      kind: 'dynamic';
+      valueFn: (locale: string) => string;
+      size: number;
+    }
 
+    const issues: string[] = [];
     const reconstructionSeries: IReconstructionElement[] = [];
 
     let lastIndex: number = 0;
     let regexResult: RegExpExecArray | null;
-    while (regexResult = placeholderRegex.exec(assetSource)) { // eslint-disable-line no-cond-assign
+    while (regexResult = PLACEHOLDER_REGEX.exec(source)) { // eslint-disable-line no-cond-assign
       const staticElement: IStaticReconstructionElement = {
         kind: 'static',
-        staticString: assetSource.substring(lastIndex, regexResult.index)
+        staticString: source.substring(lastIndex, regexResult.index)
       };
       reconstructionSeries.push(staticElement);
 
       const [placeholder, quotemark, placeholderSerialNumber] = regexResult;
 
-      const values: { [locale: string]: string } | undefined = this._stringPlaceholderMap.get(placeholderSerialNumber);
-      if (!values) {
-        compilation.errors.push(new Error(`Missing placeholder ${placeholder}`));
-        const brokenLocalizedElement: IStaticReconstructionElement = {
-          kind: 'static',
-          staticString: placeholder
+      let localizedReconstructionElement: IReconstructionElement;
+      if (placeholderSerialNumber === this._localeNamePlaceholder.suffix) {
+        const dynamicElement: IDynamicReconstructionElement = {
+          kind: 'dynamic',
+          valueFn: (locale: string) => locale,
+          size: placeholder.length
         };
-        reconstructionSeries.push(brokenLocalizedElement);
+        localizedReconstructionElement = dynamicElement;
+      } else if (placeholderSerialNumber === this._jsonpScriptNameLocalePlaceholder.suffix) {
+        const dynamicElement: IDynamicReconstructionElement = {
+          kind: 'dynamic',
+          valueFn: jsonpFunction,
+          size: placeholder.length
+        };
+        localizedReconstructionElement = dynamicElement;
       } else {
-        const localizedElement: ILocalizedReconstructionElement = {
-          kind: 'localized',
-          values: values,
-          size: placeholder.length,
-          quotemarkCharacter: quotemark !== '"' ? quotemark : undefined,
-          locFilePath: this._placeholderToLocFilePathMap.get(placeholderSerialNumber)!,
-          stringName: this._placeholderToStringNameMap.get(placeholderSerialNumber)!,
-        };
-        reconstructionSeries.push(localizedElement);
-        lastIndex = regexResult.index + placeholder.length;
+        const values: ILocaleElementMap | undefined = this._stringPlaceholderMap.get(placeholderSerialNumber);
+        if (!values) {
+          issues.push(`Missing placeholder ${placeholder}`);
+          const brokenLocalizedElement: IStaticReconstructionElement = {
+            kind: 'static',
+            staticString: placeholder
+          };
+          localizedReconstructionElement = brokenLocalizedElement;
+        } else {
+          const localizedElement: ILocalizedReconstructionElement = {
+            kind: 'localized',
+            values: values,
+            size: placeholder.length,
+            quotemarkCharacter: quotemark !== '"' ? quotemark : undefined,
+            locFilePath: this._placeholderToLocFilePathMap.get(placeholderSerialNumber)!,
+            stringName: this._placeholderToStringNameMap.get(placeholderSerialNumber)!,
+          };
+          localizedReconstructionElement = localizedElement;
+        }
       }
+
+      reconstructionSeries.push(localizedReconstructionElement);
+      lastIndex = regexResult.index + placeholder.length;
     }
 
     const lastElement: IStaticReconstructionElement = {
       kind: 'static',
-      staticString: assetSource.substr(lastIndex)
+      staticString: source.substr(lastIndex)
     };
     reconstructionSeries.push(lastElement);
 
-    const issues: string[] = [];
+    const result: IProcessStringResultSet = {
+      issues,
+      localizedResults: new Map<string, IProcessStringResult>()
+    };
+
     for (const locale of this._locales) {
       const reconstruction: string[] = [];
 
       let sizeDiff: number = 0;
       for (const element of reconstructionSeries) {
-        if (element.kind === 'static') {
-          reconstruction.push((element as IStaticReconstructionElement).staticString);
-        } else {
-          const localizedElement: ILocalizedReconstructionElement = element as ILocalizedReconstructionElement;
-          let newValue: string | undefined = localizedElement.values[locale];
-          if (!newValue) {
-            if (this._fillMissingTranslationStrings) {
-              newValue = localizedElement.values[this._defaultLocale];
-            } else {
-              issues.push(
-                `The string "${localizedElement.stringName}" in "${localizedElement.locFilePath}" is missing in the ` +
-                `locale ${locale}`
-              );
+        switch (element.kind) {
+          case 'static': {
+            reconstruction.push((element as IStaticReconstructionElement).staticString);
+            break;
+          }
 
-              newValue = '-- MISSING STRING --';
+          case 'localized': {
+            const localizedElement: ILocalizedReconstructionElement = element as ILocalizedReconstructionElement;
+            let newValue: string | undefined = localizedElement.values[locale];
+            if (!newValue) {
+              if (this._fillMissingTranslationStrings) {
+                newValue = localizedElement.values[this._defaultLocale];
+              } else {
+                issues.push(
+                  `The string "${localizedElement.stringName}" in "${localizedElement.locFilePath}" is missing in ` +
+                  `the locale ${locale}`
+                );
+
+                newValue = '-- MISSING STRING --';
+              }
             }
+
+            if (localizedElement.quotemarkCharacter) {
+              // Replace the quotemark character with the correctly-escaped character
+              newValue = newValue.replace(/\"/g, localizedElement.quotemarkCharacter)
+            }
+
+            reconstruction.push(newValue);
+            sizeDiff += (newValue.length - localizedElement.size);
+            break;
           }
 
-          if (localizedElement.quotemarkCharacter) {
-            // Replace the quotemark character with the correctly-escaped character
-            newValue = newValue.replace(/\"/g, localizedElement.quotemarkCharacter)
+          case 'dynamic': {
+            const dynamicElement: IDynamicReconstructionElement = element as IDynamicReconstructionElement;
+            const newValue: string = dynamicElement.valueFn(locale);
+            reconstruction.push(newValue);
+            sizeDiff += (newValue.length - dynamicElement.size);
+            break;
           }
-
-          reconstruction.push(newValue);
-          sizeDiff += (newValue.length - localizedElement.size);
         }
       }
 
-      const resultFilename: string = assetName.replace(Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX, locale);
       const newAssetSource: string = reconstruction.join('');
-      const newAssetSize: number = asset.size() + sizeDiff;
-      const newAsset: IAsset = lodash.clone(asset);
-      newAsset.source = () => newAssetSource;
-      newAsset.size = () => newAssetSize;
-      result.set(
+      result.localizedResults.set(
         locale,
         {
-          filename: resultFilename,
-          asset: newAsset
+          source: newAssetSource,
+          size: initialSize + sizeDiff
         }
       );
-    }
-
-    if (issues.length > 0) {
-      compilation.errors.push(Error(
-        `localization:\n${issues.map((issue) => `  ${issue}`).join('\n')}`
-      ));
     }
 
     return result;
@@ -512,11 +715,11 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
     // START options.localizedData
     if (this._options.localizedData) {
-      const localeNameMap: { [localeName: string]: string } = {};
-
       // Create a special placeholder for the locale's name
       this._localeNamePlaceholder = this._getPlaceholderString();
-      this._stringPlaceholderMap.set(this._localeNamePlaceholder.suffix, localeNameMap);
+
+      // Create a special placeholder for the [locale] token in the JSONP script src function
+      this._jsonpScriptNameLocalePlaceholder = this._getPlaceholderString();
 
       // START options.localizedData.passthroughLocale
       if (this._options.localizedData.passthroughLocale) {
@@ -527,7 +730,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
         if (usePassthroughLocale) {
           this._passthroughLocaleName = passthroughLocaleName;
           this._locales.add(passthroughLocaleName);
-          this._stringPlaceholderMap.get(this._localeNamePlaceholder.suffix)![passthroughLocaleName] = passthroughLocaleName;
         }
       }
       // END options.localizedData.passthroughLocale
@@ -550,7 +752,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
             }
 
             this._locales.add(localeName);
-            localeNameMap[localeName] = localeName;
 
             this._resolvedLocalizedStrings.set(localeName, new Map<string, Map<string, string>>());
 
@@ -593,7 +794,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
           this._locales.add(localeName);
           this._resolvedLocalizedStrings.set(localeName, new Map<string, Map<string, string>>());
-          localeNameMap[localeName] = localeName;
           this._defaultLocale = localeName;
           this._fillMissingTranslationStrings = !!fillMissingTranslationStrings;
         } else {
@@ -626,7 +826,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
             this._pseudolocalizers.set(pseudolocaleName, Pseudolocalization.getPseudolocalizer(pseudoLocaleOpts));
             this._locales.add(pseudolocaleName);
             this._resolvedLocalizedStrings.set(pseudolocaleName, new Map<string, Map<string, string>>());
-            localeNameMap[pseudolocaleName] = pseudolocaleName;
           }
         }
       }
@@ -634,7 +833,19 @@ export class LocalizationPlugin implements Webpack.Plugin {
     } else if (!isWebpackDevServer) {
       throw new Error('Localized data must be provided unless webpack dev server is running.');
     }
-    // END options.localizedStrings
+    // END options.localizedData
+
+    // START options.noStringsLocaleName
+    if (
+      this._options.noStringsLocaleName === undefined ||
+      this._options.noStringsLocaleName === null ||
+      !ensureValidLocaleName(this._options.noStringsLocaleName)
+    ) {
+      this._noStringsLocaleName = 'none';
+    } else {
+      this._noStringsLocaleName = this._options.noStringsLocaleName;
+    }
+    // END options.noStringsLocaleName
 
     return errors;
   }
