@@ -260,11 +260,13 @@ export class LocalizationPlugin implements Webpack.Plugin {
               }
 
               for (const chunk of chunks) {
-                let chunkHasAnyLocModules: boolean = false;
-                for (const module of chunk.getModules()) {
-                  if (EntityMarker.getMark(module)) {
-                    chunkHasAnyLocModules = true;
-                    break;
+                let chunkHasAnyLocModules: boolean = chunk.getAllAsyncChunks().size > 0;
+                if (!chunkHasAnyLocModules) {
+                  for (const module of chunk.getModules()) {
+                    if (EntityMarker.getMark(module)) {
+                      chunkHasAnyLocModules = true;
+                      break;
+                    }
                   }
                 }
 

@@ -31,6 +31,7 @@ module.exports = function(env) {
     entry: {
       'localization-test-A': path.join(__dirname, 'src', 'indexA.ts'),
       'localization-test-B': path.join(__dirname, 'src', 'indexB.ts'),
+      'localization-test-C': path.join(__dirname, 'src', 'indexC.ts')
     },
     output: {
       path: path.join(__dirname, 'dist'),
