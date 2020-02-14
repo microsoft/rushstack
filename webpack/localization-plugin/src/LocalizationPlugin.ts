@@ -83,7 +83,7 @@ const PLUGIN_NAME: string = 'localization';
 
 const PLACEHOLDER_PREFIX: string = Constants.STRING_PLACEHOLDER_PREFIX;
 const PLACEHOLDER_REGEX: RegExp = new RegExp(
-  `${PLACEHOLDER_PREFIX}(\\+(?:[^+]){2,})?\\+_(\\d+)`,
+  `${PLACEHOLDER_PREFIX}(\\+[^+]+)\\+_(\\d+)`,
   'g'
 );
 
@@ -301,7 +301,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
             const localizedChunkAssets: ILocaleElementMap = {};
             let alreadyProcessedAFileInThisChunk: boolean = false;
             for (const chunkFileName of chunk.files) {
-              debugger;
               if (
                 chunkFileName.indexOf(this._localeNamePlaceholder.value) !== -1 && // Ensure this is expected to be localized
                 chunkFileName.endsWith('.js') && // Ensure this is a JS file
@@ -441,7 +440,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
   ): Map<string, IProcessAssetResult> {
     const assetSource: string = asset.source();
 
-    const getJsonpFn: () => ((locale: string) => string) = () => {
+    const getJsonpFn: () => ((locale: string, chunkIdToken: string | undefined) => string) = () => {
       const idsWithStrings: Set<string> = new Set<string>();
       const idsWithoutStrings: Set<string> = new Set<string>();
 
@@ -474,8 +473,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
           chunkMapping[idWithoutStrings] = 1;
         }
 
-        return (locale: string) => {
-          return `(${JSON.stringify([locale, this._noStringsLocaleName])})[${JSON.stringify(chunkMapping)}[chunkId]]`;
+        return (locale: string, chunkIdToken: string) => {
+          return `(${JSON.stringify([locale, this._noStringsLocaleName])})[${JSON.stringify(chunkMapping)}[${chunkIdToken}]]`;
         }
       }
     };
@@ -519,7 +518,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
   private _processString(
     source: string,
     initialSize: number,
-    jsonpFunction: ((locale: string) => string) | undefined = undefined
+    jsonpFunction: ((locale: string, token: string | undefined) => string) | undefined = undefined
   ): IProcessStringResultSet {
     if (!jsonpFunction) {
       jsonpFunction = () => { throw new Error('JSONP placeholder replacement is unsupported in this context') };
@@ -545,8 +544,9 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
     interface IDynamicReconstructionElement extends IReconstructionElement {
       kind: 'dynamic';
-      valueFn: (locale: string) => string;
+      valueFn: (locale: string, token: string | undefined) => string;
       size: number;
+      token?: string;
     }
 
     const issues: string[] = [];
@@ -561,7 +561,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
       };
       reconstructionSeries.push(staticElement);
 
-      const [placeholder, capturedQuotemark, placeholderSerialNumber] = regexResult;
+      const [placeholder, capturedToken, placeholderSerialNumber] = regexResult;
 
       let localizedReconstructionElement: IReconstructionElement;
       if (placeholderSerialNumber === this._localeNamePlaceholder.suffix) {
@@ -575,7 +575,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
         const dynamicElement: IDynamicReconstructionElement = {
           kind: 'dynamic',
           valueFn: jsonpFunction,
-          size: placeholder.length
+          size: placeholder.length,
+          token: capturedToken.substr(1)
         };
         localizedReconstructionElement = dynamicElement;
       } else {
@@ -588,7 +589,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
           };
           localizedReconstructionElement = brokenLocalizedElement;
         } else {
-          const quotemark: string = capturedQuotemark.substr(1, (capturedQuotemark.length - 1) / 2);
+          const quotemark: string = capturedToken.substr(1, (capturedToken.length - 1) / 2);
           const localizedElement: ILocalizedReconstructionElement = {
             kind: 'localized',
             values: values,
@@ -655,7 +656,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
           case 'dynamic': {
             const dynamicElement: IDynamicReconstructionElement = element as IDynamicReconstructionElement;
-            const newValue: string = dynamicElement.valueFn(locale);
+            const newValue: string = dynamicElement.valueFn(locale, dynamicElement.token);
             reconstruction.push(newValue);
             sizeDiff += (newValue.length - dynamicElement.size);
             break;
@@ -720,7 +721,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
       this._localeNamePlaceholder = this._getPlaceholderString();
 
       // Create a special placeholder for the [locale] token in the JSONP script src function
-      this._jsonpScriptNameLocalePlaceholder = this._getPlaceholderString();
+      this._jsonpScriptNameLocalePlaceholder = this._getPlaceholderString('chunkId');
 
       // START options.localizedData.passthroughLocale
       if (this._options.localizedData.passthroughLocale) {
@@ -851,10 +852,17 @@ export class LocalizationPlugin implements Webpack.Plugin {
     return errors;
   }
 
-  private _getPlaceholderString(): IStringPlaceholder {
+  /**
+   * @param token - Use this as a value that may be escaped or minified.
+   */
+  private _getPlaceholderString(token: string = '""'): IStringPlaceholder {
+    if (token.match(/\+/)) {
+      throw new Error('The token may not contain a + symbol.')
+    }
+
     const suffix: string = (this._stringPlaceholderCounter++).toString();
     return {
-      value: `${Constants.STRING_PLACEHOLDER_PREFIX}+""+_${suffix}`,
+      value: `${Constants.STRING_PLACEHOLDER_PREFIX}+${token}+_${suffix}`,
       suffix: suffix
     };
   }

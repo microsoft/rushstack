@@ -3,12 +3,15 @@
 
 const LABEL: unique symbol = Symbol('loc-plugin-marked');
 
+/**
+ * Use the functions on this class to mark webpack entities that contain localized resources.
+ */
 export class EntityMarker {
-  public static markEntity<TModule, TValue>(module: TModule, value: TValue): void {
+  public static markEntity<TModule>(module: TModule, value: boolean): void {
     module[LABEL] = value;
   }
 
-  public static getMark<TModule, TValue>(module: TModule): TValue {
-    return module[LABEL];
+  public static getMark<TModule>(module: TModule): boolean {
+    return !!module[LABEL];
   }
 }

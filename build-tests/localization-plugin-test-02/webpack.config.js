@@ -10,7 +10,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = function(env) {
   const configuration = {
-    mode: 'production',
+    mode: 'development',
     module: {
       rules: [
         {

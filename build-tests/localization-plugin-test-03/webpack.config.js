@@ -39,7 +39,7 @@ module.exports = function(env) {
       chunkFilename: '[id].[name]_[locale]_[contenthash].js'
     },
     optimization: {
-      minimize: false
+      minimize: true
     },
     plugins: [
       new webpack.optimize.ModuleConcatenationPlugin(),
@@ -109,7 +109,7 @@ module.exports = function(env) {
           useAssetName: true
         }
       }),
-      new HtmlWebpackPlugin()
+      // new HtmlWebpackPlugin()
     ]
   };
 
