@@ -20,4 +20,11 @@ export class Constants {
   public static RESX_REGEX: RegExp = /\.resx$/i;
   public static LOC_JSON_REGEX: RegExp = /\.loc\.json$/i;
   public static RESX_OR_LOC_JSON_REGEX: RegExp = /\.(resx|loc\.json)$/i;
+
+  public static STRING_PLACEHOLDER_LABEL: string = 'A';
+  public static LOCALE_NAME_PLACEHOLDER_LABEL: string = 'B';
+  public static JSONP_PLACEHOLDER_LABEL: string = 'C';
+
+  public static LOCALE_NAME_PLACEHOLDER: string = `${Constants.STRING_PLACEHOLDER_PREFIX}_${Constants.LOCALE_NAME_PLACEHOLDER_LABEL}_0`;
+  public static JSONP_PLACEHOLDER: string = `${Constants.STRING_PLACEHOLDER_PREFIX}_${Constants.JSONP_PLACEHOLDER_LABEL}+chunkId+_0`;
 }

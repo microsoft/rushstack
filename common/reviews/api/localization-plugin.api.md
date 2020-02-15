@@ -203,6 +203,10 @@ export class LocalizationPlugin implements Webpack.Plugin {
     addDefaultLocFile(locFilePath: string, locFile: _ILocFile): void;
     // (undocumented)
     apply(compiler: Webpack.Compiler): void;
+    // Warning: (ae-forgotten-export) The symbol "IStringSerialNumberData" needs to be exported by the entry point index.d.ts
+    //
+    // @internal (undocumented)
+    getDataForSerialNumber(serialNumber: string): IStringSerialNumberData | undefined;
     // @internal (undocumented)
     stringKeys: Map<string, _IStringPlaceholder>;
     }
