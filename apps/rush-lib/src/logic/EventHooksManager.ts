@@ -47,7 +47,7 @@ export class EventHooksManager {
         } catch (error) {
           console.error(
             os.EOL + colors.yellow(`Event hook "${script}" failed. Run "rush" with --debug`) +
-            ` to see detailed error information.`
+            colors.yellow(` to see detailed error information.`)
           );
           if (isDebug) {
             console.error(os.EOL + error.message);
