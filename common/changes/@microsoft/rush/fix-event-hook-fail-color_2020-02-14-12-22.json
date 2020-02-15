@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Adds yellow output on event hook fail",
+      "comment": "Make the event hook failure message print in yellow.",
       "type": "none"
     }
   ],
