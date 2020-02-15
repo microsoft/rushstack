@@ -83,7 +83,7 @@ const PLUGIN_NAME: string = 'localization';
 
 const PLACEHOLDER_PREFIX: string = Constants.STRING_PLACEHOLDER_PREFIX;
 const PLACEHOLDER_REGEX: RegExp = new RegExp(
-  `${PLACEHOLDER_PREFIX}(\\+[^+]+)\\+_(\\d+)`,
+  `${PLACEHOLDER_PREFIX}(\\+[^+]*)\\+_(\\d+)`,
   'g'
 );
 
@@ -257,7 +257,9 @@ export class LocalizationPlugin implements Webpack.Plugin {
               }
 
               for (const chunk of chunks) {
-                let chunkHasAnyLocModules: boolean = chunk.getAllAsyncChunks().size > 0;
+                let chunkHasAnyLocModules: boolean = Array.from(chunk.getAllAsyncChunks()).some(
+                  (asyncChunk) => EntityMarker.getMark(asyncChunk)
+                );
                 if (!chunkHasAnyLocModules) {
                   for (const module of chunk.getModules()) {
                     if (EntityMarker.getMark(module)) {
@@ -537,7 +539,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
       kind: 'localized';
       values: ILocaleElementMap;
       size: number;
-      quotemarkCharacter: string | undefined;
       stringName: string;
       locFilePath: string;
     }
@@ -589,12 +590,10 @@ export class LocalizationPlugin implements Webpack.Plugin {
           };
           localizedReconstructionElement = brokenLocalizedElement;
         } else {
-          const quotemark: string = capturedToken.substr(1, (capturedToken.length - 1) / 2);
           const localizedElement: ILocalizedReconstructionElement = {
             kind: 'localized',
             values: values,
             size: placeholder.length,
-            quotemarkCharacter: quotemark !== '"' ? quotemark : undefined,
             locFilePath: this._placeholderToLocFilePathMap.get(placeholderSerialNumber)!,
             stringName: this._placeholderToStringNameMap.get(placeholderSerialNumber)!,
           };
@@ -644,10 +643,11 @@ export class LocalizationPlugin implements Webpack.Plugin {
               }
             }
 
-            if (localizedElement.quotemarkCharacter) {
-              // Replace the quotemark character with the correctly-escaped character
-              newValue = newValue.replace(/\"/g, localizedElement.quotemarkCharacter)
-            }
+            // Replace the quotemark character with a unicode-escaped character
+            newValue = newValue.replace(/\"/g, '\\u0022');
+
+            // Replace the apostrophe character with a unicode-escaped character
+            newValue = newValue.replace(/\'/g, '\\u0027');
 
             reconstruction.push(newValue);
             sizeDiff += (newValue.length - localizedElement.size);
@@ -855,7 +855,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
   /**
    * @param token - Use this as a value that may be escaped or minified.
    */
-  private _getPlaceholderString(token: string = '""'): IStringPlaceholder {
+  private _getPlaceholderString(token: string = ''): IStringPlaceholder {
     if (token.match(/\+/)) {
       throw new Error('The token may not contain a + symbol.')
     }

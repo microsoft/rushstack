@@ -58,7 +58,7 @@ module.exports = function(env) {
               },
               "./src/strings3.loc.json": {
                 "string1": "la tercera cadena",
-                "string2": "la cuarta cadena",
+                "string2": "cuerda cuatro con un ' apóstrofe",
                 "string3": "UNUSED STRING!"
               },
               "./src/strings4.loc.json": {
@@ -109,7 +109,7 @@ module.exports = function(env) {
           useAssetName: true
         }
       }),
-      // new HtmlWebpackPlugin()
+      new HtmlWebpackPlugin()
     ]
   };
 
