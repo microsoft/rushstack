@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Make the event hook failure message print in yellow.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "1504027+VincentSurelle@users.noreply.github.com"
+}
