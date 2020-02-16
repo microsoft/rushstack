@@ -166,12 +166,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
       return;
     }
 
-    function tryInstallPreprocessor(): void {
-      if (typingsPreprocessor) {
-        compiler.hooks.beforeRun.tap(PLUGIN_NAME, () => typingsPreprocessor!.generateTypings());
-      }
-    }
-
     if (isWebpackDevServer) {
       if (typingsPreprocessor) {
         compiler.hooks.watchRun.tap(PLUGIN_NAME, () => typingsPreprocessor!.runWatcher());
@@ -185,7 +179,9 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
       WebpackConfigurationUpdater.amendWebpackConfigurationForInPlaceLocFiles(webpackConfigurationUpdaterOptions);
     } else {
-      tryInstallPreprocessor();
+      if (typingsPreprocessor) {
+        compiler.hooks.beforeRun.tap(PLUGIN_NAME, () => typingsPreprocessor!.generateTypings());
+      }
 
       WebpackConfigurationUpdater.amendWebpackConfigurationForMultiLocale(webpackConfigurationUpdaterOptions);
 
@@ -235,10 +231,9 @@ export class LocalizationPlugin implements Webpack.Plugin {
                 return;
               }
 
+              // First pass - see if the chunk directly contains any loc modules
               for (const chunk of chunks) {
-                let chunkHasAnyLocModules: boolean = Array.from(chunk.getAllAsyncChunks()).some(
-                  (asyncChunk) => EntityMarker.getMark(asyncChunk)
-                );
+                let chunkHasAnyLocModules: boolean = false;
                 if (!chunkHasAnyLocModules) {
                   for (const module of chunk.getModules()) {
                     if (EntityMarker.getMark(module)) {
@@ -248,10 +243,24 @@ export class LocalizationPlugin implements Webpack.Plugin {
                   }
                 }
 
-                const replacementValue: string = chunkHasAnyLocModules
+                EntityMarker.markEntity(chunk, chunkHasAnyLocModules);
+              }
+
+              // Second pass - see if the chunk loads any localized chunks
+              for (const chunk of chunks) {
+                let localizedChunk: boolean = EntityMarker.getMark(chunk);
+                if (
+                  !localizedChunk &&
+                  Array.from(chunk.getAllAsyncChunks()).some((asyncChunk) => EntityMarker.getMark(asyncChunk))
+                ) {
+                  localizedChunk = true;
+                  EntityMarker.markEntity(chunk, true);
+                }
+
+                const replacementValue: string = localizedChunk
                   ? Constants.LOCALE_NAME_PLACEHOLDER
                   : this._noStringsLocaleName;
-                EntityMarker.markEntity(chunk, chunkHasAnyLocModules);
+                EntityMarker.markEntity(chunk, localizedChunk);
                 if (chunk.hasRuntime()) {
                   chunk.filenameTemplate = (compilation.options.output!.filename as string).replace(
                     Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX,
