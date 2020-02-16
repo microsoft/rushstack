@@ -156,7 +156,8 @@ export class AssetProcessor {
     );
     const reconstructedAsset: INonLocalizedReconstructionResult = AssetProcessor._reconstructNonLocalized(
       parsedAsset.reconstructionSeries,
-      options.asset.size()
+      options.asset.size(),
+      options.noStringsLocaleName
     );
 
     const parsedAssetName: IParseResult = AssetProcessor._parseStringToReconstructionSequence(
@@ -166,7 +167,8 @@ export class AssetProcessor {
     );
     const reconstructedAssetName: INonLocalizedReconstructionResult = AssetProcessor._reconstructNonLocalized(
       parsedAssetName.reconstructionSeries,
-      options.assetName.length
+      options.assetName.length,
+      options.noStringsLocaleName
     );
 
     const issues: string[] = [
@@ -267,7 +269,8 @@ export class AssetProcessor {
 
   private static _reconstructNonLocalized(
     reconstructionSeries: IReconstructionElement[],
-    initialSize: number
+    initialSize: number,
+    noStringsLocaleName: string
   ): INonLocalizedReconstructionResult {
     const issues: string[] = [];
 
@@ -296,7 +299,7 @@ export class AssetProcessor {
 
         case 'dynamic': {
           const dynamicElement: IDynamicReconstructionElement = element as IDynamicReconstructionElement;
-          const newValue: string = dynamicElement.valueFn(undefined!, dynamicElement.token);
+          const newValue: string = dynamicElement.valueFn(noStringsLocaleName, dynamicElement.token);
           reconstruction.push(newValue);
           sizeDiff += (newValue.length - dynamicElement.size);
           break;
