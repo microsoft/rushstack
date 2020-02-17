@@ -7,8 +7,61 @@
 ## Overview
 
 This plugin produces webpack bundles that have multiple locales' variants of strings embedded. It also
-has OOB support for RESX files in addition to JSON strings files (with the extension `.loc.json`), including
+has out-of-box support for RESX files in addition to JSON strings files (with the extension `.loc.json`), including
 support for generating typings.
+
+### Example Plugin Usage
+
+There are three example projects in this repository that make use of this plugin:
+
+- [Project 1](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-01)
+  - This project contains two webpack entrypoints (one with an async chunk, one without), without any localized
+resources
+  - The output is a single, non-localized variant
+- [Project 2](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-02)
+  - This project contains three webpack entrypoints:
+    - [`indexA.ts`](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-02/src/indexA.ts)
+      directly references two `.loc.json` files and one `.resx` file, and dynamically imports an async chunk with
+      localized data, and an async chunk without localized data
+    - [`indexB.ts`](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-02/src/indexB.ts)
+      directly references two `.loc.json` files
+    - [`indexC.ts`](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-02/src/indexC.ts)
+      directly references no localized resources, and dynamically imports an async chunk without localized data
+  - The webpack config contains Spanish translations for most of the English strings in the resource files
+  - The output contains English, Spanish, and "passthrough" localized variants of files that contain
+    localized data, and a non-localized variant of the files that do not contain localized data
+- [Project 3](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-03)
+  - This project contains four webpack entrypoints:
+    - [`indexA.ts`](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-03/src/indexA.ts)
+      directly references two `.loc.json` files and one `.resx` file, and dynamically imports an async chunk with
+      localized data, and an async chunk without localized data
+    - [`indexB.ts`](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-03/src/indexB.ts)
+      directly references two `.loc.json` files
+    - [`indexC.ts`](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-03/src/indexC.ts)
+      directly references no localized resources, and dynamically imports an async chunk with localized data
+    - [`indexD.ts`](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-03/src/indexD.ts)
+      directly references no localized resources, and dynamically imports an async chunk without localized data
+  - The webpack config contains Spanish translations for all of the English strings in the resource files
+  - The output contains English, Spanish, "passthrough," and two pseudo-localized variants of files that contain
+    localized data, and a non-localized variant of the files that do not contain localized data
+
+### `.resx` vs `.loc.json`
+
+[`.resx`](https://docs.microsoft.com/en-us/dotnet/framework/resources/creating-resource-files-for-desktop-apps#resources-in-resx-files)
+is an XML format for resource data. It is primarily used in .NET development, and it is supported by
+some translation services. See an example of a `.resx` file
+[here](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-02/src/strings5.resx).
+Note that the `<xsd:schema>` and `<resheader>` elements are not required. Also note that although the
+`.resx` supports many different types of localized data including strings and binary data, **only strings**
+are supported by this plugin.
+
+`.loc.json` is a very simple `JSON` schema for specifying localized string and translator comments.
+See an example of a `.loc.json` file
+[here](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-02/src/strings3.loc.json).
+
+For most projects, `.loc.json` is a simpler format to use. However for large projects, projects that already use
+translation services that support `.resx`, or engineers who are already experienced .NET developers, `.resx`
+may be more convenient.
 
 # Plugin
 
@@ -19,7 +72,7 @@ import { LocalizationPlugin } from '@rushstack/localization-plugin';
 
 {
   plugins: [
-    new SetPublicPathPlugin( /* webpackPublicPathOptions */ )
+    new LocalizationPlugin( /* options */ )
   ]
 }
 ```
@@ -175,7 +228,3 @@ If this option is set to `true`, loc modules typings will be exported wrapped in
 allows strings to be imported by using the `import strings from './strings.loc.json';` syntax instead of
 the `import { string1 } from './strings.loc.json';` or the `import * as strings from './strings.loc.json';`
 syntax.
-
-# License
-
-MIT (http://www.opensource.org/licenses/mit-license.php)
