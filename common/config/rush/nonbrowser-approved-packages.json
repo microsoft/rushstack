@@ -452,7 +452,7 @@
     },
     {
       "name": "lodash",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "lodash.merge",

@@ -1,5 +1,7 @@
+import * as lodash from 'lodash';
+
 export class ChunkWithoutStringsClass {
   public doStuff(): void {
-    console.log('STATIC STRING');
+    console.log(lodash.escape('STATIC STRING'));
   }
 }

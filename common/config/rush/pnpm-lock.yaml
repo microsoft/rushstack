@@ -12201,8 +12201,10 @@ packages:
     version: 0.0.0
   'file:projects/localization-plugin-test-02.tgz':
     dependencies:
+      '@types/lodash': 4.14.116
       '@types/webpack-env': 1.13.0
       html-webpack-plugin: 3.2.0_webpack@4.31.0
+      lodash: 4.17.15
       ts-loader: 6.0.0
       webpack: 4.31.0_webpack@4.31.0
       webpack-bundle-analyzer: 3.6.0
@@ -12211,7 +12213,7 @@ packages:
     dev: false
     name: '@rush-temp/localization-plugin-test-02'
     resolution:
-      integrity: sha512-zd9bdrUCt94qDW1bF+R8tPiWbdeefDR1GUOOiOrTARpXRPV+dYKjtToyI4EmzeYtl8dJ05DKJy7UcJQZG9u30Q==
+      integrity: sha512-UcRHixblPOmk+M2SXcbB6YwdDo2f55WfGwh90IIYrG6TZmVYjbMvn/yd7W60X4dsv78eY+uc+ZPqFkanm4Ua+w==
       tarball: 'file:projects/localization-plugin-test-02.tgz'
     version: 0.0.0
   'file:projects/localization-plugin-test-03.tgz':
@@ -12337,7 +12339,7 @@ packages:
     dev: false
     name: '@rush-temp/repo-toolbox'
     resolution:
-      integrity: sha512-3KQCtKRPhjY21w+LyMq+eGNdhe3xnUTiorofSe5AMGXP6l40k4X9nEEowZbSLG1/KU05QKlAE1JVh7x4865UPg==
+      integrity: sha512-BWKIymwTfbF5tnl9vRttmCy/At2zscjJfONSizmD0Ggoz/hIOgEnSV0OtDtMgSnxjENVSuZkQsIt3nVfHbB1zw==
       tarball: 'file:projects/repo-toolbox.tgz'
     version: 0.0.0
   'file:projects/resolve-chunk-plugin.tgz':
@@ -12362,7 +12364,7 @@ packages:
     dev: false
     name: '@rush-temp/rush-buildxl'
     resolution:
-      integrity: sha512-z9/RP9v/FQbt3JnaFxQJeydwLzgpS1rlqMjaKFNo/f6u6PnsPIkRRp63IvnHHJmOp3AhJRm4fKkiup10q+ts9w==
+      integrity: sha512-ow6xPrnvgnmjiMkwV11GOiEZO04n/IP4rkOHyWmZP0Q3g4uXS9EGzRQEKhRiHMeLLFm2BDP02LVFYpaVFUCeLA==
       tarball: 'file:projects/rush-buildxl.tgz'
     version: 0.0.0
   'file:projects/rush-lib.tgz':
@@ -12764,7 +12766,7 @@ packages:
     dev: false
     name: '@rush-temp/rush'
     resolution:
-      integrity: sha512-2r8b0ClHIvmovPh2lSk6C5WFHfDKP+C6DAcuXUlddpjhgMpwvjYvUxoId43QTDdy+Y66BTljmzmAxSLauu/Dhg==
+      integrity: sha512-7+HQzYfEJI+3ThkeYy7+Rgtrbokzl6zj/ke7FUdCLDfO9ZFcC/51U3pOafOEtMTHDO7TjJlkULaZUwmL7cTTQg==
       tarball: 'file:projects/rush.tgz'
     version: 0.0.0
   'file:projects/rushell.tgz':
