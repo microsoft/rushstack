@@ -55,7 +55,7 @@ interface IExtendedChunk extends Webpack.compilation.Chunk {
 }
 
 interface IAssetPathOptions {
-  chunk: {};
+  chunk: Webpack.compilation.Chunk;
   contentHashType: string;
 }
 
@@ -194,10 +194,17 @@ export class LocalizationPlugin implements Webpack.Plugin {
                 options.contentHashType === 'javascript' &&
                 assetPath.match(Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX)
               ) {
-                return assetPath.replace(
-                  Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX,
-                  `" + ${Constants.JSONP_PLACEHOLDER} + "`
+                if (options.chunk.id.match(/^\" +/)) { // Does this look like an async chunk URL generator?
+                  return assetPath.replace(
+                    Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX,
+                    `" + ${Constants.JSONP_PLACEHOLDER} + "`
                   );
+                } else {
+                  return assetPath.replace(
+                    Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX,
+                    Constants.LOCALE_NAME_PLACEHOLDER
+                  );
+                }
               } else {
                 return assetPath;
               }
@@ -307,7 +314,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
             }
 
             if (EntityMarker.getMark(chunk)) {
-
               processChunkJsFile((chunkFilename) => {
                 if (chunkFilename.indexOf(Constants.LOCALE_NAME_PLACEHOLDER) === -1) {
                   throw new Error(`Asset ${chunkFilename} is expected to be localized, but is missing a locale placeholder`);
@@ -356,10 +362,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
               });
             } else {
               processChunkJsFile((chunkFilename) => {
-                if (chunkFilename.indexOf(Constants.LOCALE_NAME_PLACEHOLDER) !== -1) {
-                  throw new Error(`Asset ${chunkFilename} is not expected to be localized, but has a locale placeholder`);
-                }
-
                 const asset: IAsset = compilation.assets[chunkFilename];
 
                 const resultingAsset: IProcessAssetResult = AssetProcessor.processNonLocalizedAsset({
