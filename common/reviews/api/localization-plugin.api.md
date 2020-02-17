@@ -10,9 +10,7 @@ import * as Webpack from 'webpack';
 
 // @public (undocumented)
 export interface IDefaultLocaleOptions {
-    // (undocumented)
     fillMissingTranslationStrings?: boolean;
-    // (undocumented)
     localeName: string;
 }
 
@@ -36,14 +34,10 @@ export interface ILocaleFileData {
 
 // @public
 export interface ILocalizationPluginOptions {
-    // (undocumented)
     filesToIgnore?: string[];
-    // (undocumented)
     localizationStats?: ILocalizationStatsOptions;
-    // (undocumented)
     localizedData: ILocalizedData;
     noStringsLocaleName?: string;
-    // (undocumented)
     typingsOptions?: ITypingsGenerationOptions;
 }
 
@@ -71,11 +65,9 @@ export interface ILocalizationStatsEntrypoint {
     localizedAssets: ILocaleElementMap;
 }
 
-// @public (undocumented)
+// @public
 export interface ILocalizationStatsOptions {
-    // (undocumented)
     callback?: (stats: ILocalizationStats) => void;
-    // (undocumented)
     dropPath?: string;
 }
 
@@ -133,10 +125,9 @@ export interface _IParseLocFileOptions {
     loggerOptions: _ILoggerOptions;
 }
 
-// @public (undocumented)
+// @public
 export interface IPassthroughLocaleOptions {
     passthroughLocaleName?: string;
-    // (undocumented)
     usePassthroughLocale?: boolean;
 }
 
@@ -158,7 +149,7 @@ export interface IPseudolocaleOptions {
     startDelimiter?: string;
 }
 
-// @public (undocumented)
+// @public
 export interface IPseudolocalesOptions {
     // (undocumented)
     [pseudoLocaleName: string]: IPseudolocaleOptions;
@@ -172,13 +163,10 @@ export interface _IStringPlaceholder {
     value: string;
 }
 
-// @public (undocumented)
+// @public
 export interface ITypingsGenerationOptions {
-    // (undocumented)
     exportAsDefault?: boolean;
-    // (undocumented)
     generatedTsFolder: string;
-    // (undocumented)
     sourceRoot?: string;
 }
 

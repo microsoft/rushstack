@@ -2,9 +2,14 @@
 // See LICENSE in the project root for license information.
 
 /**
+ * Options for the passthrough locale.
+ *
  * @public
  */
 export interface IPassthroughLocaleOptions {
+  /**
+   * If this is set to `true`, a passthrough locale will be included in the output
+   */
   usePassthroughLocale?: boolean;
 
   /**
@@ -15,11 +20,25 @@ export interface IPassthroughLocaleOptions {
 }
 
 /**
+ * Options for typing generation.
+ *
  * @public
  */
 export interface ITypingsGenerationOptions {
+  /**
+   * This property specifies the folder in which `.d.ts` files for loc files should be dropped.
+   */
   generatedTsFolder: string;
+
+  /**
+   * This optional property overrides the compiler context for discovery of localization files
+   * for which typings should be generated.
+   */
   sourceRoot?: string;
+
+  /**
+   * If this option is set to `true`, loc modules typings will be exported wrapped in a `default` property.
+   */
   exportAsDefault?: boolean;
 }
 
@@ -27,8 +46,16 @@ export interface ITypingsGenerationOptions {
  * @public
  */
 export interface IDefaultLocaleOptions {
+  /**
+   * This required property specifies the name of the locale used in the
+   * `.resx` and `.loc.json` files in the source
+   */
   localeName: string;
 
+  /**
+   * If this option is set to `true`, strings that are missing from
+   * `localizedData.translatedStrings` will be provided by the default locale
+   */
   fillMissingTranslationStrings?: boolean;
 }
 
@@ -51,6 +78,8 @@ export interface IPseudolocaleOptions {
 }
 
 /**
+ * Options for generated pseudolocales.
+ *
  * @public
  */
 export interface IPseudolocalesOptions {
@@ -62,6 +91,11 @@ export interface IPseudolocalesOptions {
  */
 export interface ILocalizedData {
   /**
+   * Options for the locale used in the source localized data files.
+   */
+  defaultLocale: IDefaultLocaleOptions;
+
+  /**
    * Use this parameter to specify the translated data.
    */
   translatedStrings: ILocalizedStrings;
@@ -72,22 +106,27 @@ export interface ILocalizedData {
   passthroughLocale?: IPassthroughLocaleOptions;
 
   /**
-   * Options for the locale used in the source localized data files.
-   */
-  defaultLocale: IDefaultLocaleOptions;
-
-  /**
    * Options for pseudo-localization.
    */
   pseudolocales?: IPseudolocalesOptions;
 }
 
 /**
+ * Options for how localization stats data should be produced.
+ *
  * @public
  */
 export interface ILocalizationStatsOptions {
+  /**
+   * This option is used to designate a path at which a JSON file describing the localized
+   * assets produced should be written.
+   */
   dropPath?: string;
 
+  /**
+   * This option is used to specify a callback to be called with the stats data that would be
+   * dropped at `localizationStats.dropPath` after compilation completes.
+   */
   callback?: (stats: ILocalizationStats) => void;
 }
 
@@ -97,17 +136,29 @@ export interface ILocalizationStatsOptions {
  * @public
  */
 export interface ILocalizationPluginOptions {
+  /**
+   * Localization data.
+   */
   localizedData: ILocalizedData;
+
+  /**
+   * This option is used to specify `.resx` and `.loc.json` files that should not be processed by this plugin.
+   */
+  filesToIgnore?: string[];
 
   /**
    * The value to replace the [locale] token with for chunks without localized strings. Defaults to "none"
    */
   noStringsLocaleName?: string;
 
-  filesToIgnore?: string[];
-
+  /**
+   * Options for how localization stats data should be produced.
+   */
   localizationStats?: ILocalizationStatsOptions;
 
+  /**
+   * This option is used to specify how and if TypeScript typings should be generated for loc files.
+   */
   typingsOptions?: ITypingsGenerationOptions;
 }
 
