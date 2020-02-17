@@ -8,10 +8,13 @@ import {
   Logging,
   ILoggerOptions
 } from './Logging';
-import { ILocFile } from '../interfaces';
+import { ILocalizationFile } from '../interfaces';
 import { ResxReader } from './ResxReader';
 import { Constants } from './Constants';
 
+/**
+ * @internal
+ */
 export interface IParseLocFileOptions {
   loggerOptions: ILoggerOptions;
   filePath: string;
@@ -20,13 +23,16 @@ export interface IParseLocFileOptions {
 
 interface IParseCacheEntry {
   content: string;
-  parsedFile: ILocFile;
+  parsedFile: ILocalizationFile;
 }
 
 const parseCache: Map<string, IParseCacheEntry> = new Map<string, IParseCacheEntry>();
 
+/**
+ * @internal
+ */
 export class LocFileParser {
-  public static parseLocFileFromLoader(content: string, loaderContext: loader.LoaderContext): ILocFile {
+  public static parseLocFileFromLoader(content: string, loaderContext: loader.LoaderContext): ILocalizationFile {
     return LocFileParser.parseLocFile({
       filePath: loaderContext.resourcePath,
       loggerOptions: { writeError: loaderContext.emitError, writeWarning: loaderContext.emitWarning },
@@ -34,7 +40,7 @@ export class LocFileParser {
     });
   }
 
-  public static parseLocFile(options: IParseLocFileOptions): ILocFile {
+  public static parseLocFile(options: IParseLocFileOptions): ILocalizationFile {
     if (parseCache.has(options.filePath)) {
       const entry: IParseCacheEntry = parseCache.get(options.filePath)!;
       if (entry.content === options.content) {
@@ -42,7 +48,7 @@ export class LocFileParser {
       }
     }
 
-    let parsedFile: ILocFile;
+    let parsedFile: ILocalizationFile;
     if (/\.resx$/i.test(options.filePath)) {
       parsedFile = ResxReader.readResxAsLocFile(
         options.content,

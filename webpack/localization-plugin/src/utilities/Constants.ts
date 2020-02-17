@@ -13,11 +13,18 @@ export class Constants {
   public static LOCALE_FILENAME_PLACEHOLDER: string = '[locale]';
   public static LOCALE_FILENAME_PLACEHOLDER_REGEX: RegExp = new RegExp(
     lodash.escapeRegExp(Constants.LOCALE_FILENAME_PLACEHOLDER),
-    'g'
+    'gi'
   );
-  public static STRING_PLACEHOLDER_PREFIX: string = '-LOCALIZED-STRING-f12dy0i7-n4bo-dqwj-39gf-sasqehjmihz9';
+  public static STRING_PLACEHOLDER_PREFIX: string = '_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9';
 
   public static RESX_REGEX: RegExp = /\.resx$/i;
   public static LOC_JSON_REGEX: RegExp = /\.loc\.json$/i;
   public static RESX_OR_LOC_JSON_REGEX: RegExp = /\.(resx|loc\.json)$/i;
+
+  public static STRING_PLACEHOLDER_LABEL: string = 'A';
+  public static LOCALE_NAME_PLACEHOLDER_LABEL: string = 'B';
+  public static JSONP_PLACEHOLDER_LABEL: string = 'C';
+
+  public static LOCALE_NAME_PLACEHOLDER: string = `${Constants.STRING_PLACEHOLDER_PREFIX}_${Constants.LOCALE_NAME_PLACEHOLDER_LABEL}_0`;
+  public static JSONP_PLACEHOLDER: string = `${Constants.STRING_PLACEHOLDER_PREFIX}_${Constants.JSONP_PLACEHOLDER_LABEL}+chunkId+_0`;
 }

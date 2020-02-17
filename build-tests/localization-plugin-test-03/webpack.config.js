@@ -31,6 +31,8 @@ module.exports = function(env) {
     entry: {
       'localization-test-A': path.join(__dirname, 'src', 'indexA.ts'),
       'localization-test-B': path.join(__dirname, 'src', 'indexB.ts'),
+      'localization-test-C': path.join(__dirname, 'src', 'indexC.ts'),
+      'localization-test-D': path.join(__dirname, 'src', 'indexD.ts')
     },
     output: {
       path: path.join(__dirname, 'dist'),
@@ -38,62 +40,62 @@ module.exports = function(env) {
       chunkFilename: '[id].[name]_[locale]_[contenthash].js'
     },
     optimization: {
-      minimize: false
+      minimize: true
     },
     plugins: [
       new webpack.optimize.ModuleConcatenationPlugin(),
       new LocalizationPlugin({
-        localizedStrings: {
-          "en-us": {
-            "./src/strings1.loc.json": {
-              "string1": "the first string"
-            },
-            "./src/chunks/strings2.loc.json": {
-              "string1": "the second string"
-            },
-            "./src/strings3.loc.json": {
-              "string1": "the third string",
-              "string2": "the fourth string",
-              "string3": "UNUSED STRING!"
-            },
-            "./src/strings4.loc.json": {
-              "string1": "\"String with quotemarks\""
-            },
-            "./src/strings5.resx": {
-              "string1": "The first RESX string",
-              "stringWithQuotes": "\"RESX string with quotemarks\""
+        localizedData: {
+          defaultLocale: {
+            localeName: 'en-us'
+          },
+          translatedStrings: {
+            "es-es": {
+              "./src/strings1.loc.json": {
+                "string1": "la primera cadena"
+              },
+              "./src/chunks/strings2.loc.json": {
+                "string1": "la segunda cadena"
+              },
+              "./src/strings3.loc.json": {
+                "string1": "la tercera cadena",
+                "string2": "cuerda cuatro con un ' apóstrofe",
+                "string3": "UNUSED STRING!"
+              },
+              "./src/strings4.loc.json": {
+                "string1": "\"Cadena con comillas\""
+              },
+              "./src/strings5.resx": {
+                "string1": "La primera cadena RESX",
+                "stringWithQuotes": "\"Cadena RESX con comillas\""
+              },
+              "./src/chunks/strings6.resx": {
+                "string": "cadena RESX"
+              }
             }
           },
-          "es-es": {
-            "./src/strings1.loc.json": {
-              "string1": "la primera cadena"
+          passthroughLocale: {
+            usePassthroughLocale: true
+          },
+          pseudolocales: {
+            'qps-ploca': {
+              append: '',
+              prepend: ''
             },
-            "./src/chunks/strings2.loc.json": {
-              "string1": "la segunda cadena"
-            },
-            "./src/strings3.loc.json": {
-              "string1": "la tercera cadena",
-              "string2": "la cuarta cadena",
-              "string3": "UNUSED STRING!"
-            },
-            "./src/strings4.loc.json": {
-              "string1": "\"Cadena con comillas\""
-            },
-            "./src/strings5.resx": {
-              "string1": "La primera cadena RESX",
-              "stringWithQuotes": "\"Cadena RESX con comillas\""
+            'qps-ploc': {
+              append: '##--!!]',
+              prepend: '[!!--##'
             }
           }
         },
-        defaultLocale: {
-          usePassthroughLocale: true
-        },
-        exportAsDefault: true,
         typingsOptions: {
           generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts'),
-          sourceRoot: path.resolve(__dirname, 'src')
+          sourceRoot: path.resolve(__dirname, 'src'),
+          exportAsDefault: true
         },
-        localizationStatsDropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
+        localizationStats: {
+          dropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
+        }
       }),
       new BundleAnalyzerPlugin({
         openAnalyzer: false,
@@ -105,8 +107,7 @@ module.exports = function(env) {
       }),
       new SetPublicPathPlugin({
         scriptName: {
-          name: '[name]_[locale]_[contenthash].js',
-          isTokenized: true
+          useAssetName: true
         }
       }),
       new HtmlWebpackPlugin()

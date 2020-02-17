@@ -4,7 +4,7 @@
     "comment": "the third string"
   },
   "string2": {
-    "value": "string four",
+    "value": "string four with an ' apostrophe",
     "comment": "the fourth string"
   },
   "string3": {

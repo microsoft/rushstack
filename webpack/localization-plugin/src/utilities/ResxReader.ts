@@ -8,7 +8,7 @@ import {
 } from 'xmldoc';
 import {
   ILocalizedString,
-  ILocFile
+  ILocalizationFile
 } from '../interfaces';
 import { ILoggingFunctions } from './Logging';
 
@@ -19,12 +19,12 @@ export interface IResxReaderOptions extends ILoggingFunctions {
 }
 
 export class ResxReader {
-  public static readResxFileAsLocFile(options: IResxReaderOptions): ILocFile {
+  public static readResxFileAsLocFile(options: IResxReaderOptions): ILocalizationFile {
     const resxContents: string = FileSystem.readFile(options.resxFilePath);
     return ResxReader.readResxAsLocFile(resxContents, options);
   }
 
-  public static readResxAsLocFile(resxContents: string, options: IResxReaderOptions): ILocFile {
+  public static readResxAsLocFile(resxContents: string, options: IResxReaderOptions): ILocalizationFile {
     const xmlDocument: XmlDocument = new XmlDocument(resxContents);
 
     if (xmlDocument.name !== 'root') {
@@ -35,7 +35,7 @@ export class ResxReader {
       );
     }
 
-    const locFile: ILocFile = {};
+    const locFile: ILocalizationFile = {};
 
     for (const childNode of xmlDocument.children) {
       switch (childNode.type) {

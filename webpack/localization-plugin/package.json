@@ -31,8 +31,9 @@
     "@microsoft/node-core-library": "3.19.3",
     "lodash": "~4.17.15",
     "xmldoc": "~1.1.2",
-    "json-loader": "~0.5.7",
-    "chokidar": "~3.3.1"
+    "chokidar": "~3.3.1",
+    "pseudolocale": "~1.1.0",
+    "decache": "~4.5.1"
   },
   "devDependencies": {
     "@types/webpack": "4.39.8",

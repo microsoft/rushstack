@@ -4,12 +4,7 @@
 import { loader } from 'webpack';
 import * as loaderUtils from 'loader-utils';
 
-export interface IBaseLoaderOptions {
-  /**
-   * If set to `true`, wrap the strings object in a "default" object
-   */
-  exportAsDefault: boolean;
-}
+export interface IBaseLoaderOptions { }
 
 export interface ILoaderResult {
   [stringName: string]: string
@@ -21,6 +16,6 @@ export function loaderFactory<TOptions extends IBaseLoaderOptions>(
   return function (this: loader.LoaderContext, content: string): string {
     const options: TOptions = loaderUtils.getOptions(this) as TOptions;
     const resultObject: ILoaderResult = innerLoader.call(this, this.resourcePath, content, options);
-    return JSON.stringify(options.exportAsDefault ? { default: resultObject } : resultObject);
+    return JSON.stringify(resultObject);
   }
 }
