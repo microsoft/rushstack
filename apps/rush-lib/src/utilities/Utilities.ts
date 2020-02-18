@@ -203,7 +203,7 @@ export class Utilities {
       (e) => new Error(
         `Error: ${e}${os.EOL}Often this is caused by a file lock ` +
         'from a process such as your text editor, command prompt, ' +
-        'or "gulp serve"'
+        'or a filesystem watcher.'
       ),
       'createFolderWithRetry'
     );
@@ -246,8 +246,10 @@ export class Utilities {
     try {
       FileSystem.deleteFolder(folderPath);
     } catch (e) {
-      throw new Error(e.message + os.EOL + 'Often this is caused by a file lock'
-        + ' from a process such as your text editor, command prompt, or "gulp serve"');
+      throw new Error(
+        `${e.message}${os.EOL}Often this is caused by a file lock from a process ` +
+        'such as your text editor, command prompt, or a filesystem watcher'
+      );
     }
   }
 
