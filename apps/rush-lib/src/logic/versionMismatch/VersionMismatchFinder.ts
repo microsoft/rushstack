@@ -12,9 +12,11 @@ import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfigurati
 import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
 import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderCommonVersions';
+// import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 export interface IVersionMismatchFinderRushCheckOptions {
   variant?: string | undefined;
+  jsonFlag?: boolean | undefined;
 }
 
 export interface IVersionMismatchFinderEnsureConsistentVersionsOptions {
@@ -23,6 +25,20 @@ export interface IVersionMismatchFinderEnsureConsistentVersionsOptions {
 
 export interface IVersionMismatchFinderGetMismatchesOptions {
   variant?: string | undefined;
+}
+
+export interface IMismatchProject {
+  name: string;
+  versions: IMismatchVersion[];
+}
+
+export interface IMismatchVersion {
+  version: string,
+  projects: string[];
+}
+
+export interface IMismatchVersions {
+  mismatchedVersions: IMismatchProject[];
 }
 
 export class VersionMismatchFinder {
@@ -96,20 +112,25 @@ export class VersionMismatchFinder {
     options: {
       isRushCheckCommand: boolean;
       variant?: string | undefined;
+      jsonFlag?: boolean | undefined;
     }
   ): void {
 
     if (rushConfiguration.ensureConsistentVersions || options.isRushCheckCommand) {
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfiguration, options);
 
-      mismatchFinder.print();
-
-      if (mismatchFinder.numberOfMismatches) {
-        console.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
-        process.exit(1);
+      if (options.jsonFlag) {
+        console.log(JSON.stringify(mismatchFinder.getMismatchJson(), undefined, 2));
       } else {
-        if (options.isRushCheckCommand) {
-          console.log(colors.green(`Found no mis-matching dependencies!`));
+        mismatchFinder.print();
+
+        if (mismatchFinder.numberOfMismatches) {
+          console.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
+          process.exit(1);
+        } else {
+          if (options.isRushCheckCommand) {
+            console.log(colors.green(`Found no mis-matching dependencies!`));
+          }
         }
       }
     }
@@ -137,6 +158,36 @@ export class VersionMismatchFinder {
 
     const mismatchedVersion: VersionMismatchFinderEntity[] | undefined = mismatchedPackage.get(version);
     return mismatchedVersion;
+  }
+
+  public getMismatchJson(): IMismatchVersions {
+    const mismatchedVersions: IMismatchProject[] = [];
+
+    this.getMismatches().forEach((dependency: string) => {
+      const mismatchedVersionsArray: IMismatchVersion[] = [];
+      this.getVersionsOfMismatch(dependency)!.forEach((version: string) => {
+        const projects: string[] = []
+        this.getConsumersOfMismatch(dependency, version)!.forEach((project: VersionMismatchFinderEntity) => {
+          projects.push(project.friendlyName);
+        });
+        const mismatchedVersion: IMismatchVersion = {
+          version: version,
+          projects: projects
+        }
+        mismatchedVersionsArray.push(mismatchedVersion);
+      });
+      const mismatchedProject: IMismatchProject = {
+          name: dependency,
+          versions: mismatchedVersionsArray
+      };
+
+      mismatchedVersions.push(mismatchedProject);
+    });
+
+    const output: IMismatchVersions = {
+      mismatchedVersions: mismatchedVersions
+    };
+    return output;
   }
 
   public print(): void {

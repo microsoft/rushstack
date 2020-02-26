@@ -6,10 +6,11 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { Variants } from '../../api/Variants';
-import { CommandLineStringParameter } from '@microsoft/ts-command-line';
+import { CommandLineStringParameter, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
 export class CheckAction extends BaseRushAction {
   private _variant: CommandLineStringParameter;
+  private _jsonFlag: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -25,6 +26,10 @@ export class CheckAction extends BaseRushAction {
 
   protected onDefineParameters(): void {
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
+    this._jsonFlag = this.defineFlagParameter({
+      parameterLongName: '--json',
+      description: 'If this flag is specified, output will be in JSON format.'
+    });
   }
 
   protected run(): Promise<void> {
@@ -38,7 +43,8 @@ export class CheckAction extends BaseRushAction {
     }
 
     VersionMismatchFinder.rushCheck(this.rushConfiguration, {
-      variant: this._variant.value
+      variant: this._variant.value,
+      jsonFlag: this._jsonFlag.value
     });
     return Promise.resolve();
   }
