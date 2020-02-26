@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "add --json flag to rush check",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "zhas@microsoft.com"
+}
