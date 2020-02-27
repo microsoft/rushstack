@@ -81,13 +81,15 @@ export class TypingsGenerator {
     const locFilePaths: string[] = glob.sync(
       path.join('**', '*+(.resx|.loc.json)'),
       {
-        root: this._options.srcFolder,
-        absolute: true
+        cwd: this._options.srcFolder,
+        absolute: true,
+        nosort: true,
+        nodir: true
       }
     );
 
     for (let locFilePath of locFilePaths) {
-      locFilePath = path.resolve(locFilePath);
+      locFilePath = path.resolve(this._options.srcFolder, locFilePath);
 
       if (filesToIgnore.has(locFilePath)) {
         continue;
