@@ -141,7 +141,23 @@ export function parsePnpmDependencyKey(dependencyName: string, dependencyKey: st
   }
 
   if (!semver.valid(parsedVersionPart)) {
-    return undefined;
+    // Test for urls:
+    // Examples:
+    //     github.com/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
+    //     github.com.au/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
+    //     bitbucket.com/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
+    //     bitbucket.co.in/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
+    if (/^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\/([^\/\\]+\/?)*([^\/\\]+)$/i.test(dependencyKey)) {
+      try {
+        const dependencySpecifier: DependencySpecifier = new DependencySpecifier(dependencyName, dependencyKey);
+        return dependencySpecifier;
+      }
+      catch (e) {
+        return undefined;
+      }
+    } else {
+      return undefined;
+    }
   }
 
   // Is it an alias for a different package?
@@ -172,13 +188,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       this._shrinkwrapJson.registry = '';
     }
     if (!this._shrinkwrapJson.dependencies) {
-      this._shrinkwrapJson.dependencies = { };
+      this._shrinkwrapJson.dependencies = {};
     }
     if (!this._shrinkwrapJson.specifiers) {
-      this._shrinkwrapJson.specifiers = { };
+      this._shrinkwrapJson.specifiers = {};
     }
     if (!this._shrinkwrapJson.packages) {
-      this._shrinkwrapJson.packages = { };
+      this._shrinkwrapJson.packages = {};
     }
   }
 
