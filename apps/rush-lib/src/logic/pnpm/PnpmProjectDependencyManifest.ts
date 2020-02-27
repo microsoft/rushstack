@@ -120,7 +120,7 @@ export class PnpmProjectDependencyManifest {
     if (!integrity) {
       // git dependency specifiers do not have an integrity entry
 
-      // Example ('integrity' field doesn't exist in 'resolution'):
+      // Example ('integrity' doesn't exist in 'resolution'):
       //
       // github.com/chfritz/node-xmlrpc/948db2fbd0260e5d56ed5ba58df0f5b6599bbe38:
       //   dependencies:
