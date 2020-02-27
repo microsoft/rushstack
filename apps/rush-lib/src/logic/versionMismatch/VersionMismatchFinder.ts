@@ -12,10 +12,11 @@ import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfigurati
 import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
 import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderCommonVersions';
+import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 export interface IVersionMismatchFinderRushCheckOptions {
   variant?: string | undefined;
-  jsonFlag?: boolean | undefined;
+  printAsJson?: boolean | undefined;
 }
 
 export interface IVersionMismatchFinderEnsureConsistentVersionsOptions {
@@ -111,20 +112,20 @@ export class VersionMismatchFinder {
     options: {
       isRushCheckCommand: boolean;
       variant?: string | undefined;
-      jsonFlag?: boolean | undefined;
+      printAsJson?: boolean | undefined;
     }
   ): void {
     if (rushConfiguration.ensureConsistentVersions || options.isRushCheckCommand) {
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfiguration, options);
 
-      if (options.jsonFlag) {
+      if (options.printAsJson) {
         mismatchFinder.printAsJson();
       } else {
         mismatchFinder.print();
 
         if (mismatchFinder.numberOfMismatches > 0) {
           console.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
-          process.exit(1);
+          throw new AlreadyReportedError();
         } else {
           if (options.isRushCheckCommand) {
             console.log(colors.green(`Found no mis-matching dependencies!`));

@@ -14,7 +14,7 @@ import { Variants } from '../../api/Variants';
 
 export class CheckAction extends BaseRushAction {
   private _variant: CommandLineStringParameter;
-  private _printAsJson: CommandLineFlagParameter;
+  private _jsonFlag: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -30,7 +30,7 @@ export class CheckAction extends BaseRushAction {
 
   protected onDefineParameters(): void {
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
-    this._printAsJson = this.defineFlagParameter({
+    this._jsonFlag = this.defineFlagParameter({
       parameterLongName: '--json',
       description: 'If this flag is specified, output will be in JSON format.'
     });
@@ -48,7 +48,7 @@ export class CheckAction extends BaseRushAction {
 
     VersionMismatchFinder.rushCheck(this.rushConfiguration, {
       variant: this._variant.value,
-      jsonFlag: this._printAsJson.value
+      printAsJson: this._jsonFlag.value
     });
     return Promise.resolve();
   }
