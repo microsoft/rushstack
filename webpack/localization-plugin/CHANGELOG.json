@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/localization-plugin",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/localization-plugin_v0.1.0",
+      "date": "Thu, 27 Feb 2020 02:15:03 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial implementation of plugin."
+          }
+        ]
+      }
+    }
+  ]
+}
