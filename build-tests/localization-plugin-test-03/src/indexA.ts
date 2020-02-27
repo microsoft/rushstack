@@ -16,5 +16,10 @@ import(/* webpackChunkName: 'chunk-without-strings' */ './chunks/chunkWithoutStr
   chunk.doStuff();
 });
 
+import('./chunks/unnamedChunkWithStrings').then(({ UnnamedChunkWithStringsClass }) => {
+  const chunk = new UnnamedChunkWithStringsClass();
+  chunk.doStuff();
+});
+
 console.log(strings5.string1);
 console.log(strings5.stringWithQuotes);

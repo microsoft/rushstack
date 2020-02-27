@@ -16,6 +16,7 @@
     "build": "gulp test --clean"
   },
   "peerDependencies": {
+    "webpack": "^4.31.0",
     "@types/webpack": "*"
   },
   "optionalPeerDependencies": {
@@ -30,7 +31,9 @@
     "@microsoft/node-core-library": "3.19.3",
     "lodash": "~4.17.15",
     "xmldoc": "~1.1.2",
-    "json-loader": "~0.5.7"
+    "chokidar": "~3.3.1",
+    "pseudolocale": "~1.1.0",
+    "decache": "~4.5.1"
   },
   "devDependencies": {
     "@types/webpack": "4.39.8",
@@ -43,6 +46,7 @@
     "@types/jju": "1.4.1",
     "@types/lodash": "4.14.116",
     "@types/xmldoc": "1.1.4",
-    "gulp": "~4.0.2"
+    "gulp": "~4.0.2",
+    "webpack": "~4.31.0"
   }
 }

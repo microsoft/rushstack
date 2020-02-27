@@ -43,11 +43,21 @@ module.exports = function(env) {
     plugins: [
       new webpack.optimize.ModuleConcatenationPlugin(),
       new LocalizationPlugin({
-        localizedStrings: {},
-        defaultLocale: {
-          usePassthroughLocale: true
+        localizedData: {
+          defaultLocale: {
+            localeName: 'en-us'
+          },
+          passthroughLocale: {
+            usePassthroughLocale: true
+          }
         },
-        localizationStatsDropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
+        typingsOptions: {
+          generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts'),
+          sourceRoot: path.resolve(__dirname, 'src')
+        },
+        localizationStats: {
+          dropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
+        }
       }),
       new BundleAnalyzerPlugin({
         openAnalyzer: false,
@@ -59,8 +69,7 @@ module.exports = function(env) {
       }),
       new SetPublicPathPlugin({
         scriptName: {
-          name: '[name]_[locale]_[contenthash].js',
-          isTokenized: true
+          useAssetName: true
         }
       }),
       new HtmlWebpackPlugin()

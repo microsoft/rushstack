@@ -8,16 +8,38 @@ export {
 
 export {
   IDefaultLocaleOptions,
+  ILocaleData,
+  ILocaleElementMap,
   ILocaleFileData,
-  ILocale,
-  ILocales,
+  ILocalizationFile as _ILocFile,
   ILocalizationPluginOptions,
   ILocalizationStats,
   ILocalizationStatsChunkGroup,
-  ILocalizationStatsEntrypoint
+  ILocalizationStatsEntrypoint,
+  ILocalizationStatsOptions,
+  ILocalizedData,
+  ILocalizedString as _ILocalizedString,
+  ILocalizedStrings,
+  IPassthroughLocaleOptions,
+  IPseudolocaleOptions,
+  IPseudolocalesOptions,
+  ITypingsGenerationOptions
 } from './interfaces';
 
 export {
-  ILocFilePreprocessorOptions,
-  LocFilePreprocessor
-} from './LocFilePreprocessor';
+  LocFileParser as _LocFileParser,
+  IParseLocFileOptions as _IParseLocFileOptions
+} from './utilities/LocFileParser';
+
+export {
+  ILoggerOptions as _ILoggerOptions
+} from './utilities/Logging';
+
+export {
+  ILocalizedWebpackChunk
+} from './webpackInterfaces';
+
+export {
+  ITypingsGeneratorOptions,
+  TypingsGenerator
+} from './TypingsGenerator';

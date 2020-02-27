@@ -55,16 +55,8 @@
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
-  <data name="string1" xml:space="preserve">
-    <value>The first RESX string</value>
-    <comment>The first RESX string</comment>
-  </data>
-  <data name="stringWithQuotes" xml:space="preserve">
-    <value>"RESX string with quotemarks"</value>
-    <comment>RESX string with quotemarks</comment>
-  </data>
-  <data name="unusedString" xml:space="preserve">
-    <value>UNUSED STRING</value>
-    <comment>UNUSED STRING</comment>
+  <data name="string" xml:space="preserve">
+    <value>RESX string</value>
+    <comment>RESX string</comment>
   </data>
 </root>

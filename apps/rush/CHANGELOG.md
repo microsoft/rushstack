@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 28 Jan 2020 03:57:30 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Feb 2020 21:51:19 GMT and should not be manually modified.
+
+## 5.20.0
+Wed, 12 Feb 2020 21:51:19 GMT
+
+### Updates
+
+- Support "." as a value for the --to and --from parameters to build to the current project.
+- Improve security by allowing the "rush publish" authentication token to be specified via an environment variable.
 
 ## 5.19.4
 Tue, 28 Jan 2020 03:57:30 GMT
