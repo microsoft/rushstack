@@ -12,7 +12,6 @@ import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfigurati
 import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
 import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderCommonVersions';
-// import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 export interface IVersionMismatchFinderRushCheckOptions {
   variant?: string | undefined;
@@ -27,18 +26,18 @@ export interface IVersionMismatchFinderGetMismatchesOptions {
   variant?: string | undefined;
 }
 
-export interface IMismatchProject {
-  name: string;
-  versions: IMismatchVersion[];
+export interface IMismatchDependency {
+  dependencyName: string;
+  versions: IMismatchDependencyVersion[];
 }
 
-export interface IMismatchVersion {
+export interface IMismatchDependencyVersion {
   version: string,
   projects: string[];
 }
 
-export interface IMismatchVersions {
-  mismatchedVersions: IMismatchProject[];
+export interface IMismatchDependencies {
+  mismatchedVersions: IMismatchDependency[];
 }
 
 export class VersionMismatchFinder {
@@ -115,16 +114,15 @@ export class VersionMismatchFinder {
       jsonFlag?: boolean | undefined;
     }
   ): void {
-
     if (rushConfiguration.ensureConsistentVersions || options.isRushCheckCommand) {
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfiguration, options);
 
       if (options.jsonFlag) {
-        console.log(JSON.stringify(mismatchFinder.getMismatchJson(), undefined, 2));
+        mismatchFinder.printAsJson();
       } else {
         mismatchFinder.print();
 
-        if (mismatchFinder.numberOfMismatches) {
+        if (mismatchFinder.numberOfMismatches > 0) {
           console.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
           process.exit(1);
         } else {
@@ -160,34 +158,34 @@ export class VersionMismatchFinder {
     return mismatchedVersion;
   }
 
-  public getMismatchJson(): IMismatchVersions {
-    const mismatchedVersions: IMismatchProject[] = [];
+  public printAsJson(): void {
+    const mismatchDependencies: IMismatchDependency[] = [];
 
     this.getMismatches().forEach((dependency: string) => {
-      const mismatchedVersionsArray: IMismatchVersion[] = [];
+      const mismatchDependencyVersionArray: IMismatchDependencyVersion[] = [];
       this.getVersionsOfMismatch(dependency)!.forEach((version: string) => {
         const projects: string[] = []
         this.getConsumersOfMismatch(dependency, version)!.forEach((project: VersionMismatchFinderEntity) => {
           projects.push(project.friendlyName);
         });
-        const mismatchedVersion: IMismatchVersion = {
+        const mismatchDependencyVersion: IMismatchDependencyVersion = {
           version: version,
           projects: projects
-        }
-        mismatchedVersionsArray.push(mismatchedVersion);
+        };
+        mismatchDependencyVersionArray.push(mismatchDependencyVersion);
       });
-      const mismatchedProject: IMismatchProject = {
-          name: dependency,
-          versions: mismatchedVersionsArray
+      const mismatchDepency: IMismatchDependency = {
+          dependencyName: dependency,
+          versions: mismatchDependencyVersionArray
       };
-
-      mismatchedVersions.push(mismatchedProject);
+      mismatchDependencies.push(mismatchDepency);
     });
 
-    const output: IMismatchVersions = {
-      mismatchedVersions: mismatchedVersions
+    const output: IMismatchDependencies = {
+      mismatchedVersions: mismatchDependencies
     };
-    return output;
+
+    console.log(JSON.stringify(output, undefined, 2));
   }
 
   public print(): void {

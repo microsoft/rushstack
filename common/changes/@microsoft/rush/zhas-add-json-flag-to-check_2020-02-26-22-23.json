@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "add --json flag to rush check",
+      "comment": "Add a --json flag for \"rush check\" to facilitate automation",
       "type": "none"
     }
   ],
