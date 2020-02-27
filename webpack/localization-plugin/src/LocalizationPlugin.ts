@@ -195,7 +195,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
                 assetPath.match(Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX)
               ) {
                 // Does this look like an async chunk URL generator?
-                if (typeof options.chunk.id === 'string' && options.chunk.id.match(/^\" +/)) {
+                if (typeof options.chunk.id === 'string' && options.chunk.id.match(/^\" \+/)) {
                   return assetPath.replace(
                     Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX,
                     `" + ${Constants.JSONP_PLACEHOLDER} + "`
