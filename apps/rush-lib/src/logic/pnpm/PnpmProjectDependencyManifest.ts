@@ -117,7 +117,7 @@ export class PnpmProjectDependencyManifest {
     const specifier: string = `${name}@${version}`;
     let integrity: string = shrinkwrapEntry.resolution.integrity;
 
-    if(!integrity) {
+    if (!integrity) {
       // git dependency specifiers do not have an integrity entry
 
       // Example:
