@@ -178,7 +178,7 @@ export class ResxReader {
       }
     }
 
-    if (value === undefined) {
+    if (!foundValueElement) {
       ResxReader._logErrorWithLocation(
         options,
         'Missing string value in <data> element',
@@ -194,7 +194,7 @@ export class ResxReader {
       }
 
       return {
-        value,
+        value: value || '',
         comment
       };
     }
@@ -250,7 +250,7 @@ export class ResxReader {
     element?: XmlElement | XmlDocument
   ): void {
     if (element) {
-      options.logFileError(message, options.resxFilePath, element.line, element.position);
+      options.logFileError(message, options.resxFilePath, element.line + 1, element.column + 1);
     } else {
       options.logFileError(message, options.resxFilePath);
     }
@@ -262,7 +262,7 @@ export class ResxReader {
     element?: XmlElement | XmlDocument
   ): void {
     if (element) {
-      options.logFileWarning(message, options.resxFilePath, element.line, element.position);
+      options.logFileWarning(message, options.resxFilePath, element.line + 1, element.column + 1);
     } else {
       options.logFileWarning(message, options.resxFilePath);
     }
