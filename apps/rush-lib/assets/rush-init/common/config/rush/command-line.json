@@ -167,19 +167,51 @@
        * (Required) A list of custom commands and/or built-in Rush commands that this parameter may
        * be used with.  The parameter will be appended to the shell command that Rush invokes.
        */
-       "associatedCommands": [ "build", "rebuild" ]
+      "associatedCommands": [ "build", "rebuild" ]
     },
 
     {
       /**
        * (Required) Determines the type of custom parameter.
-       * A "flag" is a custom command-line parameter whose presence acts as an on/off switch.
+       * A "string" is a custom command-line parameter whose value is a simple text string.
+       */
+      "parameterKind": "string",
+      "longName": "--my-string",
+      "description": "A custom string parameter for the \"my-global-command\" custom command",
+
+      "associatedCommands": [ "my-global-command" ],
+
+      /**
+       * The name of the argument, which will be shown in the command-line help.
+       *
+       * For example, if the parameter name is '--count" and the argument name is "NUMBER",
+       * then the command-line help would display "--count NUMBER".  The argument name must
+       * be comprised of upper-case letters, numbers, and underscores.  It should be kept short.
+       */
+      "argumentName": "SOME_TEXT",
+
+      /**
+       * If true, this parameter must be included with the command.  The default is false.
+       */
+      "required": false
+    },
+
+    {
+      /**
+       * (Required) Determines the type of custom parameter.
+       * A "choice" is a custom command-line parameter whose argument must be chosen from a list of
+       * allowable alternatives.
        */
       "parameterKind": "choice",
       "longName": "--my-choice",
       "description": "A custom choice parameter for the \"my-global-command\" custom command",
 
       "associatedCommands": [ "my-global-command" ],
+
+      /**
+       * If true, this parameter must be included with the command.  The default is false.
+       */
+       "required": false,
 
       /**
        * Normally if a parameter is omitted from the command line, it will not be passed
