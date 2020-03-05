@@ -183,6 +183,11 @@
           "items": {
             "type": "string"
           }
+        },
+        "required": {
+          "title": "Required",
+          "description": "If true, then this parameter must be included on the command line",
+          "type": "boolean"
         }
       }
     },
@@ -216,7 +221,7 @@
     },
     "stringParameter": {
       "title": "String Parameter",
-      "description": "A custom command-line parameter whose value is intepreted as a string",
+      "description": "A custom command-line parameter whose value is interpreted as a string",
       "type": "object",
       "allOf": [
         { "$ref": "#/definitions/baseParameter" },
