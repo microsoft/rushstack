@@ -149,7 +149,7 @@ export class EnvironmentConfiguration {
             EnvironmentConfiguration._pnpmStorePathOverride = (value && !options.doNotNormalizePaths)
               ? EnvironmentConfiguration._normalizeDeepestParentFolderPath(value) || value
               : value;
-              break;
+            break;
           }
 
           case EnvironmentVariableNames.RUSH_PREVIEW_VERSION:
