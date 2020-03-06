@@ -43,24 +43,12 @@
     * - "global" - use PNPM's global store, which has the benefit of being shared
     *    across multiple repo folders, but the disadvantage of less isolation for builds
     *    (e.g. bugs or incompatibilities when two repos use different releases of PNPM)
-    * - "path" - use the location specified by "pnpmStorePath" or environment variable 
-    *   RUSH_PNPM_STORE_PATH
+    *
+    * RUSH_PNPM_STORE_PATH will override the directory that will be used as the store
     *
     * The default value is "local".
     */
     /*[LINE "HYPOTHETICAL"]*/ "pnpmStore": "local",
-
-    /**
-    * This setting is only used when the "pnpmStore" setting is "path".  It specifies a custom
-    * path for the PNPM store, resolved relative to the root folder containing rush.json.
-    * 
-    * This value will be overridden if using the RUSH_PNPM_STORE_PATH environment variable.
-    *
-    * It is not recommended to store an absolute path in the rush.json file.
-    * For machine-specific overrides, use the RUSH_PNPM_STORE_PATH environment
-    * variable instead.
-    */
-    /*[LINE "HYPOTHETICAL"]*/ "pnpmStorePath": "common/temp/pnpm-store",
 
     /**
      * If true, then Rush will add the "--strict-peer-dependencies" option when invoking PNPM.
