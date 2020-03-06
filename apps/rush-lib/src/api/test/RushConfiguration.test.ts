@@ -242,7 +242,7 @@ describe('RushConfiguration', () => {
       });
 
       it('loads the correct path when environment variable is defined', (done: jest.DoneCallback) => {
-        const EXPECT_STORE_PATH: string = '/var/temp';
+        const EXPECT_STORE_PATH: string = path.resolve('/var/temp');
         process.env[PNPM_STORE_PATH_ENV] = EXPECT_STORE_PATH;
 
         const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
@@ -271,7 +271,7 @@ describe('RushConfiguration', () => {
       });
 
       it('loads the correct path when environment variable is defined', (done: jest.DoneCallback) => {
-        const EXPECT_STORE_PATH: string = '/var/temp';
+        const EXPECT_STORE_PATH: string = path.resolve('/var/temp');
         process.env[PNPM_STORE_PATH_ENV] = EXPECT_STORE_PATH;
 
         const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
