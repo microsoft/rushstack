@@ -1181,8 +1181,8 @@ export class InstallManager {
       if (
         this._rushConfiguration.pnpmOptions.pnpmStore === 'local' ||
         EnvironmentConfiguration.pnpmStorePathOverride
-      )
-          args.push('--store', this._rushConfiguration.pnpmOptions.pnpmStorePath);
+      ) {
+        args.push('--store', this._rushConfiguration.pnpmOptions.pnpmStorePath);
       }
 
       // we are using the --no-lock flag for now, which unfortunately prints a warning, but should be OK
