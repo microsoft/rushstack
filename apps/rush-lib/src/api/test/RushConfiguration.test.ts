@@ -284,38 +284,6 @@ describe('RushConfiguration', () => {
       });
     })
 
-    describe('Loading repo/rush-pnpm-path.json', () => {
-      const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'repo', 'rush-pnpm-path.json');
-      it(`loads the correct path when pnpmStore = "path"`, (done: jest.DoneCallback) => {
-
-        expect(process.env[PNPM_STORE_PATH_ENV]).not.toBeDefined();
-
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
-        const expectedValue: string = path.resolve(rushConfiguration.rushJsonFolder, 'pnpm-store');
-
-        expect(rushConfiguration.packageManager).toEqual('pnpm');
-        expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('path');
-        expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(expectedValue);
-        expect(path.isAbsolute(rushConfiguration.pnpmOptions.pnpmStorePath)).toEqual(true);
-
-        done();
-      });
-
-      it('loads the correct path when environment variable is defined', (done: jest.DoneCallback) => {
-        const expectedValue: string = path.resolve('/var/temp/pnpm-store');
-        process.env[PNPM_STORE_PATH_ENV] = expectedValue;
-
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
-
-        expect(rushConfiguration.packageManager).toEqual('pnpm');
-        expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('path');
-        expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(expectedValue);
-        expect(path.isAbsolute(rushConfiguration.pnpmOptions.pnpmStorePath)).toEqual(true);
-
-        done();
-      });
-    })
-
     it(`throws an error when invalid pnpmStore is defined`, (done: jest.DoneCallback) => {
       const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'repo', 'rush-pnpm-invalid-store.json');
       expect(() => {

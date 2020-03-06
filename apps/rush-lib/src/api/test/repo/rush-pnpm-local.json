@@ -5,8 +5,7 @@
   "projectFolderMaxDepth": 99,
 
   "pnpmOptions": {
-    "pnpmStore": "local",
-    "pnpmStorePath": "asdf/fdsjkalasj"
+    "pnpmStore": "local"
   },
 
   "approvedPackagesPolicy": {

@@ -104,7 +104,6 @@ export interface IRushRepositoryJson {
  */
 export interface IPnpmOptionsJson {
   pnpmStore?: StoreOptions;
-  pnpmStorePath?: string;
   strictPeerDependencies?: boolean;
   resolutionStrategy?: ResolutionStrategy;
 }
@@ -192,16 +191,13 @@ export class PnpmOptionsConfiguration {
    * Available options:
    *  - local: Use the standard Rush store path: common/temp/pnpm-store
    *  - global: Use PNPM's global store path
-   *  - path: Use path stored in `pnpmStorePath`
    */
   public readonly pnpmStore: StoreOptions;
 
   /**
    * The path for PNPM to use as the store directory.
    * 
-   * @remarks
-   * Only used if `pnpmStore` = 'path'.  Will be overridden by
-   * RUSH_PNPM_STORE_PATH.
+   * Will be overridden by environment variable RUSH_PNPM_STORE_PATH
    */
   public readonly pnpmStorePath: string;
 
@@ -294,7 +290,7 @@ export interface ITryFindRushJsonLocationOptions {
  * This represents the available PNPM store options
  * @public
  */
-export type StoreOptions = 'local' | 'global' | 'path';
+export type StoreOptions = 'local' | 'global';
 
 /**
  * This represents the available PNPM resolution strategies as a string

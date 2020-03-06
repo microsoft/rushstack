@@ -1175,11 +1175,10 @@ export class InstallManager {
       }
     } else if (this._rushConfiguration.packageManager === 'pnpm') {
       // Only explicitly define the store path if `pnpmStore` is using the default, or has been set to
-      // 'local' or 'path'.  If `pnpmStore` = 'global', then allow PNPM to use the system's default
-      // path.
+      // 'local'.  If `pnpmStore` = 'global', then allow PNPM to use the system's default
+      // path.  In all cases, this will be overridden by RUSH_PNPM_STORE_PATH
       switch (this._rushConfiguration.pnpmOptions.pnpmStore) {
-        case 'local':
-        case 'path': {
+        case 'local': {
           args.push('--store', this._rushConfiguration.pnpmOptions.pnpmStorePath);
           break;
         }
