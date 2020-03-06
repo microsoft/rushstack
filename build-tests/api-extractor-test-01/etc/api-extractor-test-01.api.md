@@ -4,7 +4,7 @@
 
 ```ts
 
-import Long from 'long';
+import { default as Long_2 } from 'long';
 import { MAX_UNSIGNED_VALUE } from 'long';
 
 // @public
@@ -190,7 +190,7 @@ export class TypeReferencesInAedoc {
 // @public (undocumented)
 export class UseLong {
     // (undocumented)
-    use_long(): Long;
+    use_long(): Long_2;
 }
 
 // @alpha (undocumented)
