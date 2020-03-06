@@ -101,7 +101,7 @@ export class LastInstallFlag {
 
   /**
    * Determine if the new LastInstallFlag state should generate an error
-   * @param {JsonObject} oldState The LastInstallFlag contents read from the disk
+   * @param oldState - The LastInstallFlag contents read from the disk
    */
   private _stateHasError(oldState: JsonObject): LastInstallFlagError | void {
     const pkgManager: PackageManagerName = this._state.packageManager;
