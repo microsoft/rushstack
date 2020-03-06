@@ -4,7 +4,6 @@ import { FileSystem, JsonFile, JsonObject } from '@microsoft/node-core-library';
 
 export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
 
-/** @internal */
 interface IPropertyErrors {
   /** The properties to check and force an abort on inequality */
   [key: string]: {
