@@ -12,7 +12,7 @@ import { PackageMetadataManager } from './PackageMetadataManager';
 import { ExportAnalyzer } from './ExportAnalyzer';
 import { AstImport } from './AstImport';
 import { MessageRouter } from '../collector/MessageRouter';
-import { TypeScriptInternals } from './TypeScriptInternals';
+import { TypeScriptInternals, IGlobalVariableAnalyzer } from './TypeScriptInternals';
 import { StringChecks } from './StringChecks';
 
 export type AstEntity = AstSymbol | AstImport;
@@ -48,6 +48,8 @@ export interface IFetchAstSymbolOptions {
   localName?: string;
 }
 
+const warnedNames: Set<string> = new Set<string>();
+
 /**
  * AstSymbolTable is the workhorse that builds AstSymbol and AstDeclaration objects.
  * It maintains a cache of already constructed objects.  AstSymbolTable constructs
@@ -61,6 +63,7 @@ export interface IFetchAstSymbolOptions {
 export class AstSymbolTable {
   private readonly _program: ts.Program;
   private readonly _typeChecker: ts.TypeChecker;
+  private readonly _globalVariableAnalyzer: IGlobalVariableAnalyzer;
   private readonly _packageMetadataManager: PackageMetadataManager;
   private readonly _exportAnalyzer: ExportAnalyzer;
 
@@ -89,6 +92,7 @@ export class AstSymbolTable {
 
     this._program = program;
     this._typeChecker = typeChecker;
+    this._globalVariableAnalyzer = TypeScriptInternals.getGlobalVariableAnalyzer(program);
     this._packageMetadataManager = new PackageMetadataManager(packageJsonLookup, messageRouter);
 
     this._exportAnalyzer = new ExportAnalyzer(
@@ -320,10 +324,29 @@ export class AstSymbolTable {
                 throw new Error('Symbol not found for identifier: ' + identifierNode.getText());
               }
 
-              referencedAstEntity = this._exportAnalyzer.fetchReferencedAstEntity(symbol,
-                governingAstDeclaration.astSymbol.isExternal);
+              let displacedSymbol: boolean = true;
+              for (const declaration of symbol.declarations || []) {
+                if (declaration.getSourceFile() === identifierNode.getSourceFile()) {
+                  displacedSymbol = false;
+                  break;
+                }
+              }
 
-              this._entitiesByIdentifierNode.set(identifierNode, referencedAstEntity);
+              if (displacedSymbol) {
+                if (this._globalVariableAnalyzer.hasGlobalName(identifierNode.text)) {
+                  if (!warnedNames.has(identifierNode.text)) {
+                    warnedNames.add(identifierNode.text);
+                    console.log(`Ignoring ${identifierNode.text}`);
+                  }
+                } else {
+                  throw new InternalError(`Unable to follow symbol for "${identifierNode.text}"`);
+                }
+              } else {
+                referencedAstEntity = this._exportAnalyzer.fetchReferencedAstEntity(symbol,
+                  governingAstDeclaration.astSymbol.isExternal);
+
+                this._entitiesByIdentifierNode.set(identifierNode, referencedAstEntity);
+              }
             }
 
             if (referencedAstEntity) {
