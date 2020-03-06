@@ -145,21 +145,18 @@ export class IndividualVersionPolicy extends VersionPolicy {
     validate(versionString: string, packageName: string): void;
 }
 
-// @public
-export interface IPnpmOptionsJson {
-    pnpmStore?: IPnpmStoreOptions;
+// @internal
+export interface _IPnpmOptionsJson {
+    pnpmStore?: PnpmStoreOptions;
     resolutionStrategy?: ResolutionStrategy;
     strictPeerDependencies?: boolean;
 }
 
-// @public
-export interface IPnpmOptionsRootPaths {
+// @internal
+export interface _IPnpmOptionsRootPaths {
     commonTempFolder: string;
     repoRoot: string;
 }
-
-// @public
-export type IPnpmStoreOptions = 'local' | 'global';
 
 // @public
 export interface ITryFindRushJsonLocationOptions {
@@ -247,12 +244,15 @@ export type PackageManagerName = 'pnpm' | 'npm' | 'yarn';
 // @public
 export class PnpmOptionsConfiguration {
     // @internal
-    constructor(json: IPnpmOptionsJson, rootPaths: IPnpmOptionsRootPaths);
-    readonly pnpmStore: IPnpmStoreOptions;
+    constructor(json: _IPnpmOptionsJson, rootPaths: _IPnpmOptionsRootPaths);
+    readonly pnpmStore: PnpmStoreOptions;
     readonly pnpmStorePath: string;
     readonly resolutionStrategy: ResolutionStrategy;
     readonly strictPeerDependencies: boolean;
 }
+
+// @public
+export type PnpmStoreOptions = 'local' | 'global';
 
 // @public
 export type ResolutionStrategy = 'fewer-dependencies' | 'fast';

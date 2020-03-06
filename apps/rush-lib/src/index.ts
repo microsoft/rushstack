@@ -16,7 +16,7 @@ export {
   ResolutionStrategy,
   PnpmOptionsConfiguration,
   IPnpmOptionsJson as _IPnpmOptionsJson,
-  IPnpmStoreOptions,
+  PnpmStoreOptions,
   IPnpmOptionsRootPaths as _IPnpmOptionsRootPaths,
   YarnOptionsConfiguration
 } from './api/RushConfiguration';
