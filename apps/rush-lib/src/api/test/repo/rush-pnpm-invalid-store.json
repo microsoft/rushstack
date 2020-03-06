@@ -5,8 +5,7 @@
   "projectFolderMaxDepth": 99,
 
   "pnpmOptions": {
-    "pnpmStore": "test",
-    "pnpmStorePath": "asdf/fdsjkalasj"
+    "pnpmStore": "test"
   },
 
   "approvedPackagesPolicy": {
