@@ -147,19 +147,14 @@ export class IndividualVersionPolicy extends VersionPolicy {
 
 // @public
 export interface IPnpmOptionsJson {
-    // (undocumented)
     pnpmStore?: IPnpmStoreOptions;
-    // (undocumented)
     resolutionStrategy?: ResolutionStrategy;
-    // (undocumented)
     strictPeerDependencies?: boolean;
 }
 
 // @public
 export interface IPnpmOptionsRootPaths {
-    // (undocumented)
     commonTempFolder: string;
-    // (undocumented)
     repoRoot: string;
 }
 

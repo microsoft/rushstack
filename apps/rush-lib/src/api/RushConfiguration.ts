@@ -110,8 +110,17 @@ export type IPnpmStoreOptions = 'local' | 'global';
  * @public
  */
 export interface IPnpmOptionsJson {
+  /**
+   * The store resolution method for PNPM to use
+   */
   pnpmStore?: IPnpmStoreOptions;
+  /**
+   * Should PNPM fail if peer dependencies aren't installed?
+   */
   strictPeerDependencies?: boolean;
+  /**
+   * Defines the dependency resolution strategy PNPM will use
+   */
   resolutionStrategy?: ResolutionStrategy;
 }
 
@@ -120,7 +129,13 @@ export interface IPnpmOptionsJson {
  * @public
  */
 export interface IPnpmOptionsRootPaths {
+  /**
+   * The location of the Rush `common/temp` directory
+   */
   commonTempFolder: string;
+  /**
+   * Stores the location of the repository root
+   */
   repoRoot: string;
 }
 
