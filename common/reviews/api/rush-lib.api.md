@@ -146,6 +146,27 @@ export class IndividualVersionPolicy extends VersionPolicy {
 }
 
 // @public
+export interface IPnpmOptionsJson {
+    // (undocumented)
+    pnpmStore?: IPnpmStoreOptions;
+    // (undocumented)
+    resolutionStrategy?: ResolutionStrategy;
+    // (undocumented)
+    strictPeerDependencies?: boolean;
+}
+
+// @public
+export interface IPnpmOptionsRootPaths {
+    // (undocumented)
+    commonTempFolder: string;
+    // (undocumented)
+    repoRoot: string;
+}
+
+// @public
+export type IPnpmStoreOptions = 'local' | 'global';
+
+// @public
 export interface ITryFindRushJsonLocationOptions {
     showVerbose?: boolean;
     startingFolder?: string;
@@ -230,12 +251,9 @@ export type PackageManagerName = 'pnpm' | 'npm' | 'yarn';
 
 // @public
 export class PnpmOptionsConfiguration {
-    // Warning: (ae-forgotten-export) The symbol "IPnpmOptionsJson" needs to be exported by the entry point index.d.ts
-    //
     // @internal
     constructor(json: IPnpmOptionsJson, rootPaths: IPnpmOptionsRootPaths);
-    // Warning: (ae-forgotten-export) The symbol "StoreOptions" needs to be exported by the entry point index.d.ts
-    readonly pnpmStore: StoreOptions;
+    readonly pnpmStore: IPnpmStoreOptions;
     readonly pnpmStorePath: string;
     readonly resolutionStrategy: ResolutionStrategy;
     readonly strictPeerDependencies: boolean;
