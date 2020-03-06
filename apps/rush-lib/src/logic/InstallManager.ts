@@ -61,6 +61,7 @@ import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { PackageManagerName } from '../api/packageManager/PackageManager';
 import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
 import { DependencySpecifier } from './DependencySpecifier';
+import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface CreateOptions {
@@ -1177,11 +1178,11 @@ export class InstallManager {
       // Only explicitly define the store path if `pnpmStore` is using the default, or has been set to
       // 'local'.  If `pnpmStore` = 'global', then allow PNPM to use the system's default
       // path.  In all cases, this will be overridden by RUSH_PNPM_STORE_PATH
-      switch (this._rushConfiguration.pnpmOptions.pnpmStore) {
-        case 'local': {
+      if (
+        this._rushConfiguration.pnpmOptions.pnpmStore === 'local' ||
+        EnvironmentConfiguration.pnpmStorePathOverride
+      )
           args.push('--store', this._rushConfiguration.pnpmOptions.pnpmStorePath);
-          break;
-        }
       }
 
       // we are using the --no-lock flag for now, which unfortunately prints a warning, but should be OK
