@@ -228,9 +228,9 @@ describe('RushConfiguration', () => {
 
     describe('Loading repo/rush-pnpm-local.json', () => {
       const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'repo', 'rush-pnpm-local.json');
-      const EXPECT_STORE_PATH: string = path.resolve(__dirname, 'repo', 'common', 'temp', 'pnpm-store');
 
       it(`loads the correct path when pnpmStore = "local"`, (done: jest.DoneCallback) => {
+        const EXPECT_STORE_PATH: string = path.resolve(__dirname, 'repo', 'common', 'temp', 'pnpm-store');
         const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
 
         expect(rushConfiguration.packageManager).toEqual('pnpm');
@@ -242,7 +242,8 @@ describe('RushConfiguration', () => {
       });
 
       it('loads the correct path when environment variable is defined', (done: jest.DoneCallback) => {
-        process.env[PNPM_STORE_PATH_ENV] = '/var/temp';
+        const EXPECT_STORE_PATH: string = '/var/temp';
+        process.env[PNPM_STORE_PATH_ENV] = EXPECT_STORE_PATH;
 
         const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
 
@@ -257,9 +258,9 @@ describe('RushConfiguration', () => {
 
     describe('Loading repo/rush-pnpm-global.json', () => {
       const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'repo', 'rush-pnpm-global.json');
-      const EXPECT_STORE_PATH: string = "";
 
       it(`loads the correct path when pnpmStore = "global"`, (done: jest.DoneCallback) => {
+        const EXPECT_STORE_PATH: string = "";
         const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
 
         expect(rushConfiguration.packageManager).toEqual('pnpm');
@@ -270,7 +271,8 @@ describe('RushConfiguration', () => {
       });
 
       it('loads the correct path when environment variable is defined', (done: jest.DoneCallback) => {
-        process.env[PNPM_STORE_PATH_ENV] = '/var/temp';
+        const EXPECT_STORE_PATH: string = '/var/temp';
+        process.env[PNPM_STORE_PATH_ENV] = EXPECT_STORE_PATH;
 
         const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
 

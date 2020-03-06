@@ -237,19 +237,12 @@ export class PnpmOptionsConfiguration {
   /** @internal */
   public constructor(json: IPnpmOptionsJson, rootPaths: IPnpmOptionsRootPaths) {
     this.pnpmStore = json.pnpmStore || 'local';
-    this.pnpmStorePath = path.resolve(path.join(rootPaths.commonTempFolder, 'pnpm-store'));
-    switch (this.pnpmStore) {
-      case 'global': {
-        this.pnpmStorePath = '';
-        break;
-      }
-      case 'path': {
-        this.pnpmStorePath = path.resolve(EnvironmentConfiguration.pnpmStorePathOverride
-          || (json.pnpmStorePath && path.join(rootPaths.projectRoot,  json.pnpmStorePath))
-          || this.pnpmStorePath
-        );
-        break;
-      }
+    if (EnvironmentConfiguration.pnpmStorePathOverride) {
+      this.pnpmStorePath = EnvironmentConfiguration.pnpmStorePathOverride;
+    } else if (this.pnpmStore === 'global') {
+      this.pnpmStorePath = '';
+    } else {
+      this.pnpmStorePath = path.resolve(path.join(rootPaths.commonTempFolder, 'pnpm-store'));
     }
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
