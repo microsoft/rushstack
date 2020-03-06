@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as _ from 'lodash';
 import { FileSystem, JsonFile, JsonObject } from '@microsoft/node-core-library';
+
 import { PackageManagerName } from './packageManager/PackageManager'
 
 export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
