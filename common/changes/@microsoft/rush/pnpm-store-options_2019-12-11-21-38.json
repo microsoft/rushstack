@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Implement `pnpmOptions.pnpmStore` and RUSH_PNPM_STORE_PATH, to allow the end-user to define where PNPM will load its store.",
+      "comment": "Implement `pnpmOptions.pnpmStore` and RUSH_PNPM_STORE_PATH, to allow the end-user to define where PNPM will place its store.",
       "type": "none"
     }
   ],
