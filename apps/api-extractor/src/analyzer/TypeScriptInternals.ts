@@ -4,6 +4,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as ts from 'typescript';
+import { InternalError } from '@microsoft/node-core-library';
+
+/**
+ * Exposes the TypeScript compiler internals for detecting global variable names.
+ */
+export interface IGlobalVariableAnalyzer {
+  hasGlobalName(name: string): boolean;
+}
 
 export class TypeScriptInternals {
 
@@ -92,4 +100,19 @@ export class TypeScriptInternals {
     return (declaration as any).localSymbol;
   }
 
+  public static getGlobalVariableAnalyzer(program: ts.Program): IGlobalVariableAnalyzer {
+    const anyProgram: any = program;
+    if (!anyProgram.getDiagnosticsProducingTypeChecker) {
+      throw new InternalError('Missing Program.getDiagnosticsProducingTypeChecker');
+    }
+    const typeChecker: any = anyProgram.getDiagnosticsProducingTypeChecker();
+    if (!typeChecker.getEmitResolver) {
+      throw new InternalError('Missing TypeChecker.getEmitResolver');
+    }
+    const resolver: any = typeChecker.getEmitResolver();
+    if (!resolver.hasGlobalName) {
+      throw new InternalError('Missing EmitResolver.hasGlobalName');
+    }
+    return resolver;
+  }
 }
