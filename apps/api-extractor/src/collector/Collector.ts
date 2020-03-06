@@ -26,7 +26,7 @@ import { PackageDocComment } from '../aedoc/PackageDocComment';
 import { DeclarationMetadata, InternalDeclarationMetadata } from './DeclarationMetadata';
 import { ApiItemMetadata, IApiItemMetadataOptions } from './ApiItemMetadata';
 import { SymbolMetadata } from './SymbolMetadata';
-import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
+import { TypeScriptInternals, IGlobalVariableAnalyzer } from '../analyzer/TypeScriptInternals';
 import { MessageRouter } from './MessageRouter';
 import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
 import { ExtractorConfig } from '../api/ExtractorConfig';
@@ -59,6 +59,7 @@ export interface ICollectorOptions {
 export class Collector {
   public readonly program: ts.Program;
   public readonly typeChecker: ts.TypeChecker;
+  public readonly globalVariableAnalyzer: IGlobalVariableAnalyzer;
   public readonly astSymbolTable: AstSymbolTable;
   public readonly astReferenceResolver: AstReferenceResolver;
 
@@ -115,6 +116,7 @@ export class Collector {
 
     this.program = options.program;
     this.typeChecker = options.program.getTypeChecker();
+    this.globalVariableAnalyzer = TypeScriptInternals.getGlobalVariableAnalyzer(this.program);
 
     this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
 
@@ -455,16 +457,6 @@ export class Collector {
       }
     }
 
-    // Next, add in the global names
-    const globalNames: Set<string> = new Set<string>();
-    this._collectGlobalNames(globalNames);
-
-    for (const globalName of globalNames) {
-      // Note that globalName may conflict with an exported name.
-      // We'll check for this conflict below.
-      usedNames.add(globalName);
-    }
-
     // Ensure that each entity has a unique nameForEmit
     for (const entity of this._entities) {
 
@@ -482,7 +474,7 @@ export class Collector {
       // If the idealNameForEmit happens to be the same as one of the exports, then we're safe to use that...
       if (entity.exportNames.has(idealNameForEmit)) {
         // ...except that if it conflicts with a global name, then the global name wins
-        if (!globalNames.has(idealNameForEmit)) {
+        if (!this.globalVariableAnalyzer.hasGlobalName(idealNameForEmit)) {
           entity.nameForEmit = idealNameForEmit;
           continue;
         }
@@ -492,79 +484,12 @@ export class Collector {
       let suffix: number = 1;
       let nameForEmit: string = idealNameForEmit;
 
-      // Choose a name that doesn't conflict with usedNames
-      while (usedNames.has(nameForEmit)) {
+      // Choose a name that doesn't conflict with usedNames or a global name
+      while (usedNames.has(nameForEmit) || this.globalVariableAnalyzer.hasGlobalName(nameForEmit)) {
         nameForEmit = `${idealNameForEmit}_${++suffix}`;
       }
       entity.nameForEmit = nameForEmit;
       usedNames.add(nameForEmit);
-    }
-  }
-
-  /**
-   * Adds global names to the usedNames set, to prevent API Extractor from emitting names that conflict with
-   * a global name.
-   */
-  private _collectGlobalNames(usedNames: Set<string>): void {
-    // As a temporary workaround, this a short list of names that appear in typical projects.
-    // The full solution is tracked by this issue:
-    // https://github.com/microsoft/rushstack/issues/1095
-    const globalNames: string[] = [
-      'Array',
-      'ArrayConstructor',
-      'Console',
-      'Date',
-      'DateConstructor',
-      'Error',
-      'ErrorConstructor',
-      'Float32Array',
-      'Float32ArrayConstructor',
-      'Float64Array',
-      'Float64ArrayConstructor',
-      'IArguments',
-      'Int16Array',
-      'Int16ArrayConstructor',
-      'Int32Array',
-      'Int32ArrayConstructor',
-      'Int8Array',
-      'Int8ArrayConstructor',
-      'Iterable',
-      'IterableIterator',
-      'Iterator',
-      'IteratorResult',
-      'Map',
-      'MapConstructor',
-      'Promise',
-      'PromiseConstructor',
-      'ReadonlyArray',
-      'ReadonlyMap',
-      'ReadonlySet',
-      'Set',
-      'SetConstructor',
-      'String',
-      'Symbol',
-      'SymbolConstructor',
-      'Uint16Array',
-      'Uint16ArrayConstructor',
-      'Uint32Array',
-      'Uint32ArrayConstructor',
-      'Uint8Array',
-      'Uint8ArrayConstructor',
-      'Uint8ClampedArray',
-      'Uint8ClampedArrayConstructor',
-      'WeakMap',
-      'WeakMapConstructor',
-      'WeakSet',
-      'WeakSetConstructor',
-      'clearInterval',
-      'clearTimeout',
-      'console',
-      'setInterval',
-      'setTimeout',
-      'undefined'
-    ];
-    for (const globalName of globalNames) {
-      usedNames.add(globalName);
     }
   }
 
