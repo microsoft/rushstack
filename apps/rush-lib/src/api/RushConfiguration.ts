@@ -172,7 +172,7 @@ export interface ICurrentVariantJson {
  */
 interface IPnpmOptionsRootPaths {
   commonTempFolder: string;
-  projectRoot: string;
+  repoRoot: string;
 }
 
 /**
@@ -424,7 +424,7 @@ export class RushConfiguration {
 
     this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || {}, {
       commonTempFolder: this._commonTempFolder,
-      projectRoot: this._rushJsonFolder
+      repoRoot: this._rushJsonFolder
     });
     this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || {});
 
