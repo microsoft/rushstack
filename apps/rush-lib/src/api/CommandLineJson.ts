@@ -46,6 +46,7 @@ export interface IBaseParameterJson {
   shortName?: string;
   description: string;
   associatedCommands: string[];
+  required?: boolean;
 }
 
 /**

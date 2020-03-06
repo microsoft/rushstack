@@ -183,6 +183,11 @@
           "items": {
             "type": "string"
           }
+        },
+        "required": {
+          "title": "Required",
+          "description": "If true, then this parameter must be included on the command line",
+          "type": "boolean"
         }
       }
     },
@@ -209,14 +214,15 @@
             "longName": { "$ref": "#/definitions/anything" },
             "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
-            "associatedCommands": { "$ref": "#/definitions/anything" }
+            "associatedCommands": { "$ref": "#/definitions/anything" },
+            "required": { "$ref": "#/definitions/anything" }
           }
         }
       ]
     },
     "stringParameter": {
       "title": "String Parameter",
-      "description": "A custom command-line parameter whose value is intepreted as a string",
+      "description": "A custom command-line parameter whose value is interpreted as a string",
       "type": "object",
       "allOf": [
         { "$ref": "#/definitions/baseParameter" },
@@ -244,6 +250,8 @@
             "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "associatedCommands": { "$ref": "#/definitions/anything" },
+            "required": { "$ref": "#/definitions/anything" },
+
             "argumentName": { "$ref": "#/definitions/anything" }
           }
         }
@@ -302,6 +310,7 @@
             "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "associatedCommands": { "$ref": "#/definitions/anything" },
+            "required": { "$ref": "#/definitions/anything" },
 
             "alternatives": { "$ref": "#/definitions/anything" },
             "defaultValue": { "$ref": "#/definitions/anything" }
