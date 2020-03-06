@@ -105,21 +105,7 @@ describe('LastInstallFlagError', () => {
   it('throws an Error if an invalid error key is defined', () => {
     expect(() => {
       // @ts-ignore
-      const flagError: LastInstallFlagError = new LastInstallFlagError('as;lkdfj Random Error Key'); // eslint-disable-line @typescript-eslint/no-unused-vars
+      const flagError: LastInstallFlagError = new LastInstallFlagError('non-existant key'); // eslint-disable-line @typescript-eslint/no-unused-vars
     }).toThrowError();
-  })
-
-  it('sets the error correctly when using default message behavior', () => {
-    const errorKey: string = 'testError 12341234';
-    const errorMsg: string = 'random error message 1234231'
-    LastInstallFlagError['_errors'] = {
-      [errorKey]: {
-        error: errorMsg
-      }
-    }
-    // @ts-ignore
-    const flagError: LastInstallFlagError = new LastInstallFlagError(errorKey);
-
-    expect(flagError.message).toEqual(errorMsg);
   })
 });

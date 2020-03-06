@@ -150,7 +150,7 @@ export class InstallManager {
       packageManagerVersion: rushConfiguration.packageManagerToolVersion
     }
 
-    if (rushConfiguration.packageManager === 'pnpm') {
+    if (lastInstallState.packageManager === 'pnpm') {
       lastInstallState.storePath = rushConfiguration.pnpmOptions.pnpmStorePath;
     }
 
