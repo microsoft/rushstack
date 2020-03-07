@@ -79,6 +79,16 @@ export class PurgeManager {
     // Then purge the the global folder, e.g. ~/.rush/* except for node-v4.5.6
     this._rushUserFolderRecycler.moveAllItemsInFolder(this._rushGlobalFolder.path,
       this._getMembersToExclude(this._rushGlobalFolder.path, false));
+
+    if (
+      this._rushConfiguration.packageManager === 'pnpm' &&
+      this._rushConfiguration.pnpmOptions.pnpmStore === 'global' &&
+      this._rushConfiguration.pnpmOptions.pnpmStorePath
+    ) {
+      console.warn(colors.yellow(`Purging the global pnpm-store`))
+      this._rushUserFolderRecycler.moveAllItemsInFolder(this._rushConfiguration.pnpmOptions.pnpmStorePath);
+    }
+
   }
 
   private _getMembersToExclude(folderToRecycle: string, showWarning: boolean): string[] {

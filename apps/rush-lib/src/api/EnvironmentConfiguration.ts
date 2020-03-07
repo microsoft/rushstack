@@ -46,7 +46,17 @@ export const enum EnvironmentVariableNames {
    * of relative paths. This can be necessary when a repository is moved during a build or
    * if parts of a repository are moved into a sandbox.
    */
-  RUSH_ABSOLUTE_SYMLINKS = 'RUSH_ABSOLUTE_SYMLINKS'
+  RUSH_ABSOLUTE_SYMLINKS = 'RUSH_ABSOLUTE_SYMLINKS',
+
+  /**
+   * When using PNPM as the package manager this variable will be used to define the path that
+   * PNPM will use as the store directory.
+   * 
+   * If a relative path is used, then the store path will be resolved relative to the process's
+   * current working directory.  The best way to use this environment variable is with absolute
+   * paths.
+   */
+  RUSH_PNPM_STORE_PATH = 'RUSH_PNPM_STORE_PATH'
 }
 
 /**
@@ -64,6 +74,8 @@ export class EnvironmentConfiguration {
   private static _absoluteSymlinks: boolean = false;
 
   private static _allowUnsupportedNodeVersion: boolean = false;
+
+  private static _pnpmStorePathOverride: string | undefined;
 
   /**
    * An override for the common/temp folder path.
@@ -95,6 +107,15 @@ export class EnvironmentConfiguration {
   }
 
   /**
+   * An override for the PNPM store path, if `pnpmStore` configuration is set to 'path'
+   * See {@link EnvironmentVariableNames.RUSH_PNPM_STORE_PATH}
+   */
+  public static get pnpmStorePathOverride(): string | undefined {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._pnpmStorePathOverride;
+  }
+
+  /**
    * Reads and validates environment variables. If any are invalid, this function will throw.
    */
   public static initialize(options: IEnvironmentConfigurationInitializeOptions = {}): void {
@@ -121,6 +142,13 @@ export class EnvironmentConfiguration {
 
           case EnvironmentVariableNames.RUSH_ALLOW_UNSUPPORTED_NODEJS: {
             EnvironmentConfiguration._allowUnsupportedNodeVersion = value === 'true';
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_PNPM_STORE_PATH: {
+            EnvironmentConfiguration._pnpmStorePathOverride = (value && !options.doNotNormalizePaths)
+              ? EnvironmentConfiguration._normalizeDeepestParentFolderPath(value) || value
+              : value;
             break;
           }
 

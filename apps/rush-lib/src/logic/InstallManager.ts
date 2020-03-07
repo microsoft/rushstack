@@ -22,7 +22,8 @@ import {
   FileSystem,
   FileConstants,
   Sort,
-  PosixModeBits
+  PosixModeBits,
+  JsonObject
 } from '@microsoft/node-core-library';
 
 import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
@@ -60,6 +61,7 @@ import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { PackageManagerName } from '../api/packageManager/PackageManager';
 import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
 import { DependencySpecifier } from './DependencySpecifier';
+import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface CreateOptions {
@@ -143,11 +145,17 @@ export class InstallManager {
     this._commonTempFolderRecycler = purgeManager.commonTempFolderRecycler;
     this._options = options;
 
-    this._commonNodeModulesMarker = new LastInstallFlag(this._rushConfiguration.commonTempFolder, {
+    const lastInstallState: JsonObject = {
       node: process.versions.node,
       packageManager: rushConfiguration.packageManager,
       packageManagerVersion: rushConfiguration.packageManagerToolVersion
-    });
+    }
+
+    if (lastInstallState.packageManager === 'pnpm') {
+      lastInstallState.storePath = rushConfiguration.pnpmOptions.pnpmStorePath;
+    }
+
+    this._commonNodeModulesMarker = new LastInstallFlag(this._rushConfiguration.commonTempFolder, lastInstallState);
   }
 
   /**
@@ -812,7 +820,7 @@ export class InstallManager {
         'node_modules');
 
       // This marker file indicates that the last "rush install" completed successfully
-      const markerFileExistedAndWasValidAtStart: boolean = this._commonNodeModulesMarker.isValid();
+      const markerFileExistedAndWasValidAtStart: boolean = this._commonNodeModulesMarker.isValid(true);
 
       // If "--clean" or "--full-clean" was specified, or if the last install was interrupted,
       // then we will need to delete the node_modules folder.  Otherwise, we can do an incremental
@@ -979,12 +987,15 @@ export class InstallManager {
           } catch (error) {
             // All the install attempts failed.
 
-            if (this._rushConfiguration.packageManager === 'pnpm') {
+            if (
+              this._rushConfiguration.packageManager === 'pnpm' &&
+              this._rushConfiguration.pnpmOptions.pnpmStore === 'local'
+            ) {
               // If the installation has failed even after the retries, then pnpm store may
               // have got into a corrupted, irrecoverable state. Delete the store so that a
               // future install can create the store afresh.
               console.log(colors.yellow(`Deleting the "pnpm-store" folder`));
-              this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
+              this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.pnpmOptions.pnpmStorePath);
             }
 
             throw error;
@@ -1164,7 +1175,15 @@ export class InstallManager {
         args.push('--verbose');
       }
     } else if (this._rushConfiguration.packageManager === 'pnpm') {
-      args.push('--store', this._rushConfiguration.pnpmStoreFolder);
+      // Only explicitly define the store path if `pnpmStore` is using the default, or has been set to
+      // 'local'.  If `pnpmStore` = 'global', then allow PNPM to use the system's default
+      // path.  In all cases, this will be overridden by RUSH_PNPM_STORE_PATH
+      if (
+        this._rushConfiguration.pnpmOptions.pnpmStore === 'local' ||
+        EnvironmentConfiguration.pnpmStorePathOverride
+      ) {
+        args.push('--store', this._rushConfiguration.pnpmOptions.pnpmStorePath);
+      }
 
       // we are using the --no-lock flag for now, which unfortunately prints a warning, but should be OK
       // since rush already has its own install lock file which will invalidate the cache for us.
