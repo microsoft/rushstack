@@ -46,6 +46,8 @@
      *
      * RUSH_PNPM_STORE_PATH will override the directory that will be used as the store
      *
+     * In all cases, the store path will be overridden by the environment variable RUSH_PNPM_STORE_PATH.
+     *
      * The default value is "local".
      */
     /*[LINE "HYPOTHETICAL"]*/ "pnpmStore": "local",
