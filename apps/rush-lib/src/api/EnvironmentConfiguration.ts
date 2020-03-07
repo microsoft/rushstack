@@ -49,12 +49,11 @@ export const enum EnvironmentVariableNames {
   RUSH_ABSOLUTE_SYMLINKS = 'RUSH_ABSOLUTE_SYMLINKS',
 
   /**
-   * When using PNPM as the package manager this variable will be used to define the path that
+   * When using PNPM as the package manager, this variable can be used to configure the path that
    * PNPM will use as the store directory.
-   * 
+   *
    * If a relative path is used, then the store path will be resolved relative to the process's
-   * current working directory.  The best way to use this environment variable is with absolute
-   * paths.
+   * current working directory.  An absolute path is recommended.
    */
   RUSH_PNPM_STORE_PATH = 'RUSH_PNPM_STORE_PATH'
 }

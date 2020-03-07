@@ -820,7 +820,7 @@ export class InstallManager {
         'node_modules');
 
       // This marker file indicates that the last "rush install" completed successfully
-      const markerFileExistedAndWasValidAtStart: boolean = this._commonNodeModulesMarker.isValid(true);
+      const markerFileExistedAndWasValidAtStart: boolean = this._commonNodeModulesMarker.checkValidAndReportStoreIssues();
 
       // If "--clean" or "--full-clean" was specified, or if the last install was interrupted,
       // then we will need to delete the node_modules folder.  Otherwise, we can do an incremental

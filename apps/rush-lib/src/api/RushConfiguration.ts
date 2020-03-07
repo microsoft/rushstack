@@ -125,21 +125,6 @@ export interface IPnpmOptionsJson {
 }
 
 /**
- * The paths used when resolving `pnpmStorePath`
- * @internal
- */
-export interface IPnpmOptionsRootPaths {
-  /**
-   * The location of the Rush `common/temp` directory
-   */
-  commonTempFolder: string;
-  /**
-   * Stores the location of the repository root
-   */
-  repoRoot: string;
-}
-
-/**
  * Part of IRushConfigurationJson.
  */
 export interface IYarnOptionsJson {
@@ -209,7 +194,7 @@ export interface ICurrentVariantJson {
 export class PnpmOptionsConfiguration {
   /**
    * The method used to resolve the store used by PNPM.
-   * 
+   *
    * @remarks
    * Available options:
    *  - local: Use the standard Rush store path: common/temp/pnpm-store
@@ -219,7 +204,7 @@ export class PnpmOptionsConfiguration {
 
   /**
    * The path for PNPM to use as the store directory.
-   * 
+   *
    * Will be overridden by environment variable RUSH_PNPM_STORE_PATH
    */
   public readonly pnpmStorePath: string;
@@ -254,14 +239,14 @@ export class PnpmOptionsConfiguration {
   public readonly resolutionStrategy: ResolutionStrategy;
 
   /** @internal */
-  public constructor(json: IPnpmOptionsJson, rootPaths: IPnpmOptionsRootPaths) {
+  public constructor(json: IPnpmOptionsJson, commonTempFolder: string) {
     this.pnpmStore = json.pnpmStore || 'local';
     if (EnvironmentConfiguration.pnpmStorePathOverride) {
       this.pnpmStorePath = EnvironmentConfiguration.pnpmStorePathOverride;
     } else if (this.pnpmStore === 'global') {
       this.pnpmStorePath = '';
     } else {
-      this.pnpmStorePath = path.resolve(path.join(rootPaths.commonTempFolder, 'pnpm-store'));
+      this.pnpmStorePath = path.resolve(path.join(commonTempFolder, 'pnpm-store'));
     }
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
@@ -435,10 +420,8 @@ export class RushConfiguration {
     );
     this._experimentsConfiguration = new ExperimentsConfiguration(experimentsConfigFile);
 
-    this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || {}, {
-      commonTempFolder: this._commonTempFolder,
-      repoRoot: this._rushJsonFolder
-    });
+    this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || {},
+      this._commonTempFolder);
     this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || {});
 
     // TODO: Add an actual "packageManager" field in rush.json

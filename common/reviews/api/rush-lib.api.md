@@ -152,12 +152,6 @@ export interface _IPnpmOptionsJson {
     strictPeerDependencies?: boolean;
 }
 
-// @internal
-export interface _IPnpmOptionsRootPaths {
-    commonTempFolder: string;
-    repoRoot: string;
-}
-
 // @public
 export interface ITryFindRushJsonLocationOptions {
     showVerbose?: boolean;
@@ -167,9 +161,10 @@ export interface ITryFindRushJsonLocationOptions {
 // @internal
 export class _LastInstallFlag {
     constructor(folderPath: string, state?: JsonObject);
+    checkValidAndReportStoreIssues(): boolean;
     clear(): void;
     create(): void;
-    isValid(abortOnInvalid?: boolean): boolean;
+    isValid(): boolean;
     readonly path: string;
     }
 
@@ -244,7 +239,7 @@ export type PackageManagerName = 'pnpm' | 'npm' | 'yarn';
 // @public
 export class PnpmOptionsConfiguration {
     // @internal
-    constructor(json: _IPnpmOptionsJson, rootPaths: _IPnpmOptionsRootPaths);
+    constructor(json: _IPnpmOptionsJson, commonTempFolder: string);
     readonly pnpmStore: PnpmStoreOptions;
     readonly pnpmStorePath: string;
     readonly resolutionStrategy: ResolutionStrategy;
