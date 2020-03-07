@@ -2,6 +2,30 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.21.0",
+      "tag": "@microsoft/rush_v5.21.0",
+      "date": "Sat, 07 Mar 2020 05:36:08 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Make the event hook failure message print in yellow."
+          },
+          {
+            "comment": "Improve phrasing of an error message."
+          },
+          {
+            "comment": "Add a new command-line.json setting \"required\" for non-optional parameters"
+          },
+          {
+            "comment": "Implement `pnpmOptions.pnpmStore` and RUSH_PNPM_STORE_PATH, to allow the end-user to define where PNPM will place its store."
+          },
+          {
+            "comment": "Add a --json flag for \"rush check\" to facilitate automation"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.20.0",
       "tag": "@microsoft/rush_v5.20.0",
       "date": "Wed, 12 Feb 2020 21:51:19 GMT",
