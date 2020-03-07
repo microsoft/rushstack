@@ -152,12 +152,6 @@ export interface _IPnpmOptionsJson {
     strictPeerDependencies?: boolean;
 }
 
-// @internal
-export interface _IPnpmOptionsRootPaths {
-    commonTempFolder: string;
-    repoRoot: string;
-}
-
 // @public
 export interface ITryFindRushJsonLocationOptions {
     showVerbose?: boolean;
@@ -245,7 +239,7 @@ export type PackageManagerName = 'pnpm' | 'npm' | 'yarn';
 // @public
 export class PnpmOptionsConfiguration {
     // @internal
-    constructor(json: _IPnpmOptionsJson, rootPaths: _IPnpmOptionsRootPaths);
+    constructor(json: _IPnpmOptionsJson, commonTempFolder: string);
     readonly pnpmStore: PnpmStoreOptions;
     readonly pnpmStorePath: string;
     readonly resolutionStrategy: ResolutionStrategy;
