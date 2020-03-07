@@ -61,12 +61,10 @@ export class LastInstallFlag {
         const pkgManager: PackageManagerName = newState.packageManager;
         if (pkgManager === 'pnpm') {
           if (
-            ( // Only throw an error if the package manager hasn't changed from PNPM
-              oldState.packageManager === pkgManager
-            ) && ( // Throw if the store path changed
-              oldState.storePath &&
-              oldState.storePath !== newState.storePath
-            )
+            // Only throw an error if the package manager hasn't changed from PNPM
+            oldState.packageManager === pkgManager &&
+            // Throw if the store path changed
+            oldState.storePath !== newState.storePath
           ) {
             const oldStorePath: string = oldState.storePath || '<global>';
             const newStorePath: string = newState.storePath || '<global>';
