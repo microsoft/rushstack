@@ -36,18 +36,18 @@
    */
   "pnpmOptions": {
     /**
-    * Specifies the location of the PNPM store.  There are three possible values:
-    *
-    * - "local" - use the "pnpm-store" folder in the current configured temp folder:
-    *   "common/temp/pnpm-store" by default.
-    * - "global" - use PNPM's global store, which has the benefit of being shared
-    *    across multiple repo folders, but the disadvantage of less isolation for builds
-    *    (e.g. bugs or incompatibilities when two repos use different releases of PNPM)
-    *
-    * RUSH_PNPM_STORE_PATH will override the directory that will be used as the store
-    *
-    * The default value is "local".
-    */
+     * Specifies the location of the PNPM store.  There are two possible values:
+     *
+     * - "local" - use the "pnpm-store" folder in the current configured temp folder:
+     *   "common/temp/pnpm-store" by default.
+     * - "global" - use PNPM's global store, which has the benefit of being shared
+     *    across multiple repo folders, but the disadvantage of less isolation for builds
+     *    (e.g. bugs or incompatibilities when two repos use different releases of PNPM)
+     *
+     * RUSH_PNPM_STORE_PATH will override the directory that will be used as the store
+     *
+     * The default value is "local".
+     */
     /*[LINE "HYPOTHETICAL"]*/ "pnpmStore": "local",
 
     /**
