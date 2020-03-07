@@ -79,7 +79,7 @@ describe('LastInstallFlag', () => {
     });
 
     flag1.create();
-    expect(() => { flag2.isValid(true) }).toThrowError(/PNPM store path/);
+    expect(() => { flag2.checkValidAndReportStoreIssues() }).toThrowError(/PNPM store path/);
   });
 
   it('doesn\'t throw an error if conditions for error aren\'t met', () => {
@@ -92,7 +92,7 @@ describe('LastInstallFlag', () => {
     });
 
     flag1.create();
-    expect(() => { flag2.isValid(true) }).not.toThrow();
-    expect(flag2.isValid(true)).toEqual(false);
+    expect(() => { flag2.checkValidAndReportStoreIssues() }).not.toThrow();
+    expect(flag2.checkValidAndReportStoreIssues()).toEqual(false);
   })
 });

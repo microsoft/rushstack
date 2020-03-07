@@ -28,27 +28,36 @@ export class LastInstallFlag {
   }
 
   /**
-   * Returns true if the file exists and the contents match the current state
-   * @param abortOnInvalid - If the current state is not equal to the previous
-   * state, and an the current state causes an error, then throw an exception
-   * with a friendly message
+   * Returns true if the file exists and the contents match the current state.
    */
-  public isValid(abortOnInvalid: boolean = false): boolean {
+  public isValid(): boolean {
+    return this._isValid(false);
+  }
+
+  /**
+   * Same as isValid(), but with an additional check:  If the current state is not equal to the previous
+   * state, and an the current state causes an error, then throw an exception with a friendly message.
+   */
+  public checkValidAndReportStoreIssues(): boolean {
+    return this._isValid(true);
+  }
+
+  private _isValid(checkValidAndReportStoreIssues: boolean): boolean {
     if (!FileSystem.exists(this._path)) {
       return false;
     }
-    
+
     let oldState: JsonObject;
     try {
       oldState = JsonFile.load(this._path);
     } catch (err) {
       return false;
-    } 
+    }
 
     const newState: JsonObject = this._state;
 
     if (!_.isEqual(oldState, newState)) {
-      if (abortOnInvalid) {
+      if (checkValidAndReportStoreIssues) {
         const pkgManager: PackageManagerName = newState.packageManager;
         if (pkgManager === 'pnpm') {
           if (

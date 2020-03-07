@@ -167,9 +167,10 @@ export interface ITryFindRushJsonLocationOptions {
 // @internal
 export class _LastInstallFlag {
     constructor(folderPath: string, state?: JsonObject);
+    checkValidAndReportStoreIssues(): boolean;
     clear(): void;
     create(): void;
-    isValid(abortOnInvalid?: boolean): boolean;
+    isValid(): boolean;
     readonly path: string;
     }
 
