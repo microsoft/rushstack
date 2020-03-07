@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { LastInstallFlag, LastInstallFlagError } from '../LastInstallFlag';
+import { LastInstallFlag } from '../LastInstallFlag';
 import { FileSystem } from '@microsoft/node-core-library';
 
 const TEMP_DIR: string = path.join(__dirname, 'temp');
@@ -79,10 +79,6 @@ describe('LastInstallFlag', () => {
     });
 
     flag1.create();
-    expect(() => { flag2.isValid(true) }).toThrowError(
-      // @ts-ignore
-      LastInstallFlagError // Constructor is private
-    );
     expect(() => { flag2.isValid(true) }).toThrowError(/PNPM store path/);
   });
 
@@ -98,14 +94,5 @@ describe('LastInstallFlag', () => {
     flag1.create();
     expect(() => { flag2.isValid(true) }).not.toThrow();
     expect(flag2.isValid(true)).toEqual(false);
-  })
-});
-
-describe('LastInstallFlagError', () => {
-  it('throws an Error if an invalid error key is defined', () => {
-    expect(() => {
-      // @ts-ignore
-      const flagError: LastInstallFlagError = new LastInstallFlagError('non-existant key'); // eslint-disable-line @typescript-eslint/no-unused-vars
-    }).toThrowError();
   })
 });
