@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "fix false-negative condition when pnpm store path has changed",
+      "comment": "Fix a case where an exception wouldn't have been thrown if the pnpm store path had been set after it had previously been unset.",
       "type": "none"
     }
   ],
