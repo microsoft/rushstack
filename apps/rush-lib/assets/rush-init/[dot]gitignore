@@ -55,6 +55,14 @@ jspm_packages/
 # next.js build output
 .next
 
+# Common toolchain intermediate files
+lib
+temp
+
+# Rush files
+common/temp/**
+package-deps.json
+
 # OS X temporary files
 .DS_Store
 
