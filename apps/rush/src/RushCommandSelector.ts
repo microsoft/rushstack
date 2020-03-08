@@ -5,7 +5,7 @@ import * as colors from 'colors';
 import * as path from 'path';
 import * as rushLib from '@microsoft/rush-lib';
 
-type CommandName = 'rush' | 'rushx' | undefined;
+type CommandName = 'rush' | 'rushx' | 'myrush' | undefined;
 
 /**
  * Both "rush" and "rushx" share the same src/start.ts entry point.  This makes it
@@ -59,7 +59,8 @@ export class RushCommandSelector {
     return process.exit(1);
   }
 
-  private static _getCommandName(): CommandName {
+  // TODO: Can we expose this function as so, is it safe?
+  public static _getCommandName(): CommandName {
     if (process.argv.length >= 2) {
       // Example:
       // argv[0]: "C:\\Program Files\\nodejs\\node.exe"
@@ -70,6 +71,9 @@ export class RushCommandSelector {
       }
       if (basename === 'RUSH') {
         return 'rush';
+      }
+      if (basename === 'MYRUSH') {
+        return 'myrush';
       }
     }
     return undefined;
