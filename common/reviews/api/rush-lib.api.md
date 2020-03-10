@@ -295,6 +295,10 @@ export class RushConfiguration {
     readonly npmCacheFolder: string;
     readonly npmTmpFolder: string;
     readonly packageManager: PackageManagerName;
+    // Warning: (ae-forgotten-export) The symbol "IPackageManagerOptions" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    readonly packageManagerOptions: IPackageManagerOptions | undefined;
     readonly packageManagerToolFilename: string;
     readonly packageManagerToolVersion: string;
     // @beta

@@ -30,6 +30,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected _noLinkParameter: CommandLineFlagParameter;
   protected _networkConcurrencyParameter: CommandLineIntegerParameter;
   protected _debugPackageManagerParameter: CommandLineFlagParameter;
+  protected _maxInstallAttempts: CommandLineIntegerParameter;
 
   protected onDefineParameters(): void {
     this._purgeParameter = this.defineFlagParameter({
@@ -58,6 +59,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
       parameterLongName: '--debug-package-manager',
       description: 'Activates verbose logging for the package manager. You will probably want to pipe'
         + ' the output of Rush to a file when using this command.'
+    });
+    this._maxInstallAttempts = this.defineIntegerParameter({
+      parameterLongName: '--max-install-attempts',
+      argumentName: 'NUMBER',
+      description: 'Attempts command the specified number of times.'
     });
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }
@@ -94,6 +100,10 @@ export abstract class BaseInstallAction extends BaseRushAction {
         throw new Error(`The "${this._networkConcurrencyParameter.longName}" parameter is`
           + ` only supported when using the PNPM package manager.`);
       }
+    }
+
+    if (this._maxInstallAttempts.value && this._maxInstallAttempts.value < 1) {
+      throw new Error(`The value of "${this._maxInstallAttempts.longName}" must be positive.`);
     }
 
     const installManagerOptions: IInstallManagerOptions = this.buildInstallOptions();

@@ -109,6 +109,16 @@ export type PnpmStoreOptions = 'local' | 'global';
  * Part of IRushConfigurationJson.
  * @internal
  */
+export interface IPackageManagerOptions {
+  environmentVariables?: {
+    [name: string]: string
+  };
+}
+
+/**
+ * Part of IRushConfigurationJson.
+ * @internal
+ */
 export interface IPnpmOptionsJson {
   /**
    * The store resolution method for PNPM to use
@@ -160,6 +170,7 @@ export interface IRushConfigurationJson {
   projects: IRushConfigurationProjectJson[];
   eventHooks?: IEventHooksJson;
   hotfixChangeEnabled?: boolean;
+  packageManagerOptions?: IPackageManagerOptions;
   pnpmOptions?: IPnpmOptionsJson;
   yarnOptions?: IYarnOptionsJson;
   ensureConsistentVersions?: boolean;
@@ -351,6 +362,8 @@ export class RushConfiguration {
   private _repositoryDefaultBranch: string;
   private _repositoryDefaultRemote: string;
 
+  private _packageManagerOptions?: IPackageManagerOptions;
+
   private _pnpmOptions: PnpmOptionsConfiguration;
   private _yarnOptions: YarnOptionsConfiguration;
 
@@ -449,6 +462,8 @@ export class RushConfiguration {
         + ` and ${packageManagerFields[1]} `);
     }
 
+    this._packageManagerOptions = rushConfigurationJson.packageManagerOptions;
+
     if (this._packageManager === 'npm') {
       this._packageManagerToolVersion = rushConfigurationJson.npmVersion!;
       this._packageManagerWrapper = new NpmPackageManager(this._packageManagerToolVersion);
@@ -463,10 +478,10 @@ export class RushConfiguration {
     this._shrinkwrapFilename = this._packageManagerWrapper.shrinkwrapFilename;
 
     this._tempShrinkwrapFilename = path.join(
-        this._commonTempFolder, this._shrinkwrapFilename
+      this._commonTempFolder, this._shrinkwrapFilename
     );
     this._packageManagerToolFilename = path.resolve(path.join(
-        this._commonTempFolder, `${this.packageManager}-local`, 'node_modules', '.bin', `${this.packageManager}`
+      this._commonTempFolder, `${this.packageManager}-local`, 'node_modules', '.bin', `${this.packageManager}`
     ));
 
     /// From "C:\repo\common\temp\pnpm-lock.yaml" --> "C:\repo\common\temp\pnpm-lock-preinstall.yaml"
@@ -475,9 +490,9 @@ export class RushConfiguration {
       parsedPath.name + '-preinstall' + parsedPath.ext);
 
     RushConfiguration._validateCommonRushConfigFolder(
-        this._commonRushConfigFolder,
-        this.packageManager,
-        this._shrinkwrapFilename
+      this._commonRushConfigFolder,
+      this.packageManager,
+      this._shrinkwrapFilename
     );
 
     this._projectFolderMinDepth = rushConfigurationJson.projectFolderMinDepth !== undefined
@@ -642,11 +657,11 @@ export class RushConfiguration {
       if (semver.major(Rush.version) !== semver.major(expectedRushVersion)
         || semver.minor(Rush.version) !== semver.minor(expectedRushVersion)) {
 
-          // If the major/minor are different, then make sure it's an older version.
-          if (semver.lt(Rush.version, expectedRushVersion)) {
-            throw new Error(`Unable to load ${rushJsonBaseName} because its RushVersion is`
-              + ` ${rushConfigurationJson.rushVersion}, whereas @microsoft/rush-lib is version ${Rush.version}.`
-              + ` Consider upgrading the library.`);
+        // If the major/minor are different, then make sure it's an older version.
+        if (semver.lt(Rush.version, expectedRushVersion)) {
+          throw new Error(`Unable to load ${rushJsonBaseName} because its RushVersion is`
+            + ` ${rushConfigurationJson.rushVersion}, whereas @microsoft/rush-lib is version ${Rush.version}.`
+            + ` Consider upgrading the library.`);
         }
       }
     }
@@ -741,9 +756,9 @@ export class RushConfiguration {
    * recognized config files.
    */
   private static _validateCommonRushConfigFolder(
-      commonRushConfigFolder: string,
-      packageManager: PackageManagerName,
-      shrinkwrapFilename: string
+    commonRushConfigFolder: string,
+    packageManager: PackageManagerName,
+    shrinkwrapFilename: string
   ): void {
     if (!FileSystem.exists(commonRushConfigFolder)) {
       console.log(`Creating folder: ${commonRushConfigFolder}`);
@@ -1022,6 +1037,10 @@ export class RushConfiguration {
    */
   public get projectFolderMaxDepth(): number {
     return this._projectFolderMaxDepth;
+  }
+
+  public get packageManagerOptions(): IPackageManagerOptions | undefined {
+    return this._packageManagerOptions;
   }
 
   /**

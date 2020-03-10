@@ -302,7 +302,7 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: install 1`] = `
 "usage: rush install [-h] [-p] [--bypass-policy] [--no-link]
                     [--network-concurrency COUNT] [--debug-package-manager]
-                    [--variant VARIANT]
+                    [--max-install-attempts NUMBER] [--variant VARIANT]
                     
 
 The \\"rush install\\" command installs package dependencies for all your 
@@ -336,6 +336,8 @@ Optional arguments:
                         Activates verbose logging for the package manager. 
                         You will probably want to pipe the output of Rush to 
                         a file when using this command.
+  --max-install-attempts NUMBER
+                        Attempts command the specified number of times.
   --variant VARIANT     Run command using a variant installation 
                         configuration. This parameter may alternatively 
                         specified via the RUSH_VARIANT environment variable.
@@ -563,7 +565,8 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: update 1`] = `
 "usage: rush update [-h] [-p] [--bypass-policy] [--no-link]
                    [--network-concurrency COUNT] [--debug-package-manager]
-                   [--variant VARIANT] [--full] [--recheck]
+                   [--max-install-attempts NUMBER] [--variant VARIANT]
+                   [--full] [--recheck]
                    
 
 The \\"rush update\\" command installs the dependencies described in your package.
@@ -596,6 +599,8 @@ Optional arguments:
                         Activates verbose logging for the package manager. 
                         You will probably want to pipe the output of Rush to 
                         a file when using this command.
+  --max-install-attempts NUMBER
+                        Attempts command the specified number of times.
   --variant VARIANT     Run command using a variant installation 
                         configuration. This parameter may alternatively 
                         specified via the RUSH_VARIANT environment variable.

@@ -50,8 +50,6 @@ import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration'
 // The PosixModeBits are intended to be used with bitwise operations.
 /* eslint-disable no-bitwise */
 
-const MAX_INSTALL_ATTEMPTS: number = 2;
-
 /**
  * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.
  * As a temporary workaround, augment the type.
@@ -121,6 +119,11 @@ export interface IInstallManagerOptions {
    * The variant to consider when performing installations and validating shrinkwrap updates.
    */
   variant?: string | undefined;
+
+  /**
+   * Retry the install the specified number of times
+   */
+  maxInstallAttempts?: number | undefined
 }
 
 /**
@@ -131,6 +134,7 @@ export class InstallManager {
   private _rushGlobalFolder: RushGlobalFolder;
   private _commonNodeModulesMarker: LastInstallFlag;
   private _commonTempFolderRecycler: AsyncRecycler;
+  private _maxInstallAttempts: number = 3;
 
   private _options: IInstallManagerOptions;
 
@@ -156,6 +160,10 @@ export class InstallManager {
     }
 
     this._commonNodeModulesMarker = new LastInstallFlag(this._rushConfiguration.commonTempFolder, lastInstallState);
+
+    if (options.maxInstallAttempts) {
+      this._maxInstallAttempts = options.maxInstallAttempts;
+    }
   }
 
   /**
@@ -432,7 +440,7 @@ export class InstallManager {
           packageName: packageManager,
           version: this._rushConfiguration.packageManagerToolVersion,
           tempPackageTitle: `${packageManager}-local-install`,
-          maxInstallAttempts: MAX_INSTALL_ATTEMPTS,
+          maxInstallAttempts: this._maxInstallAttempts,
           // This is using a local configuration to install a package in a shared global location.
           // Generally that's a bad practice, but in this case if we can successfully install
           // the package at all, we can reasonably assume it's good for all the repositories.
@@ -897,6 +905,16 @@ export class InstallManager {
           // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
           const packageManagerFilename: string = this._rushConfiguration.packageManagerToolFilename;
 
+          const packageManagerEnv: NodeJS.ProcessEnv = process.env;
+
+          if (this._rushConfiguration.packageManagerOptions &&
+            this._rushConfiguration.packageManagerOptions.environmentVariables) {
+
+            for (const envVar of Object.keys(this._rushConfiguration.packageManagerOptions.environmentVariables)) {
+              packageManagerEnv[envVar] = this._rushConfiguration.packageManagerOptions.environmentVariables[envVar];
+            }
+          }
+
           // Is there an existing "node_modules" folder to consider?
           if (FileSystem.exists(commonNodeModulesFolder)) {
             // Should we delete the entire "node_modules" folder?
@@ -919,8 +937,8 @@ export class InstallManager {
                 const args: string[] = ['prune'];
                 this._pushConfigurationArgs(args, options);
 
-                Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename, args,
-                  this._rushConfiguration.commonTempFolder);
+                Utilities.executeCommandWithRetry(this._maxInstallAttempts, packageManagerFilename, args,
+                  this._rushConfiguration.commonTempFolder, packageManagerEnv);
 
                 // Delete the (installed image of) the temp projects, since "npm install" does not
                 // detect changes for "file:./" references.
@@ -968,10 +986,10 @@ export class InstallManager {
           }
 
           try {
-            Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename,
+            Utilities.executeCommandWithRetry(this._maxInstallAttempts, packageManagerFilename,
               installArgs,
               this._rushConfiguration.commonTempFolder,
-              undefined,
+              packageManagerEnv,
               false, () => {
                 if (this._rushConfiguration.packageManager === 'pnpm') {
                   console.log(colors.yellow(`Deleting the "node_modules" folder`));
@@ -983,7 +1001,7 @@ export class InstallManager {
 
                   Utilities.createFolderWithRetry(commonNodeModulesFolder);
                 }
-            });
+              });
           } catch (error) {
             // All the install attempts failed.
 

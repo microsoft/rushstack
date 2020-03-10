@@ -53,6 +53,19 @@
       "description": "Allows creation of hotfix changes. This feature is experimental so it is disabled by default. If this is set, \"rush change\" only allows a \"hotfix\" change type to be specified. This change type will be used when publishing subsequent changes from the monorepo.",
       "type": "boolean"
     },
+    "packageManagerOptions": {
+      "description": "Options that apply to the package manager.",
+      "type": "object",
+      "properties": {
+        "environmentVariables": {
+          "description": "Enviroment variables for the package manager",
+          "type": "object",
+           "additionalProperties": {
+             "type": "string"
+           }
+        }
+      }
+    },
     "pnpmOptions": {
       "description": "Options that are only used when the PNPM pacakge manager is selected.",
       "type": "object",
