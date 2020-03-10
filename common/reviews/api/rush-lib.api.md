@@ -146,6 +146,14 @@ export class IndividualVersionPolicy extends VersionPolicy {
 }
 
 // @internal
+export interface _IPackageManagerOptions {
+    // (undocumented)
+    environmentVariables?: {
+        [name: string]: string;
+    };
+}
+
+// @internal
 export interface _IPnpmOptionsJson {
     pnpmStore?: PnpmStoreOptions;
     resolutionStrategy?: ResolutionStrategy;
@@ -295,10 +303,10 @@ export class RushConfiguration {
     readonly npmCacheFolder: string;
     readonly npmTmpFolder: string;
     readonly packageManager: PackageManagerName;
-    // Warning: (ae-forgotten-export) The symbol "IPackageManagerOptions" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-incompatible-release-tags) The symbol "packageManagerOptions" is marked as @public, but its signature references "IPackageManagerOptions" which is marked as @internal
     //
     // (undocumented)
-    readonly packageManagerOptions: IPackageManagerOptions | undefined;
+    readonly packageManagerOptions: _IPackageManagerOptions | undefined;
     readonly packageManagerToolFilename: string;
     readonly packageManagerToolVersion: string;
     // @beta
