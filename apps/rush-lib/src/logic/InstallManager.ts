@@ -907,8 +907,10 @@ export class InstallManager {
 
           const packageManagerEnv: NodeJS.ProcessEnv = process.env;
 
-          if (this._rushConfiguration.packageManagerOptions &&
-            this._rushConfiguration.packageManagerOptions.environmentVariables) {
+          if (
+            this._rushConfiguration.packageManagerOptions &&
+            this._rushConfiguration.packageManagerOptions.environmentVariables
+          ) {
 
             for (const envVar of Object.keys(this._rushConfiguration.packageManagerOptions.environmentVariables)) {
               packageManagerEnv[envVar] = this._rushConfiguration.packageManagerOptions.environmentVariables[envVar];
