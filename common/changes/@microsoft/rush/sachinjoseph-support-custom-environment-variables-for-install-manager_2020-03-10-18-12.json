@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Support custom environment variables for the underlying package manager install process, expose maxInstallAttempts as a parameter for rush install/update.",
+      "comment": "Support setting environment variables for package manager install processes in rush.json and expose --max-install-attempts as a parameter for rush install/update.",
       "type": "none"
     }
   ],
