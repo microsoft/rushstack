@@ -655,7 +655,7 @@
       "packageName": "@microsoft/node-core-library",
       "projectFolder": "libraries/node-core-library",
       "reviewCategory": "libraries",
-     "shouldPublish": true,
+      "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.5"
@@ -677,7 +677,7 @@
       "packageName": "@microsoft/stream-collator",
       "projectFolder": "libraries/stream-collator",
       "reviewCategory": "libraries",
-     "shouldPublish": true
+      "shouldPublish": true
     },
     {
       "packageName": "@microsoft/ts-command-line",
@@ -688,6 +688,12 @@
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.5"
       ]
+    },
+    {
+      "packageName": "@rushstack/typings-generator",
+      "projectFolder": "libraries/typings-generator",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     },
 
     // "repo-scripts" folder (alphabetical order)

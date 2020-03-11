@@ -171,6 +171,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "@rushstack/typings-generator",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@typescript-eslint/eslint-plugin",
       "allowedCategories": [ "libraries" ]
     },

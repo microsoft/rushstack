@@ -25,10 +25,11 @@
   "dependencies": {
     "@types/node": "10.17.13",
     "@types/tapable": "1.0.4",
+    "@microsoft/node-core-library": "3.19.3",
+    "@rushstack/typings-generator": "0.0.0",
     "loader-utils": "~1.1.0",
     "glob": "~7.0.5",
     "jju": "~1.4.0",
-    "@microsoft/node-core-library": "3.19.3",
     "lodash": "~4.17.15",
     "xmldoc": "~1.1.2",
     "chokidar": "~3.3.1",
