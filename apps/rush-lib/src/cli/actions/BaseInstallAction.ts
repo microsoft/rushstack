@@ -63,7 +63,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
     this._maxInstallAttempts = this.defineIntegerParameter({
       parameterLongName: '--max-install-attempts',
       argumentName: 'NUMBER',
-      description: 'Attempts command the specified number of times.'
+      description: 'Overrides the default maximum number of install attempts. The default value is 3.'
     });
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }
