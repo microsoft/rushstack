@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/typings-generator",
+      "comment": "Initial implementation.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/typings-generator",
+  "email": "iclanton@users.noreply.github.com"
+}
