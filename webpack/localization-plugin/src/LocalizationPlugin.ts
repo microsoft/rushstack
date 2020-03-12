@@ -23,7 +23,7 @@ import {
 import {
   ILocalizedWebpackChunk
 } from './webpackInterfaces';
-import { TypingsGenerator } from './TypingsGenerator';
+import { LocFileTypingsGenerator } from './LocFileTypingsGenerator';
 import { Pseudolocalization } from './Pseudolocalization';
 import { EntityMarker } from './utilities/EntityMarker';
 import { IAsset, IProcessAssetResult, AssetProcessor } from './AssetProcessor';
@@ -137,9 +137,9 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
     const errors: Error[] = this._initializeAndValidateOptions(compiler.options, isWebpackDevServer);
 
-    let typingsPreprocessor: TypingsGenerator | undefined;
+    let typingsPreprocessor: LocFileTypingsGenerator | undefined;
     if (this._options.typingsOptions) {
-      typingsPreprocessor = new TypingsGenerator({
+      typingsPreprocessor = new LocFileTypingsGenerator({
         srcFolder: this._options.typingsOptions.sourceRoot || compiler.context,
         generatedTsFolder: this._options.typingsOptions.generatedTsFolder,
         exportAsDefault: this._options.typingsOptions.exportAsDefault,
