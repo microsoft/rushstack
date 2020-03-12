@@ -60,16 +60,12 @@
             "properties": {
               "value": {
                 "type": "string"
+              },
+              "override": {
+                "type": "boolean"
               }
             },
-            "additionalProperties": {
-              "type": "boolean",
-              "properties": {
-                "override": {
-                  "type": "boolean"
-                }
-              }
-            }
+            "additionalProperties": false
           }
         }
       }
