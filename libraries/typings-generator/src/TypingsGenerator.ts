@@ -18,8 +18,8 @@ import * as chokidar from 'chokidar';
  */
 export interface ITypingsGeneratorOptions<TTypingsResult = string> {
   srcFolder: string;
-  fileExtensions: string[];
   generatedTsFolder: string;
+  fileExtensions: string[];
   parseAndGenerateTypings: (fileContents: string, filePath: string) => TTypingsResult;
   terminal?: Terminal;
   filesToIgnore?: string[];
