@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/localization-plugin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "This plugin facilitates localization with Webpack.",
   "main": "lib/index.js",
   "typings": "dist/localization-plugin.d.ts",
@@ -26,7 +26,7 @@
     "@types/node": "10.17.13",
     "@types/tapable": "1.0.4",
     "@microsoft/node-core-library": "3.19.3",
-    "@rushstack/typings-generator": "0.0.0",
+    "@rushstack/typings-generator": "0.1.0",
     "loader-utils": "~1.1.0",
     "jju": "~1.4.0",
     "lodash": "~4.17.15",

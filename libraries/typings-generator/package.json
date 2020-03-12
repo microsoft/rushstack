@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/typings-generator",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "This library provides functionality for automatically generator typings for non-TS files.",
   "main": "lib/index.js",
   "typings": "dist/typings-generator.d.ts",
