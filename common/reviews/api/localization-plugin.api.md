@@ -5,6 +5,7 @@
 ```ts
 
 import { loader } from 'webpack';
+import { StringValuesTypingsGenerator } from '@rushstack/typings-generator';
 import { Terminal } from '@microsoft/node-core-library';
 import * as Webpack from 'webpack';
 
@@ -208,13 +209,9 @@ export class _LocFileParser {
 }
 
 // @public
-export class TypingsGenerator {
+export class TypingsGenerator extends StringValuesTypingsGenerator {
     constructor(options: ITypingsGeneratorOptions);
-    // (undocumented)
-    generateTypings(): void;
-    // (undocumented)
-    runWatcher(): void;
-}
+    }
 
 
 // (No @packageDocumentation comment for this package)

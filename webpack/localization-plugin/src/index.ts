@@ -41,5 +41,5 @@ export {
 
 export {
   ITypingsGeneratorOptions,
-  TypingsGenerator
-} from './TypingsGenerator';
+  LocFileTypingsGenerator as TypingsGenerator
+} from './LocFileTypingsGenerator';
