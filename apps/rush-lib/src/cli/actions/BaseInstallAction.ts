@@ -19,6 +19,7 @@ import { StandardScriptUpdater } from '../../logic/StandardScriptUpdater';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { Variants } from '../../api/Variants';
+import { RushConstants } from '../../logic/RushConstants';
 
 /**
  * This is the common base class for InstallAction and UpdateAction.
@@ -63,7 +64,8 @@ export abstract class BaseInstallAction extends BaseRushAction {
     this._maxInstallAttempts = this.defineIntegerParameter({
       parameterLongName: '--max-install-attempts',
       argumentName: 'NUMBER',
-      description: 'Overrides the default maximum number of install attempts. The default value is 3.'
+      description: `Overrides the default maximum number of install attempts.`
+        + ` The default value is ${RushConstants.defaultMaxInstallAttempts}.`
     });
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }

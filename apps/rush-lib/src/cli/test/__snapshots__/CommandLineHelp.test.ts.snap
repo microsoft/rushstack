@@ -337,7 +337,8 @@ Optional arguments:
                         You will probably want to pipe the output of Rush to 
                         a file when using this command.
   --max-install-attempts NUMBER
-                        Attempts command the specified number of times.
+                        Overrides the default maximum number of install 
+                        attempts. The default value is 3.
   --variant VARIANT     Run command using a variant installation 
                         configuration. This parameter may alternatively 
                         specified via the RUSH_VARIANT environment variable.
@@ -600,7 +601,8 @@ Optional arguments:
                         You will probably want to pipe the output of Rush to 
                         a file when using this command.
   --max-install-attempts NUMBER
-                        Attempts command the specified number of times.
+                        Overrides the default maximum number of install 
+                        attempts. The default value is 3.
   --variant VARIANT     Run command using a variant installation 
                         configuration. This parameter may alternatively 
                         specified via the RUSH_VARIANT environment variable.

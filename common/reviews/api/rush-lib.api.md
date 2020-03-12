@@ -120,6 +120,12 @@ export class ExperimentsConfiguration {
     readonly configuration: Readonly<IExperimentsJson>;
     }
 
+// @public
+export interface IEnvironmentVariable {
+    override?: boolean;
+    value: string;
+}
+
 // @beta
 export interface IExperimentsJson {
     legacyIncrementalBuildDependencyDetection?: boolean;
@@ -145,11 +151,10 @@ export class IndividualVersionPolicy extends VersionPolicy {
     validate(versionString: string, packageName: string): void;
 }
 
-// @internal
-export interface _IPackageManagerOptions {
-    // (undocumented)
+// @public
+export interface IPackageManagerOptions {
     environmentVariables?: {
-        [name: string]: string;
+        [environmentVariableName: string]: IEnvironmentVariable;
     };
 }
 
@@ -303,10 +308,7 @@ export class RushConfiguration {
     readonly npmCacheFolder: string;
     readonly npmTmpFolder: string;
     readonly packageManager: PackageManagerName;
-    // Warning: (ae-incompatible-release-tags) The symbol "packageManagerOptions" is marked as @public, but its signature references "IPackageManagerOptions" which is marked as @internal
-    //
-    // (undocumented)
-    readonly packageManagerOptions: _IPackageManagerOptions | undefined;
+    readonly packageManagerOptions: IPackageManagerOptions | undefined;
     readonly packageManagerToolFilename: string;
     readonly packageManagerToolVersion: string;
     // @beta

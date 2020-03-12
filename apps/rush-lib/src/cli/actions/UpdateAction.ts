@@ -6,6 +6,7 @@ import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import { BaseInstallAction } from './BaseInstallAction';
 import { IInstallManagerOptions } from '../../logic/InstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
+import { RushConstants } from '../../logic/RushConstants';
 
 export class UpdateAction extends BaseInstallAction {
   private _fullParameter: CommandLineFlagParameter;
@@ -62,7 +63,9 @@ export class UpdateAction extends BaseInstallAction {
       recheckShrinkwrap: this._recheckParameter.value!,
       networkConcurrency: this._networkConcurrencyParameter.value,
       collectLogFile: this._debugPackageManagerParameter.value!,
-      variant: this._variant.value
+      variant: this._variant.value,
+      maxInstallAttempts: this._maxInstallAttempts.value ? this._maxInstallAttempts.value :
+        RushConstants.defaultMaxInstallAttempts
     };
   }
 }

@@ -106,13 +106,32 @@ export interface IRushRepositoryJson {
 export type PnpmStoreOptions = 'local' | 'global';
 
 /**
- * Part of IRushConfigurationJson.
- * @internal
+ * Options for the package manager.
+ * @public
  */
 export interface IPackageManagerOptions {
+  /**
+   * Enviroment variables for the package manager
+   */
   environmentVariables?: {
-    [name: string]: string
-  };
+    [environmentVariableName: string]: IEnvironmentVariable;
+  }
+}
+
+/**
+ * Represents an environment variable
+ * @public
+ */
+export interface IEnvironmentVariable {
+  /**
+   * Value of the environment variable
+   */
+  value: string;
+
+  /**
+   * Set to true to override the environment variable even if it is set on the device
+   */
+  override?: boolean; //
 }
 
 /**
@@ -1039,6 +1058,9 @@ export class RushConfiguration {
     return this._projectFolderMaxDepth;
   }
 
+  /**
+   * {@inheritDoc IPackageManagerOptions}
+   */
   public get packageManagerOptions(): IPackageManagerOptions | undefined {
     return this._packageManagerOptions;
   }

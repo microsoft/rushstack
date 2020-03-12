@@ -123,7 +123,7 @@ export interface IInstallManagerOptions {
   /**
    * Retry the install the specified number of times
    */
-  maxInstallAttempts?: number | undefined
+  maxInstallAttempts: number
 }
 
 /**
@@ -134,7 +134,7 @@ export class InstallManager {
   private _rushGlobalFolder: RushGlobalFolder;
   private _commonNodeModulesMarker: LastInstallFlag;
   private _commonTempFolderRecycler: AsyncRecycler;
-  private _maxInstallAttempts: number = 3;
+  private _maxInstallAttempts: number;
 
   private _options: IInstallManagerOptions;
 
@@ -161,9 +161,7 @@ export class InstallManager {
 
     this._commonNodeModulesMarker = new LastInstallFlag(this._rushConfiguration.commonTempFolder, lastInstallState);
 
-    if (options.maxInstallAttempts) {
-      this._maxInstallAttempts = options.maxInstallAttempts;
-    }
+    this._maxInstallAttempts = options.maxInstallAttempts;
   }
 
   /**
@@ -911,9 +909,38 @@ export class InstallManager {
             this._rushConfiguration.packageManagerOptions &&
             this._rushConfiguration.packageManagerOptions.environmentVariables
           ) {
+            for (const envVar in this._rushConfiguration.packageManagerOptions.environmentVariables) {
+              if ({}.hasOwnProperty.call(this._rushConfiguration.packageManagerOptions.environmentVariables, envVar)) {
+                let setEnvironmentVariable: boolean = true;
+                const envVarValueInRushConfig: string =
+                  this._rushConfiguration.packageManagerOptions.environmentVariables[envVar].value;
 
-            for (const envVar of Object.keys(this._rushConfiguration.packageManagerOptions.environmentVariables)) {
-              packageManagerEnv[envVar] = this._rushConfiguration.packageManagerOptions.environmentVariables[envVar];
+                console.log(`\nProcessing definition for environment variable: ${envVar}`);
+
+                if (process.env[envVar]) {
+                  setEnvironmentVariable = false;
+                  console.log(colors.yellow(`WARNING: Environment variable already defined on the device:`));
+                  console.log(`  Name: ${envVar}`);
+                  console.log(`  Value set on the device: ${process.env[envVar]}`);
+                  console.log(`  Value set in Rush config: ${envVarValueInRushConfig}`);
+                  if (
+                    this._rushConfiguration.packageManagerOptions.environmentVariables[envVar].override &&
+                    this._rushConfiguration.packageManagerOptions.environmentVariables[envVar].override === true
+                  ) {
+                    setEnvironmentVariable = true;
+                    console.log(colors.yellow(`WARNING: Overriding the environment variable with the value set in Rush config.`));
+                  } else {
+                    console.log(colors.yellow(`WARNING: Not overriding the value of the environment variable.`));
+                  }
+                }
+
+                if (setEnvironmentVariable === true) {
+                  console.log(`Setting environment variable for package manager.`);
+                  console.log(`  Name: ${envVar}`);
+                  console.log(`  Value: ${envVarValueInRushConfig}`);
+                  packageManagerEnv[envVar] = envVarValueInRushConfig;
+                }
+              }
             }
           }
 
