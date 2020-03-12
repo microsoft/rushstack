@@ -64,8 +64,9 @@ export class UpdateAction extends BaseInstallAction {
       networkConcurrency: this._networkConcurrencyParameter.value,
       collectLogFile: this._debugPackageManagerParameter.value!,
       variant: this._variant.value,
-      maxInstallAttempts: this._maxInstallAttempts.value ? this._maxInstallAttempts.value :
-        RushConstants.defaultMaxInstallAttempts
+      maxInstallAttempts: this._maxInstallAttempts.value !== undefined
+        ? this._maxInstallAttempts.value
+        : RushConstants.defaultMaxInstallAttempts
     };
   }
 }
