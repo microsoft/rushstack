@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/typings-generator",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/typings-generator_v0.1.0",
+      "date": "Thu, 12 Mar 2020 15:08:44 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial implementation."
+          }
+        ]
+      }
+    }
+  ]
+}
