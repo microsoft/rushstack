@@ -268,9 +268,9 @@ export abstract class PackageManager {
 export type PackageManagerName = 'pnpm' | 'npm' | 'yarn';
 
 // @public
-export class PackageManagerOptionsConfigurationBase implements IPackageManagerOptionsJsonBase {
+export abstract class PackageManagerOptionsConfigurationBase implements IPackageManagerOptionsJsonBase {
     // @internal
-    protected constructor(environmentVariables?: IConfigurationEnvironment);
+    protected constructor(json: IPackageManagerOptionsJsonBase);
     readonly environmentVariables?: IConfigurationEnvironment;
 }
 

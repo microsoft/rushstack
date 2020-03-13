@@ -265,7 +265,7 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
 export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
   /** @internal */
   public constructor(json: INpmOptionsJson) {
-    super(json.environmentVariables);
+    super(json);
   }
 }
 
@@ -327,7 +327,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
 
   /** @internal */
   public constructor(json: IPnpmOptionsJson, commonTempFolder: string) {
-    super(json.environmentVariables);
+    super(json);
     this.pnpmStore = json.pnpmStore || 'local';
     if (EnvironmentConfiguration.pnpmStorePathOverride) {
       this.pnpmStorePath = EnvironmentConfiguration.pnpmStorePathOverride;
@@ -362,7 +362,7 @@ export class YarnOptionsConfiguration extends PackageManagerOptionsConfiguration
 
   /** @internal */
   public constructor(json: IYarnOptionsJson) {
-    super(json.environmentVariables);
+    super(json);
     this.ignoreEngines = !!json.ignoreEngines;
   }
 }
