@@ -14,13 +14,16 @@ export {
   RushConfiguration,
   ITryFindRushJsonLocationOptions,
   ResolutionStrategy,
-  PnpmOptionsConfiguration,
-  IPackageManagerOptionsJsonBase as _IPackageManagerOptionsJsonBase,
-  IConfigurationEnvironment as _IConfigurationEnvironment,
-  IConfigurationEnvironmentVariable as _IConfigurationEnvironmentVariable,
+  IPackageManagerOptionsJsonBase,
+  IConfigurationEnvironment,
+  IConfigurationEnvironmentVariable,
   INpmOptionsJson as _INpmOptionsJson,
   IPnpmOptionsJson as _IPnpmOptionsJson,
+  IYarnOptionsJson as _IYarnOptionsJson,
   PnpmStoreOptions,
+  PackageManagerOptionsConfigurationBase,
+  PnpmOptionsConfiguration,
+  NpmOptionsConfiguration,
   YarnOptionsConfiguration
 } from './api/RushConfiguration';
 

@@ -107,7 +107,7 @@ export type PnpmStoreOptions = 'local' | 'global';
 
 /**
  * Options for the package manager.
- * @internal
+ * @public
  */
 export interface IPackageManagerOptionsJsonBase {
   /**
@@ -118,7 +118,7 @@ export interface IPackageManagerOptionsJsonBase {
 
 /**
  * A collection of environment variables
- * @internal
+ * @public
  */
 export interface IConfigurationEnvironment {
   /**
@@ -129,7 +129,7 @@ export interface IConfigurationEnvironment {
 
 /**
  * Represents an environment variable
- * @internal
+ * @public
  */
 export interface IConfigurationEnvironmentVariable {
   /**
@@ -171,8 +171,16 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
 
 /**
  * Part of IRushConfigurationJson.
+ * @internal
  */
 export interface IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
+    /**
+   * If true, then Rush will add the "--ignore-engines" option when invoking Yarn.
+   * This allows "rush install" to succeed if there are dependencies with engines defined in
+   * package.json which do not match the current environment.
+   *
+   * The default value is false.
+   */
   ignoreEngines?: boolean;
 }
 
@@ -233,7 +241,7 @@ export interface ICurrentVariantJson {
  *
  * @public
  */
-class PackageManagerConfigurationBase implements IPackageManagerOptionsJsonBase {
+export class PackageManagerOptionsConfigurationBase implements IPackageManagerOptionsJsonBase {
   /**
    * Enviroment variables for the package manager
    */
@@ -254,7 +262,7 @@ class PackageManagerConfigurationBase implements IPackageManagerOptionsJsonBase 
  *
  * @public
  */
-export class NpmOptionsConfiguration extends PackageManagerConfigurationBase {
+export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
   /** @internal */
   public constructor(json: INpmOptionsJson) {
     super(json.environmentVariables);
@@ -270,7 +278,7 @@ export class NpmOptionsConfiguration extends PackageManagerConfigurationBase {
  *
  * @public
  */
-export class PnpmOptionsConfiguration extends PackageManagerConfigurationBase {
+export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
   /**
    * The method used to resolve the store used by PNPM.
    *
@@ -342,7 +350,7 @@ export class PnpmOptionsConfiguration extends PackageManagerConfigurationBase {
  *
  * @public
  */
-export class YarnOptionsConfiguration extends PackageManagerConfigurationBase {
+export class YarnOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
   /**
    * If true, then Rush will add the "--ignore-engines" option when invoking Yarn.
    * This allows "rush install" to succeed if there are dependencies with engines defined in
@@ -1108,13 +1116,6 @@ export class RushConfiguration {
   }
 
   /**
-   * {@inheritDoc INpmOptions}
-   */
-  public get npmOptions(): INpmOptionsJson | undefined {
-    return this._npmOptions;
-  }
-
-  /**
    * The "approvedPackagesPolicy" settings.
    */
   public get approvedPackagesPolicy(): ApprovedPackagesPolicy {
@@ -1224,6 +1225,13 @@ export class RushConfiguration {
 
   public get projectsByName(): Map<string, RushConfigurationProject> {
     return this._projectsByName;
+  }
+
+  /**
+   * {@inheritDoc NpmOptionsConfiguration}
+   */
+  public get npmOptions(): NpmOptionsConfiguration {
+    return this._npmOptions;
   }
 
   /**

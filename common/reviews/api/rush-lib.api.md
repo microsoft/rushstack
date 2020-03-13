@@ -120,13 +120,13 @@ export class ExperimentsConfiguration {
     readonly configuration: Readonly<IExperimentsJson>;
     }
 
-// @internal
-export interface _IConfigurationEnvironment {
-    [environmentVariableName: string]: _IConfigurationEnvironmentVariable;
+// @public
+export interface IConfigurationEnvironment {
+    [environmentVariableName: string]: IConfigurationEnvironmentVariable;
 }
 
-// @internal
-export interface _IConfigurationEnvironmentVariable {
+// @public
+export interface IConfigurationEnvironmentVariable {
     override?: boolean;
     value: string;
 }
@@ -157,16 +157,16 @@ export class IndividualVersionPolicy extends VersionPolicy {
 }
 
 // @internal
-export interface _INpmOptionsJson extends _IPackageManagerOptionsJsonBase {
+export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
+}
+
+// @public
+export interface IPackageManagerOptionsJsonBase {
+    environmentVariables?: IConfigurationEnvironment;
 }
 
 // @internal
-export interface _IPackageManagerOptionsJsonBase {
-    environmentVariables?: _IConfigurationEnvironment;
-}
-
-// @internal
-export interface _IPnpmOptionsJson extends _IPackageManagerOptionsJsonBase {
+export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     pnpmStore?: PnpmStoreOptions;
     resolutionStrategy?: ResolutionStrategy;
     strictPeerDependencies?: boolean;
@@ -176,6 +176,11 @@ export interface _IPnpmOptionsJson extends _IPackageManagerOptionsJsonBase {
 export interface ITryFindRushJsonLocationOptions {
     showVerbose?: boolean;
     startingFolder?: string;
+}
+
+// @internal
+export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
+    ignoreEngines?: boolean;
 }
 
 // @internal
@@ -204,6 +209,12 @@ export class LockStepVersionPolicy extends VersionPolicy {
     validate(versionString: string, packageName: string): void;
     readonly version: string;
     }
+
+// @public
+export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
+    // @internal
+    constructor(json: _INpmOptionsJson);
+}
 
 // @beta (undocumented)
 export class PackageJsonDependency {
@@ -256,10 +267,15 @@ export abstract class PackageManager {
 // @public
 export type PackageManagerName = 'pnpm' | 'npm' | 'yarn';
 
-// Warning: (ae-forgotten-export) The symbol "PackageManagerConfigurationBase" needs to be exported by the entry point index.d.ts
-//
 // @public
-export class PnpmOptionsConfiguration extends PackageManagerConfigurationBase {
+export class PackageManagerOptionsConfigurationBase implements IPackageManagerOptionsJsonBase {
+    // @internal
+    protected constructor(environmentVariables?: IConfigurationEnvironment);
+    readonly environmentVariables?: IConfigurationEnvironment;
+}
+
+// @public
+export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
     // @internal
     constructor(json: _IPnpmOptionsJson, commonTempFolder: string);
     readonly pnpmStore: PnpmStoreOptions;
@@ -315,11 +331,7 @@ export class RushConfiguration {
     // (undocumented)
     static loadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration;
     readonly npmCacheFolder: string;
-    // Warning: (ae-incompatible-release-tags) The symbol "npmOptions" is marked as @public, but its signature references "INpmOptionsJson" which is marked as @internal
-    // Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "@microsoft/rush-lib" does not have an export "INpmOptions"
-    //
-    // (undocumented)
-    readonly npmOptions: _INpmOptionsJson | undefined;
+    readonly npmOptions: NpmOptionsConfiguration;
     readonly npmTmpFolder: string;
     readonly packageManager: PackageManagerName;
     readonly packageManagerToolFilename: string;
@@ -433,11 +445,9 @@ export enum VersionPolicyDefinitionName {
 }
 
 // @public
-export class YarnOptionsConfiguration extends PackageManagerConfigurationBase {
-    // Warning: (ae-forgotten-export) The symbol "IYarnOptionsJson" needs to be exported by the entry point index.d.ts
-    //
+export class YarnOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
     // @internal
-    constructor(json: IYarnOptionsJson);
+    constructor(json: _IYarnOptionsJson);
     readonly ignoreEngines: boolean;
 }
 
