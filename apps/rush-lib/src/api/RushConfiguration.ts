@@ -140,7 +140,7 @@ export interface IConfigurationEnvironmentVariable {
   /**
    * Set to true to override the environment variable even if it is set on the device
    */
-  override?: boolean; //
+  override?: boolean;
 }
 
 /**
