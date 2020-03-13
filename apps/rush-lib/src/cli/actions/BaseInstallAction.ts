@@ -64,8 +64,8 @@ export abstract class BaseInstallAction extends BaseRushAction {
     this._maxInstallAttempts = this.defineIntegerParameter({
       parameterLongName: '--max-install-attempts',
       argumentName: 'NUMBER',
-      description: `Overrides the default maximum number of install attempts.`
-        + ` The default value is ${RushConstants.defaultMaxInstallAttempts}.`
+      description: `Overrides the default maximum number of install attempts.`,
+      defaultValue: RushConstants.defaultMaxInstallAttempts
     });
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }
@@ -104,7 +104,9 @@ export abstract class BaseInstallAction extends BaseRushAction {
       }
     }
 
-    if (this._maxInstallAttempts.value && this._maxInstallAttempts.value < 1) {
+    // Because the 'defautltValue' option on the _maxInstallAttempts parameter is set,
+    // it is safe to assume that the value is not null
+    if (this._maxInstallAttempts.value! < 1) {
       throw new Error(`The value of "${this._maxInstallAttempts.longName}" must be positive.`);
     }
 

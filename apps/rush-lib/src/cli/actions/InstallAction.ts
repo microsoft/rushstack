@@ -4,7 +4,6 @@
 import { BaseInstallAction } from './BaseInstallAction';
 import { IInstallManagerOptions } from '../../logic/InstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { RushConstants } from '../../logic/RushConstants';
 
 export class InstallAction extends BaseInstallAction {
   public constructor(parser: RushCommandLineParser) {
@@ -36,9 +35,9 @@ export class InstallAction extends BaseInstallAction {
       networkConcurrency: this._networkConcurrencyParameter.value,
       collectLogFile: this._debugPackageManagerParameter.value!,
       variant: this._variant.value,
-      maxInstallAttempts: this._maxInstallAttempts.value !== undefined
-        ? this._maxInstallAttempts.value
-        : RushConstants.defaultMaxInstallAttempts
+      // Because the 'defautltValue' option on the _maxInstallAttempts parameter is set,
+      // it is safe to assume that the value is not null
+      maxInstallAttempts: this._maxInstallAttempts.value!
     };
   }
 }
