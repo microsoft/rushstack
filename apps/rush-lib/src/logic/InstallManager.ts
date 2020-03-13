@@ -1083,7 +1083,7 @@ export class InstallManager {
 
           if (process.env[envVar]) {
             setEnvironmentVariable = false;
-            console.log(colors.yellow(`WARNING: Environment variable already defined on the device:`));
+            console.log(colors.yellow(`WARNING: Environment variable already defined:`));
             console.log(`  Name: ${envVar}`);
             console.log(`  Value set on the device: ${process.env[envVar]}`);
             console.log(`  Value set in Rush config: ${environmentVariables[envVar].value}`);
