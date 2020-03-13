@@ -241,7 +241,7 @@ export interface ICurrentVariantJson {
  *
  * @public
  */
-export class PackageManagerOptionsConfigurationBase implements IPackageManagerOptionsJsonBase {
+export abstract class PackageManagerOptionsConfigurationBase implements IPackageManagerOptionsJsonBase {
   /**
    * Enviroment variables for the package manager
    */
