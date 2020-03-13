@@ -3,6 +3,24 @@
   "title": "Rush main config File",
   "description": "The main configuration file for the Rush multi-project build tool. See http://rushjs.io for details.",
   "type": "object",
+  "definitions": {
+    "environmentVariables": {
+      "description": "Enviroment variables for the package manager",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "override": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
   "properties": {
     "$schema": {
       "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
@@ -53,20 +71,7 @@
       "type": "object",
       "properties": {
         "environmentVariables": {
-          "description": "Enviroment variables for the package manager",
-          "type": "object",
-          "additionalProperties": {
-            "type": "object",
-            "properties": {
-              "value": {
-                "type": "string"
-              },
-              "override": {
-                "type": "boolean"
-              }
-            },
-            "additionalProperties": false
-          }
+          "$ref": "#/definitions/environmentVariables"
         }
       },
       "additionalProperties": false
@@ -96,20 +101,7 @@
           ]
         },
         "environmentVariables": {
-          "description": "Enviroment variables for the package manager",
-          "type": "object",
-          "additionalProperties": {
-            "type": "object",
-            "properties": {
-              "value": {
-                "type": "string"
-              },
-              "override": {
-                "type": "boolean"
-              }
-            },
-            "additionalProperties": false
-          }
+          "$ref": "#/definitions/environmentVariables"
         }
       },
       "additionalProperties": false
@@ -123,20 +115,7 @@
           "type": "boolean"
         },
         "environmentVariables": {
-          "description": "Enviroment variables for the package manager",
-          "type": "object",
-          "additionalProperties": {
-            "type": "object",
-            "properties": {
-              "value": {
-                "type": "string"
-              },
-              "override": {
-                "type": "boolean"
-              }
-            },
-            "additionalProperties": false
-          }
+          "$ref": "#/definitions/environmentVariables"
         }
       },
       "additionalProperties": false
