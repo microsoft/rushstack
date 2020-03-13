@@ -120,8 +120,13 @@ export class ExperimentsConfiguration {
     readonly configuration: Readonly<IExperimentsJson>;
     }
 
-// @public
-export interface IEnvironmentVariable {
+// @internal
+export interface _IConfigurationEnvironment {
+    [environmentVariableName: string]: _IConfigurationEnvironmentVariable;
+}
+
+// @internal
+export interface _IConfigurationEnvironmentVariable {
     override?: boolean;
     value: string;
 }
@@ -151,19 +156,17 @@ export class IndividualVersionPolicy extends VersionPolicy {
     validate(versionString: string, packageName: string): void;
 }
 
-// @public
-export interface INpmOptions extends IPackageManagerOptionsBase {
-}
-
-// @public
-export interface IPackageManagerOptionsBase {
-    environmentVariables?: {
-        [environmentVariableName: string]: IEnvironmentVariable;
-    };
+// @internal
+export interface _INpmOptionsJson extends _IPackageManagerOptionsJsonBase {
 }
 
 // @internal
-export interface _IPnpmOptionsJson extends IPackageManagerOptionsBase {
+export interface _IPackageManagerOptionsJsonBase {
+    environmentVariables?: _IConfigurationEnvironment;
+}
+
+// @internal
+export interface _IPnpmOptionsJson extends _IPackageManagerOptionsJsonBase {
     pnpmStore?: PnpmStoreOptions;
     resolutionStrategy?: ResolutionStrategy;
     strictPeerDependencies?: boolean;
@@ -253,13 +256,12 @@ export abstract class PackageManager {
 // @public
 export type PackageManagerName = 'pnpm' | 'npm' | 'yarn';
 
+// Warning: (ae-forgotten-export) The symbol "PackageManagerConfigurationBase" needs to be exported by the entry point index.d.ts
+//
 // @public
-export class PnpmOptionsConfiguration implements IPackageManagerOptionsBase {
+export class PnpmOptionsConfiguration extends PackageManagerConfigurationBase {
     // @internal
     constructor(json: _IPnpmOptionsJson, commonTempFolder: string);
-    readonly environmentVariables?: {
-        [environmentVariableName: string]: IEnvironmentVariable;
-    };
     readonly pnpmStore: PnpmStoreOptions;
     readonly pnpmStorePath: string;
     readonly resolutionStrategy: ResolutionStrategy;
@@ -313,7 +315,11 @@ export class RushConfiguration {
     // (undocumented)
     static loadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration;
     readonly npmCacheFolder: string;
-    readonly npmOptions: INpmOptions | undefined;
+    // Warning: (ae-incompatible-release-tags) The symbol "npmOptions" is marked as @public, but its signature references "INpmOptionsJson" which is marked as @internal
+    // Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "@microsoft/rush-lib" does not have an export "INpmOptions"
+    //
+    // (undocumented)
+    readonly npmOptions: _INpmOptionsJson | undefined;
     readonly npmTmpFolder: string;
     readonly packageManager: PackageManagerName;
     readonly packageManagerToolFilename: string;
@@ -427,14 +433,11 @@ export enum VersionPolicyDefinitionName {
 }
 
 // @public
-export class YarnOptionsConfiguration {
+export class YarnOptionsConfiguration extends PackageManagerConfigurationBase {
     // Warning: (ae-forgotten-export) The symbol "IYarnOptionsJson" needs to be exported by the entry point index.d.ts
     //
     // @internal
     constructor(json: IYarnOptionsJson);
-    readonly environmentVariables?: {
-        [environmentVariableName: string]: IEnvironmentVariable;
-    };
     readonly ignoreEngines: boolean;
 }
 

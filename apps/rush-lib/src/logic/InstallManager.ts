@@ -36,7 +36,7 @@ import { Git } from '../logic/Git';
 import { LastInstallFlag } from '../api/LastInstallFlag';
 import { LinkManagerFactory } from '../logic/LinkManagerFactory';
 import { PurgeManager } from './PurgeManager';
-import { RushConfiguration, ICurrentVariantJson, IEnvironmentVariable } from '../api/RushConfiguration';
+import { RushConfiguration, ICurrentVariantJson, IConfigurationEnvironment } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
 import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
@@ -134,7 +134,6 @@ export class InstallManager {
   private _rushGlobalFolder: RushGlobalFolder;
   private _commonNodeModulesMarker: LastInstallFlag;
   private _commonTempFolderRecycler: AsyncRecycler;
-  private _maxInstallAttempts: number;
 
   private _options: IInstallManagerOptions;
 
@@ -160,8 +159,6 @@ export class InstallManager {
     }
 
     this._commonNodeModulesMarker = new LastInstallFlag(this._rushConfiguration.commonTempFolder, lastInstallState);
-
-    this._maxInstallAttempts = options.maxInstallAttempts;
   }
 
   /**
@@ -438,7 +435,7 @@ export class InstallManager {
           packageName: packageManager,
           version: this._rushConfiguration.packageManagerToolVersion,
           tempPackageTitle: `${packageManager}-local-install`,
-          maxInstallAttempts: this._maxInstallAttempts,
+          maxInstallAttempts: this._options.maxInstallAttempts,
           // This is using a local configuration to install a package in a shared global location.
           // Generally that's a bad practice, but in this case if we can successfully install
           // the package at all, we can reasonably assume it's good for all the repositories.
@@ -905,37 +902,35 @@ export class InstallManager {
 
           let packageManagerEnv: NodeJS.ProcessEnv = process.env;
 
+          let configurationEnvironment: IConfigurationEnvironment | undefined = undefined;
+
           if (this._rushConfiguration.packageManager === 'npm') {
             if (
               this._rushConfiguration.npmOptions &&
               this._rushConfiguration.npmOptions.environmentVariables
             ) {
-              packageManagerEnv = InstallManager._mergeEnvironmentVariables(
-                packageManagerEnv,
-                this._rushConfiguration.npmOptions.environmentVariables
-              );
+              configurationEnvironment = this._rushConfiguration.npmOptions.environmentVariables;
             }
           } else if (this._rushConfiguration.packageManager === 'pnpm') {
             if (
               this._rushConfiguration.pnpmOptions &&
               this._rushConfiguration.pnpmOptions.environmentVariables
             ) {
-              packageManagerEnv = InstallManager._mergeEnvironmentVariables(
-                packageManagerEnv,
-                this._rushConfiguration.pnpmOptions.environmentVariables
-              );
+              configurationEnvironment = this._rushConfiguration.pnpmOptions.environmentVariables;
             }
           } else if (this._rushConfiguration.packageManager === 'yarn') {
             if (
               this._rushConfiguration.yarnOptions &&
               this._rushConfiguration.yarnOptions.environmentVariables
             ) {
-              packageManagerEnv = InstallManager._mergeEnvironmentVariables(
-                packageManagerEnv,
-                this._rushConfiguration.yarnOptions.environmentVariables
-              );
+              configurationEnvironment = this._rushConfiguration.yarnOptions.environmentVariables;
             }
           }
+
+          packageManagerEnv = this._mergeEnvironmentVariables(
+            process.env,
+            configurationEnvironment
+          );
 
           // Is there an existing "node_modules" folder to consider?
           if (FileSystem.exists(commonNodeModulesFolder)) {
@@ -959,7 +954,7 @@ export class InstallManager {
                 const args: string[] = ['prune'];
                 this._pushConfigurationArgs(args, options);
 
-                Utilities.executeCommandWithRetry(this._maxInstallAttempts, packageManagerFilename, args,
+                Utilities.executeCommandWithRetry(this._options.maxInstallAttempts, packageManagerFilename, args,
                   this._rushConfiguration.commonTempFolder, packageManagerEnv);
 
                 // Delete the (installed image of) the temp projects, since "npm install" does not
@@ -1008,7 +1003,7 @@ export class InstallManager {
           }
 
           try {
-            Utilities.executeCommandWithRetry(this._maxInstallAttempts, packageManagerFilename,
+            Utilities.executeCommandWithRetry(this._options.maxInstallAttempts, packageManagerFilename,
               installArgs,
               this._rushConfiguration.commonTempFolder,
               packageManagerEnv,
@@ -1069,41 +1064,42 @@ export class InstallManager {
     });
   }
 
-  private static _mergeEnvironmentVariables(
+  private _mergeEnvironmentVariables(
     baseEnv: NodeJS.ProcessEnv,
-    environmentVariables: { [environmentVariableName: string]: IEnvironmentVariable; } | undefined
+    environmentVariables?: IConfigurationEnvironment
   ): NodeJS.ProcessEnv {
     const packageManagerEnv: NodeJS.ProcessEnv = baseEnv;
 
     if (environmentVariables) {
+      // eslint-disable-next-line guard-for-in
       for (const envVar in environmentVariables) {
-        if ({}.hasOwnProperty.call(environmentVariables, envVar)) {
-          let setEnvironmentVariable: boolean = true;
-          console.log(`\nProcessing definition for environment variable: ${envVar}`);
+        let setEnvironmentVariable: boolean = true;
+        console.log(`\nProcessing definition for environment variable: ${envVar}`);
 
-          if (process.env[envVar]) {
-            setEnvironmentVariable = false;
-            console.log(colors.yellow(`WARNING: Environment variable already defined:`));
-            console.log(`  Name: ${envVar}`);
-            console.log(`  Value set on the device: ${process.env[envVar]}`);
-            console.log(`  Value set in Rush config: ${environmentVariables[envVar].value}`);
+        if (process.env[envVar]) {
+          setEnvironmentVariable = false;
+          console.log(colors.yellow(`WARNING: Environment variable already defined:`));
+          console.log(`  Name: ${envVar}`);
+          console.log(`  Value set on the device: ${process.env[envVar]}`);
+          console.log(`  Value set in rush.json: ${environmentVariables[envVar].value}`);
 
-            if (environmentVariables[envVar].override &&
-              environmentVariables[envVar].override === true) {
-              setEnvironmentVariable = true;
-              console.log(colors.yellow(`WARNING: Overriding the environment variable with the value set in rush.json.`));
-            }
-            else {
-              console.log(colors.yellow(`WARNING: Not overriding the value of the environment variable.`));
-            }
+          if (environmentVariables[envVar].override &&
+            environmentVariables[envVar].override === true) {
+            setEnvironmentVariable = true;
+            console.log(colors.yellow(`WARNING: Overriding the environment variable with the value set in rush.json.`));
           }
+          else {
+            console.log(colors.yellow(`WARNING: Not overriding the value of the environment variable.`));
+          }
+        }
 
-          if (setEnvironmentVariable) {
+        if (setEnvironmentVariable) {
+          if (this._options.debug) {
             console.log(`Setting environment variable for package manager.`);
             console.log(`  Name: ${envVar}`);
             console.log(`  Value: ${environmentVariables[envVar].value}`);
-            packageManagerEnv[envVar] = environmentVariables[envVar].value;
           }
+          packageManagerEnv[envVar] = environmentVariables[envVar].value;
         }
       }
     }
