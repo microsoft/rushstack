@@ -9,6 +9,7 @@ import {
 } from '../../index';
 
 import {
+  CommandLineParameter,
   CommandLineFlagParameter,
   CommandLineStringParameter,
   CommandLineStringListParameter,
@@ -43,6 +44,11 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
    * Optional command to run. Otherwise, use the `actionName` as the command to run.
    */
   commandToRun?: string;
+
+  /**
+   * Additional actions to run in series after the parent action is run.
+   */
+  additionalCommands?: string[];
 }
 
 /**
@@ -55,14 +61,19 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
  * execute scripts from package.json in the same as any custom command.
  */
 export class BulkScriptAction extends BaseScriptAction {
+  protected readonly commandParametersMap: Map<string, CommandLineParameter[]> =
+    new Map<string, CommandLineParameter[]>();
+
   private _enableParallelism: boolean;
   private _ignoreMissingScript: boolean;
   private _isIncrementalBuildAllowed: boolean;
   private _commandToRun: string;
+  private _additionalCommands: string[];
 
   private _changedProjectsOnly: CommandLineFlagParameter;
   private _fromFlag: CommandLineStringListParameter;
   private _toFlag: CommandLineStringListParameter;
+  private _skipFlag: CommandLineStringListParameter;
   private _fromVersionPolicy: CommandLineStringListParameter;
   private _toVersionPolicy: CommandLineStringListParameter;
   private _verboseParameter: CommandLineFlagParameter;
@@ -78,6 +89,7 @@ export class BulkScriptAction extends BaseScriptAction {
     this._commandToRun = options.commandToRun || options.actionName;
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
+    this._additionalCommands = options.additionalCommands || [];
   }
 
   public run(): Promise<void> {
@@ -97,20 +109,15 @@ export class BulkScriptAction extends BaseScriptAction {
       ? this._parallelismParameter!.value
       : '1';
 
-    // Collect all custom parameter values
-    const customParameterValues: string[] = [];
-    for (const customParameter of this.customParameters) {
-      customParameter.appendToArgList(customParameterValues);
-    }
-
     const changedProjectsOnly: boolean = this._isIncrementalBuildAllowed && this._changedProjectsOnly.value;
 
     const taskSelector: TaskSelector = new TaskSelector({
       rushConfiguration: this.rushConfiguration,
       toFlags: this._mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy),
       fromFlags: this._mergeProjectsWithVersionPolicy(this._fromFlag, this._fromVersionPolicy),
-      commandToRun: this._commandToRun,
-      customParameterValues,
+      skipFlags: this._skipFlag.values,
+      commandsToRun: [this._commandToRun, ...this._additionalCommands],
+      commandParameterValuesMap: this._getCommandParameterValuesMap(),
       isQuietMode: isQuietMode,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
       ignoreMissingScript: this._ignoreMissingScript,
@@ -188,6 +195,11 @@ export class BulkScriptAction extends BaseScriptAction {
       description: 'Run command in all projects that directly or indirectly depend on the specified project. ' +
         '"." can be used as shorthand to specify the project in the current working directory.'
     });
+    this._skipFlag = this.defineStringListParameter({
+      parameterLongName: '--skip',
+      argumentName: 'COMMANDS_TO_SKIP',
+      description: 'Skip the specified project commands from being run when executing a Rush command.'
+    });
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
@@ -203,6 +215,48 @@ export class BulkScriptAction extends BaseScriptAction {
     }
 
     this.defineScriptParameters();
+  }
+
+  protected defineScriptParameters(): void {
+    super.defineScriptParameters();
+    if (!this._commandLineConfiguration) {
+      return;
+    }
+
+    this.commandParametersMap.set(this._commandToRun, this.customParameters);
+
+    // We also want to define the parameters for each optional command
+    for (const parameterJson of this._commandLineConfiguration.parameters) {
+      // Only find the optional commands that use this parameter
+      const commandsToAppend: string[] = parameterJson.associatedCommands.filter(
+        (associatedCommand: string) => this._additionalCommands.includes(associatedCommand)
+      );
+      if (commandsToAppend.length) {
+        const commandParameter: CommandLineParameter = this.getCommandLineParameter(parameterJson);
+        for (const command of commandsToAppend) {
+          let optionalCommandParameters: CommandLineParameter[] | undefined = this.commandParametersMap.get(command);
+          if (!optionalCommandParameters) {
+            optionalCommandParameters = [];
+            this.commandParametersMap.set(command, optionalCommandParameters);
+          }
+          optionalCommandParameters.push(commandParameter);
+        }
+      }
+    }
+  }
+
+  private _getCommandParameterValuesMap(): Map<string, string[]> {
+    const commandParameterValuesMap: Map<string, string[]> = new Map<string, string[]>();
+    for (const [commandToRun, customParameters] of this.commandParametersMap) {
+      const customParameterValues: string[] = [];
+      for (const customParameter of customParameters) {
+        customParameter.appendToArgList(customParameterValues);
+      }
+
+      commandParameterValuesMap.set(commandToRun, customParameterValues);
+    }
+
+    return commandParameterValuesMap;
   }
 
   private _mergeProjectsWithVersionPolicy(

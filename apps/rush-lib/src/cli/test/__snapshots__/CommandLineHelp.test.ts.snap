@@ -98,8 +98,8 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: build 1`] = `
 "usage: rush build [-h] [-p COUNT] [-t PROJECT1]
                   [--from-version-policy VERSION_POLICY_NAME]
-                  [--to-version-policy VERSION_POLICY_NAME] [-f PROJECT2] [-v]
-                  [-o] [-s] [-m]
+                  [--to-version-policy VERSION_POLICY_NAME] [-f PROJECT2]
+                  [--skip COMMANDS_TO_SKIP] [-v] [-o] [-s] [-m]
                   
 
 This command is similar to \\"rush rebuild\\", except that \\"rush build\\" performs 
@@ -139,6 +139,9 @@ Optional arguments:
                         indirectly depend on the specified project. \\".\\" can 
                         be used as shorthand to specify the project in the 
                         current working directory.
+  --skip COMMANDS_TO_SKIP
+                        Skip the specified project commands from being run 
+                        when executing a Rush command.
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   -o, --changed-projects-only
@@ -237,7 +240,7 @@ exports[`CommandLineHelp prints the help for each action: import-strings 1`] = `
 "usage: rush import-strings [-h] [-p COUNT] [-t PROJECT1]
                            [--from-version-policy VERSION_POLICY_NAME]
                            [--to-version-policy VERSION_POLICY_NAME]
-                           [-f PROJECT2] [-v]
+                           [-f PROJECT2] [--skip COMMANDS_TO_SKIP] [-v]
                            [--locale {en-us,fr-fr,es-es,zh-cn}]
                            
 
@@ -269,6 +272,9 @@ Optional arguments:
                         indirectly depend on the specified project. \\".\\" can 
                         be used as shorthand to specify the project in the 
                         current working directory.
+  --skip COMMANDS_TO_SKIP
+                        Skip the specified project commands from being run 
+                        when executing a Rush command.
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   --locale {en-us,fr-fr,es-es,zh-cn}
@@ -485,7 +491,7 @@ exports[`CommandLineHelp prints the help for each action: rebuild 1`] = `
 "usage: rush rebuild [-h] [-p COUNT] [-t PROJECT1]
                     [--from-version-policy VERSION_POLICY_NAME]
                     [--to-version-policy VERSION_POLICY_NAME] [-f PROJECT2]
-                    [-v] [-s] [-m]
+                    [--skip COMMANDS_TO_SKIP] [-v] [-s] [-m]
                     
 
 This command assumes that the package.json file for each project contains a 
@@ -522,6 +528,9 @@ Optional arguments:
                         indirectly depend on the specified project. \\".\\" can 
                         be used as shorthand to specify the project in the 
                         current working directory.
+  --skip COMMANDS_TO_SKIP
+                        Skip the specified project commands from being run 
+                        when executing a Rush command.
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   -s, --ship            Perform a production build, including minification 

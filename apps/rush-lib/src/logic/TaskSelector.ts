@@ -13,8 +13,9 @@ export interface ITaskSelectorConstructor {
   rushConfiguration: RushConfiguration;
   toFlags: ReadonlyArray<string>;
   fromFlags: ReadonlyArray<string>;
-  commandToRun: string;
-  customParameterValues: string[];
+  skipFlags: ReadonlyArray<string>;
+  commandsToRun: string[];
+  commandParameterValuesMap: Map<string, string[]>;
   isQuietMode: boolean;
   isIncrementalBuildAllowed: boolean;
   ignoreMissingScript: boolean;
@@ -187,7 +188,14 @@ export class TaskSelector {
       const projectTask: ProjectTask = new ProjectTask({
         rushProject: project,
         rushConfiguration: this._options.rushConfiguration,
-        commandToRun: this._getScriptToRun(project),
+        commandsToRun: this._options.commandsToRun.filter(
+          (c: string) => !this._options.skipFlags.includes(c)
+        ).map((c: string) => {
+          return {
+            scriptName: c,
+            commandToRun: this._getScriptToRun(project, c)
+          }
+        }),
         isIncrementalBuildAllowed: this._options.isIncrementalBuildAllowed,
         packageChangeAnalyzer: this._packageChangeAnalyzer,
         packageDepsFilename: this._options.packageDepsFilename
@@ -199,18 +207,24 @@ export class TaskSelector {
     }
   }
 
-  private _getScriptToRun(rushProject: RushConfigurationProject): string {
-    const script: string | undefined = this._getScriptCommand(rushProject, this._options.commandToRun);
+  private _getScriptToRun(rushProject: RushConfigurationProject, commandToRun: string): string {
+    const script: string | undefined = this._getScriptCommand(rushProject, commandToRun);
 
     if (script === undefined && !this._options.ignoreMissingScript) {
-      throw new Error(`The project [${rushProject.packageName}] does not define a '${this._options.commandToRun}' command in the 'scripts' section of its package.json`);
+      throw new Error(`The project [${rushProject.packageName}] does not define a `
+        +`'${commandToRun}' command in the 'scripts' section of its package.json`);
     }
 
     if (!script) {
       return '';
     }
 
-    const taskCommand: string = `${script} ${this._options.customParameterValues.join(' ')}`;
+    const commandParameterValues: string[] | undefined = this._options.commandParameterValuesMap.get(commandToRun);
+    if (!commandParameterValues) {
+      return script;
+    }
+
+    const taskCommand: string = `${script} ${commandParameterValues.join(' ')}`;
     return process.platform === 'win32'
       ? convertSlashesForWindows(taskCommand)
       : taskCommand;

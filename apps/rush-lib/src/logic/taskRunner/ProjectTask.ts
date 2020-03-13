@@ -19,10 +19,15 @@ interface IPackageDependencies extends IPackageDeps {
   arguments: string;
 }
 
+export interface IScriptCommand {
+  commandToRun: string,
+  scriptName: string
+}
+
 export interface IProjectTaskOptions {
   rushProject: RushConfigurationProject;
   rushConfiguration: RushConfiguration;
-  commandToRun: string;
+  commandsToRun: IScriptCommand[];
   isIncrementalBuildAllowed: boolean;
   packageChangeAnalyzer: PackageChangeAnalyzer;
   packageDepsFilename: string;
@@ -58,24 +63,26 @@ export class ProjectTask implements ITaskDefinition {
   private _hasWarningOrError: boolean;
   private _rushProject: RushConfigurationProject;
   private _rushConfiguration: RushConfiguration;
-  private _commandToRun: string;
+  private _commandsToRun: IScriptCommand[];
   private _packageChangeAnalyzer: PackageChangeAnalyzer;
   private _packageDepsFilename: string;
 
   public constructor(options: IProjectTaskOptions) {
     this._rushProject = options.rushProject;
     this._rushConfiguration = options.rushConfiguration;
-    this._commandToRun = options.commandToRun;
     this.isIncrementalBuildAllowed = options.isIncrementalBuildAllowed;
     this._packageChangeAnalyzer = options.packageChangeAnalyzer;
     this._packageDepsFilename = options.packageDepsFilename;
-}
+
+    this._commandsToRun = options.commandsToRun;
+    if (this._commandsToRun.length < 1) {
+      throw Error("No commands were defined for the task.");
+    }
+  }
 
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
     try {
-      if (!this._commandToRun) {
-        this.hadEmptyScript = true;
-      }
+      this.hadEmptyScript = this._commandsToRun.some((c: IScriptCommand) => !c.commandToRun);
       const deps: IPackageDependencies | undefined = this._getPackageDependencies(writer);
       return this._executeTask(writer, deps);
     } catch (error) {
@@ -89,7 +96,7 @@ export class ProjectTask implements ITaskDefinition {
     try {
       deps = {
         files: this._packageChangeAnalyzer.getPackageDepsHash(this._rushProject.packageName)!.files,
-        arguments: this._commandToRun
+        arguments: this._commandsToRun.map((c: IScriptCommand) => c.commandToRun).join(';')
       };
     } catch (error) {
       writer.writeLine('Unable to calculate incremental build state. ' +
@@ -122,7 +129,7 @@ export class ProjectTask implements ITaskDefinition {
           // Warn and ignore - treat failing to load the file as the project being not built.
           writer.writeLine(
             `Warning: error parsing ${this._packageDepsFilename}: ${e}. Ignoring and ` +
-            `treating the command "${this._commandToRun}" as not run.`
+            `treating the command "${this._commandsToRun[0].scriptName}" as not run.`
           );
         }
       }
@@ -145,68 +152,31 @@ export class ProjectTask implements ITaskDefinition {
         // Delete the legacy package-deps.json
         FileSystem.deleteFile(legacyDepsPath);
 
-        if (!this._commandToRun) {
-          writer.writeLine(`The task command "${this._commandToRun}" was registered in the package.json but is blank,`
-            + ` so no action will be taken.`);
-
-          // Write deps on success.
-          if (currentPackageDeps) {
-            JsonFile.save(currentPackageDeps, currentDepsPath, {
-              ensureFolderExists: true
-            });
-          }
-
-          return Promise.resolve(TaskStatus.Success);
-        }
-
-        // Run the task
-
-        writer.writeLine(this._commandToRun);
-        const task: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(
-          this._commandToRun,
-          {
-            rushConfiguration: this._rushConfiguration,
-            workingDirectory: projectFolder,
-            initCwd: this._rushConfiguration.commonTempFolder,
-            handleOutput: true,
-            environmentPathOptions: {
-              includeProjectBin: true
-            }
-          }
+        // Add the callback chain to execute all commands sequentially
+        let currentPromise: Promise<TaskStatus> = this._commandsToRun.reduce<Promise<TaskStatus>>(
+          (promise: Promise<TaskStatus>, command: IScriptCommand) =>
+            promise.then((status: TaskStatus) => this._getTaskPromise(command, projectFolder, writer, status)),
+          Promise.resolve(TaskStatus.Success)
         );
 
-        // Hook into events, in order to get live streaming of build log
-        if (task.stdout !== null) {
-          task.stdout.on('data', (data: string) => {
-            writer.write(data);
-          });
-        }
-        if (task.stderr !== null) {
-          task.stderr.on('data', (data: string) => {
-            writer.writeError(data);
-            this._hasWarningOrError = true;
-          });
-        }
-
-        return new Promise((resolve: (status: TaskStatus) => void, reject: (error: TaskError) => void) => {
-          task.on('close', (code: number) => {
-            this._writeLogsToDisk(writer);
-
-            if (code !== 0) {
-              reject(new TaskError('error', `Returned error code: ${code}`));
-            } else if (this._hasWarningOrError) {
-              resolve(TaskStatus.SuccessWithWarning);
-            } else {
-              // Write deps on success.
-              if (currentPackageDeps) {
-                JsonFile.save(currentPackageDeps, currentDepsPath, {
-                  ensureFolderExists: true
-                });
-              }
-              resolve(TaskStatus.Success);
+        // Add a final callback to write out the logs on completion
+        currentPromise = currentPromise.then((status: TaskStatus) => {
+          this._writeLogsToDisk(writer);
+          if (status === TaskStatus.Success) {
+            // Write deps on success.
+            if (currentPackageDeps) {
+              JsonFile.save(currentPackageDeps, currentDepsPath, {
+                ensureFolderExists: true
+              });
             }
-          });
+          }
+          return Promise.resolve(status);
+        }, (error: TaskError) => {
+          this._writeLogsToDisk(writer);
+          return Promise.reject(error);
         });
+
+        return currentPromise;
       }
     } catch (error) {
       console.log(error);
@@ -214,6 +184,64 @@ export class ProjectTask implements ITaskDefinition {
       this._writeLogsToDisk(writer);
       return Promise.reject(new TaskError('error', error.toString()));
     }
+  }
+
+  private _getTaskPromise(
+    command: IScriptCommand,
+    workingDirectory: string,
+    writer: ITaskWriter,
+    previousStatus: TaskStatus
+  ): Promise<TaskStatus> {
+    const commandToRun: string = command.commandToRun;
+    if (!commandToRun) {
+      writer.writeLine(`The task command "${command.scriptName}" was registered in the package.json but is blank,`
+        + ' so no action will be taken.');
+      return Promise.resolve(previousStatus);
+    }
+
+    // Run the task
+    writer.writeLine(commandToRun);
+    const task: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(
+      commandToRun,
+      {
+        rushConfiguration: this._rushConfiguration,
+        workingDirectory: workingDirectory,
+        initCwd: this._rushConfiguration.commonTempFolder,
+        handleOutput: true,
+        environmentPathOptions: {
+          includeProjectBin: true
+        }
+      }
+    );
+
+    // Hook into events, in order to get live streaming of build log
+    if (task.stdout !== null) {
+      task.stdout.on('data', (data: string) => {
+        writer.write(data);
+      });
+    }
+    if (task.stderr !== null) {
+      task.stderr.on('data', (data: string) => {
+        writer.writeError(data);
+        this._hasWarningOrError = true;
+      });
+    }
+
+    return new Promise((resolve: (status: TaskStatus) => void, reject: (error: TaskError) => void) => {
+      task.on('close', (code: number) => {
+        if (code !== 0) {
+          reject(new TaskError('error', `Returned error code: ${code}`));
+        } else if (this._hasWarningOrError) {
+          resolve(TaskStatus.SuccessWithWarning);
+        } else {
+          // Ensure we don't overwrite previous status
+          if (previousStatus && previousStatus !== TaskStatus.Success) {
+            resolve(previousStatus);
+          }
+          resolve(TaskStatus.Success);
+        }
+      });
+    });
   }
 
   // @todo #179371: add log files to list of things that get gulp cleaned

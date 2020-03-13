@@ -234,6 +234,7 @@ export class RushCommandLineParser extends CommandLineParser {
           // The rush rebuild and rush build command invoke the same NPM script because they share the same
           // package-deps-hash state.
           commandToRun: command.name === RushConstants.rebuildCommandName ? 'build' : undefined,
+          additionalCommands: command.additionalCommands,
 
           summary: command.summary,
           documentation: command.description || command.summary,
@@ -278,14 +279,23 @@ export class RushCommandLineParser extends CommandLineParser {
     for (const parameter of commandLineConfiguration.parameters) {
       for (const associatedCommand of parameter.associatedCommands) {
         const action: CommandLineAction | undefined = this.tryGetAction(associatedCommand);
-        if (!action) {
-          throw new Error(`${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}"`
-            + ` that is associated with a nonexistent command "${associatedCommand}"`);
-        }
-        if (!(action instanceof BaseScriptAction)) {
-          throw new Error(`${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}"`
-            + ` that is associated with a command "${associatedCommand}", but that command does not`
-            + ` support custom parameters`);
+        if (action) {
+          if (!(action instanceof BaseScriptAction)) {
+            throw new Error(`${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}"`
+              + ` that is associated with a command "${associatedCommand}", but that command does not`
+              + ` support custom parameters`);
+          }
+        } else {
+          // Allow parameters to apply to additional commands that aren't defined as actions
+          const foundAssociatedCommand: boolean = commandLineConfiguration.commands.some((c: CommandJson) => (
+            c.commandKind === RushConstants.bulkCommandKind &&
+            (c.additionalCommands || []).includes(associatedCommand)
+          ));
+
+          if (!foundAssociatedCommand) {
+            throw new Error(`${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}"`
+              + ` that is associated with a nonexistent command "${associatedCommand}"`);
+          }
         }
       }
     }
