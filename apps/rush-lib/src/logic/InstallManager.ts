@@ -1076,11 +1076,11 @@ export class InstallManager {
         let setEnvironmentVariable: boolean = true;
         console.log(`\nProcessing definition for environment variable: ${envVar}`);
 
-        if (process.env[envVar]) {
+        if (baseEnv.hasOwnProperty(envVar)) {
           setEnvironmentVariable = false;
           console.log(colors.yellow(`WARNING: Environment variable already defined:`));
           console.log(`  Name: ${envVar}`);
-          console.log(`  Value set on the device: ${process.env[envVar]}`);
+          console.log(`  Value set on the device: ${baseEnv[envVar]}`);
           console.log(`  Value set in rush.json: ${environmentVariables[envVar].value}`);
 
           if (environmentVariables[envVar].override &&
