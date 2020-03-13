@@ -248,8 +248,8 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
   public readonly environmentVariables?: IConfigurationEnvironment
 
   /** @internal */
-  protected constructor(environmentVariables?: IConfigurationEnvironment) {
-    this.environmentVariables = environmentVariables;
+  protected constructor(json: IPackageManagerOptionsJsonBase) {
+    this.environmentVariables = json.environmentVariables;
   }
 }
 
