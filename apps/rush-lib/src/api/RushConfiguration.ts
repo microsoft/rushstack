@@ -174,7 +174,7 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
  * @internal
  */
 export interface IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
-    /**
+  /**
    * If true, then Rush will add the "--ignore-engines" option when invoking Yarn.
    * This allows "rush install" to succeed if there are dependencies with engines defined in
    * package.json which do not match the current environment.
