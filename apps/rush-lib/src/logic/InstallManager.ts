@@ -1091,7 +1091,7 @@ export class InstallManager {
             if (environmentVariables[envVar].override &&
               environmentVariables[envVar].override === true) {
               setEnvironmentVariable = true;
-              console.log(colors.yellow(`WARNING: Overriding the environment variable with the value set in Rush config.`));
+              console.log(colors.yellow(`WARNING: Overriding the environment variable with the value set in rush.json.`));
             }
             else {
               console.log(colors.yellow(`WARNING: Not overriding the value of the environment variable.`));
