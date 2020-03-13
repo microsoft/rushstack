@@ -1098,7 +1098,7 @@ export class InstallManager {
             }
           }
 
-          if (setEnvironmentVariable === true) {
+          if (setEnvironmentVariable) {
             console.log(`Setting environment variable for package manager.`);
             console.log(`  Name: ${envVar}`);
             console.log(`  Value: ${environmentVariables[envVar].value}`);
