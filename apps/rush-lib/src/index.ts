@@ -15,8 +15,9 @@ export {
   ITryFindRushJsonLocationOptions,
   ResolutionStrategy,
   PnpmOptionsConfiguration,
-  IPackageManagerOptions,
+  IPackageManagerOptionsBase,
   IEnvironmentVariable,
+  INpmOptions,
   IPnpmOptionsJson as _IPnpmOptionsJson,
   PnpmStoreOptions,
   YarnOptionsConfiguration

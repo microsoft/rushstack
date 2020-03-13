@@ -48,8 +48,8 @@
       "description": "Allows creation of hotfix changes. This feature is experimental so it is disabled by default. If this is set, \"rush change\" only allows a \"hotfix\" change type to be specified. This change type will be used when publishing subsequent changes from the monorepo.",
       "type": "boolean"
     },
-    "packageManagerOptions": {
-      "description": "Options that apply to the package manager.",
+    "npmOptions": {
+      "description": "Options that are only used when the NPM pacakge manager is selected.",
       "type": "object",
       "properties": {
         "environmentVariables": {
@@ -68,7 +68,8 @@
             "additionalProperties": false
           }
         }
-      }
+      },
+      "additionalProperties": false
     },
     "pnpmOptions": {
       "description": "Options that are only used when the PNPM pacakge manager is selected.",
@@ -93,6 +94,22 @@
             "fewer-dependencies",
             "fast"
           ]
+        },
+        "environmentVariables": {
+          "description": "Enviroment variables for the package manager",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "string"
+              },
+              "override": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          }
         }
       },
       "additionalProperties": false
@@ -104,6 +121,22 @@
         "ignoreEngines": {
           "description": "If true, then Rush will add the \"--ignore-engines\" option when invoking Yarn. * This allows \"rush install\" to succeed if there are dependencies with engines defined in package.json which do not match the current environment. The default value is false.",
           "type": "boolean"
+        },
+        "environmentVariables": {
+          "description": "Enviroment variables for the package manager",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "string"
+              },
+              "override": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          }
         }
       },
       "additionalProperties": false

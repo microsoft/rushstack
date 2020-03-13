@@ -152,14 +152,18 @@ export class IndividualVersionPolicy extends VersionPolicy {
 }
 
 // @public
-export interface IPackageManagerOptions {
+export interface INpmOptions extends IPackageManagerOptionsBase {
+}
+
+// @public
+export interface IPackageManagerOptionsBase {
     environmentVariables?: {
         [environmentVariableName: string]: IEnvironmentVariable;
     };
 }
 
 // @internal
-export interface _IPnpmOptionsJson {
+export interface _IPnpmOptionsJson extends IPackageManagerOptionsBase {
     pnpmStore?: PnpmStoreOptions;
     resolutionStrategy?: ResolutionStrategy;
     strictPeerDependencies?: boolean;
@@ -250,9 +254,12 @@ export abstract class PackageManager {
 export type PackageManagerName = 'pnpm' | 'npm' | 'yarn';
 
 // @public
-export class PnpmOptionsConfiguration {
+export class PnpmOptionsConfiguration implements IPackageManagerOptionsBase {
     // @internal
     constructor(json: _IPnpmOptionsJson, commonTempFolder: string);
+    readonly environmentVariables?: {
+        [environmentVariableName: string]: IEnvironmentVariable;
+    };
     readonly pnpmStore: PnpmStoreOptions;
     readonly pnpmStorePath: string;
     readonly resolutionStrategy: ResolutionStrategy;
@@ -306,9 +313,9 @@ export class RushConfiguration {
     // (undocumented)
     static loadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration;
     readonly npmCacheFolder: string;
+    readonly npmOptions: INpmOptions | undefined;
     readonly npmTmpFolder: string;
     readonly packageManager: PackageManagerName;
-    readonly packageManagerOptions: IPackageManagerOptions | undefined;
     readonly packageManagerToolFilename: string;
     readonly packageManagerToolVersion: string;
     // @beta
@@ -425,6 +432,9 @@ export class YarnOptionsConfiguration {
     //
     // @internal
     constructor(json: IYarnOptionsJson);
+    readonly environmentVariables?: {
+        [environmentVariableName: string]: IEnvironmentVariable;
+    };
     readonly ignoreEngines: boolean;
 }
 

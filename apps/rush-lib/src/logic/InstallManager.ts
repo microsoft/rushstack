@@ -36,7 +36,7 @@ import { Git } from '../logic/Git';
 import { LastInstallFlag } from '../api/LastInstallFlag';
 import { LinkManagerFactory } from '../logic/LinkManagerFactory';
 import { PurgeManager } from './PurgeManager';
-import { RushConfiguration, ICurrentVariantJson } from '../api/RushConfiguration';
+import { RushConfiguration, ICurrentVariantJson, IEnvironmentVariable } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
 import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
@@ -903,44 +903,37 @@ export class InstallManager {
           // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
           const packageManagerFilename: string = this._rushConfiguration.packageManagerToolFilename;
 
-          const packageManagerEnv: NodeJS.ProcessEnv = process.env;
+          let packageManagerEnv: NodeJS.ProcessEnv = process.env;
 
-          if (
-            this._rushConfiguration.packageManagerOptions &&
-            this._rushConfiguration.packageManagerOptions.environmentVariables
-          ) {
-            for (const envVar in this._rushConfiguration.packageManagerOptions.environmentVariables) {
-              if ({}.hasOwnProperty.call(this._rushConfiguration.packageManagerOptions.environmentVariables, envVar)) {
-                let setEnvironmentVariable: boolean = true;
-                const envVarValueInRushConfig: string =
-                  this._rushConfiguration.packageManagerOptions.environmentVariables[envVar].value;
-
-                console.log(`\nProcessing definition for environment variable: ${envVar}`);
-
-                if (process.env[envVar]) {
-                  setEnvironmentVariable = false;
-                  console.log(colors.yellow(`WARNING: Environment variable already defined on the device:`));
-                  console.log(`  Name: ${envVar}`);
-                  console.log(`  Value set on the device: ${process.env[envVar]}`);
-                  console.log(`  Value set in Rush config: ${envVarValueInRushConfig}`);
-                  if (
-                    this._rushConfiguration.packageManagerOptions.environmentVariables[envVar].override &&
-                    this._rushConfiguration.packageManagerOptions.environmentVariables[envVar].override === true
-                  ) {
-                    setEnvironmentVariable = true;
-                    console.log(colors.yellow(`WARNING: Overriding the environment variable with the value set in Rush config.`));
-                  } else {
-                    console.log(colors.yellow(`WARNING: Not overriding the value of the environment variable.`));
-                  }
-                }
-
-                if (setEnvironmentVariable === true) {
-                  console.log(`Setting environment variable for package manager.`);
-                  console.log(`  Name: ${envVar}`);
-                  console.log(`  Value: ${envVarValueInRushConfig}`);
-                  packageManagerEnv[envVar] = envVarValueInRushConfig;
-                }
-              }
+          if (this._rushConfiguration.packageManager === 'npm') {
+            if (
+              this._rushConfiguration.npmOptions &&
+              this._rushConfiguration.npmOptions.environmentVariables
+            ) {
+              packageManagerEnv = InstallManager._mergeEnvironmentVariables(
+                packageManagerEnv,
+                this._rushConfiguration.npmOptions.environmentVariables
+              );
+            }
+          } else if (this._rushConfiguration.packageManager === 'pnpm') {
+            if (
+              this._rushConfiguration.pnpmOptions &&
+              this._rushConfiguration.pnpmOptions.environmentVariables
+            ) {
+              packageManagerEnv = InstallManager._mergeEnvironmentVariables(
+                packageManagerEnv,
+                this._rushConfiguration.pnpmOptions.environmentVariables
+              );
+            }
+          } else if (this._rushConfiguration.packageManager === 'yarn') {
+            if (
+              this._rushConfiguration.yarnOptions &&
+              this._rushConfiguration.yarnOptions.environmentVariables
+            ) {
+              packageManagerEnv = InstallManager._mergeEnvironmentVariables(
+                packageManagerEnv,
+                this._rushConfiguration.yarnOptions.environmentVariables
+              );
             }
           }
 
@@ -1074,6 +1067,48 @@ export class InstallManager {
           console.log('');
         });
     });
+  }
+
+  private static _mergeEnvironmentVariables(
+    baseEnv: NodeJS.ProcessEnv,
+    environmentVariables: { [environmentVariableName: string]: IEnvironmentVariable; } | undefined
+  ): NodeJS.ProcessEnv {
+    const packageManagerEnv: NodeJS.ProcessEnv = baseEnv;
+
+    if (environmentVariables) {
+      for (const envVar in environmentVariables) {
+        if ({}.hasOwnProperty.call(environmentVariables, envVar)) {
+          let setEnvironmentVariable: boolean = true;
+          console.log(`\nProcessing definition for environment variable: ${envVar}`);
+
+          if (process.env[envVar]) {
+            setEnvironmentVariable = false;
+            console.log(colors.yellow(`WARNING: Environment variable already defined on the device:`));
+            console.log(`  Name: ${envVar}`);
+            console.log(`  Value set on the device: ${process.env[envVar]}`);
+            console.log(`  Value set in Rush config: ${environmentVariables[envVar].value}`);
+
+            if (environmentVariables[envVar].override &&
+              environmentVariables[envVar].override === true) {
+              setEnvironmentVariable = true;
+              console.log(colors.yellow(`WARNING: Overriding the environment variable with the value set in Rush config.`));
+            }
+            else {
+              console.log(colors.yellow(`WARNING: Not overriding the value of the environment variable.`));
+            }
+          }
+
+          if (setEnvironmentVariable === true) {
+            console.log(`Setting environment variable for package manager.`);
+            console.log(`  Name: ${envVar}`);
+            console.log(`  Value: ${environmentVariables[envVar].value}`);
+            packageManagerEnv[envVar] = environmentVariables[envVar].value;
+          }
+        }
+      }
+    }
+
+    return packageManagerEnv;
   }
 
   private _checkIfReleaseIsPublished(): Promise<boolean> {

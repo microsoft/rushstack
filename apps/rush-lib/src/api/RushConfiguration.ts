@@ -109,7 +109,7 @@ export type PnpmStoreOptions = 'local' | 'global';
  * Options for the package manager.
  * @public
  */
-export interface IPackageManagerOptions {
+export interface IPackageManagerOptionsBase {
   /**
    * Enviroment variables for the package manager
    */
@@ -135,10 +135,17 @@ export interface IEnvironmentVariable {
 }
 
 /**
+ * Options that are only used when the NPM package manager is selected.
+ * @public
+ */
+export interface INpmOptions extends IPackageManagerOptionsBase {
+}
+
+/**
  * Part of IRushConfigurationJson.
  * @internal
  */
-export interface IPnpmOptionsJson {
+export interface IPnpmOptionsJson extends IPackageManagerOptionsBase {
   /**
    * The store resolution method for PNPM to use
    */
@@ -156,7 +163,7 @@ export interface IPnpmOptionsJson {
 /**
  * Part of IRushConfigurationJson.
  */
-export interface IYarnOptionsJson {
+export interface IYarnOptionsJson extends IPackageManagerOptionsBase {
   ignoreEngines?: boolean;
 }
 
@@ -189,7 +196,7 @@ export interface IRushConfigurationJson {
   projects: IRushConfigurationProjectJson[];
   eventHooks?: IEventHooksJson;
   hotfixChangeEnabled?: boolean;
-  packageManagerOptions?: IPackageManagerOptions;
+  npmOptions?: INpmOptions;
   pnpmOptions?: IPnpmOptionsJson;
   yarnOptions?: IYarnOptionsJson;
   ensureConsistentVersions?: boolean;
@@ -221,7 +228,7 @@ export interface ICurrentVariantJson {
  *
  * @public
  */
-export class PnpmOptionsConfiguration {
+export class PnpmOptionsConfiguration implements IPackageManagerOptionsBase {
   /**
    * The method used to resolve the store used by PNPM.
    *
@@ -268,6 +275,13 @@ export class PnpmOptionsConfiguration {
    */
   public readonly resolutionStrategy: ResolutionStrategy;
 
+  /**
+   * Enviroment variables for the package manager
+   */
+  public readonly environmentVariables?: {
+    [environmentVariableName: string]: IEnvironmentVariable;
+  }
+
   /** @internal */
   public constructor(json: IPnpmOptionsJson, commonTempFolder: string) {
     this.pnpmStore = json.pnpmStore || 'local';
@@ -280,6 +294,7 @@ export class PnpmOptionsConfiguration {
     }
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
+    this.environmentVariables = json.environmentVariables;
   }
 }
 
@@ -302,9 +317,17 @@ export class YarnOptionsConfiguration {
    */
   public readonly ignoreEngines: boolean;
 
+  /**
+   * Enviroment variables for the package manager
+   */
+  public readonly environmentVariables?: {
+    [environmentVariableName: string]: IEnvironmentVariable;
+  }
+
   /** @internal */
   public constructor(json: IYarnOptionsJson) {
     this.ignoreEngines = !!json.ignoreEngines;
+    this.environmentVariables = json.environmentVariables;
   }
 }
 
@@ -381,8 +404,7 @@ export class RushConfiguration {
   private _repositoryDefaultBranch: string;
   private _repositoryDefaultRemote: string;
 
-  private _packageManagerOptions?: IPackageManagerOptions;
-
+  private _npmOptions?: INpmOptions;
   private _pnpmOptions: PnpmOptionsConfiguration;
   private _yarnOptions: YarnOptionsConfiguration;
 
@@ -481,7 +503,7 @@ export class RushConfiguration {
         + ` and ${packageManagerFields[1]} `);
     }
 
-    this._packageManagerOptions = rushConfigurationJson.packageManagerOptions;
+    this._npmOptions = rushConfigurationJson.npmOptions;
 
     if (this._packageManager === 'npm') {
       this._packageManagerToolVersion = rushConfigurationJson.npmVersion!;
@@ -1059,10 +1081,10 @@ export class RushConfiguration {
   }
 
   /**
-   * {@inheritDoc IPackageManagerOptions}
+   * {@inheritDoc INpmOptions}
    */
-  public get packageManagerOptions(): IPackageManagerOptions | undefined {
-    return this._packageManagerOptions;
+  public get npmOptions(): INpmOptions | undefined {
+    return this._npmOptions;
   }
 
   /**
