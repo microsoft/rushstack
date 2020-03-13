@@ -1080,11 +1080,10 @@ export class InstallManager {
           setEnvironmentVariable = false;
           console.log(colors.yellow(`WARNING: Environment variable already defined:`));
           console.log(`  Name: ${envVar}`);
-          console.log(`  Value set on the device: ${baseEnv[envVar]}`);
+          console.log(`  Existing value: ${baseEnv[envVar]}`);
           console.log(`  Value set in rush.json: ${environmentVariables[envVar].value}`);
 
-          if (environmentVariables[envVar].override &&
-            environmentVariables[envVar].override === true) {
+          if (environmentVariables[envVar].override) {
             setEnvironmentVariable = true;
             console.log(`Overriding the environment variable with the value set in rush.json.`);
           }
