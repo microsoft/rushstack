@@ -19,6 +19,7 @@ import { StandardScriptUpdater } from '../../logic/StandardScriptUpdater';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { Variants } from '../../api/Variants';
+import { RushConstants } from '../../logic/RushConstants';
 
 /**
  * This is the common base class for InstallAction and UpdateAction.
@@ -30,6 +31,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected _noLinkParameter: CommandLineFlagParameter;
   protected _networkConcurrencyParameter: CommandLineIntegerParameter;
   protected _debugPackageManagerParameter: CommandLineFlagParameter;
+  protected _maxInstallAttempts: CommandLineIntegerParameter;
 
   protected onDefineParameters(): void {
     this._purgeParameter = this.defineFlagParameter({
@@ -58,6 +60,12 @@ export abstract class BaseInstallAction extends BaseRushAction {
       parameterLongName: '--debug-package-manager',
       description: 'Activates verbose logging for the package manager. You will probably want to pipe'
         + ' the output of Rush to a file when using this command.'
+    });
+    this._maxInstallAttempts = this.defineIntegerParameter({
+      parameterLongName: '--max-install-attempts',
+      argumentName: 'NUMBER',
+      description: `Overrides the default maximum number of install attempts.`,
+      defaultValue: RushConstants.defaultMaxInstallAttempts
     });
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }
@@ -94,6 +102,12 @@ export abstract class BaseInstallAction extends BaseRushAction {
         throw new Error(`The "${this._networkConcurrencyParameter.longName}" parameter is`
           + ` only supported when using the PNPM package manager.`);
       }
+    }
+
+    // Because the 'defautltValue' option on the _maxInstallAttempts parameter is set,
+    // it is safe to assume that the value is not null
+    if (this._maxInstallAttempts.value! < 1) {
+      throw new Error(`The value of "${this._maxInstallAttempts.longName}" must be positive and nonzero.`);
     }
 
     const installManagerOptions: IInstallManagerOptions = this.buildInstallOptions();

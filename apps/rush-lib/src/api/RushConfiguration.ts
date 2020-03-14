@@ -106,10 +106,57 @@ export interface IRushRepositoryJson {
 export type PnpmStoreOptions = 'local' | 'global';
 
 /**
+ * Options for the package manager.
+ * @public
+ */
+export interface IPackageManagerOptionsJsonBase {
+  /**
+   * Enviroment variables for the package manager
+   */
+  environmentVariables?: IConfigurationEnvironment
+}
+
+/**
+ * A collection of environment variables
+ * @public
+ */
+export interface IConfigurationEnvironment {
+  /**
+   * Environment variables
+   */
+  [environmentVariableName: string]: IConfigurationEnvironmentVariable;
+}
+
+/**
+ * Represents the value of an environment variable, and if the value should be overridden if the variable is set
+ * in the parent environment.
+ * @public
+ */
+export interface IConfigurationEnvironmentVariable {
+  /**
+   * Value of the environment variable
+   */
+  value: string;
+
+  /**
+   * Set to true to override the environment variable even if it is set in the parent environment.
+   * The default value is false.
+   */
+  override?: boolean;
+}
+
+/**
  * Part of IRushConfigurationJson.
  * @internal
  */
-export interface IPnpmOptionsJson {
+export interface INpmOptionsJson extends IPackageManagerOptionsJsonBase {
+}
+
+/**
+ * Part of IRushConfigurationJson.
+ * @internal
+ */
+export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
   /**
    * The store resolution method for PNPM to use
    */
@@ -126,8 +173,16 @@ export interface IPnpmOptionsJson {
 
 /**
  * Part of IRushConfigurationJson.
+ * @internal
  */
-export interface IYarnOptionsJson {
+export interface IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
+  /**
+   * If true, then Rush will add the "--ignore-engines" option when invoking Yarn.
+   * This allows "rush install" to succeed if there are dependencies with engines defined in
+   * package.json which do not match the current environment.
+   *
+   * The default value is false.
+   */
   ignoreEngines?: boolean;
 }
 
@@ -160,6 +215,7 @@ export interface IRushConfigurationJson {
   projects: IRushConfigurationProjectJson[];
   eventHooks?: IEventHooksJson;
   hotfixChangeEnabled?: boolean;
+  npmOptions?: INpmOptionsJson;
   pnpmOptions?: IPnpmOptionsJson;
   yarnOptions?: IYarnOptionsJson;
   ensureConsistentVersions?: boolean;
@@ -183,6 +239,39 @@ export interface ICurrentVariantJson {
 }
 
 /**
+ * Options that all package managers share.
+ *
+ * @public
+ */
+export abstract class PackageManagerOptionsConfigurationBase implements IPackageManagerOptionsJsonBase {
+  /**
+   * Enviroment variables for the package manager
+   */
+  public readonly environmentVariables?: IConfigurationEnvironment
+
+  /** @internal */
+  protected constructor(json: IPackageManagerOptionsJsonBase) {
+    this.environmentVariables = json.environmentVariables;
+  }
+}
+
+/**
+ * Options that are only used when the NPM package manager is selected.
+ *
+ * @remarks
+ * It is valid to define these options in rush.json even if the NPM package manager
+ * is not being used.
+ *
+ * @public
+ */
+export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
+  /** @internal */
+  public constructor(json: INpmOptionsJson) {
+    super(json);
+  }
+}
+
+/**
  * Options that are only used when the PNPM package manager is selected.
  *
  * @remarks
@@ -191,7 +280,7 @@ export interface ICurrentVariantJson {
  *
  * @public
  */
-export class PnpmOptionsConfiguration {
+export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
   /**
    * The method used to resolve the store used by PNPM.
    *
@@ -240,6 +329,7 @@ export class PnpmOptionsConfiguration {
 
   /** @internal */
   public constructor(json: IPnpmOptionsJson, commonTempFolder: string) {
+    super(json);
     this.pnpmStore = json.pnpmStore || 'local';
     if (EnvironmentConfiguration.pnpmStorePathOverride) {
       this.pnpmStorePath = EnvironmentConfiguration.pnpmStorePathOverride;
@@ -262,7 +352,7 @@ export class PnpmOptionsConfiguration {
  *
  * @public
  */
-export class YarnOptionsConfiguration {
+export class YarnOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
   /**
    * If true, then Rush will add the "--ignore-engines" option when invoking Yarn.
    * This allows "rush install" to succeed if there are dependencies with engines defined in
@@ -274,6 +364,7 @@ export class YarnOptionsConfiguration {
 
   /** @internal */
   public constructor(json: IYarnOptionsJson) {
+    super(json);
     this.ignoreEngines = !!json.ignoreEngines;
   }
 }
@@ -351,6 +442,7 @@ export class RushConfiguration {
   private _repositoryDefaultBranch: string;
   private _repositoryDefaultRemote: string;
 
+  private _npmOptions: NpmOptionsConfiguration;
   private _pnpmOptions: PnpmOptionsConfiguration;
   private _yarnOptions: YarnOptionsConfiguration;
 
@@ -420,6 +512,7 @@ export class RushConfiguration {
     );
     this._experimentsConfiguration = new ExperimentsConfiguration(experimentsConfigFile);
 
+    this._npmOptions = new NpmOptionsConfiguration(rushConfigurationJson.npmOptions || {});
     this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || {},
       this._commonTempFolder);
     this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || {});
@@ -463,10 +556,10 @@ export class RushConfiguration {
     this._shrinkwrapFilename = this._packageManagerWrapper.shrinkwrapFilename;
 
     this._tempShrinkwrapFilename = path.join(
-        this._commonTempFolder, this._shrinkwrapFilename
+      this._commonTempFolder, this._shrinkwrapFilename
     );
     this._packageManagerToolFilename = path.resolve(path.join(
-        this._commonTempFolder, `${this.packageManager}-local`, 'node_modules', '.bin', `${this.packageManager}`
+      this._commonTempFolder, `${this.packageManager}-local`, 'node_modules', '.bin', `${this.packageManager}`
     ));
 
     /// From "C:\repo\common\temp\pnpm-lock.yaml" --> "C:\repo\common\temp\pnpm-lock-preinstall.yaml"
@@ -475,9 +568,9 @@ export class RushConfiguration {
       parsedPath.name + '-preinstall' + parsedPath.ext);
 
     RushConfiguration._validateCommonRushConfigFolder(
-        this._commonRushConfigFolder,
-        this.packageManager,
-        this._shrinkwrapFilename
+      this._commonRushConfigFolder,
+      this.packageManager,
+      this._shrinkwrapFilename
     );
 
     this._projectFolderMinDepth = rushConfigurationJson.projectFolderMinDepth !== undefined
@@ -642,11 +735,11 @@ export class RushConfiguration {
       if (semver.major(Rush.version) !== semver.major(expectedRushVersion)
         || semver.minor(Rush.version) !== semver.minor(expectedRushVersion)) {
 
-          // If the major/minor are different, then make sure it's an older version.
-          if (semver.lt(Rush.version, expectedRushVersion)) {
-            throw new Error(`Unable to load ${rushJsonBaseName} because its RushVersion is`
-              + ` ${rushConfigurationJson.rushVersion}, whereas @microsoft/rush-lib is version ${Rush.version}.`
-              + ` Consider upgrading the library.`);
+        // If the major/minor are different, then make sure it's an older version.
+        if (semver.lt(Rush.version, expectedRushVersion)) {
+          throw new Error(`Unable to load ${rushJsonBaseName} because its RushVersion is`
+            + ` ${rushConfigurationJson.rushVersion}, whereas @microsoft/rush-lib is version ${Rush.version}.`
+            + ` Consider upgrading the library.`);
         }
       }
     }
@@ -741,9 +834,9 @@ export class RushConfiguration {
    * recognized config files.
    */
   private static _validateCommonRushConfigFolder(
-      commonRushConfigFolder: string,
-      packageManager: PackageManagerName,
-      shrinkwrapFilename: string
+    commonRushConfigFolder: string,
+    packageManager: PackageManagerName,
+    shrinkwrapFilename: string
   ): void {
     if (!FileSystem.exists(commonRushConfigFolder)) {
       console.log(`Creating folder: ${commonRushConfigFolder}`);
@@ -1134,6 +1227,13 @@ export class RushConfiguration {
 
   public get projectsByName(): Map<string, RushConfigurationProject> {
     return this._projectsByName;
+  }
+
+  /**
+   * {@inheritDoc NpmOptionsConfiguration}
+   */
+  public get npmOptions(): NpmOptionsConfiguration {
+    return this._npmOptions;
   }
 
   /**
