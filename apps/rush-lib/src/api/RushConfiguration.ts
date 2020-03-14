@@ -128,7 +128,8 @@ export interface IConfigurationEnvironment {
 }
 
 /**
- * Represents an environment variable
+ * Represents the value of an environment variable, and if the value should be overridden if the variable is set
+ * in the parent environment.
  * @public
  */
 export interface IConfigurationEnvironmentVariable {
