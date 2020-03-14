@@ -1078,7 +1078,7 @@ export class InstallManager {
 
         if (baseEnv.hasOwnProperty(envVar)) {
           setEnvironmentVariable = false;
-          console.log(colors.yellow(`WARNING: Environment variable already defined:`));
+          console.log(`Environment variable already defined:`);
           console.log(`  Name: ${envVar}`);
           console.log(`  Existing value: ${baseEnv[envVar]}`);
           console.log(`  Value set in rush.json: ${environmentVariables[envVar].value}`);
