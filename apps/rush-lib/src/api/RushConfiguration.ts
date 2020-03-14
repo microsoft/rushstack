@@ -138,7 +138,8 @@ export interface IConfigurationEnvironmentVariable {
   value: string;
 
   /**
-   * Set to true to override the environment variable even if it is set on the device
+   * Set to true to override the environment variable even if it is set in the parent environment.
+   * The default value is false.
    */
   override?: boolean;
 }
