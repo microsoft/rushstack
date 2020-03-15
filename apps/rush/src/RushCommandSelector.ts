@@ -16,7 +16,7 @@ type CommandName = 'rush' | 'rushx' | 'myrush' | undefined;
  */
 export class RushCommandSelector {
   public static failIfNotInvokedAsRush(version: string): void {
-    if (RushCommandSelector._getCommandName() === 'rushx') {
+    if (RushCommandSelector.getCommandName() === 'rushx') {
       RushCommandSelector._failWithError(`This repository is using Rush version ${version}`
         + ` which does not support the "rushx" command`);
     }
@@ -31,7 +31,7 @@ export class RushCommandSelector {
       RushCommandSelector._failWithError(`Unable to find the "Rush" entry point in @microsoft/rush-lib`);
     }
 
-    if (RushCommandSelector._getCommandName() === 'rushx') {
+    if (RushCommandSelector.getCommandName() === 'rushx') {
       if (!Rush.launchRushX) {
         RushCommandSelector._failWithError(`This repository is using Rush version ${Rush.version}`
           + ` which does not support the "rushx" command`);
@@ -59,21 +59,19 @@ export class RushCommandSelector {
     return process.exit(1);
   }
 
-  // TODO: Can we expose this function as so, is it safe?
-  public static _getCommandName(): CommandName {
+  public static getCommandName(): CommandName {
     if (process.argv.length >= 2) {
       // Example:
       // argv[0]: "C:\\Program Files\\nodejs\\node.exe"
       // argv[1]: "C:\\Program Files\\nodejs\\node_modules\\@microsoft\\rush\\bin\\rushx"
       const basename: string = path.basename(process.argv[1]).toUpperCase();
-      if (basename === 'RUSHX') {
-        return 'rushx';
-      }
-      if (basename === 'RUSH') {
-        return 'rush';
-      }
-      if (basename === 'MYRUSH') {
-        return 'myrush';
+      switch (basename) {
+        case ('RUSHX') :
+          return 'rushx';
+        case ('RUSH'):
+          return 'rush';
+        case ('MYRUSH'):
+          return 'myrush'
       }
     }
     return undefined;
