@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack-compiler-3.0",
+      "comment": "Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-3.0",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
