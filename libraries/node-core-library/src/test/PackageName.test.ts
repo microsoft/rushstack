@@ -7,20 +7,20 @@ describe('PackageName', () => {
   describe('Test', () => {
 
     test('isValidName() positive test', () => {
-      expect(PackageName.isValidName('@rushstack/node-core-library')).toEqual(true);
+      expect(PackageName.isValidName('@microsoft/example-package')).toEqual(true);
     });
 
     test('isValidName() negative test', () => {
-      expect(PackageName.isValidName('@rushstack/node-core-library/path')).toEqual(false);
+      expect(PackageName.isValidName('@microsoft/example-package/path')).toEqual(false);
     });
 
     test('tryParse() tests', () => {
       expect(
-        PackageName.tryParse('@rushstack/node-core-library')
+        PackageName.tryParse('@microsoft/example-package')
       ).toEqual(
         {
           scope: '@microsoft',
-          unscopedName: 'node-core-library',
+          unscopedName: 'example-package',
           error: ''
         }
       );
@@ -56,32 +56,32 @@ describe('PackageName', () => {
       );
 
       expect(
-        PackageName.tryParse('@/node-core-library')
+        PackageName.tryParse('@/example-package')
       ).toEqual(
         {
           scope: '@',
-          unscopedName: 'node-core-library',
-          error: 'Error parsing "@/node-core-library": The scope name cannot be empty'
+          unscopedName: 'example-package',
+          error: 'Error parsing "@/example-package": The scope name cannot be empty'
         }
       );
 
       expect(
-        PackageName.tryParse('@rushstack/node-core-library')
+        PackageName.tryParse('@Microsoft/example-package')
       ).toEqual(
         {
           scope: '@Microsoft',
-          unscopedName: 'node-core-library',
+          unscopedName: 'example-package',
           error: 'The package scope "@Microsoft" must not contain upper case characters'
         }
       );
 
       expect(
-        PackageName.tryParse('@micro!soft/node-core-library')
+        PackageName.tryParse('@micro!soft/example-package')
       ).toEqual(
         {
           scope: '@micro!soft',
-          unscopedName: 'node-core-library',
-          error: 'The package name "@micro!soft/node-core-library" contains an invalid character: \"!\"'
+          unscopedName: 'example-package',
+          error: 'The package name "@micro!soft/example-package" contains an invalid character: \"!\"'
         }
       );
 
@@ -96,12 +96,12 @@ describe('PackageName', () => {
       );
 
       expect(
-        PackageName.tryParse('@rushstack/node-core-library/path')
+        PackageName.tryParse('@microsoft/example-package/path')
       ).toEqual(
         {
           scope: '@microsoft',
-          unscopedName: 'node-core-library/path',
-          error: 'The package name "@rushstack/node-core-library/path" contains an invalid character: \"/\"'
+          unscopedName: 'example-package/path',
+          error: 'The package name "@microsoft/example-package/path" contains an invalid character: \"/\"'
         }
       );
 
@@ -115,21 +115,21 @@ describe('PackageName', () => {
   });
 
   test('combineParts() tests', () => {
-    expect(PackageName.combineParts('@microsoft', 'node-core-library'))
-      .toEqual('@rushstack/node-core-library');
+    expect(PackageName.combineParts('@microsoft', 'example-package'))
+      .toEqual('@microsoft/example-package');
 
-    expect(PackageName.combineParts('', 'node-core-library'))
-      .toEqual('node-core-library');
+    expect(PackageName.combineParts('', 'example-package'))
+      .toEqual('example-package');
   });
 
   test('combineParts() errors', () => {
     expect(() => {
-      PackageName.combineParts('', '@rushstack/node-core-library');
+      PackageName.combineParts('', '@microsoft/example-package');
     }).toThrowError('The unscopedName cannot start with an "@" character');
 
     expect(() => {
-      PackageName.combineParts('@micr!osoft', 'node-core-library');
-    }).toThrowError('The package name "@micr!osoft/node-core-library" contains an invalid character: "!"');
+      PackageName.combineParts('@micr!osoft', 'example-package');
+    }).toThrowError('The package name "@micr!osoft/example-package" contains an invalid character: "!"');
 
     expect(() => {
       PackageName.combineParts('', '');
