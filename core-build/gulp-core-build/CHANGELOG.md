@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Tue, 28 Jan 2020 02:23:44 GMT and should not be manually modified.
+This log was last generated on Tue, 17 Mar 2020 23:55:58 GMT and should not be manually modified.
+
+## 3.15.2
+Tue, 17 Mar 2020 23:55:58 GMT
+
+### Patches
+
+- Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`
 
 ## 3.15.1
 Tue, 28 Jan 2020 02:23:44 GMT

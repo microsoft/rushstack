@@ -1,6 +1,18 @@
 {
-  "name": "@microsoft/node-core-library",
+  "name": "@rushstack/node-core-library",
   "entries": [
+    {
+      "version": "3.19.4",
+      "tag": "@rushstack/node-core-library_v3.19.4",
+      "date": "Tue, 17 Mar 2020 23:55:58 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "PACKAGE NAME CHANGE: The NPM scope was changed from `@microsoft/node-core-library` to `@rushstack/node-core-library`"
+          }
+        ]
+      }
+    },
     {
       "version": "3.19.3",
       "tag": "@microsoft/node-core-library_v3.19.3",

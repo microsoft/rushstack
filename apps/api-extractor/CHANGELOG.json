@@ -2,6 +2,29 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.7.9",
+      "tag": "@microsoft/api-extractor_v7.7.9",
+      "date": "Tue, 17 Mar 2020 23:55:58 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.7.7` to `7.7.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.19.3` to `3.19.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" from `4.3.10` to `4.3.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.7.8",
       "tag": "@microsoft/api-extractor_v7.7.8",
       "date": "Tue, 28 Jan 2020 02:23:44 GMT",

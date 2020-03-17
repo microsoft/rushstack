@@ -2,6 +2,26 @@
   "name": "@microsoft/rush-stack-compiler-2.9",
   "entries": [
     {
+      "version": "0.10.4",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.10.4",
+      "date": "Tue, 17 Mar 2020 23:55:58 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.7.8` to `7.7.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.19.3` to `3.19.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.3",
       "tag": "@microsoft/rush-stack-compiler-2.9_v0.10.3",
       "date": "Tue, 28 Jan 2020 02:23:44 GMT",

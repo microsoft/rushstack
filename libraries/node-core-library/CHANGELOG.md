@@ -1,6 +1,13 @@
-# Change Log - @microsoft/node-core-library
+# Change Log - @rushstack/node-core-library
 
-This log was last generated on Tue, 28 Jan 2020 02:23:44 GMT and should not be manually modified.
+This log was last generated on Tue, 17 Mar 2020 23:55:58 GMT and should not be manually modified.
+
+## 3.19.4
+Tue, 17 Mar 2020 23:55:58 GMT
+
+### Patches
+
+- PACKAGE NAME CHANGE: The NPM scope was changed from `@microsoft/node-core-library` to `@rushstack/node-core-library`
 
 ## 3.19.3
 Tue, 28 Jan 2020 02:23:44 GMT

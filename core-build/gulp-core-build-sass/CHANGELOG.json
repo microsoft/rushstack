@@ -2,6 +2,35 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.10.5",
+      "tag": "@microsoft/gulp-core-build-sass_v4.10.5",
+      "date": "Tue, 17 Mar 2020 23:55:58 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.15.1` to `3.15.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.10.37` to `1.10.38`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.19.3` to `3.19.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.3` to `0.4.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.4` to `6.4.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.10.4",
       "tag": "@microsoft/gulp-core-build-sass_v4.10.4",
       "date": "Tue, 28 Jan 2020 02:23:44 GMT",

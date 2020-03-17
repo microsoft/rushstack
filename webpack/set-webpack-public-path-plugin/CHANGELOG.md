@@ -1,6 +1,13 @@
-# Change Log - @microsoft/set-webpack-public-path-plugin
+# Change Log - @rushstack/set-webpack-public-path-plugin
 
-This log was last generated on Tue, 04 Feb 2020 16:08:20 GMT and should not be manually modified.
+This log was last generated on Tue, 17 Mar 2020 23:55:58 GMT and should not be manually modified.
+
+## 2.4.1
+Tue, 17 Mar 2020 23:55:58 GMT
+
+### Patches
+
+- PACKAGE NAME CHANGE: The NPM scope was changed from `@microsoft/set-webpack-public-path-plugin` to `@rushstack/set-webpack-public-path-plugin`
 
 ## 2.4.0
 Tue, 04 Feb 2020 16:08:20 GMT

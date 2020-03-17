@@ -1,6 +1,13 @@
-# Change Log - @microsoft/ts-command-line
+# Change Log - @rushstack/ts-command-line
 
-This log was last generated on Tue, 21 Jan 2020 21:56:14 GMT and should not be manually modified.
+This log was last generated on Tue, 17 Mar 2020 23:55:58 GMT and should not be manually modified.
+
+## 4.3.11
+Tue, 17 Mar 2020 23:55:58 GMT
+
+### Patches
+
+- PACKAGE NAME CHANGE: The NPM scope was changed from `@microsoft/ts-command-line` to `@rushstack/ts-command-line`
 
 ## 4.3.10
 Tue, 21 Jan 2020 21:56:14 GMT

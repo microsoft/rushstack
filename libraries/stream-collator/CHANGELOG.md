@@ -1,6 +1,13 @@
-# Change Log - @microsoft/stream-collator
+# Change Log - @rushstack/stream-collator
 
-This log was last generated on Tue, 28 Jan 2020 02:23:44 GMT and should not be manually modified.
+This log was last generated on Tue, 17 Mar 2020 23:55:58 GMT and should not be manually modified.
+
+## 3.2.5
+Tue, 17 Mar 2020 23:55:58 GMT
+
+### Patches
+
+- PACKAGE NAME CHANGE: The NPM scope was changed from `@microsoft/stream-collator` to `@rushstack/stream-collator`
 
 ## 3.2.4
 Tue, 28 Jan 2020 02:23:44 GMT

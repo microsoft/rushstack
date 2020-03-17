@@ -1,6 +1,26 @@
 {
-  "name": "@microsoft/set-webpack-public-path-plugin",
+  "name": "@rushstack/set-webpack-public-path-plugin",
   "entries": [
+    {
+      "version": "2.4.1",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v2.4.1",
+      "date": "Tue, 17 Mar 2020 23:55:58 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "PACKAGE NAME CHANGE: The NPM scope was changed from `@microsoft/set-webpack-public-path-plugin` to `@rushstack/set-webpack-public-path-plugin`"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.4` to `6.4.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.3` to `0.4.4`"
+          }
+        ]
+      }
+    },
     {
       "version": "2.4.0",
       "tag": "@microsoft/set-webpack-public-path-plugin_v2.4.0",
