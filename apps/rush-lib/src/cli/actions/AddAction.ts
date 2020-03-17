@@ -13,7 +13,7 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { PackageJsonUpdater, SemVerStyle } from '../../logic/PackageJsonUpdater';
-import { PackageName } from '@microsoft/node-core-library';
+import { PackageName } from '@rushstack/node-core-library';
 
 export class AddAction extends BaseRushAction {
   private _allFlag: CommandLineFlagParameter;

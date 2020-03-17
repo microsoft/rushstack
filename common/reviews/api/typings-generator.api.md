@@ -4,7 +4,7 @@
 
 ```ts
 
-import { Terminal } from '@microsoft/node-core-library';
+import { Terminal } from '@rushstack/node-core-library';
 
 // @public (undocumented)
 export interface IStringValuesTypingsGeneratorOptions extends ITypingsGeneratorOptions<IStringValueTypings> {

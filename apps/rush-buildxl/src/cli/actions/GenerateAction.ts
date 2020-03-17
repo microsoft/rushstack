@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { CommandLineAction } from '@microsoft/ts-command-line';
-import { Terminal } from '@microsoft/node-core-library';
+import { Terminal } from '@rushstack/node-core-library';
 import { RushConfiguration } from '@microsoft/rush-lib';
 
 import { BxlModulesGenerator } from '../../logic/BxlModulesGenerator';

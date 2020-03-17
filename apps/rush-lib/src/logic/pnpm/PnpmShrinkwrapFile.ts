@@ -1,7 +1,7 @@
 import * as yaml from 'js-yaml';
 import * as os from 'os';
 import * as semver from 'semver';
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';

@@ -24,7 +24,7 @@ import {
   FileSystem,
   PackageJsonLookup,
   IPackageJson
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 import { TaskRunner } from '../../logic/taskRunner/TaskRunner';
 import { TaskCollection } from '../../logic/taskRunner/TaskCollection';
 import { Utilities } from '../../utilities/Utilities';

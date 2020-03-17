@@ -3,7 +3,7 @@
 
 import { GulpTask, GCBTerminalProvider } from '@microsoft/gulp-core-build';
 import { IBuildConfig } from '@microsoft/gulp-core-build/lib/IBuildConfig';
-import { FileSystem, JsonObject, Terminal } from '@microsoft/node-core-library';
+import { FileSystem, JsonObject, Terminal } from '@rushstack/node-core-library';
 import * as Gulp from 'gulp';
 import * as colors from 'colors';
 import * as HttpType from 'http';

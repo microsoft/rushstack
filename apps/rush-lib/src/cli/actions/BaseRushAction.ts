@@ -10,7 +10,7 @@ import {
   ICommandLineActionOptions
 } from '@microsoft/ts-command-line';
 
-import { LockFile } from '@microsoft/node-core-library';
+import { LockFile } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { EventHooksManager } from '../../logic/EventHooksManager';

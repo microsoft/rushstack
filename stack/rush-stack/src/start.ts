@@ -5,7 +5,7 @@ import * as os from 'os';
 import * as colors from 'colors';
 import {
   PackageJsonLookup
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import { RushStackCommandLine } from './cli/RushStackCommandLine';
 

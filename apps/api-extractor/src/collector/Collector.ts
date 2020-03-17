@@ -7,7 +7,7 @@ import {
   PackageJsonLookup,
   Sort,
   InternalError
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 import {
   ReleaseTag,
   AedocDefinitions
@@ -154,8 +154,8 @@ export class Collector {
   }
 
   /**
-   * A list of module specifiers (e.g. `"@microsoft/node-core-library/lib/FileSystem"`) that should be emitted
-   * as star exports (e.g. `export * from "@microsoft/node-core-library/lib/FileSystem"`).
+   * A list of module specifiers (e.g. `"@rushstack/node-core-library/lib/FileSystem"`) that should be emitted
+   * as star exports (e.g. `export * from "@rushstack/node-core-library/lib/FileSystem"`).
    */
   public get starExportedExternalModulePaths(): ReadonlyArray<string> {
     return this._starExportedExternalModulePaths;

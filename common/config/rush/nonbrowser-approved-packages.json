@@ -47,7 +47,7 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "@microsoft/node-core-library",
+      "name": "@rushstack/node-core-library",
       "allowedCategories": [ "libraries", "tests" ]
     },
     {

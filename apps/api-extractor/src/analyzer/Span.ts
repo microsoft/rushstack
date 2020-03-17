@@ -3,7 +3,7 @@
 
 import * as ts from 'typescript';
 import { StringBuilder } from '@microsoft/tsdoc';
-import { Sort } from '@microsoft/node-core-library';
+import { Sort } from '@rushstack/node-core-library';
 
 /**
  * Specifies various transformations that will be performed by Span.getModifiedText().

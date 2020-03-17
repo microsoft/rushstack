@@ -15,7 +15,7 @@ import {
 import {
   FileSystem,
   Path
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import {

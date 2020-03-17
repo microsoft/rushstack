@@ -4,7 +4,7 @@
 import './mockRushCommandLineParser';
 
 import * as path from 'path';
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 import { Interleaver } from '@microsoft/stream-collator';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 

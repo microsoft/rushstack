@@ -3,7 +3,7 @@
 
 import * as child_process from 'child_process';
 import * as path from 'path';
-import { JsonFile, Text, FileSystem, JsonObject } from '@microsoft/node-core-library';
+import { JsonFile, Text, FileSystem, JsonObject } from '@rushstack/node-core-library';
 import { ITaskWriter } from '@microsoft/stream-collator';
 import { IPackageDeps } from '@microsoft/package-deps-hash';
 

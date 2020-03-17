@@ -3,7 +3,7 @@
 
 import * as colors from 'colors';
 import * as semver from 'semver';
-import { PackageName, FileSystem } from '@microsoft/node-core-library';
+import { PackageName, FileSystem } from '@rushstack/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
 import { DependencySpecifier } from '../DependencySpecifier';

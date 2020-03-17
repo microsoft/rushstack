@@ -6,7 +6,7 @@ import { CommandLineAction } from '@microsoft/ts-command-line';
 import {
   Terminal,
   FileSystem
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 import { RushConfiguration } from '@microsoft/rush-lib';
 
 export class CleanAction extends CommandLineAction {

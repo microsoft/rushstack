@@ -8,7 +8,7 @@ import {
   ConsoleTerminalProvider,
   Colors,
   IColorableSequence
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { ITask } from './ITask';

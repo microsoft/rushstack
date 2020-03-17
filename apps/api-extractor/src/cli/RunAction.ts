@@ -8,7 +8,7 @@ import {
   PackageJsonLookup,
   FileSystem,
   IPackageJson
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import {
   CommandLineAction,

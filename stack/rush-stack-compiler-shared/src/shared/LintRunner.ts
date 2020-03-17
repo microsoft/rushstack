@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { ITerminalProvider, FileSystem } from '@microsoft/node-core-library';
+import { ITerminalProvider, FileSystem } from '@rushstack/node-core-library';
 
 import { TslintRunner } from './TslintRunner';
 import { EslintRunner } from './EslintRunner';

@@ -11,7 +11,7 @@ describe('PackageJsonLookup', () => {
   describe('basic tests', () => {
 
     test('', () => {
-      expect(PackageJsonLookup.loadOwnPackageJson(__dirname).name).toEqual('@microsoft/node-core-library');
+      expect(PackageJsonLookup.loadOwnPackageJson(__dirname).name).toEqual('@rushstack/node-core-library');
     });
 
     test('tryLoadPackageJsonFor() test', () => {

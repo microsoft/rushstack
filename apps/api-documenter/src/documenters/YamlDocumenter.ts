@@ -11,7 +11,7 @@ import {
   FileSystem,
   NewlineKind,
   InternalError
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 import { StringBuilder, DocSection, DocComment } from '@microsoft/tsdoc';
 import {
   ApiModel,

@@ -13,7 +13,7 @@ import {
   Path,
   InternalError,
   FileSystem
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Git } from './Git';

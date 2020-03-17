@@ -5,7 +5,7 @@ import {
   StringValuesTypingsGenerator,
   IStringValueTyping
 } from '@rushstack/typings-generator';
-import { Terminal } from '@microsoft/node-core-library';
+import { Terminal } from '@rushstack/node-core-library';
 
 import { ILocalizationFile } from './interfaces';
 import { ILoggerOptions } from './utilities/Logging';

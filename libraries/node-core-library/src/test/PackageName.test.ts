@@ -7,16 +7,16 @@ describe('PackageName', () => {
   describe('Test', () => {
 
     test('isValidName() positive test', () => {
-      expect(PackageName.isValidName('@microsoft/node-core-library')).toEqual(true);
+      expect(PackageName.isValidName('@rushstack/node-core-library')).toEqual(true);
     });
 
     test('isValidName() negative test', () => {
-      expect(PackageName.isValidName('@microsoft/node-core-library/path')).toEqual(false);
+      expect(PackageName.isValidName('@rushstack/node-core-library/path')).toEqual(false);
     });
 
     test('tryParse() tests', () => {
       expect(
-        PackageName.tryParse('@microsoft/node-core-library')
+        PackageName.tryParse('@rushstack/node-core-library')
       ).toEqual(
         {
           scope: '@microsoft',
@@ -66,7 +66,7 @@ describe('PackageName', () => {
       );
 
       expect(
-        PackageName.tryParse('@Microsoft/node-core-library')
+        PackageName.tryParse('@rushstack/node-core-library')
       ).toEqual(
         {
           scope: '@Microsoft',
@@ -96,12 +96,12 @@ describe('PackageName', () => {
       );
 
       expect(
-        PackageName.tryParse('@microsoft/node-core-library/path')
+        PackageName.tryParse('@rushstack/node-core-library/path')
       ).toEqual(
         {
           scope: '@microsoft',
           unscopedName: 'node-core-library/path',
-          error: 'The package name "@microsoft/node-core-library/path" contains an invalid character: \"/\"'
+          error: 'The package name "@rushstack/node-core-library/path" contains an invalid character: \"/\"'
         }
       );
 
@@ -116,7 +116,7 @@ describe('PackageName', () => {
 
   test('combineParts() tests', () => {
     expect(PackageName.combineParts('@microsoft', 'node-core-library'))
-      .toEqual('@microsoft/node-core-library');
+      .toEqual('@rushstack/node-core-library');
 
     expect(PackageName.combineParts('', 'node-core-library'))
       .toEqual('node-core-library');
@@ -124,7 +124,7 @@ describe('PackageName', () => {
 
   test('combineParts() errors', () => {
     expect(() => {
-      PackageName.combineParts('', '@microsoft/node-core-library');
+      PackageName.combineParts('', '@rushstack/node-core-library');
     }).toThrowError('The unscopedName cannot start with an "@" character');
 
     expect(() => {

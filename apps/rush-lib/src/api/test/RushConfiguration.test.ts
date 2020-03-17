@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 
-import { Text } from '@microsoft/node-core-library';
+import { Text } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../RushConfiguration';
 import { ApprovedPackagesPolicy } from '../ApprovedPackagesPolicy';
 import { RushConfigurationProject } from '../RushConfigurationProject';

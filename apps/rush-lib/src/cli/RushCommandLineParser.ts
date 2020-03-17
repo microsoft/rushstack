@@ -6,7 +6,7 @@ import * as os from 'os';
 import * as path from 'path';
 
 import { CommandLineParser, CommandLineFlagParameter, CommandLineAction } from '@microsoft/ts-command-line';
-import { InternalError } from '@microsoft/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';

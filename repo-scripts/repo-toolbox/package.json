@@ -9,7 +9,7 @@
     "readme": "node ./lib/start.js readme"
   },
   "dependencies": {
-    "@microsoft/node-core-library": "3.19.3",
+    "@rushstack/node-core-library": "3.19.3",
     "@microsoft/rush-lib": "5.21.0",
     "@microsoft/ts-command-line": "4.3.10"
   },

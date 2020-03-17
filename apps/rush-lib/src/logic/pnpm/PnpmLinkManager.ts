@@ -15,7 +15,7 @@ import {
   FileSystem,
   FileConstants,
   InternalError
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import {
   BaseLinkManager

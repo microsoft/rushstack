@@ -14,7 +14,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "3.19.3"
+    "@rushstack/node-core-library": "3.19.3"
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.5": "0.4.3",

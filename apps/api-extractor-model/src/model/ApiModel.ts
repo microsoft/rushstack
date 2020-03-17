@@ -5,7 +5,7 @@ import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationRefer
 import { ApiItem, ApiItemKind } from '../items/ApiItem';
 import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 import { ApiPackage } from './ApiPackage';
-import { PackageName } from '@microsoft/node-core-library';
+import { PackageName } from '@rushstack/node-core-library';
 import { ModelReferenceResolver, IResolveDeclarationReferenceResult } from './ModelReferenceResolver';
 import { DocDeclarationReference } from '@microsoft/tsdoc';
 
@@ -97,7 +97,7 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
    *
    * If the NPM scope is omitted in the package name, it will still be found provided that it is an unambiguous match.
    * For example, it's often convenient to write `{@link node-core-library#JsonFile}` instead of
-   * `{@link @microsoft/node-core-library#JsonFile}`.
+   * `{@link @rushstack/node-core-library#JsonFile}`.
    */
   public tryGetPackageByName(packageName: string): ApiPackage | undefined {
     // Build the lookup on demand

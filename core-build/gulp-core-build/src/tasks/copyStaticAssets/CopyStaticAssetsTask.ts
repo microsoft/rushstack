@@ -5,7 +5,7 @@ import * as Gulp from 'gulp';
 import * as path from 'path';
 import globEscape = require('glob-escape');
 import { GulpTask } from '../GulpTask';
-import { JsonObject } from '@microsoft/node-core-library';
+import { JsonObject } from '@rushstack/node-core-library';
 
 /**
  * Configuration for CopyStaticAssetsTask

@@ -5,7 +5,7 @@ import { GulpTask } from './GulpTask';
 import gulpType = require('gulp');
 import * as path from 'path';
 import * as semver from 'semver';
-import { FileConstants } from '@microsoft/node-core-library';
+import { FileConstants } from '@rushstack/node-core-library';
 
 interface IShrinkwrapDep {
   [name: string]: { version: string }

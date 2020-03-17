@@ -9,7 +9,7 @@ import * as path from 'path';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseConfiglessRushAction } from './BaseRushAction';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
-import { FileSystem, NewlineKind, InternalError } from '@microsoft/node-core-library';
+import { FileSystem, NewlineKind, InternalError } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import { Rush } from '../../api/Rush';
 

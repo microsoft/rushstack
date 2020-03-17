@@ -9,7 +9,7 @@ import {
   CommandLineStringParameter,
   CommandLineChoiceParameter
 } from '@microsoft/ts-command-line';
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 import {
   IChangeInfo,
@@ -500,7 +500,7 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private _addNpmPublishHome(): void {    
+  private _addNpmPublishHome(): void {
     // Create "common\temp\publish-home" folder, if it doesn't exist
     Utilities.createFolderWithRetry(this._targetNpmrcPublishFolder);
 

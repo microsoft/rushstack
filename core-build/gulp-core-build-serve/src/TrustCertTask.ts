@@ -10,7 +10,7 @@ import {
   ICertificate,
   CertificateManager
 } from '@rushstack/debug-certificate-manager';
-import { Terminal } from '@microsoft/node-core-library';
+import { Terminal } from '@rushstack/node-core-library';
 
 /**
  * This task generates and trusts a development certificate. The certificate is self-signed

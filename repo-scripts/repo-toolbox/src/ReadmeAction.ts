@@ -2,7 +2,7 @@
 // See the @microsoft/rush package's LICENSE file for license information.
 
 import * as path from 'path';
-import { StringBuilder, Text, Sort, FileSystem } from '@microsoft/node-core-library';
+import { StringBuilder, Text, Sort, FileSystem } from '@rushstack/node-core-library';
 import { RushConfiguration, RushConfigurationProject, LockStepVersionPolicy } from '@microsoft/rush-lib';
 import { CommandLineAction } from '@microsoft/ts-command-line';
 

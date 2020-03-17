@@ -9,7 +9,7 @@ import {
   CommandLineAction,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 import {
   ApiModel,
   ApiItem,

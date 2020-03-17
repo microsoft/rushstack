@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { AstSymbol } from './AstSymbol';
-import { InternalError } from '@microsoft/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 
 /**
  * Indicates the import kind for an `AstImport`.
@@ -55,7 +55,7 @@ export class AstImport {
    * The name of the external package (and possibly module path) that this definition
    * was imported from.
    *
-   * Example: "@microsoft/node-core-library/lib/FileSystem"
+   * Example: "@rushstack/node-core-library/lib/FileSystem"
    */
   public readonly modulePath: string;
 
@@ -93,7 +93,7 @@ export class AstImport {
    * If modulePath and exportName are defined, then this is a dictionary key
    * that combines them with a colon (":").
    *
-   * Example: "@microsoft/node-core-library/lib/FileSystem:FileSystem"
+   * Example: "@rushstack/node-core-library/lib/FileSystem:FileSystem"
    */
   public readonly key: string;
 

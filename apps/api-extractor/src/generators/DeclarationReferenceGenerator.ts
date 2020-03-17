@@ -10,7 +10,7 @@ import {
   Navigation,
   Meaning
 } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
-import { PackageJsonLookup, INodePackageJson, InternalError } from '@microsoft/node-core-library';
+import { PackageJsonLookup, INodePackageJson, InternalError } from '@rushstack/node-core-library';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import { InternalError } from '@microsoft/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 
 import { TypeScriptHelpers } from './TypeScriptHelpers';
 import { AstSymbol } from './AstSymbol';

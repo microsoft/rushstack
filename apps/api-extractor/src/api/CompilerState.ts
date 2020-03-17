@@ -7,7 +7,7 @@ import colors = require('colors');
 
 import {
   JsonFile
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import { ExtractorConfig } from './ExtractorConfig';
 import { IExtractorInvokeOptions } from './Extractor';

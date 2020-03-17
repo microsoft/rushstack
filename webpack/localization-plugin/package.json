@@ -25,7 +25,7 @@
   "dependencies": {
     "@types/node": "10.17.13",
     "@types/tapable": "1.0.4",
-    "@microsoft/node-core-library": "3.19.3",
+    "@rushstack/node-core-library": "3.19.3",
     "@rushstack/typings-generator": "0.1.0",
     "loader-utils": "~1.1.0",
     "jju": "~1.4.0",
