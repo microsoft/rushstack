@@ -5,7 +5,7 @@ import * as colors from 'colors';
 import * as glob from 'glob';
 import * as path from 'path';
 import * as builtinPackageNames from 'builtin-modules';
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseConfiglessRushAction } from './BaseRushAction';

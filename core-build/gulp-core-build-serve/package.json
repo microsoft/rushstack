@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@microsoft/gulp-core-build": "3.15.1",
-    "@microsoft/node-core-library": "3.19.3",
+    "@rushstack/node-core-library": "3.19.3",
     "@rushstack/debug-certificate-manager": "0.2.1",
     "@types/node": "10.17.13",
     "colors": "~1.2.1",

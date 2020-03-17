@@ -7,9 +7,9 @@
 import * as ApiExtractor from '@microsoft/api-extractor';
 import { ExtractorConfig } from '@microsoft/api-extractor';
 import { IExtractorInvokeOptions } from '@microsoft/api-extractor';
-import { IPackageJson } from '@microsoft/node-core-library';
-import { ITerminalProvider } from '@microsoft/node-core-library';
-import { Terminal } from '@microsoft/node-core-library';
+import { IPackageJson } from '@rushstack/node-core-library';
+import { ITerminalProvider } from '@rushstack/node-core-library';
+import { Terminal } from '@rushstack/node-core-library';
 import * as Tslint from 'tslint';
 import * as Typescript from 'typescript';
 

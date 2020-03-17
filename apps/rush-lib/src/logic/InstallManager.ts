@@ -24,7 +24,7 @@ import {
   Sort,
   PosixModeBits,
   JsonObject
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
 import { AsyncRecycler } from '../utilities/AsyncRecycler';

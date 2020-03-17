@@ -1,4 +1,4 @@
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 import * as xml from 'xml';
 import * as Jest from 'jest-cli';
 import * as TestResults from 'jest-nunit-reporter/src/Testresults';

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonSchema } from "@microsoft/node-core-library";
+import { JsonSchema } from "@rushstack/node-core-library";
 import * as lodash from 'lodash';
 
 export class Constants {

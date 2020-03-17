@@ -10,7 +10,7 @@ import { execSync } from 'child_process';
 import {
   FileSystem,
   FileConstants
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 const SOURCE_PATH: string = path.join(__dirname).replace(
   path.join('lib', 'test'),

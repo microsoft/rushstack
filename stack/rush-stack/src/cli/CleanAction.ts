@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineAction } from  '@microsoft/ts-command-line';
+import { CommandLineAction } from  '@rushstack/ts-command-line';
 import { RushStackCommandLine } from './RushStackCommandLine';
 import { BasicTasks } from '../logic/BasicTasks';
 import { BuildContext } from '../logic/BuildContext';

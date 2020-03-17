@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonFile, JsonSchema, FileSystem } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
 import { VersionPolicy, BumpType, LockStepVersionPolicy } from './VersionPolicy';
 import { RushConfigurationProject } from './RushConfigurationProject';

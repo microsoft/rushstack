@@ -8,7 +8,7 @@ import {
   NewlineKind,
   PackageJsonLookup,
   IPackageJson
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import { ExtractorConfig } from './ExtractorConfig';
 import { Collector } from '../collector/Collector';

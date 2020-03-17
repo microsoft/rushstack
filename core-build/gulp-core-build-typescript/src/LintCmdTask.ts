@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonFile, JsonObject } from '@microsoft/node-core-library';
+import { JsonFile, JsonObject } from '@rushstack/node-core-library';
 import { LintRunner as TLintRunner } from '@microsoft/rush-stack-compiler-3.1';
 
 import {

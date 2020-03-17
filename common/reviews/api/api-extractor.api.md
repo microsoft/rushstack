@@ -4,9 +4,9 @@
 
 ```ts
 
-import { INodePackageJson } from '@microsoft/node-core-library';
-import { JsonSchema } from '@microsoft/node-core-library';
-import { NewlineKind } from '@microsoft/node-core-library';
+import { INodePackageJson } from '@rushstack/node-core-library';
+import { JsonSchema } from '@rushstack/node-core-library';
+import { NewlineKind } from '@rushstack/node-core-library';
 import * as tsdoc from '@microsoft/tsdoc';
 
 // @public
@@ -84,7 +84,7 @@ export const enum ExtractorLogLevel {
 // @public
 export class ExtractorMessage {
     // Warning: (ae-forgotten-export) The symbol "IExtractorMessageOptions" needs to be exported by the entry point index.d.ts
-    // 
+    //
     // @internal
     constructor(options: IExtractorMessageOptions);
     readonly category: ExtractorMessageCategory;

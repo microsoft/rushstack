@@ -6,7 +6,7 @@
 
 import { loader } from 'webpack';
 import { StringValuesTypingsGenerator } from '@rushstack/typings-generator';
-import { Terminal } from '@microsoft/node-core-library';
+import { Terminal } from '@rushstack/node-core-library';
 import * as Webpack from 'webpack';
 
 // @public (undocumented)

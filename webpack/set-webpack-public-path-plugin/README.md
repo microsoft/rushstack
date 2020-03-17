@@ -2,7 +2,7 @@
 
 ## Installation
 
-`npm install @microsoft/set-webpack-public-path-plugin --save-dev`
+`npm install @rushstack/set-webpack-public-path-plugin --save-dev`
 
 ## Overview
 
@@ -15,7 +15,7 @@ property.
 To use the plugin, add it to the `plugins` array of your Webpack config. For example:
 
 ```JavaScript
-import { SetPublicPathPlugin } from '@microsoft/set-webpack-public-path-plugin';
+import { SetPublicPathPlugin } from '@rushstack/set-webpack-public-path-plugin';
 
 {
   plugins: [
@@ -154,7 +154,7 @@ the global register code by searching for the value of the `registryVariableName
 ## Usage without registryVariableName
 
 ``` javascript
-var setWebpackPublicPath = require('@microsoft/set-webpack-public-path-plugin');
+var setWebpackPublicPath = require('@rushstack/set-webpack-public-path-plugin');
 var gulpInsert = require('gulp-insert');
 
 gulp.src('finizlied/webpack/bundle/path')
@@ -165,7 +165,7 @@ gulp.src('finizlied/webpack/bundle/path')
 ## Usage with registryVariableName
 
 ``` javascript
-var setWebpackPublicPath = require('@microsoft/set-webpack-public-path-plugin');
+var setWebpackPublicPath = require('@rushstack/set-webpack-public-path-plugin');
 var gulpInsert = require('gulp-insert');
 var gulpIf = require('gulp-if');
 

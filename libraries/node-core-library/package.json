@@ -1,5 +1,5 @@
 {
-  "name": "@microsoft/node-core-library",
+  "name": "@rushstack/node-core-library",
   "version": "3.19.3",
   "description": "Core libraries that every NodeJS toolchain project should use",
   "main": "lib/index.js",

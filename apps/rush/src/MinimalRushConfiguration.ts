@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile } from '@rushstack/node-core-library';
 import { RushConfiguration } from '@microsoft/rush-lib';
 import { RushConstants } from '@microsoft/rush-lib/lib/logic/RushConstants';
 

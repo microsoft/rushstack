@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "PACKAGE NAME CHANGE: The NPM scope was changed from `@microsoft/node-core-library` to `@rushstack/node-core-library`",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

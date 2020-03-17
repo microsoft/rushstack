@@ -4,8 +4,8 @@
 
 ```ts
 
-import { IPackageJson } from '@microsoft/node-core-library';
-import { JsonObject } from '@microsoft/node-core-library';
+import { IPackageJson } from '@rushstack/node-core-library';
+import { JsonObject } from '@rushstack/node-core-library';
 
 // @public
 export class ApprovedPackagesConfiguration {

@@ -8,8 +8,8 @@ import * as colors from 'colors';
 import {
   CommandLineAction,
   CommandLineStringParameter
-} from '@microsoft/ts-command-line';
-import { FileSystem } from '@microsoft/node-core-library';
+} from '@rushstack/ts-command-line';
+import { FileSystem } from '@rushstack/node-core-library';
 import {
   ApiModel,
   ApiItem,

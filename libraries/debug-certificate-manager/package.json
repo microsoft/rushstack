@@ -12,7 +12,7 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@microsoft/node-core-library": "3.19.3",
+    "@rushstack/node-core-library": "3.19.3",
     "deasync": "~0.1.19",
     "node-forge": "~0.7.1",
     "sudo": "~1.0.3"

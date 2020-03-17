@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import * as os from 'os';
-import { JsonFile, JsonSchema, FileSystem, NewlineKind, InternalError } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema, FileSystem, NewlineKind, InternalError } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
 import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';

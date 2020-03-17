@@ -7,7 +7,7 @@ import {
   IPackageJson,
   JsonFile,
   Sort
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 /**
  * @beta

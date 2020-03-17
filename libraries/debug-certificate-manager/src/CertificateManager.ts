@@ -5,7 +5,7 @@ import * as forge from 'node-forge';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import { EOL } from 'os';
-import { FileSystem, Terminal } from '@microsoft/node-core-library';
+import { FileSystem, Terminal } from '@rushstack/node-core-library';
 
 import { runSudoSync, ISudoSyncResult } from './sudoSync';
 import { CertificateStore } from './CertificateStore';

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import npmPackageArg = require('npm-package-arg');
-import { InternalError } from '@microsoft/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 
 /**
  * An NPM "version specifier" is a string that can appear as a package.json "dependencies" value.

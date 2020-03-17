@@ -8,7 +8,7 @@ import {
   PackageName,
   FileSystem,
   FileConstants
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';

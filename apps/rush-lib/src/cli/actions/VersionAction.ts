@@ -5,11 +5,11 @@ import * as semver from 'semver';
 import {
   IPackageJson,
   FileConstants
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter
-} from '@microsoft/ts-command-line';
+} from '@rushstack/ts-command-line';
 
 import { BumpType, LockStepVersionPolicy } from '../../api/VersionPolicy';
 import { VersionPolicyConfiguration } from '../../api/VersionPolicyConfiguration';

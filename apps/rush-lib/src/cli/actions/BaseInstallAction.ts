@@ -8,7 +8,7 @@ import {
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
   CommandLineStringParameter
-} from '@microsoft/ts-command-line';
+} from '@rushstack/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';

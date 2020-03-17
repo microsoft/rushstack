@@ -652,7 +652,7 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@microsoft/node-core-library",
+      "packageName": "@rushstack/node-core-library",
       "projectFolder": "libraries/node-core-library",
       "reviewCategory": "libraries",
       "shouldPublish": true,
@@ -662,7 +662,7 @@
       ]
     },
     {
-      "packageName": "@microsoft/package-deps-hash",
+      "packageName": "@rushstack/package-deps-hash",
       "projectFolder": "libraries/package-deps-hash",
       "reviewCategory": "libraries",
       "shouldPublish": true
@@ -674,13 +674,13 @@
       "shouldPublish": false
     },
     {
-      "packageName": "@microsoft/stream-collator",
+      "packageName": "@rushstack/stream-collator",
       "projectFolder": "libraries/stream-collator",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
     {
-      "packageName": "@microsoft/ts-command-line",
+      "packageName": "@rushstack/ts-command-line",
       "projectFolder": "libraries/ts-command-line",
       "reviewCategory": "libraries",
       "shouldPublish": true,
@@ -879,7 +879,7 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@microsoft/loader-raw-script",
+      "packageName": "@rushstack/loader-raw-script",
       "projectFolder": "webpack/loader-raw-script",
       "reviewCategory": "libraries",
       "shouldPublish": true
@@ -891,7 +891,7 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@microsoft/set-webpack-public-path-plugin",
+      "packageName": "@rushstack/set-webpack-public-path-plugin",
       "projectFolder": "webpack/set-webpack-public-path-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true

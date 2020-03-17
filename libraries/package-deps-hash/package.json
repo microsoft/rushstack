@@ -1,5 +1,5 @@
 {
-  "name": "@microsoft/package-deps-hash",
+  "name": "@rushstack/package-deps-hash",
   "version": "2.4.4",
   "description": "",
   "main": "lib/index.js",
@@ -15,7 +15,7 @@
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.5": "0.4.3",
     "@microsoft/node-library-build": "6.4.4",
-    "@microsoft/node-core-library": "3.19.3",
+    "@rushstack/node-core-library": "3.19.3",
     "@rushstack/eslint-config": "0.5.4",
     "@types/chai": "3.4.34",
     "@types/mocha": "5.2.5",
@@ -24,6 +24,6 @@
     "gulp": "~4.0.2"
   },
   "dependencies": {
-    "@microsoft/node-core-library": "3.19.3"
+    "@rushstack/node-core-library": "3.19.3"
   }
 }

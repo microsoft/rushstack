@@ -4,7 +4,7 @@
 import * as path from 'path';
 import { SourceMapConsumer, RawSourceMap, MappingItem, Position } from 'source-map';
 import { IExtractorMessageOptions } from '../api/ExtractorMessage';
-import { FileSystem, InternalError, JsonFile, NewlineKind } from '@microsoft/node-core-library';
+import { FileSystem, InternalError, JsonFile, NewlineKind } from '@rushstack/node-core-library';
 
 interface ISourceMap {
   sourceMapConsumer: SourceMapConsumer;

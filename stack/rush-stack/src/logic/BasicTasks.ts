@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as child_process from 'child_process';
 
 import { BuildContext } from './BuildContext';
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 export class BasicTasks {
   /**

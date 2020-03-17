@@ -7,7 +7,7 @@ import {
   JsonFile,
   JsonSchema,
   FileSystem
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import { RushConstants } from '../logic/RushConstants';
 

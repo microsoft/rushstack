@@ -3,7 +3,7 @@
 
 import { argv as clArgs } from 'yargs';
 import * as path from 'path';
-import { FileConstants } from '@microsoft/node-core-library';
+import { FileConstants } from '@rushstack/node-core-library';
 
 export const root: string = process.cwd();
 export const args: { [flat: string]: boolean | string } = clArgs;

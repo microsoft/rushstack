@@ -13,7 +13,7 @@
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "3.19.3",
+    "@rushstack/node-core-library": "3.19.3",
     "@types/chalk": "0.4.31",
     "@types/gulp": "4.0.6",
     "@types/jest": "23.3.11",

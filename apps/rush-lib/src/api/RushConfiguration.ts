@@ -12,7 +12,7 @@ import {
   Path,
   PackageName,
   FileSystem
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
 
 import { Rush } from '../api/Rush';

@@ -13,7 +13,7 @@ import {
   CommandLineStringParameter,
   CommandLineStringListParameter,
   CommandLineParameterKind
-} from '@microsoft/ts-command-line';
+} from '@rushstack/ts-command-line';
 
 import { SetupChecks } from '../../logic/SetupChecks';
 import { TaskSelector } from '../../logic/TaskSelector';
@@ -24,7 +24,7 @@ import {
   FileSystem,
   PackageJsonLookup,
   IPackageJson
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 import { TaskRunner } from '../../logic/taskRunner/TaskRunner';
 import { TaskCollection } from '../../logic/taskRunner/TaskCollection';
 import { Utilities } from '../../utilities/Utilities';

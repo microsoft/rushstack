@@ -8,13 +8,13 @@ import {
   PackageJsonLookup,
   FileSystem,
   IPackageJson
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import {
   CommandLineAction,
   CommandLineStringParameter,
   CommandLineFlagParameter
-} from '@microsoft/ts-command-line';
+} from '@rushstack/ts-command-line';
 
 import { Extractor, ExtractorResult } from '../api/Extractor';
 import { IConfigFile } from '../api/IConfigFile';

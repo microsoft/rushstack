@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

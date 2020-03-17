@@ -8,7 +8,7 @@ import { RushConfiguration } from '../api/RushConfiguration';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { Utilities } from '../utilities/Utilities';
 import { RushConstants } from '../logic/RushConstants';
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 // Refuses to run at all if the PNPM version is older than this, because there
 // are known bugs or missing features in earlier releases.

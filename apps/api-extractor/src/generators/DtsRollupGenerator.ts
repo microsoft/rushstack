@@ -4,7 +4,7 @@
 /* eslint-disable no-bitwise */
 
 import * as ts from 'typescript';
-import { FileSystem, NewlineKind, InternalError } from '@microsoft/node-core-library';
+import { FileSystem, NewlineKind, InternalError } from '@rushstack/node-core-library';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';
