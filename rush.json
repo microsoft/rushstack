@@ -662,7 +662,7 @@
       ]
     },
     {
-      "packageName": "@microsoft/package-deps-hash",
+      "packageName": "@rushstack/package-deps-hash",
       "projectFolder": "libraries/package-deps-hash",
       "reviewCategory": "libraries",
       "shouldPublish": true

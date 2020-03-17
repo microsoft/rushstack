@@ -8,7 +8,7 @@ import {
   getPackageDeps,
   getGitHashForFiles,
   IPackageDeps
-} from '@microsoft/package-deps-hash';
+} from '@rushstack/package-deps-hash';
 import {
   Path,
   InternalError,

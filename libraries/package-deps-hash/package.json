@@ -1,5 +1,5 @@
 {
-  "name": "@microsoft/package-deps-hash",
+  "name": "@rushstack/package-deps-hash",
   "version": "2.4.4",
   "description": "",
   "main": "lib/index.js",

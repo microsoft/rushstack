@@ -55,7 +55,7 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "@microsoft/package-deps-hash",
+      "name": "@rushstack/package-deps-hash",
       "allowedCategories": [ "libraries" ]
     },
     {
