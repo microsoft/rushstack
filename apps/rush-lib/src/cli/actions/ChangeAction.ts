@@ -11,7 +11,7 @@ import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
   CommandLineChoiceParameter
-} from '@microsoft/ts-command-line';
+} from '@rushstack/ts-command-line';
 import {
   FileSystem,
   Path

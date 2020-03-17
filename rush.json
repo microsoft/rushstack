@@ -680,7 +680,7 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@microsoft/ts-command-line",
+      "packageName": "@rushstack/ts-command-line",
       "projectFolder": "libraries/ts-command-line",
       "reviewCategory": "libraries",
       "shouldPublish": true,

@@ -13,7 +13,7 @@ import {
   CommandLineStringParameter,
   CommandLineStringListParameter,
   CommandLineParameterKind
-} from '@microsoft/ts-command-line';
+} from '@rushstack/ts-command-line';
 
 import { SetupChecks } from '../../logic/SetupChecks';
 import { TaskSelector } from '../../logic/TaskSelector';

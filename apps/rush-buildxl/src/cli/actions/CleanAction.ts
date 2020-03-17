@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { CommandLineAction } from '@microsoft/ts-command-line';
+import { CommandLineAction } from '@rushstack/ts-command-line';
 import {
   Terminal,
   FileSystem

@@ -8,7 +8,7 @@ import * as path from 'path';
 import {
   CommandLineAction,
   ICommandLineActionOptions
-} from '@microsoft/ts-command-line';
+} from '@rushstack/ts-command-line';
 
 import { LockFile } from '@rushstack/node-core-library';
 

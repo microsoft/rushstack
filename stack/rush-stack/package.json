@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "3.19.3",
-    "@microsoft/ts-command-line": "4.3.10",
+    "@rushstack/ts-command-line": "4.3.10",
     "colors": "~1.2.1"
   },
   "devDependencies": {

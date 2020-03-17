@@ -9,7 +9,7 @@ import {
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter
-} from '@microsoft/ts-command-line';
+} from '@rushstack/ts-command-line';
 
 import { BumpType, LockStepVersionPolicy } from '../../api/VersionPolicy';
 import { VersionPolicyConfiguration } from '../../api/VersionPolicyConfiguration';

@@ -3,7 +3,7 @@
 
 import {
   CommandLineFlagParameter
-} from '@microsoft/ts-command-line';
+} from '@rushstack/ts-command-line';
 
 import { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
 import { BaseAction } from './BaseAction';

@@ -34,7 +34,7 @@
   "dependencies": {
     "@microsoft/api-extractor-model": "7.7.7",
     "@rushstack/node-core-library": "3.19.3",
-    "@microsoft/ts-command-line": "4.3.10",
+    "@rushstack/ts-command-line": "4.3.10",
     "@microsoft/tsdoc": "0.12.14",
     "colors": "~1.2.1",
     "lodash": "~4.17.15",

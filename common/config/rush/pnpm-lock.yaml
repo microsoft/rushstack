@@ -248,7 +248,7 @@ packages:
     dependencies:
       '@microsoft/api-extractor-model': 7.7.0
       '@microsoft/node-core-library': 3.18.0
-      '@microsoft/ts-command-line': 4.3.5
+      '@rushstack/ts-command-line': 4.3.5
       '@microsoft/tsdoc': 0.12.14
       colors: 1.2.5
       lodash: 4.17.15
@@ -366,7 +366,7 @@ packages:
     dev: false
     resolution:
       integrity: sha512-AxDfMpiVqh3hsqTxMEYtQoz866WB/sw/Jl0pgTLh6sMHHmIBNMd+E0pVcP9WNk8zTkr9LCphJ5SziU1C8BgZMA==
-  /@microsoft/ts-command-line/4.3.5:
+  /@rushstack/ts-command-line/4.3.5:
     dependencies:
       '@types/argparse': 1.0.33
       argparse: 1.0.10

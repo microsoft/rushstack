@@ -7,7 +7,7 @@ import * as semver from 'semver';
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter
-} from '@microsoft/ts-command-line';
+} from '@rushstack/ts-command-line';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BaseRushAction } from './BaseRushAction';

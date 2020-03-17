@@ -4,7 +4,7 @@
 import * as path from 'path';
 import { StringBuilder, Text, Sort, FileSystem } from '@rushstack/node-core-library';
 import { RushConfiguration, RushConfigurationProject, LockStepVersionPolicy } from '@microsoft/rush-lib';
-import { CommandLineAction } from '@microsoft/ts-command-line';
+import { CommandLineAction } from '@rushstack/ts-command-line';
 
 export class ReadmeAction extends CommandLineAction {
   public constructor() {

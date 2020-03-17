@@ -135,7 +135,7 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "@microsoft/ts-command-line",
+      "name": "@rushstack/ts-command-line",
       "allowedCategories": [ "libraries" ]
     },
     {
