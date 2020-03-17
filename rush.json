@@ -879,7 +879,7 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@microsoft/loader-raw-script",
+      "packageName": "@rushstack/loader-raw-script",
       "projectFolder": "webpack/loader-raw-script",
       "reviewCategory": "libraries",
       "shouldPublish": true

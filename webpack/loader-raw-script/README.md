@@ -2,7 +2,7 @@
 
 ## Installation
 
-`npm install @microsoft/loader-raw-script --save-dev`
+`npm install @rushstack/loader-raw-script --save-dev`
 
 ## Overview
 
@@ -13,7 +13,7 @@ This simple loader loads a script file's contents directly in a webpack bundle u
 [Documentation: Using loaders](http://webpack.github.io/docs/using-loaders.html)
 
 ``` javascript
-require("@microsoft/loader-raw-script!path/to/script.js");
+require("@rushstack/loader-raw-script!path/to/script.js");
 ```
 
 ## License

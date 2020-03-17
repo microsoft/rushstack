@@ -1,5 +1,5 @@
 {
-  "name": "@microsoft/loader-raw-script",
+  "name": "@rushstack/loader-raw-script",
   "version": "1.3.4",
   "description": "",
   "main": "lib/index.js",
