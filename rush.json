@@ -674,7 +674,7 @@
       "shouldPublish": false
     },
     {
-      "packageName": "@microsoft/stream-collator",
+      "packageName": "@rushstack/stream-collator",
       "projectFolder": "libraries/stream-collator",
       "reviewCategory": "libraries",
       "shouldPublish": true

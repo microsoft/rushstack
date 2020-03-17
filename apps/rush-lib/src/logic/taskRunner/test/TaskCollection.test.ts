@@ -1,5 +1,5 @@
 import { TaskCollection } from '../TaskCollection';
-import { ITaskWriter } from '@microsoft/stream-collator';
+import { ITaskWriter } from '@rushstack/stream-collator';
 import { TaskStatus } from '../TaskStatus';
 import { ITaskDefinition, ITask } from '../ITask';
 import { StringBufferTerminalProvider } from '@rushstack/node-core-library';

@@ -4,7 +4,7 @@
 import * as child_process from 'child_process';
 import * as path from 'path';
 import { JsonFile, Text, FileSystem, JsonObject } from '@rushstack/node-core-library';
-import { ITaskWriter } from '@microsoft/stream-collator';
+import { ITaskWriter } from '@rushstack/stream-collator';
 import { IPackageDeps } from '@rushstack/package-deps-hash';
 
 import { RushConfiguration } from '../../api/RushConfiguration';

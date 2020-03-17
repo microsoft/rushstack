@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
-import { Interleaver } from '@microsoft/stream-collator';
+import { Interleaver } from '@rushstack/stream-collator';
 import {
   Terminal,
   ConsoleTerminalProvider,

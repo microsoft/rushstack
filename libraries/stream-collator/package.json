@@ -1,5 +1,5 @@
 {
-  "name": "@microsoft/stream-collator",
+  "name": "@rushstack/stream-collator",
   "version": "3.2.4",
   "description": "Display intelligible realtime output from your asynchronous streams",
   "repository": {

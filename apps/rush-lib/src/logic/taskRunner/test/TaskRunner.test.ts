@@ -1,6 +1,6 @@
 import { EOL } from 'os';
 import { TaskRunner, ITaskRunnerOptions } from '../TaskRunner';
-import { ITaskWriter } from '@microsoft/stream-collator';
+import { ITaskWriter } from '@rushstack/stream-collator';
 import { TaskStatus } from '../TaskStatus';
 import { ITaskDefinition, ITask } from '../ITask';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
