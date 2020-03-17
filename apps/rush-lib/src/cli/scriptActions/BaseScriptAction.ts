@@ -56,7 +56,8 @@ export abstract class BaseScriptAction extends BaseRushAction {
             customParameter = this.defineFlagParameter({
               parameterShortName: parameterJson.shortName,
               parameterLongName: parameterJson.longName,
-              description: parameterJson.description
+              description: parameterJson.description,
+              required: parameterJson.required
             });
             break;
           case 'choice':
@@ -64,6 +65,7 @@ export abstract class BaseScriptAction extends BaseRushAction {
               parameterShortName: parameterJson.shortName,
               parameterLongName: parameterJson.longName,
               description: parameterJson.description,
+              required: parameterJson.required,
               alternatives: parameterJson.alternatives.map(x => x.name),
               defaultValue: parameterJson.defaultValue
             });
@@ -73,6 +75,7 @@ export abstract class BaseScriptAction extends BaseRushAction {
               parameterLongName: parameterJson.longName,
               parameterShortName: parameterJson.shortName,
               description: parameterJson.description,
+              required: parameterJson.required,
               argumentName: parameterJson.argumentName
             });
             break;

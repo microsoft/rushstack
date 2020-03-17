@@ -171,6 +171,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "@rushstack/typings-generator",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@typescript-eslint/eslint-plugin",
       "allowedCategories": [ "libraries" ]
     },
@@ -248,6 +252,10 @@
     },
     {
       "name": "deasync",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "decache",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -443,16 +451,12 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "json-loader",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "loader-utils",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "lodash",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "lodash.merge",
@@ -520,6 +524,10 @@
     },
     {
       "name": "pretty-hrtime",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "pseudolocale",
       "allowedCategories": [ "libraries" ]
     },
     {

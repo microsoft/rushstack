@@ -1,6 +1,25 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 28 Jan 2020 03:57:30 GMT and should not be manually modified.
+This log was last generated on Sat, 07 Mar 2020 05:36:08 GMT and should not be manually modified.
+
+## 5.21.0
+Sat, 07 Mar 2020 05:36:08 GMT
+
+### Updates
+
+- Make the event hook failure message print in yellow.
+- Improve phrasing of an error message.
+- Add a new command-line.json setting "required" for non-optional parameters
+- Implement `pnpmOptions.pnpmStore` and RUSH_PNPM_STORE_PATH, to allow the end-user to define where PNPM will place its store.
+- Add a --json flag for "rush check" to facilitate automation
+
+## 5.20.0
+Wed, 12 Feb 2020 21:51:19 GMT
+
+### Updates
+
+- Support "." as a value for the --to and --from parameters to build to the current project.
+- Improve security by allowing the "rush publish" authentication token to be specified via an environment variable.
 
 ## 5.19.4
 Tue, 28 Jan 2020 03:57:30 GMT
