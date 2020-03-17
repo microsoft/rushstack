@@ -891,7 +891,7 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@microsoft/set-webpack-public-path-plugin",
+      "packageName": "@rushstack/set-webpack-public-path-plugin",
       "projectFolder": "webpack/set-webpack-public-path-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true

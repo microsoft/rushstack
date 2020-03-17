@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import * as Webpack from 'webpack';
-import * as SetPublicPathPluginPackageType from '@microsoft/set-webpack-public-path-plugin';
+import * as SetPublicPathPluginPackageType from '@rushstack/set-webpack-public-path-plugin';
 
 import { Constants } from './utilities/Constants';
 import { LocalizationPlugin } from './LocalizationPlugin';
@@ -59,7 +59,7 @@ export class WebpackConfigurationUpdater {
     let setPublicPathPlugin: typeof SetPublicPathPluginPackageType.SetPublicPathPlugin | undefined;
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const pluginPackage: typeof SetPublicPathPluginPackageType = require('@microsoft/set-webpack-public-path-plugin');
+      const pluginPackage: typeof SetPublicPathPluginPackageType = require('@rushstack/set-webpack-public-path-plugin');
       setPublicPathPlugin = pluginPackage.SetPublicPathPlugin;
     } catch (e) {
       // public path plugin isn't present - ignore

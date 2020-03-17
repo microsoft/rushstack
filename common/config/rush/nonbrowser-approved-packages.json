@@ -119,7 +119,7 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@microsoft/set-webpack-public-path-plugin",
+      "name": "@rushstack/set-webpack-public-path-plugin",
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
