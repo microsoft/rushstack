@@ -2,6 +2,27 @@
   "name": "@microsoft/gulp-core-build-webpack",
   "entries": [
     {
+      "version": "5.0.2",
+      "tag": "@microsoft/gulp-core-build-webpack_v5.0.2",
+      "date": "Wed, 18 Mar 2020 15:07:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.15.2` to `3.15.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.5` to `6.4.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.4` to `0.4.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.4` to `0.5.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.0.1",
       "tag": "@microsoft/gulp-core-build-webpack_v5.0.1",
       "date": "Tue, 17 Mar 2020 23:55:58 GMT",
