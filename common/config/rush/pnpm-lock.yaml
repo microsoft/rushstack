@@ -40,11 +40,9 @@ dependencies:
   '@rush-temp/node-library-build-tslint-test': 'file:projects/node-library-build-tslint-test.tgz'
   '@rush-temp/package-deps-hash': 'file:projects/package-deps-hash.tgz'
   '@rush-temp/repo-toolbox': 'file:projects/repo-toolbox.tgz'
-  '@rush-temp/resolve-chunk-plugin': 'file:projects/resolve-chunk-plugin.tgz'
   '@rush-temp/rush': 'file:projects/rush.tgz'
   '@rush-temp/rush-buildxl': 'file:projects/rush-buildxl.tgz'
   '@rush-temp/rush-lib': 'file:projects/rush-lib.tgz'
-  '@rush-temp/rush-stack': 'file:projects/rush-stack.tgz'
   '@rush-temp/rush-stack-compiler-2.4': 'file:projects/rush-stack-compiler-2.4.tgz'
   '@rush-temp/rush-stack-compiler-2.4-library-test': 'file:projects/rush-stack-compiler-2.4-library-test.tgz'
   '@rush-temp/rush-stack-compiler-2.7': 'file:projects/rush-stack-compiler-2.7.tgz'
@@ -70,7 +68,6 @@ dependencies:
   '@rush-temp/rush-stack-compiler-3.7': 'file:projects/rush-stack-compiler-3.7.tgz'
   '@rush-temp/rush-stack-compiler-3.7-library-test': 'file:projects/rush-stack-compiler-3.7-library-test.tgz'
   '@rush-temp/rush-stack-compiler-shared': 'file:projects/rush-stack-compiler-shared.tgz'
-  '@rush-temp/rush-stack-library-test': 'file:projects/rush-stack-library-test.tgz'
   '@rush-temp/rushell': 'file:projects/rushell.tgz'
   '@rush-temp/set-webpack-public-path-plugin': 'file:projects/set-webpack-public-path-plugin.tgz'
   '@rush-temp/stream-collator': 'file:projects/stream-collator.tgz'
@@ -12389,20 +12386,6 @@ packages:
       integrity: sha512-/eYU/rWThcXqbxpmxJDCsn2pP4jaakDN8zY1b9rpzh+GbuJsBaMoJ8ClS/m6OqUwnfDoYcRxt2SkGU6s1dPQmg==
       tarball: 'file:projects/repo-toolbox.tgz'
     version: 0.0.0
-  'file:projects/resolve-chunk-plugin.tgz':
-    dependencies:
-      '@types/mocha': 5.2.5
-      '@types/node': 10.17.13
-      '@types/webpack': 4.39.8
-      chai: 3.5.0
-      gulp: 4.0.2
-      mocha: 5.2.0
-    dev: false
-    name: '@rush-temp/resolve-chunk-plugin'
-    resolution:
-      integrity: sha512-Nx1yol3WiR8HlFu7MvS2fhml7hYKQ1EDvKtZjITePUBXaiQmf2XjCxjENdVkX5yE0O3tx2ewJ+pikgSBpge+gw==
-      tarball: 'file:projects/resolve-chunk-plugin.tgz'
-    version: 0.0.0
   'file:projects/rush-buildxl.tgz':
     dependencies:
       '@types/jest': 23.3.11
@@ -12780,24 +12763,6 @@ packages:
       integrity: sha512-3DA+ZdhWSjTNrAVaC6G9AizudJaiO82PoNgCTQ/3PQ4g4J9xx6BrNv+sVPv/4h5ST2WQhdHiY9OW0/2xWDWY/A==
       tarball: 'file:projects/rush-stack-compiler-shared.tgz'
     version: 0.0.0
-  'file:projects/rush-stack-library-test.tgz':
-    dev: false
-    name: '@rush-temp/rush-stack-library-test'
-    resolution:
-      integrity: sha512-yn6spG9bsH/Wn6uG4PfOyPdTMvzBdIZBAmm9DZqloCQ7N68HBOLwNpWeSOGsoTnZwpybNa9825RXyqyl8uy1Nw==
-      tarball: 'file:projects/rush-stack-library-test.tgz'
-    version: 0.0.0
-  'file:projects/rush-stack.tgz':
-    dependencies:
-      '@types/node': 10.17.13
-      colors: 1.2.5
-      gulp: 4.0.2
-    dev: false
-    name: '@rush-temp/rush-stack'
-    resolution:
-      integrity: sha512-vFu6LAX8XiIymdbqAf+0R9tcZMjIuKFYxbM4Mt5UILoEhD9Gitre/GRBypvoXbdlfQWEaL1Fw8erUcKY75kUcA==
-      tarball: 'file:projects/rush-stack.tgz'
-    version: 0.0.0
   'file:projects/rush.tgz':
     dependencies:
       '@types/chai': 3.4.34
@@ -12958,11 +12923,9 @@ specifiers:
   '@rush-temp/node-library-build-tslint-test': 'file:./projects/node-library-build-tslint-test.tgz'
   '@rush-temp/package-deps-hash': 'file:./projects/package-deps-hash.tgz'
   '@rush-temp/repo-toolbox': 'file:./projects/repo-toolbox.tgz'
-  '@rush-temp/resolve-chunk-plugin': 'file:./projects/resolve-chunk-plugin.tgz'
   '@rush-temp/rush': 'file:./projects/rush.tgz'
   '@rush-temp/rush-buildxl': 'file:./projects/rush-buildxl.tgz'
   '@rush-temp/rush-lib': 'file:./projects/rush-lib.tgz'
-  '@rush-temp/rush-stack': 'file:./projects/rush-stack.tgz'
   '@rush-temp/rush-stack-compiler-2.4': 'file:./projects/rush-stack-compiler-2.4.tgz'
   '@rush-temp/rush-stack-compiler-2.4-library-test': 'file:./projects/rush-stack-compiler-2.4-library-test.tgz'
   '@rush-temp/rush-stack-compiler-2.7': 'file:./projects/rush-stack-compiler-2.7.tgz'
@@ -12988,7 +12951,6 @@ specifiers:
   '@rush-temp/rush-stack-compiler-3.7': 'file:./projects/rush-stack-compiler-3.7.tgz'
   '@rush-temp/rush-stack-compiler-3.7-library-test': 'file:./projects/rush-stack-compiler-3.7-library-test.tgz'
   '@rush-temp/rush-stack-compiler-shared': 'file:./projects/rush-stack-compiler-shared.tgz'
-  '@rush-temp/rush-stack-library-test': 'file:./projects/rush-stack-library-test.tgz'
   '@rush-temp/rushell': 'file:./projects/rushell.tgz'
   '@rush-temp/set-webpack-public-path-plugin': 'file:./projects/set-webpack-public-path-plugin.tgz'
   '@rush-temp/stream-collator': 'file:./projects/stream-collator.tgz'
