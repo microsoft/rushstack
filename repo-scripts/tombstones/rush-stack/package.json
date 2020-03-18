@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-stack",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "description": "(This package is deprecated.)",
   "license": "MIT",
   "scripts": {
