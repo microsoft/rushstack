@@ -18,8 +18,8 @@
     "@microsoft/tsdoc": "0.12.14"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.3.11",
-    "@microsoft/rush-stack-compiler-3.5": "0.3.11",
+    "@microsoft/node-library-build": "6.4.5",
+    "@microsoft/rush-stack-compiler-3.5": "0.4.4",
     "@rushstack/eslint-config": "0.5.4",
     "@types/jest": "23.3.11",
     "@types/node": "10.17.13",

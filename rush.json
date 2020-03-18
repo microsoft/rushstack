@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.20.0",
+  "rushVersion": "5.22.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -564,12 +564,6 @@
       "shouldPublish": false
     },
     {
-      "packageName": "rush-stack-library-test",
-      "projectFolder": "build-tests/rush-stack-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
       "packageName": "web-library-build-test",
       "projectFolder": "build-tests/web-library-build-test",
       "reviewCategory": "tests",
@@ -734,12 +728,6 @@
       ]
     },
     {
-      "packageName": "@microsoft/rush-stack",
-      "projectFolder": "stack/rush-stack",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
       "packageName": "@microsoft/rush-stack-compiler-2.4",
      "projectFolder": "stack/rush-stack-compiler-2.4",
       "reviewCategory": "libraries",
@@ -881,12 +869,6 @@
     {
       "packageName": "@rushstack/loader-raw-script",
       "projectFolder": "webpack/loader-raw-script",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@microsoft/resolve-chunk-plugin",
-      "projectFolder": "webpack/resolve-chunk-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
