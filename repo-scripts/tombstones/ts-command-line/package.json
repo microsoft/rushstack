@@ -1,0 +1,9 @@
+{
+  "name": "@microsoft/ts-command-line",
+  "version": "5.0.0",
+  "description": "(Please use \"@rushstack/ts-command-line\" instead.)",
+  "license": "MIT",
+  "scripts": {
+    "postinstall": "node postinstall.js"
+  }
+}

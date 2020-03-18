@@ -1,0 +1,9 @@
+{
+  "name": "@microsoft/package-deps-hash",
+  "version": "3.0.0",
+  "description": "(Please use \"@rushstack/package-deps-hash\" instead.)",
+  "license": "MIT",
+  "scripts": {
+    "postinstall": "node postinstall.js"
+  }
+}

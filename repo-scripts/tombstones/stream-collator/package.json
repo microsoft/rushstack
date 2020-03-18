@@ -1,0 +1,9 @@
+{
+  "name": "@microsoft/stream-collator",
+  "version": "4.0.0",
+  "description": "(Please use \"@rushstack/stream-collator\" instead.)",
+  "license": "MIT",
+  "scripts": {
+    "postinstall": "node postinstall.js"
+  }
+}

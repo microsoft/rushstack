@@ -1,0 +1,9 @@
+{
+  "name": "@microsoft/loader-raw-script",
+  "version": "2.0.0",
+  "description": "(Please use \"@rushstack/loader-raw-script\" instead.)",
+  "license": "MIT",
+  "scripts": {
+    "postinstall": "node postinstall.js"
+  }
+}
