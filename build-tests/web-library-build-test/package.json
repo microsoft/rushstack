@@ -9,9 +9,9 @@
     "build": "gulp --clean"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.4.4",
-    "@microsoft/load-themed-styles": "1.10.38",
-    "@microsoft/web-library-build": "7.4.5",
+    "@microsoft/rush-stack-compiler-3.5": "0.4.5",
+    "@microsoft/load-themed-styles": "1.10.39",
+    "@microsoft/web-library-build": "7.4.6",
     "@types/jest": "23.3.11",
     "gulp": "~4.0.2",
     "jest": "~23.6.0",

@@ -10,16 +10,16 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@microsoft/api-documenter": "7.7.13",
-    "@microsoft/api-extractor-model": "7.7.8",
-    "@rushstack/node-core-library": "3.19.4",
+    "@microsoft/api-documenter": "7.7.14",
+    "@microsoft/api-extractor-model": "7.7.9",
+    "@rushstack/node-core-library": "3.19.5",
     "@microsoft/tsdoc": "0.12.14",
     "js-yaml": "~3.13.1"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.4.4",
-    "@microsoft/node-library-build": "6.4.5",
-    "@rushstack/eslint-config": "0.5.4",
+    "@microsoft/rush-stack-compiler-3.5": "0.4.5",
+    "@microsoft/node-library-build": "6.4.6",
+    "@rushstack/eslint-config": "0.5.5",
     "@types/js-yaml": "3.12.1",
     "@types/node": "10.17.13",
     "gulp": "~4.0.2"
