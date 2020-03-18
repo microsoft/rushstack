@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/set-webpack-public-path-plugin",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "(Please use \"@rushstack/set-webpack-public-path-plugin\" instead.)",
   "license": "MIT",
   "scripts": {

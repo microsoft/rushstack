@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/package-deps-hash",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "(Please use \"@rushstack/package-deps-hash\" instead.)",
   "license": "MIT",
   "scripts": {

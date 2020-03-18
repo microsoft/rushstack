@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/node-core-library",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "(Please use \"@rushstack/node-core-library\" instead.)",
   "license": "MIT",
   "scripts": {
