@@ -1,0 +1,9 @@
+{
+  "name": "@microsoft/resolve-chunk-plugin",
+  "version": "3.0.0",
+  "description": "(This package is deprecated.)",
+  "license": "MIT",
+  "scripts": {
+    "postinstall": "node postinstall.js"
+  }
+}

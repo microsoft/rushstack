@@ -1,0 +1,9 @@
+{
+  "name": "@microsoft/rush-stack",
+  "version": "0.2.5",
+  "description": "(This package is deprecated.)",
+  "license": "MIT",
+  "scripts": {
+    "postinstall": "node postinstall.js"
+  }
+}
