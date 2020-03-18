@@ -1,9 +1,0 @@
-{
-  "name": "@microsoft/loader-set-webpack-public-path",
-  "version": "4.0.0",
-  "description": "(This package has been deprecated.)",
-  "license": "MIT",
-  "scripts": {
-    "postinstall": "node postinstall.js"
-  }
-}

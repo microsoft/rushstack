@@ -1,0 +1,9 @@
+{
+  "name": "@microsoft/node-core-library",
+  "version": "4.0.0",
+  "description": "(Please use \"@rushstack/node-core-library\" instead.)",
+  "license": "MIT",
+  "scripts": {
+    "postinstall": "node postinstall.js"
+  }
+}
