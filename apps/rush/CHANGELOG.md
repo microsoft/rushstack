@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 07 Mar 2020 05:36:08 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Mar 2020 01:23:22 GMT and should not be manually modified.
+
+## 5.22.0
+Wed, 18 Mar 2020 01:23:22 GMT
+
+### Updates
+
+- Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`
+- Support setting environment variables for package manager install processes in rush.json and expose --max-install-attempts as a parameter for rush install/update.
 
 ## 5.21.0
 Sat, 07 Mar 2020 05:36:08 GMT

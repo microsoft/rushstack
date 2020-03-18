@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.22.0",
+      "tag": "@microsoft/rush_v5.22.0",
+      "date": "Wed, 18 Mar 2020 01:23:22 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`"
+          },
+          {
+            "comment": "Support setting environment variables for package manager install processes in rush.json and expose --max-install-attempts as a parameter for rush install/update."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.21.0",
       "tag": "@microsoft/rush_v5.21.0",
       "date": "Sat, 07 Mar 2020 05:36:08 GMT",
