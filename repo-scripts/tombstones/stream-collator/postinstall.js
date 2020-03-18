@@ -19,4 +19,6 @@ To learn about the Rush Stack project, please visit https://rushstack.io/`
 );
 
 writeErrorInRed(
-`* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *`);
+`* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n`);
+
+process.exit(1);
