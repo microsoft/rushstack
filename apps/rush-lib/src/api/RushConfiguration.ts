@@ -466,6 +466,7 @@ export class RushConfiguration {
   private _npmOptions: NpmOptionsConfiguration;
   private _pnpmOptions: PnpmOptionsConfiguration;
   private _yarnOptions: YarnOptionsConfiguration;
+  private _packageManagerConfigurationOptions: PackageManagerOptionsConfigurationBase;
 
   // Rush hooks
   private _eventHooks: EventHooks;
@@ -543,14 +544,17 @@ export class RushConfiguration {
 
     if (rushConfigurationJson.npmVersion) {
       this._packageManager = 'npm';
+      this._packageManagerConfigurationOptions = this._npmOptions;
       packageManagerFields.push('npmVersion');
     }
     if (rushConfigurationJson.pnpmVersion) {
       this._packageManager = 'pnpm';
+      this._packageManagerConfigurationOptions = this._pnpmOptions;
       packageManagerFields.push('pnpmVersion');
     }
     if (rushConfigurationJson.yarnVersion) {
       this._packageManager = 'yarn';
+      this._packageManagerConfigurationOptions = this._yarnOptions;
       packageManagerFields.push('yarnVersion');
     }
 
@@ -1269,6 +1273,13 @@ export class RushConfiguration {
    */
   public get yarnOptions(): YarnOptionsConfiguration {
     return this._yarnOptions;
+  }
+
+  /**
+   * The configuration options used by the current package manager.
+   */
+  public get packageManagerOptions(): PackageManagerOptionsConfigurationBase {
+    return this._packageManagerConfigurationOptions;
   }
 
   /**

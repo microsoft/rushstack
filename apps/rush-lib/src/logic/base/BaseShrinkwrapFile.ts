@@ -7,6 +7,8 @@ import { PackageName, FileSystem } from '@microsoft/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
 import { DependencySpecifier } from '../DependencySpecifier';
+import { IPolicyValidatorOptions } from '../policy/PolicyValidator';
+import { RushConfiguration } from '../../api/RushConfiguration';
 
 /**
  * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's pnpm-lock.yaml file formats.
@@ -22,20 +24,18 @@ export abstract class BaseShrinkwrapFile {
   }
 
   /**
-   * The hash of the content of the shrinkwrap. This hash can only be updated by manually
-   * calling the updateShrinkwrapHash method.
-   *
-   * @virtual
-   */
-  public get shrinkwrapHash() : string | undefined {
-    return undefined;
-  }
-
-  /**
    * Serializes and saves the shrinkwrap file to specified location
    */
   public save(filePath: string): void {
     FileSystem.writeFile(filePath, this.serialize());
+  }
+
+    /**
+   * Validate the shrinkwrap using the provided policy options.
+   *
+   * @virtual
+   */
+  public validate(rushConfiguration: RushConfiguration, options: IPolicyValidatorOptions) : void {
   }
 
   /**
@@ -81,14 +81,6 @@ export abstract class BaseShrinkwrapFile {
     }
 
     return this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency);
-  }
-
-  /**
-   * Update the hash of the shrinkwrap content.
-   *
-   * @virtual
-   */
-  public updateShrinkwrapHash(): void {
   }
 
   /**

@@ -2,10 +2,14 @@ import * as yaml from 'js-yaml';
 import * as os from 'os';
 import * as semver from 'semver';
 import * as crypto from 'crypto';
+import * as colors from 'colors';
 import { FileSystem } from '@microsoft/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
+import { RushConfiguration, PnpmOptionsConfiguration } from '../../api/RushConfiguration';
+import { IPolicyValidatorOptions } from '../policy/PolicyValidator';
+import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 // This is based on PNPM's own configuration:
 // https://github.com/pnpm/pnpm-shrinkwrap/blob/master/src/write.ts
@@ -161,19 +165,15 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    */
   public readonly shrinkwrapFilename: string;
 
-  private static readonly _shrinkwrapHashPrefix: string = '# shrinkwrap hash: ';
+  private static readonly _shrinkwrapHashPrefix: string = '# shrinkwrap hash:';
   private _shrinkwrapJson: IPnpmShrinkwrapYaml;
   private _shrinkwrapHash: string | undefined;
 
-  private constructor(
-    shrinkwrapJson: IPnpmShrinkwrapYaml,
-    shrinkwrapHash: string | undefined,
-    shrinkwrapFilename: string
-  ) {
+  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, shrinkwrapFilename: string, shrinkwrapHash?: string) {
     super();
     this._shrinkwrapJson = shrinkwrapJson;
-    this._shrinkwrapHash = shrinkwrapHash;
     this.shrinkwrapFilename = shrinkwrapFilename;
+    this._shrinkwrapHash = shrinkwrapHash;
 
     // Normalize the data
     if (!this._shrinkwrapJson.registry) {
@@ -190,7 +190,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
   }
 
-  public static loadFromFile(shrinkwrapYamlFilename: string): PnpmShrinkwrapFile | undefined {
+  public static loadFromFile(
+    shrinkwrapYamlFilename: string,
+    pnpmOptions: PnpmOptionsConfiguration
+  ): PnpmShrinkwrapFile | undefined {
     try {
       if (!FileSystem.exists(shrinkwrapYamlFilename)) {
         return undefined; // file does not exist
@@ -201,27 +204,68 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilename).toString();
       const parsedData: IPnpmShrinkwrapYaml = yaml.safeLoad(shrinkwrapContent);
 
-      // Grab the shrinkwrap hash out of the comment where we store it.
-      const hashIndex: number = shrinkwrapContent.lastIndexOf(PnpmShrinkwrapFile._shrinkwrapHashPrefix);
-      const shrinkwrapHash: string | undefined = hashIndex >= 0
-        ? shrinkwrapContent.substr(hashIndex + PnpmShrinkwrapFile._shrinkwrapHashPrefix.length).trim()
-        : undefined;
+      let shrinkwrapHash: string | undefined;
+      if (pnpmOptions.preventManualShrinkwrapChanges) {
+        // Grab the shrinkwrap hash out of the comment where we store it.
+        const hashYamlCommentRegExp: RegExp = new RegExp(
+          `\n\s*${PnpmShrinkwrapFile._shrinkwrapHashPrefix}\s*(\S+)\s*$`
+        );
+        const match: RegExpMatchArray | null = shrinkwrapContent.match(hashYamlCommentRegExp);
+        shrinkwrapHash = match ? match[1] : undefined;
 
-      return new PnpmShrinkwrapFile(parsedData, shrinkwrapHash, shrinkwrapYamlFilename);
+        // If the shrinkwrap is not inside of the file, this is likely the first run.
+        // NOTE: This means that if the hash is manually removed and the shrinkwrap is
+        // modified, we can only assume that the shrinkwrap is in a good state and apply
+        // the hash. This will allow manual modifications.
+        if (!shrinkwrapHash) {
+          shrinkwrapHash = crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
+        }
+      }
+
+      return new PnpmShrinkwrapFile(parsedData, shrinkwrapYamlFilename, shrinkwrapHash);
     } catch (error) {
       throw new Error(`Error reading "${shrinkwrapYamlFilename}":${os.EOL}  ${error.message}`);
     }
   }
 
   /** @override */
-  public get shrinkwrapHash() : string | undefined {
-    return this._shrinkwrapHash;
-  }
+  public validate(rushConfiguration: RushConfiguration, options: IPolicyValidatorOptions) : void {
+    super.validate(rushConfiguration, options);
+    if (
+      rushConfiguration.packageManager !== 'pnpm' ||
+      !rushConfiguration.pnpmOptions
+    ) {
+      return;
+    }
 
-  /** @override */
-  public updateShrinkwrapHash(): void {
-    const shrinkwrapContent: string = yaml.safeDump(this._shrinkwrapJson, SHRINKWRAP_YAML_FORMAT);
-    this._shrinkwrapHash = crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
+    // Only check the hash if allowShrinkwrapUpdates is false. If true, the shrinkwrap file
+    // may have changed and the hash could be invalid.
+    if (
+      rushConfiguration.pnpmOptions.preventManualShrinkwrapChanges &&
+      !options.allowShrinkwrapUpdates
+    ) {
+      if (!this._shrinkwrapHash) {
+        console.log(
+          colors.red(
+            'The shrinkwrap file does not contain the generated hash. You may need to run "rush update" to ' +
+            'populate the hash.'
+          ) + os.EOL
+        );
+        throw new AlreadyReportedError();
+      }
+
+      const shrinkwrapContent: string = yaml.safeDump(this._shrinkwrapJson, SHRINKWRAP_YAML_FORMAT);
+      const calculatedHash: string = crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
+      if (calculatedHash !== this._shrinkwrapHash) {
+        console.log(
+          colors.red(
+            'The shrinkwrap file hash does not match the generated hash. Please run "rush update" to ensure the ' +
+            'shrinkwrap file is up to date.'
+          ) + os.EOL
+        );
+        throw new AlreadyReportedError();
+      }
+    }
   }
 
   /** @override */
@@ -357,12 +401,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   protected serialize(): string {
     let shrinkwrapContent: string = yaml.safeDump(this._shrinkwrapJson, SHRINKWRAP_YAML_FORMAT);
     if (this._shrinkwrapHash) {
-      // We need to validate that the hashes are aligned before writing.
-      if (this._shrinkwrapHash !== crypto.createHash('sha1').update(shrinkwrapContent).digest('hex')) {
-        throw new Error('Content hash does not match');
-      }
+      this._shrinkwrapHash = crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
       shrinkwrapContent =
-        `${shrinkwrapContent.trimRight()}\n${PnpmShrinkwrapFile._shrinkwrapHashPrefix}${this._shrinkwrapHash}\n`;
+        `${shrinkwrapContent.trimRight()}\n${PnpmShrinkwrapFile._shrinkwrapHashPrefix} ${this._shrinkwrapHash}\n`;
     }
 
     return shrinkwrapContent;

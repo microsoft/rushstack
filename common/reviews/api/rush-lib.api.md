@@ -168,6 +168,8 @@ export interface IPackageManagerOptionsJsonBase {
 // @internal
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     pnpmStore?: PnpmStoreOptions;
+    // (undocumented)
+    preventManualShrinkwrapChanges?: boolean;
     resolutionStrategy?: ResolutionStrategy;
     strictPeerDependencies?: boolean;
 }
@@ -272,7 +274,6 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
     // @internal
     protected constructor(json: IPackageManagerOptionsJsonBase);
     readonly environmentVariables?: IConfigurationEnvironment;
-    readonly preventManualShrinkwrapChanges: boolean;
 }
 
 // @public
@@ -281,6 +282,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     constructor(json: _IPnpmOptionsJson, commonTempFolder: string);
     readonly pnpmStore: PnpmStoreOptions;
     readonly pnpmStorePath: string;
+    readonly preventManualShrinkwrapChanges: boolean;
     readonly resolutionStrategy: ResolutionStrategy;
     readonly strictPeerDependencies: boolean;
 }
@@ -335,6 +337,7 @@ export class RushConfiguration {
     readonly npmOptions: NpmOptionsConfiguration;
     readonly npmTmpFolder: string;
     readonly packageManager: PackageManagerName;
+    readonly packageManagerOptions: PackageManagerOptionsConfigurationBase;
     readonly packageManagerToolFilename: string;
     readonly packageManagerToolVersion: string;
     // @beta

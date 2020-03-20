@@ -95,7 +95,7 @@
      *
      * The default value is false.
      */
-     /*[LINE "HYPOTHETICAL"]*/ "preventManualShrinkwrapChanges": false
+     /*[LINE "HYPOTHETICAL"]*/ "preventManualShrinkwrapChanges": true
   },
 
   /**
