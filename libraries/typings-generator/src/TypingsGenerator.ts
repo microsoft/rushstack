@@ -7,7 +7,7 @@ import {
   ConsoleTerminalProvider,
   Path,
   NewlineKind
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 import * as glob from 'glob';
 import * as path from 'path';
 import { EOL } from 'os';

@@ -3,7 +3,7 @@ import * as os from 'os';
 import * as semver from 'semver';
 import * as crypto from 'crypto';
 import * as colors from 'colors';
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
@@ -326,7 +326,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       //    field in the resolution section.
 
       // 2) Top-level non-tarball dependency entries in pnpm-lock.yaml would look like:
-      //    '@microsoft/set-webpack-public-path-plugin': 2.1.133
+      //    '@rushstack/set-webpack-public-path-plugin': 2.1.133
       //    @microsoft/sp-build-node': 1.9.0-dev.27_typescript@2.9.2
 
       //    Here, we could just split by underscores and take the first part.

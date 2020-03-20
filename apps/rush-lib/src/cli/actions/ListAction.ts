@@ -1,6 +1,6 @@
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import * as Table from 'cli-table';
 

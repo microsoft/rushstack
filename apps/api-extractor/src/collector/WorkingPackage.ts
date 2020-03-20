@@ -6,7 +6,7 @@ import * as tsdoc from '@microsoft/tsdoc';
 
 import {
   INodePackageJson
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 /**
  * Constructor options for WorkingPackage

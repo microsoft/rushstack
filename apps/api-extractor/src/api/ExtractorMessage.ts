@@ -4,7 +4,7 @@
 import * as tsdoc from '@microsoft/tsdoc';
 import * as path from 'path';
 import { ExtractorMessageId } from './ExtractorMessageId';
-import { Path, Text } from '@microsoft/node-core-library';
+import { Path, Text } from '@rushstack/node-core-library';
 import { ExtractorLogLevel } from './ExtractorLogLevel';
 import { ConsoleMessageId } from './ConsoleMessageId';
 

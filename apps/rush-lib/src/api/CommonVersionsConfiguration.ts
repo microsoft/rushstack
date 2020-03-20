@@ -9,7 +9,7 @@ import {
   PackageName,
   ProtectableMap,
   FileSystem
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
 
 /**

@@ -1,4 +1,4 @@
-const { FileSystem } = require('@microsoft/node-core-library');
+const { FileSystem } = require('@rushstack/node-core-library');
 const child_process = require('child_process');
 const path = require('path');
 const process = require('process');

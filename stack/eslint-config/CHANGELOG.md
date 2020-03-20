@@ -1,6 +1,11 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Tue, 21 Jan 2020 21:56:13 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Mar 2020 15:07:47 GMT and should not be manually modified.
+
+## 0.5.5
+Wed, 18 Mar 2020 15:07:47 GMT
+
+*Version update only*
 
 ## 0.5.4
 Tue, 21 Jan 2020 21:56:13 GMT

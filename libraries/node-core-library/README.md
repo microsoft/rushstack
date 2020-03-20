@@ -1,4 +1,4 @@
-# @microsoft/node-core-library
+# @rushstack/node-core-library
 
 This library provides a conservative set of "core" NodeJS utilities whose
 purpose is to standardize how we solve common problems across our tooling

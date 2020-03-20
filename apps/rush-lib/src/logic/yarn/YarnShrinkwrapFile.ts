@@ -3,7 +3,7 @@ import * as lockfile from '@yarnpkg/lockfile';
 import {
   BaseShrinkwrapFile
 } from '../base/BaseShrinkwrapFile';
-import { FileSystem, PackageName, IParsedPackageNameOrError, InternalError } from '@microsoft/node-core-library';
+import { FileSystem, PackageName, IParsedPackageNameOrError, InternalError } from '@rushstack/node-core-library';
 import { RushConstants } from '../RushConstants';
 import { DependencySpecifier } from '../DependencySpecifier';
 

@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import yaml = require('js-yaml');
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 import { ApiItem } from '@microsoft/api-extractor-model';
 import {
   MarkdownDocumenterFeature,

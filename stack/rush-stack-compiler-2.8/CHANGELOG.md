@@ -1,6 +1,20 @@
 # Change Log - @microsoft/rush-stack-compiler-2.8
 
-This log was last generated on Tue, 28 Jan 2020 02:23:44 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Mar 2020 15:07:47 GMT and should not be manually modified.
+
+## 0.4.5
+Wed, 18 Mar 2020 15:07:47 GMT
+
+### Patches
+
+- Upgrade cyclic dependencies
+
+## 0.4.4
+Tue, 17 Mar 2020 23:55:58 GMT
+
+### Patches
+
+- Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`
 
 ## 0.4.3
 Tue, 28 Jan 2020 02:23:44 GMT

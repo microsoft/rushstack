@@ -12,7 +12,7 @@ import {
   JsonFile,
   LegacyAdapters,
   JsonObject
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 import * as glob from 'glob';
 import * as nodeSass from 'node-sass';
 import * as postcss from 'postcss';

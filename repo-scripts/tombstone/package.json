@@ -1,7 +1,7 @@
 {
-  "name": "@microsoft/loader-set-webpack-public-path",
+  "name": "@microsoft/node-core-library",
   "version": "4.0.0",
-  "description": "(This package has been deprecated.)",
+  "description": "(Please use \"@rushstack/node-core-library\" instead.)",
   "license": "MIT",
   "scripts": {
     "postinstall": "node postinstall.js"

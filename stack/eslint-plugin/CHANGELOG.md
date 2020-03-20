@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Sun, 19 Jan 2020 02:26:53 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Mar 2020 15:07:47 GMT and should not be manually modified.
+
+## 0.3.2
+Wed, 18 Mar 2020 15:07:47 GMT
+
+### Patches
+
+- Upgrade cyclic dependencies
 
 ## 0.3.1
 Sun, 19 Jan 2020 02:26:53 GMT

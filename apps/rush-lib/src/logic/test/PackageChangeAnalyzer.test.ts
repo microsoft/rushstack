@@ -8,7 +8,7 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 
 import {
   IPackageDeps
-} from '@microsoft/package-deps-hash';
+} from '@rushstack/package-deps-hash';
 
 const packageA: string = 'project-a';
 const packageAPath: string = path.join('tools', packageA);

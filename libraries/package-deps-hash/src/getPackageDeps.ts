@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
-import { Executable } from '@microsoft/node-core-library';
+import { Executable } from '@rushstack/node-core-library';
 
 import { IPackageDeps } from './IPackageDeps';
 

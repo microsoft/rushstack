@@ -2,6 +2,45 @@
   "name": "@microsoft/loader-load-themed-styles",
   "entries": [
     {
+      "version": "1.8.6",
+      "tag": "@microsoft/loader-load-themed-styles_v1.8.6",
+      "date": "Wed, 18 Mar 2020 15:07:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.10.38` to `1.10.39`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.5` to `6.4.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.4` to `0.4.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.4` to `0.5.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.8.5",
+      "tag": "@microsoft/loader-load-themed-styles_v1.8.5",
+      "date": "Tue, 17 Mar 2020 23:55:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.10.37` to `1.10.38`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.4` to `6.4.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.3` to `0.4.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.8.4",
       "tag": "@microsoft/loader-load-themed-styles_v1.8.4",
       "date": "Tue, 28 Jan 2020 02:23:44 GMT",

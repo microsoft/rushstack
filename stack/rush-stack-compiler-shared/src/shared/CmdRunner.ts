@@ -8,7 +8,7 @@ import {
   IPackageJson,
   FileSystem,
   Terminal
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 import { StandardBuildFolders } from './StandardBuildFolders';
 
 /**

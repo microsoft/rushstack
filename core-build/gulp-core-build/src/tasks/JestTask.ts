@@ -6,7 +6,7 @@ import { IBuildConfig } from '../IBuildConfig';
 import * as Gulp from 'gulp';
 import * as Jest from 'jest-cli';
 import * as glob from 'glob';
-import { FileSystem, JsonObject } from '@microsoft/node-core-library';
+import { FileSystem, JsonObject } from '@rushstack/node-core-library';
 
 /**
  * Configuration for JestTask

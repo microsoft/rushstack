@@ -6,7 +6,7 @@ import * as colors from 'colors';
 import {
   Executable,
   Path
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 import { RushConfiguration } from '../api/RushConfiguration';
 
 export class VersionControl {

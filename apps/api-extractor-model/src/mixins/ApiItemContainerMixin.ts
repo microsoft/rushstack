@@ -11,7 +11,7 @@ import {
 } from '../items/ApiItem';
 import { ApiNameMixin } from './ApiNameMixin';
 import { DeserializerContext } from '../model/DeserializerContext';
-import { InternalError, LegacyAdapters } from '@microsoft/node-core-library';
+import { InternalError, LegacyAdapters } from '@rushstack/node-core-library';
 
 /**
  * Constructor options for {@link (ApiItemContainerMixin:interface)}.

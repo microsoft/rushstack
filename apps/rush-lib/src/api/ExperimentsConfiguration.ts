@@ -6,7 +6,7 @@ import {
   JsonFile,
   JsonSchema,
   FileSystem
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 /**
  * This interface represents the raw experiments.json file which allows repo

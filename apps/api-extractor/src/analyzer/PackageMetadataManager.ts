@@ -10,7 +10,7 @@ import {
   NewlineKind,
   INodePackageJson,
   JsonObject
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 import { Extractor } from '../api/Extractor';
 import { MessageRouter } from '../collector/MessageRouter';
 import { ConsoleMessageId } from '../api/ConsoleMessageId';

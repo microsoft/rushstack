@@ -4,7 +4,7 @@
 import {
   JsonFile,
   IPackageJson
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 /**
  * The type of dependency; used by IPackageDependency.

@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { FileSystem, IFileSystemCreateLinkOptions, InternalError } from '@microsoft/node-core-library';
+import { FileSystem, IFileSystemCreateLinkOptions, InternalError } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { IPackageJson } from '@microsoft/node-core-library';
+import { IPackageJson } from '@rushstack/node-core-library';
 
 import { BumpType } from '../../api/VersionPolicy';
 import { ChangeFile } from '../../api/ChangeFile';

@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as _ from 'lodash';
-import { FileSystem, JsonFile, JsonObject } from '@microsoft/node-core-library';
+import { FileSystem, JsonFile, JsonObject } from '@rushstack/node-core-library';
 
 import { PackageManagerName } from './packageManager/PackageManager'
 

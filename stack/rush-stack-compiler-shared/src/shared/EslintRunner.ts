@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { ITerminalProvider } from '@microsoft/node-core-library';
+import { ITerminalProvider } from '@rushstack/node-core-library';
 
 import { CmdRunner } from './CmdRunner';
 import { ToolPaths } from './ToolPaths';

@@ -4,7 +4,7 @@
 import * as os from 'os';
 import * as colors from 'colors';
 
-import { PackageJsonLookup } from '@microsoft/node-core-library';
+import { PackageJsonLookup } from '@rushstack/node-core-library';
 
 import { ApiDocumenterCommandLine } from './cli/ApiDocumenterCommandLine';
 

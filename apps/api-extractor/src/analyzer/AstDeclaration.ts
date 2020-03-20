@@ -4,7 +4,7 @@
 import * as ts from 'typescript';
 import { AstSymbol } from './AstSymbol';
 import { Span } from './Span';
-import { InternalError } from '@microsoft/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 import { AstEntity } from './AstSymbolTable';
 
 /**

@@ -5,7 +5,7 @@ import {
   Terminal,
   ConsoleTerminalProvider,
   Sort
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import { ITask, ITaskDefinition } from './ITask';
 import { TaskStatus } from './TaskStatus';

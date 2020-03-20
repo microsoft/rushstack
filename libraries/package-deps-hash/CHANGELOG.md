@@ -1,6 +1,18 @@
-# Change Log - @microsoft/package-deps-hash
+# Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Tue, 28 Jan 2020 02:23:44 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Mar 2020 15:07:47 GMT and should not be manually modified.
+
+## 2.4.6
+Wed, 18 Mar 2020 15:07:47 GMT
+
+*Version update only*
+
+## 2.4.5
+Tue, 17 Mar 2020 23:55:58 GMT
+
+### Patches
+
+- PACKAGE NAME CHANGE: The NPM scope was changed from `@microsoft/package-deps-hash` to `@rushstack/package-deps-hash`
 
 ## 2.4.4
 Tue, 28 Jan 2020 02:23:44 GMT

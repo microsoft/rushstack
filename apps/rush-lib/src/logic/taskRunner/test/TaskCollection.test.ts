@@ -1,8 +1,8 @@
 import { TaskCollection } from '../TaskCollection';
-import { ITaskWriter } from '@microsoft/stream-collator';
+import { ITaskWriter } from '@rushstack/stream-collator';
 import { TaskStatus } from '../TaskStatus';
 import { ITaskDefinition, ITask } from '../ITask';
-import { StringBufferTerminalProvider } from '@microsoft/node-core-library';
+import { StringBufferTerminalProvider } from '@rushstack/node-core-library';
 
 function createDummyTask(name: string, action?: () => void): ITaskDefinition {
   return {
