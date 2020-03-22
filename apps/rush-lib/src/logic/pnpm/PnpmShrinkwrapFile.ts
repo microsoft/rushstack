@@ -234,7 +234,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   /** @override */
   public shouldForceRecheck(): boolean {
     // Ensure the shrinkwrap is rechecked when the hash is enabled but no hash is populated.
-    return !!this._shrinkwrapHashEnabled && !this._shrinkwrapHash;
+    return super.shouldForceRecheck() || (!!this._shrinkwrapHashEnabled && !this._shrinkwrapHash);
   }
 
   /** @override */
