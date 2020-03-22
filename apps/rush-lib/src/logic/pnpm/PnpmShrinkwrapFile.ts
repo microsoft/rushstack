@@ -168,12 +168,18 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   private static readonly _shrinkwrapHashPrefix: string = '# shrinkwrap hash:';
   private _shrinkwrapJson: IPnpmShrinkwrapYaml;
   private _shrinkwrapHash: string | undefined;
+  private _shrinkwrapHashEnabled: boolean | undefined;
 
-  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, shrinkwrapFilename: string, shrinkwrapHash?: string) {
+  private constructor(
+    shrinkwrapJson: IPnpmShrinkwrapYaml,
+    shrinkwrapFilename: string,
+    shrinkwrapHash?: string,
+    shrinkwrapHashEnabled?: boolean) {
     super();
     this._shrinkwrapJson = shrinkwrapJson;
     this.shrinkwrapFilename = shrinkwrapFilename;
     this._shrinkwrapHash = shrinkwrapHash;
+    this._shrinkwrapHashEnabled = shrinkwrapHashEnabled;
 
     // Normalize the data
     if (!this._shrinkwrapJson.registry) {
@@ -208,24 +214,27 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       if (pnpmOptions.preventManualShrinkwrapChanges) {
         // Grab the shrinkwrap hash out of the comment where we store it.
         const hashYamlCommentRegExp: RegExp = new RegExp(
-          `\n\s*${PnpmShrinkwrapFile._shrinkwrapHashPrefix}\s*(\S+)\s*$`
+          `\\n\\s*${PnpmShrinkwrapFile._shrinkwrapHashPrefix}\\s*(\\S+)\\s*$`
         );
         const match: RegExpMatchArray | null = shrinkwrapContent.match(hashYamlCommentRegExp);
         shrinkwrapHash = match ? match[1] : undefined;
-
-        // If the shrinkwrap is not inside of the file, this is likely the first run.
-        // NOTE: This means that if the hash is manually removed and the shrinkwrap is
-        // modified, we can only assume that the shrinkwrap is in a good state and apply
-        // the hash. This will allow manual modifications.
-        if (!shrinkwrapHash) {
-          shrinkwrapHash = crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
-        }
       }
 
-      return new PnpmShrinkwrapFile(parsedData, shrinkwrapYamlFilename, shrinkwrapHash);
+      return new PnpmShrinkwrapFile(
+        parsedData,
+        shrinkwrapYamlFilename,
+        shrinkwrapHash,
+        pnpmOptions.preventManualShrinkwrapChanges
+      );
     } catch (error) {
       throw new Error(`Error reading "${shrinkwrapYamlFilename}":${os.EOL}  ${error.message}`);
     }
+  }
+
+  /** @override */
+  public shouldForceRecheck(): boolean {
+    // Ensure the shrinkwrap is rechecked when the hash is enabled but no hash is populated.
+    return !!this._shrinkwrapHashEnabled && !this._shrinkwrapHash;
   }
 
   /** @override */
@@ -400,7 +409,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    */
   protected serialize(): string {
     let shrinkwrapContent: string = yaml.safeDump(this._shrinkwrapJson, SHRINKWRAP_YAML_FORMAT);
-    if (this._shrinkwrapHash) {
+    if (this._shrinkwrapHashEnabled) {
       this._shrinkwrapHash = crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
       shrinkwrapContent =
         `${shrinkwrapContent.trimRight()}\n${PnpmShrinkwrapFile._shrinkwrapHashPrefix} ${this._shrinkwrapHash}\n`;
