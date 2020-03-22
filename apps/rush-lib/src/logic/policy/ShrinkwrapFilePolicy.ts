@@ -30,6 +30,6 @@ export class ShrinkwrapFilePolicy {
     }
 
     // Run shrinkwrap-specific validation
-    shrinkwrapFile.validate(rushConfiguration, options);
+    shrinkwrapFile.validate(rushConfiguration.packageManagerOptions, options);
   }
 }

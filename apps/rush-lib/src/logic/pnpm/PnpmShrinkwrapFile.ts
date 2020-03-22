@@ -7,7 +7,7 @@ import { FileSystem } from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
-import { RushConfiguration, PnpmOptionsConfiguration } from '../../api/RushConfiguration';
+import { PackageManagerOptionsConfigurationBase, PnpmOptionsConfiguration } from '../../api/RushConfiguration';
 import { IPolicyValidatorOptions } from '../policy/PolicyValidator';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
@@ -238,21 +238,18 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public validate(rushConfiguration: RushConfiguration, options: IPolicyValidatorOptions) : void {
-    super.validate(rushConfiguration, options);
-    if (
-      rushConfiguration.packageManager !== 'pnpm' ||
-      !rushConfiguration.pnpmOptions
-    ) {
+  public validate(
+    packageManagerOptionsConfig: PackageManagerOptionsConfigurationBase,
+    policyOptions: IPolicyValidatorOptions
+  ) : void {
+    super.validate(packageManagerOptionsConfig, policyOptions);
+    if (!(packageManagerOptionsConfig instanceof PnpmOptionsConfiguration)) {
       return;
     }
 
     // Only check the hash if allowShrinkwrapUpdates is false. If true, the shrinkwrap file
     // may have changed and the hash could be invalid.
-    if (
-      rushConfiguration.pnpmOptions.preventManualShrinkwrapChanges &&
-      !options.allowShrinkwrapUpdates
-    ) {
+    if (packageManagerOptionsConfig.preventManualShrinkwrapChanges && !policyOptions.allowShrinkwrapUpdates) {
       if (!this._shrinkwrapHash) {
         console.log(
           colors.red(

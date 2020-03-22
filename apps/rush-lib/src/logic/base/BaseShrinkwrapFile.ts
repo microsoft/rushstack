@@ -8,7 +8,7 @@ import { PackageName, FileSystem } from '@rushstack/node-core-library';
 import { RushConstants } from '../../logic/RushConstants';
 import { DependencySpecifier } from '../DependencySpecifier';
 import { IPolicyValidatorOptions } from '../policy/PolicyValidator';
-import { RushConfiguration } from '../../api/RushConfiguration';
+import { PackageManagerOptionsConfigurationBase } from '../../api/RushConfiguration';
 
 /**
  * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's pnpm-lock.yaml file formats.
@@ -42,7 +42,10 @@ export abstract class BaseShrinkwrapFile {
    *
    * @virtual
    */
-  public validate(rushConfiguration: RushConfiguration, options: IPolicyValidatorOptions) : void {
+  public validate(
+    packageManagerOptionsConfig: PackageManagerOptionsConfigurationBase,
+    policyOptions: IPolicyValidatorOptions
+  ): void {
   }
 
   /**
