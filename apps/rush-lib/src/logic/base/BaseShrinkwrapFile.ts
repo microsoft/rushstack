@@ -24,13 +24,20 @@ export abstract class BaseShrinkwrapFile {
   }
 
   /**
+   * Return whether or not the committed shrinkwrap file should be forcibly rechecked for changes.
+   */
+  public shouldForceRecheck(): boolean {
+    return false;
+  }
+
+  /**
    * Serializes and saves the shrinkwrap file to specified location
    */
   public save(filePath: string): void {
     FileSystem.writeFile(filePath, this.serialize());
   }
 
-    /**
+  /**
    * Validate the shrinkwrap using the provided policy options.
    *
    * @virtual
