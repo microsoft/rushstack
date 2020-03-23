@@ -646,7 +646,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
         }
       }
 
-      if (!chunkHasAnyLocModules) {
+      // Check async chunks if this is a runtime chunk and we haven't directly found any localized modules
+      if (chunk.hasRuntime() && !chunkHasAnyLocModules) {
         for (const asyncChunk of chunk.getAllAsyncChunks()) {
           if (this._chunkHasLocalizedModules(asyncChunk)) {
             chunkHasAnyLocModules = true;
