@@ -91,7 +91,7 @@
      * afterwards, ensuring that PNPM can report or repair any potential inconsistencies.
      *
      * To temporarily disable this validation when invoking "rush install", use the
-     * "--bypassPolicy" command-line parameter.
+     * "--bypass-policy" command-line parameter.
      *
      * The default value is false.
      */

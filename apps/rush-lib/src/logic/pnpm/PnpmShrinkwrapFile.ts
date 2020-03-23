@@ -254,7 +254,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         console.log(
           colors.red(
             'The shrinkwrap file does not contain the generated hash. You may need to run "rush update" to ' +
-            'populate the hash.'
+            'populate the hash. See the "preventManualShrinkwrapChanges" setting documentation for details.'
           ) + os.EOL
         );
         throw new AlreadyReportedError();
@@ -266,7 +266,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         console.log(
           colors.red(
             'The shrinkwrap file hash does not match the generated hash. Please run "rush update" to ensure the ' +
-            'shrinkwrap file is up to date.'
+            'shrinkwrap file is up to date. See the "preventManualShrinkwrapChanges" setting documentation for ' +
+            'details.'
           ) + os.EOL
         );
         throw new AlreadyReportedError();

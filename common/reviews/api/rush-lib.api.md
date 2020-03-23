@@ -168,7 +168,6 @@ export interface IPackageManagerOptionsJsonBase {
 // @internal
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     pnpmStore?: PnpmStoreOptions;
-    // (undocumented)
     preventManualShrinkwrapChanges?: boolean;
     resolutionStrategy?: ResolutionStrategy;
     strictPeerDependencies?: boolean;

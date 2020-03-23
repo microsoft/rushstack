@@ -169,6 +169,9 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    * Defines the dependency resolution strategy PNPM will use
    */
   resolutionStrategy?: ResolutionStrategy;
+  /**
+   * {@inheritDoc PnpmOptionsConfiguration.preventManualShrinkwrapChanges}
+   */
   preventManualShrinkwrapChanges?: boolean;
 }
 
@@ -341,7 +344,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * afterwards, ensuring that PNPM can report or repair any potential inconsistencies.
    *
    * To temporarily disable this validation when invoking `rush install`, use the
-   * `--bypassPolicy` command-line parameter.
+   * `--bypass-policy` command-line parameter.
    *
    * The default value is false.
    */
