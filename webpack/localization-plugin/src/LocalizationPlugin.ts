@@ -239,36 +239,14 @@ export class LocalizationPlugin implements Webpack.Plugin {
                 return;
               }
 
-              // First pass - see if the chunk directly contains any loc modules
               for (const chunk of chunks) {
-                let chunkHasAnyLocModules: boolean = false;
-                if (!chunkHasAnyLocModules) {
-                  for (const module of chunk.getModules()) {
-                    if (EntityMarker.getMark(module)) {
-                      chunkHasAnyLocModules = true;
-                      break;
-                    }
-                  }
-                }
+                // See if the chunk contains any localized modules or loads any localized chunks
+                const localizedChunk: boolean = this._chunkHasLocalizedModules(chunk);
 
-                EntityMarker.markEntity(chunk, chunkHasAnyLocModules);
-              }
-
-              // Second pass - see if the chunk loads any localized chunks
-              for (const chunk of chunks) {
-                let localizedChunk: boolean = EntityMarker.getMark(chunk);
-                if (
-                  !localizedChunk &&
-                  Array.from(chunk.getAllAsyncChunks()).some((asyncChunk) => EntityMarker.getMark(asyncChunk))
-                ) {
-                  localizedChunk = true;
-                  EntityMarker.markEntity(chunk, true);
-                }
-
+                // Change the chunk's name to include either the locale name or the locale name for chunks without strings
                 const replacementValue: string = localizedChunk
                   ? Constants.LOCALE_NAME_PLACEHOLDER
                   : this._noStringsLocaleName;
-                EntityMarker.markEntity(chunk, localizedChunk);
                 if (chunk.hasRuntime()) {
                   chunk.filenameTemplate = (compilation.options.output!.filename as string).replace(
                     Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX,
@@ -314,7 +292,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
               }
             }
 
-            if (EntityMarker.getMark(chunk)) {
+            if (this._chunkHasLocalizedModules(chunk)) {
               processChunkJsFile((chunkFilename) => {
                 if (chunkFilename.indexOf(Constants.LOCALE_NAME_PLACEHOLDER) === -1) {
                   throw new Error(`Asset ${chunkFilename} is expected to be localized, but is missing a locale placeholder`);
@@ -654,5 +632,32 @@ export class LocalizationPlugin implements Webpack.Plugin {
       value: `${Constants.STRING_PLACEHOLDER_PREFIX}_${Constants.STRING_PLACEHOLDER_LABEL}_${suffix}`,
       suffix: suffix
     };
+  }
+
+  private _chunkHasLocalizedModules(chunk: Webpack.compilation.Chunk): boolean {
+    if (EntityMarker.getMark(chunk) === undefined) {
+      let chunkHasAnyLocModules: boolean = false;
+      if (!chunkHasAnyLocModules) {
+        for (const module of chunk.getModules()) {
+          if (EntityMarker.getMark(module)) {
+            chunkHasAnyLocModules = true;
+            break;
+          }
+        }
+      }
+
+      if (!chunkHasAnyLocModules) {
+        for (const asyncChunk of chunk.getAllAsyncChunks()) {
+          if (this._chunkHasLocalizedModules(asyncChunk)) {
+            chunkHasAnyLocModules = true;
+            break;
+          }
+        }
+      }
+
+      EntityMarker.markEntity(chunk, chunkHasAnyLocModules);
+    }
+
+    return EntityMarker.getMark(chunk)!;
   }
 }
