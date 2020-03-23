@@ -35,7 +35,10 @@ export class LocFileParser {
   public static parseLocFileFromLoader(content: string, loaderContext: loader.LoaderContext): ILocalizationFile {
     return LocFileParser.parseLocFile({
       filePath: loaderContext.resourcePath,
-      loggerOptions: { writeError: loaderContext.emitError, writeWarning: loaderContext.emitWarning },
+      loggerOptions: {
+        writeError: (errorMessage) => loaderContext.emitError(new Error(errorMessage)),
+        writeWarning: (warningMessage) => loaderContext.emitWarning(new Error(warningMessage))
+      },
       content
     });
   }
