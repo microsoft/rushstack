@@ -11,7 +11,7 @@ export {
   ILocaleData,
   ILocaleElementMap,
   ILocaleFileData,
-  ILocalizationFile as _ILocFile,
+  ILocalizationFile as _ILocalizationFile,
   ILocalizationPluginOptions,
   ILocalizationStats,
   ILocalizationStatsChunkGroup,
@@ -23,6 +23,7 @@ export {
   IPassthroughLocaleOptions,
   IPseudolocaleOptions,
   IPseudolocalesOptions,
+  IResolvedMissingTranslations,
   ITypingsGenerationOptions
 } from './interfaces';
 

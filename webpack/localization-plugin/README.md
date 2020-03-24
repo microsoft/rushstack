@@ -136,6 +136,24 @@ translatedStrings: {
 }
 ```
 
+#### `localizedData.resolveMissingTranslatedStrings = (locales: string[], filePath: string) => { ... }`
+
+This optional option can be used to resolve translated data that is missing from data that is provided
+in the `localizedData.translatedStrings` option. Set this option with a function expecting two parameters:
+the first, an array of locale names, and second, a fully-qualified path to the localized file in source. The
+function should return an object with locale names as keys and localized data as values. The localized data
+value should either be:
+
+- a string: The absolute path to the translated data in `.resx` or `.loc.json` format
+- an object: An object containing the translated data
+
+Note that these values are the same as the values that can be specified for translations for a localized
+resource in `localizedData.translatedStrings`.
+
+If the function returns data that is missing locales or individual strings, the plugin will fall back to the
+default locale if `localizedData.defaultLocale.fillMissingTranslationStrings` is set to `true`. If
+`localizedData.defaultLocale.fillMissingTranslationStrings` is set to `false`, an error will result.
+
 #### `localizedData.passthroughLocale = { }`
 
 This option is used to specify how and if a passthrough locale should be generated. A passthrough locale

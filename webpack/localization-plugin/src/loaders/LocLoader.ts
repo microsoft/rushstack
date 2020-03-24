@@ -30,11 +30,15 @@ export default loaderFactory(
     const locFileData: ILocalizationFile = LocFileParser.parseLocFile({
       content,
       terminal,
-      filePath: locFilePath,
+      filePath: locFilePath
     });
-    const additionalFiles: string[] = pluginInstance.addDefaultLocFile(terminal, locFilePath, locFileData);
-    for (const additionalFile of additionalFiles) {
+    const { additionalLoadedFilePaths, errors } = pluginInstance.addDefaultLocFile(terminal, locFilePath, locFileData);
+    for (const additionalFile of additionalLoadedFilePaths) {
       this.dependency(additionalFile);
+    }
+
+    for (const error of errors) {
+      this.emitError(error);
     }
 
     const resultObject: { [stringName: string]: string } = {};

@@ -32,6 +32,12 @@ export interface ILocaleFileData {
     [stringName: string]: string;
 }
 
+// @internal (undocumented)
+export interface _ILocalizationFile {
+    // (undocumented)
+    [stringName: string]: _ILocalizedString;
+}
+
 // @public
 export interface ILocalizationPluginOptions {
     filesToIgnore?: string[];
@@ -76,6 +82,7 @@ export interface ILocalizedData {
     defaultLocale: IDefaultLocaleOptions;
     passthroughLocale?: IPassthroughLocaleOptions;
     pseudolocales?: IPseudolocalesOptions;
+    resolveMissingTranslatedStrings?: (locales: string[], filePath: string) => IResolvedMissingTranslations;
     translatedStrings: ILocalizedStrings;
 }
 
@@ -99,12 +106,6 @@ export interface ILocalizedWebpackChunk extends Webpack.compilation.Chunk {
     localizedFiles?: {
         [locale: string]: string;
     };
-}
-
-// @internal (undocumented)
-export interface _ILocFile {
-    // (undocumented)
-    [stringName: string]: _ILocalizedString;
 }
 
 // @internal (undocumented)
@@ -147,6 +148,12 @@ export interface IPseudolocalesOptions {
     [pseudoLocaleName: string]: IPseudolocaleOptions;
 }
 
+// @public (undocumented)
+export interface IResolvedMissingTranslations {
+    // (undocumented)
+    [localeName: string]: string | ILocaleFileData;
+}
+
 // @internal (undocumented)
 export interface _IStringPlaceholder {
     // (undocumented)
@@ -179,8 +186,10 @@ export interface ITypingsGeneratorOptions {
 // @public
 export class LocalizationPlugin implements Webpack.Plugin {
     constructor(options: ILocalizationPluginOptions);
+    // Warning: (ae-forgotten-export) The symbol "IAddDefaultLocFileResult" needs to be exported by the entry point index.d.ts
+    //
     // @internal (undocumented)
-    addDefaultLocFile(terminal: Terminal, locFilePath: string, locFile: _ILocFile): string[];
+    addDefaultLocFile(terminal: Terminal, localizedResourcePath: string, localizedResourceData: _ILocalizationFile): IAddDefaultLocFileResult;
     // (undocumented)
     apply(compiler: Webpack.Compiler): void;
     // Warning: (ae-forgotten-export) The symbol "IStringSerialNumberData" needs to be exported by the entry point index.d.ts
@@ -194,7 +203,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
 // @internal (undocumented)
 export class _LocFileParser {
     // (undocumented)
-    static parseLocFile(options: _IParseLocFileOptions): _ILocFile;
+    static parseLocFile(options: _IParseLocFileOptions): _ILocalizationFile;
 }
 
 // @public

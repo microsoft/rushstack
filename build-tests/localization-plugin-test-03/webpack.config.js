@@ -2,11 +2,33 @@
 
 const path = require('path');
 const webpack = require('webpack');
+const {
+  JsonFile,
+  FileSystem
+} = require('@rushstack/node-core-library');
 
 const { LocalizationPlugin } = require('@rushstack/localization-plugin');
 const { SetPublicPathPlugin } = require('@rushstack/set-webpack-public-path-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+function resolveMissingString(localeNames, localizedResourcePath) {
+  let contextRelativePath = path.relative(__dirname, localizedResourcePath);
+  contextRelativePath = contextRelativePath.replace(/\\/g, '/'); // Convert Windows paths to Unix paths
+  if (!contextRelativePath.startsWith('.')) {
+    contextRelativePath = `./${contextRelativePath}`;
+  }
+
+  const result = {};
+  for (const localeName of localeNames) {
+    const expectedCombinedStringsPath = path.resolve(__dirname, 'localization', localeName, 'combinedStringsData.json');
+    if (FileSystem.exists(expectedCombinedStringsPath)) {
+      const loadedCombinedStringsPath = JsonFile.load(expectedCombinedStringsPath);
+      result[localeName] = loadedCombinedStringsPath[contextRelativePath];
+    }
+  }
+  return result;
+}
 
 module.exports = function(env) {
   const configuration = {
@@ -55,11 +77,6 @@ module.exports = function(env) {
                 "string1": "la primera cadena"
               },
               "./src/chunks/strings2.loc.json": "./localization/es-es/chunks/strings2.loc.json",
-              "./src/strings3.loc.json": {
-                "string1": "la tercera cadena",
-                "string2": "cuerda cuatro con un ' apóstrofe",
-                "string3": "UNUSED STRING!"
-              },
               "./src/strings4.loc.json": {
                 "string1": "\"Cadena con comillas\""
               },
@@ -72,6 +89,7 @@ module.exports = function(env) {
               }
             }
           },
+          resolveMissingTranslatedStrings: resolveMissingString,
           passthroughLocale: {
             usePassthroughLocale: true
           },

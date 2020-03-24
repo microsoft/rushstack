@@ -101,6 +101,12 @@ export interface ILocalizedData {
   translatedStrings: ILocalizedStrings;
 
   /**
+   * Use this paramter to specify a function used to load translations missing from
+   * the {@link ILocalizedData.translatedStrings} parameter.
+   */
+  resolveMissingTranslatedStrings?: (locales: string[], filePath: string) => IResolvedMissingTranslations;
+
+  /**
    * Options around including a passthrough locale.
    */
   passthroughLocale?: IPassthroughLocaleOptions;
@@ -182,6 +188,13 @@ export interface ILocalizedString {
  */
 export interface ILocaleFileData {
   [stringName: string]: string;
+}
+
+/**
+ * @public
+ */
+export interface IResolvedMissingTranslations {
+  [localeName: string]: string | ILocaleFileData;
 }
 
 /**
