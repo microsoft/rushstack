@@ -4,8 +4,6 @@
 import {
   JsonFile,
   FileSystem,
-  ITerminalProvider,
-  TerminalProviderSeverity,
   Terminal
 } from '@rushstack/node-core-library';
 import * as Webpack from 'webpack';
@@ -24,7 +22,8 @@ import {
   ILocaleData,
   ILocalizationFile,
   IPseudolocaleOptions,
-  ILocaleElementMap
+  ILocaleElementMap,
+  ILocalizedStrings
 } from './interfaces';
 import {
   ILocalizedWebpackChunk
@@ -89,6 +88,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
   public stringKeys: Map<string, IStringPlaceholder> = new Map<string, IStringPlaceholder>();
 
   private _options: ILocalizationPluginOptions;
+  private _resolvedTranslatedStringsFromOptions: ILocalizedStrings;
   private _filesToIgnore: Set<string> = new Set<string>();
   private _stringPlaceholderCounter: number = 0;
   private _stringPlaceholderMap: Map<string, IStringSerialNumberData> = new Map<string, IStringSerialNumberData>();
@@ -399,10 +399,43 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
   /**
    * @internal
+   *
+   * @returns A list of paths to translation files that were loaded
    */
-  public addDefaultLocFile(locFilePath: string, locFile: ILocalizationFile): void {
+  public addDefaultLocFile(
+    terminal: Terminal,
+    locFilePath: string,
+    locFile: ILocalizationFile
+  ): string[] {
+    const additionalLoadedFiles: string[] = [];
+
     const locFileData: ILocaleFileData = this._convertLocalizationFileToLocData(locFile);
     this._addLocFile(this._defaultLocale, locFilePath, locFileData);
+
+    for (const translatedLocaleName in this._resolvedTranslatedStringsFromOptions) {
+      if (this._resolvedTranslatedStringsFromOptions.hasOwnProperty(translatedLocaleName)) {
+        const translatedLocFileFromOptions: ILocaleFileData | string | undefined = (
+          this._resolvedTranslatedStringsFromOptions[translatedLocaleName][locFilePath]
+        );
+        if (translatedLocFileFromOptions) {
+          let translatedLocFileData: ILocaleFileData;
+          if (typeof translatedLocFileFromOptions === 'string') {
+            additionalLoadedFiles.push(translatedLocFileFromOptions);
+            const localizationFile: ILocalizationFile = LocFileParser.parseLocFile({
+              filePath: translatedLocFileFromOptions,
+              content: FileSystem.readFile(translatedLocFileFromOptions),
+              terminal: terminal
+            });
+
+            translatedLocFileData = this._convertLocalizationFileToLocData(localizationFile);
+          } else {
+            translatedLocFileData = translatedLocFileFromOptions;
+          }
+
+          this._addLocFile(translatedLocaleName, locFilePath, translatedLocFileData);
+        }
+      }
+    }
 
     this._pseudolocalizers.forEach((pseudolocalizer: (str: string) => string, pseudolocaleName: string) => {
       const pseudolocFileData: ILocaleFileData = {};
@@ -415,6 +448,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
       this._addLocFile(pseudolocaleName, locFilePath, pseudolocFileData);
     });
+
+    return additionalLoadedFiles;
   }
 
   /**
@@ -424,6 +459,9 @@ export class LocalizationPlugin implements Webpack.Plugin {
     return this._stringPlaceholderMap.get(serialNumber);
   }
 
+  /**
+   * @returns A list of paths to translation files that were loaded
+   */
   private _addLocFile(localeName: string, locFilePath: string, locFileData: ILocaleFileData): void {
     const filesMap: Map<string, Map<string, string>> = this._resolvedLocalizedStrings.get(localeName)!;
 
@@ -520,26 +558,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
       // START options.localizedData.translatedStrings
       const { translatedStrings } = this._options.localizedData;
+      this._resolvedTranslatedStringsFromOptions = {};
       if (translatedStrings) {
-        const terminalProvider: ITerminalProvider = {
-          supportsColor: false,
-          eolCharacter: '\n',
-          write: (data: string, severity: TerminalProviderSeverity) => {
-            switch (severity) {
-              case TerminalProviderSeverity.error: {
-                errors.push(new Error(data));
-                break;
-              }
-
-              case TerminalProviderSeverity.warning: {
-                warnings.push(new Error(data));
-                break;
-              }
-            }
-          }
-        };
-        const terminal: Terminal = new Terminal(terminalProvider);
-
         for (const localeName in translatedStrings) {
           if (translatedStrings.hasOwnProperty(localeName)) {
             if (this._locales.has(localeName)) {
@@ -555,8 +575,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
             }
 
             this._locales.add(localeName);
-
             this._resolvedLocalizedStrings.set(localeName, new Map<string, Map<string, string>>());
+            this._resolvedTranslatedStringsFromOptions[localeName] = {};
 
             const locFilePathsInLocale: Set<string> = new Set<string>();
 
@@ -575,21 +595,12 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
                 locFilePathsInLocale.add(normalizedLocFilePath);
 
-                let locFileData: ILocaleFileData;
-                const locFileDataFromOptions: ILocaleFileData | string = locale[locFilePath];
+                let locFileDataFromOptions: ILocaleFileData | string = locale[locFilePath];
                 if (typeof locFileDataFromOptions === 'string') {
-                  const normalizedTranslatedFilePath: string = path.resolve(configuration.context!, locFileDataFromOptions);
-                  const localizationFile: ILocalizationFile = LocFileParser.parseLocFile({
-                    filePath: normalizedTranslatedFilePath,
-                    content: FileSystem.readFile(normalizedTranslatedFilePath),
-                    terminal: terminal
-                  });
-
-                  locFileData = this._convertLocalizationFileToLocData(localizationFile);
-                } else {
-                  locFileData = locFileDataFromOptions;
+                  locFileDataFromOptions = path.resolve(configuration.context!, locFileDataFromOptions);
                 }
-                this._addLocFile(localeName, normalizedLocFilePath, locFileData);
+
+                this._resolvedTranslatedStringsFromOptions[localeName][normalizedLocFilePath] = locFileDataFromOptions;
               }
             }
           }

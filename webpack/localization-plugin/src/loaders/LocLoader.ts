@@ -26,12 +26,16 @@ export default loaderFactory(
     options: ILocLoaderOptions
   ) {
     const { pluginInstance } = options;
+    const terminal: Terminal = new Terminal(LoaderTerminalProvider.getTerminalProviderForLoader(this));
     const locFileData: ILocalizationFile = LocFileParser.parseLocFile({
       content,
+      terminal,
       filePath: locFilePath,
-      terminal: new Terminal(LoaderTerminalProvider.getTerminalProviderForLoader(this))
     });
-    pluginInstance.addDefaultLocFile(locFilePath, locFileData);
+    const additionalFiles: string[] = pluginInstance.addDefaultLocFile(terminal, locFilePath, locFileData);
+    for (const additionalFile of additionalFiles) {
+      this.dependency(additionalFile);
+    }
 
     const resultObject: { [stringName: string]: string } = {};
     for (const stringName in locFileData) { // eslint-disable-line guard-for-in

@@ -180,7 +180,7 @@ export interface ITypingsGeneratorOptions {
 export class LocalizationPlugin implements Webpack.Plugin {
     constructor(options: ILocalizationPluginOptions);
     // @internal (undocumented)
-    addDefaultLocFile(locFilePath: string, locFile: _ILocFile): void;
+    addDefaultLocFile(terminal: Terminal, locFilePath: string, locFile: _ILocFile): string[];
     // (undocumented)
     apply(compiler: Webpack.Compiler): void;
     // Warning: (ae-forgotten-export) The symbol "IStringSerialNumberData" needs to be exported by the entry point index.d.ts
