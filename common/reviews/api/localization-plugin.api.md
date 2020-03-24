@@ -4,7 +4,6 @@
 
 ```ts
 
-import { loader } from 'webpack';
 import { StringValuesTypingsGenerator } from '@rushstack/typings-generator';
 import { Terminal } from '@rushstack/node-core-library';
 import * as Webpack from 'webpack';
@@ -109,21 +108,13 @@ export interface _ILocFile {
 }
 
 // @internal (undocumented)
-export interface _ILoggerOptions {
-    // (undocumented)
-    writeError: (message: string) => void;
-    // (undocumented)
-    writeWarning: (message: string) => void;
-}
-
-// @internal (undocumented)
 export interface _IParseLocFileOptions {
     // (undocumented)
     content: string;
     // (undocumented)
     filePath: string;
     // (undocumented)
-    loggerOptions: _ILoggerOptions;
+    terminal: Terminal;
 }
 
 // @public
@@ -204,14 +195,12 @@ export class LocalizationPlugin implements Webpack.Plugin {
 export class _LocFileParser {
     // (undocumented)
     static parseLocFile(options: _IParseLocFileOptions): _ILocFile;
-    // (undocumented)
-    static parseLocFileFromLoader(content: string, loaderContext: loader.LoaderContext): _ILocFile;
 }
 
 // @public
 export class TypingsGenerator extends StringValuesTypingsGenerator {
     constructor(options: ITypingsGeneratorOptions);
-    }
+}
 
 
 // (No @packageDocumentation comment for this package)

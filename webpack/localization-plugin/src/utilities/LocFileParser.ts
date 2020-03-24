@@ -2,12 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as jju from 'jju';
-import { loader } from 'webpack';
+import { Terminal } from '@rushstack/node-core-library';
 
-import {
-  Logging,
-  ILoggerOptions
-} from './Logging';
 import { ILocalizationFile } from '../interfaces';
 import { ResxReader } from './ResxReader';
 import { Constants } from './Constants';
@@ -16,7 +12,7 @@ import { Constants } from './Constants';
  * @internal
  */
 export interface IParseLocFileOptions {
-  loggerOptions: ILoggerOptions;
+  terminal: Terminal;
   filePath: string;
   content: string;
 }
@@ -32,17 +28,6 @@ const parseCache: Map<string, IParseCacheEntry> = new Map<string, IParseCacheEnt
  * @internal
  */
 export class LocFileParser {
-  public static parseLocFileFromLoader(content: string, loaderContext: loader.LoaderContext): ILocalizationFile {
-    return LocFileParser.parseLocFile({
-      filePath: loaderContext.resourcePath,
-      loggerOptions: {
-        writeError: (errorMessage) => loaderContext.emitError(new Error(errorMessage)),
-        writeWarning: (warningMessage) => loaderContext.emitWarning(new Error(warningMessage))
-      },
-      content
-    });
-  }
-
   public static parseLocFile(options: IParseLocFileOptions): ILocalizationFile {
     if (parseCache.has(options.filePath)) {
       const entry: IParseCacheEntry = parseCache.get(options.filePath)!;
@@ -56,7 +41,7 @@ export class LocFileParser {
       parsedFile = ResxReader.readResxAsLocFile(
         options.content,
         {
-          ...Logging.getLoggingFunctions(options.loggerOptions),
+          terminal: options.terminal,
           resxFilePath: options.filePath
         }
       );
@@ -65,7 +50,7 @@ export class LocFileParser {
       try {
         Constants.LOC_JSON_SCHEMA.validateObject(parsedFile, options.filePath);
       } catch (e) {
-        options.loggerOptions.writeError(`The loc file is invalid. Error: ${e}`);
+        options.terminal.writeError(`The loc file is invalid. Error: ${e}`);
       }
     }
 

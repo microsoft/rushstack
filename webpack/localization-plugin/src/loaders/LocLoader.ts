@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { loader } from 'webpack';
+import { Terminal } from '@rushstack/node-core-library';
 
 import { LocalizationPlugin } from '../LocalizationPlugin';
 import { ILocalizationFile } from '../interfaces';
@@ -11,6 +12,7 @@ import {
   IBaseLoaderOptions
 } from './LoaderFactory';
 import { EntityMarker } from '../utilities/EntityMarker';
+import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider';
 
 export interface ILocLoaderOptions extends IBaseLoaderOptions {
   pluginInstance: LocalizationPlugin;
@@ -24,7 +26,11 @@ export default loaderFactory(
     options: ILocLoaderOptions
   ) {
     const { pluginInstance } = options;
-    const locFileData: ILocalizationFile = LocFileParser.parseLocFileFromLoader(content, this);
+    const locFileData: ILocalizationFile = LocFileParser.parseLocFile({
+      content,
+      filePath: locFilePath,
+      terminal: new Terminal(LoaderTerminalProvider.getTerminalProviderForLoader(this))
+    });
     pluginInstance.addDefaultLocFile(locFilePath, locFileData);
 
     const resultObject: { [stringName: string]: string } = {};

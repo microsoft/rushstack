@@ -32,10 +32,6 @@ export {
 } from './utilities/LocFileParser';
 
 export {
-  ILoggerOptions as _ILoggerOptions
-} from './utilities/Logging';
-
-export {
   ILocalizedWebpackChunk
 } from './webpackInterfaces';
 
