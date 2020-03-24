@@ -17,7 +17,7 @@ export interface IDefaultLocaleOptions {
 // @public (undocumented)
 export interface ILocaleData {
     // (undocumented)
-    [locFilePath: string]: ILocaleFileData;
+    [locFilePath: string]: string | ILocaleFileData;
 }
 
 // @public (undocumented)

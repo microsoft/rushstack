@@ -27,7 +27,7 @@ resources
       directly references two `.loc.json` files
     - [`indexC.ts`](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-02/src/indexC.ts)
       directly references no localized resources, and dynamically imports an async chunk without localized data
-  - The webpack config contains Spanish translations for most of the English strings in the resource files
+  - The webpack config contains and references Spanish translations for most of the English strings in the resource files
   - The output contains English, Spanish, and "passthrough" localized variants of files that contain
     localized data, and a non-localized variant of the files that do not contain localized data
 - [Project 3](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-03)
@@ -41,7 +41,7 @@ resources
       directly references no localized resources, and dynamically imports an async chunk with localized data
     - [`indexD.ts`](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-03/src/indexD.ts)
       directly references no localized resources, and dynamically imports an async chunk without localized data
-  - The webpack config contains Spanish translations for all of the English strings in the resource files
+  - The webpack config contains or references Spanish translations for some of the English strings in the resource files
   - The output contains English, Spanish, "passthrough," and two pseudo-localized variants of files that contain
     localized data, and a non-localized variant of the files that do not contain localized data
 
@@ -118,6 +118,20 @@ translatedStrings: {
     "./src/strings1.loc.json": {
       "string1": "la primera cadena"
     }
+  }
+}
+```
+
+Alternatively, instead of directly specifying the translations, a path to a translated resource file can be
+specified. For example:
+
+```JavaScript
+translatedStrings: {
+  "en-us": {
+    "./src/strings1.loc.json": "./localization/en-us/strings1.loc.json"
+  },
+  "es-es": {
+    "./src/strings1.loc.json": "./localization/es-es/strings1.loc.json"
   }
 }
 ```

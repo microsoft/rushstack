@@ -188,7 +188,7 @@ export interface ILocaleFileData {
  * @public
  */
 export interface ILocaleData {
-  [locFilePath: string]: ILocaleFileData;
+  [locFilePath: string]: string | ILocaleFileData;
 }
 
 /**

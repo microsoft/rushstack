@@ -1,7 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile } from '@rushstack/node-core-library';
+import {
+  JsonFile,
+  FileSystem,
+  ITerminalProvider,
+  TerminalProviderSeverity,
+  Terminal
+} from '@rushstack/node-core-library';
 import * as Webpack from 'webpack';
 import * as path from 'path';
 import * as Tapable from 'tapable';
@@ -27,6 +33,7 @@ import { LocFileTypingsGenerator } from './LocFileTypingsGenerator';
 import { Pseudolocalization } from './Pseudolocalization';
 import { EntityMarker } from './utilities/EntityMarker';
 import { IAsset, IProcessAssetResult, AssetProcessor } from './AssetProcessor';
+import { LocFileParser } from './utilities/LocFileParser';
 
 /**
  * @internal
@@ -135,7 +142,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     // https://github.com/webpack/webpack-dev-server/pull/1929/files#diff-15fb51940da53816af13330d8ce69b4eR66
     const isWebpackDevServer: boolean = process.env.WEBPACK_DEV_SERVER === 'true';
 
-    const errors: Error[] = this._initializeAndValidateOptions(compiler.options, isWebpackDevServer);
+    const { errors, warnings } = this._initializeAndValidateOptions(compiler.options, isWebpackDevServer);
 
     let typingsPreprocessor: LocFileTypingsGenerator | undefined;
     if (this._options.typingsOptions) {
@@ -156,14 +163,18 @@ export class LocalizationPlugin implements Webpack.Plugin {
       localeNameOrPlaceholder: Constants.LOCALE_NAME_PLACEHOLDER
     };
 
-    if (errors.length > 0) {
+    if (errors.length > 0 || warnings.length > 0) {
       compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {
         compilation.errors.push(...errors);
+        compilation.warnings.push(...warnings);
       });
 
-      WebpackConfigurationUpdater.amendWebpackConfigurationForInPlaceLocFiles(webpackConfigurationUpdaterOptions);
-
-      return;
+      if (errors.length > 0) {
+        // If there are any errors, just pass through the resources in source and don't do any
+        // additional configuration
+        WebpackConfigurationUpdater.amendWebpackConfigurationForInPlaceLocFiles(webpackConfigurationUpdaterOptions);
+        return;
+      }
     }
 
     if (isWebpackDevServer) {
@@ -390,11 +401,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
    * @internal
    */
   public addDefaultLocFile(locFilePath: string, locFile: ILocalizationFile): void {
-    const locFileData: ILocaleFileData = {};
-    for (const stringName in locFile) { // eslint-disable-line guard-for-in
-      locFileData[stringName] = locFile[stringName].value;
-    }
-
+    const locFileData: ILocaleFileData = this._convertLocalizationFileToLocData(locFile);
     this._addLocFile(this._defaultLocale, locFilePath, locFileData);
 
     this._pseudolocalizers.forEach((pseudolocalizer: (str: string) => string, pseudolocaleName: string) => {
@@ -454,8 +461,12 @@ export class LocalizationPlugin implements Webpack.Plugin {
     }
   }
 
-  private _initializeAndValidateOptions(configuration: Webpack.Configuration, isWebpackDevServer: boolean): Error[] {
+  private _initializeAndValidateOptions(
+    configuration: Webpack.Configuration,
+    isWebpackDevServer: boolean
+  ): { errors: Error[], warnings: Error[] } {
     const errors: Error[] = [];
+    const warnings: Error[] = [];
 
     function ensureValidLocaleName(localeName: string): boolean {
       const LOCALE_NAME_REGEX: RegExp = /[a-z-]/i;
@@ -510,6 +521,25 @@ export class LocalizationPlugin implements Webpack.Plugin {
       // START options.localizedData.translatedStrings
       const { translatedStrings } = this._options.localizedData;
       if (translatedStrings) {
+        const terminalProvider: ITerminalProvider = {
+          supportsColor: false,
+          eolCharacter: '\n',
+          write: (data: string, severity: TerminalProviderSeverity) => {
+            switch (severity) {
+              case TerminalProviderSeverity.error: {
+                errors.push(new Error(data));
+                break;
+              }
+
+              case TerminalProviderSeverity.warning: {
+                warnings.push(new Error(data));
+                break;
+              }
+            }
+          }
+        };
+        const terminal: Terminal = new Terminal(terminalProvider);
+
         for (const localeName in translatedStrings) {
           if (translatedStrings.hasOwnProperty(localeName)) {
             if (this._locales.has(localeName)) {
@@ -517,11 +547,11 @@ export class LocalizationPlugin implements Webpack.Plugin {
                 `The locale "${localeName}" appears multiple times. ` +
                 'There may be multiple instances with different casing.'
               ));
-              return errors;
+              return { errors, warnings };
             }
 
             if (!ensureValidLocaleName(localeName)) {
-              return errors;
+              return { errors, warnings };
             }
 
             this._locales.add(localeName);
@@ -540,12 +570,25 @@ export class LocalizationPlugin implements Webpack.Plugin {
                     `The localization file path "${locFilePath}" appears multiple times in locale ${localeName}. ` +
                     'There may be multiple instances with different casing.'
                   ));
-                  return errors;
+                  return { errors, warnings };
                 }
 
                 locFilePathsInLocale.add(normalizedLocFilePath);
 
-                const locFileData: ILocaleFileData = locale[locFilePath];
+                let locFileData: ILocaleFileData;
+                const locFileDataFromOptions: ILocaleFileData | string = locale[locFilePath];
+                if (typeof locFileDataFromOptions === 'string') {
+                  const normalizedTranslatedFilePath: string = path.resolve(configuration.context!, locFileDataFromOptions);
+                  const localizationFile: ILocalizationFile = LocFileParser.parseLocFile({
+                    filePath: normalizedTranslatedFilePath,
+                    content: FileSystem.readFile(normalizedTranslatedFilePath),
+                    terminal: terminal
+                  });
+
+                  locFileData = this._convertLocalizationFileToLocData(localizationFile);
+                } else {
+                  locFileData = locFileDataFromOptions;
+                }
                 this._addLocFile(localeName, normalizedLocFilePath, locFileData);
               }
             }
@@ -560,9 +603,9 @@ export class LocalizationPlugin implements Webpack.Plugin {
         if (this._options.localizedData.defaultLocale.localeName) {
           if (this._locales.has(localeName)) {
             errors.push(new Error('The default locale is also specified in the translated strings.'));
-            return errors;
+            return { errors, warnings };
           } else if (!ensureValidLocaleName(localeName)) {
-            return errors;
+            return { errors, warnings };
           }
 
           this._locales.add(localeName);
@@ -571,11 +614,11 @@ export class LocalizationPlugin implements Webpack.Plugin {
           this._fillMissingTranslationStrings = !!fillMissingTranslationStrings;
         } else {
           errors.push(new Error('Missing default locale name'));
-          return errors;
+          return { errors, warnings };
         }
       } else {
         errors.push(new Error('Missing default locale options.'));
-        return errors;
+        return { errors, warnings };
       }
       // END options.localizedData.defaultLocale
 
@@ -585,14 +628,14 @@ export class LocalizationPlugin implements Webpack.Plugin {
           if (this._options.localizedData.pseudolocales.hasOwnProperty(pseudolocaleName)) {
             if (this._defaultLocale === pseudolocaleName) {
               errors.push(new Error(`A pseudolocale (${pseudolocaleName}) name is also the default locale name.`));
-              return errors;
+              return { errors, warnings };
             }
 
             if (this._locales.has(pseudolocaleName)) {
               errors.push(new Error(
                 `A pseudolocale (${pseudolocaleName}) name is also specified in the translated strings.`
               ));
-              return errors;
+              return { errors, warnings };
             }
 
             const pseudoLocaleOpts: IPseudolocaleOptions = this._options.localizedData.pseudolocales[pseudolocaleName];
@@ -620,7 +663,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     }
     // END options.noStringsLocaleName
 
-    return errors;
+    return { errors, warnings };
   }
 
   /**
@@ -660,5 +703,14 @@ export class LocalizationPlugin implements Webpack.Plugin {
     }
 
     return EntityMarker.getMark(chunk)!;
+  }
+
+  private _convertLocalizationFileToLocData(locFile: ILocalizationFile): ILocaleFileData {
+    const locFileData: ILocaleFileData = {};
+    for (const stringName in locFile) { // eslint-disable-line guard-for-in
+      locFileData[stringName] = locFile[stringName].value;
+    }
+
+    return locFileData;
   }
 }
