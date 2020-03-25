@@ -30,6 +30,7 @@ import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 import { MessageRouter } from './MessageRouter';
 import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
 import { ExtractorConfig } from '../api/ExtractorConfig';
+import { AstImportAsModule } from '../analyzer/AstImportAsModule';
 
 /**
  * Options for Collector constructor.
@@ -294,6 +295,9 @@ export class Collector {
   }
 
   public tryFetchMetadataForAstEntity(astEntity: AstEntity): SymbolMetadata | undefined {
+    if (astEntity instanceof AstImportAsModule) {
+      return undefined;
+    }
     if (astEntity instanceof AstSymbol) {
       return this.fetchSymbolMetadata(astEntity);
     }
@@ -382,10 +386,7 @@ export class Collector {
 
       this._entitiesByAstEntity.set(astEntity, entity);
       this._entities.push(entity);
-
-      if (astEntity instanceof AstSymbol) {
-        this._collectReferenceDirectives(astEntity);
-      }
+      this._collectReferenceDirectives(astEntity);
     }
 
     if (exportedName) {
@@ -415,6 +416,14 @@ export class Collector {
 
           this._createEntityForIndirectReferences(referencedAstEntity, alreadySeenAstEntities);
         }
+      });
+    }
+
+    if (astEntity instanceof AstImportAsModule) {
+      this.astSymbolTable.fetchAstModuleExportInfo(astEntity.astModule).exportedLocalEntities.forEach((exportedEntity: AstEntity) => {
+        // Create a CollectorEntity for each top-level export of AstImportInternal entity
+        this._createCollectorEntity(exportedEntity, undefined);
+        this._createEntityForIndirectReferences(exportedEntity, alreadySeenAstEntities); // TODO- create entity for module export
       });
     }
   }
@@ -883,11 +892,23 @@ export class Collector {
     return parserContext;
   }
 
-  private _collectReferenceDirectives(astSymbol: AstSymbol): void {
+  private _collectReferenceDirectives(astEntity: AstEntity): void {
+    if (astEntity instanceof AstSymbol) {
+      const sourceFiles: ts.SourceFile[] = astEntity.astDeclarations.map(astDeclaration =>
+        astDeclaration.declaration.getSourceFile());
+      return this._collectReferenceDirectivesFromSourceFiles(sourceFiles);
+    }
+
+    if (astEntity instanceof AstImportAsModule) {
+      const sourceFiles: ts.SourceFile[] = [astEntity.astModule.sourceFile];
+      return this._collectReferenceDirectivesFromSourceFiles(sourceFiles);
+    }
+  }
+
+  private _collectReferenceDirectivesFromSourceFiles(sourceFiles: ts.SourceFile[]): void {
     const seenFilenames: Set<string> = new Set<string>();
 
-    for (const astDeclaration of astSymbol.astDeclarations) {
-      const sourceFile: ts.SourceFile = astDeclaration.declaration.getSourceFile();
+    for (const sourceFile of sourceFiles) {
       if (sourceFile && sourceFile.fileName) {
         if (!seenFilenames.has(sourceFile.fileName)) {
           seenFilenames.add(sourceFile.fileName);

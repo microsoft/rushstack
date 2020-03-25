@@ -11,6 +11,7 @@ import { AstModule } from './AstModule';
 import { AstImport } from './AstImport';
 import { Collector } from '../collector/Collector';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import { AstImportAsModule } from './AstImportAsModule';
 
 /**
  * Used by `AstReferenceResolver` to report a failed resolution.
@@ -85,6 +86,10 @@ export class AstReferenceResolver {
 
     if (rootAstEntity instanceof AstImport) {
       return new ResolverFailure('Reexported declarations are not supported');
+    }
+
+    if (rootAstEntity instanceof AstImportAsModule) {
+      return new ResolverFailure('Source file export declarations are not supported');
     }
 
     let currentDeclaration: AstDeclaration | ResolverFailure = this._selectDeclaration(rootAstEntity.astDeclarations,

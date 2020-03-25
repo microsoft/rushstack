@@ -16,6 +16,7 @@ import { AstSymbol } from '../analyzer/AstSymbol';
 import { ExtractorMessage } from '../api/ExtractorMessage';
 import { StringWriter } from './StringWriter';
 import { DtsEmitHelpers } from './DtsEmitHelpers';
+import { AstImportAsModule } from '../analyzer/AstImportAsModule';
 
 export class ApiReportGenerator {
   private static _TrimSpacesRegExp: RegExp = / +$/gm;
@@ -116,6 +117,12 @@ export class ApiReportGenerator {
             span.writeModifiedText(stringWriter.stringBuilder);
             stringWriter.writeLine('\n');
           }
+        }
+
+        if (entity.astEntity instanceof AstImportAsModule) {
+          // TODO [MA]: add file path to error message.
+          throw new Error('"import * as ___ from ___;" is not supported for local files when generating report.'
+            + '\nFailure in: ' + 'entity.astEntity.getSourceFile().fileName');
         }
 
         // Now emit the export statements for this entity.

@@ -11,6 +11,7 @@ import { AstModule, AstModuleExportInfo } from './AstModule';
 import { TypeScriptInternals } from './TypeScriptInternals';
 import { TypeScriptMessageFormatter } from './TypeScriptMessageFormatter';
 import { IFetchAstSymbolOptions, AstEntity } from './AstSymbolTable';
+import { AstImportAsModule } from './AstImportAsModule';
 
 /**
  * Exposes the minimal APIs from AstSymbolTable that are needed by ExportAnalyzer.
@@ -21,7 +22,7 @@ import { IFetchAstSymbolOptions, AstEntity } from './AstSymbolTable';
 export interface IAstSymbolTable {
   fetchAstSymbol(options: IFetchAstSymbolOptions): AstSymbol | undefined;
 
-  analyze(astSymbol: AstSymbol): void;
+  analyze(astEntity: AstEntity): void;
 }
 
 /**
@@ -73,6 +74,7 @@ export class ExportAnalyzer {
   private readonly _importableAmbientSourceFiles: Set<ts.SourceFile> = new Set<ts.SourceFile>();
 
   private readonly _astImportsByKey: Map<string, AstImport> = new Map<string, AstImport>();
+  private readonly _astImportAsModuleByModule: Map<AstModule, AstImportAsModule> = new Map<AstModule, AstImportAsModule>();
 
   public constructor(program: ts.Program, typeChecker: ts.TypeChecker, bundledPackageNames: Set<string>,
     astSymbolTable: IAstSymbolTable) {
@@ -308,6 +310,10 @@ export class ExportAnalyzer {
                     this._astSymbolTable.analyze(astEntity);
                   }
 
+                  if (astEntity instanceof AstImportAsModule && !astEntity.astModule.isExternal) {
+                    this._astSymbolTable.analyze(astEntity);
+                  }
+
                   astModuleExportInfo.exportedLocalEntities.set(exportSymbol.name, astEntity);
                 }
               }
@@ -447,10 +453,16 @@ export class ExportAnalyzer {
         //   SemicolonToken:  pre=[;]
 
         if (externalModulePath === undefined) {
-          // The implementation here only works when importing from an external module.
-          // The full solution is tracked by: https://github.com/microsoft/rushstack/issues/1029
-          throw new Error('"import * as ___ from ___;" is not supported yet for local files.'
-            + '\nFailure in: ' + importDeclaration.getSourceFile().fileName);
+          const astModule: AstModule = this._fetchSpecifierAstModule(importDeclaration, declarationSymbol);
+          let importAsModule: AstImportAsModule | undefined = this._astImportAsModuleByModule.get(astModule);
+          if (!importAsModule) {
+            importAsModule = new AstImportAsModule({
+              exportName: declarationSymbol.name,
+              astModule: astModule
+            });
+            this._astImportAsModuleByModule.set(astModule, importAsModule);
+          }
+          return importAsModule;
         }
 
         // Here importSymbol=undefined because {@inheritDoc} and such are not going to work correctly for

@@ -11,11 +11,12 @@ import { AstModule, AstModuleExportInfo } from './AstModule';
 import { PackageMetadataManager } from './PackageMetadataManager';
 import { ExportAnalyzer } from './ExportAnalyzer';
 import { AstImport } from './AstImport';
+import { AstImportAsModule } from './AstImportAsModule';
 import { MessageRouter } from '../collector/MessageRouter';
 import { TypeScriptInternals } from './TypeScriptInternals';
 import { StringChecks } from './StringChecks';
 
-export type AstEntity = AstSymbol | AstImport;
+export type AstEntity = AstSymbol | AstImport | AstImportAsModule;
 
 /**
  * Options for `AstSymbolTable._fetchAstSymbol()`
@@ -137,43 +138,13 @@ export class AstSymbolTable {
    * or members.  (We do always construct its parents however, since AstDefinition.parent
    * is immutable, and needed e.g. to calculate release tag inheritance.)
    */
-  public analyze(astSymbol: AstSymbol): void {
-    if (astSymbol.analyzed) {
-      return;
+  public analyze(astEntity: AstEntity): void {
+    if (astEntity instanceof AstSymbol) {
+      return this._analyzeAstSymbol(astEntity);
     }
 
-    if (astSymbol.nominalAnalysis) {
-      // We don't analyze nominal symbols
-      astSymbol._notifyAnalyzed();
-      return;
-    }
-
-    // Start at the root of the tree
-    const rootAstSymbol: AstSymbol = astSymbol.rootAstSymbol;
-
-    // Calculate the full child tree for each definition
-    for (const astDeclaration of rootAstSymbol.astDeclarations) {
-      this._analyzeChildTree(astDeclaration.declaration, astDeclaration);
-    }
-
-    rootAstSymbol._notifyAnalyzed();
-
-    if (!astSymbol.isExternal) {
-      // If this symbol is non-external (i.e. it belongs to the working package), then we also analyze any
-      // referencedAstSymbols that are non-external.  For example, this ensures that forgotten exports
-      // get analyzed.
-      rootAstSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
-        for (const referencedAstEntity of astDeclaration.referencedAstEntities) {
-
-          // Walk up to the root of the tree, looking for any imports along the way
-          if (referencedAstEntity instanceof AstSymbol) {
-            if (!referencedAstEntity.isExternal) {
-              this.analyze(referencedAstEntity);
-            }
-          }
-
-        }
-      });
+    if (astEntity instanceof AstImportAsModule) {
+      return this._analyzeAstImportAsModule(astEntity);
     }
   }
 
@@ -290,6 +261,71 @@ export class AstSymbolTable {
     }
 
     return unquotedName;
+  }
+
+
+  private _analyzeAstImportAsModule(astImportAsModule: AstImportAsModule): void {
+    if (astImportAsModule.analyzed) {
+      return;
+    }
+
+    // mark before actual analyzing, to handle module cyclic reexport
+    astImportAsModule.analyzed = true;
+
+    this.fetchAstModuleExportInfo(astImportAsModule.astModule).exportedLocalEntities.forEach(exportedEntity => {
+      if (exportedEntity instanceof AstImportAsModule) {
+        this._analyzeAstImportAsModule(exportedEntity);
+      }
+
+      if (exportedEntity instanceof AstSymbol) {
+        this._analyzeAstSymbol(exportedEntity);
+      }
+    });
+  }
+
+  private _analyzeAstSymbol(astSymbol: AstSymbol): void {
+    if (astSymbol.analyzed) {
+      return;
+    }
+
+    if (astSymbol.nominalAnalysis) {
+      // We don't analyze nominal symbols
+      astSymbol._notifyAnalyzed();
+      return;
+    }
+
+    // Start at the root of the tree
+    const rootAstSymbol: AstSymbol = astSymbol.rootAstSymbol;
+
+    // Calculate the full child tree for each definition
+    for (const astDeclaration of rootAstSymbol.astDeclarations) {
+      this._analyzeChildTree(astDeclaration.declaration, astDeclaration);
+    }
+
+    rootAstSymbol._notifyAnalyzed();
+
+    if (!astSymbol.isExternal) {
+      // If this symbol is non-external (i.e. it belongs to the working package), then we also analyze any
+      // referencedAstSymbols that are non-external.  For example, this ensures that forgotten exports
+      // get analyzed.
+      rootAstSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
+        for (const referencedAstEntity of astDeclaration.referencedAstEntities) {
+
+          // Walk up to the root of the tree, looking for any imports along the way
+          if (referencedAstEntity instanceof AstSymbol) {
+            if (!referencedAstEntity.isExternal) {
+              this._analyzeAstSymbol(referencedAstEntity);
+            }
+          }
+
+          if (referencedAstEntity instanceof AstImportAsModule) {
+            if (!referencedAstEntity.astModule.isExternal) {
+              this._analyzeAstImportAsModule(referencedAstEntity)
+            }
+          }
+        }
+      });
+    }
   }
 
   /**

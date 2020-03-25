@@ -19,6 +19,8 @@ import { SymbolMetadata } from '../collector/SymbolMetadata';
 import { StringWriter } from './StringWriter';
 import { DtsEmitHelpers } from './DtsEmitHelpers';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import { AstImportAsModule } from '../analyzer/AstImportAsModule';
+import { AstModuleExportInfo } from '../analyzer/AstModule';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()
@@ -131,6 +133,45 @@ export class DtsRollupGenerator {
             stringWriter.writeLine(span.getModifiedText());
           }
         }
+      }
+
+      if (entity.astEntity instanceof AstImportAsModule) {
+        const astModuleExportInfo: AstModuleExportInfo = collector.astSymbolTable.fetchAstModuleExportInfo(entity.astEntity.astModule);
+
+        if (!entity.nameForEmit) {
+          // This should never happen
+          throw new InternalError('referencedEntry.nameForEmit is undefined');
+        }
+        // manually generate typings for local imported module
+        stringWriter.writeLine();
+        if (entity.shouldInlineExport) {
+          stringWriter.write('export ');
+        }
+        stringWriter.writeLine(`declare namespace ${entity.nameForEmit} {`);
+
+        // all local exports of local imported module are just references to top-level declarations
+        stringWriter.writeLine('  export {');
+        astModuleExportInfo.exportedLocalEntities.forEach((exportedEntity, exportedName) => {
+          const collectorEntity: CollectorEntity | undefined = collector.tryGetCollectorEntity(exportedEntity);
+          if (!collectorEntity) {
+            // This should never happen
+            // top-level exports of local imported module should be added as collector entities before
+            throw new InternalError(`Cannot find collector entity for ${entity.nameForEmit}.${exportedEntity.localName}`);
+          }
+          if (collectorEntity.nameForEmit === exportedName) {
+            stringWriter.writeLine(`    ${collectorEntity.nameForEmit},`);
+          } else {
+            stringWriter.writeLine(`    ${collectorEntity.nameForEmit} as ${exportedName},`);
+          }
+        });
+        stringWriter.writeLine('  }'); // end of "export { ... }"
+
+        if (astModuleExportInfo.starExportedExternalModules.size > 0) {
+          // TODO [MA]: write a better error message.
+          throw new Error(`Unsupported star export of external module inside namespace imported module: ${entity.nameForEmit}`);
+        }
+
+        stringWriter.writeLine('}'); // end of "declare namespace { ... }"
       }
 
       if (!entity.shouldInlineExport) {
