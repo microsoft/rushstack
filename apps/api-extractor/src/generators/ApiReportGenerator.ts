@@ -120,9 +120,8 @@ export class ApiReportGenerator {
         }
 
         if (entity.astEntity instanceof AstImportAsModule) {
-          // TODO [MA]: add file path to error message.
           throw new Error('"import * as ___ from ___;" is not supported for local files when generating report.'
-            + '\nFailure in: ' + 'entity.astEntity.getSourceFile().fileName');
+            + '\nFailure in: ' + ApiReportGenerator._getSourceFilePath(entity.astEntity));
         }
 
         // Now emit the export statements for this entity.
@@ -165,6 +164,11 @@ export class ApiReportGenerator {
 
     // Remove any trailing spaces
     return stringWriter.toString().replace(ApiReportGenerator._TrimSpacesRegExp, '');
+  }
+
+  private static _getSourceFilePath(importAsModule: AstImportAsModule): string {
+    const sourceFile: ts.SourceFile = importAsModule.astModule?.sourceFile?.getSourceFile();
+    return sourceFile ? sourceFile.fileName : 'unkown source file';
   }
 
   /**
