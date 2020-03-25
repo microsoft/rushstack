@@ -25,6 +25,8 @@ export abstract class BaseShrinkwrapFile {
 
   /**
    * Return whether or not the committed shrinkwrap file should be forcibly rechecked for changes.
+   *
+   * @virtual
    */
   public shouldForceRecheck(): boolean {
     return false;

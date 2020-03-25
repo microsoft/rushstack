@@ -1280,6 +1280,9 @@ export class RushConfiguration {
 
   /**
    * The configuration options used by the current package manager.
+   * @remarks
+   * For package manager specific variants, reference {@link RushConfiguration.npmOptions | npmOptions},
+   * {@link RushConfiguration.pnpmOptions | pnpmOptions}, or {@link RushConfiguration.yarnOptions | yarnOptions}.
    */
   public get packageManagerOptions(): PackageManagerOptionsConfigurationBase {
     return this._packageManagerConfigurationOptions;

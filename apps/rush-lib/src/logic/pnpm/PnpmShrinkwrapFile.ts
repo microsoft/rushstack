@@ -205,9 +205,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         return undefined; // file does not exist
       }
 
-      // We don't use JsonFile/jju here because shrinkwrap.json is a special NPM file format
-      // and typically very large, so we want to load it the same way that NPM does.
-      const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilename).toString();
+      const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilename);
       const parsedData: IPnpmShrinkwrapYaml = yaml.safeLoad(shrinkwrapContent);
 
       let shrinkwrapHash: string | undefined;
@@ -244,7 +242,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   ) : void {
     super.validate(packageManagerOptionsConfig, policyOptions);
     if (!(packageManagerOptionsConfig instanceof PnpmOptionsConfiguration)) {
-      return;
+      throw new Error('The provided package manager options are not valid for PNPM shrinkwrap files.');
     }
 
     // Only check the hash if allowShrinkwrapUpdates is false. If true, the shrinkwrap file

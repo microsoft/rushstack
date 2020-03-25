@@ -12,11 +12,6 @@ import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
  */
 export class ShrinkwrapFilePolicy {
   public static validate(rushConfiguration: RushConfiguration, options: IPolicyValidatorOptions): void {
-    // For now, we only have additional validation on PNPM shrinkwrap files
-    if (rushConfiguration.packageManager !== 'pnpm' || !rushConfiguration.pnpmOptions) {
-      return;
-    }
-
     console.log('Validating package manager shrinkwrap file.' + os.EOL);
     const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
       rushConfiguration.packageManager,
