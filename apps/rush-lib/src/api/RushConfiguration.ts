@@ -169,6 +169,10 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    * Defines the dependency resolution strategy PNPM will use
    */
   resolutionStrategy?: ResolutionStrategy;
+  /**
+   * {@inheritDoc PnpmOptionsConfiguration.preventManualShrinkwrapChanges}
+   */
+  preventManualShrinkwrapChanges?: boolean;
 }
 
 /**
@@ -327,6 +331,25 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    */
   public readonly resolutionStrategy: ResolutionStrategy;
 
+  /**
+   * If true, then `rush install` will report an error if manual modifications
+   * were made to the PNPM shrinkwrap file without running `rush update` afterwards.
+   *
+   * @remarks
+   * This feature protects against accidental inconsistencies that may be introduced
+   * if the PNPM shrinkwrap file (`pnpm-lock.yaml`) is manually edited.  When this
+   * feature is enabled, `rush update` will append a hash to the file as a YAML comment,
+   * and then `rush update` and `rush install` will validate the hash.  Note that this does not prohibit
+   * manual modifications, but merely requires `rush update` be run
+   * afterwards, ensuring that PNPM can report or repair any potential inconsistencies.
+   *
+   * To temporarily disable this validation when invoking `rush install`, use the
+   * `--bypass-policy` command-line parameter.
+   *
+   * The default value is false.
+   */
+  public readonly preventManualShrinkwrapChanges: boolean;
+
   /** @internal */
   public constructor(json: IPnpmOptionsJson, commonTempFolder: string) {
     super(json);
@@ -340,6 +363,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     }
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
+    this.preventManualShrinkwrapChanges = !!json.preventManualShrinkwrapChanges
   }
 }
 
@@ -445,6 +469,7 @@ export class RushConfiguration {
   private _npmOptions: NpmOptionsConfiguration;
   private _pnpmOptions: PnpmOptionsConfiguration;
   private _yarnOptions: YarnOptionsConfiguration;
+  private _packageManagerConfigurationOptions: PackageManagerOptionsConfigurationBase;
 
   // Rush hooks
   private _eventHooks: EventHooks;
@@ -522,14 +547,17 @@ export class RushConfiguration {
 
     if (rushConfigurationJson.npmVersion) {
       this._packageManager = 'npm';
+      this._packageManagerConfigurationOptions = this._npmOptions;
       packageManagerFields.push('npmVersion');
     }
     if (rushConfigurationJson.pnpmVersion) {
       this._packageManager = 'pnpm';
+      this._packageManagerConfigurationOptions = this._pnpmOptions;
       packageManagerFields.push('pnpmVersion');
     }
     if (rushConfigurationJson.yarnVersion) {
       this._packageManager = 'yarn';
+      this._packageManagerConfigurationOptions = this._yarnOptions;
       packageManagerFields.push('yarnVersion');
     }
 
@@ -1248,6 +1276,16 @@ export class RushConfiguration {
    */
   public get yarnOptions(): YarnOptionsConfiguration {
     return this._yarnOptions;
+  }
+
+  /**
+   * The configuration options used by the current package manager.
+   * @remarks
+   * For package manager specific variants, reference {@link RushConfiguration.npmOptions | npmOptions},
+   * {@link RushConfiguration.pnpmOptions | pnpmOptions}, or {@link RushConfiguration.yarnOptions | yarnOptions}.
+   */
+  public get packageManagerOptions(): PackageManagerOptionsConfigurationBase {
+    return this._packageManagerConfigurationOptions;
   }
 
   /**

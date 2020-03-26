@@ -203,7 +203,7 @@ export class PublishAction extends BaseRushAction {
    */
   protected run(): Promise<void> {
     return Promise.resolve().then(() => {
-      PolicyValidator.validatePolicy(this.rushConfiguration, false);
+      PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: false });
 
       // Example: "common\temp\publish-home"
       this._targetNpmrcPublishFolder = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
