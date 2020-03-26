@@ -167,7 +167,7 @@ export class ApiReportGenerator {
   }
 
   private static _getSourceFilePath(importAsModule: AstImportAsModule): string {
-    const fallback = 'unkown source file';
+    const fallback: string = 'unkown source file';
     const { astModule } = importAsModule;
 
     if (!astModule || !astModule.sourceFile) {
