@@ -138,7 +138,7 @@ export class DtsRollupGenerator {
       if (entity.astEntity instanceof AstImportAsModule) {
         const astModuleExportInfo: AstModuleExportInfo = collector.astSymbolTable.fetchAstModuleExportInfo(entity.astEntity.astModule);
 
-        if (!entity.nameForEmit) {
+        if (entity.nameForEmit === undefined) {
           // This should never happen
           throw new InternalError('referencedEntry.nameForEmit is undefined');
         }
@@ -153,7 +153,7 @@ export class DtsRollupGenerator {
         stringWriter.writeLine('  export {');
         astModuleExportInfo.exportedLocalEntities.forEach((exportedEntity, exportedName) => {
           const collectorEntity: CollectorEntity | undefined = collector.tryGetCollectorEntity(exportedEntity);
-          if (!collectorEntity) {
+          if (collectorEntity === undefined) {
             // This should never happen
             // top-level exports of local imported module should be added as collector entities before
             throw new InternalError(`Cannot find collector entity for ${entity.nameForEmit}.${exportedEntity.localName}`);
