@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Delete redundant rush rebuild output",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "zhas@microsoft.com"
+}
