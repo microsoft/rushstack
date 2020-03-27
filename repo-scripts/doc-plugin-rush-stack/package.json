@@ -13,7 +13,7 @@
     "@microsoft/api-documenter": "7.7.14",
     "@microsoft/api-extractor-model": "7.7.9",
     "@rushstack/node-core-library": "3.19.5",
-    "@microsoft/tsdoc": "0.12.14",
+    "@microsoft/tsdoc": "0.12.19",
     "js-yaml": "~3.13.1"
   },
   "devDependencies": {
