@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Delete redundant rush rebuild output",
+      "comment": "Remove some misleading log output for \"rush build\" (GitHub #1733)",
       "type": "none"
     }
   ],
