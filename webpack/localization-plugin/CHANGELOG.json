@@ -2,6 +2,18 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/localization-plugin_v0.2.0",
+      "date": "Sat, 28 Mar 2020 01:38:47 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix a few RESX parsing issues and improve translated strings resolution."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.4",
       "tag": "@rushstack/localization-plugin_v0.1.4",
       "date": "Sat, 28 Mar 2020 00:37:16 GMT",
