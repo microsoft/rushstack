@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Improve analysis of types exposed via global variables (fixes GitHub issues #1765, #1095, and #1316)",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

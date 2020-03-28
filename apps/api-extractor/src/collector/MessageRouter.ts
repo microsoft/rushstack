@@ -465,7 +465,9 @@ export class MessageRouter {
   }
 
   public logDiagnostic(message: string): void {
-    this.logVerbose(ConsoleMessageId.Diagnostics, message);
+    if (this.showDiagnostics) {
+      this.logVerbose(ConsoleMessageId.Diagnostics, message);
+    }
   }
 
   /**
