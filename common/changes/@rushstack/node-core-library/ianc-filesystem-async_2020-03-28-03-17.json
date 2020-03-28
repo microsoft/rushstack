@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Create async versions of FileSystem and JsonFile APIs.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library",
+  "email": "iclanton@users.noreply.github.com"
+}
