@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-plugin",
+      "comment": "Fix a few RESX parsing issues and improve translated strings resolution.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/localization-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

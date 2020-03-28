@@ -60,10 +60,7 @@ module.exports = function(env) {
               "./src/strings4.loc.json": {
                 "string1": "\"Cadena con comillas\""
               },
-              "./src/strings5.resx": {
-                "string1": "La primera cadena RESX",
-                "stringWithQuotes": "\"Cadena RESX con comillas\""
-              }
+              "./src/strings5.resx": "./localization/es-es/strings5.resx"
             }
           },
           passthroughLocale: {

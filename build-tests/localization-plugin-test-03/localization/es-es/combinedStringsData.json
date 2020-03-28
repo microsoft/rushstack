@@ -1,0 +1,7 @@
+{
+  "./src/strings3.loc.json": {
+    "string1": "la tercera cadena",
+    "string2": "cuerda cuatro con un ' apóstrofe",
+    "string3": "UNUSED STRING!"
+  }
+}
