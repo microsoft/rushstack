@@ -505,34 +505,30 @@ export class LocalizationPlugin implements Webpack.Plugin {
     const stringsMap: Map<string, string> = new Map<string, string>();
     filesMap.set(localizedFilePath, stringsMap);
 
-    for (const stringName in localizedFileData) {
-      if (!localizedFileData.hasOwnProperty || localizedFileData.hasOwnProperty(stringName)) {
-        const stringKey: string = `${localizedFilePath}?${stringName}`;
-        if (!this.stringKeys.has(stringKey)) {
-          const placeholder: IStringPlaceholder = this._getPlaceholderString();
-          this.stringKeys.set(stringKey, placeholder);
-        }
-
-        const placeholder: IStringPlaceholder = this.stringKeys.get(stringKey)!;
-        if (!this._stringPlaceholderMap.has(placeholder.suffix)) {
-          this._stringPlaceholderMap.set(
-            placeholder.suffix,
-            {
-              values: {
-                [this._passthroughLocaleName]: stringName
-              },
-              locFilePath: localizedFilePath,
-              stringName: stringName
-            }
-          );
-        }
-
-        const stringValue: string = localizedFileData[stringName];
-
-        this._stringPlaceholderMap.get(placeholder.suffix)!.values[localeName] = stringValue;
-
-        stringsMap.set(stringName, stringValue);
+    for (const [stringName, stringValue] of Object.entries(localizedFileData)) {
+      const stringKey: string = `${localizedFilePath}?${stringName}`;
+      if (!this.stringKeys.has(stringKey)) {
+        const placeholder: IStringPlaceholder = this._getPlaceholderString();
+        this.stringKeys.set(stringKey, placeholder);
       }
+
+      const placeholder: IStringPlaceholder = this.stringKeys.get(stringKey)!;
+      if (!this._stringPlaceholderMap.has(placeholder.suffix)) {
+        this._stringPlaceholderMap.set(
+          placeholder.suffix,
+          {
+            values: {
+              [this._passthroughLocaleName]: stringName
+            },
+            locFilePath: localizedFilePath,
+            stringName: stringName
+          }
+        );
+      }
+
+      this._stringPlaceholderMap.get(placeholder.suffix)!.values[localeName] = stringValue;
+
+      stringsMap.set(stringName, stringValue);
     }
   }
 
@@ -726,19 +722,22 @@ export class LocalizationPlugin implements Webpack.Plugin {
   }
 
   private _chunkHasLocalizedModules(chunk: Webpack.compilation.Chunk): boolean {
-    if (EntityMarker.getMark(chunk) === undefined) {
-      let chunkHasAnyLocModules: boolean = false;
-      if (!chunkHasAnyLocModules) {
-        for (const module of chunk.getModules()) {
-          if (EntityMarker.getMark(module)) {
-            chunkHasAnyLocModules = true;
-            break;
-          }
+    let chunkHasAnyLocModules: boolean | undefined = EntityMarker.getMark(chunk);
+    if (chunkHasAnyLocModules === undefined) {
+      chunkHasAnyLocModules = false;
+      for (const module of chunk.getModules()) {
+        if (EntityMarker.getMark(module)) {
+          chunkHasAnyLocModules = true;
+          break;
         }
       }
 
-      // Check async chunks if this is a runtime chunk and we haven't directly found any localized modules
-      if (chunk.hasRuntime() && !chunkHasAnyLocModules) {
+      // If this chunk doesn't directly contain any localized resources, it still
+      // needs to be localized if it's an entrypoint chunk (i.e. - it has a runtime)
+      // and it loads localized async chunks.
+      // In that case, the generated chunk URL generation code needs to contain
+      // the locale name.
+      if (!chunkHasAnyLocModules && chunk.hasRuntime()) {
         for (const asyncChunk of chunk.getAllAsyncChunks()) {
           if (this._chunkHasLocalizedModules(asyncChunk)) {
             chunkHasAnyLocModules = true;
@@ -750,13 +749,13 @@ export class LocalizationPlugin implements Webpack.Plugin {
       EntityMarker.markEntity(chunk, chunkHasAnyLocModules);
     }
 
-    return EntityMarker.getMark(chunk)!;
+    return chunkHasAnyLocModules;
   }
 
   private _convertLocalizationFileToLocData(locFile: ILocalizationFile): ILocaleFileData {
     const locFileData: ILocaleFileData = {};
-    for (const stringName in locFile) { // eslint-disable-line guard-for-in
-      locFileData[stringName] = locFile[stringName].value;
+    for (const [stringName, locFileEntry] of Object.entries(locFile)) {
+      locFileData[stringName] = locFileEntry.value;
     }
 
     return locFileData;
