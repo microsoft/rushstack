@@ -14,6 +14,7 @@ import { AstImport } from './AstImport';
 import { MessageRouter } from '../collector/MessageRouter';
 import { TypeScriptInternals, IGlobalVariableAnalyzer } from './TypeScriptInternals';
 import { StringChecks } from './StringChecks';
+import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
 
 export type AstEntity = AstSymbol | AstImport;
 
@@ -61,9 +62,11 @@ export interface IFetchAstSymbolOptions {
 export class AstSymbolTable {
   private readonly _program: ts.Program;
   private readonly _typeChecker: ts.TypeChecker;
+  private readonly _messageRouter: MessageRouter;
   private readonly _globalVariableAnalyzer: IGlobalVariableAnalyzer;
   private readonly _packageMetadataManager: PackageMetadataManager;
   private readonly _exportAnalyzer: ExportAnalyzer;
+  private readonly _alreadyWarnedGlobalNames: Set<string>;
 
   /**
    * A mapping from ts.Symbol --> AstSymbol
@@ -90,6 +93,7 @@ export class AstSymbolTable {
 
     this._program = program;
     this._typeChecker = typeChecker;
+    this._messageRouter = messageRouter;
     this._globalVariableAnalyzer = TypeScriptInternals.getGlobalVariableAnalyzer(program);
     this._packageMetadataManager = new PackageMetadataManager(packageJsonLookup, messageRouter);
 
@@ -102,6 +106,8 @@ export class AstSymbolTable {
         fetchAstSymbol: this._fetchAstSymbol.bind(this)
       }
     );
+
+    this._alreadyWarnedGlobalNames = new Set<string>();
   }
 
   /**
@@ -345,7 +351,13 @@ export class AstSymbolTable {
                   // that include interesting global variables in their API, but API Extractor doesn't support
                   // that yet; it would be a feature request.)
 
-                  // console.log(`Ignoring reference to global variable ${identifierNode.text}`);
+                  if (this._messageRouter.showDiagnostics) {
+                    if (!this._alreadyWarnedGlobalNames.has(identifierNode.text)) {
+                      this._alreadyWarnedGlobalNames.add(identifierNode.text);
+                      this._messageRouter.logDiagnostic(`Ignoring reference to global variable "${identifierNode.text}"`
+                        + ` in ` + SourceFileLocationFormatter.formatDeclaration(identifierNode));
+                    }
+                  }
                 } else {
                   // If you encounter this, please report a bug with a repro.  We're interested to know
                   // how it can occur.
