@@ -15,7 +15,7 @@ import {
   ILocalizationFile
 } from '../interfaces';
 
-const STRING_NAME_RESX: RegExp = /^[A-z_][A-z0-9_]*$/;
+const STRING_NAME_RESX: RegExp = /^[A-z_$][A-z0-9_$]*$/;
 
 export interface IResxReaderOptions {
   resxFilePath: string;
