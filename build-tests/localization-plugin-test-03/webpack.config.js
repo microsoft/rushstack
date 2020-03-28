@@ -2,10 +2,7 @@
 
 const path = require('path');
 const webpack = require('webpack');
-const {
-  JsonFile,
-  FileSystem
-} = require('@rushstack/node-core-library');
+const { JsonFile } = require('@rushstack/node-core-library');
 
 const { LocalizationPlugin } = require('@rushstack/localization-plugin');
 const { SetPublicPathPlugin } = require('@rushstack/set-webpack-public-path-plugin');
@@ -22,9 +19,14 @@ function resolveMissingString(localeNames, localizedResourcePath) {
   const result = {};
   for (const localeName of localeNames) {
     const expectedCombinedStringsPath = path.resolve(__dirname, 'localization', localeName, 'combinedStringsData.json');
-    if (FileSystem.exists(expectedCombinedStringsPath)) {
+    try {
       const loadedCombinedStringsPath = JsonFile.load(expectedCombinedStringsPath);
       result[localeName] = loadedCombinedStringsPath[contextRelativePath];
+    } catch (e) {
+      if (e.code !== 'ENOENT' && e.code !== 'ENOTDIR') {
+        // File exists, but reading failed.
+        throw e;
+      }
     }
   }
   return result;
