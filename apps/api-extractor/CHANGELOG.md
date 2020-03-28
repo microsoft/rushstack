@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 18 Mar 2020 15:07:47 GMT and should not be manually modified.
+This log was last generated on Sat, 28 Mar 2020 00:37:16 GMT and should not be manually modified.
+
+## 7.7.11
+Sat, 28 Mar 2020 00:37:16 GMT
+
+### Patches
+
+- Upgrade to TSdoc 0.12.19 to fix an issue where `<h1>` wasn't allowed as an HTML tag in a doc comment
 
 ## 7.7.10
 Wed, 18 Mar 2020 15:07:47 GMT
