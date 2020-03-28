@@ -48,8 +48,6 @@ export interface IFetchAstSymbolOptions {
   localName?: string;
 }
 
-const warnedNames: Set<string> = new Set<string>();
-
 /**
  * AstSymbolTable is the workhorse that builds AstSymbol and AstDeclaration objects.
  * It maintains a cache of already constructed objects.  AstSymbolTable constructs
@@ -324,6 +322,13 @@ export class AstSymbolTable {
                 throw new Error('Symbol not found for identifier: ' + identifierNode.getText());
               }
 
+              // Normally we expect getSymbolAtLocation() to take us to a declaration within the same source
+              // file, or else to an explicit "import" statement within the same source file.  But in certain
+              // situations (e.g. a global variable) the symbol will refer to a declaration in some other
+              // source file.  We'll call that case a "displaced symbol".
+              //
+              // For more info, see this discussion:
+              // https://github.com/microsoft/rushstack/issues/1765#issuecomment-595559849
               let displacedSymbol: boolean = true;
               for (const declaration of symbol.declarations || []) {
                 if (declaration.getSourceFile() === identifierNode.getSourceFile()) {
@@ -334,11 +339,16 @@ export class AstSymbolTable {
 
               if (displacedSymbol) {
                 if (this._globalVariableAnalyzer.hasGlobalName(identifierNode.text)) {
-                  if (!warnedNames.has(identifierNode.text)) {
-                    warnedNames.add(identifierNode.text);
-                    console.log(`Ignoring ${identifierNode.text}`);
-                  }
+                  // If the displaced symbol is a global variable, then API Extractor simply ignores it.
+                  // Ambient declarations typically describe the runtime environment (provided by an API consumer),
+                  // so we don't bother analyzing them as an API contract.  (There are probably some packages
+                  // that include interesting global variables in their API, but API Extractor doesn't support
+                  // that yet; it would be a feature request.)
+
+                  // console.log(`Ignoring reference to global variable ${identifierNode.text}`);
                 } else {
+                  // If you encounter this, please report a bug with a repro.  We're interested to know
+                  // how it can occur.
                   throw new InternalError(`Unable to follow symbol for "${identifierNode.text}"`);
                 }
               } else {

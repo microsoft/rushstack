@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as ts from 'typescript';
-import { InternalError } from '@microsoft/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 
 /**
  * Exposes the TypeScript compiler internals for detecting global variable names.
