@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.7.12",
+      "tag": "@microsoft/api-extractor_v7.7.12",
+      "date": "Sun, 29 Mar 2020 00:04:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve analysis of types exposed via global variables (fixes GitHub issues #1765, #1095, and #1316)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.7.11",
       "tag": "@microsoft/api-extractor_v7.7.11",
       "date": "Sat, 28 Mar 2020 00:37:16 GMT",

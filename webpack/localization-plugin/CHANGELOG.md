@@ -1,6 +1,11 @@
 # Change Log - @rushstack/localization-plugin
 
-This log was last generated on Sat, 28 Mar 2020 01:38:47 GMT and should not be manually modified.
+This log was last generated on Sun, 29 Mar 2020 00:04:12 GMT and should not be manually modified.
+
+## 0.2.1
+Sun, 29 Mar 2020 00:04:12 GMT
+
+*Version update only*
 
 ## 0.2.0
 Sat, 28 Mar 2020 01:38:47 GMT

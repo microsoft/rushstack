@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 28 Mar 2020 00:37:16 GMT and should not be manually modified.
+This log was last generated on Sun, 29 Mar 2020 00:04:12 GMT and should not be manually modified.
+
+## 7.7.12
+Sun, 29 Mar 2020 00:04:12 GMT
+
+### Patches
+
+- Improve analysis of types exposed via global variables (fixes GitHub issues #1765, #1095, and #1316)
 
 ## 7.7.11
 Sat, 28 Mar 2020 00:37:16 GMT
