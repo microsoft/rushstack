@@ -25,7 +25,7 @@
     "@types/node": "10.17.13",
     "eslint": "~6.5.1",
     "tslint": "~5.12.1",
-    "tslint-microsoft-contrib": "~5.2.1",
+    "tslint-microsoft-contrib": "~6.2.0",
     "typescript": "~2.9.2"
   },
   "devDependencies": {
