@@ -108,6 +108,10 @@
         },
         "environmentVariables": {
           "$ref": "#/definitions/environmentVariables"
+        },
+        "preventManualShrinkwrapChanges": {
+          "description": "If true, then \"rush install\" will report an error if manual modifications were made to the PNPM shrinkwrap file without running `rush update` afterwards. To temporarily disable this validation when invoking \"rush install\", use the \"--bypassPolicy\" command-line parameter. The default value is false.",
+          "type": "boolean"
         }
       },
       "additionalProperties": false

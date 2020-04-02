@@ -2,6 +2,45 @@
   "name": "@microsoft/node-library-build",
   "entries": [
     {
+      "version": "6.4.8",
+      "tag": "@microsoft/node-library-build_v6.4.8",
+      "date": "Sun, 29 Mar 2020 00:04:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.4.7` to `8.4.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.6` to `0.4.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.4.7",
+      "tag": "@microsoft/node-library-build_v6.4.7",
+      "date": "Sat, 28 Mar 2020 00:37:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.15.3` to `3.15.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.8.6` to `3.8.7`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.4.6` to `8.4.7`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.5` to `0.4.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.5` to `0.5.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "6.4.6",
       "tag": "@microsoft/node-library-build_v6.4.6",
       "date": "Wed, 18 Mar 2020 15:07:47 GMT",

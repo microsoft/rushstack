@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { loader } from 'webpack';
+import { Terminal } from '@rushstack/node-core-library';
 
 import { LocalizationPlugin } from '../LocalizationPlugin';
 import { ILocalizationFile } from '../interfaces';
@@ -11,6 +12,7 @@ import {
   IBaseLoaderOptions
 } from './LoaderFactory';
 import { EntityMarker } from '../utilities/EntityMarker';
+import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider';
 
 export interface ILocLoaderOptions extends IBaseLoaderOptions {
   pluginInstance: LocalizationPlugin;
@@ -24,8 +26,20 @@ export default loaderFactory(
     options: ILocLoaderOptions
   ) {
     const { pluginInstance } = options;
-    const locFileData: ILocalizationFile = LocFileParser.parseLocFileFromLoader(content, this);
-    pluginInstance.addDefaultLocFile(locFilePath, locFileData);
+    const terminal: Terminal = new Terminal(LoaderTerminalProvider.getTerminalProviderForLoader(this));
+    const locFileData: ILocalizationFile = LocFileParser.parseLocFile({
+      content,
+      terminal,
+      filePath: locFilePath
+    });
+    const { additionalLoadedFilePaths, errors } = pluginInstance.addDefaultLocFile(terminal, locFilePath, locFileData);
+    for (const additionalFile of additionalLoadedFilePaths) {
+      this.dependency(additionalFile);
+    }
+
+    for (const error of errors) {
+      this.emitError(error);
+    }
 
     const resultObject: { [stringName: string]: string } = {};
     for (const stringName in locFileData) { // eslint-disable-line guard-for-in

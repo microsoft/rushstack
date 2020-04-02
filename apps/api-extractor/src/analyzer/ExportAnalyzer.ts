@@ -9,7 +9,7 @@ import { AstSymbol } from './AstSymbol';
 import { AstImport, IAstImportOptions, AstImportKind } from './AstImport';
 import { AstModule, AstModuleExportInfo } from './AstModule';
 import { TypeScriptInternals } from './TypeScriptInternals';
-import { TypeScriptMessageFormatter } from './TypeScriptMessageFormatter';
+import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
 import { IFetchAstSymbolOptions, AstEntity } from './AstSymbolTable';
 import { AstImportAsModule } from './AstImportAsModule';
 
@@ -136,7 +136,7 @@ export class ExportAnalyzer {
 
             if (!astSymbol) {
               throw new Error(`Unsupported export ${JSON.stringify(exportedSymbol.name)} in `
-                + TypeScriptMessageFormatter.formatFileAndLineNumber(followedSymbol.declarations[0]));
+                + SourceFileLocationFormatter.formatDeclaration(followedSymbol.declarations[0]));
             }
 
             astModule.cachedExportedEntities.set(exportedSymbol.name, astSymbol);

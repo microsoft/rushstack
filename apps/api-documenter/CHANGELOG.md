@@ -1,6 +1,18 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Wed, 18 Mar 2020 15:07:47 GMT and should not be manually modified.
+This log was last generated on Sun, 29 Mar 2020 00:04:12 GMT and should not be manually modified.
+
+## 7.7.16
+Sun, 29 Mar 2020 00:04:12 GMT
+
+*Version update only*
+
+## 7.7.15
+Sat, 28 Mar 2020 00:37:16 GMT
+
+### Patches
+
+- Upgrade to TSdoc 0.12.19
 
 ## 7.7.14
 Wed, 18 Mar 2020 15:07:47 GMT

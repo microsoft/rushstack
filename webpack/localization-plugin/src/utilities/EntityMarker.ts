@@ -11,7 +11,7 @@ export class EntityMarker {
     module[LABEL] = value;
   }
 
-  public static getMark<TModule>(module: TModule): boolean {
-    return !!module[LABEL];
+  public static getMark<TModule>(module: TModule): boolean | undefined {
+    return module[LABEL];
   }
 }

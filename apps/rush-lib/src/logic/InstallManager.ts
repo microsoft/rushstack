@@ -282,7 +282,7 @@ export class InstallManager {
     const options: IInstallManagerOptions = this._options;
 
     // Check the policies
-    PolicyValidator.validatePolicy(this._rushConfiguration, options.bypassPolicy);
+    PolicyValidator.validatePolicy(this._rushConfiguration, options);
 
     // Git hooks are only installed if the repo opts in by including files in /common/git-hooks
     const hookSource: string = path.join(this._rushConfiguration.commonFolder, 'git-hooks');
@@ -330,8 +330,11 @@ export class InstallManager {
     // (If it's a full update, then we ignore the shrinkwrap from Git since it will be overwritten)
     if (!options.fullUpgrade) {
       try {
-        shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(this._rushConfiguration.packageManager,
-          this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant));
+        shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
+          this._rushConfiguration.packageManager,
+          this._rushConfiguration.packageManagerOptions,
+          this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant)
+        );
       } catch (ex) {
         console.log();
         console.log(`Unable to load the ${this._shrinkwrapFilePhrase}: ${ex.message}`);
@@ -758,7 +761,12 @@ export class InstallManager {
       FileConstants.PackageJson);
 
     if (shrinkwrapFile) {
-      // If we have a (possibly incomplete) shrinkwrap file, save it as the temporary file.
+      // If we have a (possibly incomplete) shrinkwrap file, check to see if any shrinkwrap-specific
+      // changes make the shrinkwrap out-of-date, and save it as the temporary file.
+      if (shrinkwrapFile.shouldForceRecheck()) {
+        shrinkwrapIsUpToDate = false;
+      }
+
       shrinkwrapFile.save(this._rushConfiguration.tempShrinkwrapFilename);
       shrinkwrapFile.save(this._rushConfiguration.tempShrinkwrapPreinstallFilename);
     } else {
@@ -1049,6 +1057,15 @@ export class InstallManager {
           }
 
           if (options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
+            // Shrinkwrap files may need to be post processed after install, so load and save it
+            const tempShrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
+              this._rushConfiguration.packageManager,
+              this._rushConfiguration.packageManagerOptions,
+              this._rushConfiguration.tempShrinkwrapFilename);
+            if (tempShrinkwrapFile) {
+              tempShrinkwrapFile.save(this._rushConfiguration.tempShrinkwrapFilename);
+            }
+
             // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
             this._syncFile(this._rushConfiguration.tempShrinkwrapFilename,
               this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant));

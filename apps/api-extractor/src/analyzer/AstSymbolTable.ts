@@ -13,8 +13,9 @@ import { ExportAnalyzer } from './ExportAnalyzer';
 import { AstImport } from './AstImport';
 import { AstImportAsModule } from './AstImportAsModule';
 import { MessageRouter } from '../collector/MessageRouter';
-import { TypeScriptInternals } from './TypeScriptInternals';
+import { TypeScriptInternals, IGlobalVariableAnalyzer } from './TypeScriptInternals';
 import { StringChecks } from './StringChecks';
+import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
 
 export type AstEntity = AstSymbol | AstImport | AstImportAsModule;
 
@@ -62,8 +63,11 @@ export interface IFetchAstSymbolOptions {
 export class AstSymbolTable {
   private readonly _program: ts.Program;
   private readonly _typeChecker: ts.TypeChecker;
+  private readonly _messageRouter: MessageRouter;
+  private readonly _globalVariableAnalyzer: IGlobalVariableAnalyzer;
   private readonly _packageMetadataManager: PackageMetadataManager;
   private readonly _exportAnalyzer: ExportAnalyzer;
+  private readonly _alreadyWarnedGlobalNames: Set<string>;
 
   /**
    * A mapping from ts.Symbol --> AstSymbol
@@ -90,6 +94,8 @@ export class AstSymbolTable {
 
     this._program = program;
     this._typeChecker = typeChecker;
+    this._messageRouter = messageRouter;
+    this._globalVariableAnalyzer = TypeScriptInternals.getGlobalVariableAnalyzer(program);
     this._packageMetadataManager = new PackageMetadataManager(packageJsonLookup, messageRouter);
 
     this._exportAnalyzer = new ExportAnalyzer(
@@ -101,6 +107,8 @@ export class AstSymbolTable {
         fetchAstSymbol: this._fetchAstSymbol.bind(this)
       }
     );
+
+    this._alreadyWarnedGlobalNames = new Set<string>();
   }
 
   /**
@@ -356,10 +364,47 @@ export class AstSymbolTable {
                 throw new Error('Symbol not found for identifier: ' + identifierNode.getText());
               }
 
-              referencedAstEntity = this._exportAnalyzer.fetchReferencedAstEntity(symbol,
-                governingAstDeclaration.astSymbol.isExternal);
+              // Normally we expect getSymbolAtLocation() to take us to a declaration within the same source
+              // file, or else to an explicit "import" statement within the same source file.  But in certain
+              // situations (e.g. a global variable) the symbol will refer to a declaration in some other
+              // source file.  We'll call that case a "displaced symbol".
+              //
+              // For more info, see this discussion:
+              // https://github.com/microsoft/rushstack/issues/1765#issuecomment-595559849
+              let displacedSymbol: boolean = true;
+              for (const declaration of symbol.declarations || []) {
+                if (declaration.getSourceFile() === identifierNode.getSourceFile()) {
+                  displacedSymbol = false;
+                  break;
+                }
+              }
 
-              this._entitiesByIdentifierNode.set(identifierNode, referencedAstEntity);
+              if (displacedSymbol) {
+                if (this._globalVariableAnalyzer.hasGlobalName(identifierNode.text)) {
+                  // If the displaced symbol is a global variable, then API Extractor simply ignores it.
+                  // Ambient declarations typically describe the runtime environment (provided by an API consumer),
+                  // so we don't bother analyzing them as an API contract.  (There are probably some packages
+                  // that include interesting global variables in their API, but API Extractor doesn't support
+                  // that yet; it would be a feature request.)
+
+                  if (this._messageRouter.showDiagnostics) {
+                    if (!this._alreadyWarnedGlobalNames.has(identifierNode.text)) {
+                      this._alreadyWarnedGlobalNames.add(identifierNode.text);
+                      this._messageRouter.logDiagnostic(`Ignoring reference to global variable "${identifierNode.text}"`
+                        + ` in ` + SourceFileLocationFormatter.formatDeclaration(identifierNode));
+                    }
+                  }
+                } else {
+                  // If you encounter this, please report a bug with a repro.  We're interested to know
+                  // how it can occur.
+                  throw new InternalError(`Unable to follow symbol for "${identifierNode.text}"`);
+                }
+              } else {
+                referencedAstEntity = this._exportAnalyzer.fetchReferencedAstEntity(symbol,
+                  governingAstDeclaration.astSymbol.isExternal);
+
+                this._entitiesByIdentifierNode.set(identifierNode, referencedAstEntity);
+              }
             }
 
             if (referencedAstEntity) {
