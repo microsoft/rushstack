@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "doc-plugin-rush-stack": "1.0.0",
-    "@microsoft/api-documenter": "7.7.16",
+    "@microsoft/api-documenter": "7.7.17",
     "@rushstack/eslint-config": "0.5.6"
   }
 }
