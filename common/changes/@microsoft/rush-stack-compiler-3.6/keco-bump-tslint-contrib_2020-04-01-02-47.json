@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack-compiler-3.6",
+      "comment": "Update tslint-microsoft-contrib to ~6.2.0",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-3.6",
+  "email": "KevinTCoughlin@users.noreply.github.com"
+}
