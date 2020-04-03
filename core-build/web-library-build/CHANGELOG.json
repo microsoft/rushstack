@@ -2,6 +2,33 @@
   "name": "@microsoft/web-library-build",
   "entries": [
     {
+      "version": "7.4.9",
+      "tag": "@microsoft/web-library-build_v7.4.9",
+      "date": "Fri, 03 Apr 2020 15:10:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.10.8` to `4.10.9`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.7.5` to `3.7.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.4.8` to `8.4.9`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `5.0.4` to `5.0.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.8` to `6.4.9`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.7` to `0.4.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.4.8",
       "tag": "@microsoft/web-library-build_v7.4.8",
       "date": "Sun, 29 Mar 2020 00:04:12 GMT",

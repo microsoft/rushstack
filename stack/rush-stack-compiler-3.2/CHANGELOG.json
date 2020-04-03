@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-stack-compiler-3.2",
   "entries": [
     {
+      "version": "0.6.8",
+      "tag": "@microsoft/rush-stack-compiler-3.2_v0.6.8",
+      "date": "Fri, 03 Apr 2020 15:10:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update tslint-microsoft-contrib to ~6.2.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.7",
       "tag": "@microsoft/rush-stack-compiler-3.2_v0.6.7",
       "date": "Sun, 29 Mar 2020 00:04:12 GMT",

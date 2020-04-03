@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush-stack-compiler-3.3
 
-This log was last generated on Sun, 29 Mar 2020 00:04:12 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Apr 2020 15:10:15 GMT and should not be manually modified.
+
+## 0.5.8
+Fri, 03 Apr 2020 15:10:15 GMT
+
+### Patches
+
+- Update tslint-microsoft-contrib to ~6.2.0
 
 ## 0.5.7
 Sun, 29 Mar 2020 00:04:12 GMT
