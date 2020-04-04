@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 18 Mar 2020 01:23:22 GMT and should not be manually modified.
+This log was last generated on Sat, 04 Apr 2020 00:38:29 GMT and should not be manually modified.
+
+## 5.23.0
+Sat, 04 Apr 2020 00:38:29 GMT
+
+### Updates
+
+- Add a new rush.json setting "preventManualShrinkwrapChanges" which prevents against accidental mistakes in pnpm-lock.yaml.
+- Upgrade node-tar
+- Remove some misleading log output for "rush build" (GitHub #1733)
 
 ## 5.22.0
 Wed, 18 Mar 2020 01:23:22 GMT

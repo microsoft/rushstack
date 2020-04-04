@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.23.0",
+      "tag": "@microsoft/rush_v5.23.0",
+      "date": "Sat, 04 Apr 2020 00:38:29 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new rush.json setting \"preventManualShrinkwrapChanges\" which prevents against accidental mistakes in pnpm-lock.yaml."
+          },
+          {
+            "comment": "Upgrade node-tar"
+          },
+          {
+            "comment": "Remove some misleading log output for \"rush build\" (GitHub #1733)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.22.0",
       "tag": "@microsoft/rush_v5.22.0",
       "date": "Wed, 18 Mar 2020 01:23:22 GMT",
