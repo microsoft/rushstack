@@ -104,7 +104,8 @@ module.exports = function(env) {
               append: '##--!!]',
               prepend: '[!!--##'
             }
-          }
+          },
+          normalizeResxNewlines: 'lf'
         },
         typingsOptions: {
           generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts'),
