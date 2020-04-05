@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
   <data name="string1" xml:space="preserve">
-    <value>La primera cadena RESX</value>
+    <value>La primera cadena de texto RESX</value>
   </data>
   <data name="stringWithQuotes" xml:space="preserve">
-    <value>"Cadena RESX con comillas"</value>
+    <value>"cadena de texto RESX con comillas"</value>
   </data>
 </root>

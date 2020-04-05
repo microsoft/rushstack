@@ -52,13 +52,13 @@ function generateConfiguration(mode, outputFolderName) {
           translatedStrings: {
             "es-es": {
               "./src/strings1.loc.json": {
-                "string1": "la primera cadena"
+                "string1": "la primera cadena de texto"
               },
               "./src/chunks/strings2.loc.json": {
-                "string1": "la segunda cadena"
+                "string1": "la segunda cadena de texto"
               },
               "./src/strings4.loc.json": {
-                "string1": "\"Cadena con comillas\""
+                "string1": "\"cadena de texto con comillas\""
               },
               "./src/strings5.resx": "./localization/es-es/strings5.resx"
             }

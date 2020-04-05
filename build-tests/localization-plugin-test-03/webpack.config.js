@@ -76,18 +76,18 @@ function generateConfiguration(mode, outputFolderName) {
           translatedStrings: {
             "es-es": {
               "./src/strings1.loc.json": {
-                "string1": "la primera cadena"
+                "string1": "la primera cadena de texto"
               },
               "./src/chunks/strings2.loc.json": "./localization/es-es/chunks/strings2.loc.json",
               "./src/strings4.loc.json": {
-                "string1": "\"Cadena con comillas\""
+                "string1": "\"cadena de texto con comillas\""
               },
               "./src/strings5.resx": {
-                "string1": "La primera cadena RESX",
-                "stringWithQuotes": "\"Cadena RESX con comillas\""
+                "string1": "La primera cadena de texto RESX",
+                "stringWithQuotes": "\"cadena de texto RESX con comillas\""
               },
               "./src/chunks/strings6.resx": {
-                "string": "cadena RESX"
+                "string": "cadena de texto RESX"
               }
             }
           },

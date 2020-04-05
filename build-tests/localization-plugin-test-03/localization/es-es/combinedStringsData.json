@@ -1,7 +1,7 @@
 {
   "./src/strings3.loc.json": {
-    "string1": "cadena tres con una \n nueva línea y una \t tabulación",
-    "string2": "cuerda cuatro con un ' apóstrofe",
+    "string1": "cadena de texto tres con una \n nueva línea y una \t tabulación",
+    "string2": "cadena de texto cuatro con un ' apóstrofe",
     "string3": "UNUSED STRING!"
   }
 }
