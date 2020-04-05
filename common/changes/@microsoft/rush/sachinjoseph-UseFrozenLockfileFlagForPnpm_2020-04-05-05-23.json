@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Pass --frozen-lockfile=false to pnpm >= 4.10.0-3. See https://github.com/pnpm/pnpm/issues/1994.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "sachinjoseph@users.noreply.github.com"
+}
