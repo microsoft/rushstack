@@ -10,7 +10,8 @@ function executeCommand(command) {
 
 // Clean the old build outputs
 console.log(`==> Starting build.js for ${path.basename(process.cwd())}`);
-FileSystem.ensureEmptyFolder('dist');
+FileSystem.ensureEmptyFolder('dist-dev');
+FileSystem.ensureEmptyFolder('dist-prod');
 FileSystem.ensureEmptyFolder('lib');
 FileSystem.ensureEmptyFolder('temp');
 

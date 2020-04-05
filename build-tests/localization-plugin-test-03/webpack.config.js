@@ -32,9 +32,9 @@ function resolveMissingString(localeNames, localizedResourcePath) {
   return result;
 }
 
-module.exports = function(env) {
-  const configuration = {
-    mode: 'production',
+function generateConfiguration(mode, outputFolderName) {
+  return {
+    mode: mode,
     module: {
       rules: [
         {
@@ -59,7 +59,7 @@ module.exports = function(env) {
       'localization-test-D': path.join(__dirname, 'src', 'indexD.ts')
     },
     output: {
-      path: path.join(__dirname, 'dist'),
+      path: path.join(__dirname, outputFolderName),
       filename: '[name]_[locale]_[contenthash].js',
       chunkFilename: '[id].[name]_[locale]_[contenthash].js'
     },
@@ -132,6 +132,9 @@ module.exports = function(env) {
       new HtmlWebpackPlugin()
     ]
   };
-
-  return configuration;
 }
+
+module.exports = [
+  generateConfiguration('development', 'dist-dev'),
+  generateConfiguration('production', 'dist-prod'),
+];
