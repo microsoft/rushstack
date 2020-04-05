@@ -1289,7 +1289,16 @@ export class InstallManager {
       // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
       // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
       if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
-        args.push('--no-prefer-frozen-lockfile');
+        if (semver.lt(this._rushConfiguration.packageManagerToolVersion, '4.10.0-3')) {
+          args.push('--no-prefer-frozen-lockfile');
+        } else {
+          // PNPM >= 4.10.0-3 assumes "frozen-lockfile" by default on CI machines
+          // See:
+          //    1) https://github.com/microsoft/rushstack/issues/1804
+          //    2) https://github.com/pnpm/pnpm/issues/1994#issuecomment-591663078
+          //    3) https://github.com/pnpm/pnpm/issues/1994#issuecomment-596211620
+          args.push('--frozen-lockfile=false');
+        }
       } else {
         args.push('--no-prefer-frozen-shrinkwrap');
       }
