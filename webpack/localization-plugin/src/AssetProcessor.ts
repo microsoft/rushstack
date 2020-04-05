@@ -23,6 +23,7 @@ interface ILocalizedReconstructionElement extends IReconstructionElement {
   values: ILocaleElementMap;
   size: number;
   stringName: string;
+  escapedBackslash: string;
   locFilePath: string;
 }
 
@@ -30,6 +31,7 @@ interface IDynamicReconstructionElement extends IReconstructionElement {
   kind: 'dynamic';
   valueFn: (locale: string | undefined, token: string | undefined) => string;
   size: number;
+  escapedBackslash: string;
   token?: string;
 }
 
@@ -81,7 +83,7 @@ export interface IProcessAssetResult {
 }
 
 const PLACEHOLDER_REGEX: RegExp = new RegExp(
-  `${Constants.STRING_PLACEHOLDER_PREFIX}_([A-C])(\\+[^+]+\\+)?_(\\d+)`,
+  `${Constants.STRING_PLACEHOLDER_PREFIX}_(\\\\*)_([A-C])(\\+[^+]+\\+)?_(\\d+)`,
   'g'
 );
 
@@ -230,11 +232,18 @@ export class AssetProcessor {
               }
             }
 
-            // Replace the quotemark character with a unicode-escaped character
-            newValue = newValue.replace(/\"/g, '\\u0022');
+            const escapedBackslash: string = localizedElement.escapedBackslash || '\\';
 
-            // Replace the apostrophe character with a unicode-escaped character
-            newValue = newValue.replace(/\'/g, '\\u0027');
+            // Replace backslashes with the properly escaped backslash
+            newValue = newValue.replace(/\\/g, escapedBackslash);
+
+            const escapingCharacterSequence: string = escapedBackslash.substr(escapedBackslash.length / 2);
+
+            // Ensure the the quotemark, apostrophe, and newline characters are properly escaped
+            newValue = newValue.replace(/\r/g, `${escapingCharacterSequence}r`);
+            newValue = newValue.replace(/\n/g, `${escapingCharacterSequence}n`);
+            newValue = newValue.replace(/\"/g, `${escapingCharacterSequence}u0022`);
+            newValue = newValue.replace(/\'/g, `${escapingCharacterSequence}u0027`);
 
             reconstruction.push(newValue);
             sizeDiff += (newValue.length - localizedElement.size);
@@ -334,7 +343,7 @@ export class AssetProcessor {
       };
       reconstructionSeries.push(staticElement);
 
-      const [placeholder, elementLabel, token, placeholderSerialNumber] = regexResult;
+      const [placeholder, escapedBackslash, elementLabel, token, placeholderSerialNumber] = regexResult;
 
       let localizedReconstructionElement: IReconstructionElement;
       switch (elementLabel) {
@@ -353,6 +362,7 @@ export class AssetProcessor {
               values: stringData.values,
               size: placeholder.length,
               locFilePath: stringData.locFilePath,
+              escapedBackslash: escapedBackslash,
               stringName: stringData.stringName,
             };
             localizedReconstructionElement = localizedElement;
@@ -364,7 +374,8 @@ export class AssetProcessor {
           const dynamicElement: IDynamicReconstructionElement = {
             kind: 'dynamic',
             valueFn: (locale: string) => locale,
-            size: placeholder.length
+            size: placeholder.length,
+            escapedBackslash: escapedBackslash
           };
           localizedReconstructionElement = dynamicElement;
           break;
@@ -375,6 +386,7 @@ export class AssetProcessor {
             kind: 'dynamic',
             valueFn: jsonpFunction,
             size: placeholder.length,
+            escapedBackslash: escapedBackslash,
             token: token.substring(1, token.length - 1)
           };
           localizedReconstructionElement = dynamicElement;

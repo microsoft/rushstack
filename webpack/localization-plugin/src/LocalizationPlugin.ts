@@ -738,13 +738,10 @@ export class LocalizationPlugin implements Webpack.Plugin {
     return { errors, warnings };
   }
 
-  /**
-   * @param token - Use this as a value that may be escaped or minified.
-   */
   private _getPlaceholderString(): IStringPlaceholder {
     const suffix: string = (this._stringPlaceholderCounter++).toString();
     return {
-      value: `${Constants.STRING_PLACEHOLDER_PREFIX}_${Constants.STRING_PLACEHOLDER_LABEL}_${suffix}`,
+      value: `${Constants.STRING_PLACEHOLDER_PREFIX}_\\_${Constants.STRING_PLACEHOLDER_LABEL}_${suffix}`,
       suffix: suffix
     };
   }
