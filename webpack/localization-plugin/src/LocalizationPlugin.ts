@@ -33,7 +33,12 @@ import {
 import { LocFileTypingsGenerator } from './LocFileTypingsGenerator';
 import { Pseudolocalization } from './Pseudolocalization';
 import { EntityMarker } from './utilities/EntityMarker';
-import { IAsset, IProcessAssetResult, AssetProcessor } from './AssetProcessor';
+import {
+  IAsset,
+  IProcessAssetResult,
+  AssetProcessor,
+  PLACEHOLDER_REGEX
+} from './AssetProcessor';
 import { LocFileParser } from './utilities/LocFileParser';
 
 /**
@@ -77,6 +82,7 @@ interface IExtendedChunk extends Webpack.compilation.Chunk {
 interface IAssetPathOptions {
   chunk: Webpack.compilation.Chunk;
   contentHashType: string;
+  filename: string;
 }
 
 /**
@@ -219,20 +225,30 @@ export class LocalizationPlugin implements Webpack.Plugin {
             (assetPath: string, options: IAssetPathOptions) => {
               if (
                 options.contentHashType === 'javascript' &&
-                assetPath.match(Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX)
+                assetPath.match(Constants.LOCALE_FILENAME_TOKEN_REGEX)
               ) {
                 // Does this look like an async chunk URL generator?
                 if (typeof options.chunk.id === 'string' && options.chunk.id.match(/^\" \+/)) {
                   return assetPath.replace(
-                    Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX,
+                    Constants.LOCALE_FILENAME_TOKEN_REGEX,
                     `" + ${Constants.JSONP_PLACEHOLDER} + "`
                   );
                 } else {
                   return assetPath.replace(
-                    Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX,
+                    Constants.LOCALE_FILENAME_TOKEN_REGEX,
                     Constants.LOCALE_NAME_PLACEHOLDER
                   );
                 }
+              } else if (assetPath.match(Constants.NO_LOCALE_SOURCE_MAP_FILENAME_TOKEN_REGEX)) {
+                // Replace the placeholder with the [locale] token for sourcemaps
+                const deLocalizedFilename: string = options.filename.replace(
+                  PLACEHOLDER_REGEX,
+                  Constants.LOCALE_FILENAME_TOKEN
+                );
+                return assetPath.replace(
+                  Constants.NO_LOCALE_SOURCE_MAP_FILENAME_TOKEN_REGEX,
+                  deLocalizedFilename
+                );
               } else {
                 return assetPath;
               }
@@ -255,12 +271,12 @@ export class LocalizationPlugin implements Webpack.Plugin {
                 chunksHaveAnyChildren && (
                   !compilation.options.output ||
                   !compilation.options.output.chunkFilename ||
-                  compilation.options.output.chunkFilename.indexOf(Constants.LOCALE_FILENAME_PLACEHOLDER) === -1
+                  compilation.options.output.chunkFilename.indexOf(Constants.LOCALE_FILENAME_TOKEN) === -1
                 )
               ) {
                 compilation.errors.push(new Error(
                   'The configuration.output.chunkFilename property must be provided and must include ' +
-                  `the ${Constants.LOCALE_FILENAME_PLACEHOLDER} placeholder`
+                  `the ${Constants.LOCALE_FILENAME_TOKEN} placeholder`
                 ));
 
                 return;
@@ -276,12 +292,12 @@ export class LocalizationPlugin implements Webpack.Plugin {
                   : this._noStringsLocaleName;
                 if (chunk.hasRuntime()) {
                   chunk.filenameTemplate = (compilation.options.output!.filename as string).replace(
-                    Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX,
+                    Constants.LOCALE_FILENAME_TOKEN_REGEX,
                     replacementValue
                   );
                 } else {
                   chunk.filenameTemplate = compilation.options.output!.chunkFilename!.replace(
-                    Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX,
+                    Constants.LOCALE_FILENAME_TOKEN_REGEX,
                     replacementValue
                   );
                 }
@@ -560,11 +576,11 @@ export class LocalizationPlugin implements Webpack.Plugin {
       !configuration.output ||
       !configuration.output.filename ||
       (typeof configuration.output.filename !== 'string') ||
-      configuration.output.filename.indexOf(Constants.LOCALE_FILENAME_PLACEHOLDER) === -1
+      configuration.output.filename.indexOf(Constants.LOCALE_FILENAME_TOKEN) === -1
     ) {
       errors.push(new Error(
         'The configuration.output.filename property must be provided, must be a string, and must include ' +
-        `the ${Constants.LOCALE_FILENAME_PLACEHOLDER} placeholder`
+        `the ${Constants.LOCALE_FILENAME_TOKEN} placeholder`
       ));
     }
     // END configuration
