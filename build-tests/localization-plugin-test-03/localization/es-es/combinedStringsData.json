@@ -1,6 +1,6 @@
 {
   "./src/strings3.loc.json": {
-    "string1": "la tercera cadena",
+    "string1": "cadena tres con una \n nueva línea y una \t tabulación",
     "string2": "cuerda cuatro con un ' apóstrofe",
     "string3": "UNUSED STRING!"
   }
