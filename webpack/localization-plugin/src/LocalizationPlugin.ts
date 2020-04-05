@@ -4,7 +4,8 @@
 import {
   JsonFile,
   FileSystem,
-  Terminal
+  Terminal,
+  NewlineKind
 } from '@rushstack/node-core-library';
 import * as Webpack from 'webpack';
 import * as path from 'path';
@@ -111,6 +112,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
   private _noStringsLocaleName: string;
   private _fillMissingTranslationStrings: boolean;
   private _pseudolocalizers: Map<string, (str: string) => string> = new Map<string, (str: string) => string>();
+  private _resxNewlineNormalization: NewlineKind | undefined;
 
   /**
    * The outermost map's keys are the locale names.
@@ -173,7 +175,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
       pluginInstance: this,
       configuration: compiler.options,
       filesToIgnore: this._filesToIgnore,
-      localeNameOrPlaceholder: Constants.LOCALE_NAME_PLACEHOLDER
+      localeNameOrPlaceholder: Constants.LOCALE_NAME_PLACEHOLDER,
+      resxNewlineNormalization: this._resxNewlineNormalization
     };
 
     if (errors.length > 0 || warnings.length > 0) {
@@ -432,7 +435,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
         const localizationFile: ILocalizationFile = LocFileParser.parseLocFile({
           filePath: localizedData,
           content: FileSystem.readFile(localizedData),
-          terminal: terminal
+          terminal: terminal,
+          resxNewlineNormalization: this._resxNewlineNormalization
         });
 
         return this._convertLocalizationFileToLocData(localizationFile);
@@ -690,6 +694,30 @@ export class LocalizationPlugin implements Webpack.Plugin {
         }
       }
       // END options.localizedData.pseudoLocales
+
+      // START options.localizedData.normalizeResxNewlines
+      if (this._options.localizedData.normalizeResxNewlines) {
+        switch (this._options.localizedData.normalizeResxNewlines) {
+          case 'crlf': {
+            this._resxNewlineNormalization = NewlineKind.CrLf;
+            break;
+          }
+
+          case 'lf': {
+            this._resxNewlineNormalization = NewlineKind.Lf;
+            break;
+          }
+
+          default: {
+            errors.push(new Error(
+              `Unexpected value "${this._options.localizedData.normalizeResxNewlines}" for option ` +
+              '"localizedData.normalizeResxNewlines"'
+            ));
+            break;
+          }
+        }
+      }
+      // END options.localizedData.normalizeResxNewlines
     } else if (!isWebpackDevServer) {
       throw new Error('Localized data must be provided unless webpack dev server is running.');
     }

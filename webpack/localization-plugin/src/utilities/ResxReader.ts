@@ -3,7 +3,9 @@
 
 import {
   FileSystem,
-  Terminal
+  Terminal,
+  Text,
+  NewlineKind
 } from '@rushstack/node-core-library';
 import {
   XmlDocument,
@@ -20,6 +22,7 @@ const STRING_NAME_RESX: RegExp = /^[A-z_$][A-z0-9_$]*$/;
 export interface IResxReaderOptions {
   resxFilePath: string;
   terminal: Terminal;
+  newlineNormalization: NewlineKind | undefined
 }
 
 interface ILoggingFunctions {
@@ -33,8 +36,8 @@ interface IResxReaderOptionsInternal {
   resxFilePath: string;
   resxContents: string;
   loggingFunctions: ILoggingFunctions;
+  newlineNormalization: NewlineKind | undefined
 }
-
 
 export class ResxReader {
   public static readResxFileAsLocFile(options: IResxReaderOptions): ILocalizationFile {
@@ -71,7 +74,8 @@ export class ResxReader {
     return this._readResxAsLocFileInternal({
       resxFilePath: options.resxFilePath,
       resxContents,
-      loggingFunctions
+      loggingFunctions,
+      newlineNormalization: options.newlineNormalization
     })
   }
 
@@ -173,6 +177,9 @@ export class ResxReader {
               } else {
                 foundValueElement = true;
                 value = ResxReader._readTextElement(options, childNode);
+                if (value && options.newlineNormalization) {
+                  value = Text.convertTo(value, options.newlineNormalization);
+                }
               }
 
               break;

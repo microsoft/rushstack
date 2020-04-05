@@ -5,7 +5,10 @@ import {
   StringValuesTypingsGenerator,
   IStringValueTyping
 } from '@rushstack/typings-generator';
-import { Terminal } from '@rushstack/node-core-library';
+import {
+  Terminal,
+  NewlineKind
+} from '@rushstack/node-core-library';
 
 import { ILocalizationFile } from './interfaces';
 import { LocFileParser } from './utilities/LocFileParser';
@@ -19,6 +22,7 @@ export interface ITypingsGeneratorOptions {
   terminal?: Terminal;
   exportAsDefault?: boolean;
   filesToIgnore?: string[];
+  resxNewlineNormalization?: NewlineKind | undefined;
 }
 
 /**
@@ -35,7 +39,8 @@ export class LocFileTypingsGenerator extends StringValuesTypingsGenerator {
         const locFileData: ILocalizationFile = LocFileParser.parseLocFile({
           filePath: filePath,
           content: fileContents,
-          terminal: this._options.terminal!
+          terminal: this._options.terminal!,
+          resxNewlineNormalization: options.resxNewlineNormalization
         });
 
         const typings: IStringValueTyping[] = [];

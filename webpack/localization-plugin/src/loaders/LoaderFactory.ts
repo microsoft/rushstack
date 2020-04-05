@@ -3,8 +3,11 @@
 
 import { loader } from 'webpack';
 import * as loaderUtils from 'loader-utils';
+import { NewlineKind } from '@rushstack/node-core-library';
 
-export interface IBaseLoaderOptions { }
+export interface IBaseLoaderOptions {
+  resxNewlineNormalization: NewlineKind | undefined;
+}
 
 export interface ILoaderResult {
   [stringName: string]: string
