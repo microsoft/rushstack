@@ -282,6 +282,11 @@ export class FileSystem {
    * Retrieves the permissions (i.e. file mode bits) for a filesystem object.
    * Behind the scenes it uses `fs.chmodSync()`.
    * @param path - The absolute or relative path to the object that should be updated.
+   *
+   * @remarks
+   * This calls {@link FileSystem.getStatistics} to get the POSIX mode bits.
+   * If statistics in addition to the mode bits are needed, it is more efficient
+   * to call {@link FileSystem.getStatistics} directly instead.
    */
   public static getPosixModeBits(path: string): PosixModeBits {
     return FileSystem.getStatistics(path).mode;
@@ -392,6 +397,7 @@ export class FileSystem {
 
     let fileNames: string[]
     try {
+      // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
       fileNames = fsx.readdirSync(folderPath);
     } catch (e) {
       if (FileSystem._isNotExistError(e)) {
@@ -419,7 +425,7 @@ export class FileSystem {
 
     let fileNames: string[];
     try {
-      fileNames = await LegacyAdapters.convertCallbackToPromise(fsx.readdir, folderPath);
+      // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
       fileNames = await fsx.promises.readdir(folderPath);
     } catch (e) {
       if (FileSystem._isNotExistError(e)) {
