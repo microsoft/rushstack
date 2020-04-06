@@ -237,6 +237,7 @@ export class AssetProcessor {
             // Replace backslashes with the properly escaped backslash
             newValue = newValue.replace(/\\/g, escapedBackslash);
 
+            // @todo: look into using JSON.parse(...) to get the escaping characters
             const escapingCharacterSequence: string = escapedBackslash.substr(escapedBackslash.length / 2);
 
             // Ensure the the quotemark, apostrophe, and newline characters are properly escaped
