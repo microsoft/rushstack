@@ -7,7 +7,6 @@ import * as fsx from 'fs-extra';
 
 import { Text, NewlineKind, Encoding } from './Text';
 import { PosixModeBits } from './PosixModeBits';
-import { LegacyAdapters } from './LegacyAdapters';
 
 // The PosixModeBits are intended to be used with bitwise operations.
 /* eslint-disable no-bitwise */
@@ -240,7 +239,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.getStatistics}.
    */
   public static getStatisticsAsync(path: string): Promise<fs.Stats> {
-    return LegacyAdapters.convertCallbackToPromise(fsx.stat, path);
+    return fsx.promises.stat(path);
   }
 
   /**
@@ -251,16 +250,14 @@ export class FileSystem {
    * @param times - The times that the object should be updated to reflect.
    */
   public static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    fsx.utimesSync(path, times.accessedTime as any, times.modifiedTime as any);
+    fsx.utimesSync(path, times.accessedTime, times.modifiedTime);
   }
 
   /**
    * An async version of {@link FileSystem.updateTimes}.
    */
   public static updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return LegacyAdapters.convertCallbackToPromise(fsx.utimes, path, times.accessedTime as any, times.modifiedTime as any);
+    return fsx.promises.utimes(path, times.accessedTime, times.modifiedTime);
   }
 
 
@@ -278,7 +275,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.changePosixModeBits}.
    */
   public static changePosixModeBitsAsync(path: string, mode: PosixModeBits): Promise<void> {
-    return LegacyAdapters.convertCallbackToPromise(fsx.chmod, path, mode);
+    return fsx.promises.chmod(path, mode);
   }
 
   /**
@@ -352,8 +349,7 @@ export class FileSystem {
       await FileSystem.ensureFolderAsync(pathUtilities.basename(options.sourcePath));
     }
 
-    await LegacyAdapters.convertCallbackToPromise(
-      fsx.move,
+    await fsx.move(
       options.sourcePath,
       options.destinationPath,
       { overwrite: options.overwrite }
@@ -379,7 +375,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.ensureFolder}.
    */
   public static ensureFolderAsync(folderPath: string): Promise<void> {
-    return LegacyAdapters.convertCallbackToPromise(fsx.ensureDir, folderPath);
+    return fsx.ensureDir(folderPath);
   }
 
   /**
@@ -424,6 +420,7 @@ export class FileSystem {
     let fileNames: string[];
     try {
       fileNames = await LegacyAdapters.convertCallbackToPromise(fsx.readdir, folderPath);
+      fileNames = await fsx.promises.readdir(folderPath);
     } catch (e) {
       if (FileSystem._isNotExistError(e)) {
         throw new Error(`Folder does not exist: "${folderPath}"`);
@@ -454,7 +451,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.deleteFolder}.
    */
   public static deleteFolderAsync(folderPath: string): Promise<void> {
-    return LegacyAdapters.convertCallbackToPromise(fsx.remove, folderPath);
+    return fsx.remove(folderPath);
   }
 
   /**
@@ -473,7 +470,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.ensureEmptyFolder}.
    */
   public static ensureEmptyFolderAsync(folderPath: string): Promise<void> {
-    return LegacyAdapters.convertCallbackToPromise(fsx.emptyDir, folderPath);
+    return fsx.emptyDir(folderPath);
   }
 
   // ===============
@@ -525,7 +522,7 @@ export class FileSystem {
       contents = Text.convertTo(contents.toString(), options.convertLineEndings);
     }
 
-    await LegacyAdapters.convertCallbackToPromise(fsx.writeFile, filePath, contents, { encoding: options.encoding });
+    await fsx.promises.writeFile(filePath, contents, { encoding: options.encoding });
   }
 
   /**
@@ -573,7 +570,7 @@ export class FileSystem {
       contents = Text.convertTo(contents.toString(), options.convertLineEndings);
     }
 
-    await LegacyAdapters.convertCallbackToPromise(fsx.appendFile, filePath, contents, { encoding: options.encoding });
+    await fsx.promises.appendFile(filePath, contents, { encoding: options.encoding });
   }
 
   /**
@@ -626,7 +623,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.readFileToBuffer}.
    */
   public static readFileToBufferAsync(filePath: string): Promise<Buffer> {
-    return LegacyAdapters.convertCallbackToPromise(fsx.readFile, filePath);
+    return fsx.promises.readFile(filePath);
   }
 
   /**
@@ -676,7 +673,7 @@ export class FileSystem {
     };
 
     try {
-      await LegacyAdapters.convertCallbackToPromise(fsx.unlink, filePath);
+      await fsx.promises.unlink(filePath);
     } catch (error) {
       if (options.throwIfNotExists) {
         throw error;
@@ -701,7 +698,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.getLinkStatistics}.
    */
   public static getLinkStatisticsAsync(path: string): Promise<fs.Stats> {
-    return LegacyAdapters.convertCallbackToPromise(fsx.lstat, path);
+    return fsx.promises.lstat(path);
   }
 
   /**
@@ -718,7 +715,7 @@ export class FileSystem {
    */
   public static createSymbolicLinkJunctionAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
     // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
-    return LegacyAdapters.convertCallbackToPromise(fsx.symlink, options.linkTargetPath, options.newLinkPath, 'junction');
+    return fsx.promises.symlink(options.linkTargetPath, options.newLinkPath, 'junction');
   }
 
   /**
@@ -733,7 +730,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.createSymbolicLinkFile}.
    */
   public static createSymbolicLinkFileAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    return LegacyAdapters.convertCallbackToPromise(fsx.symlink, options.linkTargetPath, options.newLinkPath, 'file');
+    return fsx.promises.symlink(options.linkTargetPath, options.newLinkPath, 'file');
   }
 
   /**
@@ -748,7 +745,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.createSymbolicLinkFolder}.
    */
   public static createSymbolicLinkFolderAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    return LegacyAdapters.convertCallbackToPromise(fsx.symlink, options.linkTargetPath, options.newLinkPath, 'dir');
+    return fsx.promises.symlink(options.linkTargetPath, options.newLinkPath, 'dir');
   }
 
   /**
@@ -763,7 +760,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.createHardLink}.
    */
   public static createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    return LegacyAdapters.convertCallbackToPromise(fsx.link, options.linkTargetPath, options.newLinkPath);
+    return fsx.promises.link(options.linkTargetPath, options.newLinkPath);
   }
 
   /**
@@ -779,7 +776,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.getRealPath}.
    */
   public static getRealPathAsync(linkPath: string): Promise<string> {
-    return LegacyAdapters.convertCallbackToPromise(fsx.realpath, linkPath);
+    return fsx.promises.realpath(linkPath);
   }
 
   // ===============
