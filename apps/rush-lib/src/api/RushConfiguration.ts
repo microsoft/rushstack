@@ -111,7 +111,7 @@ export type PnpmStoreOptions = 'local' | 'global';
  */
 export interface IPackageManagerOptionsJsonBase {
   /**
-   * Enviroment variables for the package manager
+   * Environment variables for the package manager
    */
   environmentVariables?: IConfigurationEnvironment
 }
@@ -249,7 +249,7 @@ export interface ICurrentVariantJson {
  */
 export abstract class PackageManagerOptionsConfigurationBase implements IPackageManagerOptionsJsonBase {
   /**
-   * Enviroment variables for the package manager
+   * Environment variables for the package manager
    */
   public readonly environmentVariables?: IConfigurationEnvironment
 

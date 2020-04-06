@@ -188,7 +188,7 @@ export class RushCommandLineParser extends CommandLineParser {
       commandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFile);
     }
 
-    // Build actions from the command line configuration supercede default build actions.
+    // Build actions from the command line configuration supersede default build actions.
     this._addCommandLineConfigActions(commandLineConfiguration);
     this._addDefaultBuildActions(commandLineConfiguration);
     this._validateCommandLineConfigParameterAssociations(commandLineConfiguration);

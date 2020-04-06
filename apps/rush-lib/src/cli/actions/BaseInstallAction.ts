@@ -104,7 +104,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       }
     }
 
-    // Because the 'defautltValue' option on the _maxInstallAttempts parameter is set,
+    // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
     // it is safe to assume that the value is not null
     if (this._maxInstallAttempts.value! < 1) {
       throw new Error(`The value of "${this._maxInstallAttempts.longName}" must be positive and nonzero.`);

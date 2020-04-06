@@ -175,11 +175,11 @@ export class VersionMismatchFinder {
         };
         mismatchDependencyVersionArray.push(mismatchDependencyVersion);
       });
-      const mismatchDepency: IMismatchDependency = {
+      const mismatchDependency: IMismatchDependency = {
           dependencyName: dependency,
           versions: mismatchDependencyVersionArray
       };
-      mismatchDependencies.push(mismatchDepency);
+      mismatchDependencies.push(mismatchDependency);
     });
 
     const output: IMismatchDependencies = {
