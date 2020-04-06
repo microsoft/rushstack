@@ -72,6 +72,8 @@ export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
   updateExistingFile?: boolean;
 }
 
+const DEFAULT_ENCODING: string = 'utf8';
+
 /**
  * Utilities for reading/writing JSON files.
  * @public
@@ -183,8 +185,11 @@ export class JsonFile {
    * @param options - other settings that control serialization
    * @returns a JSON string, with newlines, and indented with two spaces
    */
-  public static updateString(previousJson: string, newJsonObject: JsonObject,
-    options?: IJsonFileStringifyOptions): string {
+  public static updateString(
+    previousJson: string,
+    newJsonObject: JsonObject,
+    options?: IJsonFileStringifyOptions
+  ): string {
     if (!options) {
       options = { };
     }
@@ -236,19 +241,18 @@ export class JsonFile {
       try {
         oldBuffer = FileSystem.readFileToBuffer(jsonFilename);
       } catch (error) {
-        // Ignore this error, and try writing a new file.  If that fails, then we should report that
-        // error instead.
+        FileSystem._throwIfIsNotExistError(error);
       }
     }
 
     let jsonToUpdate: string = '';
     if (options.updateExistingFile && oldBuffer) {
-      jsonToUpdate = oldBuffer.toString();
+      jsonToUpdate = oldBuffer.toString(DEFAULT_ENCODING);
     }
 
     const newJson: string = JsonFile.updateString(jsonToUpdate, jsonObject, options);
 
-    const newBuffer: Buffer = Buffer.from(newJson); // utf8 encoding happens here
+    const newBuffer: Buffer = Buffer.from(newJson, DEFAULT_ENCODING);
 
     if (options.onlyIfChanged) {
       // Has the file changed?
@@ -258,7 +262,7 @@ export class JsonFile {
       }
     }
 
-    FileSystem.writeFile(jsonFilename, newBuffer.toString(), {
+    FileSystem.writeFile(jsonFilename, newBuffer.toString(DEFAULT_ENCODING), {
       ensureFolderExists: options.ensureFolderExists
     });
 
@@ -289,19 +293,18 @@ export class JsonFile {
       try {
         oldBuffer = await FileSystem.readFileToBufferAsync(jsonFilename);
       } catch (error) {
-        // Ignore this error, and try writing a new file.  If that fails, then we should report that
-        // error instead.
+        FileSystem._throwIfIsNotExistError(error);
       }
     }
 
     let jsonToUpdate: string = '';
     if (options.updateExistingFile && oldBuffer) {
-      jsonToUpdate = oldBuffer.toString();
+      jsonToUpdate = oldBuffer.toString(DEFAULT_ENCODING);
     }
 
     const newJson: string = JsonFile.updateString(jsonToUpdate, jsonObject, options);
 
-    const newBuffer: Buffer = Buffer.from(newJson); // utf8 encoding happens here
+    const newBuffer: Buffer = Buffer.from(newJson, DEFAULT_ENCODING);
 
     if (options.onlyIfChanged) {
       // Has the file changed?
@@ -311,7 +314,7 @@ export class JsonFile {
       }
     }
 
-    await FileSystem.writeFileAsync(jsonFilename, newBuffer.toString(), {
+    await FileSystem.writeFileAsync(jsonFilename, newBuffer.toString(DEFAULT_ENCODING), {
       ensureFolderExists: options.ensureFolderExists
     });
 

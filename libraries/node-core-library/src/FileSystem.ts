@@ -334,11 +334,18 @@ export class FileSystem {
       ...options
     };
 
-    if (options.ensureFolderExists) {
-      FileSystem.ensureFolder(pathUtilities.basename(options.sourcePath));
+    try {
+      fsx.moveSync(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
+    } catch (error) {
+      if (options.ensureFolderExists) {
+        FileSystem._throwIfIsNotExistError(error);
+        const folderPath: string = pathUtilities.dirname(options.destinationPath);
+        FileSystem.ensureFolder(folderPath);
+        fsx.moveSync(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
+      } else {
+        throw error;
+      }
     }
-
-    fsx.moveSync(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
   }
 
   /**
@@ -350,15 +357,18 @@ export class FileSystem {
       ...options
     };
 
-    if (options.ensureFolderExists) {
-      await FileSystem.ensureFolderAsync(pathUtilities.basename(options.sourcePath));
+    try {
+      await fsx.move(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
+    } catch (error) {
+      if (options.ensureFolderExists) {
+        FileSystem._throwIfIsNotExistError(error);
+        const folderPath: string = pathUtilities.dirname(options.destinationPath);
+        await FileSystem.ensureFolderAsync(pathUtilities.dirname(folderPath));
+        await fsx.move(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
+      } else {
+        throw error;
+      }
     }
-
-    await fsx.move(
-      options.sourcePath,
-      options.destinationPath,
-      { overwrite: options.overwrite }
-    );
   }
 
   // ===============
@@ -498,16 +508,22 @@ export class FileSystem {
       ...options
     };
 
-    if (options.ensureFolderExists) {
-      const folderPath: string = pathUtilities.dirname(filePath);
-      FileSystem.ensureFolder(folderPath);
-    }
-
     if (options.convertLineEndings) {
       contents = Text.convertTo(contents.toString(), options.convertLineEndings);
     }
 
-    fsx.writeFileSync(filePath, contents, { encoding: options.encoding });
+    try {
+      fsx.writeFileSync(filePath, contents, { encoding: options.encoding });
+    } catch (error) {
+      if (options.ensureFolderExists) {
+        FileSystem._throwIfIsNotExistError(error);
+        const folderPath: string = pathUtilities.dirname(filePath);
+        FileSystem.ensureFolder(folderPath);
+        fsx.writeFileSync(filePath, contents, { encoding: options.encoding });
+      } else {
+        throw error;
+      }
+    }
   }
 
   /**
@@ -519,16 +535,22 @@ export class FileSystem {
       ...options
     };
 
-    if (options.ensureFolderExists) {
-      const folderPath: string = pathUtilities.dirname(filePath);
-      await FileSystem.ensureFolderAsync(folderPath);
-    }
-
     if (options.convertLineEndings) {
       contents = Text.convertTo(contents.toString(), options.convertLineEndings);
     }
 
-    await fsx.promises.writeFile(filePath, contents, { encoding: options.encoding });
+    try {
+      await fsx.promises.writeFile(filePath, contents, { encoding: options.encoding });
+    } catch (error) {
+      if (options.ensureFolderExists) {
+        FileSystem._throwIfIsNotExistError(error);
+        const folderPath: string = pathUtilities.dirname(filePath);
+        await FileSystem.ensureFolderAsync(folderPath);
+        await fsx.promises.writeFile(filePath, contents, { encoding: options.encoding });
+      } else {
+        throw error;
+      }
+    }
   }
 
   /**
@@ -546,16 +568,22 @@ export class FileSystem {
       ...options
     };
 
-    if (options.ensureFolderExists) {
-      const folderPath: string = pathUtilities.dirname(filePath);
-      FileSystem.ensureFolder(folderPath);
-    }
-
     if (options.convertLineEndings) {
       contents = Text.convertTo(contents.toString(), options.convertLineEndings);
     }
 
-    fsx.appendFileSync(filePath, contents, { encoding: options.encoding });
+    try {
+      fsx.appendFileSync(filePath, contents, { encoding: options.encoding });
+    } catch (error) {
+      if (options.ensureFolderExists) {
+        FileSystem._throwIfIsNotExistError(error);
+        const folderPath: string = pathUtilities.dirname(filePath);
+        FileSystem.ensureFolder(folderPath);
+        fsx.appendFileSync(filePath, contents, { encoding: options.encoding });
+      } else {
+        throw error;
+      }
+    }
   }
 
   /**
@@ -567,16 +595,22 @@ export class FileSystem {
       ...options
     };
 
-    if (options.ensureFolderExists) {
-      const folderPath: string = pathUtilities.dirname(filePath);
-      await FileSystem.ensureFolderAsync(folderPath);
-    }
-
     if (options.convertLineEndings) {
       contents = Text.convertTo(contents.toString(), options.convertLineEndings);
     }
 
-    await fsx.promises.appendFile(filePath, contents, { encoding: options.encoding });
+    try {
+      await fsx.promises.appendFile(filePath, contents, { encoding: options.encoding });
+    } catch (error) {
+      if (options.ensureFolderExists) {
+        FileSystem._throwIfIsNotExistError(error);
+        const folderPath: string = pathUtilities.dirname(filePath);
+        await FileSystem.ensureFolderAsync(folderPath);
+        await fsx.promises.appendFile(filePath, contents, { encoding: options.encoding });
+      } else {
+        throw error;
+      }
+    }
   }
 
   /**
@@ -663,7 +697,7 @@ export class FileSystem {
     try {
       fsx.unlinkSync(filePath);
     } catch (error) {
-      if (options.throwIfNotExists) {
+      if (options.throwIfNotExists || !FileSystem._isNotExistError(error)) {
         throw error;
       }
     }
@@ -681,7 +715,7 @@ export class FileSystem {
     try {
       await fsx.promises.unlink(filePath);
     } catch (error) {
-      if (options.throwIfNotExists) {
+      if (options.throwIfNotExists || !FileSystem._isNotExistError(error)) {
         throw error;
       }
     }
@@ -796,7 +830,16 @@ export class FileSystem {
    * @internal
    */
   public static _isNotExistError(error: NodeJS.ErrnoException): boolean {
-    return error.code === 'ENOENT';
+    return error.code === 'ENOENT' || error.code === 'ENOTDIR';
+  }
+
+  /**
+   * @internal
+   */
+  public static _throwIfIsNotExistError(error: NodeJS.ErrnoException): void {
+    if (!FileSystem._isNotExistError(error)) {
+      throw error;
+    }
   }
 
   /**

@@ -159,6 +159,8 @@ export class FileSystem {
     static readFileToBufferAsync(filePath: string): Promise<Buffer>;
     static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[];
     static readFolderAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]>;
+    // @internal (undocumented)
+    static _throwIfIsNotExistError(error: NodeJS.ErrnoException): void;
     static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void;
     static updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void>;
     static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
