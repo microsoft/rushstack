@@ -25,6 +25,6 @@ export class Constants {
   public static LOCALE_NAME_PLACEHOLDER_LABEL: string = 'B';
   public static JSONP_PLACEHOLDER_LABEL: string = 'C';
 
-  public static LOCALE_NAME_PLACEHOLDER: string = `${Constants.STRING_PLACEHOLDER_PREFIX}_${Constants.LOCALE_NAME_PLACEHOLDER_LABEL}_0`;
-  public static JSONP_PLACEHOLDER: string = `${Constants.STRING_PLACEHOLDER_PREFIX}_${Constants.JSONP_PLACEHOLDER_LABEL}+chunkId+_0`;
+  public static LOCALE_NAME_PLACEHOLDER: string = `${Constants.STRING_PLACEHOLDER_PREFIX}__${Constants.LOCALE_NAME_PLACEHOLDER_LABEL}_0`;
+  public static JSONP_PLACEHOLDER: string = `${Constants.STRING_PLACEHOLDER_PREFIX}__${Constants.JSONP_PLACEHOLDER_LABEL}+chunkId+_0`;
 }
