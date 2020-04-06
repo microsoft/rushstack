@@ -4,8 +4,15 @@
 import * as os from 'os';
 import * as jju from 'jju';
 
-import { JsonSchema, IJsonSchemaErrorInfo, IJsonSchemaValidateOptions } from './JsonSchema';
-import { Text, NewlineKind } from './Text';
+import {
+  JsonSchema,
+  IJsonSchemaErrorInfo,
+  IJsonSchemaValidateOptions
+} from './JsonSchema';
+import {
+  Text,
+  NewlineKind
+} from './Text';
 import { FileSystem } from './FileSystem';
 
 /**
