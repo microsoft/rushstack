@@ -10,9 +10,14 @@ export class Constants {
     path.resolve(__dirname, '..', 'schemas', 'locJson.schema.json')
   );
 
-  public static LOCALE_FILENAME_PLACEHOLDER: string = '[locale]';
-  public static LOCALE_FILENAME_PLACEHOLDER_REGEX: RegExp = new RegExp(
-    lodash.escapeRegExp(Constants.LOCALE_FILENAME_PLACEHOLDER),
+  public static LOCALE_FILENAME_TOKEN: string = '[locale]';
+  public static LOCALE_FILENAME_TOKEN_REGEX: RegExp = new RegExp(
+    lodash.escapeRegExp(Constants.LOCALE_FILENAME_TOKEN),
+    'gi'
+    );
+  public static NO_LOCALE_SOURCE_MAP_FILENAME_TOKEN: string = '[no-locale-file]';
+  public static NO_LOCALE_SOURCE_MAP_FILENAME_TOKEN_REGEX: RegExp = new RegExp(
+    lodash.escapeRegExp(Constants.NO_LOCALE_SOURCE_MAP_FILENAME_TOKEN),
     'gi'
   );
   public static STRING_PLACEHOLDER_PREFIX: string = '_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9';

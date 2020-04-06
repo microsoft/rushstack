@@ -41,6 +41,7 @@ function generateConfiguration(mode, outputFolderName) {
     optimization: {
       minimize: false
     },
+    devtool: 'source-map',
     plugins: [
       new webpack.optimize.ModuleConcatenationPlugin(),
       new LocalizationPlugin({

@@ -82,7 +82,7 @@ export interface IProcessAssetResult {
   asset: IAsset;
 }
 
-const PLACEHOLDER_REGEX: RegExp = new RegExp(
+export const PLACEHOLDER_REGEX: RegExp = new RegExp(
   `${Constants.STRING_PLACEHOLDER_PREFIX}_(\\\\*)_([A-C])(\\+[^+]+\\+)?_(\\d+)`,
   'g'
 );
