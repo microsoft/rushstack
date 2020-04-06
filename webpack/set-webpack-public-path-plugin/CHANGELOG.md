@@ -1,6 +1,13 @@
 # Change Log - @rushstack/set-webpack-public-path-plugin
 
-This log was last generated on Fri, 03 Apr 2020 15:10:15 GMT and should not be manually modified.
+This log was last generated on Mon, 06 Apr 2020 05:52:56 GMT and should not be manually modified.
+
+## 2.4.6
+Mon, 06 Apr 2020 05:52:56 GMT
+
+### Patches
+
+- Fix an issue where sourcemaps with inlined sources can contain incorrect escaping.
 
 ## 2.4.5
 Fri, 03 Apr 2020 15:10:15 GMT

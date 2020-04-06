@@ -1,6 +1,18 @@
 # Change Log - @rushstack/localization-plugin
 
-This log was last generated on Fri, 03 Apr 2020 15:10:15 GMT and should not be manually modified.
+This log was last generated on Mon, 06 Apr 2020 05:52:56 GMT and should not be manually modified.
+
+## 0.3.0
+Mon, 06 Apr 2020 05:52:56 GMT
+
+### Minor changes
+
+- Add support for normalization of newlines in RESX files.
+
+### Patches
+
+- Fix an issue where some characters weren't escaped correctly.
+- Fix sourcemap filenames.
 
 ## 0.2.2
 Fri, 03 Apr 2020 15:10:15 GMT

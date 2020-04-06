@@ -2,6 +2,18 @@
   "name": "@rushstack/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "2.4.6",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v2.4.6",
+      "date": "Mon, 06 Apr 2020 05:52:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where sourcemaps with inlined sources can contain incorrect escaping."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.4.5",
       "tag": "@rushstack/set-webpack-public-path-plugin_v2.4.5",
       "date": "Fri, 03 Apr 2020 15:10:15 GMT",
