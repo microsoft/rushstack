@@ -66,7 +66,8 @@ module.exports = function(env) {
           passthroughLocale: {
             usePassthroughLocale: true,
             passthroughLocaleName: 'default'
-          }
+          },
+          normalizeResxNewlines: 'crlf'
         },
         typingsOptions: {
           generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts'),

@@ -4,6 +4,7 @@
 
 ```ts
 
+import { NewlineKind } from '@rushstack/node-core-library';
 import { StringValuesTypingsGenerator } from '@rushstack/typings-generator';
 import { Terminal } from '@rushstack/node-core-library';
 import * as Webpack from 'webpack';
@@ -80,6 +81,7 @@ export interface ILocalizationStatsOptions {
 // @public (undocumented)
 export interface ILocalizedData {
     defaultLocale: IDefaultLocaleOptions;
+    normalizeResxNewlines?: 'lf' | 'crlf';
     passthroughLocale?: IPassthroughLocaleOptions;
     pseudolocales?: IPseudolocalesOptions;
     resolveMissingTranslatedStrings?: (locales: string[], filePath: string) => IResolvedMissingTranslations;
@@ -114,6 +116,8 @@ export interface _IParseLocFileOptions {
     content: string;
     // (undocumented)
     filePath: string;
+    // (undocumented)
+    resxNewlineNormalization: NewlineKind | undefined;
     // (undocumented)
     terminal: Terminal;
 }
@@ -177,6 +181,8 @@ export interface ITypingsGeneratorOptions {
     filesToIgnore?: string[];
     // (undocumented)
     generatedTsFolder: string;
+    // (undocumented)
+    resxNewlineNormalization?: NewlineKind | undefined;
     // (undocumented)
     srcFolder: string;
     // (undocumented)

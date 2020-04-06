@@ -115,6 +115,11 @@ export interface ILocalizedData {
    * Options for pseudo-localization.
    */
   pseudolocales?: IPseudolocalesOptions;
+
+  /**
+   * Normalize newlines in RESX files to either CRLF (Windows-style) or LF ('nix style)
+   */
+  normalizeResxNewlines?: 'lf' | 'crlf';
 }
 
 /**
