@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/set-webpack-public-path-plugin",
+      "comment": "Fix an issue where sourcemaps with inlined sources can contain incorrect escaping.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/set-webpack-public-path-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}
