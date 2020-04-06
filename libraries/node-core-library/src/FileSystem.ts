@@ -239,7 +239,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.getStatistics}.
    */
   public static getStatisticsAsync(path: string): Promise<fs.Stats> {
-    return fsx.promises.stat(path);
+    return fsx.stat(path);
   }
 
   /**
@@ -257,7 +257,8 @@ export class FileSystem {
    * An async version of {@link FileSystem.updateTimes}.
    */
   public static updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void> {
-    return fsx.promises.utimes(path, times.accessedTime, times.modifiedTime);
+    // The cast is required here because the fs-extra typings are incorrect.
+    return fsx.utimes(path, times.accessedTime as number, times.modifiedTime as number);
   }
 
 
@@ -275,7 +276,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.changePosixModeBits}.
    */
   public static changePosixModeBitsAsync(path: string, mode: PosixModeBits): Promise<void> {
-    return fsx.promises.chmod(path, mode);
+    return fsx.chmod(path, mode);
   }
 
   /**
@@ -436,7 +437,7 @@ export class FileSystem {
     let fileNames: string[];
     try {
       // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
-      fileNames = await fsx.promises.readdir(folderPath);
+      fileNames = await fsx.readdir(folderPath);
     } catch (e) {
       if (FileSystem._isNotExistError(e)) {
         throw new Error(`Folder does not exist: "${folderPath}"`);
@@ -540,13 +541,13 @@ export class FileSystem {
     }
 
     try {
-      await fsx.promises.writeFile(filePath, contents, { encoding: options.encoding });
+      await fsx.writeFile(filePath, contents, { encoding: options.encoding });
     } catch (error) {
       if (options.ensureFolderExists) {
         FileSystem._throwIfIsNotExistError(error);
         const folderPath: string = pathUtilities.dirname(filePath);
         await FileSystem.ensureFolderAsync(folderPath);
-        await fsx.promises.writeFile(filePath, contents, { encoding: options.encoding });
+        await fsx.writeFile(filePath, contents, { encoding: options.encoding });
       } else {
         throw error;
       }
@@ -600,13 +601,13 @@ export class FileSystem {
     }
 
     try {
-      await fsx.promises.appendFile(filePath, contents, { encoding: options.encoding });
+      await fsx.appendFile(filePath, contents, { encoding: options.encoding });
     } catch (error) {
       if (options.ensureFolderExists) {
         FileSystem._throwIfIsNotExistError(error);
         const folderPath: string = pathUtilities.dirname(filePath);
         await FileSystem.ensureFolderAsync(folderPath);
-        await fsx.promises.appendFile(filePath, contents, { encoding: options.encoding });
+        await fsx.appendFile(filePath, contents, { encoding: options.encoding });
       } else {
         throw error;
       }
@@ -663,7 +664,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.readFileToBuffer}.
    */
   public static readFileToBufferAsync(filePath: string): Promise<Buffer> {
-    return fsx.promises.readFile(filePath);
+    return fsx.readFile(filePath);
   }
 
   /**
@@ -713,7 +714,7 @@ export class FileSystem {
     };
 
     try {
-      await fsx.promises.unlink(filePath);
+      await fsx.unlink(filePath);
     } catch (error) {
       if (options.throwIfNotExists || !FileSystem._isNotExistError(error)) {
         throw error;
@@ -738,7 +739,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.getLinkStatistics}.
    */
   public static getLinkStatisticsAsync(path: string): Promise<fs.Stats> {
-    return fsx.promises.lstat(path);
+    return fsx.lstat(path);
   }
 
   /**
@@ -755,7 +756,7 @@ export class FileSystem {
    */
   public static createSymbolicLinkJunctionAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
     // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
-    return fsx.promises.symlink(options.linkTargetPath, options.newLinkPath, 'junction');
+    return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'junction');
   }
 
   /**
@@ -770,7 +771,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.createSymbolicLinkFile}.
    */
   public static createSymbolicLinkFileAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    return fsx.promises.symlink(options.linkTargetPath, options.newLinkPath, 'file');
+    return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'file');
   }
 
   /**
@@ -785,7 +786,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.createSymbolicLinkFolder}.
    */
   public static createSymbolicLinkFolderAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    return fsx.promises.symlink(options.linkTargetPath, options.newLinkPath, 'dir');
+    return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'dir');
   }
 
   /**
@@ -800,7 +801,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.createHardLink}.
    */
   public static createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    return fsx.promises.link(options.linkTargetPath, options.newLinkPath);
+    return fsx.link(options.linkTargetPath, options.newLinkPath);
   }
 
   /**
@@ -816,7 +817,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.getRealPath}.
    */
   public static getRealPathAsync(linkPath: string): Promise<string> {
-    return fsx.promises.realpath(linkPath);
+    return fsx.realpath(linkPath);
   }
 
   // ===============
