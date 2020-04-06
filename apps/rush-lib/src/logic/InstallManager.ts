@@ -1372,12 +1372,12 @@ export class InstallManager {
     const pathToDeleteWithoutStar: string = path.join(this._rushConfiguration.commonTempFolder,
       'node_modules', RushConstants.rushTempNpmScope);
     // Glob can't handle Windows paths
-    const normalizedpathToDeleteWithoutStar: string = Text.replaceAll(pathToDeleteWithoutStar, '\\', '/');
+    const normalizedPathToDeleteWithoutStar: string = Text.replaceAll(pathToDeleteWithoutStar, '\\', '/');
 
     let anyChanges: boolean = false;
 
     // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*/package.json"
-    for (const packageJsonPath of glob.sync(globEscape(normalizedpathToDeleteWithoutStar) + '/*/package.json')) {
+    for (const packageJsonPath of glob.sync(globEscape(normalizedPathToDeleteWithoutStar) + '/*/package.json')) {
       // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/example/package.json"
       const packageJsonObject: IRushTempPackageJson = JsonFile.load(packageJsonPath);
 
