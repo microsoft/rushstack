@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Normalize chmod field in Tar header",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "sachinjoseph@users.noreply.github.com"
+}
