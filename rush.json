@@ -462,12 +462,6 @@
       "shouldPublish": false
     },
     {
-      "packageName": "api-extractor-test-no-report",
-      "projectFolder": "build-tests/api-extractor-test-no-report",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
       "packageName": "localization-plugin-test-01",
       "projectFolder": "build-tests/localization-plugin-test-01",
       "reviewCategory": "tests",

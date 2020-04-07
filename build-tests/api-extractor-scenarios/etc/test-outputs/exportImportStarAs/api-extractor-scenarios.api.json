@@ -1,0 +1,73 @@
+{
+  "metadata": {
+    "toolPackage": "@microsoft/api-extractor",
+    "toolVersion": "[test mode]",
+    "schemaVersion": 1003,
+    "oldestForwardsCompatibleVersion": 1001
+  },
+  "kind": "Package",
+  "canonicalReference": "api-extractor-scenarios!",
+  "docComment": "",
+  "name": "api-extractor-scenarios",
+  "members": [
+    {
+      "kind": "EntryPoint",
+      "canonicalReference": "api-extractor-scenarios!",
+      "name": "",
+      "members": [
+        {
+          "kind": "Namespace",
+          "canonicalReference": "api-extractor-scenarios!calculator:namespace",
+          "docComment": "",
+          "excerptTokens": [],
+          "releaseTag": "None",
+          "name": "calculator",
+          "members": [
+            {
+              "kind": "Variable",
+              "canonicalReference": "api-extractor-scenarios!calculator.add:var",
+              "docComment": "/**\n * Returns the sum of adding b to a\n *\n * @param a - first number\n *\n * @param b - second number\n *\n * @returns Sum of adding b to a\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "add: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(a: number, b: number) => number"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "add",
+              "variableTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "Variable",
+              "canonicalReference": "api-extractor-scenarios!calculator.subtract:var",
+              "docComment": "/**\n * Returns the sum of subtracting b from a\n *\n * @param a - first number\n *\n * @param b - second number\n *\n * @returns Sum of subtract b from a\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "subtract: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(a: number, b: number) => number"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "subtract",
+              "variableTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
