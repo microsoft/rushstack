@@ -5,7 +5,7 @@
  * @param b - second number
  * @returns Sum of adding b to a
  */
-declare const add: (a: number, b: number) => number;
+declare function add(a: number, b: number): number;
 
 declare namespace calculator {
   export {
@@ -21,6 +21,6 @@ export { calculator }
  * @param b - second number
  * @returns Sum of subtract b from a
  */
-declare const subtract: (a: number, b: number) => number;
+declare function subtract(a: number, b: number): number;
 
 export { }

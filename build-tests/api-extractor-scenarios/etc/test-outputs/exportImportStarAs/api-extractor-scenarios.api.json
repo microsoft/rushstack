@@ -24,46 +24,120 @@
           "name": "calculator",
           "members": [
             {
-              "kind": "Variable",
-              "canonicalReference": "api-extractor-scenarios!calculator.add:var",
+              "kind": "Function",
+              "canonicalReference": "api-extractor-scenarios!calculator.add:function(1)",
               "docComment": "/**\n * Returns the sum of adding b to a\n *\n * @param a - first number\n *\n * @param b - second number\n *\n * @returns Sum of adding b to a\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "add: "
+                  "text": "export declare function add(a: "
                 },
                 {
                   "kind": "Content",
-                  "text": "(a: number, b: number) => number"
+                  "text": "number"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", b: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "number"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "number"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
                 }
               ],
+              "returnTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              },
               "releaseTag": "Public",
-              "name": "add",
-              "variableTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "a",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                },
+                {
+                  "parameterName": "b",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 3,
+                    "endIndex": 4
+                  }
+                }
+              ],
+              "name": "add"
             },
             {
-              "kind": "Variable",
-              "canonicalReference": "api-extractor-scenarios!calculator.subtract:var",
+              "kind": "Function",
+              "canonicalReference": "api-extractor-scenarios!calculator.subtract:function(1)",
               "docComment": "/**\n * Returns the sum of subtracting b from a\n *\n * @param a - first number\n *\n * @param b - second number\n *\n * @returns Sum of subtract b from a\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "subtract: "
+                  "text": "export declare function subtract(a: "
                 },
                 {
                   "kind": "Content",
-                  "text": "(a: number, b: number) => number"
+                  "text": "number"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", b: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "number"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "number"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
                 }
               ],
+              "returnTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              },
               "releaseTag": "Public",
-              "name": "subtract",
-              "variableTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "a",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                },
+                {
+                  "parameterName": "b",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 3,
+                    "endIndex": 4
+                  }
+                }
+              ],
+              "name": "subtract"
             }
           ]
         }
