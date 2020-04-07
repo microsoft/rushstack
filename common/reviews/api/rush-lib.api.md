@@ -332,6 +332,7 @@ export class RushConfiguration {
     static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
     // (undocumented)
     static loadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration;
+    readonly normalizeChmodFieldInTarHeader: boolean;
     readonly npmCacheFolder: string;
     readonly npmOptions: NpmOptionsConfiguration;
     readonly npmTmpFolder: string;

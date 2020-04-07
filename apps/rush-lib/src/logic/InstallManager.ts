@@ -737,7 +737,7 @@ export class InstallManager {
 
           // create the new tarball
           tar.create({
-            gzip: true,
+            gzip: false,
             file: tarballFile,
             cwd: tempProjectFolder,
             portable: true,
@@ -746,6 +746,10 @@ export class InstallManager {
             sync: true,
             prefix: npmPackageFolder
           } as CreateOptions, [FileConstants.PackageJson]);
+
+          if (this._rushConfiguration.normalizeChmodFieldInTarHeader) {
+            this._normalizeChmodFieldInTarHeader(tarballFile);
+          }
 
           console.log(`Updating ${tarballFile}`);
         } catch (error) {
@@ -809,6 +813,41 @@ export class InstallManager {
     }
 
     return shrinkwrapIsUpToDate;
+  }
+
+  private _normalizeChmodFieldInTarHeader(tarballFile: string): void {
+    const buffer: Buffer = FileSystem.readFileToBuffer(tarballFile);
+
+    // Tar format reference: https://www.gnu.org/software/tar/manual/html_node/Standard.html
+
+    const encodedChmod: string = '000755';
+    const chmodOffset: number = 100;
+    for (let i: number = 0; i < encodedChmod.length; i++) {
+      buffer[chmodOffset + i] = encodedChmod[i].charCodeAt(0);
+    }
+
+    // Fix checksum now that we have updated the chmod field in the file header
+    let checksum: number = 8 * 0x20;
+    const headerStartOffset: number = 0;
+    const checksumStartOffset: number = 148;
+    const checksumEndOffset: number = 156;
+    const headerEndOffset: number = 512;
+    for (let i: number = headerStartOffset; i < headerStartOffset + checksumStartOffset; i++) {
+      checksum += buffer[i];
+    }
+    // For calculating the checksum, the checksum field in the header is treated as if it were all zeroes
+    for (let i: number = headerStartOffset + checksumEndOffset; i < headerStartOffset + headerEndOffset; i++) {
+      checksum += buffer[i];
+    }
+    const octalChecksum: string = checksum.toString(8);
+    const encodedOctalChecksumWidth: number = 7;
+    const encodedOctalChecksum: string = (octalChecksum.length === encodedOctalChecksumWidth ?
+      octalChecksum : octalChecksum.padStart(encodedOctalChecksumWidth - 1, '0') + ' ');
+    for (let i: number = 0; i < encodedOctalChecksumWidth; i++) {
+      buffer[148 + i] = encodedOctalChecksum[i].charCodeAt(0);
+    }
+
+    FileSystem.writeFile(tarballFile, buffer);
   }
 
   /**
@@ -1286,14 +1325,22 @@ export class InstallManager {
       // last install flag, which encapsulates the entire installation
       args.push('--no-lock');
 
-      // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
-      // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
-      if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
-        args.push('--no-prefer-frozen-lockfile');
+      if (!this._options.allowShrinkwrapUpdates) {
+        if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
+          args.push('--frozen-lockfile');
+        } else {
+          args.push('--frozen-shrinkwrap');
+        }
       } else {
-        args.push('--no-prefer-frozen-shrinkwrap');
-      }
 
+        // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
+        // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
+        if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
+          args.push('--no-prefer-frozen-lockfile');
+        } else {
+          args.push('--no-prefer-frozen-shrinkwrap');
+        }
+      }
       if (options.collectLogFile) {
         args.push('--reporter', 'ndjson');
       }
