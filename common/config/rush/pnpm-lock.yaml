@@ -2844,7 +2844,7 @@ packages:
       glob2base: 0.0.12
       minimatch: 3.0.4
       mkdirp: 0.5.5
-      resolve: 1.15.1
+      resolve: 1.12.3
       safe-buffer: 5.2.0
       shell-quote: 1.7.2
       subarg: 1.0.0
