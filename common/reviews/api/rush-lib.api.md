@@ -134,7 +134,7 @@ export interface IConfigurationEnvironmentVariable {
 // @beta
 export interface IExperimentsJson {
     legacyIncrementalBuildDependencyDetection?: boolean;
-    normalizeChmodFieldInTarHeader?: boolean;
+    noChmodFieldInTarHeaderNormalization?: boolean;
 }
 
 // @public

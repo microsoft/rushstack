@@ -746,8 +746,8 @@ export class InstallManager {
             sync: true,
             prefix: npmPackageFolder,
             filter: (path: string, stat: tar.FileStat): boolean => {
-              if (this._rushConfiguration.experimentsConfiguration.configuration
-                .normalizeChmodFieldInTarHeader) {
+              if (!this._rushConfiguration.experimentsConfiguration.configuration
+                .noChmodFieldInTarHeaderNormalization) {
 
                 stat.mode = (stat.mode & ~0x1FF) | PosixModeBits.AllRead | PosixModeBits.UserWrite
                   | PosixModeBits.AllExecute;

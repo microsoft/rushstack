@@ -21,10 +21,10 @@ export interface IExperimentsJson {
   legacyIncrementalBuildDependencyDetection?: boolean;
 
   /**
-   * If true, the chmod field in temporary project tar headers will be set to 755.
-   * This can help ensure consistent tarball integrity across platforms.
+   * If true, the chmod field in temporary project tar headers will not be normalized.
+   * This normalization can help ensure consistent tarball integrity across platforms.
    */
-  normalizeChmodFieldInTarHeader?: boolean;
+  noChmodFieldInTarHeaderNormalization?: boolean;
 }
 
 /**
