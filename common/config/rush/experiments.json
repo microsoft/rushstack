@@ -13,4 +13,5 @@
     * is modified.
     */
   // "legacyIncrementalBuildDependencyDetection": true
+  "normalizeChmodFieldInTarHeader": true
 }
