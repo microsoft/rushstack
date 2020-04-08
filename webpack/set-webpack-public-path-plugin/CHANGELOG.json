@@ -2,6 +2,24 @@
   "name": "@rushstack/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "2.4.7",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v2.4.7",
+      "date": "Wed, 08 Apr 2020 04:07:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.9` to `6.4.10`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.8` to `0.4.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.6` to `0.5.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.4.6",
       "tag": "@rushstack/set-webpack-public-path-plugin_v2.4.6",
       "date": "Mon, 06 Apr 2020 05:52:56 GMT",
