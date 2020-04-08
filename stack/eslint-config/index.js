@@ -56,7 +56,32 @@ module.exports = {
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         //
         // CONFIGURATION:     By default, these are banned: String, Boolean, Number, Object, Symbol
-        "@typescript-eslint/ban-types": "error",
+        "@typescript-eslint/ban-types": [
+          "error",
+          {          
+            types: {
+              String: {
+                message: "Use 'string' instead",
+                fixWith: "string"
+              },
+              Boolean: {
+                message: "Use 'boolean' instead",
+                fixWith: "boolean"
+              },
+              Number: {
+                message: "Use 'number' instead",
+                fixWith: "number"
+              },
+              Object: {
+                message: "Use 'object' instead, or else define a proper TypeScript type:"
+              },
+              Symbol: {
+                message: "Use 'symbol' instead",
+                fixWith: "symbol"
+              }     
+            }                  
+          }
+        ],
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         "@typescript-eslint/camelcase": [
