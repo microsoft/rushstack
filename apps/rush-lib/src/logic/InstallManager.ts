@@ -737,7 +737,7 @@ export class InstallManager {
 
           // create the new tarball
           tar.create({
-            gzip: false,
+            gzip: true,
             file: tarballFile,
             cwd: tempProjectFolder,
             portable: true,
@@ -1299,6 +1299,7 @@ export class InstallManager {
 
       // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
       // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
+
       if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
         args.push('--no-prefer-frozen-lockfile');
       } else {

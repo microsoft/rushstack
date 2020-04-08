@@ -13,6 +13,11 @@
     "legacyIncrementalBuildDependencyDetection": {
       "description": "Rush 5.14.0 improved incremental builds to ignore spurious changes in the pnpm-lock.json file. This optimization is enabled by default. If you encounter a problem where \"rush build\" is neglecting to build some projects, please open a GitHub issue. As a workaround you can uncomment this line to temporarily restore the old behavior where everything must be rebuilt whenever pnpm-lock.json is modified.",
       "type": "boolean"
+    },
+
+    "normalizeChmodFieldInTarHeader": {
+      "description": "If true, the chmod field in temporary project tar headers will be set to 755. This can help ensure consistent tarball integrity across platforms.",
+      "type": "boolean"
     }
   },
   "additionalProperties": false
