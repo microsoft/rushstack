@@ -222,7 +222,6 @@ export interface IRushConfigurationJson {
   npmOptions?: INpmOptionsJson;
   pnpmOptions?: IPnpmOptionsJson;
   yarnOptions?: IYarnOptionsJson;
-  normalizeChmodFieldInTarHeader?: boolean;
   ensureConsistentVersions?: boolean;
   variants?: IRushVariantOptionsJson[];
 }
@@ -445,7 +444,6 @@ export class RushConfiguration {
   private _packageManagerToolFilename: string;
   private _projectFolderMinDepth: number;
   private _projectFolderMaxDepth: number;
-  private _normalizeChmodFieldInTarHeader: boolean;
   private _ensureConsistentVersions: boolean;
   private _suppressNodeLtsWarning: boolean;
   private _variants: {
@@ -530,8 +528,6 @@ export class RushConfiguration {
     this._currentVariantJsonFilename = path.join(this._commonTempFolder, 'current-variant.json');
 
     this._suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
-
-    this._normalizeChmodFieldInTarHeader = !!rushConfigurationJson.normalizeChmodFieldInTarHeader;
 
     this._ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
 
@@ -1235,14 +1231,6 @@ export class RushConfiguration {
    */
   public get suppressNodeLtsWarning(): boolean {
     return this._suppressNodeLtsWarning;
-  }
-
-  /**
-   * If true, the chmod field in temporary project tarballs will be set to 755.
-   * This can help ensure consistent tarball integrity across platforms.
-   */
-  public get normalizeChmodFieldInTarHeader(): boolean {
-    return this._normalizeChmodFieldInTarHeader;
   }
 
   /**

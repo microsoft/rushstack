@@ -134,6 +134,7 @@ export interface IConfigurationEnvironmentVariable {
 // @beta
 export interface IExperimentsJson {
     legacyIncrementalBuildDependencyDetection?: boolean;
+    normalizeChmodFieldInTarHeader?: boolean;
 }
 
 // @public
@@ -332,7 +333,6 @@ export class RushConfiguration {
     static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
     // (undocumented)
     static loadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration;
-    readonly normalizeChmodFieldInTarHeader: boolean;
     readonly npmCacheFolder: string;
     readonly npmOptions: NpmOptionsConfiguration;
     readonly npmTmpFolder: string;

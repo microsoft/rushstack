@@ -68,10 +68,6 @@
       "description": "If true, consistent version specifiers for dependencies will be enforced (i.e. \"rush check\" is run before some commands).",
       "type": "boolean"
     },
-    "normalizeChmodFieldInTarHeader": {
-      "description": "If true, the chmod field in temporary project tarballs will be set to 755. This can help ensure consistent tarball integrity across platforms.",
-      "type": "boolean"
-    },
     "hotfixChangeEnabled": {
       "description": "Allows creation of hotfix changes. This feature is experimental so it is disabled by default. If this is set, \"rush change\" only allows a \"hotfix\" change type to be specified. This change type will be used when publishing subsequent changes from the monorepo.",
       "type": "boolean"

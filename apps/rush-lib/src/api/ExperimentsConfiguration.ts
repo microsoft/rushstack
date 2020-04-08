@@ -19,6 +19,12 @@ export interface IExperimentsJson {
    * instead of project-specific tracking.
    */
   legacyIncrementalBuildDependencyDetection?: boolean;
+
+  /**
+   * If true, the chmod field in temporary project tarballs will be set to 755.
+   * This can help ensure consistent tarball integrity across platforms..
+   */
+  normalizeChmodFieldInTarHeader?: boolean;
 }
 
 /**
