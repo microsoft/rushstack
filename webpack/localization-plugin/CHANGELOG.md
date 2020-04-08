@@ -1,6 +1,13 @@
 # Change Log - @rushstack/localization-plugin
 
-This log was last generated on Wed, 08 Apr 2020 04:07:33 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Apr 2020 08:11:13 GMT and should not be manually modified.
+
+## 0.3.2
+Wed, 08 Apr 2020 08:11:13 GMT
+
+### Patches
+
+- Fix an issue where the chunk URL generation code would mark some localized chunks as non-localized.
 
 ## 0.3.1
 Wed, 08 Apr 2020 04:07:33 GMT

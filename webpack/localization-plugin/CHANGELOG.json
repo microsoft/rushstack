@@ -2,6 +2,18 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.3.2",
+      "tag": "@rushstack/localization-plugin_v0.3.2",
+      "date": "Wed, 08 Apr 2020 08:11:13 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the chunk URL generation code would mark some localized chunks as non-localized."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.1",
       "tag": "@rushstack/localization-plugin_v0.3.1",
       "date": "Wed, 08 Apr 2020 04:07:33 GMT",
