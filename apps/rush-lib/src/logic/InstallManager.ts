@@ -744,15 +744,22 @@ export class InstallManager {
             noMtime: true,
             noPax: true,
             sync: true,
-            prefix: npmPackageFolder
+            prefix: npmPackageFolder,
+            filter: (path: string, stat: tar.FileStat): boolean => {
+              stat.mode = (stat.mode & ~0x1FF) | PosixModeBits.AllRead | PosixModeBits.UserWrite
+                | PosixModeBits.AllExecute;
+
+              return true;
+            }
           } as CreateOptions, [FileConstants.PackageJson]);
 
-          if (this._rushConfiguration.normalizeChmodFieldInTarHeader) {
-            this._normalizeChmodFieldInTarHeader(tarballFile);
-          }
+          // if (this._rushConfiguration.normalizeChmodFieldInTarHeader) {
+          //   this._normalizeChmodFieldInTarHeader(tarballFile);
+          // }
 
           console.log(`Updating ${tarballFile}`);
         } catch (error) {
+          console.log(colors.yellow(error));
           // delete everything in case of any error
           FileSystem.deleteFile(tarballFile);
           FileSystem.deleteFile(tempPackageJsonFilename);
@@ -815,40 +822,40 @@ export class InstallManager {
     return shrinkwrapIsUpToDate;
   }
 
-  private _normalizeChmodFieldInTarHeader(tarballFile: string): void {
-    const buffer: Buffer = FileSystem.readFileToBuffer(tarballFile);
+  // private _normalizeChmodFieldInTarHeader(tarballFile: string): void {
+  //   const buffer: Buffer = FileSystem.readFileToBuffer(tarballFile);
 
-    // Tar format reference: https://www.gnu.org/software/tar/manual/html_node/Standard.html
+  //   // Tar format reference: https://www.gnu.org/software/tar/manual/html_node/Standard.html
 
-    const encodedChmod: string = '000755';
-    const chmodOffset: number = 100;
-    for (let i: number = 0; i < encodedChmod.length; i++) {
-      buffer[chmodOffset + i] = encodedChmod[i].charCodeAt(0);
-    }
+  //   const encodedChmod: string = '000755';
+  //   const chmodOffset: number = 100;
+  //   for (let i: number = 0; i < encodedChmod.length; i++) {
+  //     buffer[chmodOffset + i] = encodedChmod[i].charCodeAt(0);
+  //   }
 
-    // Fix checksum now that we have updated the chmod field in the file header
-    let checksum: number = 8 * 0x20;
-    const headerStartOffset: number = 0;
-    const checksumStartOffset: number = 148;
-    const checksumEndOffset: number = 156;
-    const headerEndOffset: number = 512;
-    for (let i: number = headerStartOffset; i < headerStartOffset + checksumStartOffset; i++) {
-      checksum += buffer[i];
-    }
-    // For calculating the checksum, the checksum field in the header is treated as if it were all zeroes
-    for (let i: number = headerStartOffset + checksumEndOffset; i < headerStartOffset + headerEndOffset; i++) {
-      checksum += buffer[i];
-    }
-    const octalChecksum: string = checksum.toString(8);
-    const encodedOctalChecksumWidth: number = 7;
-    const encodedOctalChecksum: string = (octalChecksum.length === encodedOctalChecksumWidth ?
-      octalChecksum : octalChecksum.padStart(encodedOctalChecksumWidth - 1, '0') + ' ');
-    for (let i: number = 0; i < encodedOctalChecksumWidth; i++) {
-      buffer[148 + i] = encodedOctalChecksum[i].charCodeAt(0);
-    }
+  //   // Fix checksum now that we have updated the chmod field in the file header
+  //   let checksum: number = 8 * 0x20;
+  //   const headerStartOffset: number = 0;
+  //   const checksumStartOffset: number = 148;
+  //   const checksumEndOffset: number = 156;
+  //   const headerEndOffset: number = 512;
+  //   for (let i: number = headerStartOffset; i < headerStartOffset + checksumStartOffset; i++) {
+  //     checksum += buffer[i];
+  //   }
+  //   // For calculating the checksum, the checksum field in the header is treated as if it were all zeroes
+  //   for (let i: number = headerStartOffset + checksumEndOffset; i < headerStartOffset + headerEndOffset; i++) {
+  //     checksum += buffer[i];
+  //   }
+  //   const octalChecksum: string = checksum.toString(8);
+  //   const encodedOctalChecksumWidth: number = 7;
+  //   const encodedOctalChecksum: string = (octalChecksum.length === encodedOctalChecksumWidth ?
+  //     octalChecksum : octalChecksum.padStart(encodedOctalChecksumWidth - 1, '0') + ' ');
+  //   for (let i: number = 0; i < encodedOctalChecksumWidth; i++) {
+  //     buffer[148 + i] = encodedOctalChecksum[i].charCodeAt(0);
+  //   }
 
-    FileSystem.writeFile(tarballFile, buffer);
-  }
+  //   FileSystem.writeFile(tarballFile, buffer);
+  // }
 
   /**
    * Runs "npm install" in the common folder.
