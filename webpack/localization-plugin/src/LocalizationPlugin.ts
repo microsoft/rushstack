@@ -349,6 +349,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
                   assetName: chunkFilename,
                   asset,
                   chunk,
+                  chunkHasLocalizedModules: this._chunkHasLocalizedModules.bind(this),
                   locales: this._locales,
                   noStringsLocaleName: this._noStringsLocaleName,
                   fillMissingTranslationStrings: this._fillMissingTranslationStrings,
@@ -392,7 +393,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
                   assetName: chunkFilename,
                   asset,
                   chunk,
-                  noStringsLocaleName: this._noStringsLocaleName
+                  noStringsLocaleName: this._noStringsLocaleName,
+                  chunkHasLocalizedModules: this._chunkHasLocalizedModules.bind(this)
                 });
 
                 // Delete the existing asset because it's been renamed

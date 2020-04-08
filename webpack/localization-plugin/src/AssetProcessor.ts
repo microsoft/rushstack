@@ -5,7 +5,6 @@ import * as Webpack from 'webpack';
 import * as lodash from 'lodash';
 
 import { Constants } from './utilities/Constants';
-import { EntityMarker } from './utilities/EntityMarker';
 import { ILocaleElementMap } from './interfaces';
 import { LocalizationPlugin, IStringSerialNumberData as IStringData } from './LocalizationPlugin';
 
@@ -62,6 +61,7 @@ export interface IProcessAssetOptionsBase {
   asset: IAsset;
   chunk: Webpack.compilation.Chunk;
   noStringsLocaleName: string;
+  chunkHasLocalizedModules: (chunk: Webpack.compilation.Chunk) => boolean;
 }
 
 export interface IProcessNonLocalizedAssetOptions extends IProcessAssetOptionsBase { }
@@ -94,7 +94,7 @@ export class AssetProcessor {
     const parsedAsset: IParseResult = AssetProcessor._parseStringToReconstructionSequence(
       options.plugin,
       assetSource,
-      this._getJsonpFunction(options.chunk, options.noStringsLocaleName)
+      this._getJsonpFunction(options.chunk, options.chunkHasLocalizedModules, options.noStringsLocaleName)
     );
     const reconstructedAsset: ILocalizedReconstructionResult = AssetProcessor._reconstructLocalized(
       parsedAsset.reconstructionSeries,
@@ -154,7 +154,7 @@ export class AssetProcessor {
     const parsedAsset: IParseResult = AssetProcessor._parseStringToReconstructionSequence(
       options.plugin,
       assetSource,
-      this._getJsonpFunction(options.chunk, options.noStringsLocaleName)
+      this._getJsonpFunction(options.chunk, options.chunkHasLocalizedModules, options.noStringsLocaleName)
     );
     const reconstructedAsset: INonLocalizedReconstructionResult = AssetProcessor._reconstructNonLocalized(
       parsedAsset.reconstructionSeries,
@@ -417,6 +417,7 @@ export class AssetProcessor {
 
   private static _getJsonpFunction(
     chunk: Webpack.compilation.Chunk,
+    chunkHasLocalizedModules: (chunk: Webpack.compilation.Chunk) => boolean,
     noStringsLocaleName: string
   ): (locale: string, chunkIdToken: string | undefined) => string {
     const idsWithStrings: Set<string> = new Set<string>();
@@ -424,7 +425,7 @@ export class AssetProcessor {
 
     const asyncChunks: Set<Webpack.compilation.Chunk> = chunk.getAllAsyncChunks();
     for (const asyncChunk of asyncChunks) {
-      if (EntityMarker.getMark(asyncChunk)) {
+      if (chunkHasLocalizedModules(asyncChunk)) {
         idsWithStrings.add(asyncChunk.id);
       } else {
         idsWithoutStrings.add(asyncChunk.id);
