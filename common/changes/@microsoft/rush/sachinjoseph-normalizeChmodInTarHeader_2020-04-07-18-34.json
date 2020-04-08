@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Normalize chmod field in Tar header",
+      "comment": "Fix an issue where the common/temp/*.tgz files resulted in different shrinkwrap files on different operating systems",
       "type": "none"
     }
   ],
