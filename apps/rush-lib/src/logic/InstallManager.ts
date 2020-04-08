@@ -746,7 +746,9 @@ export class InstallManager {
             sync: true,
             prefix: npmPackageFolder,
             filter: (path: string, stat: tar.FileStat): boolean => {
-              stat.mode = 755;
+              stat.mode = (stat.mode & ~0x1FF) | PosixModeBits.AllRead | PosixModeBits.UserWrite
+                | PosixModeBits.AllExecute;
+
               return true;
             }
           } as CreateOptions, [FileConstants.PackageJson]);
