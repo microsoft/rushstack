@@ -200,7 +200,11 @@ export class RushCommandLineParser extends CommandLineParser {
     }
 
     if (!this.tryGetAction(RushConstants.rebuildCommandName)) {
-      this._addCommandLineConfigAction(commandLineConfiguration, CommandLineConfiguration.defaultRebuildCommandJson);
+      this._addCommandLineConfigAction(
+        commandLineConfiguration,
+        CommandLineConfiguration.defaultRebuildCommandJson,
+        RushConstants.buildCommandName
+      );
     }
   }
 
@@ -217,7 +221,8 @@ export class RushCommandLineParser extends CommandLineParser {
 
   private _addCommandLineConfigAction(
     commandLineConfiguration: CommandLineConfiguration | undefined,
-    command: CommandJson
+    command: CommandJson,
+    commandToRun?: string
   ): void {
     if (this.tryGetAction(command.name)) {
       throw new Error(`${RushConstants.commandLineFilename} defines a command "${command.name}"`
@@ -231,9 +236,9 @@ export class RushCommandLineParser extends CommandLineParser {
         this.addAction(new BulkScriptAction({
           actionName: command.name,
 
-          // The rush rebuild and rush build command invoke the same NPM script because they share the same
-          // package-deps-hash state.
-          commandToRun: command.name === RushConstants.rebuildCommandName ? 'build' : undefined,
+          // By default, the "rebuild" action runs the "build" script. However, if the command-line.json file
+          // overrides "rebuild," the "rebuild" script should be run.
+          commandToRun: commandToRun,
 
           summary: command.summary,
           documentation: command.description || command.summary,
