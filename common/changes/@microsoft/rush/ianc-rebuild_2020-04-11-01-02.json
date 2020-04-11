@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix a regression where an overridden \"rebuild\" script previously executed the \"rebuild\" script.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}
