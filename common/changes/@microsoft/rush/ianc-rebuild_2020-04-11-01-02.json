@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix a regression where an overridden \"rebuild\" script previously executed the \"rebuild\" script.",
+      "comment": "Fix a regression in Rush 5.19.0 where customizing \"rush rebuild\" would call the \"build\" script instead of the \"rebuild\" script.",
       "type": "none"
     }
   ],
