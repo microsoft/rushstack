@@ -2,10 +2,10 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "\"Added support from 'import * as module from ./local/module'\"",
+      "comment": "Added support for "import * as module from './local/module';\"",
       "type": "minor"
     }
   ],
   "packageName": "@microsoft/api-extractor",
-  "email": "systemvetaren@gmail.com"
+  "email": "mckn@users.noreply.github.com"
 }
