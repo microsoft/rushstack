@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /**
- * Interface respresenting a changelog json object for a package used to represent the parsed
+ * Interface representing a changelog json object for a package used to represent the parsed
  * content of CHANGELOG.json
  */
 export interface IChangelog {
@@ -37,7 +37,7 @@ export interface IChangeLogEntry {
   date: string | undefined;
 
   /**
-   * Comments for the entry, where key respresents the ChangeType string (Example: major)
+   * Comments for the entry, where key represents the ChangeType string (Example: major)
    */
   comments: {
     /** Describes changes which cause a patch-level SemVer bump */

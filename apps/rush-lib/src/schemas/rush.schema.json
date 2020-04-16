@@ -6,7 +6,7 @@
 
   "definitions": {
     "environmentVariables": {
-      "description": "Enviroment variables for the package manager",
+      "description": "Environment variables for the package manager",
       "type": "object",
       "additionalProperties": {
         "type": "object",
@@ -73,7 +73,7 @@
       "type": "boolean"
     },
     "npmOptions": {
-      "description": "Options that are only used when the NPM pacakge manager is selected.",
+      "description": "Options that are only used when the NPM package manager is selected.",
       "type": "object",
       "properties": {
         "environmentVariables": {

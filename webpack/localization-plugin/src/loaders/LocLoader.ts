@@ -30,7 +30,8 @@ export default loaderFactory(
     const locFileData: ILocalizationFile = LocFileParser.parseLocFile({
       content,
       terminal,
-      filePath: locFilePath
+      filePath: locFilePath,
+      resxNewlineNormalization: options.resxNewlineNormalization
     });
     const { additionalLoadedFilePaths, errors } = pluginInstance.addDefaultLocFile(terminal, locFilePath, locFileData);
     for (const additionalFile of additionalLoadedFilePaths) {

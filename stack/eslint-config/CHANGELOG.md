@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Sat, 28 Mar 2020 00:37:16 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Apr 2020 04:07:33 GMT and should not be manually modified.
+
+## 0.5.7
+Wed, 08 Apr 2020 04:07:33 GMT
+
+### Patches
+
+- Improve the error message text for the "ban-types" rule
 
 ## 0.5.6
 Sat, 28 Mar 2020 00:37:16 GMT

@@ -178,6 +178,14 @@ This option allows pseudolocales to be generated from the strings in the default
 an option with pseudolocales as keys and options for the
 [pseudolocale package](https://www.npmjs.com/package/pseudolocale) as values.
 
+#### `localizedData.normalizeResxNewlines = 'crlf' | 'lf'`
+
+This option allows normalization of newlines in RESX files. RESX files are XML, so newlines can be
+specified by including a newline in the `<value>` element. For files stored on source control systems,
+clones on Windows can end up with CRLF newlines and clones on 'nix operating systems can end up with LF
+newlines. This option can be used to help make compilations run on different platforms produce the same
+result.
+
 ### `filesToIgnore = [ ]`
 
 This option is used to specify `.resx` and `.loc.json` files that should not be processed by this plugin.

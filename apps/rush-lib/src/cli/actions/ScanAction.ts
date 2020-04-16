@@ -40,19 +40,19 @@ export class ScanAction extends BaseConfiglessRushAction {
     }
 
     const requireRegExps: RegExp[] = [
-      // Example: require('someting')
+      // Example: require('something')
       /\brequire\s*\(\s*[']([^']+\s*)[']\)/,
       /\brequire\s*\(\s*["]([^"]+)["]\s*\)/,
 
-      // Example: require.ensure('someting')
+      // Example: require.ensure('something')
       /\brequire.ensure\s*\(\s*[']([^']+\s*)[']\)/,
       /\brequire.ensure\s*\(\s*["]([^"]+)["]\s*\)/,
 
-      // Example: require.resolve('someting')
+      // Example: require.resolve('something')
       /\brequire.resolve\s*\(\s*[']([^']+\s*)[']\)/,
       /\brequire.resolve\s*\(\s*["]([^"]+)["]\s*\)/,
 
-      // Example: System.import('someting')
+      // Example: System.import('something')
       /\bSystem.import\s*\(\s*[']([^']+\s*)[']\)/,
       /\bSystem.import\s*\(\s*["]([^"]+)["]\s*\)/,
 

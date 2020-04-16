@@ -2,6 +2,48 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.7.18",
+      "tag": "@microsoft/api-documenter_v7.7.18",
+      "date": "Wed, 08 Apr 2020 04:07:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.7.10` to `7.7.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.19.6` to `3.19.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" from `4.3.13` to `4.3.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.8` to `0.4.9`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.9` to `6.4.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.6` to `0.5.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.7.17",
+      "tag": "@microsoft/api-documenter_v7.7.17",
+      "date": "Fri, 03 Apr 2020 15:10:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.7` to `0.4.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.8` to `6.4.9`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.7.16",
       "tag": "@microsoft/api-documenter_v7.7.16",
       "date": "Sun, 29 Mar 2020 00:04:12 GMT",

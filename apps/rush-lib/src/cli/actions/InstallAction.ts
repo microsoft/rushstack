@@ -35,7 +35,7 @@ export class InstallAction extends BaseInstallAction {
       networkConcurrency: this._networkConcurrencyParameter.value,
       collectLogFile: this._debugPackageManagerParameter.value!,
       variant: this._variant.value,
-      // Because the 'defautltValue' option on the _maxInstallAttempts parameter is set,
+      // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!
     };

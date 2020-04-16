@@ -2,7 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as jju from 'jju';
-import { Terminal } from '@rushstack/node-core-library';
+import {
+  Terminal,
+  NewlineKind
+} from '@rushstack/node-core-library';
 
 import { ILocalizationFile } from '../interfaces';
 import { ResxReader } from './ResxReader';
@@ -15,6 +18,7 @@ export interface IParseLocFileOptions {
   terminal: Terminal;
   filePath: string;
   content: string;
+  resxNewlineNormalization: NewlineKind | undefined;
 }
 
 interface IParseCacheEntry {
@@ -29,8 +33,9 @@ const parseCache: Map<string, IParseCacheEntry> = new Map<string, IParseCacheEnt
  */
 export class LocFileParser {
   public static parseLocFile(options: IParseLocFileOptions): ILocalizationFile {
-    if (parseCache.has(options.filePath)) {
-      const entry: IParseCacheEntry = parseCache.get(options.filePath)!;
+    const fileCacheKey: string = `${options.filePath}?${options.resxNewlineNormalization || 'none'}`;
+    if (parseCache.has(fileCacheKey)) {
+      const entry: IParseCacheEntry = parseCache.get(fileCacheKey)!;
       if (entry.content === options.content) {
         return entry.parsedFile;
       }
@@ -42,7 +47,8 @@ export class LocFileParser {
         options.content,
         {
           terminal: options.terminal,
-          resxFilePath: options.filePath
+          resxFilePath: options.filePath,
+          newlineNormalization: options.resxNewlineNormalization
         }
       );
     } else {
@@ -54,7 +60,7 @@ export class LocFileParser {
       }
     }
 
-    parseCache.set(options.filePath, { content: options.content, parsedFile });
+    parseCache.set(fileCacheKey, { content: options.content, parsedFile });
     return parsedFile;
   }
 }

@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "0.5.7",
+      "tag": "@rushstack/eslint-config_v0.5.7",
+      "date": "Wed, 08 Apr 2020 04:07:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve the error message text for the \"ban-types\" rule"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.6",
       "tag": "@rushstack/eslint-config_v0.5.6",
       "date": "Sat, 28 Mar 2020 00:37:16 GMT",

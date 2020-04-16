@@ -8,9 +8,9 @@ const { SetPublicPathPlugin } = require('@rushstack/set-webpack-public-path-plug
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-module.exports = function(env) {
-  const configuration = {
-    mode: 'development',
+function generateConfiguration(mode, outputFolderName) {
+  return {
+    mode: mode,
     module: {
       rules: [
         {
@@ -34,13 +34,14 @@ module.exports = function(env) {
       'localization-test-C': path.join(__dirname, 'src', 'indexC.ts'),
     },
     output: {
-      path: path.join(__dirname, 'dist'),
+      path: path.join(__dirname, outputFolderName),
       filename: '[name]_[locale]_[contenthash].js',
       chunkFilename: '[id].[name]_[locale]_[contenthash].js'
     },
     optimization: {
       minimize: false
     },
+    devtool: 'source-map',
     plugins: [
       new webpack.optimize.ModuleConcatenationPlugin(),
       new LocalizationPlugin({
@@ -52,13 +53,13 @@ module.exports = function(env) {
           translatedStrings: {
             "es-es": {
               "./src/strings1.loc.json": {
-                "string1": "la primera cadena"
+                "string1": "la primera cadena de texto"
               },
               "./src/chunks/strings2.loc.json": {
-                "string1": "la segunda cadena"
+                "string1": "la segunda cadena de texto"
               },
               "./src/strings4.loc.json": {
-                "string1": "\"Cadena con comillas\""
+                "string1": "\"cadena de texto con comillas\""
               },
               "./src/strings5.resx": "./localization/es-es/strings5.resx"
             }
@@ -66,7 +67,8 @@ module.exports = function(env) {
           passthroughLocale: {
             usePassthroughLocale: true,
             passthroughLocaleName: 'default'
-          }
+          },
+          normalizeResxNewlines: 'crlf'
         },
         typingsOptions: {
           generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts'),
@@ -92,6 +94,9 @@ module.exports = function(env) {
       new HtmlWebpackPlugin()
     ]
   };
-
-  return configuration;
 }
+
+module.exports = [
+  generateConfiguration('development', 'dist-dev'),
+  generateConfiguration('production', 'dist-prod'),
+];

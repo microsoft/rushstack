@@ -1,6 +1,24 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 18 Mar 2020 01:23:22 GMT and should not be manually modified.
+This log was last generated on Wed, 15 Apr 2020 03:33:55 GMT and should not be manually modified.
+
+## 5.23.1
+Wed, 15 Apr 2020 03:33:55 GMT
+
+### Updates
+
+- Fix a regression in Rush 5.19.0 where customizing "rush rebuild" would call the "build" script instead of the "rebuild" script.
+- Fix an issue where, on some minimal systems, Rush used a missing shell command to detect an application path.
+- Fix an issue where the common/temp/*.tgz files resulted in different shrinkwrap files on different operating systems
+
+## 5.23.0
+Sat, 04 Apr 2020 00:38:29 GMT
+
+### Updates
+
+- Add a new rush.json setting "preventManualShrinkwrapChanges" which prevents against accidental mistakes in pnpm-lock.yaml.
+- Upgrade node-tar
+- Remove some misleading log output for "rush build" (GitHub #1733)
 
 ## 5.22.0
 Wed, 18 Mar 2020 01:23:22 GMT

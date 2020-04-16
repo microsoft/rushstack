@@ -311,7 +311,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     let value: string | undefined = BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
     if (value) {
 
-      // Getting the top level depenedency version from a PNPM lockfile version 5.1
+      // Getting the top level dependency version from a PNPM lockfile version 5.1
       // --------------------------------------------------------------------------
       //
       // 1) Top-level tarball dependency entries in pnpm-lock.yaml look like:

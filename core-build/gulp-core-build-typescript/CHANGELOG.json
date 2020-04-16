@@ -2,6 +2,42 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "8.4.10",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.4.10",
+      "date": "Wed, 08 Apr 2020 04:07:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.15.4` to `3.15.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.19.6` to `3.19.7`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.7.12` to `7.7.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.1\" from `0.9.8` to `0.9.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.6` to `0.5.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.4.9",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.4.9",
+      "date": "Fri, 03 Apr 2020 15:10:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.1\" from `0.9.7` to `0.9.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "8.4.8",
       "tag": "@microsoft/gulp-core-build-typescript_v8.4.8",
       "date": "Sun, 29 Mar 2020 00:04:12 GMT",

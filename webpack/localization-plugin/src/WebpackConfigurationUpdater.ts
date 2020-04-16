@@ -4,6 +4,8 @@
 import * as path from 'path';
 import * as Webpack from 'webpack';
 import * as SetPublicPathPluginPackageType from '@rushstack/set-webpack-public-path-plugin';
+import { NewlineKind } from '@rushstack/node-core-library';
+import * as lodash from 'lodash';
 
 import { Constants } from './utilities/Constants';
 import { LocalizationPlugin } from './LocalizationPlugin';
@@ -15,23 +17,31 @@ export interface IWebpackConfigurationUpdaterOptions {
   configuration: Webpack.Configuration;
   filesToIgnore: Set<string>;
   localeNameOrPlaceholder: string;
+  resxNewlineNormalization: NewlineKind | undefined;
 }
+
+const FILE_TOKEN_REGEX: RegExp = new RegExp(lodash.escapeRegExp('[file]'));
 
 export class WebpackConfigurationUpdater {
   public static amendWebpackConfigurationForMultiLocale(options: IWebpackConfigurationUpdaterOptions): void {
     const loader: string = path.resolve(__dirname, 'loaders', 'LocLoader.js');
     const loaderOptions: ILocLoaderOptions = {
-      pluginInstance: options.pluginInstance
+      pluginInstance: options.pluginInstance,
+      resxNewlineNormalization: options.resxNewlineNormalization
     };
 
     WebpackConfigurationUpdater._addLoadersForLocFiles(options, loader, loaderOptions);
 
     WebpackConfigurationUpdater._tryUpdateLocaleTokenInPublicPathPlugin(options);
+
+    WebpackConfigurationUpdater._tryUpdateSourceMapFilename(options.configuration);
   }
 
   public static amendWebpackConfigurationForInPlaceLocFiles(options: IWebpackConfigurationUpdaterOptions): void {
     const loader: string = path.resolve(__dirname, 'loaders', 'InPlaceLocFileLoader.js');
-    const loaderOptions: IBaseLoaderOptions = {}
+    const loaderOptions: IBaseLoaderOptions = {
+      resxNewlineNormalization: options.resxNewlineNormalization
+    };
 
     WebpackConfigurationUpdater._addRulesToConfiguration(
       options.configuration,
@@ -133,5 +143,18 @@ export class WebpackConfigurationUpdater {
     }
 
     configuration.module.rules.push(...rules);
+  }
+
+  private static _tryUpdateSourceMapFilename(configuration: Webpack.Configuration): void {
+    if (!configuration.output) {
+      configuration.output = {}; // This should never happen
+    }
+
+    if (configuration.output.sourceMapFilename !== undefined) {
+      configuration.output.sourceMapFilename = configuration.output.sourceMapFilename.replace(
+        FILE_TOKEN_REGEX,
+        Constants.NO_LOCALE_SOURCE_MAP_FILENAME_TOKEN
+      )
+    }
   }
 }

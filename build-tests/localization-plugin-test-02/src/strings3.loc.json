@@ -1,6 +1,6 @@
 {
   "string1": {
-    "value": "string three",
+    "value": "string three with a \\ backslash",
     "comment": "the third string"
   },
   "string2": {

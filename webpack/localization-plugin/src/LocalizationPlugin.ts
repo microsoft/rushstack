@@ -4,7 +4,8 @@
 import {
   JsonFile,
   FileSystem,
-  Terminal
+  Terminal,
+  NewlineKind
 } from '@rushstack/node-core-library';
 import * as Webpack from 'webpack';
 import * as path from 'path';
@@ -32,7 +33,12 @@ import {
 import { LocFileTypingsGenerator } from './LocFileTypingsGenerator';
 import { Pseudolocalization } from './Pseudolocalization';
 import { EntityMarker } from './utilities/EntityMarker';
-import { IAsset, IProcessAssetResult, AssetProcessor } from './AssetProcessor';
+import {
+  IAsset,
+  IProcessAssetResult,
+  AssetProcessor,
+  PLACEHOLDER_REGEX
+} from './AssetProcessor';
 import { LocFileParser } from './utilities/LocFileParser';
 
 /**
@@ -76,6 +82,7 @@ interface IExtendedChunk extends Webpack.compilation.Chunk {
 interface IAssetPathOptions {
   chunk: Webpack.compilation.Chunk;
   contentHashType: string;
+  filename: string;
 }
 
 /**
@@ -111,6 +118,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
   private _noStringsLocaleName: string;
   private _fillMissingTranslationStrings: boolean;
   private _pseudolocalizers: Map<string, (str: string) => string> = new Map<string, (str: string) => string>();
+  private _resxNewlineNormalization: NewlineKind | undefined;
 
   /**
    * The outermost map's keys are the locale names.
@@ -173,7 +181,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
       pluginInstance: this,
       configuration: compiler.options,
       filesToIgnore: this._filesToIgnore,
-      localeNameOrPlaceholder: Constants.LOCALE_NAME_PLACEHOLDER
+      localeNameOrPlaceholder: Constants.LOCALE_NAME_PLACEHOLDER,
+      resxNewlineNormalization: this._resxNewlineNormalization
     };
 
     if (errors.length > 0 || warnings.length > 0) {
@@ -216,20 +225,30 @@ export class LocalizationPlugin implements Webpack.Plugin {
             (assetPath: string, options: IAssetPathOptions) => {
               if (
                 options.contentHashType === 'javascript' &&
-                assetPath.match(Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX)
+                assetPath.match(Constants.LOCALE_FILENAME_TOKEN_REGEX)
               ) {
                 // Does this look like an async chunk URL generator?
                 if (typeof options.chunk.id === 'string' && options.chunk.id.match(/^\" \+/)) {
                   return assetPath.replace(
-                    Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX,
+                    Constants.LOCALE_FILENAME_TOKEN_REGEX,
                     `" + ${Constants.JSONP_PLACEHOLDER} + "`
                   );
                 } else {
                   return assetPath.replace(
-                    Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX,
+                    Constants.LOCALE_FILENAME_TOKEN_REGEX,
                     Constants.LOCALE_NAME_PLACEHOLDER
                   );
                 }
+              } else if (assetPath.match(Constants.NO_LOCALE_SOURCE_MAP_FILENAME_TOKEN_REGEX)) {
+                // Replace the placeholder with the [locale] token for sourcemaps
+                const deLocalizedFilename: string = options.filename.replace(
+                  PLACEHOLDER_REGEX,
+                  Constants.LOCALE_FILENAME_TOKEN
+                );
+                return assetPath.replace(
+                  Constants.NO_LOCALE_SOURCE_MAP_FILENAME_TOKEN_REGEX,
+                  deLocalizedFilename
+                );
               } else {
                 return assetPath;
               }
@@ -252,12 +271,12 @@ export class LocalizationPlugin implements Webpack.Plugin {
                 chunksHaveAnyChildren && (
                   !compilation.options.output ||
                   !compilation.options.output.chunkFilename ||
-                  compilation.options.output.chunkFilename.indexOf(Constants.LOCALE_FILENAME_PLACEHOLDER) === -1
+                  compilation.options.output.chunkFilename.indexOf(Constants.LOCALE_FILENAME_TOKEN) === -1
                 )
               ) {
                 compilation.errors.push(new Error(
                   'The configuration.output.chunkFilename property must be provided and must include ' +
-                  `the ${Constants.LOCALE_FILENAME_PLACEHOLDER} placeholder`
+                  `the ${Constants.LOCALE_FILENAME_TOKEN} placeholder`
                 ));
 
                 return;
@@ -273,12 +292,12 @@ export class LocalizationPlugin implements Webpack.Plugin {
                   : this._noStringsLocaleName;
                 if (chunk.hasRuntime()) {
                   chunk.filenameTemplate = (compilation.options.output!.filename as string).replace(
-                    Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX,
+                    Constants.LOCALE_FILENAME_TOKEN_REGEX,
                     replacementValue
                   );
                 } else {
                   chunk.filenameTemplate = compilation.options.output!.chunkFilename!.replace(
-                    Constants.LOCALE_FILENAME_PLACEHOLDER_REGEX,
+                    Constants.LOCALE_FILENAME_TOKEN_REGEX,
                     replacementValue
                   );
                 }
@@ -330,6 +349,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
                   assetName: chunkFilename,
                   asset,
                   chunk,
+                  chunkHasLocalizedModules: this._chunkHasLocalizedModules.bind(this),
                   locales: this._locales,
                   noStringsLocaleName: this._noStringsLocaleName,
                   fillMissingTranslationStrings: this._fillMissingTranslationStrings,
@@ -373,7 +393,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
                   assetName: chunkFilename,
                   asset,
                   chunk,
-                  noStringsLocaleName: this._noStringsLocaleName
+                  noStringsLocaleName: this._noStringsLocaleName,
+                  chunkHasLocalizedModules: this._chunkHasLocalizedModules.bind(this)
                 });
 
                 // Delete the existing asset because it's been renamed
@@ -432,7 +453,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
         const localizationFile: ILocalizationFile = LocFileParser.parseLocFile({
           filePath: localizedData,
           content: FileSystem.readFile(localizedData),
-          terminal: terminal
+          terminal: terminal,
+          resxNewlineNormalization: this._resxNewlineNormalization
         });
 
         return this._convertLocalizationFileToLocData(localizationFile);
@@ -556,11 +578,11 @@ export class LocalizationPlugin implements Webpack.Plugin {
       !configuration.output ||
       !configuration.output.filename ||
       (typeof configuration.output.filename !== 'string') ||
-      configuration.output.filename.indexOf(Constants.LOCALE_FILENAME_PLACEHOLDER) === -1
+      configuration.output.filename.indexOf(Constants.LOCALE_FILENAME_TOKEN) === -1
     ) {
       errors.push(new Error(
         'The configuration.output.filename property must be provided, must be a string, and must include ' +
-        `the ${Constants.LOCALE_FILENAME_PLACEHOLDER} placeholder`
+        `the ${Constants.LOCALE_FILENAME_TOKEN} placeholder`
       ));
     }
     // END configuration
@@ -690,6 +712,30 @@ export class LocalizationPlugin implements Webpack.Plugin {
         }
       }
       // END options.localizedData.pseudoLocales
+
+      // START options.localizedData.normalizeResxNewlines
+      if (this._options.localizedData.normalizeResxNewlines) {
+        switch (this._options.localizedData.normalizeResxNewlines) {
+          case 'crlf': {
+            this._resxNewlineNormalization = NewlineKind.CrLf;
+            break;
+          }
+
+          case 'lf': {
+            this._resxNewlineNormalization = NewlineKind.Lf;
+            break;
+          }
+
+          default: {
+            errors.push(new Error(
+              `Unexpected value "${this._options.localizedData.normalizeResxNewlines}" for option ` +
+              '"localizedData.normalizeResxNewlines"'
+            ));
+            break;
+          }
+        }
+      }
+      // END options.localizedData.normalizeResxNewlines
     } else if (!isWebpackDevServer) {
       throw new Error('Localized data must be provided unless webpack dev server is running.');
     }
@@ -710,13 +756,10 @@ export class LocalizationPlugin implements Webpack.Plugin {
     return { errors, warnings };
   }
 
-  /**
-   * @param token - Use this as a value that may be escaped or minified.
-   */
   private _getPlaceholderString(): IStringPlaceholder {
     const suffix: string = (this._stringPlaceholderCounter++).toString();
     return {
-      value: `${Constants.STRING_PLACEHOLDER_PREFIX}_${Constants.STRING_PLACEHOLDER_LABEL}_${suffix}`,
+      value: `${Constants.STRING_PLACEHOLDER_PREFIX}_\\_${Constants.STRING_PLACEHOLDER_LABEL}_${suffix}`,
       suffix: suffix
     };
   }
