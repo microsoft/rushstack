@@ -74,11 +74,15 @@ export class ApiModelGenerator {
 
     // Create a CollectorEntity for each top-level export
     for (const entity of this._collector.entities) {
-      if (entity.exported) {
+      if (entity.exported && entity.exportNames.size > 0) {
         if (entity.astEntity instanceof AstSymbol) {
           // Skip ancillary declarations; we will process them with the main declaration
           for (const astDeclaration of this._collector.getNonAncillaryDeclarations(entity.astEntity)) {
-            this._processDeclaration(astDeclaration, entity.nameForEmit, apiEntryPoint);
+            // TODO: Figure out how to represent additional exports such as "export { A, A as B, A as C }"
+
+            // If the symbol has multiple names, arbitrarily choose the first name.
+            const exportedName: string = [...entity.exportNames][0];
+            this._processDeclaration(astDeclaration, exportedName, apiEntryPoint);
           }
         } else {
           // TODO: Figure out how to represent reexported AstImport objects.  Basically we need to introduce a new
