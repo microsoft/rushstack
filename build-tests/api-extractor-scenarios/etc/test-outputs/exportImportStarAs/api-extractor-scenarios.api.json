@@ -82,6 +82,27 @@
               "name": "add"
             },
             {
+              "kind": "Variable",
+              "canonicalReference": "api-extractor-scenarios!calculator.calucatorVersion:var",
+              "docComment": "/**\n * Returns the version of the calculator.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "calucatorVersion: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "calucatorVersion",
+              "variableTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
               "kind": "Function",
               "canonicalReference": "api-extractor-scenarios!calculator.subtract:function(1)",
               "docComment": "/**\n * Returns the sum of subtracting `b` from `a`\n *\n * @param a - first number\n *\n * @param b - second number\n *\n * @returns Sum of subtract `b` from `a`\n */\n",
@@ -206,6 +227,27 @@
                 }
               ],
               "name": "add"
+            },
+            {
+              "kind": "Variable",
+              "canonicalReference": "api-extractor-scenarios!calculator2.calucatorVersion:var",
+              "docComment": "/**\n * Returns the version of the calculator.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "calucatorVersion: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "calucatorVersion",
+              "variableTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
             },
             {
               "kind": "Function",

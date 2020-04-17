@@ -18,3 +18,5 @@ export function add(a: bigint, b: bigint): bigint {
 export function subtract(a: bigint, b: bigint): bigint {
     return a - b;
 }
+
+export * from './common';
