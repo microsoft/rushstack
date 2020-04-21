@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add common-versions.json in potentially changed file list",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "susurana@microsoft.com"
+}
