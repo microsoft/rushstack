@@ -860,7 +860,10 @@ export class InstallManager {
         // Additionally, if they pulled an updated npm-shrinkwrap.json file from Git,
         // then we can't skip this install
         potentiallyChangedFiles.push(this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant));
-
+        
+        // Add common-versions.json file in potentially changed file list. 
+        potentiallyChangedFiles.push(this._rushConfiguration.getCommonVersionsFilePath(options.variant));
+        
         if (this._rushConfiguration.packageManager === 'pnpm') {
           // If the repo is using pnpmfile.js, consider that also
           const pnpmFileFilename: string = this._rushConfiguration.getPnpmfilePath(options.variant);
