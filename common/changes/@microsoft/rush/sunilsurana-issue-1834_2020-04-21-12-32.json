@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add common-versions.json in potentially changed file list",
+      "comment": "Add common-versions.json to the set of files that, when changed, will trigger reinstallation of dependencies.",
       "type": "none"
     }
   ],
