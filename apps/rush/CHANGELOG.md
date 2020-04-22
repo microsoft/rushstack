@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 15 Apr 2020 03:33:55 GMT and should not be manually modified.
+This log was last generated on Wed, 22 Apr 2020 18:44:26 GMT and should not be manually modified.
+
+## 5.23.2
+Wed, 22 Apr 2020 18:44:26 GMT
+
+### Updates
+
+- Add common-versions.json to the set of files that, when changed, will trigger reinstallation of dependencies.
 
 ## 5.23.1
 Wed, 15 Apr 2020 03:33:55 GMT
