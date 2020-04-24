@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.7.19",
+      "tag": "@microsoft/api-documenter_v7.7.19",
+      "date": "Fri, 24 Apr 2020 15:09:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Properly encode xrefs that contain '#' characters."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.7.18",
       "tag": "@microsoft/api-documenter_v7.7.18",
       "date": "Wed, 08 Apr 2020 04:07:33 GMT",
