@@ -4,10 +4,8 @@
 import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { Constructor, PropertiesOf } from '../mixins/Mixin';
 import { ApiPackage } from '../model/ApiPackage';
-import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 import { DeserializerContext } from '../model/DeserializerContext';
 import { InternalError } from '@rushstack/node-core-library';
-import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 
 /**
  * The type returned by the {@link ApiItem.kind} property, which can be used to easily distinguish subclasses of
@@ -71,11 +69,8 @@ export class ApiItem {
   }
 
   public static deserialize(jsonObject: IApiItemJson, context: DeserializerContext): ApiItem {
-    // The Deserializer class is coupled with a ton of other classes, so  we delay loading it
-    // to avoid ES5 circular imports.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const deserializerModule: typeof import('../model/Deserializer') = require('../model/Deserializer');
-    return deserializerModule.Deserializer.deserialize(context, jsonObject);
+    // (Definition in ApiItemCircularMembers.ts)
+    return undefined as unknown as ApiItem;
   }
 
   /** @virtual */
@@ -185,11 +180,8 @@ export class ApiItem {
    * item of its name/kind, then the result is an array containing only this item.
    */
   public getMergedSiblings(): ReadonlyArray<ApiItem> {
-    const parent: ApiItem | undefined = this._parent;
-    if (parent && ApiItemContainerMixin.isBaseClassOf(parent)) {
-      return parent._getMergedSiblingsForMember(this);
-    }
-    return [];
+    // (Definition in ApiItemCircularMembers.ts)
+    return undefined as unknown as ReadonlyArray<ApiItem>;
   }
 
   /**
@@ -212,34 +204,8 @@ export class ApiItem {
    * If called on an ApiEntrypoint, ApiPackage, or ApiModel item, the result is an empty string.
    */
   public getScopedNameWithinPackage(): string {
-    const reversedParts: string[] = [];
-
-    for (let current: ApiItem | undefined = this; current !== undefined; current = current.parent) {
-      if (current.kind === ApiItemKind.Model
-        || current.kind === ApiItemKind.Package
-        || current.kind === ApiItemKind.EntryPoint) {
-        break;
-      }
-      if (reversedParts.length !== 0) {
-        reversedParts.push('.');
-      } else {
-        switch (current.kind) {
-          case ApiItemKind.CallSignature:
-          case ApiItemKind.ConstructSignature:
-          case ApiItemKind.Constructor:
-          case ApiItemKind.IndexSignature:
-            // These functional forms don't have a proper name, so we don't append the "()" suffix
-            break;
-          default:
-            if (ApiParameterListMixin.isBaseClassOf(current)) {
-              reversedParts.push('()');
-            }
-        }
-      }
-      reversedParts.push(current.displayName);
-    }
-
-    return reversedParts.reverse().join('');
+    // (Definition in ApiItemCircularMembers.ts)
+    return undefined as unknown as string;
   }
 
   /**

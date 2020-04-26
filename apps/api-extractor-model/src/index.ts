@@ -167,3 +167,5 @@ export {
 export {
   HeritageType
 } from './model/HeritageType';
+
+import './items/ApiItemCircularMembers';
