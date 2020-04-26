@@ -23,8 +23,8 @@
     "@types/jest": "23.3.11",
     "@types/node": "10.17.13",
     "gulp": "~4.0.2",
-    "jest": "~23.6.0",
-    "ts-jest": "~22.4.6"
+    "jest": "~25.1.0",
+    "ts-jest": "~25.1.0"
   },
   "jest": {
     "moduleFileExtensions": [
