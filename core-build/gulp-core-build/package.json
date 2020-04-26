@@ -16,7 +16,7 @@
     "@rushstack/node-core-library": "3.19.7",
     "@types/chalk": "0.4.31",
     "@types/gulp": "4.0.6",
-    "@types/jest": "23.3.11",
+    "@types/jest": "25.1.1",
     "@types/node": "10.17.13",
     "@types/node-notifier": "0.0.28",
     "@types/orchestrator": "0.0.30",

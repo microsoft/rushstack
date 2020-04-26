@@ -25,7 +25,7 @@
     "@microsoft/rush-stack-compiler-3.5": "0.4.4",
     "@rushstack/eslint-config": "0.5.7",
     "@types/fs-extra": "5.0.4",
-    "@types/jest": "23.3.11",
+    "@types/jest": "25.1.1",
     "@types/jju": "1.4.1",
     "@types/semver": "5.3.33",
     "@types/timsort": "0.3.0",

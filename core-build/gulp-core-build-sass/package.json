@@ -31,7 +31,7 @@
     "@rushstack/eslint-config": "0.5.7",
     "@types/clean-css": "4.2.1",
     "@types/glob": "7.1.1",
-    "@types/jest": "23.3.11",
+    "@types/jest": "25.1.1",
     "@types/node-sass": "4.11.0",
     "gulp": "~4.0.2",
     "jest": "~25.1.0"
