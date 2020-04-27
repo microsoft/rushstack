@@ -9,7 +9,6 @@
  * @packageDocumentation
  */
 
-/// <reference types="jest" />
 /// <reference lib="es2015.symbol.wellknown" />
 /// <reference lib="es2018.intl" />
 import { default as Long_2 } from 'long';
@@ -59,7 +58,7 @@ export declare class AmbientConsumer {
      * Configured via tsconfig.json's "lib" setting, which specifies `@types/jest`.
      * The emitted index.d.ts gets a reference like this:  <reference types="jest" />
      */
-    definitelyTyped(): jest.Context;
+    definitelyTyped(): object;
     /**
      * Found via tsconfig.json's "include" setting point to a *.d.ts file.
      * This is an old-style Definitely Typed definition, which is the worst possible kind,

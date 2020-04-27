@@ -5,8 +5,9 @@ export declare function f(arg1: Lib1Class, arg2: Lib2Class): void;
 
 /** @public */
 declare class Lib1Class extends Lib1ForgottenExport {
-    readonly readonlyProperty: string;
-    writeableProperty: string;
+    get readonlyProperty(): string;
+    get writeableProperty(): string;
+    set writeableProperty(value: string);
 }
 
 declare class Lib1ForgottenExport {

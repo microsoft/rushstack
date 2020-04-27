@@ -14,7 +14,7 @@
   "typings": "lib/index.d.ts",
   "keywords": [],
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.4.9",
+    "@microsoft/rush-stack-compiler-3.7": "0.2.9",
     "@rushstack/eslint-config": "0.5.7",
     "@types/chai": "3.4.34",
     "@types/mocha": "5.2.5",
