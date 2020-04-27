@@ -27,18 +27,8 @@ module.exports = {
  * The return value is the updated object.
  */
 function readPackage(packageJson, context) {
-  // if (packageJson && packageJson.dependencies && packageJson.name != "@microsoft/gulp-core-build-typescript") {
-  //   if (packageJson.dependencies['jest']) {
-  //     packageJson.dependencies['jest'] = '23.6.0';
-  //   }
-  //   if (packageJson.dependencies['jest-cli']) {
-  //     packageJson.dependencies['jest-cli'] = '23.6.0';
-  //   }
-  //   if (packageJson.dependencies['ts-jest']) {
-  //     packageJson.dependencies['ts-jest'] = '~22.4.6';
-  //   }
-  // }
 
+  // Pin babel-jest until gulp-core-build with jest@25 is published
   if (packageJson && packageJson.dependencies) {
     if (packageJson.dependencies['babel-jest']) {
       packageJson.dependencies['babel-jest'] = '23.6.0';
