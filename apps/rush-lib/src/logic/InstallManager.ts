@@ -46,6 +46,11 @@ import { Rush } from '../api/Rush';
 import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../api/PackageJsonEditor';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
+import { RushGlobalFolder } from '../api/RushGlobalFolder';
+import { PackageManagerName } from '../api/packageManager/PackageManager';
+import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
+import { DependencySpecifier } from './DependencySpecifier';
+import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 
 // The PosixModeBits are intended to be used with bitwise operations.
 /* eslint-disable no-bitwise */
@@ -54,13 +59,6 @@ import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration'
  * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.
  * As a temporary workaround, augment the type.
  */
-import { CreateOptions } from 'tar';
-import { RushGlobalFolder } from '../api/RushGlobalFolder';
-import { PackageManagerName } from '../api/packageManager/PackageManager';
-import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
-import { DependencySpecifier } from './DependencySpecifier';
-import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
-
 declare module 'tar' {
   // eslint-disable-next-line @typescript-eslint/interface-name-prefix
   export interface CreateOptions {
@@ -737,8 +735,7 @@ export class InstallManager {
           // write the expected package.json file into the zip staging folder
           JsonFile.save(tempPackageJson, tempPackageJsonFilename);
 
-          // create the new tarball
-          tar.create({
+          const tarOptions: tar.CreateOptions = ({
             gzip: true,
             file: tarballFile,
             cwd: tempProjectFolder,
@@ -750,14 +747,15 @@ export class InstallManager {
             filter: (path: string, stat: tar.FileStat): boolean => {
               if (!this._rushConfiguration.experimentsConfiguration.configuration
                 .noChmodFieldInTarHeaderNormalization) {
-
                 stat.mode = (stat.mode & ~0x1FF) | PosixModeBits.AllRead | PosixModeBits.UserWrite
                   | PosixModeBits.AllExecute;
               }
-
               return true;
             }
-          } as CreateOptions, [FileConstants.PackageJson]);
+          } as tar.CreateOptions);
+
+          // create the new tarball
+          tar.create(tarOptions, [FileConstants.PackageJson]);
 
           console.log(`Updating ${tarballFile}`);
         } catch (error) {
