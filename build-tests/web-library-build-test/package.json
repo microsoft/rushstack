@@ -14,7 +14,7 @@
     "@microsoft/web-library-build": "7.4.10",
     "@types/jest": "25.1.1",
     "gulp": "~4.0.2",
-    "jest": "~25.1.0",
+    "jest": "~25.4.0",
     "ts-jest": "~25.1.0"
   }
 }

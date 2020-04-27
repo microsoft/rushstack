@@ -27,6 +27,11 @@ module.exports = {
  * The return value is the updated object.
  */
 function readPackage(packageJson, context) {
+  if (packageJson && packageJson.dependencies && packageJson.dependencies['babel-jest']) {
+    if (packageJson.version.indexOf('25') != 0 && packageJson.version.indexOf('~25') != 0) {
+      packageJson.dependencies['babel-jest'] = '22.4.0';
+    }
+  }
   // these packages have peerDependencies on typescript, but now we have multiple copies
   // in the repo so it doesn't know which one to pick
   // See this issue: https://github.com/pnpm/pnpm/issues/1187

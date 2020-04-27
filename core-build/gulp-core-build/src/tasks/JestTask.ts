@@ -7,6 +7,7 @@ import * as Gulp from 'gulp';
 import * as Jest from 'jest-cli';
 import * as glob from 'glob';
 import { FileSystem, JsonObject } from '@rushstack/node-core-library';
+const { runCLI } = require('@jest/core');
 
 /**
  * Configuration for JestTask
@@ -168,7 +169,7 @@ export class JestTask extends GulpTask<IJestConfig> {
     const oldTTY: true | undefined = process.stdout.isTTY;
     process.stdout.isTTY = undefined;
 
-    Jest.runCLI(jestConfig,
+    runCLI(jestConfig,
       [this.buildConfig.rootPath]).then(
       (result: { results: Jest.AggregatedResult, globalConfig: Jest.GlobalConfig }) => {
         process.stdout.isTTY = oldTTY;
