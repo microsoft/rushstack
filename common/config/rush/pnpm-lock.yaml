@@ -1,4 +1,6 @@
 dependencies:
+  '@jest/core': 25.4.0
+  '@jest/reporters': 25.4.0
   '@microsoft/node-library-build': 6.4.10
   '@microsoft/rush-stack-compiler-3.5': 0.4.4
   '@microsoft/teams-js': 1.3.0-beta.4
@@ -89,7 +91,7 @@ dependencies:
   '@types/gulp-istanbul': 0.9.30
   '@types/gulp-mocha': 0.0.32
   '@types/inquirer': 0.0.43
-  '@types/jest': 25.1.1
+  '@types/jest': 25.2.1
   '@types/jju': 1.4.1
   '@types/js-yaml': 3.12.1
   '@types/loader-utils': 1.1.3
@@ -138,7 +140,7 @@ dependencies:
   clean-css: 4.2.1
   cli-table: 0.3.1
   colors: 1.2.5
-  deasync: 0.1.19
+  deasync: 0.1.20
   decache: 4.5.1
   decomment: 0.9.2
   del: 2.2.2
@@ -166,10 +168,11 @@ dependencies:
   https-proxy-agent: 2.2.4
   inquirer: 6.2.2
   jest: 25.4.0
-  jest-cli: 22.4.4
+  jest-cli: 25.4.0
   jest-environment-jsdom: 25.4.0
   jest-nunit-reporter: 1.3.1
-  jest-resolve: 22.4.3
+  jest-resolve: 25.4.0_jest-resolve@25.4.0
+  jest-runtime: 25.4.0
   jju: 1.4.0
   js-yaml: 3.13.1
   jsdom: 11.11.0
@@ -1155,13 +1158,13 @@ packages:
     dev: false
     resolution:
       integrity: sha512-eroF85PoG87XjCwzxey7yBsQNkIY/TV5myKKSG/022A0FW25afdu/uub6JDMS5eT68zBBt82S+w/MFOTjeLM3Q==
-  /@types/jest/25.1.1:
+  /@types/jest/25.2.1:
     dependencies:
       jest-diff: 25.4.0
       pretty-format: 25.4.0
     dev: false
     resolution:
-      integrity: sha512-bKSZJYZJLzwaoVYNN4W3A0RvKNYsrLm5tsuXaMlfYDxKf4gY2sFrMYneCugNQWGg1gjPW+FHBwNrwPzEi4sIsw==
+      integrity: sha512-msra1bCaAeEdkSyA0CZ6gW1ukMIvZ5YoJkdXw/qhQdsuuDlFTcEUrUw8CLCPt2rVRUfXlClVvK2gvPs9IokZaA==
   /@types/jju/1.4.1:
     dev: false
     resolution:
@@ -3647,7 +3650,7 @@ packages:
     dev: false
     resolution:
       integrity: sha1-QGXiATz5+5Ft39gu+1Bq1MZ2kGI=
-  /deasync/0.1.19:
+  /deasync/0.1.20:
     dependencies:
       bindings: 1.5.0
       node-addon-api: 1.7.1
@@ -3656,7 +3659,7 @@ packages:
       node: '>=0.11.0'
     requiresBuild: true
     resolution:
-      integrity: sha512-oh3MRktfnPlLysCPpBpKZZzb4cUC/p0aA3SyRGp15lN30juJBTo/CiD0d4fR+f1kBtUQoJj1NE9RPNWQ7BQ9Mg==
+      integrity: sha512-E1GI7jMI57hL30OX6Ht/hfQU8DO4AuB9m72WFm4c38GNbUD4Q03//XZaOIHZiY+H1xUaomcot5yk2q/qIZQkGQ==
   /debug/2.2.0:
     dependencies:
       ms: 0.7.1
@@ -13542,20 +13545,20 @@ packages:
       integrity: sha512-DUOKC/IhbkdLKKiV89gw9DUauTV8U/8yJl1sjf6MtDmzevLKOF2duNJ495S3MFVjqZarr+qNGCPbkg4mu4PpLw==
   'file:projects/api-documenter-test.tgz':
     dependencies:
-      '@types/jest': 25.1.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       fs-extra: 7.0.1
       typescript: 3.7.5
     dev: false
     name: '@rush-temp/api-documenter-test'
     resolution:
-      integrity: sha512-UJfA0Y3Wdqxx4aHfZGy7DfEbjT/S0UpajuU/JxGF6D5J604B+FXpEXX1z6oDrXQRoNhRVGa4QpRofZOted3Mug==
+      integrity: sha512-i0NcLUW/nMz27ZCusMZ9UHz7rgyNcJeFjJCXOW2PY7gbKcWYYaOgVNituk7OEOGe4tevsNMif2oN8mMga4DbRQ==
       tarball: 'file:projects/api-documenter-test.tgz'
     version: 0.0.0
   'file:projects/api-documenter.tgz':
     dependencies:
       '@microsoft/tsdoc': 0.12.19
-      '@types/jest': 25.1.1
+      '@types/jest': 25.2.1
       '@types/js-yaml': 3.12.1
       '@types/node': 10.17.13
       '@types/resolve': 0.0.8
@@ -13567,43 +13570,43 @@ packages:
     dev: false
     name: '@rush-temp/api-documenter'
     resolution:
-      integrity: sha512-ZmRvjEmxQWBzRkW2kphrXNrHbVXyUIE8SZIuW7j88f8CL5TtmERwbJGObWHuhhwSr0cmWo4cNMpyfae5P9F5HQ==
+      integrity: sha512-o1S4Vjl+C1TKUN2YeEDL8Bl8kyccmLpg/70Dn/H+xVPBLqtmCI8qoC/E85htYRfp4rTFalZ8rvG/X1tgbRpnfA==
       tarball: 'file:projects/api-documenter.tgz'
     version: 0.0.0
   'file:projects/api-extractor-lib1-test.tgz':
     dependencies:
-      '@types/jest': 25.1.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       fs-extra: 7.0.1
       typescript: 3.7.5
     dev: false
     name: '@rush-temp/api-extractor-lib1-test'
     resolution:
-      integrity: sha512-f/NfTQ05B0VtAwmlE+JZphW7CKRWLLfygTN8YU3P8V58aoMne2gAfIbuzzqu+JZXDKuI7n4HvbyTTrTlO7295Q==
+      integrity: sha512-hmyq7j/5u7OEYyjOBiFW/pZHrZLQVDxyOyu2kovtw+41X0lv5x/6hOnCFiCPVQdIypVpnoZT9y6tpjcQUt3EOQ==
       tarball: 'file:projects/api-extractor-lib1-test.tgz'
     version: 0.0.0
   'file:projects/api-extractor-lib2-test.tgz':
     dependencies:
-      '@types/jest': 25.1.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       fs-extra: 7.0.1
       typescript: 3.7.5
     dev: false
     name: '@rush-temp/api-extractor-lib2-test'
     resolution:
-      integrity: sha512-TZyhW021lBU8mvhRa+zGWVhTDlIYx3Lb5zZYmjraW8G09iOCCshmcDIe4rFviP9Q4Lb+AC9D/rwLUedt7helMg==
+      integrity: sha512-7B+Y9WVKj1jJ0GjAAwABQyOqPv8aBEIoUGBG9hVW6WBEPC/hSdTKfCuoiu5tOCfFsyqz4FizN4yYI1CONBW2Dg==
       tarball: 'file:projects/api-extractor-lib2-test.tgz'
     version: 0.0.0
   'file:projects/api-extractor-lib3-test.tgz':
     dependencies:
-      '@types/jest': 25.1.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       fs-extra: 7.0.1
       typescript: 3.7.5
     dev: false
     name: '@rush-temp/api-extractor-lib3-test'
     resolution:
-      integrity: sha512-Z1m2SLkO9N8yjz+qUCJG0tcsPbcncAoVSBAsucnu1VqKFpQfKzaWOfFOzKEhzEPsAqhe2I8FhQauilFd6s6RKA==
+      integrity: sha512-fXbfNbxIi8+19qMcdlNu75HiCIFQASn/WzmWeCIvS/4czUONR86T1AY5qeNq109JCqKqChCAiJG/r+JD+XkZeA==
       tarball: 'file:projects/api-extractor-lib3-test.tgz'
     version: 0.0.0
   'file:projects/api-extractor-model.tgz':
@@ -13611,19 +13614,19 @@ packages:
       '@microsoft/node-library-build': 6.4.10
       '@microsoft/rush-stack-compiler-3.5': 0.4.4
       '@microsoft/tsdoc': 0.12.19
-      '@types/jest': 25.1.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       gulp: 4.0.2
     dev: false
     name: '@rush-temp/api-extractor-model'
     resolution:
-      integrity: sha512-jXROLz+OEPftzZuVaiwUnZd/GohOLgrZGIMdHTvkCJRsGfQZ7EBZrFKVbFUIeOrSBCBIB801z1w4pxSG0x33Ng==
+      integrity: sha512-DqSptFmdEKPbOtXqcwhn2SAh7Ig+Qmf55hvf2FP1qCsfuEp7cvzgEgqBoS3blf8rMyonIowRgCGNhp6qXZ9A7g==
       tarball: 'file:projects/api-extractor-model.tgz'
     version: 0.0.0
   'file:projects/api-extractor-scenarios.tgz':
     dependencies:
       '@microsoft/teams-js': 1.3.0-beta.4
-      '@types/jest': 25.1.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       colors: 1.2.5
       fs-extra: 7.0.1
@@ -13631,12 +13634,12 @@ packages:
     dev: false
     name: '@rush-temp/api-extractor-scenarios'
     resolution:
-      integrity: sha512-NEnwB7lvXD6Pgwvaj0WAZ7v3V4YkK8dvSB79vPqftkSN2a5UL3Z4MP5YVtKrJvEQUxgqBWUGQu96CJWTsBbEmQ==
+      integrity: sha512-hI4zzYHM9LGEekKat+W5O98wTBBaGxy2qPHmpU9KKnXDbcp3xnG7lQO/GlYcabnyvQNJaZZ9AuB6Jasl6R6LtA==
       tarball: 'file:projects/api-extractor-scenarios.tgz'
     version: 0.0.0
   'file:projects/api-extractor-test-01.tgz':
     dependencies:
-      '@types/jest': 25.1.1
+      '@types/jest': 25.2.1
       '@types/long': 4.0.0
       '@types/node': 10.17.13
       fs-extra: 7.0.1
@@ -13645,7 +13648,7 @@ packages:
     dev: false
     name: '@rush-temp/api-extractor-test-01'
     resolution:
-      integrity: sha512-9um8l66gnDW/ZLfasymZDoNxc4Ut3Cf7Yp7EFoADZK6gTUZV2gyN42r8ZESSww4IJ7tT7FcfBM45GMg2r9Eg2g==
+      integrity: sha512-lYLXzbVfYD1S2e9Rrp6xanpVEu9jiWfb5ucp0bXk1B7tuIBIXg7S+7bp1L+klAux8kNR8n4m3o/cjwqTk4p7MA==
       tarball: 'file:projects/api-extractor-test-01.tgz'
     version: 0.0.0
   'file:projects/api-extractor-test-02.tgz':
@@ -13663,14 +13666,14 @@ packages:
     version: 0.0.0
   'file:projects/api-extractor-test-03.tgz':
     dependencies:
-      '@types/jest': 25.1.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       fs-extra: 7.0.1
       typescript: 3.7.5
     dev: false
     name: '@rush-temp/api-extractor-test-03'
     resolution:
-      integrity: sha512-Lx6TpV+xDmOCFMj+1ktGB73/ZMFbdHNp0b/NGehVHMdfij03lP2ATf+zArmqYxcplfjH+dojw3VTvzlH+Sm7TA==
+      integrity: sha512-Hnl2/AlPf1xPy9p4WwMLgfW7V5ovlPlj1N+vlWAqmWYvXwpnPeLc7jQ86MhZbQlPQAF7XBJnJIOgbZJHGx//eQ==
       tarball: 'file:projects/api-extractor-test-03.tgz'
     version: 0.0.0
   'file:projects/api-extractor-test-04.tgz':
@@ -13688,7 +13691,7 @@ packages:
       '@microsoft/node-library-build': 6.4.10
       '@microsoft/rush-stack-compiler-3.5': 0.4.4
       '@microsoft/tsdoc': 0.12.19
-      '@types/jest': 25.1.1
+      '@types/jest': 25.2.1
       '@types/lodash': 4.14.116
       '@types/node': 10.17.13
       colors: 1.2.5
@@ -13700,22 +13703,22 @@ packages:
     dev: false
     name: '@rush-temp/api-extractor'
     resolution:
-      integrity: sha512-NTnnO3NYPBQYSHpBMszbj5EUnnkJnkFHdbFYQINO0rV6nmXSESTgmozTtaifY5WlzACJecUbPBz8NoiipWw9zA==
+      integrity: sha512-efzI2UZVmcG+lnPeGy+EmGpNYzAnDKCfj+em6xL3ClMZpR2g0fD3jGFq6dUG/xHiTru3h6EBgfTICZVJv9GDvA==
       tarball: 'file:projects/api-extractor.tgz'
     version: 0.0.0
   'file:projects/debug-certificate-manager.tgz':
     dependencies:
-      '@types/jest': 25.1.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       '@types/node-forge': 0.9.1
-      deasync: 0.1.19
+      deasync: 0.1.20
       gulp: 4.0.2
       node-forge: 0.7.6
       sudo: 1.0.3
     dev: false
     name: '@rush-temp/debug-certificate-manager'
     resolution:
-      integrity: sha512-zh/zFb6iDoy62oQFF7NM06PxeGNOXHpF+536kmJnX4wBpGLAsmTE/yTlStJW64WPMNvFaD88G0r+uSF2CDRiXQ==
+      integrity: sha512-Q4I6IqAc6oiZJsc2rKYIBsGgbTpamiUezN/ALVmxt5Huj4P2hjD4SwYANiH6G4Md44kXRA9Or3/KBCgdLwOIOQ==
       tarball: 'file:projects/debug-certificate-manager.tgz'
     version: 0.0.0
   'file:projects/doc-plugin-rush-stack.tgz':
@@ -13801,7 +13804,7 @@ packages:
       '@types/clean-css': 4.2.1
       '@types/glob': 7.1.1
       '@types/gulp': 4.0.6
-      '@types/jest': 25.1.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       '@types/node-sass': 4.11.0
       autoprefixer: 9.7.6
@@ -13815,7 +13818,7 @@ packages:
     dev: false
     name: '@rush-temp/gulp-core-build-sass'
     resolution:
-      integrity: sha512-KyXz95gXXQxw/HnSZDiazvhJaZU9IjP/VqBP1uFL2l+We4h7zeII14lV7oSOlTHvvE8GxZsIUvqBRObTK7D+2A==
+      integrity: sha512-/pFxNACOySAOqYOsUGjkrR5MiB48buIyoLNGj0ebZKNH2iekV5vI+4NCt2uBQM/RUu04M5qdVqJnz9P/XUyqyQ==
       tarball: 'file:projects/gulp-core-build-sass.tgz'
     version: 0.0.0
   'file:projects/gulp-core-build-serve.tgz':
@@ -13880,13 +13883,15 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build.tgz':
     dependencies:
+      '@jest/core': 25.4.0
+      '@jest/reporters': 25.4.0
       '@microsoft/node-library-build': 6.4.10
       '@microsoft/rush-stack-compiler-3.5': 0.4.4
       '@types/chai': 3.4.34
       '@types/chalk': 0.4.31
       '@types/glob': 7.1.1
       '@types/gulp': 4.0.6
-      '@types/jest': 25.1.1
+      '@types/jest': 25.2.1
       '@types/mocha': 5.2.5
       '@types/node': 10.17.13
       '@types/node-notifier': 0.0.28
@@ -13907,10 +13912,11 @@ packages:
       gulp-flatten: 0.2.0
       gulp-if: 2.0.2
       jest: 25.4.0
-      jest-cli: 22.4.4
+      jest-cli: 25.4.0
       jest-environment-jsdom: 25.4.0
       jest-nunit-reporter: 1.3.1
-      jest-resolve: 22.4.3
+      jest-resolve: 25.4.0_jest-resolve@25.4.0
+      jest-runtime: 25.4.0
       jsdom: 11.11.0
       lodash.merge: 4.6.2
       merge2: 1.0.3
@@ -13927,7 +13933,7 @@ packages:
     dev: false
     name: '@rush-temp/gulp-core-build'
     resolution:
-      integrity: sha512-LKxpjYH2tNrgH80dCxHQfQvZxGoQDS5sPrUuJdIkwUVkPtRyHaTTcBjqLZr6nNB84vFLJJDFj/MkwtkMEWBVLg==
+      integrity: sha512-I+raY4p6UHV+S5/i7whl//avnquzmX2vzN8DPbedljX13FC7jJYSFQgNKmlg/g7lW+iQ+tk1AE4NsQtX8pKuAg==
       tarball: 'file:projects/gulp-core-build.tgz'
     version: 0.0.0
   'file:projects/load-themed-styles.tgz':
@@ -14047,7 +14053,7 @@ packages:
       '@microsoft/node-library-build': 6.4.10
       '@microsoft/rush-stack-compiler-3.5': 0.4.4
       '@types/fs-extra': 5.0.4
-      '@types/jest': 25.1.1
+      '@types/jest': 25.2.1
       '@types/jju': 1.4.1
       '@types/node': 10.17.13
       '@types/semver': 5.3.33
@@ -14063,7 +14069,7 @@ packages:
     dev: false
     name: '@rush-temp/node-core-library'
     resolution:
-      integrity: sha512-Lb/YKnjmRV/YEvWu4C+Zw7N3yUTn6NJPoyjvtzYd/0BCsMs7Hafb+CXmQ5vNMy5G8RMXHHzQ1emWiPsl0G8sgg==
+      integrity: sha512-TmrkbXbO9ber17rfHGqoQkVTKbsksBusLtSFJZzVtWVd5DNDUCknDi0Bn4cWukQ7fW/mZVWbnWV095cy+5qdZg==
       tarball: 'file:projects/node-core-library.tgz'
     version: 0.0.0
   'file:projects/node-library-build-eslint-test.tgz':
@@ -14128,13 +14134,13 @@ packages:
     version: 0.0.0
   'file:projects/rush-buildxl.tgz':
     dependencies:
-      '@types/jest': 25.1.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       gulp: 4.0.2
     dev: false
     name: '@rush-temp/rush-buildxl'
     resolution:
-      integrity: sha512-qI6ynZdp2bSylyoEFiJ8zhJWgrMwlb14UsKuemQBOrsZ+nzaz1xrN3vjiwELcHGkJHM5iSvsYqvviV0dLmYCAg==
+      integrity: sha512-u5dnwjL/0zM/jDKW0vd0TdK+OTs883EqzOCAXCeWl1e9NguD/IAU8AJsKiXg+bkHr6K88ArI077Xpt3wTwLfvQ==
       tarball: 'file:projects/rush-buildxl.tgz'
     version: 0.0.0
   'file:projects/rush-lib.tgz':
@@ -14142,7 +14148,7 @@ packages:
       '@pnpm/link-bins': 5.1.7
       '@types/glob': 7.1.1
       '@types/inquirer': 0.0.43
-      '@types/jest': 25.1.1
+      '@types/jest': 25.2.1
       '@types/js-yaml': 3.12.1
       '@types/lodash': 4.14.116
       '@types/minimatch': 2.0.29
@@ -14181,7 +14187,7 @@ packages:
     dev: false
     name: '@rush-temp/rush-lib'
     resolution:
-      integrity: sha512-jtHHyVhmDTR8INqgtL3Xq4ViCN39Uynq2ogjzWEIcTm3v5mU3Ogc+RdWIhjo0e/igbCiwyAdwqXcE3KMX8nrJw==
+      integrity: sha512-ym1eRE1TIMbGA3B+ii1/UidduAmUrM88uxJzBkbxbMUVUZX1xC/BjzDBSvhepqooy+iadv1X5wTjudJtDIMTig==
       tarball: 'file:projects/rush-lib.tgz'
     version: 0.0.0
   'file:projects/rush-stack-compiler-2.4-library-test.tgz':
@@ -14523,7 +14529,7 @@ packages:
     version: 0.0.0
   'file:projects/rushell.tgz':
     dependencies:
-      '@types/jest': 25.1.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       gulp: 4.0.2
       jest: 25.4.0
@@ -14531,7 +14537,7 @@ packages:
     dev: false
     name: '@rush-temp/rushell'
     resolution:
-      integrity: sha512-QwE5VjeLFucgirFq5Q/oJyglKtE7SrXWqjHgwvx87aCZZrl40g5EmMRMdMkpgGeb+HVIu6c1k9BHqkAhF/bOSQ==
+      integrity: sha512-HhERjsYVzxuWp/o3b1LraIvw3UbX+tL/QmEoSHZVXiwQoO7CfUi+nkGmevDiCav7ZXCQE5K0jljL7v6/IR9Ckw==
       tarball: 'file:projects/rushell.tgz'
     version: 0.0.0
   'file:projects/set-webpack-public-path-plugin.tgz':
@@ -14573,7 +14579,7 @@ packages:
       '@microsoft/node-library-build': 6.4.10
       '@microsoft/rush-stack-compiler-3.5': 0.4.4
       '@types/argparse': 1.0.33
-      '@types/jest': 25.1.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       argparse: 1.0.10
       colors: 1.2.5
@@ -14581,7 +14587,7 @@ packages:
     dev: false
     name: '@rush-temp/ts-command-line'
     resolution:
-      integrity: sha512-zh4YJZPwt1Sh4QSHOLyBEzNU9U3sXW/ImuASdVvLCb8pg0UmRSWx/9yyf04PpRPBUedD8AjYZrNo0ELvWrnj4Q==
+      integrity: sha512-/T+WJRo57XEB7mmFKPIIDz6MA5PolAiLrG5f89nUYWt3w7N7gXhEyXp01g0URbhz+wQqsywhtfSFzewJ1l3lgQ==
       tarball: 'file:projects/ts-command-line.tgz'
     version: 0.0.0
   'file:projects/typings-generator.tgz':
@@ -14599,14 +14605,14 @@ packages:
     version: 0.0.0
   'file:projects/web-library-build-test.tgz':
     dependencies:
-      '@types/jest': 25.1.1
+      '@types/jest': 25.2.1
       gulp: 4.0.2
       jest: 25.4.0
       ts-jest: 25.1.0_jest@25.4.0
     dev: false
     name: '@rush-temp/web-library-build-test'
     resolution:
-      integrity: sha512-EHtdv24nzmOBaRkJ1NLkNkFLkJl6Nt7d9RV88j4rbGCPVlZRf8muvPbnWANAJmugfembbhMM6x5ppYDKox1n/w==
+      integrity: sha512-/MtIhZpX8EWGWC9/4VLNax4BRG3jJkQfsLIz7H4CEYVeCb3qmAgYPwu9cHWjz2mQa4FKEc5jHpGcLjUje3xmeA==
       tarball: 'file:projects/web-library-build-test.tgz'
     version: 0.0.0
   'file:projects/web-library-build.tgz':
@@ -14623,6 +14629,8 @@ packages:
     version: 0.0.0
 registry: ''
 specifiers:
+  '@jest/core': 25.4.0
+  '@jest/reporters': 25.4.0
   '@microsoft/node-library-build': 6.4.10
   '@microsoft/rush-stack-compiler-3.5': 0.4.4
   '@microsoft/teams-js': 1.3.0-beta.4
@@ -14713,7 +14721,7 @@ specifiers:
   '@types/gulp-istanbul': 0.9.30
   '@types/gulp-mocha': 0.0.32
   '@types/inquirer': 0.0.43
-  '@types/jest': 25.1.1
+  '@types/jest': 25.2.1
   '@types/jju': 1.4.1
   '@types/js-yaml': 3.12.1
   '@types/loader-utils': 1.1.3
@@ -14789,11 +14797,12 @@ specifiers:
   html-webpack-plugin: ~3.2.0
   https-proxy-agent: ~2.2.1
   inquirer: ~6.2.0
-  jest: ~25.4.0
-  jest-cli: ~22.4.3
-  jest-environment-jsdom: ~25.4.0
+  jest: 25.4.0
+  jest-cli: 25.4.0
+  jest-environment-jsdom: 25.4.0
   jest-nunit-reporter: ~1.3.1
-  jest-resolve: ~22.4.3
+  jest-resolve: 25.4.0
+  jest-runtime: 25.4.0
   jju: ~1.4.0
   js-yaml: ~3.13.1
   jsdom: ~11.11.0
@@ -14842,4 +14851,4 @@ specifiers:
   xmldoc: ~1.1.2
   yargs: ~4.6.0
   z-schema: ~3.18.3
-# shrinkwrap hash: a5b640c88d60a290141da7e8339f49fee20042eb
+# shrinkwrap hash: b795e792f7dedd8ae236413580efb155486da7be

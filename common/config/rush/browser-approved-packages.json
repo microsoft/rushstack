@@ -5,6 +5,26 @@
     {
       "name": "@jest/core",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@jest/reporters",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@jest/test-result",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@jest/types",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-reporters",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-runtime",
+      "allowedCategories": [ "libraries" ]
     }
   ]
 }
