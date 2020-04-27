@@ -41,7 +41,7 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
     // (undocumented)
     loadSchema(): any;
     // (undocumented)
-    readonly resources: IWebpackResources;
+    get resources(): IWebpackResources;
     }
 
 
