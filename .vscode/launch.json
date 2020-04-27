@@ -1,6 +1,22 @@
 {
 	"version": "0.2.0",
 	"configurations": [
+	{
+		"type": "node",
+		"request": "launch",
+		"name": "documenter",
+		"program": "${workspaceFolder}/apps/api-documenter/bin/api-documenter",
+		"args": [
+			"markdown",
+			"--input",
+			"/Users/feiyangc/Projects/firebase-js-sdk/packages-exp/app-exp/temp",
+			"--output",
+			"/Users/feiyangc/Projects/firebase-js-sdk/packages-exp/app-exp/docs"
+		],
+		"skipFiles": [
+			"<node_internals>/**"
+		]
+	},
 		{
 			"name": "Launch",
 			"type": "node",

@@ -114,9 +114,12 @@ export class MarkdownEmitter {
           writer.write('`');
         }
         if (context.insideTable) {
-          const code: string = this.getTableEscapedText(docCodeSpan.code);
+          const code: string = this.getTableEscapedText(docCodeSpan.code) + 'fei';
           const parts: string[] = code.split(/\r?\n/g);
           writer.write(parts.join('</code><br/><code>'));
+          if (docCodeSpan.code === 'FirebaseApp') {
+            console.log(JSON.stringify(docNode));
+          }
         } else {
           writer.write(docCodeSpan.code);
         }
