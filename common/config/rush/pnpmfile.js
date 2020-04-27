@@ -27,11 +27,18 @@ module.exports = {
  * The return value is the updated object.
  */
 function readPackage(packageJson, context) {
-  if (packageJson && packageJson.dependencies && packageJson.dependencies['babel-jest']) {
-    if (packageJson.version.indexOf('25') != 0 && packageJson.version.indexOf('~25') != 0) {
-      packageJson.dependencies['babel-jest'] = '22.4.0';
+  if (packageJson && packageJson.dependencies && packageJson.name != "@microsoft/gulp-core-build-typescript") {
+    if (packageJson.dependencies['jest']) {
+      packageJson.dependencies['jest'] = '23.6.0';
+    }
+    if (packageJson.dependencies['jest-cli']) {
+      packageJson.dependencies['jest-cli'] = '23.6.0';
+    }
+    if (packageJson.dependencies['ts-jest']) {
+      packageJson.dependencies['ts-jest'] = '~22.4.6';
     }
   }
+
   // these packages have peerDependencies on typescript, but now we have multiple copies
   // in the repo so it doesn't know which one to pick
   // See this issue: https://github.com/pnpm/pnpm/issues/1187
