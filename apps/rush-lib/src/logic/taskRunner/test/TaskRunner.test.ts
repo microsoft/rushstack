@@ -8,7 +8,7 @@ import { Utilities } from '../../../utilities/Utilities';
 
 // The TaskRunner prints "x.xx seconds" in TestRunner.test.ts.snap; ensure that the Stopwatch timing is deterministic
 jest.mock('../../../utilities/Utilities');
-const mockGetTimeInMs: jest.Mock<unknown> = jest.fn();
+const mockGetTimeInMs: jest.Mock = jest.fn();
 Utilities.getTimeInMs = mockGetTimeInMs;
 
 let mockTimeInMs: number = 0;
