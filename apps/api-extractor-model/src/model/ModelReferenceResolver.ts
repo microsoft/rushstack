@@ -8,7 +8,6 @@ import { ApiPackage } from './ApiPackage';
 import { ApiEntryPoint } from './ApiEntryPoint';
 import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
-import { DeclarationReference, ModuleSource } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 
 /**
  * Result object for {@link ApiModel.resolveDeclarationReference}.
@@ -43,21 +42,8 @@ export class ModelReferenceResolver {
     this._apiModel = apiModel;
   }
 
-  public resolve(
-    declarationReference: DocDeclarationReference | DeclarationReference,
-    contextApiItem: ApiItem | undefined
-  ): IResolveDeclarationReferenceResult {
-    if (declarationReference instanceof DocDeclarationReference) {
-      return this.resolveDocDeclarationReference(declarationReference, contextApiItem);
-    } else {
-      return this.resolveDeclarationReference(declarationReference);
-    }
-  }
-
-  private resolveDocDeclarationReference(
-    declarationReference: DocDeclarationReference,
-    contextApiItem: ApiItem | undefined
-  ): IResolveDeclarationReferenceResult {
+  public resolve(declarationReference: DocDeclarationReference,
+    contextApiItem: ApiItem | undefined): IResolveDeclarationReferenceResult {
 
     const result: IResolveDeclarationReferenceResult = {
       resolvedApiItem: undefined,
@@ -158,49 +144,4 @@ export class ModelReferenceResolver {
     return result;
   }
 
-  private resolveDeclarationReference(declarationReference: DeclarationReference): IResolveDeclarationReferenceResult {
-
-    const result: IResolveDeclarationReferenceResult = {
-      resolvedApiItem: undefined,
-      errorMessage: undefined
-    };
-
-    if (!(declarationReference.source instanceof ModuleSource)) {
-      result.errorMessage = `The reference does not include a package name`;
-      return result;
-    }
-
-    const apiPackage = this._apiModel.tryGetPackageByName(declarationReference.source.packageName);
-
-    if (apiPackage === undefined) {
-      result.errorMessage = `The package "${declarationReference.source.packageName}" could not be located`;
-      return result;
-    }
-
-    const importPath = declarationReference.source.importPath;
-
-    const foundEntryPoints: ReadonlyArray<ApiEntryPoint> = apiPackage.findEntryPointsByPath(importPath);
-    if (foundEntryPoints.length !== 1) {
-      result.errorMessage = `The import path "${importPath}" could not be resolved`;
-      return result;
-    }
-
-    const entryPoint: ApiEntryPoint = foundEntryPoints[0];
-    const identifier = declarationReference.symbol!.componentPath!.toString();
-
-    if (!identifier) {
-      result.errorMessage = `The reference does not include an identifier`;
-      return result;
-    }
-
-    const foundMembers: ReadonlyArray<ApiItem> = entryPoint.findMembersByName(identifier);
-    if (foundMembers.length === 0) {
-      result.errorMessage = `The member reference ${JSON.stringify(identifier)} was not found` ;
-      return result;
-    }
-
-    result.resolvedApiItem = foundMembers[0];
-
-    return result;
-  }
 }

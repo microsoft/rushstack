@@ -376,7 +376,7 @@ export class ApiModel extends ApiModel_base {
     // (undocumented)
     readonly packages: ReadonlyArray<ApiPackage>;
     // (undocumented)
-    resolveDeclarationReference(declarationReference: DocDeclarationReference, contextApiItem: ApiItem | undefined): IResolveDeclarationReferenceResult;
+    resolveDeclarationReference(declarationReference: DocDeclarationReference | DeclarationReference, contextApiItem: ApiItem | undefined): IResolveDeclarationReferenceResult;
     tryGetPackageByName(packageName: string): ApiPackage | undefined;
 }
 
