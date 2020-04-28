@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import * as colors from 'colors';
 
 import {
   PackageName,
@@ -39,7 +40,8 @@ import {
   ApiParameterListMixin,
   ApiReturnTypeMixin,
   ApiDeclaredItem,
-  ApiNamespace
+  ApiNamespace,
+  ExcerptTokenKind
 } from '@microsoft/api-extractor-model';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -103,7 +105,7 @@ export class MarkdownDocumenter {
     this._writeApiItemPage(this._apiModel);
 
     if (this._pluginLoader.markdownDocumenterFeature) {
-      this._pluginLoader.markdownDocumenterFeature.onFinished({ });
+      this._pluginLoader.markdownDocumenterFeature.onFinished({});
     }
   }
 
@@ -162,7 +164,7 @@ export class MarkdownDocumenter {
     }
 
     if (ApiReleaseTagMixin.isBaseClassOf(apiItem)) {
-      if (apiItem.releaseTag === ReleaseTag.Beta)  {
+      if (apiItem.releaseTag === ReleaseTag.Beta) {
         this._writeBetaWarning(output);
       }
     }
@@ -196,7 +198,7 @@ export class MarkdownDocumenter {
       if (apiItem.excerpt.text.length > 0) {
         output.appendNode(
           new DocParagraph({ configuration }, [
-            new DocEmphasisSpan({ configuration, bold: true}, [
+            new DocEmphasisSpan({ configuration, bold: true }, [
               new DocPlainText({ configuration, text: 'Signature:' })
             ])
           ])
@@ -257,7 +259,7 @@ export class MarkdownDocumenter {
     }
 
     if (appendRemarks) {
-    this._writeRemarksSection(output, apiItem);
+      this._writeRemarksSection(output, apiItem);
     }
 
     const filename: string = path.join(this._outputFolder, this._getFilenameForApiItem(apiItem));
@@ -346,8 +348,9 @@ export class MarkdownDocumenter {
   private _writeModelTable(output: DocSection, apiModel: ApiModel): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
-    const packagesTable: DocTable = new DocTable({ configuration,
-      headerTitles: [ 'Package', 'Description' ]
+    const packagesTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Package', 'Description']
     });
 
     for (const apiMember of apiModel.members) {
@@ -377,32 +380,39 @@ export class MarkdownDocumenter {
   private _writePackageOrNamespaceTables(output: DocSection, apiContainer: ApiPackage | ApiNamespace): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
-    const classesTable: DocTable = new DocTable({ configuration,
-      headerTitles: [ 'Class', 'Description' ]
+    const classesTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Class', 'Description']
     });
 
-    const enumerationsTable: DocTable = new DocTable({ configuration,
-      headerTitles: [ 'Enumeration', 'Description' ]
+    const enumerationsTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Enumeration', 'Description']
     });
 
-    const functionsTable: DocTable = new DocTable({ configuration,
-      headerTitles: [ 'Function', 'Description' ]
+    const functionsTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Function', 'Description']
     });
 
-    const interfacesTable: DocTable = new DocTable({ configuration,
-      headerTitles: [ 'Interface', 'Description' ]
+    const interfacesTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Interface', 'Description']
     });
 
-    const namespacesTable: DocTable = new DocTable({ configuration,
-      headerTitles: [ 'Namespace', 'Description' ]
+    const namespacesTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Namespace', 'Description']
     });
 
-    const variablesTable: DocTable = new DocTable({ configuration,
-      headerTitles: [ 'Variable', 'Description' ]
+    const variablesTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Variable', 'Description']
     });
 
-    const typeAliasesTable: DocTable = new DocTable({ configuration,
-      headerTitles: [ 'Type Alias', 'Description' ]
+    const typeAliasesTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Type Alias', 'Description']
     });
 
     const apiMembers: ReadonlyArray<ApiItem> = apiContainer.kind === ApiItemKind.Package ?
@@ -495,20 +505,24 @@ export class MarkdownDocumenter {
   private _writeClassTables(output: DocSection, apiClass: ApiClass): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
-    const eventsTable: DocTable = new DocTable({ configuration,
-      headerTitles: [ 'Property', 'Modifiers', 'Type', 'Description' ]
+    const eventsTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Property', 'Modifiers', 'Type', 'Description']
     });
 
-    const constructorsTable: DocTable = new DocTable({ configuration,
-      headerTitles: [ 'Constructor', 'Modifiers', 'Description' ]
+    const constructorsTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Constructor', 'Modifiers', 'Description']
     });
 
-    const propertiesTable: DocTable = new DocTable({ configuration,
-      headerTitles: [ 'Property', 'Modifiers', 'Type', 'Description' ]
+    const propertiesTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Property', 'Modifiers', 'Type', 'Description']
     });
 
-    const methodsTable: DocTable = new DocTable({ configuration,
-      headerTitles: [ 'Method', 'Modifiers', 'Description' ]
+    const methodsTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Method', 'Modifiers', 'Description']
     });
 
     for (const apiMember of apiClass.members) {
@@ -594,8 +608,9 @@ export class MarkdownDocumenter {
   private _writeEnumTables(output: DocSection, apiEnum: ApiEnum): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
-    const enumMembersTable: DocTable = new DocTable({ configuration,
-      headerTitles: [ 'Member', 'Value', 'Description' ]
+    const enumMembersTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Member', 'Value', 'Description']
     });
 
     for (const apiEnumMember of apiEnum.members) {
@@ -631,16 +646,19 @@ export class MarkdownDocumenter {
   private _writeInterfaceTables(output: DocSection, apiClass: ApiInterface): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
-    const eventsTable: DocTable = new DocTable({ configuration,
-      headerTitles: [ 'Property', 'Type', 'Description' ]
+    const eventsTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Property', 'Type', 'Description']
     });
 
-    const propertiesTable: DocTable = new DocTable({ configuration,
-      headerTitles: [ 'Property', 'Type', 'Description' ]
+    const propertiesTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Property', 'Type', 'Description']
     });
 
-    const methodsTable: DocTable = new DocTable({ configuration,
-      headerTitles: [ 'Method', 'Description' ]
+    const methodsTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Method', 'Description']
     });
 
     for (const apiMember of apiClass.members) {
@@ -707,29 +725,52 @@ export class MarkdownDocumenter {
   private _writeParameterTables(output: DocSection, apiParameterListMixin: ApiParameterListMixin): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
-    const parametersTable: DocTable = new DocTable({ configuration,
-      headerTitles: [ 'Parameter', 'Type', 'Description' ]
+    const parametersTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Parameter', 'Type', 'Description']
     });
 
     for (const apiParameter of apiParameterListMixin.parameters) {
-      const parameterDescription: DocSection = new DocSection({ configuration } );
+      const parameterDescription: DocSection = new DocSection({ configuration });
       if (apiParameter.tsdocParamBlock) {
         this._appendSection(parameterDescription, apiParameter.tsdocParamBlock.content);
       }
 
+      let typeNode: DocCodeSpan | DocLinkTag = new DocCodeSpan({ configuration, code: apiParameter.parameterTypeExcerpt.text });
+      // Assume a parameter type only has one token. Is it always correct?
+      const tokenExcerpt = apiParameter.parameterTypeExcerpt.tokens[apiParameter.parameterTypeExcerpt.tokenRange.startIndex];
+      // canonicalReference should be defined, so the second condition might not be necessary
+      // if the type is a reference, create a link node instead
+      if (tokenExcerpt.kind === ExcerptTokenKind.Reference && tokenExcerpt.canonicalReference) {
+        // TODO: make resolveDeclarationReference take canonicalReference
+        const apiItemResult = this._apiModel.resolveDeclarationReference(tokenExcerpt.canonicalReference as any, undefined);
+
+        if (apiItemResult.resolvedApiItem) {
+          typeNode = new DocLinkTag({
+            configuration,
+            tagName: '@link',
+            linkText: apiItemResult.resolvedApiItem.displayName, // TODO
+            urlDestination: this._getLinkFilenameForApiItem(apiItemResult.resolvedApiItem) // TODO
+          });
+        } else if (apiItemResult.errorMessage) {
+          console.log(colors.yellow(`WARNING: Unable to resolve reference "${tokenExcerpt.canonicalReference.toString()}": `
+            + apiItemResult.errorMessage));
+        }
+      }
+
       parametersTable.addRow(
         new DocTableRow({ configuration }, [
-          new DocTableCell({configuration}, [
+          new DocTableCell({ configuration }, [
             new DocParagraph({ configuration }, [
               new DocPlainText({ configuration, text: apiParameter.name })
             ])
           ]),
-          new DocTableCell({configuration}, [
+          new DocTableCell({ configuration }, [
             new DocParagraph({ configuration }, [
-              new DocCodeSpan({ configuration, code: apiParameter.parameterTypeExcerpt.text })
+              typeNode
             ])
           ]),
-          new DocTableCell({configuration}, parameterDescription.nodes)
+          new DocTableCell({ configuration }, parameterDescription.nodes)
         ])
       );
     }
@@ -743,7 +784,7 @@ export class MarkdownDocumenter {
       const returnTypeExcerpt: Excerpt = apiParameterListMixin.returnTypeExcerpt;
       output.appendNode(
         new DocParagraph({ configuration }, [
-          new DocEmphasisSpan({ configuration, bold: true}, [
+          new DocEmphasisSpan({ configuration, bold: true }, [
             new DocPlainText({ configuration, text: 'Returns:' })
           ])
         ])
