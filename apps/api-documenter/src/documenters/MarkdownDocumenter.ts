@@ -737,23 +737,24 @@ export class MarkdownDocumenter {
       }
 
       let typeNode: DocCodeSpan | DocLinkTag = new DocCodeSpan({ configuration, code: apiParameter.parameterTypeExcerpt.text });
-      // Assume a parameter type only has one token. Is it always correct?
-      const tokenExcerpt = apiParameter.parameterTypeExcerpt.tokens[apiParameter.parameterTypeExcerpt.tokenRange.startIndex];
+
+      // Use the last token to account for namespace types, e.g. types.MyType
+      const typeTokenExcerpt = apiParameter.parameterTypeExcerpt.tokens[apiParameter.parameterTypeExcerpt.tokenRange.endIndex - 1];
       // canonicalReference should be defined, so the second condition might not be necessary
       // if the type is a reference, create a link node instead
-      if (tokenExcerpt.kind === ExcerptTokenKind.Reference && tokenExcerpt.canonicalReference) {
+      if (typeTokenExcerpt.kind === ExcerptTokenKind.Reference && typeTokenExcerpt.canonicalReference) {
         // TODO: make resolveDeclarationReference take canonicalReference
-        const apiItemResult = this._apiModel.resolveDeclarationReference(tokenExcerpt.canonicalReference as any, undefined);
+        const apiItemResult = this._apiModel.resolveDeclarationReference(typeTokenExcerpt.canonicalReference as any, undefined);
 
         if (apiItemResult.resolvedApiItem) {
           typeNode = new DocLinkTag({
             configuration,
             tagName: '@link',
-            linkText: apiItemResult.resolvedApiItem.displayName, // TODO
-            urlDestination: this._getLinkFilenameForApiItem(apiItemResult.resolvedApiItem) // TODO
+            linkText: apiParameter.parameterTypeExcerpt.text,
+            urlDestination: this._getLinkFilenameForApiItem(apiItemResult.resolvedApiItem)
           });
         } else if (apiItemResult.errorMessage) {
-          console.log(colors.yellow(`WARNING: Unable to resolve reference "${tokenExcerpt.canonicalReference.toString()}": `
+          console.log(colors.yellow(`WARNING: Unable to resolve reference "${typeTokenExcerpt.canonicalReference.toString()}": `
             + apiItemResult.errorMessage));
         }
       }
