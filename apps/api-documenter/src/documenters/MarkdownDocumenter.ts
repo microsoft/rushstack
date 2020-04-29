@@ -875,7 +875,10 @@ export class MarkdownDocumenter {
     const section: DocSection = new DocSection({ configuration });
 
     if (apiItem instanceof ApiPropertyItem) {
-      section.appendNodeInParagraph(new DocCodeSpan({ configuration, code: apiItem.propertyTypeExcerpt.text }));
+      section.appendNodeInParagraph(
+        this._tryCreateLinkTagForTypeExcerpt(apiItem.propertyTypeExcerpt)
+        || new DocCodeSpan({ configuration, code: apiItem.propertyTypeExcerpt.text })
+      );
     }
 
     return new DocTableCell({ configuration }, section.nodes);
