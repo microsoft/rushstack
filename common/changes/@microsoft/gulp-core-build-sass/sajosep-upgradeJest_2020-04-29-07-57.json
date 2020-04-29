@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Upgrade Jest to 25",
+      "type": "minor",
+      "packageName": "@microsoft/gulp-core-build-sass"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-sass",
+  "email": "sachinjoseph@users.noreply.github.com"
+}

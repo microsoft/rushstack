@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Upgrade Jest to 25",
+      "type": "minor",
+      "packageName": "@microsoft/rush-stack-compiler-3.5"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-3.5",
+  "email": "sachinjoseph@users.noreply.github.com"
+}

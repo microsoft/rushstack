@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Upgrade Jest to 25",
+      "type": "minor",
+      "packageName": "@microsoft/gulp-core-build-mocha"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-mocha",
+  "email": "sachinjoseph@users.noreply.github.com"
+}

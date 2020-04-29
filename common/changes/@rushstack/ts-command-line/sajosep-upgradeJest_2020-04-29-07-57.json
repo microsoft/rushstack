@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Upgrade Jest to 25",
+      "type": "minor",
+      "packageName": "@rushstack/ts-command-line"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line",
+  "email": "sachinjoseph@users.noreply.github.com"
+}
