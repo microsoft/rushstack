@@ -154,13 +154,8 @@ export function parsePnpmDependencyKey(dependencyName: string, dependencyKey: st
     //     bitbucket.com/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
     //     bitbucket.co.in/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
     if (urlRegex.test(dependencyKey)) {
-      try {
-        const dependencySpecifier: DependencySpecifier = new DependencySpecifier(dependencyName, dependencyKey);
-        return dependencySpecifier;
-      }
-      catch (e) {
-        return undefined;
-      }
+      const dependencySpecifier: DependencySpecifier = new DependencySpecifier(dependencyName, dependencyKey);
+      return dependencySpecifier;
     } else {
       return undefined;
     }
