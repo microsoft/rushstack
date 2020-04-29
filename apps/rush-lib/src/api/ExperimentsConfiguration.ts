@@ -19,6 +19,12 @@ export interface IExperimentsJson {
    * instead of project-specific tracking.
    */
   legacyIncrementalBuildDependencyDetection?: boolean;
+
+  /**
+   * By default, rush passes --no-prefer-frozen-lockfile to 'pnpm install'.
+   * Set this option to true to pass '--frozen-lockfile' instead.
+   */
+  usePnpmFrozenLockfileForRushInstall?: boolean;
 }
 
 /**
