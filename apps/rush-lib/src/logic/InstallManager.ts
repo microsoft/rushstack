@@ -744,11 +744,22 @@ export class InstallManager {
             noMtime: true,
             noPax: true,
             sync: true,
-            prefix: npmPackageFolder
+            prefix: npmPackageFolder,
+            filter: (path: string, stat: tar.FileStat): boolean => {
+              if (!this._rushConfiguration.experimentsConfiguration.configuration
+                .noChmodFieldInTarHeaderNormalization) {
+
+                stat.mode = (stat.mode & ~0x1FF) | PosixModeBits.AllRead | PosixModeBits.UserWrite
+                  | PosixModeBits.AllExecute;
+              }
+
+              return true;
+            }
           } as CreateOptions, [FileConstants.PackageJson]);
 
           console.log(`Updating ${tarballFile}`);
         } catch (error) {
+          console.log(colors.yellow(error));
           // delete everything in case of any error
           FileSystem.deleteFile(tarballFile);
           FileSystem.deleteFile(tempPackageJsonFilename);
@@ -849,6 +860,9 @@ export class InstallManager {
         // Additionally, if they pulled an updated npm-shrinkwrap.json file from Git,
         // then we can't skip this install
         potentiallyChangedFiles.push(this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant));
+
+        // Add common-versions.json file in potentially changed file list.
+        potentiallyChangedFiles.push(this._rushConfiguration.getCommonVersionsFilePath(options.variant));
 
         if (this._rushConfiguration.packageManager === 'pnpm') {
           // If the repo is using pnpmfile.js, consider that also
@@ -1286,21 +1300,12 @@ export class InstallManager {
       // last install flag, which encapsulates the entire installation
       args.push('--no-lock');
 
-      if (this._rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall) {
-        if (!this._options.allowShrinkwrapUpdates) {
-          if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
-            args.push('--frozen-lockfile');
-          } else {
-            args.push('--frozen-shrinkwrap');
-          }
+      if (this._rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall &&
+        !this._options.allowShrinkwrapUpdates) {
+        if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
+          args.push('--frozen-lockfile');
         } else {
-          // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
-          // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
-          if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
-            args.push('--no-prefer-frozen-lockfile');
-          } else {
-            args.push('--no-prefer-frozen-shrinkwrap');
-          }
+          args.push('--frozen-shrinkwrap');
         }
       } else {
         // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.

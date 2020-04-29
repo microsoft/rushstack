@@ -2,6 +2,36 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.23.2",
+      "tag": "@microsoft/rush_v5.23.2",
+      "date": "Wed, 22 Apr 2020 18:44:26 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add common-versions.json to the set of files that, when changed, will trigger reinstallation of dependencies."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.23.1",
+      "tag": "@microsoft/rush_v5.23.1",
+      "date": "Wed, 15 Apr 2020 03:33:55 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a regression in Rush 5.19.0 where customizing \"rush rebuild\" would call the \"build\" script instead of the \"rebuild\" script."
+          },
+          {
+            "comment": "Fix an issue where, on some minimal systems, Rush used a missing shell command to detect an application path."
+          },
+          {
+            "comment": "Fix an issue where the common/temp/*.tgz files resulted in different shrinkwrap files on different operating systems"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.23.0",
       "tag": "@microsoft/rush_v5.23.0",
       "date": "Sat, 04 Apr 2020 00:38:29 GMT",

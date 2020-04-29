@@ -1,6 +1,22 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 04 Apr 2020 00:38:29 GMT and should not be manually modified.
+This log was last generated on Wed, 22 Apr 2020 18:44:26 GMT and should not be manually modified.
+
+## 5.23.2
+Wed, 22 Apr 2020 18:44:26 GMT
+
+### Updates
+
+- Add common-versions.json to the set of files that, when changed, will trigger reinstallation of dependencies.
+
+## 5.23.1
+Wed, 15 Apr 2020 03:33:55 GMT
+
+### Updates
+
+- Fix a regression in Rush 5.19.0 where customizing "rush rebuild" would call the "build" script instead of the "rebuild" script.
+- Fix an issue where, on some minimal systems, Rush used a missing shell command to detect an application path.
+- Fix an issue where the common/temp/*.tgz files resulted in different shrinkwrap files on different operating systems
 
 ## 5.23.0
 Sat, 04 Apr 2020 00:38:29 GMT
