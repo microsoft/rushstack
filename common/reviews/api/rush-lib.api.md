@@ -34,11 +34,11 @@ export class ApprovedPackagesPolicy {
     //
     // @internal
     constructor(rushConfiguration: RushConfiguration, rushConfigurationJson: IRushConfigurationJson);
-    get browserApprovedPackages(): ApprovedPackagesConfiguration;
-    get enabled(): boolean;
-    get ignoredNpmScopes(): Set<string>;
-    get nonbrowserApprovedPackages(): ApprovedPackagesConfiguration;
-    get reviewCategories(): Set<string>;
+    readonly browserApprovedPackages: ApprovedPackagesConfiguration;
+    readonly enabled: boolean;
+    readonly ignoredNpmScopes: Set<string>;
+    readonly nonbrowserApprovedPackages: ApprovedPackagesConfiguration;
+    readonly reviewCategories: Set<string>;
     }
 
 // @beta
@@ -64,14 +64,14 @@ export class ChangeManager {
 
 // @public
 export class CommonVersionsConfiguration {
-    get allowedAlternativeVersions(): Map<string, ReadonlyArray<string>>;
-    get filePath(): string;
+    readonly allowedAlternativeVersions: Map<string, ReadonlyArray<string>>;
+    readonly filePath: string;
     getAllPreferredVersions(): Map<string, string>;
-    get implicitlyPreferredVersions(): boolean | undefined;
+    readonly implicitlyPreferredVersions: boolean | undefined;
     static loadFromFile(jsonFilename: string): CommonVersionsConfiguration;
-    get preferredVersions(): Map<string, string>;
+    readonly preferredVersions: Map<string, string>;
     save(): boolean;
-    get xstitchPreferredVersions(): Map<string, string>;
+    readonly xstitchPreferredVersions: Map<string, string>;
     }
 
 // @beta (undocumented)
@@ -117,7 +117,7 @@ export class EventHooks {
 export class ExperimentsConfiguration {
     // @internal
     constructor(jsonFileName: string);
-    get configuration(): Readonly<IExperimentsJson>;
+    readonly configuration: Readonly<IExperimentsJson>;
     }
 
 // @public
@@ -152,8 +152,8 @@ export class IndividualVersionPolicy extends VersionPolicy {
     bump(bumpType?: BumpType, identifier?: string): void;
     ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
     // @internal
-    get _json(): IIndividualVersionJson;
-    get lockedMajor(): number | undefined;
+    readonly _json: IIndividualVersionJson;
+    readonly lockedMajor: number | undefined;
     validate(versionString: string, packageName: string): void;
 }
 
@@ -192,7 +192,7 @@ export class _LastInstallFlag {
     clear(): void;
     create(): void;
     isValid(): boolean;
-    get path(): string;
+    readonly path: string;
     }
 
 // @beta
@@ -204,12 +204,12 @@ export class LockStepVersionPolicy extends VersionPolicy {
     bump(bumpType?: BumpType, identifier?: string): void;
     ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
     // @internal
-    get _json(): ILockStepVersionJson;
-    get mainProject(): string | undefined;
-    get nextBump(): BumpType;
+    readonly _json: ILockStepVersionJson;
+    readonly mainProject: string | undefined;
+    readonly nextBump: BumpType;
     update(newVersionString: string): boolean;
     validate(versionString: string, packageName: string): void;
-    get version(): string;
+    readonly version: string;
     }
 
 // @public
@@ -222,29 +222,29 @@ export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationB
 export class PackageJsonDependency {
     constructor(name: string, version: string, type: DependencyType, onChange: () => void);
     // (undocumented)
-    get dependencyType(): DependencyType;
+    readonly dependencyType: DependencyType;
     // (undocumented)
-    get name(): string;
+    readonly name: string;
     // (undocumented)
     setVersion(newVersion: string): void;
     // (undocumented)
-    get version(): string;
+    readonly version: string;
     }
 
 // @beta (undocumented)
 export class PackageJsonEditor {
     // (undocumented)
     addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
-    get dependencyList(): ReadonlyArray<PackageJsonDependency>;
-    get devDependencyList(): ReadonlyArray<PackageJsonDependency>;
+    readonly dependencyList: ReadonlyArray<PackageJsonDependency>;
+    readonly devDependencyList: ReadonlyArray<PackageJsonDependency>;
     // (undocumented)
-    get filePath(): string;
+    readonly filePath: string;
     // (undocumented)
     static fromObject(object: IPackageJson, filename: string): PackageJsonEditor;
     // (undocumented)
     static load(filePath: string): PackageJsonEditor;
     // (undocumented)
-    get name(): string;
+    readonly name: string;
     // (undocumented)
     saveIfModified(): boolean;
     // (undocumented)
@@ -252,7 +252,7 @@ export class PackageJsonEditor {
     // (undocumented)
     tryGetDevDependency(packageName: string): PackageJsonDependency | undefined;
     // (undocumented)
-    get version(): string;
+    readonly version: string;
 }
 
 // @beta
@@ -260,7 +260,7 @@ export abstract class PackageManager {
     // @internal
     protected constructor(version: string, packageManager: PackageManagerName);
     readonly packageManager: PackageManagerName;
-    get shrinkwrapFilename(): string;
+    readonly shrinkwrapFilename: string;
     // (undocumented)
     protected _shrinkwrapFilename: string;
     readonly version: string;
@@ -297,28 +297,28 @@ export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
 export class Rush {
     static launch(launcherVersion: string, arg: ILaunchOptions): void;
     static launchRushX(launcherVersion: string, options: ILaunchOptions): void;
-    static get version(): string;
+    static readonly version: string;
 }
 
 // @public
 export class RushConfiguration {
-    get approvedPackagesPolicy(): ApprovedPackagesPolicy;
-    get changesFolder(): string;
+    readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
+    readonly changesFolder: string;
     // @deprecated
-    get committedShrinkwrapFilename(): string;
-    get commonFolder(): string;
-    get commonRushConfigFolder(): string;
-    get commonScriptsFolder(): string;
-    get commonTempFolder(): string;
+    readonly committedShrinkwrapFilename: string;
+    readonly commonFolder: string;
+    readonly commonRushConfigFolder: string;
+    readonly commonScriptsFolder: string;
+    readonly commonTempFolder: string;
     // @deprecated
-    get commonVersions(): CommonVersionsConfiguration;
-    get currentInstalledVariant(): string | undefined;
-    get currentVariantJsonFilename(): string;
-    get ensureConsistentVersions(): boolean;
+    readonly commonVersions: CommonVersionsConfiguration;
+    readonly currentInstalledVariant: string | undefined;
+    readonly currentVariantJsonFilename: string;
+    readonly ensureConsistentVersions: boolean;
     // @beta
-    get eventHooks(): EventHooks;
+    readonly eventHooks: EventHooks;
     // @beta
-    get experimentsConfiguration(): ExperimentsConfiguration;
+    readonly experimentsConfiguration: ExperimentsConfiguration;
     findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
     findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
     getCommittedShrinkwrapFilename(variant?: string | undefined): string;
@@ -326,49 +326,49 @@ export class RushConfiguration {
     getCommonVersionsFilePath(variant?: string | undefined): string;
     getPnpmfilePath(variant?: string | undefined): string;
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
-    get gitAllowedEmailRegExps(): string[];
-    get gitSampleEmail(): string;
-    get gitVersionBumpCommitMessage(): string | undefined;
-    get hotfixChangeEnabled(): boolean;
+    readonly gitAllowedEmailRegExps: string[];
+    readonly gitSampleEmail: string;
+    readonly gitVersionBumpCommitMessage: string | undefined;
+    readonly hotfixChangeEnabled: boolean;
     static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
     // (undocumented)
     static loadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration;
-    get npmCacheFolder(): string;
-    get npmOptions(): NpmOptionsConfiguration;
-    get npmTmpFolder(): string;
-    get packageManager(): PackageManagerName;
-    get packageManagerOptions(): PackageManagerOptionsConfigurationBase;
-    get packageManagerToolFilename(): string;
-    get packageManagerToolVersion(): string;
+    readonly npmCacheFolder: string;
+    readonly npmOptions: NpmOptionsConfiguration;
+    readonly npmTmpFolder: string;
+    readonly packageManager: PackageManagerName;
+    readonly packageManagerOptions: PackageManagerOptionsConfigurationBase;
+    readonly packageManagerToolFilename: string;
+    readonly packageManagerToolVersion: string;
     // @beta
-    get packageManagerWrapper(): PackageManager;
-    get pnpmOptions(): PnpmOptionsConfiguration;
-    get projectFolderMaxDepth(): number;
-    get projectFolderMinDepth(): number;
+    readonly packageManagerWrapper: PackageManager;
+    readonly pnpmOptions: PnpmOptionsConfiguration;
+    readonly projectFolderMaxDepth: number;
+    readonly projectFolderMinDepth: number;
     // (undocumented)
-    get projects(): RushConfigurationProject[];
+    readonly projects: RushConfigurationProject[];
     // (undocumented)
-    get projectsByName(): Map<string, RushConfigurationProject>;
-    get repositoryDefaultBranch(): string;
-    get repositoryDefaultFullyQualifiedRemoteBranch(): string;
-    get repositoryDefaultRemote(): string;
-    get repositoryUrl(): string | undefined;
-    get rushJsonFile(): string;
-    get rushJsonFolder(): string;
-    get rushLinkJsonFilename(): string;
-    get shrinkwrapFilename(): string;
-    get shrinkwrapFilePhrase(): string;
-    get suppressNodeLtsWarning(): boolean;
+    readonly projectsByName: Map<string, RushConfigurationProject>;
+    readonly repositoryDefaultBranch: string;
+    readonly repositoryDefaultFullyQualifiedRemoteBranch: string;
+    readonly repositoryDefaultRemote: string;
+    readonly repositoryUrl: string | undefined;
+    readonly rushJsonFile: string;
+    readonly rushJsonFolder: string;
+    readonly rushLinkJsonFilename: string;
+    readonly shrinkwrapFilename: string;
+    readonly shrinkwrapFilePhrase: string;
+    readonly suppressNodeLtsWarning: boolean;
     // @beta
-    get telemetryEnabled(): boolean;
-    get tempShrinkwrapFilename(): string;
-    get tempShrinkwrapPreinstallFilename(): string;
+    readonly telemetryEnabled: boolean;
+    readonly tempShrinkwrapFilename: string;
+    readonly tempShrinkwrapPreinstallFilename: string;
     static tryFindRushJsonLocation(options?: ITryFindRushJsonLocationOptions): string | undefined;
     tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
     // @beta (undocumented)
-    get versionPolicyConfiguration(): VersionPolicyConfiguration;
-    get yarnCacheFolder(): string;
-    get yarnOptions(): YarnOptionsConfiguration;
+    readonly versionPolicyConfiguration: VersionPolicyConfiguration;
+    readonly yarnCacheFolder: string;
+    readonly yarnOptions: YarnOptionsConfiguration;
     }
 
 // @public
@@ -377,35 +377,35 @@ export class RushConfigurationProject {
     //
     // @internal
     constructor(projectJson: IRushConfigurationProjectJson, rushConfiguration: RushConfiguration, tempProjectName: string);
-    get cyclicDependencyProjects(): Set<string>;
-    get downstreamDependencyProjects(): string[];
+    readonly cyclicDependencyProjects: Set<string>;
+    readonly downstreamDependencyProjects: string[];
     // @beta
-    get isMainProject(): boolean;
+    readonly isMainProject: boolean;
     // @deprecated
-    get packageJson(): IPackageJson;
+    readonly packageJson: IPackageJson;
     // @beta
-    get packageJsonEditor(): PackageJsonEditor;
-    get packageName(): string;
-    get projectFolder(): string;
-    get projectRelativeFolder(): string;
-    get projectRushTempFolder(): string;
-    get reviewCategory(): string;
-    get rushConfiguration(): RushConfiguration;
-    get shouldPublish(): boolean;
-    get skipRushCheck(): boolean;
-    get tempProjectName(): string;
-    get unscopedTempProjectName(): string;
+    readonly packageJsonEditor: PackageJsonEditor;
+    readonly packageName: string;
+    readonly projectFolder: string;
+    readonly projectRelativeFolder: string;
+    readonly projectRushTempFolder: string;
+    readonly reviewCategory: string;
+    readonly rushConfiguration: RushConfiguration;
+    readonly shouldPublish: boolean;
+    readonly skipRushCheck: boolean;
+    readonly tempProjectName: string;
+    readonly unscopedTempProjectName: string;
     // @beta
-    get versionPolicy(): VersionPolicy | undefined;
+    readonly versionPolicy: VersionPolicy | undefined;
     // @beta
-    get versionPolicyName(): string | undefined;
+    readonly versionPolicyName: string | undefined;
     }
 
 // @internal
 export class _RushGlobalFolder {
     constructor();
-    get nodeSpecificPath(): string;
-    get path(): string;
+    readonly nodeSpecificPath: string;
+    readonly path: string;
     }
 
 // @beta
@@ -415,15 +415,15 @@ export abstract class VersionPolicy {
     // @internal
     constructor(versionPolicyJson: IVersionPolicyJson);
     abstract bump(bumpType?: BumpType, identifier?: string): void;
-    get definitionName(): VersionPolicyDefinitionName;
+    readonly definitionName: VersionPolicyDefinitionName;
     abstract ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
-    get exemptFromRushChange(): boolean;
-    get isLockstepped(): boolean;
+    readonly exemptFromRushChange: boolean;
+    readonly isLockstepped: boolean;
     // @internal
-    abstract get _json(): IVersionPolicyJson;
+    abstract readonly _json: IVersionPolicyJson;
     // @internal
     static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined;
-    get policyName(): string;
+    readonly policyName: string;
     setDependenciesBeforeCommit(packageName: string, configuration: RushConfiguration): void;
     setDependenciesBeforePublish(packageName: string, configuration: RushConfiguration): void;
     abstract validate(versionString: string, packageName: string): void;
@@ -437,7 +437,7 @@ export class VersionPolicyConfiguration {
     getVersionPolicy(policyName: string): VersionPolicy;
     update(versionPolicyName: string, newVersion: string): void;
     validate(projectsByName: Map<string, RushConfigurationProject>): void;
-    get versionPolicies(): Map<string, VersionPolicy>;
+    readonly versionPolicies: Map<string, VersionPolicy>;
     }
 
 // @beta

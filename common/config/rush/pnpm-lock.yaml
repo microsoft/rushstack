@@ -13432,14 +13432,13 @@ packages:
     version: 0.0.0
   'file:projects/api-extractor-lib1-test.tgz':
     dependencies:
-      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       fs-extra: 7.0.1
       typescript: 2.4.2
     dev: false
     name: '@rush-temp/api-extractor-lib1-test'
     resolution:
-      integrity: sha512-vhE9QMQgQVu1AEAALV4REhke4SmkgWWnPSvejeogQB9huh+ESTRSbWBMjmY4323FogRp4+Av9Bp6XmGSc3/RKw==
+      integrity: sha512-jMu+fcmDDF7w3c0rnhD1lSBSTE4/FP2KCuoG/lE2RTBAPaL8MD2ojqQdOh+Da4RmN5+Rhydh5BlS44cAlr9KDA==
       tarball: 'file:projects/api-extractor-lib1-test.tgz'
     version: 0.0.0
   'file:projects/api-extractor-lib2-test.tgz':
@@ -14704,4 +14703,4 @@ specifiers:
   xmldoc: ~1.1.2
   yargs: ~4.6.0
   z-schema: ~3.18.3
-# shrinkwrap hash: 6b84705fd87d7afe6e8fa25a095b1d9971e151fb
+# shrinkwrap hash: 8964abb813549be4416a5e9f51b777f1e811c0b1

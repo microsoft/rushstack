@@ -16,11 +16,9 @@ export class CertificateManager {
 // @public
 export class CertificateStore {
     constructor();
-    get certificateData(): string | undefined;
-    set certificateData(certificate: string | undefined);
-    get certificatePath(): string;
-    get keyData(): string | undefined;
-    set keyData(key: string | undefined);
+    certificateData: string | undefined;
+    readonly certificatePath: string;
+    keyData: string | undefined;
     }
 
 // @public
