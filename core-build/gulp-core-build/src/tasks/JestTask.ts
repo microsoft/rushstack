@@ -6,9 +6,10 @@ import { IBuildConfig } from '../IBuildConfig';
 import * as Gulp from 'gulp';
 import * as glob from 'glob';
 
+// runCLI is not exported from 'jest' anymore.
+// See https://github.com/facebook/jest/issues/9512#issuecomment-581835474
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { runCLI } = require('@jest/core');
-// import { runCLI } from 'jest/core';
 import { Config, AggregatedResult } from '@jest/reporters';
 import { FileSystem, JsonObject } from '@rushstack/node-core-library';
 
