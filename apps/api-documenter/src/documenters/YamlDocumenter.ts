@@ -11,7 +11,7 @@ import {
   FileSystem,
   NewlineKind,
   InternalError
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 import { StringBuilder, DocSection, DocComment } from '@microsoft/tsdoc';
 import {
   ApiModel,
@@ -666,7 +666,16 @@ export class YamlDocumenter {
       onGetFilenameForApiItem: (apiItem: ApiItem) => {
         // NOTE: GitHub's markdown renderer does not resolve relative hyperlinks correctly
         // unless they start with "./" or "../".
-        return `xref:${this._getUid(apiItem)}`;
+
+        // To ensure the xref is properly escaped, we first encode the entire xref
+        // to handle escaping of reserved characters. Then we must replace '#' and '?'
+        // characters so that they are not interpreted as a querystring or hash.
+        // We must also backslash-escape unbalanced `(` and `)` characters as the
+        // markdown spec insists that they are only valid when balanced. To reduce
+        // the overhead we only support balanced parenthesis with a depth of 1.
+        return encodeURI(`xref:${this._getUid(apiItem)}`)
+          .replace(/[#?]/g, s => encodeURIComponent(s))
+          .replace(/(\([^(]*\))|[()]/g, (s, balanced) => balanced || ('\\' + s));
       }
     });
 

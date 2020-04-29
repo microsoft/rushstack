@@ -1,6 +1,59 @@
 {
-  "name": "@microsoft/ts-command-line",
+  "name": "@rushstack/ts-command-line",
   "entries": [
+    {
+      "version": "4.3.14",
+      "tag": "@rushstack/ts-command-line_v4.3.14",
+      "date": "Wed, 08 Apr 2020 04:07:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.6` to `0.5.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.13",
+      "tag": "@rushstack/ts-command-line_v4.3.13",
+      "date": "Sat, 28 Mar 2020 00:37:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.5` to `0.5.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.12",
+      "tag": "@rushstack/ts-command-line_v4.3.12",
+      "date": "Wed, 18 Mar 2020 15:07:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade cyclic dependencies"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.4` to `0.5.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.11",
+      "tag": "@rushstack/ts-command-line_v4.3.11",
+      "date": "Tue, 17 Mar 2020 23:55:58 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "PACKAGE NAME CHANGE: The NPM scope was changed from `@microsoft/ts-command-line` to `@rushstack/ts-command-line`"
+          }
+        ]
+      }
+    },
     {
       "version": "4.3.10",
       "tag": "@microsoft/ts-command-line_v4.3.10",

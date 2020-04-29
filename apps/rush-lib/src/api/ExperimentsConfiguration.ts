@@ -6,7 +6,7 @@ import {
   JsonFile,
   JsonSchema,
   FileSystem
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 /**
  * This interface represents the raw experiments.json file which allows repo
@@ -19,6 +19,12 @@ export interface IExperimentsJson {
    * instead of project-specific tracking.
    */
   legacyIncrementalBuildDependencyDetection?: boolean;
+
+  /**
+   * If true, the chmod field in temporary project tar headers will not be normalized.
+   * This normalization can help ensure consistent tarball integrity across platforms.
+   */
+  noChmodFieldInTarHeaderNormalization?: boolean;
 }
 
 /**

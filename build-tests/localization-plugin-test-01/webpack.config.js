@@ -4,13 +4,13 @@ const path = require('path');
 const webpack = require('webpack');
 
 const { LocalizationPlugin } = require('@rushstack/localization-plugin');
-const { SetPublicPathPlugin } = require('@microsoft/set-webpack-public-path-plugin');
+const { SetPublicPathPlugin } = require('@rushstack/set-webpack-public-path-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-module.exports = function(env) {
-  const configuration = {
-    mode: 'production',
+function generateConfiguration(mode, outputFolderName) {
+  return {
+    mode: mode,
     module: {
       rules: [
         {
@@ -33,7 +33,7 @@ module.exports = function(env) {
       'localization-test-B': path.join(__dirname, 'src', 'indexB.ts'),
     },
     output: {
-      path: path.join(__dirname, 'dist'),
+      path: path.join(__dirname, outputFolderName),
       filename: '[name]_[locale]_[contenthash].js',
       chunkFilename: '[id].[name]_[locale]_[contenthash].js'
     },
@@ -75,6 +75,9 @@ module.exports = function(env) {
       new HtmlWebpackPlugin()
     ]
   };
-
-  return configuration;
 }
+
+module.exports = [
+  generateConfiguration('development', 'dist-dev'),
+  generateConfiguration('production', 'dist-prod'),
+];

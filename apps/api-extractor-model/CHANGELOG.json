@@ -2,6 +2,78 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.7.11",
+      "tag": "@microsoft/api-extractor-model_v7.7.11",
+      "date": "Wed, 08 Apr 2020 04:07:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.19.6` to `3.19.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.6` to `0.5.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.7.10",
+      "tag": "@microsoft/api-extractor-model_v7.7.10",
+      "date": "Sat, 28 Mar 2020 00:37:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade to TSdoc 0.12.19"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.19.5` to `3.19.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.5` to `0.5.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.7.9",
+      "tag": "@microsoft/api-extractor-model_v7.7.9",
+      "date": "Wed, 18 Mar 2020 15:07:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade cyclic dependencies"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.19.4` to `3.19.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.4` to `0.5.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.7.8",
+      "tag": "@microsoft/api-extractor-model_v7.7.8",
+      "date": "Tue, 17 Mar 2020 23:55:58 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.19.3` to `3.19.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.7.7",
       "tag": "@microsoft/api-extractor-model_v7.7.7",
       "date": "Tue, 28 Jan 2020 02:23:44 GMT",

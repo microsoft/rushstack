@@ -4,8 +4,8 @@
 
 ```ts
 
-import { IPackageJson } from '@microsoft/node-core-library';
-import { JsonObject } from '@microsoft/node-core-library';
+import { IPackageJson } from '@rushstack/node-core-library';
+import { JsonObject } from '@rushstack/node-core-library';
 
 // @public
 export class ApprovedPackagesConfiguration {
@@ -90,6 +90,7 @@ export const enum DependencyType {
 export const enum EnvironmentVariableNames {
     RUSH_ABSOLUTE_SYMLINKS = "RUSH_ABSOLUTE_SYMLINKS",
     RUSH_ALLOW_UNSUPPORTED_NODEJS = "RUSH_ALLOW_UNSUPPORTED_NODEJS",
+    RUSH_PNPM_STORE_PATH = "RUSH_PNPM_STORE_PATH",
     RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
     RUSH_TEMP_FOLDER = "RUSH_TEMP_FOLDER",
     RUSH_VARIANT = "RUSH_VARIANT"
@@ -119,9 +120,21 @@ export class ExperimentsConfiguration {
     readonly configuration: Readonly<IExperimentsJson>;
     }
 
+// @public
+export interface IConfigurationEnvironment {
+    [environmentVariableName: string]: IConfigurationEnvironmentVariable;
+}
+
+// @public
+export interface IConfigurationEnvironmentVariable {
+    override?: boolean;
+    value: string;
+}
+
 // @beta
 export interface IExperimentsJson {
     legacyIncrementalBuildDependencyDetection?: boolean;
+    noChmodFieldInTarHeaderNormalization?: boolean;
 }
 
 // @public
@@ -144,6 +157,23 @@ export class IndividualVersionPolicy extends VersionPolicy {
     validate(versionString: string, packageName: string): void;
 }
 
+// @internal
+export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
+}
+
+// @public
+export interface IPackageManagerOptionsJsonBase {
+    environmentVariables?: IConfigurationEnvironment;
+}
+
+// @internal
+export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
+    pnpmStore?: PnpmStoreOptions;
+    preventManualShrinkwrapChanges?: boolean;
+    resolutionStrategy?: ResolutionStrategy;
+    strictPeerDependencies?: boolean;
+}
+
 // @public
 export interface ITryFindRushJsonLocationOptions {
     showVerbose?: boolean;
@@ -151,8 +181,14 @@ export interface ITryFindRushJsonLocationOptions {
 }
 
 // @internal
+export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
+    ignoreEngines?: boolean;
+}
+
+// @internal
 export class _LastInstallFlag {
     constructor(folderPath: string, state?: JsonObject);
+    checkValidAndReportStoreIssues(): boolean;
     clear(): void;
     create(): void;
     isValid(): boolean;
@@ -175,6 +211,12 @@ export class LockStepVersionPolicy extends VersionPolicy {
     validate(versionString: string, packageName: string): void;
     readonly version: string;
     }
+
+// @public
+export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
+    // @internal
+    constructor(json: _INpmOptionsJson);
+}
 
 // @beta (undocumented)
 export class PackageJsonDependency {
@@ -228,14 +270,25 @@ export abstract class PackageManager {
 export type PackageManagerName = 'pnpm' | 'npm' | 'yarn';
 
 // @public
-export class PnpmOptionsConfiguration {
-    // Warning: (ae-forgotten-export) The symbol "IPnpmOptionsJson" needs to be exported by the entry point index.d.ts
-    //
+export abstract class PackageManagerOptionsConfigurationBase implements IPackageManagerOptionsJsonBase {
     // @internal
-    constructor(json: IPnpmOptionsJson);
+    protected constructor(json: IPackageManagerOptionsJsonBase);
+    readonly environmentVariables?: IConfigurationEnvironment;
+}
+
+// @public
+export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
+    // @internal
+    constructor(json: _IPnpmOptionsJson, commonTempFolder: string);
+    readonly pnpmStore: PnpmStoreOptions;
+    readonly pnpmStorePath: string;
+    readonly preventManualShrinkwrapChanges: boolean;
     readonly resolutionStrategy: ResolutionStrategy;
     readonly strictPeerDependencies: boolean;
 }
+
+// @public
+export type PnpmStoreOptions = 'local' | 'global';
 
 // @public
 export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
@@ -281,14 +334,15 @@ export class RushConfiguration {
     // (undocumented)
     static loadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration;
     readonly npmCacheFolder: string;
+    readonly npmOptions: NpmOptionsConfiguration;
     readonly npmTmpFolder: string;
     readonly packageManager: PackageManagerName;
+    readonly packageManagerOptions: PackageManagerOptionsConfigurationBase;
     readonly packageManagerToolFilename: string;
     readonly packageManagerToolVersion: string;
     // @beta
     readonly packageManagerWrapper: PackageManager;
     readonly pnpmOptions: PnpmOptionsConfiguration;
-    readonly pnpmStoreFolder: string;
     readonly projectFolderMaxDepth: number;
     readonly projectFolderMinDepth: number;
     // (undocumented)
@@ -395,11 +449,9 @@ export enum VersionPolicyDefinitionName {
 }
 
 // @public
-export class YarnOptionsConfiguration {
-    // Warning: (ae-forgotten-export) The symbol "IYarnOptionsJson" needs to be exported by the entry point index.d.ts
-    //
+export class YarnOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
     // @internal
-    constructor(json: IYarnOptionsJson);
+    constructor(json: _IYarnOptionsJson);
     readonly ignoreEngines: boolean;
 }
 

@@ -3,7 +3,7 @@
 
 import { GulpTask } from './GulpTask';
 import * as Gulp from 'gulp';
-import { JsonObject } from '@microsoft/node-core-library';
+import { JsonObject } from '@rushstack/node-core-library';
 
 /**
  * Configuration for CopyTask

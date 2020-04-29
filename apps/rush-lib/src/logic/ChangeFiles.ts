@@ -7,7 +7,7 @@ import * as glob from 'glob';
 import { Utilities } from '../utilities/Utilities';
 import { IChangeInfo } from '../api/ChangeManagement';
 import { IChangelog } from '../api/Changelog';
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../api/RushConfiguration';
 
 /**

@@ -7,7 +7,7 @@ import {
   FileSystem,
   LegacyAdapters,
   JsonObject
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 import * as glob from 'glob';
 import * as globEscape from 'glob-escape';
 import * as decomment from 'decomment';

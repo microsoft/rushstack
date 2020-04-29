@@ -4,8 +4,8 @@
 import './mockRushCommandLineParser';
 
 import * as path from 'path';
-import { FileSystem } from '@microsoft/node-core-library';
-import { Interleaver } from '@microsoft/stream-collator';
+import { FileSystem } from '@rushstack/node-core-library';
+import { Interleaver } from '@rushstack/stream-collator';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 
 /**
@@ -199,7 +199,7 @@ describe('RushCommandLineParser', () => {
       });
 
       describe(`'rebuild' action`, () => {
-        it(`executes the package's 'build' script`, () => {
+        it(`executes the package's 'rebuild' script`, () => {
           const repoName: string = 'overrideRebuildAndRunRebuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'rebuild');
 
@@ -211,7 +211,7 @@ describe('RushCommandLineParser', () => {
               expect(packageCount).toEqual(2);
 
               // Use regex for task name in case spaces were prepended or appended to spawned command
-              const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
+              const expectedBuildTaskRegexp: RegExp = /fake_REbuild_task_but_works_with_mock/;
 
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const firstSpawn: any[] = instance.spawnMock.mock.calls[0];

@@ -5,11 +5,11 @@ import * as semver from 'semver';
 import {
   IPackageJson,
   FileConstants
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter
-} from '@microsoft/ts-command-line';
+} from '@rushstack/ts-command-line';
 
 import { BumpType, LockStepVersionPolicy } from '../../api/VersionPolicy';
 import { VersionPolicyConfiguration } from '../../api/VersionPolicyConfiguration';
@@ -97,7 +97,7 @@ export class VersionAction extends BaseRushAction {
 
   protected run(): Promise<void> {
     return Promise.resolve().then(() => {
-      PolicyValidator.validatePolicy(this.rushConfiguration, this._bypassPolicy.value);
+      PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: this._bypassPolicy.value });
       const userEmail: string = Git.getGitEmail(this.rushConfiguration);
 
       this._validateInput();

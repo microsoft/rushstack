@@ -4,7 +4,7 @@
 import * as path from 'path';
 import * as semver from 'semver';
 
-import { LockFile } from '@microsoft/node-core-library';
+import { LockFile } from '@rushstack/node-core-library';
 import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
 import {
   _LastInstallFlag,

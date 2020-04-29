@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineParameter } from '@microsoft/ts-command-line';
+import { CommandLineParameter } from '@rushstack/ts-command-line';
 import { BaseRushAction, IBaseRushActionOptions } from '../actions/BaseRushAction';
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 import { RushConstants } from '../../logic/RushConstants';
@@ -56,7 +56,8 @@ export abstract class BaseScriptAction extends BaseRushAction {
             customParameter = this.defineFlagParameter({
               parameterShortName: parameterJson.shortName,
               parameterLongName: parameterJson.longName,
-              description: parameterJson.description
+              description: parameterJson.description,
+              required: parameterJson.required
             });
             break;
           case 'choice':
@@ -64,6 +65,7 @@ export abstract class BaseScriptAction extends BaseRushAction {
               parameterShortName: parameterJson.shortName,
               parameterLongName: parameterJson.longName,
               description: parameterJson.description,
+              required: parameterJson.required,
               alternatives: parameterJson.alternatives.map(x => x.name),
               defaultValue: parameterJson.defaultValue
             });
@@ -73,6 +75,7 @@ export abstract class BaseScriptAction extends BaseRushAction {
               parameterLongName: parameterJson.longName,
               parameterShortName: parameterJson.shortName,
               description: parameterJson.description,
+              required: parameterJson.required,
               argumentName: parameterJson.argumentName
             });
             break;

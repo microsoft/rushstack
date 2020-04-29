@@ -2,12 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as jju from 'jju';
-import { loader } from 'webpack';
-
 import {
-  Logging,
-  ILoggerOptions
-} from './Logging';
+  Terminal,
+  NewlineKind
+} from '@rushstack/node-core-library';
+
 import { ILocalizationFile } from '../interfaces';
 import { ResxReader } from './ResxReader';
 import { Constants } from './Constants';
@@ -16,9 +15,10 @@ import { Constants } from './Constants';
  * @internal
  */
 export interface IParseLocFileOptions {
-  loggerOptions: ILoggerOptions;
+  terminal: Terminal;
   filePath: string;
   content: string;
+  resxNewlineNormalization: NewlineKind | undefined;
 }
 
 interface IParseCacheEntry {
@@ -32,17 +32,10 @@ const parseCache: Map<string, IParseCacheEntry> = new Map<string, IParseCacheEnt
  * @internal
  */
 export class LocFileParser {
-  public static parseLocFileFromLoader(content: string, loaderContext: loader.LoaderContext): ILocalizationFile {
-    return LocFileParser.parseLocFile({
-      filePath: loaderContext.resourcePath,
-      loggerOptions: { writeError: loaderContext.emitError, writeWarning: loaderContext.emitWarning },
-      content
-    });
-  }
-
   public static parseLocFile(options: IParseLocFileOptions): ILocalizationFile {
-    if (parseCache.has(options.filePath)) {
-      const entry: IParseCacheEntry = parseCache.get(options.filePath)!;
+    const fileCacheKey: string = `${options.filePath}?${options.resxNewlineNormalization || 'none'}`;
+    if (parseCache.has(fileCacheKey)) {
+      const entry: IParseCacheEntry = parseCache.get(fileCacheKey)!;
       if (entry.content === options.content) {
         return entry.parsedFile;
       }
@@ -53,8 +46,9 @@ export class LocFileParser {
       parsedFile = ResxReader.readResxAsLocFile(
         options.content,
         {
-          ...Logging.getLoggingFunctions(options.loggerOptions),
-          resxFilePath: options.filePath
+          terminal: options.terminal,
+          resxFilePath: options.filePath,
+          newlineNormalization: options.resxNewlineNormalization
         }
       );
     } else {
@@ -62,11 +56,11 @@ export class LocFileParser {
       try {
         Constants.LOC_JSON_SCHEMA.validateObject(parsedFile, options.filePath);
       } catch (e) {
-        options.loggerOptions.writeError(`The loc file is invalid. Error: ${e}`);
+        options.terminal.writeError(`The loc file is invalid. Error: ${e}`);
       }
     }
 
-    parseCache.set(options.filePath, { content: options.content, parsedFile });
+    parseCache.set(fileCacheKey, { content: options.content, parsedFile });
     return parsedFile;
   }
 }

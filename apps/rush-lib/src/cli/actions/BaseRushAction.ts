@@ -8,9 +8,9 @@ import * as path from 'path';
 import {
   CommandLineAction,
   ICommandLineActionOptions
-} from '@microsoft/ts-command-line';
+} from '@rushstack/ts-command-line';
 
-import { LockFile } from '@microsoft/node-core-library';
+import { LockFile } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { EventHooksManager } from '../../logic/EventHooksManager';

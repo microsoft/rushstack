@@ -5,7 +5,7 @@ import {
   GulpTask,
   GCBTerminalProvider
 } from '@microsoft/gulp-core-build';
-import { Terminal } from '@microsoft/node-core-library';
+import { Terminal } from '@rushstack/node-core-library';
 import * as Gulp from 'gulp';
 import {
   CertificateStore,

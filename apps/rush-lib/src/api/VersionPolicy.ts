@@ -3,7 +3,7 @@
 
 import { cloneDeep } from 'lodash';
 import * as semver from 'semver';
-import { IPackageJson } from '@microsoft/node-core-library';
+import { IPackageJson } from '@rushstack/node-core-library';
 
 import {
   IVersionPolicyJson,

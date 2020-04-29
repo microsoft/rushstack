@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as TTypescript from 'typescript';
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 /**
  * Used as a helper to parse tsconfig.json files.

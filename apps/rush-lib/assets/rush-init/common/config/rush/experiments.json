@@ -12,5 +12,11 @@
     * to temporarily restore the old behavior where everything must be rebuilt whenever pnpm-lock.json
     * is modified.
     */
-  /*[LINE "HYPOTHETICAL"]*/ "legacyIncrementalBuildDependencyDetection": true
+  /*[LINE "HYPOTHETICAL"]*/ "legacyIncrementalBuildDependencyDetection": true,
+
+  /**
+    * If true, the chmod field in temporary project tar headers will not be normalized.
+    * This normalization can help ensure consistent tarball integrity across platforms.
+    */
+  /*[LINE "HYPOTHETICAL"]*/ "noChmodFieldInTarHeaderNormalization": true
 }

@@ -12,7 +12,7 @@
 /// <reference types="jest" />
 /// <reference lib="es2015.symbol.wellknown" />
 /// <reference lib="es2018.intl" />
-import Long from 'long';
+import { default as Long_2 } from 'long';
 import { MAX_UNSIGNED_VALUE } from 'long';
 
 /**
@@ -302,7 +302,7 @@ declare const unexportedCustomSymbol: unique symbol;
 
 /** @public */
 export declare class UseLong {
-    use_long(): Long;
+    use_long(): Long_2;
 }
 
 /* Excluded from this release type: VARIABLE */

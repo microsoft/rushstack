@@ -3,7 +3,7 @@ import * as os from 'os';
 import {
   JsonFile,
   FileSystem
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import {
   BaseShrinkwrapFile

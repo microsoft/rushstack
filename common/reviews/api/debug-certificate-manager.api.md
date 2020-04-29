@@ -4,7 +4,7 @@
 
 ```ts
 
-import { Terminal } from '@microsoft/node-core-library';
+import { Terminal } from '@rushstack/node-core-library';
 
 // @public
 export class CertificateManager {

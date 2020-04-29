@@ -4,7 +4,7 @@
 import {
   TerminalProviderSeverity,
   ConsoleTerminalProvider
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import { GulpTask } from '../tasks/GulpTask';
 

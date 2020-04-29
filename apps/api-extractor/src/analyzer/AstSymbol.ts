@@ -3,7 +3,7 @@
 
 import * as ts from 'typescript';
 import { AstDeclaration } from './AstDeclaration';
-import { InternalError } from '@microsoft/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 
 /**
  * Constructor options for AstSymbol

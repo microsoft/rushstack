@@ -7,7 +7,7 @@ import {
   JsonFile,
   FileSystem,
   JsonObject
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 import { ExtractorConfig, IExtractorInvokeOptions } from '@microsoft/api-extractor';
 import { ApiExtractorRunner as TApiExtractorRunner } from '@microsoft/rush-stack-compiler-3.1';
 

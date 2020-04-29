@@ -101,6 +101,12 @@ export interface ILocalizedData {
   translatedStrings: ILocalizedStrings;
 
   /**
+   * Use this paramter to specify a function used to load translations missing from
+   * the {@link ILocalizedData.translatedStrings} parameter.
+   */
+  resolveMissingTranslatedStrings?: (locales: string[], filePath: string) => IResolvedMissingTranslations;
+
+  /**
    * Options around including a passthrough locale.
    */
   passthroughLocale?: IPassthroughLocaleOptions;
@@ -109,6 +115,11 @@ export interface ILocalizedData {
    * Options for pseudo-localization.
    */
   pseudolocales?: IPseudolocalesOptions;
+
+  /**
+   * Normalize newlines in RESX files to either CRLF (Windows-style) or LF ('nix style)
+   */
+  normalizeResxNewlines?: 'lf' | 'crlf';
 }
 
 /**
@@ -187,8 +198,15 @@ export interface ILocaleFileData {
 /**
  * @public
  */
+export interface IResolvedMissingTranslations {
+  [localeName: string]: string | ILocaleFileData;
+}
+
+/**
+ * @public
+ */
 export interface ILocaleData {
-  [locFilePath: string]: ILocaleFileData;
+  [locFilePath: string]: string | ILocaleFileData;
 }
 
 /**

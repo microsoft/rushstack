@@ -3,7 +3,7 @@
 
 import { EOL } from 'os';
 import * as colors from 'colors';
-import { PackageJsonLookup } from '@microsoft/node-core-library';
+import { PackageJsonLookup } from '@rushstack/node-core-library';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import { RushConstants } from '../logic/RushConstants';

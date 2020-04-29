@@ -5,29 +5,27 @@ import * as os from 'os';
 import * as colors from 'colors';
 
 import {
-  Event
-} from '../../index';
-
-import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
   CommandLineStringListParameter,
   CommandLineParameterKind
-} from '@microsoft/ts-command-line';
+} from '@rushstack/ts-command-line';
+import {
+  FileSystem,
+  PackageJsonLookup,
+  IPackageJson
+} from '@rushstack/node-core-library';
 
+import { Event } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { TaskSelector } from '../../logic/TaskSelector';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
-import {
-  FileSystem,
-  PackageJsonLookup,
-  IPackageJson
-} from '@microsoft/node-core-library';
 import { TaskRunner } from '../../logic/taskRunner/TaskRunner';
 import { TaskCollection } from '../../logic/taskRunner/TaskCollection';
 import { Utilities } from '../../utilities/Utilities';
+import { RushConstants } from '../../logic/RushConstants';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -255,7 +253,7 @@ export class BulkScriptAction extends BaseScriptAction {
   }
 
   private _doBeforeTask(): void {
-    if (this.actionName !== 'build' && this.actionName !== 'rebuild') {
+    if (this.actionName !== RushConstants.buildCommandName && this.actionName !== RushConstants.rebuildCommandName) {
       // Only collects information for built-in tasks like build or rebuild.
       return;
     }
@@ -266,7 +264,7 @@ export class BulkScriptAction extends BaseScriptAction {
   }
 
   private _doAfterTask(stopwatch: Stopwatch, success: boolean): void {
-    if (this.actionName !== 'build' && this.actionName !== 'rebuild') {
+    if (this.actionName !== RushConstants.buildCommandName && this.actionName !== RushConstants.rebuildCommandName) {
       // Only collects information for built-in tasks like build or rebuild.
       return;
     }

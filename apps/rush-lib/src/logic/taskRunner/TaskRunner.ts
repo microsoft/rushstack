@@ -2,13 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
-import { Interleaver } from '@microsoft/stream-collator';
+import { Interleaver } from '@rushstack/stream-collator';
 import {
   Terminal,
   ConsoleTerminalProvider,
   Colors,
   IColorableSequence
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { ITask } from './ITask';

@@ -47,7 +47,7 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "@microsoft/node-core-library",
+      "name": "@rushstack/node-core-library",
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
@@ -55,7 +55,7 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "@microsoft/package-deps-hash",
+      "name": "@rushstack/package-deps-hash",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -119,7 +119,7 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@microsoft/set-webpack-public-path-plugin",
+      "name": "@rushstack/set-webpack-public-path-plugin",
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
@@ -127,7 +127,7 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@microsoft/stream-collator",
+      "name": "@rushstack/stream-collator",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -135,7 +135,7 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "@microsoft/ts-command-line",
+      "name": "@rushstack/ts-command-line",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -169,6 +169,10 @@
     {
       "name": "@rushstack/localization-plugin",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@rushstack/typings-generator",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@typescript-eslint/eslint-plugin",

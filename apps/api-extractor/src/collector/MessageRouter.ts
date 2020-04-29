@@ -4,7 +4,7 @@
 import * as colors from 'colors';
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
-import { Sort, InternalError, LegacyAdapters } from '@microsoft/node-core-library';
+import { Sort, InternalError, LegacyAdapters } from '@rushstack/node-core-library';
 import { AedocDefinitions } from '@microsoft/api-extractor-model';
 
 import { AstDeclaration } from '../analyzer/AstDeclaration';
@@ -465,7 +465,9 @@ export class MessageRouter {
   }
 
   public logDiagnostic(message: string): void {
-    this.logVerbose(ConsoleMessageId.Diagnostics, message);
+    if (this.showDiagnostics) {
+      this.logVerbose(ConsoleMessageId.Diagnostics, message);
+    }
   }
 
   /**

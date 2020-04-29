@@ -16,7 +16,7 @@ import * as childProcess from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { IPackageJson } from '@microsoft/node-core-library';
+import { IPackageJson } from '@rushstack/node-core-library';
 
 export const RUSH_JSON_FILENAME: string = 'rush.json';
 const RUSH_TEMP_FOLDER_ENV_VARIABLE_NAME: string = 'RUSH_TEMP_FOLDER';
@@ -138,7 +138,7 @@ export function getNpmPath(): string {
         _npmPath = lines[lines.length - 1];
       } else {
         // We aren't on Windows - assume we're on *NIX or Darwin
-        _npmPath = childProcess.execSync('which npm', { stdio: [] }).toString();
+        _npmPath = childProcess.execSync('command -v npm', { stdio: [] }).toString();
       }
     } catch (e) {
       throw new Error(`Unable to determine the path to the NPM tool: ${e}`);

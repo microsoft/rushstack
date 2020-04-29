@@ -3,10 +3,12 @@
 
 import * as colors from 'colors';
 import * as semver from 'semver';
-import { PackageName, FileSystem } from '@microsoft/node-core-library';
+import { PackageName, FileSystem } from '@rushstack/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
 import { DependencySpecifier } from '../DependencySpecifier';
+import { IPolicyValidatorOptions } from '../policy/PolicyValidator';
+import { PackageManagerOptionsConfigurationBase } from '../../api/RushConfiguration';
 
 /**
  * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's pnpm-lock.yaml file formats.
@@ -22,10 +24,30 @@ export abstract class BaseShrinkwrapFile {
   }
 
   /**
+   * Return whether or not the committed shrinkwrap file should be forcibly rechecked for changes.
+   *
+   * @virtual
+   */
+  public shouldForceRecheck(): boolean {
+    return false;
+  }
+
+  /**
    * Serializes and saves the shrinkwrap file to specified location
    */
   public save(filePath: string): void {
     FileSystem.writeFile(filePath, this.serialize());
+  }
+
+  /**
+   * Validate the shrinkwrap using the provided policy options.
+   *
+   * @virtual
+   */
+  public validate(
+    packageManagerOptionsConfig: PackageManagerOptionsConfigurationBase,
+    policyOptions: IPolicyValidatorOptions
+  ): void {
   }
 
   /**

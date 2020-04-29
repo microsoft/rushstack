@@ -2,14 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import { InternalError } from '@microsoft/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 
 import { TypeScriptHelpers } from './TypeScriptHelpers';
 import { AstSymbol } from './AstSymbol';
 import { AstImport, IAstImportOptions, AstImportKind } from './AstImport';
 import { AstModule, AstModuleExportInfo } from './AstModule';
 import { TypeScriptInternals } from './TypeScriptInternals';
-import { TypeScriptMessageFormatter } from './TypeScriptMessageFormatter';
+import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
 import { IFetchAstSymbolOptions, AstEntity } from './AstSymbolTable';
 
 /**
@@ -134,7 +134,7 @@ export class ExportAnalyzer {
 
             if (!astSymbol) {
               throw new Error(`Unsupported export ${JSON.stringify(exportedSymbol.name)} in `
-                + TypeScriptMessageFormatter.formatFileAndLineNumber(followedSymbol.declarations[0]));
+                + SourceFileLocationFormatter.formatDeclaration(followedSymbol.declarations[0]));
             }
 
             astModule.cachedExportedEntities.set(exportedSymbol.name, astSymbol);

@@ -10,7 +10,7 @@ import { DependencySpecifier } from '../DependencySpecifier';
 
 describe('npm ShrinkwrapFile', () => {
   const filename: string = path.resolve(path.join(__dirname, './shrinkwrapFile/npm-shrinkwrap.json'));
-  const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('npm', filename)!;
+  const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('npm', {}, filename)!;
 
   it('verifies root-level dependency', () => {
     expect(shrinkwrapFile.hasCompatibleTopLevelDependency(new DependencySpecifier('q', '~1.5.0'))).toEqual(true);
@@ -34,9 +34,8 @@ describe('npm ShrinkwrapFile', () => {
 });
 
 describe('pnpm ShrinkwrapFile', () => {
-  const filename: string = path.resolve(path.join(
-    __dirname, '../../../src/logic/test/shrinkwrapFile/pnpm-lock.yaml'));
-  const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
+  const filename: string = path.resolve(path.join(__dirname, '../../../src/logic/test/shrinkwrapFile/pnpm-lock.yaml'));
+  const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', {}, filename)!;
 
   it('verifies root-level dependency', () => {
     expect(shrinkwrapFile.hasCompatibleTopLevelDependency(new DependencySpecifier('q', '~1.5.0'))).toEqual(false);

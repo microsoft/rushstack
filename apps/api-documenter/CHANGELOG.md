@@ -1,6 +1,47 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 28 Jan 2020 02:23:44 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Apr 2020 15:09:06 GMT and should not be manually modified.
+
+## 7.7.19
+Fri, 24 Apr 2020 15:09:06 GMT
+
+### Patches
+
+- Properly encode xrefs that contain '#' characters.
+
+## 7.7.18
+Wed, 08 Apr 2020 04:07:33 GMT
+
+*Version update only*
+
+## 7.7.17
+Fri, 03 Apr 2020 15:10:15 GMT
+
+*Version update only*
+
+## 7.7.16
+Sun, 29 Mar 2020 00:04:12 GMT
+
+*Version update only*
+
+## 7.7.15
+Sat, 28 Mar 2020 00:37:16 GMT
+
+### Patches
+
+- Upgrade to TSdoc 0.12.19
+
+## 7.7.14
+Wed, 18 Mar 2020 15:07:47 GMT
+
+*Version update only*
+
+## 7.7.13
+Tue, 17 Mar 2020 23:55:58 GMT
+
+### Patches
+
+- Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`
 
 ## 7.7.12
 Tue, 28 Jan 2020 02:23:44 GMT

@@ -4,7 +4,7 @@ import { ChangeFile } from './ChangeFile';
 import { IChangeFile } from './ChangeManagement';
 
 /**
- * A class that helps with programatically interacting with Rush's change files.
+ * A class that helps with programmatically interacting with Rush's change files.
  * @public
  */
 export class ChangeManager {

@@ -1,6 +1,42 @@
 # Change Log - @microsoft/rush-stack-compiler-3.2
 
-This log was last generated on Tue, 28 Jan 2020 02:23:44 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Apr 2020 04:07:33 GMT and should not be manually modified.
+
+## 0.6.9
+Wed, 08 Apr 2020 04:07:33 GMT
+
+*Version update only*
+
+## 0.6.8
+Fri, 03 Apr 2020 15:10:15 GMT
+
+### Patches
+
+- Update tslint-microsoft-contrib to ~6.2.0
+
+## 0.6.7
+Sun, 29 Mar 2020 00:04:12 GMT
+
+*Version update only*
+
+## 0.6.6
+Sat, 28 Mar 2020 00:37:16 GMT
+
+*Version update only*
+
+## 0.6.5
+Wed, 18 Mar 2020 15:07:47 GMT
+
+### Patches
+
+- Upgrade cyclic dependencies
+
+## 0.6.4
+Tue, 17 Mar 2020 23:55:58 GMT
+
+### Patches
+
+- Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`
 
 ## 0.6.3
 Tue, 28 Jan 2020 02:23:44 GMT

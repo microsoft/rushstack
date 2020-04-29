@@ -3,8 +3,8 @@
 
 import * as colors from 'colors';
 import * as path from 'path';
-import { FileSystem } from '@microsoft/node-core-library';
-import { CommandLineAction } from '@microsoft/ts-command-line';
+import { FileSystem } from '@rushstack/node-core-library';
+import { CommandLineAction } from '@rushstack/ts-command-line';
 
 import { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
 import { ExtractorConfig } from '../api/ExtractorConfig';

@@ -2,11 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as tsdoc from '@microsoft/tsdoc';
-import * as path from 'path';
 import { ExtractorMessageId } from './ExtractorMessageId';
-import { Path, Text } from '@microsoft/node-core-library';
 import { ExtractorLogLevel } from './ExtractorLogLevel';
 import { ConsoleMessageId } from './ConsoleMessageId';
+import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
 
 /**
  * Used by {@link ExtractorMessage.properties}.
@@ -211,27 +210,11 @@ export class ExtractorMessage {
     let result: string = '';
 
     if (this.sourceFilePath) {
-      // Make the path relative to the workingPackageFolderPath
-      let scrubbedPath: string = this.sourceFilePath;
-
-      if (workingPackageFolderPath !== undefined) {
-        // If it's under the working folder, make it a relative path
-        if (Path.isUnderOrEqual(this.sourceFilePath, workingPackageFolderPath)) {
-          scrubbedPath = path.relative(workingPackageFolderPath, this.sourceFilePath);
-        }
-      }
-
-      // Convert it to a Unix-style path
-      scrubbedPath = Text.replaceAll(scrubbedPath, '\\', '/');
-      result += scrubbedPath;
-
-      if (this.sourceFileLine) {
-        result += `:${this.sourceFileLine}`;
-
-        if (this.sourceFileColumn) {
-          result += `:${this.sourceFileColumn}`;
-        }
-      }
+      result += SourceFileLocationFormatter.formatPath(this.sourceFilePath, {
+        sourceFileLine: this.sourceFileLine,
+        sourceFileColumn: this.sourceFileColumn,
+        workingPackageFolderPath
+      });
 
       if (result.length > 0) {
         result += ' - ';

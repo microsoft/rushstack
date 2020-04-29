@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IPackageJson, PackageName } from '@microsoft/node-core-library';
+import { IPackageJson, PackageName } from '@rushstack/node-core-library';
 
 import { ApprovedPackagesPolicy } from '../api/ApprovedPackagesPolicy';
 import { RushConfiguration } from '../api/RushConfiguration';

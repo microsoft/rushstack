@@ -3,7 +3,7 @@ import readPackageTree = require('read-package-tree');
 import {
   JsonFile,
   IPackageJson
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import {
   BasePackage,

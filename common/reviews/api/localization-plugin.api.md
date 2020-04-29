@@ -4,8 +4,9 @@
 
 ```ts
 
-import { loader } from 'webpack';
-import { Terminal } from '@microsoft/node-core-library';
+import { NewlineKind } from '@rushstack/node-core-library';
+import { StringValuesTypingsGenerator } from '@rushstack/typings-generator';
+import { Terminal } from '@rushstack/node-core-library';
 import * as Webpack from 'webpack';
 
 // @public (undocumented)
@@ -17,7 +18,7 @@ export interface IDefaultLocaleOptions {
 // @public (undocumented)
 export interface ILocaleData {
     // (undocumented)
-    [locFilePath: string]: ILocaleFileData;
+    [locFilePath: string]: string | ILocaleFileData;
 }
 
 // @public (undocumented)
@@ -30,6 +31,12 @@ export interface ILocaleElementMap {
 export interface ILocaleFileData {
     // (undocumented)
     [stringName: string]: string;
+}
+
+// @internal (undocumented)
+export interface _ILocalizationFile {
+    // (undocumented)
+    [stringName: string]: _ILocalizedString;
 }
 
 // @public
@@ -74,8 +81,10 @@ export interface ILocalizationStatsOptions {
 // @public (undocumented)
 export interface ILocalizedData {
     defaultLocale: IDefaultLocaleOptions;
+    normalizeResxNewlines?: 'lf' | 'crlf';
     passthroughLocale?: IPassthroughLocaleOptions;
     pseudolocales?: IPseudolocalesOptions;
+    resolveMissingTranslatedStrings?: (locales: string[], filePath: string) => IResolvedMissingTranslations;
     translatedStrings: ILocalizedStrings;
 }
 
@@ -102,27 +111,15 @@ export interface ILocalizedWebpackChunk extends Webpack.compilation.Chunk {
 }
 
 // @internal (undocumented)
-export interface _ILocFile {
-    // (undocumented)
-    [stringName: string]: _ILocalizedString;
-}
-
-// @internal (undocumented)
-export interface _ILoggerOptions {
-    // (undocumented)
-    writeError: (message: string) => void;
-    // (undocumented)
-    writeWarning: (message: string) => void;
-}
-
-// @internal (undocumented)
 export interface _IParseLocFileOptions {
     // (undocumented)
     content: string;
     // (undocumented)
     filePath: string;
     // (undocumented)
-    loggerOptions: _ILoggerOptions;
+    resxNewlineNormalization: NewlineKind | undefined;
+    // (undocumented)
+    terminal: Terminal;
 }
 
 // @public
@@ -155,6 +152,12 @@ export interface IPseudolocalesOptions {
     [pseudoLocaleName: string]: IPseudolocaleOptions;
 }
 
+// @public (undocumented)
+export interface IResolvedMissingTranslations {
+    // (undocumented)
+    [localeName: string]: string | ILocaleFileData;
+}
+
 // @internal (undocumented)
 export interface _IStringPlaceholder {
     // (undocumented)
@@ -179,6 +182,8 @@ export interface ITypingsGeneratorOptions {
     // (undocumented)
     generatedTsFolder: string;
     // (undocumented)
+    resxNewlineNormalization?: NewlineKind | undefined;
+    // (undocumented)
     srcFolder: string;
     // (undocumented)
     terminal?: Terminal;
@@ -187,8 +192,10 @@ export interface ITypingsGeneratorOptions {
 // @public
 export class LocalizationPlugin implements Webpack.Plugin {
     constructor(options: ILocalizationPluginOptions);
+    // Warning: (ae-forgotten-export) The symbol "IAddDefaultLocFileResult" needs to be exported by the entry point index.d.ts
+    //
     // @internal (undocumented)
-    addDefaultLocFile(locFilePath: string, locFile: _ILocFile): void;
+    addDefaultLocFile(terminal: Terminal, localizedResourcePath: string, localizedResourceData: _ILocalizationFile): IAddDefaultLocFileResult;
     // (undocumented)
     apply(compiler: Webpack.Compiler): void;
     // Warning: (ae-forgotten-export) The symbol "IStringSerialNumberData" needs to be exported by the entry point index.d.ts
@@ -202,18 +209,12 @@ export class LocalizationPlugin implements Webpack.Plugin {
 // @internal (undocumented)
 export class _LocFileParser {
     // (undocumented)
-    static parseLocFile(options: _IParseLocFileOptions): _ILocFile;
-    // (undocumented)
-    static parseLocFileFromLoader(content: string, loaderContext: loader.LoaderContext): _ILocFile;
+    static parseLocFile(options: _IParseLocFileOptions): _ILocalizationFile;
 }
 
 // @public
-export class TypingsGenerator {
+export class TypingsGenerator extends StringValuesTypingsGenerator {
     constructor(options: ITypingsGeneratorOptions);
-    // (undocumented)
-    generateTypings(): void;
-    // (undocumented)
-    runWatcher(): void;
 }
 
 
