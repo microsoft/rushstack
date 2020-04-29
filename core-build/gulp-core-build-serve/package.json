@@ -25,7 +25,7 @@
     "sudo": "~1.0.3"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.7": "0.2.9",
+    "@microsoft/rush-stack-compiler-3.5": "0.4.9",
     "@microsoft/node-library-build": "6.4.10",
     "@rushstack/eslint-config": "0.5.7",
     "@types/express": "4.11.0",

@@ -12,7 +12,7 @@
     "@rushstack/node-core-library": "3.19.7",
     "@rushstack/localization-plugin": "0.3.2",
     "@types/webpack-env": "1.13.0",
-    "@microsoft/rush-stack-compiler-3.7": "0.2.9",
+    "@microsoft/rush-stack-compiler-3.5": "0.4.9",
     "ts-loader": "6.0.0",
     "webpack": "~4.31.0",
     "webpack-bundle-analyzer": "~3.6.0",

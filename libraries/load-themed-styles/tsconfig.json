@@ -1,5 +1,5 @@
 {
-  "extends": "./node_modules/@microsoft/rush-stack-compiler-3.7/includes/tsconfig-web.json",
+  "extends": "./node_modules/@microsoft/rush-stack-compiler-3.5/includes/tsconfig-web.json",
   "compilerOptions": {
     "module": "commonjs",
     "types": [

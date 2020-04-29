@@ -18,7 +18,7 @@ function generateConfiguration(mode, outputFolderName) {
           loader: require.resolve('ts-loader'),
           exclude: /(node_modules)/,
           options: {
-            compiler: require.resolve('@microsoft/rush-stack-compiler-3.7/node_modules/typescript'),
+            compiler: require.resolve('@microsoft/rush-stack-compiler-3.5/node_modules/typescript'),
             logLevel: 'ERROR',
             configFile: path.resolve(__dirname, 'tsconfig.json')
           }
