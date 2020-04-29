@@ -41,7 +41,9 @@ import {
   ApiReturnTypeMixin,
   ApiDeclaredItem,
   ApiNamespace,
-  ExcerptTokenKind
+  ExcerptTokenKind,
+  ExcerptToken,
+  IResolveDeclarationReferenceResult
 } from '@microsoft/api-extractor-model';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -729,33 +731,10 @@ export class MarkdownDocumenter {
       configuration,
       headerTitles: ['Parameter', 'Type', 'Description']
     });
-
     for (const apiParameter of apiParameterListMixin.parameters) {
       const parameterDescription: DocSection = new DocSection({ configuration });
       if (apiParameter.tsdocParamBlock) {
         this._appendSection(parameterDescription, apiParameter.tsdocParamBlock.content);
-      }
-
-      let typeNode: DocCodeSpan | DocLinkTag = new DocCodeSpan({ configuration, code: apiParameter.parameterTypeExcerpt.text });
-
-      // Use the last token, so it works for namespace types, e.g. types.MyType
-      const typeTokenExcerpt = apiParameter.parameterTypeExcerpt.tokens[apiParameter.parameterTypeExcerpt.tokenRange.endIndex - 1];
-
-      // In case of a reference excerpt, create a link node instead
-      if (typeTokenExcerpt.kind === ExcerptTokenKind.Reference && typeTokenExcerpt.canonicalReference) {
-        const apiItemResult = this._apiModel.resolveDeclarationReference(typeTokenExcerpt.canonicalReference, undefined);
-
-        if (apiItemResult.resolvedApiItem) {
-          typeNode = new DocLinkTag({
-            configuration,
-            tagName: '@link',
-            linkText: typeTokenExcerpt.text,
-            urlDestination: this._getLinkFilenameForApiItem(apiItemResult.resolvedApiItem)
-          });
-        } else if (apiItemResult.errorMessage) {
-          console.log(colors.yellow(`WARNING: Unable to resolve reference "${typeTokenExcerpt.canonicalReference.toString()}": `
-            + apiItemResult.errorMessage));
-        }
       }
 
       parametersTable.addRow(
@@ -767,7 +746,8 @@ export class MarkdownDocumenter {
           ]),
           new DocTableCell({ configuration }, [
             new DocParagraph({ configuration }, [
-              typeNode
+              this._tryCreateLinkTagForTypeExcerpt(apiParameter.parameterTypeExcerpt)
+              || new DocCodeSpan({ configuration, code: apiParameter.parameterTypeExcerpt.text })
             ])
           ]),
           new DocTableCell({ configuration }, parameterDescription.nodes)
@@ -792,7 +772,8 @@ export class MarkdownDocumenter {
 
       output.appendNode(
         new DocParagraph({ configuration }, [
-          new DocCodeSpan({ configuration, code: returnTypeExcerpt.text.trim() || '(not declared)' })
+          this._tryCreateLinkTagForTypeExcerpt(returnTypeExcerpt)
+          || new DocCodeSpan({ configuration, code: returnTypeExcerpt.text.trim() || '(not declared)' })
         ])
       );
 
@@ -802,6 +783,29 @@ export class MarkdownDocumenter {
         }
       }
     }
+  }
+
+  private _tryCreateLinkTagForTypeExcerpt(excerpt: Excerpt): DocLinkTag | undefined {
+      const configuration: TSDocConfiguration = this._tsdocConfiguration;
+      // Use the last token, so it works for namespace types, e.g. types.MyType
+      const typeExcerptToken: ExcerptToken = excerpt.tokens[excerpt.tokenRange.endIndex - 1];
+
+      // Create a link node in case of a reference excerpt
+      if (typeExcerptToken.kind === ExcerptTokenKind.Reference && typeExcerptToken.canonicalReference) {
+        const apiItemResult: IResolveDeclarationReferenceResult = this._apiModel.resolveDeclarationReference(typeExcerptToken.canonicalReference, undefined);
+
+        if (apiItemResult.resolvedApiItem) {
+          return new DocLinkTag({
+            configuration,
+            tagName: '@link',
+            linkText: typeExcerptToken.text,
+            urlDestination: this._getLinkFilenameForApiItem(apiItemResult.resolvedApiItem)
+          });
+        } else if (apiItemResult.errorMessage) {
+          console.log(colors.yellow(`WARNING: Unable to resolve reference "${typeExcerptToken.canonicalReference.toString()}": `
+            + apiItemResult.errorMessage));
+        }
+      }
   }
 
   private _createTitleCell(apiItem: ApiItem): DocTableCell {
