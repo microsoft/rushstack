@@ -25,5 +25,4 @@ import { AmbientConsumer } from 'api-extractor-test-01';
 // import Jest
 const x = new AmbientConsumer();
 const y = x.definitelyTyped();
-// TODO: Uncomment after fixing
-// const z = y.config;
+const z = y.results;
