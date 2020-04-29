@@ -135,8 +135,8 @@ export class PnpmProjectDependencyManifest {
       //     tarball: 'https://codeload.github.com/chfritz/node-xmlrpc/tar.gz/948db2fbd0260e5d56ed5ba58df0f5b6599bbe38'
       //   version: 1.3.2
 
-      integrity =
-        `${name}@${version}:${crypto.createHash('sha256').update(JSON.stringify(shrinkwrapEntry)).digest('hex')}:`;
+      const sha256Digest = crypto.createHash('sha256').update(JSON.stringify(shrinkwrapEntry)).digest('hex');
+      integrity = `${name}@${version}:${sha256Digest}:`;
     }
 
     if (this._projectDependencyManifestFile.has(specifier)) {
