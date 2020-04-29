@@ -146,13 +146,14 @@ export function parsePnpmDependencyKey(dependencyName: string, dependencyKey: st
   }
 
   if (!semver.valid(parsedVersionPart)) {
+    const urlRegex: RegExp = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\/([^\/\\]+\/?)*([^\/\\]+)$/i;
     // Test for urls:
     // Examples:
     //     github.com/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
     //     github.com.au/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
     //     bitbucket.com/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
     //     bitbucket.co.in/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
-    if (/^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\/([^\/\\]+\/?)*([^\/\\]+)$/i.test(dependencyKey)) {
+    if (urlRegex.test(dependencyKey)) {
       try {
         const dependencySpecifier: DependencySpecifier = new DependencySpecifier(dependencyName, dependencyKey);
         return dependencySpecifier;
@@ -255,7 +256,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public validate(
     packageManagerOptionsConfig: PackageManagerOptionsConfigurationBase,
     policyOptions: IPolicyValidatorOptions
-  ) : void {
+  ): void {
     super.validate(packageManagerOptionsConfig, policyOptions);
     if (!(packageManagerOptionsConfig instanceof PnpmOptionsConfiguration)) {
       throw new Error('The provided package manager options are not valid for PNPM shrinkwrap files.');
