@@ -168,8 +168,6 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
         result.resolvedApiItem = apiItem;
       }
 
-      console.log("resolved correctly!");
-
       return result;
     }
   }

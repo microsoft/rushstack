@@ -72,7 +72,7 @@ dist
 *.sass.ts
 
 # Visual Studio Code
-# .vscode
+.vscode
 
 # Remove eventually
 package-deps.json
