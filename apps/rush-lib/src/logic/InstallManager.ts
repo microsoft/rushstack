@@ -737,7 +737,7 @@ export class InstallManager {
 
           // create the new tarball
           tar.create({
-            gzip: false,
+            gzip: true,
             file: tarballFile,
             cwd: tempProjectFolder,
             portable: true,

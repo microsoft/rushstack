@@ -13,6 +13,4 @@
     * is modified.
     */
   // "legacyIncrementalBuildDependencyDetection": true
-
-  "usePnpmFrozenLockfileForRushInstall": true
 }
