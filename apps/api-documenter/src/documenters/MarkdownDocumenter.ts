@@ -738,19 +738,18 @@ export class MarkdownDocumenter {
 
       let typeNode: DocCodeSpan | DocLinkTag = new DocCodeSpan({ configuration, code: apiParameter.parameterTypeExcerpt.text });
 
-      // Use the last token to account for namespace types, e.g. types.MyType
+      // Use the last token, so it works for namespace types, e.g. types.MyType
       const typeTokenExcerpt = apiParameter.parameterTypeExcerpt.tokens[apiParameter.parameterTypeExcerpt.tokenRange.endIndex - 1];
-      // canonicalReference should be defined, so the second condition might not be necessary
-      // if the type is a reference, create a link node instead
+
+      // In case of a reference excerpt, create a link node instead
       if (typeTokenExcerpt.kind === ExcerptTokenKind.Reference && typeTokenExcerpt.canonicalReference) {
-        // TODO: make resolveDeclarationReference take canonicalReference
-        const apiItemResult = this._apiModel.resolveDeclarationReference(typeTokenExcerpt.canonicalReference as any, undefined);
+        const apiItemResult = this._apiModel.resolveDeclarationReference(typeTokenExcerpt.canonicalReference, undefined);
 
         if (apiItemResult.resolvedApiItem) {
           typeNode = new DocLinkTag({
             configuration,
             tagName: '@link',
-            linkText: apiParameter.parameterTypeExcerpt.text,
+            linkText: typeTokenExcerpt.text,
             urlDestination: this._getLinkFilenameForApiItem(apiItemResult.resolvedApiItem)
           });
         } else if (apiItemResult.errorMessage) {
