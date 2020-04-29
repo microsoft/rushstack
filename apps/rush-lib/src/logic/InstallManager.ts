@@ -823,7 +823,7 @@ export class InstallManager {
   }
 
   /**
-   * Runs "npm install" in the common folder.
+   * Runs "npm/pnpm/yarn install" in the "common/temp" folder.
    */
   private _installCommonModules(options: {
     shrinkwrapIsUpToDate: boolean;
@@ -861,7 +861,7 @@ export class InstallManager {
         // then we can't skip this install
         potentiallyChangedFiles.push(this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant));
 
-        // Add common-versions.json file in potentially changed file list.
+        // Add common-versions.json file to the potentially changed files list.
         potentiallyChangedFiles.push(this._rushConfiguration.getCommonVersionsFilePath(options.variant));
 
         if (this._rushConfiguration.packageManager === 'pnpm') {
@@ -1070,7 +1070,15 @@ export class InstallManager {
             this._fixupNpm5Regression();
           }
 
-          if (options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
+          if (options.allowShrinkwrapUpdates &&
+            (
+              (
+                this._rushConfiguration.packageManager === 'pnpm' &&
+                this._rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall
+              ) ||
+              !shrinkwrapIsUpToDate
+            )
+          ) {
             // Shrinkwrap files may need to be post processed after install, so load and save it
             const tempShrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
               this._rushConfiguration.packageManager,
