@@ -42,8 +42,8 @@ export class AmbientConsumer {
    * Configured via tsconfig.json's "lib" setting, which specifies `@types/jest`.
    * The emitted index.d.ts gets a reference like this:  <reference types="jest" />
    */
-  public definitelyTyped(): object {
-    return {} as object;
+  public definitelyTyped(): jest.EmptyFunction {
+    return {} as jest.EmptyFunction;
   }
 
   /**
