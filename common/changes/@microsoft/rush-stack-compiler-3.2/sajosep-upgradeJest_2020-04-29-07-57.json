@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Upgrade Jest to 25",
+      "comment": "",
       "type": "none",
       "packageName": "@microsoft/rush-stack-compiler-3.2"
     }
