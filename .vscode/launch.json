@@ -28,11 +28,9 @@
 			"program": "${workspaceRoot}/apps/rush-lib/lib/start.js",
 			"stopOnEntry": true,
 			"args": [
-				"update",
-				"--variant",
-				"test"
+				"update"
 			],
-			"cwd": "${workspaceRoot}",
+			"cwd": "D:/work/t/rushstack",
 			"runtimeExecutable": null,
 			"runtimeArgs": [
 				"--nolazy",

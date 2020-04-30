@@ -2,7 +2,7 @@
   "changes": [
     {
       "comment": "Upgrade Jest to 25",
-      "type": "minor",
+      "type": "none",
       "packageName": "@microsoft/api-extractor-model"
     }
   ],
