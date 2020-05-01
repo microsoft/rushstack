@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@microsoft/gulp-core-build-sass"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-sass",
+  "email": "sachinjoseph@users.noreply.github.com"
+}

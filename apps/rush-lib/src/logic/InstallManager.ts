@@ -46,6 +46,11 @@ import { Rush } from '../api/Rush';
 import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../api/PackageJsonEditor';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
+import { RushGlobalFolder } from '../api/RushGlobalFolder';
+import { PackageManagerName } from '../api/packageManager/PackageManager';
+import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
+import { DependencySpecifier } from './DependencySpecifier';
+import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 
 // The PosixModeBits are intended to be used with bitwise operations.
 /* eslint-disable no-bitwise */
@@ -54,20 +59,15 @@ import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration'
  * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.
  * As a temporary workaround, augment the type.
  */
-import { CreateOptions } from 'tar';
-import { RushGlobalFolder } from '../api/RushGlobalFolder';
-import { PackageManagerName } from '../api/packageManager/PackageManager';
-import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
-import { DependencySpecifier } from './DependencySpecifier';
-import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
-
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
-export interface CreateOptions {
-  /**
-   * "Set to true to omit writing mtime values for entries. Note that this prevents using other
-   * mtime-based features like tar.update or the keepNewer option with the resulting tar archive."
-   */
-  noMtime?: boolean;
+declare module 'tar' {
+  // eslint-disable-next-line @typescript-eslint/interface-name-prefix
+  export interface CreateOptions {
+    /**
+     * "Set to true to omit writing mtime values for entries. Note that this prevents using other
+     * mtime-based features like tar.update or the keepNewer option with the resulting tar archive."
+     */
+    noMtime?: boolean;
+  }
 }
 
 export interface IInstallManagerOptions {
@@ -735,8 +735,7 @@ export class InstallManager {
           // write the expected package.json file into the zip staging folder
           JsonFile.save(tempPackageJson, tempPackageJsonFilename);
 
-          // create the new tarball
-          tar.create({
+          const tarOptions: tar.CreateOptions = ({
             gzip: true,
             file: tarballFile,
             cwd: tempProjectFolder,
@@ -748,14 +747,15 @@ export class InstallManager {
             filter: (path: string, stat: tar.FileStat): boolean => {
               if (!this._rushConfiguration.experimentsConfiguration.configuration
                 .noChmodFieldInTarHeaderNormalization) {
-
                 stat.mode = (stat.mode & ~0x1FF) | PosixModeBits.AllRead | PosixModeBits.UserWrite
                   | PosixModeBits.AllExecute;
               }
-
               return true;
             }
-          } as CreateOptions, [FileConstants.PackageJson]);
+          } as tar.CreateOptions);
+
+          // create the new tarball
+          tar.create(tarOptions, [FileConstants.PackageJson]);
 
           console.log(`Updating ${tarballFile}`);
         } catch (error) {
@@ -860,10 +860,10 @@ export class InstallManager {
         // Additionally, if they pulled an updated npm-shrinkwrap.json file from Git,
         // then we can't skip this install
         potentiallyChangedFiles.push(this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant));
-        
-        // Add common-versions.json file in potentially changed file list. 
+
+        // Add common-versions.json file in potentially changed file list.
         potentiallyChangedFiles.push(this._rushConfiguration.getCommonVersionsFilePath(options.variant));
-        
+
         if (this._rushConfiguration.packageManager === 'pnpm') {
           // If the repo is using pnpmfile.js, consider that also
           const pnpmFileFilename: string = this._rushConfiguration.getPnpmfilePath(options.variant);

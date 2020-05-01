@@ -12,9 +12,9 @@
     "@microsoft/rush-stack-compiler-3.5": "0.4.9",
     "@microsoft/load-themed-styles": "1.10.43",
     "@microsoft/web-library-build": "7.4.10",
-    "@types/jest": "23.3.11",
+    "@types/jest": "25.2.1",
     "gulp": "~4.0.2",
-    "jest": "~23.6.0",
-    "ts-jest": "~22.4.6"
+    "jest": "25.4.0",
+    "ts-jest": "~25.1.0"
   }
 }

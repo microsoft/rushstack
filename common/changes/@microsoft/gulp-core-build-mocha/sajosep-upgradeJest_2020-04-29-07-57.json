@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@microsoft/gulp-core-build-mocha"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-mocha",
+  "email": "sachinjoseph@users.noreply.github.com"
+}
