@@ -2,6 +2,18 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.3.3",
+      "tag": "@rushstack/localization-plugin_v0.3.3",
+      "date": "Fri, 01 May 2020 05:15:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Don't trim RESX text elements."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.2",
       "tag": "@rushstack/localization-plugin_v0.3.2",
       "date": "Wed, 08 Apr 2020 08:11:13 GMT",

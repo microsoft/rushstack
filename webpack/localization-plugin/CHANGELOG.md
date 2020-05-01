@@ -1,6 +1,13 @@
 # Change Log - @rushstack/localization-plugin
 
-This log was last generated on Wed, 08 Apr 2020 08:11:13 GMT and should not be manually modified.
+This log was last generated on Fri, 01 May 2020 05:15:06 GMT and should not be manually modified.
+
+## 0.3.3
+Fri, 01 May 2020 05:15:06 GMT
+
+### Patches
+
+- Don't trim RESX text elements.
 
 ## 0.3.2
 Wed, 08 Apr 2020 08:11:13 GMT
