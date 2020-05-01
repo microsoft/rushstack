@@ -324,7 +324,7 @@ export interface IConfigFile {
   /**
    * support multiple entry points.
    */
-  entryPointFilePaths: string[];
+  additionalEntryPointFilePaths: string[];
 
   /**
    * A list of NPM package names whose exports should be treated as part of this package.

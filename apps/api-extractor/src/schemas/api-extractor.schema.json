@@ -23,7 +23,7 @@
       "type": "string"
     },
 
-    "entryPointFilePaths": {
+    "additionalEntryPointFilePaths": {
       "description": "Specifies the .d.ts files to be used as the starting points for analysis.",
       "type": "array",
       "items": {
