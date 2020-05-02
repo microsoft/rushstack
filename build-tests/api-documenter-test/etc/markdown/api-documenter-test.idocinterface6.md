@@ -17,11 +17,11 @@ export interface IDocInterface6
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [arrayProperty](./api-documenter-test.idocinterface6.arrayproperty.md) | <code>IDocInterface1[]</code> |  |
-|  [intersectionProperty](./api-documenter-test.idocinterface6.intersectionproperty.md) | <code>IDocInterface1 &amp; IDocInterface2</code> |  |
+|  [intersectionProperty](./api-documenter-test.idocinterface6.intersectionproperty.md) | [IDocInterface2](./api-documenter-test.idocinterface2.md) |  |
 |  [regularProperty](./api-documenter-test.idocinterface6.regularproperty.md) | <code>number</code> | Property of type number that does something |
 |  [tupleProperty](./api-documenter-test.idocinterface6.tupleproperty.md) | <code>[IDocInterface1, IDocInterface2]</code> |  |
 |  [typeReferenceProperty](./api-documenter-test.idocinterface6.typereferenceproperty.md) | <code>Generic&lt;IDocInterface1&gt;</code> |  |
-|  [unionProperty](./api-documenter-test.idocinterface6.unionproperty.md) | <code>IDocInterface1 &#124; IDocInterface2</code> |  |
+|  [unionProperty](./api-documenter-test.idocinterface6.unionproperty.md) | [IDocInterface2](./api-documenter-test.idocinterface2.md) |  |
 
 ## Methods
 
