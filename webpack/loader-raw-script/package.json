@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/loader-raw-script",
-  "version": "1.3.10",
+  "version": "1.3.11",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -23,6 +23,6 @@
     "chai": "~3.5.0",
     "gulp": "~4.0.2",
     "mocha": "^5.2.0",
-    "@microsoft/node-library-build": "6.4.10"
+    "@microsoft/node-library-build": "6.4.11"
   }
 }

@@ -8,9 +8,9 @@
     "serve": "node serve.js"
   },
   "dependencies": {
-    "@rushstack/set-webpack-public-path-plugin": "2.4.7",
+    "@rushstack/set-webpack-public-path-plugin": "2.4.8",
     "@rushstack/node-core-library": "3.19.7",
-    "@rushstack/localization-plugin": "0.3.3",
+    "@rushstack/localization-plugin": "0.3.4",
     "@types/webpack-env": "1.13.0",
     "@microsoft/rush-stack-compiler-3.5": "0.4.9",
     "ts-loader": "6.0.0",
