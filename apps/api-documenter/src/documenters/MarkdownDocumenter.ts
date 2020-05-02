@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as colors from 'colors';
-
 import {
   PackageName,
   FileSystem,
@@ -745,10 +743,7 @@ export class MarkdownDocumenter {
             ])
           ]),
           new DocTableCell({ configuration }, [
-            new DocParagraph({ configuration }, [
-              this._tryCreateLinkTagForTypeExcerpt(apiParameter.parameterTypeExcerpt)
-              || new DocCodeSpan({ configuration, code: apiParameter.parameterTypeExcerpt.text })
-            ])
+            this._createParagraphForTypeExcerpt(apiParameter.parameterTypeExcerpt)
           ]),
           new DocTableCell({ configuration }, parameterDescription.nodes)
         ])
@@ -771,10 +766,7 @@ export class MarkdownDocumenter {
       );
 
       output.appendNode(
-        new DocParagraph({ configuration }, [
-          this._tryCreateLinkTagForTypeExcerpt(returnTypeExcerpt)
-          || new DocCodeSpan({ configuration, code: returnTypeExcerpt.text.trim() || '(not declared)' })
-        ])
+        this._createParagraphForTypeExcerpt(returnTypeExcerpt)
       );
 
       if (apiParameterListMixin instanceof ApiDocumentedItem) {
@@ -785,27 +777,42 @@ export class MarkdownDocumenter {
     }
   }
 
-  private _tryCreateLinkTagForTypeExcerpt(excerpt: Excerpt): DocLinkTag | undefined {
-      const configuration: TSDocConfiguration = this._tsdocConfiguration;
-      // Use the last token, so it works for namespace types, e.g. types.MyType
-      const typeExcerptToken: ExcerptToken = excerpt.tokens[excerpt.tokenRange.endIndex - 1];
+  private _createParagraphForTypeExcerpt(excerpt: Excerpt): DocParagraph {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
-      // Create a link node in case of a reference excerpt
-      if (typeExcerptToken.kind === ExcerptTokenKind.Reference && typeExcerptToken.canonicalReference) {
-        const apiItemResult: IResolveDeclarationReferenceResult = this._apiModel.resolveDeclarationReference(typeExcerptToken.canonicalReference, undefined);
+    const paragraph: DocParagraph = new DocParagraph({ configuration });
 
-        if (apiItemResult.resolvedApiItem) {
-          return new DocLinkTag({
-            configuration,
-            tagName: '@link',
-            linkText: typeExcerptToken.text,
-            urlDestination: this._getLinkFilenameForApiItem(apiItemResult.resolvedApiItem)
-          });
-        } else if (apiItemResult.errorMessage) {
-          console.log(colors.yellow(`WARNING: Unable to resolve reference "${typeExcerptToken.canonicalReference.toString()}": `
-            + apiItemResult.errorMessage));
+    if (!excerpt.text.trim()) {
+      paragraph.appendNode(new DocCodeSpan({ configuration, code: '(not declared)' }));
+    } else {
+      // TODO: Add a helper method to Excerpt to solve this problem
+      const excerptTokens: ExcerptToken[] = excerpt.tokens.slice(
+        excerpt.tokenRange.startIndex,
+        excerpt.tokenRange.endIndex);
+
+      for (const token of excerptTokens) {
+        // If it's hyperlinkable, then append a hyperlink node
+        if (token.kind === ExcerptTokenKind.Reference && token.canonicalReference) {
+          const apiItemResult: IResolveDeclarationReferenceResult = this._apiModel.resolveDeclarationReference(
+            token.canonicalReference, undefined);
+
+          if (apiItemResult.resolvedApiItem) {
+            paragraph.appendNode(new DocLinkTag({
+              configuration,
+              tagName: '@link',
+              linkText: token.text,
+              urlDestination: this._getLinkFilenameForApiItem(apiItemResult.resolvedApiItem)
+            }));
+            continue;
+          }
         }
+
+        // Otherwise append non-hyperlinked text
+        paragraph.appendNode(new DocCodeSpan({ configuration, code: token.text }));
       }
+    }
+
+    return paragraph;
   }
 
   private _createTitleCell(apiItem: ApiItem): DocTableCell {
@@ -875,9 +882,8 @@ export class MarkdownDocumenter {
     const section: DocSection = new DocSection({ configuration });
 
     if (apiItem instanceof ApiPropertyItem) {
-      section.appendNodeInParagraph(
-        this._tryCreateLinkTagForTypeExcerpt(apiItem.propertyTypeExcerpt)
-        || new DocCodeSpan({ configuration, code: apiItem.propertyTypeExcerpt.text })
+      section.appendNode(
+        this._createParagraphForTypeExcerpt(apiItem.propertyTypeExcerpt)
       );
     }
 
