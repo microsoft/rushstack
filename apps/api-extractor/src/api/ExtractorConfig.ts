@@ -19,6 +19,7 @@ import {
 } from '@rushstack/node-core-library';
 import {
   IConfigFile,
+  IConfigEntryPoint,
   IExtractorMessagesConfig
 } from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
@@ -96,7 +97,7 @@ interface IExtractorConfigParameters {
   packageJson: INodePackageJson | undefined;
   packageFolder: string | undefined;
   mainEntryPointFilePath: string;
-  additionalEntryPointFilePaths: string[];
+  additionalEntryPoints: IConfigEntryPoint[];
   bundledPackages: string[];
   tsconfigFilePath: string;
   overrideTsconfig: { } | undefined;
@@ -157,8 +158,8 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigFile.mainEntryPointFilePath} */
   public readonly mainEntryPointFilePath: string;
 
-  /** {@inheritDoc IConfigFile.additionalEntryPointFilePaths} */
-  public readonly additionalEntryPointFilePaths: string[];
+  /** {@inheritDoc IConfigFile.additionalEntryPoints} */
+  public readonly additionalEntryPoints: IConfigEntryPoint[];
 
   /** {@inheritDoc IConfigFile.bundledPackages} */
   public readonly bundledPackages: string[];
@@ -218,7 +219,7 @@ export class ExtractorConfig {
     this.packageJson = parameters.packageJson;
     this.packageFolder = parameters.packageFolder;
     this.mainEntryPointFilePath = parameters.mainEntryPointFilePath;
-    this.additionalEntryPointFilePaths = parameters.additionalEntryPointFilePaths;
+    this.additionalEntryPoints = parameters.additionalEntryPoints;
     this.bundledPackages = parameters.bundledPackages;
     this.tsconfigFilePath = parameters.tsconfigFilePath;
     this.overrideTsconfig = parameters.overrideTsconfig;
@@ -384,18 +385,18 @@ export class ExtractorConfig {
         'mainEntryPointFilePath', configFile.mainEntryPointFilePath, currentConfigFolderPath);
     }
 
-    if (configFile.additionalEntryPointFilePaths) {
-      const absolutePath: string[] = [];
-      for (const path of configFile.additionalEntryPointFilePaths) {
-        absolutePath.push(
-          ExtractorConfig._resolveConfigFileRelativePath(
-            'additionalEntryPointFilePaths',
-            path,
-            currentConfigFolderPath
-          )
+    if (configFile.additionalEntryPoints) {
+      const entryPointWithAbsolutePath: IConfigEntryPoint[] = [];
+      for (const entryPoint of configFile.additionalEntryPoints) {
+        const absoluteFilePath =  ExtractorConfig._resolveConfigFileRelativePath(
+          'additionalEntryPoints',
+          entryPoint.filePath,
+          currentConfigFolderPath
         );
+
+        entryPointWithAbsolutePath.push({...entryPoint, filePath: absoluteFilePath});
       }
-      configFile.additionalEntryPointFilePaths = absolutePath;
+      configFile.additionalEntryPoints = entryPointWithAbsolutePath;
     }
 
     if (configFile.compiler) {
@@ -579,20 +580,20 @@ export class ExtractorConfig {
       }
 
       // TODO: remove mainEntryPointFilePath
-      const additionalEntryPointFilePaths: string[] = [];
-      for(const entryPointPath of configObject.additionalEntryPointFilePaths || []) {
-        const absoluteEntryPointPath: string = ExtractorConfig._resolvePathWithTokens('entryPointFilePath',
-        entryPointPath, tokenContext);
+      const additionalEntryPoints: IConfigEntryPoint[] = [];
+      for(const entryPoint of configObject.additionalEntryPoints || []) {
+        const absoluteEntryPointFilePath: string = ExtractorConfig._resolvePathWithTokens('entryPointFilePath',
+        entryPoint.filePath, tokenContext);
 
-        if (!ExtractorConfig.hasDtsFileExtension(absoluteEntryPointPath)) {
-          throw new Error('The "additionalEntryPointFilePaths" value is not a declaration file: ' + absoluteEntryPointPath);
+        if (!ExtractorConfig.hasDtsFileExtension(absoluteEntryPointFilePath)) {
+          throw new Error('The "additionalEntryPoints" value is not a declaration file: ' + absoluteEntryPointFilePath);
         }
 
-        if (!FileSystem.exists(absoluteEntryPointPath)) {
-          throw new Error('The "additionalEntryPointFilePaths" path does not exist: ' + absoluteEntryPointPath);
+        if (!FileSystem.exists(absoluteEntryPointFilePath)) {
+          throw new Error('The "additionalEntryPoints" path does not exist: ' + absoluteEntryPointFilePath);
         }
 
-        additionalEntryPointFilePaths.push(absoluteEntryPointPath);
+        additionalEntryPoints.push({ ...entryPoint, filePath: absoluteEntryPointFilePath});
       }
 
       const bundledPackages: string[] = configObject.bundledPackages || [];
@@ -717,7 +718,7 @@ export class ExtractorConfig {
         packageJson,
         packageFolder,
         mainEntryPointFilePath,
-        additionalEntryPointFilePaths,
+        additionalEntryPoints,
         bundledPackages,
         tsconfigFilePath,
         overrideTsconfig: configObject.compiler.overrideTsconfig,
