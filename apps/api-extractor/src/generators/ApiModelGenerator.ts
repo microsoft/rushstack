@@ -69,21 +69,30 @@ export class ApiModelGenerator {
     });
     this._apiModel.addMember(apiPackage);
 
-    const apiEntryPoint: ApiEntryPoint = new ApiEntryPoint({ name: '' });
-    apiPackage.addMember(apiEntryPoint);
+    // TODO: make multiple entry points
+    for (const [astModule, entities] of this._collector.entities.entries()) {
 
-    // Create a CollectorEntity for each top-level export
-    for (const entity of this._collector.entities) {
-      if (entity.exported) {
-        if (entity.astEntity instanceof AstSymbol) {
-          // Skip ancillary declarations; we will process them with the main declaration
-          for (const astDeclaration of this._collector.getNonAncillaryDeclarations(entity.astEntity)) {
-            this._processDeclaration(astDeclaration, entity.nameForEmit, apiEntryPoint);
+      //TODO: specify entry point name in api-extractor.json
+      const pathTokens = astModule.moduleSymbol.name.replace(/"/g, '').split('/');
+      const shortName = pathTokens[pathTokens.length - 1] === 'index' ? '' : pathTokens[pathTokens.length - 1];
+      console.log("this module name is ", shortName);
+
+      const apiEntryPoint: ApiEntryPoint = new ApiEntryPoint({ name: shortName });
+      apiPackage.addMember(apiEntryPoint);
+
+      // Create a CollectorEntity for each top-level export
+      for (const entity of entities) {
+        if (entity.exported) {
+          if (entity.astEntity instanceof AstSymbol) {
+            // Skip ancillary declarations; we will process them with the main declaration
+            for (const astDeclaration of this._collector.getNonAncillaryDeclarations(entity.astEntity)) {
+              this._processDeclaration(astDeclaration, entity.nameForEmit, apiEntryPoint);
+            }
+          } else {
+            // TODO: Figure out how to represent reexported AstImport objects.  Basically we need to introduce a new
+            // ApiItem subclass for "export alias", similar to a type alias, but representing declarations of the
+            // form "export { X } from 'external-package'".  We can also use this to solve GitHub issue #950.
           }
-        } else {
-          // TODO: Figure out how to represent reexported AstImport objects.  Basically we need to introduce a new
-          // ApiItem subclass for "export alias", similar to a type alias, but representing declarations of the
-          // form "export { X } from 'external-package'".  We can also use this to solve GitHub issue #950.
         }
       }
     }

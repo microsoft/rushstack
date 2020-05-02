@@ -156,7 +156,7 @@ export class ExtractorConfig {
   public readonly packageFolder: string | undefined;
 
   /** {@inheritDoc IConfigFile.mainEntryPointFilePath} */
-  public readonly mainEntryPointFilePath: string;
+  public readonly mainEntryPointFilePath: IConfigEntryPoint;
 
   /** {@inheritDoc IConfigFile.additionalEntryPoints} */
   public readonly additionalEntryPoints: IConfigEntryPoint[];
@@ -218,7 +218,10 @@ export class ExtractorConfig {
     this.projectFolder = parameters.projectFolder;
     this.packageJson = parameters.packageJson;
     this.packageFolder = parameters.packageFolder;
-    this.mainEntryPointFilePath = parameters.mainEntryPointFilePath;
+    this.mainEntryPointFilePath = {
+      modulePath: '',
+      filePath: parameters.mainEntryPointFilePath
+    };
     this.additionalEntryPoints = parameters.additionalEntryPoints;
     this.bundledPackages = parameters.bundledPackages;
     this.tsconfigFilePath = parameters.tsconfigFilePath;
