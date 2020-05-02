@@ -806,7 +806,6 @@ export class MarkdownDocumenter {
             continue;
           }
         }
-
         // Otherwise append non-hyperlinked text
         paragraph.appendNode(new DocCodeSpan({ configuration, code: token.text }));
       }
