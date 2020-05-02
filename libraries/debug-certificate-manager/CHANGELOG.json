@@ -2,6 +2,18 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "0.2.8",
+      "tag": "@rushstack/debug-certificate-manager_v0.2.8",
+      "date": "Sat, 02 May 2020 00:08:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.10` to `6.4.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.7",
       "tag": "@rushstack/debug-certificate-manager_v0.2.7",
       "date": "Wed, 08 Apr 2020 04:07:33 GMT",
