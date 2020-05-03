@@ -17,7 +17,7 @@ export declare function exampleFunction(x: ExampleTypeAlias, y: number): IDocInt
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  x | [ExampleTypeAlias](./api-documenter-test.exampletypealias.md) | an API item that should get hyperlinked |
-|  y | <code>number</code> | a system type that should NOT get hyperlinked |
+|  y | number | a system type that should NOT get hyperlinked |
 
 <b>Returns:</b>
 

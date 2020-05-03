@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/api-documenter",
       "comment": "Support linked types in type cells and return fields",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/api-documenter",

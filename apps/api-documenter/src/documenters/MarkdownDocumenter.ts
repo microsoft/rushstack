@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* eslint max-lines: "off" */
+
 import * as path from 'path';
 import {
   PackageName,
@@ -783,7 +785,7 @@ export class MarkdownDocumenter {
     const paragraph: DocParagraph = new DocParagraph({ configuration });
 
     if (!excerpt.text.trim()) {
-      paragraph.appendNode(new DocCodeSpan({ configuration, code: '(not declared)' }));
+      paragraph.appendNode(new DocPlainText({ configuration, text: '(not declared)' }));
     } else {
       // TODO: Add a helper method to Excerpt to solve this problem
       const excerptTokens: ExcerptToken[] = excerpt.tokens.slice(
@@ -791,7 +793,12 @@ export class MarkdownDocumenter {
         excerpt.tokenRange.endIndex);
 
       for (const token of excerptTokens) {
-        // If it's hyperlinkable, then append a hyperlink node
+        // Markdown doesn't provide a standardized syntax for hyperlinks inside code spans, so we will render
+        // the type expression as DocPlainText.  Instead of creating multiple DocParagraphs, we can simply
+        // discard any newlines and let the renderer do normal word-wrapping.
+        const unwrappedTokenText: string = token.text.replace(/[\r\n]+/g, ' ');
+
+        // If it's hyperlinkable, then append a DocLinkTag
         if (token.kind === ExcerptTokenKind.Reference && token.canonicalReference) {
           const apiItemResult: IResolveDeclarationReferenceResult = this._apiModel.resolveDeclarationReference(
             token.canonicalReference, undefined);
@@ -800,14 +807,15 @@ export class MarkdownDocumenter {
             paragraph.appendNode(new DocLinkTag({
               configuration,
               tagName: '@link',
-              linkText: token.text,
+              linkText: unwrappedTokenText,
               urlDestination: this._getLinkFilenameForApiItem(apiItemResult.resolvedApiItem)
             }));
             continue;
           }
         }
+
         // Otherwise append non-hyperlinked text
-        paragraph.appendNode(new DocCodeSpan({ configuration, code: token.text }));
+        paragraph.appendNode(new DocPlainText({ configuration, text: unwrappedTokenText }));
       }
     }
 
