@@ -40,7 +40,6 @@ import {
   ApiDeclaredItem,
   ApiNamespace,
   ExcerptTokenKind,
-  ExcerptToken,
   IResolveDeclarationReferenceResult
 } from '@microsoft/api-extractor-model';
 
@@ -785,12 +784,7 @@ export class MarkdownDocumenter {
     if (!excerpt.text.trim()) {
       paragraph.appendNode(new DocCodeSpan({ configuration, code: '(not declared)' }));
     } else {
-      // TODO: Add a helper method to Excerpt to solve this problem
-      const excerptTokens: ExcerptToken[] = excerpt.tokens.slice(
-        excerpt.tokenRange.startIndex,
-        excerpt.tokenRange.endIndex);
-
-      for (const token of excerptTokens) {
+      for (const token of excerpt.spannedTokens) {
         // If it's hyperlinkable, then append a hyperlink node
         if (token.kind === ExcerptTokenKind.Reference && token.canonicalReference) {
           const apiItemResult: IResolveDeclarationReferenceResult = this._apiModel.resolveDeclarationReference(
