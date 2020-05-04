@@ -42,7 +42,6 @@ import {
   ApiDeclaredItem,
   ApiNamespace,
   ExcerptTokenKind,
-  ExcerptToken,
   IResolveDeclarationReferenceResult
 } from '@microsoft/api-extractor-model';
 
@@ -787,12 +786,7 @@ export class MarkdownDocumenter {
     if (!excerpt.text.trim()) {
       paragraph.appendNode(new DocPlainText({ configuration, text: '(not declared)' }));
     } else {
-      // TODO: Add a helper method to Excerpt to solve this problem
-      const excerptTokens: ExcerptToken[] = excerpt.tokens.slice(
-        excerpt.tokenRange.startIndex,
-        excerpt.tokenRange.endIndex);
-
-      for (const token of excerptTokens) {
+      for (const token of excerpt.spannedTokens) {
         // Markdown doesn't provide a standardized syntax for hyperlinks inside code spans, so we will render
         // the type expression as DocPlainText.  Instead of creating multiple DocParagraphs, we can simply
         // discard any newlines and let the renderer do normal word-wrapping.
