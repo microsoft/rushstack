@@ -4,7 +4,6 @@ import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import * as Table from 'cli-table';
 
-
 export interface IJsonEntry {
   name: string;
   version: string;
@@ -21,6 +20,7 @@ export class ListAction extends BaseRushAction {
   private _path: CommandLineFlagParameter;
   private _fullPath: CommandLineFlagParameter;
   private _jsonFlag: CommandLineFlagParameter;
+  private _notTableFormatting: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -62,6 +62,11 @@ export class ListAction extends BaseRushAction {
     this._jsonFlag = this.defineFlagParameter({
       parameterLongName: '--json',
       description: 'If this flag is specified, output will be in JSON format.'
+    });
+
+    this._notTableFormatting = this.defineFlagParameter({
+      parameterLongName: '--no-table-formatting',
+      description: 'If this flag is specified, then the output table will not have headers or border characters making it easier to parse (for example, using grep).'
     });
   }
 
@@ -117,8 +122,16 @@ export class ListAction extends BaseRushAction {
     if (this._fullPath.value) {
       tableHeader.push('Full Path');
     }
+
     const table: Table = new Table({
-      head: tableHeader
+      head: this._notTableFormatting.value ? [] : tableHeader,
+      chars: this._notTableFormatting.value ? {
+        'top': '', 'top-mid': '', 'top-left': '', 'top-right': '',
+        'bottom': '', 'bottom-mid': '', 'bottom-left': '', 'bottom-right': '',
+        'left': '', 'left-mid': '', 'mid': '', 'mid-mid': '',
+        'right': '', 'right-mid': '', 'middle': ' '
+      } : {},
+      style: this._notTableFormatting ? { 'padding-left': 0, 'padding-right': 0 } : {}
     });
 
     allPackages.forEach((config: RushConfigurationProject, name: string) => {
