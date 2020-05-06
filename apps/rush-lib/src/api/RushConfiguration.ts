@@ -169,6 +169,10 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    * Defines the dependency resolution strategy PNPM will use
    */
   resolutionStrategy?: ResolutionStrategy;
+  /**
+   * Should we use the workspaces feature of PNPM to install and link packages?
+   */
+  useWorkspaces?: boolean;
 }
 
 /**
@@ -327,6 +331,14 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    */
   public readonly resolutionStrategy: ResolutionStrategy;
 
+  /**
+   * If true, then Rush will use the workspaces feature to install and link packages when invoking PNPM.
+   *
+   * @remarks
+   * The default value is false.  (For now.)
+   */
+  public readonly useWorkspaces: boolean;
+
   /** @internal */
   public constructor(json: IPnpmOptionsJson, commonTempFolder: string) {
     super(json);
@@ -340,6 +352,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     }
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
+    this.useWorkspaces = !!json.useWorkspaces;
   }
 }
 

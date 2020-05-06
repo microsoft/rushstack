@@ -32,6 +32,7 @@ export class DependencySpecifier {
    * directory - A local directory
    * remote - An HTTP url to a .tar.gz, .tar or .tgz file
    * alias - A package alias such as "npm:other-package@^1.2.3"
+   * workspace - A package specified using workspace protocol such as "workspace:^1.2.3"
    */
   public readonly specifierType: string;
 
@@ -44,6 +45,16 @@ export class DependencySpecifier {
 
   public constructor(packageName: string, versionSpecifier: string) {
     this.packageName = packageName;
+
+    // Workspace ranges are a feature from PNPM and Yarn. Set the version specifier
+    // to the trimmed version range.
+    if (versionSpecifier.startsWith('workspace:')) {
+      this.specifierType = 'workspace'
+      this.versionSpecifier = versionSpecifier.slice(this.specifierType.length);
+      this.aliasTarget = undefined;
+      return;
+    }
+
     this.versionSpecifier = versionSpecifier;
 
     const result: npmPackageArg.AliasResult = npmPackageArg.resolve(
