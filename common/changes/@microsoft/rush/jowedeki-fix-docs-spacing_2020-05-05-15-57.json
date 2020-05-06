@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix docs whitespace issue.",
+      "comment": "Fix a few instances of missing spaces in --help documentation.",
       "type": "none"
     }
   ],
