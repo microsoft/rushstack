@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-documenter",
-  "version": "7.7.20",
+  "version": "7.8.0",
   "description": "Read JSON files from api-extractor, generate documentation pages",
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
   "main": "lib/index.js",
   "typings": "dist/rollup.d.ts",
   "dependencies": {
-    "@microsoft/api-extractor-model": "7.7.11",
+    "@microsoft/api-extractor-model": "7.8.0",
     "@rushstack/node-core-library": "3.19.7",
     "@rushstack/ts-command-line": "4.3.14",
     "@microsoft/tsdoc": "0.12.19",
@@ -26,8 +26,8 @@
     "resolve": "1.8.1"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.4.9",
-    "@microsoft/node-library-build": "6.4.11",
+    "@microsoft/rush-stack-compiler-3.5": "0.4.10",
+    "@microsoft/node-library-build": "6.4.12",
     "@rushstack/eslint-config": "0.5.7",
     "@types/jest": "25.2.1",
     "@types/js-yaml": "3.12.1",
