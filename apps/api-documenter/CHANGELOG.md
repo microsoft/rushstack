@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Sat, 02 May 2020 00:08:16 GMT and should not be manually modified.
+This log was last generated on Wed, 06 May 2020 08:23:45 GMT and should not be manually modified.
+
+## 7.8.0
+Wed, 06 May 2020 08:23:45 GMT
+
+### Minor changes
+
+- For markdown output, parameter types and return types are now hyperlinked to the corresponding API item
 
 ## 7.7.20
 Sat, 02 May 2020 00:08:16 GMT

@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.8.0",
+      "tag": "@microsoft/api-extractor-model_v7.8.0",
+      "date": "Wed, 06 May 2020 08:23:45 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Enable canonicalReference to ApiItem lookup"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.7.11",
       "tag": "@microsoft/api-extractor-model_v7.7.11",
       "date": "Wed, 08 Apr 2020 04:07:33 GMT",
