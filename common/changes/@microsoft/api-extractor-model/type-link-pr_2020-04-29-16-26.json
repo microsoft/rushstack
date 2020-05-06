@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "Enable canonicalReference to ApiItem lookup",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model",
+  "email": "plane1113@gmail.com"
+}
