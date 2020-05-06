@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-documenter",
-      "comment": "Support linked types in type cells and return fields",
+      "comment": "For markdown output, parameter types and return types are now hyperlinked to the corresponding API item",
       "type": "minor"
     }
   ],
