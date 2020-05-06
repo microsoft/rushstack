@@ -143,7 +143,7 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
   ): IResolveDeclarationReferenceResult {
     if (declarationReference instanceof DocDeclarationReference) {
       return this._resolver.resolve(declarationReference, contextApiItem);
-    } else {
+    } else if (declarationReference instanceof DeclarationReference) {
       // use this._apiItemsByCanonicalReference to look up ApiItem
 
       // Build the lookup on demand
@@ -169,6 +169,10 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
       }
 
       return result;
+    } else {
+      // NOTE: The "instanceof DeclarationReference" test assumes a specific version of the @microsoft/tsdoc package.
+      throw new Error('The "declarationReference" parameter must be an instance of'
+        + ' DocDeclarationReference or DeclarationReference');
     }
   }
 
