@@ -1,6 +1,32 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Tue, 17 Mar 2020 23:55:58 GMT and should not be manually modified.
+This log was last generated on Wed, 06 May 2020 08:23:45 GMT and should not be manually modified.
+
+## 7.8.0
+Wed, 06 May 2020 08:23:45 GMT
+
+### Minor changes
+
+- Enable canonicalReference to ApiItem lookup
+
+## 7.7.11
+Wed, 08 Apr 2020 04:07:33 GMT
+
+*Version update only*
+
+## 7.7.10
+Sat, 28 Mar 2020 00:37:16 GMT
+
+### Patches
+
+- Upgrade to TSdoc 0.12.19
+
+## 7.7.9
+Wed, 18 Mar 2020 15:07:47 GMT
+
+### Patches
+
+- Upgrade cyclic dependencies
 
 ## 7.7.8
 Tue, 17 Mar 2020 23:55:58 GMT

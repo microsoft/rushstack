@@ -1,12 +1,9 @@
 {
   "name": "@rushstack/typings-generator",
-  "version": "0.1.1",
+  "version": "0.1.8",
   "description": "This library provides functionality for automatically generator typings for non-TS files.",
   "main": "lib/index.js",
   "typings": "dist/typings-generator.d.ts",
-  "tsdoc": {
-    "tsdocFlavor": "AEDoc"
-  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -18,13 +15,13 @@
   "dependencies": {
     "@types/node": "10.17.13",
     "glob": "~7.0.5",
-    "@rushstack/node-core-library": "3.19.4",
+    "@rushstack/node-core-library": "3.19.7",
     "chokidar": "~3.3.1"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.4.4",
-    "@microsoft/node-library-build": "6.4.5",
-    "@rushstack/eslint-config": "0.5.4",
+    "@microsoft/rush-stack-compiler-3.5": "0.4.10",
+    "@microsoft/node-library-build": "6.4.12",
+    "@rushstack/eslint-config": "0.5.7",
     "@types/glob": "7.1.1",
     "gulp": "~4.0.2"
   }

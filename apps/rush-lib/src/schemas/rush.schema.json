@@ -6,7 +6,7 @@
 
   "definitions": {
     "environmentVariables": {
-      "description": "Enviroment variables for the package manager",
+      "description": "Environment variables for the package manager",
       "type": "object",
       "additionalProperties": {
         "type": "object",
@@ -73,7 +73,7 @@
       "type": "boolean"
     },
     "npmOptions": {
-      "description": "Options that are only used when the NPM pacakge manager is selected.",
+      "description": "Options that are only used when the NPM package manager is selected.",
       "type": "object",
       "properties": {
         "environmentVariables": {
@@ -112,6 +112,10 @@
         },
         "environmentVariables": {
           "$ref": "#/definitions/environmentVariables"
+        },
+        "preventManualShrinkwrapChanges": {
+          "description": "If true, then \"rush install\" will report an error if manual modifications were made to the PNPM shrinkwrap file without running `rush update` afterwards. To temporarily disable this validation when invoking \"rush install\", use the \"--bypassPolicy\" command-line parameter. The default value is false.",
+          "type": "boolean"
         }
       },
       "additionalProperties": false

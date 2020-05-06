@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-extractor-model",
-  "version": "7.7.8",
+  "version": "7.8.0",
   "description": "A helper library for loading and saving the .api.json files created by API Extractor",
   "repository": {
     "type": "git",
@@ -14,14 +14,14 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@rushstack/node-core-library": "3.19.4",
-    "@microsoft/tsdoc": "0.12.14"
+    "@rushstack/node-core-library": "3.19.7",
+    "@microsoft/tsdoc": "0.12.19"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.3.11",
-    "@microsoft/rush-stack-compiler-3.5": "0.3.11",
-    "@rushstack/eslint-config": "0.5.4",
-    "@types/jest": "23.3.11",
+    "@microsoft/node-library-build": "6.4.10",
+    "@microsoft/rush-stack-compiler-3.5": "0.4.4",
+    "@rushstack/eslint-config": "0.5.7",
+    "@types/jest": "25.2.1",
     "@types/node": "10.17.13",
     "gulp": "~4.0.2"
   }

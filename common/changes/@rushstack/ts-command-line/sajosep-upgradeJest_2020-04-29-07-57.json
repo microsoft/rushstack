@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/ts-command-line"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line",
+  "email": "sachinjoseph@users.noreply.github.com"
+}

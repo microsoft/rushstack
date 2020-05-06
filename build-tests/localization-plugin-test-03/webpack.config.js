@@ -2,15 +2,39 @@
 
 const path = require('path');
 const webpack = require('webpack');
+const { JsonFile } = require('@rushstack/node-core-library');
 
 const { LocalizationPlugin } = require('@rushstack/localization-plugin');
 const { SetPublicPathPlugin } = require('@rushstack/set-webpack-public-path-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-module.exports = function(env) {
-  const configuration = {
-    mode: 'production',
+function resolveMissingString(localeNames, localizedResourcePath) {
+  let contextRelativePath = path.relative(__dirname, localizedResourcePath);
+  contextRelativePath = contextRelativePath.replace(/\\/g, '/'); // Convert Windows paths to Unix paths
+  if (!contextRelativePath.startsWith('.')) {
+    contextRelativePath = `./${contextRelativePath}`;
+  }
+
+  const result = {};
+  for (const localeName of localeNames) {
+    const expectedCombinedStringsPath = path.resolve(__dirname, 'localization', localeName, 'combinedStringsData.json');
+    try {
+      const loadedCombinedStringsPath = JsonFile.load(expectedCombinedStringsPath);
+      result[localeName] = loadedCombinedStringsPath[contextRelativePath];
+    } catch (e) {
+      if (e.code !== 'ENOENT' && e.code !== 'ENOTDIR') {
+        // File exists, but reading failed.
+        throw e;
+      }
+    }
+  }
+  return result;
+}
+
+function generateConfiguration(mode, outputFolderName) {
+  return {
+    mode: mode,
     module: {
       rules: [
         {
@@ -35,7 +59,7 @@ module.exports = function(env) {
       'localization-test-D': path.join(__dirname, 'src', 'indexD.ts')
     },
     output: {
-      path: path.join(__dirname, 'dist'),
+      path: path.join(__dirname, outputFolderName),
       filename: '[name]_[locale]_[contenthash].js',
       chunkFilename: '[id].[name]_[locale]_[contenthash].js'
     },
@@ -52,28 +76,22 @@ module.exports = function(env) {
           translatedStrings: {
             "es-es": {
               "./src/strings1.loc.json": {
-                "string1": "la primera cadena"
+                "string1": "la primera cadena de texto"
               },
-              "./src/chunks/strings2.loc.json": {
-                "string1": "la segunda cadena"
-              },
-              "./src/strings3.loc.json": {
-                "string1": "la tercera cadena",
-                "string2": "cuerda cuatro con un ' apóstrofe",
-                "string3": "UNUSED STRING!"
-              },
+              "./src/chunks/strings2.loc.json": "./localization/es-es/chunks/strings2.loc.json",
               "./src/strings4.loc.json": {
-                "string1": "\"Cadena con comillas\""
+                "string1": "\"cadena de texto con comillas\""
               },
               "./src/strings5.resx": {
-                "string1": "La primera cadena RESX",
-                "stringWithQuotes": "\"Cadena RESX con comillas\""
+                "string1": "La primera cadena de texto RESX",
+                "stringWithQuotes": "\"cadena de texto RESX con comillas\""
               },
               "./src/chunks/strings6.resx": {
-                "string": "cadena RESX"
+                "string": "cadena de texto RESX"
               }
             }
           },
+          resolveMissingTranslatedStrings: resolveMissingString,
           passthroughLocale: {
             usePassthroughLocale: true
           },
@@ -86,7 +104,8 @@ module.exports = function(env) {
               append: '##--!!]',
               prepend: '[!!--##'
             }
-          }
+          },
+          normalizeResxNewlines: 'lf'
         },
         typingsOptions: {
           generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts'),
@@ -113,6 +132,9 @@ module.exports = function(env) {
       new HtmlWebpackPlugin()
     ]
   };
-
-  return configuration;
 }
+
+module.exports = [
+  generateConfiguration('development', 'dist-dev'),
+  generateConfiguration('production', 'dist-prod'),
+];

@@ -1,6 +1,40 @@
 # Change Log - @microsoft/rush-stack-compiler-2.9
 
-This log was last generated on Tue, 17 Mar 2020 23:55:58 GMT and should not be manually modified.
+This log was last generated on Wed, 06 May 2020 08:23:45 GMT and should not be manually modified.
+
+## 0.10.10
+Wed, 06 May 2020 08:23:45 GMT
+
+*Version update only*
+
+## 0.10.9
+Wed, 08 Apr 2020 04:07:33 GMT
+
+*Version update only*
+
+## 0.10.8
+Fri, 03 Apr 2020 15:10:15 GMT
+
+### Patches
+
+- Update tslint-microsoft-contrib to ~6.2.0
+
+## 0.10.7
+Sun, 29 Mar 2020 00:04:12 GMT
+
+*Version update only*
+
+## 0.10.6
+Sat, 28 Mar 2020 00:37:16 GMT
+
+*Version update only*
+
+## 0.10.5
+Wed, 18 Mar 2020 15:07:47 GMT
+
+### Patches
+
+- Upgrade cyclic dependencies
 
 ## 0.10.4
 Tue, 17 Mar 2020 23:55:58 GMT

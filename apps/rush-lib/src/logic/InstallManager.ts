@@ -46,6 +46,12 @@ import { Rush } from '../api/Rush';
 import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../api/PackageJsonEditor';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
+import { RushGlobalFolder } from '../api/RushGlobalFolder';
+import { PackageManagerName } from '../api/packageManager/PackageManager';
+import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
+import { DependencySpecifier } from './DependencySpecifier';
+import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
+import { PnpmWorkspaceFile } from './pnpm/PnpmWorkspaceFile';
 
 // The PosixModeBits are intended to be used with bitwise operations.
 /* eslint-disable no-bitwise */
@@ -54,21 +60,15 @@ import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration'
  * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.
  * As a temporary workaround, augment the type.
  */
-import { CreateOptions } from 'tar';
-import { RushGlobalFolder } from '../api/RushGlobalFolder';
-import { PackageManagerName } from '../api/packageManager/PackageManager';
-import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
-import { DependencySpecifier } from './DependencySpecifier';
-import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
-import { PnpmWorkspaceFile } from './pnpm/PnpmWorkspaceFile';
-
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
-export interface CreateOptions {
-  /**
-   * "Set to true to omit writing mtime values for entries. Note that this prevents using other
-   * mtime-based features like tar.update or the keepNewer option with the resulting tar archive."
-   */
-  noMtime?: boolean;
+declare module 'tar' {
+  // eslint-disable-next-line @typescript-eslint/interface-name-prefix
+  export interface CreateOptions {
+    /**
+     * "Set to true to omit writing mtime values for entries. Note that this prevents using other
+     * mtime-based features like tar.update or the keepNewer option with the resulting tar archive."
+     */
+    noMtime?: boolean;
+  }
 }
 
 export interface IInstallManagerOptions {
@@ -283,7 +283,7 @@ export class InstallManager {
     const options: IInstallManagerOptions = this._options;
 
     // Check the policies
-    PolicyValidator.validatePolicy(this._rushConfiguration, options.bypassPolicy);
+    PolicyValidator.validatePolicy(this._rushConfiguration, options);
 
     // Git hooks are only installed if the repo opts in by including files in /common/git-hooks
     const hookSource: string = path.join(this._rushConfiguration.commonFolder, 'git-hooks');
@@ -331,8 +331,11 @@ export class InstallManager {
     // (If it's a full update, then we ignore the shrinkwrap from Git since it will be overwritten)
     if (!options.fullUpgrade) {
       try {
-        shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(this._rushConfiguration.packageManager,
-          this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant));
+        shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
+          this._rushConfiguration.packageManager,
+          this._rushConfiguration.packageManagerOptions,
+          this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant)
+        );
       } catch (ex) {
         console.log();
         console.log(`Unable to load the ${this._shrinkwrapFilePhrase}: ${ex.message}`);
@@ -980,8 +983,7 @@ export class InstallManager {
           // write the expected package.json file into the zip staging folder
           JsonFile.save(tempPackageJson, tempPackageJsonFilename);
 
-          // create the new tarball
-          tar.create({
+          const tarOptions: tar.CreateOptions = ({
             gzip: true,
             file: tarballFile,
             cwd: tempProjectFolder,
@@ -989,11 +991,23 @@ export class InstallManager {
             noMtime: true,
             noPax: true,
             sync: true,
-            prefix: npmPackageFolder
-          } as CreateOptions, [FileConstants.PackageJson]);
+            prefix: npmPackageFolder,
+            filter: (path: string, stat: tar.FileStat): boolean => {
+              if (!this._rushConfiguration.experimentsConfiguration.configuration
+                .noChmodFieldInTarHeaderNormalization) {
+                stat.mode = (stat.mode & ~0x1FF) | PosixModeBits.AllRead | PosixModeBits.UserWrite
+                  | PosixModeBits.AllExecute;
+              }
+              return true;
+            }
+          } as tar.CreateOptions);
+
+          // create the new tarball
+          tar.create(tarOptions, [FileConstants.PackageJson]);
 
           console.log(`Updating ${tarballFile}`);
         } catch (error) {
+          console.log(colors.yellow(error));
           // delete everything in case of any error
           FileSystem.deleteFile(tarballFile);
           FileSystem.deleteFile(tempPackageJsonFilename);
@@ -1006,7 +1020,12 @@ export class InstallManager {
       FileConstants.PackageJson);
 
     if (shrinkwrapFile) {
-      // If we have a (possibly incomplete) shrinkwrap file, save it as the temporary file.
+      // If we have a (possibly incomplete) shrinkwrap file, check to see if any shrinkwrap-specific
+      // changes make the shrinkwrap out-of-date, and save it as the temporary file.
+      if (shrinkwrapFile.shouldForceRecheck()) {
+        shrinkwrapIsUpToDate = false;
+      }
+
       shrinkwrapFile.save(this._rushConfiguration.tempShrinkwrapFilename);
       shrinkwrapFile.save(this._rushConfiguration.tempShrinkwrapPreinstallFilename);
     } else {
@@ -1364,6 +1383,9 @@ export class InstallManager {
         // then we can't skip this install
         potentiallyChangedFiles.push(this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant));
 
+        // Add common-versions.json file in potentially changed file list.
+        potentiallyChangedFiles.push(this._rushConfiguration.getCommonVersionsFilePath(options.variant));
+
         if (this._rushConfiguration.packageManager === 'pnpm') {
           // If the repo is using pnpmfile.js, consider that also
           const pnpmFileFilename: string = this._rushConfiguration.getPnpmfilePath(options.variant);
@@ -1571,6 +1593,15 @@ export class InstallManager {
           }
 
           if (options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
+            // Shrinkwrap files may need to be post processed after install, so load and save it
+            const tempShrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
+              this._rushConfiguration.packageManager,
+              this._rushConfiguration.packageManagerOptions,
+              this._rushConfiguration.tempShrinkwrapFilename);
+            if (tempShrinkwrapFile) {
+              tempShrinkwrapFile.save(this._rushConfiguration.tempShrinkwrapFilename);
+            }
+
             // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
             this._syncFile(this._rushConfiguration.tempShrinkwrapFilename,
               this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant));
@@ -1793,6 +1824,7 @@ export class InstallManager {
 
       // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
       // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
+
       if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
         args.push('--no-prefer-frozen-lockfile');
       } else {
@@ -1885,12 +1917,12 @@ export class InstallManager {
     const pathToDeleteWithoutStar: string = path.join(this._rushConfiguration.commonTempFolder,
       'node_modules', RushConstants.rushTempNpmScope);
     // Glob can't handle Windows paths
-    const normalizedpathToDeleteWithoutStar: string = Text.replaceAll(pathToDeleteWithoutStar, '\\', '/');
+    const normalizedPathToDeleteWithoutStar: string = Text.replaceAll(pathToDeleteWithoutStar, '\\', '/');
 
     let anyChanges: boolean = false;
 
     // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*/package.json"
-    for (const packageJsonPath of glob.sync(globEscape(normalizedpathToDeleteWithoutStar) + '/*/package.json')) {
+    for (const packageJsonPath of glob.sync(globEscape(normalizedPathToDeleteWithoutStar) + '/*/package.json')) {
       // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/example/package.json"
       const packageJsonObject: IRushTempPackageJson = JsonFile.load(packageJsonPath);
 

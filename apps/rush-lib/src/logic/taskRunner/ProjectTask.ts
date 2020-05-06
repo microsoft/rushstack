@@ -31,13 +31,13 @@ export interface IProjectTaskOptions {
 function _areShallowEqual(object1: JsonObject, object2: JsonObject, writer: ITaskWriter): boolean {
   for (const n in object1) {
     if (!(n in object2) || object1[n] !== object2[n]) {
-      writer.writeLine(`Found mismatch: "${n}": "${object1[n]}" !== "${object2[n]}"`);
+      // writer.writeLine(`Found mismatch: "${n}": "${object1[n]}" !== "${object2[n]}"`);
       return false;
     }
   }
   for (const n in object2) {
     if (!(n in object1)) {
-      writer.writeLine(`Found new prop in obj2: "${n}" value="${object2[n]}"`);
+      // writer.writeLine(`Found new prop in obj2: "${n}" value="${object2[n]}"`);
       return false;
     }
   }
@@ -69,7 +69,7 @@ export class ProjectTask implements ITaskDefinition {
     this.isIncrementalBuildAllowed = options.isIncrementalBuildAllowed;
     this._packageChangeAnalyzer = options.packageChangeAnalyzer;
     this._packageDepsFilename = options.packageDepsFilename;
-}
+  }
 
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
     try {
@@ -132,7 +132,7 @@ export class ProjectTask implements ITaskDefinition {
           lastPackageDeps &&
           currentPackageDeps &&
           (currentPackageDeps.arguments === lastPackageDeps.arguments &&
-          _areShallowEqual(currentPackageDeps.files, lastPackageDeps.files, writer))
+            _areShallowEqual(currentPackageDeps.files, lastPackageDeps.files, writer))
         )
       );
 

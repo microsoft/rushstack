@@ -111,7 +111,7 @@ export type PnpmStoreOptions = 'local' | 'global';
  */
 export interface IPackageManagerOptionsJsonBase {
   /**
-   * Enviroment variables for the package manager
+   * Environment variables for the package manager
    */
   environmentVariables?: IConfigurationEnvironment
 }
@@ -170,9 +170,13 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    */
   resolutionStrategy?: ResolutionStrategy;
   /**
-   * Should we use the workspaces feature of PNPM to install and link packages?
+   * {@inheritDoc PnpmOptionsConfiguration.preventManualShrinkwrapChanges}
    */
-  useWorkspaces?: boolean;
+  preventManualShrinkwrapChanges?: boolean;
+  /**
+   * {@inheritDoc PnpmOptionsConfiguration.useWorkspaces}
+   */
+ useWorkspaces?: boolean;
 }
 
 /**
@@ -249,7 +253,7 @@ export interface ICurrentVariantJson {
  */
 export abstract class PackageManagerOptionsConfigurationBase implements IPackageManagerOptionsJsonBase {
   /**
-   * Enviroment variables for the package manager
+   * Environment variables for the package manager
    */
   public readonly environmentVariables?: IConfigurationEnvironment
 
@@ -332,6 +336,25 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   public readonly resolutionStrategy: ResolutionStrategy;
 
   /**
+   * If true, then `rush install` will report an error if manual modifications
+   * were made to the PNPM shrinkwrap file without running `rush update` afterwards.
+   *
+   * @remarks
+   * This feature protects against accidental inconsistencies that may be introduced
+   * if the PNPM shrinkwrap file (`pnpm-lock.yaml`) is manually edited.  When this
+   * feature is enabled, `rush update` will append a hash to the file as a YAML comment,
+   * and then `rush update` and `rush install` will validate the hash.  Note that this does not prohibit
+   * manual modifications, but merely requires `rush update` be run
+   * afterwards, ensuring that PNPM can report or repair any potential inconsistencies.
+   *
+   * To temporarily disable this validation when invoking `rush install`, use the
+   * `--bypass-policy` command-line parameter.
+   *
+   * The default value is false.
+   */
+  public readonly preventManualShrinkwrapChanges: boolean;
+
+  /**
    * If true, then Rush will use the workspaces feature to install and link packages when invoking PNPM.
    *
    * @remarks
@@ -352,6 +375,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     }
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
+    this.preventManualShrinkwrapChanges = !!json.preventManualShrinkwrapChanges;
     this.useWorkspaces = !!json.useWorkspaces;
   }
 }
@@ -458,6 +482,7 @@ export class RushConfiguration {
   private _npmOptions: NpmOptionsConfiguration;
   private _pnpmOptions: PnpmOptionsConfiguration;
   private _yarnOptions: YarnOptionsConfiguration;
+  private _packageManagerConfigurationOptions: PackageManagerOptionsConfigurationBase;
 
   // Rush hooks
   private _eventHooks: EventHooks;
@@ -535,14 +560,17 @@ export class RushConfiguration {
 
     if (rushConfigurationJson.npmVersion) {
       this._packageManager = 'npm';
+      this._packageManagerConfigurationOptions = this._npmOptions;
       packageManagerFields.push('npmVersion');
     }
     if (rushConfigurationJson.pnpmVersion) {
       this._packageManager = 'pnpm';
+      this._packageManagerConfigurationOptions = this._pnpmOptions;
       packageManagerFields.push('pnpmVersion');
     }
     if (rushConfigurationJson.yarnVersion) {
       this._packageManager = 'yarn';
+      this._packageManagerConfigurationOptions = this._yarnOptions;
       packageManagerFields.push('yarnVersion');
     }
 
@@ -1261,6 +1289,16 @@ export class RushConfiguration {
    */
   public get yarnOptions(): YarnOptionsConfiguration {
     return this._yarnOptions;
+  }
+
+  /**
+   * The configuration options used by the current package manager.
+   * @remarks
+   * For package manager specific variants, reference {@link RushConfiguration.npmOptions | npmOptions},
+   * {@link RushConfiguration.pnpmOptions | pnpmOptions}, or {@link RushConfiguration.yarnOptions | yarnOptions}.
+   */
+  public get packageManagerOptions(): PackageManagerOptionsConfigurationBase {
+    return this._packageManagerConfigurationOptions;
   }
 
   /**

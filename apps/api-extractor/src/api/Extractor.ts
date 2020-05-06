@@ -228,6 +228,10 @@ export class Extractor {
     const modelBuilder: ApiModelGenerator = new ApiModelGenerator(collector);
     const apiPackage: ApiPackage = modelBuilder.buildApiPackage();
 
+    if (messageRouter.showDiagnostics) {
+      messageRouter.logDiagnostic(''); // skip a line after any diagnostic messages
+    }
+
     if (extractorConfig.docModelEnabled) {
       messageRouter.logVerbose(ConsoleMessageId.WritingDocModelFile, 'Writing: ' + extractorConfig.apiJsonFilePath);
       apiPackage.saveToJsonFile(extractorConfig.apiJsonFilePath, {

@@ -1,10 +1,15 @@
 import * as yaml from 'js-yaml';
 import * as os from 'os';
 import * as semver from 'semver';
+import * as crypto from 'crypto';
+import * as colors from 'colors';
 import { FileSystem } from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
+import { PackageManagerOptionsConfigurationBase, PnpmOptionsConfiguration } from '../../api/RushConfiguration';
+import { IPolicyValidatorOptions } from '../policy/PolicyValidator';
+import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 // This is based on PNPM's own configuration:
 // https://github.com/pnpm/pnpm-shrinkwrap/blob/master/src/write.ts
@@ -160,12 +165,21 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    */
   public readonly shrinkwrapFilename: string;
 
+  private static readonly _shrinkwrapHashPrefix: string = '# shrinkwrap hash:';
   private _shrinkwrapJson: IPnpmShrinkwrapYaml;
+  private _shrinkwrapHash: string | undefined;
+  private _shrinkwrapHashEnabled: boolean | undefined;
 
-  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, shrinkwrapFilename: string) {
+  private constructor(
+    shrinkwrapJson: IPnpmShrinkwrapYaml,
+    shrinkwrapFilename: string,
+    shrinkwrapHash?: string,
+    shrinkwrapHashEnabled?: boolean) {
     super();
     this._shrinkwrapJson = shrinkwrapJson;
     this.shrinkwrapFilename = shrinkwrapFilename;
+    this._shrinkwrapHash = shrinkwrapHash;
+    this._shrinkwrapHashEnabled = shrinkwrapHashEnabled;
 
     // Normalize the data
     if (!this._shrinkwrapJson.registry) {
@@ -182,19 +196,80 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
   }
 
-  public static loadFromFile(shrinkwrapYamlFilename: string): PnpmShrinkwrapFile | undefined {
+  public static loadFromFile(
+    shrinkwrapYamlFilename: string,
+    pnpmOptions: PnpmOptionsConfiguration
+  ): PnpmShrinkwrapFile | undefined {
     try {
       if (!FileSystem.exists(shrinkwrapYamlFilename)) {
         return undefined; // file does not exist
       }
 
-      // We don't use JsonFile/jju here because shrinkwrap.json is a special NPM file format
-      // and typically very large, so we want to load it the same way that NPM does.
-      const parsedData: IPnpmShrinkwrapYaml = yaml.safeLoad(FileSystem.readFile(shrinkwrapYamlFilename).toString());
+      const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilename);
+      const parsedData: IPnpmShrinkwrapYaml = yaml.safeLoad(shrinkwrapContent);
 
-      return new PnpmShrinkwrapFile(parsedData, shrinkwrapYamlFilename);
+      let shrinkwrapHash: string | undefined;
+      if (pnpmOptions.preventManualShrinkwrapChanges) {
+        // Grab the shrinkwrap hash out of the comment where we store it.
+        const hashYamlCommentRegExp: RegExp = new RegExp(
+          `\\n\\s*${PnpmShrinkwrapFile._shrinkwrapHashPrefix}\\s*(\\S+)\\s*$`
+        );
+        const match: RegExpMatchArray | null = shrinkwrapContent.match(hashYamlCommentRegExp);
+        shrinkwrapHash = match ? match[1] : undefined;
+      }
+
+      return new PnpmShrinkwrapFile(
+        parsedData,
+        shrinkwrapYamlFilename,
+        shrinkwrapHash,
+        pnpmOptions.preventManualShrinkwrapChanges
+      );
     } catch (error) {
       throw new Error(`Error reading "${shrinkwrapYamlFilename}":${os.EOL}  ${error.message}`);
+    }
+  }
+
+  /** @override */
+  public shouldForceRecheck(): boolean {
+    // Ensure the shrinkwrap is rechecked when the hash is enabled but no hash is populated.
+    return super.shouldForceRecheck() || (!!this._shrinkwrapHashEnabled && !this._shrinkwrapHash);
+  }
+
+  /** @override */
+  public validate(
+    packageManagerOptionsConfig: PackageManagerOptionsConfigurationBase,
+    policyOptions: IPolicyValidatorOptions
+  ) : void {
+    super.validate(packageManagerOptionsConfig, policyOptions);
+    if (!(packageManagerOptionsConfig instanceof PnpmOptionsConfiguration)) {
+      throw new Error('The provided package manager options are not valid for PNPM shrinkwrap files.');
+    }
+
+    // Only check the hash if allowShrinkwrapUpdates is false. If true, the shrinkwrap file
+    // may have changed and the hash could be invalid.
+    if (packageManagerOptionsConfig.preventManualShrinkwrapChanges && !policyOptions.allowShrinkwrapUpdates) {
+      if (!this._shrinkwrapHash) {
+        console.log(
+          colors.red(
+            'The shrinkwrap file does not contain the generated hash. You may need to run "rush update" to ' +
+            'populate the hash. See the "preventManualShrinkwrapChanges" setting documentation for details.'
+          ) + os.EOL
+        );
+        throw new AlreadyReportedError();
+      }
+
+      const shrinkwrapContent: string = yaml.safeDump(this._shrinkwrapJson, SHRINKWRAP_YAML_FORMAT);
+      const calculatedHash: string = crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
+      if (calculatedHash !== this._shrinkwrapHash) {
+        console.log(
+          colors.red(
+            'The shrinkwrap file hash does not match the expected hash. Please run "rush update" to ensure the ' +
+            'shrinkwrap file is up to date. See the "preventManualShrinkwrapChanges" setting documentation for ' +
+            'details.'
+          ) + os.EOL
+        );
+        throw new AlreadyReportedError();
+      }
     }
   }
 
@@ -236,7 +311,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     let value: string | undefined = BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
     if (value) {
 
-      // Getting the top level depenedency version from a PNPM lockfile version 5.1
+      // Getting the top level dependency version from a PNPM lockfile version 5.1
       // --------------------------------------------------------------------------
       //
       // 1) Top-level tarball dependency entries in pnpm-lock.yaml look like:
@@ -329,7 +404,14 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * @override
    */
   protected serialize(): string {
-    return yaml.safeDump(this._shrinkwrapJson, SHRINKWRAP_YAML_FORMAT);
+    let shrinkwrapContent: string = yaml.safeDump(this._shrinkwrapJson, SHRINKWRAP_YAML_FORMAT);
+    if (this._shrinkwrapHashEnabled) {
+      this._shrinkwrapHash = crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
+      shrinkwrapContent =
+        `${shrinkwrapContent.trimRight()}\n${PnpmShrinkwrapFile._shrinkwrapHashPrefix} ${this._shrinkwrapHash}\n`;
+    }
+
+    return shrinkwrapContent;
   }
 
   /**

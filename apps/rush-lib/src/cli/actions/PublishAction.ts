@@ -79,7 +79,7 @@ export class PublishAction extends BaseRushAction {
       parameterShortName: '-b',
       argumentName: 'BRANCH',
       description:
-      'If this flag is specified, applied changes and deleted change requests will be' +
+      'If this flag is specified, applied changes and deleted change requests will be ' +
       'committed and merged into the target branch.'
     });
     this._publish = this.defineFlagParameter({
@@ -203,7 +203,7 @@ export class PublishAction extends BaseRushAction {
    */
   protected run(): Promise<void> {
     return Promise.resolve().then(() => {
-      PolicyValidator.validatePolicy(this.rushConfiguration, false);
+      PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: false });
 
       // Example: "common\temp\publish-home"
       this._targetNpmrcPublishFolder = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');

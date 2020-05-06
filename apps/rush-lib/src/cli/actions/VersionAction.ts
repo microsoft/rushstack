@@ -80,7 +80,7 @@ export class VersionAction extends BaseRushAction {
     this._overwriteBump = this.defineStringParameter({
       parameterLongName: '--override-bump',
       argumentName: 'BUMPTYPE',
-      description: 'Overrides the bump type in the version-policy.json for the specified version policy.' +
+      description: 'Overrides the bump type in the version-policy.json for the specified version policy. ' +
         'Valid BUMPTYPE values include: prerelease, patch, preminor, minor, major. ' +
         'This setting only works for lock-step version policy in bump action.'
     });
@@ -97,7 +97,7 @@ export class VersionAction extends BaseRushAction {
 
   protected run(): Promise<void> {
     return Promise.resolve().then(() => {
-      PolicyValidator.validatePolicy(this.rushConfiguration, this._bypassPolicy.value);
+      PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: this._bypassPolicy.value });
       const userEmail: string = Git.getGitEmail(this.rushConfiguration);
 
       this._validateInput();
@@ -186,8 +186,8 @@ export class VersionAction extends BaseRushAction {
 
     const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfig);
     if (mismatchFinder.numberOfMismatches) {
-      throw new Error('Unable to finish version bump because inconsistencies were encountered.' +
-        ' Run \"rush check\" to find more details.');
+      throw new Error('Unable to finish version bump because inconsistencies were encountered. ' +
+        'Run \"rush check\" to find more details.');
     }
   }
 

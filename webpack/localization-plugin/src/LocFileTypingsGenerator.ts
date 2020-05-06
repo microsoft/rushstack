@@ -5,10 +5,12 @@ import {
   StringValuesTypingsGenerator,
   IStringValueTyping
 } from '@rushstack/typings-generator';
-import { Terminal } from '@rushstack/node-core-library';
+import {
+  Terminal,
+  NewlineKind
+} from '@rushstack/node-core-library';
 
 import { ILocalizationFile } from './interfaces';
-import { ILoggerOptions } from './utilities/Logging';
 import { LocFileParser } from './utilities/LocFileParser';
 
 /**
@@ -20,6 +22,7 @@ export interface ITypingsGeneratorOptions {
   terminal?: Terminal;
   exportAsDefault?: boolean;
   filesToIgnore?: string[];
+  resxNewlineNormalization?: NewlineKind | undefined;
 }
 
 /**
@@ -28,8 +31,6 @@ export interface ITypingsGeneratorOptions {
  * @public
  */
 export class LocFileTypingsGenerator extends StringValuesTypingsGenerator {
-  private _loggingOptions: ILoggerOptions;
-
   public constructor(options: ITypingsGeneratorOptions) {
     super({
       ...options,
@@ -38,7 +39,8 @@ export class LocFileTypingsGenerator extends StringValuesTypingsGenerator {
         const locFileData: ILocalizationFile = LocFileParser.parseLocFile({
           filePath: filePath,
           content: fileContents,
-          loggerOptions: this._loggingOptions
+          terminal: this._options.terminal!,
+          resxNewlineNormalization: options.resxNewlineNormalization
         });
 
         const typings: IStringValueTyping[] = [];
@@ -53,10 +55,5 @@ export class LocFileTypingsGenerator extends StringValuesTypingsGenerator {
         return { typings };
       }
     });
-
-    this._loggingOptions = {
-      writeError: this._options.terminal!.writeErrorLine.bind(this._options.terminal),
-      writeWarning: this._options.terminal!.writeWarningLine.bind(this._options.terminal)
-    };
   }
 }

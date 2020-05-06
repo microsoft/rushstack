@@ -4,7 +4,7 @@
 
 ```ts
 
-import Long from 'long';
+import { default as Long_2 } from 'long';
 import { MAX_UNSIGNED_VALUE } from 'long';
 
 // @public
@@ -29,7 +29,7 @@ export abstract class AbstractClass3 {
 export class AmbientConsumer {
     builtinDefinition1(): Map<string, string>;
     builtinDefinition2(): Promise<void>;
-    definitelyTyped(): jest.Context;
+    definitelyTyped(): jest.MockContext<number, any>;
     localTypings(): IAmbientInterfaceExample;
 }
 
@@ -190,7 +190,7 @@ export class TypeReferencesInAedoc {
 // @public (undocumented)
 export class UseLong {
     // (undocumented)
-    use_long(): Long;
+    use_long(): Long_2;
 }
 
 // @alpha (undocumented)

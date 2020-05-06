@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin",
   "entries": [
     {
+      "version": "0.3.2",
+      "tag": "@rushstack/eslint-plugin_v0.3.2",
+      "date": "Wed, 18 Mar 2020 15:07:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade cyclic dependencies"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.1",
       "tag": "@rushstack/eslint-plugin_v0.3.1",
       "date": "Sun, 19 Jan 2020 02:26:53 GMT",

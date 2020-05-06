@@ -1,6 +1,23 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Tue, 17 Mar 2020 23:55:58 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Apr 2020 04:07:33 GMT and should not be manually modified.
+
+## 4.3.14
+Wed, 08 Apr 2020 04:07:33 GMT
+
+*Version update only*
+
+## 4.3.13
+Sat, 28 Mar 2020 00:37:16 GMT
+
+*Version update only*
+
+## 4.3.12
+Wed, 18 Mar 2020 15:07:47 GMT
+
+### Patches
+
+- Upgrade cyclic dependencies
 
 ## 4.3.11
 Tue, 17 Mar 2020 23:55:58 GMT

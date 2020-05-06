@@ -19,6 +19,12 @@ export interface IExperimentsJson {
    * instead of project-specific tracking.
    */
   legacyIncrementalBuildDependencyDetection?: boolean;
+
+  /**
+   * If true, the chmod field in temporary project tar headers will not be normalized.
+   * This normalization can help ensure consistent tarball integrity across platforms.
+   */
+  noChmodFieldInTarHeaderNormalization?: boolean;
 }
 
 /**

@@ -2,6 +2,68 @@
   "name": "@microsoft/gulp-core-build-mocha",
   "entries": [
     {
+      "version": "3.8.9",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.8.9",
+      "date": "Sat, 02 May 2020 00:08:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.15.5` to `3.16.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.8",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.8.8",
+      "date": "Wed, 08 Apr 2020 04:07:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.15.4` to `3.15.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.6` to `0.5.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.7",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.8.7",
+      "date": "Sat, 28 Mar 2020 00:37:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.15.3` to `3.15.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.5` to `0.5.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.6",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.8.6",
+      "date": "Wed, 18 Mar 2020 15:07:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade cyclic dependencies"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.15.2` to `3.15.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.4` to `0.5.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.8.5",
       "tag": "@microsoft/gulp-core-build-mocha_v3.8.5",
       "date": "Tue, 17 Mar 2020 23:55:58 GMT",
