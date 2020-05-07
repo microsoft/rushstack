@@ -17,8 +17,8 @@ export interface IDocInterface4
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [Context](./api-documenter-test.idocinterface4.context.md) | <code>({ children }: {</code><br/><code>        children: string;</code><br/><code>    }) =&gt; boolean</code> | Test newline rendering when code blocks are used in tables |
-|  [generic](./api-documenter-test.idocinterface4.generic.md) | <code>Generic&lt;number&gt;</code> | make sure html entities are escaped in tables. |
-|  [numberOrFunction](./api-documenter-test.idocinterface4.numberorfunction.md) | <code>number &#124; (() =&gt; number)</code> | a union type with a function |
-|  [stringOrNumber](./api-documenter-test.idocinterface4.stringornumber.md) | <code>string &#124; number</code> | a union type |
+|  [Context](./api-documenter-test.idocinterface4.context.md) | ({ children }: { children: string; }) =&gt; boolean | Test newline rendering when code blocks are used in tables |
+|  [generic](./api-documenter-test.idocinterface4.generic.md) | [Generic](./api-documenter-test.generic.md)<!-- -->&lt;number&gt; | make sure html entities are escaped in tables. |
+|  [numberOrFunction](./api-documenter-test.idocinterface4.numberorfunction.md) | number \| (() =&gt; number) | a union type with a function |
+|  [stringOrNumber](./api-documenter-test.idocinterface4.stringornumber.md) | string \| number | a union type |
 

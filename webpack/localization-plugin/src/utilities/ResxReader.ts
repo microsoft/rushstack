@@ -274,7 +274,7 @@ export class ResxReader {
             break;
           }
 
-          foundText = childNode.type === 'text' ? childNode.text.trim() : childNode.cdata;
+          foundText = childNode.type === 'text' ? childNode.text : childNode.cdata;
           break;
         }
 

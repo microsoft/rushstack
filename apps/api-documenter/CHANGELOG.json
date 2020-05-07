@@ -2,6 +2,41 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.8.0",
+      "tag": "@microsoft/api-documenter_v7.8.0",
+      "date": "Wed, 06 May 2020 08:23:45 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "For markdown output, parameter types and return types are now hyperlinked to the corresponding API item"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.7.11` to `7.8.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.9` to `0.4.10`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.11` to `6.4.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.7.20",
+      "tag": "@microsoft/api-documenter_v7.7.20",
+      "date": "Sat, 02 May 2020 00:08:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.10` to `6.4.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.7.19",
       "tag": "@microsoft/api-documenter_v7.7.19",
       "date": "Fri, 24 Apr 2020 15:09:06 GMT",

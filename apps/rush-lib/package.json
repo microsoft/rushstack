@@ -19,8 +19,8 @@
   "license": "MIT",
   "dependencies": {
     "@rushstack/node-core-library": "3.19.7",
-    "@rushstack/package-deps-hash": "2.4.10",
-    "@rushstack/stream-collator": "3.2.10",
+    "@rushstack/package-deps-hash": "2.4.12",
+    "@rushstack/stream-collator": "3.2.12",
     "@rushstack/ts-command-line": "4.3.14",
     "@pnpm/link-bins": "~5.1.0",
     "@yarnpkg/lockfile": "~1.0.2",
@@ -46,12 +46,12 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.4.10",
-    "@microsoft/rush-stack-compiler-3.5": "0.4.9",
+    "@microsoft/node-library-build": "6.4.12",
+    "@microsoft/rush-stack-compiler-3.5": "0.4.10",
     "@rushstack/eslint-config": "0.5.7",
     "@types/glob": "7.1.1",
     "@types/inquirer": "0.0.43",
-    "@types/jest": "23.3.11",
+    "@types/jest": "25.2.1",
     "@types/js-yaml": "3.12.1",
     "@types/lodash": "4.14.116",
     "@types/minimatch": "2.0.29",
@@ -65,6 +65,6 @@
     "@types/wordwrap": "1.0.0",
     "@types/z-schema": "3.16.31",
     "gulp": "~4.0.2",
-    "jest": "~23.6.0"
+    "jest": "25.4.0"
   }
 }

@@ -53,7 +53,7 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
   private readonly _resolver: ModelReferenceResolver;
 
   private _packagesByName: Map<string, ApiPackage> | undefined = undefined;
-
+  private _apiItemsByCanonicalReference: Map<string, ApiItem> | undefined = undefined;
   public constructor() {
     super({ });
 
@@ -86,8 +86,8 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
       throw new Error('Only items of type ApiPackage may be added to an ApiModel');
     }
     super.addMember(member);
-
     this._packagesByName = undefined; // invalidate the cache
+    this._apiItemsByCanonicalReference = undefined; // invalidate the cache
   }
 
   /**
@@ -137,9 +137,56 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
     return this._packagesByName.get(packageName);
   }
 
-  public resolveDeclarationReference(declarationReference: DocDeclarationReference,
-    contextApiItem: ApiItem | undefined): IResolveDeclarationReferenceResult {
-    return this._resolver.resolve(declarationReference, contextApiItem);
+  public resolveDeclarationReference(
+    declarationReference: DocDeclarationReference | DeclarationReference,
+    contextApiItem: ApiItem | undefined
+  ): IResolveDeclarationReferenceResult {
+    if (declarationReference instanceof DocDeclarationReference) {
+      return this._resolver.resolve(declarationReference, contextApiItem);
+    } else if (declarationReference instanceof DeclarationReference) {
+      // use this._apiItemsByCanonicalReference to look up ApiItem
+
+      // Build the lookup on demand
+      if (!this._apiItemsByCanonicalReference) {
+        this._apiItemsByCanonicalReference = new Map<string, ApiItem>();
+
+        for (const apiPackage of this.packages) {
+          this._initApiItemsRecursive(apiPackage, this._apiItemsByCanonicalReference);
+        }
+      }
+
+      const result: IResolveDeclarationReferenceResult = {
+        resolvedApiItem: undefined,
+        errorMessage: undefined
+      };
+
+      const apiItem: ApiItem | undefined = this._apiItemsByCanonicalReference.get(declarationReference.toString());
+
+      if (!apiItem) {
+        result.errorMessage = `${declarationReference.toString()} can not be located`;
+      } else {
+        result.resolvedApiItem = apiItem;
+      }
+
+      return result;
+    } else {
+      // NOTE: The "instanceof DeclarationReference" test assumes a specific version of the @microsoft/tsdoc package.
+      throw new Error('The "declarationReference" parameter must be an instance of'
+        + ' DocDeclarationReference or DeclarationReference');
+    }
+  }
+
+  private _initApiItemsRecursive(apiItem: ApiItem, apiItemsByCanonicalReference: Map<string, ApiItem>): void {
+    if (apiItem.canonicalReference && !apiItem.canonicalReference.isEmpty) {
+      apiItemsByCanonicalReference.set(apiItem.canonicalReference.toString(), apiItem);
+    }
+
+    // Recurse container members
+    if (ApiItemContainerMixin.isBaseClassOf(apiItem)) {
+      for (const apiMember of apiItem.members) {
+        this._initApiItemsRecursive(apiMember, apiItemsByCanonicalReference);
+      }
+    }
   }
 
   /** @beta @override */

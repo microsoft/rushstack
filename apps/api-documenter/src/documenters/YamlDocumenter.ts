@@ -776,9 +776,7 @@ export class YamlDocumenter {
   }
 
   private _renderType(contextUid: DeclarationReference, typeExcerpt: Excerpt): string {
-    const excerptTokens: ExcerptToken[] = typeExcerpt.tokens.slice(
-      typeExcerpt.tokenRange.startIndex,
-      typeExcerpt.tokenRange.endIndex);
+    const excerptTokens: ExcerptToken[] = [...typeExcerpt.spannedTokens]; // copy the read-only array
 
     if (excerptTokens.length === 0) {
       return '';

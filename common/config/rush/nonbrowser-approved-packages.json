@@ -3,6 +3,14 @@
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
   "packages": [
     {
+      "name": "@jest/core",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@jest/reporters",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@microsoft/api-documenter",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -47,16 +55,8 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "@rushstack/node-core-library",
-      "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
       "name": "@microsoft/node-library-build",
       "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
-      "name": "@rushstack/package-deps-hash",
-      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@microsoft/rush-lib",
@@ -112,31 +112,19 @@
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.7",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-shared",
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@rushstack/set-webpack-public-path-plugin",
-      "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
       "name": "@microsoft/sp-tslint-rules",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "@rushstack/stream-collator",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@microsoft/teams-js",
       "allowedCategories": [ "tests" ]
-    },
-    {
-      "name": "@rushstack/ts-command-line",
-      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@microsoft/tsdoc",
@@ -169,6 +157,26 @@
     {
       "name": "@rushstack/localization-plugin",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@rushstack/node-core-library",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@rushstack/package-deps-hash",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/set-webpack-public-path-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@rushstack/stream-collator",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/ts-command-line",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/typings-generator",
