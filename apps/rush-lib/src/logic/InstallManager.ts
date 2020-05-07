@@ -25,7 +25,6 @@ import {
   PosixModeBits,
   JsonObject
 } from '@rushstack/node-core-library';
-import * as isCI from 'is-ci';
 
 import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
 import { AsyncRecycler } from '../utilities/AsyncRecycler';
@@ -1049,7 +1048,7 @@ export class InstallManager {
               this._rushConfiguration.packageManager === 'pnpm' &&
               this._rushConfiguration.pnpmOptions.pnpmStore === 'local'
             ) {
-              if (isCI) {
+              if (Utilities.isCI()) {
                 // If the installation has failed even after the retries, then pnpm store may
                 // have got into a corrupted, irrecoverable state. Delete the store so that a
                 // future install can create the store afresh on CI machines.

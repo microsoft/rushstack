@@ -3,6 +3,7 @@
 
 import * as child_process from 'child_process';
 import * as fs from 'fs';
+import * as isCI from 'is-ci';
 import * as os from 'os';
 import * as tty from 'tty';
 import * as path from 'path';
@@ -121,6 +122,26 @@ export class Utilities {
   }
 
   /**
+   * Returns true if rush is running on a CI.
+    *
+   * The package is-ci is to detect this.
+   * Set environment variable RUSH_CI_MODE to override:
+   *   To force CI mode, set the environment variable to CI
+   *   To force non-CI mode, set the environment variable to NON-CI
+   */
+  public static isCI(): boolean {
+    if (process.env.RUSH_CI_MODE === 'CI') {
+      return true;
+    }
+
+    if (process.env.RUSH_CI_MODE === 'NON-CI') {
+      return false;
+    }
+
+    return isCI;
+  }
+
+  /**
    * Node.js equivalent of performance.now().
    */
   public static getTimeInMs(): number {
@@ -154,7 +175,7 @@ export class Utilities {
     let looped: boolean = false;
 
     let result: TResult;
-    for (;;) {
+    for (; ;) {
       try {
         result = fn();
         break;
@@ -343,7 +364,7 @@ export class Utilities {
     keepEnvironment: boolean = false
   ): string {
 
-    const  result: child_process.SpawnSyncReturns<Buffer> = Utilities._executeCommandInternal(
+    const result: child_process.SpawnSyncReturns<Buffer> = Utilities._executeCommandInternal(
       command,
       args,
       workingDirectory,
@@ -359,7 +380,7 @@ export class Utilities {
    * Attempts to run Utilities.executeCommand() up to maxAttempts times before giving up.
    */
   public static executeCommandWithRetry(maxAttempts: number, command: string, args: string[],
-    workingDirectory: string,  environment?: IEnvironment, suppressOutput: boolean = false,
+    workingDirectory: string, environment?: IEnvironment, suppressOutput: boolean = false,
     retryCallback?: () => void): void {
 
     if (maxAttempts < 1) {
@@ -368,7 +389,7 @@ export class Utilities {
 
     let attemptNumber: number = 1;
 
-    for (;;) {
+    for (; ;) {
       try {
         Utilities.executeCommand(command, args, workingDirectory, environment, suppressOutput);
       } catch (error) {
@@ -701,7 +722,7 @@ export class Utilities {
    */
   private static _executeCommandInternal(
     command: string, args: string[], workingDirectory: string,
-    stdio: 'pipe'|'ignore'|'inherit'|(number|'pipe'|'ignore'|'inherit'|'ipc'|Stream|null|undefined)[]|undefined,
+    stdio: 'pipe' | 'ignore' | 'inherit' | (number | 'pipe' | 'ignore' | 'inherit' | 'ipc' | Stream | null | undefined)[] | undefined,
     environment?: IEnvironment,
     keepEnvironment: boolean = false
   ): child_process.SpawnSyncReturns<Buffer> {
