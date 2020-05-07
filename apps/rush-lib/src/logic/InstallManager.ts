@@ -682,8 +682,17 @@ export class InstallManager {
         // We will NOT locally link this package; add it as a regular dependency.
         tempPackageJson.dependencies![packageName] = packageVersion;
 
+        let tryReusingPackageVersionsFromShrinkwrap: boolean = true;
+
+        if (this._rushConfiguration.packageManager === 'pnpm') {
+          // Shrinkwrap churn optimization doesn't make sense when --frozen-lockfile is true
+          tryReusingPackageVersionsFromShrinkwrap =
+            !this._rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall;
+        }
+
         if (shrinkwrapFile) {
-          if (!shrinkwrapFile.tryEnsureCompatibleDependency(dependencySpecifier, rushProject.tempProjectName)) {
+          if (!shrinkwrapFile.tryEnsureCompatibleDependency(dependencySpecifier, rushProject.tempProjectName,
+            tryReusingPackageVersionsFromShrinkwrap)) {
             shrinkwrapWarnings.push(`"${packageName}" (${packageVersion}) required by`
               + ` "${rushProject.packageName}"`);
             shrinkwrapIsUpToDate = false;
@@ -834,6 +843,8 @@ export class InstallManager {
       variantIsUpToDate
     } = options;
 
+    const usePnpmFrozenLockfile: boolean = this._rushConfiguration.packageManager === 'pnpm' &&
+      this._rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall === true;
     return Promise.resolve().then(() => {
       console.log(os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonTempFolder)
         + os.EOL);
@@ -1070,15 +1081,7 @@ export class InstallManager {
             this._fixupNpm5Regression();
           }
 
-          if (options.allowShrinkwrapUpdates &&
-            (
-              (
-                this._rushConfiguration.packageManager === 'pnpm' &&
-                this._rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall
-              ) ||
-              !shrinkwrapIsUpToDate
-            )
-          ) {
+          if (options.allowShrinkwrapUpdates && (usePnpmFrozenLockfile || !shrinkwrapIsUpToDate)) {
             // Shrinkwrap files may need to be post processed after install, so load and save it
             const tempShrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
               this._rushConfiguration.packageManager,

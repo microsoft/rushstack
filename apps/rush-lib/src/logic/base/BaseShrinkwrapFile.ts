@@ -85,9 +85,10 @@ export abstract class BaseShrinkwrapFile {
    *
    * @virtual
    */
-  public tryEnsureCompatibleDependency(dependencySpecifier: DependencySpecifier, tempProjectName: string): boolean {
+  public tryEnsureCompatibleDependency(dependencySpecifier: DependencySpecifier,
+    tempProjectName: string, tryReusingPackageVersionsFromShrinkwrap: boolean = true): boolean {
     const shrinkwrapDependency: DependencySpecifier | undefined =
-      this.tryEnsureDependencyVersion(dependencySpecifier, tempProjectName);
+      this.tryEnsureDependencyVersion(dependencySpecifier, tempProjectName, tryReusingPackageVersionsFromShrinkwrap);
     if (!shrinkwrapDependency) {
       return false;
     }
@@ -105,7 +106,7 @@ export abstract class BaseShrinkwrapFile {
 
   /** @virtual */
   protected abstract tryEnsureDependencyVersion(dependencySpecifier: DependencySpecifier,
-    tempProjectName: string): DependencySpecifier | undefined;
+    tempProjectName: string, tryReusingPackageVersionsFromShrinkwrap: boolean): DependencySpecifier | undefined;
 
   /** @virtual */
   protected abstract getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined;
@@ -113,7 +114,7 @@ export abstract class BaseShrinkwrapFile {
   /** @virtual */
   protected abstract serialize(): string;
 
-  protected _getTempProjectNames(dependencies: { [key: string]: {} } ): ReadonlyArray<string> {
+  protected _getTempProjectNames(dependencies: { [key: string]: {} }): ReadonlyArray<string> {
     const result: string[] = [];
     for (const key of Object.keys(dependencies)) {
       // If it starts with @rush-temp, then include it:
