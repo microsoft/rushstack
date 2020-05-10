@@ -39,6 +39,7 @@ import { PurgeManager } from './PurgeManager';
 import { RushConfiguration, ICurrentVariantJson, IConfigurationEnvironment } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
+import { RushCiMode } from '../utilities/RushCiMode';
 import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
 import { Stopwatch } from '../utilities/Stopwatch';
 import { Utilities } from '../utilities/Utilities';
@@ -61,13 +62,15 @@ import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
 import { DependencySpecifier } from './DependencySpecifier';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
-export interface CreateOptions {
-  /**
-   * "Set to true to omit writing mtime values for entries. Note that this prevents using other
-   * mtime-based features like tar.update or the keepNewer option with the resulting tar archive."
-   */
-  noMtime?: boolean;
+declare module 'tar' {
+  // eslint-disable-next-line @typescript-eslint/interface-name-prefix
+  export interface CreateOptions {
+    /**
+     * "Set to true to omit writing mtime values for entries. Note that this prevents using other
+     * mtime-based features like tar.update or the keepNewer option with the resulting tar archive."
+     */
+    noMtime?: boolean;
+  }
 }
 
 export interface IInstallManagerOptions {
@@ -1048,7 +1051,7 @@ export class InstallManager {
               this._rushConfiguration.packageManager === 'pnpm' &&
               this._rushConfiguration.pnpmOptions.pnpmStore === 'local'
             ) {
-              if (Utilities.isCI()) {
+              if (RushCiMode.isCI()) {
                 // If the installation has failed even after the retries, then pnpm store may
                 // have got into a corrupted, irrecoverable state. Delete the store so that a
                 // future install can create the store afresh on CI machines.

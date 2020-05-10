@@ -3,7 +3,6 @@
 
 import * as child_process from 'child_process';
 import * as fs from 'fs';
-import * as isCI from 'is-ci';
 import * as os from 'os';
 import * as tty from 'tty';
 import * as path from 'path';
@@ -119,26 +118,6 @@ export class Utilities {
     }
 
     return homeFolder;
-  }
-
-  /**
-   * Returns true if rush is running on a CI.
-    *
-   * The package is-ci is to detect this.
-   * Set environment variable RUSH_CI_MODE to override:
-   *   To force CI mode, set the environment variable to CI
-   *   To force non-CI mode, set the environment variable to NON-CI
-   */
-  public static isCI(): boolean {
-    if (process.env.RUSH_CI_MODE === 'CI') {
-      return true;
-    }
-
-    if (process.env.RUSH_CI_MODE === 'NON-CI') {
-      return false;
-    }
-
-    return isCI;
   }
 
   /**

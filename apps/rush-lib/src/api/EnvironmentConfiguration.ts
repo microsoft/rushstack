@@ -4,6 +4,7 @@
 import * as os from 'os';
 import * as path from 'path';
 import { trueCasePathSync } from 'true-case-path';
+import { RushCiMode } from '../utilities/RushCiMode';
 
 export interface IEnvironmentConfigurationInitializeOptions {
   doNotNormalizePaths?: boolean;
@@ -55,7 +56,14 @@ export const enum EnvironmentVariableNames {
    * If a relative path is used, then the store path will be resolved relative to the process's
    * current working directory.  An absolute path is recommended.
    */
-  RUSH_PNPM_STORE_PATH = 'RUSH_PNPM_STORE_PATH'
+  RUSH_PNPM_STORE_PATH = 'RUSH_PNPM_STORE_PATH',
+
+  /**
+   * Use environment variable RUSH_CI_MODE to force a mode:
+   *   To force CI mode, set the environment variable to CI
+   *   To force non-CI mode, set the environment variable to NON-CI
+   */
+  RUSH_CI_MODE = 'RUSH_CI_MODE'
 }
 
 /**
@@ -75,6 +83,8 @@ export class EnvironmentConfiguration {
   private static _allowUnsupportedNodeVersion: boolean = false;
 
   private static _pnpmStorePathOverride: string | undefined;
+
+  private static _rushExecutionModeOverride: string | undefined = undefined;
 
   /**
    * An override for the common/temp folder path.
@@ -155,6 +165,10 @@ export class EnvironmentConfiguration {
           case EnvironmentVariableNames.RUSH_VARIANT:
             // Handled by @microsoft/rush front end
             break;
+
+          case EnvironmentVariableNames.RUSH_CI_MODE:
+            EnvironmentConfiguration._rushExecutionModeOverride = value;
+            break;
           default:
             unknownEnvVariables.push(envVarName);
             break;
@@ -169,6 +183,8 @@ export class EnvironmentConfiguration {
         `recognized by this version of Rush: ${unknownEnvVariables.join(', ')}`
       );
     }
+
+    RushCiMode.initialize(EnvironmentConfiguration._rushExecutionModeOverride);
 
     EnvironmentConfiguration._hasBeenInitialized = true;
   }

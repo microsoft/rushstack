@@ -10,7 +10,6 @@ import { RushConstants } from '../logic/RushConstants';
 import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
-import { Utilities } from '../utilities/Utilities';
 
 /**
  * Options to pass to the rush "launch" functions.
@@ -111,9 +110,7 @@ export class Rush {
       colors.bold(`Rush Multi-Project Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')) +
       colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) + `.` +
       EOL +
-      `Node.js version is ${nodeVersion} (${nodeReleaseLabel}).` +
-      EOL + EOL +
-      `Rush is running in ` + colors.yellow(Utilities.isCI() ? `CI` : `NON-CI`) + ` mode.`
+      `Node.js version is ${nodeVersion} (${nodeReleaseLabel}).`
     );
   }
 }

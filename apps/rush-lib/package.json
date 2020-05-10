@@ -52,6 +52,7 @@
     "@rushstack/eslint-config": "0.5.7",
     "@types/glob": "7.1.1",
     "@types/inquirer": "0.0.43",
+    "@types/is-ci": "2.0.0",
     "@types/jest": "23.3.11",
     "@types/js-yaml": "3.12.1",
     "@types/lodash": "4.14.116",

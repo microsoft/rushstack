@@ -89,6 +89,7 @@ dependencies:
   '@types/gulp-istanbul': 0.9.30
   '@types/gulp-mocha': 0.0.32
   '@types/inquirer': 0.0.43
+  '@types/is-ci': 2.0.0
   '@types/jest': 23.3.11
   '@types/jju': 1.4.1
   '@types/js-yaml': 3.12.1
@@ -534,6 +535,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-ox10JBprHtu5c8822XooloNKUfk=
+  /@types/ci-info/2.0.0:
+    dev: false
+    resolution:
+      integrity: sha512-5R2/MHILQLDCzTuhs1j4Qqq8AaKUf7Ma4KSSkCtc12+fMs47zfa34qhto9goxpyX00tQK1zxB885VCiawZ5Qhg==
   /@types/clean-css/4.2.1:
     dependencies:
       '@types/node': 10.17.13
@@ -649,6 +654,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-xgyfKZVMFqE8aIKy1xfFVsX2MxyXUNgjgmbF6dRbR3sL+ZM5K4ka/9L4mmTwX8eTeVYtduyXu0gUVwVJa1HbNw==
+  /@types/is-ci/2.0.0:
+    dependencies:
+      '@types/ci-info': 2.0.0
+    dev: false
+    resolution:
+      integrity: sha512-J8ytIdkALbTrqcJ6OZiEv0B9skfyok/zCDj1q06GGCDa1rlHnPobUBT0BYR1vku2oZVwVEgCurtXqCASAfjCiQ==
   /@types/jest/23.3.11:
     dev: false
     resolution:
@@ -12475,6 +12486,7 @@ packages:
       '@pnpm/link-bins': 5.1.7
       '@types/glob': 7.1.1
       '@types/inquirer': 0.0.43
+      '@types/is-ci': 2.0.0
       '@types/jest': 23.3.11
       '@types/js-yaml': 3.12.1
       '@types/lodash': 4.14.116
@@ -12515,7 +12527,7 @@ packages:
     dev: false
     name: '@rush-temp/rush-lib'
     resolution:
-      integrity: sha512-5yWMCInlmBxB0gnCL0PtDOcXsse/07/5WKrmHigYv3zH7S+VjylBuutjQcX7umJqP5l9Jz2tp5Kn7FRNpv9Cwg==
+      integrity: sha512-cdtT1307Y4bhfKMLch7eSxmsbn6JUOWCAsOl8rSz6/MtThu8w2xge1pwvO2BQAo4Gkvg8E4Ook47I7rBNLJUug==
       tarball: 'file:projects/rush-lib.tgz'
     version: 0.0.0
   'file:projects/rush-stack-compiler-2.4-library-test.tgz':
@@ -13047,6 +13059,7 @@ specifiers:
   '@types/gulp-istanbul': 0.9.30
   '@types/gulp-mocha': 0.0.32
   '@types/inquirer': 0.0.43
+  '@types/is-ci': 2.0.0
   '@types/jest': 23.3.11
   '@types/jju': 1.4.1
   '@types/js-yaml': 3.12.1
@@ -13177,4 +13190,4 @@ specifiers:
   xmldoc: ~1.1.2
   yargs: ~4.6.0
   z-schema: ~3.18.3
-# shrinkwrap hash: 03d97be52c39037f6f4c65f94adf37fb28b39964
+# shrinkwrap hash: 680c6cb360f76f7871ac4bbb860f8d4af6df7089
