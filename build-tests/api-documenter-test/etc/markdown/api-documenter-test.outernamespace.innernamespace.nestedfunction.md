@@ -16,9 +16,9 @@ function nestedFunction(x: number): number;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  x | <code>number</code> |  |
+|  x | number |  |
 
 <b>Returns:</b>
 
-`number`
+number
 

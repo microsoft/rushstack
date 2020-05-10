@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Wed, 08 Apr 2020 04:07:33 GMT and should not be manually modified.
+This log was last generated on Wed, 06 May 2020 08:23:45 GMT and should not be manually modified.
+
+## 7.8.0
+Wed, 06 May 2020 08:23:45 GMT
+
+### Minor changes
+
+- Enable canonicalReference to ApiItem lookup
 
 ## 7.7.11
 Wed, 08 Apr 2020 04:07:33 GMT

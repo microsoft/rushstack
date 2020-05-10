@@ -376,7 +376,7 @@ export class ApiModel extends ApiModel_base {
     // (undocumented)
     readonly packages: ReadonlyArray<ApiPackage>;
     // (undocumented)
-    resolveDeclarationReference(declarationReference: DocDeclarationReference, contextApiItem: ApiItem | undefined): IResolveDeclarationReferenceResult;
+    resolveDeclarationReference(declarationReference: DocDeclarationReference | DeclarationReference, contextApiItem: ApiItem | undefined): IResolveDeclarationReferenceResult;
     tryGetPackageByName(packageName: string): ApiPackage | undefined;
 }
 
@@ -604,24 +604,18 @@ export type Constructor<T = {}> = new (...args: any[]) => T;
 // @public
 export class Excerpt {
     constructor(tokens: ReadonlyArray<ExcerptToken>, tokenRange: IExcerptTokenRange);
-    // (undocumented)
     readonly isEmpty: boolean;
-    // (undocumented)
+    readonly spannedTokens: ReadonlyArray<ExcerptToken>;
     readonly text: string;
-    // (undocumented)
     readonly tokenRange: Readonly<IExcerptTokenRange>;
-    // (undocumented)
     readonly tokens: ReadonlyArray<ExcerptToken>;
 }
 
-// @public (undocumented)
+// @public
 export class ExcerptToken {
     constructor(kind: ExcerptTokenKind, text: string, canonicalReference?: DeclarationReference);
-    // (undocumented)
     readonly canonicalReference: DeclarationReference | undefined;
-    // (undocumented)
     readonly kind: ExcerptTokenKind;
-    // (undocumented)
     readonly text: string;
     }
 
@@ -826,11 +820,9 @@ export interface IExcerptToken {
     text: string;
 }
 
-// @public (undocumented)
+// @public
 export interface IExcerptTokenRange {
-    // (undocumented)
     endIndex: number;
-    // (undocumented)
     startIndex: number;
 }
 

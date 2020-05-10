@@ -79,7 +79,7 @@ export class PublishAction extends BaseRushAction {
       parameterShortName: '-b',
       argumentName: 'BRANCH',
       description:
-      'If this flag is specified, applied changes and deleted change requests will be' +
+      'If this flag is specified, applied changes and deleted change requests will be ' +
       'committed and merged into the target branch.'
     });
     this._publish = this.defineFlagParameter({

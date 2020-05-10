@@ -9,12 +9,12 @@
     "build": "node build.js"
   },
   "dependencies": {
-    "@types/jest": "23.3.11",
+    "@types/jest": "25.2.1",
     "@types/long": "4.0.0",
     "long": "^4.0.0"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "7.7.13",
+    "@microsoft/api-extractor": "7.8.0",
     "@types/node": "10.17.13",
     "fs-extra": "~7.0.1",
     "typescript": "~3.7.2"
