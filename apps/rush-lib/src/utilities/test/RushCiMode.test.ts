@@ -4,7 +4,10 @@
 import * as isCI from 'is-ci';
 
 import { RushCiMode } from '../RushCiMode';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
+/* eslint-disable dot-notation */
+const RUSH_CI_MODE_ENV_VAR: string = 'RUSH_CI_MODE';
 describe('IsCI', () => {
   it('determines the current mode as CI if RUSH_CI_MODE is set to CI', (done: jest.DoneCallback) => {
     RushCiMode.initialize('CI');
@@ -37,9 +40,15 @@ describe('IsCI', () => {
 
     RushCiMode.initialize('NON-CI');
     RushCiMode.initialize('AAA');
+    process.env[RUSH_CI_MODE_ENV_VAR] = 'ABC';
+    EnvironmentConfiguration.initialize();
     RushCiMode.initialize('');
     RushCiMode.initialize('CI');
     RushCiMode.initialize('CI');
+    expect(RushCiMode.isCI()).toBe(true);
+
+    process.env[RUSH_CI_MODE_ENV_VAR] = 'CI';
+    EnvironmentConfiguration.initialize();
     expect(RushCiMode.isCI()).toBe(true);
 
     done();
@@ -66,7 +75,13 @@ describe('IsCI', () => {
     RushCiMode.initialize('CI');
     RushCiMode.initialize('');
     RushCiMode.initialize('AAA');
+    process.env[RUSH_CI_MODE_ENV_VAR] = 'CI';
+    EnvironmentConfiguration.initialize();
     RushCiMode.initialize('NON-CI');
+    expect(RushCiMode.isCI()).toBe(false);
+
+    process.env['RUSH_CI_MODE'] = 'NON-CI';
+    EnvironmentConfiguration.initialize();
     expect(RushCiMode.isCI()).toBe(false);
 
     done();
@@ -103,6 +118,18 @@ describe('IsCI', () => {
       RushCiMode.initialize('CI');
       RushCiMode.initialize('NON-CI');
       RushCiMode.initialize('DEF');
+      expect(RushCiMode.isCI()).toBe(isCI);
+
+      process.env['RUSH_CI_MODE'] = '';
+      EnvironmentConfiguration.initialize();
+      expect(RushCiMode.isCI()).toBe(isCI);
+
+      process.env['RUSH_CI_MODE'] = 'ABC';
+      EnvironmentConfiguration.initialize();
+      expect(RushCiMode.isCI()).toBe(isCI);
+
+      process.env['RUSH_CI_MODE'] = undefined;
+      EnvironmentConfiguration.initialize();
       expect(RushCiMode.isCI()).toBe(isCI);
 
       done();

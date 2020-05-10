@@ -60,8 +60,8 @@ export const enum EnvironmentVariableNames {
 
   /**
    * Use environment variable RUSH_CI_MODE to force a mode:
-   *   To force CI mode, set the environment variable to CI
-   *   To force non-CI mode, set the environment variable to NON-CI
+   *   To force CI mode, set the environment variable to 'CI'
+   *   To force non-CI mode, set the environment variable to 'NON-CI'
    */
   RUSH_CI_MODE = 'RUSH_CI_MODE'
 }
