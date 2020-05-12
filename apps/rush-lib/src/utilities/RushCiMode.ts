@@ -18,7 +18,7 @@ export class RushCiMode {
 
   private constructor(overrideMode: string | undefined) {
     this._forceCI = false;
-    this._forceNONCI = false;
+    this._forceNonCI = false;
     if (!overrideMode) {
       // Nothing to do.
       return;
