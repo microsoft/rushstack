@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-plugin",
+      "comment": "Fix encoding of tab characters.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/localization-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}
