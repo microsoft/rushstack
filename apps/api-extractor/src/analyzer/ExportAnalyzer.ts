@@ -562,6 +562,11 @@ export class ExportAnalyzer {
       }
     }
 
+    const importTypeNode = TypeScriptHelpers.findFirstChildNode(declaration, ts.SyntaxKind.ImportType);
+    if (importTypeNode) {
+      throw new Error(`Unsupported ImportType node: ${importTypeNode.getText()}\nFailure in: ${declaration.getSourceFile().fileName}`);
+    }
+
     return undefined;
   }
 
