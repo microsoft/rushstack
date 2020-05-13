@@ -135,6 +135,7 @@ export interface IConfigurationEnvironmentVariable {
 export interface IExperimentsJson {
     legacyIncrementalBuildDependencyDetection?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
+    usePnpmFrozenLockfileForRushInstall?: boolean;
 }
 
 // @public

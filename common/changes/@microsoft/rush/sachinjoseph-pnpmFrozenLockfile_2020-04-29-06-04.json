@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Provide an option to pass --frozen-lockfile to pnpm for rush install",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "sachinjoseph@users.noreply.github.com"
+}
