@@ -119,8 +119,8 @@ export interface ICommandLineStringDefinition extends IBaseCommandLineDefinition
 }
 
 /**
- * For use with CommandLineParser, this interface represents a command line parameter
- * whose argument is a list of strings.
+ * For use with CommandLineParser, this interface represents a command line parameter whose argument is
+ * a single text string.  The parameter can be specified multiple times to build a list.
  *
  * @public
  */

@@ -80,13 +80,13 @@ function createParser(): DynamicCommandLineParser {
     parameterShortName: '-s',
     description: 'A string',
     argumentName: 'TEXT',
-    environmentVariable: 'ENV_INTEGER'
+    environmentVariable: 'ENV_STRING'
   });
   action.defineStringParameter({
     parameterLongName: '--string-with-default',
     description: 'A string with a default',
     argumentName: 'TEXT',
-    environmentVariable: 'ENV_INTEGER',
+    environmentVariable: 'ENV_STRING',
     defaultValue: '123'
   });
 
@@ -94,9 +94,9 @@ function createParser(): DynamicCommandLineParser {
   action.defineStringListParameter({
     parameterLongName: '--string-list',
     parameterShortName: '-l',
-    description: 'A string list',
-    argumentName: 'LIST',
-    environmentVariable: 'ENV_INTEGER'
+    description: 'This parameter be specified multiple times to make a list of strings',
+    argumentName: 'LIST_ITEM',
+    environmentVariable: 'ENV_STRING_LIST'
   });
   return commandLineParser;
 }

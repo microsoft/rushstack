@@ -101,7 +101,7 @@ export abstract class CommandLineParameterProvider {
   }
 
   /**
-   * Defines a command-line parameter whose value is an integer.
+   * Defines a command-line parameter whose argument is an integer.
    *
    * @remarks
    * Example:  example-tool --max-attempts 5
@@ -122,7 +122,7 @@ export abstract class CommandLineParameterProvider {
   }
 
   /**
-   * Defines a command-line parameter whose value is a single text string.
+   * Defines a command-line parameter whose argument is a single text string.
    *
    * @remarks
    * Example:  example-tool --message "Hello, world!"
@@ -143,7 +143,8 @@ export abstract class CommandLineParameterProvider {
   }
 
   /**
-   * Defines a command-line parameter whose value is one or more text strings.
+   * Defines a command-line parameter whose argument is a single text string.  The parameter can be
+   * specified multiple times to build a list.
    *
    * @remarks
    * Example:  example-tool --add file1.txt --add file2.txt --add file3.txt
