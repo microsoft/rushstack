@@ -8,6 +8,8 @@ This library helps you create professional command-line tools for Node.js. By "p
 
 - **automatic documentation**: Some command-line libraries treat the `--help` docs as someone else's job.  **ts-command-line** requires each every parameter to have a documentation string, and will automatically generate the `--help` docs for you.  If you like to write long paragraphs, no problem -- they will be word-wrapped correctly.   *[golf clap]*
 
+- **environment variable mappings**: Any CLI parameter can be associated with an environment variable.  If the parameter is not explicitly provided, the value from the environment will be used.  The associated environment variables are documented in the `--help`.
+
 - **structure and extensibility**: Instead of a simple function chain, **ts-command-line** provides a  "scaffold" pattern that makes it easy to find and understand the command-line implementation for any tool project.  The scaffold model is generally recommended, but there's also a "dynamic" model if you need it.  See below for examples.
 
 Internally, the implementation is based on [argparse](https://www.npmjs.com/package/argparse) and the Python approach to command-lines.  Compared to other libraries, **ts-command-line** doesn't provide zillions of custom syntaxes and bells and whistles.  Instead it aims to be a simple, consistent, and professional solution for your command-line tool.  Give it a try!
@@ -25,12 +27,24 @@ In this example, we can identify the following components:
 
 - The **tool name** in this example is `widget`.  This is the name of your Node.js bin script.
 - The **parameters** are  `--verbose`, `--force`, and `--max-count`.
-- The currently supported **parameter kinds** include: **flag** (i.e. boolean), **integer**, **string**, **choice** (i.e. enums), and **string list**.
 - The value "123" is the **argument** for the `--max-count` integer parameter.  (Flags don't have arguments, because their value is determined by whether the flag was provided or not.)
 - Similar to Git's command-line, the `push` token is called an **action**.  It acts as sub-command with its own unique set of parameters.
 - The `--verbose` flag is a **global parameter** because it precedes the action name.  It affects all actions.
 - The `--force` flag is an **action parameter** because it comes after the action name.  It only applies to that action.
 
+### Parameter Kinds
+
+Several different kinds of parameters are supported:
+
+| Parameter Kind | Example | Data Type | Description |
+| --- | --- | --- | --- |
+| flag | `--verbose` | `boolean` | Value is `true` if the flag was specified on the command line, `false` otherwise. |
+| integer | `--max-retry 3` | `int` | The argument is an integer number |
+| string | `--title "Hello, world"` | `string` | The argument is a text string. |
+| choice | `--color red` | `string` | The argument is must be a string from a list of allowed choices (similar to an enum). |
+| string list | `-o file1.txt -o file2.txt` | `string[]` | The argument is a text string. The parameter can be specified multiple times to build a list. |
+
+Other parameter kinds can be implemented if requested.  However, keeping the grammar simple and systematic tends to produce more a intuitive command line for users.
 
 ## Scaffold Model
 
@@ -47,6 +61,7 @@ We could define our subclass for the "`push`" action like this:
 ```typescript
 class PushAction extends CommandLineAction {
   private _force: CommandLineFlagParameter;
+  private _protocol: CommandLineChoiceParameter;
 
   public constructor() {
     super({
@@ -65,6 +80,14 @@ class PushAction extends CommandLineAction {
       parameterLongName: '--force',
       parameterShortName: '-f',
       description: 'Push and overwrite any existing state'
+    });
+
+    this._protocol = this.defineChoiceParameter({
+      parameterLongName: '--protocol',
+      description: 'Specify the protocol to use',
+      alternatives: [ 'ftp', 'webdav', 'scp' ],
+      environmentVariable: 'WIDGET_PROTOCOL',
+      defaultValue: 'scp'
     });
   }
 }
@@ -133,13 +156,17 @@ For detailed help about a specific command, use: widget <command> -h
 For help about the `push` action, the user can type "`widget push --help`", which shows this output:
 
 ```
-usage: widget push [-h] [-f]
+usage: widget push [-h] [-f] [--protocol {ftp,webdav,scp}]
 
 Your long description goes here.
 
 Optional arguments:
-  -h, --help   Show this help message and exit.
-  -f, --force  Push and overwrite any existing state
+  -h, --help            Show this help message and exit.
+  -f, --force           Push and overwrite any existing state
+  --protocol {ftp,webdav,scp}
+                        Specify the protocol to use. This parameter may
+                        alternatively specified via the WIDGET_PROTOCOL
+                        environment variable. The default value is "scp".
 ```
 
 ## Dynamic Model
