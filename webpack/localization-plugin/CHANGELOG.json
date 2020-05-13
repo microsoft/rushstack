@@ -2,6 +2,18 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.3.6",
+      "tag": "@rushstack/localization-plugin_v0.3.6",
+      "date": "Wed, 13 May 2020 19:10:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix encoding of tab characters."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.5",
       "tag": "@rushstack/localization-plugin_v0.3.5",
       "date": "Wed, 06 May 2020 08:23:45 GMT",

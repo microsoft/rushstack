@@ -1,6 +1,13 @@
 # Change Log - @rushstack/localization-plugin
 
-This log was last generated on Wed, 06 May 2020 08:23:45 GMT and should not be manually modified.
+This log was last generated on Wed, 13 May 2020 19:10:53 GMT and should not be manually modified.
+
+## 0.3.6
+Wed, 13 May 2020 19:10:53 GMT
+
+### Patches
+
+- Fix encoding of tab characters.
 
 ## 0.3.5
 Wed, 06 May 2020 08:23:45 GMT
