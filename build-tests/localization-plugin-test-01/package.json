@@ -10,7 +10,7 @@
   "dependencies": {
     "@rushstack/set-webpack-public-path-plugin": "2.4.9",
     "@rushstack/node-core-library": "3.19.7",
-    "@rushstack/localization-plugin": "0.3.5",
+    "@rushstack/localization-plugin": "0.3.6",
     "@types/webpack-env": "1.13.0",
     "@microsoft/rush-stack-compiler-3.5": "0.4.10",
     "ts-loader": "6.0.0",
