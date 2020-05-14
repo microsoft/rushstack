@@ -88,6 +88,8 @@ export abstract class CommandLineParameter {
 
     if (this.environmentVariable) {
       if (this.required) {
+        // TODO: This constraint is imposed only because argparse enforces "required" parameters, but
+        // it does not know about ts-command-line environment variable mappings.  We should fix this.
         throw new Error(`An "environmentVariable" cannot be specified for "${this.longName}"`
           + ` because it is a required parameter`);
       }
@@ -321,8 +323,14 @@ export class CommandLineFlagParameter extends CommandLineParameter {
       if (typeof data !== 'boolean') {
         this.reportInvalidData(data);
       }
-      this._value = data;
-      return;
+
+      // If the flag is omitted, then argparse sets the data to "false" instead of "undefined".
+      // This design prevents a syntax such as "--flag=false", probably because argparse prefers "--no-flag".
+      // If we switch to a new CLI parser, we should try to add support for "--flag=false".
+      if (data) {
+        this._value = data;
+        return;
+      }
     }
 
     if (this.environmentVariable !== undefined) {
@@ -582,12 +590,32 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
         // NOTE: If the environment variable is defined as an empty string,
         // here we will accept the empty string as our value.  (For number/flag we don't do that.)
 
-        // In the current implementation, the environment variable for a "string list" can only
-        // store a single item.  If we wanted to allow multiple items (and still have a conventional-seeming
-        // environment), we would ask the caller to provide an appropriate delimiter.  Getting involved
-        // with escaping here seems unwise, since there are so many shell escaping mechanisms that could
-        // potentially confuse the experience.
-        this._values = [ environmentValue ];
+        if (environmentValue[0] === '[') {
+          // Specifying multiple items in an environment variable is a somewhat rare case.  But environment
+          // variables are actually a pretty reliable way for a tool to avoid shell escaping problems
+          // when spawning another tool.  For this case, we need a reliable way to pass an array of strings
+          // that could contain any character.  For example, if we simply used ";" as the list delimiter,
+          // then what to do if a string contains that character?  We'd need to design an escaping mechanism.
+          // Since JSON is simple and standard and can escape every possible string, it's a better option
+          // than a custom delimiter.
+          try {
+            const parsedJson: unknown = JSON.parse(environmentValue);
+            if (!Array.isArray(parsedJson)
+              || !parsedJson.every(x => typeof x === 'string' || typeof x === "boolean" || typeof x === "number")) {
+              throw new Error(`The ${environmentValue} environment variable value must be a JSON `
+                + ` array containing only strings, numbers, and booleans.`);
+            }
+            this._values = parsedJson.map(x => x.toString());
+          } catch (ex) {
+            throw new Error(`The ${environmentValue} environment variable value looks like a JSON array`
+              + ` but failed to parse: ` + ex.message);
+          }
+        } else {
+          // As a shorthand, a single value may be specified without JSON encoding, as long as it does not
+          // start with the "[" character.
+          this._values = [ environmentValue ];
+        }
+
         return;
       }
     }
