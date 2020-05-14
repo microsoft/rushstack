@@ -203,20 +203,15 @@ export abstract class CommandLineParameterProvider {
     }
     this._remainder = new CommandLineRemainder(definition);
 
+    const argparseOptions: argparse.ArgumentOptions = {
+      help: this._remainder.description,
+      nargs: argparse.Const.REMAINDER,
+      metavar: '"..."'
+    };
+
+    this._getArgumentParser().addArgument(argparse.Const.REMAINDER, argparseOptions);
+
     return this._remainder;
-  }
-
-  /** @internal */
-  public _buildRemainderParserIfNeeded(): void {
-    if (this.remainder) {
-      const argparseOptions: argparse.ArgumentOptions = {
-        help: this.remainder.description,
-        nargs: argparse.Const.REMAINDER,
-        metavar: '"..."'
-      };
-
-      this._getArgumentParser().addArgument(argparse.Const.REMAINDER, argparseOptions);
-    }
   }
 
   /**
@@ -279,6 +274,11 @@ export abstract class CommandLineParameterProvider {
   }
 
   private _defineParameter(parameter: CommandLineParameter): void {
+    if (this._remainder) {
+      throw new Error('defineCommandLineRemainder() was already called for this provider;'
+        + ' no further parameters can be defined');
+    }
+
     const names: string[] = [];
     if (parameter.shortName) {
       names.push(parameter.shortName);

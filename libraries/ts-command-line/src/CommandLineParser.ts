@@ -79,7 +79,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   public selectedAction: CommandLineAction | undefined;
 
   private _argumentParser: argparse.ArgumentParser;
-  private _actionsSubParser: argparse.SubParser;
+  private _actionsSubParser: argparse.SubParser | undefined;
   private _options: ICommandLineParserOptions;
   private _actions: CommandLineAction[];
   private _actionsByName: Map<string, CommandLineAction>;
@@ -100,11 +100,6 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
         + ` ${this._options.toolFilename} <command> -h`)
     });
 
-    this._actionsSubParser = this._argumentParser.addSubparsers({
-      metavar: '<command>',
-      dest: 'action'
-    });
-
     this.onDefineParameters();
   }
 
@@ -119,6 +114,13 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    * Defines a new action that can be used with the CommandLineParser instance.
    */
   public addAction(action: CommandLineAction): void {
+    if (!this._actionsSubParser) {
+      this._actionsSubParser = this._argumentParser.addSubparsers({
+        metavar: '<command>',
+        dest: 'action'
+      });
+    }
+
     action._buildParser(this._actionsSubParser);
     this._actions.push(action);
     this._actionsByName.set(action.actionName, action);
@@ -199,7 +201,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       }
       this._executed = true;
 
-      this._finalizeParser();
+      this._validateDefinitions();
 
       if (!args) {
         // 0=node.exe, 1=script name
@@ -220,8 +222,9 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
           break;
         }
       }
-      if (!this.selectedAction) {
-        throw new Error('Unrecognized action');
+      if (this.actions.length > 0 && !this.selectedAction) {
+        const actions: string[] = this.actions.map(x => x.actionName);
+        throw new Error(`An action must be specified (${actions.join(', ')})`);
       }
 
       return this.onExecute();
@@ -239,9 +242,10 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     }
   }
 
-  private _finalizeParser(): void {
-    for (const action of this.actions) {
-      action._buildRemainderParserIfNeeded();
+  private _validateDefinitions(): void {
+    if (this.remainder && this.actions.length > 0) {
+      // This is apparently not supported by argparse
+      throw new Error('defineCommandLineRemainder() cannot be called for a CommandLineParser with actions');
     }
   }
 
@@ -258,6 +262,9 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    * the chosen action is executed.
    */
   protected onExecute(): Promise<void> {
-    return this.selectedAction!._execute();
+    if (!this.selectedAction) {
+      return Promise.resolve();
+    }
+    return this.selectedAction._execute();
   }
 }

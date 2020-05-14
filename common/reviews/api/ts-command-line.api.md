@@ -102,8 +102,6 @@ export enum CommandLineParameterKind {
 export abstract class CommandLineParameterProvider {
     // @internal
     constructor();
-    // @internal (undocumented)
-    _buildRemainderParserIfNeeded(): void;
     defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoiceParameter;
     defineCommandLineRemainder(definition: ICommandLineRemainderDefinition): CommandLineRemainder;
     defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter;
@@ -153,6 +151,8 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
 export class CommandLineRemainder {
     // @internal
     constructor(definition: ICommandLineRemainderDefinition);
+    // @override
+    appendToArgList(argList: string[]): void;
     readonly description: string;
     // @internal
     _setValue(data: any): void;
