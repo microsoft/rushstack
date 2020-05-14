@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/ts-command-line",
+      "comment": "Fix some bugs that prevented a CommandLineParser from being defined without any actions",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

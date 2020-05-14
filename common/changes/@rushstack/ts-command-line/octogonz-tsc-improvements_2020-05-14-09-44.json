@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/ts-command-line",
+      "comment": "Add a new feature defineCommandLineRemainder() which allows additional unvalidated CLI arguments, e.g. to pass along to another tool",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
