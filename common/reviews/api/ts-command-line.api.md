@@ -102,7 +102,10 @@ export enum CommandLineParameterKind {
 export abstract class CommandLineParameterProvider {
     // @internal
     constructor();
+    // @internal (undocumented)
+    _buildRemainderParserIfNeeded(): void;
     defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoiceParameter;
+    defineCommandLineRemainder(definition: ICommandLineRemainderDefinition): CommandLineRemainder;
     defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter;
     defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter;
     defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter;
@@ -118,6 +121,7 @@ export abstract class CommandLineParameterProvider {
     readonly parameters: ReadonlyArray<CommandLineParameter>;
     // @internal (undocumented)
     protected _processParsedData(data: _ICommandLineParserData): void;
+    readonly remainder: CommandLineRemainder | undefined;
     renderHelpText(): string;
 }
 
@@ -144,6 +148,16 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     readonly toolFilename: string;
     tryGetAction(actionName: string): CommandLineAction | undefined;
 }
+
+// @public
+export class CommandLineRemainder {
+    // @internal
+    constructor(definition: ICommandLineRemainderDefinition);
+    readonly description: string;
+    // @internal
+    _setValue(data: any): void;
+    readonly values: ReadonlyArray<string>;
+    }
 
 // @public
 export class CommandLineStringListParameter extends CommandLineParameterWithArgument {
@@ -234,6 +248,11 @@ export interface _ICommandLineParserData {
 export interface ICommandLineParserOptions {
     toolDescription: string;
     toolFilename: string;
+}
+
+// @public
+export interface ICommandLineRemainderDefinition {
+    description: string;
 }
 
 // @public

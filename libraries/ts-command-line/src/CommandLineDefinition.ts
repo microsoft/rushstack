@@ -18,7 +18,7 @@ export interface IBaseCommandLineDefinition {
   parameterShortName?: string;
 
   /**
-   * Documentation for the flag, that will be shown when invoking the tool with "--help"
+   * Documentation for the parameter that will be shown when invoking the tool with "--help"
    */
   description: string;
 
@@ -80,16 +80,16 @@ export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition
 }
 
 /**
- * For use with CommandLineParser, this interface represents a command line parameter
- * that is a boolean flag.
+ * For use with {@link CommandLineParameterProvider.defineFlagParameter},
+ * this interface defines a command line parameter that is a boolean flag.
  *
  * @public
  */
 export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition { }
 
 /**
- * For use with CommandLineParser, this interface represents a command line parameter
- * whose argument is an integer value.
+ * For use with {@link CommandLineParameterProvider.defineIntegerParameter},
+ * this interface defines a command line parameter whose argument is an integer value.
  *
  * @public
  */
@@ -101,8 +101,8 @@ export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitio
 }
 
 /**
- * For use with CommandLineParser, this interface represents a command line parameter
- * whose argument is a string value.
+ * For use with {@link CommandLineParameterProvider.defineStringParameter},
+ * this interface defines a command line parameter whose argument is a string value.
  *
  * @public
  */
@@ -119,9 +119,24 @@ export interface ICommandLineStringDefinition extends IBaseCommandLineDefinition
 }
 
 /**
- * For use with CommandLineParser, this interface represents a command line parameter whose argument is
- * a single text string.  The parameter can be specified multiple times to build a list.
+ * For use with {@link CommandLineParameterProvider.defineStringListParameter},
+ * this interface defines a command line parameter whose argument is a single text string.
+ * The parameter can be specified multiple times to build a list.
  *
  * @public
  */
 export interface ICommandLineStringListDefinition extends IBaseCommandLineDefinitionWithArgument { }
+
+/**
+ * For use with {@link CommandLineParameterProvider.defineCommandLineRemainder},
+ * this interface defines a rule that captures any remaining command line arguments after the recognized portion.
+ *
+ * @public
+ */
+export interface ICommandLineRemainderDefinition {
+  /**
+   * Documentation for how the remaining arguments will be used.  This will be shown when invoking
+   * the tool with "--help".
+   */
+  description: string;
+}

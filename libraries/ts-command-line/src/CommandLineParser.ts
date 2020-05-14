@@ -198,6 +198,9 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
         throw new Error('execute() was already called for this parser instance');
       }
       this._executed = true;
+
+      this._finalizeParser();
+
       if (!args) {
         // 0=node.exe, 1=script name
         args = process.argv.slice(2);
@@ -233,6 +236,12 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
         }
       }
       return Promise.reject(err);
+    }
+  }
+
+  private _finalizeParser(): void {
+    for (const action of this.actions) {
+      action._buildRemainderParserIfNeeded();
     }
   }
 

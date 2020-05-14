@@ -8,6 +8,7 @@ import {
   ICommandLineStringListDefinition,
   ICommandLineIntegerDefinition,
   ICommandLineChoiceDefinition,
+  ICommandLineRemainderDefinition,
   IBaseCommandLineDefinitionWithArgument
 } from './CommandLineDefinition';
 
@@ -644,5 +645,45 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
         argList.push(value);
       }
     }
+  }
+}
+
+/**
+ * The data type returned by {@link CommandLineParameterProvider.defineCommandLineRemainder}.
+ * @public
+ */
+export class CommandLineRemainder {
+  private _values: string[] = [];
+
+  /** {@inheritDoc IBaseCommandLineDefinition.description} */
+  public readonly description: string;
+
+  /** @internal */
+  public constructor(definition: ICommandLineRemainderDefinition) {
+    this.description = definition.description;
+  }
+
+  /**
+   * Returns any remaining command line arguments after the recognized portion
+   * that was parsed from the command line.
+   *
+   * @remarks
+   * The array will be empty if the command-line has not been parsed yet.
+   */
+  public get values(): ReadonlyArray<string> {
+    return this._values;
+  }
+
+  /**
+   * {@inheritDoc CommandLineParameter._setValue}
+   * @internal
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public _setValue(data: any): void { // abstract
+    if (!Array.isArray(data) || !data.every(x => typeof x === 'string')) {
+      throw new Error(`Unexpected data object for remainder: ` + JSON.stringify(data));
+    }
+
+    this._values.push(...data);
   }
 }

@@ -7,7 +7,8 @@ import {
   ICommandLineStringDefinition,
   ICommandLineStringListDefinition,
   ICommandLineIntegerDefinition,
-  ICommandLineChoiceDefinition
+  ICommandLineChoiceDefinition,
+  ICommandLineRemainderDefinition
 } from './CommandLineDefinition';
 
 import {
@@ -18,7 +19,8 @@ import {
   CommandLineStringListParameter,
   CommandLineIntegerParameter,
   CommandLineChoiceParameter,
-  CommandLineParameterKind
+  CommandLineParameterKind,
+  CommandLineRemainder
 } from './CommandLineParameter';
 
 /**
@@ -42,6 +44,8 @@ export abstract class CommandLineParameterProvider {
   private _parameters: CommandLineParameter[];
   private _parametersByLongName: Map<string, CommandLineParameter>;
 
+  private _remainder: CommandLineRemainder | undefined;
+
   /** @internal */
   // Third party code should not inherit subclasses or call this constructor
   public constructor() {
@@ -57,11 +61,22 @@ export abstract class CommandLineParameterProvider {
   }
 
   /**
+   * If {@link CommandLineParameterProvider.defineCommandLineRemainder} was called,
+   * this object captures any remaining command line arguments after the recognized portion.
+   */
+  public get remainder(): CommandLineRemainder | undefined {
+    return this._remainder;
+  }
+
+  /**
    * Defines a command-line parameter whose value must be a string from a fixed set of
    * allowable choices (similar to an enum).
    *
    * @remarks
-   * Example:  example-tool --log-level warn
+   * Example of a choice parameter:
+   * ```
+   * example-tool --log-level warn
+   * ```
    */
   public defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoiceParameter {
     const parameter: CommandLineChoiceParameter = new CommandLineChoiceParameter(definition);
@@ -83,7 +98,10 @@ export abstract class CommandLineParameterProvider {
    * and false otherwise.
    *
    * @remarks
-   * Example:  example-tool --debug
+   * Example usage of a flag parameter:
+   * ```
+   * example-tool --debug
+   * ```
    */
   public defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter {
     const parameter: CommandLineFlagParameter = new CommandLineFlagParameter(definition);
@@ -104,7 +122,10 @@ export abstract class CommandLineParameterProvider {
    * Defines a command-line parameter whose argument is an integer.
    *
    * @remarks
-   * Example:  example-tool --max-attempts 5
+   * Example usage of an integer parameter:
+   * ```
+   * example-tool --max-attempts 5
+   * ```
    */
   public defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter {
     const parameter: CommandLineIntegerParameter = new CommandLineIntegerParameter(definition);
@@ -125,7 +146,10 @@ export abstract class CommandLineParameterProvider {
    * Defines a command-line parameter whose argument is a single text string.
    *
    * @remarks
-   * Example:  example-tool --message "Hello, world!"
+   * Example usage of a string parameter:
+   * ```
+   * example-tool --message "Hello, world!"
+   * ```
    */
   public defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter {
     const parameter: CommandLineStringParameter = new CommandLineStringParameter(definition);
@@ -147,12 +171,52 @@ export abstract class CommandLineParameterProvider {
    * specified multiple times to build a list.
    *
    * @remarks
-   * Example:  example-tool --add file1.txt --add file2.txt --add file3.txt
+   * Example usage of a string list parameter:
+   * ```
+   * example-tool --add file1.txt --add file2.txt --add file3.txt
+   * ```
    */
   public defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter {
     const parameter: CommandLineStringListParameter = new CommandLineStringListParameter(definition);
     this._defineParameter(parameter);
     return parameter;
+  }
+
+  /**
+   * Defines a rule that captures any remaining command line arguments after the recognized portion.
+   *
+   * @remarks
+   * This feature is useful for commands that pass their arguments along to an external tool, relying on
+   * that tool to perform validation.  (It could also be used to parse parameters without any validation
+   * or documentation, but that is not recommended.)
+   *
+   * Example of capturing the remainder after an optional flag parameter.
+   * ```
+   * example-tool --my-flag this is the remainder
+   * ```
+   *
+   * In the "--help" documentation, the remainder rule will be represented as "...".
+   */
+  public defineCommandLineRemainder(definition: ICommandLineRemainderDefinition): CommandLineRemainder {
+    if (this._remainder) {
+      throw new Error('defineRemainingArguments() has already been called for this provider');
+    }
+    this._remainder = new CommandLineRemainder(definition);
+
+    return this._remainder;
+  }
+
+  /** @internal */
+  public _buildRemainderParserIfNeeded(): void {
+    if (this.remainder) {
+      const argparseOptions: argparse.ArgumentOptions = {
+        help: this.remainder.description,
+        nargs: argparse.Const.REMAINDER,
+        metavar: '"..."'
+      };
+
+      this._getArgumentParser().addArgument(argparse.Const.REMAINDER, argparseOptions);
+    }
   }
 
   /**
@@ -189,6 +253,10 @@ export abstract class CommandLineParameterProvider {
     for (const parameter of this._parameters) {
       const value: any = data[parameter._parserKey]; // eslint-disable-line @typescript-eslint/no-explicit-any
       parameter._setValue(value);
+    }
+
+    if (this.remainder) {
+      this.remainder._setValue(data[argparse.Const.REMAINDER]);
     }
   }
 

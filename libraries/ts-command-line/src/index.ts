@@ -19,7 +19,8 @@ export {
   ICommandLineStringDefinition,
   ICommandLineStringListDefinition,
   ICommandLineIntegerDefinition,
-  ICommandLineChoiceDefinition
+  ICommandLineChoiceDefinition,
+  ICommandLineRemainderDefinition
 } from './CommandLineDefinition';
 
 export {
@@ -30,7 +31,8 @@ export {
   CommandLineStringListParameter,
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
-  CommandLineChoiceParameter
+  CommandLineChoiceParameter,
+  CommandLineRemainder
 } from './CommandLineParameter';
 
 export {
