@@ -1,19 +1,22 @@
 # ts-command-line
 
-This library helps you create professional command-line tools for Node.js. By "professional", we mean:
+This library helps you create professional command-line tools using TypeScript.  By "professional", we mean:
 
-- **no gotchas for users**:  Seems obvious, but try typing "`npm install --save-dex`" instead of "`npm install --save-dev`" sometime.  The command seems to execute successfully, but it doesn't save anything! The misspelled flag was silently ignored.  This lack of rigor plagues many familiar NodeJS tools and can be confusing and frustrating.  For a great user experience, a command line tool should always be strict about its syntax.
+- **simple by design**:  Making a CLI is similar to making a graphical UI -- some people have a knack for clean and intuitive designs, but your average developer... needs some help.  :-)  Keeping things simple is the best help.  **ts-command-line** intentionally provides a relatively minimalist set of CLI building blocks that encourage simple designs.  If your app has lots of knobs and switches, we recommend to move them into a commented config file with a published JSON schema, rather than designing a CLI with hundreds of parameters.
+
+- **automatic documentation**: Some command-line libraries treat the `--help` docs as someone else's job.  **ts-command-line** requires each every parameter to follow a standardized naming pattern and have a documentation string.  It will automatically generate the `--help` docs for you.  If you like to write long paragraphs, no problem -- they will be word-wrapped correctly.   *[golf clap]*
+
+- **no gotchas for users**:  Seems obvious, but try typing "`npm install --save-dex`" instead of "`npm install --save-dev`" sometime.  The command seems to execute successfully, but it doesn't save anything! The misspelled flag was silently ignored.  This lack of rigor plagues many familiar Node.js tools and can be confusing and frustrating.  For a great user experience, a command line tool should always be strict about its syntax.
 
 - **no gotchas for developers**:  Many command-line libraries store their parsed data in a simple JavaScript hash object.  This is convenient for small projects. But suppose a large project has many different source files that define and read parameters. If you try to read `data['output-dir']` when it wasn't defined, or if you misspell the key name, your tool will silently behave as if the parameter was omitted.  And is `data['max-count']` a string or a number? Hard to tell! We solve this by modeling each parameter kind as a real TypeScript class.
 
-- **automatic documentation**: Some command-line libraries treat the `--help` docs as someone else's job.  **ts-command-line** requires each every parameter to have a documentation string, and will automatically generate the `--help` docs for you.  If you like to write long paragraphs, no problem -- they will be word-wrapped correctly.   *[golf clap]*
+- **structure and extensibility**: Instead of a simple function chain, **ts-command-line** provides a "scaffold" pattern that makes it easy to find and understand the command-line implementation for any tool project.  The scaffold model is generally recommended, but there's also a "dynamic" model if you need it.  See below for examples.
 
-- **environment variable mappings**: Any CLI parameter can be associated with an environment variable.  If the parameter is not explicitly provided, the value from the environment will be used.  The associated environment variables are documented in the `--help`.
+- **environment variable mappings**: Any CLI parameter can be associated with an environment variable.  If the parameter is not explicitly provided, the value from the environment will be used.  The associated environment variables are automatically documented in the `--help`.
 
-- **structure and extensibility**: Instead of a simple function chain, **ts-command-line** provides a  "scaffold" pattern that makes it easy to find and understand the command-line implementation for any tool project.  The scaffold model is generally recommended, but there's also a "dynamic" model if you need it.  See below for examples.
+Internally, the implementation is based on [argparse](https://www.npmjs.com/package/argparse) and the Python approach to command-lines.
 
-Internally, the implementation is based on [argparse](https://www.npmjs.com/package/argparse) and the Python approach to command-lines.  Compared to other libraries, **ts-command-line** doesn't provide zillions of custom syntaxes and bells and whistles.  Instead it aims to be a simple, consistent, and professional solution for your command-line tool.  Give it a try!
-
+Compared to other libraries, **ts-command-line** doesn't provide zillions of custom syntaxes and bells and whistles.  Instead it aims to be a simple, consistent, and professional solution for your command-line tool.  Give it a try!
 
 ### Some Terminology
 
@@ -32,6 +35,7 @@ In this example, we can identify the following components:
 - The `--verbose` flag is a **global parameter** because it precedes the action name.  It affects all actions.
 - The `--force` flag is an **action parameter** because it comes after the action name.  It only applies to that action.
 
+
 ### Parameter Kinds
 
 Several different kinds of parameters are supported:
@@ -45,6 +49,7 @@ Several different kinds of parameters are supported:
 | string list | `-o file1.txt -o file2.txt` | `string[]` | The argument is a text string. The parameter can be specified multiple times to build a list. |
 
 Other parameter kinds can be implemented if requested.  However, keeping the grammar simple and systematic tends to produce more a intuitive command line for users.
+
 
 ## Scaffold Model
 
