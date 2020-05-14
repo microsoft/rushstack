@@ -4,7 +4,6 @@
 import * as os from 'os';
 import * as path from 'path';
 import { trueCasePathSync } from 'true-case-path';
-import { RushCiMode } from '../utilities/RushCiMode';
 
 export interface IEnvironmentConfigurationInitializeOptions {
   doNotNormalizePaths?: boolean;
@@ -84,7 +83,7 @@ export class EnvironmentConfiguration {
 
   private static _pnpmStorePathOverride: string | undefined;
 
-  private static _rushExecutionModeOverride: string | undefined = undefined;
+  private static _ciModeOverride: string | undefined = undefined;
 
   /**
    * An override for the common/temp folder path.
@@ -122,6 +121,15 @@ export class EnvironmentConfiguration {
   public static get pnpmStorePathOverride(): string | undefined {
     EnvironmentConfiguration._ensureInitialized();
     return EnvironmentConfiguration._pnpmStorePathOverride;
+  }
+
+  /**
+   * An override for the PNPM store path, if `pnpmStore` configuration is set to 'path'
+   * See {@link EnvironmentVariableNames.RUSH_CI_MODE}
+   */
+  public static get ciModeOverride(): string | undefined {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._ciModeOverride;
   }
 
   /**
@@ -167,7 +175,7 @@ export class EnvironmentConfiguration {
             break;
 
           case EnvironmentVariableNames.RUSH_CI_MODE:
-            EnvironmentConfiguration._rushExecutionModeOverride = value;
+            EnvironmentConfiguration._ciModeOverride = value;
             break;
           default:
             unknownEnvVariables.push(envVarName);
@@ -183,8 +191,6 @@ export class EnvironmentConfiguration {
         `recognized by this version of Rush: ${unknownEnvVariables.join(', ')}`
       );
     }
-
-    RushCiMode.initialize(EnvironmentConfiguration._rushExecutionModeOverride);
 
     EnvironmentConfiguration._hasBeenInitialized = true;
   }

@@ -39,7 +39,6 @@ import { PurgeManager } from './PurgeManager';
 import { RushConfiguration, ICurrentVariantJson, IConfigurationEnvironment } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
-import { RushCiMode } from '../utilities/RushCiMode';
 import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
 import { Stopwatch } from '../utilities/Stopwatch';
 import { Utilities } from '../utilities/Utilities';
@@ -1049,7 +1048,7 @@ export class InstallManager {
               this._rushConfiguration.packageManager === 'pnpm' &&
               this._rushConfiguration.pnpmOptions.pnpmStore === 'local'
             ) {
-              if (RushCiMode.isCI()) {
+              if (this._rushConfiguration.isCI) {
                 // If the installation has failed even after the retries, then pnpm store may
                 // have got into a corrupted, irrecoverable state. Delete the store so that a
                 // future install can create the store afresh on CI machines.
