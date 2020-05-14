@@ -177,6 +177,7 @@ export class EnvironmentConfiguration {
           case EnvironmentVariableNames.RUSH_CI_MODE:
             EnvironmentConfiguration._ciModeOverride = value;
             break;
+
           default:
             unknownEnvVariables.push(envVarName);
             break;
