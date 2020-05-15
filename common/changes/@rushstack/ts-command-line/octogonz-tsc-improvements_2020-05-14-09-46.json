@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/ts-command-line",
+      "comment": "Add the ability for an environment variable to specify multiple values for CommandLineStringListParameter, encoded as a JSON array",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

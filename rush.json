@@ -598,6 +598,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "ts-command-line-test",
+      "projectFolder": "build-tests/ts-command-line-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "web-library-build-test",
       "projectFolder": "build-tests/web-library-build-test",
       "reviewCategory": "tests",

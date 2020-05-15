@@ -13,7 +13,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@types/argparse": "1.0.33",
+    "@types/argparse": "1.0.38",
     "argparse": "~1.0.9",
     "colors": "~1.2.1"
   },
