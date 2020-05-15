@@ -10,18 +10,17 @@ import {
   ICommandLineChoiceDefinition,
   ICommandLineRemainderDefinition
 } from '../parameters/CommandLineDefinition';
-
 import {
   CommandLineParameter,
   CommandLineParameterWithArgument,
-  CommandLineFlagParameter,
-  CommandLineStringParameter,
-  CommandLineStringListParameter,
-  CommandLineIntegerParameter,
-  CommandLineChoiceParameter,
   CommandLineParameterKind,
-  CommandLineRemainder
-} from '../parameters/CommandLineParameter';
+} from '../parameters/BaseClasses';
+import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
+import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
+import { CommandLineStringListParameter } from '../parameters/CommandLineStringListParameter';
+import { CommandLineIntegerParameter } from '../parameters/CommandLineIntegerParameter';
+import { CommandLineChoiceParameter } from '../parameters/CommandLineChoiceParameter';
+import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
 
 /**
  * This is the argparse result data object

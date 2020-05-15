@@ -26,14 +26,15 @@ export {
 export {
   CommandLineParameterKind,
   CommandLineParameter,
-  CommandLineParameterWithArgument,
-  CommandLineStringParameter,
-  CommandLineStringListParameter,
-  CommandLineFlagParameter,
-  CommandLineIntegerParameter,
-  CommandLineChoiceParameter,
-  CommandLineRemainder
-} from './parameters/CommandLineParameter';
+  CommandLineParameterWithArgument
+} from './parameters/BaseClasses';
+
+export { CommandLineFlagParameter } from './parameters/CommandLineFlagParameter';
+export { CommandLineStringParameter } from './parameters/CommandLineStringParameter';
+export { CommandLineStringListParameter } from './parameters/CommandLineStringListParameter';
+export { CommandLineIntegerParameter } from './parameters/CommandLineIntegerParameter';
+export { CommandLineChoiceParameter } from './parameters/CommandLineChoiceParameter';
+export { CommandLineRemainder } from './parameters/CommandLineRemainder';
 
 export {
   CommandLineParameterProvider,

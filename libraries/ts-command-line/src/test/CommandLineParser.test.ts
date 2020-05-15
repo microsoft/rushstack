@@ -1,9 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineAction } from '../providers/CommandLineAction';
-import { CommandLineParser } from '../providers/CommandLineParser';
-import { CommandLineFlagParameter } from '../parameters/CommandLineParameter';
+import { CommandLineAction, CommandLineParser, CommandLineFlagParameter } from '..';
 
 class TestAction extends CommandLineAction {
   public done: boolean = false;
