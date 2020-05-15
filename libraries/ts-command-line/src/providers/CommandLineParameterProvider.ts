@@ -9,7 +9,7 @@ import {
   ICommandLineIntegerDefinition,
   ICommandLineChoiceDefinition,
   ICommandLineRemainderDefinition
-} from './CommandLineDefinition';
+} from '../parameters/CommandLineDefinition';
 
 import {
   CommandLineParameter,
@@ -21,7 +21,7 @@ import {
   CommandLineChoiceParameter,
   CommandLineParameterKind,
   CommandLineRemainder
-} from './CommandLineParameter';
+} from '../parameters/CommandLineParameter';
 
 /**
  * This is the argparse result data object

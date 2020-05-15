@@ -10,7 +10,7 @@
 export {
   CommandLineAction,
   ICommandLineActionOptions
-} from './CommandLineAction';
+} from './providers/CommandLineAction';
 
 export {
   IBaseCommandLineDefinition,
@@ -21,7 +21,7 @@ export {
   ICommandLineIntegerDefinition,
   ICommandLineChoiceDefinition,
   ICommandLineRemainderDefinition
-} from './CommandLineDefinition';
+} from './parameters/CommandLineDefinition';
 
 export {
   CommandLineParameterKind,
@@ -33,22 +33,22 @@ export {
   CommandLineIntegerParameter,
   CommandLineChoiceParameter,
   CommandLineRemainder
-} from './CommandLineParameter';
+} from './parameters/CommandLineParameter';
 
 export {
   CommandLineParameterProvider,
   ICommandLineParserData as _ICommandLineParserData
-} from './CommandLineParameterProvider';
+} from './providers/CommandLineParameterProvider';
 
 export {
   ICommandLineParserOptions,
   CommandLineParser
-} from './CommandLineParser';
+} from './providers/CommandLineParser';
 
 export {
   DynamicCommandLineAction
-} from './DynamicCommandLineAction';
+} from './providers/DynamicCommandLineAction';
 
 export {
   DynamicCommandLineParser
-} from './DynamicCommandLineParser';
+} from './providers/DynamicCommandLineParser';
