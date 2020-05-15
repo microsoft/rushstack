@@ -290,7 +290,7 @@ describe('CommandLineParameter', () => {
     process.env.ENV_STRING = 'Hello, world!';
     process.env.ENV_STRING2 = 'Hello, world!';
     process.env.ENV_STRING_LIST = 'simple text';
-    process.env.ENV_JSON_STRING_LIST = '[ 1, true, "Hello, world!" ]';
+    process.env.ENV_JSON_STRING_LIST = ' [ 1, true, "Hello, world!" ] ';
 
     return commandLineParser.execute(args).then(() => {
       expect(commandLineParser.selectedAction).toBe(action);

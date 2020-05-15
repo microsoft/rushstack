@@ -591,7 +591,7 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
         // NOTE: If the environment variable is defined as an empty string,
         // here we will accept the empty string as our value.  (For number/flag we don't do that.)
 
-        if (environmentValue[0] === '[') {
+        if (environmentValue.trimLeft()[0] === '[') {
           // Specifying multiple items in an environment variable is a somewhat rare case.  But environment
           // variables are actually a pretty reliable way for a tool to avoid shell escaping problems
           // when spawning another tool.  For this case, we need a reliable way to pass an array of strings
