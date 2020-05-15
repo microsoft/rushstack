@@ -137,10 +137,11 @@ commandLine.execute();
 
 When we run `widget --verbose push --force`, the `PushAction.onExecute()` method will get invoked and then your business logic takes over.
 
-| --- |
-| For a more complete example, take a look at the [ts-command-line-test](https://github.com/microsoft/rushstack/tree/master/build-tests/ts-command-line-test) sample project. |
-| --- |
+---
 
+**For a more complete example, take a look at the [ts-command-line-test](https://github.com/microsoft/rushstack/tree/master/build-tests/ts-command-line-test) sample project.**
+
+---
 
 #### Testing out the docs
 
