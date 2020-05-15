@@ -10,7 +10,7 @@
 export {
   CommandLineAction,
   ICommandLineActionOptions
-} from './CommandLineAction';
+} from './providers/CommandLineAction';
 
 export {
   IBaseCommandLineDefinition,
@@ -21,34 +21,35 @@ export {
   ICommandLineIntegerDefinition,
   ICommandLineChoiceDefinition,
   ICommandLineRemainderDefinition
-} from './CommandLineDefinition';
+} from './parameters/CommandLineDefinition';
 
 export {
   CommandLineParameterKind,
   CommandLineParameter,
-  CommandLineParameterWithArgument,
-  CommandLineStringParameter,
-  CommandLineStringListParameter,
-  CommandLineFlagParameter,
-  CommandLineIntegerParameter,
-  CommandLineChoiceParameter,
-  CommandLineRemainder
-} from './CommandLineParameter';
+  CommandLineParameterWithArgument
+} from './parameters/BaseClasses';
+
+export { CommandLineFlagParameter } from './parameters/CommandLineFlagParameter';
+export { CommandLineStringParameter } from './parameters/CommandLineStringParameter';
+export { CommandLineStringListParameter } from './parameters/CommandLineStringListParameter';
+export { CommandLineIntegerParameter } from './parameters/CommandLineIntegerParameter';
+export { CommandLineChoiceParameter } from './parameters/CommandLineChoiceParameter';
+export { CommandLineRemainder } from './parameters/CommandLineRemainder';
 
 export {
   CommandLineParameterProvider,
   ICommandLineParserData as _ICommandLineParserData
-} from './CommandLineParameterProvider';
+} from './providers/CommandLineParameterProvider';
 
 export {
   ICommandLineParserOptions,
   CommandLineParser
-} from './CommandLineParser';
+} from './providers/CommandLineParser';
 
 export {
   DynamicCommandLineAction
-} from './DynamicCommandLineAction';
+} from './providers/DynamicCommandLineAction';
 
 export {
   DynamicCommandLineParser
-} from './DynamicCommandLineParser';
+} from './providers/DynamicCommandLineParser';

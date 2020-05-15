@@ -3,10 +3,10 @@
 
 import * as colors from 'colors';
 
-import { CommandLineAction } from '../CommandLineAction';
-import { CommandLineParser } from '../CommandLineParser';
-import { DynamicCommandLineParser } from '../DynamicCommandLineParser';
-import { DynamicCommandLineAction } from '../DynamicCommandLineAction';
+import { CommandLineAction } from '../providers/CommandLineAction';
+import { CommandLineParser } from '../providers/CommandLineParser';
+import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser';
+import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
 
 function createParser(): DynamicCommandLineParser {
   const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser(
