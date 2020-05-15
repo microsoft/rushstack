@@ -2,13 +2,13 @@
 
 This library helps you create professional command-line tools using TypeScript.  By "professional", we mean:
 
-- **simple by design**:  Making a CLI is similar to making a graphical UI -- some people have a knack for clean and intuitive designs, but your average developer... needs some help.  :-)  Keeping things simple is the best help.  **ts-command-line** intentionally provides a relatively minimalist set of CLI building blocks that encourage simple designs.  If your app has lots of knobs and switches, we recommend to move them into a commented config file with a published JSON schema, rather than designing a CLI with hundreds of parameters.
+- **no gotchas for users**:  Seems obvious, but try typing "`npm install --save-dex`" instead of "`npm install --save-dev`" sometime.  The command seems to execute successfully, but it doesn't save anything! The misspelled flag was silently ignored. This lack of rigor plagues many familiar Node.js tools and can be confusing and frustrating. For a great user experience, a command line tool should always be strict about its syntax.
 
-- **automatic documentation**: Some command-line libraries treat the `--help` docs as someone else's job.  **ts-command-line** requires each every parameter to follow a standardized naming pattern and have a documentation string.  It will automatically generate the `--help` docs for you.  If you like to write long paragraphs, no problem -- they will be word-wrapped correctly.   *[golf clap]*
+- **no gotchas for developers**:  Many command-line libraries store their parsed data in a simple JavaScript object. This is convenient for small projects. But suppose a large project has many different source files that define and read parameters. If you try to read `data['output-dir']` when it wasn't defined, or if you misspell the key name, your tool will silently behave as if the parameter was omitted. And is `data['max-count']` a string or a number? Hard to tell! We solve this by modeling each parameter kind as a real TypeScript class.
 
-- **no gotchas for users**:  Seems obvious, but try typing "`npm install --save-dex`" instead of "`npm install --save-dev`" sometime.  The command seems to execute successfully, but it doesn't save anything! The misspelled flag was silently ignored.  This lack of rigor plagues many familiar Node.js tools and can be confusing and frustrating.  For a great user experience, a command line tool should always be strict about its syntax.
+- **simple by design**:  Making a CLI is similar to making a graphical UI -- some people have a knack for clean and intuitive designs, but your average developer... needs some help.  :-)  Keeping things simple is the best help.  **ts-command-line** intentionally provides a minimalist set of CLI building blocks that encourage simple designs.  If your app has lots of knobs and switches, we recommend NOT to design a complex CLI with hundreds of parameters.  Move those options into a commented config file with a published JSON schema.
 
-- **no gotchas for developers**:  Many command-line libraries store their parsed data in a simple JavaScript hash object.  This is convenient for small projects. But suppose a large project has many different source files that define and read parameters. If you try to read `data['output-dir']` when it wasn't defined, or if you misspell the key name, your tool will silently behave as if the parameter was omitted.  And is `data['max-count']` a string or a number? Hard to tell! We solve this by modeling each parameter kind as a real TypeScript class.
+- **automatic documentation**: Some command-line libraries treat the `--help` docs as someone else's job.  **ts-command-line** requires each every parameter to follow a standardized naming pattern and have a documentation string.  It will automatically generate the `--help` docs for you.  If you like to write long paragraphs, no problem -- they will be word-wrapped correctly. *[golf clap]*
 
 - **structure and extensibility**: Instead of a simple function chain, **ts-command-line** provides a "scaffold" pattern that makes it easy to find and understand the command-line implementation for any tool project.  The scaffold model is generally recommended, but there's also a "dynamic" model if you need it.  See below for examples.
 
@@ -48,7 +48,7 @@ Several different kinds of parameters are supported:
 | choice | `--color red` | `string` | The argument is must be a string from a list of allowed choices (similar to an enum). |
 | string list | `-o file1.txt -o file2.txt` | `string[]` | The argument is a text string. The parameter can be specified multiple times to build a list. |
 
-Other parameter kinds can be implemented if requested.  However, keeping the grammar simple and systematic tends to produce more a intuitive command line for users.
+Other parameter kinds could be implemented if requested.  That said, keeping your CLI grammar simple and systematic makes it easier for users to learn.
 
 
 ## Scaffold Model
@@ -64,7 +64,7 @@ widget --verbose push --force
 We could define our subclass for the "`push`" action like this:
 
 ```typescript
-class PushAction extends CommandLineAction {
+export class PushAction extends CommandLineAction {
   private _force: CommandLineFlagParameter;
   private _protocol: CommandLineChoiceParameter;
 
@@ -72,12 +72,12 @@ class PushAction extends CommandLineAction {
     super({
       actionName: 'push',
       summary: 'Pushes a widget to the service',
-      documentation: 'Your long description goes here.'
+      documentation: 'Here we provide a longer description of how our action works.'
     });
   }
 
   protected onExecute(): Promise<void> { // abstract
-    return BusinessLogic.doTheWork(this._force.value);
+    return BusinessLogic.doTheWork(this._force.value, this._protocol.value || "(none)");
   }
 
   protected onDefineParameters(): void { // abstract
@@ -90,7 +90,7 @@ class PushAction extends CommandLineAction {
     this._protocol = this.defineChoiceParameter({
       parameterLongName: '--protocol',
       description: 'Specify the protocol to use',
-      alternatives: [ 'ftp', 'webdav', 'scp' ],
+      alternatives: ['ftp', 'webdav', 'scp'],
       environmentVariable: 'WIDGET_PROTOCOL',
       defaultValue: 'scp'
     });
@@ -101,13 +101,13 @@ class PushAction extends CommandLineAction {
 Then we might define the parser subclass like this:
 
 ```typescript
-class WidgetCommandLine extends CommandLineParser {
+export class WidgetCommandLine extends CommandLineParser {
   private _verbose: CommandLineFlagParameter;
 
   public constructor() {
     super({
       toolFilename: 'widget',
-      toolDescription: 'The widget tool is really great.'
+      toolDescription: 'The "widget" tool is a code sample for using the @rushstack/ts-command-line library.'
     });
 
     this.addAction(new PushAction());
@@ -149,7 +149,8 @@ If you invoke the tool as "`widget --help`", the docs are automatically generate
 ```
 usage: widget [-h] [-v] <command> ...
 
-The widget tool is really great.
+The "widget" tool is a code sample for using the @rushstack/ts-command-line
+library.
 
 Positional arguments:
   <command>
@@ -167,7 +168,7 @@ For help about the `push` action, the user can type "`widget push --help`", whic
 ```
 usage: widget push [-h] [-f] [--protocol {ftp,webdav,scp}]
 
-Your long description goes here.
+Here we provide a longer description of how our action works.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
@@ -191,8 +192,9 @@ In this case, you can use the `DynamicCommandLineAction` and `DynamicCommandLine
 // Define the parser
 const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser({
   toolFilename: 'widget',
-  toolDescription: 'The widget tool is really great.'
+  toolDescription: 'The "widget" tool is a code sample for using the @rushstack/ts-command-line library.'
 });
+
 commandLineParser.defineFlagParameter({
   parameterLongName: '--verbose',
   parameterShortName: '-v',
@@ -203,14 +205,23 @@ commandLineParser.defineFlagParameter({
 const action: DynamicCommandLineAction = new DynamicCommandLineAction({
   actionName: 'push',
   summary: 'Pushes a widget to the service',
-  documentation: 'More detail about the "push" action'
+  documentation: 'Here we provide a longer description of how our action works.'
 });
+
 commandLineParser.addAction(action);
 
 action.defineFlagParameter({
   parameterLongName: '--force',
   parameterShortName: '-f',
   description: 'Push and overwrite any existing state'
+});
+
+action.defineChoiceParameter({
+  parameterLongName: '--protocol',
+  description: 'Specify the protocol to use',
+  alternatives: ['ftp', 'webdav', 'scp'],
+  environmentVariable: 'WIDGET_PROTOCOL',
+  defaultValue: 'scp'
 });
 
 // Parse the command line

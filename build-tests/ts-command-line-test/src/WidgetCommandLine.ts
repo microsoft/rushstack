@@ -12,7 +12,7 @@ export class WidgetCommandLine extends CommandLineParser {
   public constructor() {
     super({
       toolFilename: 'widget',
-      toolDescription: 'The widget tool is really great.'
+      toolDescription: 'The "widget" tool is a code sample for using the @rushstack/ts-command-line library.'
     });
 
     this.addAction(new PushAction());

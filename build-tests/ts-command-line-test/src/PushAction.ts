@@ -12,12 +12,12 @@ export class PushAction extends CommandLineAction {
     super({
       actionName: 'push',
       summary: 'Pushes a widget to the service',
-      documentation: 'Your long description goes here.'
+      documentation: 'Here we provide a longer description of how our action works.'
     });
   }
 
   protected onExecute(): Promise<void> { // abstract
-    return BusinessLogic.doTheWork(this._force.value);
+    return BusinessLogic.doTheWork(this._force.value, this._protocol.value || "(none)");
   }
 
   protected onDefineParameters(): void { // abstract

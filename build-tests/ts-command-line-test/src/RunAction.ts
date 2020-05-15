@@ -10,14 +10,14 @@ export class RunAction extends CommandLineAction {
   public constructor() {
     super({
       actionName: 'run',
-      summary: 'Runs the rest of the command line as a shell command',
-      documentation: 'Your long description goes here.'
+      summary: 'This action (hypothetically) passes its command line arguments to the shell to be executed.',
+      documentation: 'This demonstrates how to use the defineCommandLineRemainder() API.'
     });
   }
 
   protected onExecute(): Promise<void> { // abstract
-    console.log(`Title: ${this._title.value || '(none)'}`);
-    console.log('Remainder: ' + JSON.stringify(this.remainder!.values));
+    console.log(`Console Title: ${this._title.value || '(none)'}`);
+    console.log('Arguments to be executed: ' + JSON.stringify(this.remainder!.values));
 
     return Promise.resolve();
   }
@@ -26,11 +26,12 @@ export class RunAction extends CommandLineAction {
     this._title = this.defineStringParameter({
       parameterLongName: '--title',
       argumentName: 'TITLE',
-      description: 'An optional title to show'
+      environmentVariable: 'WIDGET_TITLE',
+      description: 'An optional title to show in the console window'
     });
 
     this.defineCommandLineRemainder({
-      description: 'The remaining arguments will be blah.'
+      description: 'The remaining arguments are passed along to the command shell.'
     });
   }
 }
