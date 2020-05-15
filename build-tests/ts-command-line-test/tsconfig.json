@@ -21,7 +21,6 @@
     "outDir": "lib"
   },
   "include": [
-    "src/**/*.ts",
-    "typings/tsd.d.ts"
+    "src/**/*.ts"
   ]
 }
