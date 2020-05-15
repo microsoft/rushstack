@@ -107,7 +107,7 @@ Optional arguments:
                  environment variable.
 ```
 
-The "run" action is defined in [RunAction.ts](./src/PushAction.ts).
+The "run" action is defined in [RunAction.ts](./src/RunAction.ts).
 
 Example invocation:
 
