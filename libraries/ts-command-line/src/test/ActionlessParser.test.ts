@@ -43,7 +43,7 @@ describe('Actionless CommandLineParser', () => {
 
     return commandLineParser.execute(['--flag', 'the', 'remaining', 'args']).then(() => {
       expect(commandLineParser.selectedAction).toBeUndefined();
-    //  expect(commandLineParser.flag.value).toBe(true);
+      expect(commandLineParser.flag.value).toBe(true);
       expect(commandLineParser.remainder!.values).toEqual(['the', 'remaining', 'args']);
     });
   });
