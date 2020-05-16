@@ -1,6 +1,30 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Wed, 08 Apr 2020 04:07:33 GMT and should not be manually modified.
+This log was last generated on Fri, 15 May 2020 08:10:59 GMT and should not be manually modified.
+
+## 7.8.1
+Fri, 15 May 2020 08:10:59 GMT
+
+*Version update only*
+
+## 7.8.0
+Wed, 06 May 2020 08:23:45 GMT
+
+### Minor changes
+
+- For markdown output, parameter types and return types are now hyperlinked to the corresponding API item
+
+## 7.7.20
+Sat, 02 May 2020 00:08:16 GMT
+
+*Version update only*
+
+## 7.7.19
+Fri, 24 Apr 2020 15:09:06 GMT
+
+### Patches
+
+- Properly encode xrefs that contain '#' characters.
 
 ## 7.7.18
 Wed, 08 Apr 2020 04:07:33 GMT

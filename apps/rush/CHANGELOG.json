@@ -2,6 +2,41 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.23.3",
+      "tag": "@microsoft/rush_v5.23.3",
+      "date": "Fri, 15 May 2020 08:10:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a few instances of missing spaces in --help documentation."
+          },
+          {
+            "comment": "Provide an option to pass --frozen-lockfile to pnpm for rush install"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.10` to `0.4.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.12` to `6.4.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.23.2",
+      "tag": "@microsoft/rush_v5.23.2",
+      "date": "Wed, 22 Apr 2020 18:44:26 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add common-versions.json to the set of files that, when changed, will trigger reinstallation of dependencies."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.23.1",
       "tag": "@microsoft/rush_v5.23.1",
       "date": "Wed, 15 Apr 2020 03:33:55 GMT",

@@ -19,7 +19,7 @@ describe('AddAction', () => {
         PackageJsonUpdater.prototype,
         'doRushAdd'
       ).mockImplementation(() => Promise.resolve());
-      jest.spyOn(process, 'exit').mockImplementation(() => { /* stub */ });
+      jest.spyOn(process, 'exit').mockImplementation();
       oldExitCode = process.exitCode;
       oldArgs = process.argv;
     });

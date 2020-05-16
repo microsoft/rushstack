@@ -666,7 +666,16 @@ export class YamlDocumenter {
       onGetFilenameForApiItem: (apiItem: ApiItem) => {
         // NOTE: GitHub's markdown renderer does not resolve relative hyperlinks correctly
         // unless they start with "./" or "../".
-        return `xref:${this._getUid(apiItem)}`;
+
+        // To ensure the xref is properly escaped, we first encode the entire xref
+        // to handle escaping of reserved characters. Then we must replace '#' and '?'
+        // characters so that they are not interpreted as a querystring or hash.
+        // We must also backslash-escape unbalanced `(` and `)` characters as the
+        // markdown spec insists that they are only valid when balanced. To reduce
+        // the overhead we only support balanced parenthesis with a depth of 1.
+        return encodeURI(`xref:${this._getUid(apiItem)}`)
+          .replace(/[#?]/g, s => encodeURIComponent(s))
+          .replace(/(\([^(]*\))|[()]/g, (s, balanced) => balanced || ('\\' + s));
       }
     });
 
@@ -767,9 +776,7 @@ export class YamlDocumenter {
   }
 
   private _renderType(contextUid: DeclarationReference, typeExcerpt: Excerpt): string {
-    const excerptTokens: ExcerptToken[] = typeExcerpt.tokens.slice(
-      typeExcerpt.tokenRange.startIndex,
-      typeExcerpt.tokenRange.endIndex);
+    const excerptTokens: ExcerptToken[] = [...typeExcerpt.spannedTokens]; // copy the read-only array
 
     if (excerptTokens.length === 0) {
       return '';

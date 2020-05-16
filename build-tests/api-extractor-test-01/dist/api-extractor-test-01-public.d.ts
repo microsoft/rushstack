@@ -59,7 +59,7 @@ export declare class AmbientConsumer {
      * Configured via tsconfig.json's "lib" setting, which specifies `@types/jest`.
      * The emitted index.d.ts gets a reference like this:  <reference types="jest" />
      */
-    definitelyTyped(): jest.Context;
+    definitelyTyped(): jest.MockContext<number, any>;
     /**
      * Found via tsconfig.json's "include" setting point to a *.d.ts file.
      * This is an old-style Definitely Typed definition, which is the worst possible kind,
