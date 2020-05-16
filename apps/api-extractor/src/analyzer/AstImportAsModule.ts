@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { AstModule } from './AstModule';
+import { AstSyntheticEntity } from './AstEntity';
 
 export interface IAstImportAsModuleOptions {
   readonly astModule: AstModule;
@@ -9,7 +10,7 @@ export interface IAstImportAsModuleOptions {
 }
 
 // TODO [MA]: add documentation
-export class AstImportAsModule {
+export class AstImportAsModule extends AstSyntheticEntity {
   // TODO [MA]: add documentation
   public analyzed: boolean = false;
 
@@ -40,11 +41,13 @@ export class AstImportAsModule {
   public readonly exportName: string;
 
   public constructor(options: IAstImportAsModuleOptions) {
+    super();
     this.astModule = options.astModule;
     this.exportName = options.exportName;
   }
 
-  public get localName(): string {
+  /** {@inheritdoc} */
+  public get localName(): string { // abstract
     return this.exportName;
   }
 }

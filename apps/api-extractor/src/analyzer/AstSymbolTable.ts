@@ -10,14 +10,12 @@ import { AstSymbol } from './AstSymbol';
 import { AstModule, AstModuleExportInfo } from './AstModule';
 import { PackageMetadataManager } from './PackageMetadataManager';
 import { ExportAnalyzer } from './ExportAnalyzer';
-import { AstImport } from './AstImport';
+import { AstEntity } from './AstEntity';
 import { AstImportAsModule } from './AstImportAsModule';
 import { MessageRouter } from '../collector/MessageRouter';
 import { TypeScriptInternals, IGlobalVariableAnalyzer } from './TypeScriptInternals';
 import { StringChecks } from './StringChecks';
 import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
-
-export type AstEntity = AstSymbol | AstImport | AstImportAsModule;
 
 /**
  * Options for `AstSymbolTable._fetchAstSymbol()`

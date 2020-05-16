@@ -6,7 +6,7 @@ import * as ts from 'typescript';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { Collector } from './Collector';
 import { Sort } from '@rushstack/node-core-library';
-import { AstEntity } from '../analyzer/AstSymbolTable';
+import { AstEntity } from '../analyzer/AstEntity';
 
 /**
  * This is a data structure used by the Collector to track an AstEntity that may be emitted in the *.d.ts file.
@@ -15,7 +15,7 @@ import { AstEntity } from '../analyzer/AstSymbolTable';
  * The additional contextual state beyond AstSymbol is:
  * - Whether it's an export of this entry point or not
  * - The nameForEmit, which may get renamed by DtsRollupGenerator._makeUniqueNames()
- * - The export name (or names, if the same declaration is exported multiple times)
+ * - The export name (or names, if the same symbol is exported multiple times)
  */
 export class CollectorEntity {
   /**

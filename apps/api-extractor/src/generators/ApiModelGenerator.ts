@@ -41,7 +41,7 @@ import { DeclarationReferenceGenerator } from './DeclarationReferenceGenerator';
 import { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { AstImportAsModule } from '../analyzer/AstImportAsModule';
-import { AstEntity } from '../analyzer/AstSymbolTable';
+import { AstEntity } from '../analyzer/AstEntity';
 import { AstModule } from '../analyzer/AstModule';
 
 export class ApiModelGenerator {

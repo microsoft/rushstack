@@ -16,7 +16,8 @@ import {
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
 import { CollectorEntity } from './CollectorEntity';
-import { AstSymbolTable, AstEntity } from '../analyzer/AstSymbolTable';
+import { AstSymbolTable, } from '../analyzer/AstSymbolTable';
+import { AstEntity } from '../analyzer/AstEntity';
 import { AstModule, AstModuleExportInfo } from '../analyzer/AstModule';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
@@ -31,6 +32,7 @@ import { MessageRouter } from './MessageRouter';
 import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
 import { ExtractorConfig } from '../api/ExtractorConfig';
 import { AstImportAsModule } from '../analyzer/AstImportAsModule';
+import { AstImport } from '../analyzer/AstImport';
 
 /**
  * Options for Collector constructor.
@@ -297,14 +299,13 @@ export class Collector {
   }
 
   public tryFetchMetadataForAstEntity(astEntity: AstEntity): SymbolMetadata | undefined {
-    if (astEntity instanceof AstImportAsModule) {
-      return undefined;
-    }
     if (astEntity instanceof AstSymbol) {
       return this.fetchSymbolMetadata(astEntity);
     }
-    if (astEntity.astSymbol) { // astImport
-      return this.fetchSymbolMetadata(astEntity.astSymbol);
+    if (astEntity instanceof AstImport) {
+      if (astEntity.astSymbol) {
+        return this.fetchSymbolMetadata(astEntity.astSymbol);
+      }
     }
     return undefined;
   }

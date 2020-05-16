@@ -10,7 +10,8 @@ import { AstImport, IAstImportOptions, AstImportKind } from './AstImport';
 import { AstModule, AstModuleExportInfo } from './AstModule';
 import { TypeScriptInternals } from './TypeScriptInternals';
 import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
-import { IFetchAstSymbolOptions, AstEntity } from './AstSymbolTable';
+import { IFetchAstSymbolOptions } from './AstSymbolTable';
+import { AstEntity } from './AstEntity';
 import { AstImportAsModule } from './AstImportAsModule';
 
 /**

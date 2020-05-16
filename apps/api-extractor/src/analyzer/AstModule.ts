@@ -4,7 +4,7 @@
 import * as ts from 'typescript';
 
 import { AstSymbol } from './AstSymbol';
-import { AstEntity } from './AstSymbolTable';
+import { AstEntity } from './AstEntity';
 
 /**
  * Represents information collected by {@link AstSymbolTable.fetchAstModuleExportInfo}
@@ -16,6 +16,12 @@ export class AstModuleExportInfo {
 
 /**
  * Constructor parameters for AstModule
+ *
+ * @privateRemarks
+ * Our naming convention is to use I____Parameters for constructor options and
+ * I____Options for general function options.  However the word "parameters" is
+ * confusingly similar to the terminology for function parameters modeled by API Extractor,
+ * so we use I____Options for both cases in this code base.
  */
 export interface IAstModuleOptions {
   sourceFile: ts.SourceFile;
@@ -25,12 +31,6 @@ export interface IAstModuleOptions {
 
 /**
  * An internal data structure that represents a source file that is analyzed by AstSymbolTable.
- *
- * @privateRemarks
- * Our naming convention is to use I____Parameters for constructor options and
- * I____Options for general function options.  However the word "parameters" is
- * confusingly similar to the terminology for function parameters modeled by API Extractor,
- * so we use I____Options for both cases in this code base.
  */
 export class AstModule {
   /**
