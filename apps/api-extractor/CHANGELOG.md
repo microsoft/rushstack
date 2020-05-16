@@ -1,6 +1,11 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 15 May 2020 08:10:59 GMT and should not be manually modified.
+## 7.8.2-pr1796.0
+Fri, 15 May 2020 19:27:59 GMT
+
+**This is a prerelease build of the branch for [PR 1796](https://github.com/microsoft/rushstack/pull/1796).**
+
+Git hash: 6682782069da7c666678c4c971b306916e46e75b
 
 ## 7.8.1
 Fri, 15 May 2020 08:10:59 GMT
@@ -775,7 +780,7 @@ Thu, 25 Oct 2018 08:56:02 GMT
 
 ### Patches
 
-- Fix issue where `DocErrorText.text` returned `[object Object]` instead of the text 
+- Fix issue where `DocErrorText.text` returned `[object Object]` instead of the text
 
 ## 6.0.7
 Wed, 24 Oct 2018 16:03:10 GMT
