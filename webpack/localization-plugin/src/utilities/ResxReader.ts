@@ -111,6 +111,14 @@ export class ResxReader {
                   childNode
                 );
               } else {
+                if (locFile.hasOwnProperty(stringName)) {
+                  ResxReader._logErrorWithLocation(
+                    options,
+                    `Duplicate string value "${stringName}"`,
+                    childNode
+                  );
+                }
+
                 const locString: ILocalizedString | undefined = ResxReader._readDataElement(options, childNode);
 
                 if (locString) {

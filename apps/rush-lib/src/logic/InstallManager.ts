@@ -682,8 +682,17 @@ export class InstallManager {
         // We will NOT locally link this package; add it as a regular dependency.
         tempPackageJson.dependencies![packageName] = packageVersion;
 
+        let tryReusingPackageVersionsFromShrinkwrap: boolean = true;
+
+        if (this._rushConfiguration.packageManager === 'pnpm') {
+          // Shrinkwrap churn optimization doesn't make sense when --frozen-lockfile is true
+          tryReusingPackageVersionsFromShrinkwrap =
+            !this._rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall;
+        }
+
         if (shrinkwrapFile) {
-          if (!shrinkwrapFile.tryEnsureCompatibleDependency(dependencySpecifier, rushProject.tempProjectName)) {
+          if (!shrinkwrapFile.tryEnsureCompatibleDependency(dependencySpecifier, rushProject.tempProjectName,
+            tryReusingPackageVersionsFromShrinkwrap)) {
             shrinkwrapWarnings.push(`"${packageName}" (${packageVersion}) required by`
               + ` "${rushProject.packageName}"`);
             shrinkwrapIsUpToDate = false;
@@ -823,7 +832,7 @@ export class InstallManager {
   }
 
   /**
-   * Runs "npm install" in the common folder.
+   * Runs "npm/pnpm/yarn install" in the "common/temp" folder.
    */
   private _installCommonModules(options: {
     shrinkwrapIsUpToDate: boolean;
@@ -834,6 +843,8 @@ export class InstallManager {
       variantIsUpToDate
     } = options;
 
+    const usePnpmFrozenLockfile: boolean = this._rushConfiguration.packageManager === 'pnpm' &&
+      this._rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall === true;
     return Promise.resolve().then(() => {
       console.log(os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonTempFolder)
         + os.EOL);
@@ -861,7 +872,7 @@ export class InstallManager {
         // then we can't skip this install
         potentiallyChangedFiles.push(this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant));
 
-        // Add common-versions.json file in potentially changed file list.
+        // Add common-versions.json file to the potentially changed files list.
         potentiallyChangedFiles.push(this._rushConfiguration.getCommonVersionsFilePath(options.variant));
 
         if (this._rushConfiguration.packageManager === 'pnpm') {
@@ -1070,7 +1081,7 @@ export class InstallManager {
             this._fixupNpm5Regression();
           }
 
-          if (options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
+          if (options.allowShrinkwrapUpdates && (usePnpmFrozenLockfile || !shrinkwrapIsUpToDate)) {
             // Shrinkwrap files may need to be post processed after install, so load and save it
             const tempShrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
               this._rushConfiguration.packageManager,
@@ -1300,13 +1311,21 @@ export class InstallManager {
       // last install flag, which encapsulates the entire installation
       args.push('--no-lock');
 
-      // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
-      // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
-
-      if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
-        args.push('--no-prefer-frozen-lockfile');
+      if (this._rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall &&
+        !this._options.allowShrinkwrapUpdates) {
+        if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
+          args.push('--frozen-lockfile');
+        } else {
+          args.push('--frozen-shrinkwrap');
+        }
       } else {
-        args.push('--no-prefer-frozen-shrinkwrap');
+        // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
+        // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
+        if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
+          args.push('--no-prefer-frozen-lockfile');
+        } else {
+          args.push('--no-prefer-frozen-shrinkwrap');
+        }
       }
 
       if (options.collectLogFile) {
