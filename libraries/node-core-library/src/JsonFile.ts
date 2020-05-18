@@ -87,7 +87,7 @@ export class JsonFile {
       const contents: string = FileSystem.readFile(jsonFilename);
       return jju.parse(contents);
     } catch (error) {
-      if (FileSystem._isNotExistError(error)) {
+      if (FileSystem.isNotExistError(error)) {
         throw new Error(`Input file not found: ${jsonFilename}`);
       } else {
         throw new Error(`Error reading "${jsonFilename}":` + os.EOL + `  ${error.message}`);
@@ -103,7 +103,7 @@ export class JsonFile {
       const contents: string = await FileSystem.readFileAsync(jsonFilename);
       return jju.parse(contents);
     } catch (error) {
-      if (FileSystem._isNotExistError(error)) {
+      if (FileSystem.isNotExistError(error)) {
         throw new Error(`Input file not found: ${jsonFilename}`);
       } else {
         throw new Error(`Error reading "${jsonFilename}":` + os.EOL + `  ${error.message}`);
@@ -241,7 +241,7 @@ export class JsonFile {
       try {
         oldBuffer = FileSystem.readFileToBuffer(jsonFilename);
       } catch (error) {
-        FileSystem._throwIfIsNotExistError(error);
+        FileSystem.throwIfIsNotExistError(error);
       }
     }
 
@@ -293,7 +293,7 @@ export class JsonFile {
       try {
         oldBuffer = await FileSystem.readFileToBufferAsync(jsonFilename);
       } catch (error) {
-        FileSystem._throwIfIsNotExistError(error);
+        FileSystem.throwIfIsNotExistError(error);
       }
     }
 

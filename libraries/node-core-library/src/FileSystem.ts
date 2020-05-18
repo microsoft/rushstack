@@ -339,7 +339,7 @@ export class FileSystem {
       fsx.moveSync(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
     } catch (error) {
       if (options.ensureFolderExists) {
-        FileSystem._throwIfIsNotExistError(error);
+        FileSystem.throwIfIsNotExistError(error);
         const folderPath: string = pathUtilities.dirname(options.destinationPath);
         FileSystem.ensureFolder(folderPath);
         fsx.moveSync(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
@@ -362,7 +362,7 @@ export class FileSystem {
       await fsx.move(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
     } catch (error) {
       if (options.ensureFolderExists) {
-        FileSystem._throwIfIsNotExistError(error);
+        FileSystem.throwIfIsNotExistError(error);
         const folderPath: string = pathUtilities.dirname(options.destinationPath);
         await FileSystem.ensureFolderAsync(pathUtilities.dirname(folderPath));
         await fsx.move(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
@@ -411,7 +411,7 @@ export class FileSystem {
       // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
       fileNames = fsx.readdirSync(folderPath);
     } catch (e) {
-      if (FileSystem._isNotExistError(e)) {
+      if (FileSystem.isNotExistError(e)) {
         throw new Error(`Folder does not exist: "${folderPath}"`);
       } else {
         throw e;
@@ -439,7 +439,7 @@ export class FileSystem {
       // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
       fileNames = await fsx.readdir(folderPath);
     } catch (e) {
-      if (FileSystem._isNotExistError(e)) {
+      if (FileSystem.isNotExistError(e)) {
         throw new Error(`Folder does not exist: "${folderPath}"`);
       } else {
         throw e;
@@ -517,7 +517,7 @@ export class FileSystem {
       fsx.writeFileSync(filePath, contents, { encoding: options.encoding });
     } catch (error) {
       if (options.ensureFolderExists) {
-        FileSystem._throwIfIsNotExistError(error);
+        FileSystem.throwIfIsNotExistError(error);
         const folderPath: string = pathUtilities.dirname(filePath);
         FileSystem.ensureFolder(folderPath);
         fsx.writeFileSync(filePath, contents, { encoding: options.encoding });
@@ -544,7 +544,7 @@ export class FileSystem {
       await fsx.writeFile(filePath, contents, { encoding: options.encoding });
     } catch (error) {
       if (options.ensureFolderExists) {
-        FileSystem._throwIfIsNotExistError(error);
+        FileSystem.throwIfIsNotExistError(error);
         const folderPath: string = pathUtilities.dirname(filePath);
         await FileSystem.ensureFolderAsync(folderPath);
         await fsx.writeFile(filePath, contents, { encoding: options.encoding });
@@ -577,7 +577,7 @@ export class FileSystem {
       fsx.appendFileSync(filePath, contents, { encoding: options.encoding });
     } catch (error) {
       if (options.ensureFolderExists) {
-        FileSystem._throwIfIsNotExistError(error);
+        FileSystem.throwIfIsNotExistError(error);
         const folderPath: string = pathUtilities.dirname(filePath);
         FileSystem.ensureFolder(folderPath);
         fsx.appendFileSync(filePath, contents, { encoding: options.encoding });
@@ -604,7 +604,7 @@ export class FileSystem {
       await fsx.appendFile(filePath, contents, { encoding: options.encoding });
     } catch (error) {
       if (options.ensureFolderExists) {
-        FileSystem._throwIfIsNotExistError(error);
+        FileSystem.throwIfIsNotExistError(error);
         const folderPath: string = pathUtilities.dirname(filePath);
         await FileSystem.ensureFolderAsync(folderPath);
         await fsx.appendFile(filePath, contents, { encoding: options.encoding });
@@ -698,7 +698,7 @@ export class FileSystem {
     try {
       fsx.unlinkSync(filePath);
     } catch (error) {
-      if (options.throwIfNotExists || !FileSystem._isNotExistError(error)) {
+      if (options.throwIfNotExists || !FileSystem.isNotExistError(error)) {
         throw error;
       }
     }
@@ -716,7 +716,7 @@ export class FileSystem {
     try {
       await fsx.unlink(filePath);
     } catch (error) {
-      if (options.throwIfNotExists || !FileSystem._isNotExistError(error)) {
+      if (options.throwIfNotExists || !FileSystem.isNotExistError(error)) {
         throw error;
       }
     }
@@ -827,18 +827,17 @@ export class FileSystem {
   /**
    * Returns true if the error provided indicates the file or folder
    * does not exist.
-   *
-   * @internal
    */
-  public static _isNotExistError(error: NodeJS.ErrnoException): boolean {
+  public static isNotExistError(error: NodeJS.ErrnoException): boolean {
     return error.code === 'ENOENT' || error.code === 'ENOTDIR';
   }
 
   /**
-   * @internal
+   * Re-throws the provided error if the error indicates the file or folder
+   * does not exist.
    */
-  public static _throwIfIsNotExistError(error: NodeJS.ErrnoException): void {
-    if (!FileSystem._isNotExistError(error)) {
+  public static throwIfIsNotExistError(error: NodeJS.ErrnoException): void {
+    if (!FileSystem.isNotExistError(error)) {
       throw error;
     }
   }
