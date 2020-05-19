@@ -36,10 +36,17 @@ export const enum EnvironmentVariableNames {
 
   /**
    * This variable selects a specific installation variant for Rush to use when installing
-   * and linking package dependencies.  For more information, see this article:
-   * https://rushjs.io/pages/advanced/installation_variants/
+   * and linking package dependencies.
+   * For more information, see the command-line help for the `--variant` parameter
+   * and this article:  https://rushjs.io/pages/advanced/installation_variants/
    */
   RUSH_VARIANT = 'RUSH_VARIANT',
+
+  /**
+   * Specifies the maximum number of concurrent processes to launch during a build.
+   * For more information, see the command-line help for the `--parallelism` parameter for "rush build".
+   */
+  RUSH_PARALLELISM = 'RUSH_PARALLELISM',
 
   /**
    * If this variable is set to "true", Rush will create symlinks with absolute paths instead
@@ -151,6 +158,7 @@ export class EnvironmentConfiguration {
             break;
           }
 
+          case EnvironmentVariableNames.RUSH_PARALLELISM:
           case EnvironmentVariableNames.RUSH_PREVIEW_VERSION:
           case EnvironmentVariableNames.RUSH_VARIANT:
             // Handled by @microsoft/rush front end
