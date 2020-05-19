@@ -119,12 +119,12 @@ Optional arguments:
   -p COUNT, --parallelism COUNT
                         Specifies the maximum number of concurrent processes 
                         to launch during a build. The COUNT should be a 
-                        positive integer or else the word \\"max\\" (which 
-                        specifies a count equal to the number of CPU cores). 
-                        If this parameter omitted, the default value depends 
-                        on the operating system and number of CPU cores. This 
-                        parameter may alternatively specified via the 
-                        RUSH_PARALLELISM environment variable.
+                        positive integer or else the word \\"max\\" to specify a 
+                        count that is equal to the number of CPU cores. If 
+                        this parameter is omitted, then the default value 
+                        depends on the operating system and number of CPU 
+                        cores. This parameter may alternatively specified via 
+                        the RUSH_PARALLELISM environment variable.
   -t PROJECT1, --to PROJECT1
                         Run command in the specified project and all of its 
                         dependencies. \\".\\" can be used as shorthand to specify 
@@ -252,12 +252,12 @@ Optional arguments:
   -p COUNT, --parallelism COUNT
                         Specifies the maximum number of concurrent processes 
                         to launch during a build. The COUNT should be a 
-                        positive integer or else the word \\"max\\" (which 
-                        specifies a count equal to the number of CPU cores). 
-                        If this parameter omitted, the default value depends 
-                        on the operating system and number of CPU cores. This 
-                        parameter may alternatively specified via the 
-                        RUSH_PARALLELISM environment variable.
+                        positive integer or else the word \\"max\\" to specify a 
+                        count that is equal to the number of CPU cores. If 
+                        this parameter is omitted, then the default value 
+                        depends on the operating system and number of CPU 
+                        cores. This parameter may alternatively specified via 
+                        the RUSH_PARALLELISM environment variable.
   -t PROJECT1, --to PROJECT1
                         Run command in the specified project and all of its 
                         dependencies. \\".\\" can be used as shorthand to specify 
@@ -511,12 +511,12 @@ Optional arguments:
   -p COUNT, --parallelism COUNT
                         Specifies the maximum number of concurrent processes 
                         to launch during a build. The COUNT should be a 
-                        positive integer or else the word \\"max\\" (which 
-                        specifies a count equal to the number of CPU cores). 
-                        If this parameter omitted, the default value depends 
-                        on the operating system and number of CPU cores. This 
-                        parameter may alternatively specified via the 
-                        RUSH_PARALLELISM environment variable.
+                        positive integer or else the word \\"max\\" to specify a 
+                        count that is equal to the number of CPU cores. If 
+                        this parameter is omitted, then the default value 
+                        depends on the operating system and number of CPU 
+                        cores. This parameter may alternatively specified via 
+                        the RUSH_PARALLELISM environment variable.
   -t PROJECT1, --to PROJECT1
                         Run command in the specified project and all of its 
                         dependencies. \\".\\" can be used as shorthand to specify 

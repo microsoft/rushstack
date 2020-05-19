@@ -159,8 +159,9 @@ export class BulkScriptAction extends BaseScriptAction {
         argumentName: 'COUNT',
         environmentVariable: EnvironmentVariableNames.RUSH_PARALLELISM,
         description: 'Specifies the maximum number of concurrent processes to launch during a build.'
-          + ' The COUNT should be a positive integer, or else the token "max" to indicate the number of CPU cores.'
-          + ' If this parameter omitted, the default value depends on the operating system and number of CPU cores.'
+          + ' The COUNT should be a positive integer or else the word "max" to specify a count that is equal to'
+          + ' the number of CPU cores. If this parameter is omitted, then the default value depends on the'
+          + ' operating system and number of CPU cores.'
       });
     }
     this._toFlag = this.defineStringListParameter({
