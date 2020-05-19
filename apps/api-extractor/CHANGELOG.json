@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.8.2",
+      "tag": "@microsoft/api-extractor_v7.8.2",
+      "date": "Tue, 19 May 2020 15:08:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Report an error to indicate that \"import()\" types are not supported"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.8.1",
       "tag": "@microsoft/api-extractor_v7.8.1",
       "date": "Fri, 15 May 2020 08:10:59 GMT",
