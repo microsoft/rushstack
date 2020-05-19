@@ -37,6 +37,35 @@ export interface IParsedPackageNameOrError extends IParsedPackageName {
 }
 
 /**
+ * Determines the package naming rules that are checked by {@link PackageName}.
+ */
+export enum PackageNameFlavor {
+  /**
+   * The default rules fairly strictly conform to the npmjs.com policy for published packages,
+   * including these restrictions:
+   *
+   * - The package name cannot be longer than 214 characters.
+   *
+   * - The package name must not be empty.
+   *
+   * - Other than the `@` and `/` delimiters used for scopes, the only allowed characters
+   *   are letters, numbers, `-`, `_`, and `.`.
+   *
+   * - The name must not start with a `.` or `_`.
+   */
+  Default,
+
+  /**
+   * This rule is the same as Default, but allows upper-case characters to accommodate some legacy private registries
+   * that still allow that.  In the future we may relax this flavor further, however we aim to minimize these
+   * exceptions as much as possible.  Many popular tools use punctuation characters as delimiters, based on the
+   * assumption that they can never appear in a package name; thus if we relax the rules too much it is likely to
+   * cause confusing malfunctions.
+   */
+  MostlyStandard
+}
+
+/**
  * Various functions for working with package names that may include scopes.
  *
  * @public

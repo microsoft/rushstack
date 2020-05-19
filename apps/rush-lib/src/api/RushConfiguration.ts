@@ -213,6 +213,7 @@ export interface IRushConfigurationJson {
   suppressNodeLtsWarning?: boolean;
   projectFolderMinDepth?: number;
   projectFolderMaxDepth?: number;
+  allowMostlyStandardPackageNames?: boolean;
   approvedPackagesPolicy?: IApprovedPackagesPolicyJson;
   gitPolicy?: IRushGitPolicyJson;
   telemetryEnabled?: boolean;
@@ -444,6 +445,7 @@ export class RushConfiguration {
   private _packageManagerToolFilename: string;
   private _projectFolderMinDepth: number;
   private _projectFolderMaxDepth: number;
+  private _allowMostlyStandardPackageNames: boolean;
   private _ensureConsistentVersions: boolean;
   private _suppressNodeLtsWarning: boolean;
   private _variants: {
@@ -612,6 +614,8 @@ export class RushConfiguration {
     if (this._projectFolderMaxDepth < this._projectFolderMinDepth) {
       throw new Error('The projectFolderMaxDepth cannot be smaller than the projectFolderMinDepth');
     }
+
+    this._allowMostlyStandardPackageNames = !!rushConfigurationJson.allowMostlyStandardPackageNames;
 
     this._approvedPackagesPolicy = new ApprovedPackagesPolicy(this, rushConfigurationJson);
 
@@ -1143,6 +1147,21 @@ export class RushConfiguration {
    */
   public get projectFolderMaxDepth(): number {
     return this._projectFolderMaxDepth;
+  }
+
+  /**
+   * Today the npmjs.com registry enforces fairly strict naming rules for packages, but in the early
+   * days there was no standard and hardly any enforcement.  A few large legacy projects are still using
+   * nonstandard package names, and private registries sometimes allow it.  Set "allowMostlyStandardPackageNames"
+   * to true to relax Rush's enforcement of package names.  This allows upper case letters and in the future may
+   * relax other rules, however we want to minimize these exceptions.  Many popular tools use certain punctuation
+   * characters as delimiters, based on the assumption that they will never appear in a package name; thus if we relax
+   * the rules too much it is likely to cause very confusing malfunctions.
+   *
+   * The default value is false.
+   */
+  public get allowMostlyStandardPackageNames(): boolean {
+    return this._allowMostlyStandardPackageNames;
   }
 
   /**
