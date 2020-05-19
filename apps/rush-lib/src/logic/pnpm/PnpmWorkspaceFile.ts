@@ -1,7 +1,8 @@
-import * as yaml from 'js-yaml';
+import * as globEscape from 'glob-escape';
 import * as os from 'os';
 import * as path from 'path';
-import { FileSystem, Sort } from '@rushstack/node-core-library';
+import * as yaml from 'js-yaml';
+import { FileSystem, Sort, Text } from '@rushstack/node-core-library';
 
 import { BaseWorkspaceFile } from '../base/BaseWorkspaceFile';
 
@@ -63,8 +64,9 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
       packagePath = path.relative(path.dirname(this.workspaceFilename), packagePath);
     }
 
-    // Ensure that the path is split using forward slashes
-    this._workspacePackages.add(path.posix.join(...packagePath.split(path.sep)));
+    // Glob can't handle Windows paths
+    const globPath: string = Text.replaceAll(packagePath, '\\', '/');
+    this._workspacePackages.add(globEscape(globPath));
   }
 
   /** @override */

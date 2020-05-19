@@ -5,7 +5,8 @@ import * as colors from 'colors';
 import * as semver from 'semver';
 
 import { RushConfiguration } from '../api/RushConfiguration';
-import { InstallManager, IInstallManagerOptions } from './InstallManager';
+import { BaseInstallManager, IInstallManagerOptions } from './base/BaseInstallManager';
+import { InstallManagerFactory } from './InstallManagerFactory';
 import { VersionMismatchFinder } from './versionMismatch/VersionMismatchFinder';
 import { PurgeManager } from './PurgeManager';
 import { Utilities } from '../utilities/Utilities';
@@ -125,7 +126,7 @@ export class PackageJsonUpdater {
       variant
     } = options;
 
-    const implicitlyPinned: Map<string, string> = InstallManager.collectImplicitlyPreferredVersions(
+    const implicitlyPinned: Map<string, string> = BaseInstallManager.collectImplicitlyPreferredVersions(
       this._rushConfiguration,
       {
         variant
@@ -145,7 +146,7 @@ export class PackageJsonUpdater {
       variant: variant,
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts
     };
-    const installManager: InstallManager = new InstallManager(
+    const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
       this._rushConfiguration,
       this._rushGlobalFolder,
       purgeManager,
@@ -280,7 +281,7 @@ export class PackageJsonUpdater {
    */
   private async _getNormalizedVersionSpec(
     projects: RushConfigurationProject[],
-    installManager: InstallManager,
+    installManager: BaseInstallManager,
     packageName: string,
     initialSpec: string | undefined,
     implicitlyPinnedVersion: string | undefined,

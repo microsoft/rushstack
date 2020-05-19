@@ -264,25 +264,20 @@ export class Utilities {
   }
 
   /*
-   * Returns true if outputFilename has a more recent last modified timestamp
-   * than all of the inputFilenames, which would imply that we don't need to rebuild it.
-   * Returns false if any of the files does not exist.
+   * Returns true if dateToCompare is more recent than all of the inputFilenames, which
+   * would imply that we don't need to rebuild it. Returns false if any of the files
+   * does not exist.
    * NOTE: The filenames can also be paths for directories, in which case the directory
    * timestamp is compared.
    */
-  public static isFileTimestampCurrent(outputFilename: string, inputFilenames: string[]): boolean {
-    if (!FileSystem.exists(outputFilename)) {
-      return false;
-    }
-    const outputStats: fs.Stats = FileSystem.getStatistics(outputFilename);
-
+  public static isFileTimestampCurrent(dateToCompare: Date, inputFilenames: string[]): boolean {
     for (const inputFilename of inputFilenames) {
       if (!FileSystem.exists(inputFilename)) {
         return false;
       }
 
       const inputStats: fs.Stats = FileSystem.getStatistics(inputFilename);
-      if (outputStats.mtime < inputStats.mtime) {
+      if (dateToCompare < inputStats.mtime) {
         return false;
       }
     }
@@ -548,6 +543,22 @@ export class Utilities {
     }
 
     FileSystem.writeFile(targetNpmrcPath, resultLines.join(os.EOL));
+  }
+
+  /**
+   * Copies the file "sourcePath" to "destinationPath", overwriting the target file location.
+   * If the source file does not exist, then the target file is deleted.
+   */
+  public static syncFile(sourcePath: string, destinationPath: string): void {
+    if (FileSystem.exists(sourcePath)) {
+      console.log('Updating ' + destinationPath);
+      FileSystem.copyFile({ sourcePath, destinationPath });
+    } else {
+      if (FileSystem.exists(destinationPath)) {
+        console.log('Deleting ' + destinationPath);
+        FileSystem.deleteFile(destinationPath);
+      }
+    }
   }
 
   /**

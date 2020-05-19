@@ -50,7 +50,7 @@ export class DependencySpecifier {
     // to the trimmed version range.
     if (versionSpecifier.startsWith('workspace:')) {
       this.specifierType = 'workspace'
-      this.versionSpecifier = versionSpecifier.slice(this.specifierType.length);
+      this.versionSpecifier = versionSpecifier.slice(this.specifierType.length + 1).trim();
       this.aliasTarget = undefined;
       return;
     }

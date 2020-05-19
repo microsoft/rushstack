@@ -8,7 +8,7 @@ import { PackageName, FileSystem } from '@rushstack/node-core-library';
 import { RushConstants } from '../../logic/RushConstants';
 import { DependencySpecifier } from '../DependencySpecifier';
 import { IPolicyValidatorOptions } from '../policy/PolicyValidator';
-import { PackageManagerOptionsConfigurationBase } from '../../api/RushConfiguration';
+import { PackageManagerOptionsConfigurationBase, RushConfiguration } from '../../api/RushConfiguration';
 
 /**
  * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's pnpm-lock.yaml file formats.
@@ -95,6 +95,20 @@ export abstract class BaseShrinkwrapFile {
     return this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency);
   }
 
+  public tryEnsureCompatibleWorkspaceDependency(
+    dependencySpecifier: DependencySpecifier,
+    projectName: string,
+    rushConfiguration: RushConfiguration
+  ): boolean {
+    const shrinkwrapDependency: DependencySpecifier | undefined =
+      this.tryEnsureWorkspaceDependencyVersion(dependencySpecifier, projectName, rushConfiguration);
+    if (!shrinkwrapDependency) {
+      return false;
+    }
+
+    return this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency);
+  }
+
   /**
    * Returns the list of temp projects defined in this file.
    * Example: [ '@rush-temp/project1', '@rush-temp/project2' ]
@@ -103,9 +117,25 @@ export abstract class BaseShrinkwrapFile {
    */
   public abstract getTempProjectNames(): ReadonlyArray<string>;
 
+  /**
+   * Returns the list of paths to Rush projects relative to the
+   * install root.
+   * Example: [ '../../apps/project1', '../../apps/project2' ]
+   *
+   * @virtual
+   */
+  public abstract getWorkspacePaths(): ReadonlyArray<string>;
+
   /** @virtual */
   protected abstract tryEnsureDependencyVersion(dependencySpecifier: DependencySpecifier,
     tempProjectName: string): DependencySpecifier | undefined;
+
+  /** @virtual */
+  protected abstract tryEnsureWorkspaceDependencyVersion(
+    dependencySpecifier: DependencySpecifier,
+    projectName: string,
+    rushConfiguration: RushConfiguration
+  ): DependencySpecifier | undefined;
 
   /** @virtual */
   protected abstract getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined;

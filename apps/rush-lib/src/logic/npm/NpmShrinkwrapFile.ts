@@ -2,13 +2,15 @@ import * as os from 'os';
 
 import {
   JsonFile,
-  FileSystem
+  FileSystem,
+  InternalError
 } from '@rushstack/node-core-library';
 
 import {
   BaseShrinkwrapFile
 } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
+import { RushConfiguration } from '../../api/RushConfiguration';
 
 interface INpmShrinkwrapDependencyJson {
   version: string;
@@ -111,4 +113,17 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     return new DependencySpecifier(dependencySpecifier.packageName, dependencyJson.version);
   }
 
+  /** @override */
+  protected tryEnsureWorkspaceDependencyVersion(
+    dependencySpecifier: DependencySpecifier,
+    projectName: string,
+    rushConfiguration: RushConfiguration
+  ): DependencySpecifier | undefined {
+    throw new InternalError('Not implemented');
+  }
+
+  /** @override */
+  public getWorkspacePaths(): ReadonlyArray<string> {
+    throw new InternalError('Not implemented');
+  }
 }

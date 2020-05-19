@@ -6,6 +6,7 @@ import {
 import { FileSystem, PackageName, IParsedPackageNameOrError, InternalError } from '@rushstack/node-core-library';
 import { RushConstants } from '../RushConstants';
 import { DependencySpecifier } from '../DependencySpecifier';
+import { RushConfiguration } from '../../api/RushConfiguration';
 
 /**
  * Used with YarnShrinkwrapFile._encodePackageNameAndSemVer() and _decodePackageNameAndSemVer().
@@ -196,6 +197,11 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
+  public getWorkspacePaths(): ReadonlyArray<string> {
+    throw new InternalError('Not implemented');
+  }
+
+  /** @override */
   public hasCompatibleTopLevelDependency(dependencySpecifier: DependencySpecifier): boolean {
     // It seems like we should normalize the key somehow, but Yarn apparently does not
     // do any normalization.
@@ -227,6 +233,14 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   protected tryEnsureDependencyVersion(dependencySpecifier: DependencySpecifier,
     tempProjectName: string): DependencySpecifier | undefined {
 
+    throw new InternalError('Not implemented');
+  }
+
+  protected tryEnsureWorkspaceDependencyVersion(
+    dependencySpecifier: DependencySpecifier,
+    projectName: string,
+    rushConfiguration: RushConfiguration
+  ): DependencySpecifier | undefined {
     throw new InternalError('Not implemented');
   }
 }

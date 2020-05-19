@@ -26,6 +26,7 @@ import { IRushLinkJson } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from './PnpmShrinkwrapFile';
 import { PnpmProjectDependencyManifest } from './PnpmProjectDependencyManifest';
+import { PackageJsonDependency } from '../../api/PackageJsonEditor';
 
 // special flag for debugging, will print extra diagnostic information,
 // but comes with performance cost
@@ -51,13 +52,122 @@ export class PnpmLinkManager extends BaseLinkManager {
       throw new InternalError(`Cannot load shrinkwrap at "${this._rushConfiguration.tempShrinkwrapFilename}"`);
     }
 
+    const useWorkspaces: boolean = (
+      this._rushConfiguration.packageManager === 'pnpm' &&
+      this._rushConfiguration.pnpmOptions &&
+      this._rushConfiguration.pnpmOptions.useWorkspaces
+    );
+
     for (const rushProject of this._rushConfiguration.projects) {
       console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-      await this._linkProject(rushProject, rushLinkJson, pnpmShrinkwrapFile);
+
+      if (useWorkspaces) {
+        await this._linkWorkspaceProject(rushProject, rushLinkJson, pnpmShrinkwrapFile);
+      } else {
+        await this._linkProject(rushProject, rushLinkJson, pnpmShrinkwrapFile);
+      }
     }
 
     console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
     JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
+  }
+
+  /**
+   * This is called once for each local project from Rush.json.
+   * @param project             The local project that we will create symlinks for
+   * @param rushLinkJson        The common/temp/rush-link.json output file
+   */
+  private async _linkWorkspaceProject(
+    project: RushConfigurationProject,
+    rushLinkJson: IRushLinkJson,
+    pnpmShrinkwrapFile: PnpmShrinkwrapFile
+  ): Promise<void> {
+    // First, generate the local dependency graph. When using workspaces, Rush forces `workspace:`
+    // notation for all locally-referenced projects.
+    const localDependencies: PackageJsonDependency[] = [
+      ...project.packageJsonEditor.dependencyList,
+      ...project.packageJsonEditor.devDependencyList
+    ].filter(x => x.version.startsWith('workspace:'));
+
+    for (const { name } of localDependencies) {
+      const matchedRushPackage: RushConfigurationProject | undefined =
+        this._rushConfiguration.getProjectByName(name);
+
+      if (matchedRushPackage) {
+        // We found a suitable match, so add the local package as a local link
+        let localLinks: string[] = rushLinkJson.localLinks[project.packageName];
+        if (!localLinks) {
+          localLinks = [];
+          rushLinkJson.localLinks[project.packageName] = localLinks;
+        }
+        localLinks.push(name);
+      } else {
+        throw new InternalError(
+          `Cannot find dependency "${name}" for "${project.packageName}" in the Rush configuration`
+        );
+      }
+    }
+
+    // // We won't be using the package to actually create symlinks, this is just to bootstrap
+    // // the shrinkwrap-deps.json generation logic.
+    // const localPackage: BasePackage = BasePackage.createLinkedPackage(
+    //   project.packageName,
+    //   project.packageJsonEditor.version,
+    //   project.projectFolder
+    // );
+
+    // // Iterate through all the regular dependencies
+    // const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined =
+    //   pnpmShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(tempProjectDependencyKey);
+    // if (!parentShrinkwrapEntry) {
+    //   throw new InternalError(
+    //     'Cannot find shrinkwrap entry using dependency key for temp project: ' +
+    //     `${project.tempProjectName}`);
+    // }
+
+    // const pnpmProjectDependencyManifest: PnpmProjectDependencyManifest = new PnpmProjectDependencyManifest({
+    //   pnpmShrinkwrapFile,
+    //   project
+    // });
+
+    // const dependencies: PackageJsonDependency[] = [
+    //   ...project.packageJsonEditor.dependencyList,
+    //   ...project.packageJsonEditor.devDependencyList
+    // ].filter(x => !x.version.startsWith('workspace:'));
+
+    // for (const { name, dependencyType } of dependencies) {
+
+    //   // read the version number from the shrinkwrap entry
+    //   const isOptional: boolean = dependencyType === DependencyType.Optional;
+    //   const version: string | undefined = isOptional
+    //     ? (parentShrinkwrapEntry.optionalDependencies || {})[name]
+    //     : (parentShrinkwrapEntry.dependencies || {})[name];
+    //   if (!version) {
+    //     if (!isOptional) {
+    //       throw new InternalError(
+    //         `Cannot find shrinkwrap entry dependency "${name}" for workspace project: ` +
+    //         `${project.packageName}`);
+    //     }
+    //     continue;
+    //   }
+
+    //   const newLocalFolderPath: string = path.join(localPackage.folderPath, 'node_modules', name);
+    //   const newLocalPackage: BasePackage = BasePackage.createLinkedPackage(
+    //     name,
+    //     version,
+    //     newLocalFolderPath
+    //   );
+
+    //   if (!this._rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection) {
+    //     pnpmProjectDependencyManifest.addDependency(newLocalPackage, parentShrinkwrapEntry);
+    //   }
+    // }
+
+    // if (!this._rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection) {
+    //   pnpmProjectDependencyManifest.save();
+    // } else {
+    //   pnpmProjectDependencyManifest.deleteIfExists();
+    // }
   }
 
   /**
