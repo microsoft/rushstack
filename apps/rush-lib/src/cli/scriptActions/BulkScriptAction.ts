@@ -26,6 +26,7 @@ import { TaskRunner } from '../../logic/taskRunner/TaskRunner';
 import { TaskCollection } from '../../logic/taskRunner/TaskCollection';
 import { Utilities } from '../../utilities/Utilities';
 import { RushConstants } from '../../logic/RushConstants';
+import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -156,7 +157,7 @@ export class BulkScriptAction extends BaseScriptAction {
         parameterLongName: '--parallelism',
         parameterShortName: '-p',
         argumentName: 'COUNT',
-        environmentVariable: 'RUSH_PARALLELISM',
+        environmentVariable: EnvironmentVariableNames.RUSH_PARALLELISM,
         description: 'Specifies the maximum number of concurrent processes to launch during a build.'
           + ' The COUNT should be a positive integer, or else the token "max" to indicate the number of CPU cores.'
           + ' If this parameter omitted, the default value depends on the operating system and number of CPU cores.'
