@@ -323,6 +323,11 @@ export interface IPackageJsonScriptTable {
 }
 
 // @public
+export interface IPackageNameParserOptions {
+    allowUpperCase?: boolean;
+}
+
+// @public
 export interface IParsedPackageName {
     scope: string;
     unscopedName: string;
@@ -440,6 +445,18 @@ export class PackageName {
     static parse(packageName: string): IParsedPackageName;
     static tryParse(packageName: string): IParsedPackageNameOrError;
     static validate(packageName: string): void;
+}
+
+// @public
+export class PackageNameParser {
+    constructor(options?: IPackageNameParserOptions);
+    combineParts(scope: string, unscopedName: string): string;
+    getScope(packageName: string): string;
+    getUnscopedName(packageName: string): string;
+    isValidName(packageName: string): boolean;
+    parse(packageName: string): IParsedPackageName;
+    tryParse(packageName: string): IParsedPackageNameOrError;
+    validate(packageName: string): void;
 }
 
 // @public
