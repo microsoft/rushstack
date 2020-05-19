@@ -156,8 +156,9 @@ export class BulkScriptAction extends BaseScriptAction {
         parameterLongName: '--parallelism',
         parameterShortName: '-p',
         argumentName: 'COUNT',
-        description: 'Specify the number of concurrent build processes'
-          + ' The value "max" can be specified to indicate the number of CPU cores.'
+        environmentVariable: 'RUSH_PARALLELISM',
+        description: 'Specifies the maximum number of concurrent processes to launch during a build.'
+          + ' The COUNT should be a positive integer, or else the token "max" to indicate the number of CPU cores.'
           + ' If this parameter omitted, the default value depends on the operating system and number of CPU cores.'
       });
     }
