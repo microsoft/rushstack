@@ -846,7 +846,7 @@ export class RushConfiguration {
     // NOTE: projectJsons was already sorted in alphabetical order by the caller.
     for (const projectJson of sortedProjectJsons) {
       // If the name is "@ms/MyProject", extract the "MyProject" part
-      const unscopedName: string = PackageName.getUnscopedName(projectJson.packageName);
+      const unscopedName: string = PackageNameParsers.permissive.getUnscopedName(projectJson.packageName);
 
       // Generate a unique like name "@rush-temp/MyProject", or "@rush-temp/MyProject-2" if
       // there is a naming conflict
@@ -1435,7 +1435,7 @@ export class RushConfiguration {
 
     // Is there an approximate match?
     for (const project of this._projects) {
-      if (PackageName.getUnscopedName(project.packageName) === shorthandProjectName) {
+      if (this.packageNameParser.getUnscopedName(project.packageName) === shorthandProjectName) {
         if (result) {
           // Ambiguous -- there is more than one match
           return undefined;

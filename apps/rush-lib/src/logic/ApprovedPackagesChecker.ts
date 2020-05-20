@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IPackageJson, PackageName } from '@rushstack/node-core-library';
-
 import { ApprovedPackagesPolicy } from '../api/ApprovedPackagesPolicy';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { DependencySpecifier } from './DependencySpecifier';
+import { IPackageJson } from '@rushstack/node-core-library';
 
 export class ApprovedPackagesChecker {
   private readonly _rushConfiguration: RushConfiguration;
@@ -97,7 +96,7 @@ export class ApprovedPackagesChecker {
           referencedPackageName = dependencySpecifier.aliasTarget.packageName;
         }
 
-        const scope: string = PackageName.getScope(referencedPackageName);
+        const scope: string = this._rushConfiguration.packageNameParser.getScope(referencedPackageName);
 
         // Make sure the scope isn't something like "@types" which should be ignored
         if (!approvedPackagesPolicy.ignoredNpmScopes.has(scope)) {
