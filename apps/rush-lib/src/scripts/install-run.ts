@@ -327,6 +327,10 @@ function _cleanInstallFolder(rushTempFolder: string, packageInstallFolder: strin
         'rush-recycler',
         `install-run-${Date.now().toString()}`
       );
+
+      // Windows does not allow renaming a directory to an existing directory
+      fs.rmdirSync(rushRecyclerFolder);
+
       fs.renameSync(nodeModulesFolder, rushRecyclerFolder);
     }
   } catch (e) {
