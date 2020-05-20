@@ -10,8 +10,8 @@ import {
   JsonFile,
   JsonSchema,
   Path,
-  PackageName,
-  FileSystem
+  FileSystem,
+  PackageNameParser
 } from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
 
@@ -29,6 +29,7 @@ import { NpmPackageManager } from './packageManager/NpmPackageManager';
 import { YarnPackageManager } from './packageManager/YarnPackageManager';
 import { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { ExperimentsConfiguration } from './ExperimentsConfiguration';
+import { PackageNameParsers } from './PackageNameParsers';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'master';
@@ -476,6 +477,8 @@ export class RushConfiguration {
   // Rush hooks
   private _eventHooks: EventHooks;
 
+  private readonly _packageNameParser: PackageNameParser
+
   private _telemetryEnabled: boolean;
 
   private _projects: RushConfigurationProject[];
@@ -616,6 +619,8 @@ export class RushConfiguration {
     }
 
     this._allowMostlyStandardPackageNames = !!rushConfigurationJson.allowMostlyStandardPackageNames;
+    this._packageNameParser = this._allowMostlyStandardPackageNames
+      ? PackageNameParsers.mostlyStandard : PackageNameParsers.rushDefault;
 
     this._approvedPackagesPolicy = new ApprovedPackagesPolicy(this, rushConfigurationJson);
 
@@ -1345,6 +1350,13 @@ export class RushConfiguration {
    */
   public get eventHooks(): EventHooks {
     return this._eventHooks;
+  }
+
+  /**
+   * The rush hooks. It allows customized scripts to run at the specified point.
+   */
+  public get packageNameParser(): PackageNameParser {
+    return this._packageNameParser;
   }
 
   /**

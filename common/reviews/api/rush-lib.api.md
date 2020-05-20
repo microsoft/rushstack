@@ -6,6 +6,7 @@
 
 import { IPackageJson } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
+import { PackageNameParser } from '@rushstack/node-core-library';
 
 // @public
 export class ApprovedPackagesConfiguration {
@@ -304,6 +305,7 @@ export class Rush {
 
 // @public
 export class RushConfiguration {
+    readonly allowMostlyStandardPackageNames: boolean;
     readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
     readonly changesFolder: string;
     // @deprecated
@@ -344,6 +346,7 @@ export class RushConfiguration {
     readonly packageManagerToolVersion: string;
     // @beta
     readonly packageManagerWrapper: PackageManager;
+    readonly packageNameParser: PackageNameParser;
     readonly pnpmOptions: PnpmOptionsConfiguration;
     readonly projectFolderMaxDepth: number;
     readonly projectFolderMinDepth: number;
