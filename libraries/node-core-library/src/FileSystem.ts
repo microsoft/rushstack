@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as pathUtilities from 'path';
+import * as nodeJsPath from 'path';
 import * as fs from 'fs';
 import * as fsx from 'fs-extra';
 
@@ -344,7 +344,7 @@ export class FileSystem {
           throw error;
         }
 
-        const folderPath: string = pathUtilities.dirname(options.destinationPath);
+        const folderPath: string = nodeJsPath.dirname(options.destinationPath);
         FileSystem.ensureFolder(folderPath);
         fsx.moveSync(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
       } else {
@@ -370,8 +370,8 @@ export class FileSystem {
           throw error;
         }
 
-        const folderPath: string = pathUtilities.dirname(options.destinationPath);
-        await FileSystem.ensureFolderAsync(pathUtilities.dirname(folderPath));
+        const folderPath: string = nodeJsPath.dirname(options.destinationPath);
+        await FileSystem.ensureFolderAsync(nodeJsPath.dirname(folderPath));
         await fsx.move(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
       } else {
         throw error;
@@ -426,7 +426,7 @@ export class FileSystem {
     }
 
     if (options.absolutePaths) {
-      return fileNames.map(fileName => pathUtilities.resolve(folderPath, fileName));
+      return fileNames.map(fileName => nodeJsPath.resolve(folderPath, fileName));
     } else {
       return fileNames;
     }
@@ -454,7 +454,7 @@ export class FileSystem {
     }
 
     if (options.absolutePaths) {
-      return fileNames.map(fileName => pathUtilities.resolve(folderPath, fileName));
+      return fileNames.map(fileName => nodeJsPath.resolve(folderPath, fileName));
     } else {
       return fileNames;
     }
@@ -528,7 +528,7 @@ export class FileSystem {
           throw error;
         }
 
-        const folderPath: string = pathUtilities.dirname(filePath);
+        const folderPath: string = nodeJsPath.dirname(filePath);
         FileSystem.ensureFolder(folderPath);
         fsx.writeFileSync(filePath, contents, { encoding: options.encoding });
       } else {
@@ -558,7 +558,7 @@ export class FileSystem {
           throw error;
         }
 
-        const folderPath: string = pathUtilities.dirname(filePath);
+        const folderPath: string = nodeJsPath.dirname(filePath);
         await FileSystem.ensureFolderAsync(folderPath);
         await fsx.writeFile(filePath, contents, { encoding: options.encoding });
       } else {
@@ -594,7 +594,7 @@ export class FileSystem {
           throw error;
         }
 
-        const folderPath: string = pathUtilities.dirname(filePath);
+        const folderPath: string = nodeJsPath.dirname(filePath);
         FileSystem.ensureFolder(folderPath);
         fsx.appendFileSync(filePath, contents, { encoding: options.encoding });
       } else {
@@ -624,7 +624,7 @@ export class FileSystem {
           throw error;
         }
 
-        const folderPath: string = pathUtilities.dirname(filePath);
+        const folderPath: string = nodeJsPath.dirname(filePath);
         await FileSystem.ensureFolderAsync(folderPath);
         await fsx.appendFile(filePath, contents, { encoding: options.encoding });
       } else {
