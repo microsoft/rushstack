@@ -257,7 +257,8 @@ export class FileSystem {
    * An async version of {@link FileSystem.updateTimes}.
    */
   public static updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void> {
-    // The cast is required here because the fs-extra typings are incorrect.
+    // This cast is needed because the fs-extra typings require both parameters
+    // to have the same type (number or Date), whereas Node.js does not require that.
     return fsx.utimes(path, times.accessedTime as number, times.modifiedTime as number);
   }
 
