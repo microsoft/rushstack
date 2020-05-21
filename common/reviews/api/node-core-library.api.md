@@ -118,28 +118,50 @@ export const enum FileConstants {
 // @public
 export class FileSystem {
     static appendToFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
+    static appendToFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void>;
     static changePosixModeBits(path: string, mode: PosixModeBits): void;
+    static changePosixModeBitsAsync(path: string, mode: PosixModeBits): Promise<void>;
     static copyFile(options: IFileSystemCopyFileOptions): void;
+    static copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void>;
     static createHardLink(options: IFileSystemCreateLinkOptions): void;
+    static createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
     static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void;
+    static createSymbolicLinkFileAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
     static createSymbolicLinkFolder(options: IFileSystemCreateLinkOptions): void;
+    static createSymbolicLinkFolderAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
     static createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void;
+    static createSymbolicLinkJunctionAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
     static deleteFile(filePath: string, options?: IFileSystemDeleteFileOptions): void;
+    static deleteFileAsync(filePath: string, options?: IFileSystemDeleteFileOptions): Promise<void>;
     static deleteFolder(folderPath: string): void;
+    static deleteFolderAsync(folderPath: string): Promise<void>;
     static ensureEmptyFolder(folderPath: string): void;
+    static ensureEmptyFolderAsync(folderPath: string): Promise<void>;
     static ensureFolder(folderPath: string): void;
+    static ensureFolderAsync(folderPath: string): Promise<void>;
     static exists(path: string): boolean;
     static formatPosixModeBits(modeBits: PosixModeBits): string;
     static getLinkStatistics(path: string): fs.Stats;
+    static getLinkStatisticsAsync(path: string): Promise<fs.Stats>;
     static getPosixModeBits(path: string): PosixModeBits;
+    static getPosixModeBitsAsync(path: string): Promise<PosixModeBits>;
     static getRealPath(linkPath: string): string;
+    static getRealPathAsync(linkPath: string): Promise<string>;
     static getStatistics(path: string): fs.Stats;
+    static getStatisticsAsync(path: string): Promise<fs.Stats>;
+    static isNotExistError(error: NodeJS.ErrnoException): boolean;
     static move(options: IFileSystemMoveOptions): void;
+    static moveAsync(options: IFileSystemMoveOptions): Promise<void>;
     static readFile(filePath: string, options?: IFileSystemReadFileOptions): string;
+    static readFileAsync(filePath: string, options?: IFileSystemReadFileOptions): Promise<string>;
     static readFileToBuffer(filePath: string): Buffer;
+    static readFileToBufferAsync(filePath: string): Promise<Buffer>;
     static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[];
+    static readFolderAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]>;
     static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void;
+    static updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void>;
     static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
+    static writeFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void>;
 }
 
 // @public
@@ -362,8 +384,12 @@ export interface ITerminalProvider {
 export class JsonFile {
     static load(jsonFilename: string): JsonObject;
     static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): JsonObject;
+    static loadAndValidateAsync(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): Promise<JsonObject>;
     static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): JsonObject;
+    static loadAndValidateWithCallbackAsync(jsonFilename: string, jsonSchema: JsonSchema, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): Promise<JsonObject>;
+    static loadAsync(jsonFilename: string): Promise<JsonObject>;
     static save(jsonObject: JsonObject, jsonFilename: string, options?: IJsonFileSaveOptions): boolean;
+    static saveAsync(jsonObject: JsonObject, jsonFilename: string, options?: IJsonFileSaveOptions): Promise<boolean>;
     static stringify(jsonObject: JsonObject, options?: IJsonFileStringifyOptions): string;
     static updateString(previousJson: string, newJsonObject: JsonObject, options?: IJsonFileStringifyOptions): string;
     static validateNoUndefinedMembers(jsonObject: JsonObject): void;
