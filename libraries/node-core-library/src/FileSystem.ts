@@ -340,7 +340,10 @@ export class FileSystem {
       fsx.moveSync(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
     } catch (error) {
       if (options.ensureFolderExists) {
-        FileSystem.throwIfIsNotExistError(error);
+        if (!FileSystem.isNotExistError(error)) {
+          throw error;
+        }
+
         const folderPath: string = pathUtilities.dirname(options.destinationPath);
         FileSystem.ensureFolder(folderPath);
         fsx.moveSync(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
@@ -363,7 +366,10 @@ export class FileSystem {
       await fsx.move(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
     } catch (error) {
       if (options.ensureFolderExists) {
-        FileSystem.throwIfIsNotExistError(error);
+        if (!FileSystem.isNotExistError(error)) {
+          throw error;
+        }
+
         const folderPath: string = pathUtilities.dirname(options.destinationPath);
         await FileSystem.ensureFolderAsync(pathUtilities.dirname(folderPath));
         await fsx.move(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
@@ -420,7 +426,7 @@ export class FileSystem {
     }
 
     if (options.absolutePaths) {
-      return FileSystem._resolvePaths(fileNames, folderPath);
+      return fileNames.map(fileName => pathUtilities.resolve(folderPath, fileName));
     } else {
       return fileNames;
     }
@@ -448,7 +454,7 @@ export class FileSystem {
     }
 
     if (options.absolutePaths) {
-      return FileSystem._resolvePaths(fileNames, folderPath);
+      return fileNames.map(fileName => pathUtilities.resolve(folderPath, fileName));
     } else {
       return fileNames;
     }
@@ -518,7 +524,10 @@ export class FileSystem {
       fsx.writeFileSync(filePath, contents, { encoding: options.encoding });
     } catch (error) {
       if (options.ensureFolderExists) {
-        FileSystem.throwIfIsNotExistError(error);
+        if (!FileSystem.isNotExistError(error)) {
+          throw error;
+        }
+
         const folderPath: string = pathUtilities.dirname(filePath);
         FileSystem.ensureFolder(folderPath);
         fsx.writeFileSync(filePath, contents, { encoding: options.encoding });
@@ -545,7 +554,10 @@ export class FileSystem {
       await fsx.writeFile(filePath, contents, { encoding: options.encoding });
     } catch (error) {
       if (options.ensureFolderExists) {
-        FileSystem.throwIfIsNotExistError(error);
+        if (!FileSystem.isNotExistError(error)) {
+          throw error;
+        }
+
         const folderPath: string = pathUtilities.dirname(filePath);
         await FileSystem.ensureFolderAsync(folderPath);
         await fsx.writeFile(filePath, contents, { encoding: options.encoding });
@@ -578,7 +590,10 @@ export class FileSystem {
       fsx.appendFileSync(filePath, contents, { encoding: options.encoding });
     } catch (error) {
       if (options.ensureFolderExists) {
-        FileSystem.throwIfIsNotExistError(error);
+        if (!FileSystem.isNotExistError(error)) {
+          throw error;
+        }
+
         const folderPath: string = pathUtilities.dirname(filePath);
         FileSystem.ensureFolder(folderPath);
         fsx.appendFileSync(filePath, contents, { encoding: options.encoding });
@@ -605,7 +620,10 @@ export class FileSystem {
       await fsx.appendFile(filePath, contents, { encoding: options.encoding });
     } catch (error) {
       if (options.ensureFolderExists) {
-        FileSystem.throwIfIsNotExistError(error);
+        if (!FileSystem.isNotExistError(error)) {
+          throw error;
+        }
+
         const folderPath: string = pathUtilities.dirname(filePath);
         await FileSystem.ensureFolderAsync(folderPath);
         await fsx.appendFile(filePath, contents, { encoding: options.encoding });
@@ -831,24 +849,5 @@ export class FileSystem {
    */
   public static isNotExistError(error: NodeJS.ErrnoException): boolean {
     return error.code === 'ENOENT' || error.code === 'ENOTDIR';
-  }
-
-  /**
-   * Re-throws the provided error if the error indicates the file or folder
-   * does not exist.
-   */
-  public static throwIfIsNotExistError(error: NodeJS.ErrnoException): void {
-    if (!FileSystem.isNotExistError(error)) {
-      throw error;
-    }
-  }
-
-  /**
-   * Resolves the provided paths relative to the provided parent path
-   * @param paths - The paths to resolve.
-   * @param relativeTo - The path relative to which the paths should be resolved.
-   */
-  private static _resolvePaths(paths: string[], relativeTo: string): string[] {
-    return paths.map(fileName => pathUtilities.resolve(relativeTo, fileName));
   }
 }

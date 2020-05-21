@@ -241,7 +241,9 @@ export class JsonFile {
       try {
         oldBuffer = FileSystem.readFileToBuffer(jsonFilename);
       } catch (error) {
-        FileSystem.throwIfIsNotExistError(error);
+        if (!FileSystem.isNotExistError(error)) {
+          throw error;
+        }
       }
     }
 
@@ -293,7 +295,9 @@ export class JsonFile {
       try {
         oldBuffer = await FileSystem.readFileToBufferAsync(jsonFilename);
       } catch (error) {
-        FileSystem.throwIfIsNotExistError(error);
+        if (!FileSystem.isNotExistError(error)) {
+          throw error;
+        }
       }
     }
 
