@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.21.0",
+      "tag": "@rushstack/node-core-library_v3.21.0",
+      "date": "Thu, 21 May 2020 23:09:44 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Create async versions of FileSystem and JsonFile APIs."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.20.0",
       "tag": "@rushstack/node-core-library_v3.20.0",
       "date": "Thu, 21 May 2020 15:41:59 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 21 May 2020 15:41:59 GMT and should not be manually modified.
+This log was last generated on Thu, 21 May 2020 23:09:44 GMT and should not be manually modified.
+
+## 3.21.0
+Thu, 21 May 2020 23:09:44 GMT
+
+### Minor changes
+
+- Create async versions of FileSystem and JsonFile APIs.
 
 ## 3.20.0
 Thu, 21 May 2020 15:41:59 GMT
