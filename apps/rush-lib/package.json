@@ -18,9 +18,9 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@rushstack/node-core-library": "3.20.0",
-    "@rushstack/package-deps-hash": "2.4.15",
-    "@rushstack/stream-collator": "3.2.15",
+    "@rushstack/node-core-library": "3.21.0",
+    "@rushstack/package-deps-hash": "2.4.16",
+    "@rushstack/stream-collator": "3.2.16",
     "@rushstack/ts-command-line": "4.4.0",
     "@pnpm/link-bins": "~5.1.0",
     "@yarnpkg/lockfile": "~1.0.2",
@@ -46,8 +46,8 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.4.15",
-    "@microsoft/rush-stack-compiler-3.5": "0.4.13",
+    "@microsoft/node-library-build": "6.4.16",
+    "@microsoft/rush-stack-compiler-3.5": "0.4.14",
     "@rushstack/eslint-config": "0.5.7",
     "@types/glob": "7.1.1",
     "@types/inquirer": "0.0.43",
