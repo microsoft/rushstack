@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 15 May 2020 08:10:59 GMT and should not be manually modified.
+This log was last generated on Thu, 21 May 2020 15:41:59 GMT and should not be manually modified.
+
+## 5.23.4
+Thu, 21 May 2020 15:41:59 GMT
+
+### Updates
+
+- Add a new rush.json setting "allowMostlyStandardPackageNames"
+- Add RUSH_PARALLELISM environment variable for specifying the --parallelism default
 
 ## 5.23.3
 Fri, 15 May 2020 08:10:59 GMT

@@ -2,6 +2,32 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.23.4",
+      "tag": "@microsoft/rush_v5.23.4",
+      "date": "Thu, 21 May 2020 15:41:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new rush.json setting \"allowMostlyStandardPackageNames\""
+          },
+          {
+            "comment": "Add RUSH_PARALLELISM environment variable for specifying the --parallelism default"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.19.7` to `3.20.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.12` to `0.4.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.14` to `6.4.15`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.23.3",
       "tag": "@microsoft/rush_v5.23.3",
       "date": "Fri, 15 May 2020 08:10:59 GMT",

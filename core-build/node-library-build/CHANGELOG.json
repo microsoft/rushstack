@@ -2,6 +2,27 @@
   "name": "@microsoft/node-library-build",
   "entries": [
     {
+      "version": "6.4.15",
+      "tag": "@microsoft/node-library-build_v6.4.15",
+      "date": "Thu, 21 May 2020 15:41:59 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.16.0` to `3.16.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.8.9` to `3.8.10`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.4.14` to `8.4.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.12` to `0.4.13`"
+          }
+        ]
+      }
+    },
+    {
       "version": "6.4.14",
       "tag": "@microsoft/node-library-build_v6.4.14",
       "date": "Tue, 19 May 2020 15:08:19 GMT",
