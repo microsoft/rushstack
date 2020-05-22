@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as jju from 'jju';
 import {
   Terminal,
-  NewlineKind
+  NewlineKind,
+  JsonFile
 } from '@rushstack/node-core-library';
 
 import { ILocalizationFile } from '../interfaces';
@@ -52,7 +52,7 @@ export class LocFileParser {
         }
       );
     } else {
-      parsedFile = jju.parse(options.content);
+      parsedFile = JsonFile.parse(options.content);
       try {
         Constants.LOC_JSON_SCHEMA.validateObject(parsedFile, options.filePath);
       } catch (e) {
