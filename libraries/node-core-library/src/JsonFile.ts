@@ -114,7 +114,7 @@ export class JsonFile {
   /**
    * Parses a JSON file's contents.
    */
-  public static parse(jsonContents: string): JsonObject {
+  public static parseString(jsonContents: string): JsonObject {
     return jju.parse(jsonContents);
   }
 
@@ -141,21 +141,6 @@ export class JsonFile {
     options?: IJsonSchemaValidateOptions
   ): Promise<JsonObject> {
     const jsonObject: JsonObject = await JsonFile.loadAsync(jsonFilename);
-    jsonSchema.validateObject(jsonObject, jsonFilename, options);
-
-    return jsonObject;
-  }
-
-  /**
-   * Validates a JSON file's contents against its schema.
-   */
-  public static validate(
-    jsonContents: string,
-    jsonFilename: string,
-    jsonSchema: JsonSchema,
-    options?: IJsonSchemaValidateOptions
-  ): JsonObject {
-    const jsonObject: JsonObject = JsonFile.parse(jsonContents);
     jsonSchema.validateObject(jsonObject, jsonFilename, options);
 
     return jsonObject;

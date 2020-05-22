@@ -52,7 +52,7 @@ export class LocFileParser {
         }
       );
     } else {
-      parsedFile = JsonFile.parse(options.content);
+      parsedFile = JsonFile.parseString(options.content);
       try {
         Constants.LOC_JSON_SCHEMA.validateObject(parsedFile, options.filePath);
       } catch (e) {
