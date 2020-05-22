@@ -347,7 +347,7 @@ export class RushInstallManager extends BaseInstallManager {
     // then we can't skip this install
     potentiallyChangedFiles.push(this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant));
 
-    // Add common-versions.json file in potentially changed file list.
+    // Add common-versions.json file to the potentially changed files list.
     potentiallyChangedFiles.push(this.rushConfiguration.getCommonVersionsFilePath(this.options.variant));
 
     if (this.rushConfiguration.packageManager === 'pnpm') {

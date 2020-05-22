@@ -238,6 +238,9 @@ export abstract class BaseInstallManager {
 
   protected abstract canSkipInstall(lastInstallDate: Date): boolean;
 
+  /**
+   * Runs "npm/pnpm/yarn install" in the "common/temp" folder.
+   */
   protected abstract install(cleanInstall: boolean): Promise<void>;
 
   protected async prepare(): Promise<{ variantIsUpToDate: boolean, shrinkwrapIsUpToDate: boolean }> {
@@ -606,10 +609,30 @@ export abstract class BaseInstallManager {
       // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
       // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
 
-      if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
-        args.push('--no-prefer-frozen-lockfile');
+      if (this.rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall) {
+        if (!this.options.allowShrinkwrapUpdates) {
+          if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
+            args.push('--frozen-lockfile');
+          } else {
+            args.push('--frozen-shrinkwrap');
+          }
+        } else {
+          // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
+          // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
+          if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
+            args.push('--no-prefer-frozen-lockfile');
+          } else {
+            args.push('--no-prefer-frozen-shrinkwrap');
+          }
+        }
       } else {
-        args.push('--no-prefer-frozen-shrinkwrap');
+        // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
+        // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
+        if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
+          args.push('--no-prefer-frozen-lockfile');
+        } else {
+          args.push('--no-prefer-frozen-shrinkwrap');
+        }
       }
 
       if (options.collectLogFile) {
