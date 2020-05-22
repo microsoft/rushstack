@@ -149,8 +149,6 @@ export class FileSystem {
     static getRealPathAsync(linkPath: string): Promise<string>;
     static getStatistics(path: string): fs.Stats;
     static getStatisticsAsync(path: string): Promise<fs.Stats>;
-    static isFileNotExistError(error: NodeJS.ErrnoException): boolean;
-    static isFolderNotExistError(error: NodeJS.ErrnoException): boolean;
     static isNotExistError(error: NodeJS.ErrnoException): boolean;
     static move(options: IFileSystemMoveOptions): void;
     static moveAsync(options: IFileSystemMoveOptions): Promise<void>;
@@ -167,9 +165,21 @@ export class FileSystem {
 }
 
 // @public
-export class FileSystemNotExistError extends Error {
+export class FileSystemNotExistError extends Error implements NodeJS.ErrnoException {
+    // (undocumented)
+    static [Symbol.hasInstance](error: FileSystemNotExistError): boolean;
     constructor(innerError: NodeJS.ErrnoException);
-    readonly innerError: NodeJS.ErrnoException;
+    // (undocumented)
+    readonly code: string | undefined;
+    // (undocumented)
+    readonly errno: number | undefined;
+    static isFileNotExistError(error: NodeJS.ErrnoException): boolean;
+    static isFolderNotExistError(error: NodeJS.ErrnoException): boolean;
+    static isNotExistError(error: NodeJS.ErrnoException): boolean;
+    // (undocumented)
+    readonly path: string | undefined;
+    // (undocumented)
+    readonly syscall: string | undefined;
 }
 
 // @public
