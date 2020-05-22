@@ -63,6 +63,12 @@
     <value>"RESX string with quotemarks"</value>
     <comment>RESX string with quotemarks</comment>
   </data>
+  <data name="stringWithTabsAndNewlines" xml:space="preserve">
+    <value>
+			RESX string with newlines and tabs
+    </value>
+    <comment>RESX string with quotemarks</comment>
+  </data>
   <data name="unusedString" xml:space="preserve">
     <value>UNUSED STRING</value>
     <comment>UNUSED STRING</comment>

@@ -10,8 +10,8 @@ import {
   JsonFile,
   JsonSchema,
   Path,
-  PackageName,
-  FileSystem
+  FileSystem,
+  PackageNameParser
 } from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
 
@@ -29,6 +29,7 @@ import { NpmPackageManager } from './packageManager/NpmPackageManager';
 import { YarnPackageManager } from './packageManager/YarnPackageManager';
 import { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { ExperimentsConfiguration } from './ExperimentsConfiguration';
+import { PackageNameParsers } from './PackageNameParsers';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'master';
@@ -217,6 +218,7 @@ export interface IRushConfigurationJson {
   suppressNodeLtsWarning?: boolean;
   projectFolderMinDepth?: number;
   projectFolderMaxDepth?: number;
+  allowMostlyStandardPackageNames?: boolean;
   approvedPackagesPolicy?: IApprovedPackagesPolicyJson;
   gitPolicy?: IRushGitPolicyJson;
   telemetryEnabled?: boolean;
@@ -457,6 +459,7 @@ export class RushConfiguration {
   private _packageManagerToolFilename: string;
   private _projectFolderMinDepth: number;
   private _projectFolderMaxDepth: number;
+  private _allowMostlyStandardPackageNames: boolean;
   private _ensureConsistentVersions: boolean;
   private _suppressNodeLtsWarning: boolean;
   private _variants: {
@@ -486,6 +489,8 @@ export class RushConfiguration {
 
   // Rush hooks
   private _eventHooks: EventHooks;
+
+  private readonly _packageNameParser: PackageNameParser
 
   private _telemetryEnabled: boolean;
 
@@ -625,6 +630,10 @@ export class RushConfiguration {
     if (this._projectFolderMaxDepth < this._projectFolderMinDepth) {
       throw new Error('The projectFolderMaxDepth cannot be smaller than the projectFolderMinDepth');
     }
+
+    this._allowMostlyStandardPackageNames = !!rushConfigurationJson.allowMostlyStandardPackageNames;
+    this._packageNameParser = this._allowMostlyStandardPackageNames
+      ? PackageNameParsers.mostlyStandard : PackageNameParsers.rushDefault;
 
     this._approvedPackagesPolicy = new ApprovedPackagesPolicy(this, rushConfigurationJson);
 
@@ -850,7 +859,7 @@ export class RushConfiguration {
     // NOTE: projectJsons was already sorted in alphabetical order by the caller.
     for (const projectJson of sortedProjectJsons) {
       // If the name is "@ms/MyProject", extract the "MyProject" part
-      const unscopedName: string = PackageName.getUnscopedName(projectJson.packageName);
+      const unscopedName: string = PackageNameParsers.permissive.getUnscopedName(projectJson.packageName);
 
       // Generate a unique like name "@rush-temp/MyProject", or "@rush-temp/MyProject-2" if
       // there is a naming conflict
@@ -1159,6 +1168,21 @@ export class RushConfiguration {
   }
 
   /**
+   * Today the npmjs.com registry enforces fairly strict naming rules for packages, but in the early
+   * days there was no standard and hardly any enforcement.  A few large legacy projects are still using
+   * nonstandard package names, and private registries sometimes allow it.  Set "allowMostlyStandardPackageNames"
+   * to true to relax Rush's enforcement of package names.  This allows upper case letters and in the future may
+   * relax other rules, however we want to minimize these exceptions.  Many popular tools use certain punctuation
+   * characters as delimiters, based on the assumption that they will never appear in a package name; thus if we relax
+   * the rules too much it is likely to cause very confusing malfunctions.
+   *
+   * The default value is false.
+   */
+  public get allowMostlyStandardPackageNames(): boolean {
+    return this._allowMostlyStandardPackageNames;
+  }
+
+  /**
    * The "approvedPackagesPolicy" settings.
    */
   public get approvedPackagesPolicy(): ApprovedPackagesPolicy {
@@ -1342,6 +1366,13 @@ export class RushConfiguration {
   }
 
   /**
+   * The rush hooks. It allows customized scripts to run at the specified point.
+   */
+  public get packageNameParser(): PackageNameParser {
+    return this._packageNameParser;
+  }
+
+  /**
    * Gets the path to the common-versions.json config file for a specific variant.
    * @param variant - The name of the current variant in use by the active command.
    */
@@ -1417,7 +1448,7 @@ export class RushConfiguration {
 
     // Is there an approximate match?
     for (const project of this._projects) {
-      if (PackageName.getUnscopedName(project.packageName) === shorthandProjectName) {
+      if (this.packageNameParser.getUnscopedName(project.packageName) === shorthandProjectName) {
         if (result) {
           // Ambiguous -- there is more than one match
           return undefined;

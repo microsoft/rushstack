@@ -195,7 +195,10 @@ export abstract class BaseInstallManager {
       // Perform the actual install
       await this.install(cleanInstall);
 
-      if (this.options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
+      const usePnpmFrozenLockfile: boolean = this._rushConfiguration.packageManager === 'pnpm' &&
+        this._rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall === true;
+
+      if (this.options.allowShrinkwrapUpdates && (usePnpmFrozenLockfile || !shrinkwrapIsUpToDate)) {
         // Shrinkwrap files may need to be post processed after install, so load and save it
         const tempShrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
           this.rushConfiguration.packageManager,

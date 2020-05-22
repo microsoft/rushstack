@@ -219,8 +219,22 @@ export class RushInstallManager extends BaseInstallManager {
         // We will NOT locally link this package; add it as a regular dependency.
         tempPackageJson.dependencies![packageName] = packageVersion;
 
+        let tryReusingPackageVersionsFromShrinkwrap: boolean = true;
+
+        if (this.rushConfiguration.packageManager === 'pnpm') {
+          // Shrinkwrap churn optimization doesn't make sense when --frozen-lockfile is true
+          tryReusingPackageVersionsFromShrinkwrap =
+            !this.rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall;
+        }
+
         if (shrinkwrapFile) {
-          if (!shrinkwrapFile.tryEnsureCompatibleDependency(dependencySpecifier, rushProject.tempProjectName)) {
+          if (
+            !shrinkwrapFile.tryEnsureCompatibleDependency(
+              dependencySpecifier,
+              rushProject.tempProjectName,
+              tryReusingPackageVersionsFromShrinkwrap
+            )
+          ) {
             shrinkwrapWarnings.push(`Missing dependency "${packageName}" (${packageVersion}) required by`
               + ` "${rushProject.packageName}"`);
             shrinkwrapIsUpToDate = false;

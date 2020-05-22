@@ -434,12 +434,12 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   /**
    * Gets the resolved version number of a dependency for a specific temp project.
    * For PNPM, we can reuse the version that another project is using.
-   * Note that this function modifies the shrinkwrap data.
+   * Note that this function modifies the shrinkwrap data if tryReusingPackageVersionsFromShrinkwrap is set to true.
    *
    * @override
    */
   protected tryEnsureDependencyVersion(dependencySpecifier: DependencySpecifier,
-    tempProjectName: string): DependencySpecifier | undefined {
+    tempProjectName: string, tryReusingPackageVersionsFromShrinkwrap: boolean): DependencySpecifier | undefined {
 
     // PNPM doesn't have the same advantage of NPM, where we can skip generate as long as the
     // shrinkwrap file puts our dependency in either the top of the node_modules folder
@@ -463,7 +463,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     if (!packageDescription.dependencies.hasOwnProperty(packageName)) {
-      if (dependencySpecifier.versionSpecifier) {
+
+      if (tryReusingPackageVersionsFromShrinkwrap && dependencySpecifier.versionSpecifier) {
         // this means the current temp project doesn't provide this dependency,
         // however, we may be able to use a different version. we prefer the latest version
         let latestVersion: string | undefined = undefined;

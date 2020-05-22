@@ -138,6 +138,10 @@
       "description": "The maximum folder depth for the projectFolder field.  The default value is 2, i.e. a single slash in the path name.",
       "type": "number"
     },
+    "allowMostlyStandardPackageNames": {
+      "description": "Today the npmjs.com registry enforces fairly strict naming rules for packages, but in the early days there was no standard and hardly any enforcement.  A few large legacy projects are still using nonstandard package names, and private registries sometimes allow it.  Set \"allowMostlyStandardPackageNames\" to true to relax Rush's enforcement of package names.  This allows upper case letters and in the future may relax other rules, however we want to minimize these exceptions.  Many popular tools use certain punctuation characters as delimiters, based on the assumption that they will never appear in a package name; thus if we relax the rules too much it is likely to cause very confusing malfunctions. The default value is false.",
+      "type": "boolean"
+    },
     "approvedPackagesPolicy": {
       "description": "Controls a package review workflow driven by the two config files \"browser-approved-packages.json\" and \"nonbrowser-approved-packages.json\"",
       "type": "object",

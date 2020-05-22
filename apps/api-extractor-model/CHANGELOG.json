@@ -2,6 +2,42 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.8.3",
+      "tag": "@microsoft/api-extractor-model_v7.8.3",
+      "date": "Fri, 22 May 2020 15:08:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.21.0` to `3.22.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.8.2",
+      "tag": "@microsoft/api-extractor-model_v7.8.2",
+      "date": "Thu, 21 May 2020 23:09:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.20.0` to `3.21.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.8.1",
+      "tag": "@microsoft/api-extractor-model_v7.8.1",
+      "date": "Thu, 21 May 2020 15:42:00 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.19.7` to `3.20.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.8.0",
       "tag": "@microsoft/api-extractor-model_v7.8.0",
       "date": "Wed, 06 May 2020 08:23:45 GMT",

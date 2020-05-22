@@ -2,6 +2,35 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.4.0",
+      "tag": "@rushstack/ts-command-line_v4.4.0",
+      "date": "Fri, 15 May 2020 08:10:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a new feature defineCommandLineRemainder() which allows additional unvalidated CLI arguments, e.g. to pass along to another tool"
+          },
+          {
+            "comment": "Add the ability for an environment variable to specify multiple values for CommandLineStringListParameter, encoded as a JSON array"
+          },
+          {
+            "comment": "Fix some bugs that prevented a CommandLineParser from being defined without any actions"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix a bug with environmentVariable mapping for CommandLineFlagParameter"
+          },
+          {
+            "comment": "Use API Extractor to trim internal APIs from the .d.ts rollup"
+          },
+          {
+            "comment": "Improve the README.md and API documentation"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.3.14",
       "tag": "@rushstack/ts-command-line_v4.3.14",
       "date": "Wed, 08 Apr 2020 04:07:33 GMT",

@@ -2,6 +2,81 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.10.50",
+      "tag": "@microsoft/load-themed-styles_v1.10.50",
+      "date": "Fri, 22 May 2020 15:08:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.14` to `0.4.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.16` to `6.4.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.49",
+      "tag": "@microsoft/load-themed-styles_v1.10.49",
+      "date": "Thu, 21 May 2020 23:09:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.13` to `0.4.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.15` to `6.4.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.48",
+      "tag": "@microsoft/load-themed-styles_v1.10.48",
+      "date": "Thu, 21 May 2020 15:41:59 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.12` to `0.4.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.14` to `6.4.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.47",
+      "tag": "@microsoft/load-themed-styles_v1.10.47",
+      "date": "Tue, 19 May 2020 15:08:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.11` to `0.4.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.13` to `6.4.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.46",
+      "tag": "@microsoft/load-themed-styles_v1.10.46",
+      "date": "Fri, 15 May 2020 08:10:59 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.10` to `0.4.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.12` to `6.4.13`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.10.45",
       "tag": "@microsoft/load-themed-styles_v1.10.45",
       "date": "Wed, 06 May 2020 08:23:45 GMT",
