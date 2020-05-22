@@ -7,6 +7,7 @@ import * as fsx from 'fs-extra';
 
 import { Text, NewlineKind, Encoding } from './Text';
 import { PosixModeBits } from './PosixModeBits';
+import { FileSystemNotExistError } from './FileSystemNotExistError';
 
 // The PosixModeBits are intended to be used with bitwise operations.
 /* eslint-disable no-bitwise */
@@ -232,14 +233,14 @@ export class FileSystem {
    * @param path - The absolute or relative path to the filesystem object.
    */
   public static getStatistics(path: string): fs.Stats {
-    return fsx.statSync(path);
+    return FileSystem._doAndThrowNotExistError(() => fsx.statSync(path));
   }
 
   /**
    * An async version of {@link FileSystem.getStatistics}.
    */
   public static getStatisticsAsync(path: string): Promise<fs.Stats> {
-    return fsx.stat(path);
+    return FileSystem._doAndThrowNotExistErrorAsync(() => fsx.stat(path));
   }
 
   /**
@@ -250,7 +251,7 @@ export class FileSystem {
    * @param times - The times that the object should be updated to reflect.
    */
   public static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void {
-    fsx.utimesSync(path, times.accessedTime, times.modifiedTime);
+    FileSystem._doAndThrowNotExistError(() => fsx.utimesSync(path, times.accessedTime, times.modifiedTime));
   }
 
   /**
@@ -259,7 +260,7 @@ export class FileSystem {
   public static updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void> {
     // This cast is needed because the fs-extra typings require both parameters
     // to have the same type (number or Date), whereas Node.js does not require that.
-    return fsx.utimes(path, times.accessedTime as number, times.modifiedTime as number);
+    return FileSystem._doAndThrowNotExistErrorAsync(() => fsx.utimes(path, times.accessedTime as number, times.modifiedTime as number));
   }
 
 
@@ -270,14 +271,14 @@ export class FileSystem {
    * @param modeBits - POSIX-style file mode bits specified using the {@link PosixModeBits} enum
    */
   public static changePosixModeBits(path: string, mode: PosixModeBits): void {
-    fs.chmodSync(path, mode);
+    FileSystem._doAndThrowNotExistError(() => fs.chmodSync(path, mode));
   }
 
   /**
    * An async version of {@link FileSystem.changePosixModeBits}.
    */
   public static changePosixModeBitsAsync(path: string, mode: PosixModeBits): Promise<void> {
-    return fsx.chmod(path, mode);
+    return FileSystem._doAndThrowNotExistErrorAsync(() => fsx.chmod(path, mode));
   }
 
   /**
@@ -339,8 +340,9 @@ export class FileSystem {
     try {
       fsx.moveSync(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
     } catch (error) {
+      const isNotExistError: boolean = FileSystem.isNotExistError(error);
       if (options.ensureFolderExists) {
-        if (!FileSystem.isNotExistError(error)) {
+        if (!isNotExistError) {
           throw error;
         }
 
@@ -348,7 +350,11 @@ export class FileSystem {
         FileSystem.ensureFolder(folderPath);
         fsx.moveSync(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
       } else {
-        throw error;
+        if (isNotExistError) {
+          throw new FileSystemNotExistError(error);
+        } else {
+          throw error;
+        }
       }
     }
   }
@@ -365,8 +371,9 @@ export class FileSystem {
     try {
       await fsx.move(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
     } catch (error) {
+      const isNotExistError: boolean = FileSystem.isNotExistError(error);
       if (options.ensureFolderExists) {
-        if (!FileSystem.isNotExistError(error)) {
+        if (!isNotExistError) {
           throw error;
         }
 
@@ -374,7 +381,11 @@ export class FileSystem {
         await FileSystem.ensureFolderAsync(nodeJsPath.dirname(folderPath));
         await fsx.move(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
       } else {
-        throw error;
+        if (isNotExistError) {
+          throw new FileSystemNotExistError(error);
+        } else {
+          throw error;
+        }
       }
     }
   }
@@ -417,11 +428,11 @@ export class FileSystem {
     try {
       // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
       fileNames = fsx.readdirSync(folderPath);
-    } catch (e) {
-      if (FileSystem.isNotExistError(e)) {
-        throw new Error(`Folder does not exist: "${folderPath}"`);
+    } catch (error) {
+      if (FileSystem.isNotExistError(error)) {
+        throw new FileSystemNotExistError(error);
       } else {
-        throw e;
+        throw error;
       }
     }
 
@@ -445,11 +456,11 @@ export class FileSystem {
     try {
       // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
       fileNames = await fsx.readdir(folderPath);
-    } catch (e) {
-      if (FileSystem.isNotExistError(e)) {
-        throw new Error(`Folder does not exist: "${folderPath}"`);
+    } catch (error) {
+      if (FileSystem.isNotExistError(error)) {
+        throw new FileSystemNotExistError(error);
       } else {
-        throw e;
+        throw error;
       }
     }
 
@@ -523,16 +534,21 @@ export class FileSystem {
     try {
       fsx.writeFileSync(filePath, contents, { encoding: options.encoding });
     } catch (error) {
+      const folderPath: string = nodeJsPath.dirname(filePath);
+      const isNotExistError: boolean = FileSystem.isNotExistError(error);
       if (options.ensureFolderExists) {
-        if (!FileSystem.isNotExistError(error)) {
+        if (!isNotExistError) {
           throw error;
         }
 
-        const folderPath: string = nodeJsPath.dirname(filePath);
         FileSystem.ensureFolder(folderPath);
         fsx.writeFileSync(filePath, contents, { encoding: options.encoding });
       } else {
-        throw error;
+        if (isNotExistError) {
+          throw new FileSystemNotExistError(error);
+        } else {
+          throw error;
+        }
       }
     }
   }
@@ -553,16 +569,21 @@ export class FileSystem {
     try {
       await fsx.writeFile(filePath, contents, { encoding: options.encoding });
     } catch (error) {
+      const folderPath: string = nodeJsPath.dirname(filePath);
+      const isNotExistError: boolean = FileSystem.isNotExistError(error);
       if (options.ensureFolderExists) {
-        if (!FileSystem.isNotExistError(error)) {
+        if (!isNotExistError) {
           throw error;
         }
 
-        const folderPath: string = nodeJsPath.dirname(filePath);
         await FileSystem.ensureFolderAsync(folderPath);
         await fsx.writeFile(filePath, contents, { encoding: options.encoding });
       } else {
-        throw error;
+        if (isNotExistError) {
+          throw new FileSystemNotExistError(error);
+        } else {
+          throw error;
+        }
       }
     }
   }
@@ -589,16 +610,21 @@ export class FileSystem {
     try {
       fsx.appendFileSync(filePath, contents, { encoding: options.encoding });
     } catch (error) {
+      const folderPath: string = nodeJsPath.dirname(filePath);
+      const isNotExistError: boolean = FileSystem.isNotExistError(error);
       if (options.ensureFolderExists) {
-        if (!FileSystem.isNotExistError(error)) {
+        if (!isNotExistError) {
           throw error;
         }
 
-        const folderPath: string = nodeJsPath.dirname(filePath);
         FileSystem.ensureFolder(folderPath);
         fsx.appendFileSync(filePath, contents, { encoding: options.encoding });
       } else {
-        throw error;
+        if (isNotExistError) {
+          throw new FileSystemNotExistError(error);
+        } else {
+          throw error;
+        }
       }
     }
   }
@@ -619,16 +645,21 @@ export class FileSystem {
     try {
       await fsx.appendFile(filePath, contents, { encoding: options.encoding });
     } catch (error) {
+      const folderPath: string = nodeJsPath.dirname(filePath);
+      const isNotExistError: boolean = FileSystem.isNotExistError(error);
       if (options.ensureFolderExists) {
-        if (!FileSystem.isNotExistError(error)) {
+        if (!isNotExistError) {
           throw error;
         }
 
-        const folderPath: string = nodeJsPath.dirname(filePath);
         await FileSystem.ensureFolderAsync(folderPath);
         await fsx.appendFile(filePath, contents, { encoding: options.encoding });
       } else {
-        throw error;
+        if (isNotExistError) {
+          throw new FileSystemNotExistError(error);
+        } else {
+          throw error;
+        }
       }
     }
   }
@@ -676,14 +707,14 @@ export class FileSystem {
    * @param filePath - The relative or absolute path to the file whose contents should be read.
    */
   public static readFileToBuffer(filePath: string): Buffer {
-    return fsx.readFileSync(filePath);
+    return FileSystem._doAndThrowNotExistError(() => fsx.readFileSync(filePath));
   }
 
   /**
    * An async version of {@link FileSystem.readFileToBuffer}.
    */
   public static readFileToBufferAsync(filePath: string): Promise<Buffer> {
-    return fsx.readFile(filePath);
+    return FileSystem._doAndThrowNotExistErrorAsync(() => fsx.readFile(filePath));
   }
 
   /**
@@ -692,14 +723,14 @@ export class FileSystem {
    * Behind the scenes it uses `fs.copyFileSync()`.
    */
   public static copyFile(options: IFileSystemCopyFileOptions): void {
-    fsx.copySync(options.sourcePath, options.destinationPath);
+    FileSystem._doAndThrowNotExistError(() => fsx.copySync(options.sourcePath, options.destinationPath));
   }
 
   /**
    * An async version of {@link FileSystem.copyFile}.
    */
   public static async copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void> {
-    await fsx.copy(options.sourcePath, options.destinationPath);
+    return FileSystem._doAndThrowNotExistErrorAsync(() => fsx.copy(options.sourcePath, options.destinationPath));
   }
 
   /**
@@ -717,7 +748,11 @@ export class FileSystem {
     try {
       fsx.unlinkSync(filePath);
     } catch (error) {
-      if (options.throwIfNotExists || !FileSystem.isNotExistError(error)) {
+      if (FileSystem.isNotExistError(error)) {
+        if (options.throwIfNotExists) {
+          throw new FileSystemNotExistError(error);
+        }
+      } else {
         throw error;
       }
     }
@@ -735,7 +770,11 @@ export class FileSystem {
     try {
       await fsx.unlink(filePath);
     } catch (error) {
-      if (options.throwIfNotExists || !FileSystem.isNotExistError(error)) {
+      if (FileSystem.isNotExistError(error)) {
+        if (options.throwIfNotExists) {
+          throw new FileSystemNotExistError(error);
+        }
+      } else {
         throw error;
       }
     }
@@ -751,14 +790,14 @@ export class FileSystem {
    * @param path - The absolute or relative path to the filesystem object.
    */
   public static getLinkStatistics(path: string): fs.Stats {
-    return fsx.lstatSync(path);
+    return FileSystem._doAndThrowNotExistError(() => fsx.lstatSync(path));
   }
 
   /**
    * An async version of {@link FileSystem.getLinkStatistics}.
    */
-  public static getLinkStatisticsAsync(path: string): Promise<fs.Stats> {
-    return fsx.lstat(path);
+  public static async getLinkStatisticsAsync(path: string): Promise<fs.Stats> {
+    return FileSystem._doAndThrowNotExistErrorAsync(() => fsx.lstat(path));
   }
 
   /**
@@ -767,15 +806,14 @@ export class FileSystem {
    */
   public static createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void {
     // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
-    fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'junction');
+    FileSystem._doAndThrowNotExistError(() => fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'junction'));
   }
 
   /**
    * An async version of {@link FileSystem.createSymbolicLinkJunction}.
    */
   public static createSymbolicLinkJunctionAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
-    return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'junction');
+    return FileSystem._doAndThrowNotExistErrorAsync(() => fsx.symlink(options.linkTargetPath, options.newLinkPath, 'junction'));
   }
 
   /**
@@ -783,14 +821,14 @@ export class FileSystem {
    * Behind the scenes it uses `fs.symlinkSync()`.
    */
   public static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void {
-    fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'file');
+    FileSystem._doAndThrowNotExistError(() => fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'file'));
   }
 
   /**
    * An async version of {@link FileSystem.createSymbolicLinkFile}.
    */
   public static createSymbolicLinkFileAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'file');
+    return FileSystem._doAndThrowNotExistErrorAsync(() => fsx.symlink(options.linkTargetPath, options.newLinkPath, 'file'));
   }
 
   /**
@@ -798,14 +836,14 @@ export class FileSystem {
    * Behind the scenes it uses `fs.symlinkSync()`.
    */
   public static createSymbolicLinkFolder(options: IFileSystemCreateLinkOptions): void {
-    fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'dir');
+    FileSystem._doAndThrowNotExistError(() => fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'dir'));
   }
 
   /**
    * An async version of {@link FileSystem.createSymbolicLinkFolder}.
    */
-  public static createSymbolicLinkFolderAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'dir');
+  public static async createSymbolicLinkFolderAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
+    return FileSystem._doAndThrowNotExistErrorAsync(() => fsx.symlink(options.linkTargetPath, options.newLinkPath));
   }
 
   /**
@@ -813,14 +851,14 @@ export class FileSystem {
    * Behind the scenes it uses `fs.linkSync()`.
    */
   public static createHardLink(options: IFileSystemCreateLinkOptions): void {
-    fsx.linkSync(options.linkTargetPath, options.newLinkPath);
+    FileSystem._doAndThrowNotExistError(() => fsx.linkSync(options.linkTargetPath, options.newLinkPath));
   }
 
   /**
    * An async version of {@link FileSystem.createHardLink}.
    */
   public static createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    return fsx.link(options.linkTargetPath, options.newLinkPath);
+    return FileSystem._doAndThrowNotExistErrorAsync(() => fsx.link(options.linkTargetPath, options.newLinkPath));
   }
 
   /**
@@ -829,14 +867,14 @@ export class FileSystem {
    * @param linkPath - The path to the link.
    */
   public static getRealPath(linkPath: string): string {
-    return fsx.realpathSync(linkPath);
+    return FileSystem._doAndThrowNotExistError(() => fsx.realpathSync(linkPath));
   }
 
   /**
    * An async version of {@link FileSystem.getRealPath}.
    */
   public static getRealPathAsync(linkPath: string): Promise<string> {
-    return fsx.realpath(linkPath);
+    return FileSystem._doAndThrowNotExistErrorAsync(() => fsx.realpath(linkPath));
   }
 
   // ===============
@@ -844,10 +882,48 @@ export class FileSystem {
   // ===============
 
   /**
-   * Returns true if the error provided indicates the file or folder
-   * does not exist.
+   * Returns true if the error provided indicates the file does not exist.
+   */
+  public static isFileNotExistError(error: NodeJS.ErrnoException): boolean {
+    return error.code === 'ENOENT';
+  }
+
+  /**
+   * Returns true if the error provided indicates the folder does not exist.
+   */
+  public static isFolderNotExistError(error: NodeJS.ErrnoException): boolean {
+    return error.code === 'ENOTDIR';
+  }
+
+  /**
+   * Returns true if the error provided indicates the file or folder does not exist.
    */
   public static isNotExistError(error: NodeJS.ErrnoException): boolean {
-    return error.code === 'ENOENT' || error.code === 'ENOTDIR';
+    return FileSystem.isFileNotExistError(error) || FileSystem.isFolderNotExistError(error);
+  }
+
+  private static _doAndThrowNotExistError<TResult>(fn: () => TResult): TResult {
+    try {
+      return fn();
+    } catch (error) {
+      if (FileSystem.isNotExistError(error)) {
+        throw new FileSystemNotExistError(error);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  private static async _doAndThrowNotExistErrorAsync<TResult>(fn: () => Promise<TResult>): Promise<TResult> {
+    try {
+      return await fn();
+    } catch (error) {
+      if (FileSystem.isNotExistError(error)) {
+        throw new FileSystemNotExistError(error);
+      } else {
+        throw error;
+      }
+    }
   }
 }
+

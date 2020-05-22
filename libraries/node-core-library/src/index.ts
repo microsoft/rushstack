@@ -77,6 +77,7 @@ export {
   IFileSystemUpdateTimeParameters,
   IFileSystemCreateLinkOptions
 } from './FileSystem';
+export { FileSystemNotExistError } from './FileSystemNotExistError';
 export {
   FileWriter,
   IFileWriterFlags

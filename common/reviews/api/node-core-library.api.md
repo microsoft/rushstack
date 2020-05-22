@@ -149,6 +149,8 @@ export class FileSystem {
     static getRealPathAsync(linkPath: string): Promise<string>;
     static getStatistics(path: string): fs.Stats;
     static getStatisticsAsync(path: string): Promise<fs.Stats>;
+    static isFileNotExistError(error: NodeJS.ErrnoException): boolean;
+    static isFolderNotExistError(error: NodeJS.ErrnoException): boolean;
     static isNotExistError(error: NodeJS.ErrnoException): boolean;
     static move(options: IFileSystemMoveOptions): void;
     static moveAsync(options: IFileSystemMoveOptions): Promise<void>;
@@ -162,6 +164,12 @@ export class FileSystem {
     static updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void>;
     static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
     static writeFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void>;
+}
+
+// @public
+export class FileSystemNotExistError extends Error {
+    constructor(innerError: NodeJS.ErrnoException);
+    readonly innerError: NodeJS.ErrnoException;
 }
 
 // @public

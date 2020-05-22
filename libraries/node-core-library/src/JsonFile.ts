@@ -14,6 +14,7 @@ import {
   NewlineKind
 } from './Text';
 import { FileSystem } from './FileSystem';
+import { FileSystemNotExistError } from './FileSystemNotExistError';
 
 /**
  * Represents a JSON-serializable object whose type has not been determined yet.
@@ -87,8 +88,8 @@ export class JsonFile {
       const contents: string = FileSystem.readFile(jsonFilename);
       return jju.parse(contents);
     } catch (error) {
-      if (FileSystem.isNotExistError(error)) {
-        throw new Error(`Input file not found: ${jsonFilename}`);
+      if (error instanceof FileSystemNotExistError) {
+        throw error;
       } else {
         throw new Error(`Error reading "${jsonFilename}":` + os.EOL + `  ${error.message}`);
       }
@@ -103,8 +104,8 @@ export class JsonFile {
       const contents: string = await FileSystem.readFileAsync(jsonFilename);
       return jju.parse(contents);
     } catch (error) {
-      if (FileSystem.isNotExistError(error)) {
-        throw new Error(`Input file not found: ${jsonFilename}`);
+      if (error instanceof FileSystemNotExistError) {
+        throw error
       } else {
         throw new Error(`Error reading "${jsonFilename}":` + os.EOL + `  ${error.message}`);
       }
@@ -248,7 +249,7 @@ export class JsonFile {
       try {
         oldBuffer = FileSystem.readFileToBuffer(jsonFilename);
       } catch (error) {
-        if (!FileSystem.isNotExistError(error)) {
+        if (!(error instanceof FileSystemNotExistError)) {
           throw error;
         }
       }
@@ -302,7 +303,7 @@ export class JsonFile {
       try {
         oldBuffer = await FileSystem.readFileToBufferAsync(jsonFilename);
       } catch (error) {
-        if (!FileSystem.isNotExistError(error)) {
+        if (!(error instanceof FileSystemNotExistError)) {
           throw error;
         }
       }
