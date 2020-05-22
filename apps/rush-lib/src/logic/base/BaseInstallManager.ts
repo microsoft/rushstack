@@ -101,6 +101,16 @@ export interface IInstallManagerOptions {
    * Retry the install the specified number of times
    */
   maxInstallAttempts: number
+
+  /**
+   * Run install in the specified projects as well as all dependencies
+   */
+  toFlags: ReadonlyArray<string>;
+
+  /**
+   * Run install in the specified projects as well as all dependent projects
+   */
+  fromFlags: ReadonlyArray<string>;
 }
 
 /**

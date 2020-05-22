@@ -94,7 +94,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           + 'the shrinkwrap file.'
         ));
         throw new AlreadyReportedError();
-    }
+      }
     }
 
     // dependency name --> version specifier
@@ -180,7 +180,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         } else if (dependencySpecifier.specifierType === 'workspace') {
           // Already specified as a local project. Allow the package manager to validate this
           continue;
-          }
+        }
 
         // PNPM does not specify peer dependencies for workspaces in the shrinkwrap, so skip validating these
         if (this.rushConfiguration.packageManager === 'pnpm' && dependencyType === DependencyType.Peer) {
@@ -380,7 +380,31 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (this.rushConfiguration.packageManager === 'pnpm') {
       args.push('--recursive');
       args.push('--link-workspace-packages', 'false');
+
+      const toPackages: Set<string> = this._findPackageNames(options.toFlags);
+      for (const toPackage of toPackages) {
+        args.push('--filter', `${toPackage}...`);
+      }
+
+      const fromPackages: Set<string> = this._findPackageNames(options.fromFlags);
+      for (const fromPackage of fromPackages) {
+        args.push('--filter', `...${fromPackage}`);
+      }
     }
+  }
+
+  private _findPackageNames(shorthandNames: ReadonlyArray<string>): Set<string> {
+
+    const dependencies: Set<string> = new Set<string>();
+    for (const name of shorthandNames) {
+      const project: RushConfigurationProject | undefined =
+        this.rushConfiguration.findProjectByShorthandName(name);
+      if (!project) {
+        throw new Error(`The project '${name}' does not exist in rush.json`);
+      }
+      dependencies.add(project.packageName);
+    }
+    return dependencies;
   }
 
   /**
