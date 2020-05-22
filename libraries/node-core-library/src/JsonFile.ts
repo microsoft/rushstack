@@ -112,6 +112,13 @@ export class JsonFile {
   }
 
   /**
+   * Parses a JSON file's contents.
+   */
+  public static parseString(jsonContents: string): JsonObject {
+    return jju.parse(jsonContents);
+  }
+
+  /**
    * Loads a JSON file and validate its schema.
    */
   public static loadAndValidate(

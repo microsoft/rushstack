@@ -388,6 +388,7 @@ export class JsonFile {
     static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): JsonObject;
     static loadAndValidateWithCallbackAsync(jsonFilename: string, jsonSchema: JsonSchema, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): Promise<JsonObject>;
     static loadAsync(jsonFilename: string): Promise<JsonObject>;
+    static parseString(jsonContents: string): JsonObject;
     static save(jsonObject: JsonObject, jsonFilename: string, options?: IJsonFileSaveOptions): boolean;
     static saveAsync(jsonObject: JsonObject, jsonFilename: string, options?: IJsonFileSaveOptions): Promise<boolean>;
     static stringify(jsonObject: JsonObject, options?: IJsonFileStringifyOptions): string;
