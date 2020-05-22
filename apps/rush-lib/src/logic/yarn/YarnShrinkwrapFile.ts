@@ -1,12 +1,13 @@
 import * as os from 'os';
 import * as lockfile from '@yarnpkg/lockfile';
+
 import {
   BaseShrinkwrapFile
 } from '../base/BaseShrinkwrapFile';
 import { FileSystem, PackageName, IParsedPackageNameOrError, InternalError } from '@rushstack/node-core-library';
 import { RushConstants } from '../RushConstants';
 import { DependencySpecifier } from '../DependencySpecifier';
-import { RushConfiguration } from '../../api/RushConfiguration';
+// import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 /**
  * Used with YarnShrinkwrapFile._encodePackageNameAndSemVer() and _decodePackageNameAndSemVer().
@@ -197,11 +198,6 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public getWorkspacePaths(): ReadonlyArray<string> {
-    throw new InternalError('Not implemented');
-  }
-
-  /** @override */
   public hasCompatibleTopLevelDependency(dependencySpecifier: DependencySpecifier): boolean {
     // It seems like we should normalize the key somehow, but Yarn apparently does not
     // do any normalization.
@@ -236,10 +232,20 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
     throw new InternalError('Not implemented');
   }
 
-  protected tryEnsureWorkspaceDependencyVersion(
+  /** @override */
+  public getWorkspaceKeys(): ReadonlyArray<string> {
+    throw new InternalError('Not implemented');
+  }
+
+  /** @override */
+  public getWorkspaceKeyByPath(workspaceRoot: string, projectFolder: string): string {
+    throw new InternalError('Not implemented');
+  }
+
+  /** @override */
+  protected getWorkspaceDependencyVersion(
     dependencySpecifier: DependencySpecifier,
-    projectName: string,
-    rushConfiguration: RushConfiguration
+    workspaceKey: string
   ): DependencySpecifier | undefined {
     throw new InternalError('Not implemented');
   }

@@ -10,7 +10,6 @@ import {
   BaseShrinkwrapFile
 } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
-import { RushConfiguration } from '../../api/RushConfiguration';
 
 interface INpmShrinkwrapDependencyJson {
   version: string;
@@ -114,16 +113,20 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  protected tryEnsureWorkspaceDependencyVersion(
-    dependencySpecifier: DependencySpecifier,
-    projectName: string,
-    rushConfiguration: RushConfiguration
-  ): DependencySpecifier | undefined {
+  public getWorkspaceKeys(): ReadonlyArray<string> {
     throw new InternalError('Not implemented');
   }
 
   /** @override */
-  public getWorkspacePaths(): ReadonlyArray<string> {
+  public getWorkspaceKeyByPath(workspaceRoot: string, projectFolder: string): string {
+    throw new InternalError('Not implemented');
+  }
+
+  /** @override */
+  protected getWorkspaceDependencyVersion(
+    dependencySpecifier: DependencySpecifier,
+    workspaceKey: string
+  ): DependencySpecifier | undefined {
     throw new InternalError('Not implemented');
   }
 }

@@ -24,9 +24,9 @@ import { BasePackage } from '../base/BasePackage';
 import { RushConstants } from '../../logic/RushConstants';
 import { IRushLinkJson } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from './PnpmShrinkwrapFile';
+import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml, IPnpmShrinkwrapImporterYaml } from './PnpmShrinkwrapFile';
 import { PnpmProjectDependencyManifest } from './PnpmProjectDependencyManifest';
-import { PackageJsonDependency } from '../../api/PackageJsonEditor';
+import { PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
 
 // special flag for debugging, will print extra diagnostic information,
 // but comes with performance cost
@@ -108,66 +108,70 @@ export class PnpmLinkManager extends BaseLinkManager {
       }
     }
 
-    // // We won't be using the package to actually create symlinks, this is just to bootstrap
-    // // the shrinkwrap-deps.json generation logic.
-    // const localPackage: BasePackage = BasePackage.createLinkedPackage(
-    //   project.packageName,
-    //   project.packageJsonEditor.version,
-    //   project.projectFolder
-    // );
+    const importerKey: string = pnpmShrinkwrapFile.getWorkspaceKeyByPath(
+      this._rushConfiguration.commonTempFolder,
+      project.projectFolder
+    );
+    const workspaceImporter: IPnpmShrinkwrapImporterYaml | undefined = pnpmShrinkwrapFile.getWorkspaceImporter(importerKey);
+    if (!workspaceImporter) {
+      throw new InternalError(`Cannot find shrinkwrap entry using importer key for workspace project: ${importerKey}`);
+    }
 
-    // // Iterate through all the regular dependencies
-    // const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined =
-    //   pnpmShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(tempProjectDependencyKey);
-    // if (!parentShrinkwrapEntry) {
-    //   throw new InternalError(
-    //     'Cannot find shrinkwrap entry using dependency key for temp project: ' +
-    //     `${project.tempProjectName}`);
-    // }
+    const pnpmProjectDependencyManifest: PnpmProjectDependencyManifest = new PnpmProjectDependencyManifest({
+      pnpmShrinkwrapFile,
+      project
+    });
 
-    // const pnpmProjectDependencyManifest: PnpmProjectDependencyManifest = new PnpmProjectDependencyManifest({
-    //   pnpmShrinkwrapFile,
-    //   project
-    // });
+    // Dev dependen
+    const dependencies: PackageJsonDependency[] = [
+      ...project.packageJsonEditor.dependencyList,
+      ...project.packageJsonEditor.devDependencyList
+    ].filter(x => !x.version.startsWith('workspace:'));
 
-    // const dependencies: PackageJsonDependency[] = [
-    //   ...project.packageJsonEditor.dependencyList,
-    //   ...project.packageJsonEditor.devDependencyList
-    // ].filter(x => !x.version.startsWith('workspace:'));
+    for (const { name, dependencyType } of dependencies) {
+      // read the version number from the shrinkwrap entry
+      let version: string | undefined;
+      switch (dependencyType) {
+        case DependencyType.Regular:
+          version = (workspaceImporter.dependencies || {})[name];
+          break;
+        case DependencyType.Dev:
+          version = (workspaceImporter.devDependencies || {})[name];
+          break;
+        case DependencyType.Optional:
+          version = (workspaceImporter.optionalDependencies || {})[name];
+          break;
+        case DependencyType.Peer:
+          // Peer dependencies do not need to be considered
+          continue;
+      }
 
-    // for (const { name, dependencyType } of dependencies) {
+      if (!version) {
+        if (dependencyType !== DependencyType.Optional) {
+          throw new InternalError(
+            `Cannot find shrinkwrap entry dependency "${name}" for workspace project: ${project.packageName}`
+          );
+        }
+        continue;
+      }
 
-    //   // read the version number from the shrinkwrap entry
-    //   const isOptional: boolean = dependencyType === DependencyType.Optional;
-    //   const version: string | undefined = isOptional
-    //     ? (parentShrinkwrapEntry.optionalDependencies || {})[name]
-    //     : (parentShrinkwrapEntry.dependencies || {})[name];
-    //   if (!version) {
-    //     if (!isOptional) {
-    //       throw new InternalError(
-    //         `Cannot find shrinkwrap entry dependency "${name}" for workspace project: ` +
-    //         `${project.packageName}`);
-    //     }
-    //     continue;
-    //   }
+      if (!this._rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection) {
+        pnpmProjectDependencyManifest.addDependency(
+          name,
+          version,
+          {
+            ...(workspaceImporter.optionalDependencies || {}),
+            ...(workspaceImporter.dependencies || {}),
+            ...(workspaceImporter.devDependencies || {})
+          });
+      }
+    }
 
-    //   const newLocalFolderPath: string = path.join(localPackage.folderPath, 'node_modules', name);
-    //   const newLocalPackage: BasePackage = BasePackage.createLinkedPackage(
-    //     name,
-    //     version,
-    //     newLocalFolderPath
-    //   );
-
-    //   if (!this._rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection) {
-    //     pnpmProjectDependencyManifest.addDependency(newLocalPackage, parentShrinkwrapEntry);
-    //   }
-    // }
-
-    // if (!this._rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection) {
-    //   pnpmProjectDependencyManifest.save();
-    // } else {
-    //   pnpmProjectDependencyManifest.deleteIfExists();
-    // }
+    if (!this._rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection) {
+      pnpmProjectDependencyManifest.save();
+    } else {
+      pnpmProjectDependencyManifest.deleteIfExists();
+    }
   }
 
   /**
@@ -425,7 +429,8 @@ export class PnpmLinkManager extends BaseLinkManager {
       throw new InternalError(`Dependency "${dependencyName}" is not a symlink in "${pathToLocalInstallation}`);
     }
 
-    // read the version number from the shrinkwrap entry
+    // read the version number from the shrinkwrap entry and return if no version is specified
+    // and the dependency is optional
     const version: string | undefined = isOptional
       ? (parentShrinkwrapEntry.optionalDependencies || {})[dependencyName]
       : (parentShrinkwrapEntry.dependencies || {})[dependencyName];
@@ -450,7 +455,14 @@ export class PnpmLinkManager extends BaseLinkManager {
     newLocalPackage.symlinkTargetFolderPath = FileSystem.getRealPath(dependencyLocalInstallationSymlink);
 
     if (!this._rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection) {
-      pnpmProjectDependencyManifest.addDependency(newLocalPackage, parentShrinkwrapEntry);
+      pnpmProjectDependencyManifest.addDependency(
+        newLocalPackage.name,
+        newLocalPackage.version!,
+        {
+          ...(parentShrinkwrapEntry.optionalDependencies || {}),
+          ...(parentShrinkwrapEntry.dependencies || {})
+        }
+      );
     }
 
     return newLocalPackage;

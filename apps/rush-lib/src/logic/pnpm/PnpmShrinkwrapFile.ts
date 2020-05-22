@@ -8,7 +8,7 @@ import { FileSystem } from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
-import { PackageManagerOptionsConfigurationBase, PnpmOptionsConfiguration, RushConfiguration } from '../../api/RushConfiguration';
+import { PackageManagerOptionsConfigurationBase, PnpmOptionsConfiguration } from '../../api/RushConfiguration';
 import { IPolicyValidatorOptions } from '../policy/PolicyValidator';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
@@ -51,7 +51,9 @@ export interface IPnpmShrinkwrapImporterYaml {
   dependencies: { [dependency: string]: string }
   /** The list of resolved version numbers for dev dependencies */
   devDependencies: { [dependency: string]: string }
-  /** The list of specifiers used to resolve direct dependency versions */
+  /** The list of resolved version numbers for optional dependencies */
+  optionalDependencies: { [dependency: string]: string }
+  /** The list of specifiers used to resolve dependency versions */
   specifiers: { [dependency: string]: string }
 }
 
@@ -86,7 +88,7 @@ export interface IPnpmShrinkwrapImporterYaml {
  *    }
  *  }
  */
-interface IPnpmShrinkwrapYaml extends IPnpmShrinkwrapImporterYaml {
+interface IPnpmShrinkwrapYaml {
   /** The list of resolved version numbers for direct dependencies */
   dependencies: { [dependency: string]: string }
   /** The list of importers for local workspace projects */
@@ -206,6 +208,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     if (!this._shrinkwrapJson.packages) {
       this._shrinkwrapJson.packages = { };
     }
+    if (!this._shrinkwrapJson.importers) {
+      this._shrinkwrapJson.importers = { };
+    }
   }
 
   public static loadFromFile(
@@ -290,19 +295,6 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return this._getTempProjectNames(this._shrinkwrapJson.dependencies);
   }
 
-  /** @override */
-  public getWorkspacePaths(): ReadonlyArray<string> {
-    const result: string[] = [];
-    for (const key of Object.keys(this._shrinkwrapJson.importers)) {
-      // If it starts with @rush-temp, then include it:
-      if (key !== '.')  {
-        result.push(key);
-      }
-    }
-    result.sort();  // make the result deterministic
-    return result;
-  }
-
   /**
    * Gets the path to the tarball file if the package is a tarball.
    * Returns undefined if the package entry doesn't exist or the package isn't a tarball.
@@ -319,14 +311,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   public getTopLevelDependencyKey(dependencyName: string): string | undefined {
-    // For workspaces, top-level dependencies aren't populated, so instead we use the root workspace
-    // for common package versions and consider this the 'top level'
-    const dependenciesToCheck: { [dependency: string]: string } = (
-      this._shrinkwrapJson.importers && this._shrinkwrapJson.importers.hasOwnProperty('.')
-    ) ? this._shrinkwrapJson.importers['.'].dependencies
-      : this._shrinkwrapJson.dependencies;
-
-    return BaseShrinkwrapFile.tryGetValue(dependenciesToCheck, dependencyName);
+    return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
   }
 
   /**
@@ -340,14 +325,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * @override
    */
   public getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined {
-    // For workspaces, top-level dependencies aren't populated, so instead we use the root workspace
-    // for common package versions and consider this the 'top level'
-    const dependenciesToCheck: { [dependency: string]: string } = (
-      this._shrinkwrapJson.importers && this._shrinkwrapJson.importers.hasOwnProperty('.')
-    ) ? this._shrinkwrapJson.importers['.'].dependencies
-      : this._shrinkwrapJson.dependencies;
-
-    let value: string | undefined = BaseShrinkwrapFile.tryGetValue(dependenciesToCheck, dependencyName);
+    let value: string | undefined = BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
     if (value) {
 
       // Getting the top level dependency version from a PNPM lockfile version 5.1
@@ -421,13 +399,6 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     return undefined;
-  }
-
-  public getImporter(importerPath: string): IPnpmShrinkwrapImporterYaml | undefined {
-    const importer: IPnpmShrinkwrapImporterYaml | undefined =
-      BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.importers, importerPath);
-
-    return importer && importer.dependencies ? importer : undefined;
   }
 
   public getShrinkwrapEntryFromTempProjectDependencyKey(
@@ -530,6 +501,28 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return this._parsePnpmDependencyKey(packageName, dependencyKey);
   }
 
+  /** @override */
+  public getWorkspaceKeys(): ReadonlyArray<string> {
+    const result: string[] = [];
+    for (const key of Object.keys(this._shrinkwrapJson.importers)) {
+      // Avoid including the common workspace
+      if (key !== '.')  {
+        result.push(key);
+      }
+    }
+    result.sort();  // make the result deterministic
+    return result;
+  }
+
+  /** @override */
+  public getWorkspaceKeyByPath(workspaceRoot: string, projectFolder: string): string {
+    return path.relative(workspaceRoot, projectFolder).replace(new RegExp(`\\${path.sep}`, 'g'), '/');
+  }
+
+  public getWorkspaceImporter(importerPath: string): IPnpmShrinkwrapImporterYaml | undefined {
+    return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.importers, importerPath);
+  }
+
   /**
    * Gets the resolved version number of a dependency for a specific temp project.
    * For PNPM, we can reuse the version that another project is using.
@@ -537,10 +530,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    *
    * @override
    */
-  protected tryEnsureWorkspaceDependencyVersion(
+  protected getWorkspaceDependencyVersion(
     dependencySpecifier: DependencySpecifier,
-    projectName: string,
-    rushConfiguration: RushConfiguration
+    workspaceKey: string
   ): DependencySpecifier | undefined {
 
     // PNPM doesn't have the same advantage of NPM, where we can skip generate as long as the
@@ -552,18 +544,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // linked to.
 
     const packageName: string = dependencySpecifier.packageName;
-
-    // Importer paths use forward slashes
-    const importerPath: string = path.relative(
-      rushConfiguration.commonTempFolder,
-      rushConfiguration.getProjectByName(projectName)!.projectFolder
-    ).replace(new RegExp(`\\${path.sep}`, 'g'), '/');
-    const projectImporter: IPnpmShrinkwrapImporterYaml | undefined = this.getImporter(importerPath);
+    const projectImporter: IPnpmShrinkwrapImporterYaml | undefined = this.getWorkspaceImporter(workspaceKey);
     if (!projectImporter) {
       return undefined;
     }
 
     const allDependencies: { [dependency: string]: string } = {
+      ...(projectImporter.optionalDependencies || {}),
       ...(projectImporter.dependencies || {}),
       ...(projectImporter.devDependencies || {})
     }

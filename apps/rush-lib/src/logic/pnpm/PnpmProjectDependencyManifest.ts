@@ -16,7 +16,6 @@ import {
 } from './PnpmShrinkwrapFile';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../RushConstants';
-import { BasePackage } from '../base/BasePackage';
 import { DependencySpecifier } from '../DependencySpecifier';
 
 export interface IPnpmProjectDependencyManifestOptions {
@@ -63,12 +62,8 @@ export class PnpmProjectDependencyManifest {
     );
   }
 
-  public addDependency(pkg: BasePackage, parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml): void {
-    if (!pkg.version) {
-      throw new InternalError(`Version missing from dependency ${pkg.name}`);
-    }
-
-    this._addDependencyInternal(pkg.name, pkg.version, parentShrinkwrapEntry);
+  public addDependency(name: string, version: string, parentDependencies: { [dependency: string]: string }): void {
+    this._addDependencyInternal(name, version, parentDependencies);
   }
 
   /**
@@ -98,7 +93,7 @@ export class PnpmProjectDependencyManifest {
   private _addDependencyInternal(
     name: string,
     version: string,
-    parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml,
+    parentDependencies: { [dependency: string]: string },
     throwIfShrinkwrapEntryMissing: boolean = true
   ): void {
     const shrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined = this._pnpmShrinkwrapFile.getShrinkwrapEntry(
@@ -125,11 +120,17 @@ export class PnpmProjectDependencyManifest {
     // Add the current dependency
     this._projectDependencyManifestFile.set(specifier, integrity);
 
+    // Collect the shrinkwrap dependencies
+    const shrinkwrapDependencies: { [dependency: string]: string } = {
+      ...(shrinkwrapEntry.optionalDependencies || {}),
+      ...(shrinkwrapEntry.dependencies || {})
+    }
+
     // Add the dependencies of the dependency
     for (const dependencyName in shrinkwrapEntry.dependencies) {
       if (shrinkwrapEntry.dependencies.hasOwnProperty(dependencyName)) {
         const dependencyVersion: string = shrinkwrapEntry.dependencies[dependencyName];
-        this._addDependencyInternal(dependencyName, dependencyVersion, shrinkwrapEntry);
+        this._addDependencyInternal(dependencyName, dependencyVersion, shrinkwrapDependencies);
       }
     }
 
@@ -141,7 +142,7 @@ export class PnpmProjectDependencyManifest {
         this._addDependencyInternal(
           optionalDependencyName,
           dependencyVersion,
-          shrinkwrapEntry,
+          shrinkwrapDependencies,
           throwIfShrinkwrapEntryMissing = false);
       }
     }
@@ -171,13 +172,10 @@ export class PnpmProjectDependencyManifest {
         }
 
         // If not, check the parent.
-        if (
-          parentShrinkwrapEntry.dependencies &&
-          parentShrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName)
-        ) {
+        if (parentDependencies.hasOwnProperty(peerDependencyName)) {
           const dependencySpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(
             peerDependencyName,
-            parentShrinkwrapEntry.dependencies[peerDependencyName]
+            parentDependencies[peerDependencyName]
           );
           if (dependencySpecifier) {
             if (!semver.valid(dependencySpecifier.versionSpecifier)) {
@@ -204,7 +202,7 @@ export class PnpmProjectDependencyManifest {
             this._addDependencyInternal(
               peerDependencyName,
               peerDependencyKeys[peerDependencyName],
-              shrinkwrapEntry
+              shrinkwrapDependencies
             );
             continue;
           }
@@ -231,7 +229,7 @@ export class PnpmProjectDependencyManifest {
         this._addDependencyInternal(
           peerDependencyName,
           this._pnpmShrinkwrapFile.getTopLevelDependencyKey(peerDependencyName)!,
-          shrinkwrapEntry
+          shrinkwrapDependencies
         );
       }
     }

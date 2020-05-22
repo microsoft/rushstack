@@ -8,7 +8,7 @@ import { PackageName, FileSystem } from '@rushstack/node-core-library';
 import { RushConstants } from '../../logic/RushConstants';
 import { DependencySpecifier } from '../DependencySpecifier';
 import { IPolicyValidatorOptions } from '../policy/PolicyValidator';
-import { PackageManagerOptionsConfigurationBase, RushConfiguration } from '../../api/RushConfiguration';
+import { PackageManagerOptionsConfigurationBase } from '../../api/RushConfiguration';
 
 /**
  * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's pnpm-lock.yaml file formats.
@@ -95,20 +95,6 @@ export abstract class BaseShrinkwrapFile {
     return this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency);
   }
 
-  public tryEnsureCompatibleWorkspaceDependency(
-    dependencySpecifier: DependencySpecifier,
-    projectName: string,
-    rushConfiguration: RushConfiguration
-  ): boolean {
-    const shrinkwrapDependency: DependencySpecifier | undefined =
-      this.tryEnsureWorkspaceDependencyVersion(dependencySpecifier, projectName, rushConfiguration);
-    if (!shrinkwrapDependency) {
-      return false;
-    }
-
-    return this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency);
-  }
-
   /**
    * Returns the list of temp projects defined in this file.
    * Example: [ '@rush-temp/project1', '@rush-temp/project2' ]
@@ -117,28 +103,60 @@ export abstract class BaseShrinkwrapFile {
    */
   public abstract getTempProjectNames(): ReadonlyArray<string>;
 
-  /**
-   * Returns the list of paths to Rush projects relative to the
-   * install root.
-   * Example: [ '../../apps/project1', '../../apps/project2' ]
-   *
-   * @virtual
-   */
-  public abstract getWorkspacePaths(): ReadonlyArray<string>;
-
   /** @virtual */
   protected abstract tryEnsureDependencyVersion(dependencySpecifier: DependencySpecifier,
     tempProjectName: string): DependencySpecifier | undefined;
 
   /** @virtual */
-  protected abstract tryEnsureWorkspaceDependencyVersion(
-    dependencySpecifier: DependencySpecifier,
-    projectName: string,
-    rushConfiguration: RushConfiguration
-  ): DependencySpecifier | undefined;
+  protected abstract getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined;
+
+  /**
+   * Returns true if the specified workspace in the shrinkwrap file includes a package that would
+   * satisfy the specified SemVer version range.
+   *
+   * Consider this example:
+   *
+   * - project-a\
+   *   - lib-a@1.2.3
+   *   - lib-b@1.0.0
+   * - lib-b@2.0.0
+   *
+   * In this example, hasCompatibleWorkspaceDependency("lib-b", ">= 1.1.0", "workspace-key-for-project-a")
+   * would fail because it finds lib-b@1.0.0 which does not satisfy the pattern ">= 1.1.0".
+   *
+   * @virtual
+   */
+  public hasCompatibleWorkspaceDependency(dependencySpecifier: DependencySpecifier, workspaceKey: string): boolean {
+    const shrinkwrapDependency: DependencySpecifier | undefined = this.getWorkspaceDependencyVersion(
+      dependencySpecifier,
+      workspaceKey
+    );
+    return shrinkwrapDependency
+      ? this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency)
+      : false;
+  }
+
+  /**
+   * Returns the list of keys to workspace projects specified in the shrinkwrap.
+   * Example: [ '../../apps/project1', '../../apps/project2' ]
+   *
+   * @virtual
+   */
+  public abstract getWorkspaceKeys(): ReadonlyArray<string>;
+
+  /**
+   * Returns the key to the project in the workspace specified by the shrinkwrap.
+   * Example: '../../apps/project1'
+   *
+   * @virtual
+   */
+  public abstract getWorkspaceKeyByPath(workspaceRoot: string, projectFolder: string): string
 
   /** @virtual */
-  protected abstract getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined;
+  protected abstract getWorkspaceDependencyVersion(
+    dependencySpecifier: DependencySpecifier,
+    workspaceKey: string
+  ): DependencySpecifier | undefined;
 
   /** @virtual */
   protected abstract serialize(): string;
