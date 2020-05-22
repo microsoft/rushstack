@@ -149,6 +149,8 @@ export class FileSystem {
     static getRealPathAsync(linkPath: string): Promise<string>;
     static getStatistics(path: string): fs.Stats;
     static getStatisticsAsync(path: string): Promise<fs.Stats>;
+    static isFileDoesNotExistError(error: NodeJS.ErrnoException): boolean;
+    static isFolderDoesNotExistError(error: NodeJS.ErrnoException): boolean;
     static isNotExistError(error: NodeJS.ErrnoException): boolean;
     static move(options: IFileSystemMoveOptions): void;
     static moveAsync(options: IFileSystemMoveOptions): Promise<void>;

@@ -188,6 +188,40 @@ const DELETE_FILE_DEFAULT_OPTIONS: Partial<IFileSystemDeleteFileOptions> = {
   throwIfNotExists: false
 };
 
+export function prettifyErrorMessage<TResult>(
+  target: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+  propertyKey: string,
+  propertyDescriptor: PropertyDescriptor,
+): PropertyDescriptor {
+  function updateErrorMessage(error: NodeJS.ErrnoException): void {
+    if (FileSystem.isFileDoesNotExistError(error)) { // eslint-disable-line @typescript-eslint/no-use-before-define
+      error.message = `File does not exist: ${error.path}`;
+    } else if (FileSystem.isFolderDoesNotExistError(error)) { // eslint-disable-line @typescript-eslint/no-use-before-define
+      error.message = `Folder does not exist: ${error.path}`;
+    }
+  }
+
+  const fn: () => TResult = propertyDescriptor.value
+  propertyDescriptor.value = function(...args: any[]) {// eslint-disable-line @typescript-eslint/no-explicit-any
+    try {
+      const result: Promise<TResult> = fn.apply(this, args)
+      if (result instanceof Promise) {
+        return result.catch((error: NodeJS.ErrnoException) => {
+          updateErrorMessage(error);
+          throw error;
+        });
+      } else {
+        return result;
+      }
+    } catch (error) {
+      updateErrorMessage(error);
+      throw error;
+    }
+  }
+
+  return propertyDescriptor;
+}
+
 /**
  * The FileSystem API provides a complete set of recommended operations for interacting with the file system.
  *
@@ -221,6 +255,7 @@ export class FileSystem {
    * break-on-exception debugging experience. Also, throwing/catching is generally slow.
    * @param path - The absolute or relative path to the filesystem object.
    */
+  @prettifyErrorMessage
   public static exists(path: string): boolean {
     return fsx.existsSync(path);
   }
@@ -231,6 +266,7 @@ export class FileSystem {
    * Behind the scenes it uses `fs.statSync()`.
    * @param path - The absolute or relative path to the filesystem object.
    */
+  @prettifyErrorMessage
   public static getStatistics(path: string): fs.Stats {
     return fsx.statSync(path);
   }
@@ -238,6 +274,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.getStatistics}.
    */
+  @prettifyErrorMessage
   public static getStatisticsAsync(path: string): Promise<fs.Stats> {
     return fsx.stat(path);
   }
@@ -249,6 +286,7 @@ export class FileSystem {
    * @param path - The path of the file that should be modified.
    * @param times - The times that the object should be updated to reflect.
    */
+  @prettifyErrorMessage
   public static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void {
     fsx.utimesSync(path, times.accessedTime, times.modifiedTime);
   }
@@ -256,6 +294,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.updateTimes}.
    */
+  @prettifyErrorMessage
   public static updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void> {
     // This cast is needed because the fs-extra typings require both parameters
     // to have the same type (number or Date), whereas Node.js does not require that.
@@ -269,6 +308,7 @@ export class FileSystem {
    * @param path - The absolute or relative path to the object that should be updated.
    * @param modeBits - POSIX-style file mode bits specified using the {@link PosixModeBits} enum
    */
+  @prettifyErrorMessage
   public static changePosixModeBits(path: string, mode: PosixModeBits): void {
     fs.chmodSync(path, mode);
   }
@@ -276,6 +316,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.changePosixModeBits}.
    */
+  @prettifyErrorMessage
   public static changePosixModeBitsAsync(path: string, mode: PosixModeBits): Promise<void> {
     return fsx.chmod(path, mode);
   }
@@ -290,6 +331,7 @@ export class FileSystem {
    * If statistics in addition to the mode bits are needed, it is more efficient
    * to call {@link FileSystem.getStatistics} directly instead.
    */
+  @prettifyErrorMessage
   public static getPosixModeBits(path: string): PosixModeBits {
     return FileSystem.getStatistics(path).mode;
   }
@@ -297,6 +339,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.getPosixModeBits}.
    */
+  @prettifyErrorMessage
   public static async getPosixModeBitsAsync(path: string): Promise<PosixModeBits> {
     return (await FileSystem.getStatisticsAsync(path)).mode;
   }
@@ -308,6 +351,7 @@ export class FileSystem {
    * For example, `PosixModeBits.AllRead | PosixModeBits.AllWrite` would be formatted as "-rw-rw-rw-".
    * @param modeBits - POSIX-style file mode bits specified using the {@link PosixModeBits} enum
    */
+  @prettifyErrorMessage
   public static formatPosixModeBits(modeBits: PosixModeBits): string {
     let result: string = '-';  // (later we may add support for additional states such as S_IFDIR or S_ISUID)
 
@@ -330,6 +374,7 @@ export class FileSystem {
    * Moves a file. The folder must exist, unless the `ensureFolderExists` option is provided.
    * Behind the scenes it uses `fs-extra.moveSync()`
    */
+  @prettifyErrorMessage
   public static move(options: IFileSystemMoveOptions): void {
     options = {
       ...MOVE_DEFAULT_OPTIONS,
@@ -356,6 +401,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.move}.
    */
+  @prettifyErrorMessage
   public static async moveAsync(options: IFileSystemMoveOptions): Promise<void> {
     options = {
       ...MOVE_DEFAULT_OPTIONS,
@@ -390,6 +436,7 @@ export class FileSystem {
    * Throws an exception if anything in the folderPath is not a folder.
    * @param folderPath - The absolute or relative path of the folder which should be created.
    */
+  @prettifyErrorMessage
   public static ensureFolder(folderPath: string): void {
     fsx.ensureDirSync(folderPath);
   }
@@ -397,6 +444,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.ensureFolder}.
    */
+  @prettifyErrorMessage
   public static ensureFolderAsync(folderPath: string): Promise<void> {
     return fsx.ensureDir(folderPath);
   }
@@ -407,6 +455,7 @@ export class FileSystem {
    * @param folderPath - The absolute or relative path to the folder which should be read.
    * @param options - Optional settings that can change the behavior. Type: `IReadFolderOptions`
    */
+  @prettifyErrorMessage
   public static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[] {
     options = {
       ...READ_FOLDER_DEFAULT_OPTIONS,
@@ -425,6 +474,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.readFolder}.
    */
+  @prettifyErrorMessage
   public static async readFolderAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]> {
     options = {
       ...READ_FOLDER_DEFAULT_OPTIONS,
@@ -447,6 +497,7 @@ export class FileSystem {
    * Does not throw if the folderPath does not exist.
    * @param folderPath - The absolute or relative path to the folder which should be deleted.
    */
+  @prettifyErrorMessage
   public static deleteFolder(folderPath: string): void {
     fsx.removeSync(folderPath);
   }
@@ -454,6 +505,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.deleteFolder}.
    */
+  @prettifyErrorMessage
   public static deleteFolderAsync(folderPath: string): Promise<void> {
     return fsx.remove(folderPath);
   }
@@ -466,6 +518,7 @@ export class FileSystem {
    * for a brief period after it was deleted, causing EBUSY errors for any code that tries to recreate the folder.
    * @param folderPath - The absolute or relative path to the folder which should have its contents deleted.
    */
+  @prettifyErrorMessage
   public static ensureEmptyFolder(folderPath: string): void {
     fsx.emptyDirSync(folderPath);
   }
@@ -473,6 +526,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.ensureEmptyFolder}.
    */
+  @prettifyErrorMessage
   public static ensureEmptyFolderAsync(folderPath: string): Promise<void> {
     return fsx.emptyDir(folderPath);
   }
@@ -490,6 +544,7 @@ export class FileSystem {
    * @param contents - The text that should be written to the file.
    * @param options - Optional settings that can change the behavior. Type: `IWriteFileOptions`
    */
+  @prettifyErrorMessage
   public static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void {
     options = {
       ...WRITE_FILE_DEFAULT_OPTIONS,
@@ -520,6 +575,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.writeFile}.
    */
+  @prettifyErrorMessage
   public static async writeFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void> {
     options = {
       ...WRITE_FILE_DEFAULT_OPTIONS,
@@ -556,6 +612,7 @@ export class FileSystem {
    * @param contents - The text that should be written to the file.
    * @param options - Optional settings that can change the behavior. Type: `IWriteFileOptions`
    */
+  @prettifyErrorMessage
   public static appendToFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void {
     options = {
       ...APPEND_TO_FILE_DEFAULT_OPTIONS,
@@ -586,6 +643,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.appendToFile}.
    */
+  @prettifyErrorMessage
   public static async appendToFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void> {
     options = {
       ...APPEND_TO_FILE_DEFAULT_OPTIONS,
@@ -619,6 +677,7 @@ export class FileSystem {
    * @param filePath - The relative or absolute path to the file whose contents should be read.
    * @param options - Optional settings that can change the behavior. Type: `IReadFileOptions`
    */
+  @prettifyErrorMessage
   public static readFile(filePath: string, options?: IFileSystemReadFileOptions): string {
     options = {
       ...READ_FILE_DEFAULT_OPTIONS,
@@ -636,6 +695,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.readFile}.
    */
+  @prettifyErrorMessage
   public static async readFileAsync(filePath: string, options?: IFileSystemReadFileOptions): Promise<string> {
     options = {
       ...READ_FILE_DEFAULT_OPTIONS,
@@ -655,6 +715,7 @@ export class FileSystem {
    * Behind the scenes is uses `fs.readFileSync()`.
    * @param filePath - The relative or absolute path to the file whose contents should be read.
    */
+  @prettifyErrorMessage
   public static readFileToBuffer(filePath: string): Buffer {
     return fsx.readFileSync(filePath);
   }
@@ -662,6 +723,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.readFileToBuffer}.
    */
+  @prettifyErrorMessage
   public static readFileToBufferAsync(filePath: string): Promise<Buffer> {
     return fsx.readFile(filePath);
   }
@@ -671,6 +733,7 @@ export class FileSystem {
    * By default, destinationPath is overwritten if it already exists.
    * Behind the scenes it uses `fs.copyFileSync()`.
    */
+  @prettifyErrorMessage
   public static copyFile(options: IFileSystemCopyFileOptions): void {
     fsx.copySync(options.sourcePath, options.destinationPath);
   }
@@ -678,6 +741,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.copyFile}.
    */
+  @prettifyErrorMessage
   public static async copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void> {
     await fsx.copy(options.sourcePath, options.destinationPath);
   }
@@ -688,6 +752,7 @@ export class FileSystem {
    * @param filePath - The absolute or relative path to the file that should be deleted.
    * @param options - Optional settings that can change the behavior. Type: `IDeleteFileOptions`
    */
+  @prettifyErrorMessage
   public static deleteFile(filePath: string, options?: IFileSystemDeleteFileOptions): void {
     options = {
       ...DELETE_FILE_DEFAULT_OPTIONS,
@@ -706,6 +771,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.deleteFile}.
    */
+  @prettifyErrorMessage
   public static async deleteFileAsync(filePath: string, options?: IFileSystemDeleteFileOptions): Promise<void> {
     options = {
       ...DELETE_FILE_DEFAULT_OPTIONS,
@@ -730,6 +796,7 @@ export class FileSystem {
    * Behind the scenes it uses `fs.lstatSync()`.
    * @param path - The absolute or relative path to the filesystem object.
    */
+  @prettifyErrorMessage
   public static getLinkStatistics(path: string): fs.Stats {
     return fsx.lstatSync(path);
   }
@@ -737,6 +804,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.getLinkStatistics}.
    */
+  @prettifyErrorMessage
   public static getLinkStatisticsAsync(path: string): Promise<fs.Stats> {
     return fsx.lstat(path);
   }
@@ -745,6 +813,7 @@ export class FileSystem {
    * Creates a Windows "directory junction". Behaves like `createSymbolicLinkToFile()` on other platforms.
    * Behind the scenes it uses `fs.symlinkSync()`.
    */
+  @prettifyErrorMessage
   public static createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void {
     // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
     fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'junction');
@@ -753,6 +822,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.createSymbolicLinkJunction}.
    */
+  @prettifyErrorMessage
   public static createSymbolicLinkJunctionAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
     // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
     return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'junction');
@@ -762,6 +832,7 @@ export class FileSystem {
    * Creates a symbolic link to a file (on Windows this requires elevated permissionsBits).
    * Behind the scenes it uses `fs.symlinkSync()`.
    */
+  @prettifyErrorMessage
   public static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void {
     fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'file');
   }
@@ -769,6 +840,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.createSymbolicLinkFile}.
    */
+  @prettifyErrorMessage
   public static createSymbolicLinkFileAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
     return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'file');
   }
@@ -777,6 +849,7 @@ export class FileSystem {
    * Creates a symbolic link to a folder (on Windows this requires elevated permissionsBits).
    * Behind the scenes it uses `fs.symlinkSync()`.
    */
+  @prettifyErrorMessage
   public static createSymbolicLinkFolder(options: IFileSystemCreateLinkOptions): void {
     fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'dir');
   }
@@ -784,6 +857,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.createSymbolicLinkFolder}.
    */
+  @prettifyErrorMessage
   public static createSymbolicLinkFolderAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
     return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'dir');
   }
@@ -792,6 +866,7 @@ export class FileSystem {
    * Creates a hard link.
    * Behind the scenes it uses `fs.linkSync()`.
    */
+  @prettifyErrorMessage
   public static createHardLink(options: IFileSystemCreateLinkOptions): void {
     fsx.linkSync(options.linkTargetPath, options.newLinkPath);
   }
@@ -799,6 +874,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.createHardLink}.
    */
+  @prettifyErrorMessage
   public static createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
     return fsx.link(options.linkTargetPath, options.newLinkPath);
   }
@@ -808,6 +884,7 @@ export class FileSystem {
    * Behind the scenes it uses `fs.realpathSync()`.
    * @param linkPath - The path to the link.
    */
+  @prettifyErrorMessage
   public static getRealPath(linkPath: string): string {
     return fsx.realpathSync(linkPath);
   }
@@ -815,6 +892,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.getRealPath}.
    */
+  @prettifyErrorMessage
   public static getRealPathAsync(linkPath: string): Promise<string> {
     return fsx.realpath(linkPath);
   }
@@ -824,10 +902,23 @@ export class FileSystem {
   // ===============
 
   /**
-   * Returns true if the error provided indicates the file or folder
-   * does not exist.
+   * Returns true if the error provided indicates the file or folder does not exist.
    */
   public static isNotExistError(error: NodeJS.ErrnoException): boolean {
-    return error.code === 'ENOENT' || error.code === 'ENOTDIR';
+    return FileSystem.isFileDoesNotExistError(error) || FileSystem.isFolderDoesNotExistError(error);
+  }
+
+  /**
+   * Returns true if the error provided indicates the file does not exist.
+   */
+  public static isFileDoesNotExistError(error: NodeJS.ErrnoException): boolean {
+    return error instanceof Error && (error.code === 'ENOENT');
+  }
+
+  /**
+   * Returns true if the error provided indicates the folder does not exist.
+   */
+  public static isFolderDoesNotExistError(error: NodeJS.ErrnoException): boolean {
+    return error instanceof Error && (error.code === 'ENOTDIR');
   }
 }
