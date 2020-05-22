@@ -413,18 +413,8 @@ export class FileSystem {
       ...options
     };
 
-    let fileNames: string[]
-    try {
-      // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
-      fileNames = fsx.readdirSync(folderPath);
-    } catch (e) {
-      if (FileSystem.isNotExistError(e)) {
-        throw new Error(`Folder does not exist: "${folderPath}"`);
-      } else {
-        throw e;
-      }
-    }
-
+    // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
+    const fileNames: string[] = fsx.readdirSync(folderPath);
     if (options.absolutePaths) {
       return fileNames.map(fileName => nodeJsPath.resolve(folderPath, fileName));
     } else {
@@ -441,18 +431,8 @@ export class FileSystem {
       ...options
     };
 
-    let fileNames: string[];
-    try {
-      // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
-      fileNames = await fsx.readdir(folderPath);
-    } catch (e) {
-      if (FileSystem.isNotExistError(e)) {
-        throw new Error(`Folder does not exist: "${folderPath}"`);
-      } else {
-        throw e;
-      }
-    }
-
+    // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
+    const fileNames: string[] = await fsx.readdir(folderPath);
     if (options.absolutePaths) {
       return fileNames.map(fileName => nodeJsPath.resolve(folderPath, fileName));
     } else {
