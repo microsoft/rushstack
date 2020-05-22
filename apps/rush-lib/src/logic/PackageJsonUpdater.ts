@@ -144,9 +144,7 @@ export class PackageJsonUpdater {
       networkConcurrency: undefined,
       collectLogFile: false,
       variant: variant,
-      maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
-      toFlags: [],
-      fromFlags: []
+      maxInstallAttempts: RushConstants.defaultMaxInstallAttempts
     };
     const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
       this._rushConfiguration,
