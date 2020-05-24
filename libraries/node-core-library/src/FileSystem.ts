@@ -205,6 +205,7 @@ const DELETE_FILE_DEFAULT_OPTIONS: Partial<IFileSystemDeleteFileOptions> = {
  * @public
  */
 export class FileSystem {
+  private static __error: NodeJS.ErrnoException;
 
   // ===============
   // COMMON OPERATIONS
@@ -920,14 +921,36 @@ export class FileSystem {
    * Returns true if the error provided indicates the file does not exist.
    */
   public static isFileDoesNotExistError(error: NodeJS.ErrnoException): boolean {
-    return error instanceof Error && (error.code === 'ENOENT');
+    return FileSystem._isErrorType(error) && (error.code === 'ENOENT');
   }
 
   /**
    * Returns true if the error provided indicates the folder does not exist.
    */
   public static isFolderDoesNotExistError(error: NodeJS.ErrnoException): boolean {
-    return error instanceof Error && (error.code === 'ENOTDIR');
+    return FileSystem._isErrorType(error) && (error.code === 'ENOTDIR');
+  }
+
+  private static _isErrorType(error: NodeJS.ErrnoException): boolean {
+    if (process.env.NODE_ENV !== 'test' && process.env.JEST_WORKER_ID === undefined) {
+      return error instanceof Error;
+    } else {
+      // Using this instead of `error instanceof Error` because that doesn't work in Jest tests
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (error as any).__proto__ === (FileSystem._fsError as any).__proto__;
+    }
+  }
+
+  private static get _fsError(): NodeJS.ErrnoException {
+    if (!FileSystem.__error) {
+      try {
+        fsx.readFileSync(nodeJsPath.join(__dirname, 'fileThatDoesn\'tExist'));
+      } catch (error) {
+        FileSystem.__error = error;
+      }
+    }
+
+    return FileSystem.__error;
   }
 
   private static _wrapException<TResult>(fn: () => TResult): TResult {
