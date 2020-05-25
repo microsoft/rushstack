@@ -421,7 +421,19 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * @override
    */
   protected serialize(): string {
-    let shrinkwrapContent: string = yaml.safeDump(this._shrinkwrapJson, SHRINKWRAP_YAML_FORMAT);
+    // Ensure that if any of the top-level properties are provided but empty that they are removed. We populate the object
+    // properties when we read the shrinkwrap but PNPM does not set these top-level properties unless they are present.
+    const shrinkwrapToSerialize: Partial<IPnpmShrinkwrapYaml> = { ...this._shrinkwrapJson }
+    for (const key of Object.keys(shrinkwrapToSerialize).filter(key => shrinkwrapToSerialize.hasOwnProperty(key))) {
+      if (
+        typeof shrinkwrapToSerialize[key] === 'object' &&
+        Object.entries(shrinkwrapToSerialize[key] || {}).length === 0
+      ) {
+        delete shrinkwrapToSerialize[key];
+      }
+    }
+
+    let shrinkwrapContent: string = yaml.safeDump(shrinkwrapToSerialize, SHRINKWRAP_YAML_FORMAT);
     if (this._shrinkwrapHashEnabled) {
       this._shrinkwrapHash = crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
       shrinkwrapContent =
