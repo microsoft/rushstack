@@ -26,6 +26,7 @@
     "functionOverload",
     "importEquals",
     "importType",
+    "dynamicImportType",
     "inconsistentReleaseTags",
     "internationalCharacters",
     "preapproved",
