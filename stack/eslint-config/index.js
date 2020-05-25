@@ -7,6 +7,8 @@ module.exports = {
   // Disable the parser by default
   parser: '',
 
+  root: true,
+
   plugins: [
     '@rushstack/eslint-plugin',
     '@typescript-eslint/eslint-plugin',

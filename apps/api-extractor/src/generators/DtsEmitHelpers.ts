@@ -30,10 +30,10 @@ export class DtsEmitHelpers {
         stringWriter.writeLine(` from '${astImport.modulePath}';`);
         break;
       case AstImportKind.NamedImport:
-        if (collectorEntity.nameForEmit !== astImport.exportName) {
-          stringWriter.write(`${importPrefix} { ${astImport.exportName} as ${collectorEntity.nameForEmit} }`);
-        } else {
+        if (collectorEntity.nameForEmit === astImport.exportName) {
           stringWriter.write(`${importPrefix} { ${astImport.exportName} }`);
+        } else {
+          stringWriter.write(`${importPrefix} { ${astImport.exportName} as ${collectorEntity.nameForEmit} }`);
         }
         stringWriter.writeLine(` from '${astImport.modulePath}';`);
         break;
@@ -46,6 +46,22 @@ export class DtsEmitHelpers {
         stringWriter.writeLine(
           `${importPrefix} ${collectorEntity.nameForEmit} = require('${astImport.modulePath}');`
         );
+        break;
+      case AstImportKind.ImportType:
+        const nestLevels: number = (astImport.exportName || '').split('.').length;
+
+        if (nestLevels === 1) {
+          if (collectorEntity.nameForEmit === astImport.exportName) {
+            stringWriter.write(`${importPrefix} { ${astImport.exportName} }`);
+          } else {
+            stringWriter.write(`${importPrefix} { ${astImport.exportName} as ${collectorEntity.nameForEmit} }`);
+          }
+          stringWriter.writeLine(` from '${astImport.modulePath}';`);
+        } else {
+          stringWriter.writeLine(
+            `${importPrefix} * as ${collectorEntity.nameForEmit} from '${astImport.modulePath}';`
+          );
+        }
         break;
       default:
         throw new InternalError('Unimplemented AstImportKind');

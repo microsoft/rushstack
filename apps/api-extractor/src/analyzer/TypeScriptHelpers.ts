@@ -123,13 +123,19 @@ export class TypeScriptHelpers {
 
   // Return name of the module, which could be like "./SomeLocalFile' or like 'external-package/entry/point'
   public static getModuleSpecifier(
-    declarationWithModuleSpecifier: ts.ImportDeclaration | ts.ExportDeclaration
+    nodeWithModuleSpecifier: ts.ImportDeclaration | ts.ExportDeclaration | ts.ImportTypeNode
   ): string | undefined {
+    if (nodeWithModuleSpecifier.kind === ts.SyntaxKind.ImportType) {
+      return ((nodeWithModuleSpecifier.argument as ts.LiteralTypeNode)
+        .literal as ts.StringLiteral).text.trim();
+    }
+
+    // Node is a declaration
     if (
-      declarationWithModuleSpecifier.moduleSpecifier &&
-      ts.isStringLiteralLike(declarationWithModuleSpecifier.moduleSpecifier)
+      nodeWithModuleSpecifier.moduleSpecifier &&
+      ts.isStringLiteralLike(nodeWithModuleSpecifier.moduleSpecifier)
     ) {
-      return TypeScriptInternals.getTextOfIdentifierOrLiteral(declarationWithModuleSpecifier.moduleSpecifier);
+      return TypeScriptInternals.getTextOfIdentifierOrLiteral(nodeWithModuleSpecifier.moduleSpecifier);
     }
 
     return undefined;

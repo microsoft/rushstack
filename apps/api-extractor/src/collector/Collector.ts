@@ -271,8 +271,8 @@ export class Collector {
    * @remarks
    * Throws an Error if the ts.Identifier is not part of node tree that was analyzed.
    */
-  public tryGetEntityForIdentifierNode(identifier: ts.Identifier): CollectorEntity | undefined {
-    const astEntity: AstEntity | undefined = this.astSymbolTable.tryGetEntityForIdentifierNode(identifier);
+  public tryGetEntityForNode(identifier: ts.Identifier | ts.ImportTypeNode): CollectorEntity | undefined {
+    const astEntity: AstEntity | undefined = this.astSymbolTable.tryGetEntityForNode(identifier);
     if (astEntity) {
       return this._entitiesByAstEntity.get(astEntity);
     }
@@ -344,7 +344,9 @@ export class Collector {
    * initially ignoring the underscore prefix, while still deterministically comparing it.
    * The star is used as a delimiter because it is not a legal  identifier character.
    */
-  public static getSortKeyIgnoringUnderscore(identifier: string): string {
+  public static getSortKeyIgnoringUnderscore(identifier: string | undefined): string {
+    if (!identifier) return '';
+
     let parts: string[];
 
     if (identifier[0] === '_') {
@@ -485,10 +487,14 @@ export class Collector {
         entity.singleExportName !== undefined &&
         entity.singleExportName !== ts.InternalSymbolName.Default
       ) {
-        idealNameForEmit = entity.singleExportName;
-      } else {
+        // TODO: remove replace after "exportPath" support
+        idealNameForEmit = entity.singleExportName.replace(/\./g, '_');
+      } else if (entity.astEntity.localName) {
         // otherwise use the local name
-        idealNameForEmit = entity.astEntity.localName;
+        // TODO: remove replace after "exportPath" support
+        idealNameForEmit = entity.astEntity.localName.replace(/\./g, '_');
+      } else {
+        idealNameForEmit = '_NameForEmit';
       }
 
       // If the idealNameForEmit happens to be the same as one of the exports, then we're safe to use that...
