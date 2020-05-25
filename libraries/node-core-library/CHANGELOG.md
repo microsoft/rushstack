@@ -1,6 +1,27 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 08 Apr 2020 04:07:34 GMT and should not be manually modified.
+This log was last generated on Fri, 22 May 2020 15:08:42 GMT and should not be manually modified.
+
+## 3.22.0
+Fri, 22 May 2020 15:08:42 GMT
+
+### Minor changes
+
+- Expose string parsing APIs from JsonFile.
+
+## 3.21.0
+Thu, 21 May 2020 23:09:44 GMT
+
+### Minor changes
+
+- Create async versions of FileSystem and JsonFile APIs.
+
+## 3.20.0
+Thu, 21 May 2020 15:41:59 GMT
+
+### Minor changes
+
+- Add PackageNameParser class, which is a configurable version of the PackageName API
 
 ## 3.19.7
 Wed, 08 Apr 2020 04:07:34 GMT

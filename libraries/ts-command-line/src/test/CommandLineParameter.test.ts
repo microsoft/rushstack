@@ -3,10 +3,7 @@
 
 import * as colors from 'colors';
 
-import { CommandLineAction } from '../CommandLineAction';
-import { CommandLineParser } from '../CommandLineParser';
-import { DynamicCommandLineParser } from '../DynamicCommandLineParser';
-import { DynamicCommandLineAction } from '../DynamicCommandLineAction';
+import { CommandLineAction, CommandLineParser, DynamicCommandLineParser, DynamicCommandLineAction } from '..';
 
 function createParser(): DynamicCommandLineParser {
   const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser(
@@ -40,7 +37,7 @@ function createParser(): DynamicCommandLineParser {
     parameterLongName: '--choice-with-default',
     description: 'A choice with a default',
     alternatives: [ 'one', 'two', 'three', 'default' ],
-    environmentVariable: 'ENV_CHOICE',
+    environmentVariable: 'ENV_CHOICE2',
     defaultValue: 'default'
   });
 
@@ -64,13 +61,15 @@ function createParser(): DynamicCommandLineParser {
     parameterLongName: '--integer-with-default',
     description: 'An integer with a default',
     argumentName: 'NUMBER',
-    environmentVariable: 'ENV_INTEGER',
+    environmentVariable: 'ENV_INTEGER2',
     defaultValue: 123
   });
   action.defineIntegerParameter({
     parameterLongName: '--integer-required',
     description: 'An integer',
     argumentName: 'NUMBER',
+    // Not yet supported
+    // environmentVariable: 'ENV_INTEGER_REQUIRED',
     required: true
   });
 
@@ -80,13 +79,13 @@ function createParser(): DynamicCommandLineParser {
     parameterShortName: '-s',
     description: 'A string',
     argumentName: 'TEXT',
-    environmentVariable: 'ENV_INTEGER'
+    environmentVariable: 'ENV_STRING'
   });
   action.defineStringParameter({
     parameterLongName: '--string-with-default',
     description: 'A string with a default',
     argumentName: 'TEXT',
-    environmentVariable: 'ENV_INTEGER',
+    environmentVariable: 'ENV_STRING2',
     defaultValue: '123'
   });
 
@@ -94,9 +93,9 @@ function createParser(): DynamicCommandLineParser {
   action.defineStringListParameter({
     parameterLongName: '--string-list',
     parameterShortName: '-l',
-    description: 'A string list',
-    argumentName: 'LIST',
-    environmentVariable: 'ENV_INTEGER'
+    description: 'This parameter be specified multiple times to make a list of strings',
+    argumentName: 'LIST_ITEM',
+    environmentVariable: 'ENV_STRING_LIST'
   });
   return commandLineParser;
 }
@@ -256,6 +255,42 @@ describe('CommandLineParameter', () => {
         action.getStringListParameter('--string-list'),
         snapshotPropertyNames
       );
+
+      const copiedArgs: string[] = [];
+      for (const parameter of action.parameters) {
+        copiedArgs.push(`### ${parameter.longName} output: ###`);
+        parameter.appendToArgList(copiedArgs);
+      }
+      expect(copiedArgs).toMatchSnapshot();
+    });
+  });
+
+  it('parses each parameter from an environment variable', () => {
+    const commandLineParser: CommandLineParser = createParser();
+    const action: CommandLineAction = commandLineParser.getAction('do:the-job');
+
+    action.defineStringListParameter({
+      parameterLongName: '--json-string-list',
+      description: 'Test JSON parsing',
+      argumentName: 'LIST_ITEM',
+      environmentVariable: 'ENV_JSON_STRING_LIST'
+    });
+
+    const args: string[] = [ 'do:the-job', '--integer-required', '1' ];
+
+    process.env.ENV_CHOICE = 'one';
+    process.env.ENV_CHOICE2 = 'two';
+    process.env.ENV_FLAG = '1';
+    process.env.ENV_INTEGER = '111';
+    process.env.ENV_INTEGER2 = '222';
+    process.env.ENV_INTEGER_REQUIRED = '333';
+    process.env.ENV_STRING = 'Hello, world!';
+    process.env.ENV_STRING2 = 'Hello, world!';
+    process.env.ENV_STRING_LIST = 'simple text';
+    process.env.ENV_JSON_STRING_LIST = ' [ 1, true, "Hello, world!" ] ';
+
+    return commandLineParser.execute(args).then(() => {
+      expect(commandLineParser.selectedAction).toBe(action);
 
       const copiedArgs: string[] = [];
       for (const parameter of action.parameters) {

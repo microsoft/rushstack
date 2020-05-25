@@ -2,6 +2,54 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.16.3",
+      "tag": "@microsoft/gulp-core-build_v3.16.3",
+      "date": "Fri, 22 May 2020 15:08:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.21.0` to `3.22.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.16.2",
+      "tag": "@microsoft/gulp-core-build_v3.16.2",
+      "date": "Thu, 21 May 2020 23:09:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.20.0` to `3.21.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.16.1",
+      "tag": "@microsoft/gulp-core-build_v3.16.1",
+      "date": "Thu, 21 May 2020 15:42:00 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.19.7` to `3.20.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.16.0",
+      "tag": "@microsoft/gulp-core-build_v3.16.0",
+      "date": "Sat, 02 May 2020 00:08:16 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade Jest to 25"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.15.5",
       "tag": "@microsoft/gulp-core-build_v3.15.5",
       "date": "Wed, 08 Apr 2020 04:07:34 GMT",

@@ -6,6 +6,7 @@
 
 import { IPackageJson } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
+import { PackageNameParser } from '@rushstack/node-core-library';
 
 // @public
 export class ApprovedPackagesConfiguration {
@@ -90,6 +91,7 @@ export const enum DependencyType {
 export const enum EnvironmentVariableNames {
     RUSH_ABSOLUTE_SYMLINKS = "RUSH_ABSOLUTE_SYMLINKS",
     RUSH_ALLOW_UNSUPPORTED_NODEJS = "RUSH_ALLOW_UNSUPPORTED_NODEJS",
+    RUSH_PARALLELISM = "RUSH_PARALLELISM",
     RUSH_PNPM_STORE_PATH = "RUSH_PNPM_STORE_PATH",
     RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
     RUSH_TEMP_FOLDER = "RUSH_TEMP_FOLDER",
@@ -135,6 +137,7 @@ export interface IConfigurationEnvironmentVariable {
 export interface IExperimentsJson {
     legacyIncrementalBuildDependencyDetection?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
+    usePnpmFrozenLockfileForRushInstall?: boolean;
 }
 
 // @public
@@ -302,6 +305,7 @@ export class Rush {
 
 // @public
 export class RushConfiguration {
+    readonly allowMostlyStandardPackageNames: boolean;
     readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
     readonly changesFolder: string;
     // @deprecated
@@ -342,6 +346,7 @@ export class RushConfiguration {
     readonly packageManagerToolVersion: string;
     // @beta
     readonly packageManagerWrapper: PackageManager;
+    readonly packageNameParser: PackageNameParser;
     readonly pnpmOptions: PnpmOptionsConfiguration;
     readonly projectFolderMaxDepth: number;
     readonly projectFolderMinDepth: number;

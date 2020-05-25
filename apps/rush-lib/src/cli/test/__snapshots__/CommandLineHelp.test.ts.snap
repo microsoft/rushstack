@@ -117,11 +117,14 @@ therein; a full rebuild is forced whenever the command has changed (e.g.
 Optional arguments:
   -h, --help            Show this help message and exit.
   -p COUNT, --parallelism COUNT
-                        Specify the number of concurrent build processes The 
-                        value \\"max\\" can be specified to indicate the number 
-                        of CPU cores. If this parameter omitted, the default 
-                        value depends on the operating system and number of 
-                        CPU cores.
+                        Specifies the maximum number of concurrent processes 
+                        to launch during a build. The COUNT should be a 
+                        positive integer or else the word \\"max\\" to specify a 
+                        count that is equal to the number of CPU cores. If 
+                        this parameter is omitted, then the default value 
+                        depends on the operating system and number of CPU 
+                        cores. This parameter may alternatively specified via 
+                        the RUSH_PARALLELISM environment variable.
   -t PROJECT1, --to PROJECT1
                         Run command in the specified project and all of its 
                         dependencies. \\".\\" can be used as shorthand to specify 
@@ -172,7 +175,7 @@ are backwards and forwards compatible. Examples are: Modifying a private API
 or fixing a bug in the logic of how an existing API works. HOTFIX 
 (EXPERIMENTAL) - these are changes that are hotfixes targeting a specific 
 older version of the package. When a hotfix change is added, other changes 
-will not be able to increment the version number.Enable this feature by 
+will not be able to increment the version number. Enable this feature by 
 setting 'hotfixChangeEnabled' in your rush.json.
 
 Optional arguments:
@@ -183,7 +186,7 @@ Optional arguments:
                         \\"git diff\\" to detect changes.
   -b BRANCH, --target-branch BRANCH
                         If this parameter is specified, compare the checked 
-                        out branch with the specified branch todetermine 
+                        out branch with the specified branch to determine 
                         which projects were changed. If this parameter is not 
                         specified, the checked out branch is compared against 
                         the \\"master\\" branch.
@@ -247,11 +250,14 @@ into each project.
 Optional arguments:
   -h, --help            Show this help message and exit.
   -p COUNT, --parallelism COUNT
-                        Specify the number of concurrent build processes The 
-                        value \\"max\\" can be specified to indicate the number 
-                        of CPU cores. If this parameter omitted, the default 
-                        value depends on the operating system and number of 
-                        CPU cores.
+                        Specifies the maximum number of concurrent processes 
+                        to launch during a build. The COUNT should be a 
+                        positive integer or else the word \\"max\\" to specify a 
+                        count that is equal to the number of CPU cores. If 
+                        this parameter is omitted, then the default value 
+                        depends on the operating system and number of CPU 
+                        cores. This parameter may alternatively specified via 
+                        the RUSH_PARALLELISM environment variable.
   -t PROJECT1, --to PROJECT1
                         Run command in the specified project and all of its 
                         dependencies. \\".\\" can be used as shorthand to specify 
@@ -400,7 +406,7 @@ Optional arguments:
                         be applied to package.json files.
   -b BRANCH, --target-branch BRANCH
                         If this flag is specified, applied changes and 
-                        deleted change requests will becommitted and merged 
+                        deleted change requests will be committed and merged 
                         into the target branch.
   -p, --publish         If this flag is specified, applied changes will be 
                         published to npm.
@@ -503,11 +509,14 @@ of \\"rush rebuild\\".)
 Optional arguments:
   -h, --help            Show this help message and exit.
   -p COUNT, --parallelism COUNT
-                        Specify the number of concurrent build processes The 
-                        value \\"max\\" can be specified to indicate the number 
-                        of CPU cores. If this parameter omitted, the default 
-                        value depends on the operating system and number of 
-                        CPU cores.
+                        Specifies the maximum number of concurrent processes 
+                        to launch during a build. The COUNT should be a 
+                        positive integer or else the word \\"max\\" to specify a 
+                        count that is equal to the number of CPU cores. If 
+                        this parameter is omitted, then the default value 
+                        depends on the operating system and number of CPU 
+                        cores. This parameter may alternatively specified via 
+                        the RUSH_PARALLELISM environment variable.
   -t PROJECT1, --to PROJECT1
                         Run command in the specified project and all of its 
                         dependencies. \\".\\" can be used as shorthand to specify 
@@ -657,7 +666,7 @@ Optional arguments:
                         The name of the version policy
   --override-bump BUMPTYPE
                         Overrides the bump type in the version-policy.json 
-                        for the specified version policy.Valid BUMPTYPE 
+                        for the specified version policy. Valid BUMPTYPE 
                         values include: prerelease, patch, preminor, minor, 
                         major. This setting only works for lock-step version 
                         policy in bump action.

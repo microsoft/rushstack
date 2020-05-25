@@ -29,7 +29,7 @@ export abstract class AbstractClass3 {
 export class AmbientConsumer {
     builtinDefinition1(): Map<string, string>;
     builtinDefinition2(): Promise<void>;
-    definitelyTyped(): jest.Context;
+    definitelyTyped(): jest.MockContext<number, any>;
     localTypings(): IAmbientInterfaceExample;
 }
 

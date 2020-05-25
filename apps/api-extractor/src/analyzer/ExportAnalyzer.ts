@@ -133,7 +133,7 @@ export class ExportAnalyzer {
             });
 
             if (!astSymbol) {
-              throw new Error(`Unsupported export ${JSON.stringify(exportedSymbol.name)} in `
+              throw new Error(`Unsupported export ${JSON.stringify(exportedSymbol.name)}:\n`
                 + SourceFileLocationFormatter.formatDeclaration(followedSymbol.declarations[0]));
             }
 
@@ -560,6 +560,13 @@ export class ExportAnalyzer {
           });
         }
       }
+    }
+
+    const importTypeNode: ts.Node | undefined
+      = TypeScriptHelpers.findFirstChildNode(declaration, ts.SyntaxKind.ImportType);
+    if (importTypeNode) {
+      throw new Error('The expression contains an import() type, which is not yet supported by API Extractor:\n'
+        + SourceFileLocationFormatter.formatDeclaration(importTypeNode));
     }
 
     return undefined;

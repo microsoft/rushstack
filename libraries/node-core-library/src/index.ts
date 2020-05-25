@@ -52,7 +52,13 @@ export {
   IPackageJsonLookupParameters,
   PackageJsonLookup
 } from './PackageJsonLookup';
-export { PackageName, IParsedPackageName, IParsedPackageNameOrError } from './PackageName';
+export {
+  PackageName,
+  PackageNameParser,
+  IPackageNameParserOptions,
+  IParsedPackageName,
+  IParsedPackageNameOrError
+} from './PackageName';
 export { Path } from './Path';
 export {
   Encoding,

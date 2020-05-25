@@ -1,6 +1,57 @@
 # Change Log - @rushstack/localization-plugin
 
-This log was last generated on Wed, 08 Apr 2020 08:11:13 GMT and should not be manually modified.
+This log was last generated on Fri, 22 May 2020 15:08:42 GMT and should not be manually modified.
+
+## 0.3.11
+Fri, 22 May 2020 15:08:42 GMT
+
+### Patches
+
+- Remove unnecessary jju dependency.
+
+## 0.3.10
+Thu, 21 May 2020 23:09:44 GMT
+
+*Version update only*
+
+## 0.3.9
+Thu, 21 May 2020 15:42:00 GMT
+
+*Version update only*
+
+## 0.3.8
+Tue, 19 May 2020 15:08:20 GMT
+
+*Version update only*
+
+## 0.3.7
+Fri, 15 May 2020 08:10:59 GMT
+
+*Version update only*
+
+## 0.3.6
+Wed, 13 May 2020 19:10:53 GMT
+
+### Patches
+
+- Fix encoding of tab characters.
+
+## 0.3.5
+Wed, 06 May 2020 08:23:45 GMT
+
+*Version update only*
+
+## 0.3.4
+Sat, 02 May 2020 00:08:16 GMT
+
+*Version update only*
+
+## 0.3.3
+Fri, 01 May 2020 05:15:06 GMT
+
+### Patches
+
+- Don't trim RESX text elements.
 
 ## 0.3.2
 Wed, 08 Apr 2020 08:11:13 GMT

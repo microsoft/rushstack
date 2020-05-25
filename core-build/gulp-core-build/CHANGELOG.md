@@ -1,6 +1,28 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Wed, 08 Apr 2020 04:07:34 GMT and should not be manually modified.
+This log was last generated on Fri, 22 May 2020 15:08:43 GMT and should not be manually modified.
+
+## 3.16.3
+Fri, 22 May 2020 15:08:43 GMT
+
+*Version update only*
+
+## 3.16.2
+Thu, 21 May 2020 23:09:44 GMT
+
+*Version update only*
+
+## 3.16.1
+Thu, 21 May 2020 15:42:00 GMT
+
+*Version update only*
+
+## 3.16.0
+Sat, 02 May 2020 00:08:16 GMT
+
+### Minor changes
+
+- Upgrade Jest to 25
 
 ## 3.15.5
 Wed, 08 Apr 2020 04:07:34 GMT

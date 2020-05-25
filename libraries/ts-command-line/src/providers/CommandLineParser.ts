@@ -6,6 +6,7 @@ import * as colors from 'colors';
 
 import { CommandLineAction } from './CommandLineAction';
 import { CommandLineParameterProvider, ICommandLineParserData } from './CommandLineParameterProvider';
+import { CommandLineParserExitError, CustomArgumentParser} from './CommandLineParserExitError';
 
 /**
  * Options for the {@link CommandLineParser} constructor.
@@ -21,37 +22,6 @@ export interface ICommandLineParserOptions {
    * General documentation that is included in the "--help" main page
    */
   toolDescription: string;
-}
-
-export class CommandLineParserExitError extends Error {
-  public readonly exitCode: number;
-
-  public constructor(exitCode: number, message: string) {
-    super(message);
-
-    // Manually set the prototype, as we can no longer extend built-in classes like Error, Array, Map, etc
-    // https://github.com/microsoft/TypeScript-wiki/blob/master/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
-    //
-    // Note: the prototype must also be set on any classes which extend this one
-    (this as any).__proto__ = CommandLineParserExitError.prototype; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-    this.exitCode = exitCode;
-  }
-}
-
-class CustomArgumentParser extends argparse.ArgumentParser {
-  public exit(status: number, message: string): void { // override
-    throw new CommandLineParserExitError(status, message);
-  }
-
-  public error(err: Error | string): void { // override
-    // Ensure the ParserExitError bubbles up to the top without any special processing
-    if (err instanceof CommandLineParserExitError) {
-      throw err;
-    }
-
-    super.error(err);
-  }
 }
 
 /**
@@ -79,7 +49,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   public selectedAction: CommandLineAction | undefined;
 
   private _argumentParser: argparse.ArgumentParser;
-  private _actionsSubParser: argparse.SubParser;
+  private _actionsSubParser: argparse.SubParser | undefined;
   private _options: ICommandLineParserOptions;
   private _actions: CommandLineAction[];
   private _actionsByName: Map<string, CommandLineAction>;
@@ -100,11 +70,6 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
         + ` ${this._options.toolFilename} <command> -h`)
     });
 
-    this._actionsSubParser = this._argumentParser.addSubparsers({
-      metavar: '<command>',
-      dest: 'action'
-    });
-
     this.onDefineParameters();
   }
 
@@ -119,6 +84,13 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    * Defines a new action that can be used with the CommandLineParser instance.
    */
   public addAction(action: CommandLineAction): void {
+    if (!this._actionsSubParser) {
+      this._actionsSubParser = this._argumentParser.addSubparsers({
+        metavar: '<command>',
+        dest: 'action'
+      });
+    }
+
     action._buildParser(this._actionsSubParser);
     this._actions.push(action);
     this._actionsByName.set(action.actionName, action);
@@ -198,6 +170,9 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
         throw new Error('execute() was already called for this parser instance');
       }
       this._executed = true;
+
+      this._validateDefinitions();
+
       if (!args) {
         // 0=node.exe, 1=script name
         args = process.argv.slice(2);
@@ -217,8 +192,9 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
           break;
         }
       }
-      if (!this.selectedAction) {
-        throw new Error('Unrecognized action');
+      if (this.actions.length > 0 && !this.selectedAction) {
+        const actions: string[] = this.actions.map(x => x.actionName);
+        throw new Error(`An action must be specified (${actions.join(', ')})`);
       }
 
       return this.onExecute();
@@ -236,6 +212,13 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     }
   }
 
+  private _validateDefinitions(): void {
+    if (this.remainder && this.actions.length > 0) {
+      // This is apparently not supported by argparse
+      throw new Error('defineCommandLineRemainder() cannot be called for a CommandLineParser with actions');
+    }
+  }
+
   /**
    * {@inheritDoc CommandLineParameterProvider._getArgumentParser}
    * @internal
@@ -249,6 +232,9 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    * the chosen action is executed.
    */
   protected onExecute(): Promise<void> {
-    return this.selectedAction!._execute();
+    if (!this.selectedAction) {
+      return Promise.resolve();
+    }
+    return this.selectedAction._execute();
   }
 }

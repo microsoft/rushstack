@@ -2,6 +2,87 @@
   "name": "@microsoft/rush-stack-compiler-3.5",
   "entries": [
     {
+      "version": "0.4.15",
+      "tag": "@microsoft/rush-stack-compiler-3.5_v0.4.15",
+      "date": "Fri, 22 May 2020 15:08:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.8.4` to `7.8.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.21.0` to `3.22.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.14",
+      "tag": "@microsoft/rush-stack-compiler-3.5_v0.4.14",
+      "date": "Thu, 21 May 2020 23:09:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.8.3` to `7.8.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.20.0` to `3.21.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.13",
+      "tag": "@microsoft/rush-stack-compiler-3.5_v0.4.13",
+      "date": "Thu, 21 May 2020 15:42:00 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.8.2` to `7.8.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.19.7` to `3.20.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.12",
+      "tag": "@microsoft/rush-stack-compiler-3.5_v0.4.12",
+      "date": "Tue, 19 May 2020 15:08:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.8.1` to `7.8.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.11",
+      "tag": "@microsoft/rush-stack-compiler-3.5_v0.4.11",
+      "date": "Fri, 15 May 2020 08:10:59 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.8.0` to `7.8.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.10",
+      "tag": "@microsoft/rush-stack-compiler-3.5_v0.4.10",
+      "date": "Wed, 06 May 2020 08:23:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.7.13` to `7.8.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.9",
       "tag": "@microsoft/rush-stack-compiler-3.5_v0.4.9",
       "date": "Wed, 08 Apr 2020 04:07:33 GMT",
