@@ -10,7 +10,7 @@ import { ReleaseTag } from '@microsoft/api-extractor-model';
 import { Collector } from '../collector/Collector';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { Span, SpanModification } from '../analyzer/Span';
-import { AstImport } from '../analyzer/AstImport';
+import { AstImport, AstImportKind } from '../analyzer/AstImport';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { ApiItemMetadata } from '../collector/ApiItemMetadata';
@@ -265,24 +265,57 @@ export class DtsRollupGenerator {
         break;
 
       case ts.SyntaxKind.Identifier:
-        const referencedEntity: CollectorEntity | undefined = collector.tryGetEntityForIdentifierNode(
-          span.node as ts.Identifier
-        );
+        {
+          const referencedEntity: CollectorEntity | undefined = collector.tryGetEntityForNode(
+            span.node as ts.Identifier
+          );
 
-        if (referencedEntity) {
-          if (!referencedEntity.nameForEmit) {
-            // This should never happen
-            throw new InternalError('referencedEntry.nameForEmit is undefined');
+          if (referencedEntity) {
+            if (!referencedEntity.nameForEmit) {
+              // This should never happen
+              throw new InternalError('referencedEntry.nameForEmit is undefined');
+            }
+
+            span.modification.prefix = referencedEntity.nameForEmit;
+            // For debugging:
+            // span.modification.prefix += '/*R=FIX*/';
+          } else {
+            // For debugging:
+            // span.modification.prefix += '/*R=KEEP*/';
           }
-
-          span.modification.prefix = referencedEntity.nameForEmit;
-          // For debugging:
-          // span.modification.prefix += '/*R=FIX*/';
-        } else {
-          // For debugging:
-          // span.modification.prefix += '/*R=KEEP*/';
         }
+        break;
 
+      case ts.SyntaxKind.ImportType:
+        {
+          const node: ts.ImportTypeNode = span.node as ts.ImportTypeNode;
+          const referencedEntity: CollectorEntity | undefined = collector.tryGetEntityForNode(node);
+
+          if (referencedEntity) {
+            if (!referencedEntity.nameForEmit) {
+              // This should never happen
+              throw new InternalError('referencedEntry.nameForEmit is undefined');
+            }
+
+            if (
+              referencedEntity.astEntity instanceof AstImport &&
+              referencedEntity.astEntity.importKind === AstImportKind.ImportType &&
+              (referencedEntity.astEntity.exportName || '').split('.').length > 1
+            ) {
+              const replacement: string = referencedEntity.astEntity.exportName
+                ? `${referencedEntity.nameForEmit}.${referencedEntity.astEntity.exportName}`
+                : referencedEntity.nameForEmit;
+
+              span.modification.skipAll();
+              span.modification.prefix = replacement;
+            } else {
+              // Replace with internal symbol or AstImport
+
+              span.modification.skipAll();
+              span.modification.prefix = referencedEntity.nameForEmit;
+            }
+          }
+        }
         break;
     }
 

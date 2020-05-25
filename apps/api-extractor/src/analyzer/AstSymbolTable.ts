@@ -87,7 +87,7 @@ export class AstSymbolTable {
 
   // Note that this is a mapping from specific AST nodes that we analyzed, based on the underlying symbol
   // for that node.
-  private readonly _entitiesByIdentifierNode: Map<ts.Identifier, AstEntity | undefined> = new Map<
+  private readonly _entitiesByNode: Map<ts.Identifier | ts.ImportTypeNode, AstEntity | undefined> = new Map<
     ts.Identifier,
     AstEntity | undefined
   >();
@@ -214,11 +214,11 @@ export class AstSymbolTable {
    * @remarks
    * Throws an Error if the ts.Identifier is not part of node tree that was analyzed.
    */
-  public tryGetEntityForIdentifierNode(identifier: ts.Identifier): AstEntity | undefined {
-    if (!this._entitiesByIdentifierNode.has(identifier)) {
+  public tryGetEntityForNode(identifier: ts.Identifier | ts.ImportTypeNode): AstEntity | undefined {
+    if (!this._entitiesByNode.has(identifier)) {
       throw new InternalError('tryGetEntityForIdentifier() called for an identifier that was not analyzed');
     }
-    return this._entitiesByIdentifierNode.get(identifier);
+    return this._entitiesByNode.get(identifier);
   }
 
   /**
@@ -326,9 +326,7 @@ export class AstSymbolTable {
           );
 
           if (identifierNode) {
-            let referencedAstEntity: AstEntity | undefined = this._entitiesByIdentifierNode.get(
-              identifierNode
-            );
+            let referencedAstEntity: AstEntity | undefined = this._entitiesByNode.get(identifierNode);
             if (!referencedAstEntity) {
               const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(identifierNode);
               if (!symbol) {
@@ -379,7 +377,7 @@ export class AstSymbolTable {
                   governingAstDeclaration.astSymbol.isExternal
                 );
 
-                this._entitiesByIdentifierNode.set(identifierNode, referencedAstEntity);
+                this._entitiesByNode.set(identifierNode, referencedAstEntity);
               }
             }
 
@@ -394,19 +392,38 @@ export class AstSymbolTable {
       case ts.SyntaxKind.Identifier:
         {
           const identifierNode: ts.Identifier = node as ts.Identifier;
-          if (!this._entitiesByIdentifierNode.has(identifierNode)) {
+          if (!this._entitiesByNode.has(identifierNode)) {
             const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(identifierNode);
 
             let referencedAstEntity: AstEntity | undefined = undefined;
 
             if (symbol === governingAstDeclaration.astSymbol.followedSymbol) {
-              referencedAstEntity = this._fetchEntityForIdentifierNode(
-                identifierNode,
-                governingAstDeclaration
-              );
+              referencedAstEntity = this._fetchEntityForNode(identifierNode, governingAstDeclaration);
             }
 
-            this._entitiesByIdentifierNode.set(identifierNode, referencedAstEntity);
+            this._entitiesByNode.set(identifierNode, referencedAstEntity);
+          }
+        }
+        break;
+
+      case ts.SyntaxKind.ImportType:
+        {
+          const importTypeNode: ts.ImportTypeNode = node as ts.ImportTypeNode;
+          let referencedAstEntity: AstEntity | undefined = this._entitiesByNode.get(importTypeNode);
+
+          if (!this._entitiesByNode.has(importTypeNode)) {
+            referencedAstEntity = this._fetchEntityForNode(importTypeNode, governingAstDeclaration);
+
+            if (!referencedAstEntity) {
+              // This should never happen
+              throw new Error('Failed to fetch entity for import() type node: ' + importTypeNode.getText());
+            }
+
+            this._entitiesByNode.set(importTypeNode, referencedAstEntity);
+          }
+
+          if (referencedAstEntity) {
+            governingAstDeclaration._notifyReferencedAstEntity(referencedAstEntity);
           }
         }
         break;
@@ -423,23 +440,30 @@ export class AstSymbolTable {
     }
   }
 
-  private _fetchEntityForIdentifierNode(
-    identifierNode: ts.Identifier,
+  private _fetchEntityForNode(
+    node: ts.Identifier | ts.ImportTypeNode,
     governingAstDeclaration: AstDeclaration
   ): AstEntity | undefined {
-    let referencedAstEntity: AstEntity | undefined = this._entitiesByIdentifierNode.get(identifierNode);
+    let referencedAstEntity: AstEntity | undefined = this._entitiesByNode.get(node);
     if (!referencedAstEntity) {
-      const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(identifierNode);
-      if (!symbol) {
-        throw new Error('Symbol not found for identifier: ' + identifierNode.getText());
+      if (node.kind === ts.SyntaxKind.ImportType) {
+        referencedAstEntity = this._exportAnalyzer.fetchReferencedAstEntityFromImportTypeNode(
+          node,
+          governingAstDeclaration.astSymbol.isExternal
+        );
+      } else {
+        const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(node);
+        if (!symbol) {
+          throw new Error('Symbol not found for identifier: ' + node.getText());
+        }
+
+        referencedAstEntity = this._exportAnalyzer.fetchReferencedAstEntity(
+          symbol,
+          governingAstDeclaration.astSymbol.isExternal
+        );
       }
 
-      referencedAstEntity = this._exportAnalyzer.fetchReferencedAstEntity(
-        symbol,
-        governingAstDeclaration.astSymbol.isExternal
-      );
-
-      this._entitiesByIdentifierNode.set(identifierNode, referencedAstEntity);
+      this._entitiesByNode.set(node, referencedAstEntity);
     }
     return referencedAstEntity;
   }
