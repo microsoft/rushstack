@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* eslint max-lines: off */
-
 import * as colors from 'colors';
 import * as fetch from 'node-fetch';
 import * as fs from 'fs';
@@ -11,6 +9,7 @@ import HttpsProxyAgent = require('https-proxy-agent');
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
+
 import {
   FileSystem,
   JsonFile,
@@ -26,6 +25,7 @@ import { AsyncRecycler } from '../../utilities/AsyncRecycler';
 import { BaseLinkManager } from './BaseLinkManager';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
+import { DependencySpecifier } from '../DependencySpecifier';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { Git } from '../Git';
 import { LastInstallFlag } from '../../api/LastInstallFlag';
@@ -35,14 +35,13 @@ import { PackageManagerName } from '../../api/packageManager/PackageManager';
 import { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import { PolicyValidator } from '../policy/PolicyValidator';
 import { PurgeManager } from '../PurgeManager';
-import { Rush } from '../../api/Rush';
 import { RushConfiguration, IConfigurationEnvironment, ICurrentVariantJson } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { Rush } from '../../api/Rush';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { RushConstants } from '../RushConstants';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { Utilities } from '../../utilities/Utilities';
-import { DependencySpecifier } from '../DependencySpecifier';
 
 // The PosixModeBits are intended to be used with bitwise operations.
 /* eslint-disable no-bitwise */

@@ -13,6 +13,7 @@ import {
 import { BaseRushAction } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';
 import { BaseInstallManager, IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
+import { InstallManagerFactory } from '../../logic/InstallManagerFactory';
 import { PurgeManager } from '../../logic/PurgeManager';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { StandardScriptUpdater } from '../../logic/StandardScriptUpdater';
@@ -20,7 +21,6 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
-import { InstallManagerFactory } from '../../logic/InstallManagerFactory';
 
 /**
  * This is the common base class for InstallAction and UpdateAction.

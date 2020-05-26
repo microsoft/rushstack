@@ -4,13 +4,13 @@
 import * as colors from 'colors';
 import * as semver from 'semver';
 
-import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { BaseInstallManager, IInstallManagerOptions } from './base/BaseInstallManager';
+import { RushInstallManager } from './RushInstallManager';
+import { WorkspaceInstallManager } from './WorkspaceInstallManager';
+import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { PurgeManager } from './PurgeManager';
 import { RushConfiguration } from '../api/RushConfiguration'
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
-import { RushInstallManager } from './RushInstallManager';
-import { WorkspaceInstallManager } from './WorkspaceInstallManager';
 
 export class InstallManagerFactory {
 
