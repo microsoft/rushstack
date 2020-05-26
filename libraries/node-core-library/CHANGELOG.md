@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Fri, 22 May 2020 15:08:42 GMT and should not be manually modified.
+This log was last generated on Tue, 26 May 2020 23:00:25 GMT and should not be manually modified.
+
+## 3.22.1
+Tue, 26 May 2020 23:00:25 GMT
+
+### Patches
+
+- Make not-exist error messages more readable.
 
 ## 3.22.0
 Fri, 22 May 2020 15:08:42 GMT

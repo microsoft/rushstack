@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.22.1",
+      "tag": "@rushstack/node-core-library_v3.22.1",
+      "date": "Tue, 26 May 2020 23:00:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Make not-exist error messages more readable."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.22.0",
       "tag": "@rushstack/node-core-library_v3.22.0",
       "date": "Fri, 22 May 2020 15:08:42 GMT",
