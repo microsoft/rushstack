@@ -88,7 +88,7 @@ export class JsonFile {
       return jju.parse(contents);
     } catch (error) {
       if (FileSystem.isNotExistError(error)) {
-        throw new Error(`Input file not found: ${jsonFilename}`);
+        throw error;
       } else {
         throw new Error(`Error reading "${jsonFilename}":` + os.EOL + `  ${error.message}`);
       }
@@ -104,7 +104,7 @@ export class JsonFile {
       return jju.parse(contents);
     } catch (error) {
       if (FileSystem.isNotExistError(error)) {
-        throw new Error(`Input file not found: ${jsonFilename}`);
+        throw error;
       } else {
         throw new Error(`Error reading "${jsonFilename}":` + os.EOL + `  ${error.message}`);
       }
