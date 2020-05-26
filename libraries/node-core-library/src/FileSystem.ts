@@ -205,8 +205,6 @@ const DELETE_FILE_DEFAULT_OPTIONS: Partial<IFileSystemDeleteFileOptions> = {
  * @public
  */
 export class FileSystem {
-  private static __error: NodeJS.ErrnoException;
-
   // ===============
   // COMMON OPERATIONS
   // ===============
@@ -913,77 +911,62 @@ export class FileSystem {
   /**
    * Returns true if the error provided indicates the file or folder does not exist.
    */
-  public static isNotExistError(error: NodeJS.ErrnoException): boolean {
+  public static isNotExistError(error: Error): boolean {
     return FileSystem.isFileDoesNotExistError(error) || FileSystem.isFolderDoesNotExistError(error);
   }
 
   /**
    * Returns true if the error provided indicates the file does not exist.
    */
-  public static isFileDoesNotExistError(error: NodeJS.ErrnoException): boolean {
-    return FileSystem._isErrorType(error) && (error.code === 'ENOENT');
+  public static isFileDoesNotExistError(error: Error): boolean {
+    return FileSystem.isErrnoException(error) && (error.code === 'ENOENT');
   }
 
   /**
    * Returns true if the error provided indicates the folder does not exist.
    */
-  public static isFolderDoesNotExistError(error: NodeJS.ErrnoException): boolean {
-    return FileSystem._isErrorType(error) && (error.code === 'ENOTDIR');
+  public static isFolderDoesNotExistError(error: Error): boolean {
+    return FileSystem.isErrnoException(error) && (error.code === 'ENOTDIR');
   }
 
-  private static _isErrorType(error: NodeJS.ErrnoException): boolean {
-    if (process.env.NODE_ENV !== 'test' && process.env.JEST_WORKER_ID === undefined) {
-      return error instanceof Error;
-    } else {
-      // Using this instead of `error instanceof Error` because that doesn't work in Jest tests
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (error as any).__proto__ === (FileSystem._fsError as any).__proto__;
-    }
-  }
-
-  private static get _fsError(): NodeJS.ErrnoException {
-    if (!FileSystem.__error) {
-      try {
-        fsx.readFileSync(nodeJsPath.join(__dirname, 'fileThatDoesn\'tExist'));
-      } catch (error) {
-        FileSystem.__error = error;
-      }
-    }
-
-    return FileSystem.__error;
+  /**
+   * Detects if the provided error object is a `NodeJS.ErrnoException`
+   */
+  public static isErrnoException(error: Error): error is NodeJS.ErrnoException {
+    const typedError: NodeJS.ErrnoException = error;
+    return (
+      typeof typedError.code === 'string' &&
+      typeof typedError.errno === 'number' &&
+      typeof typedError.path === 'string' &&
+      typeof typedError.syscall === 'string'
+    );
   }
 
   private static _wrapException<TResult>(fn: () => TResult): TResult {
-    function updateErrorMessage(error: NodeJS.ErrnoException): void {
-      if (FileSystem.isFileDoesNotExistError(error)) { // eslint-disable-line @typescript-eslint/no-use-before-define
-        error.message = `File does not exist: ${error.path}`;
-      } else if (FileSystem.isFolderDoesNotExistError(error)) { // eslint-disable-line @typescript-eslint/no-use-before-define
-        error.message = `Folder does not exist: ${error.path}`;
-      }
-    }
-
     try {
       return fn();
     } catch (error) {
-      updateErrorMessage(error);
+      FileSystem._updateErrorMessage(error);
       throw error;
     }
   }
 
   private static async _wrapExceptionAsync<TResult>(fn: () => Promise<TResult>): Promise<TResult> {
-    function updateErrorMessage(error: NodeJS.ErrnoException): void {
-      if (FileSystem.isFileDoesNotExistError(error)) { // eslint-disable-line @typescript-eslint/no-use-before-define
-        error.message = `File does not exist: ${error.path}`;
-      } else if (FileSystem.isFolderDoesNotExistError(error)) { // eslint-disable-line @typescript-eslint/no-use-before-define
-        error.message = `Folder does not exist: ${error.path}`;
-      }
-    }
-
     try {
       return await fn();
     } catch (error) {
-      updateErrorMessage(error);
+      FileSystem._updateErrorMessage(error);
       throw error;
+    }
+  }
+
+  private static _updateErrorMessage(error: Error): void {
+    if (FileSystem.isErrnoException(error)) {
+      if (FileSystem.isFileDoesNotExistError(error)) { // eslint-disable-line @typescript-eslint/no-use-before-define
+        error.message = `File does not exist: ${error.path}\n${error.message}`;
+      } else if (FileSystem.isFolderDoesNotExistError(error)) { // eslint-disable-line @typescript-eslint/no-use-before-define
+        error.message = `Folder does not exist: ${error.path}\n${error.message}`;
+      }
     }
   }
 }
