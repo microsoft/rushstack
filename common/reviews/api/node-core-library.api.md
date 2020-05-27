@@ -161,6 +161,8 @@ export class FileSystem {
     static readFileToBufferAsync(filePath: string): Promise<Buffer>;
     static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[];
     static readFolderAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]>;
+    static readLink(path: string): string;
+    static readLinkAsync(path: string): Promise<string>;
     static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void;
     static updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void>;
     static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
