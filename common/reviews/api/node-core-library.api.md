@@ -141,14 +141,14 @@ export class FileSystem {
     static ensureFolderAsync(folderPath: string): Promise<void>;
     static exists(path: string): boolean;
     static formatPosixModeBits(modeBits: PosixModeBits): string;
-    static getLinkStatistics(path: string): fs.Stats;
-    static getLinkStatisticsAsync(path: string): Promise<fs.Stats>;
+    static getLinkStatistics(path: string): FileSystemStats;
+    static getLinkStatisticsAsync(path: string): Promise<FileSystemStats>;
     static getPosixModeBits(path: string): PosixModeBits;
     static getPosixModeBitsAsync(path: string): Promise<PosixModeBits>;
     static getRealPath(linkPath: string): string;
     static getRealPathAsync(linkPath: string): Promise<string>;
-    static getStatistics(path: string): fs.Stats;
-    static getStatisticsAsync(path: string): Promise<fs.Stats>;
+    static getStatistics(path: string): FileSystemStats;
+    static getStatisticsAsync(path: string): Promise<FileSystemStats>;
     static isErrnoException(error: Error): error is NodeJS.ErrnoException;
     static isFileDoesNotExistError(error: Error): boolean;
     static isFolderDoesNotExistError(error: Error): boolean;
@@ -166,6 +166,9 @@ export class FileSystem {
     static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
     static writeFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void>;
 }
+
+// @public
+export type FileSystemStats = fs.Stats;
 
 // @public
 export class FileWriter {
