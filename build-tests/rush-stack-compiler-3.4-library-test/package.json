@@ -9,8 +9,8 @@
     "build": "gulp test --clean"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.4.17",
-    "@microsoft/rush-stack-compiler-3.4": "0.4.15",
+    "@microsoft/node-library-build": "6.4.19",
+    "@microsoft/rush-stack-compiler-3.4": "0.4.17",
     "@types/node": "10.17.13",
     "gulp": "~4.0.2"
   }

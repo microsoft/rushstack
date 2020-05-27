@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-stack-compiler-3.7",
-  "version": "0.2.15",
+  "version": "0.2.17",
   "description": "A plug-in for selecting the compiler used with the @microsoft/rush-stack toolchain. This version selects TypeScript 3.7.",
   "license": "MIT",
   "repository": {
@@ -19,9 +19,9 @@
   "main": "lib/shared/index.js",
   "typings": "lib/shared/index.d.ts",
   "dependencies": {
-    "@microsoft/api-extractor": "7.8.5",
-    "@rushstack/node-core-library": "3.22.0",
-    "@rushstack/eslint-config": "0.5.7",
+    "@microsoft/api-extractor": "7.8.7",
+    "@rushstack/node-core-library": "3.23.0",
+    "@rushstack/eslint-config": "0.5.8",
     "@types/node": "10.17.13",
     "eslint": "~6.5.1",
     "tslint": "~5.12.1",
@@ -32,7 +32,7 @@
     "@microsoft/node-library-build": "6.4.10",
     "@microsoft/rush-stack-compiler-3.5": "0.4.4",
     "@microsoft/rush-stack-compiler-shared": "0.0.0",
-    "@rushstack/eslint-config": "0.5.7",
+    "@rushstack/eslint-config": "0.5.8",
     "gulp": "~4.0.2"
   }
 }
