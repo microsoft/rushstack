@@ -108,7 +108,8 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
         useCSSModules: false,
         warnOnCssInvalidPropertyName: true,
         dropCssFiles: false,
-        warnOnNonCSSModules: false
+        warnOnNonCSSModules: false,
+        autoprefixerOptions: { overrideBrowserslist: ['> 1%', 'last 2 versions', 'ie >= 10'] }
       }
     );
   }
