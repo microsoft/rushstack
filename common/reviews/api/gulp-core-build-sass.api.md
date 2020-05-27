@@ -4,6 +4,7 @@
 
 ```ts
 
+import * as autoprefixer from 'autoprefixer';
 import * as CleanCss from 'clean-css';
 import * as Gulp from 'gulp';
 import { GulpTask } from '@microsoft/gulp-core-build';
