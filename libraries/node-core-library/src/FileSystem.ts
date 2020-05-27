@@ -8,6 +8,15 @@ import * as fsx from 'fs-extra';
 import { Text, NewlineKind, Encoding } from './Text';
 import { PosixModeBits } from './PosixModeBits';
 
+/**
+ * An alias for the Node.js `fs.Stats` object.
+ *
+ * @remarks
+ * This avoids the need to import the `fs` package when using the {@link FileSystem} API.
+ * @public
+ */
+export type FileSystemStats = fs.Stats;
+
 // The PosixModeBits are intended to be used with bitwise operations.
 /* eslint-disable no-bitwise */
 
@@ -232,7 +241,7 @@ export class FileSystem {
    * Behind the scenes it uses `fs.statSync()`.
    * @param path - The absolute or relative path to the filesystem object.
    */
-  public static getStatistics(path: string): fs.Stats {
+  public static getStatistics(path: string): FileSystemStats {
     return FileSystem._wrapException(() => {
       return fsx.statSync(path);
     });
@@ -241,7 +250,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.getStatistics}.
    */
-  public static getStatisticsAsync(path: string): Promise<fs.Stats> {
+  public static getStatisticsAsync(path: string): Promise<FileSystemStats> {
     return FileSystem._wrapExceptionAsync(() => {
       return fsx.stat(path);
     });
@@ -791,7 +800,7 @@ export class FileSystem {
    * Behind the scenes it uses `fs.lstatSync()`.
    * @param path - The absolute or relative path to the filesystem object.
    */
-  public static getLinkStatistics(path: string): fs.Stats {
+  public static getLinkStatistics(path: string): FileSystemStats {
     return FileSystem._wrapException(() => {
       return fsx.lstatSync(path);
     });
@@ -800,9 +809,35 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.getLinkStatistics}.
    */
-  public static getLinkStatisticsAsync(path: string): Promise<fs.Stats> {
+  public static getLinkStatisticsAsync(path: string): Promise<FileSystemStats> {
     return FileSystem._wrapExceptionAsync(() => {
       return fsx.lstat(path);
+    });
+  }
+
+  /**
+   * If `path` refers to a symbolic link, this returns the path of the link target, which may be
+   * an absolute or relative path.
+   *
+   * @remarks
+   * If `path` refers to a filesystem object that is not a symbolic link, then an `ErrnoException` is thrown
+   * with code 'UNKNOWN'.  If `path` does not exist, then an `ErrnoException` is thrown with code `ENOENT`.
+   *
+   * @param path - The absolute or relative path to the symbolic link.
+   * @returns the path of the link target
+   */
+  public static readLink(path: string): string {
+    return FileSystem._wrapException(() => {
+      return fsx.readlinkSync(path);
+    });
+  }
+
+  /**
+   * An async version of {@link FileSystem.readLink}.
+   */
+  public static readLinkAsync(path: string): Promise<string> {
+    return FileSystem._wrapExceptionAsync(() => {
+      return fsx.readlink(path);
     });
   }
 

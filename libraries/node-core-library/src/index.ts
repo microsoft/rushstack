@@ -68,6 +68,7 @@ export {
 export { Sort } from './Sort';
 export {
   FileSystem,
+  FileSystemStats,
   IFileSystemReadFolderOptions,
   IFileSystemWriteFileOptions,
   IFileSystemReadFileOptions,
