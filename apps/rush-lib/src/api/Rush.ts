@@ -4,8 +4,8 @@
 import { EOL } from 'os';
 import * as colors from 'colors';
 import { PackageJsonLookup } from '@rushstack/node-core-library';
+import { CommandLineParser } from '@rushstack/ts-command-line';
 
-import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import { RushConstants } from '../logic/RushConstants';
 import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
@@ -61,10 +61,14 @@ export class Rush {
       return;
     }
 
-    const parser: RushCommandLineParser = new RushCommandLineParser({
-      alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
-    });
-    parser.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise
+    // Use a dynamic import here to avoid an issue where a class's (RushInstallManager) base class (BaseInstallManager)
+    // isn't defined at its class declaration because of a circular import dependency
+    import('../cli/RushCommandLineParser').then(({ RushCommandLineParser }) => {
+      const parser: CommandLineParser = new RushCommandLineParser({
+        alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
+      });
+      return parser.execute()
+    }).catch(console.error); // CommandLineParser.execute() should never reject the promise
   }
 
   /**

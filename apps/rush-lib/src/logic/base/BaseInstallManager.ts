@@ -29,11 +29,9 @@ import { DependencySpecifier } from '../DependencySpecifier';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { Git } from '../Git';
 import { LastInstallFlag } from '../../api/LastInstallFlag';
-import { LinkManagerFactory } from '../LinkManagerFactory';
 import { PackageJsonDependency } from '../../api/PackageJsonEditor';
 import { PackageManagerName } from '../../api/packageManager/PackageManager';
 import { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
-import { PolicyValidator } from '../policy/PolicyValidator';
 import { PurgeManager } from '../PurgeManager';
 import { RushConfiguration, IConfigurationEnvironment, ICurrentVariantJson } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -233,6 +231,9 @@ export abstract class BaseInstallManager {
   protected abstract install(cleanInstall: boolean): Promise<void>;
 
   protected async prepare(): Promise<{ variantIsUpToDate: boolean, shrinkwrapIsUpToDate: boolean }> {
+    // Use a dynamic import here to avoid an issue where a class's (RushInstallManager) base class (BaseInstallManager)
+    // isn't defined at its class declaration because of a circular import dependency
+    const { PolicyValidator } = await import('../policy/PolicyValidator');
     // Check the policies
     PolicyValidator.validatePolicy(this.rushConfiguration, this.options);
 
@@ -375,7 +376,10 @@ export abstract class BaseInstallManager {
     return { shrinkwrapIsUpToDate, variantIsUpToDate };
   }
 
-  protected link(): Promise<void> {
+  protected async link(): Promise<void> {
+    // Use a dynamic import here to avoid an issue where a class's (RushInstallManager) base class (BaseInstallManager)
+    // isn't defined at its class declaration because of a circular import dependency
+    const { LinkManagerFactory } = await import('../LinkManagerFactory');
     const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
     return linkManager.createSymlinksForProjects(false);
   }
