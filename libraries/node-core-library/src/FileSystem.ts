@@ -250,8 +250,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.getStatistics}.
    */
-  public static getStatisticsAsync(path: string): Promise<FileSystemStats> {
-    return FileSystem._wrapExceptionAsync(() => {
+  public static async getStatisticsAsync(path: string): Promise<FileSystemStats> {
+    return await FileSystem._wrapExceptionAsync(() => {
       return fsx.stat(path);
     });
   }
@@ -272,8 +272,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.updateTimes}.
    */
-  public static updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void> {
-    return FileSystem._wrapExceptionAsync(() => {
+  public static async updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void> {
+    return await FileSystem._wrapExceptionAsync(() => {
       // This cast is needed because the fs-extra typings require both parameters
       // to have the same type (number or Date), whereas Node.js does not require that.
       return fsx.utimes(path, times.accessedTime as number, times.modifiedTime as number);
@@ -296,8 +296,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.changePosixModeBits}.
    */
-  public static changePosixModeBitsAsync(path: string, mode: PosixModeBits): Promise<void> {
-    return FileSystem._wrapExceptionAsync(() => {
+  public static async changePosixModeBitsAsync(path: string, mode: PosixModeBits): Promise<void> {
+    return await FileSystem._wrapExceptionAsync(() => {
       return fsx.chmod(path, mode);
     });
   }
@@ -321,8 +321,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.getPosixModeBits}.
    */
-  public static getPosixModeBitsAsync(path: string): Promise<PosixModeBits> {
-    return FileSystem._wrapExceptionAsync(async () => {
+  public static async getPosixModeBitsAsync(path: string): Promise<PosixModeBits> {
+    return await FileSystem._wrapExceptionAsync(async () => {
       return (await FileSystem.getStatisticsAsync(path)).mode;
     });
   }
@@ -384,8 +384,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.move}.
    */
-  public static moveAsync(options: IFileSystemMoveOptions): Promise<void> {
-    return FileSystem._wrapExceptionAsync(async () => {
+  public static async moveAsync(options: IFileSystemMoveOptions): Promise<void> {
+    return await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...MOVE_DEFAULT_OPTIONS,
         ...options
@@ -429,8 +429,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.ensureFolder}.
    */
-  public static ensureFolderAsync(folderPath: string): Promise<void> {
-    return FileSystem._wrapExceptionAsync(() => {
+  public static async ensureFolderAsync(folderPath: string): Promise<void> {
+    return await FileSystem._wrapExceptionAsync(() => {
       return fsx.ensureDir(folderPath);
     });
   }
@@ -461,8 +461,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.readFolder}.
    */
-  public static readFolderAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]> {
-    return FileSystem._wrapExceptionAsync(async () => {
+  public static async readFolderAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]> {
+    return await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...READ_FOLDER_DEFAULT_OPTIONS,
         ...options
@@ -494,8 +494,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.deleteFolder}.
    */
-  public static deleteFolderAsync(folderPath: string): Promise<void> {
-    return FileSystem._wrapExceptionAsync(() => {
+  public static async deleteFolderAsync(folderPath: string): Promise<void> {
+    return await FileSystem._wrapExceptionAsync(() => {
       return fsx.remove(folderPath);
     });
   }
@@ -517,8 +517,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.ensureEmptyFolder}.
    */
-  public static ensureEmptyFolderAsync(folderPath: string): Promise<void> {
-    return FileSystem._wrapExceptionAsync(() => {
+  public static async ensureEmptyFolderAsync(folderPath: string): Promise<void> {
+    return await FileSystem._wrapExceptionAsync(() => {
       return fsx.emptyDir(folderPath);
     });
   }
@@ -568,8 +568,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.writeFile}.
    */
-  public static writeFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void> {
-    return FileSystem._wrapExceptionAsync(async () => {
+  public static async writeFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void> {
+    return await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...WRITE_FILE_DEFAULT_OPTIONS,
         ...options
@@ -638,8 +638,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.appendToFile}.
    */
-  public static appendToFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void> {
-    return FileSystem._wrapExceptionAsync(async () => {
+  public static async appendToFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void> {
+    return await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...APPEND_TO_FILE_DEFAULT_OPTIONS,
         ...options
@@ -692,8 +692,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.readFile}.
    */
-  public static readFileAsync(filePath: string, options?: IFileSystemReadFileOptions): Promise<string> {
-    return FileSystem._wrapExceptionAsync(async () => {
+  public static async readFileAsync(filePath: string, options?: IFileSystemReadFileOptions): Promise<string> {
+    return await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...READ_FILE_DEFAULT_OPTIONS,
         ...options
@@ -722,8 +722,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.readFileToBuffer}.
    */
-  public static readFileToBufferAsync(filePath: string): Promise<Buffer> {
-    return FileSystem._wrapExceptionAsync(() => {
+  public static async readFileToBufferAsync(filePath: string): Promise<Buffer> {
+    return await FileSystem._wrapExceptionAsync(() => {
       return fsx.readFile(filePath);
     });
   }
@@ -742,8 +742,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.copyFile}.
    */
-  public static copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void> {
-    return FileSystem._wrapExceptionAsync(() => {
+  public static async copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void> {
+    return await FileSystem._wrapExceptionAsync(() => {
       return fsx.copy(options.sourcePath, options.destinationPath);
     });
   }
@@ -774,8 +774,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.deleteFile}.
    */
-  public static deleteFileAsync(filePath: string, options?: IFileSystemDeleteFileOptions): Promise<void> {
-    return FileSystem._wrapExceptionAsync(async () => {
+  public static async deleteFileAsync(filePath: string, options?: IFileSystemDeleteFileOptions): Promise<void> {
+    return await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...DELETE_FILE_DEFAULT_OPTIONS,
         ...options
@@ -809,8 +809,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.getLinkStatistics}.
    */
-  public static getLinkStatisticsAsync(path: string): Promise<FileSystemStats> {
-    return FileSystem._wrapExceptionAsync(() => {
+  public static async getLinkStatisticsAsync(path: string): Promise<FileSystemStats> {
+    return await FileSystem._wrapExceptionAsync(() => {
       return fsx.lstat(path);
     });
   }
@@ -835,8 +835,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.readLink}.
    */
-  public static readLinkAsync(path: string): Promise<string> {
-    return FileSystem._wrapExceptionAsync(() => {
+  public static async readLinkAsync(path: string): Promise<string> {
+    return await FileSystem._wrapExceptionAsync(() => {
       return fsx.readlink(path);
     });
   }
@@ -855,8 +855,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.createSymbolicLinkJunction}.
    */
-  public static createSymbolicLinkJunctionAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    return FileSystem._wrapExceptionAsync(() => {
+  public static async createSymbolicLinkJunctionAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
+    return await FileSystem._wrapExceptionAsync(() => {
       // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
       return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'junction');
     });
@@ -875,8 +875,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.createSymbolicLinkFile}.
    */
-  public static createSymbolicLinkFileAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    return FileSystem._wrapExceptionAsync(() => {
+  public static async createSymbolicLinkFileAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
+    return await FileSystem._wrapExceptionAsync(() => {
       return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'file');
     });
   }
@@ -894,8 +894,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.createSymbolicLinkFolder}.
    */
-  public static createSymbolicLinkFolderAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    return FileSystem._wrapExceptionAsync(() => {
+  public static async createSymbolicLinkFolderAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
+    return await FileSystem._wrapExceptionAsync(() => {
       return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'dir');
     });
   }
@@ -913,8 +913,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.createHardLink}.
    */
-  public static createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    return FileSystem._wrapExceptionAsync(() => {
+  public static async createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
+    return await FileSystem._wrapExceptionAsync(() => {
       return fsx.link(options.linkTargetPath, options.newLinkPath);
     });
   }
@@ -933,8 +933,8 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.getRealPath}.
    */
-  public static getRealPathAsync(linkPath: string): Promise<string> {
-    return FileSystem._wrapExceptionAsync(() => {
+  public static async getRealPathAsync(linkPath: string): Promise<string> {
+    return await FileSystem._wrapExceptionAsync(() => {
       return fsx.realpath(linkPath);
     });
   }
