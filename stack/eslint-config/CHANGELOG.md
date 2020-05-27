@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Wed, 08 Apr 2020 04:07:33 GMT and should not be manually modified.
+This log was last generated on Wed, 27 May 2020 05:15:10 GMT and should not be manually modified.
+
+## 0.5.8
+Wed, 27 May 2020 05:15:10 GMT
+
+### Patches
+
+- Relax "max-lines" lint rule to 2,000 lines instead of 1,000 lines
 
 ## 0.5.7
 Wed, 08 Apr 2020 04:07:33 GMT

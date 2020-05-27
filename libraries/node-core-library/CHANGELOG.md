@@ -1,6 +1,14 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Tue, 26 May 2020 23:00:25 GMT and should not be manually modified.
+This log was last generated on Wed, 27 May 2020 05:15:10 GMT and should not be manually modified.
+
+## 3.23.0
+Wed, 27 May 2020 05:15:10 GMT
+
+### Minor changes
+
+- Add an "FileSystemStats" alias to avoid the need to import "fs" when using the FileSystem API
+- Add FileSystem.readLink() and readLinkAsync()
 
 ## 3.22.1
 Tue, 26 May 2020 23:00:25 GMT
