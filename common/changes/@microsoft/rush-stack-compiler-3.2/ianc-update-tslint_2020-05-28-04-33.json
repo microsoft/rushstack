@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update TSLint to 5.20.1",
+      "type": "minor",
+      "packageName": "@microsoft/rush-stack-compiler-3.2"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-3.2",
+  "email": "iclanton@users.noreply.github.com"
+}
