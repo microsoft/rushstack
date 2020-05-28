@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "3.23.1",
-    "@microsoft/rush-lib": "5.23.4",
+    "@microsoft/rush-lib": "5.23.5",
     "@rushstack/ts-command-line": "4.4.1"
   },
   "devDependencies": {
