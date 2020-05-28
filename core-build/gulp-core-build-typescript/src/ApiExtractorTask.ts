@@ -47,7 +47,7 @@ export class ApiExtractorTask extends RSCTask<IApiExtractorTaskConfig>  {
     };
 
     const ApiExtractorRunner: typeof TApiExtractorRunner = this._rushStackCompiler.ApiExtractorRunner;
-    const extractorConfig: ExtractorConfig = ApiExtractorRunner.apiExtractor.ExtractorConfig.loadFileAndPrepare(
+    const extractorConfig: ExtractorConfig = this._rushStackCompiler.ApiExtractor.ExtractorConfig.loadFileAndPrepare(
       this._getApiExtractorConfigFilePath(this.buildConfig.rootPath)
     );
 
