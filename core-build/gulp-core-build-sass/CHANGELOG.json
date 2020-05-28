@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.11.0",
+      "tag": "@microsoft/gulp-core-build-sass_v4.11.0",
+      "date": "Thu, 28 May 2020 00:09:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow configuration of autoprefixer plugin"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.10.19",
       "tag": "@microsoft/gulp-core-build-sass_v4.10.19",
       "date": "Wed, 27 May 2020 05:15:10 GMT",

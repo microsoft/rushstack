@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Wed, 27 May 2020 05:15:11 GMT and should not be manually modified.
+This log was last generated on Thu, 28 May 2020 00:09:21 GMT and should not be manually modified.
+
+## 4.11.0
+Thu, 28 May 2020 00:09:21 GMT
+
+### Minor changes
+
+- Allow configuration of autoprefixer plugin
 
 ## 4.10.19
 Wed, 27 May 2020 05:15:10 GMT
