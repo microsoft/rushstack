@@ -93,7 +93,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           + 'the shrinkwrap file.'
         ));
         throw new AlreadyReportedError();
-    }
+      }
     }
 
     // dependency name --> version specifier
@@ -179,7 +179,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         } else if (dependencySpecifier.specifierType === 'workspace') {
           // Already specified as a local project. Allow the package manager to validate this
           continue;
-          }
+        }
 
         // PNPM does not specify peer dependencies for workspaces in the shrinkwrap, so skip validating these
         if (this.rushConfiguration.packageManager === 'pnpm' && dependencyType === DependencyType.Peer) {

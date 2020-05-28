@@ -26,6 +26,7 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml, IPnpmShrinkwrapImporterYaml } from './PnpmShrinkwrapFile';
 import { PnpmProjectDependencyManifest } from './PnpmProjectDependencyManifest';
 import { PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
+import { DependencySpecifier } from '../DependencySpecifier';
 
 // special flag for debugging, will print extra diagnostic information,
 // but comes with performance cost
@@ -86,7 +87,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     const localDependencies: PackageJsonDependency[] = [
       ...project.packageJsonEditor.dependencyList,
       ...project.packageJsonEditor.devDependencyList
-    ].filter(x => x.version.startsWith('workspace:'));
+    ].filter(x => new DependencySpecifier(x.name, x.version).specifierType === 'workspace');
 
     for (const { name } of localDependencies) {
       const matchedRushPackage: RushConfigurationProject | undefined =
@@ -115,17 +116,18 @@ export class PnpmLinkManager extends BaseLinkManager {
     if (!workspaceImporter) {
       throw new InternalError(`Cannot find shrinkwrap entry using importer key for workspace project: ${importerKey}`);
     }
-
     const pnpmProjectDependencyManifest: PnpmProjectDependencyManifest = new PnpmProjectDependencyManifest({
       pnpmShrinkwrapFile,
       project
     });
+    const useProjectDependencyManifest: boolean =
+      !this._rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection;
 
-    // Dev dependen
+    // Dev dependencies take priority over normal dependencies
     const dependencies: PackageJsonDependency[] = [
       ...project.packageJsonEditor.dependencyList,
       ...project.packageJsonEditor.devDependencyList
-    ].filter(x => !x.version.startsWith('workspace:'));
+    ].filter(x => new DependencySpecifier(x.name, x.version).specifierType !== 'workspace');
 
     for (const { name, dependencyType } of dependencies) {
       // read the version number from the shrinkwrap entry
@@ -141,11 +143,14 @@ export class PnpmLinkManager extends BaseLinkManager {
           version = (workspaceImporter.optionalDependencies || {})[name];
           break;
         case DependencyType.Peer:
-          // Peer dependencies do not need to be considered
+          // Peer dependencies do not need to be considered since they aren't a true
+          // dependency, and would be satisfied in the consuming package. They are
+          // also not specified in the workspace importer
           continue;
       }
 
       if (!version) {
+        // Optional dependencies by definition may not exist, so avoid throwing on these
         if (dependencyType !== DependencyType.Optional) {
           throw new InternalError(
             `Cannot find shrinkwrap entry dependency "${name}" for workspace project: ${project.packageName}`
@@ -154,7 +159,8 @@ export class PnpmLinkManager extends BaseLinkManager {
         continue;
       }
 
-      if (!this._rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection) {
+      if (useProjectDependencyManifest) {
+        // Add to the manifest and provide all the parent dependencies
         pnpmProjectDependencyManifest.addDependency(
           name,
           version,
@@ -166,7 +172,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       }
     }
 
-    if (!this._rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection) {
+    if (useProjectDependencyManifest) {
       pnpmProjectDependencyManifest.save();
     } else {
       pnpmProjectDependencyManifest.deleteIfExists();
