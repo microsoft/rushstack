@@ -2,6 +2,32 @@
   "name": "@microsoft/rush-stack-compiler-3.7",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@microsoft/rush-stack-compiler-3.7_v0.3.0",
+      "date": "Thu, 28 May 2020 05:59:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Change the way the typescript, tslint, and api-extractor packages are exported."
+          },
+          {
+            "comment": "Update TSLint to 5.20.1"
+          },
+          {
+            "comment": "Update tsconfig-node.json to target es2017 (supported by Node 8); this enables native async/await, and will show complete callstacks when using Node 12"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.8.7` to `7.8.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.23.0` to `3.23.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.17",
       "tag": "@microsoft/rush-stack-compiler-3.7_v0.2.17",
       "date": "Wed, 27 May 2020 05:15:11 GMT",
