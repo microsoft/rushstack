@@ -3,10 +3,6 @@
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
   "packages": [
     {
-      "name": "@microsoft/ts-command-line",
-      "allowedCategories": [ "tests" ]
-    },
-    {
       "name": "@jest/core",
       "allowedCategories": [ "libraries" ]
     },
@@ -128,6 +124,10 @@
     },
     {
       "name": "@microsoft/teams-js",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@microsoft/ts-command-line",
       "allowedCategories": [ "tests" ]
     },
     {
@@ -460,6 +460,10 @@
     },
     {
       "name": "jsdom",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "import-lazy",
       "allowedCategories": [ "libraries" ]
     },
     {

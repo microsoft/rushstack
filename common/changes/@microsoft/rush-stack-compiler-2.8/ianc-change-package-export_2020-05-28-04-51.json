@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack-compiler-2.8",
+      "comment": "Change the way the typescript, tslint, and api-extractor packages are exported.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-2.8",
+  "email": "iclanton@users.noreply.github.com"
+}
