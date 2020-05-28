@@ -324,10 +324,13 @@ function _cleanInstallFolder(rushTempFolder: string, packageInstallFolder: strin
     if (fs.existsSync(nodeModulesFolder)) {
       const rushRecyclerFolder: string = _ensureAndJoinPath(
         rushTempFolder,
-        'rush-recycler',
-        `install-run-${Date.now().toString()}`
+        'rush-recycler'
       );
-      fs.renameSync(nodeModulesFolder, rushRecyclerFolder);
+
+      fs.renameSync(
+        nodeModulesFolder,
+        path.join(rushRecyclerFolder, `install-run-${Date.now().toString()}`)
+      );
     }
   } catch (e) {
     throw new Error(`Error cleaning the package install folder (${packageInstallFolder}): ${e}`);
