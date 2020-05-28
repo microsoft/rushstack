@@ -273,7 +273,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.updateTimes}.
    */
   public static async updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void> {
-    return await FileSystem._wrapExceptionAsync(() => {
+    await FileSystem._wrapExceptionAsync(() => {
       // This cast is needed because the fs-extra typings require both parameters
       // to have the same type (number or Date), whereas Node.js does not require that.
       return fsx.utimes(path, times.accessedTime as number, times.modifiedTime as number);
