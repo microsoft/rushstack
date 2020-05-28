@@ -297,7 +297,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.changePosixModeBits}.
    */
   public static async changePosixModeBitsAsync(path: string, mode: PosixModeBits): Promise<void> {
-    return await FileSystem._wrapExceptionAsync(() => {
+    await FileSystem._wrapExceptionAsync(() => {
       return fsx.chmod(path, mode);
     });
   }
@@ -385,7 +385,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.move}.
    */
   public static async moveAsync(options: IFileSystemMoveOptions): Promise<void> {
-    return await FileSystem._wrapExceptionAsync(async () => {
+    await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...MOVE_DEFAULT_OPTIONS,
         ...options
@@ -430,7 +430,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.ensureFolder}.
    */
   public static async ensureFolderAsync(folderPath: string): Promise<void> {
-    return await FileSystem._wrapExceptionAsync(() => {
+    await FileSystem._wrapExceptionAsync(() => {
       return fsx.ensureDir(folderPath);
     });
   }
@@ -495,7 +495,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.deleteFolder}.
    */
   public static async deleteFolderAsync(folderPath: string): Promise<void> {
-    return await FileSystem._wrapExceptionAsync(() => {
+    await FileSystem._wrapExceptionAsync(() => {
       return fsx.remove(folderPath);
     });
   }
@@ -518,7 +518,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.ensureEmptyFolder}.
    */
   public static async ensureEmptyFolderAsync(folderPath: string): Promise<void> {
-    return await FileSystem._wrapExceptionAsync(() => {
+    await FileSystem._wrapExceptionAsync(() => {
       return fsx.emptyDir(folderPath);
     });
   }
@@ -569,7 +569,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.writeFile}.
    */
   public static async writeFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void> {
-    return await FileSystem._wrapExceptionAsync(async () => {
+    await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...WRITE_FILE_DEFAULT_OPTIONS,
         ...options
@@ -639,7 +639,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.appendToFile}.
    */
   public static async appendToFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void> {
-    return await FileSystem._wrapExceptionAsync(async () => {
+    await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...APPEND_TO_FILE_DEFAULT_OPTIONS,
         ...options
@@ -743,7 +743,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.copyFile}.
    */
   public static async copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void> {
-    return await FileSystem._wrapExceptionAsync(() => {
+    await FileSystem._wrapExceptionAsync(() => {
       return fsx.copy(options.sourcePath, options.destinationPath);
     });
   }
@@ -775,7 +775,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.deleteFile}.
    */
   public static async deleteFileAsync(filePath: string, options?: IFileSystemDeleteFileOptions): Promise<void> {
-    return await FileSystem._wrapExceptionAsync(async () => {
+    await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...DELETE_FILE_DEFAULT_OPTIONS,
         ...options
@@ -856,7 +856,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.createSymbolicLinkJunction}.
    */
   public static async createSymbolicLinkJunctionAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    return await FileSystem._wrapExceptionAsync(() => {
+    await FileSystem._wrapExceptionAsync(() => {
       // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
       return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'junction');
     });
@@ -876,7 +876,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.createSymbolicLinkFile}.
    */
   public static async createSymbolicLinkFileAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    return await FileSystem._wrapExceptionAsync(() => {
+    await FileSystem._wrapExceptionAsync(() => {
       return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'file');
     });
   }
@@ -895,7 +895,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.createSymbolicLinkFolder}.
    */
   public static async createSymbolicLinkFolderAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    return await FileSystem._wrapExceptionAsync(() => {
+    await FileSystem._wrapExceptionAsync(() => {
       return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'dir');
     });
   }
@@ -914,7 +914,7 @@ export class FileSystem {
    * An async version of {@link FileSystem.createHardLink}.
    */
   public static async createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    return await FileSystem._wrapExceptionAsync(() => {
+    await FileSystem._wrapExceptionAsync(() => {
       return fsx.link(options.linkTargetPath, options.newLinkPath);
     });
   }
