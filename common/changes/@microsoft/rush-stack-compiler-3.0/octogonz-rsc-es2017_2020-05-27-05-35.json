@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update tsconfig-node.json to target es2017 (supported by Node 8); this enables native async/await, and will show complete callstacks when using Node 12",
+      "type": "minor",
+      "packageName": "@microsoft/rush-stack-compiler-3.0"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-3.0",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
