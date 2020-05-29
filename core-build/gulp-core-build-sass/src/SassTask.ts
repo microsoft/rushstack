@@ -91,9 +91,9 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     'src/**/*.scss.ts'
   ];
 
-  private _postCSSPlugins: postcss.AcceptedPlugin[] = [
-    autoprefixer(this.taskConfig.autoprefixerOptions)
-  ];
+  private get _postCSSPlugins(): postcss.AcceptedPlugin[] {
+    return [autoprefixer(this.taskConfig.autoprefixerOptions)];
+  }
 
   public constructor() {
     super(
