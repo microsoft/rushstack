@@ -235,6 +235,7 @@ export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
 
 // @public
 export interface IFileSystemCopyFileOptions {
+    alreadyExistsBehavior?: AlreadyExistsBehavior;
     destinationPath: string;
     sourcePath: string;
 }

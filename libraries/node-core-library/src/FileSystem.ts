@@ -120,22 +120,29 @@ export interface IFileSystemCopyFileOptions {
    * The path may be absolute or relative.
    */
   destinationPath: string;
+
+  /**
+   * Specifies what to do if the target object already exists.
+   */
+  alreadyExistsBehavior?: AlreadyExistsBehavior;
 }
 
 /**
  * Specifies the behavior of {@link FileSystem.copyFiles} in a situation where the target object
  * already exists.
+ * @public
  */
 export const enum AlreadyExistsBehavior {
   /**
-   * If the destination object exists, report an error.  This is the default behavior.
-   */
-  Error = 'error',
-
-  /**
    * If the destination object exists, overwrite it.
+   * This is the default behavior for {@link FileSystem.copyFiles}.
    */
   Overwrite = 'overwrite',
+
+  /**
+   * If the destination object exists, report an error.
+   */
+  Error = 'error',
 
   /**
    * If the destination object exists, skip it and continue the operation.
@@ -811,13 +818,29 @@ export class FileSystem {
   }
 
   /**
-   * Copies a file from one location to another.
+   * Copies a single file from one location to another.
    * By default, destinationPath is overwritten if it already exists.
-   * Behind the scenes it uses `fs.copyFileSync()`.
+   *
+   * @remarks
+   * The `copyFile()` API cannot be used to copy folders.  It copies at most one file.
+   * Use {@link FileSystem.copyFiles} if you need to recursively copy a tree of folders.
+   *
+   * The implementation is based on `copySync()` from the `fs-extra` package.
    */
   public static copyFile(options: IFileSystemCopyFileOptions): void {
+    const existsBehavior: AlreadyExistsBehavior = options.alreadyExistsBehavior !== undefined
+      ? options.alreadyExistsBehavior : AlreadyExistsBehavior.Overwrite;
+
+    if (FileSystem.getStatistics(options.sourcePath).isDirectory()) {
+      throw new Error('The specified path refers to a folder; this operation expects a file object:\n'
+        + options.sourcePath);
+    }
+
     FileSystem._wrapException(() => {
-      fsx.copySync(options.sourcePath, options.destinationPath);
+      fsx.copySync(options.sourcePath, options.destinationPath, {
+        errorOnExist: existsBehavior === AlreadyExistsBehavior.Error,
+        overwrite: existsBehavior === AlreadyExistsBehavior.Overwrite
+      });
     });
   }
 
@@ -825,19 +848,35 @@ export class FileSystem {
    * An async version of {@link FileSystem.copyFile}.
    */
   public static async copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void> {
+    const existsBehavior: AlreadyExistsBehavior = options.alreadyExistsBehavior !== undefined
+      ? options.alreadyExistsBehavior : AlreadyExistsBehavior.Overwrite;
+
+    if (FileSystem.getStatistics(options.sourcePath).isDirectory()) {
+      throw new Error('The specified path refers to a folder; this operation expects a file object:\n'
+        + options.sourcePath);
+    }
+
     await FileSystem._wrapExceptionAsync(() => {
-      return fsx.copy(options.sourcePath, options.destinationPath);
+      return fsx.copy(options.sourcePath, options.destinationPath, {
+        errorOnExist: existsBehavior === AlreadyExistsBehavior.Error,
+        overwrite: existsBehavior === AlreadyExistsBehavior.Overwrite
+      });
     });
   }
 
   /**
-   * Copies a file from one location to another.
+   * Copies a file or folder from one location to another, recursively copying any folder contents.
    * By default, destinationPath is overwritten if it already exists.
-   * Behind the scenes it uses `fs.copyFileSync()`.
+   *
+   * @remarks
+   * If you only intend to copy a single file, it is recommended to use {@link FileSystem.copyFile}
+   * instead to more clearly communicate the intended operation.
+   *
+   * The implementation is based on `copySync()` from the `fs-extra` package.
    */
   public static copyFiles(options: IFileSystemCopyFilesOptions): void {
     const existsBehavior: AlreadyExistsBehavior = options.alreadyExistsBehavior !== undefined
-      ? options.alreadyExistsBehavior : AlreadyExistsBehavior.Error;
+      ? options.alreadyExistsBehavior : AlreadyExistsBehavior.Overwrite;
 
     FileSystem._wrapException(() => {
       fsx.copySync(options.sourcePath, options.destinationPath, {
@@ -851,14 +890,13 @@ export class FileSystem {
   }
 
   /**
-   * An async version of {@link FileSystem.copyFile}.
+   * An async version of {@link FileSystem.copyFiles}.
    */
   public static async copyFilesAsync(options: IFileSystemCopyFilesOptions): Promise<void> {
+    const existsBehavior: AlreadyExistsBehavior = options.alreadyExistsBehavior !== undefined
+      ? options.alreadyExistsBehavior : AlreadyExistsBehavior.Overwrite;
+
     await FileSystem._wrapExceptionAsync(async () => {
-
-      const existsBehavior: AlreadyExistsBehavior = options.alreadyExistsBehavior !== undefined
-        ? options.alreadyExistsBehavior : AlreadyExistsBehavior.Error;
-
       fsx.copySync(options.sourcePath, options.destinationPath, {
         dereference: !!options.dereferenceSymlinks,
         errorOnExist: existsBehavior === AlreadyExistsBehavior.Error,
