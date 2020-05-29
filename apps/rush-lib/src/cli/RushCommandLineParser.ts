@@ -18,6 +18,7 @@ import { BaseScriptAction } from '../cli/scriptActions/BaseScriptAction';
 import { AddAction } from './actions/AddAction';
 import { ChangeAction } from './actions/ChangeAction';
 import { CheckAction } from './actions/CheckAction';
+import { DeployAction } from './actions/DeployAction';
 import { UpdateAction } from './actions/UpdateAction';
 import { InstallAction } from './actions/InstallAction';
 import { InitAction } from './actions/InitAction';
@@ -156,6 +157,7 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new AddAction(this));
       this.addAction(new ChangeAction(this));
       this.addAction(new CheckAction(this));
+      this.addAction(new DeployAction(this));
       this.addAction(new InstallAction(this));
       this.addAction(new InitAction(this));
       this.addAction(new LinkAction(this));
