@@ -11,8 +11,7 @@ import {
   FileSystemStats,
   Sort,
   JsonFile,
-  IPackageJson,
-  PackageName,
+  IPackageJson
 } from "@rushstack/node-core-library";
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
@@ -37,6 +36,12 @@ interface IDeployScenarioJson {
   subdeployments?: IDeploySubdeploymentsJson;
 }
 
+interface ISubdeploymentState {
+  targetSubdeploymentFolder: string;
+  symlinkAnalyzer: SymlinkAnalyzer;
+  foldersToCopy: Set<string>;
+}
+
 export class DeployManager {
   private readonly _rushConfiguration: RushConfiguration;
 
@@ -44,9 +49,6 @@ export class DeployManager {
   private _sourceRootFolder: string;
 
   private readonly _packageJsonLookup: PackageJsonLookup;
-  private readonly _symlinkAnalyzer: SymlinkAnalyzer;
-
-  private readonly _foldersToCopy: Set<string>;
 
   private _deployScenarioJson: IDeployScenarioJson;
   private _deployScenarioProjectJsonsByName: Map<string, IDeployScenarioProjectJson>;
@@ -54,8 +56,6 @@ export class DeployManager {
   public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
     this._packageJsonLookup = new PackageJsonLookup();
-    this._symlinkAnalyzer = new SymlinkAnalyzer();
-    this._foldersToCopy = new Set<string>();
     this._deployScenarioProjectJsonsByName = new Map();
   }
 
@@ -85,11 +85,11 @@ export class DeployManager {
     }
   }
 
-  private _collectFoldersRecursive(packageJsonPath: string): void {
+  private _collectFoldersRecursive(packageJsonPath: string, subdemploymentState: ISubdeploymentState): void {
     const packageJsonFolderPath: string = path.dirname(packageJsonPath);
 
-    if (!this._foldersToCopy.has(packageJsonFolderPath)) {
-      this._foldersToCopy.add(packageJsonFolderPath);
+    if (!subdemploymentState.foldersToCopy.has(packageJsonFolderPath)) {
+      subdemploymentState.foldersToCopy.add(packageJsonFolderPath);
 
       const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
 
@@ -129,7 +129,7 @@ export class DeployManager {
             try {
               const resolvedPath: string = require("fs").realpathSync(filePath);
 
-              this._symlinkAnalyzer.analyzePath(filePath);
+              subdemploymentState.symlinkAnalyzer.analyzePath(filePath);
               return resolvedPath;
             } catch (realpathErr) {
               if (realpathErr.code !== "ENOENT") {
@@ -154,24 +154,25 @@ export class DeployManager {
           throw new Error(`Error finding package.json for ${resolvedDependency}`);
         }
 
-        this._collectFoldersRecursive(dependencyPackageJsonPath);
+        this._collectFoldersRecursive(dependencyPackageJsonPath, subdemploymentState);
       }
     }
   }
 
-  private _remapPathForDeployFolder(absolutePathInSourceFolder: string): string {
+  private _remapPathForDeployFolder(absolutePathInSourceFolder: string,
+    subdemploymentState: ISubdeploymentState): string {
 
     if (!Path.isUnderOrEqual(absolutePathInSourceFolder, this._sourceRootFolder)) {
       throw new Error("Source path is not under " + this._sourceRootFolder + "\n" + absolutePathInSourceFolder);
     }
     const relativePath: string = path.relative(this._sourceRootFolder, absolutePathInSourceFolder);
-    const absolutePathInTargetFolder: string = path.join(this._targetRootFolder, relativePath);
+    const absolutePathInTargetFolder: string = path.join(subdemploymentState.targetSubdeploymentFolder, relativePath);
     return absolutePathInTargetFolder;
   }
 
-  private _deployFolder(sourceFolderPath: string): void {
+  private _deployFolder(sourceFolderPath: string, subdemploymentState: ISubdeploymentState): void {
 
-    const targetFolderPath: string = this._remapPathForDeployFolder(sourceFolderPath);
+    const targetFolderPath: string = this._remapPathForDeployFolder(sourceFolderPath, subdemploymentState);
 
     // When copying a package folder, we always ignore the node_modules folder; it will be added indirectly
     // only if needed
@@ -187,7 +188,7 @@ export class DeployManager {
 
         const stats: FileSystemStats = FileSystem.getLinkStatistics(src);
         if (stats.isSymbolicLink()) {
-          this._symlinkAnalyzer.analyzePath(src);
+          subdemploymentState.symlinkAnalyzer.analyzePath(src);
           return false;
         }
 
@@ -196,11 +197,11 @@ export class DeployManager {
     });
   }
 
-  private _deploySymlink(originalLinkInfo: ILinkInfo): boolean {
+  private _deploySymlink(originalLinkInfo: ILinkInfo, subdemploymentState: ISubdeploymentState): boolean {
     const linkInfo: ILinkInfo = {
       kind: originalLinkInfo.kind,
-      linkPath: this._remapPathForDeployFolder(originalLinkInfo.linkPath),
-      targetPath: this._remapPathForDeployFolder(originalLinkInfo.targetPath),
+      linkPath: this._remapPathForDeployFolder(originalLinkInfo.linkPath, subdemploymentState),
+      targetPath: this._remapPathForDeployFolder(originalLinkInfo.targetPath, subdemploymentState),
     };
 
     // Has the link target been created yet?  If not, we should try again later
@@ -266,6 +267,12 @@ export class DeployManager {
       }
     }
 
+    const subdemploymentState: ISubdeploymentState = {
+      targetSubdeploymentFolder: path.join(this._targetRootFolder, subdeploymentFolderName || ''),
+      symlinkAnalyzer: new SymlinkAnalyzer(),
+      foldersToCopy: new Set<string>()
+    };
+
     for (const projectName of includedProjectNamesSet) {
       console.log(`Analyzing project "${projectName}"`);
       const project: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(projectName);
@@ -274,21 +281,21 @@ export class DeployManager {
         throw new Error(`The project ${projectName} is not defined in rush.json`);
       }
 
-      this._collectFoldersRecursive(path.join(project.projectFolder, 'package.json'));
+      this._collectFoldersRecursive(path.join(project.projectFolder, 'package.json'), subdemploymentState);
     }
 
-    Sort.sortSet(this._foldersToCopy);
+    Sort.sortSet(subdemploymentState.foldersToCopy);
 
-    console.log("Copying folders");
-    for (const folderToCopy of this._foldersToCopy) {
-      this._deployFolder(folderToCopy);
+    console.log("Copying folders...");
+    for (const folderToCopy of subdemploymentState.foldersToCopy) {
+      this._deployFolder(folderToCopy, subdemploymentState);
     }
 
-    console.log("Copying symlinks");
-    const linksToCopy: ILinkInfo[] = this._symlinkAnalyzer.reportSymlinks();
+    console.log("Copying symlinks...");
+    const linksToCopy: ILinkInfo[] = subdemploymentState.symlinkAnalyzer.reportSymlinks();
 
     for (const linkToCopy of linksToCopy) {
-      if (!this._deploySymlink(linkToCopy)) {
+      if (!this._deploySymlink(linkToCopy, subdemploymentState)) {
         throw new Error("Target does not exist: " + JSON.stringify(linkToCopy, undefined, 2));
       }
     }
@@ -333,7 +340,6 @@ export class DeployManager {
           throw new Error(`The subdeploymentProjects specified the name "${subdeploymentProjectName}"` +
             ` which was not found in rush.json`);
         }
-        console.log(`Preparing subdeployment for "${subdeploymentProjectName}"`);
 
         let subdeploymentFolderName: string;
 
@@ -342,13 +348,15 @@ export class DeployManager {
         if (projectSettings && projectSettings.subdeploymentFolderName) {
           subdeploymentFolderName = projectSettings.subdeploymentFolderName;
         } else {
-          subdeploymentFolderName = PackageName.getUnscopedName(subdeploymentProjectName);
+          subdeploymentFolderName = this._rushConfiguration.packageNameParser.getUnscopedName(subdeploymentProjectName);
         }
         if (usedSubdeploymentFolderNames.has(subdeploymentFolderName)) {
           throw new Error(`The subdeployment folder name "${subdeploymentFolderName}" is not unique.`
             + `  Use the "subdeploymentFolderName" setting to specify a different name.`);
         }
         usedSubdeploymentFolderNames.add(subdeploymentFolderName);
+
+        console.log(`\nPreparing subdeployment for "${subdeploymentFolderName}"`);
 
         this._deploySubdeployment([ subdeploymentProjectName ], subdeploymentFolderName);
       }
