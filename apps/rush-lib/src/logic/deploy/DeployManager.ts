@@ -3,6 +3,7 @@
 
 import * as path from "path";
 import * as resolve from "resolve";
+import * as fsx from "fs-extra";
 import {
   Path,
   FileSystem,
@@ -43,7 +44,7 @@ export class DeployManager {
     this._foldersToCopy = new Set<string>();
   }
 
-  private _loadConfigFile(scenarioName): void {
+  private _loadConfigFile(scenarioName: string): void {
     const deployScenarioPath: string = path.join(this._rushConfiguration.commonFolder, 'config/deploy-scenarios',
       scenarioName + '.json');
 
@@ -67,19 +68,19 @@ export class DeployManager {
       // Just the keys from optionalDependencies
       const optionalDependencyNames: Set<string> = new Set<string>();
 
-      for (const name in packageJson.dependencies || {}) {
+      for (const name of Object.keys(packageJson.dependencies || {})) {
         allDependencyNames.add(name);
       }
-      for (const name in packageJson.peerDependencies || {}) {
+      for (const name of Object.keys(packageJson.peerDependencies || {})) {
         allDependencyNames.add(name);
       }
-      for (const name in packageJson.optionalDependencies || {}) {
+      for (const name of Object.keys(packageJson.optionalDependencies || {})) {
         allDependencyNames.add(name);
         optionalDependencyNames.add(name);
       }
 
       for (const dependencyPackageName of allDependencyNames) {
-        const resolvedDependency = resolve.sync(dependencyPackageName, {
+        const resolvedDependency: string = resolve.sync(dependencyPackageName, {
           basedir: packageJsonFolderPath,
           preserveSymlinks: false,
           packageFilter: (pkg, dir) => {
@@ -90,7 +91,7 @@ export class DeployManager {
           },
           realpathSync: (filePath) => {
             try {
-              const resolvedPath = require("fs").realpathSync(filePath);
+              const resolvedPath: string = require("fs").realpathSync(filePath);
 
               this._symlinkAnalyzer.analyzePath(filePath);
               return resolvedPath;
@@ -111,7 +112,8 @@ export class DeployManager {
           throw new Error(`Error resolving ${dependencyPackageName} from ${packageJsonPath}`);
         }
 
-        const dependencyPackageJsonPath = this._packageJsonLookup.tryGetPackageJsonFilePathFor(resolvedDependency);
+        const dependencyPackageJsonPath: string | undefined
+          = this._packageJsonLookup.tryGetPackageJsonFilePathFor(resolvedDependency);
         if (!dependencyPackageJsonPath) {
           throw new Error(`Error finding package.json for ${resolvedDependency}`);
         }
@@ -133,11 +135,86 @@ export class DeployManager {
     this._collectFoldersRecursive(path.join(project.projectFolder, 'package.json'));
   }
 
-  public deploy(scenarioName: string, overwriteExisting: boolean, targetFolder: string | undefined) {
+  private _remapPathForDeployFolder(absolutePathInSourceFolder: string,
+    sourceRootFolder: string, targetRootFolder: string): string {
+
+    if (!Path.isUnderOrEqual(absolutePathInSourceFolder, sourceRootFolder)) {
+      throw new Error("Source path is not under " + sourceRootFolder + "\n" + absolutePathInSourceFolder);
+    }
+    const relativePath: string = path.relative(sourceRootFolder, absolutePathInSourceFolder);
+    const absolutePathInTargetFolder: string = path.join(targetRootFolder, relativePath);
+    return absolutePathInTargetFolder;
+  }
+
+  private _deployFolder(sourceFolderPath: string,
+    sourceRootFolder: string, targetRootFolder: string): void {
+
+    const targetFolderPath: string = this._remapPathForDeployFolder(sourceFolderPath,
+      sourceRootFolder, targetRootFolder);
+
+    // When copying a package folder, we always ignore the node_modules folder; it will be added indirectly
+    // only if needed
+    const pathToIgnore: string = path.join(sourceFolderPath, "node_modules");
+
+    fsx.copySync(sourceFolderPath, targetFolderPath, {
+      overwrite: false,
+      errorOnExist: true,
+      filter: (src: string, dest: string) => {
+        if (Path.isUnderOrEqual(src, pathToIgnore)) {
+          return false;
+        }
+
+        const stats: FileSystemStats = FileSystem.getLinkStatistics(src);
+        if (stats.isSymbolicLink()) {
+          this._symlinkAnalyzer.analyzePath(src);
+          return false;
+        }
+
+        return true;
+      },
+    });
+  }
+
+  public deploy(scenarioName: string, overwriteExisting: boolean, targetFolderParameter: string | undefined): void {
     this._loadConfigFile(scenarioName);
 
     for (const includedProject of this._deployScenarioJson.includedProjects) {
       this._collectProject(includedProject);
     }
+
+    Sort.sortSet(this._foldersToCopy);
+
+    let targetRootFolder: string;
+    if (targetFolderParameter) {
+      targetRootFolder = path.resolve(targetFolderParameter);
+      if (!FileSystem.exists(targetRootFolder)) {
+        throw new Error('The specified target folder does not exist: ' + JSON.stringify(targetFolderParameter));
+      }
+    } else {
+      targetRootFolder = path.join(this._rushConfiguration.commonFolder, 'deploy');
+    }
+
+    console.log("Deploying to target folder: " + targetRootFolder);
+
+    FileSystem.ensureFolder(targetRootFolder);
+
+    // Is the target folder empty?
+    if (FileSystem.readFolder(targetRootFolder).length > 0) {
+      if (overwriteExisting) {
+        console.log('Deleting folder contents because "--overwrite" was specified...');
+        FileSystem.ensureEmptyFolder(targetRootFolder);
+      } else {
+        throw new Error('The deploy target folder is not empty. You can specify "--overwrite"'
+          + ' to recursively delete all folder contents.');
+      }
+    }
+
+    const sourceRootFolder: string = this._rushConfiguration.rushJsonFolder;
+
+    console.log("Copying folders");
+    for (const folderToCopy of this._foldersToCopy) {
+      this._deployFolder(folderToCopy, sourceRootFolder, targetRootFolder);
+    }
+
   }
 }
