@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.11.2",
+      "tag": "@microsoft/gulp-core-build-sass_v4.11.2",
+      "date": "Fri, 29 May 2020 21:35:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix static autoprefixer configuration options"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.11.1",
       "tag": "@microsoft/gulp-core-build-sass_v4.11.1",
       "date": "Thu, 28 May 2020 05:59:02 GMT",
