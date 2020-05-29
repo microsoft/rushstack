@@ -44,7 +44,8 @@
     "true-case-path": "~2.2.1",
     "wordwrap": "~1.0.0",
     "z-schema": "~3.18.3",
-    "resolve": "~1.17.0"
+    "resolve": "~1.17.0",
+    "fs-extra": "~7.0.1"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "6.4.20",
