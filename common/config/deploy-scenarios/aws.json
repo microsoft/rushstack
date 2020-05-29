@@ -1,0 +1,31 @@
+{
+  /**
+   * When deploying a local Rush project, by the "devDependencies" are normally excluded.
+   * Set this to "true" to include them.
+   *
+   * The default value is false.
+   */
+   "includeDevDependencies": false,
+
+  /**
+   * When deploying a local Rush project, by the .npmignore filter is normally applied, so the included files are
+   * what would be packaged by "npm pack".  Set this to "true" to include all files (except for the "node_modules"
+   * folder).
+   *
+   * The default value is false.
+   */
+   "includeNpmIgnoreFiles": false,
+
+  /**
+   * The list of local Rush projects to be included in the deployment.  For each project, the "rush deploy" operation
+   * will recursively include the package.json dependencies which may be NPM packages or other local Rush projects.
+   */
+  "includedProjects": [
+    {
+      /**
+       * The package name for the project, which must be defined in rush.json.
+       */
+      "projectName": "rush-lib"
+    }
+  ]
+}
