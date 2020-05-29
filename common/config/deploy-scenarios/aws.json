@@ -5,7 +5,7 @@
    *
    * The default value is false.
    */
-   "includeDevDependencies": false,
+  "includeDevDependencies": false,
 
   /**
    * When deploying a local Rush project, by the .npmignore filter is normally applied, so the included files are
@@ -14,18 +14,62 @@
    *
    * The default value is false.
    */
-   "includeNpmIgnoreFiles": false,
+  "includeNpmIgnoreFiles": false,
 
   /**
-   * The list of local Rush projects to be included in the deployment.  For each project, the "rush deploy" operation
-   * will recursively include the package.json dependencies which may be NPM packages or other local Rush projects.
+   * Specify how symlinks will be created in the deployed folder:
+   *
+   * - "default": Create the symlinks after copying the files; this is the default behavior.
+   * - "script": A Node.js script called "create-symlinks.js" will be written.  When executed, this script will
+   *   create the symlinks described in the "deploy-metadata.json" output file.
+   * - "none": Do nothing; some other tool may create them later.
    */
-  "includedProjects": [
+  "symlinkCreation": "script",
+
+  /**
+   * Customize how local Rush projects are processed during deployment.  If subdeployments are not enabled,
+   * then this section also defines the list of projects to be deployed.
+   */
+  "projectSettings": [
     {
       /**
-       * The package name for the project, which must be defined in rush.json.
+       * The full package name of the project, which must be declared in rush.json.
        */
-      "projectName": "@microsoft/api-extractor"
+      "projectName": "@microsoft/api-extractor",
+
+      /**
+       * This optional setting is only relevant when the "subdeploymentProjectNames" setting is specified.  It
+       * customizes the subdeployment folder name.  If omitted, the default subdeployment folder name will be the
+       * package name without its NPM scope.
+       */
+      // "subdeploymentFolderName": "ae",
+
+      /**
+       * A list of additional local Rush projects to be deployed with this project (beyond the package.json
+       * dependencies).  Specify full package names, which must be declared in rush.json.
+       */
+      "additionalProjectsToInclude": [
+        "@microsoft/api-documenter"
+      ]
     }
-  ]
+  ],
+
+  "subdeployments": {
+    /**
+     * This optional setting enables multiple deployments to be prepared by a single invocation of "rush deploy".
+     * The default value is false.
+     */
+    "enabled": true,
+
+    /**
+     * The "subdeploymentProjects" setting is an array of Rush project names.  These names must be full package names
+     * as declared in rush.json.  For each entry, a subdeployment folder will be created under the "rush deploy"
+     * target folder.  (The folder name can be customized using the "subdeploymentFolderName" project setting.)
+     * Each subdeployment folder will receive its own copy of the named project and its associated dependencies.
+     *
+     * Whereas if subdeployments are NOT enabled, then all projects from the "projectSettings" section will be
+     * deployed as a single set, without creating subdeployment folders.
+     */
+    "subdeploymentProjects": [ "@microsoft/api-extractor", "repo-toolbox" ]
+  }
 }

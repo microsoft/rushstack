@@ -48,6 +48,6 @@ export class DeployAction extends BaseRushAction {
 
   protected async run(): Promise<void> {
     const deployManager: DeployManager = new DeployManager(this.rushConfiguration);
-    deployManager.deploy(this._scenario.value!, !!this._overwrite.value, this._targetFolder.value);
+    deployManager.deployScenario(this._scenario.value!, !!this._overwrite.value, this._targetFolder.value);
   }
 }

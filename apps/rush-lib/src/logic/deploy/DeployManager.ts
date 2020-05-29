@@ -12,6 +12,7 @@ import {
   Sort,
   JsonFile,
   IPackageJson,
+  PackageName,
 } from "@rushstack/node-core-library";
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
@@ -19,12 +20,21 @@ import { RushConfigurationProject } from "../../api/RushConfigurationProject";
 
 interface IDeployScenarioProjectJson {
   projectName: string;
+  subdeploymentFolderName?: string;
+  additionalProjectsToInclude?: string[];
+}
+
+interface IDeploySubdeploymentsJson {
+  enabled?: boolean;
+  subdeploymentProjects?: string[];
 }
 
 interface IDeployScenarioJson {
   includeDevDependencies?: boolean;
   includeNpmIgnoreFiles?: boolean;
-  includedProjects: IDeployScenarioProjectJson[];
+  symlinkCreation?: "default" | "script" | "none";
+  projectSettings?: IDeployScenarioProjectJson[];
+  subdeployments?: IDeploySubdeploymentsJson;
 }
 
 export class DeployManager {
@@ -39,12 +49,14 @@ export class DeployManager {
   private readonly _foldersToCopy: Set<string>;
 
   private _deployScenarioJson: IDeployScenarioJson;
+  private _deployScenarioProjectJsonsByName: Map<string, IDeployScenarioProjectJson>;
 
   public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
     this._packageJsonLookup = new PackageJsonLookup();
     this._symlinkAnalyzer = new SymlinkAnalyzer();
     this._foldersToCopy = new Set<string>();
+    this._deployScenarioProjectJsonsByName = new Map();
   }
 
   private _loadConfigFile(scenarioName: string): void {
@@ -56,6 +68,21 @@ export class DeployManager {
     }
 
     this._deployScenarioJson = JsonFile.load(deployScenarioPath);
+
+    for (const projectSetting of this._deployScenarioJson.projectSettings || []) {
+      // Validate projectSetting.projectName
+      if (!this._rushConfiguration.getProjectByName(projectSetting.projectName)) {
+        throw new Error(`The "projectSettings" section refers to the project name "${projectSetting.projectName}"` +
+          ` which was not found in rush.json`);
+      }
+      for (const additionalProjectsToInclude of projectSetting.additionalProjectsToInclude || []) {
+        if (!this._rushConfiguration.getProjectByName(projectSetting.projectName)) {
+          throw new Error(`The "additionalProjectsToInclude" setting refers to the` +
+            ` project name "${additionalProjectsToInclude}" which was not found in rush.json`);
+        }
+      }
+      this._deployScenarioProjectJsonsByName.set(projectSetting.projectName, projectSetting);
+    }
   }
 
   private _collectFoldersRecursive(packageJsonPath: string): void {
@@ -130,18 +157,6 @@ export class DeployManager {
         this._collectFoldersRecursive(dependencyPackageJsonPath);
       }
     }
-  }
-
-  private _collectProject(scenarioProject: IDeployScenarioProjectJson): void {
-    console.log('Analyzing ' + scenarioProject.projectName);
-    const project: RushConfigurationProject | undefined
-      = this._rushConfiguration.getProjectByName(scenarioProject.projectName);
-
-    if (!project) {
-      throw new Error(`The project ${scenarioProject.projectName} is not defined in rush.json`);
-    }
-
-    this._collectFoldersRecursive(path.join(project.projectFolder, 'package.json'));
   }
 
   private _remapPathForDeployFolder(absolutePathInSourceFolder: string): string {
@@ -236,7 +251,52 @@ export class DeployManager {
     return true;
   }
 
-  public deploy(scenarioName: string, overwriteExisting: boolean, targetFolderParameter: string | undefined): void {
+  private _deploySubdeployment(includedProjectNames: string[], subdeploymentFolderName: string | undefined): void {
+    // Include the additionalProjectsToInclude
+    const includedProjectNamesSet: Set<string> = new Set();
+    for (const projectName of includedProjectNames) {
+      includedProjectNamesSet.add(projectName);
+
+      const projectSettings: IDeployScenarioProjectJson | undefined
+        = this._deployScenarioProjectJsonsByName.get(projectName);
+      if (projectSettings && projectSettings.additionalProjectsToInclude) {
+        for (const additionalProjectToInclude of projectSettings.additionalProjectsToInclude) {
+          includedProjectNamesSet.add(additionalProjectToInclude);
+        }
+      }
+    }
+
+    for (const projectName of includedProjectNamesSet) {
+      console.log(`Analyzing project "${projectName}"`);
+      const project: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(projectName);
+
+      if (!project) {
+        throw new Error(`The project ${projectName} is not defined in rush.json`);
+      }
+
+      this._collectFoldersRecursive(path.join(project.projectFolder, 'package.json'));
+    }
+
+    Sort.sortSet(this._foldersToCopy);
+
+    console.log("Copying folders");
+    for (const folderToCopy of this._foldersToCopy) {
+      this._deployFolder(folderToCopy);
+    }
+
+    console.log("Copying symlinks");
+    const linksToCopy: ILinkInfo[] = this._symlinkAnalyzer.reportSymlinks();
+
+    for (const linkToCopy of linksToCopy) {
+      if (!this._deploySymlink(linkToCopy)) {
+        throw new Error("Target does not exist: " + JSON.stringify(linkToCopy, undefined, 2));
+      }
+    }
+  }
+
+  public deployScenario(scenarioName: string, overwriteExisting: boolean,
+    targetFolderParameter: string | undefined): void {
+
     this._loadConfigFile(scenarioName);
 
     if (targetFolderParameter) {
@@ -251,13 +311,6 @@ export class DeployManager {
 
     console.log("Deploying to target folder: " + this._targetRootFolder);
 
-
-    for (const includedProject of this._deployScenarioJson.includedProjects) {
-      this._collectProject(includedProject);
-    }
-
-    Sort.sortSet(this._foldersToCopy);
-
     FileSystem.ensureFolder(this._targetRootFolder);
 
     // Is the target folder empty?
@@ -271,18 +324,41 @@ export class DeployManager {
       }
     }
 
-    console.log("Copying folders");
-    for (const folderToCopy of this._foldersToCopy) {
-      this._deployFolder(folderToCopy);
-    }
+    if (this._deployScenarioJson.subdeployments && this._deployScenarioJson.subdeployments.enabled) {
+      const usedSubdeploymentFolderNames: Set<string> = new Set();
+      for (const subdeploymentProjectName of this._deployScenarioJson.subdeployments.subdeploymentProjects || []) {
+        const rushProject: RushConfigurationProject | undefined =
+          this._rushConfiguration.getProjectByName(subdeploymentProjectName);
+        if (!rushProject) {
+          throw new Error(`The subdeploymentProjects specified the name "${subdeploymentProjectName}"` +
+            ` which was not found in rush.json`);
+        }
+        console.log(`Preparing subdeployment for "${subdeploymentProjectName}"`);
 
-    console.log("Copying symlinks");
-    const linksToCopy: ILinkInfo[] = this._symlinkAnalyzer.reportSymlinks();
+        let subdeploymentFolderName: string;
 
-    for (const linkToCopy of linksToCopy) {
-      if (!this._deploySymlink(linkToCopy)) {
-        throw new Error("Target does not exist: " + JSON.stringify(linkToCopy, undefined, 2));
+        const projectSettings: IDeployScenarioProjectJson | undefined
+          = this._deployScenarioProjectJsonsByName.get(subdeploymentProjectName);
+        if (projectSettings && projectSettings.subdeploymentFolderName) {
+          subdeploymentFolderName = projectSettings.subdeploymentFolderName;
+        } else {
+          subdeploymentFolderName = PackageName.getUnscopedName(subdeploymentProjectName);
+        }
+        if (usedSubdeploymentFolderNames.has(subdeploymentFolderName)) {
+          throw new Error(`The subdeployment folder name "${subdeploymentFolderName}" is not unique.`
+            + `  Use the "subdeploymentFolderName" setting to specify a different name.`);
+        }
+        usedSubdeploymentFolderNames.add(subdeploymentFolderName);
+
+        this._deploySubdeployment([ subdeploymentProjectName ], subdeploymentFolderName);
       }
+    } else {
+      if (!this._deployScenarioJson.projectSettings || this._deployScenarioJson.projectSettings.length === 0) {
+        throw new Error('No projects were specified to be deployed. If subdeployments.enabled is false,'
+          + ' then the "projectSettings" section must specify at least one project.');
+      }
+      const includedProjectNames: string[] = this._deployScenarioJson.projectSettings.map(x => x.projectName);
+      this._deploySubdeployment(includedProjectNames, undefined);
     }
 
     console.log("SUCCESS");
