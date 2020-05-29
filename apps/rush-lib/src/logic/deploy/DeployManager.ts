@@ -74,8 +74,14 @@ export class DeployManager {
       for (const name of Object.keys(packageJson.dependencies || {})) {
         allDependencyNames.add(name);
       }
+      if (this._deployScenarioJson.includeDevDependencies) {
+        for (const name of Object.keys(packageJson.devDependencies || {})) {
+          allDependencyNames.add(name);
+        }
+      }
       for (const name of Object.keys(packageJson.peerDependencies || {})) {
         allDependencyNames.add(name);
+        optionalDependencyNames.add(name); // consider peers optional, since they are so frequently broken
       }
       for (const name of Object.keys(packageJson.optionalDependencies || {})) {
         allDependencyNames.add(name);
