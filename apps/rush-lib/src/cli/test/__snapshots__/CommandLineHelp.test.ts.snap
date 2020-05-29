@@ -41,6 +41,10 @@ Positional arguments:
     version       (EXPERIMENTAL) Manage package versions in the repo.
     import-strings
                   Imports translated strings into each project.
+    upload        Uploads the built files to the server
+    build         Build all projects that haven't been built, or have changed 
+                  since they were last built.
+    rebuild       Clean and rebuild the entire set of projects
 
 Optional arguments:
   -h, --help      Show this help message and exit.
@@ -90,6 +94,66 @@ Optional arguments:
                         run after updating the package.json files.
   --all                 If specified, the dependency will be added to all 
                         projects.
+"
+`;
+
+exports[`CommandLineHelp prints the help for each action: build 1`] = `
+"usage: rush build [-h] [-p COUNT] [-t PROJECT1]
+                  [--from-version-policy VERSION_POLICY_NAME]
+                  [--to-version-policy VERSION_POLICY_NAME] [-f PROJECT2] [-v]
+                  [-o] [-s] [-m]
+                  
+
+This command is similar to \\"rush rebuild\\", except that \\"rush build\\" performs 
+an incremental build. In other words, it only builds projects whose source 
+files have changed since the last successful build. The analysis requires a 
+Git working tree, and only considers source files that are tracked by Git and 
+whose path is under the project folder. (For more details about this 
+algorithm, see the documentation for the \\"package-deps-hash\\" NPM package.) 
+The incremental build state is tracked in a per-project folder called \\".
+rush/temp\\" which should NOT be added to Git. The build command is tracked by 
+the \\"arguments\\" field in the \\"package-deps_build.json\\" file contained 
+therein; a full rebuild is forced whenever the command has changed (e.g. 
+\\"--production\\" or not).
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -p COUNT, --parallelism COUNT
+                        Specifies the maximum number of concurrent processes 
+                        to launch during a build. The COUNT should be a 
+                        positive integer or else the word \\"max\\" to specify a 
+                        count that is equal to the number of CPU cores. If 
+                        this parameter is omitted, then the default value 
+                        depends on the operating system and number of CPU 
+                        cores. This parameter may alternatively specified via 
+                        the RUSH_PARALLELISM environment variable.
+  -t PROJECT1, --to PROJECT1
+                        Run command in the specified project and all of its 
+                        dependencies. \\".\\" can be used as shorthand to specify 
+                        the project in the current working directory.
+  --from-version-policy VERSION_POLICY_NAME
+                        Run command in all projects with the specified 
+                        version policy and all projects that directly or 
+                        indirectly depend on projects with the specified 
+                        version policy
+  --to-version-policy VERSION_POLICY_NAME
+                        Run command in all projects with the specified 
+                        version policy and all of their dependencies
+  -f PROJECT2, --from PROJECT2
+                        Run command in all projects that directly or 
+                        indirectly depend on the specified project. \\".\\" can 
+                        be used as shorthand to specify the project in the 
+                        current working directory.
+  -v, --verbose         Display the logs during the build, rather than just 
+                        displaying the build status summary
+  -o, --changed-projects-only
+                        If specified, the incremental build will only rebuild 
+                        projects that have changed, but not any projects that 
+                        directly or indirectly depend on the changed package.
+  -s, --ship            Perform a production build, including minification 
+                        and localization steps
+  -m, --minimal         Perform a fast build, which disables certain tasks 
+                        such as unit tests and linting
 "
 `;
 
@@ -434,6 +498,59 @@ Optional arguments:
 "
 `;
 
+exports[`CommandLineHelp prints the help for each action: rebuild 1`] = `
+"usage: rush rebuild [-h] [-p COUNT] [-t PROJECT1]
+                    [--from-version-policy VERSION_POLICY_NAME]
+                    [--to-version-policy VERSION_POLICY_NAME] [-f PROJECT2]
+                    [-v] [-s] [-m]
+                    
+
+This command assumes that the package.json file for each project contains a 
+\\"scripts\\" entry for \\"npm run build\\" that performs a full clean build. Rush 
+invokes this script to build each project that is registered in rush.json. 
+Projects are built in parallel where possible, but always respecting the 
+dependency graph for locally linked projects. The number of simultaneous 
+processes will be based on the number of machine cores unless overridden by 
+the --parallelism flag. (For an incremental build, see \\"rush build\\" instead 
+of \\"rush rebuild\\".)
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -p COUNT, --parallelism COUNT
+                        Specifies the maximum number of concurrent processes 
+                        to launch during a build. The COUNT should be a 
+                        positive integer or else the word \\"max\\" to specify a 
+                        count that is equal to the number of CPU cores. If 
+                        this parameter is omitted, then the default value 
+                        depends on the operating system and number of CPU 
+                        cores. This parameter may alternatively specified via 
+                        the RUSH_PARALLELISM environment variable.
+  -t PROJECT1, --to PROJECT1
+                        Run command in the specified project and all of its 
+                        dependencies. \\".\\" can be used as shorthand to specify 
+                        the project in the current working directory.
+  --from-version-policy VERSION_POLICY_NAME
+                        Run command in all projects with the specified 
+                        version policy and all projects that directly or 
+                        indirectly depend on projects with the specified 
+                        version policy
+  --to-version-policy VERSION_POLICY_NAME
+                        Run command in all projects with the specified 
+                        version policy and all of their dependencies
+  -f PROJECT2, --from PROJECT2
+                        Run command in all projects that directly or 
+                        indirectly depend on the specified project. \\".\\" can 
+                        be used as shorthand to specify the project in the 
+                        current working directory.
+  -v, --verbose         Display the logs during the build, rather than just 
+                        displaying the build status summary
+  -s, --ship            Perform a production build, including minification 
+                        and localization steps
+  -m, --minimal         Perform a fast build, which disables certain tasks 
+                        such as unit tests and linting
+"
+`;
+
 exports[`CommandLineHelp prints the help for each action: scan 1`] = `
 "usage: rush scan [-h]
 
@@ -525,6 +642,20 @@ Optional arguments:
                         your shrinkwrap file with Rush's fixups. (To minimize 
                         shrinkwrap churn, these fixups are normally performed 
                         only in the temporary folder.)
+"
+`;
+
+exports[`CommandLineHelp prints the help for each action: upload 1`] = `
+"usage: rush upload [-h] [--locale {en-us,fr-fr,es-es,zh-cn}]
+
+Uploads all the built assets to the CDN
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  --locale {en-us,fr-fr,es-es,zh-cn}
+                        Selects a single instead of the default locale 
+                        (en-us) for non-ship builds or all locales for ship 
+                        builds.
 "
 `;
 
