@@ -7,6 +7,13 @@
 import * as child_process from 'child_process';
 import * as fs from 'fs';
 
+// @public
+export const enum AlreadyExistsBehavior {
+    Error = "error",
+    Ignore = "ignore",
+    Overwrite = "overwrite"
+}
+
 // @beta
 export class Colors {
     // (undocumented)
@@ -123,6 +130,8 @@ export class FileSystem {
     static changePosixModeBitsAsync(path: string, mode: PosixModeBits): Promise<void>;
     static copyFile(options: IFileSystemCopyFileOptions): void;
     static copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void>;
+    static copyFiles(options: IFileSystemCopyFilesOptions): void;
+    static copyFilesAsync(options: IFileSystemCopyFilesOptions): Promise<void>;
     static createHardLink(options: IFileSystemCreateLinkOptions): void;
     static createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
     static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void;
@@ -168,6 +177,12 @@ export class FileSystem {
     static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
     static writeFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void>;
 }
+
+// @public
+export type FileSystemCopyFilesAsyncFilter = (sourcePath: string, destinationPath: string) => Promise<boolean>;
+
+// @public
+export type FileSystemCopyFilesFilter = (sourcePath: string, destinationPath: string) => boolean;
 
 // @public
 export type FileSystemStats = fs.Stats;
@@ -222,6 +237,21 @@ export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
 export interface IFileSystemCopyFileOptions {
     destinationPath: string;
     sourcePath: string;
+}
+
+// @public
+export interface IFileSystemCopyFilesAsyncOptions {
+    alreadyExistsBehavior?: AlreadyExistsBehavior;
+    dereferenceSymlinks?: boolean;
+    destinationPath: string;
+    filter?: FileSystemCopyFilesAsyncFilter | FileSystemCopyFilesFilter;
+    preserveTimestamps?: boolean;
+    sourcePath: string;
+}
+
+// @public
+export interface IFileSystemCopyFilesOptions extends IFileSystemCopyFilesAsyncOptions {
+    filter?: FileSystemCopyFilesFilter;
 }
 
 // @public

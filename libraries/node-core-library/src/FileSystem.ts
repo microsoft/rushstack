@@ -21,7 +21,7 @@ export type FileSystemStats = fs.Stats;
 /* eslint-disable no-bitwise */
 
 /**
- * The options for FileSystem.readFolder()
+ * The options for {@link FileSystem.readFolder}
  * @public
  */
 export interface IFileSystemReadFolderOptions {
@@ -33,7 +33,7 @@ export interface IFileSystemReadFolderOptions {
 }
 
 /**
- * The options for FileSystem.writeFile()
+ * The options for {@link FileSystem.writeFile}
  * @public
  */
 export interface IFileSystemWriteFileOptions {
@@ -57,7 +57,7 @@ export interface IFileSystemWriteFileOptions {
 }
 
 /**
- * The options for FileSystem.readFile()
+ * The options for {@link FileSystem.readFile}
  * @public
  */
 export interface IFileSystemReadFileOptions {
@@ -75,7 +75,7 @@ export interface IFileSystemReadFileOptions {
 }
 
 /**
- * The options for FileSystem.move()
+ * The options for {@link FileSystem.move}
  * @public
  */
 export interface IFileSystemMoveOptions {
@@ -105,7 +105,7 @@ export interface IFileSystemMoveOptions {
 }
 
 /**
- * The options for FileSystem.copyFile()
+ * The options for {@link FileSystem.copyFile}
  * @public
  */
 export interface IFileSystemCopyFileOptions {
@@ -123,7 +123,89 @@ export interface IFileSystemCopyFileOptions {
 }
 
 /**
- * The options for FileSystem.deleteFile()
+ * Specifies the behavior of {@link FileSystem.copyFiles} in a situation where the target object
+ * already exists.
+ */
+export const enum AlreadyExistsBehavior {
+  /**
+   * If the destination object exists, report an error.  This is the default behavior.
+   */
+  Error = 'error',
+
+  /**
+   * If the destination object exists, overwrite it.
+   */
+  Overwrite = 'overwrite',
+
+  /**
+   * If the destination object exists, skip it and continue the operation.
+   */
+  Ignore = 'ignore'
+}
+
+/**
+ * Callback function type for {@link IFileSystemCopyFilesAsyncOptions.filter}
+ * @public
+ */
+export type FileSystemCopyFilesAsyncFilter = (sourcePath: string, destinationPath: string) => Promise<boolean>;
+
+/**
+ * Callback function type for {@link IFileSystemCopyFilesOptions.filter}
+ * @public
+ */
+export type FileSystemCopyFilesFilter = (sourcePath: string, destinationPath: string) => boolean;
+
+/**
+ * The options for {@link FileSystem.copyFilesAsync}
+ * @public
+ */
+export interface IFileSystemCopyFilesAsyncOptions {
+  /**
+   * The starting path of the file or folder to be copied.
+   * The path may be absolute or relative.
+   */
+  sourcePath: string;
+
+  /**
+   * The path that the files will be copied to.
+   * The path may be absolute or relative.
+   */
+  destinationPath: string;
+
+  /**
+   * If true, then when copying symlinks, copy the target object instead of copying the link.
+   */
+  dereferenceSymlinks?: boolean;
+
+  /**
+   * Specifies what to do if the target object already exists.
+   */
+  alreadyExistsBehavior?: AlreadyExistsBehavior;
+
+  /**
+   * If true, then the target object will be assigned "last modification" and "last access" timestamps
+   * that are the same as the source.  Otherwise, the OS default timestamps are assigned.
+   */
+  preserveTimestamps?: boolean;
+
+  /**
+   * A callback that will be invoked for each path that is copied.  The callback can return `false`
+   * to cause the object to be excluded from the operation.
+   */
+  filter?: FileSystemCopyFilesAsyncFilter | FileSystemCopyFilesFilter;
+}
+
+/**
+ * The options for {@link FileSystem.copyFiles}
+ * @public
+ */
+export interface IFileSystemCopyFilesOptions extends IFileSystemCopyFilesAsyncOptions {
+  /**  {@inheritdoc IFileSystemCopyFilesAsyncOptions.filter} */
+  filter?: FileSystemCopyFilesFilter; // narrow the type to exclude FileSystemCopyFilesAsyncFilter
+}
+
+/**
+ * The options for {@link FileSystem.deleteFile}
  * @public
 */
 export interface IFileSystemDeleteFileOptions {
@@ -135,7 +217,7 @@ export interface IFileSystemDeleteFileOptions {
 }
 
 /**
- * The parameters for `updateTimes()`.
+ * The options for {@link FileSystem.updateTimes}
  * Both times must be specified.
  * @public
  */
@@ -152,8 +234,8 @@ export interface IFileSystemUpdateTimeParameters {
 }
 
 /**
- * The options for `FileSystem.createSymbolicLinkJunction()`, `createSymbolicLinkFile()`,
- * `createSymbolicLinkFolder()`,  and `createHardLink()`.
+ * The options for {@link FileSystem.createSymbolicLinkJunction}, {@link FileSystem.createSymbolicLinkFile},
+ * {@link FileSystem.createSymbolicLinkFolder}, and {@link FileSystem.createHardLink}.
  *
  * @public
  */
@@ -745,6 +827,45 @@ export class FileSystem {
   public static async copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void> {
     await FileSystem._wrapExceptionAsync(() => {
       return fsx.copy(options.sourcePath, options.destinationPath);
+    });
+  }
+
+  /**
+   * Copies a file from one location to another.
+   * By default, destinationPath is overwritten if it already exists.
+   * Behind the scenes it uses `fs.copyFileSync()`.
+   */
+  public static copyFiles(options: IFileSystemCopyFilesOptions): void {
+    const existsBehavior: AlreadyExistsBehavior = options.alreadyExistsBehavior !== undefined
+      ? options.alreadyExistsBehavior : AlreadyExistsBehavior.Error;
+
+    FileSystem._wrapException(() => {
+      fsx.copySync(options.sourcePath, options.destinationPath, {
+        dereference: !!options.dereferenceSymlinks,
+        errorOnExist: existsBehavior === AlreadyExistsBehavior.Error,
+        overwrite: existsBehavior === AlreadyExistsBehavior.Overwrite,
+        preserveTimestamps: !!options.preserveTimestamps,
+        filter: options.filter
+      });
+    });
+  }
+
+  /**
+   * An async version of {@link FileSystem.copyFile}.
+   */
+  public static async copyFilesAsync(options: IFileSystemCopyFilesOptions): Promise<void> {
+    await FileSystem._wrapExceptionAsync(async () => {
+
+      const existsBehavior: AlreadyExistsBehavior = options.alreadyExistsBehavior !== undefined
+        ? options.alreadyExistsBehavior : AlreadyExistsBehavior.Error;
+
+      fsx.copySync(options.sourcePath, options.destinationPath, {
+        dereference: !!options.dereferenceSymlinks,
+        errorOnExist: existsBehavior === AlreadyExistsBehavior.Error,
+        overwrite: existsBehavior === AlreadyExistsBehavior.Overwrite,
+        preserveTimestamps: !!options.preserveTimestamps,
+        filter: options.filter
+      });
     });
   }
 
