@@ -23,7 +23,7 @@
     "@microsoft/tsdoc": "0.12.19",
     "colors": "~1.2.1",
     "js-yaml": "~3.13.1",
-    "resolve": "1.8.1"
+    "resolve": "~1.17.0"
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.5": "0.5.0",
@@ -32,7 +32,7 @@
     "@types/jest": "25.2.1",
     "@types/js-yaml": "3.12.1",
     "@types/node": "10.17.13",
-    "@types/resolve": "0.0.8",
+    "@types/resolve": "1.17.1",
     "gulp": "~4.0.2",
     "jest": "25.4.0"
   }

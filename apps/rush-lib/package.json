@@ -43,7 +43,8 @@
     "tar": "~5.0.5",
     "true-case-path": "~2.2.1",
     "wordwrap": "~1.0.0",
-    "z-schema": "~3.18.3"
+    "z-schema": "~3.18.3",
+    "resolve": "~1.17.0"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "6.4.20",
@@ -57,6 +58,7 @@
     "@types/minimatch": "2.0.29",
     "@types/node": "10.17.13",
     "@types/node-fetch": "1.6.9",
+    "@types/resolve": "1.17.1",
     "@types/semver": "5.3.33",
     "@types/tar": "4.0.3",
     "@types/npm-package-arg": "6.1.0",
