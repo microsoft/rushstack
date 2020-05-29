@@ -25,7 +25,7 @@
       /**
        * The package name for the project, which must be defined in rush.json.
        */
-      "projectName": "rush-lib"
+      "projectName": "@microsoft/rush-lib"
     }
   ]
 }
