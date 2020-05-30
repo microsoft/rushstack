@@ -1,23 +1,26 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IModuleMinificationCallback, IModuleMinificationResult } from '../ModuleMinifierPlugin.types';
+import { IModuleMinificationCallback, IModuleMinificationResult } from './ModuleMinifierPlugin.types';
 import { MinifyOptions } from 'terser';
 import { Worker } from 'worker_threads';
-import '../OverrideWebpackIdentifierAllocation';
-import { WorkerPool } from './WorkerPool';
+import { WorkerPool } from './threadPool/WorkerPool';
 import { createHash } from 'crypto';
+import { cpus } from 'os';
+
+import './OverrideWebpackIdentifierAllocation';
 
 export interface IWorkerPoolMinifierOptions {
   /**
    * Maximum number of worker threads to use. Will never use more than there are modules to process.
+   * Defaults to os.cpus().length
    */
-  maxThreads: number;
+  maxThreads?: number;
   /**
    * The options to forward to Terser.
    * `output.comments` is currently not configurable and will always extract license comments to a separate file.
    */
-  terserOptions: MinifyOptions;
+  terserOptions?: MinifyOptions;
 }
 
 type IWorkerResponseMessage = {
@@ -35,11 +38,16 @@ export class WorkerPoolMinifier {
   private readonly _activeRequests: Map<string, IModuleMinificationCallback[]>;
 
   public constructor(options: IWorkerPoolMinifierOptions) {
+    const {
+      maxThreads = cpus().length,
+      terserOptions = {}
+    } = options || {};
+
     const activeRequests: Map<string, IModuleMinificationCallback[]> = new Map();
     const resultCache: Map<string, IWorkerResponseMessage> = new Map();
     const terserPool: WorkerPool = new WorkerPool({
       id: 'Minifier',
-      maxWorkers: options.maxThreads,
+      maxWorkers: maxThreads,
       prepareWorker: (worker: Worker) => {
         worker.on('message', (message: IWorkerResponseMessage) => {
           const callbacks: IModuleMinificationCallback[] | undefined = activeRequests.get(message.hash)!;
@@ -51,7 +59,7 @@ export class WorkerPoolMinifier {
           terserPool.checkinWorker(worker);
         });
       },
-      workerData: options.terserOptions,
+      workerData: terserOptions,
       workerScriptPath: require.resolve('./MinifierWorker')
     });
 

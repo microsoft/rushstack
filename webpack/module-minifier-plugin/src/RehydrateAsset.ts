@@ -38,15 +38,15 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
   const lastModuleId: string | number = modules[modules.length - 1];
 
   // Extended logic from webpack.Template.getModulesArrayBounds
-  const maxId: number = typeof firstModuleId === 'number' ? firstModuleId : Infinity;
-  const minId: number = typeof lastModuleId === 'number' ? lastModuleId : 0;
+  const minId: number = typeof firstModuleId === 'number' ? firstModuleId : 0;
+  const maxId: number = typeof lastModuleId === 'number' ? lastModuleId : Infinity;
 
-  let concatArrayOverhead: number = 18 + ("" + minId).length + maxId - minId;
   const simpleArrayOverhead: number = 2 + maxId;
+  let concatArrayOverhead: number = simpleArrayOverhead + 9;
 
   let useObject: boolean = typeof firstModuleId !== 'number' || typeof lastModuleId !== 'number';
   let objectOverhead: number = 1;
-  let lastId: number = minId;
+  let lastId: number = 0;
 
   if (!useObject) {
     for (const id of modules) {
@@ -59,8 +59,10 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
       // This is the extension from webpack.Template.getModulesArrayBounds
       // We can make smaller emit by injecting additional filler arrays
       const delta: number = id - lastId - 1;
+
       // Compare the length of `],Array(${delta}),[` to ','.repeat(delta + 1)
-      const fillerArraySavings: number = delta + 1 - (11 + ('' + delta).length);
+      const threshold = (lastId === 0 ? 7 : 11) + ('' + delta).length;
+      const fillerArraySavings: number = delta + 1 - threshold;
       if (fillerArraySavings > 0) {
           concatArrayOverhead -= fillerArraySavings;
       }
@@ -96,9 +98,11 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
     // This is because the above criteria triggers an Array(len) expression instead
     const enoughCommas: string = ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,';
 
+    const useConcatAtStart: boolean = useConcat && minId > 8;
     lastId = useConcat ? minId : 0;
     // TODO: Just because we want to use concat elsewhere doesn't mean its optimal to use at the start
-    let separator: string = useConcat ? `Array(${minId}).concat([` : '[';
+    let separator: string = useConcatAtStart ? `Array(${minId}).concat([` : `[${enoughCommas.slice(0, minId)}`;
+    let concatInserted: boolean = useConcatAtStart;
     for (const id of modules) {
       const delta: number = id as number - lastId - 1;
       const deltaStr: string = '' + delta;
@@ -108,7 +112,12 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
       const moduleCode: string = item ? item.code : emptyFunction;
 
       if (useConcat && delta + 1 > fillerArrayThreshold) {
+        if (concatInserted) {
           source.add(`],Array(${deltaStr}),[`);
+        } else {
+          source.add(`].concat(Array(${deltaStr}),[`);
+          concatInserted = true;
+        }
       } else {
           source.add(separator + enoughCommas.slice(0, delta + 1));
       }

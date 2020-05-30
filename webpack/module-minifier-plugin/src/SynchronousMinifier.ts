@@ -11,7 +11,7 @@ import './OverrideWebpackIdentifierAllocation';
  * @public
  */
 export interface ISynchronousMinifierOptions {
-  terserOptions: MinifyOptions;
+  terserOptions?: MinifyOptions;
 }
 
 /**
@@ -23,8 +23,8 @@ export class SynchronousMinifier {
 
   public constructor(options: ISynchronousMinifierOptions) {
     const {
-      terserOptions
-    } = options;
+      terserOptions = {}
+    } = options || {};
 
     this.terserOptions = {
       ...terserOptions,
