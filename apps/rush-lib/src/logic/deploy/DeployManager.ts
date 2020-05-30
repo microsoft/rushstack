@@ -4,6 +4,8 @@
 import * as path from "path";
 import * as resolve from "resolve";
 import * as fsx from "fs-extra";
+import * as npmPacklist from 'npm-packlist';
+import ignore, { Ignore } from 'ignore';
 import {
   Path,
   FileSystem,
@@ -36,10 +38,16 @@ interface IDeployScenarioJson {
   subdeployments?: IDeploySubdeploymentsJson;
 }
 
+interface IFolderInfo {
+  folderPath: string;
+  isRushProject: boolean;
+}
+
 interface ISubdeploymentState {
   targetSubdeploymentFolder: string;
   symlinkAnalyzer: SymlinkAnalyzer;
   foldersToCopy: Set<string>;
+  folderInfosByPath: Map<string, IFolderInfo>;
 }
 
 export class DeployManager {
@@ -172,29 +180,73 @@ export class DeployManager {
 
   private _deployFolder(sourceFolderPath: string, subdemploymentState: ISubdeploymentState): void {
 
+    let useNpmIgnoreFilter: boolean = false;
+
+    if (!this._deployScenarioJson.includeNpmIgnoreFiles) {
+      const sourceFolderInfo: IFolderInfo | undefined
+        = subdemploymentState.folderInfosByPath.get(FileSystem.getRealPath(sourceFolderPath));
+      if (sourceFolderInfo) {
+        if (sourceFolderInfo.isRushProject) {
+          useNpmIgnoreFilter = true;
+        }
+      }
+    }
+
     const targetFolderPath: string = this._remapPathForDeployFolder(sourceFolderPath, subdemploymentState);
 
-    // When copying a package folder, we always ignore the node_modules folder; it will be added indirectly
-    // only if needed
-    const pathToIgnore: string = path.join(sourceFolderPath, "node_modules");
+    if (useNpmIgnoreFilter) {
+      // Use npm-packlist to filter the files
+      const npmPackFiles: string[] = npmPacklist.sync({ path: sourceFolderPath });
 
-    fsx.copySync(sourceFolderPath, targetFolderPath, {
-      overwrite: false,
-      errorOnExist: true,
-      filter: (src: string, dest: string) => {
-        if (Path.isUnderOrEqual(src, pathToIgnore)) {
-          return false;
+      for (const npmPackFile of npmPackFiles) {
+        const copySourcePath: string = path.join(sourceFolderPath, npmPackFile);
+        const copyDestinationPath: string = path.join(targetFolderPath, npmPackFile);
+
+        if (subdemploymentState.symlinkAnalyzer.analyzePath(copySourcePath).kind !== "link") {
+          FileSystem.ensureFolder(path.dirname(copyDestinationPath));
+
+          fsx.copySync(copySourcePath, copyDestinationPath, {
+            overwrite: false,
+            errorOnExist: true
+          });
         }
+      }
+    } else {
+      // use a simplistic "ignore" ruleset to filter the files
+      const ignoreFilter: Ignore = ignore();
+      ignoreFilter.add([
+        // The top-level node_modules folder is always excluded
+        '/node_modules',
+        // Also exclude well-known folders that can contribute a lot of unnecessary files
+        '**/.git',
+        '**/.svn',
+        '**/.hg',
+        '**/.DS_Store'
+      ]);
 
-        const stats: FileSystemStats = FileSystem.getLinkStatistics(src);
-        if (stats.isSymbolicLink()) {
-          subdemploymentState.symlinkAnalyzer.analyzePath(src);
-          return false;
-        }
+      fsx.copySync(sourceFolderPath, targetFolderPath, {
+        overwrite: false,
+        errorOnExist: true,
+        filter: (src: string, dest: string) => {
+          const relativeSrc: string = path.relative(sourceFolderPath, src);
+          if (!relativeSrc) {
+            return true;  // don't filter sourceFolderPath itself
+          }
 
-        return true;
-      },
-    });
+          if (ignoreFilter.ignores(relativeSrc)) {
+            return false;
+          }
+
+          const stats: FileSystemStats = FileSystem.getLinkStatistics(src);
+          if (stats.isSymbolicLink()) {
+            subdemploymentState.symlinkAnalyzer.analyzePath(src);
+            return false;
+          } else {
+            return true;
+          }
+        },
+      });
+    }
   }
 
   private _deploySymlink(originalLinkInfo: ILinkInfo, subdemploymentState: ISubdeploymentState): boolean {
@@ -270,8 +322,17 @@ export class DeployManager {
     const subdemploymentState: ISubdeploymentState = {
       targetSubdeploymentFolder: path.join(this._targetRootFolder, subdeploymentFolderName || ''),
       symlinkAnalyzer: new SymlinkAnalyzer(),
-      foldersToCopy: new Set<string>()
+      foldersToCopy: new Set(),
+      folderInfosByPath: new Map()
     };
+
+    for (const rushProject of this._rushConfiguration.projects) {
+      const projectFolder: string = FileSystem.getRealPath(rushProject.projectFolder);
+      subdemploymentState.folderInfosByPath.set(projectFolder, {
+        folderPath: projectFolder,
+        isRushProject: true
+      });
+    }
 
     for (const projectName of includedProjectNamesSet) {
       console.log(`Analyzing project "${projectName}"`);
