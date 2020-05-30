@@ -3,7 +3,6 @@
 
 import * as path from "path";
 import * as resolve from "resolve";
-import * as fsx from "fs-extra";
 import * as npmPacklist from 'npm-packlist';
 import ignore, { Ignore } from 'ignore';
 import {
@@ -14,7 +13,8 @@ import {
   Sort,
   JsonFile,
   JsonSchema,
-  IPackageJson
+  IPackageJson,
+  AlreadyExistsBehavior
 } from "@rushstack/node-core-library";
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
@@ -221,9 +221,10 @@ export class DeployManager {
         if (subdemploymentState.symlinkAnalyzer.analyzePath(copySourcePath).kind !== "link") {
           FileSystem.ensureFolder(path.dirname(copyDestinationPath));
 
-          fsx.copySync(copySourcePath, copyDestinationPath, {
-            overwrite: false,
-            errorOnExist: true
+          FileSystem.copyFile({
+            sourcePath: copySourcePath,
+            destinationPath: copyDestinationPath,
+            alreadyExistsBehavior: AlreadyExistsBehavior.Error
           });
         }
       }
@@ -240,9 +241,10 @@ export class DeployManager {
         '**/.DS_Store'
       ]);
 
-      fsx.copySync(sourceFolderPath, targetFolderPath, {
-        overwrite: false,
-        errorOnExist: true,
+      FileSystem.copyFiles({
+        sourcePath: sourceFolderPath,
+        destinationPath: targetFolderPath,
+        alreadyExistsBehavior: AlreadyExistsBehavior.Error,
         filter: (src: string, dest: string) => {
           const relativeSrc: string = path.relative(sourceFolderPath, src);
           if (!relativeSrc) {
@@ -260,7 +262,7 @@ export class DeployManager {
           } else {
             return true;
           }
-        },
+        }
       });
     }
   }

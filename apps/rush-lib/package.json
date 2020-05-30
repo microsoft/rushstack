@@ -45,7 +45,6 @@
     "wordwrap": "~1.0.0",
     "z-schema": "~3.18.3",
     "resolve": "~1.17.0",
-    "fs-extra": "~7.0.1",
     "npm-packlist": "~2.1.2",
     "@types/npm-packlist": "~1.1.1",
     "ignore": "~5.1.6"
