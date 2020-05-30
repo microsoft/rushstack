@@ -324,7 +324,7 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: init-deploy 1`] = `
-"usage: rush init-deploy [-h] -s SCENARIO
+"usage: rush init-deploy [-h] -s SCENARIO -p PROJECT_NAME
 
 The deployment config files are stored under \\"common/config/deploy\\" and are 
 used to configure behavior of the \\"rush deploy\\" command.
@@ -335,6 +335,9 @@ Optional arguments:
                         Specifies the name of the config file describing the 
                         deployment. The name must be lower case and separated 
                         by dashes. Example: \\"production-web\\"
+  -p PROJECT_NAME, --project PROJECT_NAME
+                        Specifies the name of the main Rush project to be 
+                        deployed in this scenario.
 "
 `;
 

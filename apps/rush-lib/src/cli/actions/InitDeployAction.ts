@@ -3,11 +3,13 @@ import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { DeployManager } from '../../logic/deploy/DeployManager';
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, NewlineKind } from '@rushstack/node-core-library';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 export class InitDeployAction extends BaseRushAction {
   private static _CONFIG_TEMPLATE_PATH: string = path.join(__dirname, '../../../assets/rush-deploy-init/scenario-template.json');
   private _scenario: CommandLineStringParameter;
+  private _project: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -29,6 +31,13 @@ export class InitDeployAction extends BaseRushAction {
         'Specifies the name of the config file describing the deployment. ' +
         'The name must be lower case and separated by dashes.  Example: "production-web"'
     });
+    this._project = this.defineStringParameter({
+      parameterLongName: '--project',
+      parameterShortName: '-p',
+      argumentName: 'PROJECT_NAME',
+      required: true,
+      description: 'Specifies the name of the main Rush project to be deployed in this scenario.'
+    });
   }
 
   protected async run(): Promise<void> {
@@ -45,11 +54,19 @@ export class InitDeployAction extends BaseRushAction {
 
     console.log('Creating ' + scenarioFilePath);
 
-    FileSystem.ensureFolder(path.dirname(scenarioFilePath));
+    const shortProjectName: string = this._project.value!;
+    const rushProject: RushConfigurationProject | undefined
+      = this.rushConfiguration.findProjectByShorthandName(shortProjectName);
+    if (!rushProject) {
+      throw new Error(`The specified project was not found in rush.json: "${shortProjectName}"`);
+    }
 
-    FileSystem.copyFile({
-      sourcePath: InitDeployAction._CONFIG_TEMPLATE_PATH,
-      destinationPath: scenarioFilePath
+    const templateContent: string = FileSystem.readFile(InitDeployAction._CONFIG_TEMPLATE_PATH);
+    const expandedContent: string = templateContent.replace('[%PROJECT_NAME_TO_DEPLOY%]', rushProject.packageName);
+
+    FileSystem.writeFile(scenarioFilePath, expandedContent, {
+      ensureFolderExists: true,
+      convertLineEndings: NewlineKind.OsDefault
     });
 
     console.log('\nPlease edit this file to define your deployment scenario.');
