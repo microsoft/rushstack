@@ -67,6 +67,7 @@ export {
 } from './Text';
 export { Sort } from './Sort';
 export {
+  AlreadyExistsBehavior,
   FileSystem,
   FileSystemStats,
   IFileSystemReadFolderOptions,
@@ -76,7 +77,11 @@ export {
   IFileSystemCopyFileOptions,
   IFileSystemDeleteFileOptions,
   IFileSystemUpdateTimeParameters,
-  IFileSystemCreateLinkOptions
+  IFileSystemCreateLinkOptions,
+  IFileSystemCopyFilesAsyncOptions,
+  IFileSystemCopyFilesOptions,
+  FileSystemCopyFilesAsyncFilter,
+  FileSystemCopyFilesFilter,
 } from './FileSystem';
 export {
   FileWriter,
