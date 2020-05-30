@@ -4,7 +4,6 @@
 import { RawSource, Source } from 'webpack-sources';
 import * as webpack from 'webpack';
 import { AsyncSeriesWaterfallHook, Tap } from 'tapable';
-import * as RequestShortener from 'webpack/lib/RequestShortener';
 import {
   CHUNK_MODULES_TOKEN,
   MODULE_WRAPPER_PREFIX,
@@ -92,26 +91,6 @@ export class ModuleMinifierPlugin {
   }
 
   public apply(compiler: webpack.Compiler): void {
-    // Ensure that "EXTERNAL MODULE: " comments are portable and module version invariant
-    const baseShorten: (request: string) => string = RequestShortener.prototype.shorten;
-    RequestShortener.prototype.shorten = function (this: RequestShortener, request: string): string {
-      const baseResult: string = baseShorten.call(this, request);
-      const nodeModules: '/node_modules/' = '/node_modules/';
-
-      if (!baseResult) {
-        return baseResult;
-      }
-
-      const nodeModulesIndex: number = baseResult.lastIndexOf(nodeModules);
-      if (nodeModulesIndex < 0) {
-        return baseResult;
-      }
-
-      const nodeModulePath: string = baseResult.slice(nodeModulesIndex + nodeModules.length);
-      this.cache.set(request, nodeModulePath);
-      return nodeModulePath;
-    }
-
     const {
       stableIdsPlugin
     } = this;
