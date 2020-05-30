@@ -9,6 +9,9 @@
     "type": "git",
     "url": "https://github.com/Microsoft/rushstack/tree/master/webpack/module-minifier-plugin"
   },
+  "engines": {
+    "node": ">=10.17.1"
+  },
   "scripts": {
     "build": "gulp test --clean"
   },
