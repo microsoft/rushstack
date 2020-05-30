@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 // Everything in this file is a `const` and TypeScript will infer more specific correct types than most developers would write.
 /* eslint-disable @typescript-eslint/typedef */
 

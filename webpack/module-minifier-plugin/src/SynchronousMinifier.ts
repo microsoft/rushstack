@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { IModuleMinificationCallback } from './ModuleMinifierPlugin.types';
 import { minifySingleFile } from './terser/MinifySingleFile';
 import { MinifyOptions } from 'terser';

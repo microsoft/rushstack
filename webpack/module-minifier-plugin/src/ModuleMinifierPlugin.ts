@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { RawSource, Source } from 'webpack-sources';
 import * as webpack from 'webpack';
 import { AsyncSeriesWaterfallHook, Tap } from 'tapable';

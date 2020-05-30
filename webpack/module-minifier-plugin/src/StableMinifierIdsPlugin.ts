@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { compilation, Compiler } from 'webpack';
 import { createHash } from 'crypto';
 import { Tap } from 'tapable';
