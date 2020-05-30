@@ -1,0 +1,210 @@
+import * as webpack from 'webpack';
+import { AsyncSeriesWaterfallHook } from 'tapable';
+
+/**
+ * Result from the minifier function when an error is encountered.
+ * @public
+ */
+export interface IModuleMinificationErrorResult {
+  /**
+   * The error encountered, to be added to the current compilation's error collection.
+   */
+  err: Error;
+}
+
+/**
+ * Result from the minifier on a successful minification.
+ * @public
+ */
+export interface IModuleMinificationSuccessResult {
+  /**
+   * The error property being `undefined` indicates success.
+   */
+  err: undefined;
+  /**
+   * The minified code.
+   */
+  code: string;
+  /**
+   * The array of extracted comments, usually these are license information for 3rd party libraries.
+   */
+  extractedComments: string[];
+}
+
+/**
+ * Result from the minifier.
+ * @public
+ */
+export type IModuleMinificationResult = IModuleMinificationErrorResult | IModuleMinificationSuccessResult;
+
+/**
+ * Information about a dehydrated webpack ECMAScript asset
+ * @public
+ */
+export interface IAssetInfo {
+  /**
+   * The (minified) boilerplate code for the asset. Will contain a token to be replaced by the minified modules.
+   */
+  code: string;
+
+  /**
+   * The name of the asset, used to index into compilation.assets
+   */
+  fileName: string;
+
+  /**
+   * The extracted comments from the boilerplate. Will usually be empty unless the minifier configuration and a plugin inject a comment that needs extraction in the runtime.
+   */
+  extractedComments: string[];
+
+  /**
+   * The ids of the modules that are part of the chunk corresponding to this asset
+   */
+  modules: (string | number)[];
+
+  /**
+   * The raw chunk object from Webpack, in case information from it is necessary for reconstruction
+   */
+  chunk: webpack.compilation.Chunk;
+}
+
+/**
+ * Information about a minified module
+ * @public
+ */
+export interface IModuleInfo {
+  /**
+   * The (minified) code of this module. Will be a function expression.
+   */
+  code: string;
+
+  /**
+   * The extracted comments from this module, e.g. license information for a 3rd party library.
+   */
+  extractedComments: string[];
+
+  /**
+   * The raw module object from Webpack, in case information from it is necessary for reconstruction
+   */
+  module: IExtendedModule;
+}
+
+/**
+ * Extension of the webpack Module typings with members that are used by this Plugin
+ * @public
+ */
+export interface IExtendedModule extends webpack.compilation.Module, webpack.Module {
+  /**
+   * Id for the module
+   */
+  id: string | number | null;
+  /**
+   * Gets a descriptive identifier for the module.
+   */
+  identifier(): string;
+  /**
+   * Path to the physical file this module represents
+   */
+  resource?: string;
+  /**
+   * If set, bypass the minifier for this module. Useful if the code is known to already be minified.
+   */
+  skipMinification?: boolean;
+}
+
+/**
+ * This is the second parameter to the NormalModuleFactory `module` hook
+ * @internal
+ */
+export interface INormalModuleFactoryModuleData {
+  resourceResolveData?: {
+    /**
+     * Contents of the description file (package.json) for the module
+     */
+    descriptionFileData?: {
+      /**
+       * The name of the package
+       */
+      name: string;
+    };
+    /**
+     * Absolute path of the description file (package.json) for the module
+     */
+    descriptionFilePath?: string;
+    /**
+     * Absolute path of the directory containing the description file (package.json) for the module
+     */
+    descriptionFileRoot?: string;
+    /**
+     * Relative path from the description file (package.json) to the module
+     */
+    relativePath?: string;
+  };
+}
+
+/**
+ * A map from file names to dehydrated assets
+ * @public
+ */
+export type IAssetMap = Map<string, IAssetInfo>;
+/**
+ * A map from module ids to minified modules
+ * @public
+ */
+export type IModuleMap = Map<string | number, IModuleInfo>;
+
+/**
+ * An async function called to minify a module (or dehydrated chunk)
+ * @public
+ */
+export interface IModuleMinifierFunction {
+  (code: string, callback: (result: IModuleMinificationResult) => void): void;
+}
+
+/**
+ * Object that can be invoked to minify code.
+ * @public
+ */
+export interface IModuleMinifier {
+  minify: IModuleMinifierFunction;
+}
+
+/**
+ * Options to the ModuleMinifierPlugin constructor
+ * @public
+ */
+export interface IModuleMinifierPluginOptions {
+  /**
+   * Minifier implementation to use.
+   */
+  minifier: IModuleMinifier;
+
+  /**
+   * Instructs the plugin to alter the code of modules to maximize portability across compilations.
+   */
+  usePortableModules: boolean;
+}
+
+/**
+ * The set of data remaining to rehydrate in the current compilation
+ * @public
+ */
+export interface IDehydratedAssets {
+  /**
+   * The set of remaining assets to rehydrate. Each tap may remove some or all assets from this collection
+   */
+  assets: IAssetMap;
+
+  /**
+   * The set of modules to use for rehydrating assets.
+   */
+  modules: IModuleMap;
+}
+
+/**
+ * Hooks provided by the ModuleMinifierPlugin
+ * @public
+ */
+export interface IModuleMinifierPluginHooks {
+  rehydrateAssets: AsyncSeriesWaterfallHook<IDehydratedAssets, webpack.compilation.Compilation>;
+}
