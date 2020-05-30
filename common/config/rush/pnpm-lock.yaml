@@ -108,6 +108,7 @@ dependencies:
   '@types/node-notifier': 0.0.28
   '@types/node-sass': 4.11.0
   '@types/npm-package-arg': 6.1.0
+  '@types/npm-packlist': 1.1.1
   '@types/orchestrator': 0.0.30
   '@types/read-package-tree': 5.1.0
   '@types/resolve': 1.17.1
@@ -168,6 +169,7 @@ dependencies:
   gulp-replace: 0.5.4
   html-webpack-plugin: 3.2.0_webpack@4.31.0
   https-proxy-agent: 2.2.4
+  ignore: 5.1.6
   import-lazy: 4.0.0
   inquirer: 6.2.2
   jest: 25.4.0
@@ -189,6 +191,7 @@ dependencies:
   node-notifier: 5.0.2
   node-sass: 4.12.0
   npm-package-arg: 6.1.1
+  npm-packlist: 2.1.2
   object-assign: 4.1.1
   orchestrator: 0.3.8
   postcss: 7.0.31
@@ -1160,6 +1163,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-vbt5fb0y1svMhu++1lwtKmZL76d0uPChFlw7kEzyUmTwfmpHRcFb8i0R8ElT69q/L+QLgK2hgECivIAvaEDwag==
+  /@types/npm-packlist/1.1.1:
+    dev: false
+    resolution:
+      integrity: sha512-+0ZRUpPOs4Mvvwj/pftWb14fnPN/yS6nOp6HZFyIMDuUmyPtKXcO4/SPhyRGR6dUCAn1B3hHJozD/UCrU+Mmew==
   /@types/orchestrator/0.0.30:
     dependencies:
       '@types/q': 1.5.2
@@ -5998,12 +6005,24 @@ packages:
     dev: false
     resolution:
       integrity: sha1-xg7taebY/bazEEofy8ocGS3FtQE=
+  /ignore-walk/3.0.3:
+    dependencies:
+      minimatch: 3.0.4
+    dev: false
+    resolution:
+      integrity: sha512-m7o6xuOaT1aqheYHKf8W6J5pYH85ZI9w077erOzLje3JsB1gkafkAhHHY19dqjulgIZHFm32Cp5uNZgcQqdJKw==
   /ignore/4.0.6:
     dev: false
     engines:
       node: '>= 4'
     resolution:
       integrity: sha512-cyFDKrqc/YdcWFniJhzI42+AzS+gNwmUzOSFcRCQYwySuBBBy/KjuxWLZ/FHEH6Moq1NizMOBWyTcv8O4OZIMg==
+  /ignore/5.1.6:
+    dev: false
+    engines:
+      node: '>= 4'
+    resolution:
+      integrity: sha512-cgXgkypZBcCnOgSihyeqbo6gjIaIyDqPQB7Ra4vhE9m6kigdGoQDMHjviFhRZo3IMlRy6yElosoviMs5YxZXUA==
   /import-fresh/3.2.1:
     dependencies:
       parent-module: 1.0.1
@@ -9123,6 +9142,12 @@ packages:
       node: '>= 0.10'
     resolution:
       integrity: sha512-KGvQ0cB70AQfg107Xvs/Fbu+dGmZoTRJp2TaPwcwQm3/7PteUyN2BCgk8KBMPGBUXZdVwyWS8fDCGFygBm19UQ==
+  /npm-bundled/1.1.1:
+    dependencies:
+      npm-normalize-package-bin: 1.0.1
+    dev: false
+    resolution:
+      integrity: sha512-gqkfgGePhTpAEgUsGEgcq1rqPXA+tv/aVBlgEzfXwA1yiUJF7xtEt3CtVwOjNYQOVknDk0F20w58Fnm3EtG0fA==
   /npm-normalize-package-bin/1.0.1:
     dev: false
     resolution:
@@ -9136,6 +9161,18 @@ packages:
     dev: false
     resolution:
       integrity: sha512-qBpssaL3IOZWi5vEKUKW0cO7kzLeT+EQO9W8RsLOZf76KF9E/K9+wH0C7t06HXPpaH8WH5xF1MExLuCwbTqRUg==
+  /npm-packlist/2.1.2:
+    dependencies:
+      glob: 7.1.6
+      ignore-walk: 3.0.3
+      npm-bundled: 1.1.1
+      npm-normalize-package-bin: 1.0.1
+    dev: false
+    engines:
+      node: '>=10'
+    hasBin: true
+    resolution:
+      integrity: sha512-eByPaP+wsKai0BJX5pmb58d3mfR0zUATcnyuvSxIudTEn+swCPFLxh7srCmqB4hr7i9V24/DPjjq5b2qUtbgXQ==
   /npm-run-path/2.0.2:
     dependencies:
       path-key: 2.0.1
@@ -14113,6 +14150,7 @@ packages:
       '@types/node': 10.17.13
       '@types/node-fetch': 1.6.9
       '@types/npm-package-arg': 6.1.0
+      '@types/npm-packlist': 1.1.1
       '@types/read-package-tree': 5.1.0
       '@types/resolve': 1.17.1
       '@types/semver': 5.3.33
@@ -14124,11 +14162,13 @@ packages:
       builtin-modules: 3.1.0
       cli-table: 0.3.1
       colors: 1.2.5
+      fs-extra: 7.0.1
       git-repo-info: 2.1.1
       glob: 7.0.6
       glob-escape: 0.0.2
       gulp: 4.0.2
       https-proxy-agent: 2.2.4
+      ignore: 5.1.6
       inquirer: 6.2.2
       jest: 25.4.0
       js-yaml: 3.13.1
@@ -14136,6 +14176,7 @@ packages:
       minimatch: 3.0.4
       node-fetch: 2.1.2
       npm-package-arg: 6.1.1
+      npm-packlist: 2.1.2
       read-package-tree: 5.1.6
       resolve: 1.17.0
       semver: 5.3.0
@@ -14147,7 +14188,7 @@ packages:
     dev: false
     name: '@rush-temp/rush-lib'
     resolution:
-      integrity: sha512-RxiDo95wy4dKGyFLJPtali5c+Lbs8fdjy9+ubCGkwujd+0e/szQb/Yd2AleVw0FOtxnwPcShOQlWbXP5h57M/w==
+      integrity: sha512-kNEOXLXRA13cZydVFiNVlW4wyP4cHyoDWlyxQ0M9f6+1dU3X6r8juIH8orsGyShAVoiVBXGjcSNa/Q4UQJZ/Kg==
       tarball: 'file:projects/rush-lib.tgz'
     version: 0.0.0
   'file:projects/rush-stack-compiler-2.4-library-test.tgz':
@@ -14721,6 +14762,7 @@ specifiers:
   '@types/node-notifier': 0.0.28
   '@types/node-sass': 4.11.0
   '@types/npm-package-arg': 6.1.0
+  '@types/npm-packlist': ~1.1.1
   '@types/orchestrator': 0.0.30
   '@types/read-package-tree': 5.1.0
   '@types/resolve': 1.17.1
@@ -14781,6 +14823,7 @@ specifiers:
   gulp-replace: ^0.5.4
   html-webpack-plugin: ~3.2.0
   https-proxy-agent: ~2.2.1
+  ignore: ~5.1.6
   import-lazy: ~4.0.0
   inquirer: ~6.2.0
   jest: 25.4.0
@@ -14802,6 +14845,7 @@ specifiers:
   node-notifier: ~5.0.2
   node-sass: 4.12.0
   npm-package-arg: ~6.1.0
+  npm-packlist: ~2.1.2
   object-assign: ~4.1.0
   orchestrator: ~0.3.8
   postcss: 7.0.31
@@ -14835,4 +14879,4 @@ specifiers:
   xmldoc: ~1.1.2
   yargs: ~4.6.0
   z-schema: ~3.18.3
-# shrinkwrap hash: 1a4d100468b6739a18bd67e283ca101ac2b67d84
+# shrinkwrap hash: 0606ea934201ac2d74ded943b48b0d52c0c616c7
