@@ -49,7 +49,7 @@ describe('rehydrateAsset', () => {
     };
 
     const result: string = rehydrateAsset(asset, modules, banner).source();
-    const expected: string = `/* fnord */\n<before>{a:foo,b:bar}<after>`;
+    const expected: string = `/* fnord */\n<before>{"a":foo,"b":bar}<after>`;
 
     if (result !== expected) {
       throw new Error(`Expected ${expected} but received ${result}`);

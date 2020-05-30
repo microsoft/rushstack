@@ -61,7 +61,7 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
       const delta: number = id - lastId - 1;
 
       // Compare the length of `],Array(${delta}),[` to ','.repeat(delta + 1)
-      const threshold = (lastId === 0 ? 7 : 11) + ('' + delta).length;
+      const threshold: number = (lastId === 0 ? 7 : 11) + ('' + delta).length;
       const fillerArraySavings: number = delta + 1 - threshold;
       if (fillerArraySavings > 0) {
           concatArrayOverhead -= fillerArraySavings;
@@ -82,7 +82,7 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
     // Write an object literal
     let separator: '{' | ',' = '{';
     for (const id of modules) {
-      source.add(`${separator}${id}:`);
+      source.add(`${separator}${JSON.stringify(id)}:`);
       separator = ',';
 
       const item: IModuleInfo | undefined = moduleMap.get(id);
