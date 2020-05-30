@@ -11,8 +11,12 @@ export class DeployAction extends BaseRushAction {
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'deploy',
-      summary: 'Copy a subset of Rush projects and their dependencies to a deployment folder',
-      documentation: '',
+      summary: '(EXPERIMENTAL) Copy a subset of Rush projects and their dependencies to a deployment folder',
+      documentation: '(EXPERIMENTAL) After building the repo, "rush deploy" can be used to copy a subset of'
+        + ' Rush projects and their dependencies to a deployment target folder, which can then be copied to'
+        + ' a production machine.  The "rush deploy" behavior is specified by a scenario config file located under'
+        + ' the "common/config/deploy" folder. You can define multiple scenarios. Use the "rush init-deploy" command'
+        + ' to create a new config file.',
       parser
     });
   }
@@ -39,6 +43,7 @@ export class DeployAction extends BaseRushAction {
       parameterLongName: '--target-folder',
       parameterShortName: '-t',
       argumentName: 'PATH',
+      environmentVariable: 'RUSH_DEPLOY_TARGET_FOLDER',
       description:
         'By default, files are deployed to the common/deploy folder inside the Rush repo.' +
         ' Use this parameter to specify a different location. ' +

@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Rush config files that define deployment scenarios",
+  "title": "Rush config file that defines a deployment scenario",
   "description": "For use with the Rush tool, these files are located in the \"common/config/deploy-scenarios\" folder and enable repo maintainers to define deployment scenarios.",
 
   "type": "object",

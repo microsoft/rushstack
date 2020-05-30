@@ -53,8 +53,10 @@ interface ISubdeploymentState {
 
 export class DeployManager {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../../schemas/deploy-scenarios.schema.json')
+    path.join(__dirname, '../../schemas/deploy-scenario.schema.json')
   );
+
+  private static _scenarioNameRegExp: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
   private readonly _rushConfiguration: RushConfiguration;
 
@@ -72,6 +74,16 @@ export class DeployManager {
     this._deployScenarioProjectJsonsByName = new Map();
   }
 
+  public static validateScenarioName(scenarioName: string): void {
+    if (!scenarioName) {
+      throw new Error('The scenario name cannot be an empty string');
+    }
+    if (!this._scenarioNameRegExp.test(scenarioName)) {
+      throw new Error(`"${scenarioName}" is not a valid scenario name. The name must be comprised of`
+        + ' lower case letters and numbers, separated by single hyphens. Example: "my-scenario"');
+    }
+  }
+
   private _loadConfigFile(scenarioName: string): void {
     const deployScenarioPath: string = path.join(this._rushConfiguration.commonFolder, 'config/deploy-scenarios',
       scenarioName + '.json');
@@ -79,6 +91,9 @@ export class DeployManager {
     if (!FileSystem.exists(deployScenarioPath)) {
       throw new Error('The scenario config file was not found: ' + deployScenarioPath);
     }
+
+    console.log('Loading deployment scenario from: '
+      + path.relative(this._rushConfiguration.commonFolder, deployScenarioPath))
 
     this._deployScenarioJson = JsonFile.loadAndValidate(deployScenarioPath, DeployManager._jsonSchema);
 
@@ -370,6 +385,8 @@ export class DeployManager {
   public deployScenario(scenarioName: string, overwriteExisting: boolean,
     targetFolderParameter: string | undefined): void {
 
+    DeployManager.validateScenarioName(scenarioName);
+
     this._loadConfigFile(scenarioName);
 
     if (targetFolderParameter) {
@@ -399,7 +416,14 @@ export class DeployManager {
 
     if (this._deployScenarioJson.subdeployments && this._deployScenarioJson.subdeployments.enabled) {
       const usedSubdeploymentFolderNames: Set<string> = new Set();
-      for (const subdeploymentProjectName of this._deployScenarioJson.subdeployments.subdeploymentProjects || []) {
+
+      const subdeploymentProjects: string[] = this._deployScenarioJson.subdeployments.subdeploymentProjects || [];
+      if (subdeploymentProjects.length === 0) {
+        throw new Error(`The scenario configuration ${scenarioName}.json does not specify any projects to be deployed.`
+          + ' The "subdeploymentProjects" setting must specify at least one project name.');
+      }
+
+      for (const subdeploymentProjectName of subdeploymentProjects) {
         const rushProject: RushConfigurationProject | undefined =
           this._rushConfiguration.getProjectByName(subdeploymentProjectName);
         if (!rushProject) {
@@ -428,8 +452,8 @@ export class DeployManager {
       }
     } else {
       if (!this._deployScenarioJson.projectSettings || this._deployScenarioJson.projectSettings.length === 0) {
-        throw new Error('No projects were specified to be deployed. If subdeployments.enabled is false,'
-          + ' then the "projectSettings" section must specify at least one project.');
+        throw new Error(`The scenario configuration ${scenarioName}.json does not specify any projects to be deployed.`
+          + ' The "projectSettings" section must specify at least one project.');
       }
       const includedProjectNames: string[] = this._deployScenarioJson.projectSettings.map(x => x.projectName);
       this._deploySubdeployment(includedProjectNames, undefined);

@@ -22,11 +22,12 @@ Positional arguments:
     check         Checks each project's package.json files and ensures that 
                   all dependencies are of the same version throughout the 
                   repository.
-    deploy        Copy a subset of Rush projects and their dependencies to a 
-                  deployment folder
+    deploy        (EXPERIMENTAL) Copy a subset of Rush projects and their 
+                  dependencies to a deployment folder
     install       Install package dependencies for all projects in the repo 
                   according to the shrinkwrap file
     init          Initializes a new repository to be managed by Rush
+    init-deploy   Create the config file for a new deployment scenario.
     link          Create node_modules symlinks for all projects
     list          List package information for all projects in the repo
     publish       Reads and processes package publishing change requests 
@@ -227,6 +228,13 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: deploy 1`] = `
 "usage: rush deploy [-h] -s SCENARIO [--overwrite] [-t PATH]
 
+(EXPERIMENTAL) After building the repo, \\"rush deploy\\" can be used to copy a 
+subset of Rush projects and their dependencies to a deployment target folder, 
+which can then be copied to a production machine. The \\"rush deploy\\" behavior 
+is specified by a scenario config file located under the 
+\\"common/config/deploy\\" folder. You can define multiple scenarios. Use the 
+\\"rush init-deploy\\" command to create a new config file.
+
 Optional arguments:
   -h, --help            Show this help message and exit.
   -s SCENARIO, --scenario SCENARIO
@@ -240,7 +248,9 @@ Optional arguments:
                         By default, files are deployed to the common/deploy 
                         folder inside the Rush repo. Use this parameter to 
                         specify a different location. WARNING: USE CAUTION 
-                        WHEN COMBINING WITH \\"--overwrite\\"
+                        WHEN COMBINING WITH \\"--overwrite\\" This parameter may 
+                        alternatively specified via the 
+                        RUSH_DEPLOY_TARGET_FOLDER environment variable.
 "
 `;
 
@@ -310,6 +320,21 @@ Optional arguments:
                         monorepo that illustrates many Rush features. This 
                         option is primarily intended for maintaining that 
                         example.
+"
+`;
+
+exports[`CommandLineHelp prints the help for each action: init-deploy 1`] = `
+"usage: rush init-deploy [-h] -s SCENARIO
+
+The deployment config files are stored under \\"common/config/deploy\\" and are 
+used to configure behavior of the \\"rush deploy\\" command.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -s SCENARIO, --scenario SCENARIO
+                        Specifies the name of the config file describing the 
+                        deployment. The name must be lower case and separated 
+                        by dashes. Example: \\"production-web\\"
 "
 `;
 

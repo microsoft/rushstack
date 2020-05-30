@@ -1,0 +1,89 @@
+/**
+ * This configuration file defines a deployment scenario for use with the "rush deploy" command.
+ * The scenario files are located under the "common/config/deploy-scenarios" folder.
+ * For full documentation, please see https://rushjs.io
+ */
+ {
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/deploy-scenario.schema.json",
+
+  /**
+   * When deploying a local Rush project, by the "devDependencies" are normally excluded.
+   * Set this to "true" to include them.
+   *
+   * The default value is false.
+   */
+  // "includeDevDependencies": true,
+
+  /**
+   * When deploying a local Rush project, normally the .npmignore filter is applied so that Rush only copies
+   * files that would be packaged by "npm pack".  Setting "includeNpmIgnoreFiles" to true will disable this
+   * filtering so that all files are copied (with a few trivial exceptions such as the "node_modules" folder).
+   *
+   * The default value is false.
+   */
+  // "includeNpmIgnoreFiles": true,
+
+  /**
+   * Specify how symlinks will be created in the deployed folder:
+   *
+   * - "default": Create the symlinks after copying the files; this is the default behavior.
+   * - "script": A Node.js script called "create-symlinks.js" will be written.  When executed, this script will
+   *   create the symlinks described in the "deploy-metadata.json" output file.
+   * - "none": Do nothing; some other tool may create them later.
+   */
+  // "symlinkCreation": "script",
+
+  /**
+   * Customize how local Rush projects are processed during deployment.  If subdeployments are not enabled,
+   * then this section also defines the list of projects to be deployed.
+   */
+  "projectSettings": [
+    // {
+    //   /**
+    //    * The full package name of the project, which must be declared in rush.json.
+    //    */
+    //   "projectName": "@my-scope/my-project",
+    //
+    //   /**
+    //    * This optional setting is only relevant when the "subdeploymentProjectNames" setting is specified.  It
+    //    * customizes the subdeployment folder name.  If omitted, the default subdeployment folder name will be the
+    //    * package name without its NPM scope.
+    //    */
+    //   // "subdeploymentFolderName": "my-proj",
+    //
+    //   /**
+    //    * A list of additional local Rush projects to be deployed with this project (beyond the package.json
+    //    * dependencies).  Specify full package names, which must be declared in rush.json.
+    //    */
+    //   "additionalProjectsToInclude": [
+    //     // "@my-scope/my-project2"
+    //   ]
+    // }
+  ],
+
+  /**
+   * Subdeployments are an optional feature that enables multiple deployments to be prepared by a single
+   * invocation of "rush deploy".
+   */
+  "subdeployments": {
+    /**
+     * Enables subdeployments for this deployment scenario.
+     * The default value is false.
+     */
+    "enabled": false,
+
+    /**
+     * The "subdeploymentProjects" setting is an array of Rush project names.  These names must be full package names
+     * as declared in rush.json.  For each entry, a subdeployment folder will be created under the "rush deploy"
+     * target folder.  (The folder name can be customized using the "subdeploymentFolderName" project setting.)
+     * Each subdeployment folder will receive its own copy of the named project and its associated dependencies.
+     *
+     * Whereas if subdeployments are NOT enabled, then all projects from the "projectSettings" section will be
+     * deployed as a single set, without creating subdeployment folders.
+     */
+    "subdeploymentProjects": [
+      // "@my-scope/my-project1",
+      // "@my-scope/my-project3"
+    ]
+  }
+}
