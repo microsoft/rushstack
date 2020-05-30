@@ -5,6 +5,10 @@
     "lib": [
       "ES2017"
     ],
-    "target": "ESNext"
+    "target": "ESNext",
+    "types": [
+      "jest",
+      "node"
+    ]
   }
 }
