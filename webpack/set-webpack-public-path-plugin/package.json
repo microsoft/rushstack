@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/set-webpack-public-path-plugin",
-  "version": "2.4.17",
+  "version": "2.4.18",
   "description": "This plugin sets the webpack public path at runtime.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -20,8 +20,8 @@
     "@types/webpack": "*"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.4.20",
-    "@microsoft/rush-stack-compiler-3.5": "0.5.0",
+    "@microsoft/node-library-build": "6.4.21",
+    "@microsoft/rush-stack-compiler-3.5": "0.5.1",
     "@rushstack/eslint-config": "0.5.8",
     "@types/lodash": "4.14.116",
     "@types/mocha": "5.2.5",

@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-mocha",
   "entries": [
     {
+      "version": "3.8.16",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.8.16",
+      "date": "Sat, 30 May 2020 02:59:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.16.6` to `3.16.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.8.15",
       "tag": "@microsoft/gulp-core-build-mocha_v3.8.15",
       "date": "Thu, 28 May 2020 05:59:02 GMT",

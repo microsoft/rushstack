@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 21 May 2020 15:41:59 GMT and should not be manually modified.
+This log was last generated on Thu, 28 May 2020 22:49:57 GMT and should not be manually modified.
+
+## 5.23.5
+Thu, 28 May 2020 22:49:57 GMT
+
+### Updates
+
+- Fix an issue where Rush cannot reinstall itself on Windows
 
 ## 5.23.4
 Thu, 21 May 2020 15:41:59 GMT
