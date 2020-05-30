@@ -219,7 +219,8 @@ export class ModuleMinifierPlugin {
       // During code generation, send the generated code to the minifier and replace with a placeholder
       compilation.moduleTemplates.javascript.hooks.package.tap(TAP_AFTER, minifyModule);
 
-      async function optimizeChunkAssets(chunks: webpack.compilation.Chunk[]): Promise<void> {
+      // This should happen before any other tasks that operate during optimizeChunkAssets
+      compilation.hooks.optimizeChunkAssets.tapPromise(TAP_BEFORE, async (chunks: webpack.compilation.Chunk[]): Promise<void> => {
         // Still need to minify the rendered assets
         for (const chunk of chunks) {
           const chunkModules: (string | number)[] = [];
@@ -241,34 +242,45 @@ export class ModuleMinifierPlugin {
 
           for (const assetName of chunk.files) {
             const asset: Source = compilation.assets[assetName];
-
             const rawCode: string = asset.source();
 
-            ++pendingMinificationRequests;
+            // Verify that this is a JS asset
+            if (/\.m?js(\?.+)?$/.test(assetName)) {
+              ++pendingMinificationRequests;
 
-            minifier.minify(rawCode, (result: IModuleMinificationResult) => {
-              if (isMinificationResultError(result)) {
-                compilation.errors.push(result.error);
-                return;
-              }
+              minifier.minify(rawCode, (result: IModuleMinificationResult) => {
+                if (isMinificationResultError(result)) {
+                  compilation.errors.push(result.error);
+                  return;
+                }
 
-              const {
-                code,
-                extractedComments
-              } = result;
+                const {
+                  code,
+                  extractedComments
+                } = result;
 
-              const withIds: string = chunk.hasRuntime() ? postProcessCode(code, assetName) : code;
+                const withIds: string = chunk.hasRuntime() ? postProcessCode(code, assetName) : code;
 
+                minifiedAssets.set(assetName, {
+                  code: withIds,
+                  extractedComments,
+                  modules: chunkModules,
+                  chunk,
+                  fileName: assetName
+                });
+
+                onFileMinified();
+              });
+            } else {
+              // Skip minification for all other assets, though the modules still are
               minifiedAssets.set(assetName, {
-                code: withIds,
-                extractedComments,
+                code: rawCode,
+                extractedComments: [],
                 modules: chunkModules,
                 chunk,
                 fileName: assetName
               });
-
-              onFileMinified();
-            });
+            }
           }
         }
 
@@ -290,10 +302,7 @@ export class ModuleMinifierPlugin {
           assets,
           modules
         }, compilation);
-      };
-
-      // This should happen before any other tasks that operate during optimizeChunkAssets
-      compilation.hooks.optimizeChunkAssets.tapPromise(TAP_BEFORE, optimizeChunkAssets);
+      });
 
       for (const template of [compilation.chunkTemplate, compilation.mainTemplate]) {
         // @ts-ignore Incompatible type definitions. Suffice to say, this hook exists.
