@@ -26,17 +26,13 @@ interface IDeployScenarioProjectJson {
   additionalProjectsToInclude?: string[];
 }
 
-interface IDeploySubdeploymentsJson {
-  enabled?: boolean;
-  subdeploymentProjects?: string[];
-}
-
 interface IDeployScenarioJson {
+  deploymentProjectNames: string[],
+  enableSubdeployments?: boolean;
   includeDevDependencies?: boolean;
   includeNpmIgnoreFiles?: boolean;
   symlinkCreation?: "default" | "script" | "none";
   projectSettings?: IDeployScenarioProjectJson[];
-  subdeployments?: IDeploySubdeploymentsJson;
 }
 
 interface IFolderInfo {
@@ -414,20 +410,17 @@ export class DeployManager {
       }
     }
 
-    if (this._deployScenarioJson.subdeployments && this._deployScenarioJson.subdeployments.enabled) {
+    // The JSON schema ensures this array has at least one item
+    const deploymentProjectNames: string[] = this._deployScenarioJson.deploymentProjectNames;
+
+    if (this._deployScenarioJson.enableSubdeployments) {
       const usedSubdeploymentFolderNames: Set<string> = new Set();
 
-      const subdeploymentProjects: string[] = this._deployScenarioJson.subdeployments.subdeploymentProjects || [];
-      if (subdeploymentProjects.length === 0) {
-        throw new Error(`The scenario configuration ${scenarioName}.json does not specify any projects to be deployed.`
-          + ' The "subdeploymentProjects" setting must specify at least one project name.');
-      }
-
-      for (const subdeploymentProjectName of subdeploymentProjects) {
+      for (const subdeploymentProjectName of deploymentProjectNames) {
         const rushProject: RushConfigurationProject | undefined =
           this._rushConfiguration.getProjectByName(subdeploymentProjectName);
         if (!rushProject) {
-          throw new Error(`The subdeploymentProjects specified the name "${subdeploymentProjectName}"` +
+          throw new Error(`The "deploymentProjectNames" setting specified the name "${subdeploymentProjectName}"` +
             ` which was not found in rush.json`);
         }
 
@@ -451,12 +444,11 @@ export class DeployManager {
         this._deploySubdeployment([ subdeploymentProjectName ], subdeploymentFolderName);
       }
     } else {
-      if (!this._deployScenarioJson.projectSettings || this._deployScenarioJson.projectSettings.length === 0) {
-        throw new Error(`The scenario configuration ${scenarioName}.json does not specify any projects to be deployed.`
-          + ' The "projectSettings" section must specify at least one project.');
+      if (deploymentProjectNames.length !== 1) {
+        throw new Error(`The "deploymentProjectNames" setting specifies specifies more than one project;`
+          + ' this is not supported unless the "enableSubdeployments" setting is true.');
       }
-      const includedProjectNames: string[] = this._deployScenarioJson.projectSettings.map(x => x.projectName);
-      this._deploySubdeployment(includedProjectNames, undefined);
+      this._deploySubdeployment(deploymentProjectNames, undefined);
     }
 
     console.log("SUCCESS");

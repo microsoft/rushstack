@@ -10,14 +10,30 @@
       "type": "string"
     },
 
+    "deploymentProjectNames": {
+      "description": "Specify the name of the Rush project to be deployed. The name must be a full package name as declared in rush.json.  If you want to include other projects that are not dependencies, add an entry for your main project to the \"projectSettings\", then use the \"additionalProjectsToInclude\" setting. The \"deploymentProjectNames\" array must contain exactly one project, unless \"enableSubdeployments\" is true; see documentation for that setting for details.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minItems": 1
+      }
+    },
+
+    "enableSubdeployments": {
+      "description": "Subdeployments are an optional feature that enables multiple deployments to be prepared by a single invocation of \"rush deploy\". In this mode, more than one name can be specified for \"deploymentProjectNames\". For each entry, a subdeployment folder will be created under the \"rush deploy\" target folder. (The folder name can be customized using the \"subdeploymentFolderName\" project setting.) Each subdeployment folder will receive its own copy of the named project and its associated dependencies. The default value is false.",
+      "type": "boolean",
+    },
+
     "includeDevDependencies": {
       "description": "When deploying a local Rush project, by the \"devDependencies\" are normally excluded. Set this to \"true\" to include them. The default value is false.",
       "type": "boolean"
     },
+
     "includeNpmIgnoreFiles": {
       "description": "When deploying a local Rush project, normally the .npmignore filter is applied so that Rush only copies files that would be packaged by \"npm pack\".  Setting \"includeNpmIgnoreFiles\" to true will disable this filtering so that all files are copied (with a few trivial exceptions such as the \"node_modules\" folder). The default value is false.",
       "type": "boolean"
     },
+
     "symlinkCreation": {
       "description": "Specify how symlinks will be created in the deployed folder:\n\"default\": Create the symlinks after copying the files; this is the default behavior.\n\"script\": A Node.js script called \"create-symlinks.js\" will be written.  When executed, this script will create the symlinks described in the \"deploy-metadata.json\" output file.\n\"none\": Do nothing; some other tool may create them later.",
       "type": "string",
@@ -25,7 +41,7 @@
     },
 
     "projectSettings": {
-      "description": "Customize how local Rush projects are processed during deployment.  If subdeployments are not enabled, then this section also defines the list of projects to be deployed.",
+      "description": "Customize how Rush projects are processed during deployment.",
       "type": "array",
       "items": {
         "type": "object",
@@ -35,7 +51,7 @@
             "type": "string"
           },
           "subdeploymentFolderName": {
-            "description": "This optional setting is only relevant when the \"subdeploymentProjectNames\" setting is specified.  It customizes the subdeployment folder name.  If omitted, the default subdeployment folder name will be the package name without its NPM scope.",
+            "description": "This optional setting is only relevant when the \"enableSubdeployments\" setting is true.  It customizes the subdeployment folder name.  If omitted, the default subdeployment folder name will be the package name without its NPM scope.",
             "type": "string"
           },
           "additionalProjectsToInclude": {
@@ -49,26 +65,8 @@
         "required": [ "projectName" ],
         "additionalProperties": false
       }
-    },
-
-    "subdeployments": {
-      "description": "Subdeployments are an optional feature that enables multiple deployments to be prepared by a single invocation of \"rush deploy\".",
-      "type": "object",
-      "properties": {
-        "enabled": {
-          "description": "* Enables subdeployments for this deployment scenario. The default value is false.",
-          "type": "boolean"
-        },
-        "subdeploymentProjects": {
-          "description": "The \"subdeploymentProjects\" setting is an array of Rush project names.  These names must be full package names as declared in rush.json.  For each entry, a subdeployment folder will be created under the \"rush deploy\" target folder.  (The folder name can be customized using the \"subdeploymentFolderName\" project setting.) Each subdeployment folder will receive its own copy of the named project and its associated dependencies. Whereas if subdeployments are NOT enabled, then all projects from the \"projectSettings\" section will be deployed as a single set, without creating subdeployment folders.",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "additionalProperties": false
     }
   },
+  "required": [ "deploymentProjectNames" ],
   "additionalProperties": false
 }
