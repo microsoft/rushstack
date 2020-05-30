@@ -9,7 +9,7 @@
 
   /**
    * When deploying a local Rush project, normally the .npmignore filter is applied so that Rush only copies
-   * files that would be packaged by "npm pack".  Setting includeNpmIgnoreFiles to "true" will disable this
+   * files that would be packaged by "npm pack".  Setting "includeNpmIgnoreFiles" to true will disable this
    * filtering so that all files are copied (with a few trivial exceptions such as the "node_modules" folder).
    *
    * The default value is false.
@@ -54,9 +54,13 @@
     }
   ],
 
+  /**
+   * Subdeployments are an optional feature that enables multiple deployments to be prepared by a single
+   * invocation of "rush deploy".
+   */
   "subdeployments": {
     /**
-     * This optional setting enables multiple deployments to be prepared by a single invocation of "rush deploy".
+     * Enables subdeployments for this deployment scenario.
      * The default value is false.
      */
     "enabled": true,

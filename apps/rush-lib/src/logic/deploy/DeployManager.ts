@@ -13,6 +13,7 @@ import {
   FileSystemStats,
   Sort,
   JsonFile,
+  JsonSchema,
   IPackageJson
 } from "@rushstack/node-core-library";
 import { RushConfiguration } from '../../api/RushConfiguration';
@@ -51,6 +52,10 @@ interface ISubdeploymentState {
 }
 
 export class DeployManager {
+  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
+    path.join(__dirname, '../../schemas/deploy-scenarios.schema.json')
+  );
+
   private readonly _rushConfiguration: RushConfiguration;
 
   private _targetRootFolder: string;
@@ -75,7 +80,7 @@ export class DeployManager {
       throw new Error('The scenario config file was not found: ' + deployScenarioPath);
     }
 
-    this._deployScenarioJson = JsonFile.load(deployScenarioPath);
+    this._deployScenarioJson = JsonFile.loadAndValidate(deployScenarioPath, DeployManager._jsonSchema);
 
     for (const projectSetting of this._deployScenarioJson.projectSettings || []) {
       // Validate projectSetting.projectName
