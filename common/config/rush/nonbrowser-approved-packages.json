@@ -423,6 +423,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "ignore",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "import-lazy",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "inquirer",
       "allowedCategories": [ "libraries" ]
     },
@@ -460,10 +468,6 @@
     },
     {
       "name": "jsdom",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "import-lazy",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -520,6 +524,10 @@
     },
     {
       "name": "npm-package-arg",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "npm-packlist",
       "allowedCategories": [ "libraries" ]
     },
     {
