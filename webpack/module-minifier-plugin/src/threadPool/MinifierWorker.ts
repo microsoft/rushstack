@@ -1,13 +1,13 @@
 import { minifySingleFile } from '../terser/MinifySingleFile';
 import { MinifyOptions } from 'terser';
-import * as workerThreads from 'worker_threads';
+import { parentPort, workerData } from 'worker_threads';
 
-const terserOptions: MinifyOptions = workerThreads.workerData;
+const terserOptions: MinifyOptions = workerData;
 
 // Set to non-zero to help debug unexpected graceful exit
 process.exitCode = 2;
 
-workerThreads.parentPort!.on("message", (message) => {
+parentPort!.on("message", (message) => {
     if (!message) {
         process.exit(0);
     }
@@ -23,7 +23,7 @@ workerThreads.parentPort!.on("message", (message) => {
       extractedComments
     } = minifySingleFile(source, terserOptions);
 
-    workerThreads.parentPort!.postMessage({
+    parentPort!.postMessage({
         hash,
         error: error && error.toString(),
         code: minified,
