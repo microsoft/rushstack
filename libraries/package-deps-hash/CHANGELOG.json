@@ -2,6 +2,27 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "2.4.21",
+      "tag": "@rushstack/package-deps-hash_v2.4.21",
+      "date": "Sat, 30 May 2020 02:59:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.23.1` to `3.24.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.5.0` to `0.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.20` to `6.4.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.23.1` to `3.24.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.4.20",
       "tag": "@rushstack/package-deps-hash_v2.4.20",
       "date": "Thu, 28 May 2020 05:59:02 GMT",

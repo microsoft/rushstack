@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 28 May 2020 05:59:02 GMT and should not be manually modified.
+This log was last generated on Sat, 30 May 2020 02:59:54 GMT and should not be manually modified.
+
+## 3.24.0
+Sat, 30 May 2020 02:59:54 GMT
+
+### Minor changes
+
+- Add a FileSystem.copyFiles() API for recursively copying folders, and clarify that FileSystem.copyFile() only copies a single file
 
 ## 3.23.1
 Thu, 28 May 2020 05:59:02 GMT
