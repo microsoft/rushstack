@@ -2,6 +2,12 @@
 /* eslint-disable @typescript-eslint/typedef */
 
 /**
+ * The static character frequency prioritization for identifier allocation.
+ * @public
+ */
+export const DEFAULT_DIGIT_SORT: string = 'etnrisouaflchpdvmgybwESxTNCkLAOM_DPHBjFIqRUzWXV$JKQGYZ0516372984';
+
+/**
  * Prefix to wrap `function (module, __webpack_exports__, __webpack_require__) { ... }` so that the minifier doesn't delete it
  * @internal
  */

@@ -9,7 +9,19 @@ export interface IModuleMinificationErrorResult {
   /**
    * The error encountered, to be added to the current compilation's error collection.
    */
-  err: Error;
+  error: Error;
+  /**
+   * Marker property to always return the same result shape.
+   */
+  code?: undefined;
+  /**
+   * Marker property to always return the same result shape.
+   */
+  extractedComments?: undefined;
+  /**
+   * The minifier implementation may use a hash for deduplication.
+   */
+  hash?: string;
 }
 
 /**
@@ -20,7 +32,7 @@ export interface IModuleMinificationSuccessResult {
   /**
    * The error property being `undefined` indicates success.
    */
-  err: undefined;
+  error: undefined;
   /**
    * The minified code.
    */
@@ -29,6 +41,10 @@ export interface IModuleMinificationSuccessResult {
    * The array of extracted comments, usually these are license information for 3rd party libraries.
    */
   extractedComments: string[];
+  /**
+   * The minifier implementation may use a hash for deduplication.
+   */
+  hash?: string;
 }
 
 /**
@@ -36,6 +52,14 @@ export interface IModuleMinificationSuccessResult {
  * @public
  */
 export type IModuleMinificationResult = IModuleMinificationErrorResult | IModuleMinificationSuccessResult;
+
+/**
+ * Callback passed to a minifier function
+ * @public
+ */
+export interface IModuleMinificationCallback {
+  (result: IModuleMinificationResult): void;
+}
 
 /**
  * Information about a dehydrated webpack ECMAScript asset
@@ -158,7 +182,7 @@ export type IModuleMap = Map<string | number, IModuleInfo>;
  * @public
  */
 export interface IModuleMinifierFunction {
-  (code: string, callback: (result: IModuleMinificationResult) => void): void;
+  (code: string, callback: IModuleMinificationCallback): void;
 }
 
 /**

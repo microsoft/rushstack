@@ -1,4 +1,4 @@
-import { IModuleMinificationResult } from './ModuleMinifierPlugin.types';
+import { IModuleMinificationCallback } from './ModuleMinifierPlugin.types';
 
 /**
  * Minifier implementation that does not actually transform the code, for debugging.
@@ -12,12 +12,16 @@ export class NoopMinifier {
    */
   public minify(
     code: string,
-    callback: (result: IModuleMinificationResult) => void
+    callback: IModuleMinificationCallback
   ): void {
     callback({
-      err: undefined,
+      error: undefined,
       code,
       extractedComments: []
     });
+  }
+
+  public shutdown(): void {
+    // Nothing to do
   }
 }

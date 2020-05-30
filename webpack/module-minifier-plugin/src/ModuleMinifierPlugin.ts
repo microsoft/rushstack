@@ -60,7 +60,7 @@ function defaultRehydrateAssets(dehydratedAssets: IDehydratedAssets, compilation
 }
 
 function isMinificationResultError(result: IModuleMinificationResult): result is IModuleMinificationErrorResult {
-  return !!result.err;
+  return !!result.error;
 }
 
 /**
@@ -200,7 +200,7 @@ export class ModuleMinifierPlugin {
 
             minifier.minify(wrappedCode, (result: IModuleMinificationResult) => {
               if (isMinificationResultError(result)) {
-                compilation.errors.push(result.err);
+                compilation.errors.push(result.error);
                 return;
               }
 
@@ -266,7 +266,7 @@ export class ModuleMinifierPlugin {
 
             minifier.minify(rawCode, (result: IModuleMinificationResult) => {
               if (isMinificationResultError(result)) {
-                compilation.errors.push(result.err);
+                compilation.errors.push(result.error);
                 return;
               }
 
