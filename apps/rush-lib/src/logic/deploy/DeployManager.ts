@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as colors from 'colors';
 import * as path from "path";
 import * as resolve from "resolve";
 import * as npmPacklist from 'npm-packlist';
@@ -97,8 +98,7 @@ export class DeployManager {
       throw new Error('The scenario config file was not found: ' + deployScenarioPath);
     }
 
-    console.log('Loading deployment scenario from: '
-      + path.relative(this._rushConfiguration.commonFolder, deployScenarioPath))
+    console.log(colors.cyan('Loading deployment scenario: ') + deployScenarioPath)
 
     this._deployScenarioJson = JsonFile.loadAndValidate(deployScenarioPath, DeployManager._jsonSchema);
 
@@ -390,7 +390,7 @@ export class DeployManager {
       this._deployFolder(folderToCopy, subdemploymentState);
     }
 
-    console.log("Copying symlinks...");
+    console.log("Creating symlinks...");
     const linksToCopy: ILinkInfo[] = subdemploymentState.symlinkAnalyzer.reportSymlinks();
 
     for (const linkToCopy of linksToCopy) {
@@ -417,14 +417,14 @@ export class DeployManager {
     }
     this._sourceRootFolder = this._rushConfiguration.rushJsonFolder;
 
-    console.log("Deploying to target folder: " + this._targetRootFolder);
+    console.log(colors.cyan("Deploying to target folder:  ") + this._targetRootFolder + '\n');
 
     FileSystem.ensureFolder(this._targetRootFolder);
 
     // Is the target folder empty?
     if (FileSystem.readFolder(this._targetRootFolder).length > 0) {
       if (overwriteExisting) {
-        console.log('Deleting folder contents because "--overwrite" was specified...');
+        console.log('Deleting target folder contents because "--overwrite" was specified...');
         FileSystem.ensureEmptyFolder(this._targetRootFolder);
       } else {
         throw new Error('The deploy target folder is not empty. You can specify "--overwrite"'
@@ -461,7 +461,7 @@ export class DeployManager {
         }
         usedSubdeploymentFolderNames.add(subdeploymentFolderName);
 
-        console.log(`\nPreparing subdeployment for "${subdeploymentFolderName}"`);
+        console.log(colors.green(`\nPreparing subdeployment for "${subdeploymentFolderName}"`));
 
         this._deploySubdeployment([ subdeploymentProjectName ], subdeploymentFolderName);
       }
@@ -473,6 +473,6 @@ export class DeployManager {
       this._deploySubdeployment(deploymentProjectNames, undefined);
     }
 
-    console.log("SUCCESS");
+    console.log("\nThe operation completed successfully.");
   }
 }

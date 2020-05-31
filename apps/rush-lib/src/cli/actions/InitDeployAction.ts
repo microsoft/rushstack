@@ -1,4 +1,5 @@
 import * as path from 'path';
+import * as colors from 'colors';
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
@@ -52,7 +53,7 @@ export class InitDeployAction extends BaseRushAction {
         '\nIf you intend to replace it, please delete the old file first.');
     }
 
-    console.log('Creating ' + scenarioFilePath);
+    console.log(colors.green('Creating scenario file: ') + scenarioFilePath);
 
     const shortProjectName: string = this._project.value!;
     const rushProject: RushConfigurationProject | undefined
@@ -69,6 +70,6 @@ export class InitDeployAction extends BaseRushAction {
       convertLineEndings: NewlineKind.OsDefault
     });
 
-    console.log('\nPlease edit this file to define your deployment scenario.');
+    console.log('\nFile successfully written. Please review the file contents before committing.');
   }
 }
