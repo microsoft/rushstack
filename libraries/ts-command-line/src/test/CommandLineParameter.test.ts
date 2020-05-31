@@ -35,7 +35,7 @@ function createParser(): DynamicCommandLineParser {
   });
   action.defineChoiceParameter({
     parameterLongName: '--choice-with-default',
-    description: 'A choice with a default',
+    description: 'A choice with a default. This description ends with a "quoted word"',
     alternatives: [ 'one', 'two', 'three', 'default' ],
     environmentVariable: 'ENV_CHOICE2',
     defaultValue: 'default'
