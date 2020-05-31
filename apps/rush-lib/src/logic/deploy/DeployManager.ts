@@ -68,22 +68,29 @@ interface IFolderInfo {
  * This object tracks DeployManager state that is different for each subdeployment.
  */
 interface ISubdeploymentState {
+  scenarioName: string;
+
+  mainProjectName: string;
+
   /**
    * The absolute path of the target folder for the subdeployment. If enableSubdeployments=false,
    * then this points to the DeployManager._targetRootFolder.
    */
   targetSubdeploymentFolder: string;
-  symlinkAnalyzer: SymlinkAnalyzer;
+
   /**
    * During the analysis stage, _collectFoldersRecursive() uses this set to collect the absolute paths
    * of the package folders to be copied.  The copying is performed later by _deployFolder().
    */
   foldersToCopy: Set<string>;
+
   /**
    * Additional information about some of the foldersToCopy paths.
    * The key is the absolute real path from foldersToCopy.
    */
   folderInfosByPath: Map<string, IFolderInfo>;
+
+  symlinkAnalyzer: SymlinkAnalyzer;
 }
 
 /**
@@ -411,30 +418,31 @@ export class DeployManager {
   }
 
   /**
-   * Process one subdeployment.  If `enableSubdeployments` is false, then `subdeploymentFolderName` will be
-   * undefined.
+   * Recursively apply the "additionalProjectToInclude" setting.
    */
-  private _deploySubdeployment(includedProjectNames: string[], subdeploymentFolderName: string | undefined): void {
-    // Include the additionalProjectsToInclude
-    const includedProjectNamesSet: Set<string> = new Set();
-    for (const projectName of includedProjectNames) {
-      includedProjectNamesSet.add(projectName);
+  private _collectAdditionalProjectsToInclude(includedProjectNamesSet: Set<string>, projectName: string): void {
+    if (includedProjectNamesSet.has(projectName)) {
+      return;
+    }
+    includedProjectNamesSet.add(projectName);
 
-      const projectSettings: IDeployScenarioProjectJson | undefined
-        = this._deployScenarioProjectJsonsByName.get(projectName);
-      if (projectSettings && projectSettings.additionalProjectsToInclude) {
-        for (const additionalProjectToInclude of projectSettings.additionalProjectsToInclude) {
-          includedProjectNamesSet.add(additionalProjectToInclude);
-        }
+    const projectSettings: IDeployScenarioProjectJson | undefined
+      = this._deployScenarioProjectJsonsByName.get(projectName);
+    if (projectSettings && projectSettings.additionalProjectsToInclude) {
+      for (const additionalProjectToInclude of projectSettings.additionalProjectsToInclude) {
+        this._collectAdditionalProjectsToInclude(includedProjectNamesSet, additionalProjectToInclude);
       }
     }
+  }
 
-    const subdemploymentState: ISubdeploymentState = {
-      targetSubdeploymentFolder: path.join(this._targetRootFolder, subdeploymentFolderName || ''),
-      symlinkAnalyzer: new SymlinkAnalyzer(),
-      foldersToCopy: new Set(),
-      folderInfosByPath: new Map()
-    };
+  /**
+   * Process one subdeployment.  If `enableSubdeployments` is false, then this processes the entire
+   * deployment, and ISubdeploymentState.targetSubdeploymentFolder is simply the deployment target folder.
+   */
+  private _deploySubdeployment(subdemploymentState: ISubdeploymentState): void {
+    // Calculate the set with additionalProjectsToInclude
+    const includedProjectNamesSet: Set<string> = new Set();
+    this._collectAdditionalProjectsToInclude(includedProjectNamesSet, subdemploymentState.mainProjectName);
 
     for (const rushProject of this._rushConfiguration.projects) {
       const projectFolder: string = FileSystem.getRealPath(rushProject.projectFolder);
@@ -546,14 +554,33 @@ export class DeployManager {
 
         console.log(colors.green(`\nPreparing subdeployment for "${subdeploymentFolderName}"`));
 
-        this._deploySubdeployment([ subdeploymentProjectName ], subdeploymentFolderName);
+        const subdemploymentState: ISubdeploymentState = {
+          scenarioName: scenarioName,
+          mainProjectName: subdeploymentProjectName,
+          targetSubdeploymentFolder: path.join(this._targetRootFolder, subdeploymentFolderName),
+          foldersToCopy: new Set(),
+          folderInfosByPath: new Map(),
+          symlinkAnalyzer: new SymlinkAnalyzer()
+        };
+
+        this._deploySubdeployment(subdemploymentState);
       }
     } else {
       if (deploymentProjectNames.length !== 1) {
         throw new Error(`The "deploymentProjectNames" setting specifies specifies more than one project;`
           + ' this is not supported unless the "enableSubdeployments" setting is true.');
       }
-      this._deploySubdeployment(deploymentProjectNames, undefined);
+
+      const subdemploymentState: ISubdeploymentState = {
+        scenarioName: scenarioName,
+        mainProjectName: deploymentProjectNames[0],
+        targetSubdeploymentFolder: this._targetRootFolder,
+        foldersToCopy: new Set(),
+        folderInfosByPath: new Map(),
+        symlinkAnalyzer: new SymlinkAnalyzer()
+      };
+
+      this._deploySubdeployment(subdemploymentState);
     }
 
     console.log("\nThe operation completed successfully.");
