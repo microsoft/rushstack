@@ -118,13 +118,13 @@ export class DeployManager {
     }
   }
 
-  private _collectFoldersRecursive(packageJsonPath: string, subdemploymentState: ISubdeploymentState): void {
-    const packageJsonFolderPath: string = path.dirname(packageJsonPath);
+  private _collectFoldersRecursive(packageJsonFolderPath: string, subdemploymentState: ISubdeploymentState): void {
+    const packageJsonRealFolderPath: string = FileSystem.getRealPath(packageJsonFolderPath);
 
-    if (!subdemploymentState.foldersToCopy.has(packageJsonFolderPath)) {
-      subdemploymentState.foldersToCopy.add(packageJsonFolderPath);
+    if (!subdemploymentState.foldersToCopy.has(packageJsonRealFolderPath)) {
+      subdemploymentState.foldersToCopy.add(packageJsonRealFolderPath);
 
-      const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
+      const packageJson: IPackageJson = JsonFile.load(path.join(packageJsonRealFolderPath, 'package.json'));
 
       // Union of keys from regular dependencies, peerDependencies, and optionalDependencies
       const allDependencyNames: Set<string> = new Set<string>();
@@ -150,7 +150,7 @@ export class DeployManager {
 
       for (const dependencyPackageName of allDependencyNames) {
         const resolvedDependency: string = resolve.sync(dependencyPackageName, {
-          basedir: packageJsonFolderPath,
+          basedir: packageJsonRealFolderPath,
           preserveSymlinks: false,
           packageFilter: (pkg, dir) => {
             // point "main" at a file that is guaranteed to exist
@@ -178,16 +178,16 @@ export class DeployManager {
             // Ignore missing optional dependency
             continue;
           }
-          throw new Error(`Error resolving ${dependencyPackageName} from ${packageJsonPath}`);
+          throw new Error(`Error resolving ${dependencyPackageName} from ${packageJsonRealFolderPath}`);
         }
 
-        const dependencyPackageJsonPath: string | undefined
-          = this._packageJsonLookup.tryGetPackageJsonFilePathFor(resolvedDependency);
-        if (!dependencyPackageJsonPath) {
-          throw new Error(`Error finding package.json for ${resolvedDependency}`);
+        const dependencyPackageFolderPath: string | undefined
+          = this._packageJsonLookup.tryGetPackageFolderFor(resolvedDependency);
+        if (!dependencyPackageFolderPath) {
+          throw new Error(`Error finding package.json folder for ${resolvedDependency}`);
         }
 
-        this._collectFoldersRecursive(dependencyPackageJsonPath, subdemploymentState);
+        this._collectFoldersRecursive(dependencyPackageFolderPath, subdemploymentState);
       }
     }
   }
@@ -374,7 +374,7 @@ export class DeployManager {
         throw new Error(`The project ${projectName} is not defined in rush.json`);
       }
 
-      this._collectFoldersRecursive(path.join(project.projectFolder, 'package.json'), subdemploymentState);
+      this._collectFoldersRecursive(project.projectFolder, subdemploymentState);
     }
 
     Sort.sortSet(subdemploymentState.foldersToCopy);
