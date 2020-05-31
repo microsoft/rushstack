@@ -15,7 +15,8 @@ import {
   JsonFile,
   JsonSchema,
   IPackageJson,
-  AlreadyExistsBehavior
+  AlreadyExistsBehavior,
+  InternalError
 } from "@rushstack/node-core-library";
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
@@ -30,12 +31,14 @@ declare module "npm-packlist" {
   }
 }
 
+// Describes IDeployScenarioJson.projectSettings
 interface IDeployScenarioProjectJson {
   projectName: string;
   subdeploymentFolderName?: string;
   additionalProjectsToInclude?: string[];
 }
 
+// The parsed JSON file structure, as defined by the "deploy-scenario.schema.json" JSON schema
 interface IDeployScenarioJson {
   deploymentProjectNames: string[],
   enableSubdeployments?: boolean;
@@ -45,33 +48,75 @@ interface IDeployScenarioJson {
   projectSettings?: IDeployScenarioProjectJson[];
 }
 
+/**
+ * Stores additional information about folders being copied.
+ * Only some of the ISubdeploymentState.foldersToCopy items will an IFolderInfo object.
+ */
 interface IFolderInfo {
+  /**
+   * This is the lookup key for ISubdeploymentState.folderInfosByPath.
+   * It is an absolute real path.
+   */
   folderPath: string;
+  /**
+   * True if this is the package folder for a local Rush project.
+   */
   isRushProject: boolean;
 }
 
+/**
+ * This object tracks DeployManager state that is different for each subdeployment.
+ */
 interface ISubdeploymentState {
+  /**
+   * The absolute path of the target folder for the subdeployment. If enableSubdeployments=false,
+   * then this points to the DeployManager._targetRootFolder.
+   */
   targetSubdeploymentFolder: string;
   symlinkAnalyzer: SymlinkAnalyzer;
+  /**
+   * During the analysis stage, _collectFoldersRecursive() uses this set to collect the absolute paths
+   * of the package folders to be copied.  The copying is performed later by _deployFolder().
+   */
   foldersToCopy: Set<string>;
+  /**
+   * Additional information about some of the foldersToCopy paths.
+   * The key is the absolute real path from foldersToCopy.
+   */
   folderInfosByPath: Map<string, IFolderInfo>;
 }
 
+/**
+ * Manages the business logic for the "rush deploy" command.
+ */
 export class DeployManager {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
     path.join(__dirname, '../../schemas/deploy-scenario.schema.json')
   );
 
+  // Used by validateScenarioName()
   private static _scenarioNameRegExp: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
   private readonly _rushConfiguration: RushConfiguration;
-
-  private _targetRootFolder: string;
-  private _sourceRootFolder: string;
-
   private readonly _packageJsonLookup: PackageJsonLookup;
 
+  /**
+   * The target folder for the deployment.  By default it will be "common/deploy".
+   */
+  private _targetRootFolder: string;
+  /**
+   * The source folder that copying originates from.  Generally it is the repo root folder with rush.json.
+   */
+  private _sourceRootFolder: string;
+
+  /**
+   * The parsed scenario config file, as defined by the "deploy-scenario.schema.json" JSON schema
+   */
   private _deployScenarioJson: IDeployScenarioJson;
+
+  /**
+   * Used to lookup items in IDeployScenarioJson.projectSettings based on their IDeployScenarioProjectJson.projectName
+   */
   private _deployScenarioProjectJsonsByName: Map<string, IDeployScenarioProjectJson>;
 
   public constructor(rushConfiguration: RushConfiguration) {
@@ -80,6 +125,9 @@ export class DeployManager {
     this._deployScenarioProjectJsonsByName = new Map();
   }
 
+  /**
+   * Validates that the input string conforms to the naming rules for a "rush deploy" scenario name.
+   */
   public static validateScenarioName(scenarioName: string): void {
     if (!scenarioName) {
       throw new Error('The scenario name cannot be an empty string');
@@ -90,6 +138,9 @@ export class DeployManager {
     }
   }
 
+  /**
+   * Load and validate the scenario config file.  The result is stored in this._deployScenarioJson.
+   */
   private _loadConfigFile(scenarioName: string): void {
     const deployScenarioPath: string = path.join(this._rushConfiguration.commonFolder, 'config/deploy-scenarios',
       scenarioName + '.json');
@@ -118,6 +169,9 @@ export class DeployManager {
     }
   }
 
+  /**
+   * Recursively crawl the node_modules dependencies and collect the result in ISubdeploymentState.foldersToCopy.
+   */
   private _collectFoldersRecursive(packageJsonFolderPath: string, subdemploymentState: ISubdeploymentState): void {
     const packageJsonRealFolderPath: string = FileSystem.getRealPath(packageJsonFolderPath);
 
@@ -198,6 +252,12 @@ export class DeployManager {
     }
   }
 
+  /**
+   * Maps a file path from DeployManager._sourceRootFolder --> ISubdeploymentState.targetSubdeploymentFolder
+   *
+   * Example input: "C:\MyRepo\libraries\my-lib"
+   * Example output: "C:\MyRepo\common\deploy\my-scenario\libraries\my-lib"
+   */
   private _remapPathForDeployFolder(absolutePathInSourceFolder: string,
     subdemploymentState: ISubdeploymentState): string {
 
@@ -209,6 +269,9 @@ export class DeployManager {
     return absolutePathInTargetFolder;
   }
 
+  /**
+   * Copy one package folder to the deployment target folder.
+   */
   private _deployFolder(sourceFolderPath: string, subdemploymentState: ISubdeploymentState): void {
 
     let useNpmIgnoreFilter: boolean = false;
@@ -287,6 +350,9 @@ export class DeployManager {
     }
   }
 
+  /**
+   * Create a symlink as described by the ILinkInfo object.
+   */
   private _deploySymlink(originalLinkInfo: ILinkInfo, subdemploymentState: ISubdeploymentState): boolean {
     const linkInfo: ILinkInfo = {
       kind: originalLinkInfo.kind,
@@ -342,6 +408,10 @@ export class DeployManager {
     return true;
   }
 
+  /**
+   * Process one subdeployment.  If `enableSubdeployments` is false, then `subdeploymentFolderName` will be
+   * undefined.
+   */
   private _deploySubdeployment(includedProjectNames: string[], subdeploymentFolderName: string | undefined): void {
     // Include the additionalProjectsToInclude
     const includedProjectNamesSet: Set<string> = new Set();
@@ -395,15 +465,26 @@ export class DeployManager {
 
     for (const linkToCopy of linksToCopy) {
       if (!this._deploySymlink(linkToCopy, subdemploymentState)) {
-        throw new Error("Target does not exist: " + JSON.stringify(linkToCopy, undefined, 2));
+        // TODO: If a symbolic link points to another symbolic link, then we should order the operations
+        // so that the intermediary target is created first.  This case was procrastinated because it does
+        // not seem to occur in practice.  If you encounter this, please report it.
+        throw new InternalError("Target does not exist: " + JSON.stringify(linkToCopy, undefined, 2));
       }
     }
   }
 
+  /**
+   * The main entry point for performing a deployment.
+   */
   public deployScenario(scenarioName: string, overwriteExisting: boolean,
     targetFolderParameter: string | undefined): void {
 
     DeployManager.validateScenarioName(scenarioName);
+
+    if (this._targetRootFolder !== undefined) {
+      // We can remove this restriction, but currently there is no reason.
+      throw new InternalError('deployScenario() cannot be called twice');
+    }
 
     this._loadConfigFile(scenarioName);
 

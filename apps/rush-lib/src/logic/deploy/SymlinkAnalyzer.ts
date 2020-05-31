@@ -5,33 +5,56 @@ import {
   FileSystem,
   FileSystemStats,
   Sort,
+  InternalError,
 } from "@rushstack/node-core-library";
 
 import * as path from "path";
 
-interface IFileNode {
+/**
+ * Represents a file object analyzed by {@link SymlinkAnalyzer}.
+ */
+export interface IFileNode {
   kind: 'file';
   nodePath: string;
 }
 
-interface IFolderNode {
+/**
+ * Represents a folder object analyzed by {@link SymlinkAnalyzer}.
+ */
+export interface IFolderNode {
   kind: 'folder';
   nodePath: string;
 }
 
-interface ILinkNode {
+/**
+ * Represents a symbolic link analyzed by {@link SymlinkAnalyzer}.
+ */
+export interface ILinkNode {
   kind: 'link';
   nodePath: string;
 
-  // If it is a symlink, the (immediate) target that the symlink resolves to.
+  /**
+   * The immediate target that the symlink resolves to.
+   */
   linkTarget: string;
 }
 
-type PathNode = IFileNode | IFolderNode | ILinkNode;
+export type PathNode = IFileNode | IFolderNode | ILinkNode;
 
+/**
+ * Represents a symbolic link reported by {@link SymlinkAnalyzer.reportSymlinks()}.
+ */
 export interface ILinkInfo {
   kind: 'fileLink' | 'folderLink';
+
+  /**
+   * The path of the symbolic link.
+   */
   linkPath: string;
+
+  /**
+   * The target that the link points to.
+   */
   targetPath: string;
 }
 
@@ -117,11 +140,16 @@ export class SymlinkAnalyzer {
       }
 
       if (currentNode.kind !== 'folder') {
-        throw new Error('The path ends prematurely at: ' + inputPath);
+        // This should never happen, because analyzePath() is always supposed to receive complete paths
+        // to real filesystem objects.
+        throw new InternalError('The path ends prematurely at: ' + inputPath);
       }
     }
   }
 
+  /**
+   * Returns a summary of all the symbolic links encountered by {@link SymlinkAnalyzer.analyzePath}.
+   */
   public reportSymlinks(): ILinkInfo[] {
     const list: ILinkInfo[] = [...this._linkInfosByPath.values()];
     Sort.sortBy(list, x => x.linkPath);
