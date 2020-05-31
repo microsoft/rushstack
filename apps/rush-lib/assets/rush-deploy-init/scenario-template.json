@@ -7,21 +7,22 @@
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/deploy-scenario.schema.json",
 
   /**
-   * Specify the name of the Rush project to be deployed. The name must be a full package name
-   * as declared in rush.json.  If you want to include other projects that are not dependencies,
-   * add an entry for your main project to the "projectSettings", then use the "additionalProjectsToInclude" setting.
+   * Specify the name of the main Rush project to be deployed, using the full package name as declared in rush.json.
+   * Dependencies are automatically included with the main project.  If you want the deployment to include
+   * other unrelated projects, add your main project to the "projectSettings" section, and then add the other
+   * projects to its "additionalProjectsToInclude" list.
    *
-   * The "deploymentProjectNames" array must contain exactly one project, unless "enableSubdeployments" is true;
-   * see documentation for that setting for details.
+   * The "deploymentProjectNames" array normally contains exactly one item.  However, if "enableSubdeployments"
+   * is true, then multiple projects can be specified, and each item create a separate subdeployment.
    */
   "deploymentProjectNames": [
     "[%PROJECT_NAME_TO_DEPLOY%]"
   ],
 
   /**
-   * Subdeployments are an optional feature that enables multiple deployments to be prepared by a single
-   * invocation of "rush deploy". In this mode, more than one name can be specified for "deploymentProjectNames".
-   * For each entry, a subdeployment folder will be created under the "rush deploy" target folder.
+   * Subdeployments are an optional feature that enables multiple deployments to be processed with a single
+   * invocation of "rush deploy". In this mode, more than one item can be specified for "deploymentProjectNames".
+   * For each item, a subdeployment folder will be created under the "rush deploy" target folder.
    * (The folder name can be customized using the "subdeploymentFolderName" project setting.)
    * Each subdeployment folder will receive its own copy of the named project and its associated dependencies.
    *
@@ -30,8 +31,8 @@
   "enableSubdeployments": false,
 
   /**
-   * When deploying a local Rush project, by the "devDependencies" are normally excluded.
-   * Set this to "true" to include them.
+   * When deploying a local Rush project, the package.json "devDependencies" are normally excluded.
+   * If you want to include them, set "includeDevDependencies" to true.
    *
    * The default value is false.
    */
