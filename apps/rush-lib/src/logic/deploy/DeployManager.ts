@@ -206,7 +206,12 @@ export class DeployManager {
       }
 
       for (const dependencyPackageName of allDependencyNames) {
-        const resolvedDependency: string = resolve.sync(dependencyPackageName, {
+        // The "resolve" library models the Node.js require() API, which gives precedence to "core" system modules
+        // over an NPM package with the same name.  But we are traversing package.json dependencies, which refer
+        // to system modules.  Appending a "/" forces require() to load the NPM package.
+        const resolveSuffix: string = dependencyPackageName + resolve.isCore(dependencyPackageName) ? '/' : '';
+
+        const resolvedDependency: string = resolve.sync(dependencyPackageName + resolveSuffix, {
           basedir: packageJsonRealFolderPath,
           preserveSymlinks: false,
           packageFilter: (pkg, dir) => {
@@ -236,12 +241,6 @@ export class DeployManager {
             continue;
           }
           throw new Error(`Error resolving ${dependencyPackageName} from ${packageJsonRealFolderPath}`);
-        }
-
-        if (resolvedDependency === dependencyPackageName) {
-          // When resolve.sync() encounters a system package such as "fs" or "path" (detected via the isCore()
-          // function), it simply returns its original input, instead of a proper file path.
-          continue;
         }
 
         const dependencyPackageFolderPath: string | undefined
