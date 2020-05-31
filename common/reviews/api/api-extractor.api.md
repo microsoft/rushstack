@@ -43,6 +43,7 @@ export class ExtractorConfig {
     readonly betaTrimmedFilePath: string;
     readonly bundledPackages: string[];
     readonly docModelEnabled: boolean;
+    readonly entryPointFilePaths: string[];
     static readonly FILENAME: string;
     getDiagnosticDump(): string;
     // @internal
@@ -185,6 +186,7 @@ export interface IConfigFile {
     docModel?: IConfigDocModel;
     // @beta
     dtsRollup?: IConfigDtsRollup;
+    entryPointFilePaths: string[];
     extends?: string;
     mainEntryPointFilePath: string;
     messages?: IExtractorMessagesConfig;

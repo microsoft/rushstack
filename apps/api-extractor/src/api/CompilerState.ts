@@ -69,9 +69,9 @@ export class CompilerState {
       ));
     }
 
-    const inputFilePaths: string[] = commandLine.fileNames.concat(extractorConfig.mainEntryPointFilePath);
+    const inputFilePaths: string[] = commandLine.fileNames.concat(extractorConfig.mainEntryPointFilePath.filePath);
     if (options && options.additionalEntryPoints) {
-      inputFilePaths.push(...options.additionalEntryPoints);
+      inputFilePaths.push(...options.additionalEntryPoints.map(entryPoint => entryPoint));
     }
 
     // Append the entry points and remove any non-declaration files from the list

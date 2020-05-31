@@ -15,6 +15,7 @@ import { MessageRouter } from '../collector/MessageRouter';
 import { TypeScriptInternals, IGlobalVariableAnalyzer } from './TypeScriptInternals';
 import { StringChecks } from './StringChecks';
 import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
+import { IWorkingPackageEntryPoint } from '../collector/WorkingPackage';
 
 export type AstEntity = AstSymbol | AstImport;
 
@@ -120,8 +121,8 @@ export class AstSymbolTable {
   /**
    * This crawls the specified entry point and collects the full set of exported AstSymbols.
    */
-  public fetchAstModuleExportInfo(astModule: AstModule): AstModuleExportInfo {
-    return this._exportAnalyzer.fetchAstModuleExportInfo(astModule);
+  public fetchAstModuleExportInfo(astModule: AstModule, otherEntryPoints: IWorkingPackageEntryPoint[]): AstModuleExportInfo {
+    return this._exportAnalyzer.fetchAstModuleExportInfo(astModule, otherEntryPoints);
   }
 
   /**
@@ -145,7 +146,7 @@ export class AstSymbolTable {
    * or members.  (We do always construct its parents however, since AstDefinition.parent
    * is immutable, and needed e.g. to calculate release tag inheritance.)
    */
-  public analyze(astSymbol: AstSymbol): void {
+  public analyze(astSymbol: AstSymbol, otherEntryPoints: IWorkingPackageEntryPoint[]): void {
     if (astSymbol.analyzed) {
       return;
     }
@@ -161,7 +162,7 @@ export class AstSymbolTable {
 
     // Calculate the full child tree for each definition
     for (const astDeclaration of rootAstSymbol.astDeclarations) {
-      this._analyzeChildTree(astDeclaration.declaration, astDeclaration);
+      this._analyzeChildTree(astDeclaration.declaration, astDeclaration, otherEntryPoints);
     }
 
     rootAstSymbol._notifyAnalyzed();
@@ -176,7 +177,7 @@ export class AstSymbolTable {
           // Walk up to the root of the tree, looking for any imports along the way
           if (referencedAstEntity instanceof AstSymbol) {
             if (!referencedAstEntity.isExternal) {
-              this.analyze(referencedAstEntity);
+              this.analyze(referencedAstEntity, otherEntryPoints);
             }
           }
 
@@ -303,7 +304,7 @@ export class AstSymbolTable {
   /**
    * Used by analyze to recursively analyze the entire child tree.
    */
-  private _analyzeChildTree(node: ts.Node, governingAstDeclaration: AstDeclaration): void {
+  private _analyzeChildTree(node: ts.Node, governingAstDeclaration: AstDeclaration, otherEntryPoints: IWorkingPackageEntryPoint[]): void {
     switch (node.kind) {
       case ts.SyntaxKind.JSDocComment: // Skip JSDoc comments - TS considers @param tags TypeReference nodes
         return;
@@ -365,7 +366,7 @@ export class AstSymbolTable {
                 }
               } else {
                 referencedAstEntity = this._exportAnalyzer.fetchReferencedAstEntity(symbol,
-                  governingAstDeclaration.astSymbol.isExternal);
+                  governingAstDeclaration.astSymbol.isExternal, otherEntryPoints);
 
                 this._entitiesByIdentifierNode.set(identifierNode, referencedAstEntity);
               }
@@ -402,7 +403,7 @@ export class AstSymbolTable {
       governingAstDeclaration.astSymbol.isExternal);
 
     for (const childNode of node.getChildren()) {
-      this._analyzeChildTree(childNode, newGoverningAstDeclaration || governingAstDeclaration);
+      this._analyzeChildTree(childNode, newGoverningAstDeclaration || governingAstDeclaration, otherEntryPoints);
     }
   }
 
@@ -417,7 +418,7 @@ export class AstSymbolTable {
       }
 
       referencedAstEntity = this._exportAnalyzer.fetchReferencedAstEntity(symbol,
-        governingAstDeclaration.astSymbol.isExternal);
+        governingAstDeclaration.astSymbol.isExternal, []);
 
       this._entitiesByIdentifierNode.set(identifierNode, referencedAstEntity);
     }
@@ -590,9 +591,9 @@ export class AstSymbolTable {
     }
 
     if (options.isExternal !== astSymbol.isExternal) {
-      throw new InternalError(`Cannot assign isExternal=${options.isExternal} for`
-        + ` the symbol ${astSymbol.localName} because it was previously registered`
-        + ` with isExternal=${astSymbol.isExternal}`);
+      // throw new InternalError(`Cannot assign isExternal=${options.isExternal} for`
+      //   + ` the symbol ${astSymbol.localName} because it was previously registered`
+      //   + ` with isExternal=${astSymbol.isExternal}`);
     }
 
     return astSymbol;

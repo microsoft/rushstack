@@ -11,6 +11,7 @@ import { AstModule, AstModuleExportInfo } from './AstModule';
 import { TypeScriptInternals } from './TypeScriptInternals';
 import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
 import { IFetchAstSymbolOptions, AstEntity } from './AstSymbolTable';
+import { IWorkingPackageEntryPoint } from '../collector/WorkingPackage';
 
 /**
  * Exposes the minimal APIs from AstSymbolTable that are needed by ExportAnalyzer.
@@ -21,7 +22,7 @@ import { IFetchAstSymbolOptions, AstEntity } from './AstSymbolTable';
 export interface IAstSymbolTable {
   fetchAstSymbol(options: IFetchAstSymbolOptions): AstSymbol | undefined;
 
-  analyze(astSymbol: AstSymbol): void;
+  analyze(astSymbol: AstSymbol, otherEntryPoints: IWorkingPackageEntryPoint[]): void;
 }
 
 /**
@@ -226,7 +227,7 @@ export class ExportAnalyzer {
   /**
    * Implementation of {@link AstSymbolTable.fetchAstModuleExportInfo}.
    */
-  public fetchAstModuleExportInfo(entryPointAstModule: AstModule): AstModuleExportInfo {
+  public fetchAstModuleExportInfo(entryPointAstModule: AstModule, otherEntryPoints: IWorkingPackageEntryPoint[]): AstModuleExportInfo {
     if (entryPointAstModule.isExternal) {
       throw new Error('fetchAstModuleExportInfo() is not supported for external modules');
     }
@@ -235,7 +236,7 @@ export class ExportAnalyzer {
       const astModuleExportInfo: AstModuleExportInfo = new AstModuleExportInfo();
 
       this._collectAllExportsRecursive(astModuleExportInfo, entryPointAstModule,
-        new Set<AstModule>());
+        new Set<AstModule>(), otherEntryPoints);
 
       entryPointAstModule.astModuleExportInfo = astModuleExportInfo;
     }
@@ -281,7 +282,7 @@ export class ExportAnalyzer {
   }
 
   private _collectAllExportsRecursive(astModuleExportInfo: AstModuleExportInfo, astModule: AstModule,
-    visitedAstModules: Set<AstModule>): void {
+    visitedAstModules: Set<AstModule>, otherEntryPoints: IWorkingPackageEntryPoint[]): void {
 
     if (visitedAstModules.has(astModule)) {
       return;
@@ -305,7 +306,7 @@ export class ExportAnalyzer {
                   const astEntity: AstEntity = this._getExportOfAstModule(exportSymbol.name, astModule);
 
                   if (astEntity instanceof AstSymbol && !astEntity.isExternal) {
-                    this._astSymbolTable.analyze(astEntity);
+                    this._astSymbolTable.analyze(astEntity, otherEntryPoints);
                   }
 
                   astModuleExportInfo.exportedLocalEntities.set(exportSymbol.name, astEntity);
@@ -317,7 +318,7 @@ export class ExportAnalyzer {
       }
 
       for (const starExportedModule of astModule.starExportedModules) {
-        this._collectAllExportsRecursive(astModuleExportInfo, starExportedModule, visitedAstModules);
+        this._collectAllExportsRecursive(astModuleExportInfo, starExportedModule, visitedAstModules, otherEntryPoints);
       }
     }
   }
@@ -327,7 +328,7 @@ export class ExportAnalyzer {
    * refers to.  For example, if a particular interface describes the return value of a function, this API can help
    * us determine a TSDoc declaration reference for that symbol (if the symbol is exported).
    */
-  public fetchReferencedAstEntity(symbol: ts.Symbol, referringModuleIsExternal: boolean): AstEntity | undefined {
+  public fetchReferencedAstEntity(symbol: ts.Symbol, referringModuleIsExternal: boolean, otherEntryPoints: IWorkingPackageEntryPoint[]): AstEntity | undefined {
     let current: ts.Symbol = symbol;
 
     if (referringModuleIsExternal) {
@@ -338,11 +339,11 @@ export class ExportAnalyzer {
         for (const declaration of current.declarations || []) {
 
           let matchedAstEntity: AstEntity | undefined;
-          matchedAstEntity = this._tryMatchExportDeclaration(declaration, current);
+          matchedAstEntity = this._tryMatchExportDeclaration(declaration, current, otherEntryPoints);
           if (matchedAstEntity !== undefined) {
             return matchedAstEntity;
           }
-          matchedAstEntity = this._tryMatchImportDeclaration(declaration, current);
+          matchedAstEntity = this._tryMatchImportDeclaration(declaration, current, otherEntryPoints);
           if (matchedAstEntity !== undefined) {
             return matchedAstEntity;
           }
@@ -373,7 +374,7 @@ export class ExportAnalyzer {
     return astSymbol;
   }
 
-  private _tryMatchExportDeclaration(declaration: ts.Declaration, declarationSymbol: ts.Symbol): AstEntity | undefined {
+  private _tryMatchExportDeclaration(declaration: ts.Declaration, declarationSymbol: ts.Symbol, otherEntryPoints: IWorkingPackageEntryPoint[]): AstEntity | undefined {
     const exportDeclaration: ts.ExportDeclaration | undefined
       = TypeScriptHelpers.findFirstParent<ts.ExportDeclaration>(declaration, ts.SyntaxKind.ExportDeclaration);
 
@@ -406,7 +407,7 @@ export class ExportAnalyzer {
       // Ignore "export { A }" without a module specifier
       if (exportDeclaration.moduleSpecifier) {
         const externalModulePath: string | undefined = this._tryGetExternalModulePath(exportDeclaration,
-          declarationSymbol);
+          declarationSymbol, otherEntryPoints);
 
         if (externalModulePath !== undefined) {
           return this._fetchAstImport(declarationSymbol, {
@@ -423,13 +424,13 @@ export class ExportAnalyzer {
     return undefined;
   }
 
-  private _tryMatchImportDeclaration(declaration: ts.Declaration, declarationSymbol: ts.Symbol): AstEntity | undefined {
+  private _tryMatchImportDeclaration(declaration: ts.Declaration, declarationSymbol: ts.Symbol, otherEntryPoints: IWorkingPackageEntryPoint[]): AstEntity | undefined {
     const importDeclaration: ts.ImportDeclaration | undefined
       = TypeScriptHelpers.findFirstParent<ts.ImportDeclaration>(declaration, ts.SyntaxKind.ImportDeclaration);
 
     if (importDeclaration) {
       const externalModulePath: string | undefined = this._tryGetExternalModulePath(importDeclaration,
-        declarationSymbol);
+        declarationSymbol, otherEntryPoints);
 
       if (declaration.kind === ts.SyntaxKind.NamespaceImport) {
         // EXAMPLE:
@@ -620,7 +621,7 @@ export class ExportAnalyzer {
     if (astModule.moduleSymbol.exports) {
       const exportSymbol: ts.Symbol | undefined = astModule.moduleSymbol.exports.get(escapedExportName);
       if (exportSymbol) {
-        astEntity = this.fetchReferencedAstEntity(exportSymbol, astModule.isExternal);
+        astEntity = this.fetchReferencedAstEntity(exportSymbol, astModule.isExternal, []);
 
         if (astEntity !== undefined) {
           astModule.cachedExportedEntities.set(exportName, astEntity); // cache for next time
@@ -653,7 +654,7 @@ export class ExportAnalyzer {
   }
 
   private _tryGetExternalModulePath(importOrExportDeclaration: ts.ImportDeclaration | ts.ExportDeclaration,
-    exportSymbol: ts.Symbol): string | undefined {
+    exportSymbol: ts.Symbol, otherEntryPoints: IWorkingPackageEntryPoint[]): string | undefined {
 
       // The name of the module, which could be like "./SomeLocalFile' or like 'external-package/entry/point'
     const moduleSpecifier: string | undefined = TypeScriptHelpers.getModuleSpecifier(importOrExportDeclaration);
@@ -663,11 +664,23 @@ export class ExportAnalyzer {
 
     // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
     // but ignore:  "../folder/LocalFile"
-    if (this._isExternalModulePath(moduleSpecifier)) {
+    // Also Match import path from other entry points
+    if (this._isExternalModulePath(moduleSpecifier) || this._isFromOtherEntryPoint(importOrExportDeclaration, otherEntryPoints)) {
       return moduleSpecifier;
     }
 
     return undefined;
+  }
+
+  private _isFromOtherEntryPoint(importOrExportDeclaration: ts.ImportDeclaration | ts.ExportDeclaration, otherEntryPoints: IWorkingPackageEntryPoint[]): boolean {
+    // The name of the module, which could be like "./SomeLocalFile' or like 'external-package/entry/point'
+    const moduleSpecifier: string | undefined = TypeScriptHelpers.getModuleSpecifier(importOrExportDeclaration);
+    if (!moduleSpecifier) {
+      throw new InternalError('Unable to parse module specifier');
+    }
+
+    // TODO: Make both side absolute path from the package and compare
+    return !!otherEntryPoints.find(entry => `./${entry.modulePath}` === moduleSpecifier);
   }
 
   /**

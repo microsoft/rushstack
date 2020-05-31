@@ -243,7 +243,7 @@ export class Collector {
       // Create a CollectorEntity for each top-level export
       const exportedAstEntities: AstEntity[] = [];
 
-      const astModuleExportInfo: AstModuleExportInfo = this.astSymbolTable.fetchAstModuleExportInfo(astEntryPoint);
+      const astModuleExportInfo: AstModuleExportInfo = this.astSymbolTable.fetchAstModuleExportInfo(astEntryPoint, this.workingPackage.entryPoints.filter(e => e !== entryPoint));
       for (const [exportName, astEntity] of astModuleExportInfo.exportedLocalEntities) {
         this._createCollectorEntity(astEntity, astEntryPoint, exportName);
 
@@ -255,7 +255,12 @@ export class Collector {
       // are encountered first as exports.
       const alreadySeenAstSymbols: Set<AstSymbol> = new Set<AstSymbol>();
       for (const exportedAstEntity of exportedAstEntities) {
-        this._createEntityForIndirectReferences(exportedAstEntity, astEntryPoint, alreadySeenAstSymbols);
+        this._createEntityForIndirectReferences(
+          exportedAstEntity,
+          astEntryPoint,
+          alreadySeenAstSymbols,
+          this.workingPackage.entryPoints.filter(e => e !== entryPoint)
+        );
 
         if (exportedAstEntity instanceof AstSymbol) {
           this.fetchSymbolMetadata(exportedAstEntity);
@@ -430,7 +435,12 @@ export class Collector {
     }
   }
 
-  private _createEntityForIndirectReferences(astEntity: AstEntity, astModule: AstModule, alreadySeenAstEntities: Set<AstEntity>): void {
+  private _createEntityForIndirectReferences(
+    astEntity: AstEntity,
+    astModule: AstModule,
+    alreadySeenAstEntities: Set<AstEntity>,
+    otherEntryPoints: IWorkingPackageEntryPoint[]
+  ): void {
     if (alreadySeenAstEntities.has(astEntity)) {
       return;
     }
@@ -450,7 +460,7 @@ export class Collector {
             this._createCollectorEntity(referencedAstEntity, astModule, undefined);
           }
 
-          this._createEntityForIndirectReferences(referencedAstEntity, astModule, alreadySeenAstEntities);
+          this._createEntityForIndirectReferences(referencedAstEntity, astModule, alreadySeenAstEntities, otherEntryPoints);
         }
       });
     }
