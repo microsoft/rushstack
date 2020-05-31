@@ -181,6 +181,12 @@ export class DeployManager {
           throw new Error(`Error resolving ${dependencyPackageName} from ${packageJsonRealFolderPath}`);
         }
 
+        if (resolvedDependency === dependencyPackageName) {
+          // When resolve.sync() encounters a system package such as "fs" or "path" (detected via the isCore()
+          // function), it simply returns its original input, instead of a proper file path.
+          continue;
+        }
+
         const dependencyPackageFolderPath: string | undefined
           = this._packageJsonLookup.tryGetPackageFolderFor(resolvedDependency);
         if (!dependencyPackageFolderPath) {
