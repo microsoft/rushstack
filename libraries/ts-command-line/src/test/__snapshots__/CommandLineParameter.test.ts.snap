@@ -34,7 +34,7 @@ exports[`CommandLineParameter parses an input with ALL parameters 3`] = `
 Object {
   "argumentName": undefined,
   "defaultValue": "default",
-  "description": "A choice with a default",
+  "description": "A choice with a default. This description ends with a \\"quoted word\\"",
   "environmentVariable": "ENV_CHOICE2",
   "kind": 0,
   "longName": "--choice-with-default",
@@ -220,7 +220,7 @@ exports[`CommandLineParameter parses an input with NO parameters 3`] = `
 Object {
   "argumentName": undefined,
   "defaultValue": "default",
-  "description": "A choice with a default",
+  "description": "A choice with a default. This description ends with a \\"quoted word\\"",
   "environmentVariable": "ENV_CHOICE2",
   "kind": 0,
   "longName": "--choice-with-default",
@@ -412,9 +412,10 @@ Optional arguments:
                         A choice. This parameter may alternatively be 
                         specified via the ENV_CHOICE environment variable.
   --choice-with-default {one,two,three,default}
-                        A choice with a default. This parameter may 
-                        alternatively be specified via the ENV_CHOICE2 
-                        environment variable. The default value is \\"default\\".
+                        A choice with a default. This description ends with a 
+                        \\"quoted word\\" This parameter may alternatively be 
+                        specified via the ENV_CHOICE2 environment variable. 
+                        The default value is \\"default\\".
   -f, --flag            A flag. This parameter may alternatively be specified 
                         via the ENV_FLAG environment variable.
   -i NUMBER, --integer NUMBER
