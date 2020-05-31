@@ -49,6 +49,12 @@ export class SymlinkAnalyzer {
     for (; ;) {
       const currentPath: string = pathSegments.slice(0, pathSegmentsIndex + 1).join(path.sep);
 
+      if (currentPath === '') {
+        // Edge case for a Unix path like "/folder/file" --> [ "", "folder", "file" ]
+        ++pathSegmentsIndex;
+        continue;
+      }
+
       let currentNode: PathNode | undefined = this._nodesByPath.get(currentPath);
       if (currentNode === undefined) {
         const linkStats: FileSystemStats = FileSystem.getLinkStatistics(currentPath);
