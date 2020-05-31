@@ -292,7 +292,7 @@ export abstract class CommandLineParameterProvider {
     parameter._getSupplementaryNotes(supplementaryNotes);
     if (supplementaryNotes.length > 0) {
       // If they left the period off the end of their sentence, then add one.
-      if (finalDescription.match(/[a-z0-9]\s*$/i)) {
+      if (finalDescription.match(/[a-z0-9]"?\s*$/i)) {
         finalDescription = finalDescription.trimRight() + '.';
       }
       // Append the supplementary text

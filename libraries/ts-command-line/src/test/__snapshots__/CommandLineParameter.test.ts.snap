@@ -413,7 +413,7 @@ Optional arguments:
                         specified via the ENV_CHOICE environment variable.
   --choice-with-default {one,two,three,default}
                         A choice with a default. This description ends with a 
-                        \\"quoted word\\" This parameter may alternatively be 
+                        \\"quoted word\\". This parameter may alternatively be 
                         specified via the ENV_CHOICE2 environment variable. 
                         The default value is \\"default\\".
   -f, --flag            A flag. This parameter may alternatively be specified 
