@@ -20,6 +20,15 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
 import { RushConfigurationProject } from "../../api/RushConfigurationProject";
 
+// (@types/npm-packlist is missing this API)
+declare module "npm-packlist" {
+  export class WalkerSync {
+    public readonly result: string[];
+    public constructor(opts: { path: string });
+    public start(): void;
+  }
+}
+
 interface IDeployScenarioProjectJson {
   projectName: string;
   subdeploymentFolderName?: string;
@@ -211,8 +220,13 @@ export class DeployManager {
     const targetFolderPath: string = this._remapPathForDeployFolder(sourceFolderPath, subdemploymentState);
 
     if (useNpmIgnoreFilter) {
-      // Use npm-packlist to filter the files
-      const npmPackFiles: string[] = npmPacklist.sync({ path: sourceFolderPath });
+      // Use npm-packlist to filter the files.  Using the WalkerSync class (instead of the sync() API) ensures
+      // that "bundledDependencies" are not included.
+      const walker: npmPacklist.WalkerSync = new npmPacklist.WalkerSync({
+        path: sourceFolderPath
+      });
+      walker.start();
+      const npmPackFiles: string[] = walker.result;
 
       for (const npmPackFile of npmPackFiles) {
         const copySourcePath: string = path.join(sourceFolderPath, npmPackFile);
