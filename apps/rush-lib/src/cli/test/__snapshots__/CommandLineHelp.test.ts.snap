@@ -123,8 +123,8 @@ Optional arguments:
                         count that is equal to the number of CPU cores. If 
                         this parameter is omitted, then the default value 
                         depends on the operating system and number of CPU 
-                        cores. This parameter may alternatively specified via 
-                        the RUSH_PARALLELISM environment variable.
+                        cores. This parameter may alternatively be specified 
+                        via the RUSH_PARALLELISM environment variable.
   -t PROJECT1, --to PROJECT1
                         Run command in the specified project and all of its 
                         dependencies. \\".\\" can be used as shorthand to specify 
@@ -216,7 +216,7 @@ are of the same version throughout the repository.
 Optional arguments:
   -h, --help         Show this help message and exit.
   --variant VARIANT  Run command using a variant installation configuration. 
-                     This parameter may alternatively specified via the 
+                     This parameter may alternatively be specified via the 
                      RUSH_VARIANT environment variable.
   --json             If this flag is specified, output will be in JSON format.
 "
@@ -256,8 +256,8 @@ Optional arguments:
                         count that is equal to the number of CPU cores. If 
                         this parameter is omitted, then the default value 
                         depends on the operating system and number of CPU 
-                        cores. This parameter may alternatively specified via 
-                        the RUSH_PARALLELISM environment variable.
+                        cores. This parameter may alternatively be specified 
+                        via the RUSH_PARALLELISM environment variable.
   -t PROJECT1, --to PROJECT1
                         Run command in the specified project and all of its 
                         dependencies. \\".\\" can be used as shorthand to specify 
@@ -346,7 +346,7 @@ Optional arguments:
                         Overrides the default maximum number of install 
                         attempts. The default value is 3.
   --variant VARIANT     Run command using a variant installation 
-                        configuration. This parameter may alternatively 
+                        configuration. This parameter may alternatively be 
                         specified via the RUSH_VARIANT environment variable.
 "
 `;
@@ -515,8 +515,8 @@ Optional arguments:
                         count that is equal to the number of CPU cores. If 
                         this parameter is omitted, then the default value 
                         depends on the operating system and number of CPU 
-                        cores. This parameter may alternatively specified via 
-                        the RUSH_PARALLELISM environment variable.
+                        cores. This parameter may alternatively be specified 
+                        via the RUSH_PARALLELISM environment variable.
   -t PROJECT1, --to PROJECT1
                         Run command in the specified project and all of its 
                         dependencies. \\".\\" can be used as shorthand to specify 
@@ -613,7 +613,7 @@ Optional arguments:
                         Overrides the default maximum number of install 
                         attempts. The default value is 3.
   --variant VARIANT     Run command using a variant installation 
-                        configuration. This parameter may alternatively 
+                        configuration. This parameter may alternatively be 
                         specified via the RUSH_VARIANT environment variable.
   --full                Normally \\"rush update\\" tries to preserve your 
                         existing installed versions and only makes the 

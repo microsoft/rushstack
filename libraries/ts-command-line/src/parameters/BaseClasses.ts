@@ -108,7 +108,7 @@ export abstract class CommandLineParameter {
    */
   public _getSupplementaryNotes(supplementaryNotes: string[]): void { // virtual
     if (this.environmentVariable !== undefined) {
-      supplementaryNotes.push('This parameter may alternatively specified via the ' + this.environmentVariable
+      supplementaryNotes.push('This parameter may alternatively be specified via the ' + this.environmentVariable
       + ' environment variable.');
     }
   }
