@@ -248,8 +248,8 @@ Optional arguments:
                         By default, files are deployed to the common/deploy 
                         folder inside the Rush repo. Use this parameter to 
                         specify a different location. WARNING: USE CAUTION 
-                        WHEN COMBINING WITH \\"--overwrite\\" This parameter may 
-                        alternatively specified via the 
+                        WHEN COMBINING WITH \\"--overwrite\\". This parameter may 
+                        alternatively be specified via the 
                         RUSH_DEPLOY_TARGET_FOLDER environment variable.
 "
 `;
