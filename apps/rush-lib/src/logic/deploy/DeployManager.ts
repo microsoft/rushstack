@@ -167,6 +167,9 @@ export class DeployManager {
       }
       this._deployScenarioProjectJsonsByName.set(projectSetting.projectName, projectSetting);
     }
+    if (this._deployScenarioJson.symlinkCreation && this._deployScenarioJson.symlinkCreation !== 'default') {
+      throw new Error('The "symlinkCreation" setting is not implemented yet.');
+    }
   }
 
   /**
