@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/ts-command-line",
+      "comment": "Fix a typo in the supplementary notes for parameters with environment variable mappings",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
