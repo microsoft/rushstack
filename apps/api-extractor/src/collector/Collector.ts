@@ -243,7 +243,7 @@ export class Collector {
       // Create a CollectorEntity for each top-level export
       const exportedAstEntities: AstEntity[] = [];
 
-      const astModuleExportInfo: AstModuleExportInfo = this.astSymbolTable.fetchAstModuleExportInfo(astEntryPoint, this.workingPackage.entryPoints.filter(e => e !== entryPoint));
+      const astModuleExportInfo: AstModuleExportInfo = this.astSymbolTable.fetchAstModuleExportInfo(astEntryPoint);
       for (const [exportName, astEntity] of astModuleExportInfo.exportedLocalEntities) {
         this._createCollectorEntity(astEntity, astEntryPoint, exportName);
 
@@ -258,8 +258,7 @@ export class Collector {
         this._createEntityForIndirectReferences(
           exportedAstEntity,
           astEntryPoint,
-          alreadySeenAstSymbols,
-          this.workingPackage.entryPoints.filter(e => e !== entryPoint)
+          alreadySeenAstSymbols
         );
 
         if (exportedAstEntity instanceof AstSymbol) {
@@ -438,8 +437,7 @@ export class Collector {
   private _createEntityForIndirectReferences(
     astEntity: AstEntity,
     astModule: AstModule,
-    alreadySeenAstEntities: Set<AstEntity>,
-    otherEntryPoints: IWorkingPackageEntryPoint[]
+    alreadySeenAstEntities: Set<AstEntity>
   ): void {
     if (alreadySeenAstEntities.has(astEntity)) {
       return;
@@ -460,7 +458,7 @@ export class Collector {
             this._createCollectorEntity(referencedAstEntity, astModule, undefined);
           }
 
-          this._createEntityForIndirectReferences(referencedAstEntity, astModule, alreadySeenAstEntities, otherEntryPoints);
+          this._createEntityForIndirectReferences(referencedAstEntity, astModule, alreadySeenAstEntities);
         }
       });
     }

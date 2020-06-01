@@ -121,8 +121,8 @@ export class AstSymbolTable {
   /**
    * This crawls the specified entry point and collects the full set of exported AstSymbols.
    */
-  public fetchAstModuleExportInfo(astModule: AstModule, otherEntryPoints: IWorkingPackageEntryPoint[]): AstModuleExportInfo {
-    return this._exportAnalyzer.fetchAstModuleExportInfo(astModule, otherEntryPoints);
+  public fetchAstModuleExportInfo(astModule: AstModule): AstModuleExportInfo {
+    return this._exportAnalyzer.fetchAstModuleExportInfo(astModule);
   }
 
   /**
@@ -146,7 +146,7 @@ export class AstSymbolTable {
    * or members.  (We do always construct its parents however, since AstDefinition.parent
    * is immutable, and needed e.g. to calculate release tag inheritance.)
    */
-  public analyze(astSymbol: AstSymbol, otherEntryPoints: IWorkingPackageEntryPoint[]): void {
+  public analyze(astSymbol: AstSymbol): void {
     if (astSymbol.analyzed) {
       return;
     }
@@ -162,7 +162,7 @@ export class AstSymbolTable {
 
     // Calculate the full child tree for each definition
     for (const astDeclaration of rootAstSymbol.astDeclarations) {
-      this._analyzeChildTree(astDeclaration.declaration, astDeclaration, otherEntryPoints);
+      this._analyzeChildTree(astDeclaration.declaration, astDeclaration);
     }
 
     rootAstSymbol._notifyAnalyzed();
@@ -177,7 +177,7 @@ export class AstSymbolTable {
           // Walk up to the root of the tree, looking for any imports along the way
           if (referencedAstEntity instanceof AstSymbol) {
             if (!referencedAstEntity.isExternal) {
-              this.analyze(referencedAstEntity, otherEntryPoints);
+              this.analyze(referencedAstEntity);
             }
           }
 
@@ -304,7 +304,7 @@ export class AstSymbolTable {
   /**
    * Used by analyze to recursively analyze the entire child tree.
    */
-  private _analyzeChildTree(node: ts.Node, governingAstDeclaration: AstDeclaration, otherEntryPoints: IWorkingPackageEntryPoint[]): void {
+  private _analyzeChildTree(node: ts.Node, governingAstDeclaration: AstDeclaration): void {
     switch (node.kind) {
       case ts.SyntaxKind.JSDocComment: // Skip JSDoc comments - TS considers @param tags TypeReference nodes
         return;
@@ -366,7 +366,7 @@ export class AstSymbolTable {
                 }
               } else {
                 referencedAstEntity = this._exportAnalyzer.fetchReferencedAstEntity(symbol,
-                  governingAstDeclaration.astSymbol.isExternal, otherEntryPoints);
+                  governingAstDeclaration.astSymbol.isExternal);
 
                 this._entitiesByIdentifierNode.set(identifierNode, referencedAstEntity);
               }
@@ -403,7 +403,7 @@ export class AstSymbolTable {
       governingAstDeclaration.astSymbol.isExternal);
 
     for (const childNode of node.getChildren()) {
-      this._analyzeChildTree(childNode, newGoverningAstDeclaration || governingAstDeclaration, otherEntryPoints);
+      this._analyzeChildTree(childNode, newGoverningAstDeclaration || governingAstDeclaration);
     }
   }
 
