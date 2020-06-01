@@ -102,6 +102,8 @@ export class DeployManager {
   );
 
   // Used by validateScenarioName()
+  // Matches lowercase words separated by dashes.
+  // Example: "deploy-the-thing123"
   private static _scenarioNameRegExp: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
   private readonly _rushConfiguration: RushConfiguration;
@@ -150,16 +152,16 @@ export class DeployManager {
    * Load and validate the scenario config file.  The result is stored in this._deployScenarioJson.
    */
   private _loadConfigFile(scenarioName: string): void {
-    const deployScenarioPath: string = path.join(this._rushConfiguration.commonFolder, 'config/deploy-scenarios',
-      scenarioName + '.json');
+    const scenarioFilePath: string = path.join(this._rushConfiguration.commonDeployConfigFolder,
+      `${scenarioName}.json`);
 
-    if (!FileSystem.exists(deployScenarioPath)) {
-      throw new Error('The scenario config file was not found: ' + deployScenarioPath);
+    if (!FileSystem.exists(scenarioFilePath)) {
+      throw new Error('The scenario config file was not found: ' + scenarioFilePath);
     }
 
-    console.log(colors.cyan('Loading deployment scenario: ') + deployScenarioPath)
+    console.log(colors.cyan('Loading deployment scenario: ') + scenarioFilePath)
 
-    this._deployScenarioJson = JsonFile.loadAndValidate(deployScenarioPath, DeployManager._jsonSchema);
+    this._deployScenarioJson = JsonFile.loadAndValidate(scenarioFilePath, DeployManager._jsonSchema);
 
     for (const projectSetting of this._deployScenarioJson.projectSettings || []) {
       // Validate projectSetting.projectName
