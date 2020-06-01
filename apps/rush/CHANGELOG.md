@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 28 May 2020 22:49:57 GMT and should not be manually modified.
+This log was last generated on Mon, 01 Jun 2020 08:48:49 GMT and should not be manually modified.
+
+## 5.24.0
+Mon, 01 Jun 2020 08:48:49 GMT
+
+### Updates
+
+- Set next LTS node version to 14.
+- Add new "rush deploy" command that copies subsets of files/symlinks to a deployment folder
 
 ## 5.23.5
 Thu, 28 May 2020 22:49:57 GMT

@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.24.0",
+      "tag": "@microsoft/rush_v5.24.0",
+      "date": "Mon, 01 Jun 2020 08:48:49 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Set next LTS node version to 14."
+          },
+          {
+            "comment": "Add new \"rush deploy\" command that copies subsets of files/symlinks to a deployment folder"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.23.5",
       "tag": "@microsoft/rush_v5.23.5",
       "date": "Thu, 28 May 2020 22:49:57 GMT",
