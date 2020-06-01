@@ -113,6 +113,8 @@ export class DeployManager {
   );
 
   // Used by validateScenarioName()
+  // Matches lowercase words separated by dashes.
+  // Example: "deploy-the-thing123"
   private static _scenarioNameRegExp: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
   private readonly _rushConfiguration: RushConfiguration;
@@ -122,7 +124,8 @@ export class DeployManager {
    * The target folder for the deployment.  By default it will be "common/deploy".
    */
   private _targetRootFolder: string;
-  /**
+
+    /**
    * The source folder that copying originates from.  Generally it is the repo root folder with rush.json.
    */
   private _sourceRootFolder: string;
@@ -152,7 +155,7 @@ export class DeployManager {
     }
     if (!this._scenarioNameRegExp.test(scenarioName)) {
       throw new Error(`"${scenarioName}" is not a valid scenario name. The name must be comprised of`
-        + ' lower case letters and numbers, separated by single hyphens. Example: "my-scenario"');
+        + ' lowercase letters and numbers, separated by single hyphens. Example: "my-scenario"');
     }
   }
 
@@ -160,16 +163,16 @@ export class DeployManager {
    * Load and validate the scenario config file.  The result is stored in this._deployScenarioJson.
    */
   private _loadConfigFile(scenarioName: string): void {
-    const deployScenarioPath: string = path.join(this._rushConfiguration.commonFolder, 'config/deploy-scenarios',
-      scenarioName + '.json');
+    const scenarioFilePath: string = path.join(this._rushConfiguration.commonDeployConfigFolder,
+      `${scenarioName}.json`);
 
-    if (!FileSystem.exists(deployScenarioPath)) {
-      throw new Error('The scenario config file was not found: ' + deployScenarioPath);
+    if (!FileSystem.exists(scenarioFilePath)) {
+      throw new Error('The scenario config file was not found: ' + scenarioFilePath);
     }
 
-    console.log(colors.cyan('Loading deployment scenario: ') + deployScenarioPath)
+    console.log(colors.cyan('Loading deployment scenario: ') + scenarioFilePath)
 
-    this._deployScenarioJson = JsonFile.loadAndValidate(deployScenarioPath, DeployManager._jsonSchema);
+    this._deployScenarioJson = JsonFile.loadAndValidate(scenarioFilePath, DeployManager._jsonSchema);
 
     for (const projectSetting of this._deployScenarioJson.projectSettings || []) {
       // Validate projectSetting.projectName
@@ -220,6 +223,10 @@ export class DeployManager {
         optionalDependencyNames.add(name);
       }
 
+      // (Used only by the legacy code fragment in the resolve.sync() hook below)
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const fs: typeof import("fs") = require("fs");
+
       for (const dependencyPackageName of allDependencyNames) {
         // The "resolve" library models the Node.js require() API, which gives precedence to "core" system modules
         // over an NPM package with the same name.  But we are traversing package.json dependencies, which refer
@@ -236,8 +243,9 @@ export class DeployManager {
             return pkg;
           },
           realpathSync: (filePath) => {
+            // This code fragment is a modification of the documented default implementation from the "fs-extra" docs
             try {
-              const resolvedPath: string = require("fs").realpathSync(filePath);
+              const resolvedPath: string = fs.realpathSync(filePath);
 
               subdemploymentState.symlinkAnalyzer.analyzePath(filePath);
               return resolvedPath;
@@ -406,8 +414,8 @@ export class DeployManager {
     const relativeTargetPath: string = path.relative(FileSystem.getRealPath(newLinkFolder), linkInfo.targetPath);
 
     // NOTE: This logic is based on NpmLinkManager._createSymlink()
-    if (process.platform === "win32") {
-      if (linkInfo.kind === "folderLink") {
+    if (process.platform === 'win32') {
+      if (linkInfo.kind === 'folderLink') {
         // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
         FileSystem.createSymbolicLinkJunction({
           linkTargetPath: relativeTargetPath,
@@ -426,7 +434,7 @@ export class DeployManager {
     } else {
       // However hard links seem to cause build failures on Mac, so for all other operating systems
       // we use symbolic links for this case.
-      if (linkInfo.kind === "folderLink") {
+      if (linkInfo.kind === 'folderLink') {
         FileSystem.createSymbolicLinkFolder({
           linkTargetPath: relativeTargetPath,
           newLinkPath: linkInfo.linkPath,

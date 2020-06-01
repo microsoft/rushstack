@@ -311,6 +311,7 @@ export class RushConfiguration {
     readonly changesFolder: string;
     // @deprecated
     readonly committedShrinkwrapFilename: string;
+    readonly commonDeployConfigFolder: string;
     readonly commonFolder: string;
     readonly commonRushConfigFolder: string;
     readonly commonScriptsFolder: string;

@@ -431,6 +431,7 @@ export class RushConfiguration {
   private _commonFolder: string;
   private _commonTempFolder: string;
   private _commonScriptsFolder: string;
+  private _commonDeployConfigFolder: string;
   private _commonRushConfigFolder: string;
   private _packageManager: PackageManagerName;
   private _packageManagerWrapper: PackageManager;
@@ -522,6 +523,7 @@ export class RushConfiguration {
       path.join(this._commonFolder, RushConstants.rushTempFolderName);
 
     this._commonScriptsFolder = path.join(this._commonFolder, 'scripts');
+    this._commonDeployConfigFolder = path.join(this._commonFolder, 'config', 'deploy-scenarios');
 
     this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
     this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
@@ -999,6 +1001,15 @@ export class RushConfiguration {
    */
   public get commonScriptsFolder(): string {
     return this._commonScriptsFolder;
+  }
+
+  /**
+   * The folder where deployment scenario config files are stored.  These files are created by
+   * running "rush init-deploy".
+   * Example: `C:\MyRepo\common\config\deploy-scenarios`
+   */
+  public get commonDeployConfigFolder(): string {
+    return this._commonDeployConfigFolder;
   }
 
   /**
