@@ -418,7 +418,7 @@ export class AstSymbolTable {
       }
 
       referencedAstEntity = this._exportAnalyzer.fetchReferencedAstEntity(symbol,
-        governingAstDeclaration.astSymbol.isExternal, []);
+        governingAstDeclaration.astSymbol.isExternal);
 
       this._entitiesByIdentifierNode.set(identifierNode, referencedAstEntity);
     }
