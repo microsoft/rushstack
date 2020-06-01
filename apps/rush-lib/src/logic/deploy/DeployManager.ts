@@ -111,7 +111,8 @@ export class DeployManager {
    * The target folder for the deployment.  By default it will be "common/deploy".
    */
   private _targetRootFolder: string;
-  /**
+
+    /**
    * The source folder that copying originates from.  Generally it is the repo root folder with rush.json.
    */
   private _sourceRootFolder: string;
@@ -141,7 +142,7 @@ export class DeployManager {
     }
     if (!this._scenarioNameRegExp.test(scenarioName)) {
       throw new Error(`"${scenarioName}" is not a valid scenario name. The name must be comprised of`
-        + ' lower case letters and numbers, separated by single hyphens. Example: "my-scenario"');
+        + ' lowercase letters and numbers, separated by single hyphens. Example: "my-scenario"');
     }
   }
 
@@ -381,8 +382,8 @@ export class DeployManager {
     const relativeTargetPath: string = path.relative(FileSystem.getRealPath(newLinkFolder), linkInfo.targetPath);
 
     // NOTE: This logic is based on NpmLinkManager._createSymlink()
-    if (process.platform === "win32") {
-      if (linkInfo.kind === "folderLink") {
+    if (process.platform === 'win32') {
+      if (linkInfo.kind === 'folderLink') {
         // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
         FileSystem.createSymbolicLinkJunction({
           linkTargetPath: relativeTargetPath,
@@ -401,7 +402,7 @@ export class DeployManager {
     } else {
       // However hard links seem to cause build failures on Mac, so for all other operating systems
       // we use symbolic links for this case.
-      if (linkInfo.kind === "folderLink") {
+      if (linkInfo.kind === 'folderLink') {
         FileSystem.createSymbolicLinkFolder({
           linkTargetPath: relativeTargetPath,
           newLinkPath: linkInfo.linkPath,

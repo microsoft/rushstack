@@ -45,8 +45,11 @@ export class InitDeployAction extends BaseRushAction {
     const scenarioName: string = this._scenario.value!;
     DeployManager.validateScenarioName(scenarioName);
 
-    const scenarioFilePath: string = path.join(this.rushConfiguration.commonFolder, 'config/deploy-scenarios',
-      scenarioName + '.json');
+    const scenarioFilePath: string = path.join(
+      this.rushConfiguration.commonFolder,
+      'config/deploy-scenarios',
+      `${scenarioName}.json
+    );
 
     if (FileSystem.exists(scenarioFilePath)) {
       throw new Error('The target file already exists:\n' + scenarioFilePath +
