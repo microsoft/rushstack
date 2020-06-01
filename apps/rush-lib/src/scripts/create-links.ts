@@ -62,8 +62,8 @@ function createLinks(targetSubdeploymentFolder: string, deployMetadataObject: ID
     ensureFolder(path.dirname(newLinkPath));
 
     // NOTE: This logic is based on NpmLinkManager._createSymlink()
-    if (process.platform === "win32") {
-      if (linkInfo.kind === "folderLink") {
+    if (process.platform === 'win32') {
+      if (linkInfo.kind === 'folderLink') {
         // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
         FileSystem.createSymbolicLinkJunction({ newLinkPath, linkTargetPath });
       } else {
@@ -76,7 +76,7 @@ function createLinks(targetSubdeploymentFolder: string, deployMetadataObject: ID
     } else {
       // However hard links seem to cause build failures on Mac, so for all other operating systems
       // we use symbolic links for this case.
-      if (linkInfo.kind === "folderLink") {
+      if (linkInfo.kind === 'folderLink') {
         FileSystem.createSymbolicLinkFolder({ newLinkPath, linkTargetPath });
       } else {
         FileSystem.createSymbolicLinkFile({ newLinkPath, linkTargetPath });

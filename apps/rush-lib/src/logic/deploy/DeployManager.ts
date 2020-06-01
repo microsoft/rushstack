@@ -19,7 +19,7 @@ import {
   InternalError,
   NewlineKind,
   Text
-} from "@rushstack/node-core-library";
+} from '@rushstack/node-core-library';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
 import { RushConfigurationProject } from "../../api/RushConfigurationProject";
@@ -296,7 +296,7 @@ export class DeployManager {
     subdemploymentState: ISubdeploymentState): string {
 
     if (!Path.isUnderOrEqual(absolutePathInSourceFolder, this._sourceRootFolder)) {
-      throw new Error("Source path is not under " + this._sourceRootFolder + "\n" + absolutePathInSourceFolder);
+      throw new Error(`Source path is not under ${this._sourceRootFolder}\n${absolutePathInSourceFolder}`);
     }
     const relativePath: string = path.relative(this._sourceRootFolder, absolutePathInSourceFolder);
     return Text.replaceAll(relativePath, '\\', '/');
@@ -520,11 +520,11 @@ export class DeployManager {
       this._deployFolder(folderToCopy, subdemploymentState);
     }
 
-    console.log("Writing deploy-metadata.json");
+    console.log('Writing deploy-metadata.json');
     this._writeDeployMetadata(subdemploymentState);
 
-    if (this._deployScenarioJson.linkCreation === "script") {
-      console.log("Copying create-links.js");
+    if (this._deployScenarioJson.linkCreation === 'script') {
+      console.log('Copying create-links.js');
       FileSystem.copyFile({
         sourcePath: path.join(__dirname, '../../scripts/create-links.js'),
         destinationPath: path.join(subdemploymentState.targetSubdeploymentFolder, 'create-links.js'),
@@ -532,8 +532,8 @@ export class DeployManager {
       });
     }
 
-    if (this._deployScenarioJson.linkCreation === "default") {
-      console.log("Creating symlinks...");
+    if (this._deployScenarioJson.linkCreation === 'default') {
+      console.log('Creating symlinks...');
       const linksToCopy: ILinkInfo[] = subdemploymentState.symlinkAnalyzer.reportSymlinks();
 
       for (const linkToCopy of linksToCopy) {
@@ -541,7 +541,7 @@ export class DeployManager {
           // TODO: If a symbolic link points to another symbolic link, then we should order the operations
           // so that the intermediary target is created first.  This case was procrastinated because it does
           // not seem to occur in practice.  If you encounter this, please report it.
-          throw new InternalError("Target does not exist: " + JSON.stringify(linkToCopy, undefined, 2));
+          throw new InternalError('Target does not exist: ' + JSON.stringify(linkToCopy, undefined, 2));
         }
       }
     }
