@@ -44,7 +44,7 @@ interface IDeployScenarioJson {
   enableSubdeployments?: boolean;
   includeDevDependencies?: boolean;
   includeNpmIgnoreFiles?: boolean;
-  symlinkCreation?: "default" | "script" | "none";
+  linkCreation?: "default" | "script" | "none";
   projectSettings?: IDeployScenarioProjectJson[];
 }
 
@@ -174,8 +174,8 @@ export class DeployManager {
       }
       this._deployScenarioProjectJsonsByName.set(projectSetting.projectName, projectSetting);
     }
-    if (this._deployScenarioJson.symlinkCreation && this._deployScenarioJson.symlinkCreation !== 'default') {
-      throw new Error('The "symlinkCreation" setting is not implemented yet.');
+    if (this._deployScenarioJson.linkCreation && this._deployScenarioJson.linkCreation !== 'default') {
+      throw new Error('The "linkCreation" setting is not implemented yet.');
     }
   }
 

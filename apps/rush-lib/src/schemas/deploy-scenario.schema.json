@@ -34,8 +34,8 @@
       "type": "boolean"
     },
 
-    "symlinkCreation": {
-      "description": "Specify how symlinks will be created in the deployed folder:\n\"default\": Create the symlinks after copying the files; this is the default behavior.\n\"script\": A Node.js script called \"create-symlinks.js\" will be written.  When executed, this script will create the symlinks described in the \"deploy-metadata.json\" output file.\n\"none\": Do nothing; some other tool may create them later.",
+    "linkCreation": {
+      "description": "Specify how links (symbolic links, hard links, and/or NTFS junctions) will be created in the deployed folder:\n\"default\": Create the links while copying the files; this is the default behavior.\n\"script\": A Node.js script called \"create-links.js\" will be written.  When executed, this script will create the links described in the \"deploy-metadata.json\" output file.\n\"none\": Do nothing; some other tool may create the links later.",
       "type": "string",
       "enum": [ "default", "script", "none" ]
     },
