@@ -16,7 +16,9 @@ import {
   JsonSchema,
   IPackageJson,
   AlreadyExistsBehavior,
-  InternalError
+  InternalError,
+  NewlineKind,
+  Text
 } from "@rushstack/node-core-library";
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
@@ -46,6 +48,15 @@ interface IDeployScenarioJson {
   includeNpmIgnoreFiles?: boolean;
   linkCreation?: "default" | "script" | "none";
   projectSettings?: IDeployScenarioProjectJson[];
+}
+
+/**
+ * The deploy-matadata.json file format.
+ */
+interface IDeployMetadataJson {
+  scenarioName: string;
+  mainProjectName: string;
+  links: ILinkInfo[];
 }
 
 /**
@@ -174,9 +185,6 @@ export class DeployManager {
       }
       this._deployScenarioProjectJsonsByName.set(projectSetting.projectName, projectSetting);
     }
-    if (this._deployScenarioJson.linkCreation && this._deployScenarioJson.linkCreation !== 'default') {
-      throw new Error('The "linkCreation" setting is not implemented yet.');
-    }
   }
 
   /**
@@ -277,6 +285,23 @@ export class DeployManager {
     const absolutePathInTargetFolder: string = path.join(subdemploymentState.targetSubdeploymentFolder, relativePath);
     return absolutePathInTargetFolder;
   }
+
+  /**
+   * Maps a file path from DeployManager._sourceRootFolder --> relative path
+   *
+   * Example input: "C:\MyRepo\libraries\my-lib"
+   * Example output: "libraries/my-lib"
+   */
+  private _remapPathForDeployMetadata(absolutePathInSourceFolder: string,
+    subdemploymentState: ISubdeploymentState): string {
+
+    if (!Path.isUnderOrEqual(absolutePathInSourceFolder, this._sourceRootFolder)) {
+      throw new Error("Source path is not under " + this._sourceRootFolder + "\n" + absolutePathInSourceFolder);
+    }
+    const relativePath: string = path.relative(this._sourceRootFolder, absolutePathInSourceFolder);
+    return Text.replaceAll(relativePath, '\\', '/');
+  }
+
 
   /**
    * Copy one package folder to the deployment target folder.
@@ -435,6 +460,31 @@ export class DeployManager {
     }
   }
 
+  private _writeDeployMetadata(subdemploymentState: ISubdeploymentState): void {
+    const deployMetadataFilePath: string = path.join(subdemploymentState.targetSubdeploymentFolder,
+      'deploy-metadata.json');
+
+    const deployMetadataJson: IDeployMetadataJson = {
+      scenarioName: subdemploymentState.scenarioName,
+      mainProjectName: subdemploymentState.mainProjectName,
+      links: [ ]
+    };
+
+    // Remap the links to be relative to the subdeployment folder
+    for (const absoluteLinkInfo of subdemploymentState.symlinkAnalyzer.reportSymlinks()) {
+      const relativeInfo: ILinkInfo = {
+        kind: absoluteLinkInfo.kind,
+        linkPath: this._remapPathForDeployMetadata(absoluteLinkInfo.linkPath, subdemploymentState),
+        targetPath: this._remapPathForDeployMetadata(absoluteLinkInfo.targetPath, subdemploymentState),
+      };
+      deployMetadataJson.links.push(relativeInfo);
+    }
+
+    JsonFile.save(deployMetadataJson, deployMetadataFilePath, {
+      newlineConversion: NewlineKind.OsDefault
+    });
+  }
+
   /**
    * Process one subdeployment.  If `enableSubdeployments` is false, then this processes the entire
    * deployment, and ISubdeploymentState.targetSubdeploymentFolder is simply the deployment target folder.
@@ -470,15 +520,29 @@ export class DeployManager {
       this._deployFolder(folderToCopy, subdemploymentState);
     }
 
-    console.log("Creating symlinks...");
-    const linksToCopy: ILinkInfo[] = subdemploymentState.symlinkAnalyzer.reportSymlinks();
+    console.log("Writing deploy-metadata.json");
+    this._writeDeployMetadata(subdemploymentState);
 
-    for (const linkToCopy of linksToCopy) {
-      if (!this._deploySymlink(linkToCopy, subdemploymentState)) {
-        // TODO: If a symbolic link points to another symbolic link, then we should order the operations
-        // so that the intermediary target is created first.  This case was procrastinated because it does
-        // not seem to occur in practice.  If you encounter this, please report it.
-        throw new InternalError("Target does not exist: " + JSON.stringify(linkToCopy, undefined, 2));
+    if (this._deployScenarioJson.linkCreation === "script") {
+      console.log("Copying create-links.js");
+      FileSystem.copyFile({
+        sourcePath: path.join(__dirname, '../../scripts/create-links.js'),
+        destinationPath: path.join(subdemploymentState.targetSubdeploymentFolder, 'create-links.js'),
+        alreadyExistsBehavior: AlreadyExistsBehavior.Error
+      });
+    }
+
+    if (this._deployScenarioJson.linkCreation === "default") {
+      console.log("Creating symlinks...");
+      const linksToCopy: ILinkInfo[] = subdemploymentState.symlinkAnalyzer.reportSymlinks();
+
+      for (const linkToCopy of linksToCopy) {
+        if (!this._deploySymlink(linkToCopy, subdemploymentState)) {
+          // TODO: If a symbolic link points to another symbolic link, then we should order the operations
+          // so that the intermediary target is created first.  This case was procrastinated because it does
+          // not seem to occur in practice.  If you encounter this, please report it.
+          throw new InternalError("Target does not exist: " + JSON.stringify(linkToCopy, undefined, 2));
+        }
       }
     }
   }
