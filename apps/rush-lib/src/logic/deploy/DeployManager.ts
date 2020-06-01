@@ -215,6 +215,10 @@ export class DeployManager {
         optionalDependencyNames.add(name);
       }
 
+      // (Used only by the legacy code fragment in the resolve.sync() hook below)
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const fs: typeof import("fs") = require("fs");
+
       for (const dependencyPackageName of allDependencyNames) {
         // The "resolve" library models the Node.js require() API, which gives precedence to "core" system modules
         // over an NPM package with the same name.  But we are traversing package.json dependencies, which refer
@@ -231,8 +235,9 @@ export class DeployManager {
             return pkg;
           },
           realpathSync: (filePath) => {
+            // This code fragment is a modification of the documented default implementation from the "fs-extra" docs
             try {
-              const resolvedPath: string = require("fs").realpathSync(filePath);
+              const resolvedPath: string = fs.realpathSync(filePath);
 
               subdemploymentState.symlinkAnalyzer.analyzePath(filePath);
               return resolvedPath;
