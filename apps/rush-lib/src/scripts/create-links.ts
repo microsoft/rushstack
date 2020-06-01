@@ -5,25 +5,11 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import /* type */ { IDeployMetadataJson } from '../logic/deploy/DeployManager';
+import /* type */ { IFileSystemCreateLinkOptions } from '@rushstack/node-core-library';
 
-interface ILinkInfo {
-  kind: 'fileLink' | 'folderLink';
-  linkPath: string;
-  targetPath: string;
-}
-interface IDeployMetadataJson {
-  scenarioName: string;
-  mainProjectName: string;
-  links: ILinkInfo[];
-}
-
-// API borrowed from @rushstack/node-core-library
-export interface IFileSystemCreateLinkOptions {
-  linkTargetPath: string;
-  newLinkPath: string;
-}
-
-// API borrowed from @rushstack/node-core-library
+// API borrowed from @rushstack/node-core-library, since this script avoids using any
+// NPM dependencies.
 class FileSystem {
   public static createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void {
     fs.symlinkSync(options.linkTargetPath, options.newLinkPath, 'junction');

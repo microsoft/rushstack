@@ -53,7 +53,7 @@ interface IDeployScenarioJson {
 /**
  * The deploy-matadata.json file format.
  */
-interface IDeployMetadataJson {
+export interface IDeployMetadataJson {
   scenarioName: string;
   mainProjectName: string;
   links: ILinkInfo[];
