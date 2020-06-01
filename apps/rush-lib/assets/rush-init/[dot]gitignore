@@ -59,5 +59,6 @@ jspm_packages/
 .DS_Store
 
 # Rush temporary files
+common/deploy/
 common/temp/
 **/.rush/temp/
