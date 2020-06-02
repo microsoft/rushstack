@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Expect error when trying to resolve optional dependency during deploy",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "jlsjonas@users.noreply.github.com"
+}
