@@ -6,14 +6,14 @@
 
 /**
  * The sorted sequence of leading digits for mangled identifiers
- * Computed from character frequency analysis of OneDrive
+ * Computed from character frequency analysis of the source code for OneDrive
  * @public
  */
 export const IDENTIFIER_LEADING_DIGITS: string = 'etnairoscdlufpm_hbgvySDIxCOwEALkMPTUFHRNBjVzGKWqQYJXZ$';
 
 /**
  * The sorted sequence of trailing digits for mangled identifiers
- * Computed from character frequency analysis of OneDrive
+ * Computed from character frequency analysis of the source code for OneDrive
  * @public
  */
 export const IDENTIFIER_TRAILING_DIGITS: string = 'etnairoscdlufpm_hbg01v32y67S4985DIxCOwEALkMPTUFHRNBjVzGKWqQYJXZ$';
