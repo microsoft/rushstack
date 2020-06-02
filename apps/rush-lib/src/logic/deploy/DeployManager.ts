@@ -174,6 +174,11 @@ export class DeployManager {
 
     this._deployScenarioJson = JsonFile.loadAndValidate(scenarioFilePath, DeployManager._jsonSchema);
 
+    // Apply the defaults
+    if (!this._deployScenarioJson.linkCreation) {
+      this._deployScenarioJson.linkCreation = 'default';
+    }
+
     for (const projectSetting of this._deployScenarioJson.projectSettings || []) {
       // Validate projectSetting.projectName
       if (!this._rushConfiguration.getProjectByName(projectSetting.projectName)) {
