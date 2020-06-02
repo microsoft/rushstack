@@ -5,12 +5,12 @@ jobs:
   condition: succeeded()
   strategy:
     matrix:
-      'NodeJs 8':
-        NodeVersion: 8
       'NodeJs 10':
         NodeVersion: 10
       'NodeJs 12':
         NodeVersion: 12
+      'NodeJs 14':
+        NodeVersion: 14
   steps:
   - checkout: self
   - template: templates/build.yaml
