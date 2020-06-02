@@ -34,7 +34,7 @@
     "webpack-sources": "1.4.3"
   },
   "sideEffects": [
-    "./lib/terser/DisableCharacterFrequencyAnalysis",
+    "./lib/terser/Base54",
     "./lib/OverrideWebpackIdentifierAllocation"
   ]
 }

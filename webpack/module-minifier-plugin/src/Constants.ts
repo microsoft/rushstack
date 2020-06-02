@@ -5,10 +5,18 @@
 /* eslint-disable @typescript-eslint/typedef */
 
 /**
- * The static character frequency prioritization for identifier allocation.
+ * The sorted sequence of leading digits for mangled identifiers
+ * Computed from character frequency analysis of OneDrive
  * @public
  */
-export const DEFAULT_DIGIT_SORT: string = 'etnrisouaflchpdvmgybwESxTNCkLAOM_DPHBjFIqRUzWXV$JKQGYZ0516372984';
+export const IDENTIFIER_LEADING_DIGITS: string = 'etnairoscdlufpm_hbgvySDIxCOwEALkMPTUFHRNBjVzGKWqQYJXZ$';
+
+/**
+ * The sorted sequence of trailing digits for mangled identifiers
+ * Computed from character frequency analysis of OneDrive
+ * @public
+ */
+export const IDENTIFIER_TRAILING_DIGITS: string = 'etnairoscdlufpm_hbg01v32y67S4985DIxCOwEALkMPTUFHRNBjVzGKWqQYJXZ$';
 
 /**
  * Prefix to wrap `function (module, __webpack_exports__, __webpack_require__) { ... }` so that the minifier doesn't delete it

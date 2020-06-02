@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DEFAULT_DIGIT_SORT } from './Constants';
+// TODO: Allow dynamic override of these values in the input to the minifier
+import { IDENTIFIER_LEADING_DIGITS, IDENTIFIER_TRAILING_DIGITS } from './Constants';
 
 // Set of ECMAScript reserved keywords (past and present): https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Lexical_grammar
 const RESERVED_KEYWORDS: string[] = [
@@ -76,21 +77,26 @@ const RESERVED_KEYWORDS: string[] = [
  * @param ordinal The number to convert to a base54 identifier
  */
 export function getIdentifierInternal(ordinal: number): string {
-  let ret: string = DEFAULT_DIGIT_SORT[ordinal % 54];
+  let ret: string = IDENTIFIER_LEADING_DIGITS[ordinal % 54];
 
   ordinal = (ordinal / 54) | 0; // eslint-disable-line no-bitwise
   while (ordinal > 0) {
     --ordinal;
-    ret += DEFAULT_DIGIT_SORT[ordinal & 0x3f]; // eslint-disable-line no-bitwise
+    ret += IDENTIFIER_TRAILING_DIGITS[ordinal & 0x3f]; // eslint-disable-line no-bitwise
     ordinal >>>= 6; // eslint-disable-line no-bitwise
   }
 
   return ret;
 }
 
-const charToNumber: Map<number, number> = new Map();
+const leadingCharIndex: Map<number, number> = new Map();
 for (let i: number = 0; i < 64; i++) {
-  charToNumber.set(DEFAULT_DIGIT_SORT.charCodeAt(i), i);
+  leadingCharIndex.set(IDENTIFIER_LEADING_DIGITS.charCodeAt(i), i);
+}
+
+const trailingCharIndex: Map<number, number> = new Map();
+for (let i: number = 0; i < 64; i++) {
+  trailingCharIndex.set(IDENTIFIER_TRAILING_DIGITS.charCodeAt(i), i);
 }
 
 /**
@@ -106,7 +112,7 @@ export function getOrdinalFromIdentifierInternal(identifier: string): number {
     }
 
     ordinal <<= 6; // eslint-disable-line no-bitwise
-    ordinal += charToNumber.get(identifier.charCodeAt(i))! + 1;
+    ordinal += trailingCharIndex.get(identifier.charCodeAt(i))! + 1;
   }
 
   if (ordinal >= 0x2000000) {
@@ -114,7 +120,7 @@ export function getOrdinalFromIdentifierInternal(identifier: string): number {
   }
 
   ordinal *= 54;
-  ordinal += charToNumber.get(identifier.charCodeAt(0))!;
+  ordinal += leadingCharIndex.get(identifier.charCodeAt(0))!;
   return ordinal;
 }
 

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { minify, MinifyOptions, MinifyOutput } from 'terser';
-import './DisableCharacterFrequencyAnalysis';
+import './Base54';
 
 import { IModuleMinificationResult, IModuleMinificationErrorResult } from '../ModuleMinifierPlugin.types';
 
@@ -14,11 +14,15 @@ interface IComment {
   col: number;
 }
 
-// Borrowed from TerserWebpackPlugin. Identifies a license comment
-function extractCondition(astNode: unknown, comment: IComment): boolean {
-  return (comment.type === 'comment2' || comment.type === 'comment1') &&
-    /@preserve|@lic|@cc_on|^\**!/i.test(comment.value);
-};
+/**
+ * The logic for Terser's default "some" comments setting for preservation
+ * @see https://github.com/terser/terser/blob/8d8200c2331c695d37f139b5850b10b595bce1d8/lib/output.js#L164-170
+ */
+function isSomeComments(comment: IComment): boolean {
+    // multiline comment
+    return (comment.type === "comment2" || comment.type === "comment1") &&
+        /@preserve|@lic|@cc_on|^\**!/i.test(comment.value);
+}
 
 /**
  * Minifies a single chunk of code. Factored out for reuse between ThreadPoolMinifier and SynchronousMinifier
@@ -31,8 +35,12 @@ export function minifySingleFile(source: string, terserOptions: MinifyOptions): 
     terserOptions.output = {};
   }
 
+  /**
+   * Comment extraction as performed by terser-webpack-plugin to ensure output parity in default configuration
+   * @see https://github.com/webpack-contrib/terser-webpack-plugin/blob/master/src/minify.js#L129-142
+   */
   terserOptions.output.comments = (astNode: unknown, comment: IComment) => {
-    if (extractCondition(astNode, comment)) {
+    if (isSomeComments(comment)) {
       const commentText: string = comment.type === 'comment2' ? `/*${comment.value}*/\n` : `//${comment.value}\n`;
       extractedComments.push(commentText);
     }
