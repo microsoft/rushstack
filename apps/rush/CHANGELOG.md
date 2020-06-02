@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 01 Jun 2020 08:48:49 GMT and should not be manually modified.
+This log was last generated on Tue, 02 Jun 2020 03:11:32 GMT and should not be manually modified.
+
+## 5.24.1
+Tue, 02 Jun 2020 03:11:32 GMT
+
+### Updates
+
+- Fix an issue where the "linkCreation" defaulted to "none" instead of "default"
 
 ## 5.24.0
 Mon, 01 Jun 2020 08:48:49 GMT

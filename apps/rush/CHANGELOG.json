@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.24.1",
+      "tag": "@microsoft/rush_v5.24.1",
+      "date": "Tue, 02 Jun 2020 03:11:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where the \"linkCreation\" defaulted to \"none\" instead of \"default\""
+          }
+        ]
+      }
+    },
+    {
       "version": "5.24.0",
       "tag": "@microsoft/rush_v5.24.0",
       "date": "Mon, 01 Jun 2020 08:48:49 GMT",
