@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 02 Jun 2020 03:11:32 GMT and should not be manually modified.
+This log was last generated on Wed, 03 Jun 2020 05:35:19 GMT and should not be manually modified.
+
+## 5.24.2
+Wed, 03 Jun 2020 05:35:19 GMT
+
+### Updates
+
+- Expect error when trying to resolve optional dependency during deploy
 
 ## 5.24.1
 Tue, 02 Jun 2020 03:11:32 GMT

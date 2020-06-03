@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.24.2",
+      "tag": "@microsoft/rush_v5.24.2",
+      "date": "Wed, 03 Jun 2020 05:35:19 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Expect error when trying to resolve optional dependency during deploy"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.24.1",
       "tag": "@microsoft/rush_v5.24.1",
       "date": "Tue, 02 Jun 2020 03:11:32 GMT",
