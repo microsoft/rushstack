@@ -926,7 +926,7 @@
       "packageName": "@rushstack/module-minifier-plugin",
       "projectFolder": "webpack/module-minifier-plugin",
       "reviewCategory": "libraries",
-      "shouldPublish": false
+      "shouldPublish": true
     },
     {
       "packageName": "@rushstack/set-webpack-public-path-plugin",
