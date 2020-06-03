@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { compilation, Compiler } from 'webpack';
+import { ReplaceSource } from 'webpack-sources';
 import { createHash } from 'crypto';
 import { Tap } from 'tapable';
 import * as RequestShortener from 'webpack/lib/RequestShortener';
@@ -141,25 +142,31 @@ export class StableMinifierIdsPlugin {
 
   /**
    * Replaces stable ids in code with the original output ids
-   * @param code - The ECMAScript code to process
+   * @param source - The webpack Source to transform
    * @param context - Context information for error logging
    */
-  public restoreIdsInCode(code: string, context: string): string {
-    STABLE_MODULE_ID_REGEX.lastIndex = -1;
+  public restoreIdsInCode(source: ReplaceSource, context: string): ReplaceSource {
     const {
       _stableIdToFinalId: stableIdToFinalId
     } = this;
 
-    return code.replace(STABLE_MODULE_ID_REGEX, (moduleIdToken: string, id: string) => {
+    const code: string = source.original().source();
+
+    STABLE_MODULE_ID_REGEX.lastIndex = -1;
+    // RegExp.exec uses null or an array as the return type, explicitly
+    let match: RegExpExecArray | null = null; // eslint-disable-line @rushstack/no-null
+    while ((match = STABLE_MODULE_ID_REGEX.exec(code))) {
+      const id: string = match[1];
       const mapped: string | number | undefined = stableIdToFinalId.get(id);
 
       if (mapped === undefined) {
         console.error(`Missing module id for ${id} in ${context}!`);
-        return moduleIdToken;
       }
 
-      return `${mapped}`;
-    });
+      source.replace(match.index, STABLE_MODULE_ID_REGEX.lastIndex - 1, mapped);
+    }
+
+    return source;
   }
 
   /**

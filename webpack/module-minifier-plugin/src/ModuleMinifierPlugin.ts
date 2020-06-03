@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { RawSource, Source } from 'webpack-sources';
+import { ConcatSource, RawSource, ReplaceSource, Source, SourceMapSource } from 'webpack-sources';
 import * as webpack from 'webpack';
 import { AsyncSeriesWaterfallHook, Tap } from 'tapable';
 import {
@@ -99,14 +99,16 @@ export class ModuleMinifierPlugin {
       stableIdsPlugin.apply(compiler);
     }
 
-    const postProcessCode: (code: string, context: string) => string = (
-      stableIdsPlugin ? stableIdsPlugin.restoreIdsInCode.bind(stableIdsPlugin) : (code: string) => code
+    const postProcessCode: (code: ReplaceSource, context: string) => ReplaceSource = (
+      stableIdsPlugin ? stableIdsPlugin.restoreIdsInCode.bind(stableIdsPlugin) : (code: ReplaceSource) => code
     );
     const getRealId: (id: string | number) => string | number | undefined = (
       stableIdsPlugin ? stableIdsPlugin.getMappedId.bind(stableIdsPlugin) : (id: string | number) => id
     );
 
     compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: webpack.compilation.Compilation) => {
+      const useSourceMaps: boolean = false;
+
       /**
        * Set of local module ids that have been processed.
        */
@@ -169,18 +171,26 @@ export class ModuleMinifierPlugin {
         if (id !== null && !submittedModules.has(id)) {
           // options.chunk contains the current chunk, if needed
           // Render the source, then hash, then persist hash -> module, return a placeholder
-          const code: string = source.source();
 
           // Initially populate the map with unminified version; replace during callback
           submittedModules.add(id);
 
           const realId: string | number | undefined = getRealId(id);
 
-          if (code.length && realId !== undefined && !mod.skipMinification) {
-            ++pendingMinificationRequests;
-            const wrappedCode: string = `${MODULE_WRAPPER_PREFIX}${code}${MODULE_WRAPPER_SUFFIX}`;
+          if (realId !== undefined && !mod.skipMinification) {
+            const wrapped: ConcatSource = new ConcatSource(MODULE_WRAPPER_PREFIX, source, MODULE_WRAPPER_SUFFIX);
 
-            minifier.minify(wrappedCode, (result: IModuleMinificationResult) => {
+            const {
+              source: wrappedCode,
+              map
+            } = wrapped.sourceAndMap();
+
+            ++pendingMinificationRequests;
+
+            minifier.minify({
+              code: wrappedCode,
+              map: true
+            }, (result: IModuleMinificationResult) => {
               if (isMinificationResultError(result)) {
                 compilation.errors.push(result.error);
                 return;
@@ -188,14 +198,29 @@ export class ModuleMinifierPlugin {
 
               const {
                 code: minified,
+                map: minifierMap,
                 extractedComments
               } = result;
 
-              const unwrapped: string = minified.slice(MODULE_WRAPPER_PREFIX.length, -MODULE_WRAPPER_SUFFIX.length);
-              const withIds: string = postProcessCode(unwrapped, mod.identifier());
+              const rawOutput: Source = useSourceMaps ? new SourceMapSource(
+                minified, // Code
+                realId, // File
+                minifierMap, // Base source map
+                wrappedCode, // Source from before transform
+                map, // Source Map from before transform
+                true // Remove original source
+              ) : new RawSource(minified);
+
+              const unwrapped: ReplaceSource = new ReplaceSource(rawOutput);
+              const len: number = minified.length;
+
+              unwrapped.replace(0, MODULE_WRAPPER_PREFIX.length - 1, '');
+              unwrapped.replace(len - MODULE_WRAPPER_SUFFIX.length, len - 1, '');
+
+              const withIds: Source = postProcessCode(unwrapped, mod.identifier());
 
               minifiedModules.set(realId, {
-                code: withIds,
+                source: withIds,
                 extractedComments,
                 module: mod
               });
@@ -205,7 +230,7 @@ export class ModuleMinifierPlugin {
           } else {
             // Route any other modules straight through
             minifiedModules.set(realId !== undefined ? realId : id, {
-              code: postProcessCode(code, mod.identifier()),
+              source: postProcessCode(new ReplaceSource(source), mod.identifier()),
               extractedComments: [],
               module: mod
             });
@@ -248,21 +273,34 @@ export class ModuleMinifierPlugin {
             if (/\.m?js(\?.+)?$/.test(assetName)) {
               ++pendingMinificationRequests;
 
-              minifier.minify(rawCode, (result: IModuleMinificationResult) => {
+              minifier.minify({
+                code: rawCode,
+                map: true
+              }, (result: IModuleMinificationResult) => {
                 if (isMinificationResultError(result)) {
                   compilation.errors.push(result.error);
                   return;
                 }
 
                 const {
-                  code,
+                  code: minified,
+                  map: minifierMap,
                   extractedComments
                 } = result;
 
-                const withIds: string = chunk.hasRuntime() ? postProcessCode(code, assetName) : code;
+                const rawOutput: Source = useSourceMaps ? new SourceMapSource(
+                  minified, // Code
+                  assetName, // File
+                  minifierMap, // Base source map
+                  rawCode, // Source from before transform
+                  undefined, // Source Map from before transform
+                  false // Remove original source
+                ) : new RawSource(minified);
+
+                const withIds: Source = chunk.hasRuntime() ? postProcessCode(new ReplaceSource(rawOutput), assetName) : rawOutput;
 
                 minifiedAssets.set(assetName, {
-                  code: withIds,
+                  source: withIds,
                   extractedComments,
                   modules: chunkModules,
                   chunk,
@@ -274,7 +312,7 @@ export class ModuleMinifierPlugin {
             } else {
               // Skip minification for all other assets, though the modules still are
               minifiedAssets.set(assetName, {
-                code: rawCode,
+                source: asset,
                 extractedComments: [],
                 modules: chunkModules,
                 chunk,

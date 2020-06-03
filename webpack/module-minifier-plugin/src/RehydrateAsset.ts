@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { RawSource, ConcatSource, Source } from 'webpack-sources';
+import { ConcatSource, ReplaceSource, Source } from 'webpack-sources';
 
 import { CHUNK_MODULES_TOKEN } from './Constants';
 import { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.types';
@@ -15,19 +15,23 @@ import { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.type
  */
 export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner: string): Source {
   const {
-      code,
-      modules
+    source: assetSource,
+    modules
   } = asset;
 
-  const tokenIndex: number = code.indexOf(CHUNK_MODULES_TOKEN);
-  const suffixStart: number = tokenIndex + CHUNK_MODULES_TOKEN.length;
+  const assetCode: string = assetSource.source();
 
-  const prefix: string = code.slice(0, tokenIndex);
-  const suffix: string = code.slice(suffixStart);
+  const tokenIndex: number = assetCode.indexOf(CHUNK_MODULES_TOKEN);
+  const suffixStart: number = tokenIndex + CHUNK_MODULES_TOKEN.length;
+  const suffix: string = assetCode.slice(suffixStart);
+
+  const prefix: ReplaceSource = new ReplaceSource(assetSource);
+  // Preserve source map via fiddly logic
+  prefix.replace(tokenIndex, assetCode.length, '');
 
   if (!modules.length) {
-      // Empty chunk, degenerate case
-      return new RawSource(`${banner}${prefix}[]${suffix}`);
+    // Empty chunk, degenerate case
+    return new ConcatSource(banner, prefix, '[]', suffix);
   }
 
   const emptyFunction = 'function(){}'; // eslint-disable-line @typescript-eslint/typedef
@@ -64,7 +68,7 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
       const threshold: number = (lastId === 0 ? 7 : 11) + ('' + delta).length;
       const fillerArraySavings: number = delta + 1 - threshold;
       if (fillerArraySavings > 0) {
-          concatArrayOverhead -= fillerArraySavings;
+        concatArrayOverhead -= fillerArraySavings;
       }
 
       objectOverhead += 2 + ('' + id).length;
@@ -86,7 +90,7 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
       separator = ',';
 
       const item: IModuleInfo | undefined = moduleMap.get(id);
-      const moduleCode: string = item ? item.code : emptyFunction;
+      const moduleCode: Source | string = item ? item.source : emptyFunction;
       source.add(moduleCode);
     }
 
@@ -109,7 +113,7 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
       const fillerArrayThreshold: number = 11 + deltaStr.length;
 
       const item: IModuleInfo | undefined = moduleMap.get(id);
-      const moduleCode: string = item ? item.code : emptyFunction;
+      const moduleCode: Source | string = item ? item.source : emptyFunction;
 
       if (useConcat && delta + 1 > fillerArrayThreshold) {
         if (concatInserted) {
@@ -119,7 +123,7 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
           concatInserted = true;
         }
       } else {
-          source.add(separator + enoughCommas.slice(0, delta + 1));
+        source.add(separator + enoughCommas.slice(0, delta + 1));
       }
       lastId = id as number;
       source.add(moduleCode);

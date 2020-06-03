@@ -14,12 +14,13 @@
   },
   "peerDependencies": {
     "webpack": "^4.31.0",
-    "webpack-sources": "1.4.3",
+    "webpack-sources": "~1.4.3",
     "@types/webpack": "*"
   },
   "dependencies": {
     "@types/node": "10.17.13",
     "@types/tapable": "1.0.4",
+    "source-map": "~0.6.1",
     "tapable": "^1.1.0",
     "terser": "4.7.0"
   },
@@ -31,7 +32,7 @@
     "@rushstack/eslint-config": "0.5.8",
     "gulp": "~4.0.2",
     "webpack": "~4.31.0",
-    "webpack-sources": "1.4.3"
+    "webpack-sources": "~1.4.3"
   },
   "sideEffects": [
     "./lib/terser/Base54",

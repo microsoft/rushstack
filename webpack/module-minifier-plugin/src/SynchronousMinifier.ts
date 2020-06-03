@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IModuleMinificationCallback } from './ModuleMinifierPlugin.types';
+import { IModuleMinificationCallback, IModuleMinificationRequest } from './ModuleMinifierPlugin.types';
 import { minifySingleFile } from './terser/MinifySingleFile';
 import { MinifyOptions } from 'terser';
 import './OverrideWebpackIdentifierAllocation';
@@ -36,14 +36,14 @@ export class SynchronousMinifier {
 
   /**
    * Transform that synchronously invokes Terser
-   * @param code - The code to process
+   * @param request - The request to process
    * @param callback - The callback to invoke
    */
   public minify(
-    code: string,
+    request: IModuleMinificationRequest,
     callback: IModuleMinificationCallback
   ): void {
-    callback(minifySingleFile(code, this.terserOptions));
+    callback(minifySingleFile(request, this.terserOptions));
   }
 
   public shutdown(): void {

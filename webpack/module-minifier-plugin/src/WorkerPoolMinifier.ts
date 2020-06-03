@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IModuleMinificationCallback, IModuleMinificationResult } from './ModuleMinifierPlugin.types';
+import { IModuleMinificationCallback, IModuleMinificationResult, IModuleMinificationRequest } from './ModuleMinifierPlugin.types';
 import { MinifyOptions } from 'terser';
 import { Worker } from 'worker_threads';
 import { WorkerPool } from './threadPool/WorkerPool';
@@ -70,13 +70,18 @@ export class WorkerPoolMinifier {
 
   /**
    * Transform code by farming it out to a worker pool.
-   * @param code - The code to process
+   * @param request - The request to process
    * @param callback - The callback to invoke
    */
   public minify(
-    code: string,
+    request: IModuleMinificationRequest,
     callback: IModuleMinificationCallback
   ): void {
+    const {
+      code,
+      map
+    } = request;
+
     const hash: string = createHash('sha256').update(code).digest('hex');
 
     const cached: IWorkerResponseMessage | undefined = this._resultCache.get(hash);
@@ -84,26 +89,34 @@ export class WorkerPoolMinifier {
       callback(cached);
     }
 
-    const callbacks: IModuleMinificationCallback[] | undefined = this._activeRequests.get(hash);
+    const {
+      _activeRequests: activeRequests
+    } = this;
+    const callbacks: IModuleMinificationCallback[] | undefined = activeRequests.get(hash);
     if (callbacks) {
       callbacks.push(callback);
       return;
     }
 
-    this._activeRequests.set(hash, [callback]);
+    activeRequests.set(hash, [callback]);
 
     this._pool.checkoutWorker(true).then((worker) => {
       worker.postMessage({
         hash,
-        code
+        code,
+        map
       });
     }).catch((error: Error) => {
-      callback({
-        hash,
-        error,
-        code: undefined,
-        extractedComments: undefined
-      });
+      const errorCallbacks: IModuleMinificationCallback[] = activeRequests.get(hash)!;
+      for (const errorCallback of errorCallbacks) {
+        errorCallback({
+          hash,
+          error,
+          code: undefined,
+          map: undefined,
+          extractedComments: undefined
+        });
+      }
     });
   }
 

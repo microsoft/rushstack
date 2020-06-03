@@ -2,9 +2,16 @@
 // See LICENSE in the project root for license information.
 
 import { minify, MinifyOptions, MinifyOutput } from 'terser';
+import { RawSourceMap } from 'source-map';
 import './Base54';
 
-import { IModuleMinificationResult, IModuleMinificationErrorResult } from '../ModuleMinifierPlugin.types';
+declare module 'terser' {
+  interface SourceMapOptions { // eslint-disable-line @typescript-eslint/interface-name-prefix
+    asObject?: boolean;
+  }
+}
+
+import { IModuleMinificationRequest, IModuleMinificationResult, IModuleMinificationErrorResult } from '../ModuleMinifierPlugin.types';
 
 interface IComment {
   value: string;
@@ -29,7 +36,7 @@ function isSomeComments(comment: IComment): boolean {
  * Mutates terserOptions.output.comments to support comment extraction
  * @internal
  */
-export function minifySingleFile(source: string, terserOptions: MinifyOptions): IModuleMinificationResult {
+export function minifySingleFile(request: IModuleMinificationRequest, terserOptions: MinifyOptions): IModuleMinificationResult {
   const extractedComments: string[] = [];
   if (!terserOptions.output) {
     terserOptions.output = {};
@@ -48,15 +55,26 @@ export function minifySingleFile(source: string, terserOptions: MinifyOptions): 
     return false;
   };
 
-  // TODO: Handle source maps
+  const {
+    code,
+    map,
+    hash
+  } = request;
+
+  terserOptions.sourceMap = map ? {
+    asObject: true
+  } : false;
+
   const minified: MinifyOutput = minify({
-    source
+    code
   }, terserOptions);
 
   if (minified.error) {
     return {
       error: minified.error,
       code: undefined,
+      map: undefined,
+      hash,
       extractedComments: undefined
     } as IModuleMinificationErrorResult;
   }
@@ -64,6 +82,8 @@ export function minifySingleFile(source: string, terserOptions: MinifyOptions): 
   return {
     error: undefined,
     code: minified.code!,
+    map: minified.map as RawSourceMap,
+    hash,
     extractedComments
   };
 }

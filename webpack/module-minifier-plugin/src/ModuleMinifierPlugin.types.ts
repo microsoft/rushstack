@@ -1,14 +1,39 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as webpack from 'webpack';
+import { RawSourceMap } from 'source-map';
 import { AsyncSeriesWaterfallHook } from 'tapable';
+import * as webpack from 'webpack';
+import { Source } from 'webpack-sources';
+
+/**
+ * Request to the minifier
+ * @public
+ */
+export interface IModuleMinificationRequest {
+  /**
+   * Identity of the request. Will be included in the response.
+   */
+  hash?: string;
+  /**
+   * The raw code fragment
+   */
+  code: string;
+  /**
+   * Indicates if a source map is desired for this code fragment
+   */
+  map: boolean;
+}
 
 /**
  * Result from the minifier function when an error is encountered.
  * @public
  */
 export interface IModuleMinificationErrorResult {
+  /**
+   * Identity of the request
+   */
+  hash?: string;
   /**
    * The error encountered, to be added to the current compilation's error collection.
    */
@@ -20,11 +45,11 @@ export interface IModuleMinificationErrorResult {
   /**
    * Marker property to always return the same result shape.
    */
-  extractedComments?: undefined;
+  map?: undefined;
   /**
-   * The minifier implementation may use a hash for deduplication.
+   * Marker property to always return the same result shape.
    */
-  hash?: string;
+  extractedComments?: undefined;
 }
 
 /**
@@ -32,6 +57,10 @@ export interface IModuleMinificationErrorResult {
  * @public
  */
 export interface IModuleMinificationSuccessResult {
+  /**
+   * Identity of the request
+   */
+  hash?: string;
   /**
    * The error property being `undefined` indicates success.
    */
@@ -41,13 +70,13 @@ export interface IModuleMinificationSuccessResult {
    */
   code: string;
   /**
+   * Marker property to always return the same result shape.
+   */
+  map?: RawSourceMap;
+  /**
    * The array of extracted comments, usually these are license information for 3rd party libraries.
    */
   extractedComments: string[];
-  /**
-   * The minifier implementation may use a hash for deduplication.
-   */
-  hash?: string;
 }
 
 /**
@@ -72,7 +101,7 @@ export interface IAssetInfo {
   /**
    * The (minified) boilerplate code for the asset. Will contain a token to be replaced by the minified modules.
    */
-  code: string;
+  source: Source;
 
   /**
    * The name of the asset, used to index into compilation.assets
@@ -103,7 +132,7 @@ export interface IModuleInfo {
   /**
    * The (minified) code of this module. Will be a function expression.
    */
-  code: string;
+  source: Source;
 
   /**
    * The extracted comments from this module, e.g. license information for a 3rd party library.
@@ -185,7 +214,7 @@ export type IModuleMap = Map<string | number, IModuleInfo>;
  * @public
  */
 export interface IModuleMinifierFunction {
-  (code: string, callback: IModuleMinificationCallback): void;
+  (request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
 }
 
 /**
