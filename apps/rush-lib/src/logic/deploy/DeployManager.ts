@@ -40,13 +40,16 @@ interface IDeployScenarioProjectJson {
   additionalProjectsToInclude?: string[];
 }
 
+// The choices for how links should be created in deployments
+export type LinkCreation = 'default' | 'script' | 'none';
+
 // The parsed JSON file structure, as defined by the "deploy-scenario.schema.json" JSON schema
 interface IDeployScenarioJson {
   deploymentProjectNames: string[],
   enableSubdeployments?: boolean;
   includeDevDependencies?: boolean;
   includeNpmIgnoreFiles?: boolean;
-  linkCreation?: "default" | "script" | "none";
+  linkCreation?: LinkCreation;
   projectSettings?: IDeployScenarioProjectJson[];
 }
 
@@ -125,7 +128,7 @@ export class DeployManager {
    */
   private _targetRootFolder: string;
 
-    /**
+  /**
    * The source folder that copying originates from.  Generally it is the repo root folder with rush.json.
    */
   private _sourceRootFolder: string;
@@ -480,7 +483,7 @@ export class DeployManager {
     const deployMetadataJson: IDeployMetadataJson = {
       scenarioName: subdemploymentState.scenarioName,
       mainProjectName: subdemploymentState.mainProjectName,
-      links: [ ]
+      links: []
     };
 
     // Remap the links to be relative to the subdeployment folder
@@ -560,21 +563,11 @@ export class DeployManager {
     }
   }
 
-  /**
-   * The main entry point for performing a deployment.
-   */
-  public deployScenario(scenarioName: string, overwriteExisting: boolean,
-    targetFolderParameter: string | undefined): void {
-
-    DeployManager.validateScenarioName(scenarioName);
-
-    if (this._targetRootFolder !== undefined) {
-      // We can remove this restriction, but currently there is no reason.
-      throw new InternalError('deployScenario() cannot be called twice');
-    }
-
-    this._loadConfigFile(scenarioName);
-
+  private _deploy(
+    overwriteExisting: boolean,
+    targetFolderParameter: string | undefined,
+    scenarioName: string,
+  ): void {
     if (targetFolderParameter) {
       this._targetRootFolder = path.resolve(targetFolderParameter);
       if (!FileSystem.exists(this._targetRootFolder)) {
@@ -662,4 +655,41 @@ export class DeployManager {
 
     console.log("\nThe operation completed successfully.");
   }
+
+
+  public deployProject(
+    projectName: string,
+    includeDevDependencies: IDeployScenarioJson['includeDevDependencies'],
+    includeNpmIgnoreFiles: IDeployScenarioJson['includeNpmIgnoreFiles'],
+    linkCreation: IDeployScenarioJson['linkCreation'],
+    overwriteExisting: boolean,
+    targetFolderParameter: string | undefined,
+  ): void {
+    this._deployScenarioJson = {
+      deploymentProjectNames: [projectName],
+      includeDevDependencies,
+      includeNpmIgnoreFiles,
+      linkCreation: linkCreation !== undefined ? linkCreation : 'default',
+    };
+
+    this._deploy(overwriteExisting, targetFolderParameter, 'default');
+  }
+
+  /**
+   * The main entry point for performing a deployment.
+   */
+  public deployScenario(scenarioName: string, overwriteExisting: boolean,
+    targetFolderParameter: string | undefined): void {
+
+    DeployManager.validateScenarioName(scenarioName);
+
+    if (this._targetRootFolder !== undefined) {
+      // We can remove this restriction, but currently there is no reason.
+      throw new InternalError('deployScenario() cannot be called twice');
+    }
+
+    this._loadConfigFile(scenarioName);
+    this._deploy(overwriteExisting, targetFolderParameter, scenarioName);
+  }
+
 }

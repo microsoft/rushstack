@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "provided no-config default deploy behavior",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "dfee@users.noreply.github.com"
+}

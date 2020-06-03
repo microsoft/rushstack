@@ -226,21 +226,52 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: deploy 1`] = `
-"usage: rush deploy [-h] -s SCENARIO [--overwrite] [-t PATH]
+"usage: rush deploy [-h] [-p PROJECT_NAME] [-s SCENARIO]
+                   [--include-dev-dependencies] [--include-npm-ignore-files]
+                   [--link-creation {default,none,script}] [--overwrite]
+                   [-t PATH]
+                   
 
 (EXPERIMENTAL) After building the repo, \\"rush deploy\\" can be used to copy a 
 subset of Rush projects and their dependencies to a deployment target folder, 
-which can then be copied to a production machine. The \\"rush deploy\\" behavior 
-is specified by a scenario config file located under the 
-\\"common/config/deploy\\" folder. You can define multiple scenarios. Use the 
-\\"rush init-deploy\\" command to create a new config file.
+which can then be copied to a production machine. The default \\"rush deploy\\" 
+behavior takes a project name, while custom deploy behavior can be specified 
+by a scenario config file located under the \\"common/config/deploy\\" folder. 
+Use the \\"rush init-deploy\\" command to create a new config file for custom 
+deployments.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
+  -p PROJECT_NAME, --project-name PROJECT_NAME
+                        Specifies the name of the project to deploy. This 
+                        project must be defined in rush.json. This and 
+                        --scenario are mutually exclusive, and one is 
+                        required.
   -s SCENARIO, --scenario SCENARIO
                         Specifies the name of a config file describing the 
                         deployment. For example if SCENARIO is \\"web\\", the 
-                        input file is: common/config/deploy/web.json
+                        input file is: common/config/deploy/web.json. This 
+                        and --project-name are mutually exclusive, and one is 
+                        required.
+  --include-dev-dependencies
+                        By default, dev dependencies are not included in the 
+                        deployment. This option is only valid when 
+                        --project-name is specified.
+  --include-npm-ignore-files
+                        By default, files in .npmignore are not included in 
+                        the deployment. This option is only valid when 
+                        --project-name is specified.
+  --link-creation {default,none,script}
+                        Specify how links (symbolic links, hard links, and/or 
+                        NTFS junctions) will be created in the deployed 
+                        folder. \\"default\\": Create the links while copying the 
+                        files; this is the default behavior. \\"script\\": A Node.
+                        js script called \\"create-links.js\\" will be written. 
+                        When executed, this script will create the links 
+                        described in the \\"deploy-metadata.json\\" output file. 
+                        \\"none\\": Do nothing; some other tool may create the 
+                        links later. This option is only valid when 
+                        --project-name is specified.
   --overwrite           By default, deployment will fail if the target folder 
                         is not empty. SPECIFYING THIS FLAG WILL RECURSIVELY 
                         DELETE EXISTING CONTENTS OF THE TARGET FOLDER.
