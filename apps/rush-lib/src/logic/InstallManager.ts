@@ -712,67 +712,47 @@ export class InstallManager {
       // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
       const tempPackageJsonFilename: string = path.join(tempProjectFolder, FileConstants.PackageJson);
 
-      // we only want to overwrite the package if the existing tarball's package.json is different from tempPackageJson
-      let shouldOverwrite: boolean = true;
       try {
-        // if the tarball and the temp file still exist, then compare the contents
-        if (FileSystem.exists(tarballFile) && FileSystem.exists(tempPackageJsonFilename)) {
+        // ensure the folder we are about to zip exists
+        Utilities.createFolderWithRetry(tempProjectFolder);
 
-          // compare the extracted package.json with the one we are about to write
-          const oldBuffer: Buffer = FileSystem.readFileToBuffer(tempPackageJsonFilename);
-          const newBuffer: Buffer = Buffer.from(JsonFile.stringify(tempPackageJson));
+        // remove the old tarball & old temp package json, this is for any cases where new tarball creation
+        // fails, and the shouldOverwrite logic is messed up because the my-project-2\package.json
+        // exists and is updated, but the tarball is not accurate
+        FileSystem.deleteFile(tarballFile);
+        FileSystem.deleteFile(tempPackageJsonFilename);
 
-          if (Buffer.compare(oldBuffer, newBuffer) === 0) {
-            shouldOverwrite = false;
-          }
-        }
-      } catch (error) {
-        // ignore the error, we will go ahead and create a new tarball
-      }
+        // write the expected package.json file into the zip staging folder
+        JsonFile.save(tempPackageJson, tempPackageJsonFilename);
 
-      if (shouldOverwrite) {
-        try {
-          // ensure the folder we are about to zip exists
-          Utilities.createFolderWithRetry(tempProjectFolder);
-
-          // remove the old tarball & old temp package json, this is for any cases where new tarball creation
-          // fails, and the shouldOverwrite logic is messed up because the my-project-2\package.json
-          // exists and is updated, but the tarball is not accurate
-          FileSystem.deleteFile(tarballFile);
-          FileSystem.deleteFile(tempPackageJsonFilename);
-
-          // write the expected package.json file into the zip staging folder
-          JsonFile.save(tempPackageJson, tempPackageJsonFilename);
-
-          const tarOptions: tar.CreateOptions = ({
-            gzip: true,
-            file: tarballFile,
-            cwd: tempProjectFolder,
-            portable: true,
-            noMtime: true,
-            noPax: true,
-            sync: true,
-            prefix: npmPackageFolder,
-            filter: (path: string, stat: tar.FileStat): boolean => {
-              if (!this._rushConfiguration.experimentsConfiguration.configuration
-                .noChmodFieldInTarHeaderNormalization) {
-                stat.mode = (stat.mode & ~0x1FF) | PosixModeBits.AllRead | PosixModeBits.UserWrite
-                  | PosixModeBits.AllExecute;
-              }
-              return true;
+        const tarOptions: tar.CreateOptions = ({
+          gzip: true,
+          file: tarballFile,
+          cwd: tempProjectFolder,
+          portable: true,
+          noMtime: true,
+          noPax: true,
+          sync: true,
+          prefix: npmPackageFolder,
+          filter: (path: string, stat: tar.FileStat): boolean => {
+            if (!this._rushConfiguration.experimentsConfiguration.configuration
+              .noChmodFieldInTarHeaderNormalization) {
+              stat.mode = (stat.mode & ~0x1FF) | PosixModeBits.AllRead | PosixModeBits.UserWrite
+                | PosixModeBits.AllExecute;
             }
-          } as tar.CreateOptions);
+            return true;
+          }
+        } as tar.CreateOptions);
 
-          // create the new tarball
-          tar.create(tarOptions, [FileConstants.PackageJson]);
+        // create the new tarball
+        tar.create(tarOptions, [FileConstants.PackageJson]);
 
-          console.log(`Updating ${tarballFile}`);
-        } catch (error) {
-          console.log(colors.yellow(error));
-          // delete everything in case of any error
-          FileSystem.deleteFile(tarballFile);
-          FileSystem.deleteFile(tempPackageJsonFilename);
-        }
+        console.log(`Updating ${tarballFile}`);
+      } catch (error) {
+        console.log(colors.yellow(error));
+        // delete everything in case of any error
+        FileSystem.deleteFile(tarballFile);
+        FileSystem.deleteFile(tempPackageJsonFilename);
       }
     }
 
