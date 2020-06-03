@@ -95,6 +95,14 @@ export class ModuleMinifierPlugin {
       stableIdsPlugin
     } = this;
 
+    const {
+      options: {
+        devtool
+      }
+    } = compiler;
+
+    const useSourceMaps: boolean = devtool === 'source-map' || devtool === 'inline-source-map';
+
     if (stableIdsPlugin) {
       stableIdsPlugin.apply(compiler);
     }
@@ -107,7 +115,6 @@ export class ModuleMinifierPlugin {
     );
 
     compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: webpack.compilation.Compilation) => {
-      const useSourceMaps: boolean = false;
 
       /**
        * Set of local module ids that have been processed.
