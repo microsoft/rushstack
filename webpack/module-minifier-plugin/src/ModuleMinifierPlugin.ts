@@ -217,7 +217,7 @@ export class ModuleMinifierPlugin {
                 minifierMap, // Base source map
                 wrappedCode, // Source from before transform
                 map, // Source Map from before transform
-                true // Remove original source
+                false // Remove original source
               ) : new RawSource(minified);
 
               const unwrapped: ReplaceSource = new ReplaceSource(rawOutput);
@@ -303,7 +303,7 @@ export class ModuleMinifierPlugin {
                 let codeForMap: string = rawCode;
                 if (useSourceMaps) {
                   // Pretend the __WEBPACK_CHUNK_MODULES__ token is an array of module ids, so that which chunk contains the modules can be tracked.
-                  codeForMap = codeForMap.replace(CHUNK_MODULES_TOKEN, JSON.stringify(chunkModules, null, 2));
+                  codeForMap = codeForMap.replace(CHUNK_MODULES_TOKEN, JSON.stringify(chunkModules, undefined, 2));
                 }
 
                 const rawOutput: Source = useSourceMaps ? new SourceMapSource(
