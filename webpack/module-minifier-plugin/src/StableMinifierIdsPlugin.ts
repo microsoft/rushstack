@@ -10,7 +10,7 @@ import * as RequestShortener from 'webpack/lib/RequestShortener';
 import { STAGE_AFTER, STAGE_BEFORE } from './Constants';
 import { INormalModuleFactoryModuleData, IExtendedModule } from './ModuleMinifierPlugin.types';
 
-const PLUGIN_NAME: 'StableMinifierIdsPlugin' = 'StableMinifierIdsPlugin';
+const PLUGIN_NAME: 'PortableMinifierModuleIdsPlugin' = 'PortableMinifierModuleIdsPlugin';
 
 const TAP_BEFORE: Tap = {
   name: PLUGIN_NAME,
@@ -25,19 +25,62 @@ const TAP_AFTER: Tap = {
 const STABLE_MODULE_ID_PREFIX: '__MODULEID_SHA_' = '__MODULEID_SHA_';
 const STABLE_MODULE_ID_REGEX: RegExp = /['"]?(__MODULEID_SHA_[0-9a-f]+)['"]?/g;
 
+export class ModuleIdRestorer {
+  private readonly _idMap: Map<string | number, string | number>;
+
+  public constructor(idMap: Map<string | number, string | number>) {
+    this._idMap = idMap;
+  }
+
+  /**
+   * Replaces stable ids in code with the original output ids
+   * @param source - The webpack Source to transform
+   * @param context - Context information for error logging
+   */
+  public restoreIdsInCode(source: ReplaceSource, context: string): ReplaceSource {
+    const {
+      _idMap: stableIdToFinalId
+    } = this;
+
+    const code: string = source.original().source();
+
+    STABLE_MODULE_ID_REGEX.lastIndex = -1;
+    // RegExp.exec uses null or an array as the return type, explicitly
+    let match: RegExpExecArray | null = null; // eslint-disable-line @rushstack/no-null
+    while ((match = STABLE_MODULE_ID_REGEX.exec(code))) {
+      const id: string = match[1];
+      const mapped: string | number | undefined = stableIdToFinalId.get(id);
+
+      if (mapped === undefined) {
+        console.error(`Missing module id for ${id} in ${context}!`);
+      }
+
+      source.replace(match.index, STABLE_MODULE_ID_REGEX.lastIndex - 1, JSON.stringify(mapped));
+    }
+
+    return source;
+  }
+
+  /**
+   * Maps a module id to the expected output id
+   * @param id - The current value of `module.id`
+   */
+  public getMappedId(id: string | number): string | number | undefined {
+    return this._idMap.get(id);
+  }
+}
+
 /**
  * Plugin responsible for converting the Webpack module ids (of whatever variety) to stable ids before code is handed to the minifier, then back again.
  * Uses the node module identity of the target module. Will emit an error if it encounters multiple versions of the same package in the same compilation.
  * @public
  */
-export class StableMinifierIdsPlugin {
-  private readonly _stableIdToFinalId: Map<string | number, string | number>;
-
+export class PortableMinifierModuleIdsPlugin {
   public constructor() {
-    this._stableIdToFinalId = new Map();
+    // Nothing
   }
 
-  public apply(compiler: Compiler): void {
+  public apply(compiler: Compiler): ModuleIdRestorer {
     // Ensure that "EXTERNAL MODULE: " comments are portable and module version invariant
     const baseShorten: (request: string) => string = RequestShortener.prototype.shorten;
     RequestShortener.prototype.shorten = function (this: RequestShortener, request: string): string {
@@ -59,9 +102,7 @@ export class StableMinifierIdsPlugin {
     }
 
     const nameByResource: Map<string | undefined, string> = new Map();
-    const {
-      _stableIdToFinalId: stableIdToFinalId
-    } = this;
+    const stableIdToFinalId: Map<string | number, string | number> = new Map();
 
     /**
      * Figure out portable ids for modules by using their id based on the node module resolution algorithm
@@ -90,7 +131,7 @@ export class StableMinifierIdsPlugin {
       });
     });
 
-    compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: compilation.Compilation) => {
+    compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: compilation.Compilation) => {
 
       // Make module ids portable immediately before rendering.
       // Unfortunately, other means of altering these ids don't work in Webpack 4 without a lot more code and work.
@@ -99,11 +140,11 @@ export class StableMinifierIdsPlugin {
         // For tracking collisions
         const resourceById: Map<string | number, string> = new Map();
 
-        for (const module of compilation.modules) {
-          const originalId: string | number = module.id;
+        for (const mod of compilation.modules) {
+          const originalId: string | number = mod.id;
 
           // Need to handle ConcatenatedModules, which don't have the resource property directly
-          const resource: string = (module.rootModule || module).resource;
+          const resource: string = (mod.rootModule || mod).resource;
 
           // Map to the friendly node module identifier
           const preferredId: string | undefined = nameByResource.get(resource);
@@ -122,7 +163,7 @@ export class StableMinifierIdsPlugin {
 
             // Record to detect collisions
             resourceById.set(stableId, resource);
-            module.id = stableId;
+            mod.id = stableId;
           }
         }
       });
@@ -139,42 +180,7 @@ export class StableMinifierIdsPlugin {
         }
       });
     });
-  }
 
-  /**
-   * Replaces stable ids in code with the original output ids
-   * @param source - The webpack Source to transform
-   * @param context - Context information for error logging
-   */
-  public restoreIdsInCode(source: ReplaceSource, context: string): ReplaceSource {
-    const {
-      _stableIdToFinalId: stableIdToFinalId
-    } = this;
-
-    const code: string = source.original().source();
-
-    STABLE_MODULE_ID_REGEX.lastIndex = -1;
-    // RegExp.exec uses null or an array as the return type, explicitly
-    let match: RegExpExecArray | null = null; // eslint-disable-line @rushstack/no-null
-    while ((match = STABLE_MODULE_ID_REGEX.exec(code))) {
-      const id: string = match[1];
-      const mapped: string | number | undefined = stableIdToFinalId.get(id);
-
-      if (mapped === undefined) {
-        console.error(`Missing module id for ${id} in ${context}!`);
-      }
-
-      source.replace(match.index, STABLE_MODULE_ID_REGEX.lastIndex - 1, mapped);
-    }
-
-    return source;
-  }
-
-  /**
-   * Maps a module id to the expected output id
-   * @param id - The current value of `module.id`
-   */
-  public getMappedId(id: string | number): string | number | undefined {
-    return this._stableIdToFinalId.get(id);
+    return new ModuleIdRestorer(stableIdToFinalId);
   }
 }

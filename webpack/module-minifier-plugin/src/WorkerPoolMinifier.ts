@@ -5,7 +5,6 @@ import { IModuleMinificationCallback, IModuleMinificationResult, IModuleMinifica
 import { MinifyOptions } from 'terser';
 import { Worker } from 'worker_threads';
 import { WorkerPool } from './threadPool/WorkerPool';
-import { createHash } from 'crypto';
 import { cpus } from 'os';
 
 import './OverrideWebpackIdentifierAllocation';
@@ -23,10 +22,6 @@ export interface IWorkerPoolMinifierOptions {
   terserOptions?: MinifyOptions;
 }
 
-type IWorkerResponseMessage = {
-  hash: string;
-} & IModuleMinificationResult;
-
 /**
  * Minifier implementation that uses a thread pool for minification.
  * @public
@@ -34,7 +29,7 @@ type IWorkerResponseMessage = {
 export class WorkerPoolMinifier {
   private readonly _pool: WorkerPool;
 
-  private readonly _resultCache: Map<string, IWorkerResponseMessage>;
+  private readonly _resultCache: Map<string, IModuleMinificationResult>;
   private readonly _activeRequests: Map<string, IModuleMinificationCallback[]>;
 
   public constructor(options: IWorkerPoolMinifierOptions) {
@@ -44,12 +39,12 @@ export class WorkerPoolMinifier {
     } = options || {};
 
     const activeRequests: Map<string, IModuleMinificationCallback[]> = new Map();
-    const resultCache: Map<string, IWorkerResponseMessage> = new Map();
+    const resultCache: Map<string, IModuleMinificationResult> = new Map();
     const terserPool: WorkerPool = new WorkerPool({
       id: 'Minifier',
       maxWorkers: maxThreads,
       prepareWorker: (worker: Worker) => {
-        worker.on('message', (message: IWorkerResponseMessage) => {
+        worker.on('message', (message: IModuleMinificationResult) => {
           const callbacks: IModuleMinificationCallback[] | undefined = activeRequests.get(message.hash)!;
           activeRequests.delete(message.hash);
           resultCache.set(message.hash, message);
@@ -78,15 +73,12 @@ export class WorkerPoolMinifier {
     callback: IModuleMinificationCallback
   ): void {
     const {
-      code,
-      nameForMap
+      hash
     } = request;
 
-    const hash: string = createHash('sha256').update(code).digest('hex');
-
-    const cached: IWorkerResponseMessage | undefined = this._resultCache.get(hash);
+    const cached: IModuleMinificationResult | undefined = this._resultCache.get(hash);
     if (cached) {
-      callback(cached);
+      return callback(cached);
     }
 
     const {
@@ -101,11 +93,7 @@ export class WorkerPoolMinifier {
     activeRequests.set(hash, [callback]);
 
     this._pool.checkoutWorker(true).then((worker) => {
-      worker.postMessage({
-        hash,
-        code,
-        nameForMap
-      });
+      worker.postMessage(request);
     }).catch((error: Error) => {
       const errorCallbacks: IModuleMinificationCallback[] = activeRequests.get(hash)!;
       for (const errorCallback of errorCallbacks) {

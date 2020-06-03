@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IModuleMinificationCallback, IModuleMinificationRequest } from './ModuleMinifierPlugin.types';
+import { IModuleMinificationCallback, IModuleMinificationRequest, IModuleMinificationResult } from './ModuleMinifierPlugin.types';
 import { minifySingleFile } from './terser/MinifySingleFile';
 import { MinifyOptions } from 'terser';
 import './OverrideWebpackIdentifierAllocation';
@@ -21,6 +21,8 @@ export interface ISynchronousMinifierOptions {
 export class SynchronousMinifier {
   public readonly terserOptions: MinifyOptions;
 
+  private readonly _resultCache: Map<string, IModuleMinificationResult>;
+
   public constructor(options: ISynchronousMinifierOptions) {
     const {
       terserOptions = {}
@@ -32,6 +34,8 @@ export class SynchronousMinifier {
         ...terserOptions.output
       } : {}
     };
+
+    this._resultCache = new Map();
   }
 
   /**
@@ -43,7 +47,19 @@ export class SynchronousMinifier {
     request: IModuleMinificationRequest,
     callback: IModuleMinificationCallback
   ): void {
-    callback(minifySingleFile(request, this.terserOptions));
+    const {
+      hash
+    } = request;
+
+    const cached: IModuleMinificationResult | undefined = this._resultCache.get(hash);
+    if (cached) {
+      return callback(cached);
+    }
+
+    const result: IModuleMinificationResult = minifySingleFile(request, this.terserOptions);
+    this._resultCache.set(hash, result);
+
+    callback(result);
   }
 
   public shutdown(): void {

@@ -24,7 +24,8 @@ import {
 } from './ModuleMinifierPlugin.types';
 import { generateLicenseFileForAsset } from './GenerateLicenseFileForAsset';
 import { rehydrateAsset } from './RehydrateAsset';
-import { StableMinifierIdsPlugin } from './StableMinifierIdsPlugin';
+import { PortableMinifierModuleIdsPlugin, ModuleIdRestorer } from './StableMinifierIdsPlugin';
+import { createHash } from 'crypto';
 
 // The name of the plugin, for use in taps
 const PLUGIN_NAME: 'ModuleMinifierPlugin' = 'ModuleMinifierPlugin';
@@ -52,7 +53,7 @@ function defaultRehydrateAssets(dehydratedAssets: IDehydratedAssets, compilation
 
   // Now assets/modules contain fully minified code. Rehydrate.
   for (const [assetName, info] of assets) {
-    const banner: string = generateLicenseFileForAsset(compilation, info, modules)
+    const banner: string = /\.m?js(\?.+)?$/.test(assetName) ? generateLicenseFileForAsset(compilation, info, modules) : '';
 
     const outputSource: Source = rehydrateAsset(info, modules, banner);
     compilation.assets[assetName] = outputSource;
@@ -72,7 +73,7 @@ function isMinificationResultError(result: IModuleMinificationResult): result is
 export class ModuleMinifierPlugin {
   public readonly hooks: IModuleMinifierPluginHooks;
   public readonly minifier: IModuleMinifier;
-  public readonly stableIdsPlugin: StableMinifierIdsPlugin | undefined;
+  public readonly portableIdsPlugin: PortableMinifierModuleIdsPlugin | undefined;
 
   public constructor(options: IModuleMinifierPluginOptions) {
     this.hooks = {
@@ -83,7 +84,7 @@ export class ModuleMinifierPlugin {
     };
 
     if (options.usePortableModules) {
-      this.stableIdsPlugin = new StableMinifierIdsPlugin();
+      this.portableIdsPlugin = new PortableMinifierModuleIdsPlugin();
     }
 
     this.hooks.rehydrateAssets.tap(PLUGIN_NAME, defaultRehydrateAssets);
@@ -92,7 +93,7 @@ export class ModuleMinifierPlugin {
 
   public apply(compiler: webpack.Compiler): void {
     const {
-      stableIdsPlugin
+      portableIdsPlugin: stableIdsPlugin
     } = this;
 
     const {
@@ -103,18 +104,16 @@ export class ModuleMinifierPlugin {
 
     const useSourceMaps: boolean = devtool === 'source-map' || devtool === 'inline-source-map';
 
-    if (stableIdsPlugin) {
-      stableIdsPlugin.apply(compiler);
-    }
+    const moduleIdRestorer: ModuleIdRestorer | undefined = stableIdsPlugin && stableIdsPlugin.apply(compiler);
 
     const postProcessCode: (code: ReplaceSource, context: string) => ReplaceSource = (
-      stableIdsPlugin ? stableIdsPlugin.restoreIdsInCode.bind(stableIdsPlugin) : (code: ReplaceSource) => code
+      moduleIdRestorer ? moduleIdRestorer.restoreIdsInCode.bind(moduleIdRestorer) : (code: ReplaceSource) => code
     );
     const getRealId: (id: string | number) => string | number | undefined = (
-      stableIdsPlugin ? stableIdsPlugin.getMappedId.bind(stableIdsPlugin) : (id: string | number) => id
+      moduleIdRestorer ? moduleIdRestorer.getMappedId.bind(moduleIdRestorer) : (id: string | number) => id
     );
 
-    compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: webpack.compilation.Compilation) => {
+    compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: webpack.compilation.Compilation) => {
 
       /**
        * Set of local module ids that have been processed.
@@ -196,48 +195,54 @@ export class ModuleMinifierPlugin {
               map
             } = wrapped.sourceAndMap();
 
+            const hash: string = createHash('sha256').update(wrappedCode).digest('hex');
+
             ++pendingMinificationRequests;
 
             minifier.minify({
+              hash,
               code: wrappedCode,
               nameForMap
             }, (result: IModuleMinificationResult) => {
               if (isMinificationResultError(result)) {
                 compilation.errors.push(result.error);
-                return;
+              } else {
+                try {
+                  // Have the source map display the module id instead of the minifier boilerplate
+                  const sourceForMap: string = `// ${mod.readableIdentifier(requestShortener)}${wrappedCode.slice(MODULE_WRAPPER_PREFIX.length, -MODULE_WRAPPER_SUFFIX.length)}`;
+
+                  const {
+                    code: minified,
+                    map: minifierMap,
+                    extractedComments
+                  } = result;
+
+                  const rawOutput: Source = useSourceMaps ? new SourceMapSource(
+                    minified, // Code
+                    nameForMap, // File
+                    minifierMap, // Base source map
+                    sourceForMap, // Source from before transform
+                    map, // Source Map from before transform
+                    false // Remove original source
+                  ) : new RawSource(minified);
+
+                  const unwrapped: ReplaceSource = new ReplaceSource(rawOutput);
+                  const len: number = minified.length;
+
+                  unwrapped.replace(0, MODULE_WRAPPER_PREFIX.length - 1, '');
+                  unwrapped.replace(len - MODULE_WRAPPER_SUFFIX.length, len - 1, '');
+
+                  const withIds: Source = postProcessCode(unwrapped, mod.identifier());
+
+                  minifiedModules.set(realId, {
+                    source: withIds,
+                    extractedComments,
+                    module: mod
+                  });
+                } catch (err) {
+                  compilation.errors.push(err);
+                }
               }
-
-              // Have the source map display the module id instead of the minifier boilerplate
-              const sourceForMap: string = `// ${mod.readableIdentifier(requestShortener)}${wrappedCode.slice(MODULE_WRAPPER_PREFIX.length, -MODULE_WRAPPER_SUFFIX.length)}`;
-
-              const {
-                code: minified,
-                map: minifierMap,
-                extractedComments
-              } = result;
-
-              const rawOutput: Source = useSourceMaps ? new SourceMapSource(
-                minified, // Code
-                nameForMap, // File
-                minifierMap, // Base source map
-                sourceForMap, // Source from before transform
-                map, // Source Map from before transform
-                false // Remove original source
-              ) : new RawSource(minified);
-
-              const unwrapped: ReplaceSource = new ReplaceSource(rawOutput);
-              const len: number = minified.length;
-
-              unwrapped.replace(0, MODULE_WRAPPER_PREFIX.length - 1, '');
-              unwrapped.replace(len - MODULE_WRAPPER_SUFFIX.length, len - 1, '');
-
-              const withIds: Source = postProcessCode(unwrapped, mod.identifier());
-
-              minifiedModules.set(realId, {
-                source: withIds,
-                extractedComments,
-                module: mod
-              });
 
               onFileMinified();
             });
@@ -287,55 +292,62 @@ export class ModuleMinifierPlugin {
               ++pendingMinificationRequests;
 
               const rawCode: string = asset.source();
-              const isRuntime: boolean = chunk.hasRuntime();
               const nameForMap: string = `(chunks)/${assetName}`;
 
+              const hash: string = createHash('sha256').update(rawCode).digest('hex');
+
               minifier.minify({
+                hash,
                 code: rawCode,
                 nameForMap
               }, (result: IModuleMinificationResult) => {
                 if (isMinificationResultError(result)) {
                   compilation.errors.push(result.error);
-                  return;
+                  console.error(result.error);
+                } else {
+                  try {
+                    const {
+                      code: minified,
+                      map: minifierMap,
+                      extractedComments
+                    } = result;
+
+                    let codeForMap: string = rawCode;
+                    if (useSourceMaps) {
+                      // Pretend the __WEBPACK_CHUNK_MODULES__ token is an array of module ids, so that which chunk contains the modules can be tracked.
+                      codeForMap = codeForMap.replace(CHUNK_MODULES_TOKEN, JSON.stringify(chunkModules, undefined, 2));
+                    }
+
+                    const rawOutput: Source = useSourceMaps ? new SourceMapSource(
+                      minified, // Code
+                      nameForMap, // File
+                      minifierMap, // Base source map
+                      codeForMap, // Source from before transform
+                      undefined, // Source Map from before transform
+                      false // Remove original source
+                    ) : new RawSource(minified);
+
+                    const withIds: Source = postProcessCode(new ReplaceSource(rawOutput), assetName);
+
+                    minifiedAssets.set(assetName, {
+                      source: withIds,
+                      extractedComments,
+                      modules: chunkModules,
+                      chunk,
+                      fileName: assetName
+                    });
+                  } catch (err) {
+                    compilation.errors.push(err);
+                  }
                 }
-
-                const {
-                  code: minified,
-                  map: minifierMap,
-                  extractedComments
-                } = result;
-
-                let codeForMap: string = rawCode;
-                if (useSourceMaps) {
-                  // Pretend the __WEBPACK_CHUNK_MODULES__ token is an array of module ids, so that which chunk contains the modules can be tracked.
-                  codeForMap = codeForMap.replace(CHUNK_MODULES_TOKEN, JSON.stringify(chunkModules, undefined, 2));
-                }
-
-                const rawOutput: Source = useSourceMaps ? new SourceMapSource(
-                  minified, // Code
-                  nameForMap, // File
-                  minifierMap, // Base source map
-                  codeForMap, // Source from before transform
-                  undefined, // Source Map from before transform
-                  false // Remove original source
-                ) : new RawSource(minified);
-
-                const withIds: Source = isRuntime ? postProcessCode(new ReplaceSource(rawOutput), assetName) : rawOutput;
-
-                minifiedAssets.set(assetName, {
-                  source: withIds,
-                  extractedComments,
-                  modules: chunkModules,
-                  chunk,
-                  fileName: assetName
-                });
 
                 onFileMinified();
               });
             } else {
               // Skip minification for all other assets, though the modules still are
               minifiedAssets.set(assetName, {
-                source: asset,
+                // Still need to restore ids
+                source: postProcessCode(new ReplaceSource(asset), assetName),
                 extractedComments: [],
                 modules: chunkModules,
                 chunk,

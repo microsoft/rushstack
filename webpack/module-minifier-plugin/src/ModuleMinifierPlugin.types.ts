@@ -14,7 +14,7 @@ export interface IModuleMinificationRequest {
   /**
    * Identity of the request. Will be included in the response.
    */
-  hash?: string;
+  hash: string;
   /**
    * The raw code fragment
    */
@@ -33,7 +33,7 @@ export interface IModuleMinificationErrorResult {
   /**
    * Identity of the request
    */
-  hash?: string;
+  hash: string;
   /**
    * The error encountered, to be added to the current compilation's error collection.
    */
@@ -60,7 +60,7 @@ export interface IModuleMinificationSuccessResult {
   /**
    * Identity of the request
    */
-  hash?: string;
+  hash: string;
   /**
    * The error property being `undefined` indicates success.
    */
