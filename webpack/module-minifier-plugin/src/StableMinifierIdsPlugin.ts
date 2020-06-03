@@ -81,11 +81,12 @@ export class StableMinifierIdsPlugin {
           if (packageJson && relativePath) {
             const nodeId: string = `${packageJson.name}${relativePath.slice(1).replace(/\.js(on)?$/, '')}`;
             nameByResource.set(mod.resource, nodeId);
-            return;
+            return mod;
           }
         }
 
         console.error(`Missing resolution data for ${mod.resource}`);
+        return mod;
       });
     });
 
@@ -137,7 +138,7 @@ export class StableMinifierIdsPlugin {
           }
         }
       });
-    })
+    });
   }
 
   /**
