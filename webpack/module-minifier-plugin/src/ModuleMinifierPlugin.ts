@@ -166,6 +166,8 @@ export class ModuleMinifierPlugin {
         minifier
       } = this;
 
+      const requestShortener: webpack.compilation.RequestShortener = compilation.runtimeTemplate.requestShortener;
+
       /**
        * Extracts the code for the module and sends it to be minified.
        * Currently source maps are explicitly not supported.
@@ -185,7 +187,7 @@ export class ModuleMinifierPlugin {
           const realId: string | number | undefined = getRealId(id);
 
           if (realId !== undefined && !mod.skipMinification) {
-            const wrapped: ConcatSource = new ConcatSource(MODULE_WRAPPER_PREFIX, source, MODULE_WRAPPER_SUFFIX);
+            const wrapped: ConcatSource = new ConcatSource(MODULE_WRAPPER_PREFIX + '\n', source, '\n' + MODULE_WRAPPER_SUFFIX);
 
             const nameForMap: string = `(modules)/${realId}`;
 
@@ -205,6 +207,9 @@ export class ModuleMinifierPlugin {
                 return;
               }
 
+              // Have the source map display the module id instead of the minifier boilerplate
+              const sourceForMap: string = `// ${mod.readableIdentifier(requestShortener)}${wrappedCode.slice(MODULE_WRAPPER_PREFIX.length, -MODULE_WRAPPER_SUFFIX.length)}`;
+
               const {
                 code: minified,
                 map: minifierMap,
@@ -215,7 +220,7 @@ export class ModuleMinifierPlugin {
                 minified, // Code
                 nameForMap, // File
                 minifierMap, // Base source map
-                wrappedCode, // Source from before transform
+                sourceForMap, // Source from before transform
                 map, // Source Map from before transform
                 false // Remove original source
               ) : new RawSource(minified);

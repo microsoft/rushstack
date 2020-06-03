@@ -159,6 +159,10 @@ export interface IExtendedModule extends webpack.compilation.Module, webpack.Mod
    */
   identifier(): string;
   /**
+   * Gets a friendly identifier for the module.
+   */
+  readableIdentifier(requestShortener: webpack.compilation.RequestShortener): string;
+  /**
    * Path to the physical file this module represents
    */
   resource?: string;
@@ -166,6 +170,17 @@ export interface IExtendedModule extends webpack.compilation.Module, webpack.Mod
    * If set, bypass the minifier for this module. Useful if the code is known to already be minified.
    */
   skipMinification?: boolean;
+}
+
+declare module 'webpack' {
+  namespace compilation { // eslint-disable-line @typescript-eslint/no-namespace
+    interface RuntimeTemplate { // eslint-disable-line @typescript-eslint/interface-name-prefix
+      requestShortener: webpack.compilation.RequestShortener;
+    }
+
+    interface RequestShortener { // eslint-disable-line @typescript-eslint/interface-name-prefix
+    }
+  }
 }
 
 /**
