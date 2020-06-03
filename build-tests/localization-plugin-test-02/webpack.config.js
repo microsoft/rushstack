@@ -4,6 +4,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 const { LocalizationPlugin } = require('@rushstack/localization-plugin');
+const { ModuleMinifierPlugin, SynchronousMinifier } = require('@rushstack/module-minifier-plugin');
 const { SetPublicPathPlugin } = require('@rushstack/set-webpack-public-path-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -39,7 +40,11 @@ function generateConfiguration(mode, outputFolderName) {
       chunkFilename: '[id].[name]_[locale]_[contenthash].js'
     },
     optimization: {
-      minimize: false
+      minimizer: [
+        new ModuleMinifierPlugin({
+          minifier: new SynchronousMinifier()
+        })
+      ]
     },
     devtool: 'source-map',
     plugins: [
