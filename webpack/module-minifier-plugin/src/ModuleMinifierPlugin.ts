@@ -187,6 +187,8 @@ export class ModuleMinifierPlugin {
           if (realId !== undefined && !mod.skipMinification) {
             const wrapped: ConcatSource = new ConcatSource(MODULE_WRAPPER_PREFIX, source, MODULE_WRAPPER_SUFFIX);
 
+            const nameForMap: string = `(modules)/${realId}`;
+
             const {
               source: wrappedCode,
               map
@@ -196,7 +198,7 @@ export class ModuleMinifierPlugin {
 
             minifier.minify({
               code: wrappedCode,
-              map: true
+              nameForMap
             }, (result: IModuleMinificationResult) => {
               if (isMinificationResultError(result)) {
                 compilation.errors.push(result.error);
@@ -211,7 +213,7 @@ export class ModuleMinifierPlugin {
 
               const rawOutput: Source = useSourceMaps ? new SourceMapSource(
                 minified, // Code
-                realId, // File
+                nameForMap, // File
                 minifierMap, // Base source map
                 wrappedCode, // Source from before transform
                 map, // Source Map from before transform
@@ -274,15 +276,18 @@ export class ModuleMinifierPlugin {
 
           for (const assetName of chunk.files) {
             const asset: Source = compilation.assets[assetName];
-            const rawCode: string = asset.source();
 
             // Verify that this is a JS asset
             if (/\.m?js(\?.+)?$/.test(assetName)) {
               ++pendingMinificationRequests;
 
+              const rawCode: string = asset.source();
+              const isRuntime: boolean = chunk.hasRuntime();
+              const nameForMap: string = `(chunks)/${assetName}`;
+
               minifier.minify({
                 code: rawCode,
-                map: true
+                nameForMap
               }, (result: IModuleMinificationResult) => {
                 if (isMinificationResultError(result)) {
                   compilation.errors.push(result.error);
@@ -295,16 +300,22 @@ export class ModuleMinifierPlugin {
                   extractedComments
                 } = result;
 
+                let codeForMap: string = rawCode;
+                if (useSourceMaps) {
+                  // Pretend the __WEBPACK_CHUNK_MODULES__ token is an array of module ids, so that which chunk contains the modules can be tracked.
+                  codeForMap = codeForMap.replace(CHUNK_MODULES_TOKEN, JSON.stringify(chunkModules, null, 2));
+                }
+
                 const rawOutput: Source = useSourceMaps ? new SourceMapSource(
                   minified, // Code
-                  assetName, // File
+                  nameForMap, // File
                   minifierMap, // Base source map
-                  rawCode, // Source from before transform
+                  codeForMap, // Source from before transform
                   undefined, // Source Map from before transform
                   false // Remove original source
                 ) : new RawSource(minified);
 
-                const withIds: Source = chunk.hasRuntime() ? postProcessCode(new ReplaceSource(rawOutput), assetName) : rawOutput;
+                const withIds: Source = isRuntime ? postProcessCode(new ReplaceSource(rawOutput), assetName) : rawOutput;
 
                 minifiedAssets.set(assetName, {
                   source: withIds,

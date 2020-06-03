@@ -57,16 +57,16 @@ export function minifySingleFile(request: IModuleMinificationRequest, terserOpti
 
   const {
     code,
-    map,
+    nameForMap,
     hash
   } = request;
 
-  terserOptions.sourceMap = map ? {
+  terserOptions.sourceMap = nameForMap ? {
     asObject: true
   } : false;
 
   const minified: MinifyOutput = minify({
-    code
+    [nameForMap || 'code']: code
   }, terserOptions);
 
   if (minified.error) {

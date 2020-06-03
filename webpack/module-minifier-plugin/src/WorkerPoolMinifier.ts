@@ -79,7 +79,7 @@ export class WorkerPoolMinifier {
   ): void {
     const {
       code,
-      map
+      nameForMap
     } = request;
 
     const hash: string = createHash('sha256').update(code).digest('hex');
@@ -104,7 +104,7 @@ export class WorkerPoolMinifier {
       worker.postMessage({
         hash,
         code,
-        map
+        nameForMap
       });
     }).catch((error: Error) => {
       const errorCallbacks: IModuleMinificationCallback[] = activeRequests.get(hash)!;

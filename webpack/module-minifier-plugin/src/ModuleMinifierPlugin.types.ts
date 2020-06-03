@@ -20,9 +20,9 @@ export interface IModuleMinificationRequest {
    */
   code: string;
   /**
-   * Indicates if a source map is desired for this code fragment
+   * File name to show for the source code in the source map
    */
-  map: boolean;
+  nameForMap: string | undefined;
 }
 
 /**
