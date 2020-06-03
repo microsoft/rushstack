@@ -24,6 +24,15 @@ modules.set(2, {
   extractedComments: [],
   module: undefined!
 });
+for (let i: number = 14; i < 30; i++) {
+  if (i !== 25) {
+    modules.set(i, {
+      source: new RawSource('bozz'),
+      extractedComments: [],
+      module: undefined!
+    });
+  }
+}
 modules.set(25, {
   source: new RawSource('bang'),
   extractedComments: [],
@@ -68,6 +77,40 @@ describe('rehydrateAsset', () => {
 
     const result: string = rehydrateAsset(asset, modules, banner).source();
     const expected: string = `/* fnord */\n<before>{0:fizz,25:bang}<after>`;
+
+    if (result !== expected) {
+      throw new Error(`Expected ${expected} but received ${result}`);
+    }
+  });
+
+  it('uses a regular array for a couple missing leading elements', () => {
+    const asset: IAssetInfo = {
+      source: new RawSource(`<before>${CHUNK_MODULES_TOKEN}<after>`),
+      modules: [2],
+      extractedComments: [],
+      fileName: 'test',
+      chunk: undefined!
+    };
+
+    const result: string = rehydrateAsset(asset, modules, banner).source();
+    const expected: string = `/* fnord */\n<before>[,,buzz]<after>`;
+
+    if (result !== expected) {
+      throw new Error(`Expected ${expected} but received ${result}`);
+    }
+  });
+
+  it('uses a regular array for several missing leading elements', () => {
+    const asset: IAssetInfo = {
+      source: new RawSource(`<before>${CHUNK_MODULES_TOKEN}<after>`),
+      modules: [14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29],
+      extractedComments: [],
+      fileName: 'test',
+      chunk: undefined!
+    };
+
+    const result: string = rehydrateAsset(asset, modules, banner).source();
+    const expected: string = `/* fnord */\n<before>[,,,,,,,,,,,,,,bozz,bozz,bozz,bozz,bozz,bozz,bozz,bozz,bozz,bozz,bozz,bang,bozz,bozz,bozz,bozz]<after>`;
 
     if (result !== expected) {
       throw new Error(`Expected ${expected} but received ${result}`);

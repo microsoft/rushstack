@@ -105,7 +105,7 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
     const useConcatAtStart: boolean = useConcat && minId > 8;
     lastId = useConcat ? minId : 0;
     // TODO: Just because we want to use concat elsewhere doesn't mean its optimal to use at the start
-    let separator: string = useConcatAtStart ? `Array(${minId}).concat([` : `[${enoughCommas.slice(0, minId)}`;
+    let separator: string = useConcatAtStart ? `Array(${minId}).concat([` : '[';
     let concatInserted: boolean = useConcatAtStart;
     for (const id of modules) {
       const delta: number = id as number - lastId - 1;
