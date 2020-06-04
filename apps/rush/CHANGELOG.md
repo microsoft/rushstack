@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 03 Jun 2020 05:35:19 GMT and should not be manually modified.
+This log was last generated on Thu, 04 Jun 2020 22:50:56 GMT and should not be manually modified.
+
+## 5.24.3
+Thu, 04 Jun 2020 22:50:56 GMT
+
+### Updates
+
+- Fix an issue where "rush deploy" generated incorrect symlinks on Mac OS if the target folder was symlinked (GitHub #1910)
 
 ## 5.24.2
 Wed, 03 Jun 2020 05:35:19 GMT

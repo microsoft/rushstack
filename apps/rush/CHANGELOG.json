@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.24.3",
+      "tag": "@microsoft/rush_v5.24.3",
+      "date": "Thu, 04 Jun 2020 22:50:56 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where \"rush deploy\" generated incorrect symlinks on Mac OS if the target folder was symlinked (GitHub #1910)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.24.2",
       "tag": "@microsoft/rush_v5.24.2",
       "date": "Wed, 03 Jun 2020 05:35:19 GMT",
