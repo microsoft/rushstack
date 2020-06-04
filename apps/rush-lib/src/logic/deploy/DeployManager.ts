@@ -424,7 +424,7 @@ export class DeployManager {
     FileSystem.ensureFolder(newLinkFolder);
 
     // Link to the relative path for symlinks
-    const relativeTargetPath: string = path.relative(FileSystem.getRealPath(newLinkFolder), linkInfo.targetPath);
+    const relativeTargetPath: string = path.relative(newLinkFolder, linkInfo.targetPath);
 
     // NOTE: This logic is based on NpmLinkManager._createSymlink()
     if (process.platform === 'win32') {
