@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Always recreate tarballs",
+      "comment": "Fix an issue where \"rush install\" sometimes skipped regenerating temporary packages, which is incompatible with PNPM's \"--frozen-lockfile\" feature",
       "type": "none"
     }
   ],
