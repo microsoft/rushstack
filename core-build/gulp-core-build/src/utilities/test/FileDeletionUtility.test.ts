@@ -111,7 +111,7 @@ describe('FileDeletionUtility', () => {
       ];
       const actual: string[] = FileDeletionUtility.removeChildren(files);
 
-      expect(actual.length).toEqual(expected.length);
+      expect(actual).toHaveLength(expected.length);
       expect(expected).toEqual(actual);
     });
     it('removes everything under the root', () => {
@@ -134,7 +134,7 @@ describe('FileDeletionUtility', () => {
       ];
       const actual: string[] = FileDeletionUtility.removeChildren(files);
 
-      expect(actual.length).toEqual(expected.length);
+      expect(actual).toHaveLength(expected.length);
       expect(expected).toEqual(actual);
     });
   });

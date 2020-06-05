@@ -245,7 +245,7 @@ describe('getPackageDeps', () => {
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
-      expect(filePaths.length).toEqual(Object.keys(expectedFiles).length);
+      expect(filePaths).toHaveLength(Object.keys(expectedFiles).length);
 
       filePaths.forEach(filePath => (expect(results.files[filePath]).toEqual(expectedFiles[filePath])));
 

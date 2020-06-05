@@ -62,10 +62,10 @@ describe('LoadThemedStylesLoader', () => {
 
     expect(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1).toEqual(true);
     expect(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1).toEqual(true);
-    expect(LoadThemedStylesMock.loadedData.length).toEqual(2);
+    expect(LoadThemedStylesMock.loadedData).toHaveLength(2);
     expect(LoadThemedStylesMock.calledWithAsync[0]).toEqual(false);
     expect(LoadThemedStylesMock.calledWithAsync[1]).toEqual(false);
-    expect(LoadThemedStylesMock.calledWithAsync.length).toEqual(2);
+    expect(LoadThemedStylesMock.calledWithAsync).toHaveLength(2);
     expect(returnedModule.exports).toEqual('locals');
   });
 
@@ -79,7 +79,7 @@ describe('LoadThemedStylesLoader', () => {
     const returnedModule: { exports: string } = eval(loaderResult); // eslint-disable-line no-eval
 
     expect(LoadThemedStylesMock.loadedData.indexOf('styles') !== -1).toEqual(true);
-    expect(LoadThemedStylesMock.loadedData.length).toEqual(1);
+    expect(LoadThemedStylesMock.loadedData).toHaveLength(1);
     expect(returnedModule.exports).toEqual({});
   });
 
@@ -95,10 +95,10 @@ describe('LoadThemedStylesLoader', () => {
 
     expect(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1).toEqual(true);
     expect(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1).toEqual(true);
-    expect(LoadThemedStylesMock.loadedData.length).toEqual(2);
+    expect(LoadThemedStylesMock.loadedData).toHaveLength(2);
     expect(LoadThemedStylesMock.calledWithAsync[0]).toEqual(false);
     expect(LoadThemedStylesMock.calledWithAsync[1]).toEqual(false);
-    expect(LoadThemedStylesMock.calledWithAsync.length).toEqual(2);
+    expect(LoadThemedStylesMock.calledWithAsync).toHaveLength(2);
     expect(returnedModule.exports).toEqual({ default: 'locals' });
   });
 
@@ -114,10 +114,10 @@ describe('LoadThemedStylesLoader', () => {
 
     expect(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1).toEqual(true);
     expect(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1).toEqual(true);
-    expect(LoadThemedStylesMock.loadedData.length).toEqual(2);
+    expect(LoadThemedStylesMock.loadedData).toHaveLength(2);
     expect(LoadThemedStylesMock.calledWithAsync[0]).toEqual(true);
     expect(LoadThemedStylesMock.calledWithAsync[1]).toEqual(true);
-    expect(LoadThemedStylesMock.calledWithAsync.length).toEqual(2);
+    expect(LoadThemedStylesMock.calledWithAsync).toHaveLength(2);
     expect(returnedModule.exports).toEqual('locals');
   });
 
@@ -132,10 +132,10 @@ describe('LoadThemedStylesLoader', () => {
 
     expect(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1).toEqual(true);
     expect(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1).toEqual(true);
-    expect(LoadThemedStylesMock.loadedData.length).toEqual(2);
+    expect(LoadThemedStylesMock.loadedData).toHaveLength(2);
     expect(LoadThemedStylesMock.calledWithAsync[0]).toEqual(false);
     expect(LoadThemedStylesMock.calledWithAsync[1]).toEqual(false);
-    expect(LoadThemedStylesMock.calledWithAsync.length).toEqual(2);
+    expect(LoadThemedStylesMock.calledWithAsync).toHaveLength(2);
     expect(returnedModule.exports).toEqual('locals');
   });
 });
