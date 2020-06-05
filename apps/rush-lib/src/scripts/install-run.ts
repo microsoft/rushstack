@@ -437,13 +437,17 @@ export function installAndRun(
   console.log(os.EOL + statusMessage + os.EOL + statusMessageLine + os.EOL);
 
   const binPath: string = _getBinPath(packageInstallFolder, packageBinName);
+  const binFolderPath: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
   const result: childProcess.SpawnSyncReturns<Buffer>  = childProcess.spawnSync(
     binPath,
     packageBinArgs,
     {
       stdio: 'inherit',
       cwd: process.cwd(),
-      env: process.env
+      env: {
+        ...process.env,
+        PATH: `${binFolderPath}:${process.env.PATH}`
+      }
     }
   );
 
