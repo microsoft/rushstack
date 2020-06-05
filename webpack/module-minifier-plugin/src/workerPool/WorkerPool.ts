@@ -133,6 +133,14 @@ export class WorkerPool {
   }
 
   /**
+   * Resets the pool and allows more work
+   */
+  public reset(): void {
+    this._finishing = false;
+    this._error = undefined;
+  }
+
+  /**
    * Returns a worker to the pool. If the pool is finishing, deallocates the worker.
    * @param worker - The worker to free
    */

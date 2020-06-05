@@ -165,6 +165,8 @@ export class ModuleMinifierPlugin {
         minifier
       } = this;
 
+      const cleanupMinifier: () => Promise<void> = minifier.ref();
+
       const requestShortener: webpack.compilation.RequestShortener = compilation.runtimeTemplate.requestShortener;
 
       /**
@@ -364,6 +366,9 @@ export class ModuleMinifierPlugin {
             resolveMinifyPromise = resolve;
           });;
         }
+
+        // Handle any error from the minifier.
+        await cleanupMinifier();
 
         // All assets and modules have been minified, hand them off to be rehydrated
 

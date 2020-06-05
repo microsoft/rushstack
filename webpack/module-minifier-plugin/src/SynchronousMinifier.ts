@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IModuleMinificationCallback, IModuleMinificationRequest, IModuleMinificationResult } from './ModuleMinifierPlugin.types';
+import { IModuleMinificationCallback, IModuleMinificationRequest, IModuleMinificationResult, IModuleMinifier } from './ModuleMinifierPlugin.types';
 import { minifySingleFile } from './terser/MinifySingleFile';
 import { MinifyOptions } from 'terser';
 import './OverrideWebpackIdentifierAllocation';
@@ -18,7 +18,7 @@ export interface ISynchronousMinifierOptions {
  * Minifier implementation that synchronously minifies code on the main thread.
  * @public
  */
-export class SynchronousMinifier {
+export class SynchronousMinifier implements IModuleMinifier {
   public readonly terserOptions: MinifyOptions;
 
   private readonly _resultCache: Map<string, IModuleMinificationResult>;
@@ -62,7 +62,9 @@ export class SynchronousMinifier {
     callback(result);
   }
 
-  public shutdown(): void {
-    // Nothing to do
+  public ref(): () => Promise<void> {
+    return async () => {
+      // Nothing to do
+    };
   }
 }

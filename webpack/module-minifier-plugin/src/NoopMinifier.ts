@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IModuleMinificationCallback, IModuleMinificationRequest } from './ModuleMinifierPlugin.types';
+import { IModuleMinificationCallback, IModuleMinificationRequest, IModuleMinifier } from './ModuleMinifierPlugin.types';
 
 /**
  * Minifier implementation that does not actually transform the code, for debugging.
  * @public
  */
-export class NoopMinifier {
+export class NoopMinifier implements IModuleMinifier {
   /**
    * No-op code transform.
    * @param request - The request to process
@@ -31,7 +31,9 @@ export class NoopMinifier {
     });
   }
 
-  public shutdown(): void {
-    // Nothing to do
+  public ref(): () => Promise<void> {
+    return async () => {
+      // Nothing to do
+    };
   }
 }

@@ -4,32 +4,19 @@
 import { minifySingleFile } from '../terser/MinifySingleFile';
 import { MinifyOptions } from 'terser';
 import { parentPort, workerData } from 'worker_threads';
+import { IModuleMinificationRequest, IModuleMinificationResult } from '../ModuleMinifierPlugin.types';
 
 const terserOptions: MinifyOptions = workerData;
 
 // Set to non-zero to help debug unexpected graceful exit
 process.exitCode = 2;
 
-parentPort!.on("message", (message) => {
+parentPort!.on("message", (message: IModuleMinificationRequest) => {
     if (!message) {
         process.exit(0);
     }
 
-    const {
-        hash,
-        code: source
-    } = message;
+    const result: IModuleMinificationResult = minifySingleFile(message, terserOptions);
 
-    const {
-      error,
-      code: minified,
-      extractedComments
-    } = minifySingleFile(source, terserOptions);
-
-    parentPort!.postMessage({
-        hash,
-        error: error && error.toString(),
-        code: minified,
-        extractedComments
-    });
+    parentPort!.postMessage(result);
 });

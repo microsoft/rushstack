@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IModuleMinificationCallback, IModuleMinificationResult, IModuleMinificationRequest } from './ModuleMinifierPlugin.types';
+import { IModuleMinificationCallback, IModuleMinificationResult, IModuleMinificationRequest, IModuleMinifier } from './ModuleMinifierPlugin.types';
 import { MinifyOptions } from 'terser';
 import { Worker } from 'worker_threads';
-import { WorkerPool } from './threadPool/WorkerPool';
+import { WorkerPool } from './workerPool/WorkerPool';
 import { cpus } from 'os';
 
 import './OverrideWebpackIdentifierAllocation';
@@ -26,9 +26,10 @@ export interface IWorkerPoolMinifierOptions {
  * Minifier implementation that uses a thread pool for minification.
  * @public
  */
-export class WorkerPoolMinifier {
+export class WorkerPoolMinifier implements IModuleMinifier {
   private readonly _pool: WorkerPool;
 
+  private _refCount: number;
   private readonly _resultCache: Map<string, IModuleMinificationResult>;
   private readonly _activeRequests: Map<string, IModuleMinificationCallback[]>;
 
@@ -55,10 +56,11 @@ export class WorkerPoolMinifier {
         });
       },
       workerData: terserOptions,
-      workerScriptPath: require.resolve('./MinifierWorker')
+      workerScriptPath: require.resolve('./workerPool/MinifierWorker')
     });
 
     this._activeRequests = activeRequests;
+    this._refCount = 0;
     this._resultCache = resultCache;
     this._pool = terserPool;
   }
@@ -108,10 +110,15 @@ export class WorkerPoolMinifier {
     });
   }
 
-  /**
-   * Shuts down the worker threads to free up resources.
-   */
-  public shutdown(): Promise<void> {
-    return this._pool.finish();
+  public ref(): () => Promise<void> {
+    if (++this._refCount === 1) {
+      this._pool.reset();
+    }
+
+    return async () => {
+      if (--this._refCount === 0) {
+        await this._pool.finish();
+      }
+    };
   }
 }

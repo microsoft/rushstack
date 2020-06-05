@@ -238,6 +238,11 @@ export interface IModuleMinifierFunction {
  */
 export interface IModuleMinifier {
   minify: IModuleMinifierFunction;
+
+  /**
+   * Prevents the minifier from shutting down
+   */
+  ref(): () => Promise<void>;
 }
 
 /**
