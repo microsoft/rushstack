@@ -16,11 +16,8 @@
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.5": "0.5.2",
     "@rushstack/eslint-config": "0.5.8",
-    "@types/chai": "3.4.34",
-    "@types/mocha": "5.2.5",
+    "@types/jest": "25.2.1",
     "@types/webpack-env": "1.13.0",
-    "chai": "~3.5.0",
-    "gulp": "~4.0.2",
     "@microsoft/node-library-build": "6.4.22"
   }
 }

@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { assert, expect } from 'chai';
 import Vinyl = require('vinyl');
 import * as Gulp  from 'gulp';
 import { Readable } from 'stream';
@@ -134,7 +133,7 @@ describe('GulpTask', () => {
       testArray = [];
       task.setConfig({ addToMe: testArray });
       serial(task).execute(mockBuildConfig).then(() => {
-        expect(testArray).to.deep.equal([task.name]);
+        expect(testArray).toEqual([task.name]);
         done();
       }).catch(done);
     });
@@ -143,7 +142,7 @@ describe('GulpTask', () => {
       testArray = [];
       task.setConfig({ addToMe: testArray });
       parallel(task).execute(mockBuildConfig).then(() => {
-        expect(testArray).to.deep.equal([task.name]);
+        expect(testArray).toEqual([task.name]);
         done();
       }).catch(done);
     });
@@ -156,7 +155,7 @@ describe('GulpTask', () => {
     }
     serial(tasks).execute(mockBuildConfig).then(() => {
       for (const task of tasks) {
-        expect(testArray.indexOf(task.name)).to.be.greaterThan(-1);
+        expect(testArray.indexOf(task.name)).toBeGreaterThan(-1);
       }
       done();
     }).catch(done);
@@ -169,7 +168,7 @@ describe('GulpTask', () => {
     }
     parallel(tasks).execute(mockBuildConfig).then(() => {
       for (const task of tasks) {
-        expect(testArray.indexOf(task.name)).to.be.greaterThan(-1);
+        expect(testArray.indexOf(task.name)).toBeGreaterThan(-1);
       }
       done();
     }).catch(done);
@@ -177,9 +176,9 @@ describe('GulpTask', () => {
 
   it(`reads schema file if loadSchema is implemented`, (done) => {
     const schemaTask: SchemaTask = new SchemaTask();
-    assert.isFalse(schemaTask.taskConfig.shouldDoThings);
+    expect(schemaTask.taskConfig.shouldDoThings).toEqual(false);
     schemaTask.onRegister();
-    assert.isTrue(schemaTask.taskConfig.shouldDoThings);
+    expect(schemaTask.taskConfig.shouldDoThings).toEqual(true);
     done();
   });
 
@@ -191,8 +190,8 @@ describe('GulpTask', () => {
       return path.join(__dirname, 'other-schema-task.config.json');
     };
 
-    assert.isFalse(schemaTask.taskConfig.shouldDoThings);
-    assert.throws(schemaTask.onRegister);
+    expect(schemaTask.taskConfig.shouldDoThings).toEqual(false);
+    expect(schemaTask.onRegister).toThrow();
     done();
   });
 });

@@ -275,7 +275,7 @@ describe('updateChangelogs', () => {
       rushConfiguration,
       false
     );
-    expect(updatedChangeLogs.length).toEqual(1);
+    expect(updatedChangeLogs).toHaveLength(1);
     expect(updatedChangeLogs[0].name).toEqual('b');
   });
 
@@ -305,7 +305,7 @@ describe('updateChangelogs', () => {
       rushConfiguration,
       false
     );
-    expect(updatedChangeLogs.length).toEqual(1);
+    expect(updatedChangeLogs).toHaveLength(1);
     expect(updatedChangeLogs[0].name).toEqual('b');
   });
 
@@ -335,7 +335,7 @@ describe('updateChangelogs', () => {
       rushConfiguration,
       false
     );
-    expect(updatedChangeLogs.length).toEqual(2);
+    expect(updatedChangeLogs).toHaveLength(2);
     expect(updatedChangeLogs[0].name).toEqual('a');
     expect(updatedChangeLogs[1].name).toEqual('b');
   });

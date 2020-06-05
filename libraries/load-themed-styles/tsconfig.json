@@ -3,7 +3,8 @@
   "compilerOptions": {
     "module": "commonjs",
     "types": [
-      "webpack-env"
+      "webpack-env",
+      "jest"
     ]
   }
 }
