@@ -150,10 +150,10 @@ export class VersionAction extends BaseRushAction {
         const newPolicyVersion: semver.SemVer = new semver.SemVer(policy.version);
         if (newPolicyVersion.prerelease.length) {
           // Update 1.5.0-alpha.10 to 1.5.0-beta.10
-          newPolicyVersion.prerelease[0] = this._prereleaseIdentifier.value;
+          newPolicyVersion.prerelease = [ this._prereleaseIdentifier.value, ...newPolicyVersion.prerelease.slice(1) ];
         } else {
           // Update 1.5.0 to 1.5.0-beta
-          newPolicyVersion.prerelease.push(this._prereleaseIdentifier.value);
+          newPolicyVersion.prerelease = [ this._prereleaseIdentifier.value ];
         }
         newVersion = newPolicyVersion.format();
       }
