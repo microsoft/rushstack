@@ -217,28 +217,17 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       version: '0.0.0'
     };
 
-    // dependency name --> version specifier
-    const allPreferredVersions: Map<string, string> = BaseInstallManager.collectPreferredVersions(
-      this.rushConfiguration,
-      this.options.variant
-    );
-
-    // Add any preferred versions to the top of the commonPackageJson
-    // do this in alphabetical order for simpler debugging
-    for (const dependency of Array.from(allPreferredVersions.keys()).sort()) {
-      commonPackageJson.dependencies![dependency] = allPreferredVersions.get(dependency)!;
-    }
-
     // Example: "C:\MyRepo\common\temp\package.json"
     const commonPackageJsonFilename: string = path.join(
       this.rushConfiguration.commonTempFolder,
       FileConstants.PackageJson
     );
 
+    JsonFile.save(commonPackageJson, commonPackageJsonFilename, { onlyIfChanged: true });
+
     // Save the generated files. Don't update the file timestamp unless the content has changed,
     // since "rush install" will consider this timestamp
     workspaceFile.save(workspaceFile.workspaceFilename, { onlyIfChanged: true });
-    JsonFile.save(commonPackageJson, commonPackageJsonFilename, { onlyIfChanged: true });
 
     stopwatch.stop();
     console.log(`Finished creating workspace (${stopwatch.toString()})`);
@@ -341,7 +330,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
               this.installRecycler.moveFolder(nodeModulesFolder);
             }
           }
-        });
+        }
+      );
 
       // Ensure that node_modules folders exist after install, since the timestamps on these folders are used
       // to determine if the install can be skipped
