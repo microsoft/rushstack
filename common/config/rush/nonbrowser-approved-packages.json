@@ -423,6 +423,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "import-lazy",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "inquirer",
       "allowedCategories": [ "libraries" ]
     },

@@ -16,7 +16,7 @@ import {
   JsonObject,
   LockFile,
   MapExtensions,
-  PosixModeBits,
+  PosixModeBits
 } from '@rushstack/node-core-library';
 
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
@@ -339,6 +339,14 @@ export abstract class BaseInstallManager {
 
       // ensure that we remove any old one that may be hanging around
       Utilities.syncFile(committedPnpmFilePath, tempPnpmFilePath);
+
+      // shim support for common versions resolution into the pnpmfile
+      if (
+        this.rushConfiguration.pnpmOptions &&
+        (this.rushConfiguration.pnpmOptions.useShimPnpmfile || this.rushConfiguration.pnpmOptions.useWorkspaces)
+      ) {
+        await BaseInstallManager.createShimPnpmfile(tempPnpmFilePath, this.rushConfiguration, this.options.variant);
+      }
     }
 
     // Allow for package managers to do their own preparation and check that the shrinkwrap is up to date
@@ -515,6 +523,87 @@ export abstract class BaseInstallManager {
 
       lock.release();
     });
+  }
+
+  protected static async createShimPnpmfile(
+    filename: string,
+    rushConfiguration: RushConfiguration,
+    variant: string | undefined
+  ): Promise<void> {
+
+    const allPreferredVersions: Map<string, string> =
+      BaseInstallManager.collectPreferredVersions(rushConfiguration, variant);
+    const allowedAlternativeVersions: Map<string, ReadonlyArray<string>> =
+      rushConfiguration.getCommonVersions(variant).allowedAlternativeVersions;
+
+    // Setup the header of the shim
+    const clientPnpmfileName: string = 'clientPnpmfile.js';
+    const pnpmfileContent: string[] = [
+      '// THIS IS A GENERATED FILE. DO NOT MODIFY.',
+      '"use strict";',
+      'module.exports = { hooks: { readPackage, afterAllResolved } };',
+
+      'const { existsSync } = require("fs");',
+      'const originalPnpmfile = ',
+      `  existsSync("${clientPnpmfileName}") ? require("./${path.basename(clientPnpmfileName, '.js')}") : undefined;`,
+      `const semver = require(${JSON.stringify(require.resolve('semver'))});`,
+      `const allPreferredVersions = ${JSON.stringify(MapExtensions.toObject(allPreferredVersions))};`,
+      `const allowedAlternativeVersions = ${JSON.stringify(MapExtensions.toObject(allowedAlternativeVersions))};`,
+
+      'function afterAllResolved(lockfile, context) {',
+      '  return (originalPnpmfile && originalPnpmfile.hooks && originalPnpmfile.hooks.afterAllResolved)',
+      '    ? originalPnpmfile.hooks.afterAllResolved(lockfile, context)',
+      '    : lockfile;',
+      '}',
+
+      'function readPackage(pkg, context) {',
+      '  setPreferredVersions(pkg.dependencies);',
+      '  setPreferredVersions(pkg.devDependencies);',
+      '  setPreferredVersions(pkg.optionalDependencies);',
+      '  return (originalPnpmfile && originalPnpmfile.hooks && originalPnpmfile.hooks.readPackage)',
+      '    ? originalPnpmfile.hooks.readPackage(pkg, context)',
+      '    : pkg;',
+      '}',
+
+      'function setPreferredVersions(dependencies) {',
+      '  for (const name of Object.keys(dependencies || {})) {',
+      '    if (allPreferredVersions.hasOwnProperty(name)) {',
+      '      const preferredVersion = allPreferredVersions[name];',
+      '      const version = dependencies[name];',
+      '      if (allowedAlternativeVersions.hasOwnProperty(name)) {',
+      '        const allowedAlternatives = allowedAlternativeVersions[name];',
+      '        if (allowedAlternatives && allowedAlternatives.indexOf(version) > -1) {',
+      '          continue;',
+      '        }',
+      '      }',
+      '      let isValidRange = false;',
+      '      try {',
+      '        isValidRange = !!semver.validRange(preferredVersion) && !!semver.validRange(version);',
+      '      } catch {',
+      '      }',
+      '      if (isValidRange && semver.subset(preferredVersion, version)) {',
+      '        dependencies[name] = preferredVersion;',
+      '      }',
+      '    }',
+      '  }',
+      '}',
+    ];
+
+    // Attempt to move the existing pnpmfile if there is one
+    try {
+      const pnpmfileDir: string = path.dirname(filename);
+      await FileSystem.moveAsync({
+        sourcePath: filename,
+        destinationPath: path.join(pnpmfileDir, clientPnpmfileName)
+      });
+    } catch (error) {
+      if (!FileSystem.isNotExistError(error)) {
+        throw error;
+      }
+    }
+
+    // Write the shim pnpmfile to the original file path
+    await FileSystem.writeFileAsync(filename, pnpmfileContent.join('\n'), { ensureFolderExists: true });
   }
 
   protected getPackageManagerEnvironment(): NodeJS.ProcessEnv {

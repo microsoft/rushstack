@@ -110,6 +110,10 @@
           "description": "If true, then Rush will use the workspaces feature to install and link packages when invoking PNPM. The default value is false.",
           "type": "boolean"
         },
+        "useShimPnpmfile": {
+          "description": "If true, then Rush will use the workspaces feature to install and link packages when invoking PNPM. The default value is false.",
+          "type": "boolean"
+        },
         "environmentVariables": {
           "$ref": "#/definitions/environmentVariables"
         },

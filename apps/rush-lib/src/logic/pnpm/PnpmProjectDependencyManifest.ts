@@ -221,7 +221,7 @@ export class PnpmProjectDependencyManifest {
             // We couldn't find the peer dependency, but we determined it's by design, skip this dependency...
             continue;
           }
-          throw new InternalError(
+          throw new Error(
             `Could not find peer dependency '${peerDependencyName}' that satisfies version '${dependencySemVer}'`
           );
         }

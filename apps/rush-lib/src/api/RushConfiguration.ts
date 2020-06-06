@@ -178,6 +178,10 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    * {@inheritDoc PnpmOptionsConfiguration.useWorkspaces}
    */
  useWorkspaces?: boolean;
+ /**
+  * {@inheritDoc PnpmOptionsConfiguration.useShimPnpmfile}
+  */
+  useShimPnpmfile?: boolean;
 }
 
 /**
@@ -364,6 +368,14 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    */
   public readonly useWorkspaces: boolean;
 
+  /**
+   * If true, then Rush will shim common versions support into the pnpmfile.
+   *
+   * @remarks
+   * The default value is false. (For now.)
+   */
+  public readonly useShimPnpmfile: boolean;
+
   /** @internal */
   public constructor(json: IPnpmOptionsJson, commonTempFolder: string) {
     super(json);
@@ -379,6 +391,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
     this.preventManualShrinkwrapChanges = !!json.preventManualShrinkwrapChanges;
     this.useWorkspaces = !!json.useWorkspaces;
+    this.useShimPnpmfile = !!json.useShimPnpmfile;
   }
 }
 

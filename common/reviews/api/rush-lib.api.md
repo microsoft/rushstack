@@ -175,6 +175,7 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     preventManualShrinkwrapChanges?: boolean;
     resolutionStrategy?: ResolutionStrategy;
     strictPeerDependencies?: boolean;
+    useShimPnpmfile?: boolean;
     useWorkspaces?: boolean;
 }
 
@@ -289,6 +290,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly preventManualShrinkwrapChanges: boolean;
     readonly resolutionStrategy: ResolutionStrategy;
     readonly strictPeerDependencies: boolean;
+    readonly useShimPnpmfile: boolean;
     readonly useWorkspaces: boolean;
 }
 
