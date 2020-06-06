@@ -446,7 +446,7 @@ export function installAndRun(
       cwd: process.cwd(),
       env: {
         ...process.env,
-        PATH: `${binFolderPath}:${process.env.PATH}`
+        PATH: [binFolderPath, process.env.PATH].join(path.delimiter)
       }
     }
   );
