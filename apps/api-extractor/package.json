@@ -39,7 +39,7 @@
     "colors": "~1.2.1",
     "lodash": "~4.17.15",
     "resolve": "~1.17.0",
-    "source-map": "~0.6.1",
+    "source-map": "~0.7.3",
     "typescript": "~3.7.2"
   },
   "devDependencies": {
