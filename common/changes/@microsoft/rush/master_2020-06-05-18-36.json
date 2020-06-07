@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fixes an issue when install-run.js is not able to find its own .bin in PATH",
+      "comment": "Fix an issue where install-run.js is not able to find its own .bin in PATH",
       "type": "none"
     }
   ],
