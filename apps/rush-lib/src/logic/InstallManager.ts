@@ -730,49 +730,51 @@ export class InstallManager {
         // ignore the error, we will go ahead and create a new tarball
       }
 
-      if (shouldOverwrite) {
-        try {
+      try {
+        if (shouldOverwrite) {
           // ensure the folder we are about to zip exists
           Utilities.createFolderWithRetry(tempProjectFolder);
 
           // remove the old tarball & old temp package json, this is for any cases where new tarball creation
           // fails, and the shouldOverwrite logic is messed up because the my-project-2\package.json
           // exists and is updated, but the tarball is not accurate
-          FileSystem.deleteFile(tarballFile);
           FileSystem.deleteFile(tempPackageJsonFilename);
 
           // write the expected package.json file into the zip staging folder
           JsonFile.save(tempPackageJson, tempPackageJsonFilename);
 
-          const tarOptions: tar.CreateOptions = ({
-            gzip: true,
-            file: tarballFile,
-            cwd: tempProjectFolder,
-            portable: true,
-            noMtime: true,
-            noPax: true,
-            sync: true,
-            prefix: npmPackageFolder,
-            filter: (path: string, stat: tar.FileStat): boolean => {
-              if (!this._rushConfiguration.experimentsConfiguration.configuration
-                .noChmodFieldInTarHeaderNormalization) {
-                stat.mode = (stat.mode & ~0x1FF) | PosixModeBits.AllRead | PosixModeBits.UserWrite
-                  | PosixModeBits.AllExecute;
-              }
-              return true;
-            }
-          } as tar.CreateOptions);
-
-          // create the new tarball
-          tar.create(tarOptions, [FileConstants.PackageJson]);
-
           console.log(`Updating ${tarballFile}`);
-        } catch (error) {
-          console.log(colors.yellow(error));
-          // delete everything in case of any error
-          FileSystem.deleteFile(tarballFile);
-          FileSystem.deleteFile(tempPackageJsonFilename);
         }
+
+        FileSystem.deleteFile(tarballFile);
+
+        const tarOptions: tar.CreateOptions = ({
+          gzip: true,
+          file: tarballFile,
+          cwd: tempProjectFolder,
+          portable: true,
+          noMtime: true,
+          noPax: true,
+          sync: true,
+          prefix: npmPackageFolder,
+          filter: (path: string, stat: tar.FileStat): boolean => {
+            if (!this._rushConfiguration.experimentsConfiguration.configuration
+              .noChmodFieldInTarHeaderNormalization) {
+              stat.mode = (stat.mode & ~0x1FF) | PosixModeBits.AllRead | PosixModeBits.UserWrite
+                | PosixModeBits.AllExecute;
+            }
+            return true;
+          }
+        } as tar.CreateOptions);
+
+        // create the new tarball
+        tar.create(tarOptions, [FileConstants.PackageJson]);
+
+      } catch (error) {
+        console.log(colors.yellow(error));
+        // delete everything in case of any error
+        FileSystem.deleteFile(tarballFile);
+        FileSystem.deleteFile(tempPackageJsonFilename);
       }
     }
 
