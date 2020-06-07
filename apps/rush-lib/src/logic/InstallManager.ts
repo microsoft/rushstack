@@ -809,7 +809,7 @@ export class InstallManager {
   }
 
   /**
-   * Deletes the existing tarball and creates a tarball of the given temp project folder
+   * Deletes the existing tarball and creates a tarball for the given rush project
    */
   private _createTempProjectTarball(rushProject: RushConfigurationProject): void {
     const tarballFile: string = this._getTarballFilePath(rushProject);
