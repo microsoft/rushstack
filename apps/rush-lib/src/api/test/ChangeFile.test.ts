@@ -30,7 +30,7 @@ describe('ChangeFile', () => {
       comment: 'for patch'
     });
 
-    expect(changeFile.getChanges('a').length).toEqual(2);
+    expect(changeFile.getChanges('a')).toHaveLength(2);
     expect(changeFile.getChanges('a')[0].comment).toEqual('for minor');
     expect(changeFile.getChanges('a')[1].comment).toEqual('for patch');
   });

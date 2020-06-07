@@ -19,4 +19,8 @@ build.preCopy.setConfig({
 
 build.preCopy.cleanMatch = [sharedSrcDir];
 
+// This project doesn't have unit tests and GCB's Mocha doesn't play nice with Node 14, so disable Mocha
+build.mocha.enabled = false;
+build.instrument.enabled = false;
+
 build.initialize(require('gulp'));
