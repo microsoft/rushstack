@@ -13,6 +13,7 @@ export interface IBaseCommandJson {
    */
   description?: string;
   safeForSimultaneousRushProcesses: boolean;
+  autoinstallFolder?: string;
 }
 
 /**
