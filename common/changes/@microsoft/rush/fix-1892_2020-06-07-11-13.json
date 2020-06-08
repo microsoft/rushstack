@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Explicitly assigning the option value for --resolution-strategy. This fixes a crash with pnpm v5, which deprecated the option.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "zkochan@users.noreply.github.com"
+}
