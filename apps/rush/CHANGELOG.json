@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.24.4",
+      "tag": "@microsoft/rush_v5.24.4",
+      "date": "Mon, 08 Jun 2020 18:04:35 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Explicitly assigning the option value for --resolution-strategy. This fixes a crash with pnpm v5, which deprecated the option."
+          },
+          {
+            "comment": "Fix an issue where install-run.js is not able to find its own .bin in PATH"
+          },
+          {
+            "comment": "Fix an issue where \"rush install\" sometimes skipped regenerating temporary packages, which is incompatible with PNPM's \"--frozen-lockfile\" feature"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.24.3",
       "tag": "@microsoft/rush_v5.24.3",
       "date": "Thu, 04 Jun 2020 22:50:56 GMT",

@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 04 Jun 2020 22:50:56 GMT and should not be manually modified.
+This log was last generated on Mon, 08 Jun 2020 18:04:35 GMT and should not be manually modified.
+
+## 5.24.4
+Mon, 08 Jun 2020 18:04:35 GMT
+
+### Updates
+
+- Explicitly assigning the option value for --resolution-strategy. This fixes a crash with pnpm v5, which deprecated the option.
+- Fix an issue where install-run.js is not able to find its own .bin in PATH
+- Fix an issue where "rush install" sometimes skipped regenerating temporary packages, which is incompatible with PNPM's "--frozen-lockfile" feature
 
 ## 5.24.3
 Thu, 04 Jun 2020 22:50:56 GMT
