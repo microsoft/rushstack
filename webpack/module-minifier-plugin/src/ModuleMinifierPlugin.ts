@@ -75,6 +75,8 @@ export class ModuleMinifierPlugin {
   public readonly minifier: IModuleMinifier;
   public readonly portableIdsPlugin: PortableMinifierModuleIdsPlugin | undefined;
 
+  private readonly _sourceMap: boolean;
+
   public constructor(options: IModuleMinifierPluginOptions) {
     this.hooks = {
       rehydrateAssets: new AsyncSeriesWaterfallHook([
@@ -89,6 +91,8 @@ export class ModuleMinifierPlugin {
 
     this.hooks.rehydrateAssets.tap(PLUGIN_NAME, defaultRehydrateAssets);
     this.minifier = options.minifier;
+
+    this._sourceMap = !!options.sourceMap;
   }
 
   public apply(compiler: webpack.Compiler): void {
@@ -96,13 +100,7 @@ export class ModuleMinifierPlugin {
       portableIdsPlugin: stableIdsPlugin
     } = this;
 
-    const {
-      options: {
-        devtool
-      }
-    } = compiler;
-
-    const useSourceMaps: boolean = devtool === 'source-map' || devtool === 'inline-source-map';
+    const useSourceMaps: boolean = this._sourceMap;
 
     const moduleIdRestorer: ModuleIdRestorer | undefined = stableIdsPlugin && stableIdsPlugin.apply(compiler);
 

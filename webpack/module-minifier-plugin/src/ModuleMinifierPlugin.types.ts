@@ -256,6 +256,11 @@ export interface IModuleMinifierPluginOptions {
   minifier: IModuleMinifier;
 
   /**
+   * Whether to enable source map processing.
+   */
+  sourceMap: boolean;
+
+  /**
    * Instructs the plugin to alter the code of modules to maximize portability across compilations.
    */
   usePortableModules: boolean;
