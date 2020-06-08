@@ -1,6 +1,18 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Fri, 15 May 2020 08:10:59 GMT and should not be manually modified.
+This log was last generated on Mon, 01 Jun 2020 08:34:17 GMT and should not be manually modified.
+
+## 4.4.2
+Mon, 01 Jun 2020 08:34:17 GMT
+
+### Patches
+
+- Fix a typo in the supplementary notes for parameters with environment variable mappings
+
+## 4.4.1
+Wed, 27 May 2020 05:15:10 GMT
+
+*Version update only*
 
 ## 4.4.0
 Fri, 15 May 2020 08:10:59 GMT

@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/node-library-build",
-  "version": "6.4.17",
+  "version": "6.4.22",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,15 +13,15 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.16.3",
-    "@microsoft/gulp-core-build-mocha": "3.8.12",
-    "@microsoft/gulp-core-build-typescript": "8.4.17",
+    "@microsoft/gulp-core-build": "3.16.7",
+    "@microsoft/gulp-core-build-mocha": "3.8.16",
+    "@microsoft/gulp-core-build-typescript": "8.4.22",
     "@types/gulp": "4.0.6",
     "@types/node": "10.17.13",
     "gulp": "~4.0.2"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.4.15",
-    "@rushstack/eslint-config": "0.5.7"
+    "@microsoft/rush-stack-compiler-3.5": "0.5.2",
+    "@rushstack/eslint-config": "0.5.8"
   }
 }

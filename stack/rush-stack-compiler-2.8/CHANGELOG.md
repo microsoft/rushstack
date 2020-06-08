@@ -1,6 +1,35 @@
 # Change Log - @microsoft/rush-stack-compiler-2.8
 
-This log was last generated on Fri, 22 May 2020 15:08:43 GMT and should not be manually modified.
+This log was last generated on Mon, 01 Jun 2020 08:34:17 GMT and should not be manually modified.
+
+## 0.5.2
+Mon, 01 Jun 2020 08:34:17 GMT
+
+*Version update only*
+
+## 0.5.1
+Sat, 30 May 2020 02:59:54 GMT
+
+*Version update only*
+
+## 0.5.0
+Thu, 28 May 2020 05:59:02 GMT
+
+### Minor changes
+
+- Change the way the typescript, tslint, and api-extractor packages are exported.
+- Update TSLint to 5.20.1
+- Update tsconfig-node.json to target es2017 (supported by Node 8); this enables native async/await, and will show complete callstacks when using Node 12
+
+## 0.4.17
+Wed, 27 May 2020 05:15:11 GMT
+
+*Version update only*
+
+## 0.4.16
+Tue, 26 May 2020 23:00:25 GMT
+
+*Version update only*
 
 ## 0.4.15
 Fri, 22 May 2020 15:08:43 GMT

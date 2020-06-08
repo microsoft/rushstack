@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { expect } from 'chai';
-
 import {
   serial,
   parallel,
@@ -22,7 +20,7 @@ describe('serial', () => {
     const tasks: IExecutable[] = createTasks('task', 3, command => execution.push(command));
 
     serial(tasks).execute(mockBuildConfig).then(() => {
-      expect(execution).to.deep.equal([
+      expect(execution).toEqual([
         'executing task 0',
         'complete task 0',
         'executing task 1',
@@ -42,7 +40,7 @@ describe('parallel', () => {
     const tasks: IExecutable[] = createTasks('task', 3, command => execution.push(command));
 
     parallel(tasks).execute(mockBuildConfig).then(() => {
-      expect(execution).to.deep.equal([
+      expect(execution).toEqual([
         'executing task 0',
         'executing task 1',
         'executing task 2',
@@ -66,7 +64,7 @@ describe('parallel', () => {
       serial2Tasks
     ]).execute(mockBuildConfig)
       .then(() => {
-        expect(execution).to.deep.equal([
+        expect(execution).toEqual([
           'executing serial set 1 - 0',
           'complete serial set 1 - 0',
           'executing serial set 1 - 1',
@@ -96,8 +94,8 @@ describe('parallel', () => {
       () => {
         done('The task returned success unexpectedly.');
       }).catch((error) => {
-        expect(error).to.equal('Failure', 'Make sure the proper error is propagate');
-        expect(execution).to.deep.equal([
+        expect(error).toEqual('Failure'); //, 'Make sure the proper error is propagate');
+        expect(execution).toEqual([
           'executing task 0',
           'complete task 0',
           'executing fail task',
@@ -111,7 +109,7 @@ describe('parallel', () => {
   it('can read the current config', (done) => {
     const config: IBuildConfig = getConfig();
     // eslint-disable-next-line
-    expect(config).not.to.be.null;
+    expect(config).not.toBeNull();
     done();
   });
 
@@ -122,7 +120,7 @@ describe('parallel', () => {
     };
 
     setConfig(newConfig);
-    expect(getConfig().distFolder).to.eq(distFolder);
+    expect(getConfig().distFolder).toEqual(distFolder);
     done();
   });
 });

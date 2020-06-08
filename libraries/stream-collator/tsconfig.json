@@ -3,7 +3,8 @@
   "compilerOptions": {
     "strictNullChecks": false,
     "types": [
-      "node"
+      "node",
+      "jest"
     ]
   }
 }

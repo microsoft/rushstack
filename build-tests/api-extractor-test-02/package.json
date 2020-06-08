@@ -13,7 +13,7 @@
     "semver": "~7.3.0"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "7.8.5",
+    "@microsoft/api-extractor": "7.8.10",
     "@types/node": "10.17.13",
     "@types/semver": "~7.2.0",
     "fs-extra": "~7.0.1",

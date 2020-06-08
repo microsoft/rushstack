@@ -2,6 +2,84 @@
   "name": "@rushstack/stream-collator",
   "entries": [
     {
+      "version": "3.2.22",
+      "tag": "@rushstack/stream-collator_v3.2.22",
+      "date": "Mon, 01 Jun 2020 08:34:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.5.1` to `0.5.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.21` to `6.4.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.21",
+      "tag": "@rushstack/stream-collator_v3.2.21",
+      "date": "Sat, 30 May 2020 02:59:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.5.0` to `0.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.20` to `6.4.21`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.20",
+      "tag": "@rushstack/stream-collator_v3.2.20",
+      "date": "Thu, 28 May 2020 05:59:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.17` to `0.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.19` to `6.4.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.19",
+      "tag": "@rushstack/stream-collator_v3.2.19",
+      "date": "Wed, 27 May 2020 05:15:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.16` to `0.4.17`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.18` to `6.4.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.7` to `0.5.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.18",
+      "tag": "@rushstack/stream-collator_v3.2.18",
+      "date": "Tue, 26 May 2020 23:00:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.15` to `0.4.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.17` to `6.4.18`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.17",
       "tag": "@rushstack/stream-collator_v3.2.17",
       "date": "Fri, 22 May 2020 15:08:43 GMT",

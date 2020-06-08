@@ -91,6 +91,7 @@ export const enum DependencyType {
 export const enum EnvironmentVariableNames {
     RUSH_ABSOLUTE_SYMLINKS = "RUSH_ABSOLUTE_SYMLINKS",
     RUSH_ALLOW_UNSUPPORTED_NODEJS = "RUSH_ALLOW_UNSUPPORTED_NODEJS",
+    RUSH_DEPLOY_TARGET_FOLDER = "RUSH_DEPLOY_TARGET_FOLDER",
     RUSH_PARALLELISM = "RUSH_PARALLELISM",
     RUSH_PNPM_STORE_PATH = "RUSH_PNPM_STORE_PATH",
     RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
@@ -314,6 +315,7 @@ export class RushConfiguration {
     readonly changesFolder: string;
     // @deprecated
     readonly committedShrinkwrapFilename: string;
+    readonly commonDeployConfigFolder: string;
     readonly commonFolder: string;
     readonly commonRushConfigFolder: string;
     readonly commonScriptsFolder: string;

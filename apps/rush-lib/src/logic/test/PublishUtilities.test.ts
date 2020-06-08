@@ -38,7 +38,7 @@ describe('findChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'noChange'))
     );
 
-    expect(Object.keys(allChanges).length).toEqual(0);
+    expect(Object.keys(allChanges)).toHaveLength(0);
   });
 
   it('returns 1 change when changing a leaf package', () => {
@@ -49,7 +49,7 @@ describe('findChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'leafChange'))
     );
 
-    expect(Object.keys(allChanges).length).toEqual(1);
+    expect(Object.keys(allChanges)).toHaveLength(1);
     expect(allChanges).toHaveProperty('d');
     expect(allChanges['d'].changeType).toEqual(ChangeType.patch);
   });
@@ -62,7 +62,7 @@ describe('findChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'rootPatchChange'))
     );
 
-    expect(Object.keys(allChanges).length).toEqual(2);
+    expect(Object.keys(allChanges)).toHaveLength(2);
 
     expect(allChanges).toHaveProperty('a');
     expect(allChanges).toHaveProperty('b');
@@ -81,7 +81,7 @@ describe('findChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'rootHotfixChange'))
     );
 
-    expect(Object.keys(allChanges).length).toEqual(4);
+    expect(Object.keys(allChanges)).toHaveLength(4);
 
     expect(allChanges).toHaveProperty('a');
     expect(allChanges).toHaveProperty('b');
@@ -105,7 +105,7 @@ describe('findChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'rootMajorChange'))
     );
 
-    expect(Object.keys(allChanges).length).toEqual(3);
+    expect(Object.keys(allChanges)).toHaveLength(3);
 
     expect(allChanges).toHaveProperty('a');
     expect(allChanges).toHaveProperty('b');
@@ -128,7 +128,7 @@ describe('findChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'cyclicDeps'))
     );
 
-    expect(Object.keys(allChanges).length).toEqual(2);
+    expect(Object.keys(allChanges)).toHaveLength(2);
 
     expect(allChanges).toHaveProperty('cyclic-dep-1');
     expect(allChanges).toHaveProperty('cyclic-dep-2');
@@ -168,7 +168,7 @@ describe('findChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'multipleChanges'))
     );
 
-    expect(Object.keys(allChanges).length).toEqual(3);
+    expect(Object.keys(allChanges)).toHaveLength(3);
     expect(allChanges).toHaveProperty('a');
     expect(allChanges).toHaveProperty('b');
     expect(allChanges).toHaveProperty('c');
@@ -187,7 +187,7 @@ describe('findChangeRequests', () => {
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'orderedChanges')));
 
-    expect(Object.keys(allChanges).length).toEqual(3);
+    expect(Object.keys(allChanges)).toHaveLength(3);
     expect(allChanges).toHaveProperty('a');
     expect(allChanges).toHaveProperty('b');
     expect(allChanges).toHaveProperty('c');
@@ -206,7 +206,7 @@ describe('findChangeRequests', () => {
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'multipleHotfixChanges')));
 
-    expect(Object.keys(allChanges).length).toEqual(4);
+    expect(Object.keys(allChanges)).toHaveLength(4);
     expect(allChanges).toHaveProperty('a');
     expect(allChanges).toHaveProperty('b');
     expect(allChanges).toHaveProperty('c');
@@ -230,7 +230,7 @@ describe('findChangeRequests', () => {
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'explicitVersionChange')));
 
-    expect(Object.keys(allChanges).length).toEqual(2);
+    expect(Object.keys(allChanges)).toHaveLength(2);
     expect(allChanges).toHaveProperty('c');
     expect(allChanges).toHaveProperty('d');
     expect(allChanges['c'].changeType).toEqual(ChangeType.patch);
@@ -246,7 +246,7 @@ describe('findChangeRequests', () => {
       false,
       undefined,
       new Set<string>(['a', 'b', 'e']));
-    expect(Object.keys(allChanges).length).toEqual(5);
+    expect(Object.keys(allChanges)).toHaveLength(5);
     expect(allChanges['a'].newVersion).toEqual('1.0.0');
     expect(allChanges['b'].newVersion).toEqual('2.0.0');
     expect(allChanges['c'].changeType).toEqual(ChangeType.patch);
@@ -272,7 +272,7 @@ describe('sortChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'multipleChanges')));
     const orderedChanges: IChangeInfo[] = PublishUtilities.sortChangeRequests(allChanges);
 
-    expect(orderedChanges.length).toEqual(3);
+    expect(orderedChanges).toHaveLength(3);
     expect(orderedChanges[0].packageName).toEqual('a');
     expect(orderedChanges[1].packageName).toEqual('b');
     expect(orderedChanges[2].packageName).toEqual('c');

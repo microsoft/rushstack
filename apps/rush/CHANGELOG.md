@@ -1,6 +1,51 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 21 May 2020 15:41:59 GMT and should not be manually modified.
+This log was last generated on Mon, 08 Jun 2020 18:04:35 GMT and should not be manually modified.
+
+## 5.24.4
+Mon, 08 Jun 2020 18:04:35 GMT
+
+### Updates
+
+- Explicitly assigning the option value for --resolution-strategy. This fixes a crash with pnpm v5, which deprecated the option.
+- Fix an issue where install-run.js is not able to find its own .bin in PATH
+- Fix an issue where "rush install" sometimes skipped regenerating temporary packages, which is incompatible with PNPM's "--frozen-lockfile" feature
+
+## 5.24.3
+Thu, 04 Jun 2020 22:50:56 GMT
+
+### Updates
+
+- Fix an issue where "rush deploy" generated incorrect symlinks on Mac OS if the target folder was symlinked (GitHub #1910)
+
+## 5.24.2
+Wed, 03 Jun 2020 05:35:19 GMT
+
+### Updates
+
+- Expect error when trying to resolve optional dependency during deploy
+
+## 5.24.1
+Tue, 02 Jun 2020 03:11:32 GMT
+
+### Updates
+
+- Fix an issue where the "linkCreation" defaulted to "none" instead of "default"
+
+## 5.24.0
+Mon, 01 Jun 2020 08:48:49 GMT
+
+### Updates
+
+- Set next LTS node version to 14.
+- Add new "rush deploy" command that copies subsets of files/symlinks to a deployment folder
+
+## 5.23.5
+Thu, 28 May 2020 22:49:57 GMT
+
+### Updates
+
+- Fix an issue where Rush cannot reinstall itself on Windows
 
 ## 5.23.4
 Thu, 21 May 2020 15:41:59 GMT

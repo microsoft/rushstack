@@ -78,6 +78,11 @@ export interface ISassTaskConfig {
    * returnPromise and sourceMap will be ignored.
    */
   cleanCssOptions?: CleanCss.Options;
+
+  /**
+   * Allows the override of the options passed to autoprefixer.
+   */
+  autoprefixerOptions?: autoprefixer.Options;
 }
 
 export class SassTask extends GulpTask<ISassTaskConfig> {
@@ -86,9 +91,9 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     'src/**/*.scss.ts'
   ];
 
-  private _postCSSPlugins: postcss.AcceptedPlugin[] = [
-    autoprefixer({ overrideBrowserslist: ['> 1%', 'last 2 versions', 'ie >= 10'] })
-  ];
+  private get _postCSSPlugins(): postcss.AcceptedPlugin[] {
+    return [autoprefixer(this.taskConfig.autoprefixerOptions)];
+  }
 
   public constructor() {
     super(
@@ -103,7 +108,8 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
         useCSSModules: false,
         warnOnCssInvalidPropertyName: true,
         dropCssFiles: false,
-        warnOnNonCSSModules: false
+        warnOnNonCSSModules: false,
+        autoprefixerOptions: { overrideBrowserslist: ['> 1%', 'last 2 versions', 'ie >= 10'] }
       }
     );
   }
