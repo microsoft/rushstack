@@ -730,7 +730,7 @@ export abstract class BaseInstallManager {
       }
 
       if ((this._rushConfiguration.packageManagerWrapper as PnpmPackageManager).supportsResolutionStrategy) {
-        args.push('--resolution-strategy', this._rushConfiguration.pnpmOptions.resolutionStrategy);
+        args.push(`--resolution-strategy=${this._rushConfiguration.pnpmOptions.resolutionStrategy}`);
       }
     } else if (this._rushConfiguration.packageManager === 'yarn') {
       args.push('--link-folder', 'yarn-link');

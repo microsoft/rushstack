@@ -147,9 +147,6 @@ export class RushInstallManager extends BaseInstallManager {
       // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
       const tarballFile: string = this._getTarballFilePath(rushProject);
 
-      // Example: "my-project-2"
-      const unscopedTempProjectName: string = rushProject.unscopedTempProjectName;
-
       // Example: dependencies["@rush-temp/my-project-2"] = "file:./projects/my-project-2.tgz"
       commonPackageJson.dependencies![rushProject.tempProjectName]
         = `file:./${RushConstants.rushTempProjectsFolderName}/${rushProject.unscopedTempProjectName}.tgz`;
@@ -242,14 +239,8 @@ export class RushInstallManager extends BaseInstallManager {
         }
       }
 
-      // NPM expects the root of the tarball to have a directory called 'package'
-      const npmPackageFolder: string = 'package';
-
       // Example: "C:\MyRepo\common\temp\projects\my-project-2"
-      const tempProjectFolder: string = path.join(
-        this.rushConfiguration.commonTempFolder,
-        RushConstants.rushTempProjectsFolderName,
-        unscopedTempProjectName);
+      const tempProjectFolder: string = this._getTempProjectFolder(rushProject);
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
       const tempPackageJsonFilename: string = path.join(tempProjectFolder, FileConstants.PackageJson);
@@ -286,27 +277,8 @@ export class RushInstallManager extends BaseInstallManager {
           // write the expected package.json file into the zip staging folder
           JsonFile.save(tempPackageJson, tempPackageJsonFilename);
 
-          const tarOptions: tar.CreateOptions = ({
-            gzip: true,
-            file: tarballFile,
-            cwd: tempProjectFolder,
-            portable: true,
-            noMtime: true,
-            noPax: true,
-            sync: true,
-            prefix: npmPackageFolder,
-            filter: (path: string, stat: tar.FileStat): boolean => {
-              if (!this.rushConfiguration.experimentsConfiguration.configuration
-                .noChmodFieldInTarHeaderNormalization) {
-                stat.mode = (stat.mode & ~0x1FF) | PosixModeBits.AllRead | PosixModeBits.UserWrite
-                  | PosixModeBits.AllExecute;
-              }
-              return true;
-            }
-          } as tar.CreateOptions);
-
-          // create the new tarball
-          tar.create(tarOptions, [FileConstants.PackageJson]);
+          // Delete the existing tarball and create a new one
+          this._createTempProjectTarball(rushProject);
 
           console.log(`Updating ${tarballFile}`);
         } catch (error) {
@@ -384,6 +356,13 @@ export class RushInstallManager extends BaseInstallManager {
         console.log(`Deleting the "npm-tmp" folder`);
         this.installRecycler.moveFolder(this.rushConfiguration.npmTmpFolder);
       }
+    }
+
+    // Since we are actually running npm/pnpm/yarn install, recreate all the temp project tarballs.
+    // This ensures that any existing tarballs with older header bits will be regenerated.
+    // It is safe to assume that temp project pacakge.jsons already exist.
+    for (const rushProject of this.rushConfiguration.projects) {
+      this._createTempProjectTarball(rushProject);
     }
 
     const commonNodeModulesFolder: string = path.join(
@@ -520,6 +499,11 @@ export class RushInstallManager extends BaseInstallManager {
     }
   }
 
+  private _getTempProjectFolder(rushProject: RushConfigurationProject): string {
+    const unscopedTempProjectName: string = rushProject.unscopedTempProjectName;
+    return path.join(this.rushConfiguration.commonTempFolder, RushConstants.rushTempProjectsFolderName, unscopedTempProjectName);
+  }
+
   /**
    * Gets the path to the tarball
    * Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
@@ -529,6 +513,40 @@ export class RushInstallManager extends BaseInstallManager {
       this.rushConfiguration.commonTempFolder,
       RushConstants.rushTempProjectsFolderName,
       `${project.unscopedTempProjectName}.tgz`);
+  }
+
+  /**
+   * Deletes the existing tarball and creates a tarball for the given rush project
+   */
+  private _createTempProjectTarball(rushProject: RushConfigurationProject): void {
+    const tarballFile: string = this._getTarballFilePath(rushProject);
+    const tempProjectFolder: string = this._getTempProjectFolder(rushProject);
+
+    FileSystem.deleteFile(tarballFile);
+
+    // NPM expects the root of the tarball to have a directory called 'package'
+    const npmPackageFolder: string = 'package';
+
+    const tarOptions: tar.CreateOptions = ({
+      gzip: true,
+      file: tarballFile,
+      cwd: tempProjectFolder,
+      portable: true,
+      noMtime: true,
+      noPax: true,
+      sync: true,
+      prefix: npmPackageFolder,
+      filter: (path: string, stat: tar.FileStat): boolean => {
+        if (!this.rushConfiguration.experimentsConfiguration.configuration
+          .noChmodFieldInTarHeaderNormalization) {
+          stat.mode = (stat.mode & ~0x1FF) | PosixModeBits.AllRead | PosixModeBits.UserWrite
+            | PosixModeBits.AllExecute;
+        }
+        return true;
+      }
+    } as tar.CreateOptions);
+    // create the new tarball
+    tar.create(tarOptions, [FileConstants.PackageJson]);
   }
 
   /**
