@@ -132,7 +132,7 @@
         },
         {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "commandKind": { "$ref": "#/definitions/anything" },
             "name": { "$ref": "#/definitions/anything" },
