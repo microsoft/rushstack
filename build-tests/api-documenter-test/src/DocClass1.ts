@@ -93,12 +93,14 @@ export interface IDocInterface3 {
   /**
    * A quoted identifier with redundant quotes.
    */
-  redundantQuotes: string;
+  // prettier-ignore
+  "redundantQuotes": string;
 
   /**
-   * An identifier that does needs quotes.  It misleadingly looks like an ECMAScript symbol.
+   * An identifier that does need quotes.  It misleadingly looks like an ECMAScript symbol.
    */
-  '[not.a.symbol]': string;
+  // prettier-ignore
+  "[not.a.symbol]": string;
 }
 
 /**
