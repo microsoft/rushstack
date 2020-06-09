@@ -4,10 +4,7 @@
 import * as colors from 'colors';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
-import {
-  PackageJsonDependency,
-  DependencyType
-} from '../../api/PackageJsonEditor';
+import { PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
 import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
@@ -33,7 +30,7 @@ export interface IMismatchDependency {
 }
 
 export interface IMismatchDependencyVersion {
-  version: string,
+  version: string;
   projects: string[];
 }
 
@@ -42,14 +39,14 @@ export interface IMismatchDependencies {
 }
 
 export class VersionMismatchFinder {
- /* store it like this:
-  * {
-  *   "@types/node": {
-  *     "1.0.0": [ '@ms/rush' ]
-  *   }
-  * }
-  */
-  private _allowedAlternativeVersion:  Map<string, ReadonlyArray<string>>;
+  /* store it like this:
+   * {
+   *   "@types/node": {
+   *     "1.0.0": [ '@ms/rush' ]
+   *   }
+   * }
+   */
+  private _allowedAlternativeVersion: Map<string, ReadonlyArray<string>>;
   private _mismatches: Map<string, Map<string, VersionMismatchFinderEntity[]>>;
   private _projects: VersionMismatchFinderEntity[];
 
@@ -69,7 +66,7 @@ export class VersionMismatchFinder {
   ): void {
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
       ...options,
-      isRushCheckCommand: true
+      isRushCheckCommand: true,
     });
   }
 
@@ -79,7 +76,7 @@ export class VersionMismatchFinder {
   ): void {
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
       ...options,
-      isRushCheckCommand: false
+      isRushCheckCommand: false,
     });
   }
 
@@ -101,10 +98,7 @@ export class VersionMismatchFinder {
     // or xstitchPreferredVersions from common-versions.json
     projects.push(new VersionMismatchFinderCommonVersions(commonVersions));
 
-    return new VersionMismatchFinder(
-      projects,
-      commonVersions.allowedAlternativeVersions
-    );
+    return new VersionMismatchFinder(projects, commonVersions.allowedAlternativeVersions);
   }
 
   private static _checkForInconsistentVersions(
@@ -116,7 +110,10 @@ export class VersionMismatchFinder {
     }
   ): void {
     if (rushConfiguration.ensureConsistentVersions || options.isRushCheckCommand) {
-      const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfiguration, options);
+      const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
+        rushConfiguration,
+        options
+      );
 
       if (options.printAsJson) {
         mismatchFinder.printAsJson();
@@ -135,7 +132,7 @@ export class VersionMismatchFinder {
     }
   }
 
-    public get numberOfMismatches(): number {
+  public get numberOfMismatches(): number {
     return this._mismatches.size;
   }
 
@@ -144,13 +141,16 @@ export class VersionMismatchFinder {
   }
 
   public getVersionsOfMismatch(mismatch: string): string[] | undefined {
-    return this._mismatches.has(mismatch)
-      ? this._getKeys(this._mismatches.get(mismatch))
-      : undefined;
+    return this._mismatches.has(mismatch) ? this._getKeys(this._mismatches.get(mismatch)) : undefined;
   }
 
-  public getConsumersOfMismatch(mismatch: string, version: string): VersionMismatchFinderEntity[] | undefined {
-    const mismatchedPackage: Map<string, VersionMismatchFinderEntity[]> | undefined = this._mismatches.get(mismatch);
+  public getConsumersOfMismatch(
+    mismatch: string,
+    version: string
+  ): VersionMismatchFinderEntity[] | undefined {
+    const mismatchedPackage: Map<string, VersionMismatchFinderEntity[]> | undefined = this._mismatches.get(
+      mismatch
+    );
     if (!mismatchedPackage) {
       return undefined;
     }
@@ -165,25 +165,25 @@ export class VersionMismatchFinder {
     this.getMismatches().forEach((dependency: string) => {
       const mismatchDependencyVersionArray: IMismatchDependencyVersion[] = [];
       this.getVersionsOfMismatch(dependency)!.forEach((version: string) => {
-        const projects: string[] = []
+        const projects: string[] = [];
         this.getConsumersOfMismatch(dependency, version)!.forEach((project: VersionMismatchFinderEntity) => {
           projects.push(project.friendlyName);
         });
         const mismatchDependencyVersion: IMismatchDependencyVersion = {
           version: version,
-          projects: projects
+          projects: projects,
         };
         mismatchDependencyVersionArray.push(mismatchDependencyVersion);
       });
       const mismatchDependency: IMismatchDependency = {
-          dependencyName: dependency,
-          versions: mismatchDependencyVersionArray
+        dependencyName: dependency,
+        versions: mismatchDependencyVersionArray,
       };
       mismatchDependencies.push(mismatchDependency);
     });
 
     const output: IMismatchDependencies = {
-      mismatchedVersions: mismatchDependencies
+      mismatchedVersions: mismatchDependencies,
     };
 
     console.log(JSON.stringify(output, undefined, 2));
@@ -229,7 +229,9 @@ export class VersionMismatchFinder {
               this._mismatches.set(name, new Map<string, VersionMismatchFinderEntity[]>());
             }
 
-            const dependencyVersions: Map<string, VersionMismatchFinderEntity[]> = this._mismatches.get(name)!;
+            const dependencyVersions: Map<string, VersionMismatchFinderEntity[]> = this._mismatches.get(
+              name
+            )!;
 
             if (!dependencyVersions.has(version)) {
               dependencyVersions.set(version, []);
@@ -248,11 +250,10 @@ export class VersionMismatchFinder {
     });
   }
 
-  private _isVersionAllowedAlternative(
-    dependency: string,
-    version: string): boolean {
-
-    const allowedAlternatives: ReadonlyArray<string> | undefined = this._allowedAlternativeVersion.get(dependency);
+  private _isVersionAllowedAlternative(dependency: string, version: string): boolean {
+    const allowedAlternatives: ReadonlyArray<string> | undefined = this._allowedAlternativeVersion.get(
+      dependency
+    );
     return Boolean(allowedAlternatives && allowedAlternatives.indexOf(version) > -1);
   }
 

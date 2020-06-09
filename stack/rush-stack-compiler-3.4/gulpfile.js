@@ -8,13 +8,31 @@ const sharedLibDir = path.join(__dirname, 'lib', 'shared');
 build.preCopy.setConfig({
   copyTo: {
     [sharedSrcDir]: [
-      path.join(__dirname, 'node_modules', '@microsoft', 'rush-stack-compiler-shared', 'src', 'shared', '**', '*')
+      path.join(
+        __dirname,
+        'node_modules',
+        '@microsoft',
+        'rush-stack-compiler-shared',
+        'src',
+        'shared',
+        '**',
+        '*'
+      ),
     ],
     [sharedLibDir]: [
-      path.join(__dirname, 'node_modules', '@microsoft', 'rush-stack-compiler-shared', 'src', 'shared', '**', '*.d.ts')
-    ]
+      path.join(
+        __dirname,
+        'node_modules',
+        '@microsoft',
+        'rush-stack-compiler-shared',
+        'src',
+        'shared',
+        '**',
+        '*.d.ts'
+      ),
+    ],
   },
-  shouldFlatten: false
+  shouldFlatten: false,
 });
 
 build.preCopy.cleanMatch = [sharedSrcDir];

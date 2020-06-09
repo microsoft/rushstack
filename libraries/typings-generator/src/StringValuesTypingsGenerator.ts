@@ -3,10 +3,7 @@
 
 import { EOL } from 'os';
 
-import {
-  ITypingsGeneratorOptions,
-  TypingsGenerator
-} from './TypingsGenerator';
+import { ITypingsGeneratorOptions, TypingsGenerator } from './TypingsGenerator';
 
 /**
  * @public
@@ -43,14 +40,15 @@ export class StringValuesTypingsGenerator extends TypingsGenerator {
     super({
       ...options,
       parseAndGenerateTypings: (fileContents: string, filePath: string) => {
-        const stringValueTypings: IStringValueTypings = options.parseAndGenerateTypings(fileContents, filePath);
+        const stringValueTypings: IStringValueTypings = options.parseAndGenerateTypings(
+          fileContents,
+          filePath
+        );
 
         const outputLines: string[] = [];
         let indent: string = '';
         if (options.exportAsDefault) {
-          outputLines.push(
-            `export interface ${EXPORT_AS_DEFAULT_INTERFACE_NAME} {`
-          );
+          outputLines.push(`export interface ${EXPORT_AS_DEFAULT_INTERFACE_NAME} {`);
 
           indent = '  ';
         }
@@ -67,15 +65,9 @@ export class StringValuesTypingsGenerator extends TypingsGenerator {
           }
 
           if (options.exportAsDefault) {
-            outputLines.push(
-              `${indent}${exportName}: string;`,
-              ''
-            );
+            outputLines.push(`${indent}${exportName}: string;`, '');
           } else {
-            outputLines.push(
-              `export declare const ${exportName}: string;`,
-              ''
-            );
+            outputLines.push(`export declare const ${exportName}: string;`, '');
           }
         }
 
@@ -89,7 +81,7 @@ export class StringValuesTypingsGenerator extends TypingsGenerator {
         }
 
         return outputLines.join(EOL);
-      }
+      },
     });
   }
 }

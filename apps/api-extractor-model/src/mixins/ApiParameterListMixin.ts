@@ -96,8 +96,10 @@ export interface ApiParameterListMixin extends ApiItem {
  *
  * @public
  */
-export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiParameterListMixin) { // eslint-disable-line @typescript-eslint/no-explicit-any
+export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(
+  baseClass: TBaseClass
+): TBaseClass & (new (...args: any[]) => ApiParameterListMixin) {
+  // eslint-disable-line @typescript-eslint/no-explicit-any
 
   abstract class MixedClass extends baseClass implements ApiParameterListMixin {
     public readonly [_overloadIndex]: number;
@@ -115,11 +117,10 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(ba
       if (this instanceof ApiDeclaredItem) {
         if (options.parameters) {
           for (const parameterOptions of options.parameters) {
-
             const parameter: Parameter = new Parameter({
               name: parameterOptions.parameterName,
               parameterTypeExcerpt: this.buildExcerpt(parameterOptions.parameterTypeTokenRange),
-              parent: this
+              parent: this,
             });
 
             this[_parameters].push(parameter);
@@ -131,9 +132,11 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(ba
     }
 
     /** @override */
-    public static onDeserializeInto(options: Partial<IApiParameterListMixinOptions>, context: DeserializerContext,
-      jsonObject: IApiParameterListJson): void {
-
+    public static onDeserializeInto(
+      options: Partial<IApiParameterListMixinOptions>,
+      context: DeserializerContext,
+      jsonObject: IApiParameterListJson
+    ): void {
       baseClass.onDeserializeInto(options, context, jsonObject);
 
       options.overloadIndex = jsonObject.overloadIndex;
@@ -158,7 +161,7 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(ba
       for (const parameter of this.parameters) {
         parameterObjects.push({
           parameterName: parameter.name,
-          parameterTypeTokenRange: parameter.parameterTypeExcerpt.tokenRange
+          parameterTypeTokenRange: parameter.parameterTypeExcerpt.tokenRange,
         });
       }
 

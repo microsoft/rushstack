@@ -1,9 +1,7 @@
 {
   "$schema": "http://json.schemastore.org/tslint",
 
-  "rulesDirectory": [
-    "tslint-microsoft-contrib"
-  ],
+  "rulesDirectory": ["tslint-microsoft-contrib"],
   "rules": {
     "class-name": true,
     "comment-format": [true, "check-space"],
@@ -43,14 +41,7 @@
     "no-any": true,
     "no-bitwise": true,
     "no-consecutive-blank-lines": true,
-    "no-console": [
-      true,
-      "debug",
-      "info",
-      "time",
-      "timeEnd",
-      "trace"
-    ],
+    "no-console": [true, "debug", "info", "time", "timeEnd", "trace"],
     "no-constant-condition": true,
     "no-construct": true,
     "no-debugger": true,
@@ -73,13 +64,7 @@
     "no-with-statement": true,
     "no-var-keyword": true,
     "object-literal-sort-keys": false,
-    "one-line": [
-      true,
-      "check-open-brace",
-      "check-catch",
-      "check-else",
-      "check-whitespace"
-    ],
+    "one-line": [true, "check-open-brace", "check-catch", "check-else", "check-whitespace"],
     "quotemark": [true, "single", "avoid-escape"],
     "prefer-const": true,
     "radix": true,
@@ -113,13 +98,6 @@
     "use-isnan": true,
     "use-named-parameter": true,
     "variable-name": [true, "check-format", "allow-leading-underscore", "ban-keywords"],
-    "whitespace": [
-      true,
-      "check-branch",
-      "check-decl",
-      "check-operator",
-      "check-separator",
-      "check-type"
-    ]
+    "whitespace": [true, "check-branch", "check-decl", "check-operator", "check-separator", "check-type"]
   }
 }

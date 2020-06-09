@@ -12,22 +12,25 @@ describe('ChangeFile', () => {
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-npm.json');
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
-    const changeFile: ChangeFile = new ChangeFile({
-      packageName: 'a',
-      changes: [],
-      email: 'fake@microsoft.com'
-    }, rushConfiguration);
+    const changeFile: ChangeFile = new ChangeFile(
+      {
+        packageName: 'a',
+        changes: [],
+        email: 'fake@microsoft.com',
+      },
+      rushConfiguration
+    );
 
     changeFile.addChange({
       packageName: 'a',
       changeType: ChangeType.minor,
-      comment: 'for minor'
+      comment: 'for minor',
     });
 
     changeFile.addChange({
       packageName: 'a',
       changeType: ChangeType.patch,
-      comment: 'for patch'
+      comment: 'for patch',
     });
 
     expect(changeFile.getChanges('a')).toHaveLength(2);

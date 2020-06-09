@@ -1,47 +1,43 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  TSESTree,
-  TSESLint,
-  ParserServices
-} from '@typescript-eslint/experimental-utils';
+import { TSESTree, TSESLint, ParserServices } from '@typescript-eslint/experimental-utils';
 import * as ts from 'typescript';
 
 type MessageIds = 'error-untyped-underscore';
-type Options = [ ];
+type Options = [];
 
-const noUntypedUnderscoreRule: TSESLint.RuleModule<MessageIds,Options> = {
+const noUntypedUnderscoreRule: TSESLint.RuleModule<MessageIds, Options> = {
   meta: {
     type: 'problem',
     messages: {
       'error-untyped-underscore':
-        'This expression appears to access a private member "{{memberName}}"; '
-        + 'either remove the underscore prefix or else declare a type for the containing object'
+        'This expression appears to access a private member "{{memberName}}"; ' +
+        'either remove the underscore prefix or else declare a type for the containing object',
     },
-    schema: [ ],
+    schema: [],
     docs: {
-      description: 'Prevent TypeScript code from accessing legacy JavaScript members'
-        + ' whose names have an underscore prefix',
+      description:
+        'Prevent TypeScript code from accessing legacy JavaScript members' +
+        ' whose names have an underscore prefix',
       category: 'Stylistic Issues',
       recommended: false,
-      url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
-    }
+      url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin',
+    },
   },
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {
-
     const parserServices: ParserServices | undefined = context.parserServices;
-    if (!parserServices ||
-      !parserServices.program ||
-      !parserServices.esTreeNodeToTSNodeMap) {
-        throw new Error('This rule requires your ESLint configuration to define the "parserOptions.project"'
-          + ' property for "@typescript-eslint/parser".',);
+    if (!parserServices || !parserServices.program || !parserServices.esTreeNodeToTSNodeMap) {
+      throw new Error(
+        'This rule requires your ESLint configuration to define the "parserOptions.project"' +
+          ' property for "@typescript-eslint/parser".'
+      );
     }
 
     const typeChecker: ts.TypeChecker = parserServices.program.getTypeChecker();
 
     return {
-      MemberExpression: function(node: TSESTree.MemberExpression) {
+      MemberExpression: function (node: TSESTree.MemberExpression) {
         // Is it an expression like "x.y"?
 
         // Ignore expressions such as "super.y", "this.y", and "that.y"
@@ -61,7 +57,6 @@ const noUntypedUnderscoreRule: TSESLint.RuleModule<MessageIds,Options> = {
         if (node.property && node.property.type === 'Identifier') {
           const memberName: string = node.property.name;
           if (memberName && memberName[0] === '_') {
-
             // Do we have type information for the property (e.g. "_y")?
             //
             // Examples where propertyType is defined:
@@ -78,7 +73,9 @@ const noUntypedUnderscoreRule: TSESLint.RuleModule<MessageIds,Options> = {
             //
             let propertyType: ts.Symbol | undefined = undefined;
 
-            const memberObjectNode: ts.Node | undefined = parserServices.esTreeNodeToTSNodeMap!.get(node.object);
+            const memberObjectNode: ts.Node | undefined = parserServices.esTreeNodeToTSNodeMap!.get(
+              node.object
+            );
             if (memberObjectNode) {
               const memberObjectType: ts.Type | undefined = typeChecker.getTypeAtLocation(memberObjectNode);
               if (memberObjectType) {
@@ -92,15 +89,14 @@ const noUntypedUnderscoreRule: TSESLint.RuleModule<MessageIds,Options> = {
               context.report({
                 node,
                 messageId: 'error-untyped-underscore',
-                data: { memberName: memberName }
+                data: { memberName: memberName },
               });
             }
-
           }
         }
-      }
+      },
     };
-  }
+  },
 };
 
 export { noUntypedUnderscoreRule };

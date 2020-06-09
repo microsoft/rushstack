@@ -1,11 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  Terminal,
-  NewlineKind,
-  JsonFile
-} from '@rushstack/node-core-library';
+import { Terminal, NewlineKind, JsonFile } from '@rushstack/node-core-library';
 
 import { ILocalizationFile } from '../interfaces';
 import { ResxReader } from './ResxReader';
@@ -43,14 +39,11 @@ export class LocFileParser {
 
     let parsedFile: ILocalizationFile;
     if (/\.resx$/i.test(options.filePath)) {
-      parsedFile = ResxReader.readResxAsLocFile(
-        options.content,
-        {
-          terminal: options.terminal,
-          resxFilePath: options.filePath,
-          newlineNormalization: options.resxNewlineNormalization
-        }
-      );
+      parsedFile = ResxReader.readResxAsLocFile(options.content, {
+        terminal: options.terminal,
+        resxFilePath: options.filePath,
+        newlineNormalization: options.resxNewlineNormalization,
+      });
     } else {
       parsedFile = JsonFile.parseString(options.content);
       try {

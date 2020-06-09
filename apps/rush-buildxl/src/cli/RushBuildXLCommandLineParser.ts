@@ -13,7 +13,7 @@ export class RushBuildXLCommandLineParser extends CommandLineParser {
   public constructor(terminal: Terminal) {
     super({
       toolFilename: 'rush-buildlx',
-      toolDescription: 'This experimental tool allows Rush to interact with BuildXL.'
+      toolDescription: 'This experimental tool allows Rush to interact with BuildXL.',
     });
 
     this._terminal = terminal;
@@ -22,9 +22,12 @@ export class RushBuildXLCommandLineParser extends CommandLineParser {
     this.addAction(new GenerateAction(this._terminal));
   }
 
-  protected onDefineParameters(): void { /* no global parameters */ }
+  protected onDefineParameters(): void {
+    /* no global parameters */
+  }
 
-  protected onExecute(): Promise<void> { // override
+  protected onExecute(): Promise<void> {
+    // override
     return super.onExecute().catch((error) => {
       this._terminal.writeErrorLine();
       this._terminal.writeErrorLine('ERROR: ' + error.message.trim());

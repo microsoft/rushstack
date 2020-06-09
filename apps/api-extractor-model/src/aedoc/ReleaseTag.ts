@@ -2,19 +2,19 @@
 // See LICENSE in the project root for license information.
 
 /**
-  * A "release tag" is a custom TSDoc tag that is applied to an API to communicate the level of support
-  * provided for third-party developers.
-  *
-  * @remarks
-  *
-  * The four release tags are: `@internal`, `@alpha`, `@beta`, and `@public`. They are applied to API items such
-  * as classes, member functions, enums, etc.  The release tag applies recursively to members of a container
-  * (e.g. class or interface). For example, if a class is marked as `@beta`, then all of its members automatically
-  * have this status; you DON'T need add the `@beta` tag to each member function. However, you could add
-  * `@internal` to a member function to give it a different release status.
-  *
-  * @public
-  */
+ * A "release tag" is a custom TSDoc tag that is applied to an API to communicate the level of support
+ * provided for third-party developers.
+ *
+ * @remarks
+ *
+ * The four release tags are: `@internal`, `@alpha`, `@beta`, and `@public`. They are applied to API items such
+ * as classes, member functions, enums, etc.  The release tag applies recursively to members of a container
+ * (e.g. class or interface). For example, if a class is marked as `@beta`, then all of its members automatically
+ * have this status; you DON'T need add the `@beta` tag to each member function. However, you could add
+ * `@internal` to a member function to give it a different release status.
+ *
+ * @public
+ */
 export enum ReleaseTag {
   /**
    * No release tag was specified in the AEDoc summary.
@@ -41,7 +41,7 @@ export enum ReleaseTag {
    * Indicates that an API item has been officially released. It is part of the supported
    * contract (e.g. SemVer) for a package.
    */
-  Public = 4
+  Public = 4,
 }
 
 /**
@@ -57,11 +57,16 @@ export namespace ReleaseTag {
    */
   export function getTagName(releaseTag: ReleaseTag): string {
     switch (releaseTag) {
-      case ReleaseTag.None: return '(none)';
-      case ReleaseTag.Internal: return '@internal';
-      case ReleaseTag.Alpha: return '@alpha';
-      case ReleaseTag.Beta: return '@beta';
-      case ReleaseTag.Public: return '@public';
+      case ReleaseTag.None:
+        return '(none)';
+      case ReleaseTag.Internal:
+        return '@internal';
+      case ReleaseTag.Alpha:
+        return '@alpha';
+      case ReleaseTag.Beta:
+        return '@beta';
+      case ReleaseTag.Public:
+        return '@public';
     }
     throw new Error('Unsupported release tag');
   }
@@ -77,5 +82,4 @@ export namespace ReleaseTag {
   export function compare(a: ReleaseTag, b: ReleaseTag): number {
     return a - b;
   }
-
 }

@@ -10,7 +10,7 @@ export const enum FileConstants {
   /**
    * "package.json" - the configuration file that defines an NPM package
    */
-  PackageJson = 'package.json'
+  PackageJson = 'package.json',
 }
 
 /**
@@ -27,5 +27,5 @@ export const enum FolderConstants {
   /**
    * "node_modules" - the folder where package managers install their files
    */
-  NodeModules = 'node_modules'
+  NodeModules = 'node_modules',
 }

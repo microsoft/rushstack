@@ -6,14 +6,9 @@ import { IPackageDeps } from '../IPackageDeps';
 import * as path from 'path';
 import { execSync } from 'child_process';
 
-import {
-  FileSystem,
-  FileConstants
-} from '@rushstack/node-core-library';
+import { FileSystem, FileConstants } from '@rushstack/node-core-library';
 
-const SOURCE_PATH: string = path.join(__dirname).replace(
-  path.join('lib', 'test'),
-  path.join('src', 'test'));
+const SOURCE_PATH: string = path.join(__dirname).replace(path.join('lib', 'test'), path.join('src', 'test'));
 
 const TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'testProject');
 const NESTED_TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'nestedTestProject');
@@ -66,19 +61,19 @@ describe('parseGitLsTree', () => {
 });
 
 describe('getPackageDeps', () => {
-
   it('can parse committed file', (done) => {
     const results: IPackageDeps = getPackageDeps(TEST_PROJECT_PATH);
     try {
       const expectedFiles: { [key: string]: string } = {
         'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9'
+        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9',
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
-      filePaths.forEach(filePath => (expect(results.files[filePath]).toEqual(expectedFiles[filePath])));
-
-    } catch (e) { return done(e); }
+      filePaths.forEach((filePath) => expect(results.files[filePath]).toEqual(expectedFiles[filePath]));
+    } catch (e) {
+      return done(e);
+    }
 
     done();
   });
@@ -88,12 +83,14 @@ describe('getPackageDeps', () => {
     try {
       const expectedFiles: { [key: string]: string } = {
         'src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9'
+        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9',
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
-      filePaths.forEach(filePath => (expect(results.files[filePath]).toEqual(expectedFiles[filePath])));
-    } catch (e) { return done(e); }
+      filePaths.forEach((filePath) => expect(results.files[filePath]).toEqual(expectedFiles[filePath]));
+    } catch (e) {
+      return done(e);
+    }
 
     done();
   });
@@ -113,18 +110,16 @@ describe('getPackageDeps', () => {
       const expectedFiles: { [key: string]: string } = {
         'a.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
         'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9'
+        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9',
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
-      filePaths.forEach(filePath => (expect(results.files[filePath]).toEqual(expectedFiles[filePath])));
-
+      filePaths.forEach((filePath) => expect(results.files[filePath]).toEqual(expectedFiles[filePath]));
     } catch (e) {
       return _done(e);
     }
 
     _done();
-
   });
 
   it('can handle adding two files', (done) => {
@@ -146,12 +141,11 @@ describe('getPackageDeps', () => {
         'a.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
         'b.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
         'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9'
+        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9',
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
-      filePaths.forEach(filePath => (expect(results.files[filePath]).toEqual(expectedFiles[filePath])));
-
+      filePaths.forEach((filePath) => expect(results.files[filePath]).toEqual(expectedFiles[filePath]));
     } catch (e) {
       return _done(e);
     }
@@ -165,19 +159,18 @@ describe('getPackageDeps', () => {
     FileSystem.deleteFile(testFilePath);
 
     function _done(e?: Error): void {
-      execSync(`git checkout ${ testFilePath }`, { stdio: 'ignore' });
+      execSync(`git checkout ${testFilePath}`, { stdio: 'ignore' });
       done(e);
     }
 
     const results: IPackageDeps = getPackageDeps(TEST_PROJECT_PATH);
     try {
       const expectedFiles: { [key: string]: string } = {
-        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9'
+        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9',
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
-      filePaths.forEach(filePath => (expect(results.files[filePath]).toEqual(expectedFiles[filePath])));
-
+      filePaths.forEach((filePath) => expect(results.files[filePath]).toEqual(expectedFiles[filePath]));
     } catch (e) {
       return _done(e);
     }
@@ -199,12 +192,11 @@ describe('getPackageDeps', () => {
     try {
       const expectedFiles: { [key: string]: string } = {
         'file1.txt': 'f2ba8f84ab5c1bce84a7b441cb1959cfc7093b7f',
-        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9'
+        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9',
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
-      filePaths.forEach(filePath => (expect(results.files[filePath]).toEqual(expectedFiles[filePath])));
-
+      filePaths.forEach((filePath) => expect(results.files[filePath]).toEqual(expectedFiles[filePath]));
     } catch (e) {
       return _done(e);
     }
@@ -216,13 +208,14 @@ describe('getPackageDeps', () => {
     const results: IPackageDeps = getPackageDeps(TEST_PROJECT_PATH, ['file1.txt']);
     try {
       const expectedFiles: { [key: string]: string } = {
-        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9'
+        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9',
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
-      filePaths.forEach(filePath => (expect(results.files[filePath]).toEqual(expectedFiles[filePath])));
-
-    } catch (e) { return done(e); }
+      filePaths.forEach((filePath) => expect(results.files[filePath]).toEqual(expectedFiles[filePath]));
+    } catch (e) {
+      return done(e);
+    }
 
     done();
   });
@@ -241,19 +234,17 @@ describe('getPackageDeps', () => {
     try {
       const expectedFiles: { [key: string]: string } = {
         'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9'
+        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9',
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
       expect(filePaths).toHaveLength(Object.keys(expectedFiles).length);
 
-      filePaths.forEach(filePath => (expect(results.files[filePath]).toEqual(expectedFiles[filePath])));
-
+      filePaths.forEach((filePath) => expect(results.files[filePath]).toEqual(expectedFiles[filePath]));
     } catch (e) {
       return _done(e);
     }
 
     _done();
   });
-
 });

@@ -64,7 +64,6 @@
      */
     /*[LINE "DEMO"]*/ "strictPeerDependencies": true,
 
-
     /**
      * Configures the strategy used to select versions during installation.
      *
@@ -95,7 +94,7 @@
      *
      * The default value is false.
      */
-     /*[LINE "HYPOTHETICAL"]*/ "preventManualShrinkwrapChanges": true
+    /*[LINE "HYPOTHETICAL"]*/ "preventManualShrinkwrapChanges": true
   },
 
   /**
@@ -109,16 +108,16 @@
   "nodeSupportedVersionRange": ">=10.13.0 <11.0.0",
 
   /**
-  * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
-  * spend six months in a stabilization period before the first Long Term Support (LTS) version.
-  * For example, 8.9.0 was the first LTS version of Node.js 8.  Pre-LTS versions are not recommended
-  * for production usage because they frequently have bugs.  They may cause Rush itself
-  * to malfunction.
-  *
-  * Rush normally prints a warning if it detects a pre-LTS Node.js version.  If you are testing
-  * pre-LTS versions in preparation for supporting the first LTS version, you can use this setting
-  * to disable Rush's warning.
-  */
+   * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
+   * spend six months in a stabilization period before the first Long Term Support (LTS) version.
+   * For example, 8.9.0 was the first LTS version of Node.js 8.  Pre-LTS versions are not recommended
+   * for production usage because they frequently have bugs.  They may cause Rush itself
+   * to malfunction.
+   *
+   * Rush normally prints a warning if it detects a pre-LTS Node.js version.  If you are testing
+   * pre-LTS versions in preparation for supporting the first LTS version, you can use this setting
+   * to disable Rush's warning.
+   */
   /*[LINE "HYPOTHETICAL"]*/ "suppressNodeLtsWarning": false,
 
   /**
@@ -132,7 +131,7 @@
    * version. In those cases, you will need to add an entry to the "allowedAlternativeVersions"
    * section of the common-versions.json.
    */
-   /*[LINE "HYPOTHETICAL"]*/ "ensureConsistentVersions": true,
+  /*[LINE "HYPOTHETICAL"]*/ "ensureConsistentVersions": true,
 
   /**
    * Large monorepos can become intimidating for newcomers if project folder paths don't follow
@@ -197,8 +196,8 @@
     "reviewCategories": [
       // Some example categories:
       "production", // projects that ship to production
-      "tools",      // non-shipping projects that are part of the developer toolchain
-      "prototypes"  // experiments that should mostly be ignored by the review process
+      "tools", // non-shipping projects that are part of the developer toolchain
+      "prototypes" // experiments that should mostly be ignored by the review process
     ],
 
     /**
@@ -207,7 +206,7 @@
      * if the underlying package was already approved, this would imply that the typings
      * are also approved.
      */
-    /*[LINE "HYPOTHETICAL"]*/ "ignoredNpmScopes": [ "@types" ]
+    /*[LINE "HYPOTHETICAL"]*/ "ignoredNpmScopes": ["@types"]
   },
   /*[END "DEMO"]*/
 
@@ -228,10 +227,7 @@
      * RegExp escapes need two backspashes, and ordinary periods should be "\\.".
      */
     /*[BEGIN "DEMO"]*/
-    "allowedEmailRegExps": [
-      "[^@]+@users\\.noreply\\.github\\.com",
-      "travis@example\\.org"
-    ],
+    "allowedEmailRegExps": ["[^@]+@users\\.noreply\\.github\\.com", "travis@example\\.org"],
     /*[END "DEMO"]*/
 
     /**
@@ -289,9 +285,7 @@
     /**
      * The list of shell commands to run before the Rush installation starts
      */
-    "preRushInstall": [
-      /*[LINE "HYPOTHETICAL"]*/ "common/scripts/pre-rush-install.js"
-    ],
+    "preRushInstall": [/*[LINE "HYPOTHETICAL"]*/ "common/scripts/pre-rush-install.js"],
 
     /**
      * The list of shell commands to run after the Rush installation finishes
@@ -392,9 +386,7 @@
        * locally linked because it would create a cyclic dependency; instead, the last published
        * version will be installed in the Common folder.
        */
-      "cyclicDependencyProjects": [
-        /*[LINE "HYPOTHETICAL"]*/ "my-toolchain"
-      ],
+      "cyclicDependencyProjects": [/*[LINE "HYPOTHETICAL"]*/ "my-toolchain"],
 
       /**
        * If true, then this project will be ignored by the "rush check" command.

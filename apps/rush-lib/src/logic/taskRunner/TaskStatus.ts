@@ -11,5 +11,5 @@ export enum TaskStatus {
   SuccessWithWarning = 'SUCCESS WITH WARNINGS',
   Skipped = 'SKIPPED',
   Failure = 'FAILURE',
-  Blocked = 'BLOCKED'
+  Blocked = 'BLOCKED',
 }

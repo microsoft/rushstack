@@ -16,12 +16,12 @@ export enum RegularEnum {
   /**
    * These are some docs for Two
    */
-  Two = RegularEnum.One + 1
+  Two = RegularEnum.One + 1,
 }
 
 /** @public */
 export const enum ConstEnum {
   Zero,
   One = 1,
-  Two = RegularEnum.One + 1
+  Two = RegularEnum.One + 1,
 }

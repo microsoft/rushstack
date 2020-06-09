@@ -5,7 +5,7 @@ export enum TerminalProviderSeverity {
   log,
   warning,
   error,
-  verbose
+  verbose,
 }
 
 /**

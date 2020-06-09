@@ -14,7 +14,7 @@ export const enum ExcerptTokenKind {
   /**
    * A reference to an API declaration
    */
-  Reference = 'Reference'
+  Reference = 'Reference',
 }
 
 /**
@@ -137,8 +137,11 @@ export class Excerpt {
     this.tokens = tokens;
     this.tokenRange = tokenRange;
 
-    if (this.tokenRange.startIndex < 0 || this.tokenRange.endIndex > this.tokens.length
-      || this.tokenRange.startIndex > this.tokenRange.endIndex) {
+    if (
+      this.tokenRange.startIndex < 0 ||
+      this.tokenRange.endIndex > this.tokens.length ||
+      this.tokenRange.startIndex > this.tokenRange.endIndex
+    ) {
       throw new Error('Invalid token range');
     }
 
@@ -150,7 +153,7 @@ export class Excerpt {
    */
   public get text(): string {
     if (this._text === undefined) {
-      this._text = this.spannedTokens.map(x => x.text).join('');
+      this._text = this.spannedTokens.map((x) => x.text).join('');
     }
     return this._text;
   }

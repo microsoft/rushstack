@@ -4,15 +4,8 @@
 import * as os from 'os';
 import * as jju from 'jju';
 
-import {
-  JsonSchema,
-  IJsonSchemaErrorInfo,
-  IJsonSchemaValidateOptions
-} from './JsonSchema';
-import {
-  Text,
-  NewlineKind
-} from './Text';
+import { JsonSchema, IJsonSchemaErrorInfo, IJsonSchemaValidateOptions } from './JsonSchema';
+import { Text, NewlineKind } from './Text';
 import { FileSystem } from './FileSystem';
 
 /**
@@ -198,7 +191,7 @@ export class JsonFile {
     options?: IJsonFileStringifyOptions
   ): string {
     if (!options) {
-      options = { };
+      options = {};
     }
 
     JsonFile.validateNoUndefinedMembers(newJsonObject);
@@ -209,12 +202,12 @@ export class JsonFile {
       // NOTE: We don't use mode=json here because comments aren't allowed by strict JSON
       stringified = jju.update(previousJson, newJsonObject, {
         mode: 'cjson',
-        indent: 2
+        indent: 2,
       });
     } else if (options.prettyFormatting) {
       stringified = jju.stringify(newJsonObject, {
         mode: 'json',
-        indent: 2
+        indent: 2,
       });
     } else {
       stringified = JSON.stringify(newJsonObject, undefined, 2);
@@ -239,7 +232,7 @@ export class JsonFile {
    */
   public static save(jsonObject: JsonObject, jsonFilename: string, options?: IJsonFileSaveOptions): boolean {
     if (!options) {
-      options = { };
+      options = {};
     }
 
     // Do we need to read the previous file contents?
@@ -272,7 +265,7 @@ export class JsonFile {
     }
 
     FileSystem.writeFile(jsonFilename, newBuffer.toString(DEFAULT_ENCODING), {
-      ensureFolderExists: options.ensureFolderExists
+      ensureFolderExists: options.ensureFolderExists,
     });
 
     // TEST CODE: Used to verify that onlyIfChanged isn't broken by a hidden transformation during saving.
@@ -291,9 +284,13 @@ export class JsonFile {
   /**
    * An async version of {@link JsonFile.loadAndValidateWithCallback}.
    */
-  public static async saveAsync(jsonObject: JsonObject, jsonFilename: string, options?: IJsonFileSaveOptions): Promise<boolean> {
+  public static async saveAsync(
+    jsonObject: JsonObject,
+    jsonFilename: string,
+    options?: IJsonFileSaveOptions
+  ): Promise<boolean> {
     if (!options) {
-      options = { };
+      options = {};
     }
 
     // Do we need to read the previous file contents?
@@ -326,7 +323,7 @@ export class JsonFile {
     }
 
     await FileSystem.writeFileAsync(jsonFilename, newBuffer.toString(DEFAULT_ENCODING), {
-      ensureFolderExists: options.ensureFolderExists
+      ensureFolderExists: options.ensureFolderExists,
     });
 
     // TEST CODE: Used to verify that onlyIfChanged isn't broken by a hidden transformation during saving.
@@ -392,7 +389,8 @@ export class JsonFile {
 
         // Convert this:     A path: "C:\file"
         // To this:          A path: \"C:\\file\"
-        const escapedKey: string = key.replace(/[\\]/g, '\\\\') // escape backslashes
+        const escapedKey: string = key
+          .replace(/[\\]/g, '\\\\') // escape backslashes
           .replace(/["]/g, '\\'); // escape quotes
         result += `["${escapedKey}"]`;
       }

@@ -6,30 +6,26 @@ import { Terminal } from '@rushstack/node-core-library';
 
 import { ILocalizationFile } from '../interfaces';
 import { LocFileParser } from '../utilities/LocFileParser';
-import {
-  loaderFactory,
-  IBaseLoaderOptions
-} from './LoaderFactory';
+import { loaderFactory, IBaseLoaderOptions } from './LoaderFactory';
 import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider';
 
-export default loaderFactory(
-  function (
-    this: loader.LoaderContext,
-    locFilePath: string,
-    content: string,
-    options: IBaseLoaderOptions
-  ) {
-    const locFileData: ILocalizationFile = LocFileParser.parseLocFile({
-      content,
-      filePath: locFilePath,
-      terminal: new Terminal(LoaderTerminalProvider.getTerminalProviderForLoader(this)),
-      resxNewlineNormalization: options.resxNewlineNormalization
-    });
-    const resultObject: { [stringName: string]: string } = {};
-    for (const stringName in locFileData) { // eslint-disable-line guard-for-in
-      resultObject[stringName] = locFileData[stringName].value;
-    }
-
-    return resultObject;
+export default loaderFactory(function (
+  this: loader.LoaderContext,
+  locFilePath: string,
+  content: string,
+  options: IBaseLoaderOptions
+) {
+  const locFileData: ILocalizationFile = LocFileParser.parseLocFile({
+    content,
+    filePath: locFilePath,
+    terminal: new Terminal(LoaderTerminalProvider.getTerminalProviderForLoader(this)),
+    resxNewlineNormalization: options.resxNewlineNormalization,
+  });
+  const resultObject: { [stringName: string]: string } = {};
+  for (const stringName in locFileData) {
+    // eslint-disable-line guard-for-in
+    resultObject[stringName] = locFileData[stringName].value;
   }
-);
+
+  return resultObject;
+});

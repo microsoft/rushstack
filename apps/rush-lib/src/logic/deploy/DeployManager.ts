@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as colors from 'colors';
-import * as path from "path";
-import * as resolve from "resolve";
+import * as path from 'path';
+import * as resolve from 'resolve';
 import * as npmPacklist from 'npm-packlist';
 import ignore, { Ignore } from 'ignore';
 import {
@@ -18,14 +18,14 @@ import {
   AlreadyExistsBehavior,
   InternalError,
   NewlineKind,
-  Text
+  Text,
 } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
-import { RushConfigurationProject } from "../../api/RushConfigurationProject";
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 // (@types/npm-packlist is missing this API)
-declare module "npm-packlist" {
+declare module 'npm-packlist' {
   export class WalkerSync {
     public readonly result: string[];
     public constructor(opts: { path: string });
@@ -42,11 +42,11 @@ interface IDeployScenarioProjectJson {
 
 // The parsed JSON file structure, as defined by the "deploy-scenario.schema.json" JSON schema
 interface IDeployScenarioJson {
-  deploymentProjectNames: string[],
+  deploymentProjectNames: string[];
   enableSubdeployments?: boolean;
   includeDevDependencies?: boolean;
   includeNpmIgnoreFiles?: boolean;
-  linkCreation?: "default" | "script" | "none";
+  linkCreation?: 'default' | 'script' | 'none';
   projectSettings?: IDeployScenarioProjectJson[];
 }
 
@@ -125,7 +125,7 @@ export class DeployManager {
    */
   private _targetRootFolder: string;
 
-    /**
+  /**
    * The source folder that copying originates from.  Generally it is the repo root folder with rush.json.
    */
   private _sourceRootFolder: string;
@@ -154,8 +154,10 @@ export class DeployManager {
       throw new Error('The scenario name cannot be an empty string');
     }
     if (!this._scenarioNameRegExp.test(scenarioName)) {
-      throw new Error(`"${scenarioName}" is not a valid scenario name. The name must be comprised of`
-        + ' lowercase letters and numbers, separated by single hyphens. Example: "my-scenario"');
+      throw new Error(
+        `"${scenarioName}" is not a valid scenario name. The name must be comprised of` +
+          ' lowercase letters and numbers, separated by single hyphens. Example: "my-scenario"'
+      );
     }
   }
 
@@ -163,14 +165,16 @@ export class DeployManager {
    * Load and validate the scenario config file.  The result is stored in this._deployScenarioJson.
    */
   private _loadConfigFile(scenarioName: string): void {
-    const scenarioFilePath: string = path.join(this._rushConfiguration.commonDeployConfigFolder,
-      `${scenarioName}.json`);
+    const scenarioFilePath: string = path.join(
+      this._rushConfiguration.commonDeployConfigFolder,
+      `${scenarioName}.json`
+    );
 
     if (!FileSystem.exists(scenarioFilePath)) {
       throw new Error('The scenario config file was not found: ' + scenarioFilePath);
     }
 
-    console.log(colors.cyan('Loading deployment scenario: ') + scenarioFilePath)
+    console.log(colors.cyan('Loading deployment scenario: ') + scenarioFilePath);
 
     this._deployScenarioJson = JsonFile.loadAndValidate(scenarioFilePath, DeployManager._jsonSchema);
 
@@ -182,13 +186,17 @@ export class DeployManager {
     for (const projectSetting of this._deployScenarioJson.projectSettings || []) {
       // Validate projectSetting.projectName
       if (!this._rushConfiguration.getProjectByName(projectSetting.projectName)) {
-        throw new Error(`The "projectSettings" section refers to the project name "${projectSetting.projectName}"` +
-          ` which was not found in rush.json`);
+        throw new Error(
+          `The "projectSettings" section refers to the project name "${projectSetting.projectName}"` +
+            ` which was not found in rush.json`
+        );
       }
       for (const additionalProjectsToInclude of projectSetting.additionalProjectsToInclude || []) {
         if (!this._rushConfiguration.getProjectByName(projectSetting.projectName)) {
-          throw new Error(`The "additionalProjectsToInclude" setting refers to the` +
-            ` project name "${additionalProjectsToInclude}" which was not found in rush.json`);
+          throw new Error(
+            `The "additionalProjectsToInclude" setting refers to the` +
+              ` project name "${additionalProjectsToInclude}" which was not found in rush.json`
+          );
         }
       }
       this._deployScenarioProjectJsonsByName.set(projectSetting.projectName, projectSetting);
@@ -198,7 +206,10 @@ export class DeployManager {
   /**
    * Recursively crawl the node_modules dependencies and collect the result in ISubdeploymentState.foldersToCopy.
    */
-  private _collectFoldersRecursive(packageJsonFolderPath: string, subdemploymentState: ISubdeploymentState): void {
+  private _collectFoldersRecursive(
+    packageJsonFolderPath: string,
+    subdemploymentState: ISubdeploymentState
+  ): void {
     const packageJsonRealFolderPath: string = FileSystem.getRealPath(packageJsonFolderPath);
 
     if (!subdemploymentState.foldersToCopy.has(packageJsonRealFolderPath)) {
@@ -230,13 +241,14 @@ export class DeployManager {
 
       // (Used only by the legacy code fragment in the resolve.sync() hook below)
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const fs: typeof import("fs") = require("fs");
+      const fs: typeof import('fs') = require('fs');
 
       for (const dependencyPackageName of allDependencyNames) {
         // The "resolve" library models the Node.js require() API, which gives precedence to "core" system modules
         // over an NPM package with the same name.  But we are traversing package.json dependencies, which refer
         // to system modules.  Appending a "/" forces require() to load the NPM package.
-        const resolveSuffix: string = dependencyPackageName + resolve.isCore(dependencyPackageName) ? '/' : '';
+        const resolveSuffix: string =
+          dependencyPackageName + resolve.isCore(dependencyPackageName) ? '/' : '';
 
         try {
           const resolvedDependency: string = resolve.sync(dependencyPackageName + resolveSuffix, {
@@ -245,7 +257,7 @@ export class DeployManager {
             packageFilter: (pkg, dir) => {
               // point "main" at a file that is guaranteed to exist
               // This helps resolve packages such as @types/node that have no entry point
-              pkg.main = "./package.json";
+              pkg.main = './package.json';
               return pkg;
             },
             realpathSync: (filePath) => {
@@ -256,7 +268,7 @@ export class DeployManager {
                 subdemploymentState.symlinkAnalyzer.analyzePath(filePath);
                 return resolvedPath;
               } catch (realpathErr) {
-                if (realpathErr.code !== "ENOENT") {
+                if (realpathErr.code !== 'ENOENT') {
                   throw realpathErr;
                 }
               }
@@ -272,8 +284,9 @@ export class DeployManager {
             throw new Error(`Error resolving ${dependencyPackageName} from ${packageJsonRealFolderPath}`);
           }
 
-          const dependencyPackageFolderPath: string | undefined
-              = this._packageJsonLookup.tryGetPackageFolderFor(resolvedDependency);
+          const dependencyPackageFolderPath:
+            | string
+            | undefined = this._packageJsonLookup.tryGetPackageFolderFor(resolvedDependency);
           if (!dependencyPackageFolderPath) {
             throw new Error(`Error finding package.json folder for ${resolvedDependency}`);
           }
@@ -296,14 +309,20 @@ export class DeployManager {
    * Example input: "C:\MyRepo\libraries\my-lib"
    * Example output: "C:\MyRepo\common\deploy\my-scenario\libraries\my-lib"
    */
-  private _remapPathForDeployFolder(absolutePathInSourceFolder: string,
-    subdemploymentState: ISubdeploymentState): string {
-
+  private _remapPathForDeployFolder(
+    absolutePathInSourceFolder: string,
+    subdemploymentState: ISubdeploymentState
+  ): string {
     if (!Path.isUnderOrEqual(absolutePathInSourceFolder, this._sourceRootFolder)) {
-      throw new Error("Source path is not under " + this._sourceRootFolder + "\n" + absolutePathInSourceFolder);
+      throw new Error(
+        'Source path is not under ' + this._sourceRootFolder + '\n' + absolutePathInSourceFolder
+      );
     }
     const relativePath: string = path.relative(this._sourceRootFolder, absolutePathInSourceFolder);
-    const absolutePathInTargetFolder: string = path.join(subdemploymentState.targetSubdeploymentFolder, relativePath);
+    const absolutePathInTargetFolder: string = path.join(
+      subdemploymentState.targetSubdeploymentFolder,
+      relativePath
+    );
     return absolutePathInTargetFolder;
   }
 
@@ -313,9 +332,10 @@ export class DeployManager {
    * Example input: "C:\MyRepo\libraries\my-lib"
    * Example output: "libraries/my-lib"
    */
-  private _remapPathForDeployMetadata(absolutePathInSourceFolder: string,
-    subdemploymentState: ISubdeploymentState): string {
-
+  private _remapPathForDeployMetadata(
+    absolutePathInSourceFolder: string,
+    subdemploymentState: ISubdeploymentState
+  ): string {
     if (!Path.isUnderOrEqual(absolutePathInSourceFolder, this._sourceRootFolder)) {
       throw new Error(`Source path is not under ${this._sourceRootFolder}\n${absolutePathInSourceFolder}`);
     }
@@ -323,17 +343,16 @@ export class DeployManager {
     return Text.replaceAll(relativePath, '\\', '/');
   }
 
-
   /**
    * Copy one package folder to the deployment target folder.
    */
   private _deployFolder(sourceFolderPath: string, subdemploymentState: ISubdeploymentState): void {
-
     let useNpmIgnoreFilter: boolean = false;
 
     if (!this._deployScenarioJson.includeNpmIgnoreFiles) {
-      const sourceFolderInfo: IFolderInfo | undefined
-        = subdemploymentState.folderInfosByPath.get(FileSystem.getRealPath(sourceFolderPath));
+      const sourceFolderInfo: IFolderInfo | undefined = subdemploymentState.folderInfosByPath.get(
+        FileSystem.getRealPath(sourceFolderPath)
+      );
       if (sourceFolderInfo) {
         if (sourceFolderInfo.isRushProject) {
           useNpmIgnoreFilter = true;
@@ -347,7 +366,7 @@ export class DeployManager {
       // Use npm-packlist to filter the files.  Using the WalkerSync class (instead of the sync() API) ensures
       // that "bundledDependencies" are not included.
       const walker: npmPacklist.WalkerSync = new npmPacklist.WalkerSync({
-        path: sourceFolderPath
+        path: sourceFolderPath,
       });
       walker.start();
       const npmPackFiles: string[] = walker.result;
@@ -356,13 +375,13 @@ export class DeployManager {
         const copySourcePath: string = path.join(sourceFolderPath, npmPackFile);
         const copyDestinationPath: string = path.join(targetFolderPath, npmPackFile);
 
-        if (subdemploymentState.symlinkAnalyzer.analyzePath(copySourcePath).kind !== "link") {
+        if (subdemploymentState.symlinkAnalyzer.analyzePath(copySourcePath).kind !== 'link') {
           FileSystem.ensureFolder(path.dirname(copyDestinationPath));
 
           FileSystem.copyFile({
             sourcePath: copySourcePath,
             destinationPath: copyDestinationPath,
-            alreadyExistsBehavior: AlreadyExistsBehavior.Error
+            alreadyExistsBehavior: AlreadyExistsBehavior.Error,
           });
         }
       }
@@ -376,7 +395,7 @@ export class DeployManager {
         '**/.git',
         '**/.svn',
         '**/.hg',
-        '**/.DS_Store'
+        '**/.DS_Store',
       ]);
 
       FileSystem.copyFiles({
@@ -386,7 +405,7 @@ export class DeployManager {
         filter: (src: string, dest: string) => {
           const relativeSrc: string = path.relative(sourceFolderPath, src);
           if (!relativeSrc) {
-            return true;  // don't filter sourceFolderPath itself
+            return true; // don't filter sourceFolderPath itself
           }
 
           if (ignoreFilter.ignores(relativeSrc)) {
@@ -400,7 +419,7 @@ export class DeployManager {
           } else {
             return true;
           }
-        }
+        },
       });
     }
   }
@@ -466,14 +485,18 @@ export class DeployManager {
   /**
    * Recursively apply the "additionalProjectToInclude" setting.
    */
-  private _collectAdditionalProjectsToInclude(includedProjectNamesSet: Set<string>, projectName: string): void {
+  private _collectAdditionalProjectsToInclude(
+    includedProjectNamesSet: Set<string>,
+    projectName: string
+  ): void {
     if (includedProjectNamesSet.has(projectName)) {
       return;
     }
     includedProjectNamesSet.add(projectName);
 
-    const projectSettings: IDeployScenarioProjectJson | undefined
-      = this._deployScenarioProjectJsonsByName.get(projectName);
+    const projectSettings:
+      | IDeployScenarioProjectJson
+      | undefined = this._deployScenarioProjectJsonsByName.get(projectName);
     if (projectSettings && projectSettings.additionalProjectsToInclude) {
       for (const additionalProjectToInclude of projectSettings.additionalProjectsToInclude) {
         this._collectAdditionalProjectsToInclude(includedProjectNamesSet, additionalProjectToInclude);
@@ -482,13 +505,15 @@ export class DeployManager {
   }
 
   private _writeDeployMetadata(subdemploymentState: ISubdeploymentState): void {
-    const deployMetadataFilePath: string = path.join(subdemploymentState.targetSubdeploymentFolder,
-      'deploy-metadata.json');
+    const deployMetadataFilePath: string = path.join(
+      subdemploymentState.targetSubdeploymentFolder,
+      'deploy-metadata.json'
+    );
 
     const deployMetadataJson: IDeployMetadataJson = {
       scenarioName: subdemploymentState.scenarioName,
       mainProjectName: subdemploymentState.mainProjectName,
-      links: [ ]
+      links: [],
     };
 
     // Remap the links to be relative to the subdeployment folder
@@ -502,7 +527,7 @@ export class DeployManager {
     }
 
     JsonFile.save(deployMetadataJson, deployMetadataFilePath, {
-      newlineConversion: NewlineKind.OsDefault
+      newlineConversion: NewlineKind.OsDefault,
     });
   }
 
@@ -519,13 +544,15 @@ export class DeployManager {
       const projectFolder: string = FileSystem.getRealPath(rushProject.projectFolder);
       subdemploymentState.folderInfosByPath.set(projectFolder, {
         folderPath: projectFolder,
-        isRushProject: true
+        isRushProject: true,
       });
     }
 
     for (const projectName of includedProjectNamesSet) {
       console.log(`Analyzing project "${projectName}"`);
-      const project: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(projectName);
+      const project: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(
+        projectName
+      );
 
       if (!project) {
         throw new Error(`The project ${projectName} is not defined in rush.json`);
@@ -536,7 +563,7 @@ export class DeployManager {
 
     Sort.sortSet(subdemploymentState.foldersToCopy);
 
-    console.log("Copying folders...");
+    console.log('Copying folders...');
     for (const folderToCopy of subdemploymentState.foldersToCopy) {
       this._deployFolder(folderToCopy, subdemploymentState);
     }
@@ -549,7 +576,7 @@ export class DeployManager {
       FileSystem.copyFile({
         sourcePath: path.join(__dirname, '../../scripts/create-links.js'),
         destinationPath: path.join(subdemploymentState.targetSubdeploymentFolder, 'create-links.js'),
-        alreadyExistsBehavior: AlreadyExistsBehavior.Error
+        alreadyExistsBehavior: AlreadyExistsBehavior.Error,
       });
     }
 
@@ -571,9 +598,11 @@ export class DeployManager {
   /**
    * The main entry point for performing a deployment.
    */
-  public deployScenario(scenarioName: string, overwriteExisting: boolean,
-    targetFolderParameter: string | undefined): void {
-
+  public deployScenario(
+    scenarioName: string,
+    overwriteExisting: boolean,
+    targetFolderParameter: string | undefined
+  ): void {
     DeployManager.validateScenarioName(scenarioName);
 
     if (this._targetRootFolder !== undefined) {
@@ -586,14 +615,16 @@ export class DeployManager {
     if (targetFolderParameter) {
       this._targetRootFolder = path.resolve(targetFolderParameter);
       if (!FileSystem.exists(this._targetRootFolder)) {
-        throw new Error('The specified target folder does not exist: ' + JSON.stringify(targetFolderParameter));
+        throw new Error(
+          'The specified target folder does not exist: ' + JSON.stringify(targetFolderParameter)
+        );
       }
     } else {
       this._targetRootFolder = path.join(this._rushConfiguration.commonFolder, 'deploy');
     }
     this._sourceRootFolder = this._rushConfiguration.rushJsonFolder;
 
-    console.log(colors.cyan("Deploying to target folder:  ") + this._targetRootFolder + '\n');
+    console.log(colors.cyan('Deploying to target folder:  ') + this._targetRootFolder + '\n');
 
     FileSystem.ensureFolder(this._targetRootFolder);
 
@@ -603,8 +634,10 @@ export class DeployManager {
         console.log('Deleting target folder contents because "--overwrite" was specified...');
         FileSystem.ensureEmptyFolder(this._targetRootFolder);
       } else {
-        throw new Error('The deploy target folder is not empty. You can specify "--overwrite"'
-          + ' to recursively delete all folder contents.');
+        throw new Error(
+          'The deploy target folder is not empty. You can specify "--overwrite"' +
+            ' to recursively delete all folder contents.'
+        );
       }
     }
 
@@ -615,25 +648,33 @@ export class DeployManager {
       const usedSubdeploymentFolderNames: Set<string> = new Set();
 
       for (const subdeploymentProjectName of deploymentProjectNames) {
-        const rushProject: RushConfigurationProject | undefined =
-          this._rushConfiguration.getProjectByName(subdeploymentProjectName);
+        const rushProject: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(
+          subdeploymentProjectName
+        );
         if (!rushProject) {
-          throw new Error(`The "deploymentProjectNames" setting specified the name "${subdeploymentProjectName}"` +
-            ` which was not found in rush.json`);
+          throw new Error(
+            `The "deploymentProjectNames" setting specified the name "${subdeploymentProjectName}"` +
+              ` which was not found in rush.json`
+          );
         }
 
         let subdeploymentFolderName: string;
 
-        const projectSettings: IDeployScenarioProjectJson | undefined
-          = this._deployScenarioProjectJsonsByName.get(subdeploymentProjectName);
+        const projectSettings:
+          | IDeployScenarioProjectJson
+          | undefined = this._deployScenarioProjectJsonsByName.get(subdeploymentProjectName);
         if (projectSettings && projectSettings.subdeploymentFolderName) {
           subdeploymentFolderName = projectSettings.subdeploymentFolderName;
         } else {
-          subdeploymentFolderName = this._rushConfiguration.packageNameParser.getUnscopedName(subdeploymentProjectName);
+          subdeploymentFolderName = this._rushConfiguration.packageNameParser.getUnscopedName(
+            subdeploymentProjectName
+          );
         }
         if (usedSubdeploymentFolderNames.has(subdeploymentFolderName)) {
-          throw new Error(`The subdeployment folder name "${subdeploymentFolderName}" is not unique.`
-            + `  Use the "subdeploymentFolderName" setting to specify a different name.`);
+          throw new Error(
+            `The subdeployment folder name "${subdeploymentFolderName}" is not unique.` +
+              `  Use the "subdeploymentFolderName" setting to specify a different name.`
+          );
         }
         usedSubdeploymentFolderNames.add(subdeploymentFolderName);
 
@@ -645,15 +686,17 @@ export class DeployManager {
           targetSubdeploymentFolder: path.join(this._targetRootFolder, subdeploymentFolderName),
           foldersToCopy: new Set(),
           folderInfosByPath: new Map(),
-          symlinkAnalyzer: new SymlinkAnalyzer()
+          symlinkAnalyzer: new SymlinkAnalyzer(),
         };
 
         this._deploySubdeployment(subdemploymentState);
       }
     } else {
       if (deploymentProjectNames.length !== 1) {
-        throw new Error(`The "deploymentProjectNames" setting specifies specifies more than one project;`
-          + ' this is not supported unless the "enableSubdeployments" setting is true.');
+        throw new Error(
+          `The "deploymentProjectNames" setting specifies specifies more than one project;` +
+            ' this is not supported unless the "enableSubdeployments" setting is true.'
+        );
       }
 
       const subdemploymentState: ISubdeploymentState = {
@@ -662,12 +705,12 @@ export class DeployManager {
         targetSubdeploymentFolder: this._targetRootFolder,
         foldersToCopy: new Set(),
         folderInfosByPath: new Map(),
-        symlinkAnalyzer: new SymlinkAnalyzer()
+        symlinkAnalyzer: new SymlinkAnalyzer(),
       };
 
       this._deploySubdeployment(subdemploymentState);
     }
 
-    console.log("\nThe operation completed successfully.");
+    console.log('\nThe operation completed successfully.');
   }
 }

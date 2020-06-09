@@ -1,17 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  ITerminalProvider,
-  TerminalProviderSeverity
-} from './ITerminalProvider';
-import {
-  IColorableSequence,
-  ColorValue,
-  Colors,
-  eolSequence,
-  TextAttribute
-} from './Colors';
+import { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
+import { IColorableSequence, ColorValue, Colors, eolSequence, TextAttribute } from './Colors';
 
 /**
  * This class facilitates writing to a console.
@@ -67,7 +58,7 @@ export class Terminal {
       messageParts.map(
         (part): IColorableSequence => ({
           ...Colors._normalizeStringOrColorableSequence(part),
-          foregroundColor: ColorValue.Yellow
+          foregroundColor: ColorValue.Yellow,
         })
       ),
       TerminalProviderSeverity.warning
@@ -86,10 +77,10 @@ export class Terminal {
         ...messageParts.map(
           (part): IColorableSequence => ({
             ...Colors._normalizeStringOrColorableSequence(part),
-            foregroundColor: ColorValue.Yellow
+            foregroundColor: ColorValue.Yellow,
           })
         ),
-        eolSequence
+        eolSequence,
       ],
       TerminalProviderSeverity.warning
     );
@@ -106,7 +97,7 @@ export class Terminal {
       messageParts.map(
         (part): IColorableSequence => ({
           ...Colors._normalizeStringOrColorableSequence(part),
-          foregroundColor: ColorValue.Red
+          foregroundColor: ColorValue.Red,
         })
       ),
       TerminalProviderSeverity.error
@@ -125,10 +116,10 @@ export class Terminal {
         ...messageParts.map(
           (part): IColorableSequence => ({
             ...Colors._normalizeStringOrColorableSequence(part),
-            foregroundColor: ColorValue.Red
+            foregroundColor: ColorValue.Red,
           })
         ),
-        eolSequence
+        eolSequence,
       ],
       TerminalProviderSeverity.error
     );
@@ -186,7 +177,10 @@ export class Terminal {
     });
   }
 
-  private _serializeFormattableTextSegments(segments: (string | IColorableSequence)[], withColor: boolean): string[] {
+  private _serializeFormattableTextSegments(
+    segments: (string | IColorableSequence)[],
+    withColor: boolean
+  ): string[] {
     const lines: string[] = [];
     let segmentsToJoin: string[] = [];
     let lastSegmentWasEol: boolean = false;
@@ -197,7 +191,6 @@ export class Terminal {
         lines.push(segmentsToJoin.join(''));
         segmentsToJoin = [];
       } else {
-
         if (withColor) {
           const startColorCodes: number[] = [];
           const endColorCodes: number[] = [];
@@ -357,22 +350,14 @@ export class Terminal {
 
           for (let j: number = 0; j < startColorCodes.length; j++) {
             const code: number = startColorCodes[j];
-            segmentsToJoin.push(...[
-              '\u001b[',
-              code.toString(),
-              'm'
-            ]);
+            segmentsToJoin.push(...['\u001b[', code.toString(), 'm']);
           }
 
           segmentsToJoin.push(segment.text);
 
           for (let j: number = endColorCodes.length - 1; j >= 0; j--) {
             const code: number = endColorCodes[j];
-            segmentsToJoin.push(...[
-              '\u001b[',
-              code.toString(),
-              'm'
-            ]);
+            segmentsToJoin.push(...['\u001b[', code.toString(), 'm']);
           }
         } else {
           segmentsToJoin.push(segment.text);

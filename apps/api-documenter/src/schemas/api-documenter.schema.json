@@ -11,10 +11,7 @@
     "outputTarget": {
       "description": "Specifies what type of documentation will be generated",
       "type": "string",
-      "enum": [
-        "docfx",
-        "markdown"
-      ]
+      "enum": ["docfx", "markdown"]
     },
 
     "newlineKind": {

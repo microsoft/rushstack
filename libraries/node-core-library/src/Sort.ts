@@ -45,10 +45,12 @@ export class Sort {
     }
 
     // Null is smaller than anything except undefined
-    if (x === null) { // eslint-disable-line @rushstack/no-null
+    if (x === null) {
+      // eslint-disable-line @rushstack/no-null
       return -1;
     }
-    if (y === null) { // eslint-disable-line @rushstack/no-null
+    if (y === null) {
+      // eslint-disable-line @rushstack/no-null
       return 1;
     }
 
@@ -76,8 +78,11 @@ export class Sort {
    * ```
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static sortBy<T>(array: T[], keySelector: (element: T) => any, comparer: (x: any, y: any) => number
-    = Sort.compareByValue): void {
+  public static sortBy<T>(
+    array: T[],
+    keySelector: (element: T) => any,
+    comparer: (x: any, y: any) => number = Sort.compareByValue
+  ): void {
     LegacyAdapters.sortStable(array, (x, y) => comparer(keySelector(x), keySelector(y)));
   }
 
@@ -107,9 +112,11 @@ export class Sort {
    * ```
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static isSortedBy<T>(array: T[], keySelector: (element: T) => any, comparer: (x: any, y: any) => number
-    = Sort.compareByValue): boolean {
-
+  public static isSortedBy<T>(
+    array: T[],
+    keySelector: (element: T) => any,
+    comparer: (x: any, y: any) => number = Sort.compareByValue
+  ): boolean {
     let previousKey: T | undefined = undefined;
     for (const element of array) {
       const key: T = keySelector(element);
@@ -137,15 +144,18 @@ export class Sort {
    * ```
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static sortMapKeys<K, V>(map: Map<K, V>, keyComparer: (x: K, y: K) => number = Sort.compareByValue): void {
+  public static sortMapKeys<K, V>(
+    map: Map<K, V>,
+    keyComparer: (x: K, y: K) => number = Sort.compareByValue
+  ): void {
     const pairs: [K, V][] = Array.from(map.entries());
 
     // Sorting a map is expensive, so first check whether it's already sorted.
-    if (Sort.isSortedBy(pairs, x => x[0], keyComparer)) {
+    if (Sort.isSortedBy(pairs, (x) => x[0], keyComparer)) {
       return;
     }
 
-    Sort.sortBy(pairs, x => x[0], keyComparer);
+    Sort.sortBy(pairs, (x) => x[0], keyComparer);
     map.clear();
     for (const pair of pairs) {
       map.set(pair[0], pair[1]);
@@ -168,9 +178,11 @@ export class Sort {
    * ```
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static sortSetBy<T>(set: Set<T>, keySelector: (element: T) => any,
-    keyComparer: (x: T, y: T) => number = Sort.compareByValue): void {
-
+  public static sortSetBy<T>(
+    set: Set<T>,
+    keySelector: (element: T) => any,
+    keyComparer: (x: T, y: T) => number = Sort.compareByValue
+  ): void {
     const array: T[] = Array.from(set);
 
     // Sorting a set is expensive, so first check whether it's already sorted.

@@ -14,16 +14,17 @@ export class GitEmailPolicy {
     if (!Git.isGitPresent()) {
       // If Git isn't installed, or this Rush project is not under a Git working folder,
       // then we don't care about the Git email
-      console.log(colors.cyan(
-        'Ignoring Git validation because the Git binary was not found in the shell path.') + os.EOL);
+      console.log(
+        colors.cyan('Ignoring Git validation because the Git binary was not found in the shell path.') +
+          os.EOL
+      );
       return;
     }
 
     if (!Git.isPathUnderGitWorkingTree()) {
       // If Git isn't installed, or this Rush project is not under a Git working folder,
       // then we don't care about the Git email
-      console.log(colors.cyan(
-        'Ignoring Git validation because this is not a Git working folder.' + os.EOL));
+      console.log(colors.cyan('Ignoring Git validation because this is not a Git working folder.' + os.EOL));
       return;
     }
 
@@ -45,19 +46,23 @@ export class GitEmailPolicy {
       // sanity check; a valid email should not contain any whitespace
       // if this fails, then we have another issue to report
       if (!userEmail.match(/^\S+$/g)) {
-        console.log([
-          colors.red('Your Git email address is invalid: ' + JSON.stringify(userEmail)),
-          '',
-          `To configure your Git email address, try something like this:`,
-          '',
-          ...GitEmailPolicy.getEmailExampleLines(rushConfiguration),
-          ''
-        ].join(os.EOL));
+        console.log(
+          [
+            colors.red('Your Git email address is invalid: ' + JSON.stringify(userEmail)),
+            '',
+            `To configure your Git email address, try something like this:`,
+            '',
+            ...GitEmailPolicy.getEmailExampleLines(rushConfiguration),
+            '',
+          ].join(os.EOL)
+        );
         throw new AlreadyReportedError();
       }
     } catch (e) {
       if (e instanceof AlreadyReportedError) {
-        console.log(colors.red('Aborting, so you can go fix your settings.  (Or use --bypass-policy to skip.)'));
+        console.log(
+          colors.red('Aborting, so you can go fix your settings.  (Or use --bypass-policy to skip.)')
+        );
         throw e;
       } else {
         throw e;
@@ -96,21 +101,23 @@ export class GitEmailPolicy {
       // but if it fails, this isn't critical, so don't bother them about it
     }
 
-    console.log([
-      'Hey there!  To keep things tidy, this repo asks you to submit your Git commits using an email like ' +
-        (rushConfiguration.gitAllowedEmailRegExps.length > 1 ? 'one of these patterns:' : 'this pattern:'),
-      '',
-      ...rushConfiguration.gitAllowedEmailRegExps.map((pattern) => '    ' + colors.cyan(pattern)),
-      '',
-      '...but yours is configured like this:',
-      '',
-      `    ${fancyEmail}`,
-      '',
-      'To fix it, you can use commands like this:',
-      '',
-      ...GitEmailPolicy.getEmailExampleLines(rushConfiguration),
-      ''
-    ].join(os.EOL));
+    console.log(
+      [
+        'Hey there!  To keep things tidy, this repo asks you to submit your Git commits using an email like ' +
+          (rushConfiguration.gitAllowedEmailRegExps.length > 1 ? 'one of these patterns:' : 'this pattern:'),
+        '',
+        ...rushConfiguration.gitAllowedEmailRegExps.map((pattern) => '    ' + colors.cyan(pattern)),
+        '',
+        '...but yours is configured like this:',
+        '',
+        `    ${fancyEmail}`,
+        '',
+        'To fix it, you can use commands like this:',
+        '',
+        ...GitEmailPolicy.getEmailExampleLines(rushConfiguration),
+        '',
+      ].join(os.EOL)
+    );
 
     console.log(colors.red('Aborting, so you can go fix your settings.  (Or use --bypass-policy to skip.)'));
     throw new AlreadyReportedError();
@@ -119,7 +126,9 @@ export class GitEmailPolicy {
   public static getEmailExampleLines(rushConfiguration: RushConfiguration): string[] {
     return [
       colors.cyan('    git config --local user.name "Mr. Example"'),
-      colors.cyan(`    git config --local user.email "${rushConfiguration.gitSampleEmail || 'example@contoso.com'}"`)
+      colors.cyan(
+        `    git config --local user.email "${rushConfiguration.gitSampleEmail || 'example@contoso.com'}"`
+      ),
     ];
   }
 }

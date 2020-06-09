@@ -3,11 +3,7 @@
 
 import * as ts from 'typescript';
 import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
-import {
-  ExcerptTokenKind,
-  IExcerptToken,
-  IExcerptTokenRange
-} from '@microsoft/api-extractor-model';
+import { ExcerptTokenKind, IExcerptToken, IExcerptTokenRange } from '@microsoft/api-extractor-model';
 
 import { Span } from '../analyzer/Span';
 import { DeclarationReferenceGenerator } from './DeclarationReferenceGenerator';
@@ -82,9 +78,12 @@ export class ExcerptBuilder {
    * @param excerptTokens - The target token list to append to
    * @param nodesToCapture - A list of child nodes whose token ranges we want to capture
    */
-  public static addDeclaration(excerptTokens: IExcerptToken[], astDeclaration: AstDeclaration,
-    nodesToCapture: IExcerptBuilderNodeToCapture[], referenceGenerator: DeclarationReferenceGenerator): void {
-
+  public static addDeclaration(
+    excerptTokens: IExcerptToken[],
+    astDeclaration: AstDeclaration,
+    nodesToCapture: IExcerptBuilderNodeToCapture[],
+    referenceGenerator: DeclarationReferenceGenerator
+  ): void {
     let stopBeforeChildKind: ts.SyntaxKind | undefined = undefined;
 
     switch (astDeclaration.declaration.kind) {
@@ -114,7 +113,7 @@ export class ExcerptBuilder {
       startingNode: span.node,
       stopBeforeChildKind,
       tokenRangesByNode,
-      disableMergingForNextToken: false
+      disableMergingForNextToken: false,
     });
   }
 
@@ -149,11 +148,15 @@ export class ExcerptBuilder {
       }
 
       if (canonicalReference) {
-        ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Reference,
-          span.prefix, state, canonicalReference);
+        ExcerptBuilder._appendToken(
+          excerptTokens,
+          ExcerptTokenKind.Reference,
+          span.prefix,
+          state,
+          canonicalReference
+        );
       } else {
-        ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Content,
-          span.prefix, state);
+        ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Content, span.prefix, state);
       }
     }
 
@@ -190,24 +193,32 @@ export class ExcerptBuilder {
     return true;
   }
 
-  private static _appendToken(excerptTokens: IExcerptToken[], excerptTokenKind: ExcerptTokenKind,
-    text: string, state: IBuildSpanState, canonicalReference?: DeclarationReference): void {
-
+  private static _appendToken(
+    excerptTokens: IExcerptToken[],
+    excerptTokenKind: ExcerptTokenKind,
+    text: string,
+    state: IBuildSpanState,
+    canonicalReference?: DeclarationReference
+  ): void {
     if (text.length === 0) {
       return;
     }
 
     if (excerptTokenKind !== ExcerptTokenKind.Content) {
-      if (excerptTokenKind === ExcerptTokenKind.Reference && excerptTokens.length > 1
-        && !state.disableMergingForNextToken) {
+      if (
+        excerptTokenKind === ExcerptTokenKind.Reference &&
+        excerptTokens.length > 1 &&
+        !state.disableMergingForNextToken
+      ) {
         // If the previous two tokens were a Reference and a '.', then concatenate
         // all three tokens as a qualified name Reference.
         const previousTokenM1: IExcerptToken = excerptTokens[excerptTokens.length - 1];
         const previousTokenM2: IExcerptToken = excerptTokens[excerptTokens.length - 2];
-        if (previousTokenM1.kind === ExcerptTokenKind.Content
-          && previousTokenM1.text.trim() === '.'
-          && previousTokenM2.kind === ExcerptTokenKind.Reference) {
-
+        if (
+          previousTokenM1.kind === ExcerptTokenKind.Content &&
+          previousTokenM1.text.trim() === '.' &&
+          previousTokenM2.kind === ExcerptTokenKind.Reference
+        ) {
           previousTokenM2.text += '.' + text;
           if (canonicalReference !== undefined) {
             previousTokenM2.canonicalReference = canonicalReference.toString();
@@ -266,5 +277,4 @@ export class ExcerptBuilder {
         return false;
     }
   }
-
 }

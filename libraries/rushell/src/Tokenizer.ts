@@ -30,7 +30,7 @@ export enum TokenKind {
   DollarVariable,
 
   // The end of the input string
-  EndOfInput
+  EndOfInput,
 }
 
 export class Token {
@@ -66,7 +66,7 @@ export class Tokenizer {
   private _currentIndex: number;
 
   public constructor(input: TextRange | string) {
-    if (typeof(input) === 'string') {
+    if (typeof input === 'string') {
       this.input = TextRange.fromString(input);
     } else {
       this.input = input;
@@ -128,12 +128,16 @@ export class Tokenizer {
       let c: string | undefined = this._peekCharacter();
       while (c !== '"') {
         if (c === undefined) {
-          throw new ParseError('The double-quoted string is missing the ending quote',
-            input.getNewRange(startIndex, this._currentIndex));
+          throw new ParseError(
+            'The double-quoted string is missing the ending quote',
+            input.getNewRange(startIndex, this._currentIndex)
+          );
         }
         if (c === '\r' || c === '\n') {
-          throw new ParseError('Newlines are not supported inside strings',
-            input.getNewRange(this._currentIndex, this._currentIndex + 1));
+          throw new ParseError(
+            'Newlines are not supported inside strings',
+            input.getNewRange(this._currentIndex, this._currentIndex + 1)
+          );
         }
 
         // NOTE: POSIX says that backslash acts as an escape character inside a double-quoted string
@@ -147,8 +151,10 @@ export class Tokenizer {
         if (c === '\\') {
           this._readCharacter(); // discard the backslash
           if (this._peekCharacter() === undefined) {
-            throw new ParseError('A backslash must be followed by another character',
-              input.getNewRange(this._currentIndex, this._currentIndex + 1));
+            throw new ParseError(
+              'A backslash must be followed by another character',
+              input.getNewRange(this._currentIndex, this._currentIndex + 1)
+            );
           }
           // Add the escaped character
           text += this._readCharacter();
@@ -171,8 +177,10 @@ export class Tokenizer {
         if (c === '\\') {
           this._readCharacter(); // discard the backslash
           if (this._peekCharacter() === undefined) {
-            throw new ParseError('A backslash must be followed by another character',
-              input.getNewRange(this._currentIndex, this._currentIndex + 1));
+            throw new ParseError(
+              'A backslash must be followed by another character',
+              input.getNewRange(this._currentIndex, this._currentIndex + 1)
+            );
           }
           // Add the escaped character
           text += this._readCharacter();
@@ -192,8 +200,10 @@ export class Tokenizer {
 
       let name: string = this._readCharacter() || '';
       if (!startVariableCharacterRegExp.test(name)) {
-        throw new ParseError('The "$" symbol must be followed by a letter or underscore',
-          input.getNewRange(startIndex, this._currentIndex));
+        throw new ParseError(
+          'The "$" symbol must be followed by a letter or underscore',
+          input.getNewRange(startIndex, this._currentIndex)
+        );
       }
 
       let c: string | undefined = this._peekCharacter();

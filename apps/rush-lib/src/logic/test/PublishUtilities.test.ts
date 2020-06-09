@@ -3,16 +3,10 @@
 
 import * as path from 'path';
 
-import {
-  IChangeInfo,
-  ChangeType
-} from '../../api/ChangeManagement';
+import { IChangeInfo, ChangeType } from '../../api/ChangeManagement';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import {
-  PublishUtilities,
-  IChangeInfoHash
-} from '../PublishUtilities';
+import { PublishUtilities, IChangeInfoHash } from '../PublishUtilities';
 import { ChangeFiles } from '../ChangeFiles';
 
 /* eslint-disable dot-notation */
@@ -139,12 +133,14 @@ describe('findChangeRequests', () => {
 
   it('returns error when mixing hotfix and non-hotfix changes', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    expect(PublishUtilities.findChangeRequests.bind(
-      PublishUtilities,
-      allPackages,
-      packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'hotfixWithPatchChanges'))))
-        .toThrow('Cannot apply hotfix alongside patch change on same package');
+    expect(
+      PublishUtilities.findChangeRequests.bind(
+        PublishUtilities,
+        allPackages,
+        packagesRushConfiguration,
+        new ChangeFiles(path.join(__dirname, 'hotfixWithPatchChanges'))
+      )
+    ).toThrow('Cannot apply hotfix alongside patch change on same package');
   });
 
   it('returns error when adding hotfix with config disabled', () => {
@@ -152,12 +148,14 @@ describe('findChangeRequests', () => {
     // Overload hotfixChangeEnabled function
     packagesRushConfiguration['_hotfixChangeEnabled'] = false;
 
-    expect(PublishUtilities.findChangeRequests.bind(
-      PublishUtilities,
-      allPackages,
-      packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'rootHotfixChange'))))
-        .toThrow('Cannot add hotfix change; hotfixChangeEnabled is false in configuration.');
+    expect(
+      PublishUtilities.findChangeRequests.bind(
+        PublishUtilities,
+        allPackages,
+        packagesRushConfiguration,
+        new ChangeFiles(path.join(__dirname, 'rootHotfixChange'))
+      )
+    ).toThrow('Cannot add hotfix change; hotfixChangeEnabled is false in configuration.');
   });
 
   it('can resolve multiple changes requests on the same package', () => {
@@ -185,7 +183,8 @@ describe('findChangeRequests', () => {
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'orderedChanges')));
+      new ChangeFiles(path.join(__dirname, 'orderedChanges'))
+    );
 
     expect(Object.keys(allChanges)).toHaveLength(3);
     expect(allChanges).toHaveProperty('a');
@@ -204,7 +203,8 @@ describe('findChangeRequests', () => {
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'multipleHotfixChanges')));
+      new ChangeFiles(path.join(__dirname, 'multipleHotfixChanges'))
+    );
 
     expect(Object.keys(allChanges)).toHaveLength(4);
     expect(allChanges).toHaveProperty('a');
@@ -228,7 +228,8 @@ describe('findChangeRequests', () => {
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'explicitVersionChange')));
+      new ChangeFiles(path.join(__dirname, 'explicitVersionChange'))
+    );
 
     expect(Object.keys(allChanges)).toHaveLength(2);
     expect(allChanges).toHaveProperty('c');
@@ -245,7 +246,8 @@ describe('findChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'repo', 'changes')),
       false,
       undefined,
-      new Set<string>(['a', 'b', 'e']));
+      new Set<string>(['a', 'b', 'e'])
+    );
     expect(Object.keys(allChanges)).toHaveLength(5);
     expect(allChanges['a'].newVersion).toEqual('1.0.0');
     expect(allChanges['b'].newVersion).toEqual('2.0.0');
@@ -261,7 +263,9 @@ describe('sortChangeRequests', () => {
   let rushConfiguration: RushConfiguration;
 
   beforeEach(() => {
-    rushConfiguration = RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json'));
+    rushConfiguration = RushConfiguration.loadFromConfigurationFile(
+      path.resolve(__dirname, 'packages', 'rush.json')
+    );
   });
 
   it('can return a sorted array of the change requests to be published in the correct order', () => {
@@ -269,7 +273,8 @@ describe('sortChangeRequests', () => {
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
       rushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'multipleChanges')));
+      new ChangeFiles(path.join(__dirname, 'multipleChanges'))
+    );
     const orderedChanges: IChangeInfo[] = PublishUtilities.sortChangeRequests(allChanges);
 
     expect(orderedChanges).toHaveLength(3);
@@ -291,44 +296,43 @@ describe('isRangeDependency', () => {
 
 describe('getNewDependencyVersion', () => {
   it('can update dependency versions', () => {
-    const dependencies: { [key: string]: string} = {
-      'a': '~1.0.0',
-      'b': '^1.0.0',
-      'c': '>=1.0.0 <2.0.0'
+    const dependencies: { [key: string]: string } = {
+      a: '~1.0.0',
+      b: '^1.0.0',
+      c: '>=1.0.0 <2.0.0',
     };
-    expect(PublishUtilities.getNewDependencyVersion(dependencies,
-      'a', '1.1.0')).toEqual('~1.1.0');
-    expect(PublishUtilities.getNewDependencyVersion(dependencies,
-      'b', '1.2.0')).toEqual('^1.2.0');
-    expect(PublishUtilities.getNewDependencyVersion(dependencies,
-      'c', '1.3.0')).toEqual('>=1.3.0 <2.0.0');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies, 'a', '1.1.0')).toEqual('~1.1.0');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies, 'b', '1.2.0')).toEqual('^1.2.0');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies, 'c', '1.3.0')).toEqual('>=1.3.0 <2.0.0');
   });
 
   it('can update dependency versions with prereleases', () => {
-    const dependencies: { [key: string]: string} = {
-      'a': '~1.0.0-pr.1',
-      'b': '^1.0.0-pr.1',
-      'c': '>=1.0.0-pr.1 <2.0.0'
+    const dependencies: { [key: string]: string } = {
+      a: '~1.0.0-pr.1',
+      b: '^1.0.0-pr.1',
+      c: '>=1.0.0-pr.1 <2.0.0',
     };
-    expect(PublishUtilities.getNewDependencyVersion(dependencies,
-      'a', '1.1.0-pr.1')).toEqual('~1.1.0-pr.1');
-    expect(PublishUtilities.getNewDependencyVersion(dependencies,
-      'b', '1.2.0-pr.2')).toEqual('^1.2.0-pr.2');
-    expect(PublishUtilities.getNewDependencyVersion(dependencies,
-      'c', '1.3.0-pr.3')).toEqual('>=1.3.0-pr.3 <2.0.0');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies, 'a', '1.1.0-pr.1')).toEqual('~1.1.0-pr.1');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies, 'b', '1.2.0-pr.2')).toEqual('^1.2.0-pr.2');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies, 'c', '1.3.0-pr.3')).toEqual(
+      '>=1.3.0-pr.3 <2.0.0'
+    );
   });
 
   it('can update to prerelease', () => {
-    const dependencies: { [key: string]: string} = {
-      'a': '~1.0.0',
-      'b': '^1.0.0',
-      'c': '>=1.0.0 <2.0.0'
+    const dependencies: { [key: string]: string } = {
+      a: '~1.0.0',
+      b: '^1.0.0',
+      c: '>=1.0.0 <2.0.0',
     };
-    expect(PublishUtilities.getNewDependencyVersion(dependencies,
-      'a', '1.0.0-hotfix.0')).toEqual('~1.0.0-hotfix.0');
-    expect(PublishUtilities.getNewDependencyVersion(dependencies,
-      'b', '1.0.0-hotfix.0')).toEqual('^1.0.0-hotfix.0');
-    expect(PublishUtilities.getNewDependencyVersion(dependencies,
-      'c', '1.0.0-hotfix.0')).toEqual('>=1.0.0-hotfix.0 <2.0.0');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies, 'a', '1.0.0-hotfix.0')).toEqual(
+      '~1.0.0-hotfix.0'
+    );
+    expect(PublishUtilities.getNewDependencyVersion(dependencies, 'b', '1.0.0-hotfix.0')).toEqual(
+      '^1.0.0-hotfix.0'
+    );
+    expect(PublishUtilities.getNewDependencyVersion(dependencies, 'c', '1.0.0-hotfix.0')).toEqual(
+      '>=1.0.0-hotfix.0 <2.0.0'
+    );
   });
 });

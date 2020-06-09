@@ -64,7 +64,7 @@ export interface IProcessAssetOptionsBase {
   chunkHasLocalizedModules: (chunk: Webpack.compilation.Chunk) => boolean;
 }
 
-export interface IProcessNonLocalizedAssetOptions extends IProcessAssetOptionsBase { }
+export interface IProcessNonLocalizedAssetOptions extends IProcessAssetOptionsBase {}
 
 export interface IProcessLocalizedAssetOptions extends IProcessAssetOptionsBase {
   locales: Set<string>;
@@ -88,7 +88,9 @@ export const PLACEHOLDER_REGEX: RegExp = new RegExp(
 );
 
 export class AssetProcessor {
-  public static processLocalizedAsset(options: IProcessLocalizedAssetOptions): Map<string, IProcessAssetResult> {
+  public static processLocalizedAsset(
+    options: IProcessLocalizedAssetOptions
+  ): Map<string, IProcessAssetResult> {
     const assetSource: string = options.asset.source();
 
     const parsedAsset: IParseResult = AssetProcessor._parseStringToReconstructionSequence(
@@ -107,7 +109,9 @@ export class AssetProcessor {
     const parsedAssetName: IParseResult = AssetProcessor._parseStringToReconstructionSequence(
       options.plugin,
       options.assetName,
-      () => { throw new Error('unsupported'); }
+      () => {
+        throw new Error('unsupported');
+      }
     );
     const reconstructedAssetName: ILocalizedReconstructionResult = AssetProcessor._reconstructLocalized(
       parsedAssetName.reconstructionSeries,
@@ -123,26 +127,23 @@ export class AssetProcessor {
       newAsset.source = () => source;
       newAsset.size = () => size;
 
-      result.set(
-        locale,
-        {
-          filename: reconstructedAssetName.result.get(locale)!.source,
-          asset: newAsset
-        }
-      );
+      result.set(locale, {
+        filename: reconstructedAssetName.result.get(locale)!.source,
+        asset: newAsset,
+      });
     }
 
     const issues: string[] = [
       ...parsedAsset.issues,
       ...reconstructedAsset.issues,
       ...parsedAssetName.issues,
-      ...reconstructedAssetName.issues
+      ...reconstructedAssetName.issues,
     ];
 
     if (issues.length > 0) {
-      options.compilation.errors.push(Error(
-        `localization:\n${issues.map((issue) => `  ${issue}`).join('\n')}`
-      ));
+      options.compilation.errors.push(
+        Error(`localization:\n${issues.map((issue) => `  ${issue}`).join('\n')}`)
+      );
     }
 
     return result;
@@ -165,7 +166,9 @@ export class AssetProcessor {
     const parsedAssetName: IParseResult = AssetProcessor._parseStringToReconstructionSequence(
       options.plugin,
       options.assetName,
-      () => { throw new Error('unsupported'); }
+      () => {
+        throw new Error('unsupported');
+      }
     );
     const reconstructedAssetName: INonLocalizedReconstructionResult = AssetProcessor._reconstructNonLocalized(
       parsedAssetName.reconstructionSeries,
@@ -177,13 +180,13 @@ export class AssetProcessor {
       ...parsedAsset.issues,
       ...reconstructedAsset.issues,
       ...parsedAssetName.issues,
-      ...reconstructedAssetName.issues
+      ...reconstructedAssetName.issues,
     ];
 
     if (issues.length > 0) {
-      options.compilation.errors.push(Error(
-        `localization:\n${issues.map((issue) => `  ${issue}`).join('\n')}`
-      ));
+      options.compilation.errors.push(
+        Error(`localization:\n${issues.map((issue) => `  ${issue}`).join('\n')}`)
+      );
     }
 
     const newAsset: IAsset = lodash.clone(options.asset);
@@ -191,7 +194,7 @@ export class AssetProcessor {
     newAsset.size = () => reconstructedAsset.result.size;
     return {
       filename: reconstructedAssetName.result.source,
-      asset: newAsset
+      asset: newAsset,
     };
   }
 
@@ -225,7 +228,7 @@ export class AssetProcessor {
               } else {
                 issues.push(
                   `The string "${localizedElement.stringName}" in "${localizedElement.locFilePath}" is missing in ` +
-                  `the locale ${locale}`
+                    `the locale ${locale}`
                 );
 
                 newValue = '-- MISSING STRING --';
@@ -248,7 +251,7 @@ export class AssetProcessor {
             newValue = newValue.replace(/\'/g, `${escapingCharacterSequence}u0027`);
 
             reconstruction.push(newValue);
-            sizeDiff += (newValue.length - localizedElement.size);
+            sizeDiff += newValue.length - localizedElement.size;
             break;
           }
 
@@ -256,25 +259,22 @@ export class AssetProcessor {
             const dynamicElement: IDynamicReconstructionElement = element as IDynamicReconstructionElement;
             const newValue: string = dynamicElement.valueFn(locale, dynamicElement.token);
             reconstruction.push(newValue);
-            sizeDiff += (newValue.length - dynamicElement.size);
+            sizeDiff += newValue.length - dynamicElement.size;
             break;
           }
         }
       }
 
       const newAssetSource: string = reconstruction.join('');
-      localizedResults.set(
-        locale,
-        {
-          source: newAssetSource,
-          size: initialSize + sizeDiff
-        }
-      );
+      localizedResults.set(locale, {
+        source: newAssetSource,
+        size: initialSize + sizeDiff,
+      });
     }
 
     return {
       issues,
-      result: localizedResults
+      result: localizedResults,
     };
   }
 
@@ -299,12 +299,12 @@ export class AssetProcessor {
           const localizedElement: ILocalizedReconstructionElement = element as ILocalizedReconstructionElement;
           issues.push(
             `The string "${localizedElement.stringName}" in "${localizedElement.locFilePath}" appeared in an asset ` +
-            'that is not expected to contain localized resources.'
+              'that is not expected to contain localized resources.'
           );
 
           const newValue: string = '-- NOT EXPECTED TO BE LOCALIZED --';
           reconstruction.push(newValue);
-          sizeDiff += (newValue.length - localizedElement.size);
+          sizeDiff += newValue.length - localizedElement.size;
           break;
         }
 
@@ -312,7 +312,7 @@ export class AssetProcessor {
           const dynamicElement: IDynamicReconstructionElement = element as IDynamicReconstructionElement;
           const newValue: string = dynamicElement.valueFn(noStringsLocaleName, dynamicElement.token);
           reconstruction.push(newValue);
-          sizeDiff += (newValue.length - dynamicElement.size);
+          sizeDiff += newValue.length - dynamicElement.size;
           break;
         }
       }
@@ -323,8 +323,8 @@ export class AssetProcessor {
       issues,
       result: {
         source: newAssetSource,
-        size: initialSize + sizeDiff
-      }
+        size: initialSize + sizeDiff,
+      },
     };
   }
 
@@ -338,10 +338,11 @@ export class AssetProcessor {
 
     let lastIndex: number = 0;
     let regexResult: RegExpExecArray | null;
-    while (regexResult = PLACEHOLDER_REGEX.exec(source)) { // eslint-disable-line no-cond-assign
+    while ((regexResult = PLACEHOLDER_REGEX.exec(source))) {
+      // eslint-disable-line no-cond-assign
       const staticElement: IStaticReconstructionElement = {
         kind: 'static',
-        staticString: source.substring(lastIndex, regexResult.index)
+        staticString: source.substring(lastIndex, regexResult.index),
       };
       reconstructionSeries.push(staticElement);
 
@@ -355,7 +356,7 @@ export class AssetProcessor {
             issues.push(`Missing placeholder ${placeholder}`);
             const brokenLocalizedElement: IStaticReconstructionElement = {
               kind: 'static',
-              staticString: placeholder
+              staticString: placeholder,
             };
             localizedReconstructionElement = brokenLocalizedElement;
           } else {
@@ -377,7 +378,7 @@ export class AssetProcessor {
             kind: 'dynamic',
             valueFn: (locale: string) => locale,
             size: placeholder.length,
-            escapedBackslash: escapedBackslash
+            escapedBackslash: escapedBackslash,
           };
           localizedReconstructionElement = dynamicElement;
           break;
@@ -389,13 +390,13 @@ export class AssetProcessor {
             valueFn: jsonpFunction,
             size: placeholder.length,
             escapedBackslash: escapedBackslash,
-            token: token.substring(1, token.length - 1)
+            token: token.substring(1, token.length - 1),
           };
           localizedReconstructionElement = dynamicElement;
           break;
         }
 
-        default:{
+        default: {
           throw new Error(`Unexpected label ${elementLabel}`);
         }
       }
@@ -406,13 +407,13 @@ export class AssetProcessor {
 
     const lastElement: IStaticReconstructionElement = {
       kind: 'static',
-      staticString: source.substr(lastIndex)
+      staticString: source.substr(lastIndex),
     };
     reconstructionSeries.push(lastElement);
 
     return {
       issues,
-      reconstructionSeries
+      reconstructionSeries,
     };
   }
 
@@ -458,8 +459,10 @@ export class AssetProcessor {
           throw new Error('Missing locale name.');
         }
 
-        return `(${JSON.stringify([locale, noStringsLocaleName])})[${JSON.stringify(chunkMapping)}[${chunkIdToken}]]`;
-      }
+        return `(${JSON.stringify([locale, noStringsLocaleName])})[${JSON.stringify(
+          chunkMapping
+        )}[${chunkIdToken}]]`;
+      };
     }
   }
 }

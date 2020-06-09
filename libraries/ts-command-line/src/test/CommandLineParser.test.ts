@@ -11,7 +11,7 @@ class TestAction extends CommandLineAction {
     super({
       actionName: 'do:the-job',
       summary: 'does the job',
-      documentation: 'a longer description'
+      documentation: 'a longer description',
     });
   }
 
@@ -24,7 +24,7 @@ class TestAction extends CommandLineAction {
   protected onDefineParameters(): void {
     this._flag = this.defineFlagParameter({
       parameterLongName: '--flag',
-      description: 'The flag'
+      description: 'The flag',
     });
   }
 }
@@ -33,7 +33,7 @@ class TestCommandLine extends CommandLineParser {
   public constructor() {
     super({
       toolFilename: 'example',
-      toolDescription: 'An example project'
+      toolDescription: 'An example project',
     });
 
     this.addAction(new TestAction());
@@ -45,7 +45,6 @@ class TestCommandLine extends CommandLineParser {
 }
 
 describe('CommandLineParser', () => {
-
   it('executes an action', () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
 
@@ -57,5 +56,4 @@ describe('CommandLineParser', () => {
       expect(action.done).toBe(true);
     });
   });
-
 });

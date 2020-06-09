@@ -19,7 +19,7 @@ export enum ChangeType {
   hotfix = 2,
   patch = 3,
   minor = 4,
-  major = 5
+  major = 5,
 }
 
 /**

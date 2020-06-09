@@ -14,7 +14,7 @@ export class GenerateAction extends CommandLineAction {
     super({
       actionName: 'generate',
       summary: 'Generates a BuildXL configuration for the current Rush repository.',
-      documentation: 'Generates a BuildXL configuration for the current Rush repository.'
+      documentation: 'Generates a BuildXL configuration for the current Rush repository.',
     });
 
     this._terminal = terminal;
@@ -29,10 +29,10 @@ export class GenerateAction extends CommandLineAction {
       throw new Error('Environment variable BUILDXL_BIN not defined');
     }
 
-    const generator: BxlModulesGenerator =
-        new BxlModulesGenerator(
-          RushConfiguration.loadFromDefaultLocation(),
-          process.env.BUILDXL_BIN);
+    const generator: BxlModulesGenerator = new BxlModulesGenerator(
+      RushConfiguration.loadFromDefaultLocation(),
+      process.env.BUILDXL_BIN
+    );
 
     await generator.run();
     this._terminal.writeLine(`Successfully generated BuildXL configuration.`);

@@ -2,7 +2,10 @@
 // See LICENSE in the project root for license information.
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const exportedObject: any = [['A', 'STYLE 1'], ['B', 'STYLE 2']];
+const exportedObject: any = [
+  ['A', 'STYLE 1'],
+  ['B', 'STYLE 2'],
+];
 
 exportedObject.locals = 'locals';
 

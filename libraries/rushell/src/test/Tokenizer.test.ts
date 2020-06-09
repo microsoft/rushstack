@@ -4,10 +4,7 @@
 import { Tokenizer, TokenKind, Token } from '../Tokenizer';
 
 function escape(s: string): string {
-  return s.replace(/\n/g, '[n]')
-    .replace(/\r/g, '[r]')
-    .replace(/\t/g, '[t]')
-    .replace(/\\/g, '[b]');
+  return s.replace(/\n/g, '[n]').replace(/\r/g, '[r]').replace(/\t/g, '[t]').replace(/\\/g, '[b]');
 }
 
 function tokenize(input: string): Token[] {
@@ -18,21 +15,17 @@ function tokenize(input: string): Token[] {
 function matchSnapshot(input: string): void {
   const tokenizer: Tokenizer = new Tokenizer(input);
 
-  const reportedTokens: { kind: string, value: string }[] = tokenizer.readTokens().map(
-    token => {
-      return {
-        kind: TokenKind[token.kind],
-        value: escape(token.toString())
-      };
-    }
-  );
+  const reportedTokens: { kind: string; value: string }[] = tokenizer.readTokens().map((token) => {
+    return {
+      kind: TokenKind[token.kind],
+      value: escape(token.toString()),
+    };
+  });
 
-  expect(
-    {
-      input: escape(tokenizer.input.toString()),
-      tokens: reportedTokens
-    }
-  ).toMatchSnapshot();
+  expect({
+    input: escape(tokenizer.input.toString()),
+    tokens: reportedTokens,
+  }).toMatchSnapshot();
 }
 
 test('00: empty inputs', () => {

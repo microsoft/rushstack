@@ -8,7 +8,7 @@ import * as os from 'os';
  * @public
  */
 export const enum Encoding {
-  Utf8 = 'utf8'
+  Utf8 = 'utf8',
 }
 
 /**
@@ -32,7 +32,7 @@ export const enum NewlineKind {
   /**
    * Default newline type for this operating system (`os.EOL`).
    */
-  OsDefault = 'os'
+  OsDefault = 'os',
 }
 
 /**
@@ -79,7 +79,7 @@ export class Text {
    * Converts all newlines in the provided string to use the specified newline type.
    */
   public static convertTo(input: string, newlineKind: NewlineKind): string {
-    const newline: string = newlineKind === NewlineKind.OsDefault ? os.EOL : newlineKind as string;
+    const newline: string = newlineKind === NewlineKind.OsDefault ? os.EOL : (newlineKind as string);
     return input.replace(Text._newLineRegEx, newline);
   }
 

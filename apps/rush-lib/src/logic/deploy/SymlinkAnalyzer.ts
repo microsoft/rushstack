@@ -1,14 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  FileSystem,
-  FileSystemStats,
-  Sort,
-  InternalError,
-} from "@rushstack/node-core-library";
+import { FileSystem, FileSystemStats, Sort, InternalError } from '@rushstack/node-core-library';
 
-import * as path from "path";
+import * as path from 'path';
 
 /**
  * Represents a file object analyzed by {@link SymlinkAnalyzer}.
@@ -69,7 +64,7 @@ export class SymlinkAnalyzer {
     let pathSegments: string[] = path.resolve(inputPath).split(path.sep);
     let pathSegmentsIndex: number = 0;
 
-    for (; ;) {
+    for (;;) {
       const currentPath: string = pathSegments.slice(0, pathSegmentsIndex + 1).join(path.sep);
 
       if (currentPath === '') {
@@ -89,17 +84,17 @@ export class SymlinkAnalyzer {
           currentNode = {
             kind: 'link',
             nodePath: currentPath,
-            linkTarget: resolvedLinkTargetPath
+            linkTarget: resolvedLinkTargetPath,
           };
         } else if (linkStats.isDirectory()) {
           currentNode = {
             kind: 'folder',
-            nodePath: currentPath
+            nodePath: currentPath,
           };
         } else if (linkStats.isFile()) {
           currentNode = {
             kind: 'file',
-            nodePath: currentPath
+            nodePath: currentPath,
           };
         } else {
           throw new Error('Unknown object type: ' + currentPath);
@@ -121,7 +116,7 @@ export class SymlinkAnalyzer {
             const linkInfo: ILinkInfo = {
               kind: targetIsDirectory ? 'folderLink' : 'fileLink',
               linkPath: currentNode.nodePath,
-              targetPath: targetNode.nodePath
+              targetPath: targetNode.nodePath,
             };
             this._linkInfosByPath.set(currentNode.nodePath, linkInfo);
           }
@@ -152,7 +147,7 @@ export class SymlinkAnalyzer {
    */
   public reportSymlinks(): ILinkInfo[] {
     const list: ILinkInfo[] = [...this._linkInfosByPath.values()];
-    Sort.sortBy(list, x => x.linkPath);
+    Sort.sortBy(list, (x) => x.linkPath);
     return list;
   }
 }

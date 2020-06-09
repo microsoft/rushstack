@@ -56,8 +56,10 @@ export interface ApiNameMixin extends ApiItem {
  *
  * @public
  */
-export function ApiNameMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiNameMixin) { // eslint-disable-line @typescript-eslint/no-explicit-any
+export function ApiNameMixin<TBaseClass extends IApiItemConstructor>(
+  baseClass: TBaseClass
+): TBaseClass & (new (...args: any[]) => ApiNameMixin) {
+  // eslint-disable-line @typescript-eslint/no-explicit-any
 
   abstract class MixedClass extends baseClass implements ApiNameMixin {
     public readonly [_name]: string;
@@ -71,9 +73,11 @@ export function ApiNameMixin<TBaseClass extends IApiItemConstructor>(baseClass: 
     }
 
     /** @override */
-    public static onDeserializeInto(options: Partial<IApiNameMixinOptions>, context: DeserializerContext,
-      jsonObject: IApiNameMixinJson): void {
-
+    public static onDeserializeInto(
+      options: Partial<IApiNameMixinOptions>,
+      context: DeserializerContext,
+      jsonObject: IApiNameMixinJson
+    ): void {
       baseClass.onDeserializeInto(options, context, jsonObject);
 
       options.name = jsonObject.name;

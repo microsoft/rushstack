@@ -90,5 +90,5 @@ export const enum PosixModeBits {
   /**
    * An alias combining OthersExecute, GroupExecute, and UserExecute permission bits.
    */
-  AllExecute = OthersExecute | GroupExecute | UserExecute
+  AllExecute = OthersExecute | GroupExecute | UserExecute,
 }

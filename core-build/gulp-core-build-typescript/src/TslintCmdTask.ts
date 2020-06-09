@@ -5,10 +5,7 @@ import * as path from 'path';
 import { JsonFile, JsonObject } from '@rushstack/node-core-library';
 import { TslintRunner as TTslintRunner } from '@microsoft/rush-stack-compiler-3.1';
 
-import {
-  RSCTask,
-  IRSCTaskConfig
-} from './RSCTask';
+import { RSCTask, IRSCTaskConfig } from './RSCTask';
 
 /**
  * @public
@@ -25,12 +22,9 @@ export interface ITslintCmdTaskConfig extends IRSCTaskConfig {
  */
 export class TslintCmdTask extends RSCTask<ITslintCmdTaskConfig> {
   public constructor() {
-    super(
-      'tslint',
-      {
-        displayAsError: false
-      }
-    );
+    super('tslint', {
+      displayAsError: false,
+    });
   }
 
   public loadSchema(): JsonObject {
@@ -45,7 +39,7 @@ export class TslintCmdTask extends RSCTask<ITslintCmdTaskConfig> {
         displayAsError: this.taskConfig.displayAsError,
 
         fileError: this.fileError.bind(this),
-        fileWarning: this.fileWarning.bind(this)
+        fileWarning: this.fileWarning.bind(this),
       },
       this.buildFolder,
       this._terminalProvider

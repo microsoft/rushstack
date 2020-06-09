@@ -18,27 +18,13 @@ export { ApiExtractorRunner } from './ApiExtractorRunner';
 export {
   RushStackCompilerBase,
   IRushStackCompilerBaseOptions,
-  WriteFileIssueFunction
+  WriteFileIssueFunction,
 } from './RushStackCompilerBase';
 export { StandardBuildFolders } from './StandardBuildFolders';
-export {
-  TypescriptCompiler,
-  ITypescriptCompilerOptions
-} from './TypescriptCompiler';
-export {
-  ILintRunnerConfig
-} from './ILintRunnerConfig';
-export {
-  LintRunner
-} from './LintRunner';
-export {
-  ITslintRunnerConfig,
-  TslintRunner
-} from './TslintRunner';
+export { TypescriptCompiler, ITypescriptCompilerOptions } from './TypescriptCompiler';
+export { ILintRunnerConfig } from './ILintRunnerConfig';
+export { LintRunner } from './LintRunner';
+export { ITslintRunnerConfig, TslintRunner } from './TslintRunner';
 export { ToolPaths } from './ToolPaths';
 
-export {
-  Typescript,
-  Tslint,
-  ApiExtractor
-} from './ToolPackages';
+export { Typescript, Tslint, ApiExtractor } from './ToolPackages';

@@ -9,9 +9,10 @@ export class PackageDocComment {
   /**
    * For the given source file, see if it starts with a TSDoc comment containing the `@packageDocumentation` tag.
    */
-  public static tryFindInSourceFile(sourceFile: ts.SourceFile,
-    collector: Collector): ts.TextRange | undefined {
-
+  public static tryFindInSourceFile(
+    sourceFile: ts.SourceFile,
+    collector: Collector
+  ): ts.TextRange | undefined {
     // The @packageDocumentation comment is special because it is not attached to an AST
     // definition.  Instead, it is part of the "trivia" tokens that the compiler treats
     // as irrelevant white space.
@@ -47,8 +48,8 @@ export class PackageDocComment {
       // wrong place?  This sanity check helps people to figure out why there comment isn't working.
       for (const statement of sourceFile.statements) {
         const ranges: ts.CommentRange[] = [];
-        ranges.push(...ts.getLeadingCommentRanges(sourceFile.text, statement.getFullStart()) || []);
-        ranges.push(...ts.getTrailingCommentRanges(sourceFile.text, statement.getEnd()) || []);
+        ranges.push(...(ts.getLeadingCommentRanges(sourceFile.text, statement.getFullStart()) || []));
+        ranges.push(...(ts.getTrailingCommentRanges(sourceFile.text, statement.getEnd()) || []));
 
         for (const commentRange of ranges) {
           const commentBody: string = sourceFile.text.substring(commentRange.pos, commentRange.end);
@@ -57,7 +58,8 @@ export class PackageDocComment {
             collector.messageRouter.addAnalyzerIssueForPosition(
               ExtractorMessageId.MisplacedPackageTag,
               'The @packageDocumentation comment must appear at the top of entry point *.d.ts file',
-              sourceFile, commentRange.pos
+              sourceFile,
+              commentRange.pos
             );
             break;
           }
@@ -67,5 +69,4 @@ export class PackageDocComment {
 
     return packageCommentRange;
   }
-
 }

@@ -63,5 +63,5 @@ export const enum ConsoleMessageId {
   /**
    * Used for the information printed when the "--diagnostics" flag is enabled.
    */
-  Diagnostics = 'console-diagnostics'
+  Diagnostics = 'console-diagnostics',
 }

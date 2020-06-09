@@ -7,7 +7,7 @@ import * as os from 'os';
 import {
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
-  CommandLineStringParameter
+  CommandLineStringParameter,
 } from '@rushstack/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
@@ -37,35 +37,38 @@ export abstract class BaseInstallAction extends BaseRushAction {
     this._purgeParameter = this.defineFlagParameter({
       parameterLongName: '--purge',
       parameterShortName: '-p',
-      description: 'Perform "rush purge" before starting the installation'
+      description: 'Perform "rush purge" before starting the installation',
     });
     this._bypassPolicyParameter = this.defineFlagParameter({
       parameterLongName: '--bypass-policy',
-      description: 'Overrides enforcement of the "gitPolicy" rules from rush.json (use honorably!)'
+      description: 'Overrides enforcement of the "gitPolicy" rules from rush.json (use honorably!)',
     });
     this._noLinkParameter = this.defineFlagParameter({
       parameterLongName: '--no-link',
-      description: 'If "--no-link" is specified, then project symlinks will NOT be created'
-        + ' after the installation completes.  You will need to run "rush link" manually.'
-        + ' This flag is useful for automated builds that want to report stages individually'
-        + ' or perform extra operations in between the two stages.'
+      description:
+        'If "--no-link" is specified, then project symlinks will NOT be created' +
+        ' after the installation completes.  You will need to run "rush link" manually.' +
+        ' This flag is useful for automated builds that want to report stages individually' +
+        ' or perform extra operations in between the two stages.',
     });
     this._networkConcurrencyParameter = this.defineIntegerParameter({
       parameterLongName: '--network-concurrency',
       argumentName: 'COUNT',
-      description: 'If specified, limits the maximum number of concurrent network requests.'
-        + '  This is useful when troubleshooting network failures.'
+      description:
+        'If specified, limits the maximum number of concurrent network requests.' +
+        '  This is useful when troubleshooting network failures.',
     });
     this._debugPackageManagerParameter = this.defineFlagParameter({
       parameterLongName: '--debug-package-manager',
-      description: 'Activates verbose logging for the package manager. You will probably want to pipe'
-        + ' the output of Rush to a file when using this command.'
+      description:
+        'Activates verbose logging for the package manager. You will probably want to pipe' +
+        ' the output of Rush to a file when using this command.',
     });
     this._maxInstallAttempts = this.defineIntegerParameter({
       parameterLongName: '--max-install-attempts',
       argumentName: 'NUMBER',
       description: `Overrides the default maximum number of install attempts.`,
-      defaultValue: RushConstants.defaultMaxInstallAttempts
+      defaultValue: RushConstants.defaultMaxInstallAttempts,
     });
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }
@@ -74,7 +77,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
   protected run(): Promise<void> {
     VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, {
-      variant: this._variant.value
+      variant: this._variant.value,
     });
 
     const stopwatch: Stopwatch = Stopwatch.start();
@@ -99,8 +102,10 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     if (this._networkConcurrencyParameter.value) {
       if (this.rushConfiguration.packageManager !== 'pnpm') {
-        throw new Error(`The "${this._networkConcurrencyParameter.longName}" parameter is`
-          + ` only supported when using the PNPM package manager.`);
+        throw new Error(
+          `The "${this._networkConcurrencyParameter.longName}" parameter is` +
+            ` only supported when using the PNPM package manager.`
+        );
       }
     }
 
@@ -119,7 +124,8 @@ export abstract class BaseInstallAction extends BaseRushAction {
       installManagerOptions
     );
 
-    return installManager.doInstall()
+    return installManager
+      .doInstall()
       .then(() => {
         purgeManager.deleteAll();
         stopwatch.stop();
@@ -128,12 +134,18 @@ export abstract class BaseInstallAction extends BaseRushAction {
         this.eventHooksManager.handle(Event.postRushInstall, this.parser.isDebug);
 
         if (warnAboutScriptUpdate) {
-          console.log(os.EOL + colors.yellow('Rush refreshed some files in the "common/scripts" folder.'
-            + '  Please commit this change to Git.'));
+          console.log(
+            os.EOL +
+              colors.yellow(
+                'Rush refreshed some files in the "common/scripts" folder.' +
+                  '  Please commit this change to Git.'
+              )
+          );
         }
 
-        console.log(os.EOL + colors.green(
-          `Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`));
+        console.log(
+          os.EOL + colors.green(`Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`)
+        );
       })
       .catch((error) => {
         purgeManager.deleteAll();
@@ -144,9 +156,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
       });
   }
 
-  private _collectTelemetry(stopwatch: Stopwatch, installManagerOptions: IInstallManagerOptions,
-    success: boolean): void {
-
+  private _collectTelemetry(
+    stopwatch: Stopwatch,
+    installManagerOptions: IInstallManagerOptions,
+    success: boolean
+  ): void {
     if (this.parser.telemetry) {
       this.parser.telemetry.log({
         name: 'install',
@@ -155,10 +169,9 @@ export abstract class BaseInstallAction extends BaseRushAction {
         extraData: {
           mode: this.actionName,
           clean: (!!this._purgeParameter.value).toString(),
-          full: installManagerOptions.fullUpgrade.toString()
-        }
+          full: installManagerOptions.fullUpgrade.toString(),
+        },
       });
     }
   }
-
 }

@@ -39,7 +39,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
       let tocItem: IYamlTocItem;
       if (apiItem.kind === ApiItemKind.Namespace && !this.newDocfxNamespaces) {
         tocItem = {
-          name: this._getTocItemName(apiItem)
+          name: this._getTocItemName(apiItem),
         };
       } else {
         if (this._shouldEmbed(apiItem.kind)) {
@@ -49,7 +49,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
 
         tocItem = {
           name: this._getTocItemName(apiItem),
-          uid: this._getUid(apiItem)
+          uid: this._getUid(apiItem),
         };
 
         if (apiItem.kind !== ApiItemKind.Package) {
@@ -98,10 +98,9 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
 
     // First we attempt to filter by inline tag if provided.
     if (apiItem instanceof ApiDocumentedItem) {
-      const docInlineTag: DocInlineTag | undefined =
-        categoryInlineTag
-          ? this._findInlineTagByName(categoryInlineTag, apiItem.tsdocComment)
-          : undefined;
+      const docInlineTag: DocInlineTag | undefined = categoryInlineTag
+        ? this._findInlineTagByName(categoryInlineTag, apiItem.tsdocComment)
+        : undefined;
 
       const tagContent: string | undefined =
         docInlineTag && docInlineTag.tagContent && docInlineTag.tagContent.trim();
@@ -134,7 +133,10 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
 
   // This is a direct copy of a @docCategory inline tag finder in office-ui-fabric-react,
   // but is generic enough to be used for any inline tag
-  private _findInlineTagByName(tagName: string, docComment: DocComment | undefined): DocInlineTag | undefined {
+  private _findInlineTagByName(
+    tagName: string,
+    docComment: DocComment | undefined
+  ): DocInlineTag | undefined {
     const tagNameToCheck: string = `@${tagName}`;
 
     if (docComment instanceof DocInlineTag) {

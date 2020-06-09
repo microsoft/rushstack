@@ -20,13 +20,13 @@ function generateConfiguration(mode, outputFolderName) {
           options: {
             compiler: require.resolve('@microsoft/rush-stack-compiler-3.5/node_modules/typescript'),
             logLevel: 'ERROR',
-            configFile: path.resolve(__dirname, 'tsconfig.json')
-          }
-        }
-      ]
+            configFile: path.resolve(__dirname, 'tsconfig.json'),
+          },
+        },
+      ],
     },
     resolve: {
-      extensions: ['.js', '.jsx', '.json', '.ts', '.tsx']
+      extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
     },
     entry: {
       'localization-test-A': path.join(__dirname, 'src', 'indexA.ts'),
@@ -36,10 +36,10 @@ function generateConfiguration(mode, outputFolderName) {
     output: {
       path: path.join(__dirname, outputFolderName),
       filename: '[name]_[locale]_[contenthash].js',
-      chunkFilename: '[id].[name]_[locale]_[contenthash].js'
+      chunkFilename: '[id].[name]_[locale]_[contenthash].js',
     },
     optimization: {
-      minimize: false
+      minimize: false,
     },
     devtool: 'source-map',
     plugins: [
@@ -48,35 +48,35 @@ function generateConfiguration(mode, outputFolderName) {
         localizedData: {
           defaultLocale: {
             localeName: 'en-us',
-            fillMissingTranslationStrings: true
+            fillMissingTranslationStrings: true,
           },
           translatedStrings: {
-            "es-es": {
-              "./src/strings1.loc.json": {
-                "string1": "la primera cadena de texto"
+            'es-es': {
+              './src/strings1.loc.json': {
+                string1: 'la primera cadena de texto',
               },
-              "./src/chunks/strings2.loc.json": {
-                "string1": "la segunda cadena de texto"
+              './src/chunks/strings2.loc.json': {
+                string1: 'la segunda cadena de texto',
               },
-              "./src/strings4.loc.json": {
-                "string1": "\"cadena de texto con comillas\""
+              './src/strings4.loc.json': {
+                string1: '"cadena de texto con comillas"',
               },
-              "./src/strings5.resx": "./localization/es-es/strings5.resx"
-            }
+              './src/strings5.resx': './localization/es-es/strings5.resx',
+            },
           },
           passthroughLocale: {
             usePassthroughLocale: true,
-            passthroughLocaleName: 'default'
+            passthroughLocaleName: 'default',
           },
-          normalizeResxNewlines: 'crlf'
+          normalizeResxNewlines: 'crlf',
         },
         typingsOptions: {
           generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts'),
-          sourceRoot: path.resolve(__dirname, 'src')
+          sourceRoot: path.resolve(__dirname, 'src'),
         },
         localizationStats: {
-          dropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
-        }
+          dropPath: path.resolve(__dirname, 'temp', 'localization-stats.json'),
+        },
       }),
       new BundleAnalyzerPlugin({
         openAnalyzer: false,
@@ -84,15 +84,15 @@ function generateConfiguration(mode, outputFolderName) {
         reportFilename: path.resolve(__dirname, 'temp', 'stats.html'),
         generateStatsFile: true,
         statsFilename: path.resolve(__dirname, 'temp', 'stats.json'),
-        logLevel: 'error'
+        logLevel: 'error',
       }),
       new SetPublicPathPlugin({
         scriptName: {
-          useAssetName: true
-        }
+          useAssetName: true,
+        },
       }),
-      new HtmlWebpackPlugin()
-    ]
+      new HtmlWebpackPlugin(),
+    ],
   };
 }
 

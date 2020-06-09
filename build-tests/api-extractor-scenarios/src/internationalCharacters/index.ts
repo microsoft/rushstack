@@ -7,11 +7,9 @@ export class ClassΞ {
     return this;
   }
 
-  public 'invalid chars'<T = ClassΞ>(): void {
-  }
+  public 'invalid chars'<T = ClassΞ>(): void {}
 
-  public 'validChars'(): void {
-  }
+  public validChars(): void {}
 }
 
-export { ClassΞ as ClassΣ }
+export { ClassΞ as ClassΣ };

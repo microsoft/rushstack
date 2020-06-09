@@ -27,9 +27,7 @@ export abstract class BaseScriptAction extends BaseRushAction {
   protected readonly _commandLineConfiguration: CommandLineConfiguration | undefined;
   protected readonly customParameters: CommandLineParameter[] = [];
 
-  public constructor(
-    options: IBaseScriptActionOptions
-  ) {
+  public constructor(options: IBaseScriptActionOptions) {
     super(options);
     this._commandLineConfiguration = options.commandLineConfiguration;
   }
@@ -57,17 +55,17 @@ export abstract class BaseScriptAction extends BaseRushAction {
               parameterShortName: parameterJson.shortName,
               parameterLongName: parameterJson.longName,
               description: parameterJson.description,
-              required: parameterJson.required
+              required: parameterJson.required,
             });
             break;
           case 'choice':
-           customParameter = this.defineChoiceParameter({
+            customParameter = this.defineChoiceParameter({
               parameterShortName: parameterJson.shortName,
               parameterLongName: parameterJson.longName,
               description: parameterJson.description,
               required: parameterJson.required,
-              alternatives: parameterJson.alternatives.map(x => x.name),
-              defaultValue: parameterJson.defaultValue
+              alternatives: parameterJson.alternatives.map((x) => x.name),
+              defaultValue: parameterJson.defaultValue,
             });
             break;
           case 'string':
@@ -76,12 +74,14 @@ export abstract class BaseScriptAction extends BaseRushAction {
               parameterShortName: parameterJson.shortName,
               description: parameterJson.description,
               required: parameterJson.required,
-              argumentName: parameterJson.argumentName
+              argumentName: parameterJson.argumentName,
             });
             break;
           default:
-            throw new Error(`${RushConstants.commandLineFilename} defines a parameter "${parameterJson!.longName}"`
-              + ` using an unsupported parameter kind "${parameterJson!.parameterKind}"`);
+            throw new Error(
+              `${RushConstants.commandLineFilename} defines a parameter "${parameterJson!.longName}"` +
+                ` using an unsupported parameter kind "${parameterJson!.parameterKind}"`
+            );
         }
 
         if (customParameter) {

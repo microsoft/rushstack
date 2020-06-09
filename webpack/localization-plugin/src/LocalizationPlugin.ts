@@ -1,12 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  JsonFile,
-  FileSystem,
-  Terminal,
-  NewlineKind
-} from '@rushstack/node-core-library';
+import { JsonFile, FileSystem, Terminal, NewlineKind } from '@rushstack/node-core-library';
 import * as Webpack from 'webpack';
 import * as path from 'path';
 import * as Tapable from 'tapable';
@@ -14,7 +9,7 @@ import * as Tapable from 'tapable';
 import { Constants } from './utilities/Constants';
 import {
   IWebpackConfigurationUpdaterOptions,
-  WebpackConfigurationUpdater
+  WebpackConfigurationUpdater,
 } from './WebpackConfigurationUpdater';
 import {
   ILocalizationPluginOptions,
@@ -25,20 +20,13 @@ import {
   IPseudolocaleOptions,
   ILocaleElementMap,
   ILocalizedStrings,
-  IResolvedMissingTranslations
+  IResolvedMissingTranslations,
 } from './interfaces';
-import {
-  ILocalizedWebpackChunk
-} from './webpackInterfaces';
+import { ILocalizedWebpackChunk } from './webpackInterfaces';
 import { LocFileTypingsGenerator } from './LocFileTypingsGenerator';
 import { Pseudolocalization } from './Pseudolocalization';
 import { EntityMarker } from './utilities/EntityMarker';
-import {
-  IAsset,
-  IProcessAssetResult,
-  AssetProcessor,
-  PLACEHOLDER_REGEX
-} from './AssetProcessor';
+import { IAsset, IProcessAssetResult, AssetProcessor, PLACEHOLDER_REGEX } from './AssetProcessor';
 import { LocFileParser } from './utilities/LocFileParser';
 
 /**
@@ -111,13 +99,19 @@ export class LocalizationPlugin implements Webpack.Plugin {
   private _resolvedTranslatedStringsFromOptions: ILocalizedStrings;
   private _filesToIgnore: Set<string> = new Set<string>();
   private _stringPlaceholderCounter: number = 0;
-  private _stringPlaceholderMap: Map<string, IStringSerialNumberData> = new Map<string, IStringSerialNumberData>();
+  private _stringPlaceholderMap: Map<string, IStringSerialNumberData> = new Map<
+    string,
+    IStringSerialNumberData
+  >();
   private _locales: Set<string> = new Set<string>();
   private _passthroughLocaleName: string;
   private _defaultLocale: string;
   private _noStringsLocaleName: string;
   private _fillMissingTranslationStrings: boolean;
-  private _pseudolocalizers: Map<string, (str: string) => string> = new Map<string, (str: string) => string>();
+  private _pseudolocalizers: Map<string, (str: string) => string> = new Map<
+    string,
+    (str: string) => string
+  >();
   private _resxNewlineNormalization: NewlineKind | undefined;
 
   /**
@@ -125,7 +119,10 @@ export class LocalizationPlugin implements Webpack.Plugin {
    * The middle map's keys are the resolved, file names.
    * The innermost map's keys are the string identifiers and its values are the string values.
    */
-  private _resolvedLocalizedStrings: Map<string, Map<string, Map<string, string>>> = new Map<string, Map<string, Map<string, string>>>();
+  private _resolvedLocalizedStrings: Map<string, Map<string, Map<string, string>>> = new Map<
+    string,
+    Map<string, Map<string, string>>
+  >();
 
   public constructor(options: ILocalizationPluginOptions) {
     this._options = options;
@@ -171,7 +168,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
         srcFolder: this._options.typingsOptions.sourceRoot || compiler.context,
         generatedTsFolder: this._options.typingsOptions.generatedTsFolder,
         exportAsDefault: this._options.typingsOptions.exportAsDefault,
-        filesToIgnore: this._options.filesToIgnore
+        filesToIgnore: this._options.filesToIgnore,
       });
     } else {
       typingsPreprocessor = undefined;
@@ -182,7 +179,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
       configuration: compiler.options,
       filesToIgnore: this._filesToIgnore,
       localeNameOrPlaceholder: Constants.LOCALE_NAME_PLACEHOLDER,
-      resxNewlineNormalization: this._resxNewlineNormalization
+      resxNewlineNormalization: this._resxNewlineNormalization,
     };
 
     if (errors.length > 0 || warnings.length > 0) {
@@ -194,7 +191,9 @@ export class LocalizationPlugin implements Webpack.Plugin {
       if (errors.length > 0) {
         // If there are any errors, just pass through the resources in source and don't do any
         // additional configuration
-        WebpackConfigurationUpdater.amendWebpackConfigurationForInPlaceLocFiles(webpackConfigurationUpdaterOptions);
+        WebpackConfigurationUpdater.amendWebpackConfigurationForInPlaceLocFiles(
+          webpackConfigurationUpdaterOptions
+        );
         return;
       }
     }
@@ -207,10 +206,14 @@ export class LocalizationPlugin implements Webpack.Plugin {
           compiler.options.plugins = [];
         }
 
-        compiler.options.plugins.push(new Webpack.WatchIgnorePlugin([this._options.typingsOptions!.generatedTsFolder]));
+        compiler.options.plugins.push(
+          new Webpack.WatchIgnorePlugin([this._options.typingsOptions!.generatedTsFolder])
+        );
       }
 
-      WebpackConfigurationUpdater.amendWebpackConfigurationForInPlaceLocFiles(webpackConfigurationUpdaterOptions);
+      WebpackConfigurationUpdater.amendWebpackConfigurationForInPlaceLocFiles(
+        webpackConfigurationUpdaterOptions
+      );
     } else {
       if (typingsPreprocessor) {
         compiler.hooks.beforeRun.tap(PLUGIN_NAME, () => typingsPreprocessor!.generateTypings());
@@ -220,7 +223,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
       if (errors.length === 0) {
         compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: IExtendedConfiguration) => {
-          (compilation.mainTemplate as unknown as IExtendedMainTemplate).hooks.assetPath.tap(
+          ((compilation.mainTemplate as unknown) as IExtendedMainTemplate).hooks.assetPath.tap(
             PLUGIN_NAME,
             (assetPath: string, options: IAssetPathOptions) => {
               if (
@@ -268,16 +271,17 @@ export class LocalizationPlugin implements Webpack.Plugin {
               }
 
               if (
-                chunksHaveAnyChildren && (
-                  !compilation.options.output ||
+                chunksHaveAnyChildren &&
+                (!compilation.options.output ||
                   !compilation.options.output.chunkFilename ||
-                  compilation.options.output.chunkFilename.indexOf(Constants.LOCALE_FILENAME_TOKEN) === -1
-                )
+                  compilation.options.output.chunkFilename.indexOf(Constants.LOCALE_FILENAME_TOKEN) === -1)
               ) {
-                compilation.errors.push(new Error(
-                  'The configuration.output.chunkFilename property must be provided and must include ' +
-                  `the ${Constants.LOCALE_FILENAME_TOKEN} placeholder`
-                ));
+                compilation.errors.push(
+                  new Error(
+                    'The configuration.output.chunkFilename property must be provided and must include ' +
+                      `the ${Constants.LOCALE_FILENAME_TOKEN} placeholder`
+                  )
+                );
 
                 return;
               }
@@ -309,7 +313,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
         compiler.hooks.emit.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {
           const localizationStats: ILocalizationStats = {
             entrypoints: {},
-            namedChunkGroups: {}
+            namedChunkGroups: {},
           };
 
           const alreadyProcessedAssets: Set<string> = new Set<string>();
@@ -325,7 +329,9 @@ export class LocalizationPlugin implements Webpack.Plugin {
                   !alreadyProcessedAssets.has(chunkFilename) // Ensure this isn't a vendor chunk we've already processed
                 ) {
                   if (alreadyProcessedAFileInThisChunk) {
-                    throw new Error(`Found more than one JS file in chunk "${chunk.name}". This is not expected.`);
+                    throw new Error(
+                      `Found more than one JS file in chunk "${chunk.name}". This is not expected.`
+                    );
                   }
 
                   alreadyProcessedAFileInThisChunk = true;
@@ -338,12 +344,17 @@ export class LocalizationPlugin implements Webpack.Plugin {
             if (this._chunkHasLocalizedModules(chunk)) {
               processChunkJsFile((chunkFilename) => {
                 if (chunkFilename.indexOf(Constants.LOCALE_NAME_PLACEHOLDER) === -1) {
-                  throw new Error(`Asset ${chunkFilename} is expected to be localized, but is missing a locale placeholder`);
+                  throw new Error(
+                    `Asset ${chunkFilename} is expected to be localized, but is missing a locale placeholder`
+                  );
                 }
 
                 const asset: IAsset = compilation.assets[chunkFilename];
 
-                const resultingAssets: Map<string, IProcessAssetResult> = AssetProcessor.processLocalizedAsset({
+                const resultingAssets: Map<
+                  string,
+                  IProcessAssetResult
+                > = AssetProcessor.processLocalizedAsset({
                   plugin: this,
                   compilation,
                   assetName: chunkFilename,
@@ -353,7 +364,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
                   locales: this._locales,
                   noStringsLocaleName: this._noStringsLocaleName,
                   fillMissingTranslationStrings: this._fillMissingTranslationStrings,
-                  defaultLocale: this._defaultLocale
+                  defaultLocale: this._defaultLocale,
                 });
 
                 // Delete the existing asset because it's been renamed
@@ -370,13 +381,13 @@ export class LocalizationPlugin implements Webpack.Plugin {
                 if (chunk.hasRuntime()) {
                   // This is an entrypoint
                   localizationStats.entrypoints[chunk.name] = {
-                    localizedAssets: localizedChunkAssets
+                    localizedAssets: localizedChunkAssets,
                   };
                 } else {
                   // This is a secondary chunk
                   if (chunk.name) {
                     localizationStats.namedChunkGroups[chunk.name] = {
-                      localizedAssets: localizedChunkAssets
+                      localizedAssets: localizedChunkAssets,
                     };
                   }
                 }
@@ -394,7 +405,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
                   asset,
                   chunk,
                   noStringsLocaleName: this._noStringsLocaleName,
-                  chunkHasLocalizedModules: this._chunkHasLocalizedModules.bind(this)
+                  chunkHasLocalizedModules: this._chunkHasLocalizedModules.bind(this),
                 });
 
                 // Delete the existing asset because it's been renamed
@@ -415,7 +426,9 @@ export class LocalizationPlugin implements Webpack.Plugin {
                 compiler.outputPath,
                 this._options.localizationStats.dropPath
               );
-              JsonFile.save(localizationStats, resolvedLocalizationStatsDropPath, { ensureFolderExists: true });
+              JsonFile.save(localizationStats, resolvedLocalizationStatsDropPath, {
+                ensureFolderExists: true,
+              });
             }
 
             if (this._options.localizationStats.callback) {
@@ -447,14 +460,16 @@ export class LocalizationPlugin implements Webpack.Plugin {
     const locFileData: ILocaleFileData = this._convertLocalizationFileToLocData(localizedResourceData);
     this._addLocFile(this._defaultLocale, localizedResourcePath, locFileData);
 
-    const resolveLocalizedData: (localizedData: ILocaleFileData | string) => ILocaleFileData = (localizedData) => {
+    const resolveLocalizedData: (localizedData: ILocaleFileData | string) => ILocaleFileData = (
+      localizedData
+    ) => {
       if (typeof localizedData === 'string') {
         additionalLoadedFilePaths.push(localizedData);
         const localizationFile: ILocalizationFile = LocFileParser.parseLocFile({
           filePath: localizedData,
           content: FileSystem.readFile(localizedData),
           terminal: terminal,
-          resxNewlineNormalization: this._resxNewlineNormalization
+          resxNewlineNormalization: this._resxNewlineNormalization,
         });
 
         return this._convertLocalizationFileToLocData(localizationFile);
@@ -466,9 +481,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
     const missingLocales: string[] = [];
     for (const translatedLocaleName in this._resolvedTranslatedStringsFromOptions) {
       if (this._resolvedTranslatedStringsFromOptions.hasOwnProperty(translatedLocaleName)) {
-        const translatedLocFileFromOptions: ILocaleFileData | string | undefined = (
-          this._resolvedTranslatedStringsFromOptions[translatedLocaleName][localizedResourcePath]
-        );
+        const translatedLocFileFromOptions: ILocaleFileData | string | undefined = this
+          ._resolvedTranslatedStringsFromOptions[translatedLocaleName][localizedResourcePath];
         if (!translatedLocFileFromOptions) {
           missingLocales.push(translatedLocaleName);
         } else {
@@ -492,7 +506,9 @@ export class LocalizationPlugin implements Webpack.Plugin {
       if (resolvedTranslatedData) {
         for (const resolvedLocaleName in resolvedTranslatedData) {
           if (resolvedTranslatedData.hasOwnProperty(resolvedLocaleName)) {
-            const translatedLocFileData: ILocaleFileData = resolveLocalizedData(resolvedTranslatedData[resolvedLocaleName]);
+            const translatedLocFileData: ILocaleFileData = resolveLocalizedData(
+              resolvedTranslatedData[resolvedLocaleName]
+            );
             this._addLocFile(resolvedLocaleName, localizedResourcePath, translatedLocFileData);
           }
         }
@@ -521,7 +537,11 @@ export class LocalizationPlugin implements Webpack.Plugin {
     return this._stringPlaceholderMap.get(serialNumber);
   }
 
-  private _addLocFile(localeName: string, localizedFilePath: string, localizedFileData: ILocaleFileData): void {
+  private _addLocFile(
+    localeName: string,
+    localizedFilePath: string,
+    localizedFileData: ILocaleFileData
+  ): void {
     const filesMap: Map<string, Map<string, string>> = this._resolvedLocalizedStrings.get(localeName)!;
 
     const stringsMap: Map<string, string> = new Map<string, string>();
@@ -536,16 +556,13 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
       const placeholder: IStringPlaceholder = this.stringKeys.get(stringKey)!;
       if (!this._stringPlaceholderMap.has(placeholder.suffix)) {
-        this._stringPlaceholderMap.set(
-          placeholder.suffix,
-          {
-            values: {
-              [this._passthroughLocaleName]: stringName
-            },
-            locFilePath: localizedFilePath,
-            stringName: stringName
-          }
-        );
+        this._stringPlaceholderMap.set(placeholder.suffix, {
+          values: {
+            [this._passthroughLocaleName]: stringName,
+          },
+          locFilePath: localizedFilePath,
+          stringName: stringName,
+        });
       }
 
       this._stringPlaceholderMap.get(placeholder.suffix)!.values[localeName] = stringValue;
@@ -557,16 +574,16 @@ export class LocalizationPlugin implements Webpack.Plugin {
   private _initializeAndValidateOptions(
     configuration: Webpack.Configuration,
     isWebpackDevServer: boolean
-  ): { errors: Error[], warnings: Error[] } {
+  ): { errors: Error[]; warnings: Error[] } {
     const errors: Error[] = [];
     const warnings: Error[] = [];
 
     function ensureValidLocaleName(localeName: string): boolean {
       const LOCALE_NAME_REGEX: RegExp = /[a-z-]/i;
       if (!localeName.match(LOCALE_NAME_REGEX)) {
-        errors.push(new Error(
-          `Invalid locale name: ${localeName}. Locale names may only contain letters and hyphens.`
-        ));
+        errors.push(
+          new Error(`Invalid locale name: ${localeName}. Locale names may only contain letters and hyphens.`)
+        );
         return false;
       } else {
         return true;
@@ -577,18 +594,21 @@ export class LocalizationPlugin implements Webpack.Plugin {
     if (
       !configuration.output ||
       !configuration.output.filename ||
-      (typeof configuration.output.filename !== 'string') ||
+      typeof configuration.output.filename !== 'string' ||
       configuration.output.filename.indexOf(Constants.LOCALE_FILENAME_TOKEN) === -1
     ) {
-      errors.push(new Error(
-        'The configuration.output.filename property must be provided, must be a string, and must include ' +
-        `the ${Constants.LOCALE_FILENAME_TOKEN} placeholder`
-      ));
+      errors.push(
+        new Error(
+          'The configuration.output.filename property must be provided, must be a string, and must include ' +
+            `the ${Constants.LOCALE_FILENAME_TOKEN} placeholder`
+        )
+      );
     }
     // END configuration
 
     // START options.filesToIgnore
-    { // eslint-disable-line no-lone-blocks
+    {
+      // eslint-disable-line no-lone-blocks
       for (const filePath of this._options.filesToIgnore || []) {
         const normalizedFilePath: string = path.resolve(configuration.context!, filePath);
         this._filesToIgnore.add(normalizedFilePath);
@@ -602,7 +622,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
       if (this._options.localizedData.passthroughLocale) {
         const {
           usePassthroughLocale,
-          passthroughLocaleName = 'passthrough'
+          passthroughLocaleName = 'passthrough',
         } = this._options.localizedData.passthroughLocale;
         if (usePassthroughLocale) {
           this._passthroughLocaleName = passthroughLocaleName;
@@ -618,10 +638,12 @@ export class LocalizationPlugin implements Webpack.Plugin {
         for (const localeName in translatedStrings) {
           if (translatedStrings.hasOwnProperty(localeName)) {
             if (this._locales.has(localeName)) {
-              errors.push(Error(
-                `The locale "${localeName}" appears multiple times. ` +
-                'There may be multiple instances with different casing.'
-              ));
+              errors.push(
+                Error(
+                  `The locale "${localeName}" appears multiple times. ` +
+                    'There may be multiple instances with different casing.'
+                )
+              );
               return { errors, warnings };
             }
 
@@ -641,10 +663,12 @@ export class LocalizationPlugin implements Webpack.Plugin {
                 const normalizedLocFilePath: string = path.resolve(configuration.context!, locFilePath);
 
                 if (locFilePathsInLocale.has(normalizedLocFilePath)) {
-                  errors.push(new Error(
-                    `The localization file path "${locFilePath}" appears multiple times in locale ${localeName}. ` +
-                    'There may be multiple instances with different casing.'
-                  ));
+                  errors.push(
+                    new Error(
+                      `The localization file path "${locFilePath}" appears multiple times in locale ${localeName}. ` +
+                        'There may be multiple instances with different casing.'
+                    )
+                  );
                   return { errors, warnings };
                 }
 
@@ -655,7 +679,9 @@ export class LocalizationPlugin implements Webpack.Plugin {
                   locFileDataFromOptions = path.resolve(configuration.context!, locFileDataFromOptions);
                 }
 
-                this._resolvedTranslatedStringsFromOptions[localeName][normalizedLocFilePath] = locFileDataFromOptions;
+                this._resolvedTranslatedStringsFromOptions[localeName][
+                  normalizedLocFilePath
+                ] = locFileDataFromOptions;
               }
             }
           }
@@ -693,19 +719,28 @@ export class LocalizationPlugin implements Webpack.Plugin {
         for (const pseudolocaleName in this._options.localizedData.pseudolocales) {
           if (this._options.localizedData.pseudolocales.hasOwnProperty(pseudolocaleName)) {
             if (this._defaultLocale === pseudolocaleName) {
-              errors.push(new Error(`A pseudolocale (${pseudolocaleName}) name is also the default locale name.`));
+              errors.push(
+                new Error(`A pseudolocale (${pseudolocaleName}) name is also the default locale name.`)
+              );
               return { errors, warnings };
             }
 
             if (this._locales.has(pseudolocaleName)) {
-              errors.push(new Error(
-                `A pseudolocale (${pseudolocaleName}) name is also specified in the translated strings.`
-              ));
+              errors.push(
+                new Error(
+                  `A pseudolocale (${pseudolocaleName}) name is also specified in the translated strings.`
+                )
+              );
               return { errors, warnings };
             }
 
-            const pseudoLocaleOpts: IPseudolocaleOptions = this._options.localizedData.pseudolocales[pseudolocaleName];
-            this._pseudolocalizers.set(pseudolocaleName, Pseudolocalization.getPseudolocalizer(pseudoLocaleOpts));
+            const pseudoLocaleOpts: IPseudolocaleOptions = this._options.localizedData.pseudolocales[
+              pseudolocaleName
+            ];
+            this._pseudolocalizers.set(
+              pseudolocaleName,
+              Pseudolocalization.getPseudolocalizer(pseudoLocaleOpts)
+            );
             this._locales.add(pseudolocaleName);
             this._resolvedLocalizedStrings.set(pseudolocaleName, new Map<string, Map<string, string>>());
           }
@@ -727,10 +762,12 @@ export class LocalizationPlugin implements Webpack.Plugin {
           }
 
           default: {
-            errors.push(new Error(
-              `Unexpected value "${this._options.localizedData.normalizeResxNewlines}" for option ` +
-              '"localizedData.normalizeResxNewlines"'
-            ));
+            errors.push(
+              new Error(
+                `Unexpected value "${this._options.localizedData.normalizeResxNewlines}" for option ` +
+                  '"localizedData.normalizeResxNewlines"'
+              )
+            );
             break;
           }
         }
@@ -760,7 +797,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     const suffix: string = (this._stringPlaceholderCounter++).toString();
     return {
       value: `${Constants.STRING_PLACEHOLDER_PREFIX}_\\_${Constants.STRING_PLACEHOLDER_LABEL}_${suffix}`,
-      suffix: suffix
+      suffix: suffix,
     };
   }
 

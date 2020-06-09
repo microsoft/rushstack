@@ -36,13 +36,10 @@ export class CopyTask extends GulpTask<ICopyConfig> {
    * Instantiates a CopyTask with an empty configuration
    */
   public constructor() {
-    super(
-      'copy',
-      {
-        copyTo: {},
-        shouldFlatten: true
-      }
-    );
+    super('copy', {
+      copyTo: {},
+      shouldFlatten: true,
+    });
   }
 
   /**
@@ -58,7 +55,8 @@ export class CopyTask extends GulpTask<ICopyConfig> {
   public executeTask(
     gulp: typeof Gulp,
     completeCallback: (error?: string | Error) => void
-  ): Promise<any> | NodeJS.ReadWriteStream | void { // eslint-disable-line @typescript-eslint/no-explicit-any
+  ): Promise<any> | NodeJS.ReadWriteStream | void {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     /* eslint-disable */
     const flatten = require('gulp-flatten');
     const gulpif = require('gulp-if');
@@ -73,11 +71,14 @@ export class CopyTask extends GulpTask<ICopyConfig> {
       if (copyTo.hasOwnProperty(copyDest)) {
         const sources: string[] = copyTo[copyDest];
 
-        sources.forEach(sourceMatch => allStreams.push(
-          gulp.src(sourceMatch, { allowEmpty: true })
-            .pipe(gulpif(shouldFlatten, flatten()))
-            .pipe(gulp.dest(copyDest))
-        ));
+        sources.forEach((sourceMatch) =>
+          allStreams.push(
+            gulp
+              .src(sourceMatch, { allowEmpty: true })
+              .pipe(gulpif(shouldFlatten, flatten()))
+              .pipe(gulp.dest(copyDest))
+          )
+        );
       }
     }
 

@@ -2,11 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
-import {
-  PackageJsonEditor,
-  PackageJsonDependency,
-  DependencyType
-} from '../../api/PackageJsonEditor';
+import { PackageJsonEditor, PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 export class VersionMismatchFinderProject extends VersionMismatchFinderEntity {
@@ -17,7 +13,7 @@ export class VersionMismatchFinderProject extends VersionMismatchFinderEntity {
     super({
       friendlyName: project.packageName,
       cyclicDependencyProjects: project.cyclicDependencyProjects,
-      skipRushCheck: project.skipRushCheck
+      skipRushCheck: project.skipRushCheck,
     });
 
     this._fileManager = project.packageJsonEditor;
@@ -40,7 +36,11 @@ export class VersionMismatchFinderProject extends VersionMismatchFinderEntity {
     return this._fileManager.tryGetDevDependency(packageName);
   }
 
-  public addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void {
+  public addOrUpdateDependency(
+    packageName: string,
+    newVersion: string,
+    dependencyType: DependencyType
+  ): void {
     return this._fileManager.addOrUpdateDependency(packageName, newVersion, dependencyType);
   }
 

@@ -19,7 +19,7 @@ import {
   installAndRun,
   findRushJsonFolder,
   RUSH_JSON_FILENAME,
-  runWithErrorAndStatusCode
+  runWithErrorAndStatusCode,
 } from './install-run';
 
 const PACKAGE_NAME: string = '@microsoft/rush';
@@ -38,21 +38,23 @@ function _getRushVersion(): string {
     const rushJsonContents: string = fs.readFileSync(rushJsonPath, 'utf-8');
     // Use a regular expression to parse out the rushVersion value because rush.json supports comments,
     // but JSON.parse does not and we don't want to pull in more dependencies than we need to in this script.
-    const rushJsonMatches: string[] = rushJsonContents.match(/\"rushVersion\"\s*\:\s*\"([0-9a-zA-Z.+\-]+)\"/)!;
+    const rushJsonMatches: string[] = rushJsonContents.match(
+      /\"rushVersion\"\s*\:\s*\"([0-9a-zA-Z.+\-]+)\"/
+    )!;
     return rushJsonMatches[1];
   } catch (e) {
     throw new Error(
       `Unable to determine the required version of Rush from rush.json (${rushJsonFolder}). ` +
-      'The \'rushVersion\' field is either not assigned in rush.json or was specified ' +
-      'using an unexpected syntax.'
+        "The 'rushVersion' field is either not assigned in rush.json or was specified " +
+        'using an unexpected syntax.'
     );
   }
 }
 
 function _run(): void {
   const [
-    nodePath, /* Ex: /bin/node */
-    scriptPath, /* /repo/common/scripts/install-run-rush.js */
+    nodePath /* Ex: /bin/node */,
+    scriptPath /* /repo/common/scripts/install-run-rush.js */,
     ...packageBinArgs /* [build, --to, myproject] */
   ]: string[] = process.argv;
 

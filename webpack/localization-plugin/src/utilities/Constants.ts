@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonSchema } from "@rushstack/node-core-library";
+import { JsonSchema } from '@rushstack/node-core-library';
 import * as lodash from 'lodash';
 
 export class Constants {
@@ -14,7 +14,7 @@ export class Constants {
   public static LOCALE_FILENAME_TOKEN_REGEX: RegExp = new RegExp(
     lodash.escapeRegExp(Constants.LOCALE_FILENAME_TOKEN),
     'gi'
-    );
+  );
   public static NO_LOCALE_SOURCE_MAP_FILENAME_TOKEN: string = '[no-locale-file]';
   public static NO_LOCALE_SOURCE_MAP_FILENAME_TOKEN_REGEX: RegExp = new RegExp(
     lodash.escapeRegExp(Constants.NO_LOCALE_SOURCE_MAP_FILENAME_TOKEN),

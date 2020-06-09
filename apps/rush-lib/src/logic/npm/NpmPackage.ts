@@ -1,14 +1,8 @@
 import * as path from 'path';
 import readPackageTree = require('read-package-tree');
-import {
-  JsonFile,
-  IPackageJson
-} from '@rushstack/node-core-library';
+import { JsonFile, IPackageJson } from '@rushstack/node-core-library';
 
-import {
-  BasePackage,
-  IRushTempPackageJson
-} from '../base/BasePackage';
+import { BasePackage, IRushTempPackageJson } from '../base/BasePackage';
 
 /**
  * Used by the "rush link" algorithm when doing NPM package resolution.
@@ -31,7 +25,7 @@ export enum PackageDependencyKind {
   /**
    * The dependency should be a symlink to a project that is locally built by Rush..
    */
-  LocalLink
+  LocalLink,
 }
 
 export interface IPackageDependency {
@@ -61,11 +55,12 @@ export class NpmPackage extends BasePackage {
    */
   public dependencies: IPackageDependency[];
 
-  private constructor(name: string,
+  private constructor(
+    name: string,
     version: string | undefined,
     dependencies: IPackageDependency[],
-    folderPath: string) {
-
+    folderPath: string
+  ) {
     super(name, version, folderPath, undefined);
     this.dependencies = dependencies.slice(0); // clone the array
     this.parent = undefined;
@@ -74,8 +69,12 @@ export class NpmPackage extends BasePackage {
   /**
    * Used by "npm link" when creating a Package object that represents symbolic links to be created.
    */
-  public static createLinkedNpmPackage(name: string, version: string | undefined, dependencies: IPackageDependency[],
-    folderPath: string): NpmPackage {
+  public static createLinkedNpmPackage(
+    name: string,
+    version: string | undefined,
+    dependencies: IPackageDependency[],
+    folderPath: string
+  ): NpmPackage {
     return new NpmPackage(name, version, dependencies, folderPath);
   }
 
@@ -97,7 +96,7 @@ export class NpmPackage extends BasePackage {
       package: packageJson,
       parent: null, // eslint-disable-line @rushstack/no-null
       path: installFolderName,
-      realpath: installFolderName
+      realpath: installFolderName,
     };
     return NpmPackage.createFromNpm(npmPackage);
   }
@@ -108,8 +107,9 @@ export class NpmPackage extends BasePackage {
    */
   public static createFromNpm(npmPackage: readPackageTree.Node): NpmPackage {
     if (npmPackage.error) {
-      throw new Error(`Failed to parse package.json for ${path.basename(npmPackage.path)}:`
-        + ` ${npmPackage.error.message}`);
+      throw new Error(
+        `Failed to parse package.json for ${path.basename(npmPackage.path)}:` + ` ${npmPackage.error.message}`
+      );
     }
 
     let dependencies: IPackageDependency[] = [];
@@ -123,7 +123,7 @@ export class NpmPackage extends BasePackage {
           dependencies.push({
             name: dependencyName,
             versionRange: packageJson.optionalDependencies[dependencyName],
-            kind: PackageDependencyKind.Optional
+            kind: PackageDependencyKind.Optional,
           });
         }
       }
@@ -135,7 +135,7 @@ export class NpmPackage extends BasePackage {
           dependencies.push({
             name: dependencyName,
             versionRange: packageJson.dependencies[dependencyName],
-            kind: PackageDependencyKind.Normal
+            kind: PackageDependencyKind.Normal,
           });
         }
       }
@@ -147,7 +147,7 @@ export class NpmPackage extends BasePackage {
           dependencies.push({
             name: dependencyName,
             versionRange: packageJson.dependencies![dependencyName],
-            kind: PackageDependencyKind.LocalLink
+            kind: PackageDependencyKind.LocalLink,
           });
         }
       }
@@ -211,8 +211,7 @@ export class NpmPackage extends BasePackage {
       // could add a missing dependency.
       parentForCreate = currentParent;
 
-      if (!currentParent.parent
-        || (cyclicSubtreeRoot && currentParent === cyclicSubtreeRoot)) {
+      if (!currentParent.parent || (cyclicSubtreeRoot && currentParent === cyclicSubtreeRoot)) {
         // We reached the root without finding a match
         // parentForCreate will be the root.
         return { found: undefined, parentForCreate };
@@ -230,5 +229,4 @@ export class NpmPackage extends BasePackage {
   public resolve(dependencyName: string): NpmPackage | undefined {
     return this.resolveOrCreate(dependencyName).found as NpmPackage;
   }
-
 }

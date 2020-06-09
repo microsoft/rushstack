@@ -1,18 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  TscCmdTask,
-  ITscCmdTaskConfig
-} from './TscCmdTask';
-import {
-  LintCmdTask,
-  ILintCmdTaskConfig
-} from './LintCmdTask';
-import {
-  TslintCmdTask,
-  ITslintCmdTaskConfig
-} from './TslintCmdTask';
+import { TscCmdTask, ITscCmdTaskConfig } from './TscCmdTask';
+import { LintCmdTask, ILintCmdTaskConfig } from './LintCmdTask';
+import { TslintCmdTask, ITslintCmdTaskConfig } from './TslintCmdTask';
 import { ApiExtractorTask } from './ApiExtractorTask';
 
 export {
@@ -21,7 +12,7 @@ export {
   TslintCmdTask,
   ITslintCmdTaskConfig,
   LintCmdTask,
-  ILintCmdTaskConfig
+  ILintCmdTaskConfig,
 };
 
 /** @public */

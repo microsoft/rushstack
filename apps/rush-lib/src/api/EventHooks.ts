@@ -23,7 +23,7 @@ export enum Event {
   /**
    * Post Rush build event
    */
-  postRushBuild = 4
+  postRushBuild = 4,
 }
 
 /**

@@ -30,12 +30,15 @@ describe('npm', () => {
     }`;
     stub.mockImplementationOnce(() => json);
 
-    const versions: string[] = Npm.publishedVersions(packageName,
-      __dirname,
-      process.env);
+    const versions: string[] = Npm.publishedVersions(packageName, __dirname, process.env);
 
-    expect(stub).toHaveBeenCalledWith('npm', `view ${packageName} time --json`.split(' '),
-    expect.anything(), expect.anything(), expect.anything());
+    expect(stub).toHaveBeenCalledWith(
+      'npm',
+      `view ${packageName} time --json`.split(' '),
+      expect.anything(),
+      expect.anything(),
+      expect.anything()
+    );
 
     expect(versions).toHaveLength(4);
     expect(versions).toMatchObject(['0.0.0', '1.4.0', '1.4.1', '2.4.0-alpha.1']);
@@ -51,14 +54,22 @@ describe('npm', () => {
     stub.mockImplementationOnce(() => '');
     stub.mockImplementationOnce(() => json);
 
-    const versions: string[] = Npm.publishedVersions(packageName,
-      __dirname,
-      process.env);
+    const versions: string[] = Npm.publishedVersions(packageName, __dirname, process.env);
 
-    expect(stub).toHaveBeenCalledWith('npm', `view ${packageName} time --json`.split(' '),
-      expect.anything(), expect.anything(), expect.anything());
-    expect(stub).toHaveBeenCalledWith('npm', `view ${packageName} versions --json`.split(' '),
-    expect.anything(), expect.anything(), expect.anything());
+    expect(stub).toHaveBeenCalledWith(
+      'npm',
+      `view ${packageName} time --json`.split(' '),
+      expect.anything(),
+      expect.anything(),
+      expect.anything()
+    );
+    expect(stub).toHaveBeenCalledWith(
+      'npm',
+      `view ${packageName} versions --json`.split(' '),
+      expect.anything(),
+      expect.anything(),
+      expect.anything()
+    );
 
     expect(versions).toHaveLength(4);
     expect(versions).toMatchObject(['0.0.0', '1.4.0', '1.4.1', '2.4.0-alpha.1']);

@@ -14,17 +14,14 @@ if (NodeJsCompatibility.warnAboutVersionTooOld()) {
 
 const alreadyReportedNodeTooNewError: boolean = NodeJsCompatibility.warnAboutVersionTooNew({
   isRushLib: false,
-  alreadyReportedNodeTooNewError: false
+  alreadyReportedNodeTooNewError: false,
 });
 
 import * as colors from 'colors';
 import * as os from 'os';
 import * as semver from 'semver';
 
-import {
-  Text,
-  PackageJsonLookup
-} from '@rushstack/node-core-library';
+import { Text, PackageJsonLookup } from '@rushstack/node-core-library';
 import { EnvironmentVariableNames } from '@microsoft/rush-lib';
 import * as rushLib from '@microsoft/rush-lib';
 
@@ -33,7 +30,9 @@ import { RushVersionSelector } from './RushVersionSelector';
 import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 
 // Load the configuration
-const configuration: MinimalRushConfiguration | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
+const configuration:
+  | MinimalRushConfiguration
+  | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
 
 const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 
@@ -43,7 +42,9 @@ const previewVersion: string | undefined = process.env[EnvironmentVariableNames.
 
 if (previewVersion) {
   if (!semver.valid(previewVersion, false)) {
-    console.error(colors.red(`Invalid value for RUSH_PREVIEW_VERSION environment variable: "${previewVersion}"`));
+    console.error(
+      colors.red(`Invalid value for RUSH_PREVIEW_VERSION environment variable: "${previewVersion}"`)
+    );
     process.exit(1);
   }
 
@@ -58,9 +59,7 @@ if (previewVersion) {
   );
 
   if (configuration) {
-    lines.push(
-      `* The rush.json configuration asks for:   ${Text.padEnd(configuration.rushVersion, 25)} *`
-    );
+    lines.push(`* The rush.json configuration asks for:   ${Text.padEnd(configuration.rushVersion, 25)} *`);
   }
 
   lines.push(
@@ -70,10 +69,7 @@ if (previewVersion) {
     `*********************************************************************`
   );
 
-  console.error(lines
-    .map(line => colors.black(colors.bgYellow(line)))
-    .join(os.EOL));
-
+  console.error(lines.map((line) => colors.black(colors.bgYellow(line))).join(os.EOL));
 } else if (configuration) {
   rushVersionToLoad = configuration.rushVersion;
 }
@@ -92,7 +88,8 @@ const launchOptions: rushLib.ILaunchOptions = { isManaged, alreadyReportedNodeTo
 // install it
 if (rushVersionToLoad && rushVersionToLoad !== currentPackageVersion) {
   const versionSelector: RushVersionSelector = new RushVersionSelector(currentPackageVersion);
-  versionSelector.ensureRushVersionInstalled(rushVersionToLoad, configuration, launchOptions)
+  versionSelector
+    .ensureRushVersionInstalled(rushVersionToLoad, configuration, launchOptions)
     .catch((error: Error) => {
       console.log(colors.red('Error: ' + error.message));
     });

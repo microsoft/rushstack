@@ -148,14 +148,17 @@ export const enum AlreadyExistsBehavior {
   /**
    * If the destination object exists, skip it and continue the operation.
    */
-  Ignore = 'ignore'
+  Ignore = 'ignore',
 }
 
 /**
  * Callback function type for {@link IFileSystemCopyFilesAsyncOptions.filter}
  * @public
  */
-export type FileSystemCopyFilesAsyncFilter = (sourcePath: string, destinationPath: string) => Promise<boolean>;
+export type FileSystemCopyFilesAsyncFilter = (
+  sourcePath: string,
+  destinationPath: string
+) => Promise<boolean>;
 
 /**
  * Callback function type for {@link IFileSystemCopyFilesOptions.filter}
@@ -215,7 +218,7 @@ export interface IFileSystemCopyFilesOptions extends IFileSystemCopyFilesAsyncOp
 /**
  * The options for {@link FileSystem.deleteFile}
  * @public
-*/
+ */
 export interface IFileSystemDeleteFileOptions {
   /**
    * If true, will throw an exception if the file did not exist before `deleteFile()` was called.
@@ -261,38 +264,38 @@ export interface IFileSystemCreateLinkOptions {
 
 const MOVE_DEFAULT_OPTIONS: Partial<IFileSystemMoveOptions> = {
   overwrite: true,
-  ensureFolderExists: false
+  ensureFolderExists: false,
 };
 
 const READ_FOLDER_DEFAULT_OPTIONS: Partial<IFileSystemReadFolderOptions> = {
-  absolutePaths: false
+  absolutePaths: false,
 };
 
 const WRITE_FILE_DEFAULT_OPTIONS: Partial<IFileSystemWriteFileOptions> = {
   ensureFolderExists: false,
   convertLineEndings: undefined,
-  encoding: Encoding.Utf8
+  encoding: Encoding.Utf8,
 };
 
 const APPEND_TO_FILE_DEFAULT_OPTIONS: Partial<IFileSystemWriteFileOptions> = {
-  ...WRITE_FILE_DEFAULT_OPTIONS
+  ...WRITE_FILE_DEFAULT_OPTIONS,
 };
 
 const READ_FILE_DEFAULT_OPTIONS: Partial<IFileSystemReadFileOptions> = {
   encoding: Encoding.Utf8,
-  convertLineEndings: undefined
+  convertLineEndings: undefined,
 };
 
 const COPY_FILE_DEFAULT_OPTIONS: Partial<IFileSystemCopyFileOptions> = {
-  alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
+  alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite,
 };
 
 const COPY_FILES_DEFAULT_OPTIONS: Partial<IFileSystemCopyFilesOptions> = {
-  alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
+  alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite,
 };
 
 const DELETE_FILE_DEFAULT_OPTIONS: Partial<IFileSystemDeleteFileOptions> = {
-  throwIfNotExists: false
+  throwIfNotExists: false,
 };
 
 /**
@@ -378,7 +381,6 @@ export class FileSystem {
     });
   }
 
-
   /**
    * Changes the permissions (i.e. file mode bits) for a filesystem object.
    * Behind the scenes it uses `fs.chmodSync()`.
@@ -433,19 +435,19 @@ export class FileSystem {
    * @param modeBits - POSIX-style file mode bits specified using the {@link PosixModeBits} enum
    */
   public static formatPosixModeBits(modeBits: PosixModeBits): string {
-    let result: string = '-';  // (later we may add support for additional states such as S_IFDIR or S_ISUID)
+    let result: string = '-'; // (later we may add support for additional states such as S_IFDIR or S_ISUID)
 
-    result += (modeBits & PosixModeBits.UserRead) ? 'r' : '-';
-    result += (modeBits & PosixModeBits.UserWrite) ? 'w' : '-';
-    result += (modeBits & PosixModeBits.UserExecute) ? 'x' : '-';
+    result += modeBits & PosixModeBits.UserRead ? 'r' : '-';
+    result += modeBits & PosixModeBits.UserWrite ? 'w' : '-';
+    result += modeBits & PosixModeBits.UserExecute ? 'x' : '-';
 
-    result += (modeBits & PosixModeBits.GroupRead) ? 'r' : '-';
-    result += (modeBits & PosixModeBits.GroupWrite) ? 'w' : '-';
-    result += (modeBits & PosixModeBits.GroupExecute) ? 'x' : '-';
+    result += modeBits & PosixModeBits.GroupRead ? 'r' : '-';
+    result += modeBits & PosixModeBits.GroupWrite ? 'w' : '-';
+    result += modeBits & PosixModeBits.GroupExecute ? 'x' : '-';
 
-    result += (modeBits & PosixModeBits.OthersRead) ? 'r' : '-';
-    result += (modeBits & PosixModeBits.OthersWrite) ? 'w' : '-';
-    result += (modeBits & PosixModeBits.OthersExecute) ? 'x' : '-';
+    result += modeBits & PosixModeBits.OthersRead ? 'r' : '-';
+    result += modeBits & PosixModeBits.OthersWrite ? 'w' : '-';
+    result += modeBits & PosixModeBits.OthersExecute ? 'x' : '-';
 
     return result;
   }
@@ -458,7 +460,7 @@ export class FileSystem {
     FileSystem._wrapException(() => {
       options = {
         ...MOVE_DEFAULT_OPTIONS,
-        ...options
+        ...options,
       };
 
       try {
@@ -486,7 +488,7 @@ export class FileSystem {
     await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...MOVE_DEFAULT_OPTIONS,
-        ...options
+        ...options,
       };
 
       try {
@@ -543,13 +545,13 @@ export class FileSystem {
     return FileSystem._wrapException(() => {
       options = {
         ...READ_FOLDER_DEFAULT_OPTIONS,
-        ...options
+        ...options,
       };
 
       // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
       const fileNames: string[] = fsx.readdirSync(folderPath);
       if (options.absolutePaths) {
-        return fileNames.map(fileName => nodeJsPath.resolve(folderPath, fileName));
+        return fileNames.map((fileName) => nodeJsPath.resolve(folderPath, fileName));
       } else {
         return fileNames;
       }
@@ -559,17 +561,20 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.readFolder}.
    */
-  public static async readFolderAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]> {
+  public static async readFolderAsync(
+    folderPath: string,
+    options?: IFileSystemReadFolderOptions
+  ): Promise<string[]> {
     return await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...READ_FOLDER_DEFAULT_OPTIONS,
-        ...options
+        ...options,
       };
 
       // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
       const fileNames: string[] = await fsx.readdir(folderPath);
       if (options.absolutePaths) {
-        return fileNames.map(fileName => nodeJsPath.resolve(folderPath, fileName));
+        return fileNames.map((fileName) => nodeJsPath.resolve(folderPath, fileName));
       } else {
         return fileNames;
       }
@@ -634,11 +639,15 @@ export class FileSystem {
    * @param contents - The text that should be written to the file.
    * @param options - Optional settings that can change the behavior. Type: `IWriteFileOptions`
    */
-  public static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void {
+  public static writeFile(
+    filePath: string,
+    contents: string | Buffer,
+    options?: IFileSystemWriteFileOptions
+  ): void {
     FileSystem._wrapException(() => {
       options = {
         ...WRITE_FILE_DEFAULT_OPTIONS,
-        ...options
+        ...options,
       };
 
       if (options.convertLineEndings) {
@@ -666,11 +675,15 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.writeFile}.
    */
-  public static async writeFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void> {
+  public static async writeFileAsync(
+    filePath: string,
+    contents: string | Buffer,
+    options?: IFileSystemWriteFileOptions
+  ): Promise<void> {
     await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...WRITE_FILE_DEFAULT_OPTIONS,
-        ...options
+        ...options,
       };
 
       if (options.convertLineEndings) {
@@ -704,11 +717,15 @@ export class FileSystem {
    * @param contents - The text that should be written to the file.
    * @param options - Optional settings that can change the behavior. Type: `IWriteFileOptions`
    */
-  public static appendToFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void {
+  public static appendToFile(
+    filePath: string,
+    contents: string | Buffer,
+    options?: IFileSystemWriteFileOptions
+  ): void {
     FileSystem._wrapException(() => {
       options = {
         ...APPEND_TO_FILE_DEFAULT_OPTIONS,
-        ...options
+        ...options,
       };
 
       if (options.convertLineEndings) {
@@ -736,11 +753,15 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.appendToFile}.
    */
-  public static async appendToFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void> {
+  public static async appendToFileAsync(
+    filePath: string,
+    contents: string | Buffer,
+    options?: IFileSystemWriteFileOptions
+  ): Promise<void> {
     await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...APPEND_TO_FILE_DEFAULT_OPTIONS,
-        ...options
+        ...options,
       };
 
       if (options.convertLineEndings) {
@@ -775,7 +796,7 @@ export class FileSystem {
     return FileSystem._wrapException(() => {
       options = {
         ...READ_FILE_DEFAULT_OPTIONS,
-        ...options
+        ...options,
       };
 
       let contents: string = FileSystem.readFileToBuffer(filePath).toString(options.encoding);
@@ -794,7 +815,7 @@ export class FileSystem {
     return await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...READ_FILE_DEFAULT_OPTIONS,
-        ...options
+        ...options,
       };
 
       let contents: string = (await FileSystem.readFileToBufferAsync(filePath)).toString(options.encoding);
@@ -839,18 +860,19 @@ export class FileSystem {
   public static copyFile(options: IFileSystemCopyFileOptions): void {
     options = {
       ...COPY_FILE_DEFAULT_OPTIONS,
-      ...options
+      ...options,
     };
 
     if (FileSystem.getStatistics(options.sourcePath).isDirectory()) {
-      throw new Error('The specified path refers to a folder; this operation expects a file object:\n'
-        + options.sourcePath);
+      throw new Error(
+        'The specified path refers to a folder; this operation expects a file object:\n' + options.sourcePath
+      );
     }
 
     FileSystem._wrapException(() => {
       fsx.copySync(options.sourcePath, options.destinationPath, {
         errorOnExist: options.alreadyExistsBehavior === AlreadyExistsBehavior.Error,
-        overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite
+        overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite,
       });
     });
   }
@@ -861,18 +883,19 @@ export class FileSystem {
   public static async copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void> {
     options = {
       ...COPY_FILE_DEFAULT_OPTIONS,
-      ...options
+      ...options,
     };
 
     if (FileSystem.getStatistics(options.sourcePath).isDirectory()) {
-      throw new Error('The specified path refers to a folder; this operation expects a file object:\n'
-        + options.sourcePath);
+      throw new Error(
+        'The specified path refers to a folder; this operation expects a file object:\n' + options.sourcePath
+      );
     }
 
     await FileSystem._wrapExceptionAsync(() => {
       return fsx.copy(options.sourcePath, options.destinationPath, {
         errorOnExist: options.alreadyExistsBehavior === AlreadyExistsBehavior.Error,
-        overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite
+        overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite,
       });
     });
   }
@@ -890,7 +913,7 @@ export class FileSystem {
   public static copyFiles(options: IFileSystemCopyFilesOptions): void {
     options = {
       ...COPY_FILES_DEFAULT_OPTIONS,
-      ...options
+      ...options,
     };
 
     FileSystem._wrapException(() => {
@@ -899,7 +922,7 @@ export class FileSystem {
         errorOnExist: options.alreadyExistsBehavior === AlreadyExistsBehavior.Error,
         overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite,
         preserveTimestamps: !!options.preserveTimestamps,
-        filter: options.filter
+        filter: options.filter,
       });
     });
   }
@@ -910,7 +933,7 @@ export class FileSystem {
   public static async copyFilesAsync(options: IFileSystemCopyFilesOptions): Promise<void> {
     options = {
       ...COPY_FILES_DEFAULT_OPTIONS,
-      ...options
+      ...options,
     };
 
     await FileSystem._wrapExceptionAsync(async () => {
@@ -919,7 +942,7 @@ export class FileSystem {
         errorOnExist: options.alreadyExistsBehavior === AlreadyExistsBehavior.Error,
         overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite,
         preserveTimestamps: !!options.preserveTimestamps,
-        filter: options.filter
+        filter: options.filter,
       });
     });
   }
@@ -934,7 +957,7 @@ export class FileSystem {
     FileSystem._wrapException(() => {
       options = {
         ...DELETE_FILE_DEFAULT_OPTIONS,
-        ...options
+        ...options,
       };
 
       try {
@@ -950,11 +973,14 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.deleteFile}.
    */
-  public static async deleteFileAsync(filePath: string, options?: IFileSystemDeleteFileOptions): Promise<void> {
+  public static async deleteFileAsync(
+    filePath: string,
+    options?: IFileSystemDeleteFileOptions
+  ): Promise<void> {
     await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...DELETE_FILE_DEFAULT_OPTIONS,
-        ...options
+        ...options,
       };
 
       try {
@@ -1130,14 +1156,14 @@ export class FileSystem {
    * Returns true if the error provided indicates the file does not exist.
    */
   public static isFileDoesNotExistError(error: Error): boolean {
-    return FileSystem.isErrnoException(error) && (error.code === 'ENOENT');
+    return FileSystem.isErrnoException(error) && error.code === 'ENOENT';
   }
 
   /**
    * Returns true if the error provided indicates the folder does not exist.
    */
   public static isFolderDoesNotExistError(error: Error): boolean {
-    return FileSystem.isErrnoException(error) && (error.code === 'ENOTDIR');
+    return FileSystem.isErrnoException(error) && error.code === 'ENOTDIR';
   }
 
   /**
@@ -1173,9 +1199,11 @@ export class FileSystem {
 
   private static _updateErrorMessage(error: Error): void {
     if (FileSystem.isErrnoException(error)) {
-      if (FileSystem.isFileDoesNotExistError(error)) { // eslint-disable-line @typescript-eslint/no-use-before-define
+      if (FileSystem.isFileDoesNotExistError(error)) {
+        // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `File does not exist: ${error.path}\n${error.message}`;
-      } else if (FileSystem.isFolderDoesNotExistError(error)) { // eslint-disable-line @typescript-eslint/no-use-before-define
+      } else if (FileSystem.isFolderDoesNotExistError(error)) {
+        // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `Folder does not exist: ${error.path}\n${error.message}`;
       }
     }

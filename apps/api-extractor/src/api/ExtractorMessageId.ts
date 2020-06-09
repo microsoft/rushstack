@@ -114,5 +114,5 @@ export const allExtractorMessageIds: Set<string> = new Set<string>([
   'ae-cyclic-inherit-doc',
   'ae-unresolved-link',
   'ae-setter-with-docs',
-  'ae-missing-getter'
+  'ae-missing-getter',
 ]);

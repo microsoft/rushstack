@@ -1,7 +1,4 @@
-
-import {
-  ICommandLineStringDefinition
-} from '@rushstack/ts-command-line';
+import { ICommandLineStringDefinition } from '@rushstack/ts-command-line';
 
 /**
  * Namespace for utilities relating to the Variants feature.
@@ -14,6 +11,6 @@ export class Variants {
     parameterLongName: '--variant',
     argumentName: 'VARIANT',
     description: 'Run command using a variant installation configuration',
-    environmentVariable: 'RUSH_VARIANT'
+    environmentVariable: 'RUSH_VARIANT',
   };
 }

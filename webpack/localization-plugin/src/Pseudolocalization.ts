@@ -13,7 +13,7 @@ export class Pseudolocalization {
 
     pseudolocale.option = {
       ...pseudolocale.option,
-      ...options
+      ...options,
     };
     return pseudolocale.str;
   }

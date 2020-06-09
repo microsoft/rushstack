@@ -45,5 +45,5 @@ export const enum ExtractorLogLevel {
   /**
    * The message will be discarded entirely.
    */
-  None = 'none'
+  None = 'none',
 }

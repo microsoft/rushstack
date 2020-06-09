@@ -48,7 +48,7 @@ export enum ApiJsonSchemaVersion {
    * if the older library would not be able to deserialize your new file format.  Adding a nonessential field
    * is generally okay.  Removing, modifying, or reinterpreting existing fields is NOT safe.
    */
-  OLDEST_FORWARDS_COMPATIBLE = V_1001
+  OLDEST_FORWARDS_COMPATIBLE = V_1001,
 }
 
 export class DeserializerContext {

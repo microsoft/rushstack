@@ -20,5 +20,5 @@ export enum VisitorState {
   /**
    * We are finished vising the node and all its references.
    */
-  Visited = 2
+  Visited = 2,
 }

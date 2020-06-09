@@ -1,7 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DeclarationReference, Meaning, Navigation, Component } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+import {
+  DeclarationReference,
+  Meaning,
+  Navigation,
+  Component,
+} from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyItem';
 
@@ -9,8 +14,7 @@ import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyIt
  * Constructor options for {@link ApiPropertySignature}.
  * @public
  */
-export interface IApiPropertySignatureOptions extends IApiPropertyItemOptions {
-}
+export interface IApiPropertySignatureOptions extends IApiPropertyItemOptions {}
 
 /**
  * Represents a TypeScript property declaration that belongs to an `ApiInterface`.
@@ -35,7 +39,6 @@ export interface IApiPropertySignatureOptions extends IApiPropertyItemOptions {
  * @public
  */
 export class ApiPropertySignature extends ApiPropertyItem {
-
   public constructor(options: IApiPropertySignatureOptions) {
     super(options);
   }

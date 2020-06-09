@@ -13,7 +13,7 @@ function verifyProvider(): void {
     log: provider.getOutput(),
     warning: provider.getWarningOutput(),
     error: provider.getErrorOutput(),
-    verbose: provider.getVerbose()
+    verbose: provider.getVerbose(),
   }).toMatchSnapshot();
 }
 
@@ -127,7 +127,12 @@ describe('01 color enabled', () => {
       });
 
       test('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.writeWarningLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+        terminal.writeWarningLine(
+          'message 1',
+          Colors.green('message 2'),
+          'message 3',
+          Colors.red('message 4')
+        );
         verifyProvider();
       });
     });
@@ -235,7 +240,12 @@ describe('01 color enabled', () => {
       });
 
       test('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.writeVerboseLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+        terminal.writeVerboseLine(
+          'message 1',
+          Colors.green('message 2'),
+          'message 3',
+          Colors.red('message 4')
+        );
         verifyProvider();
       });
     });
@@ -395,7 +405,12 @@ describe('02 color disabled', () => {
       });
 
       test('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.writeWarningLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+        terminal.writeWarningLine(
+          'message 1',
+          Colors.green('message 2'),
+          'message 3',
+          Colors.red('message 4')
+        );
         verifyProvider();
       });
     });
@@ -503,7 +518,12 @@ describe('02 color disabled', () => {
       });
 
       test('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.writeVerboseLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+        terminal.writeVerboseLine(
+          'message 1',
+          Colors.green('message 2'),
+          'message 3',
+          Colors.red('message 4')
+        );
         verifyProvider();
       });
     });

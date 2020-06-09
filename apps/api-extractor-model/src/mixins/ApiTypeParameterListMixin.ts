@@ -66,8 +66,10 @@ export interface ApiTypeParameterListMixin extends ApiItem {
  *
  * @public
  */
-export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiTypeParameterListMixin) { // eslint-disable-line @typescript-eslint/no-explicit-any
+export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor>(
+  baseClass: TBaseClass
+): TBaseClass & (new (...args: any[]) => ApiTypeParameterListMixin) {
+  // eslint-disable-line @typescript-eslint/no-explicit-any
 
   abstract class MixedClass extends baseClass implements ApiTypeParameterListMixin {
     public readonly [_typeParameters]: TypeParameter[];
@@ -83,26 +85,29 @@ export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor
       if (this instanceof ApiDeclaredItem) {
         if (options.typeParameters) {
           for (const typeParameterOptions of options.typeParameters) {
-
             const typeParameter: TypeParameter = new TypeParameter({
               name: typeParameterOptions.typeParameterName,
               constraintExcerpt: this.buildExcerpt(typeParameterOptions.constraintTokenRange),
               defaultTypeExcerpt: this.buildExcerpt(typeParameterOptions.defaultTypeTokenRange),
-              parent: this
+              parent: this,
             });
 
             this[_typeParameters].push(typeParameter);
           }
         }
       } else {
-        throw new InternalError('ApiTypeParameterListMixin expects a base class that inherits from ApiDeclaredItem');
+        throw new InternalError(
+          'ApiTypeParameterListMixin expects a base class that inherits from ApiDeclaredItem'
+        );
       }
     }
 
     /** @override */
-    public static onDeserializeInto(options: Partial<IApiTypeParameterListMixinOptions>, context: DeserializerContext,
-      jsonObject: IApiTypeParameterListMixinJson): void {
-
+    public static onDeserializeInto(
+      options: Partial<IApiTypeParameterListMixinOptions>,
+      context: DeserializerContext,
+      jsonObject: IApiTypeParameterListMixinJson
+    ): void {
       baseClass.onDeserializeInto(options, context, jsonObject);
 
       options.typeParameters = jsonObject.typeParameters || [];
@@ -118,13 +123,11 @@ export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor
 
       const typeParameterObjects: IApiTypeParameterOptions[] = [];
       for (const typeParameter of this.typeParameters) {
-        typeParameterObjects.push(
-          {
-            typeParameterName: typeParameter.name,
-            constraintTokenRange: typeParameter.constraintExcerpt.tokenRange,
-            defaultTypeTokenRange: typeParameter.defaultTypeExcerpt.tokenRange
-          }
-        );
+        typeParameterObjects.push({
+          typeParameterName: typeParameter.name,
+          constraintTokenRange: typeParameter.constraintExcerpt.tokenRange,
+          defaultTypeTokenRange: typeParameter.defaultTypeExcerpt.tokenRange,
+        });
       }
 
       if (typeParameterObjects.length > 0) {

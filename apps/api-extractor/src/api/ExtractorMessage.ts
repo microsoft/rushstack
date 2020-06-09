@@ -13,7 +13,6 @@ import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationForma
  * @public
  */
 export interface IExtractorMessageProperties {
-
   /**
    * A declaration can have multiple names if it is exported more than once.
    * If an `ExtractorMessage` applies to a specific export name, this property can indicate that.
@@ -65,7 +64,7 @@ export const enum ExtractorMessageCategory {
    * These strings begin with the prefix "console-".
    * Example: `console-writing-typings-file`
    */
-  Console = 'console'
+  Console = 'console',
 }
 
 /**
@@ -138,7 +137,7 @@ export class ExtractorMessage {
     this.sourceFilePath = options.sourceFilePath;
     this.sourceFileLine = options.sourceFileLine;
     this.sourceFileColumn = options.sourceFileColumn;
-    this.properties = options.properties || { };
+    this.properties = options.properties || {};
 
     this._handled = false;
     this._logLevel = options.logLevel || ExtractorLogLevel.None;
@@ -162,7 +161,9 @@ export class ExtractorMessage {
 
   public set handled(value: boolean) {
     if (this._handled && !value) {
-      throw new Error('One a message has been marked as handled, the "handled" property cannot be set to false');
+      throw new Error(
+        'One a message has been marked as handled, the "handled" property cannot be set to false'
+      );
     }
     this._handled = value;
   }
@@ -213,7 +214,7 @@ export class ExtractorMessage {
       result += SourceFileLocationFormatter.formatPath(this.sourceFilePath, {
         sourceFileLine: this.sourceFileLine,
         sourceFileColumn: this.sourceFileColumn,
-        workingPackageFolderPath
+        workingPackageFolderPath,
       });
 
       if (result.length > 0) {

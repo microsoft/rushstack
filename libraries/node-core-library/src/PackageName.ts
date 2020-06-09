@@ -78,7 +78,7 @@ export class PackageNameParser {
 
   private readonly _options: IPackageNameParserOptions;
 
-  public constructor(options: IPackageNameParserOptions = { }) {
+  public constructor(options: IPackageNameParserOptions = {}) {
     this._options = { ...options };
   }
 
@@ -95,7 +95,7 @@ export class PackageNameParser {
     const result: IParsedPackageNameOrError = {
       scope: '',
       unscopedName: '',
-      error: ''
+      error: '',
     };
 
     let input: string = packageName;
@@ -147,8 +147,8 @@ export class PackageNameParser {
     }
 
     // Convert "@scope/unscoped-name" --> "scopeunscoped-name"
-    const nameWithoutScopeSymbols: string = (result.scope ? result.scope.slice(1, -1) : '')
-      + result.unscopedName;
+    const nameWithoutScopeSymbols: string =
+      (result.scope ? result.scope.slice(1, -1) : '') + result.unscopedName;
 
     if (!this._options.allowUpperCase) {
       // "New packages must not have uppercase letters in the name."
@@ -164,7 +164,8 @@ export class PackageNameParser {
     // "The name ends up being part of a URL, an argument on the command line, and a folder name.
     // Therefore, the name can't contain any non-URL-safe characters"
     const match: RegExpMatchArray | null = nameWithoutScopeSymbols.match(
-      PackageNameParser._invalidNameCharactersRegExp);
+      PackageNameParser._invalidNameCharactersRegExp
+    );
     if (match) {
       result.error = `The package name "${packageName}" contains an invalid character: "${match[0]}"`;
       return result;
@@ -276,7 +277,7 @@ export class PackageName {
 
   /** {@inheritDoc PackageNameParser.parse} */
   public static parse(packageName: string): IParsedPackageName {
-   return this._parser.parse(packageName);
+    return this._parser.parse(packageName);
   }
 
   /** {@inheritDoc PackageNameParser.getScope} */

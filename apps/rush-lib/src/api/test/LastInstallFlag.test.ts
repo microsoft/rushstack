@@ -68,31 +68,35 @@ describe('LastInstallFlag', () => {
     FileSystem.deleteFile(flag.path);
   });
 
-  it('throws an error if new storePath doesn\'t match the old one', () => {
+  it("throws an error if new storePath doesn't match the old one", () => {
     const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR, {
       packageManager: 'pnpm',
-      storePath: path.join(TEMP_DIR, 'pnpm-store')
+      storePath: path.join(TEMP_DIR, 'pnpm-store'),
     });
     const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR, {
       packageManager: 'pnpm',
-      storePath: path.join(TEMP_DIR, 'temp-store')
+      storePath: path.join(TEMP_DIR, 'temp-store'),
     });
 
     flag1.create();
-    expect(() => { flag2.checkValidAndReportStoreIssues() }).toThrowError(/PNPM store path/);
+    expect(() => {
+      flag2.checkValidAndReportStoreIssues();
+    }).toThrowError(/PNPM store path/);
   });
 
-  it('doesn\'t throw an error if conditions for error aren\'t met', () => {
+  it("doesn't throw an error if conditions for error aren't met", () => {
     const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR, {
       packageManager: 'pnpm',
-      storePath: path.join(TEMP_DIR, 'pnpm-store')
+      storePath: path.join(TEMP_DIR, 'pnpm-store'),
     });
     const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR, {
       packageManager: 'npm',
     });
 
     flag1.create();
-    expect(() => { flag2.checkValidAndReportStoreIssues() }).not.toThrow();
+    expect(() => {
+      flag2.checkValidAndReportStoreIssues();
+    }).not.toThrow();
     expect(flag2.checkValidAndReportStoreIssues()).toEqual(false);
-  })
+  });
 });

@@ -4,16 +4,8 @@
 import * as path from 'path';
 import * as colors from 'colors';
 
-import {
-  getPackageDeps,
-  getGitHashForFiles,
-  IPackageDeps
-} from '@rushstack/package-deps-hash';
-import {
-  Path,
-  InternalError,
-  FileSystem
-} from '@rushstack/node-core-library';
+import { getPackageDeps, getGitHashForFiles, IPackageDeps } from '@rushstack/package-deps-hash';
+import { Path, InternalError, FileSystem } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Git } from './Git';
@@ -53,7 +45,7 @@ export class PackageChangeAnalyzer {
     // pre-populate the map with the projects from the config
     for (const project of this._rushConfiguration.projects) {
       projectHashDeps.set(project.packageName, {
-        files: {}
+        files: {},
       });
     }
 
@@ -70,9 +62,11 @@ export class PackageChangeAnalyzer {
     } catch (e) {
       // If getPackageDeps fails, don't fail the whole build. Treat this case as if we don't know anything about
       // the state of the files in the repo. This can happen if the environment doesn't have Git.
-      console.log(colors.yellow(
-        `Error calculating the state of the repo. (inner error: ${e}). Continuing without diffing files.`
-      ));
+      console.log(
+        colors.yellow(
+          `Error calculating the state of the repo. (inner error: ${e}). Continuing without diffing files.`
+        )
+      );
 
       return projectHashDeps;
     }
@@ -136,22 +130,24 @@ export class PackageChangeAnalyzer {
 
     if (
       this._rushConfiguration.packageManager === 'pnpm' &&
-      !this._rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection
+      !this._rushConfiguration.experimentsConfiguration.configuration
+        .legacyIncrementalBuildDependencyDetection
     ) {
       const projects: RushConfigurationProject[] = [];
       const projectDependencyManifestPaths: string[] = [];
 
       for (const project of this._rushConfiguration.projects) {
-        const dependencyManifestFilePath: string = PnpmProjectDependencyManifest.getFilePathForProject(project);
-        const relativeDependencyManifestFilePath: string = path.relative(
-          this._rushConfiguration.rushJsonFolder,
-          dependencyManifestFilePath
-        ).replace(/\\/g, '/');
+        const dependencyManifestFilePath: string = PnpmProjectDependencyManifest.getFilePathForProject(
+          project
+        );
+        const relativeDependencyManifestFilePath: string = path
+          .relative(this._rushConfiguration.rushJsonFolder, dependencyManifestFilePath)
+          .replace(/\\/g, '/');
 
         if (!FileSystem.exists(dependencyManifestFilePath)) {
           throw new Error(
             `A project dependency file (${relativeDependencyManifestFilePath}) is missing. You may need to run ` +
-            '"rush unlink" and "rush link".'
+              '"rush unlink" and "rush link".'
           );
         }
 
@@ -177,10 +173,12 @@ export class PackageChangeAnalyzer {
       const variant: string | undefined = this._rushConfiguration.currentInstalledVariant;
 
       // Add the shrinkwrap file to every project's dependencies
-      const shrinkwrapFile: string = path.relative(
-        this._rushConfiguration.rushJsonFolder,
-        this._rushConfiguration.getCommittedShrinkwrapFilename(variant)
-      ).replace(/\\/g, '/');
+      const shrinkwrapFile: string = path
+        .relative(
+          this._rushConfiguration.rushJsonFolder,
+          this._rushConfiguration.getCommittedShrinkwrapFilename(variant)
+        )
+        .replace(/\\/g, '/');
 
       for (const project of this._rushConfiguration.projects) {
         const shrinkwrapHash: string | undefined = noProjectHashes[shrinkwrapFile];

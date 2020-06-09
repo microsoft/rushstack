@@ -18,7 +18,10 @@ mockGetTimeInMs.mockImplementation(() => {
   return mockTimeInMs;
 });
 
-function createTaskRunner(taskRunnerOptions: ITaskRunnerOptions, taskDefinition: ITaskDefinition): TaskRunner {
+function createTaskRunner(
+  taskRunnerOptions: ITaskRunnerOptions,
+  taskDefinition: ITaskDefinition
+): TaskRunner {
   const task: ITask = taskDefinition as ITask;
   task.dependencies = new Set<ITask>();
   task.dependents = new Set<ITask>();
@@ -47,13 +50,16 @@ describe('TaskRunner', () => {
 
   describe('Constructor', () => {
     it('throwsErrorOnInvalidParallelism', () => {
-      expect(() => new TaskRunner([], {
-        quietMode: false,
-        parallelism: 'tequila',
-        changedProjectsOnly: false,
-        terminal,
-        allowWarningsInSuccessfulBuild: false
-      })).toThrowErrorMatchingSnapshot();
+      expect(
+        () =>
+          new TaskRunner([], {
+            quietMode: false,
+            parallelism: 'tequila',
+            changedProjectsOnly: false,
+            terminal,
+            allowWarningsInSuccessfulBuild: false,
+          })
+      ).toThrowErrorMatchingSnapshot();
     });
   });
 
@@ -64,7 +70,7 @@ describe('TaskRunner', () => {
         parallelism: '1',
         changedProjectsOnly: false,
         terminal,
-        allowWarningsInSuccessfulBuild: false
+        allowWarningsInSuccessfulBuild: false,
       };
     });
 
@@ -79,13 +85,13 @@ describe('TaskRunner', () => {
           writer.writeError('Error: step 1 failed' + EOL);
           return Promise.resolve(TaskStatus.Failure);
         },
-        hadEmptyScript: false
+        hadEmptyScript: false,
       });
 
       return taskRunner
         .execute()
         .then(() => fail(EXPECTED_FAIL))
-        .catch(err => {
+        .catch((err) => {
           expect(err.message).toMatchSnapshot();
           const allMessages: string = terminalProvider.getOutput();
           expect(allMessages).not.toContain('Build step 1');
@@ -103,13 +109,13 @@ describe('TaskRunner', () => {
           writer.write('Error: step 1 failed' + EOL);
           return Promise.resolve(TaskStatus.Failure);
         },
-        hadEmptyScript: false
+        hadEmptyScript: false,
       });
 
       return taskRunner
         .execute()
         .then(() => fail(EXPECTED_FAIL))
-        .catch(err => {
+        .catch((err) => {
           expect(err.message).toMatchSnapshot();
           expect(terminalProvider.getOutput()).toMatch(/Build step 1.*Error: step 1 failed/);
           checkConsoleOutput(terminalProvider);
@@ -127,16 +133,17 @@ describe('TaskRunner', () => {
           }
           return Promise.resolve(TaskStatus.Failure);
         },
-        hadEmptyScript: false
+        hadEmptyScript: false,
       });
 
       return taskRunner
         .execute()
         .then(() => fail(EXPECTED_FAIL))
-        .catch(err => {
+        .catch((err) => {
           expect(err.message).toMatchSnapshot();
-          expect(terminalProvider.getOutput())
-            .toMatch(/Building units.* - unit #1;.* - unit #3;.*lines omitted.* - unit #48;.* - unit #50;/);
+          expect(terminalProvider.getOutput()).toMatch(
+            /Building units.* - unit #1;.* - unit #3;.*lines omitted.* - unit #48;.* - unit #50;/
+          );
           checkConsoleOutput(terminalProvider);
         });
     });
@@ -152,16 +159,17 @@ describe('TaskRunner', () => {
           }
           return Promise.resolve(TaskStatus.Failure);
         },
-        hadEmptyScript: false
+        hadEmptyScript: false,
       });
 
       return taskRunner
         .execute()
         .then(() => fail(EXPECTED_FAIL))
-        .catch(err => {
+        .catch((err) => {
           expect(err.message).toMatchSnapshot();
-          expect(terminalProvider.getOutput())
-            .toMatch(/List of errors:\S.* - error #1;\S.*lines omitted.* - error #48;\S.* - error #50;\S/);
+          expect(terminalProvider.getOutput()).toMatch(
+            /List of errors:\S.* - error #1;\S.*lines omitted.* - error #48;\S.* - error #50;\S/
+          );
           checkConsoleOutput(terminalProvider);
         });
     });
@@ -175,7 +183,7 @@ describe('TaskRunner', () => {
           parallelism: '1',
           changedProjectsOnly: false,
           terminal,
-          allowWarningsInSuccessfulBuild: false
+          allowWarningsInSuccessfulBuild: false,
         };
       });
 
@@ -188,13 +196,13 @@ describe('TaskRunner', () => {
             writer.write('Warning: step 1 succeeded with warnings' + EOL);
             return Promise.resolve(TaskStatus.SuccessWithWarning);
           },
-          hadEmptyScript: false
+          hadEmptyScript: false,
         });
 
         return taskRunner
           .execute()
           .then(() => fail('Promise returned by execute() resolved but was expected to fail'))
-          .catch(err => {
+          .catch((err) => {
             expect(err.message).toMatchSnapshot();
             const allMessages: string = terminalProvider.getOutput();
             expect(allMessages).toContain('Build step 1');
@@ -211,7 +219,7 @@ describe('TaskRunner', () => {
           parallelism: '1',
           changedProjectsOnly: false,
           terminal,
-          allowWarningsInSuccessfulBuild: true
+          allowWarningsInSuccessfulBuild: true,
         };
       });
 
@@ -224,7 +232,7 @@ describe('TaskRunner', () => {
             writer.write('Warning: step 1 succeeded with warnings' + EOL);
             return Promise.resolve(TaskStatus.SuccessWithWarning);
           },
-          hadEmptyScript: false
+          hadEmptyScript: false,
         });
 
         return taskRunner
@@ -235,7 +243,7 @@ describe('TaskRunner', () => {
             expect(allMessages).toContain('Warning: step 1 succeeded with warnings');
             checkConsoleOutput(terminalProvider);
           })
-          .catch(err => fail('Promise returned by execute() rejected but was expected to resolve'));
+          .catch((err) => fail('Promise returned by execute() rejected but was expected to resolve'));
       });
     });
   });

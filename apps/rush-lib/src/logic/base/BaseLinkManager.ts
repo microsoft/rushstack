@@ -16,7 +16,7 @@ import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
 export enum SymlinkKind {
   File,
-  Directory
+  Directory,
 }
 
 export interface IBaseLinkManagerCreateSymlinkOptions extends IFileSystemCreateLinkOptions {
@@ -36,13 +36,10 @@ export abstract class BaseLinkManager {
 
     let targetPath: string;
     if (EnvironmentConfiguration.absoluteSymlinks) {
-        targetPath = options.linkTargetPath;
+      targetPath = options.linkTargetPath;
     } else {
       // Link to the relative path, to avoid going outside containers such as a Docker image
-      targetPath = path.relative(
-        fs.realpathSync(newLinkFolder),
-        options.linkTargetPath
-      );
+      targetPath = path.relative(fs.realpathSync(newLinkFolder), options.linkTargetPath);
     }
 
     if (process.platform === 'win32') {
@@ -50,7 +47,7 @@ export abstract class BaseLinkManager {
         // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
         FileSystem.createSymbolicLinkJunction({
           linkTargetPath: targetPath,
-          newLinkPath: options.newLinkPath
+          newLinkPath: options.newLinkPath,
         });
       } else {
         // For files, we use a Windows "hard link", because creating a symbolic link requires
@@ -59,7 +56,7 @@ export abstract class BaseLinkManager {
         // NOTE: We cannot use the relative path for hard links
         FileSystem.createHardLink({
           linkTargetPath: options.linkTargetPath,
-          newLinkPath: options.newLinkPath
+          newLinkPath: options.newLinkPath,
         });
       }
     } else {
@@ -68,12 +65,12 @@ export abstract class BaseLinkManager {
       if (options.symlinkKind === SymlinkKind.Directory) {
         FileSystem.createSymbolicLinkFolder({
           linkTargetPath: targetPath,
-          newLinkPath: options.newLinkPath
+          newLinkPath: options.newLinkPath,
         });
       } else {
         FileSystem.createSymbolicLinkFile({
           linkTargetPath: targetPath,
-          newLinkPath: options.newLinkPath
+          newLinkPath: options.newLinkPath,
         });
       }
     }
@@ -132,7 +129,7 @@ export abstract class BaseLinkManager {
       BaseLinkManager._createSymlink({
         linkTargetPath: localPackage.symlinkTargetFolderPath,
         newLinkPath: localPackage.folderPath,
-        symlinkKind: SymlinkKind.Directory
+        symlinkKind: SymlinkKind.Directory,
       });
     } else {
       // If there are children, then we need to symlink each item in the folder individually
@@ -149,7 +146,6 @@ export abstract class BaseLinkManager {
           const linkStats: fs.Stats = FileSystem.getLinkStatistics(linkTarget);
 
           if (linkStats.isSymbolicLink()) {
-
             const targetStats: fs.Stats = FileSystem.getStatistics(FileSystem.getRealPath(linkTarget));
             if (targetStats.isDirectory()) {
               // Neither a junction nor a directory-symlink can have a directory-symlink
@@ -168,7 +164,7 @@ export abstract class BaseLinkManager {
           BaseLinkManager._createSymlink({
             linkTargetPath: linkTarget,
             newLinkPath: linkSource,
-            symlinkKind
+            symlinkKind,
           });
         }
       }
@@ -203,7 +199,7 @@ export abstract class BaseLinkManager {
     // a full "rush link" is required next time
     Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
 
-    await this._linkProjects()
+    await this._linkProjects();
 
     stopwatch.stop();
     console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));

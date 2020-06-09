@@ -26,7 +26,7 @@ export enum AstImportKind {
   /**
    * An import statement such as `import x = require("y");`.
    */
-  EqualsImport
+  EqualsImport,
 }
 
 /**

@@ -12,22 +12,24 @@ export class WidgetCommandLine extends CommandLineParser {
   public constructor() {
     super({
       toolFilename: 'widget',
-      toolDescription: 'The "widget" tool is a code sample for using the @rushstack/ts-command-line library.'
+      toolDescription: 'The "widget" tool is a code sample for using the @rushstack/ts-command-line library.',
     });
 
     this.addAction(new PushAction());
     this.addAction(new RunAction());
   }
 
-  protected onDefineParameters(): void { // abstract
+  protected onDefineParameters(): void {
+    // abstract
     this._verbose = this.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
-      description: 'Show extra logging detail'
+      description: 'Show extra logging detail',
     });
   }
 
-  protected onExecute(): Promise<void> { // override
+  protected onExecute(): Promise<void> {
+    // override
     BusinessLogic.configureLogger(this._verbose.value);
     return super.onExecute();
   }

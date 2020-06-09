@@ -4,7 +4,7 @@ import {
   splitStyles,
   loadStyles,
   configureLoadStyles,
-  IThemingInstruction
+  IThemingInstruction,
 } from './../index';
 
 describe('detokenize', () => {
@@ -24,7 +24,7 @@ describe('detokenize', () => {
 
   it('respects theme', () => {
     loadTheme({
-      color: 'red'
+      color: 'red',
     });
 
     try {
@@ -45,23 +45,27 @@ describe('detokenize', () => {
   });
 
   it('splits non-themable CSS', () => {
-      const cssString: string = '.sampleClass\n{\n color: #FF0000;\n}\n';
-      const arr: IThemingInstruction[] = splitStyles(cssString);
-      expect(arr).toHaveLength(1);
-      expect(arr[0].rawString).toEqual(cssString);
+    const cssString: string = '.sampleClass\n{\n color: #FF0000;\n}\n';
+    const arr: IThemingInstruction[] = splitStyles(cssString);
+    expect(arr).toHaveLength(1);
+    expect(arr[0].rawString).toEqual(cssString);
   });
 
   it('splits themable CSS', () => {
-      const arr: IThemingInstruction[] = splitStyles('.firstClass { color: "[theme: firstColor ]";}\n' +
-          ' .secondClass { color: "[theme:secondColor, default: #AAA]";}\n .coach { color: #333; }');
-      expect(arr).toHaveLength(5);
-      for (let i: number = 0; i < arr.length; i++) {
-          if (i % 2 === 0) { // even index should be a string component
-              expect(typeof arr[i].rawString).toEqual('string');
-          } else { // odd index should be a theme instruction object
-              expect(typeof arr[i].theme).toEqual('string');
-          }
+    const arr: IThemingInstruction[] = splitStyles(
+      '.firstClass { color: "[theme: firstColor ]";}\n' +
+        ' .secondClass { color: "[theme:secondColor, default: #AAA]";}\n .coach { color: #333; }'
+    );
+    expect(arr).toHaveLength(5);
+    for (let i: number = 0; i < arr.length; i++) {
+      if (i % 2 === 0) {
+        // even index should be a string component
+        expect(typeof arr[i].rawString).toEqual('string');
+      } else {
+        // odd index should be a theme instruction object
+        expect(typeof arr[i].theme).toEqual('string');
       }
+    }
   });
 
   it('passes the styles to loadStyles override callback', () => {

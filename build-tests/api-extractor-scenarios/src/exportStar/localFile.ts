@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /** @public */
-export class A { }
+export class A {}
 
 /** @public */
-export class B { }
+export class B {}

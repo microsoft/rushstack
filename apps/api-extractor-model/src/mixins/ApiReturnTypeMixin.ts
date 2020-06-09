@@ -55,8 +55,10 @@ export interface ApiReturnTypeMixin extends ApiItem {
  *
  * @public
  */
-export function ApiReturnTypeMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiReturnTypeMixin) { // eslint-disable-line @typescript-eslint/no-explicit-any
+export function ApiReturnTypeMixin<TBaseClass extends IApiItemConstructor>(
+  baseClass: TBaseClass
+): TBaseClass & (new (...args: any[]) => ApiReturnTypeMixin) {
+  // eslint-disable-line @typescript-eslint/no-explicit-any
 
   abstract class MixedClass extends baseClass implements ApiReturnTypeMixin {
     public [_returnTypeExcerpt]: Excerpt;
@@ -75,9 +77,11 @@ export function ApiReturnTypeMixin<TBaseClass extends IApiItemConstructor>(baseC
     }
 
     /** @override */
-    public static onDeserializeInto(options: Partial<IApiReturnTypeMixinOptions>, context: DeserializerContext,
-      jsonObject: IApiReturnTypeMixinJson): void {
-
+    public static onDeserializeInto(
+      options: Partial<IApiReturnTypeMixinOptions>,
+      context: DeserializerContext,
+      jsonObject: IApiReturnTypeMixinJson
+    ): void {
       baseClass.onDeserializeInto(options, context, jsonObject);
 
       options.returnTypeTokenRange = jsonObject.returnTypeTokenRange;

@@ -10,22 +10,24 @@ import { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
 import { ExtractorConfig } from '../api/ExtractorConfig';
 
 export class InitAction extends CommandLineAction {
-
   public constructor(parser: ApiExtractorCommandLine) {
     super({
       actionName: 'init',
       summary: `Create an ${ExtractorConfig.FILENAME} config file`,
-      documentation: `Use this command when setting up API Extractor for a new project.  It writes an`
-        + ` ${ExtractorConfig.FILENAME} config file template with code comments that describe all the settings.`
-        + ` The file will be written in the current directory.`
+      documentation:
+        `Use this command when setting up API Extractor for a new project.  It writes an` +
+        ` ${ExtractorConfig.FILENAME} config file template with code comments that describe all the settings.` +
+        ` The file will be written in the current directory.`,
     });
   }
 
-  protected onDefineParameters(): void { // override
+  protected onDefineParameters(): void {
+    // override
     // No parameters yet
   }
 
-  protected onExecute(): Promise<void> { // override
+  protected onExecute(): Promise<void> {
+    // override
     const inputFilePath: string = path.resolve(__dirname, '../schemas/api-extractor-template.json');
     const outputFilePath: string = path.resolve(ExtractorConfig.FILENAME);
 
@@ -38,11 +40,13 @@ export class InitAction extends CommandLineAction {
     console.log(colors.green('Writing file: ') + outputFilePath);
     FileSystem.copyFile({
       sourcePath: inputFilePath,
-      destinationPath: outputFilePath
+      destinationPath: outputFilePath,
     });
 
-    console.log('\nThe recommended location for this file is in the project\'s "config" subfolder,\n'
-      + 'or else in the top-level folder with package.json.');
+    console.log(
+      '\nThe recommended location for this file is in the project\'s "config" subfolder,\n' +
+        'or else in the top-level folder with package.json.'
+    );
 
     return Promise.resolve();
   }

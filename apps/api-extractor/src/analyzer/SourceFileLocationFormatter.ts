@@ -8,7 +8,7 @@ import { Path, Text } from '@rushstack/node-core-library';
 export interface ISourceFileLocationFormatOptions {
   sourceFileLine?: number;
   sourceFileColumn?: number;
-  workingPackageFolderPath?: string
+  workingPackageFolderPath?: string;
 }
 
 export class SourceFileLocationFormatter {
@@ -23,13 +23,13 @@ export class SourceFileLocationFormatter {
     return SourceFileLocationFormatter.formatPath(sourceFile.fileName, {
       sourceFileLine: lineAndCharacter.line + 1,
       sourceFileColumn: lineAndCharacter.character + 1,
-      workingPackageFolderPath
+      workingPackageFolderPath,
     });
   }
 
   public static formatPath(sourceFilePath: string, options?: ISourceFileLocationFormatOptions): string {
     if (!options) {
-      options = { };
+      options = {};
     }
 
     let result: string = '';

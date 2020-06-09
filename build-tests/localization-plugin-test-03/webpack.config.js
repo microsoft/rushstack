@@ -18,7 +18,12 @@ function resolveMissingString(localeNames, localizedResourcePath) {
 
   const result = {};
   for (const localeName of localeNames) {
-    const expectedCombinedStringsPath = path.resolve(__dirname, 'localization', localeName, 'combinedStringsData.json');
+    const expectedCombinedStringsPath = path.resolve(
+      __dirname,
+      'localization',
+      localeName,
+      'combinedStringsData.json'
+    );
     try {
       const loadedCombinedStringsPath = JsonFile.load(expectedCombinedStringsPath);
       result[localeName] = loadedCombinedStringsPath[contextRelativePath];
@@ -44,77 +49,77 @@ function generateConfiguration(mode, outputFolderName) {
           options: {
             compiler: require.resolve('@microsoft/rush-stack-compiler-3.5/node_modules/typescript'),
             logLevel: 'ERROR',
-            configFile: path.resolve(__dirname, 'tsconfig.json')
-          }
-        }
-      ]
+            configFile: path.resolve(__dirname, 'tsconfig.json'),
+          },
+        },
+      ],
     },
     resolve: {
-      extensions: ['.js', '.jsx', '.json', '.ts', '.tsx']
+      extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
     },
     entry: {
       'localization-test-A': path.join(__dirname, 'src', 'indexA.ts'),
       'localization-test-B': path.join(__dirname, 'src', 'indexB.ts'),
       'localization-test-C': path.join(__dirname, 'src', 'indexC.ts'),
-      'localization-test-D': path.join(__dirname, 'src', 'indexD.ts')
+      'localization-test-D': path.join(__dirname, 'src', 'indexD.ts'),
     },
     output: {
       path: path.join(__dirname, outputFolderName),
       filename: '[name]_[locale]_[contenthash].js',
-      chunkFilename: '[id].[name]_[locale]_[contenthash].js'
+      chunkFilename: '[id].[name]_[locale]_[contenthash].js',
     },
     optimization: {
-      minimize: true
+      minimize: true,
     },
     plugins: [
       new webpack.optimize.ModuleConcatenationPlugin(),
       new LocalizationPlugin({
         localizedData: {
           defaultLocale: {
-            localeName: 'en-us'
+            localeName: 'en-us',
           },
           translatedStrings: {
-            "es-es": {
-              "./src/strings1.loc.json": {
-                "string1": "la primera cadena de texto"
+            'es-es': {
+              './src/strings1.loc.json': {
+                string1: 'la primera cadena de texto',
               },
-              "./src/chunks/strings2.loc.json": "./localization/es-es/chunks/strings2.loc.json",
-              "./src/strings4.loc.json": {
-                "string1": "\"cadena de texto con comillas\""
+              './src/chunks/strings2.loc.json': './localization/es-es/chunks/strings2.loc.json',
+              './src/strings4.loc.json': {
+                string1: '"cadena de texto con comillas"',
               },
-              "./src/strings5.resx": {
-                "string1": "La primera cadena de texto RESX",
-                "stringWithQuotes": "\"cadena de texto RESX con comillas\""
+              './src/strings5.resx': {
+                string1: 'La primera cadena de texto RESX',
+                stringWithQuotes: '"cadena de texto RESX con comillas"',
               },
-              "./src/chunks/strings6.resx": {
-                "string": "cadena de texto RESX"
-              }
-            }
+              './src/chunks/strings6.resx': {
+                string: 'cadena de texto RESX',
+              },
+            },
           },
           resolveMissingTranslatedStrings: resolveMissingString,
           passthroughLocale: {
-            usePassthroughLocale: true
+            usePassthroughLocale: true,
           },
           pseudolocales: {
             'qps-ploca': {
               append: '',
-              prepend: ''
+              prepend: '',
             },
             'qps-ploc': {
               append: '##--!!]',
-              prepend: '[!!--##'
-            }
+              prepend: '[!!--##',
+            },
           },
-          normalizeResxNewlines: 'lf'
+          normalizeResxNewlines: 'lf',
         },
         typingsOptions: {
           generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts'),
           sourceRoot: path.resolve(__dirname, 'src'),
-          exportAsDefault: true
+          exportAsDefault: true,
         },
         localizationStats: {
-          dropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
-        }
+          dropPath: path.resolve(__dirname, 'temp', 'localization-stats.json'),
+        },
       }),
       new BundleAnalyzerPlugin({
         openAnalyzer: false,
@@ -122,15 +127,15 @@ function generateConfiguration(mode, outputFolderName) {
         reportFilename: path.resolve(__dirname, 'temp', 'stats.html'),
         generateStatsFile: true,
         statsFilename: path.resolve(__dirname, 'temp', 'stats.json'),
-        logLevel: 'error'
+        logLevel: 'error',
       }),
       new SetPublicPathPlugin({
         scriptName: {
-          useAssetName: true
-        }
+          useAssetName: true,
+        },
       }),
-      new HtmlWebpackPlugin()
-    ]
+      new HtmlWebpackPlugin(),
+    ],
   };
 }
 

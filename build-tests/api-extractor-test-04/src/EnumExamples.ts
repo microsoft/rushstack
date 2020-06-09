@@ -21,7 +21,7 @@ export enum RegularEnum {
    * This member is marked as \@internal
    * @internal
    */
-  _InternalMember
+  _InternalMember,
 }
 
 /**
@@ -44,5 +44,5 @@ export const enum ConstEnum {
    * This member is marked as \@internal
    * @internal
    */
-  _InternalMember = '_InternalMember'
+  _InternalMember = '_InternalMember',
 }

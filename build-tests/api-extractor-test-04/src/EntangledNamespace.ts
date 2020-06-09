@@ -6,13 +6,11 @@
  * @beta
  */
 export namespace EntangledNamespace {
-
   /**
    * This is a nested namespace.
    * The "beta" release tag is inherited from the parent.
    */
   export namespace N2 {
-
     /**
      * This class is in a nested namespace.
      * @alpha

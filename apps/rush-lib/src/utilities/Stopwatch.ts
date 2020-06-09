@@ -8,7 +8,7 @@ import { Utilities } from './Utilities';
  */
 export enum StopwatchState {
   Stopped = 1,
-  Started = 2
+  Started = 2,
 }
 
 /**
@@ -36,7 +36,7 @@ export class Stopwatch {
     return new Stopwatch().start();
   }
 
-    public get state(): StopwatchState {
+  public get state(): StopwatchState {
     return this._state;
   }
 
@@ -58,7 +58,7 @@ export class Stopwatch {
    * Stops executing the stopwatch and saves the current timestamp
    */
   public stop(): Stopwatch {
-    this._endTime = (this._startTime !== undefined ? this._getTime() : undefined);
+    this._endTime = this._startTime !== undefined ? this._getTime() : undefined;
     this._state = StopwatchState.Stopped;
     return this;
   }
@@ -85,8 +85,7 @@ export class Stopwatch {
       const minutes: number = Math.floor(totalSeconds / 60);
       const seconds: number = totalSeconds % 60.0;
 
-      return `${minutes.toFixed(0)} minute${minutes === 1 ? '' : 's'}` +
-        ` ${seconds.toFixed(1)} seconds`;
+      return `${minutes.toFixed(0)} minute${minutes === 1 ? '' : 's'}` + ` ${seconds.toFixed(1)} seconds`;
     } else {
       return `${totalSeconds.toFixed(2)} seconds`;
     }
@@ -99,10 +98,8 @@ export class Stopwatch {
     if (this._startTime === undefined) {
       return 0;
     }
-    const curTime: number = this._endTime !== undefined
-      ? this._endTime
-      : this._getTime();
+    const curTime: number = this._endTime !== undefined ? this._endTime : this._getTime();
 
-    return ((curTime - this._startTime) / 1000.0);
+    return (curTime - this._startTime) / 1000.0;
   }
 }

@@ -28,9 +28,7 @@ export interface IGlobalScriptActionOptions extends IBaseScriptActionOptions {
 export class GlobalScriptAction extends BaseScriptAction {
   private _shellCommand: string;
 
-  public constructor(
-    options: IGlobalScriptActionOptions
-  ) {
+  public constructor(options: IGlobalScriptActionOptions) {
     super(options);
     this._shellCommand = options.shellCommand;
   }
@@ -49,18 +47,15 @@ export class GlobalScriptAction extends BaseScriptAction {
         shellCommand += ' ' + customParameterValues.join(' ');
       }
 
-      const exitCode: number = Utilities.executeLifecycleCommand(
-        shellCommand,
-        {
-          rushConfiguration: this.rushConfiguration,
-          workingDirectory: this.rushConfiguration.rushJsonFolder,
-          initCwd: this.rushConfiguration.commonTempFolder,
-          handleOutput: false,
-          environmentPathOptions: {
-            includeRepoBin: true
-          }
-        }
-      );
+      const exitCode: number = Utilities.executeLifecycleCommand(shellCommand, {
+        rushConfiguration: this.rushConfiguration,
+        workingDirectory: this.rushConfiguration.rushJsonFolder,
+        initCwd: this.rushConfiguration.commonTempFolder,
+        handleOutput: false,
+        environmentPathOptions: {
+          includeRepoBin: true,
+        },
+      });
 
       process.exitCode = exitCode;
 

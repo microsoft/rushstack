@@ -13,12 +13,12 @@ import { DocTableRow } from './DocTableRow';
  * Identifies custom subclasses of {@link DocNode}.
  */
 export const enum CustomDocNodeKind {
-  EmphasisSpan                  = 'EmphasisSpan',
-  Heading                       = 'Heading',
-  NoteBox                       = 'NoteBox',
-  Table                         = 'Table',
-  TableCell                     = 'TableCell',
-  TableRow                      = 'TableRow'
+  EmphasisSpan = 'EmphasisSpan',
+  Heading = 'Heading',
+  NoteBox = 'NoteBox',
+  Table = 'Table',
+  TableCell = 'TableCell',
+  TableRow = 'TableRow',
 }
 
 export class CustomDocNodes {
@@ -34,22 +34,22 @@ export class CustomDocNodes {
         { docNodeKind: CustomDocNodeKind.NoteBox, constructor: DocNoteBox },
         { docNodeKind: CustomDocNodeKind.Table, constructor: DocTable },
         { docNodeKind: CustomDocNodeKind.TableCell, constructor: DocTableCell },
-        { docNodeKind: CustomDocNodeKind.TableRow, constructor: DocTableRow }
+        { docNodeKind: CustomDocNodeKind.TableRow, constructor: DocTableRow },
       ]);
 
       configuration.docNodeManager.registerAllowableChildren(CustomDocNodeKind.EmphasisSpan, [
         DocNodeKind.PlainText,
-        DocNodeKind.SoftBreak
+        DocNodeKind.SoftBreak,
       ]);
 
       configuration.docNodeManager.registerAllowableChildren(DocNodeKind.Section, [
         CustomDocNodeKind.Heading,
         CustomDocNodeKind.NoteBox,
-        CustomDocNodeKind.Table
+        CustomDocNodeKind.Table,
       ]);
 
       configuration.docNodeManager.registerAllowableChildren(DocNodeKind.Paragraph, [
-        CustomDocNodeKind.EmphasisSpan
+        CustomDocNodeKind.EmphasisSpan,
       ]);
 
       CustomDocNodes._configuration = configuration;

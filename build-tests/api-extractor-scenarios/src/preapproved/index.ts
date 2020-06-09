@@ -4,7 +4,7 @@
 /** @internal @preapproved */
 export enum _PreapprovedEnum {
   ONE = 1,
-  TWO
+  TWO,
 }
 
 /** @internal @preapproved */
@@ -14,15 +14,12 @@ export interface _PreapprovedInterface {
 
 /** @internal @preapproved */
 export class _PreapprovedClass {
-  public member(): void {
-  }
+  public member(): void {}
 }
 
 /** @internal @preapproved */
 export namespace _PreapprovedNamespace {
-  export class X {
-  }
+  export class X {}
 
-  export function f(): void {
-  }
+  export function f(): void {}
 }

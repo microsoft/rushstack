@@ -24,12 +24,14 @@ describe('updateIndividualChangelog', () => {
         packageName: 'a',
         newVersion: '1.0.0',
         changeType: ChangeType.major,
-        changes: [{
-          packageName: 'a',
-          type: 'major',
-          changeType: ChangeType.major,
-          comment: 'Patching a'
-        }]
+        changes: [
+          {
+            packageName: 'a',
+            type: 'major',
+            changeType: ChangeType.major,
+            comment: 'Patching a',
+          },
+        ],
       },
       'rootMajorChange',
       false,
@@ -48,12 +50,12 @@ describe('updateIndividualChangelog', () => {
               {
                 author: undefined,
                 comment: 'Patching a',
-                commit: undefined
-              }
-            ]
-          }
-        }
-      ]
+                commit: undefined,
+              },
+            ],
+          },
+        },
+      ],
     };
 
     // Ignore comparing date.
@@ -68,12 +70,14 @@ describe('updateIndividualChangelog', () => {
         packageName: 'a',
         newVersion: '1.0.0',
         changeType: ChangeType.major,
-        changes: [{
-          packageName: 'a',
-          type: 'major',
-          changeType: ChangeType.major,
-          comment: 'Patching a'
-        }]
+        changes: [
+          {
+            packageName: 'a',
+            type: 'major',
+            changeType: ChangeType.major,
+            comment: 'Patching a',
+          },
+        ],
       },
       path.resolve(__dirname, 'exampleChangelog'),
       false,
@@ -92,10 +96,10 @@ describe('updateIndividualChangelog', () => {
               {
                 author: undefined,
                 comment: 'Patching a',
-                commit: undefined
-              }
-            ]
-          }
+                commit: undefined,
+              },
+            ],
+          },
         },
         {
           version: '0.0.1',
@@ -104,12 +108,12 @@ describe('updateIndividualChangelog', () => {
           comments: {
             patch: [
               {
-                comment: 'Patching a'
-              }
-            ]
-          }
-        }
-      ]
+                comment: 'Patching a',
+              },
+            ],
+          },
+        },
+      ],
     };
 
     // Ignore comparing date.
@@ -124,12 +128,14 @@ describe('updateIndividualChangelog', () => {
         packageName: 'a',
         newVersion: '0.0.1',
         changeType: ChangeType.patch,
-        changes: [{
-          packageName: 'a',
-          type: 'patch',
-          changeType: ChangeType.patch,
-          comment: 'Patching a'
-        }]
+        changes: [
+          {
+            packageName: 'a',
+            type: 'patch',
+            changeType: ChangeType.patch,
+            comment: 'Patching a',
+          },
+        ],
       },
       path.resolve(__dirname, 'exampleChangelog'),
       false,
@@ -145,12 +151,14 @@ describe('updateIndividualChangelog', () => {
         packageName: 'a',
         newVersion: '0.0.2',
         changeType: ChangeType.dependency,
-        changes: [{
-          packageName: 'a',
-          type: 'dependency',
-          changeType: ChangeType.dependency,
-          comment: 'Updating a'
-        }]
+        changes: [
+          {
+            packageName: 'a',
+            type: 'dependency',
+            changeType: ChangeType.dependency,
+            comment: 'Updating a',
+          },
+        ],
       },
       path.resolve(__dirname, 'exampleChangelog'),
       false,
@@ -169,10 +177,10 @@ describe('updateIndividualChangelog', () => {
               {
                 author: undefined,
                 comment: 'Updating a',
-                commit: undefined
-              }
-            ]
-          }
+                commit: undefined,
+              },
+            ],
+          },
         },
         {
           version: '0.0.1',
@@ -181,12 +189,12 @@ describe('updateIndividualChangelog', () => {
           comments: {
             patch: [
               {
-                comment: 'Patching a'
-              }
-            ]
-          }
-        }
-      ]
+                comment: 'Patching a',
+              },
+            ],
+          },
+        },
+      ],
     };
 
     // Remove date.
@@ -201,12 +209,14 @@ describe('updateIndividualChangelog', () => {
         packageName: 'a',
         newVersion: '0.0.2',
         changeType: ChangeType.none,
-        changes: [{
-          packageName: 'a',
-          type: 'none',
-          changeType: ChangeType.none,
-          comment: ''
-        }]
+        changes: [
+          {
+            packageName: 'a',
+            type: 'none',
+            changeType: ChangeType.none,
+            comment: '',
+          },
+        ],
       },
       path.resolve(__dirname, 'exampleChangelog'),
       false,
@@ -220,7 +230,7 @@ describe('updateIndividualChangelog', () => {
           version: '0.0.2',
           tag: 'a_v0.0.2',
           date: undefined,
-          comments: {}
+          comments: {},
         },
         {
           version: '0.0.1',
@@ -229,12 +239,12 @@ describe('updateIndividualChangelog', () => {
           comments: {
             patch: [
               {
-                comment: 'Patching a'
-              }
-            ]
-          }
-        }
-      ]
+                comment: 'Patching a',
+              },
+            ],
+          },
+        },
+      ],
     };
 
     // Remove date.
@@ -260,14 +270,14 @@ describe('updateChangelogs', () => {
       packageName: 'a',
       changeType: ChangeType.dependency,
       newVersion: '1.0.0',
-      changes: []
+      changes: [],
     };
     // Package b has version change.
     changeHash['b'] = {
       packageName: 'b',
       changeType: ChangeType.patch,
       newVersion: '1.0.1',
-      changes: []
+      changes: [],
     };
     const updatedChangeLogs: IChangelog[] = ChangelogGenerator.updateChangelogs(
       changeHash,
@@ -286,14 +296,14 @@ describe('updateChangelogs', () => {
       packageName: 'a',
       changeType: ChangeType.dependency,
       newVersion: '1.0.1-pre.1',
-      changes: []
+      changes: [],
     };
     // Package b is not a prerelease
     changeHash['b'] = {
       packageName: 'b',
       changeType: ChangeType.patch,
       newVersion: '1.0.1',
-      changes: []
+      changes: [],
     };
     // Makes package 'a' prerelease package.
     const rushProjectA: RushConfigurationProject = rushConfiguration.projectsByName.get('a')!;
@@ -316,14 +326,14 @@ describe('updateChangelogs', () => {
       packageName: 'a',
       changeType: ChangeType.hotfix,
       newVersion: '1.0.1-hotfix.1',
-      changes: []
+      changes: [],
     };
     // Package b is not a hotfix
     changeHash['b'] = {
       packageName: 'b',
       changeType: ChangeType.patch,
       newVersion: '1.0.1',
-      changes: []
+      changes: [],
     };
     // Makes package 'a' hotfix package.
     const rushProjectA: RushConfigurationProject = rushConfiguration.projectsByName.get('a')!;

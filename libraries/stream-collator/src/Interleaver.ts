@@ -10,18 +10,18 @@ import * as os from 'os';
  * @public
  */
 export interface ITaskWriter {
-  write(data: string): void;      // Writes a string to the buffer
-  writeLine(data: string): void;  // Writes a string with a newline character at the end
+  write(data: string): void; // Writes a string to the buffer
+  writeLine(data: string): void; // Writes a string with a newline character at the end
   writeError(data: string): void; // Writes an error to the stderr stream
-  getStdOutput(): string;         // Returns standard output buffer as a string
-  getStdError(): string;          // Returns standard error buffer as a string
-  close(): void;                  // Closes the stream and marks the simultaneous process as completed
+  getStdOutput(): string; // Returns standard output buffer as a string
+  getStdError(): string; // Returns standard error buffer as a string
+  close(): void; // Closes the stream and marks the simultaneous process as completed
 }
 
 enum TaskWriterState {
   Open = 1,
   ClosedUnwritten = 2,
-  Written = 3
+  Written = 3,
 }
 
 interface ITaskWriterInfo {
@@ -33,7 +33,7 @@ interface ITaskWriterInfo {
 
 enum ITaskOutputStream {
   stdout = 1,
-  stderr = 2
+  stderr = 2,
 }
 
 /**
@@ -46,7 +46,7 @@ export class Interleaver {
   private static _activeTask: string = undefined;
   private static _stdout: { write: (text: string) => void } = process.stdout;
 
-  private constructor() { }
+  private constructor() {}
 
   /**
    * Resets the default output stream
@@ -68,7 +68,7 @@ export class Interleaver {
       quietMode: quietMode,
       state: TaskWriterState.Open,
       stderr: [],
-      stdout: []
+      stdout: [],
     });
 
     if (this._activeTask === undefined) {
@@ -81,7 +81,7 @@ export class Interleaver {
       getStdOutput: (): string => this._getTaskOutput(taskName),
       write: (data: string): void => this._writeTaskOutput(taskName, data),
       writeError: (data: string): void => this._writeTaskOutput(taskName, data, ITaskOutputStream.stderr),
-      writeLine: (data: string): void => this._writeTaskOutput(taskName, data + os.EOL)
+      writeLine: (data: string): void => this._writeTaskOutput(taskName, data + os.EOL),
     };
   }
 
@@ -96,14 +96,16 @@ export class Interleaver {
   /**
    * Adds the text to the task's buffer, and writes it to the console if it is the active task
    */
-  private static _writeTaskOutput(taskName: string, data: string,
-    stream: ITaskOutputStream = ITaskOutputStream.stdout): void {
-
+  private static _writeTaskOutput(
+    taskName: string,
+    data: string,
+    stream: ITaskOutputStream = ITaskOutputStream.stdout
+  ): void {
     const taskInfo: ITaskWriterInfo = this._tasks.get(taskName);
     if (!taskInfo || taskInfo.state !== TaskWriterState.Open) {
       throw new Error('The task is not registered or has been completed and written.');
     }
-    const outputBuffer: string[] = (stream === ITaskOutputStream.stderr ? taskInfo.stderr : taskInfo.stdout);
+    const outputBuffer: string[] = stream === ITaskOutputStream.stderr ? taskInfo.stderr : taskInfo.stdout;
 
     if (!this._activeTask) {
       this._activeTask = taskName;
@@ -124,7 +126,10 @@ export class Interleaver {
   /**
    * Returns the current value of the task's buffer
    */
-  private static _getTaskOutput(taskName: string, stream: ITaskOutputStream = ITaskOutputStream.stdout): string {
+  private static _getTaskOutput(
+    taskName: string,
+    stream: ITaskOutputStream = ITaskOutputStream.stdout
+  ): string {
     const taskInfo: ITaskWriterInfo = this._tasks.get(taskName);
     return (stream === ITaskOutputStream.stdout ? taskInfo.stdout : taskInfo.stderr).join('');
   }

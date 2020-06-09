@@ -1,10 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  IBaseCommandLineDefinition,
-  IBaseCommandLineDefinitionWithArgument
-} from './CommandLineDefinition';
+import { IBaseCommandLineDefinition, IBaseCommandLineDefinitionWithArgument } from './CommandLineDefinition';
 
 /**
  * Identifies the kind of a CommandLineParameter.
@@ -20,7 +17,7 @@ export enum CommandLineParameterKind {
   /** Indicates a CommandLineStringParameter */
   String,
   /** Indicates a CommandLineStringListParameter */
-  StringList
+  StringList,
 }
 
 /**
@@ -70,14 +67,18 @@ export abstract class CommandLineParameter {
     this.environmentVariable = definition.environmentVariable;
 
     if (!CommandLineParameter._longNameRegExp.test(this.longName)) {
-      throw new Error(`Invalid name: "${this.longName}". The parameter long name must be`
-        + ` lower-case and use dash delimiters (e.g. "--do-a-thing")`);
+      throw new Error(
+        `Invalid name: "${this.longName}". The parameter long name must be` +
+          ` lower-case and use dash delimiters (e.g. "--do-a-thing")`
+      );
     }
 
     if (this.shortName) {
       if (!CommandLineParameter._shortNameRegExp.test(this.shortName)) {
-        throw new Error(`Invalid name: "${this.shortName}". The parameter short name must be`
-          + ` a dash followed by a single upper-case or lower-case letter (e.g. "-a")`);
+        throw new Error(
+          `Invalid name: "${this.shortName}". The parameter short name must be` +
+            ` a dash followed by a single upper-case or lower-case letter (e.g. "-a")`
+        );
       }
     }
 
@@ -85,13 +86,17 @@ export abstract class CommandLineParameter {
       if (this.required) {
         // TODO: This constraint is imposed only because argparse enforces "required" parameters, but
         // it does not know about ts-command-line environment variable mappings.  We should fix this.
-        throw new Error(`An "environmentVariable" cannot be specified for "${this.longName}"`
-          + ` because it is a required parameter`);
+        throw new Error(
+          `An "environmentVariable" cannot be specified for "${this.longName}"` +
+            ` because it is a required parameter`
+        );
       }
 
       if (!CommandLineParameter._environmentVariableRegExp.test(this.environmentVariable)) {
-        throw new Error(`Invalid environment variable name: "${this.environmentVariable}". The name must`
-          + ` consist only of upper-case letters, numbers, and underscores. It may not start with a number.`);
+        throw new Error(
+          `Invalid environment variable name: "${this.environmentVariable}". The name must` +
+            ` consist only of upper-case letters, numbers, and underscores. It may not start with a number.`
+        );
       }
     }
   }
@@ -106,10 +111,14 @@ export abstract class CommandLineParameter {
    * Returns additional text used by the help formatter.
    * @internal
    */
-  public _getSupplementaryNotes(supplementaryNotes: string[]): void { // virtual
+  public _getSupplementaryNotes(supplementaryNotes: string[]): void {
+    // virtual
     if (this.environmentVariable !== undefined) {
-      supplementaryNotes.push('This parameter may alternatively be specified via the ' + this.environmentVariable
-      + ' environment variable.');
+      supplementaryNotes.push(
+        'This parameter may alternatively be specified via the ' +
+          this.environmentVariable +
+          ' environment variable.'
+      );
     }
   }
 
@@ -136,9 +145,9 @@ export abstract class CommandLineParameter {
   /**
    * Internal usage only.  Used to report unexpected output from the argparse library.
    */
-  protected reportInvalidData(data: any): never { // eslint-disable-line @typescript-eslint/no-explicit-any
-    throw new Error(`Unexpected data object for parameter "${this.longName}": `
-      + JSON.stringify(data));
+  protected reportInvalidData(data: any): never {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
+    throw new Error(`Unexpected data object for parameter "${this.longName}": ` + JSON.stringify(data));
   }
 
   protected validateDefaultValue(hasDefaultValue: boolean): void {
@@ -148,8 +157,9 @@ export abstract class CommandLineParameter {
       // It would be confusing to allow a default value that sometimes allows the "required" parameter
       // to be omitted.  If you sometimes don't have a suitable default value, then the better approach
       // is to throw a custom error explaining why the parameter is required in that case.
-      throw new Error(`A default value cannot be specified for "${this.longName}"`
-        + ` because it is a "required" parameter`);
+      throw new Error(
+        `A default value cannot be specified for "${this.longName}"` + ` because it is a "required" parameter`
+      );
     }
   }
 }
@@ -174,22 +184,24 @@ export abstract class CommandLineParameterWithArgument extends CommandLineParame
     super(definition);
 
     if (definition.argumentName === '') {
-      throw new Error('The argument name cannot be an empty string. (For the default name, specify undefined.)');
+      throw new Error(
+        'The argument name cannot be an empty string. (For the default name, specify undefined.)'
+      );
     }
     if (definition.argumentName.toUpperCase() !== definition.argumentName) {
-      throw new Error(`Invalid name: "${definition.argumentName}". The argument name must be all upper case.`);
+      throw new Error(
+        `Invalid name: "${definition.argumentName}". The argument name must be all upper case.`
+      );
     }
     const match: RegExpMatchArray | null = definition.argumentName.match(
-      CommandLineParameterWithArgument._invalidArgumentNameRegExp);
+      CommandLineParameterWithArgument._invalidArgumentNameRegExp
+    );
     if (match) {
-      throw new Error(`The argument name "${definition.argumentName}" contains an invalid character "${match[0]}".`
-        + ` Only upper-case letters, numbers, and underscores are allowed.`);
+      throw new Error(
+        `The argument name "${definition.argumentName}" contains an invalid character "${match[0]}".` +
+          ` Only upper-case letters, numbers, and underscores are allowed.`
+      );
     }
     this.argumentName = definition.argumentName;
   }
 }
-
-
-
-
-

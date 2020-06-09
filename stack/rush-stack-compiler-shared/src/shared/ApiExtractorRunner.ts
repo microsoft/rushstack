@@ -3,10 +3,7 @@
 
 import { ITerminalProvider } from '@rushstack/node-core-library';
 
-import {
-  RushStackCompilerBase,
-  IRushStackCompilerBaseOptions
-} from './RushStackCompilerBase';
+import { RushStackCompilerBase, IRushStackCompilerBaseOptions } from './RushStackCompilerBase';
 import { ApiExtractor } from './index';
 import { ToolPaths } from './ToolPaths';
 import { LoggingUtilities } from './LoggingUtilities';
@@ -26,14 +23,14 @@ export class ApiExtractorRunner extends RushStackCompilerBase {
     extractorOptions: ApiExtractor.IExtractorInvokeOptions,
     rootPath: string,
     terminalProvider: ITerminalProvider
-  ) // Remove in the next major version
+  ); // Remove in the next major version
   public constructor(
     options: IRushStackCompilerBaseOptions,
     extractorConfig: ApiExtractor.ExtractorConfig,
     extractorOptions: ApiExtractor.IExtractorInvokeOptions,
     rootPath: string,
     terminalProvider: ITerminalProvider
-  )
+  );
   public constructor(
     arg1: IRushStackCompilerBaseOptions | ApiExtractor.ExtractorConfig,
     arg2: ApiExtractor.ExtractorConfig | ApiExtractor.IExtractorInvokeOptions,
@@ -120,7 +117,7 @@ export class ApiExtractorRunner extends RushStackCompilerBase {
           }
           message.handled = true;
         },
-        typescriptCompilerFolder: ToolPaths.typescriptPackagePath
+        typescriptCompilerFolder: ToolPaths.typescriptPackagePath,
       };
 
       // NOTE: ExtractorResult.succeeded indicates whether errors or warnings occurred, however we

@@ -16,7 +16,7 @@ import {
   fileWarning,
   warn,
   logEndSubtask,
-  logStartSubtask
+  logStartSubtask,
 } from '../logging';
 import Vinyl = require('vinyl');
 import gulp = require('gulp');
@@ -208,7 +208,13 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * @param warningCode - the custom warning code representing this warning
    * @param message - a description of the warning
    */
-  public fileWarning(filePath: string, line: number, column: number, warningCode: string, message: string): void {
+  public fileWarning(
+    filePath: string,
+    line: number,
+    column: number,
+    warningCode: string,
+    message: string
+  ): void {
     fileWarning(this.name, filePath, line, column, warningCode, message);
   }
 
@@ -265,43 +271,50 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
         } else if (stream.pipe) {
           // wait for stream to end
 
-          eos(stream, {
-            error: true,
-            readable: stream.readable,
-            writable: stream.writable && !stream.readable
-          }, (err: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
-            if (err) {
-              reject(err);
-            } else {
-              resolve();
+          eos(
+            stream,
+            {
+              error: true,
+              readable: stream.readable,
+              writable: stream.writable && !stream.readable,
+            },
+            (err: any) => {
+              // eslint-disable-line @typescript-eslint/no-explicit-any
+              if (err) {
+                reject(err);
+              } else {
+                resolve();
+              }
             }
-          });
+          );
 
           // Make sure the stream is completely read
-          stream.pipe(through2.obj(
-            (file: Vinyl,
-              encoding: string,
-              callback: (p?: any) => void) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+          stream.pipe(
+            through2.obj(
+              (file: Vinyl, encoding: string, callback: (p?: any) => void) => {
+                // eslint-disable-line @typescript-eslint/no-explicit-any
                 callback();
-            },
-            (callback: () => void) => {
-              callback();
-            }));
-
+              },
+              (callback: () => void) => {
+                callback();
+              }
+            )
+          );
         } else if (this.executeTask.length === 1) {
           resolve(stream);
         }
       } else if (this.executeTask.length === 1) {
         resolve(stream);
       }
-    })
-      .then(() => {
+    }).then(
+      () => {
         logEndSubtask(this.name, startTime);
       },
       (ex) => {
         logEndSubtask(this.name, startTime, ex);
         throw ex;
-      });
+      }
+    );
   }
 
   /**
@@ -328,7 +341,9 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
 
     try {
       doesExist = FileSystem.getStatistics(fullPath).isFile();
-    } catch (e) { /* no-op */ }
+    } catch (e) {
+      /* no-op */
+    }
 
     return doesExist;
   }
@@ -342,11 +357,12 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
     const fullSourcePath: string = path.resolve(__dirname, localSourcePath);
     const fullDestPath: string = path.resolve(
       this.buildConfig.rootPath,
-      (localDestPath || path.basename(localSourcePath)));
+      localDestPath || path.basename(localSourcePath)
+    );
 
     FileSystem.copyFile({
       sourcePath: fullSourcePath,
-      destinationPath: fullDestPath
+      destinationPath: fullDestPath,
     });
   }
 
@@ -361,7 +377,9 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
     try {
       const content: string = FileSystem.readFile(fullPath);
       result = JSON.parse(content);
-    } catch (e) { /* no-op */ }
+    } catch (e) {
+      /* no-op */
+    }
 
     return result;
   }
@@ -392,7 +410,8 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
     if (!FileSystem.exists(filePath)) {
       return undefined;
     } else {
-      if (args['verbose']) { // eslint-disable-line dot-notation
+      if (args['verbose']) {
+        // eslint-disable-line dot-notation
         console.log(`Found config file: ${path.basename(filePath)}`);
       }
 

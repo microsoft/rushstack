@@ -27,7 +27,7 @@ class ExampleApi {
 
         // If the provided value is negative, clamp it to zero:
         return Math.max(value, 0);
-      }
+      },
     });
   }
 
@@ -79,5 +79,4 @@ describe('ProtectableMap', () => {
       exampleApi.studentAgesByName.set('Jane', 23);
     }).toThrowError('The key must be all upper case: Jane');
   });
-
 });

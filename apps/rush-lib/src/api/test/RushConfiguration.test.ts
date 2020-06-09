@@ -28,14 +28,13 @@ describe('RushConfiguration', () => {
 
     process.env['USERPROFILE'] = _oldEnv['USERPROFILE']; // eslint-disable-line dot-notation
     process.env['HOME'] = _oldEnv['HOME']; // eslint-disable-line dot-notation
-
   });
 
   afterEach(() => {
     process.env = _oldEnv;
   });
 
-  it('can\'t load too new rush', (done: jest.DoneCallback) => {
+  it("can't load too new rush", (done: jest.DoneCallback) => {
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-too-new.json');
 
     expect(() => {
@@ -50,27 +49,37 @@ describe('RushConfiguration', () => {
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
     expect(rushConfiguration.packageManager).toEqual('npm');
-    assertPathProperty('committedShrinkwrapFilename',
-      rushConfiguration.committedShrinkwrapFilename, './repo/common/config/rush/npm-shrinkwrap.json');
-    assertPathProperty('commonFolder',
-      rushConfiguration.commonFolder, './repo/common');
-    assertPathProperty('commonRushConfigFolder',
-      rushConfiguration.commonRushConfigFolder, './repo/common/config/rush');
-    assertPathProperty('commonTempFolder',
-      rushConfiguration.commonTempFolder, './repo/common/temp');
-    assertPathProperty('npmCacheFolder',
-      rushConfiguration.npmCacheFolder, './repo/common/temp/npm-cache');
-    assertPathProperty('npmTmpFolder',
-      rushConfiguration.npmTmpFolder, './repo/common/temp/npm-tmp');
+    assertPathProperty(
+      'committedShrinkwrapFilename',
+      rushConfiguration.committedShrinkwrapFilename,
+      './repo/common/config/rush/npm-shrinkwrap.json'
+    );
+    assertPathProperty('commonFolder', rushConfiguration.commonFolder, './repo/common');
+    assertPathProperty(
+      'commonRushConfigFolder',
+      rushConfiguration.commonRushConfigFolder,
+      './repo/common/config/rush'
+    );
+    assertPathProperty('commonTempFolder', rushConfiguration.commonTempFolder, './repo/common/temp');
+    assertPathProperty('npmCacheFolder', rushConfiguration.npmCacheFolder, './repo/common/temp/npm-cache');
+    assertPathProperty('npmTmpFolder', rushConfiguration.npmTmpFolder, './repo/common/temp/npm-tmp');
     expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
-    assertPathProperty('pnpmStorePath',
-      rushConfiguration.pnpmOptions.pnpmStorePath, './repo/common/temp/pnpm-store');
-    assertPathProperty('packageManagerToolFilename',
-      rushConfiguration.packageManagerToolFilename, './repo/common/temp/npm-local/node_modules/.bin/npm');
-    assertPathProperty('rushJsonFolder',
-      rushConfiguration.rushJsonFolder, './repo');
-    assertPathProperty('rushLinkJsonFilename',
-      rushConfiguration.rushLinkJsonFilename, './repo/common/temp/rush-link.json');
+    assertPathProperty(
+      'pnpmStorePath',
+      rushConfiguration.pnpmOptions.pnpmStorePath,
+      './repo/common/temp/pnpm-store'
+    );
+    assertPathProperty(
+      'packageManagerToolFilename',
+      rushConfiguration.packageManagerToolFilename,
+      './repo/common/temp/npm-local/node_modules/.bin/npm'
+    );
+    assertPathProperty('rushJsonFolder', rushConfiguration.rushJsonFolder, './repo');
+    assertPathProperty(
+      'rushLinkJsonFilename',
+      rushConfiguration.rushLinkJsonFilename,
+      './repo/common/temp/rush-link.json'
+    );
 
     expect(rushConfiguration.packageManagerToolVersion).toEqual('4.5.0');
 
@@ -84,11 +93,13 @@ describe('RushConfiguration', () => {
     // "approvedPackagesPolicy" feature
     const approvedPackagesPolicy: ApprovedPackagesPolicy = rushConfiguration.approvedPackagesPolicy;
     expect(approvedPackagesPolicy.enabled).toEqual(true);
-    expect(Utilities.getSetAsArray(approvedPackagesPolicy.reviewCategories)).toEqual(
-      ['first-party', 'third-party', 'prototype']);
+    expect(Utilities.getSetAsArray(approvedPackagesPolicy.reviewCategories)).toEqual([
+      'first-party',
+      'third-party',
+      'prototype',
+    ]);
 
-    expect(Utilities.getSetAsArray(approvedPackagesPolicy.ignoredNpmScopes)).toEqual(
-      ['@types', '@internal']);
+    expect(Utilities.getSetAsArray(approvedPackagesPolicy.ignoredNpmScopes)).toEqual(['@types', '@internal']);
 
     expect(approvedPackagesPolicy.browserApprovedPackages.items[0].packageName).toEqual('example');
     expect(approvedPackagesPolicy.browserApprovedPackages.items[0].allowedCategories.size).toEqual(3);
@@ -117,27 +128,37 @@ describe('RushConfiguration', () => {
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
     expect(rushConfiguration.packageManager).toEqual('pnpm');
-    assertPathProperty('committedShrinkwrapFilename',
-      rushConfiguration.committedShrinkwrapFilename, './repo/common/config/rush/pnpm-lock.yaml');
-    assertPathProperty('commonFolder',
-      rushConfiguration.commonFolder, './repo/common');
-    assertPathProperty('commonRushConfigFolder',
-      rushConfiguration.commonRushConfigFolder, './repo/common/config/rush');
-    assertPathProperty('commonTempFolder',
-      rushConfiguration.commonTempFolder, './repo/common/temp');
-    assertPathProperty('npmCacheFolder',
-      rushConfiguration.npmCacheFolder, './repo/common/temp/npm-cache');
-    assertPathProperty('npmTmpFolder',
-      rushConfiguration.npmTmpFolder, './repo/common/temp/npm-tmp');
+    assertPathProperty(
+      'committedShrinkwrapFilename',
+      rushConfiguration.committedShrinkwrapFilename,
+      './repo/common/config/rush/pnpm-lock.yaml'
+    );
+    assertPathProperty('commonFolder', rushConfiguration.commonFolder, './repo/common');
+    assertPathProperty(
+      'commonRushConfigFolder',
+      rushConfiguration.commonRushConfigFolder,
+      './repo/common/config/rush'
+    );
+    assertPathProperty('commonTempFolder', rushConfiguration.commonTempFolder, './repo/common/temp');
+    assertPathProperty('npmCacheFolder', rushConfiguration.npmCacheFolder, './repo/common/temp/npm-cache');
+    assertPathProperty('npmTmpFolder', rushConfiguration.npmTmpFolder, './repo/common/temp/npm-tmp');
     expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
-    assertPathProperty('pnpmStorePath',
-      rushConfiguration.pnpmOptions.pnpmStorePath, './repo/common/temp/pnpm-store');
-    assertPathProperty('packageManagerToolFilename',
-      rushConfiguration.packageManagerToolFilename, './repo/common/temp/pnpm-local/node_modules/.bin/pnpm');
-    assertPathProperty('rushJsonFolder',
-      rushConfiguration.rushJsonFolder, './repo');
-    assertPathProperty('rushLinkJsonFilename',
-      rushConfiguration.rushLinkJsonFilename, './repo/common/temp/rush-link.json');
+    assertPathProperty(
+      'pnpmStorePath',
+      rushConfiguration.pnpmOptions.pnpmStorePath,
+      './repo/common/temp/pnpm-store'
+    );
+    assertPathProperty(
+      'packageManagerToolFilename',
+      rushConfiguration.packageManagerToolFilename,
+      './repo/common/temp/pnpm-local/node_modules/.bin/pnpm'
+    );
+    assertPathProperty('rushJsonFolder', rushConfiguration.rushJsonFolder, './repo');
+    assertPathProperty(
+      'rushLinkJsonFilename',
+      rushConfiguration.rushLinkJsonFilename,
+      './repo/common/temp/rush-link.json'
+    );
 
     expect(rushConfiguration.packageManagerToolVersion).toEqual('4.5.0');
 
@@ -150,10 +171,12 @@ describe('RushConfiguration', () => {
     // "approvedPackagesPolicy" feature
     const approvedPackagesPolicy: ApprovedPackagesPolicy = rushConfiguration.approvedPackagesPolicy;
     expect(approvedPackagesPolicy.enabled).toBe(true);
-    expect(Utilities.getSetAsArray(approvedPackagesPolicy.reviewCategories)).toEqual(
-      ['first-party', 'third-party', 'prototype']);
-    expect(Utilities.getSetAsArray(approvedPackagesPolicy.ignoredNpmScopes)).toEqual(
-      ['@types', '@internal']);
+    expect(Utilities.getSetAsArray(approvedPackagesPolicy.reviewCategories)).toEqual([
+      'first-party',
+      'third-party',
+      'prototype',
+    ]);
+    expect(Utilities.getSetAsArray(approvedPackagesPolicy.ignoredNpmScopes)).toEqual(['@types', '@internal']);
 
     expect(approvedPackagesPolicy.browserApprovedPackages.items[0].packageName).toEqual('example');
     expect(approvedPackagesPolicy.browserApprovedPackages.items[0].allowedCategories.size).toEqual(3);
@@ -202,11 +225,19 @@ describe('RushConfiguration', () => {
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
     assertPathProperty('commonTempFolder', rushConfiguration.commonTempFolder, expectedValue);
-    assertPathProperty('npmCacheFolder', rushConfiguration.npmCacheFolder, path.join(expectedValue, 'npm-cache'));
+    assertPathProperty(
+      'npmCacheFolder',
+      rushConfiguration.npmCacheFolder,
+      path.join(expectedValue, 'npm-cache')
+    );
     assertPathProperty('npmTmpFolder', rushConfiguration.npmTmpFolder, path.join(expectedValue, 'npm-tmp'));
 
     expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
-    assertPathProperty('pnpmStorePath', rushConfiguration.pnpmOptions.pnpmStorePath, path.join(expectedValue, 'pnpm-store'));
+    assertPathProperty(
+      'pnpmStorePath',
+      rushConfiguration.pnpmOptions.pnpmStorePath,
+      path.join(expectedValue, 'pnpm-store')
+    );
     assertPathProperty(
       'packageManagerToolFilename',
       rushConfiguration.packageManagerToolFilename,
@@ -222,7 +253,7 @@ describe('RushConfiguration', () => {
   describe('PNPM Store Paths', () => {
     afterEach(() => {
       EnvironmentConfiguration['_pnpmStorePathOverride'] = undefined;
-    })
+    });
 
     const PNPM_STORE_PATH_ENV: string = 'RUSH_PNPM_STORE_PATH';
 
@@ -231,7 +262,9 @@ describe('RushConfiguration', () => {
 
       it(`loads the correct path when pnpmStore = "local"`, (done: jest.DoneCallback) => {
         const EXPECT_STORE_PATH: string = path.resolve(__dirname, 'repo', 'common', 'temp', 'pnpm-store');
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+          RUSH_JSON_FILENAME
+        );
 
         expect(rushConfiguration.packageManager).toEqual('pnpm');
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
@@ -245,7 +278,9 @@ describe('RushConfiguration', () => {
         const EXPECT_STORE_PATH: string = path.resolve('/var/temp');
         process.env[PNPM_STORE_PATH_ENV] = EXPECT_STORE_PATH;
 
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+          RUSH_JSON_FILENAME
+        );
 
         expect(rushConfiguration.packageManager).toEqual('pnpm');
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
@@ -254,14 +289,16 @@ describe('RushConfiguration', () => {
 
         done();
       });
-    })
+    });
 
     describe('Loading repo/rush-pnpm-global.json', () => {
       const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'repo', 'rush-pnpm-global.json');
 
       it(`loads the correct path when pnpmStore = "global"`, (done: jest.DoneCallback) => {
-        const EXPECT_STORE_PATH: string = "";
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+        const EXPECT_STORE_PATH: string = '';
+        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+          RUSH_JSON_FILENAME
+        );
 
         expect(rushConfiguration.packageManager).toEqual('pnpm');
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('global');
@@ -274,7 +311,9 @@ describe('RushConfiguration', () => {
         const EXPECT_STORE_PATH: string = path.resolve('/var/temp');
         process.env[PNPM_STORE_PATH_ENV] = EXPECT_STORE_PATH;
 
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+          RUSH_JSON_FILENAME
+        );
 
         expect(rushConfiguration.packageManager).toEqual('pnpm');
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('global');
@@ -282,16 +321,18 @@ describe('RushConfiguration', () => {
 
         done();
       });
-    })
+    });
 
     it(`throws an error when invalid pnpmStore is defined`, (done: jest.DoneCallback) => {
       const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'repo', 'rush-pnpm-invalid-store.json');
       expect(() => {
         //@ts-ignore
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME); // eslint-disable-line @typescript-eslint/no-unused-vars
+        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+          RUSH_JSON_FILENAME
+        ); // eslint-disable-line @typescript-eslint/no-unused-vars
       }).toThrow();
 
       done();
     });
-  })
+  });
 });
