@@ -73,7 +73,25 @@ export class AsyncRecycler {
     }
 
     Utilities.retryUntilTimeout(
-      () => FileSystem.move({ sourcePath: folderPath, destinationPath: newFolderPath }),
+      () => {
+        try {
+          FileSystem.move({ sourcePath: folderPath, destinationPath: newFolderPath });
+        } catch (e) {
+          if (FileSystem.isErrnoException(e)) {
+            // It could be an invalid symlink, so try to obtain the stats
+            try {
+              const stats: fs.Stats = FileSystem.getLinkStatistics(folderPath);
+              if (stats.isSymbolicLink() && stats.isDirectory()) {
+                FileSystem.deleteFolder(folderPath);
+                return;
+              }
+            } catch (e2) {
+              // Throw original error below
+            }
+          }
+          throw e;
+        }
+      },
       maxWaitTimeMs,
       (e) => new Error(`Error: ${e}${os.EOL}Often this is caused by a file lock ` +
                       'from a process like the virus scanner.'),
