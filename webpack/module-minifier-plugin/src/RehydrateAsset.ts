@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ConcatSource, ReplaceSource, Source } from 'webpack-sources';
+import { CachedSource, ConcatSource, ReplaceSource, Source } from 'webpack-sources';
 
 import { CHUNK_MODULES_TOKEN } from './Constants';
 import { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.types';
@@ -136,5 +136,5 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
 
   source.add(suffix);
 
-  return source;
+  return new CachedSource(source);
 }

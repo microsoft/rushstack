@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ConcatSource, RawSource, ReplaceSource, Source, SourceMapSource } from 'webpack-sources';
+import { CachedSource, ConcatSource, RawSource, ReplaceSource, Source, SourceMapSource } from 'webpack-sources';
 import * as webpack from 'webpack';
 import { AsyncSeriesWaterfallHook, Tap } from 'tapable';
 import {
@@ -193,7 +193,10 @@ export class ModuleMinifierPlugin {
             const {
               source: wrappedCode,
               map
-            } = wrapped.sourceAndMap();
+            } = useSourceMaps ? wrapped.sourceAndMap() : {
+              source: wrapped.source(),
+              map: undefined
+            };
 
             const hash: string = createHash('sha256').update(wrappedCode).digest('hex');
 
@@ -202,7 +205,7 @@ export class ModuleMinifierPlugin {
             minifier.minify({
               hash,
               code: wrappedCode,
-              nameForMap
+              nameForMap: useSourceMaps ? nameForMap : undefined
             }, (result: IModuleMinificationResult) => {
               if (isMinificationResultError(result)) {
                 compilation.errors.push(result.error);
@@ -235,7 +238,7 @@ export class ModuleMinifierPlugin {
                   const withIds: Source = postProcessCode(unwrapped, mod.identifier());
 
                   minifiedModules.set(realId, {
-                    source: withIds,
+                    source: new CachedSource(withIds),
                     extractedComments,
                     module: mod
                   });
@@ -249,7 +252,7 @@ export class ModuleMinifierPlugin {
           } else {
             // Route any other modules straight through
             minifiedModules.set(realId !== undefined ? realId : id, {
-              source: postProcessCode(new ReplaceSource(source), mod.identifier()),
+              source: new CachedSource(postProcessCode(new ReplaceSource(source), mod.identifier())),
               extractedComments: [],
               module: mod
             });
@@ -299,7 +302,7 @@ export class ModuleMinifierPlugin {
               minifier.minify({
                 hash,
                 code: rawCode,
-                nameForMap
+                nameForMap: useSourceMaps ? nameForMap : undefined
               }, (result: IModuleMinificationResult) => {
                 if (isMinificationResultError(result)) {
                   compilation.errors.push(result.error);
@@ -330,7 +333,7 @@ export class ModuleMinifierPlugin {
                     const withIds: Source = postProcessCode(new ReplaceSource(rawOutput), assetName);
 
                     minifiedAssets.set(assetName, {
-                      source: withIds,
+                      source: new CachedSource(withIds),
                       extractedComments,
                       modules: chunkModules,
                       chunk,
