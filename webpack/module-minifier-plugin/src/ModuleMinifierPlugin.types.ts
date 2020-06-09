@@ -173,12 +173,15 @@ export interface IExtendedModule extends webpack.compilation.Module, webpack.Mod
 }
 
 declare module 'webpack' {
-  namespace compilation { // eslint-disable-line @typescript-eslint/no-namespace
-    interface RuntimeTemplate { // eslint-disable-line @typescript-eslint/interface-name-prefix
+  namespace compilation {
+    // eslint-disable-line @typescript-eslint/no-namespace
+    interface RuntimeTemplate {
+      // eslint-disable-line @typescript-eslint/interface-name-prefix
       requestShortener: webpack.compilation.RequestShortener;
     }
 
-    interface RequestShortener { // eslint-disable-line @typescript-eslint/interface-name-prefix
+    interface RequestShortener {
+      // eslint-disable-line @typescript-eslint/interface-name-prefix
     }
   }
 }

@@ -1,7 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IModuleMinificationCallback, IModuleMinificationResult, IModuleMinificationRequest, IModuleMinifier } from './ModuleMinifierPlugin.types';
+import {
+  IModuleMinificationCallback,
+  IModuleMinificationResult,
+  IModuleMinificationRequest,
+  IModuleMinifier
+} from './ModuleMinifierPlugin.types';
 import { MinifyOptions } from 'terser';
 import { Worker } from 'worker_threads';
 import { WorkerPool } from './workerPool/WorkerPool';
@@ -36,10 +41,7 @@ export class WorkerPoolMinifier implements IModuleMinifier {
   private readonly _activeRequests: Map<string, IModuleMinificationCallback[]>;
 
   public constructor(options: IWorkerPoolMinifierOptions) {
-    const {
-      maxThreads = cpus().length,
-      terserOptions = {}
-    } = options || {};
+    const { maxThreads = cpus().length, terserOptions = {} } = options || {};
 
     const activeRequests: Map<string, IModuleMinificationCallback[]> = new Map();
     const resultCache: Map<string, IModuleMinificationResult> = new Map();
@@ -83,13 +85,8 @@ export class WorkerPoolMinifier implements IModuleMinifier {
    * @param request - The request to process
    * @param callback - The callback to invoke
    */
-  public minify(
-    request: IModuleMinificationRequest,
-    callback: IModuleMinificationCallback
-  ): void {
-    const {
-      hash
-    } = request;
+  public minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void {
+    const { hash } = request;
 
     const cached: IModuleMinificationResult | undefined = this._resultCache.get(hash);
     if (cached) {
@@ -97,9 +94,7 @@ export class WorkerPoolMinifier implements IModuleMinifier {
       return callback(cached);
     }
 
-    const {
-      _activeRequests: activeRequests
-    } = this;
+    const { _activeRequests: activeRequests } = this;
     const callbacks: IModuleMinificationCallback[] | undefined = activeRequests.get(hash);
     if (callbacks) {
       ++this._deduped;
@@ -110,20 +105,23 @@ export class WorkerPoolMinifier implements IModuleMinifier {
     activeRequests.set(hash, [callback]);
     ++this._minified;
 
-    this._pool.checkoutWorker(true).then((worker) => {
-      worker.postMessage(request);
-    }).catch((error: Error) => {
-      const errorCallbacks: IModuleMinificationCallback[] = activeRequests.get(hash)!;
-      for (const errorCallback of errorCallbacks) {
-        errorCallback({
-          hash,
-          error,
-          code: undefined,
-          map: undefined,
-          extractedComments: undefined
-        });
-      }
-    });
+    this._pool
+      .checkoutWorker(true)
+      .then((worker) => {
+        worker.postMessage(request);
+      })
+      .catch((error: Error) => {
+        const errorCallbacks: IModuleMinificationCallback[] = activeRequests.get(hash)!;
+        for (const errorCallback of errorCallbacks) {
+          errorCallback({
+            hash,
+            error,
+            code: undefined,
+            map: undefined,
+            extractedComments: undefined
+          });
+        }
+      });
   }
 
   public ref(): () => Promise<void> {

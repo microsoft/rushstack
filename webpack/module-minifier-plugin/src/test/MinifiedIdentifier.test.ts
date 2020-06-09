@@ -1,4 +1,8 @@
-import { getIdentifierInternal, getOrdinalFromIdentifierInternal, getIdentifier } from '../MinifiedIdentifier';
+import {
+  getIdentifierInternal,
+  getOrdinalFromIdentifierInternal,
+  getIdentifier
+} from '../MinifiedIdentifier';
 
 describe('MinifiedIdentifier', () => {
   describe('getIdentifierInternal', () => {

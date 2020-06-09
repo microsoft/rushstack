@@ -38,9 +38,7 @@ export class ModuleIdRestorer {
    * @param context - Context information for error logging
    */
   public restoreIdsInCode(source: ReplaceSource, context: string): ReplaceSource {
-    const {
-      _idMap: stableIdToFinalId
-    } = this;
+    const { _idMap: stableIdToFinalId } = this;
 
     const code: string = source.original().source();
 
@@ -99,7 +97,7 @@ export class PortableMinifierModuleIdsPlugin {
       const nodeModulePath: string = baseResult.slice(nodeModulesIndex + nodeModules.length);
       this.cache.set(request, nodeModulePath);
       return nodeModulePath;
-    }
+    };
 
     const nameByResource: Map<string | undefined, string> = new Map();
     const stableIdToFinalId: Map<string | number, string | number> = new Map();
@@ -109,15 +107,10 @@ export class PortableMinifierModuleIdsPlugin {
      */
     compiler.hooks.normalModuleFactory.tap(PLUGIN_NAME, (nmf: compilation.NormalModuleFactory) => {
       nmf.hooks.module.tap(PLUGIN_NAME, (mod: IExtendedModule, data: INormalModuleFactoryModuleData) => {
-        const {
-          resourceResolveData: resolveData
-        } = data;
+        const { resourceResolveData: resolveData } = data;
 
         if (resolveData) {
-          const {
-            descriptionFileData: packageJson,
-            relativePath
-          } = resolveData;
+          const { descriptionFileData: packageJson, relativePath } = resolveData;
 
           if (packageJson && relativePath) {
             const nodeId: string = `${packageJson.name}${relativePath.slice(1).replace(/\.js(on)?$/, '')}`;
@@ -132,7 +125,6 @@ export class PortableMinifierModuleIdsPlugin {
     });
 
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: compilation.Compilation) => {
-
       // Make module ids portable immediately before rendering.
       // Unfortunately, other means of altering these ids don't work in Webpack 4 without a lot more code and work.
       // Namely, a number of functions reference "module.id" directly during code generation
@@ -156,7 +148,11 @@ export class PortableMinifierModuleIdsPlugin {
             const existingResource: string | undefined = resourceById.get(stableId);
 
             if (existingResource) {
-              compilation.errors.push(new Error(`Module id collision for ${resource} with ${existingResource}.\n This means you are bundling multiple versions of the same module.`));
+              compilation.errors.push(
+                new Error(
+                  `Module id collision for ${resource} with ${existingResource}.\n This means you are bundling multiple versions of the same module.`
+                )
+              );
             }
 
             stableIdToFinalId.set(stableId, originalId);

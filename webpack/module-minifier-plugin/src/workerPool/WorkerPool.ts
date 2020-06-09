@@ -62,14 +62,7 @@ export class WorkerPool {
   private readonly _workerScript: string;
 
   public constructor(options: IWorkerPoolOptions) {
-    const {
-      id,
-      maxWorkers,
-      onWorkerDestroyed,
-      prepareWorker,
-      workerData,
-      workerScriptPath
-    } = options;
+    const { id, maxWorkers, onWorkerDestroyed, prepareWorker, workerData, workerScriptPath } = options;
 
     this.id = id;
     this.maxWorkers = maxWorkers;
@@ -184,7 +177,7 @@ export class WorkerPool {
     }
 
     return new Promise((resolve: (worker: Worker) => void, reject: (error: Error) => void) => {
-      this._pending.push([resolve, reject])
+      this._pending.push([resolve, reject]);
     });
   }
 
@@ -198,7 +191,7 @@ export class WorkerPool {
 
     const worker: Worker & {
       [WORKER_ID_SYMBOL]?: string;
-     } = new Worker(this._workerScript, {
+    } = new Worker(this._workerScript, {
       eval: false,
       workerData: this._workerData
     });

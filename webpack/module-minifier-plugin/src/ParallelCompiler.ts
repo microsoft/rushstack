@@ -21,25 +21,25 @@ export interface IParallelWebpackOptions {
  * @param timeNs
  */
 function formatTime(timeNs: bigint): string {
-    let unit: string = 'ns';
-    let fraction: bigint = 0n;
-    if (timeNs > 1e3) {
-        unit = 'us';
-        fraction = timeNs % 1000n;
-        timeNs /= 1000n;
-    }
-    if (timeNs > 1e3) {
-        unit = 'ms';
-        fraction = timeNs % 1000n;
-        timeNs /= 1000n;
-    }
-    if (timeNs > 1e3) {
-        unit = 's';
-        fraction = timeNs % 1000n;
-        timeNs /= 1000n;
-    }
+  let unit: string = 'ns';
+  let fraction: bigint = 0n;
+  if (timeNs > 1e3) {
+    unit = 'us';
+    fraction = timeNs % 1000n;
+    timeNs /= 1000n;
+  }
+  if (timeNs > 1e3) {
+    unit = 'ms';
+    fraction = timeNs % 1000n;
+    timeNs /= 1000n;
+  }
+  if (timeNs > 1e3) {
+    unit = 's';
+    fraction = timeNs % 1000n;
+    timeNs /= 1000n;
+  }
 
-    return `${timeNs}.${('000' + fraction).slice(-3, -1)} ${unit}`;
+  return `${timeNs}.${('000' + fraction).slice(-3, -1)} ${unit}`;
 }
 
 export async function runParallel(options: IParallelWebpackOptions): Promise<void> {
@@ -53,7 +53,10 @@ export async function runParallel(options: IParallelWebpackOptions): Promise<voi
 
   // TODO: Use all cores if not minifying
   const {
-    maxCompilationThreads: maxConfiguredCompilationThreads = Math.max(totalCpus > 8 ? (totalCpus * 3) >> 2 : totalCpus >> 1, 1),
+    maxCompilationThreads: maxConfiguredCompilationThreads = Math.max(
+      totalCpus > 8 ? (totalCpus * 3) >> 2 : totalCpus >> 1,
+      1
+    ),
     sourceMap,
     usePortableModules
   } = options;
@@ -90,17 +93,23 @@ export async function runParallel(options: IParallelWebpackOptions): Promise<voi
   for (let i: number = 0; i < configCount; i++) {
     const webpackWorker: Worker = await webpackPool.checkoutWorker(true);
 
-    const sendMinifierResult: (result: IModuleMinificationResult) => void = (result: IModuleMinificationResult): void => {
+    const sendMinifierResult: (result: IModuleMinificationResult) => void = (
+      result: IModuleMinificationResult
+    ): void => {
       webpackWorker.postMessage(result);
     };
 
-    const workerOnMessage: (message: IModuleMinificationRequest | number) => void = (message: IModuleMinificationRequest | number): void => {
+    const workerOnMessage: (message: IModuleMinificationRequest | number) => void = (
+      message: IModuleMinificationRequest | number
+    ): void => {
       if (typeof message === 'object') {
         return minifier.minify(message, sendMinifierResult);
       }
 
       ++processed;
-      console.log(`${processed}/${configCount} complete (${formatTime(process.hrtime.bigint() - startTime)})`);
+      console.log(
+        `${processed}/${configCount} complete (${formatTime(process.hrtime.bigint() - startTime)})`
+      );
 
       webpackWorker.off('message', workerOnMessage);
       webpackPool.checkinWorker(webpackWorker);

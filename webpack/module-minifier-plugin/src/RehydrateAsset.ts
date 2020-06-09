@@ -14,10 +14,7 @@ import { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.type
  * @public
  */
 export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner: string): Source {
-  const {
-    source: assetSource,
-    modules
-  } = asset;
+  const { source: assetSource, modules } = asset;
 
   const assetCode: string = assetSource.source();
 
@@ -108,7 +105,7 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
     let separator: string = useConcatAtStart ? `Array(${minId}).concat([` : '[';
     let concatInserted: boolean = useConcatAtStart;
     for (const id of modules) {
-      const delta: number = id as number - lastId - 1;
+      const delta: number = (id as number) - lastId - 1;
       const deltaStr: string = '' + delta;
       const fillerArrayThreshold: number = 11 + deltaStr.length;
 

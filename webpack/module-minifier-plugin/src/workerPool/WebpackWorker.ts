@@ -10,11 +10,7 @@ import '../OverrideWebpackIdentifierAllocation';
 // Hack to support mkdirp on node 10
 process.umask = () => 0;
 
-const {
-  configFilePath,
-  sourceMap,
-  usePortableModules
-} = workerThreads.workerData;
+const { configFilePath, sourceMap, usePortableModules } = workerThreads.workerData;
 
 const webpackConfigs: webpack.Configuration[] = require(configFilePath); // eslint-disable-line @typescript-eslint/no-var-requires
 
@@ -24,12 +20,10 @@ const minifier: MessagePortMinifier = new MessagePortMinifier(workerThreads.pare
 
 async function processTask(index: number): Promise<void> {
   const config: webpack.Configuration = webpackConfigs[index];
-  console.log(`Compiling config: ${config.name || config.output && config.output.filename}`);
+  console.log(`Compiling config: ${config.name || (config.output && config.output.filename)}`);
 
   const optimization: webpack.Options.Optimization = config.optimization || (config.optimization = {});
-  const {
-    minimizer
-  } = optimization;
+  const { minimizer } = optimization;
 
   if (minimizer) {
     for (const plugin of minimizer) {
@@ -38,21 +32,22 @@ async function processTask(index: number): Promise<void> {
       }
     }
   } else {
-    const {
-      devtool,
-      mode
-    } = config;
+    const { devtool, mode } = config;
 
-    const finalSourceMap: boolean = typeof sourceMap === 'boolean' ? sourceMap :
-      typeof devtool === 'string' ?
-        (devtool.endsWith('source-map') && !devtool.includes('eval')) :
-        (devtool !== false && mode === 'production');
+    const finalSourceMap: boolean =
+      typeof sourceMap === 'boolean'
+        ? sourceMap
+        : typeof devtool === 'string'
+        ? devtool.endsWith('source-map') && !devtool.includes('eval')
+        : devtool !== false && mode === 'production';
 
-    optimization.minimizer = [new ModuleMinifierPlugin({
-      minifier,
-      usePortableModules,
-      sourceMap: finalSourceMap
-    })];
+    optimization.minimizer = [
+      new ModuleMinifierPlugin({
+        minifier,
+        usePortableModules,
+        sourceMap: finalSourceMap
+      })
+    ];
   }
 
   return new Promise((resolve: () => void, reject: (err: Error) => void) => {
@@ -65,7 +60,7 @@ async function processTask(index: number): Promise<void> {
       if (stats && stats.hasErrors()) {
         const errorStats: webpack.Stats.ToJsonOutput = stats.toJson('errors-only');
 
-        errorStats.errors.forEach(error => {
+        errorStats.errors.forEach((error) => {
           console.error(error);
         });
 
@@ -79,7 +74,7 @@ async function processTask(index: number): Promise<void> {
 
 process.exitCode = 3;
 
-workerThreads.parentPort!.on("message", (message: number | false | object) => {
+workerThreads.parentPort!.on('message', (message: number | false | object) => {
   // Termination request
   if (message === false) {
     process.exit(0);
@@ -92,10 +87,13 @@ workerThreads.parentPort!.on("message", (message: number | false | object) => {
 
   const index: number = message as number;
 
-  processTask(index).then(() => {
-    workerThreads.parentPort!.postMessage(index);
-  }, (err: Error) => {
-    console.error(err);
-    process.exit(1);
-  });
+  processTask(index).then(
+    () => {
+      workerThreads.parentPort!.postMessage(index);
+    },
+    (err: Error) => {
+      console.error(err);
+      process.exit(1);
+    }
+  );
 });

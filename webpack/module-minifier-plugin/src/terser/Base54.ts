@@ -22,7 +22,8 @@ base54.reset = (): void => {
 base54.reset();
 
 // @ts-ignore Monkey-patch
-terser.AST_Toplevel.prototype.compute_char_frequency = (): void => { // eslint-disable-line @typescript-eslint/camelcase
+terser.AST_Toplevel.prototype.compute_char_frequency = (): void => {
+  // eslint-disable-line @typescript-eslint/camelcase
   // TODO: Expose hook for exporting character frequency information for use in config
   base54.reset();
 };

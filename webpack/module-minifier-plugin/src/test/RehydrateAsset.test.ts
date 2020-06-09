@@ -103,7 +103,7 @@ describe('rehydrateAsset', () => {
   it('uses a regular array for several missing leading elements', () => {
     const asset: IAssetInfo = {
       source: new RawSource(`<before>${CHUNK_MODULES_TOKEN}<after>`),
-      modules: [14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29],
+      modules: [14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
       extractedComments: [],
       fileName: 'test',
       chunk: undefined!

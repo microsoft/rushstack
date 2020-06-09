@@ -146,7 +146,11 @@ const RESERVED_ORDINALS: number[] = ((): number[] => {
  */
 export function getIdentifier(ordinal: number): string {
   // Need to skip over reserved keywords
-  for (let i: number = 0, len: number = RESERVED_ORDINALS.length; i < len && ordinal >= RESERVED_ORDINALS[i]; i++) {
+  for (
+    let i: number = 0, len: number = RESERVED_ORDINALS.length;
+    i < len && ordinal >= RESERVED_ORDINALS[i];
+    i++
+  ) {
     ++ordinal;
   }
 

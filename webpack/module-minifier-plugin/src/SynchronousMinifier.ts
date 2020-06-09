@@ -1,7 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IModuleMinificationCallback, IModuleMinificationRequest, IModuleMinificationResult, IModuleMinifier } from './ModuleMinifierPlugin.types';
+import {
+  IModuleMinificationCallback,
+  IModuleMinificationRequest,
+  IModuleMinificationResult,
+  IModuleMinifier
+} from './ModuleMinifierPlugin.types';
 import { minifySingleFile } from './terser/MinifySingleFile';
 import { MinifyOptions } from 'terser';
 import './OverrideWebpackIdentifierAllocation';
@@ -24,15 +29,15 @@ export class SynchronousMinifier implements IModuleMinifier {
   private readonly _resultCache: Map<string, IModuleMinificationResult>;
 
   public constructor(options: ISynchronousMinifierOptions) {
-    const {
-      terserOptions = {}
-    } = options || {};
+    const { terserOptions = {} } = options || {};
 
     this.terserOptions = {
       ...terserOptions,
-      output: terserOptions.output ? {
-        ...terserOptions.output
-      } : {}
+      output: terserOptions.output
+        ? {
+            ...terserOptions.output
+          }
+        : {}
     };
 
     this._resultCache = new Map();
@@ -43,13 +48,8 @@ export class SynchronousMinifier implements IModuleMinifier {
    * @param request - The request to process
    * @param callback - The callback to invoke
    */
-  public minify(
-    request: IModuleMinificationRequest,
-    callback: IModuleMinificationCallback
-  ): void {
-    const {
-      hash
-    } = request;
+  public minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void {
+    const { hash } = request;
 
     const cached: IModuleMinificationResult | undefined = this._resultCache.get(hash);
     if (cached) {

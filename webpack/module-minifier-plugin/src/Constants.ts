@@ -16,7 +16,8 @@ export const IDENTIFIER_LEADING_DIGITS: string = 'etnairoscdlufpm_hbgvySDIxCOwEA
  * Computed from character frequency analysis of the source code for OneDrive
  * @public
  */
-export const IDENTIFIER_TRAILING_DIGITS: string = 'etnairoscdlufpm_hbg01v32y67S4985DIxCOwEALkMPTUFHRNBjVzGKWqQYJXZ$';
+export const IDENTIFIER_TRAILING_DIGITS: string =
+  'etnairoscdlufpm_hbg01v32y67S4985DIxCOwEALkMPTUFHRNBjVzGKWqQYJXZ$';
 
 /**
  * Prefix to wrap `function (module, __webpack_exports__, __webpack_require__) { ... }` so that the minifier doesn't delete it

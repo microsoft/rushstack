@@ -1,7 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IModuleMinificationCallback, IModuleMinificationRequest, IModuleMinificationResult, IModuleMinifier } from './ModuleMinifierPlugin.types';
+import {
+  IModuleMinificationCallback,
+  IModuleMinificationRequest,
+  IModuleMinificationResult,
+  IModuleMinifier
+} from './ModuleMinifierPlugin.types';
 import { MessagePort } from 'worker_threads';
 
 /**
@@ -16,7 +21,7 @@ export class MessagePortMinifier implements IModuleMinifier {
   public constructor(port: MessagePort) {
     this.port = port;
 
-    const callbacks: Map<string, IModuleMinificationCallback[]> = this._callbacks = new Map();
+    const callbacks: Map<string, IModuleMinificationCallback[]> = (this._callbacks = new Map());
 
     port.on('message', (message: IModuleMinificationResult | number | false) => {
       if (typeof message === 'object') {
@@ -34,13 +39,8 @@ export class MessagePortMinifier implements IModuleMinifier {
    * @param request - The request to process
    * @param callback - The callback to invoke
    */
-  public minify(
-    request: IModuleMinificationRequest,
-    callback: IModuleMinificationCallback
-  ): void {
-    const {
-      hash
-    } = request;
+  public minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void {
+    const { hash } = request;
 
     const callbacks: IModuleMinificationCallback[] | undefined = this._callbacks.get(hash);
     if (callbacks) {
