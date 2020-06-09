@@ -89,6 +89,7 @@ package-deps.json
 # Machine-egnerated files
 common/reviews
 common/changes
+common/scripts
 CHANGELOG.*
 pnpm-lock.yaml
 build-tests/*/etc
