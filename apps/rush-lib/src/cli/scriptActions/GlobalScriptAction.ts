@@ -43,7 +43,7 @@ export class GlobalScriptAction extends BaseScriptAction {
     this._autoinstallFolder = options.autoinstallFolder;
   }
 
-  private async _prepareAutoinstallFolder(): Promise<void> {
+  private async _prepareAutoinstallFolder(): Promise<string> {
     await InstallHelpers.ensureLocalPackageManager(this.rushConfiguration, this.rushGlobalFolder,
       RushConstants.defaultMaxInstallAttempts);
 
@@ -101,11 +101,17 @@ export class GlobalScriptAction extends BaseScriptAction {
     }
 
     lock.release();
+
+    return autoinstallFolderFullPath;
   }
 
   public async run(): Promise<void> {
+    const additionalPathFolders: string[] = [];
+
     if (this._autoinstallFolder) {
-      await this._prepareAutoinstallFolder();
+      const autoinstallFolderFullPath: string = await this._prepareAutoinstallFolder();
+      const autoinstallFolderBinPath: string = path.join(autoinstallFolderFullPath, 'node_modules', '.bin');
+      additionalPathFolders.push(autoinstallFolderBinPath);
     }
 
     // Collect all custom parameter values
@@ -128,7 +134,8 @@ export class GlobalScriptAction extends BaseScriptAction {
         initCwd: this.rushConfiguration.commonTempFolder,
         handleOutput: false,
         environmentPathOptions: {
-          includeRepoBin: true
+          includeRepoBin: true,
+          additionalPathFolders: additionalPathFolders
         }
       }
     );
