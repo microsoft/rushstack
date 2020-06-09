@@ -122,6 +122,20 @@
     //    */
     //   "shellCommand": "node common/scripts/my-global-command.js"
     // }
+
+    {
+      "name": "prettier",
+      "commandKind": "global",
+      "summary": "Invokes the Prettier command in a Rush repo",
+
+      // The description is not used because "shellCommandDefinesParameters"=true
+      // "description": "Invokes the Prettier command in a Rush repo",
+
+      "autoinstallSubfolder": "rush-prettier",
+
+      // This will invoke common/autoinstall/rush-prettier/node_modules/.bin/pretty-quick
+      "shellCommand": "pretty-quick"
+    }
   ],
 
   /**
