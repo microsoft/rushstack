@@ -19,17 +19,17 @@ while (!/[\\/]eslint[\\/]lib[\\/]cli-engine[\\/]config-array-factory\.js/i.test(
 }
 const eslintFolder = path.join(path.dirname(currentModule.filename), '../..');
 
-const configArrayFactoryPath = path.join(eslintFolder, "lib/cli-engine/config-array-factory");
+const configArrayFactoryPath = path.join(eslintFolder, 'lib/cli-engine/config-array-factory');
 const ConfigArrayFactory = require(configArrayFactoryPath).ConfigArrayFactory;
 
 if (!ConfigArrayFactory.__patched) {
   ConfigArrayFactory.__patched = true;
 
-  const moduleResolverPath = path.join(eslintFolder, "lib/shared/relative-module-resolver");
+  const moduleResolverPath = path.join(eslintFolder, 'lib/shared/relative-module-resolver');
   const ModuleResolver = require(moduleResolverPath);
 
   const originalLoadPlugin = ConfigArrayFactory.prototype._loadPlugin;
-  ConfigArrayFactory.prototype._loadPlugin = function(name, importerPath, importerName) {
+  ConfigArrayFactory.prototype._loadPlugin = function (name, importerPath, importerName) {
     const originalResolve = ModuleResolver.resolve;
     try {
       ModuleResolver.resolve = function (moduleName, relativeToPath) {
@@ -40,5 +40,5 @@ if (!ConfigArrayFactory.__patched) {
     } finally {
       ModuleResolver.resolve = originalResolve;
     }
-  }
+  };
 }

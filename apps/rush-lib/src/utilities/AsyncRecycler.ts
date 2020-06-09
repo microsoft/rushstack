@@ -6,11 +6,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import {
-  Text,
-  Path,
-  FileSystem
-} from '@rushstack/node-core-library';
+import { Text, Path, FileSystem } from '@rushstack/node-core-library';
 
 import { Utilities } from './Utilities';
 
@@ -75,8 +71,11 @@ export class AsyncRecycler {
     Utilities.retryUntilTimeout(
       () => FileSystem.move({ sourcePath: folderPath, destinationPath: newFolderPath }),
       maxWaitTimeMs,
-      (e) => new Error(`Error: ${e}${os.EOL}Often this is caused by a file lock ` +
-                      'from a process like the virus scanner.'),
+      (e) =>
+        new Error(
+          `Error: ${e}${os.EOL}Often this is caused by a file lock ` +
+            'from a process like the virus scanner.'
+        ),
       'recycleFolder'
     );
   }
@@ -89,9 +88,7 @@ export class AsyncRecycler {
   public moveAllItemsInFolder(folderPath: string, membersToExclude?: ReadonlyArray<string>): void {
     const resolvedFolderPath: string = path.resolve(folderPath);
 
-    const excludeSet: Set<string> = new Set<string>(
-      (membersToExclude || []).map(x => x.toUpperCase())
-    );
+    const excludeSet: Set<string> = new Set<string>((membersToExclude || []).map((x) => x.toUpperCase()));
 
     for (const memberPath of FileSystem.readFolder(resolvedFolderPath, { absolutePaths: true })) {
       const normalizedMemberName: string = path.basename(memberPath).toUpperCase();
@@ -147,24 +144,24 @@ export class AsyncRecycler {
       command = 'cmd.exe';
 
       // In PowerShell single-quote literals, single quotes are escaped by doubling them
-      const escapedRecyclerFolder: string = Text.replaceAll(this.recyclerFolder, '\'', '\'\'');
+      const escapedRecyclerFolder: string = Text.replaceAll(this.recyclerFolder, "'", "''");
 
       // As of PowerShell 3.0, the "\\?" prefix can be used for paths that exceed MAX_PATH.
       // (This prefix does not seem to work for cmd.exe's "rd" command.)
       args = [
         '/c',
         '"' +
-        'PowerShell.exe -Version 3.0 -NoLogo -NonInteractive -WindowStyle Hidden -Command'
-          + ` Get-ChildItem -Force '${escapedRecyclerFolder}'`
+          'PowerShell.exe -Version 3.0 -NoLogo -NonInteractive -WindowStyle Hidden -Command' +
+          ` Get-ChildItem -Force '${escapedRecyclerFolder}'` +
           // The "^|" here prevents cmd.exe from interpreting the "|" symbol
-          + ` ^| ForEach ($_) { Remove-Item -ErrorAction Ignore -Force -Recurse "\\\\?\\$($_.FullName)" }`
-          + '"'
+          ` ^| ForEach ($_) { Remove-Item -ErrorAction Ignore -Force -Recurse "\\\\?\\$($_.FullName)" }` +
+          '"'
       ];
 
       options.windowsVerbatimArguments = true;
     } else {
       command = 'rm';
-      args = [ '-rf' ];
+      args = ['-rf'];
 
       let pathCount: number = 0;
 
@@ -189,5 +186,4 @@ export class AsyncRecycler {
     // The child won't stay alive unless we unlink it from the parent process
     process.unref();
   }
-
 }

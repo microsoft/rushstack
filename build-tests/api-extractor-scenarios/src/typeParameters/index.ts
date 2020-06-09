@@ -2,26 +2,21 @@
 // See LICENSE in the project root for license information.
 
 /** @public */
-export class GenericClass<T> {
-}
+export class GenericClass<T> {}
 
 /** @public */
-export class GenericClassWithConstraint<T extends string> {
-}
+export class GenericClassWithConstraint<T extends string> {}
 
 /** @public */
-export class GenericClassWithDefault<T = number> {
-}
+export class GenericClassWithDefault<T = number> {}
 
 /** @public */
 export class ClassWithGenericMethod {
-  public method<T>() {
-  }
+  public method<T>() {}
 }
 
 /** @public */
-export interface GenericInterface<T> {
-}
+export interface GenericInterface<T> {}
 
 /** @public */
 export interface InterfaceWithGenericCallSignature {
@@ -34,8 +29,7 @@ export interface InterfaceWithGenericConstructSignature {
 }
 
 /** @public */
-export function genericFunction<T>(): void {
-}
+export function genericFunction<T>(): void {}
 
 /** @public */
 export type GenericTypeAlias<T> = T;

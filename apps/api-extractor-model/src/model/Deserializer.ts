@@ -27,7 +27,7 @@ import { DeserializerContext } from './DeserializerContext';
 
 export class Deserializer {
   public static deserialize(context: DeserializerContext, jsonObject: IApiItemJson): ApiItem {
-    const options: Partial<IApiItemOptions> = { };
+    const options: Partial<IApiItemOptions> = {};
 
     switch (jsonObject.kind) {
       case ApiItemKind.Class:

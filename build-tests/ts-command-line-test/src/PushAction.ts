@@ -1,7 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineFlagParameter, CommandLineAction, CommandLineChoiceParameter } from '@rushstack/ts-command-line';
+import {
+  CommandLineFlagParameter,
+  CommandLineAction,
+  CommandLineChoiceParameter
+} from '@rushstack/ts-command-line';
 import { BusinessLogic } from './BusinessLogic';
 
 export class PushAction extends CommandLineAction {
@@ -16,11 +20,13 @@ export class PushAction extends CommandLineAction {
     });
   }
 
-  protected onExecute(): Promise<void> { // abstract
-    return BusinessLogic.doTheWork(this._force.value, this._protocol.value || "(none)");
+  protected onExecute(): Promise<void> {
+    // abstract
+    return BusinessLogic.doTheWork(this._force.value, this._protocol.value || '(none)');
   }
 
-  protected onDefineParameters(): void { // abstract
+  protected onDefineParameters(): void {
+    // abstract
     this._force = this.defineFlagParameter({
       parameterLongName: '--force',
       parameterShortName: '-f',

@@ -3,10 +3,7 @@
 
 import * as path from 'path';
 import { CommandLineAction } from '@rushstack/ts-command-line';
-import {
-  Terminal,
-  FileSystem
-} from '@rushstack/node-core-library';
+import { Terminal, FileSystem } from '@rushstack/node-core-library';
 import { RushConfiguration } from '@microsoft/rush-lib';
 
 export class CleanAction extends CommandLineAction {

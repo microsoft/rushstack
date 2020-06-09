@@ -1,11 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  Terminal,
-  ConsoleTerminalProvider,
-  Sort
-} from '@rushstack/node-core-library';
+import { Terminal, ConsoleTerminalProvider, Sort } from '@rushstack/node-core-library';
 
 import { ITask, ITaskDefinition } from './ITask';
 import { TaskStatus } from './TaskStatus';
@@ -26,10 +22,7 @@ export class TaskCollection {
   private _terminal: Terminal;
 
   public constructor(options: ITaskCollectionOptions) {
-    const {
-      quietMode,
-      terminal = new Terminal(new ConsoleTerminalProvider())
-    } = options;
+    const { quietMode, terminal = new Terminal(new ConsoleTerminalProvider()) } = options;
     this._tasks = new Map<string, ITask>();
     this._quietMode = quietMode;
     this._terminal = terminal;
@@ -121,9 +114,12 @@ export class TaskCollection {
   ): void {
     for (const task of tasks) {
       if (dependencyChain.indexOf(task.name) >= 0) {
-        throw new Error('A cyclic dependency was encountered:\n'
-          + '  ' + [...dependencyChain, task.name].reverse().join('\n  -> ')
-          + '\nConsider using the cyclicDependencyProjects option for rush.json.');
+        throw new Error(
+          'A cyclic dependency was encountered:\n' +
+            '  ' +
+            [...dependencyChain, task.name].reverse().join('\n  -> ') +
+            '\nConsider using the cyclicDependencyProjects option for rush.json.'
+        );
       }
 
       if (!alreadyCheckedProjects.has(task.name)) {
@@ -152,7 +148,7 @@ export class TaskCollection {
     } else {
       // Otherwise we are as long as the longest package + 1
       const depsLengths: number[] = [];
-      task.dependents.forEach(dep => depsLengths.push(this._calculateCriticalPaths(dep)));
+      task.dependents.forEach((dep) => depsLengths.push(this._calculateCriticalPaths(dep)));
       task.criticalPathLength = Math.max(...depsLengths) + 1;
       return task.criticalPathLength;
     }

@@ -9,30 +9,17 @@ const tscAmdTask = new build.TscCmdTask();
 tscAmdTask.name = 'tsc-amd';
 tscAmdTask.cleanMatch = [path.join(__dirname, 'lib-amd')];
 tscAmdTask.setConfig({
-  customArgs: [
-    '--outDir', './lib-amd',
-    '--module', 'amd'
-  ]
+  customArgs: ['--outDir', './lib-amd', '--module', 'amd']
 });
 
 const tscEsnextTask = new build.TscCmdTask();
 tscEsnextTask.name = 'tsc-es6';
 tscEsnextTask.cleanMatch = [path.join(__dirname, 'lib-es6')];
 tscEsnextTask.setConfig({
-  customArgs: [
-    '--outDir', './lib-es6',
-    '--module', 'esnext'
-  ]
+  customArgs: ['--outDir', './lib-es6', '--module', 'esnext']
 });
 
-build.defaultTasks = build.task(
-  'default',
-  build.parallel(
-    build.defaultTasks,
-    tscAmdTask,
-    tscEsnextTask
-  )
-);
+build.defaultTasks = build.task('default', build.parallel(build.defaultTasks, tscAmdTask, tscEsnextTask));
 
 build.setConfig({
   libAMDFolder: 'lib-amd',

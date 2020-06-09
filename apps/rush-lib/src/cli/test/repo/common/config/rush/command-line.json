@@ -21,7 +21,7 @@
       "longName": "--locale",
       "parameterKind": "choice",
       "description": "Selects a single instead of the default locale (en-us) for non-ship builds or all locales for ship builds.",
-      "associatedCommands": [ "import-strings", "upload" ],
+      "associatedCommands": ["import-strings", "upload"],
       "alternatives": [
         {
           "name": "en-us",
@@ -47,7 +47,7 @@
       "shortName": "-s",
       "parameterKind": "flag",
       "description": "Perform a production build, including minification and localization steps",
-      "associatedCommands": [ "build", "rebuild" ]
+      "associatedCommands": ["build", "rebuild"]
     },
 
     {
@@ -55,7 +55,7 @@
       "shortName": "-m",
       "parameterKind": "flag",
       "description": "Perform a fast build, which disables certain tasks such as unit tests and linting",
-      "associatedCommands": [ "build", "rebuild" ]
+      "associatedCommands": ["build", "rebuild"]
     }
   ]
 }

@@ -32,7 +32,8 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
    * @internal
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public _setValue(data: any): void { // abstract
+  public _setValue(data: any): void {
+    // abstract
     if (data !== null && data !== undefined) {
       if (typeof data !== 'string') {
         this.reportInvalidData(data);
@@ -64,7 +65,8 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
    * {@inheritDoc CommandLineParameter._getSupplementaryNotes}
    * @internal
    */
-  public _getSupplementaryNotes(supplementaryNotes: string[]): void { // virtual
+  public _getSupplementaryNotes(supplementaryNotes: string[]): void {
+    // virtual
     super._getSupplementaryNotes(supplementaryNotes);
     if (this.defaultValue !== undefined) {
       if (this.defaultValue.length < 160) {
@@ -91,5 +93,4 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
       argList.push(this.value);
     }
   }
-
 }

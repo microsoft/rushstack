@@ -35,8 +35,7 @@ export class BxlModule {
   }
 
   public async writeFile(): Promise<void> {
-    const contents: string =
-`import { Cmd, Transformer } from "Sdk.Transformers";
+    const contents: string = `import { Cmd, Transformer } from "Sdk.Transformers";
 
 export const cmdTool: Transformer.ToolDefinition = {
   exe: f\`\${Environment.getPathValue("COMSPEC")}\`,

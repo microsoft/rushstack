@@ -1,7 +1,5 @@
 {
   "copyTo": {
-    "lib": [
-      "preCopyTest.js"
-    ]
+    "lib": ["preCopyTest.js"]
   }
 }

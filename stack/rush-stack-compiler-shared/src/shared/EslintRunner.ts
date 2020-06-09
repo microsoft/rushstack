@@ -7,10 +7,7 @@ import { ITerminalProvider } from '@rushstack/node-core-library';
 import { CmdRunner } from './CmdRunner';
 import { ToolPaths } from './ToolPaths';
 import { ILintRunnerConfig } from './ILintRunnerConfig';
-import {
-  RushStackCompilerBase,
-  WriteFileIssueFunction
-} from './RushStackCompilerBase';
+import { RushStackCompilerBase, WriteFileIssueFunction } from './RushStackCompilerBase';
 
 interface IEslintFileResult {
   // Example: "/full/path/to/File.ts"
@@ -62,22 +59,15 @@ export class EslintRunner extends RushStackCompilerBase<ILintRunnerConfig> {
 
   public constructor(taskOptions: ILintRunnerConfig, rootPath: string, terminalProvider: ITerminalProvider) {
     super(taskOptions, rootPath, terminalProvider);
-    this._cmdRunner = new CmdRunner(
-      this._standardBuildFolders,
-      this._terminal,
-      {
-        packagePath: ToolPaths.eslintPackagePath,
-        packageJson: ToolPaths.eslintPackageJson,
-        packageBinPath: path.join('bin', 'eslint.js')
-      }
-    );
+    this._cmdRunner = new CmdRunner(this._standardBuildFolders, this._terminal, {
+      packagePath: ToolPaths.eslintPackagePath,
+      packageJson: ToolPaths.eslintPackageJson,
+      packageBinPath: path.join('bin', 'eslint.js')
+    });
   }
 
   public invoke(): Promise<void> {
-    const args: string[] = [
-      '--format', 'json',
-      'src/**/*.{ts,tsx}'
-    ];
+    const args: string[] = ['--format', 'json', 'src/**/*.{ts,tsx}'];
 
     const stdoutBuffer: string[] = [];
 
@@ -100,16 +90,12 @@ export class EslintRunner extends RushStackCompilerBase<ILintRunnerConfig> {
             ? this._taskOptions.fileError
             : this._taskOptions.fileWarning;
           for (const eslintFileResult of eslintFileResults) {
-            const pathFromRoot: string = path.relative(this._standardBuildFolders.projectFolderPath,
-              eslintFileResult.filePath);
+            const pathFromRoot: string = path.relative(
+              this._standardBuildFolders.projectFolderPath,
+              eslintFileResult.filePath
+            );
             for (const message of eslintFileResult.messages) {
-              eslintErrorLogFn(
-                pathFromRoot,
-                message.line,
-                message.column,
-                message.ruleId,
-                message.message
-              );
+              eslintErrorLogFn(pathFromRoot, message.line, message.column, message.ruleId, message.message);
             }
           }
         } catch (e) {

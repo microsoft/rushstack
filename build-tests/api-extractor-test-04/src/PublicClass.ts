@@ -5,8 +5,7 @@
  * These are internal constructor parameters for PublicClass's internal constructor.
  * @internal
  */
-export interface IPublicClassInternalParameters {
-}
+export interface IPublicClassInternalParameters {}
 
 /**
  * This is a public class
@@ -14,8 +13,7 @@ export interface IPublicClassInternalParameters {
  */
 export class PublicClass {
   /** @internal */
-  constructor(parameters: IPublicClassInternalParameters) {
-  }
+  constructor(parameters: IPublicClassInternalParameters) {}
 
   /**
    * This is a beta field
@@ -26,27 +24,23 @@ export class PublicClass {
   /**
    * This is a comment
    */
-  public undecoratedMember(): void {
-  }
+  public undecoratedMember(): void {}
 
   /**
    * This is a beta comment
    * @beta
    */
-  public betaMember(): void {
-  }
+  public betaMember(): void {}
 
   /**
    * This is an alpha comment
    * @alpha
    */
-  public alphaMember(): void {
-  }
+  public alphaMember(): void {}
 
   /**
    * This is an internal member
    * @internal
    */
-  public _internalMember(): void {
-  }
+  public _internalMember(): void {}
 }

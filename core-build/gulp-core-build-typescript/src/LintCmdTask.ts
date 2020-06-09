@@ -5,10 +5,7 @@ import * as path from 'path';
 import { JsonFile, JsonObject } from '@rushstack/node-core-library';
 import { LintRunner as TLintRunner } from '@microsoft/rush-stack-compiler-3.1';
 
-import {
-  RSCTask,
-  IRSCTaskConfig
-} from './RSCTask';
+import { RSCTask, IRSCTaskConfig } from './RSCTask';
 
 /**
  * @public
@@ -25,12 +22,9 @@ export interface ILintCmdTaskConfig extends IRSCTaskConfig {
  */
 export class LintCmdTask extends RSCTask<ILintCmdTaskConfig> {
   public constructor() {
-    super(
-      'lint',
-      {
-        displayAsError: false
-      }
-    );
+    super('lint', {
+      displayAsError: false
+    });
   }
 
   public loadSchema(): JsonObject {

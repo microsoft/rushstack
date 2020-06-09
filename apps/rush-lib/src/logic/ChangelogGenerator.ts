@@ -4,24 +4,11 @@
 import * as path from 'path';
 import * as semver from 'semver';
 
-import {
-  FileSystem,
-  JsonFile
-} from '@rushstack/node-core-library';
+import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 
-import {
-  PublishUtilities,
-  IChangeInfoHash
-} from './PublishUtilities';
-import {
-  IChangeInfo,
-  ChangeType
-} from '../api/ChangeManagement';
-import {
-  IChangelog,
-  IChangeLogEntry,
-  IChangeLogComment
-} from '../api/Changelog';
+import { PublishUtilities, IChangeInfoHash } from './PublishUtilities';
+import { IChangeInfo, ChangeType } from '../api/ChangeManagement';
+import { IChangelog, IChangeLogEntry, IChangeLogComment } from '../api/Changelog';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConfiguration } from '../api/RushConfiguration';
 
@@ -71,7 +58,7 @@ export class ChangelogGenerator {
     allProjects: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration
   ): void {
-    allProjects.forEach(project => {
+    allProjects.forEach((project) => {
       const markdownPath: string = path.resolve(project.projectFolder, CHANGELOG_MD);
       const markdownJSONPath: string = path.resolve(project.projectFolder, CHANGELOG_JSON);
 
@@ -81,7 +68,10 @@ export class ChangelogGenerator {
           throw new Error('A CHANGELOG.md without json: ' + markdownPath);
         }
 
-        const changelog: IChangelog = ChangelogGenerator._getChangelog(project.packageName, project.projectFolder);
+        const changelog: IChangelog = ChangelogGenerator._getChangelog(
+          project.packageName,
+          project.projectFolder
+        );
         const isLockstepped: boolean = !!project.versionPolicy && project.versionPolicy.isLockstepped;
 
         FileSystem.writeFile(
@@ -89,7 +79,6 @@ export class ChangelogGenerator {
           ChangelogGenerator._translateToMarkdown(changelog, rushConfiguration, isLockstepped)
         );
       }
-
     });
   }
 
@@ -110,9 +99,7 @@ export class ChangelogGenerator {
     }
     const changelog: IChangelog = ChangelogGenerator._getChangelog(change.packageName, projectFolder);
 
-    if (
-      !changelog.entries.some(entry => entry.version === change.newVersion)) {
-
+    if (!changelog.entries.some((entry) => entry.version === change.newVersion)) {
       const changelogEntry: IChangeLogEntry = {
         version: change.newVersion!,
         tag: PublishUtilities.createTagname(change.packageName, change.newVersion!),
@@ -120,14 +107,12 @@ export class ChangelogGenerator {
         comments: {}
       };
 
-      change.changes!.forEach(individualChange => {
+      change.changes!.forEach((individualChange) => {
         if (individualChange.comment) {
-
           // Initialize the comments array only as necessary.
           const changeTypeString: string = ChangeType[individualChange.changeType!];
-          const comments: IChangeLogComment[] =
-            changelogEntry.comments[changeTypeString] =
-            changelogEntry.comments[changeTypeString] || [];
+          const comments: IChangeLogComment[] = (changelogEntry.comments[changeTypeString] =
+            changelogEntry.comments[changeTypeString] || []);
 
           const changeLogComment: IChangeLogComment = {
             comment: individualChange.comment
@@ -149,7 +134,7 @@ export class ChangelogGenerator {
 
       console.log(
         `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: ` +
-        `Changelog update for "${change.packageName}@${change.newVersion}".`
+          `Changelog update for "${change.packageName}@${change.newVersion}".`
       );
 
       if (shouldCommit) {
@@ -222,38 +207,42 @@ export class ChangelogGenerator {
 
       comments += ChangelogGenerator._getChangeComments(
         'Breaking changes',
-        entry.comments[ChangeType[ChangeType.major]]);
+        entry.comments[ChangeType[ChangeType.major]]
+      );
 
       comments += ChangelogGenerator._getChangeComments(
         'Minor changes',
-        entry.comments[ChangeType[ChangeType.minor]]);
+        entry.comments[ChangeType[ChangeType.minor]]
+      );
 
       comments += ChangelogGenerator._getChangeComments(
         'Patches',
-        entry.comments[ChangeType[ChangeType.patch]]);
+        entry.comments[ChangeType[ChangeType.patch]]
+      );
 
       if (isLockstepped) {
         // In lockstepped projects, all changes are of type ChangeType.none.
         comments += ChangelogGenerator._getChangeComments(
           'Updates',
-          entry.comments[ChangeType[ChangeType.none]]);
+          entry.comments[ChangeType[ChangeType.none]]
+        );
       }
 
       if (rushConfiguration.hotfixChangeEnabled) {
         comments += ChangelogGenerator._getChangeComments(
           'Hotfixes',
-          entry.comments[ChangeType[ChangeType.hotfix]]);
+          entry.comments[ChangeType[ChangeType.hotfix]]
+        );
       }
 
       if (!comments) {
-        markdown += ((changelog.entries.length === index + 1) ?
-          '*Initial release*' :
-          '*Version update only*') +
-          EOL + EOL;
+        markdown +=
+          (changelog.entries.length === index + 1 ? '*Initial release*' : '*Version update only*') +
+          EOL +
+          EOL;
       } else {
         markdown += comments;
       }
-
     });
 
     return markdown;
@@ -267,7 +256,7 @@ export class ChangelogGenerator {
 
     if (commentsArray) {
       comments = `### ${title}${EOL + EOL}`;
-      commentsArray.forEach(comment => {
+      commentsArray.forEach((comment) => {
         comments += `- ${comment.comment}${EOL}`;
       });
       comments += EOL;
@@ -288,9 +277,10 @@ export class ChangelogGenerator {
     project: RushConfigurationProject,
     allChanges: IChangeInfoHash
   ): boolean {
-
-    return project.shouldPublish &&
+    return (
+      project.shouldPublish &&
       (!semver.prerelease(project.packageJson.version) ||
-      allChanges[project.packageName].changeType === ChangeType.hotfix);
+        allChanges[project.packageName].changeType === ChangeType.hotfix)
+    );
   }
 }

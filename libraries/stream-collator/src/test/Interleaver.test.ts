@@ -38,8 +38,12 @@ describe('Interleaver tests', () => {
 
     it('should not let you register two tasks with the same name', () => {
       const taskName: string = 'Hello World';
-      expect(() => { Interleaver.registerTask(taskName); }).not.toThrow();
-      expect(() => { Interleaver.registerTask(taskName); }).toThrow();
+      expect(() => {
+        Interleaver.registerTask(taskName);
+      }).not.toThrow();
+      expect(() => {
+        Interleaver.registerTask(taskName);
+      }).toThrow();
     });
 
     it('should not let you close a task twice', () => {
@@ -53,7 +57,9 @@ describe('Interleaver tests', () => {
       const taskName: string = 'Hello World';
       const task: ITaskWriter = Interleaver.registerTask(taskName);
       task.close();
-      expect(() => { task.write('1'); }).toThrow();
+      expect(() => {
+        task.write('1');
+      }).toThrow();
     });
   });
 
@@ -78,7 +84,6 @@ describe('Interleaver tests', () => {
 
       expect(taskA.getStdOutput()).toEqual('');
       expect(taskA.getStdError()).toEqual(error);
-
     });
   });
 
