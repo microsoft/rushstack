@@ -281,7 +281,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
             shellCommand: command.shellCommand,
 
-            autoinstallFolder: command.autoinstallFolder
+            autoinstallSubfolder: command.autoinstallSubfolder
           })
         );
         break;

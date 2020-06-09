@@ -139,12 +139,12 @@
        * candidates for Git hook scripts.  But they have the disadvantages of not being buildable projects,
        * and of increasing the overall installation footprint for your monorepo.
        *
-       * The "autoinstallFolder" setting must not contain a path and must be a valid NPM package name.
+       * The "autoinstallSubfolder" setting must not contain a path and must be a valid NPM package name.
        * For example, the name "my-task" would map to "common/autoinstall/my-task/package.json", and
        * the "common/autoinstall/my-task/node_modules/.bin" folder would be added to the shell PATH when
        * invoking the "shellCommand".
        */
-      /*[LINE "HYPOTHETICAL"]*/ "autoinstallFolder": "my-task"
+      /*[LINE "HYPOTHETICAL"]*/ "autoinstallSubfolder": "my-task"
     }
     /*[END "DEMO"]*/
   ],
