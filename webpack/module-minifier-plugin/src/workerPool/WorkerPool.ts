@@ -161,7 +161,6 @@ export class WorkerPool {
       worker.postMessage(false);
     } else {
       // No pending work, idle the workers
-      worker.unref();
       this._idle.push(worker);
     }
   }
@@ -181,7 +180,6 @@ export class WorkerPool {
     }
 
     if (worker) {
-      worker.ref();
       return Promise.resolve(worker);
     }
 
