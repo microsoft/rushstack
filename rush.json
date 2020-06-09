@@ -589,6 +589,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "rush-stack-compiler-3.8-library-test",
+      "projectFolder": "build-tests/rush-stack-compiler-3.8-library-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "ts-command-line-test",
       "projectFolder": "build-tests/ts-command-line-test",
       "reviewCategory": "tests",
@@ -820,6 +826,13 @@
     {
       "packageName": "@microsoft/rush-stack-compiler-3.7",
       "projectFolder": "stack/rush-stack-compiler-3.7",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
+    },
+    {
+      "packageName": "@microsoft/rush-stack-compiler-3.8",
+      "projectFolder": "stack/rush-stack-compiler-3.8",
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
