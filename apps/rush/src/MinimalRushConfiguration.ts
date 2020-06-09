@@ -21,13 +21,20 @@ export class MinimalRushConfiguration {
   private _commonRushConfigFolder: string;
 
   private constructor(minimalRushConfigurationJson: IMinimalRushConfigurationJson, rushJsonFilename: string) {
-    this._rushVersion = minimalRushConfigurationJson.rushVersion || minimalRushConfigurationJson.rushMinimumVersion;
-    this._commonRushConfigFolder = path.join(path.dirname(rushJsonFilename),
-      RushConstants.commonFolderName, 'config', 'rush');
+    this._rushVersion =
+      minimalRushConfigurationJson.rushVersion || minimalRushConfigurationJson.rushMinimumVersion;
+    this._commonRushConfigFolder = path.join(
+      path.dirname(rushJsonFilename),
+      RushConstants.commonFolderName,
+      'config',
+      'rush'
+    );
   }
 
   public static loadFromDefaultLocation(): MinimalRushConfiguration | undefined {
-    const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation({ showVerbose: true });
+    const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation({
+      showVerbose: true
+    });
     if (rushJsonLocation) {
       return MinimalRushConfiguration._loadFromConfigurationFile(rushJsonLocation);
     } else {

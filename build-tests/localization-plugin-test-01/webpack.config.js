@@ -30,7 +30,7 @@ function generateConfiguration(mode, outputFolderName) {
     },
     entry: {
       'localization-test-A': path.join(__dirname, 'src', 'indexA.ts'),
-      'localization-test-B': path.join(__dirname, 'src', 'indexB.ts'),
+      'localization-test-B': path.join(__dirname, 'src', 'indexB.ts')
     },
     output: {
       path: path.join(__dirname, outputFolderName),
@@ -79,5 +79,5 @@ function generateConfiguration(mode, outputFolderName) {
 
 module.exports = [
   generateConfiguration('development', 'dist-dev'),
-  generateConfiguration('production', 'dist-prod'),
+  generateConfiguration('production', 'dist-prod')
 ];

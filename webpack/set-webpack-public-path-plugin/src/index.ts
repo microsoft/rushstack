@@ -9,7 +9,4 @@
  */
 
 export * from './SetPublicPathPlugin';
-export {
-  getGlobalRegisterCode,
-  registryVariableName
-} from './codeGenerator';
+export { getGlobalRegisterCode, registryVariableName } from './codeGenerator';

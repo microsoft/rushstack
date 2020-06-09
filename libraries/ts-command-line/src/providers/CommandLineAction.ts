@@ -60,8 +60,10 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
     super();
 
     if (!CommandLineAction._actionNameRegExp.test(options.actionName)) {
-      throw new Error(`Invalid action name "${options.actionName}". `
-        + `The name must be comprised of lower-case words optionally separated by hyphens or colons.`);
+      throw new Error(
+        `Invalid action name "${options.actionName}". ` +
+          `The name must be comprised of lower-case words optionally separated by hyphens or colons.`
+      );
     }
 
     this.actionName = options.actionName;
@@ -104,7 +106,8 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
    * {@inheritDoc CommandLineParameterProvider._getArgumentParser}
    * @internal
    */
-  protected _getArgumentParser(): argparse.ArgumentParser { // override
+  protected _getArgumentParser(): argparse.ArgumentParser {
+    // override
     if (!this._argumentParser) {
       // We will improve this in the future
       throw new Error('The CommandLineAction must be added to a CommandLineParser before it can be used');

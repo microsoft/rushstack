@@ -28,9 +28,7 @@
             },
             {
               "name": "References",
-              "items": [
-                { "name": "InjectedCustomItem", "uid": "customUrl" }
-              ]
+              "items": [{ "name": "InjectedCustomItem", "uid": "customUrl" }]
             }
           ]
         }

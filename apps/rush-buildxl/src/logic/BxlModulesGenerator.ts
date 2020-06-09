@@ -22,9 +22,11 @@ export class BxlModulesGenerator {
       path.resolve(this._rushConfiguration.commonTempFolder, 'bxl', 'modules')
     );
     const rushJsonFilePath: string = this._normalizePathSeparator(this._rushConfiguration.rushJsonFile);
-    const commonRushConfigFolder: string = this._normalizePathSeparator(this._rushConfiguration.commonRushConfigFolder);
+    const commonRushConfigFolder: string = this._normalizePathSeparator(
+      this._rushConfiguration.commonRushConfigFolder
+    );
 
-    const modules: BxlModule[] =  this._rushConfiguration.projects.map((project) => {
+    const modules: BxlModule[] = this._rushConfiguration.projects.map((project) => {
       const name: string = this._packageNameToModuleName(project.packageName);
       const moduleRoot: string = path.resolve(modulesRoot, name);
       const projDir: string = this._normalizePathSeparator(project.projectFolder);
@@ -32,10 +34,15 @@ export class BxlModulesGenerator {
       return new BxlModule(name, projDir, rushJsonFilePath, moduleRoot);
     });
 
-    const bxlConfig: BxlConfig = new BxlConfig(this._buildXLRoot, modulesRoot, modules, commonRushConfigFolder);
+    const bxlConfig: BxlConfig = new BxlConfig(
+      this._buildXLRoot,
+      modulesRoot,
+      modules,
+      commonRushConfigFolder
+    );
 
     // Write individual module dsc files
-    const tasks: Promise<void>[] = modules.map(module => module.writeFile());
+    const tasks: Promise<void>[] = modules.map((module) => module.writeFile());
     await Promise.all(tasks);
 
     // Write config.dsc

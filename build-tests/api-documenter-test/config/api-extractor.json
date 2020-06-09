@@ -6,7 +6,7 @@
   "newlineKind": "crlf",
 
   "apiReport": {
-    "enabled": true,
+    "enabled": true
   },
 
   "docModel": {

@@ -29,4 +29,3 @@ export const enum ConstEnum {
   One = 1,
   Two = RegularEnum.One + 1
 }
-

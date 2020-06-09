@@ -33,7 +33,7 @@ export interface IConfigCompiler {
    *
    * If omitted, then the tsconfig.json file will instead be read from the projectFolder.
    */
-  overrideTsconfig?: { };
+  overrideTsconfig?: {};
 
   /**
    * This option causes the compiler to be invoked with the `--skipLibCheck` option.

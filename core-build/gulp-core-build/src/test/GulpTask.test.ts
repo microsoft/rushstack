@@ -2,19 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import Vinyl = require('vinyl');
-import * as Gulp  from 'gulp';
+import * as Gulp from 'gulp';
 import { Readable } from 'stream';
 import * as path from 'path';
 
-import {
-  serial,
-  parallel,
-  GulpTask
-} from '../index';
+import { serial, parallel, GulpTask } from '../index';
 import { mockBuildConfig } from './mockBuildConfig';
 
-interface IConfig {
-}
+interface IConfig {}
 
 let testArray: string[] = [];
 
@@ -36,16 +31,17 @@ class StreamTask extends GulpTask<IConfig> {
     super('stream', {});
   }
 
-  public executeTask(gulp: typeof Gulp): any { // eslint-disable-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public executeTask(gulp: typeof Gulp): any {
     const stream: Readable = new Readable({ objectMode: true });
 
     // Add no opt function to make it compat with through
-    stream['_read'] = () => { // eslint-disable-line dot-notation
+    // eslint-disable-next-line dot-notation
+    stream['_read'] = () => {
       // Do Nothing
     };
 
     setTimeout(() => {
-
       const file: Vinyl = new Vinyl({
         path: 'test.js',
         contents: Buffer.from('test')
@@ -101,12 +97,9 @@ class SchemaTask extends GulpTask<ISimpleConfig> {
   public name: string = '';
 
   public constructor() {
-    super(
-      'schema-task',
-      {
-        shouldDoThings: false
-      }
-    );
+    super('schema-task', {
+      shouldDoThings: false
+    });
   }
 
   public executeTask(gulp: typeof Gulp, callback: (error?: string | Error) => void): void {
@@ -118,8 +111,7 @@ class SchemaTask extends GulpTask<ISimpleConfig> {
   }
 }
 
-const tasks: GulpTask<IConfig>[] = [
-];
+const tasks: GulpTask<IConfig>[] = [];
 
 tasks.push(new PromiseTask());
 tasks.push(new StreamTask());
@@ -132,19 +124,25 @@ describe('GulpTask', () => {
     it(`${task.name} serial`, (done) => {
       testArray = [];
       task.setConfig({ addToMe: testArray });
-      serial(task).execute(mockBuildConfig).then(() => {
-        expect(testArray).toEqual([task.name]);
-        done();
-      }).catch(done);
+      serial(task)
+        .execute(mockBuildConfig)
+        .then(() => {
+          expect(testArray).toEqual([task.name]);
+          done();
+        })
+        .catch(done);
     });
 
     it(`${task.name} parallel`, (done) => {
       testArray = [];
       task.setConfig({ addToMe: testArray });
-      parallel(task).execute(mockBuildConfig).then(() => {
-        expect(testArray).toEqual([task.name]);
-        done();
-      }).catch(done);
+      parallel(task)
+        .execute(mockBuildConfig)
+        .then(() => {
+          expect(testArray).toEqual([task.name]);
+          done();
+        })
+        .catch(done);
     });
   }
 
@@ -153,12 +151,15 @@ describe('GulpTask', () => {
     for (const task of tasks) {
       task.setConfig({ addToMe: testArray });
     }
-    serial(tasks).execute(mockBuildConfig).then(() => {
-      for (const task of tasks) {
-        expect(testArray.indexOf(task.name)).toBeGreaterThan(-1);
-      }
-      done();
-    }).catch(done);
+    serial(tasks)
+      .execute(mockBuildConfig)
+      .then(() => {
+        for (const task of tasks) {
+          expect(testArray.indexOf(task.name)).toBeGreaterThan(-1);
+        }
+        done();
+      })
+      .catch(done);
   });
 
   it(`all tasks parallel`, (done) => {
@@ -166,12 +167,15 @@ describe('GulpTask', () => {
     for (const task of tasks) {
       task.setConfig({ addToMe: testArray });
     }
-    parallel(tasks).execute(mockBuildConfig).then(() => {
-      for (const task of tasks) {
-        expect(testArray.indexOf(task.name)).toBeGreaterThan(-1);
-      }
-      done();
-    }).catch(done);
+    parallel(tasks)
+      .execute(mockBuildConfig)
+      .then(() => {
+        for (const task of tasks) {
+          expect(testArray.indexOf(task.name)).toBeGreaterThan(-1);
+        }
+        done();
+      })
+      .catch(done);
   });
 
   it(`reads schema file if loadSchema is implemented`, (done) => {

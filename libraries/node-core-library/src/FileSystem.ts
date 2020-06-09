@@ -155,7 +155,10 @@ export const enum AlreadyExistsBehavior {
  * Callback function type for {@link IFileSystemCopyFilesAsyncOptions.filter}
  * @public
  */
-export type FileSystemCopyFilesAsyncFilter = (sourcePath: string, destinationPath: string) => Promise<boolean>;
+export type FileSystemCopyFilesAsyncFilter = (
+  sourcePath: string,
+  destinationPath: string
+) => Promise<boolean>;
 
 /**
  * Callback function type for {@link IFileSystemCopyFilesOptions.filter}
@@ -215,7 +218,7 @@ export interface IFileSystemCopyFilesOptions extends IFileSystemCopyFilesAsyncOp
 /**
  * The options for {@link FileSystem.deleteFile}
  * @public
-*/
+ */
 export interface IFileSystemDeleteFileOptions {
   /**
    * If true, will throw an exception if the file did not exist before `deleteFile()` was called.
@@ -378,7 +381,6 @@ export class FileSystem {
     });
   }
 
-
   /**
    * Changes the permissions (i.e. file mode bits) for a filesystem object.
    * Behind the scenes it uses `fs.chmodSync()`.
@@ -433,19 +435,19 @@ export class FileSystem {
    * @param modeBits - POSIX-style file mode bits specified using the {@link PosixModeBits} enum
    */
   public static formatPosixModeBits(modeBits: PosixModeBits): string {
-    let result: string = '-';  // (later we may add support for additional states such as S_IFDIR or S_ISUID)
+    let result: string = '-'; // (later we may add support for additional states such as S_IFDIR or S_ISUID)
 
-    result += (modeBits & PosixModeBits.UserRead) ? 'r' : '-';
-    result += (modeBits & PosixModeBits.UserWrite) ? 'w' : '-';
-    result += (modeBits & PosixModeBits.UserExecute) ? 'x' : '-';
+    result += modeBits & PosixModeBits.UserRead ? 'r' : '-';
+    result += modeBits & PosixModeBits.UserWrite ? 'w' : '-';
+    result += modeBits & PosixModeBits.UserExecute ? 'x' : '-';
 
-    result += (modeBits & PosixModeBits.GroupRead) ? 'r' : '-';
-    result += (modeBits & PosixModeBits.GroupWrite) ? 'w' : '-';
-    result += (modeBits & PosixModeBits.GroupExecute) ? 'x' : '-';
+    result += modeBits & PosixModeBits.GroupRead ? 'r' : '-';
+    result += modeBits & PosixModeBits.GroupWrite ? 'w' : '-';
+    result += modeBits & PosixModeBits.GroupExecute ? 'x' : '-';
 
-    result += (modeBits & PosixModeBits.OthersRead) ? 'r' : '-';
-    result += (modeBits & PosixModeBits.OthersWrite) ? 'w' : '-';
-    result += (modeBits & PosixModeBits.OthersExecute) ? 'x' : '-';
+    result += modeBits & PosixModeBits.OthersRead ? 'r' : '-';
+    result += modeBits & PosixModeBits.OthersWrite ? 'w' : '-';
+    result += modeBits & PosixModeBits.OthersExecute ? 'x' : '-';
 
     return result;
   }
@@ -549,7 +551,7 @@ export class FileSystem {
       // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
       const fileNames: string[] = fsx.readdirSync(folderPath);
       if (options.absolutePaths) {
-        return fileNames.map(fileName => nodeJsPath.resolve(folderPath, fileName));
+        return fileNames.map((fileName) => nodeJsPath.resolve(folderPath, fileName));
       } else {
         return fileNames;
       }
@@ -559,7 +561,10 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.readFolder}.
    */
-  public static async readFolderAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]> {
+  public static async readFolderAsync(
+    folderPath: string,
+    options?: IFileSystemReadFolderOptions
+  ): Promise<string[]> {
     return await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...READ_FOLDER_DEFAULT_OPTIONS,
@@ -569,7 +574,7 @@ export class FileSystem {
       // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
       const fileNames: string[] = await fsx.readdir(folderPath);
       if (options.absolutePaths) {
-        return fileNames.map(fileName => nodeJsPath.resolve(folderPath, fileName));
+        return fileNames.map((fileName) => nodeJsPath.resolve(folderPath, fileName));
       } else {
         return fileNames;
       }
@@ -634,7 +639,11 @@ export class FileSystem {
    * @param contents - The text that should be written to the file.
    * @param options - Optional settings that can change the behavior. Type: `IWriteFileOptions`
    */
-  public static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void {
+  public static writeFile(
+    filePath: string,
+    contents: string | Buffer,
+    options?: IFileSystemWriteFileOptions
+  ): void {
     FileSystem._wrapException(() => {
       options = {
         ...WRITE_FILE_DEFAULT_OPTIONS,
@@ -666,7 +675,11 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.writeFile}.
    */
-  public static async writeFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void> {
+  public static async writeFileAsync(
+    filePath: string,
+    contents: string | Buffer,
+    options?: IFileSystemWriteFileOptions
+  ): Promise<void> {
     await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...WRITE_FILE_DEFAULT_OPTIONS,
@@ -704,7 +717,11 @@ export class FileSystem {
    * @param contents - The text that should be written to the file.
    * @param options - Optional settings that can change the behavior. Type: `IWriteFileOptions`
    */
-  public static appendToFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void {
+  public static appendToFile(
+    filePath: string,
+    contents: string | Buffer,
+    options?: IFileSystemWriteFileOptions
+  ): void {
     FileSystem._wrapException(() => {
       options = {
         ...APPEND_TO_FILE_DEFAULT_OPTIONS,
@@ -736,7 +753,11 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.appendToFile}.
    */
-  public static async appendToFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void> {
+  public static async appendToFileAsync(
+    filePath: string,
+    contents: string | Buffer,
+    options?: IFileSystemWriteFileOptions
+  ): Promise<void> {
     await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...APPEND_TO_FILE_DEFAULT_OPTIONS,
@@ -843,8 +864,9 @@ export class FileSystem {
     };
 
     if (FileSystem.getStatistics(options.sourcePath).isDirectory()) {
-      throw new Error('The specified path refers to a folder; this operation expects a file object:\n'
-        + options.sourcePath);
+      throw new Error(
+        'The specified path refers to a folder; this operation expects a file object:\n' + options.sourcePath
+      );
     }
 
     FileSystem._wrapException(() => {
@@ -865,8 +887,9 @@ export class FileSystem {
     };
 
     if (FileSystem.getStatistics(options.sourcePath).isDirectory()) {
-      throw new Error('The specified path refers to a folder; this operation expects a file object:\n'
-        + options.sourcePath);
+      throw new Error(
+        'The specified path refers to a folder; this operation expects a file object:\n' + options.sourcePath
+      );
     }
 
     await FileSystem._wrapExceptionAsync(() => {
@@ -950,7 +973,10 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.deleteFile}.
    */
-  public static async deleteFileAsync(filePath: string, options?: IFileSystemDeleteFileOptions): Promise<void> {
+  public static async deleteFileAsync(
+    filePath: string,
+    options?: IFileSystemDeleteFileOptions
+  ): Promise<void> {
     await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...DELETE_FILE_DEFAULT_OPTIONS,
@@ -1130,14 +1156,14 @@ export class FileSystem {
    * Returns true if the error provided indicates the file does not exist.
    */
   public static isFileDoesNotExistError(error: Error): boolean {
-    return FileSystem.isErrnoException(error) && (error.code === 'ENOENT');
+    return FileSystem.isErrnoException(error) && error.code === 'ENOENT';
   }
 
   /**
    * Returns true if the error provided indicates the folder does not exist.
    */
   public static isFolderDoesNotExistError(error: Error): boolean {
-    return FileSystem.isErrnoException(error) && (error.code === 'ENOTDIR');
+    return FileSystem.isErrnoException(error) && error.code === 'ENOTDIR';
   }
 
   /**
@@ -1173,9 +1199,11 @@ export class FileSystem {
 
   private static _updateErrorMessage(error: Error): void {
     if (FileSystem.isErrnoException(error)) {
-      if (FileSystem.isFileDoesNotExistError(error)) { // eslint-disable-line @typescript-eslint/no-use-before-define
+      if (FileSystem.isFileDoesNotExistError(error)) {
+        // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `File does not exist: ${error.path}\n${error.message}`;
-      } else if (FileSystem.isFolderDoesNotExistError(error)) { // eslint-disable-line @typescript-eslint/no-use-before-define
+      } else if (FileSystem.isFolderDoesNotExistError(error)) {
+        // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `Folder does not exist: ${error.path}\n${error.message}`;
       }
     }

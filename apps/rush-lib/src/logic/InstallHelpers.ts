@@ -4,10 +4,7 @@
 import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
-import {
-  LockFile,
-  FileSystem
-} from '@rushstack/node-core-library';
+import { LockFile, FileSystem } from '@rushstack/node-core-library';
 
 import { LastInstallFlag } from '../api/LastInstallFlag';
 import { Utilities } from '../utilities/Utilities';
@@ -16,14 +13,15 @@ import { RushConfiguration } from '../api/RushConfiguration';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 
 export class InstallHelpers {
-
   /**
    * If the "(p)npm-local" symlink hasn't been set up yet, this creates it, installing the
    * specified (P)npm version in the user's home directory if needed.
    */
-  public static async ensureLocalPackageManager(rushConfiguration: RushConfiguration,
-    rushGlobalFolder: RushGlobalFolder, maxInstallAttempts: number): Promise<void> {
-
+  public static async ensureLocalPackageManager(
+    rushConfiguration: RushConfiguration,
+    rushGlobalFolder: RushGlobalFolder,
+    maxInstallAttempts: number
+  ): Promise<void> {
     // Example: "C:\Users\YourName\.rush"
     const rushUserFolder: string = rushGlobalFolder.nodeSpecificPath;
 
@@ -79,8 +77,10 @@ export class InstallHelpers {
     FileSystem.ensureFolder(rushConfiguration.commonTempFolder);
 
     // Example: "C:\MyRepo\common\temp\pnpm-local"
-    const localPackageManagerToolFolder: string =
-      path.join(rushConfiguration.commonTempFolder, `${packageManager}-local`);
+    const localPackageManagerToolFolder: string = path.join(
+      rushConfiguration.commonTempFolder,
+      `${packageManager}-local`
+    );
 
     console.log(os.EOL + 'Symlinking "' + localPackageManagerToolFolder + '"');
     console.log('  --> "' + packageManagerToolFolder + '"');
@@ -102,5 +102,4 @@ export class InstallHelpers {
 
     lock.release();
   }
-
 }

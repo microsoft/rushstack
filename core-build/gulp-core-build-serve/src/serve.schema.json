@@ -16,7 +16,7 @@
 
       "type": "object",
       "additionalProperties": false,
-      "required": [ "port", "entryPath" ],
+      "required": ["port", "entryPath"],
       "properties": {
         "port": {
           "title": "API Port",

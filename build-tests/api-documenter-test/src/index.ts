@@ -35,7 +35,7 @@ export const constVariable: number = 123;
  * @public
  */
 export function exampleFunction(x: ExampleTypeAlias, y: number): IDocInterface1 {
-  return undefined as unknown as IDocInterface1;
+  return (undefined as unknown) as IDocInterface1;
 }
 
 /**

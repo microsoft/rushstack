@@ -221,7 +221,10 @@ export class Colors {
     }
   }
 
-  private static _applyTextAttribute(text: string | IColorableSequence, attribute: TextAttribute): IColorableSequence {
+  private static _applyTextAttribute(
+    text: string | IColorableSequence,
+    attribute: TextAttribute
+  ): IColorableSequence {
     const sequence: IColorableSequence = Colors._normalizeStringOrColorableSequence(text);
     if (!sequence.textAttributes) {
       sequence.textAttributes = [];

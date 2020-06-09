@@ -220,7 +220,7 @@ export interface ILocalizedStrings {
  * @public
  */
 export interface ILocaleElementMap {
-  [locale: string]: string
+  [locale: string]: string;
 }
 
 /**

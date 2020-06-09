@@ -64,9 +64,10 @@ export abstract class VersionPolicy {
     this._definitionName = VersionPolicyDefinitionName[versionPolicyJson.definitionName];
     this._exemptFromRushChange = versionPolicyJson.exemptFromRushChange || false;
 
-    const jsonDependencies: IVersionPolicyDependencyJson = versionPolicyJson.dependencies || { };
+    const jsonDependencies: IVersionPolicyDependencyJson = versionPolicyJson.dependencies || {};
     this._versionFormatForCommit = jsonDependencies.versionFormatForCommit || VersionFormatForCommit.original;
-    this._versionFormatForPublish = jsonDependencies.versionFormatForPublish || VersionFormatForPublish.original;
+    this._versionFormatForPublish =
+      jsonDependencies.versionFormatForPublish || VersionFormatForPublish.original;
   }
 
   /**
@@ -77,7 +78,8 @@ export abstract class VersionPolicy {
    * @internal
    */
   public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined {
-    const definition: VersionPolicyDefinitionName = VersionPolicyDefinitionName[versionPolicyJson.definitionName];
+    const definition: VersionPolicyDefinitionName =
+      VersionPolicyDefinitionName[versionPolicyJson.definitionName];
     if (definition === VersionPolicyDefinitionName.lockStepVersion) {
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       return new LockStepVersionPolicy(versionPolicyJson as ILockStepVersionJson);
@@ -158,8 +160,9 @@ export abstract class VersionPolicy {
       const packageJsonEditor: PackageJsonEditor = project.packageJsonEditor;
 
       for (const dependency of packageJsonEditor.dependencyList) {
-        const rushDependencyProject: RushConfigurationProject | undefined =
-          configuration.getProjectByName(dependency.name);
+        const rushDependencyProject: RushConfigurationProject | undefined = configuration.getProjectByName(
+          dependency.name
+        );
 
         if (rushDependencyProject) {
           const dependencyVersion: string = rushDependencyProject.packageJson.version;
@@ -183,8 +186,9 @@ export abstract class VersionPolicy {
       const packageJsonEditor: PackageJsonEditor = project.packageJsonEditor;
 
       for (const dependency of packageJsonEditor.dependencyList) {
-        const rushDependencyProject: RushConfigurationProject | undefined =
-          configuration.getProjectByName(dependency.name);
+        const rushDependencyProject: RushConfigurationProject | undefined = configuration.getProjectByName(
+          dependency.name
+        );
 
         if (rushDependencyProject) {
           dependency.setVersion('*');
@@ -271,8 +275,9 @@ export class LockStepVersionPolicy extends VersionPolicy {
     if (compareResult === 0) {
       return undefined;
     } else if (compareResult > 0 && !force) {
-      const errorMessage: string = `Version ${project.version} in package ${project.name}`
-        + ` is higher than locked version ${this._version.format()}.`;
+      const errorMessage: string =
+        `Version ${project.version} in package ${project.name}` +
+        ` is higher than locked version ${this._version.format()}.`;
       throw new Error(errorMessage);
     }
     return this._updatePackageVersion(project, this._version);
@@ -378,8 +383,9 @@ export class IndividualVersionPolicy extends VersionPolicy {
         updatedProject.version = `${this._lockedMajor}.0.0`;
         return updatedProject;
       } else if (version.major > this.lockedMajor) {
-        const errorMessage: string = `Version ${project.version} in package ${project.name}`
-          + ` is higher than locked major version ${this._lockedMajor}.`;
+        const errorMessage: string =
+          `Version ${project.version} in package ${project.name}` +
+          ` is higher than locked major version ${this._lockedMajor}.`;
         throw new Error(errorMessage);
       }
     }

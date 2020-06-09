@@ -35,26 +35,33 @@ export class GlobalScriptAction extends BaseScriptAction {
   private _shellCommand: string;
   private _autoinstallFolder: string | undefined;
 
-  public constructor(
-    options: IGlobalScriptActionOptions
-  ) {
+  public constructor(options: IGlobalScriptActionOptions) {
     super(options);
     this._shellCommand = options.shellCommand;
     this._autoinstallFolder = options.autoinstallFolder;
   }
 
   private async _prepareAutoinstallFolder(): Promise<string> {
-    await InstallHelpers.ensureLocalPackageManager(this.rushConfiguration, this.rushGlobalFolder,
-      RushConstants.defaultMaxInstallAttempts);
+    await InstallHelpers.ensureLocalPackageManager(
+      this.rushConfiguration,
+      this.rushGlobalFolder,
+      RushConstants.defaultMaxInstallAttempts
+    );
 
     const autoinstallFolderForCommand: string = this._autoinstallFolder!;
 
     // Example: .../common/autoinstall/my-task
-    const autoinstallFolderFullPath: string = path.join(this.rushConfiguration.commonFolder, 'autoinstall',
-      autoinstallFolderForCommand);
+    const autoinstallFolderFullPath: string = path.join(
+      this.rushConfiguration.commonFolder,
+      'autoinstall',
+      autoinstallFolderForCommand
+    );
 
     // Example: common/autoinstall/my-task/package.json
-    const relativePathForLogs: string = path.relative(this.rushConfiguration.rushJsonFolder, autoinstallFolderFullPath);
+    const relativePathForLogs: string = path.relative(
+      this.rushConfiguration.rushJsonFolder,
+      autoinstallFolderFullPath
+    );
 
     if (!FileSystem.exists(autoinstallFolderFullPath)) {
       throw new Error('The autoinstall folder does not exist: ' + autoinstallFolderFullPath);
@@ -73,8 +80,11 @@ export class GlobalScriptAction extends BaseScriptAction {
     const lock: LockFile = await LockFile.acquire(autoinstallFolderFullPath, 'autoinstall');
 
     // Example: .../common/autoinstall/my-task/.rush/temp
-    const lastInstallFlagPath: string = path.join(autoinstallFolderFullPath, RushConstants.projectRushFolderName,
-      'temp');
+    const lastInstallFlagPath: string = path.join(
+      autoinstallFolderFullPath,
+      RushConstants.projectRushFolderName,
+      'temp'
+    );
 
     const lastInstallFlag: LastInstallFlag = new LastInstallFlag(lastInstallFlagPath, {
       node: process.versions.node,
@@ -97,8 +107,14 @@ export class GlobalScriptAction extends BaseScriptAction {
 
       console.log(`Installing dependencies under ${autoinstallFolderFullPath}...\n`);
 
-      Utilities.executeCommand(this.rushConfiguration.packageManagerToolFilename, ['install', '--frozen-lockfile'],
-        autoinstallFolderFullPath, undefined, /* suppressOutput */ false, /* keepEnvironment */ true);
+      Utilities.executeCommand(
+        this.rushConfiguration.packageManagerToolFilename,
+        ['install', '--frozen-lockfile'],
+        autoinstallFolderFullPath,
+        undefined,
+        /* suppressOutput */ false,
+        /* keepEnvironment */ true
+      );
 
       // Create file: ../common/autoinstall/my-task/.rush/temp/last-install.flag
       lastInstallFlag.create();
@@ -134,19 +150,16 @@ export class GlobalScriptAction extends BaseScriptAction {
       shellCommand += ' ' + customParameterValues.join(' ');
     }
 
-    const exitCode: number = Utilities.executeLifecycleCommand(
-      shellCommand,
-      {
-        rushConfiguration: this.rushConfiguration,
-        workingDirectory: this.rushConfiguration.rushJsonFolder,
-        initCwd: this.rushConfiguration.commonTempFolder,
-        handleOutput: false,
-        environmentPathOptions: {
-          includeRepoBin: true,
-          additionalPathFolders: additionalPathFolders
-        }
+    const exitCode: number = Utilities.executeLifecycleCommand(shellCommand, {
+      rushConfiguration: this.rushConfiguration,
+      workingDirectory: this.rushConfiguration.rushJsonFolder,
+      initCwd: this.rushConfiguration.commonTempFolder,
+      handleOutput: false,
+      environmentPathOptions: {
+        includeRepoBin: true,
+        additionalPathFolders: additionalPathFolders
       }
-    );
+    });
 
     process.exitCode = exitCode;
 

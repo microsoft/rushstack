@@ -6,8 +6,7 @@ import { JsonFile, JsonObject } from '../JsonFile';
 import { JsonSchema, IJsonSchemaErrorInfo } from '../JsonSchema';
 
 function normalize(text: string): string {
-  return text.replace(/[\r\n ]+/g, ' ')
-    .trim();
+  return text.replace(/[\r\n ]+/g, ' ').trim();
 }
 
 describe('JsonSchema', () => {
@@ -18,16 +17,10 @@ describe('JsonSchema', () => {
   test('loadAndValidate successfully validates a JSON file', () => {
     const jsonPath: string = path.resolve(path.join(__dirname, './test-data/test.json'));
     const jsonObject: JsonObject = JsonFile.loadAndValidate(jsonPath, schema);
-    expect(jsonObject).toMatchObject(
-      {
-        'exampleString': 'This is a string',
-        'exampleArray': [
-          'apple',
-          'banana',
-          'coconut'
-        ]
-      }
-    );
+    expect(jsonObject).toMatchObject({
+      exampleString: 'This is a string',
+      exampleArray: ['apple', 'banana', 'coconut']
+    });
   });
 
   test('validateObjectWithCallback successfully reports a compound validation error', () => {

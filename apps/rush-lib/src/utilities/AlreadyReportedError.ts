@@ -7,7 +7,6 @@
  * block should not print any error.
  */
 export class AlreadyReportedError extends Error {
-
   public constructor() {
     super('An error occurred.');
 

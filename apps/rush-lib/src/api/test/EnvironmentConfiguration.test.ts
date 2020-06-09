@@ -83,7 +83,7 @@ describe('EnvironmentConfiguration', () => {
       EnvironmentConfiguration.initialize({ doNotNormalizePaths: true });
 
       expect(EnvironmentConfiguration.pnpmStorePathOverride).toEqual(expectedValue);
-    })
+    });
 
     it('returns expected path from environment variable with normalization', () => {
       const expectedValue: string = path.resolve(path.join(process.cwd(), 'temp'));
@@ -93,6 +93,6 @@ describe('EnvironmentConfiguration', () => {
       EnvironmentConfiguration.initialize();
 
       expect(EnvironmentConfiguration.pnpmStorePathOverride).toEqual(expectedValue);
-    })
-  })
+    });
+  });
 });

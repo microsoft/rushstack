@@ -1,7 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DeclarationReference, Meaning, Navigation, Component } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+import {
+  DeclarationReference,
+  Meaning,
+  Navigation,
+  Component
+} from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
@@ -12,12 +17,11 @@ import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
  * Constructor options for {@link ApiClass}.
  * @public
  */
-export interface IApiNamespaceOptions extends
-  IApiItemContainerMixinOptions,
-  IApiNameMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiDeclaredItemOptions {
-}
+export interface IApiNamespaceOptions
+  extends IApiItemContainerMixinOptions,
+    IApiNameMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiDeclaredItemOptions {}
 
 /**
  * Represents a TypeScript namespace declaration.
@@ -42,7 +46,6 @@ export interface IApiNamespaceOptions extends
  * @public
  */
 export class ApiNamespace extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
-
   public constructor(options: IApiNamespaceOptions) {
     super(options);
   }

@@ -22,7 +22,6 @@ class TestCommandLine extends CommandLineParser {
 }
 
 describe('Actionless CommandLineParser', () => {
-
   it('parses a flag', () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
 
@@ -45,5 +44,4 @@ describe('Actionless CommandLineParser', () => {
       expect(commandLineParser.remainder!.values).toEqual(['the', 'remaining', 'args']);
     });
   });
-
 });

@@ -345,15 +345,12 @@ export type YamlTypeId =
   | 'event'
   | 'typealias'
   | 'variable'
-  | 'namespace'
-  ;
+  | 'namespace';
 
 /**
  * Development languages supported by the Universal Reference file format, as defined by typescript.schema.json.
  */
-export type YamlDevLangs =
-  | 'typeScript'
-  ;
+export type YamlDevLangs = 'typeScript';
 
 /**
  * Part of the IYamlApiFile structure.  Documents the source file where an IYamlItem is defined.

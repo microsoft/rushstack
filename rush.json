@@ -64,7 +64,6 @@
      */
     "strictPeerDependencies": true,
 
-
     /**
      * Configures the strategy used to select versions during installation.
      *
@@ -95,7 +94,7 @@
      *
      * The default value is false.
      */
-     "preventManualShrinkwrapChanges": true
+    "preventManualShrinkwrapChanges": true
   },
 
   /**
@@ -109,16 +108,16 @@
   "nodeSupportedVersionRange": ">=8.9.4 <9.0.0 || >=10.13.0 <11.0.0 || >=12.13.0 <13.0.0 || >=14.0.0 <15.0.0",
 
   /**
-  * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
-  * spend six months in a stabilization period before the first Long Term Support (LTS) version.
-  * For example, 8.9.0 was the first LTS version of Node.js 8.  Pre-LTS versions are not recommended
-  * for production usage because they frequently have bugs.  They may cause Rush itself
-  * to malfunction.
-  *
-  * Rush normally prints a warning if it detects a pre-LTS Node.js version.  If you are testing
-  * pre-LTS versions in preparation for supporting the first LTS version, you can use this setting
-  * to disable Rush's warning.
-  */
+   * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
+   * spend six months in a stabilization period before the first Long Term Support (LTS) version.
+   * For example, 8.9.0 was the first LTS version of Node.js 8.  Pre-LTS versions are not recommended
+   * for production usage because they frequently have bugs.  They may cause Rush itself
+   * to malfunction.
+   *
+   * Rush normally prints a warning if it detects a pre-LTS Node.js version.  If you are testing
+   * pre-LTS versions in preparation for supporting the first LTS version, you can use this setting
+   * to disable Rush's warning.
+   */
   // "suppressNodeLtsWarning": false,
 
   /**
@@ -181,8 +180,8 @@
      * or you could just have a single category called "default".
      */
     "reviewCategories": [
-      "libraries",  // library projects that ship
-      "tests",      // non-shipping test projects
+      "libraries", // library projects that ship
+      "tests" // non-shipping test projects
     ],
 
     /**
@@ -191,7 +190,7 @@
      * if the underlying package was already approved, this would imply that the typings
      * are also approved.
      */
-    "ignoredNpmScopes": [ "@types" ]
+    "ignoredNpmScopes": ["@types"]
   },
 
   /**
@@ -210,16 +209,14 @@
      * IMPORTANT: Because these are regular expressions encoded as JSON string literals,
      * RegExp escapes need two backspashes, and ordinary periods should be "\\.".
      */
-    "allowedEmailRegExps": [
-      "[^@]+@users\\.noreply\\.github\\.com"
-    ],
+    "allowedEmailRegExps": ["[^@]+@users\\.noreply\\.github\\.com"],
 
     /**
      * When Rush reports that the address is malformed, the notice can include an example
      * of a recommended email.  Make sure it conforms to one of the allowedEmailRegExps
      * expressions.
      */
-    "sampleEmail": "mrexample@users.noreply.github.com",
+    "sampleEmail": "mrexample@users.noreply.github.com"
 
     /**
      * The commit message to use when committing changes during 'rush publish'.
@@ -247,7 +244,7 @@
      * your PR branch, and in this situation "rush change" will also automatically invoke "git fetch"
      * to retrieve the latest activity for the remote master branch.
      */
-     "url": "https://github.com/microsoft/rushstack.git"
+    "url": "https://github.com/microsoft/rushstack.git"
 
     /**
      * The default branch name. This tells "rush change" which remote branch to compare against.
@@ -400,20 +397,14 @@
       "projectFolder": "apps/api-extractor",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.5"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/api-extractor-model",
       "projectFolder": "apps/api-extractor-model",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.5"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/api-documenter",
@@ -616,20 +607,14 @@
       "projectFolder": "core-build/gulp-core-build",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.5"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/gulp-core-build-mocha",
       "projectFolder": "core-build/gulp-core-build-mocha",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.5"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/gulp-core-build-sass",
@@ -648,10 +633,7 @@
       "projectFolder": "core-build/gulp-core-build-typescript",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.5"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/gulp-core-build-webpack",
@@ -690,10 +672,7 @@
       "projectFolder": "libraries/node-core-library",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.5"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@rushstack/package-deps-hash",
@@ -718,10 +697,7 @@
       "projectFolder": "libraries/ts-command-line",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.5"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@rushstack/typings-generator",
@@ -762,130 +738,91 @@
       "projectFolder": "stack/eslint-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.5"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-2.4",
-     "projectFolder": "stack/rush-stack-compiler-2.4",
+      "projectFolder": "stack/rush-stack-compiler-2.4",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.5"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-2.7",
-     "projectFolder": "stack/rush-stack-compiler-2.7",
+      "projectFolder": "stack/rush-stack-compiler-2.7",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.5"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-2.8",
       "projectFolder": "stack/rush-stack-compiler-2.8",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.5"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-2.9",
       "projectFolder": "stack/rush-stack-compiler-2.9",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.5"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-3.0",
       "projectFolder": "stack/rush-stack-compiler-3.0",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.5"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-3.1",
       "projectFolder": "stack/rush-stack-compiler-3.1",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.5"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-3.2",
       "projectFolder": "stack/rush-stack-compiler-3.2",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.5"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-3.3",
       "projectFolder": "stack/rush-stack-compiler-3.3",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.5"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-3.4",
       "projectFolder": "stack/rush-stack-compiler-3.4",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.5"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-3.5",
       "projectFolder": "stack/rush-stack-compiler-3.5",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.5"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-3.6",
       "projectFolder": "stack/rush-stack-compiler-3.6",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.5"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-3.7",
       "projectFolder": "stack/rush-stack-compiler-3.7",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.5"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-shared",

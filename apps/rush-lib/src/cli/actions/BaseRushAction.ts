@@ -5,10 +5,7 @@ import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 
-import {
-  CommandLineAction,
-  ICommandLineActionOptions
-} from '@rushstack/ts-command-line';
+import { CommandLineAction, ICommandLineActionOptions } from '@rushstack/ts-command-line';
 
 import { LockFile } from '@rushstack/node-core-library';
 
@@ -87,8 +84,10 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction {
     if (this.rushConfiguration) {
       // eslint-disable-next-line dot-notation
       let environmentPath: string | undefined = process.env['PATH'];
-      environmentPath = path.join(this.rushConfiguration.commonTempFolder, 'node_modules', '.bin') +
-        path.delimiter + environmentPath;
+      environmentPath =
+        path.join(this.rushConfiguration.commonTempFolder, 'node_modules', '.bin') +
+        path.delimiter +
+        environmentPath;
       // eslint-disable-next-line dot-notation
       process.env['PATH'] = environmentPath;
     }

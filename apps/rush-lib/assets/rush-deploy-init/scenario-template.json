@@ -3,7 +3,7 @@
  * The scenario files are located under the "common/config/deploy-scenarios" folder.
  * For full documentation, please see https://rushjs.io
  */
- {
+{
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/deploy-scenario.schema.json",
 
   /**
@@ -15,9 +15,7 @@
    * The "deploymentProjectNames" array normally contains exactly one item.  However, if "enableSubdeployments"
    * is true, then multiple projects can be specified, and each item create a separate subdeployment.
    */
-  "deploymentProjectNames": [
-    "[%PROJECT_NAME_TO_DEPLOY%]"
-  ],
+  "deploymentProjectNames": ["[%PROJECT_NAME_TO_DEPLOY%]"],
 
   /**
    * Subdeployments are an optional feature that enables multiple deployments to be processed with a single

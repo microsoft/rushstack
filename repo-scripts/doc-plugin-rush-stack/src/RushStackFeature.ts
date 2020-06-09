@@ -64,7 +64,9 @@ export class RushStackFeature extends MarkdownDocumenterFeature {
       if (this._apiItemsWithPages.has(apiItem)) {
         const newNode: INavigationNode = {
           title: apiItem.displayName,
-          url: path.posix.join('/pages/api/', this.context.documenter.getLinkForApiItem(apiItem)!).replace(/\.md$/, '')
+          url: path.posix
+            .join('/pages/api/', this.context.documenter.getLinkForApiItem(apiItem)!)
+            .replace(/\.md$/, '')
         };
         parentNodes.push(newNode);
 
