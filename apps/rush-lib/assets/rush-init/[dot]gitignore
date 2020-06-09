@@ -61,4 +61,5 @@ jspm_packages/
 # Rush temporary files
 common/deploy/
 common/temp/
+common/autoinstall/*/.npmrc
 **/.rush/temp/
