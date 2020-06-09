@@ -120,11 +120,31 @@
       "safeForSimultaneousRushProcesses": false,
 
       /**
-       * A script that will be invoked using the OS shell. The working directory will be the folder
-       * that contains rush.json.  If custom parameters are associated with this command, their
+       * (Required) A script that will be invoked using the OS shell. The working directory will be
+       * the folder that contains rush.json.  If custom parameters are associated with this command, their
        * values will be appended to the end of this string.
        */
-      "shellCommand": "node common/scripts/my-global-command.js"
+      "shellCommand": "node common/scripts/my-global-command.js",
+
+      /**
+       * If your "shellCommand" script depends on NPM packages, the recommended best practice is
+       * to make it into a regular Rush project that builds with your normal toolchain.  However, if
+       * the command needs to work without first having to run "rush build", the recommended practice
+       * is to publish the project to an NPM registry and use common/scripts/install-run.js to launch it.
+       *
+       * Autoinstall folders offer another possibility: They are folders under "common/autoinstall" with
+       * a package.json file and shrinkwrap file. Rush will automatically invoke the package manager to
+       * install these dependencies before an associated command is invoked.  Autoinstall folders have the
+       * advantage that they work even in a branch where "rush install" is broken, which makes them good
+       * candidates for Git hook scripts.  But they have the disadvantages of not being buildable projects,
+       * and of increasing the overall installation footprint for your monorepo.
+       *
+       * The "autoinstallFolder" setting must not contain a path and must be a valid NPM package name.
+       * For example, the name "my-task" would map to "common/autoinstall/my-task/package.json", and
+       * the "common/autoinstall/my-task/node_modules/.bin" folder would be added to the shell PATH when
+       * invoking the "shellCommand".
+       */
+      /*[LINE "HYPOTHETICAL"]*/ "autoinstallFolder": "my-task"
     }
     /*[END "DEMO"]*/
   ],
