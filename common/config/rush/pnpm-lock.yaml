@@ -71,6 +71,8 @@ dependencies:
   '@rush-temp/rush-stack-compiler-3.7-library-test': 'file:projects/rush-stack-compiler-3.7-library-test.tgz'
   '@rush-temp/rush-stack-compiler-3.8': 'file:projects/rush-stack-compiler-3.8.tgz'
   '@rush-temp/rush-stack-compiler-3.8-library-test': 'file:projects/rush-stack-compiler-3.8-library-test.tgz'
+  '@rush-temp/rush-stack-compiler-3.9': 'file:projects/rush-stack-compiler-3.9.tgz'
+  '@rush-temp/rush-stack-compiler-3.9-library-test': 'file:projects/rush-stack-compiler-3.9-library-test.tgz'
   '@rush-temp/rush-stack-compiler-shared': 'file:projects/rush-stack-compiler-shared.tgz'
   '@rush-temp/rushell': 'file:projects/rushell.tgz'
   '@rush-temp/set-webpack-public-path-plugin': 'file:projects/set-webpack-public-path-plugin.tgz'
@@ -12558,6 +12560,13 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-MYlEfn5VrLNsgudQTVJeNaQFUAI7DkhnOjdpAp4T+ku1TfQClewlbSuTVHiA+8skNBgaf02TL/kLOvig4y3G8w==
+  /typescript/3.9.5:
+    dev: false
+    engines:
+      node: '>=4.2.0'
+    hasBin: true
+    resolution:
+      integrity: sha512-hSAifV3k+i6lEoCJ2k6R2Z/rp/H3+8sdmcn5NrS3/3kE7+RyZXm9aqvxWqjEXHAd8b0pShatpcdMTvEdvAJltQ==
   /uglify-js/3.0.28:
     dependencies:
       commander: 2.11.0
@@ -14600,7 +14609,7 @@ packages:
     dev: false
     name: '@rush-temp/rush-stack-compiler-3.8-library-test'
     resolution:
-      integrity: sha512-JqM8A+MjqkiP7fdCZKiGUHm7716/RWvaeE4vFWuJqIiEUmIulNjKILc5Aot1MG2Y2zfa1xLrStwdc55MBgQLyw==
+      integrity: sha512-lTgqOFzebnh6/CpNx4R6nJWyLmwA3N/gh0o9uDmN/3XUngHyvSmVaPOmMEJARmcJlAVtygk6QlLMYmfSXPcvTQ==
       tarball: 'file:projects/rush-stack-compiler-3.8-library-test.tgz'
     version: 0.0.0
   'file:projects/rush-stack-compiler-3.8.tgz':
@@ -14619,6 +14628,33 @@ packages:
     resolution:
       integrity: sha512-6Mi8UxqL6NMirkpDA/e+wQpHH+08m/Mde03de5g7sM8GRXbQEuNCidEKUCnC2vYa9AJLxQJwSLk6Aslp2ShVnQ==
       tarball: 'file:projects/rush-stack-compiler-3.8.tgz'
+    version: 0.0.0
+  'file:projects/rush-stack-compiler-3.9-library-test.tgz':
+    dependencies:
+      '@types/node': 10.17.13
+      gulp: 4.0.2
+    dev: false
+    name: '@rush-temp/rush-stack-compiler-3.9-library-test'
+    resolution:
+      integrity: sha512-7u4jI0r+mgBxO8FDulKwvTX2s2PduonHFAxSSbatu/aOaj04wzzKcqINplWbkh3Cm2MX4gzLByYV1xQnLpZHAA==
+      tarball: 'file:projects/rush-stack-compiler-3.9-library-test.tgz'
+    version: 0.0.0
+  'file:projects/rush-stack-compiler-3.9.tgz':
+    dependencies:
+      '@microsoft/node-library-build': 6.4.10
+      '@microsoft/rush-stack-compiler-3.5': 0.4.4
+      '@types/node': 10.17.13
+      eslint: 6.5.1
+      gulp: 4.0.2
+      import-lazy: 4.0.0
+      tslint: 5.20.1
+      tslint-microsoft-contrib: 6.2.0_tslint@5.20.1
+      typescript: 3.9.5
+    dev: false
+    name: '@rush-temp/rush-stack-compiler-3.9'
+    resolution:
+      integrity: sha512-SrVuAqENR6feWYjpjLU3qZBlOMMzYC9jLbJvWcsPsNCCUVRzChsrb0ov9bXTFGoIKxwQnB7lZ8pRC0yYvLFRyw==
+      tarball: 'file:projects/rush-stack-compiler-3.9.tgz'
     version: 0.0.0
   'file:projects/rush-stack-compiler-shared.tgz':
     dev: false
@@ -14833,6 +14869,8 @@ specifiers:
   '@rush-temp/rush-stack-compiler-3.7-library-test': 'file:./projects/rush-stack-compiler-3.7-library-test.tgz'
   '@rush-temp/rush-stack-compiler-3.8': 'file:./projects/rush-stack-compiler-3.8.tgz'
   '@rush-temp/rush-stack-compiler-3.8-library-test': 'file:./projects/rush-stack-compiler-3.8-library-test.tgz'
+  '@rush-temp/rush-stack-compiler-3.9': 'file:./projects/rush-stack-compiler-3.9.tgz'
+  '@rush-temp/rush-stack-compiler-3.9-library-test': 'file:./projects/rush-stack-compiler-3.9-library-test.tgz'
   '@rush-temp/rush-stack-compiler-shared': 'file:./projects/rush-stack-compiler-shared.tgz'
   '@rush-temp/rushell': 'file:./projects/rushell.tgz'
   '@rush-temp/set-webpack-public-path-plugin': 'file:./projects/set-webpack-public-path-plugin.tgz'
@@ -14987,4 +15025,4 @@ specifiers:
   xmldoc: ~1.1.2
   yargs: ~4.6.0
   z-schema: ~3.18.3
-# shrinkwrap hash: 33d5cfbfce8db27e38a4dd37ab03fa1c6fc7af21
+# shrinkwrap hash: da1b183013f5b9337a45ba9ea584835ba0c592b8
