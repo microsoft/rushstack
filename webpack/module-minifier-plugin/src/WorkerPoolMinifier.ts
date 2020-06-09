@@ -30,6 +30,8 @@ export class WorkerPoolMinifier implements IModuleMinifier {
   private readonly _pool: WorkerPool;
 
   private _refCount: number;
+  private _deduped: number;
+  private _minified: number;
   private readonly _resultCache: Map<string, IModuleMinificationResult>;
   private readonly _activeRequests: Map<string, IModuleMinificationCallback[]>;
 
@@ -63,6 +65,17 @@ export class WorkerPoolMinifier implements IModuleMinifier {
     this._refCount = 0;
     this._resultCache = resultCache;
     this._pool = terserPool;
+
+    this._deduped = 0;
+    this._minified = 0;
+  }
+
+  public get maxThreads(): number {
+    return this._pool.maxWorkers;
+  }
+
+  public set maxThreads(threads: number) {
+    this._pool.maxWorkers = threads;
   }
 
   /**
@@ -80,6 +93,7 @@ export class WorkerPoolMinifier implements IModuleMinifier {
 
     const cached: IModuleMinificationResult | undefined = this._resultCache.get(hash);
     if (cached) {
+      ++this._deduped;
       return callback(cached);
     }
 
@@ -88,11 +102,13 @@ export class WorkerPoolMinifier implements IModuleMinifier {
     } = this;
     const callbacks: IModuleMinificationCallback[] | undefined = activeRequests.get(hash);
     if (callbacks) {
+      ++this._deduped;
       callbacks.push(callback);
       return;
     }
 
     activeRequests.set(hash, [callback]);
+    ++this._minified;
 
     this._pool.checkoutWorker(true).then((worker) => {
       worker.postMessage(request);
@@ -118,6 +134,7 @@ export class WorkerPoolMinifier implements IModuleMinifier {
     return async () => {
       if (--this._refCount === 0) {
         await this._pool.finish();
+        console.log(`Module minification: ${this._deduped} Deduped, ${this._minified} Processed`);
       }
     };
   }

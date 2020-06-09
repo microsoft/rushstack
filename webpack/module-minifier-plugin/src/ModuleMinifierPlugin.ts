@@ -72,7 +72,7 @@ function isMinificationResultError(result: IModuleMinificationResult): result is
  */
 export class ModuleMinifierPlugin {
   public readonly hooks: IModuleMinifierPluginHooks;
-  public readonly minifier: IModuleMinifier;
+  public minifier: IModuleMinifier;
   public readonly portableIdsPlugin: PortableMinifierModuleIdsPlugin | undefined;
 
   private readonly _sourceMap: boolean;
