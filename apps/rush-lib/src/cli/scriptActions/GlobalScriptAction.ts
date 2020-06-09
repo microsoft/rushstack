@@ -8,7 +8,7 @@ import * as path from 'path';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { Utilities } from '../../utilities/Utilities';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
-import { FileSystem, LockFile } from '@rushstack/node-core-library';
+import { FileSystem, LockFile, IPackageJson, JsonFile } from '@rushstack/node-core-library';
 import { InstallHelpers } from '../../logic/InstallHelpers';
 import { RushConstants } from '../../logic/RushConstants';
 import { LastInstallFlag } from '../../api/LastInstallFlag';
@@ -49,34 +49,42 @@ export class GlobalScriptAction extends BaseScriptAction {
 
     const autoinstallFolderForCommand: string = this._autoinstallFolder!;
 
+    // Example: .../common/autoinstall/my-task
     const autoinstallFolderFullPath: string = path.join(this.rushConfiguration.commonFolder, 'autoinstall',
       autoinstallFolderForCommand);
+
+    // Example: common/autoinstall/my-task/package.json
+    const relativePathForLogs: string = path.relative(this.rushConfiguration.rushJsonFolder, autoinstallFolderFullPath);
 
     if (!FileSystem.exists(autoinstallFolderFullPath)) {
       throw new Error('The autoinstall folder does not exist: ' + autoinstallFolderFullPath);
     }
-    if (!FileSystem.exists(path.join(autoinstallFolderFullPath, 'package.json'))) {
+
+    // Example: .../common/autoinstall/my-task/package.json
+    const packageJsonPath: string = path.join(autoinstallFolderFullPath, 'package.json');
+    if (!FileSystem.exists(packageJsonPath)) {
       throw new Error('The autoinstall folder is missing a package.json file: ' + autoinstallFolderFullPath);
     }
 
-    console.log(`Trying to acquire lock for "${autoinstallFolderForCommand}" folder`);
+    const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
+
+    console.log(`Acquiring lock for "${relativePathForLogs}" folder...`);
 
     const lock: LockFile = await LockFile.acquire(autoinstallFolderFullPath, 'autoinstall');
 
-    console.log(`Acquired lock`);
-
-    // Example: common/autoinstall/my-task/.rush/temp
+    // Example: .../common/autoinstall/my-task/.rush/temp
     const lastInstallFlagPath: string = path.join(autoinstallFolderFullPath, RushConstants.projectRushFolderName,
       'temp');
 
     const lastInstallFlag: LastInstallFlag = new LastInstallFlag(lastInstallFlagPath, {
       node: process.versions.node,
       packageManager: this.rushConfiguration.packageManager,
-      packageManagerVersion: this.rushConfiguration.packageManagerToolVersion
+      packageManagerVersion: this.rushConfiguration.packageManagerToolVersion,
+      packageJson: packageJson
     });
 
     if (!lastInstallFlag.isValid() || lock.dirtyWhenAcquired) {
-      // Example: common/autoinstall/my-task/node_modules
+      // Example: ../common/autoinstall/my-task/node_modules
       const nodeModulesFolder: string = path.join(autoinstallFolderFullPath, 'node_modules');
 
       if (FileSystem.exists(nodeModulesFolder)) {
@@ -84,20 +92,20 @@ export class GlobalScriptAction extends BaseScriptAction {
         FileSystem.ensureEmptyFolder(nodeModulesFolder);
       }
 
-      // Copy: common/autoinstall/my-task/.npmrc
+      // Copy: .../common/autoinstall/my-task/.npmrc
       Utilities.syncNpmrc(this.rushConfiguration.commonRushConfigFolder, autoinstallFolderFullPath);
 
-      console.log('Autoinstalling dependencies under ' + autoinstallFolderFullPath);
+      console.log(`Installing dependencies under ${autoinstallFolderFullPath}...\n`);
 
-      Utilities.executeCommand(this.rushConfiguration.packageManagerToolFilename, ['install'],
-        autoinstallFolderFullPath, undefined, /* suppressOutput */ true, /* keepEnvironment */ true);
+      Utilities.executeCommand(this.rushConfiguration.packageManagerToolFilename, ['install', '--frozen-lockfile'],
+        autoinstallFolderFullPath, undefined, /* suppressOutput */ false, /* keepEnvironment */ true);
 
-      // Create file: common/autoinstall/my-task/.rush/temp/last-install.flag
+      // Create file: ../common/autoinstall/my-task/.rush/temp/last-install.flag
       lastInstallFlag.create();
 
-      console.log('Autoinstall completed successfully');
+      console.log('Autoinstall completed successfully\n');
     } else {
-      console.log('Autoinstall folder is already up to date');
+      console.log('Autoinstall folder is already up to date\n');
     }
 
     lock.release();
