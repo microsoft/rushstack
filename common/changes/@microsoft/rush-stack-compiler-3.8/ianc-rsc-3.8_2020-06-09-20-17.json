@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack-compiler-3.8",
+      "comment": "Initial package creation.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-3.8",
+  "email": "iclanton@users.noreply.github.com"
+}
