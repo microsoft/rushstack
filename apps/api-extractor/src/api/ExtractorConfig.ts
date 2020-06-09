@@ -15,7 +15,7 @@ import {
   Text,
   InternalError,
   Path,
-  NewlineKind,
+  NewlineKind
 } from '@rushstack/node-core-library';
 import { IConfigFile, IExtractorMessagesConfig } from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
@@ -282,7 +282,7 @@ export class ExtractorConfig {
     const extractorConfig: ExtractorConfig = ExtractorConfig.prepare({
       configObject,
       configObjectFullPath,
-      packageJsonFullPath,
+      packageJsonFullPath
     });
 
     return extractorConfig;
@@ -334,7 +334,7 @@ export class ExtractorConfig {
             // Resolve "my-package" from the perspective of the current folder.
             try {
               extendsField = resolve.sync(extendsField, {
-                basedir: currentConfigFolderPath,
+                basedir: currentConfigFolderPath
               });
             } catch (e) {
               throw new Error(`Error resolving NodeJS path "${extendsField}": ${e.message}`);
@@ -573,7 +573,7 @@ export class ExtractorConfig {
       const tokenContext: IExtractorConfigTokenContext = {
         unscopedPackageName: 'unknown-package',
         packageName: 'unknown-package',
-        projectFolder: projectFolder,
+        projectFolder: projectFolder
       };
 
       if (packageJson) {
@@ -774,7 +774,7 @@ export class ExtractorConfig {
         tsdocMetadataFilePath,
         newlineKind,
         messages: configObject.messages || {},
-        testMode: !!configObject.testMode,
+        testMode: !!configObject.testMode
       });
     } catch (e) {
       throw new Error(`Error parsing ${filenameForErrors}:\n` + e.message);

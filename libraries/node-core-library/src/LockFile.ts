@@ -81,7 +81,7 @@ export function getProcessStartTime(pid: number): string | undefined {
   }
 
   const psResult: child_process.SpawnSyncReturns<string> = child_process.spawnSync('ps', args, {
-    encoding: 'utf8',
+    encoding: 'utf8'
   });
   const psStdout: string = psResult.stdout;
 

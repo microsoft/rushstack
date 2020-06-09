@@ -34,7 +34,7 @@ export class LocFileTypingsGenerator extends StringValuesTypingsGenerator {
           filePath: filePath,
           content: fileContents,
           terminal: this._options.terminal!,
-          resxNewlineNormalization: options.resxNewlineNormalization,
+          resxNewlineNormalization: options.resxNewlineNormalization
         });
 
         const typings: IStringValueTyping[] = [];
@@ -43,12 +43,12 @@ export class LocFileTypingsGenerator extends StringValuesTypingsGenerator {
         for (const stringName in locFileData) {
           typings.push({
             exportName: stringName,
-            comment: locFileData[stringName].comment,
+            comment: locFileData[stringName].comment
           });
         }
 
         return { typings };
-      },
+      }
     });
   }
 }

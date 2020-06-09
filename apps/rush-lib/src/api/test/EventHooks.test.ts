@@ -20,7 +20,7 @@ describe('EventHooks', () => {
   it('loads two rush hooks', () => {
     const expectedHooks: string[] = ['do one', 'do two'];
     const eventHooks: EventHooks = new EventHooks({
-      postRushBuild: expectedHooks,
+      postRushBuild: expectedHooks
     });
     const resultHooks: string[] = eventHooks.get(Event.postRushBuild);
     expect(resultHooks).toEqual(expectedHooks);

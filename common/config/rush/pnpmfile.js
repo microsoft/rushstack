@@ -14,8 +14,8 @@
  */
 module.exports = {
   hooks: {
-    readPackage,
-  },
+    readPackage
+  }
 };
 
 /**

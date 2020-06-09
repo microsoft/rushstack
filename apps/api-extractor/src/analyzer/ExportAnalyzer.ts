@@ -136,7 +136,7 @@ export class ExportAnalyzer {
               followedSymbol: followedSymbol,
               isExternal: astModule.isExternal,
               includeNominalAnalysis: true,
-              addIfMissing: true,
+              addIfMissing: true
             });
 
             if (!astSymbol) {
@@ -390,7 +390,7 @@ export class ExportAnalyzer {
       followedSymbol: current,
       isExternal: referringModuleIsExternal,
       includeNominalAnalysis: false,
-      addIfMissing: true,
+      addIfMissing: true
     });
 
     return astSymbol;
@@ -441,7 +441,7 @@ export class ExportAnalyzer {
           return this._fetchAstImport(declarationSymbol, {
             importKind: AstImportKind.NamedImport,
             modulePath: externalModulePath,
-            exportName: exportName,
+            exportName: exportName
           });
         }
 
@@ -496,7 +496,7 @@ export class ExportAnalyzer {
         return this._fetchAstImport(undefined, {
           importKind: AstImportKind.StarImport,
           exportName: declarationSymbol.name,
-          modulePath: externalModulePath,
+          modulePath: externalModulePath
         });
       }
 
@@ -528,7 +528,7 @@ export class ExportAnalyzer {
           return this._fetchAstImport(declarationSymbol, {
             importKind: AstImportKind.NamedImport,
             modulePath: externalModulePath,
-            exportName: exportName,
+            exportName: exportName
           });
         }
 
@@ -561,7 +561,7 @@ export class ExportAnalyzer {
           return this._fetchAstImport(declarationSymbol, {
             importKind: AstImportKind.DefaultImport,
             modulePath: externalModulePath,
-            exportName,
+            exportName
           });
         }
 
@@ -599,7 +599,7 @@ export class ExportAnalyzer {
           return this._fetchAstImport(declarationSymbol, {
             importKind: AstImportKind.EqualsImport,
             modulePath: externalModuleName,
-            exportName: variableName,
+            exportName: variableName
           });
         }
       }
@@ -695,7 +695,7 @@ export class ExportAnalyzer {
           return this._fetchAstImport(astSymbol.followedSymbol, {
             importKind: AstImportKind.NamedImport,
             modulePath: starExportedModule.externalModulePath,
-            exportName: exportName,
+            exportName: exportName
           });
         }
 
@@ -771,7 +771,7 @@ export class ExportAnalyzer {
 
     const moduleReference: IAstModuleReference = {
       moduleSpecifier: moduleSpecifier,
-      moduleSpecifierSymbol: exportSymbol,
+      moduleSpecifierSymbol: exportSymbol
     };
     const specifierAstModule: AstModule = this.fetchAstModuleFromSourceFile(
       moduleSourceFile,
@@ -797,7 +797,7 @@ export class ExportAnalyzer {
           followedSymbol: followedSymbol,
           isExternal: true,
           includeNominalAnalysis: false,
-          addIfMissing: true,
+          addIfMissing: true
         });
       }
     }

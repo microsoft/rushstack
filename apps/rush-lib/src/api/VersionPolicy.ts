@@ -11,7 +11,7 @@ import {
   IIndividualVersionJson,
   VersionFormatForCommit,
   VersionFormatForPublish,
-  IVersionPolicyDependencyJson,
+  IVersionPolicyDependencyJson
 } from './VersionPolicyConfiguration';
 import { PackageJsonEditor } from './PackageJsonEditor';
 import { RushConfiguration } from './RushConfiguration';
@@ -33,7 +33,7 @@ export enum BumpType {
   // Minor version bump
   'minor',
   // Major version bump
-  'major',
+  'major'
 }
 
 /**
@@ -42,7 +42,7 @@ export enum BumpType {
  */
 export enum VersionPolicyDefinitionName {
   'lockStepVersion',
-  'individualVersion',
+  'individualVersion'
 }
 
 /**
@@ -255,7 +255,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
       policyName: this.policyName,
       definitionName: VersionPolicyDefinitionName[this.definitionName],
       version: this.version,
-      nextBump: BumpType[this.nextBump],
+      nextBump: BumpType[this.nextBump]
     };
     if (this._mainProject) {
       json.mainProject = this._mainProject;
@@ -361,7 +361,7 @@ export class IndividualVersionPolicy extends VersionPolicy {
   public get _json(): IIndividualVersionJson {
     const json: IIndividualVersionJson = {
       policyName: this.policyName,
-      definitionName: VersionPolicyDefinitionName[this.definitionName],
+      definitionName: VersionPolicyDefinitionName[this.definitionName]
     };
     if (this.lockedMajor !== undefined) {
       json.lockedMajor = this.lockedMajor;

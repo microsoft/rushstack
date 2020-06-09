@@ -51,7 +51,7 @@ export class CopyStaticAssetsTask extends GulpTask<ICopyStaticAssetsTaskConfig> 
       includeExtensions: [],
       excludeExtensions: [],
       includeFiles: [],
-      excludeFiles: [],
+      excludeFiles: []
     });
   }
 
@@ -69,7 +69,7 @@ export class CopyStaticAssetsTask extends GulpTask<ICopyStaticAssetsTaskConfig> 
       'json',
       'html',
       'css',
-      'md',
+      'md'
     ]);
 
     for (let ext of allExtensions) {

@@ -8,7 +8,7 @@ import { JsonFile, InternalError, FileSystem } from '@rushstack/node-core-librar
 import {
   PnpmShrinkwrapFile,
   IPnpmShrinkwrapDependencyYaml,
-  parsePnpmDependencyKey,
+  parsePnpmDependencyKey
 } from './PnpmShrinkwrapFile';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../RushConstants';

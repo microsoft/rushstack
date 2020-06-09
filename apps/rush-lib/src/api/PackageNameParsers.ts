@@ -14,7 +14,7 @@ export class PackageNameParsers {
    * in rush.json.
    */
   public static mostlyStandard: PackageNameParser = new PackageNameParser({
-    allowUpperCase: true,
+    allowUpperCase: true
   });
 
   /**

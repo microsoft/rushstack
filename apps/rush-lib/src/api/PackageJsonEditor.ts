@@ -12,7 +12,7 @@ export const enum DependencyType {
   Regular = 'dependencies',
   Dev = 'devDependencies',
   Optional = 'optionalDependencies',
-  Peer = 'peerDependencies',
+  Peer = 'peerDependencies'
 }
 
 /**

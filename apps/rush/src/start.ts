@@ -14,7 +14,7 @@ if (NodeJsCompatibility.warnAboutVersionTooOld()) {
 
 const alreadyReportedNodeTooNewError: boolean = NodeJsCompatibility.warnAboutVersionTooNew({
   isRushLib: false,
-  alreadyReportedNodeTooNewError: false,
+  alreadyReportedNodeTooNewError: false
 });
 
 import * as colors from 'colors';

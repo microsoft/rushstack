@@ -55,7 +55,7 @@ export abstract class BaseScriptAction extends BaseRushAction {
               parameterShortName: parameterJson.shortName,
               parameterLongName: parameterJson.longName,
               description: parameterJson.description,
-              required: parameterJson.required,
+              required: parameterJson.required
             });
             break;
           case 'choice':
@@ -65,7 +65,7 @@ export abstract class BaseScriptAction extends BaseRushAction {
               description: parameterJson.description,
               required: parameterJson.required,
               alternatives: parameterJson.alternatives.map((x) => x.name),
-              defaultValue: parameterJson.defaultValue,
+              defaultValue: parameterJson.defaultValue
             });
             break;
           case 'string':
@@ -74,7 +74,7 @@ export abstract class BaseScriptAction extends BaseRushAction {
               parameterShortName: parameterJson.shortName,
               description: parameterJson.description,
               required: parameterJson.required,
-              argumentName: parameterJson.argumentName,
+              argumentName: parameterJson.argumentName
             });
             break;
           default:

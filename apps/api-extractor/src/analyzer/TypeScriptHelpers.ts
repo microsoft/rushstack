@@ -279,7 +279,7 @@ export class TypeScriptHelpers {
             ts.setEmitFlags(declarationName, ts.EmitFlags.NoIndentation | ts.EmitFlags.SingleLine);
           }
           emit(hint, node);
-        },
+        }
       }
     );
     const sourceFile: ts.SourceFile = declarationName.getSourceFile();

@@ -30,7 +30,7 @@ export enum TokenKind {
   DollarVariable,
 
   // The end of the input string
-  EndOfInput,
+  EndOfInput
 }
 
 export class Token {

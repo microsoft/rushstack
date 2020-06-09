@@ -23,7 +23,7 @@ export interface ILintCmdTaskConfig extends IRSCTaskConfig {
 export class LintCmdTask extends RSCTask<ILintCmdTaskConfig> {
   public constructor() {
     super('lint', {
-      displayAsError: false,
+      displayAsError: false
     });
   }
 
@@ -39,7 +39,7 @@ export class LintCmdTask extends RSCTask<ILintCmdTaskConfig> {
         displayAsError: this.taskConfig.displayAsError,
 
         fileError: this.fileError.bind(this),
-        fileWarning: this.fileWarning.bind(this),
+        fileWarning: this.fileWarning.bind(this)
       },
       this.buildFolder,
       this._terminalProvider

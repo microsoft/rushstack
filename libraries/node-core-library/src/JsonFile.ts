@@ -202,12 +202,12 @@ export class JsonFile {
       // NOTE: We don't use mode=json here because comments aren't allowed by strict JSON
       stringified = jju.update(previousJson, newJsonObject, {
         mode: 'cjson',
-        indent: 2,
+        indent: 2
       });
     } else if (options.prettyFormatting) {
       stringified = jju.stringify(newJsonObject, {
         mode: 'json',
-        indent: 2,
+        indent: 2
       });
     } else {
       stringified = JSON.stringify(newJsonObject, undefined, 2);
@@ -265,7 +265,7 @@ export class JsonFile {
     }
 
     FileSystem.writeFile(jsonFilename, newBuffer.toString(DEFAULT_ENCODING), {
-      ensureFolderExists: options.ensureFolderExists,
+      ensureFolderExists: options.ensureFolderExists
     });
 
     // TEST CODE: Used to verify that onlyIfChanged isn't broken by a hidden transformation during saving.
@@ -323,7 +323,7 @@ export class JsonFile {
     }
 
     await FileSystem.writeFileAsync(jsonFilename, newBuffer.toString(DEFAULT_ENCODING), {
-      ensureFolderExists: options.ensureFolderExists,
+      ensureFolderExists: options.ensureFolderExists
     });
 
     // TEST CODE: Used to verify that onlyIfChanged isn't broken by a hidden transformation during saving.

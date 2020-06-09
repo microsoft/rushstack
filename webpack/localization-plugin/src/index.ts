@@ -21,17 +21,17 @@ export {
   IPseudolocaleOptions,
   IPseudolocalesOptions,
   IResolvedMissingTranslations,
-  ITypingsGenerationOptions,
+  ITypingsGenerationOptions
 } from './interfaces';
 
 export {
   LocFileParser as _LocFileParser,
-  IParseLocFileOptions as _IParseLocFileOptions,
+  IParseLocFileOptions as _IParseLocFileOptions
 } from './utilities/LocFileParser';
 
 export { ILocalizedWebpackChunk } from './webpackInterfaces';
 
 export {
   ITypingsGeneratorOptions,
-  LocFileTypingsGenerator as TypingsGenerator,
+  LocFileTypingsGenerator as TypingsGenerator
 } from './LocFileTypingsGenerator';

@@ -13,7 +13,7 @@ function verifyProvider(): void {
     log: provider.getOutput(),
     warning: provider.getWarningOutput(),
     error: provider.getErrorOutput(),
-    verbose: provider.getVerbose(),
+    verbose: provider.getVerbose()
   }).toMatchSnapshot();
 }
 

@@ -13,7 +13,7 @@ export class RushBuildXLCommandLineParser extends CommandLineParser {
   public constructor(terminal: Terminal) {
     super({
       toolFilename: 'rush-buildlx',
-      toolDescription: 'This experimental tool allows Rush to interact with BuildXL.',
+      toolDescription: 'This experimental tool allows Rush to interact with BuildXL.'
     });
 
     this._terminal = terminal;

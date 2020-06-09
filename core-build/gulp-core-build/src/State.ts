@@ -23,8 +23,8 @@ export interface IPackageJSON {
 // @todo: remove this when the compiler is fixed.
 let packageJson: IPackageJSON = {
   directories: {
-    packagePath: undefined,
-  },
+    packagePath: undefined
+  }
 };
 try {
   packageJson = require(path.join(root, FileConstants.PackageJson));

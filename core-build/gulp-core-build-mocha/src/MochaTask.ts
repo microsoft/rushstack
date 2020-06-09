@@ -16,7 +16,7 @@ export class MochaTask extends GulpTask<IMochaTaskConfig> {
   public constructor() {
     super('mocha', {
       testMatch: ['lib/**/*.test.js'],
-      reportDir: 'coverage',
+      reportDir: 'coverage'
     });
   }
 
@@ -48,14 +48,14 @@ export class MochaTask extends GulpTask<IMochaTaskConfig> {
       .pipe(
         mocha({
           grep: matchString,
-          timeout: 15000,
+          timeout: 15000
         }).on('error', (error: Error) => {
           completeCallback(error.toString());
         })
       )
       .pipe(
         istanbul.writeReports({
-          dir: this.taskConfig.reportDir,
+          dir: this.taskConfig.reportDir
         })
       );
   }

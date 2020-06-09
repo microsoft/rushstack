@@ -48,7 +48,7 @@ export class ModelReferenceResolver {
   ): IResolveDeclarationReferenceResult {
     const result: IResolveDeclarationReferenceResult = {
       resolvedApiItem: undefined,
-      errorMessage: undefined,
+      errorMessage: undefined
     };
 
     let apiPackage: ApiPackage | undefined = undefined;

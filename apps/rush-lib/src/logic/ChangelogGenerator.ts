@@ -104,7 +104,7 @@ export class ChangelogGenerator {
         version: change.newVersion!,
         tag: PublishUtilities.createTagname(change.packageName, change.newVersion!),
         date: new Date().toUTCString(),
-        comments: {},
+        comments: {}
       };
 
       change.changes!.forEach((individualChange) => {
@@ -115,7 +115,7 @@ export class ChangelogGenerator {
             changelogEntry.comments[changeTypeString] || []);
 
           const changeLogComment: IChangeLogComment = {
-            comment: individualChange.comment,
+            comment: individualChange.comment
           };
           if (individualChange.author) {
             changeLogComment.author = individualChange.author;
@@ -167,7 +167,7 @@ export class ChangelogGenerator {
     if (!changelog) {
       changelog = {
         name: packageName,
-        entries: [],
+        entries: []
       };
     } else {
       // Force the changelog name to be same as package name.
@@ -191,7 +191,7 @@ export class ChangelogGenerator {
       '',
       `This log was last generated on ${new Date().toUTCString()} and should not be manually modified.`,
       '',
-      '',
+      ''
     ].join(EOL);
 
     changelog.entries.forEach((entry, index) => {

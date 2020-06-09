@@ -117,7 +117,7 @@ export class ApiExtractorRunner extends RushStackCompilerBase {
           }
           message.handled = true;
         },
-        typescriptCompilerFolder: ToolPaths.typescriptPackagePath,
+        typescriptCompilerFolder: ToolPaths.typescriptPackagePath
       };
 
       // NOTE: ExtractorResult.succeeded indicates whether errors or warnings occurred, however we

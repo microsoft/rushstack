@@ -17,7 +17,7 @@ build.preCopy.setConfig({
         'shared',
         '**',
         '*'
-      ),
+      )
     ],
     [sharedLibDir]: [
       path.join(
@@ -29,10 +29,10 @@ build.preCopy.setConfig({
         'shared',
         '**',
         '*.d.ts'
-      ),
-    ],
+      )
+    ]
   },
-  shouldFlatten: false,
+  shouldFlatten: false
 });
 
 build.preCopy.cleanMatch = [sharedSrcDir];

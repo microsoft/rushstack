@@ -197,7 +197,7 @@ export class Extractor {
       messageCallback: options.messageCallback,
       messagesConfig: extractorConfig.messages || {},
       showVerboseMessages: !!options.showVerboseMessages,
-      showDiagnostics: !!options.showDiagnostics,
+      showDiagnostics: !!options.showDiagnostics
     });
 
     if (messageRouter.showDiagnostics) {
@@ -216,7 +216,7 @@ export class Extractor {
     const collector: Collector = new Collector({
       program: compilerState.program as ts.Program,
       messageRouter,
-      extractorConfig: extractorConfig,
+      extractorConfig: extractorConfig
     });
 
     collector.analyze();
@@ -242,7 +242,7 @@ export class Extractor {
 
         newlineConversion: extractorConfig.newlineKind,
         ensureFolderExists: true,
-        testMode: extractorConfig.testMode,
+        testMode: extractorConfig.testMode
       });
     }
 
@@ -264,7 +264,7 @@ export class Extractor {
       // Write the actual file
       FileSystem.writeFile(actualApiReportPath, actualApiReportContent, {
         ensureFolderExists: true,
-        convertLineEndings: extractorConfig.newlineKind,
+        convertLineEndings: extractorConfig.newlineKind
       });
 
       // Compare it against the expected file
@@ -295,7 +295,7 @@ export class Extractor {
 
             FileSystem.writeFile(expectedApiReportPath, actualApiReportContent, {
               ensureFolderExists: true,
-              convertLineEndings: extractorConfig.newlineKind,
+              convertLineEndings: extractorConfig.newlineKind
             });
           }
         } else {
@@ -331,7 +331,7 @@ export class Extractor {
             );
           } else {
             FileSystem.writeFile(expectedApiReportPath, actualApiReportContent, {
-              convertLineEndings: extractorConfig.newlineKind,
+              convertLineEndings: extractorConfig.newlineKind
             });
             messageRouter.logWarning(
               ConsoleMessageId.ApiReportCreated,
@@ -391,7 +391,7 @@ export class Extractor {
       succeeded,
       apiReportChanged,
       errorCount: messageRouter.errorCount,
-      warningCount: messageRouter.warningCount,
+      warningCount: messageRouter.warningCount
     });
   }
 

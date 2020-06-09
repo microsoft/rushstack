@@ -20,7 +20,7 @@ export class LinkAction extends BaseRushAction {
         ' automatically as part of "rush install" or "rush update".  You should only need to use "rush link"' +
         ' if you performed "rush unlink" for some reason, or if you specified the "--no-link" option' +
         ' for "rush install" or "rush update".',
-      parser,
+      parser
     });
   }
 
@@ -30,7 +30,7 @@ export class LinkAction extends BaseRushAction {
       parameterShortName: '-f',
       description:
         'Deletes and recreates all links, even if the filesystem state seems to indicate that this is ' +
-        'unnecessary.',
+        'unnecessary.'
     });
   }
 

@@ -16,7 +16,7 @@ import {
   fileWarning,
   warn,
   logEndSubtask,
-  logStartSubtask,
+  logStartSubtask
 } from '../logging';
 import Vinyl = require('vinyl');
 import gulp = require('gulp');
@@ -276,7 +276,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
             {
               error: true,
               readable: stream.readable,
-              writable: stream.writable && !stream.readable,
+              writable: stream.writable && !stream.readable
             },
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (err: any) => {
@@ -362,7 +362,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
 
     FileSystem.copyFile({
       sourcePath: fullSourcePath,
-      destinationPath: fullDestPath,
+      destinationPath: fullDestPath
     });
   }
 

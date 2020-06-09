@@ -9,17 +9,17 @@ import { TSDocConfiguration, TSDocTagDefinition, TSDocTagSyntaxKind, StandardTag
 export class AedocDefinitions {
   public static readonly betaDocumentation: TSDocTagDefinition = new TSDocTagDefinition({
     tagName: '@betaDocumentation',
-    syntaxKind: TSDocTagSyntaxKind.ModifierTag,
+    syntaxKind: TSDocTagSyntaxKind.ModifierTag
   });
 
   public static readonly internalRemarks: TSDocTagDefinition = new TSDocTagDefinition({
     tagName: '@internalRemarks',
-    syntaxKind: TSDocTagSyntaxKind.BlockTag,
+    syntaxKind: TSDocTagSyntaxKind.BlockTag
   });
 
   public static readonly preapprovedTag: TSDocTagDefinition = new TSDocTagDefinition({
     tagName: '@preapproved',
-    syntaxKind: TSDocTagSyntaxKind.ModifierTag,
+    syntaxKind: TSDocTagSyntaxKind.ModifierTag
   });
 
   public static get tsdocConfiguration(): TSDocConfiguration {
@@ -29,7 +29,7 @@ export class AedocDefinitions {
         [
           AedocDefinitions.betaDocumentation,
           AedocDefinitions.internalRemarks,
-          AedocDefinitions.preapprovedTag,
+          AedocDefinitions.preapprovedTag
         ],
         true
       );
@@ -55,7 +55,7 @@ export class AedocDefinitions {
           StandardTags.returns,
           StandardTags.sealed,
           StandardTags.throws,
-          StandardTags.virtual,
+          StandardTags.virtual
         ],
         true
       );

@@ -5,7 +5,7 @@ import {
   DeclarationReference,
   Meaning,
   Navigation,
-  Component,
+  Component
 } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
 import { ApiItemKind } from '../items/ApiItem';
@@ -15,7 +15,7 @@ import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 import {
   ApiTypeParameterListMixin,
   IApiTypeParameterListMixinOptions,
-  IApiTypeParameterListMixinJson,
+  IApiTypeParameterListMixinJson
 } from '../mixins/ApiTypeParameterListMixin';
 import { DeserializerContext } from './DeserializerContext';
 

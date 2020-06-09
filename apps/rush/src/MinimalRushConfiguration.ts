@@ -33,7 +33,7 @@ export class MinimalRushConfiguration {
 
   public static loadFromDefaultLocation(): MinimalRushConfiguration | undefined {
     const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation({
-      showVerbose: true,
+      showVerbose: true
     });
     if (rushJsonLocation) {
       return MinimalRushConfiguration._loadFromConfigurationFile(rushJsonLocation);

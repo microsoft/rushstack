@@ -96,7 +96,7 @@ describe('RushConfiguration', () => {
     expect(Utilities.getSetAsArray(approvedPackagesPolicy.reviewCategories)).toEqual([
       'first-party',
       'third-party',
-      'prototype',
+      'prototype'
     ]);
 
     expect(Utilities.getSetAsArray(approvedPackagesPolicy.ignoredNpmScopes)).toEqual(['@types', '@internal']);
@@ -174,7 +174,7 @@ describe('RushConfiguration', () => {
     expect(Utilities.getSetAsArray(approvedPackagesPolicy.reviewCategories)).toEqual([
       'first-party',
       'third-party',
-      'prototype',
+      'prototype'
     ]);
     expect(Utilities.getSetAsArray(approvedPackagesPolicy.ignoredNpmScopes)).toEqual(['@types', '@internal']);
 

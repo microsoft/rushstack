@@ -59,7 +59,7 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
         configPath: './webpack.config.js',
         suppressWarnings: [],
         printStats: true,
-        ...extendedConfig,
+        ...extendedConfig
       } as any // eslint-disable-line @typescript-eslint/no-explicit-any
     );
   }
@@ -67,7 +67,7 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
   public get resources(): IWebpackResources {
     if (!this._resources) {
       this._resources = {
-        webpack: this.taskConfig.webpack || require('webpack'),
+        webpack: this.taskConfig.webpack || require('webpack')
       };
     }
 
@@ -132,7 +132,7 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
 
           const statsResult: Webpack.Stats.ToJsonOutput = stats.toJson({
             hash: false,
-            source: false,
+            source: false
           });
 
           if (statsResult.errors && statsResult.errors.length) {

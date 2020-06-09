@@ -58,7 +58,7 @@ export class InitAction extends BaseConfiglessRushAction {
       documentation:
         'When invoked in an empty folder, this command provisions a standard' +
         ' set of config file templates to start managing projects using Rush.',
-      parser,
+      parser
     });
   }
 
@@ -69,14 +69,14 @@ export class InitAction extends BaseConfiglessRushAction {
       description:
         'By default "rush init" will not overwrite existing config files.' +
         ' Specify this switch to override that. This can be useful when upgrading' +
-        ' your repo to a newer release of Rush. WARNING: USE WITH CARE!',
+        ' your repo to a newer release of Rush. WARNING: USE WITH CARE!'
     });
     this._rushExampleParameter = this.defineFlagParameter({
       parameterLongName: '--rush-example-repo',
       description:
         'When copying the template config files, this uncomments fragments that are used' +
         ' by the "rush-example" GitHub repo, which is a sample monorepo that illustrates many Rush' +
-        ' features. This option is primarily intended for maintaining that example.',
+        ' features. This option is primarily intended for maintaining that example.'
     });
   }
 
@@ -164,7 +164,7 @@ export class InitAction extends BaseConfiglessRushAction {
       'common/config/rush/common-versions.json',
       'common/config/rush/experiments.json',
       'common/config/rush/pnpmfile.js',
-      'common/config/rush/version-policies.json',
+      'common/config/rush/version-policies.json'
     ];
 
     const assetsSubfolder: string = path.resolve(__dirname, '../../../assets/rush-init');
@@ -340,7 +340,7 @@ export class InitAction extends BaseConfiglessRushAction {
 
     // Write the output
     FileSystem.writeFile(destinationPath, outputLines.join('\r\n'), {
-      ensureFolderExists: true,
+      ensureFolderExists: true
     });
   }
 

@@ -157,7 +157,7 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
 
       const result: IResolveDeclarationReferenceResult = {
         resolvedApiItem: undefined,
-        errorMessage: undefined,
+        errorMessage: undefined
       };
 
       const apiItem: ApiItem | undefined = this._apiItemsByCanonicalReference.get(

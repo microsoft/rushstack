@@ -135,7 +135,7 @@ export class AsyncRecycler {
     const options: child_process.SpawnOptions = {
       detached: true,
       // The child won't stay alive unless we detach its stdio
-      stdio: 'ignore',
+      stdio: 'ignore'
     };
 
     if (os.platform() === 'win32') {
@@ -155,7 +155,7 @@ export class AsyncRecycler {
           ` Get-ChildItem -Force '${escapedRecyclerFolder}'` +
           // The "^|" here prevents cmd.exe from interpreting the "|" symbol
           ` ^| ForEach ($_) { Remove-Item -ErrorAction Ignore -Force -Recurse "\\\\?\\$($_.FullName)" }` +
-          '"',
+          '"'
       ];
 
       options.windowsVerbatimArguments = true;

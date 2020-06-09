@@ -45,14 +45,14 @@ export class ResxReader {
       },
       logFileWarning: (message: string, filePath: string, line?: number, position?: number) => {
         ResxReader._logWithLocation(writeWarning, message, filePath, line, position);
-      },
+      }
     };
 
     return this._readResxAsLocFileInternal({
       resxFilePath: options.resxFilePath,
       resxContents,
       loggingFunctions,
-      newlineNormalization: options.newlineNormalization,
+      newlineNormalization: options.newlineNormalization
     });
   }
 
@@ -224,7 +224,7 @@ export class ResxReader {
 
       return {
         value: value || '',
-        comment,
+        comment
       };
     }
   }

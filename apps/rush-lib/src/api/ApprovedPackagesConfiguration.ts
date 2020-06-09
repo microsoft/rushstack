@@ -71,7 +71,7 @@ export class ApprovedPackagesConfiguration {
     this._loadedJson = {
       // Ensure this comes first in the key ordering
       $schema: '',
-      packages: [],
+      packages: []
     };
   }
 
@@ -157,7 +157,7 @@ export class ApprovedPackagesConfiguration {
 
       const itemJson: IApprovedPackagesItemJson = {
         name: item.packageName,
-        allowedCategories: allowedCategories,
+        allowedCategories: allowedCategories
       };
 
       this._loadedJson.packages.push(itemJson);
@@ -175,7 +175,7 @@ export class ApprovedPackagesConfiguration {
     body = '// DO NOT ADD COMMENTS IN THIS FILE.  They will be lost when the Rush tool resaves it.\n' + body;
 
     FileSystem.writeFile(this._jsonFilename, body, {
-      convertLineEndings: NewlineKind.CrLf,
+      convertLineEndings: NewlineKind.CrLf
     });
   }
 

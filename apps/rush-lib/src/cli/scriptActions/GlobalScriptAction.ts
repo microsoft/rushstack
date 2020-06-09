@@ -53,8 +53,8 @@ export class GlobalScriptAction extends BaseScriptAction {
         initCwd: this.rushConfiguration.commonTempFolder,
         handleOutput: false,
         environmentPathOptions: {
-          includeRepoBin: true,
-        },
+          includeRepoBin: true
+        }
       });
 
       process.exitCode = exitCode;

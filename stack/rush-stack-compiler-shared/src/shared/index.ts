@@ -18,7 +18,7 @@ export { ApiExtractorRunner } from './ApiExtractorRunner';
 export {
   RushStackCompilerBase,
   IRushStackCompilerBaseOptions,
-  WriteFileIssueFunction,
+  WriteFileIssueFunction
 } from './RushStackCompilerBase';
 export { StandardBuildFolders } from './StandardBuildFolders';
 export { TypescriptCompiler, ITypescriptCompilerOptions } from './TypescriptCompiler';

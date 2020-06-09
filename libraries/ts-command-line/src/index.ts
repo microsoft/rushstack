@@ -17,13 +17,13 @@ export {
   ICommandLineStringListDefinition,
   ICommandLineIntegerDefinition,
   ICommandLineChoiceDefinition,
-  ICommandLineRemainderDefinition,
+  ICommandLineRemainderDefinition
 } from './parameters/CommandLineDefinition';
 
 export {
   CommandLineParameterKind,
   CommandLineParameter,
-  CommandLineParameterWithArgument,
+  CommandLineParameterWithArgument
 } from './parameters/BaseClasses';
 
 export { CommandLineFlagParameter } from './parameters/CommandLineFlagParameter';
@@ -35,7 +35,7 @@ export { CommandLineRemainder } from './parameters/CommandLineRemainder';
 
 export {
   CommandLineParameterProvider,
-  ICommandLineParserData as _ICommandLineParserData,
+  ICommandLineParserData as _ICommandLineParserData
 } from './providers/CommandLineParameterProvider';
 
 export { ICommandLineParserOptions, CommandLineParser } from './providers/CommandLineParser';

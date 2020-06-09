@@ -23,7 +23,7 @@ export const enum SemVerStyle {
   Exact = 'exact',
   Caret = 'caret',
   Tilde = 'tilde',
-  Passthrough = 'passthrough',
+  Passthrough = 'passthrough'
 }
 
 /**
@@ -119,13 +119,13 @@ export class PackageJsonUpdater {
       skipUpdate,
       debugInstall,
       rangeStyle,
-      variant,
+      variant
     } = options;
 
     const implicitlyPinned: Map<string, string> = InstallManager.collectImplicitlyPreferredVersions(
       this._rushConfiguration,
       {
-        variant,
+        variant
       }
     );
 
@@ -140,7 +140,7 @@ export class PackageJsonUpdater {
       networkConcurrency: undefined,
       collectLogFile: false,
       variant: variant,
-      maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
+      maxInstallAttempts: RushConstants.defaultMaxInstallAttempts
     };
     const installManager: InstallManager = new InstallManager(
       this._rushConfiguration,
@@ -169,7 +169,7 @@ export class PackageJsonUpdater {
         project: new VersionMismatchFinderProject(project),
         packageName,
         newVersion: version,
-        dependencyType: devDependency ? DependencyType.Dev : undefined,
+        dependencyType: devDependency ? DependencyType.Dev : undefined
       };
       this.updateProject(currentProjectUpdate);
 
@@ -180,7 +180,7 @@ export class PackageJsonUpdater {
         const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
           this._rushConfiguration,
           {
-            variant: variant,
+            variant: variant
           }
         );
 
@@ -205,7 +205,7 @@ export class PackageJsonUpdater {
                   otherPackageUpdates.push({
                     project: consumer,
                     packageName: packageName,
-                    newVersion: version,
+                    newVersion: version
                   });
                 }
               }

@@ -103,7 +103,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
       port: 4321,
       hostname: 'localhost',
       tryCreateDevCertificate: false,
-      ...(extendedConfig as any), // eslint-disable-line @typescript-eslint/no-explicit-any
+      ...(extendedConfig as any) // eslint-disable-line @typescript-eslint/no-explicit-any
     } as IServeTaskConfig & TExtendedConfig);
     this._terminalProvider = new GCBTerminalProvider(this);
     this._terminal = new Terminal(this._terminalProvider);
@@ -142,7 +142,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
       port: port,
       root: path.join(rootPath, this.taskConfig.rootFolder || ''),
       preferHttp1: true,
-      host: hostname,
+      host: hostname
     });
 
     // If an api is provided, spin it up.
@@ -201,7 +201,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
 
       gulp.src('').pipe(
         open({
-          uri: uri,
+          uri: uri
         })
       );
     }
@@ -228,7 +228,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
         [
           `  Request: `,
           `${ipAddress ? `[${colors.cyan(ipAddress)}] ` : ``}`,
-          `'${resourceColor(req.url)}'`,
+          `'${resourceColor(req.url)}'`
         ].join('')
       );
     }

@@ -27,14 +27,14 @@ export class AddAction extends BaseRushAction {
         ' either the latest version or a version that won\'t break the "ensureConsistentVersions" policy). If a version' +
         ' range is specified, the latest version in the range will be used. The version will be automatically prepended' +
         ' with a tilde, unless the "--exact" or "--caret" flags are used. The "--make-consistent" flag can be used to' +
-        ' update all packages with the dependency.',
+        ' update all packages with the dependency.'
     ];
     super({
       actionName: 'add',
       summary: 'Adds a dependency to the package.json and runs rush upgrade.',
       documentation: documentation.join(os.EOL),
       safeForSimultaneousRushProcesses: false,
-      parser,
+      parser
     });
   }
 
@@ -48,41 +48,41 @@ export class AddAction extends BaseRushAction {
         '(Required) The name of the package which should be added as a dependency.' +
         ' A SemVer version specifier can be appended after an "@" sign.  WARNING: Symbol characters' +
         " are usually interpreted by your shell, so it's recommended to use quotes." +
-        ' For example, write "rush add --package "example@^1.2.3"" instead of "rush add --package example@^1.2.3".',
+        ' For example, write "rush add --package "example@^1.2.3"" instead of "rush add --package example@^1.2.3".'
     });
     this._exactFlag = this.defineFlagParameter({
       parameterLongName: '--exact',
       description:
         'If specified, the SemVer specifier added to the' +
-        ' package.json will be an exact version (e.g. without tilde or caret).',
+        ' package.json will be an exact version (e.g. without tilde or caret).'
     });
     this._caretFlag = this.defineFlagParameter({
       parameterLongName: '--caret',
       description:
         'If specified, the SemVer specifier added to the' +
-        ' package.json will be a prepended with a "caret" specifier ("^").',
+        ' package.json will be a prepended with a "caret" specifier ("^").'
     });
     this._devDependencyFlag = this.defineFlagParameter({
       parameterLongName: '--dev',
       description:
-        'If specified, the package will be added to the "devDependencies" section of the package.json',
+        'If specified, the package will be added to the "devDependencies" section of the package.json'
     });
     this._makeConsistentFlag = this.defineFlagParameter({
       parameterLongName: '--make-consistent',
       parameterShortName: '-m',
       description:
         'If specified, other packages with this dependency will have their package.json' +
-        ' files updated to use the same version of the dependency.',
+        ' files updated to use the same version of the dependency.'
     });
     this._skipUpdateFlag = this.defineFlagParameter({
       parameterLongName: '--skip-update',
       parameterShortName: '-s',
       description:
-        'If specified, the "rush update" command will not be run after updating the package.json files.',
+        'If specified, the "rush update" command will not be run after updating the package.json files.'
     });
     this._allFlag = this.defineFlagParameter({
       parameterLongName: '--all',
-      description: 'If specified, the dependency will be added to all projects.',
+      description: 'If specified, the dependency will be added to all projects.'
     });
   }
 
@@ -160,7 +160,7 @@ export class AddAction extends BaseRushAction {
       updateOtherPackages: this._makeConsistentFlag.value,
       skipUpdate: this._skipUpdateFlag.value,
       debugInstall: this.parser.isDebug,
-      rangeStyle: rangeStyle,
+      rangeStyle: rangeStyle
     });
   }
 }

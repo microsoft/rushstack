@@ -96,7 +96,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       warnOnCssInvalidPropertyName: true,
       dropCssFiles: false,
       warnOnNonCSSModules: false,
-      autoprefixerOptions: { overrideBrowserslist: ['> 1%', 'last 2 versions', 'ie >= 10'] },
+      autoprefixerOptions: { overrideBrowserslist: ['> 1%', 'last 2 versions', 'ie >= 10'] }
     });
   }
 
@@ -151,7 +151,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       sourceMap: this.taskConfig.dropCssFiles,
       sourceMapContents: true,
       omitSourceMapUrl: true,
-      outFile: cssOutputPath,
+      outFile: cssOutputPath
     })
       .catch((error: nodeSass.SassError) => {
         this.fileError(filePath, error.line, error.column, error.name, error.message);
@@ -159,11 +159,11 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       })
       .then((result: nodeSass.Result) => {
         const options: postcss.ProcessOptions = {
-          from: filePath,
+          from: filePath
         };
         if (result.map && !this.buildConfig.production) {
           options.map = {
-            prev: result.map.toString(), // Pass the source map through to postcss
+            prev: result.map.toString() // Pass the source map through to postcss
           };
         }
 
@@ -194,7 +194,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
           }
 
           FileSystem.writeFile(cssOutputPathAbsolute, generatedFileLines.join(EOL), {
-            ensureFolderExists: true,
+            ensureFolderExists: true
           });
         }
 
@@ -209,7 +209,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
         if (cssOutputPathAbsolute) {
           lines = lines.concat([
             `require(${JSON.stringify(`./${path.basename(cssOutputPathAbsolute)}`)});`,
-            stylesExportString,
+            stylesExportString
           ]);
         } else if (content) {
           lines = lines.concat([
@@ -217,7 +217,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
             '',
             stylesExportString,
             '',
-            `loadStyles(${JSON.stringify(splitStyles(content))});`,
+            `loadStyles(${JSON.stringify(splitStyles(content))});`
           ]);
         }
 

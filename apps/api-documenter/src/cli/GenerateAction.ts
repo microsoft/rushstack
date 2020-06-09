@@ -19,7 +19,7 @@ export class GenerateAction extends BaseAction {
       summary: 'EXPERIMENTAL',
       documentation:
         'EXPERIMENTAL - This action is a prototype of a new config file driven mode of operation for' +
-        ' API Documenter.  It is not ready for general usage yet.  Its design may change in the future.',
+        ' API Documenter.  It is not ready for general usage yet.  Its design may change in the future.'
     });
   }
 

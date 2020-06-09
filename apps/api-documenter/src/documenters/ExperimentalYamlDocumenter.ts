@@ -39,7 +39,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
       let tocItem: IYamlTocItem;
       if (apiItem.kind === ApiItemKind.Namespace && !this.newDocfxNamespaces) {
         tocItem = {
-          name: this._getTocItemName(apiItem),
+          name: this._getTocItemName(apiItem)
         };
       } else {
         if (this._shouldEmbed(apiItem.kind)) {
@@ -49,7 +49,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
 
         tocItem = {
           name: this._getTocItemName(apiItem),
-          uid: this._getUid(apiItem),
+          uid: this._getUid(apiItem)
         };
 
         if (apiItem.kind !== ApiItemKind.Package) {

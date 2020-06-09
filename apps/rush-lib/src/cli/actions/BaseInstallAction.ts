@@ -7,7 +7,7 @@ import * as os from 'os';
 import {
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
-  CommandLineStringParameter,
+  CommandLineStringParameter
 } from '@rushstack/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
@@ -37,11 +37,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
     this._purgeParameter = this.defineFlagParameter({
       parameterLongName: '--purge',
       parameterShortName: '-p',
-      description: 'Perform "rush purge" before starting the installation',
+      description: 'Perform "rush purge" before starting the installation'
     });
     this._bypassPolicyParameter = this.defineFlagParameter({
       parameterLongName: '--bypass-policy',
-      description: 'Overrides enforcement of the "gitPolicy" rules from rush.json (use honorably!)',
+      description: 'Overrides enforcement of the "gitPolicy" rules from rush.json (use honorably!)'
     });
     this._noLinkParameter = this.defineFlagParameter({
       parameterLongName: '--no-link',
@@ -49,26 +49,26 @@ export abstract class BaseInstallAction extends BaseRushAction {
         'If "--no-link" is specified, then project symlinks will NOT be created' +
         ' after the installation completes.  You will need to run "rush link" manually.' +
         ' This flag is useful for automated builds that want to report stages individually' +
-        ' or perform extra operations in between the two stages.',
+        ' or perform extra operations in between the two stages.'
     });
     this._networkConcurrencyParameter = this.defineIntegerParameter({
       parameterLongName: '--network-concurrency',
       argumentName: 'COUNT',
       description:
         'If specified, limits the maximum number of concurrent network requests.' +
-        '  This is useful when troubleshooting network failures.',
+        '  This is useful when troubleshooting network failures.'
     });
     this._debugPackageManagerParameter = this.defineFlagParameter({
       parameterLongName: '--debug-package-manager',
       description:
         'Activates verbose logging for the package manager. You will probably want to pipe' +
-        ' the output of Rush to a file when using this command.',
+        ' the output of Rush to a file when using this command.'
     });
     this._maxInstallAttempts = this.defineIntegerParameter({
       parameterLongName: '--max-install-attempts',
       argumentName: 'NUMBER',
       description: `Overrides the default maximum number of install attempts.`,
-      defaultValue: RushConstants.defaultMaxInstallAttempts,
+      defaultValue: RushConstants.defaultMaxInstallAttempts
     });
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }
@@ -77,7 +77,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
   protected run(): Promise<void> {
     VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, {
-      variant: this._variant.value,
+      variant: this._variant.value
     });
 
     const stopwatch: Stopwatch = Stopwatch.start();
@@ -169,8 +169,8 @@ export abstract class BaseInstallAction extends BaseRushAction {
         extraData: {
           mode: this.actionName,
           clean: (!!this._purgeParameter.value).toString(),
-          full: installManagerOptions.fullUpgrade.toString(),
-        },
+          full: installManagerOptions.fullUpgrade.toString()
+        }
       });
     }
   }

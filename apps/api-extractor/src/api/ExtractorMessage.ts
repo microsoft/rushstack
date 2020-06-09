@@ -64,7 +64,7 @@ export const enum ExtractorMessageCategory {
    * These strings begin with the prefix "console-".
    * Example: `console-writing-typings-file`
    */
-  Console = 'console',
+  Console = 'console'
 }
 
 /**
@@ -214,7 +214,7 @@ export class ExtractorMessage {
       result += SourceFileLocationFormatter.formatPath(this.sourceFilePath, {
         sourceFileLine: this.sourceFileLine,
         sourceFileColumn: this.sourceFileColumn,
-        workingPackageFolderPath,
+        workingPackageFolderPath
       });
 
       if (result.length > 0) {

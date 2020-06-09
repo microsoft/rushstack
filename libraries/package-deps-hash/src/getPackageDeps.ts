@@ -136,7 +136,7 @@ export function gitLsTree(path: string): string {
     'git',
     ['ls-tree', 'HEAD', '-r'],
     {
-      currentWorkingDirectory: path,
+      currentWorkingDirectory: path
     }
   );
 
@@ -155,7 +155,7 @@ export function gitStatus(path: string): string {
     'git',
     ['status', '-s', '-u', '.'],
     {
-      currentWorkingDirectory: path,
+      currentWorkingDirectory: path
     }
   );
 
@@ -186,7 +186,7 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
   }
 
   const changes: IPackageDeps = {
-    files: {},
+    files: {}
   };
 
   const gitLsOutput: string = gitLsTree(packagePath);

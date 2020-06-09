@@ -81,7 +81,7 @@ export class StringValuesTypingsGenerator extends TypingsGenerator {
         }
 
         return outputLines.join(EOL);
-      },
+      }
     });
   }
 }

@@ -77,7 +77,7 @@ export class Telemetry {
             return {
               filePath: filePath,
               modifiedTime: stats.mtime.getTime(),
-              isFile: stats.isFile(),
+              isFile: stats.isFile()
             };
           })
           .filter((value) => {

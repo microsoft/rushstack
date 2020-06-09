@@ -65,7 +65,7 @@ export function getSetPublicPathCode(
     if (options.regexVariable) {
       lines.push(
         ...[
-          `var regex = (typeof ${regexVarName} !== 'undefined') ? ${regexVarName} : ${regexInitializationSnippet};`,
+          `var regex = (typeof ${regexVarName} !== 'undefined') ? ${regexVarName} : ${regexInitializationSnippet};`
         ]
       );
     } else {
@@ -94,7 +94,7 @@ export function getSetPublicPathCode(
         ...(options.preferLastFoundScript ? [] : ['      break;']),
         '    }',
         '  }',
-        '}',
+        '}'
       ]
     );
 
@@ -109,7 +109,7 @@ export function getSetPublicPathCode(
         ...[
           `var ${varName} = window.System ? window.System.baseURL || '' : '';`,
           `if (${varName} !== '' && ${varName}.substr(-1) !== '/') ${varName} += '/';`,
-          '',
+          ''
         ]
       );
     } else {
@@ -152,7 +152,7 @@ export function getGlobalRegisterCode(debug: boolean = false): string {
     `    if (path) ${registryVariableName}[path]=true;`,
     '  }',
     '}',
-    '})();',
+    '})();'
   ];
 
   const joinedScript: string = joinLines(lines);
@@ -162,8 +162,8 @@ export function getGlobalRegisterCode(debug: boolean = false): string {
   } else {
     const minifyOutput: uglify.MinifyOutput = uglify.minify(joinedScript, {
       compress: {
-        dead_code: true,
-      },
+        dead_code: true
+      }
     });
 
     return `${EOL}${minifyOutput.code}`;

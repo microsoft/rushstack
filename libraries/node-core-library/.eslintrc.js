@@ -6,5 +6,5 @@ module.exports = {
   parserOptions: { tsconfigRootDir: __dirname },
 
   // TODO: Remove this once "tsdoc/syntax" is enabled by default
-  rules: { 'tsdoc/syntax': 'error' },
+  rules: { 'tsdoc/syntax': 'error' }
 };

@@ -73,7 +73,7 @@ export class SourceMapper {
                 // The "source-map" package inexplicably uses 1-based line numbers but 0-based column numbers.
                 // Fix that up proactively so we don't have to deal with it later.
                 generatedColumn: mappingItem.generatedColumn + 1,
-                originalColumn: mappingItem.originalColumn + 1,
+                originalColumn: mappingItem.originalColumn + 1
               });
             },
             this,
@@ -111,7 +111,7 @@ export class SourceMapper {
       sourceMap.mappingItems,
       {
         line: options.sourceFileLine,
-        column: options.sourceFileColumn,
+        column: options.sourceFileColumn
       }
     );
 
@@ -130,13 +130,13 @@ export class SourceMapper {
     if (originalFileInfo === undefined) {
       originalFileInfo = {
         fileExists: FileSystem.exists(mappedFilePath),
-        maxColumnForLine: [],
+        maxColumnForLine: []
       };
 
       if (originalFileInfo.fileExists) {
         // Read the file and measure the length of each line
         originalFileInfo.maxColumnForLine = FileSystem.readFile(mappedFilePath, {
-          convertLineEndings: NewlineKind.Lf,
+          convertLineEndings: NewlineKind.Lf
         })
           .split('\n')
           .map((x) => x.length + 1); // +1 since columns are 1-based
@@ -156,7 +156,7 @@ export class SourceMapper {
     const guessedPosition: Position = {
       line: nearestMappingItem.originalLine + options.sourceFileLine - nearestMappingItem.generatedLine,
       column:
-        nearestMappingItem.originalColumn + options.sourceFileColumn - nearestMappingItem.generatedColumn,
+        nearestMappingItem.originalColumn + options.sourceFileColumn - nearestMappingItem.generatedColumn
     };
 
     // Verify that the result is not out of bounds, in cause our heuristic failed

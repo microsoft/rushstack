@@ -44,7 +44,7 @@ export class NpmLinkManager extends BaseLinkManager {
     commonPackageLookup.loadTree(commonRootPackage);
 
     const rushLinkJson: IRushLinkJson = {
-      localLinks: {},
+      localLinks: {}
     };
 
     for (const rushProject of this._rushConfiguration.projects) {
@@ -106,7 +106,7 @@ export class NpmLinkManager extends BaseLinkManager {
       tar.extract({
         cwd: extractedFolder,
         file: tarballFile,
-        sync: true,
+        sync: true
       });
 
       // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp\project1"
@@ -138,7 +138,7 @@ export class NpmLinkManager extends BaseLinkManager {
     queue.push({
       commonPackage: commonProjectPackage,
       localPackage: localProjectPackage,
-      cyclicSubtreeRoot: undefined,
+      cyclicSubtreeRoot: undefined
     });
 
     for (;;) {
@@ -304,7 +304,7 @@ export class NpmLinkManager extends BaseLinkManager {
             queue.push({
               commonPackage: commonDependencyPackage,
               localPackage: newLocalPackage,
-              cyclicSubtreeRoot: newCyclicSubtreeRoot,
+              cyclicSubtreeRoot: newCyclicSubtreeRoot
             });
           }
         } else {
@@ -339,7 +339,7 @@ export class NpmLinkManager extends BaseLinkManager {
         NpmLinkManager._createSymlink({
           linkTargetPath: commonBinFolder,
           newLinkPath: projectBinFolder,
-          symlinkKind: SymlinkKind.Directory,
+          symlinkKind: SymlinkKind.Directory
         });
       }
     }

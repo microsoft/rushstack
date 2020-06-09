@@ -13,7 +13,7 @@ const noUntypedUnderscoreRule: TSESLint.RuleModule<MessageIds, Options> = {
     messages: {
       'error-untyped-underscore':
         'This expression appears to access a private member "{{memberName}}"; ' +
-        'either remove the underscore prefix or else declare a type for the containing object',
+        'either remove the underscore prefix or else declare a type for the containing object'
     },
     schema: [],
     docs: {
@@ -22,8 +22,8 @@ const noUntypedUnderscoreRule: TSESLint.RuleModule<MessageIds, Options> = {
         ' whose names have an underscore prefix',
       category: 'Stylistic Issues',
       recommended: false,
-      url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin',
-    },
+      url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
+    }
   },
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {
     const parserServices: ParserServices | undefined = context.parserServices;
@@ -89,14 +89,14 @@ const noUntypedUnderscoreRule: TSESLint.RuleModule<MessageIds, Options> = {
               context.report({
                 node,
                 messageId: 'error-untyped-underscore',
-                data: { memberName: memberName },
+                data: { memberName: memberName }
               });
             }
           }
         }
-      },
+      }
     };
-  },
+  }
 };
 
 export { noUntypedUnderscoreRule };

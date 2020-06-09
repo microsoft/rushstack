@@ -11,6 +11,6 @@ export class Variants {
     parameterLongName: '--variant',
     argumentName: 'VARIANT',
     description: 'Run command using a variant installation configuration',
-    environmentVariable: 'RUSH_VARIANT',
+    environmentVariable: 'RUSH_VARIANT'
   };
 }

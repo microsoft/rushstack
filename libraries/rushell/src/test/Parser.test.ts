@@ -15,7 +15,7 @@ function matchSnapshot(input: string): void {
   const result: AstScript = parser.parse();
   expect({
     input: escape(tokenizer.input.toString()),
-    tree: '\n' + result.getDump(),
+    tree: '\n' + result.getDump()
   }).toMatchSnapshot();
 }
 
@@ -30,7 +30,7 @@ function matchErrorSnapshot(input: string): void {
   }
   expect({
     input: escape(tokenizer.input.toString()),
-    reportedError: error,
+    reportedError: error
   }).toMatchSnapshot();
 }
 

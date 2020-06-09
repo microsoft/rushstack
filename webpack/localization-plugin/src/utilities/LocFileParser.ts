@@ -42,7 +42,7 @@ export class LocFileParser {
       parsedFile = ResxReader.readResxAsLocFile(options.content, {
         terminal: options.terminal,
         resxFilePath: options.filePath,
-        newlineNormalization: options.resxNewlineNormalization,
+        newlineNormalization: options.resxNewlineNormalization
       });
     } else {
       parsedFile = JsonFile.parseString(options.content);

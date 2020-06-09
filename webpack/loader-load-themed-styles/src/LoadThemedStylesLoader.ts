@@ -79,7 +79,7 @@ export class LoadThemedStylesLoader {
       '// add the styles to the DOM',
       `for (var i = 0; i < content.length; i++) loader.loadStyles(content[i][1], ${async === true});`,
       '',
-      `if(content.locals) ${exportName} = content.locals;`,
+      `if(content.locals) ${exportName} = content.locals;`
     ].join('\n');
   }
 }

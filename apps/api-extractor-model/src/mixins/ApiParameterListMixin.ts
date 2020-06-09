@@ -119,7 +119,7 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(
             const parameter: Parameter = new Parameter({
               name: parameterOptions.parameterName,
               parameterTypeExcerpt: this.buildExcerpt(parameterOptions.parameterTypeTokenRange),
-              parent: this,
+              parent: this
             });
 
             this[_parameters].push(parameter);
@@ -160,7 +160,7 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(
       for (const parameter of this.parameters) {
         parameterObjects.push({
           parameterName: parameter.name,
-          parameterTypeTokenRange: parameter.parameterTypeExcerpt.tokenRange,
+          parameterTypeTokenRange: parameter.parameterTypeExcerpt.tokenRange
         });
       }
 

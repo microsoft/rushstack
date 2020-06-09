@@ -37,7 +37,7 @@ export class TaskSelector {
 
     this._packageChangeAnalyzer = new PackageChangeAnalyzer(options.rushConfiguration);
     this._taskCollection = new TaskCollection({
-      quietMode: options.isQuietMode,
+      quietMode: options.isQuietMode
     });
 
     try {
@@ -188,7 +188,7 @@ export class TaskSelector {
         commandToRun: this._getScriptToRun(project),
         isIncrementalBuildAllowed: this._options.isIncrementalBuildAllowed,
         packageChangeAnalyzer: this._packageChangeAnalyzer,
-        packageDepsFilename: this._options.packageDepsFilename,
+        packageDepsFilename: this._options.packageDepsFilename
       });
 
       if (!this._taskCollection.hasTask(projectTask.name)) {

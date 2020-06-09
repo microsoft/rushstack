@@ -22,7 +22,7 @@ export {
   PackageManagerOptionsConfigurationBase,
   PnpmOptionsConfiguration,
   NpmOptionsConfiguration,
-  YarnOptionsConfiguration,
+  YarnOptionsConfiguration
 } from './api/RushConfiguration';
 
 export { PackageManagerName, PackageManager } from './api/packageManager/PackageManager';
@@ -50,7 +50,7 @@ export {
   BumpType,
   LockStepVersionPolicy,
   IndividualVersionPolicy,
-  VersionPolicy,
+  VersionPolicy
 } from './api/VersionPolicy';
 
 export { VersionPolicyConfiguration } from './api/VersionPolicyConfiguration';

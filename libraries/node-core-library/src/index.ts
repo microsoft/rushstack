@@ -13,13 +13,13 @@ export {
   ExecutableStdioMapping,
   IExecutableResolveOptions,
   IExecutableSpawnSyncOptions,
-  Executable,
+  Executable
 } from './Executable';
 export {
   INodePackageJson,
   IPackageJson,
   IPackageJsonDependencyTable,
-  IPackageJsonScriptTable,
+  IPackageJsonScriptTable
 } from './IPackageJson';
 export { InternalError } from './InternalError';
 export { JsonObject, JsonFile, IJsonFileSaveOptions, IJsonFileStringifyOptions } from './JsonFile';
@@ -27,7 +27,7 @@ export {
   JsonSchema,
   IJsonSchemaErrorInfo,
   IJsonSchemaValidateOptions,
-  IJsonSchemaFromFileOptions,
+  IJsonSchemaFromFileOptions
 } from './JsonSchema';
 export { LockFile } from './LockFile';
 export { MapExtensions } from './MapExtensions';
@@ -39,7 +39,7 @@ export {
   PackageNameParser,
   IPackageNameParserOptions,
   IParsedPackageName,
-  IParsedPackageNameOrError,
+  IParsedPackageNameOrError
 } from './PackageName';
 export { Path } from './Path';
 export { Encoding, Text, NewlineKind } from './Text';
@@ -59,7 +59,7 @@ export {
   IFileSystemCopyFilesAsyncOptions,
   IFileSystemCopyFilesOptions,
   FileSystemCopyFilesAsyncFilter,
-  FileSystemCopyFilesFilter,
+  FileSystemCopyFilesFilter
 } from './FileSystem';
 export { FileWriter, IFileWriterFlags } from './FileWriter';
 export { LegacyAdapters, LegacyCallback } from './LegacyAdapters';

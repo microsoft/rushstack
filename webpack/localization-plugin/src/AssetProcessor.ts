@@ -129,7 +129,7 @@ export class AssetProcessor {
 
       result.set(locale, {
         filename: reconstructedAssetName.result.get(locale)!.source,
-        asset: newAsset,
+        asset: newAsset
       });
     }
 
@@ -137,7 +137,7 @@ export class AssetProcessor {
       ...parsedAsset.issues,
       ...reconstructedAsset.issues,
       ...parsedAssetName.issues,
-      ...reconstructedAssetName.issues,
+      ...reconstructedAssetName.issues
     ];
 
     if (issues.length > 0) {
@@ -180,7 +180,7 @@ export class AssetProcessor {
       ...parsedAsset.issues,
       ...reconstructedAsset.issues,
       ...parsedAssetName.issues,
-      ...reconstructedAssetName.issues,
+      ...reconstructedAssetName.issues
     ];
 
     if (issues.length > 0) {
@@ -194,7 +194,7 @@ export class AssetProcessor {
     newAsset.size = () => reconstructedAsset.result.size;
     return {
       filename: reconstructedAssetName.result.source,
-      asset: newAsset,
+      asset: newAsset
     };
   }
 
@@ -268,13 +268,13 @@ export class AssetProcessor {
       const newAssetSource: string = reconstruction.join('');
       localizedResults.set(locale, {
         source: newAssetSource,
-        size: initialSize + sizeDiff,
+        size: initialSize + sizeDiff
       });
     }
 
     return {
       issues,
-      result: localizedResults,
+      result: localizedResults
     };
   }
 
@@ -323,8 +323,8 @@ export class AssetProcessor {
       issues,
       result: {
         source: newAssetSource,
-        size: initialSize + sizeDiff,
-      },
+        size: initialSize + sizeDiff
+      }
     };
   }
 
@@ -342,7 +342,7 @@ export class AssetProcessor {
       // eslint-disable-line no-cond-assign
       const staticElement: IStaticReconstructionElement = {
         kind: 'static',
-        staticString: source.substring(lastIndex, regexResult.index),
+        staticString: source.substring(lastIndex, regexResult.index)
       };
       reconstructionSeries.push(staticElement);
 
@@ -356,7 +356,7 @@ export class AssetProcessor {
             issues.push(`Missing placeholder ${placeholder}`);
             const brokenLocalizedElement: IStaticReconstructionElement = {
               kind: 'static',
-              staticString: placeholder,
+              staticString: placeholder
             };
             localizedReconstructionElement = brokenLocalizedElement;
           } else {
@@ -366,7 +366,7 @@ export class AssetProcessor {
               size: placeholder.length,
               locFilePath: stringData.locFilePath,
               escapedBackslash: escapedBackslash,
-              stringName: stringData.stringName,
+              stringName: stringData.stringName
             };
             localizedReconstructionElement = localizedElement;
           }
@@ -378,7 +378,7 @@ export class AssetProcessor {
             kind: 'dynamic',
             valueFn: (locale: string) => locale,
             size: placeholder.length,
-            escapedBackslash: escapedBackslash,
+            escapedBackslash: escapedBackslash
           };
           localizedReconstructionElement = dynamicElement;
           break;
@@ -390,7 +390,7 @@ export class AssetProcessor {
             valueFn: jsonpFunction,
             size: placeholder.length,
             escapedBackslash: escapedBackslash,
-            token: token.substring(1, token.length - 1),
+            token: token.substring(1, token.length - 1)
           };
           localizedReconstructionElement = dynamicElement;
           break;
@@ -407,13 +407,13 @@ export class AssetProcessor {
 
     const lastElement: IStaticReconstructionElement = {
       kind: 'static',
-      staticString: source.substr(lastIndex),
+      staticString: source.substr(lastIndex)
     };
     reconstructionSeries.push(lastElement);
 
     return {
       issues,
-      reconstructionSeries,
+      reconstructionSeries
     };
   }
 

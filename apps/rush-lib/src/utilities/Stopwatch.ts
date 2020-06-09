@@ -8,7 +8,7 @@ import { Utilities } from './Utilities';
  */
 export enum StopwatchState {
   Stopped = 1,
-  Started = 2,
+  Started = 2
 }
 
 /**

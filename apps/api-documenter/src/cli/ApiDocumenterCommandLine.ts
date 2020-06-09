@@ -12,7 +12,7 @@ export class ApiDocumenterCommandLine extends CommandLineParser {
       toolFilename: 'api-documenter',
       toolDescription:
         'Reads *.api.json files produced by api-extractor, ' +
-        ' and generates API documentation in various output formats.',
+        ' and generates API documentation in various output formats.'
     });
     this._populateActions();
   }

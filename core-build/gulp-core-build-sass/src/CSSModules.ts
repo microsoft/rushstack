@@ -45,7 +45,7 @@ export default class CSSModules implements ICSSModules {
   public getPlugin(): postcss.AcceptedPlugin {
     return cssModules({
       getJSON: this.saveJson.bind(this),
-      generateScopedName: this.generateScopedName.bind(this),
+      generateScopedName: this.generateScopedName.bind(this)
     });
   }
 

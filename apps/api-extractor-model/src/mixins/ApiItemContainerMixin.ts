@@ -7,7 +7,7 @@ import {
   IApiItemJson,
   IApiItemOptions,
   IApiItemConstructor,
-  ApiItemKind,
+  ApiItemKind
 } from '../items/ApiItem';
 import { ApiNameMixin } from './ApiNameMixin';
 import { DeserializerContext } from '../model/DeserializerContext';

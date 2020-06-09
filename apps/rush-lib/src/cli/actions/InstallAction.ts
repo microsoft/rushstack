@@ -21,7 +21,7 @@ export class InstallAction extends BaseInstallAction {
         ' "rush install" instead of "rush update" to catch developers who forgot to commit their' +
         ' shrinkwrap changes.  Cautious people can also use "rush install" if they want to avoid' +
         ' accidentally updating their shrinkwrap file.',
-      parser,
+      parser
     });
   }
 
@@ -38,7 +38,7 @@ export class InstallAction extends BaseInstallAction {
       variant: this._variant.value,
       // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
       // it is safe to assume that the value is not null
-      maxInstallAttempts: this._maxInstallAttempts.value!,
+      maxInstallAttempts: this._maxInstallAttempts.value!
     };
   }
 }

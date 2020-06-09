@@ -10,7 +10,7 @@ import * as inquirer from 'inquirer';
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
-  CommandLineChoiceParameter,
+  CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
 import { FileSystem, Path } from '@rushstack/node-core-library';
 
@@ -25,7 +25,7 @@ import {
   VersionPolicy,
   IndividualVersionPolicy,
   LockStepVersionPolicy,
-  VersionPolicyDefinitionName,
+  VersionPolicyDefinitionName
 } from '../../api/VersionPolicy';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
@@ -67,7 +67,7 @@ export class ChangeAction extends BaseRushAction {
         'specific older version of the package. When a hotfix change is added, ' +
         'other changes will not be able to increment the version number. ' +
         "Enable this feature by setting 'hotfixChangeEnabled' in your rush.json.",
-      '',
+      ''
     ];
     super({
       actionName: 'change',
@@ -76,7 +76,7 @@ export class ChangeAction extends BaseRushAction {
         'for the next publish.',
       documentation: documentation.join(os.EOL),
       safeForSimultaneousRushProcesses: true,
-      parser,
+      parser
     });
   }
 
@@ -88,12 +88,12 @@ export class ChangeAction extends BaseRushAction {
     this._verifyParameter = this.defineFlagParameter({
       parameterLongName: '--verify',
       parameterShortName: '-v',
-      description: 'Verify the change file has been generated and that it is a valid JSON file',
+      description: 'Verify the change file has been generated and that it is a valid JSON file'
     });
 
     this._noFetchParameter = this.defineFlagParameter({
       parameterLongName: '--no-fetch',
-      description: 'Skips fetching the baseline branch before running "git diff" to detect changes.',
+      description: 'Skips fetching the baseline branch before running "git diff" to detect changes.'
     });
 
     this._targetBranchParameter = this.defineStringParameter({
@@ -103,14 +103,14 @@ export class ChangeAction extends BaseRushAction {
       description:
         'If this parameter is specified, compare the checked out branch with the specified branch to ' +
         'determine which projects were changed. If this parameter is not specified, the checked out branch ' +
-        'is compared against the "master" branch.',
+        'is compared against the "master" branch.'
     });
 
     this._overwriteFlagParameter = this.defineFlagParameter({
       parameterLongName: '--overwrite',
       description:
         `If a changefile already exists, overwrite without prompting ` +
-        `(or erroring in ${BULK_LONG_NAME} mode).`,
+        `(or erroring in ${BULK_LONG_NAME} mode).`
     });
 
     this._changeEmailParameter = this.defineStringParameter({
@@ -118,7 +118,7 @@ export class ChangeAction extends BaseRushAction {
       argumentName: 'EMAIL',
       description:
         'The email address to use in changefiles. If this parameter is not provided, the email address ' +
-        'will be detected or prompted for in interactive mode.',
+        'will be detected or prompted for in interactive mode.'
     });
 
     this._bulkChangeParameter = this.defineFlagParameter({
@@ -126,19 +126,19 @@ export class ChangeAction extends BaseRushAction {
       description:
         'If this flag is specified, apply the same change message and bump type to all changed projects. ' +
         `The ${BULK_MESSAGE_LONG_NAME} and the ${BULK_BUMP_TYPE_LONG_NAME} parameters must be specified if the ` +
-        `${BULK_LONG_NAME} parameter is specified`,
+        `${BULK_LONG_NAME} parameter is specified`
     });
 
     this._bulkChangeMessageParameter = this.defineStringParameter({
       parameterLongName: BULK_MESSAGE_LONG_NAME,
       argumentName: 'MESSAGE',
-      description: `The message to apply to all changed projects if the ${BULK_LONG_NAME} flag is provided.`,
+      description: `The message to apply to all changed projects if the ${BULK_LONG_NAME} flag is provided.`
     });
 
     this._bulkChangeBumpTypeParameter = this.defineChoiceParameter({
       parameterLongName: BULK_BUMP_TYPE_LONG_NAME,
       alternatives: [...Object.keys(this._getBumpOptions()), ChangeType[ChangeType.none]],
-      description: `The bump type to apply to all changed projects if the ${BULK_LONG_NAME} flag is provided.`,
+      description: `The bump type to apply to all changed projects if the ${BULK_LONG_NAME} flag is provided.`
     });
   }
 
@@ -151,7 +151,7 @@ export class ChangeAction extends BaseRushAction {
         this._bulkChangeParameter,
         this._bulkChangeMessageParameter,
         this._bulkChangeBumpTypeParameter,
-        this._overwriteFlagParameter,
+        this._overwriteFlagParameter
       ]
         .map((parameter) => {
           return parameter.value
@@ -226,11 +226,11 @@ export class ChangeAction extends BaseRushAction {
             {
               comment,
               type: projectChangeType,
-              packageName,
-            } as IChangeInfo,
+              packageName
+            } as IChangeInfo
           ],
           packageName,
-          email,
+          email
         });
       }
 
@@ -385,7 +385,7 @@ export class ChangeAction extends BaseRushAction {
           changeFile = {
             changes: [],
             packageName: changeInfo.packageName,
-            email: undefined,
+            email: undefined
           };
           changedFileData.set(changeInfo.packageName, changeFile!);
         }
@@ -420,13 +420,13 @@ export class ChangeAction extends BaseRushAction {
         choices: [
           {
             name: 'Skip',
-            value: 'skip',
+            value: 'skip'
           },
           {
             name: 'Append',
-            value: 'append',
-          },
-        ],
+            value: 'append'
+          }
+        ]
       });
 
       if (appendComment === 'skip') {
@@ -447,33 +447,33 @@ export class ChangeAction extends BaseRushAction {
     const { comment }: { comment: string } = await promptModule({
       name: 'comment',
       type: 'input',
-      message: `Describe changes, or ENTER if no changes:`,
+      message: `Describe changes, or ENTER if no changes:`
     });
 
     if (Object.keys(bumpOptions).length === 0 || !comment) {
       return {
         packageName: packageName,
         comment: comment || '',
-        type: ChangeType[ChangeType.none],
+        type: ChangeType[ChangeType.none]
       } as IChangeInfo;
     } else {
       const { bumpType }: { bumpType: string } = await promptModule({
         choices: Object.keys(bumpOptions).map((option) => {
           return {
             value: option,
-            name: bumpOptions[option],
+            name: bumpOptions[option]
           };
         }),
         default: 'patch',
         message: 'Select the type of change:',
         name: 'bumpType',
-        type: 'list',
+        type: 'list'
       });
 
       return {
         packageName: packageName,
         comment: comment,
-        type: bumpType,
+        type: bumpType
       } as IChangeInfo;
     }
   }
@@ -483,14 +483,14 @@ export class ChangeAction extends BaseRushAction {
       this.rushConfiguration && this.rushConfiguration.hotfixChangeEnabled
         ? {
             [ChangeType[ChangeType.hotfix]]:
-              'hotfix - for changes that need to be published in a separate hotfix package',
+              'hotfix - for changes that need to be published in a separate hotfix package'
           }
         : {
             [ChangeType[ChangeType.major]]:
               'major - for changes that break compatibility, e.g. removing an API',
             [ChangeType[ChangeType.minor]]: 'minor - for backwards compatible changes, e.g. adding a new API',
             [ChangeType[ChangeType.patch]]:
-              'patch - for changes that do not affect compatibility, e.g. fixing a bug',
+              'patch - for changes that do not affect compatibility, e.g. fixing a bug'
           };
 
     if (packageName) {
@@ -548,8 +548,8 @@ export class ChangeAction extends BaseRushAction {
           type: 'confirm',
           name: 'isCorrectEmail',
           default: 'Y',
-          message: `Is your email address ${email}?`,
-        },
+          message: `Is your email address ${email}?`
+        }
       ]);
       return isCorrectEmail ? email : undefined;
     } else {
@@ -568,8 +568,8 @@ export class ChangeAction extends BaseRushAction {
         message: 'What is your email address?',
         validate: (input: string) => {
           return true; // @todo should be an email
-        },
-      },
+        }
+      }
     ]);
     return email;
   }
@@ -634,8 +634,8 @@ export class ChangeAction extends BaseRushAction {
       {
         name: 'overwrite',
         type: 'confirm',
-        message: `Overwrite ${filePath}?`,
-      },
+        message: `Overwrite ${filePath}?`
+      }
     ]);
 
     if (overwrite) {

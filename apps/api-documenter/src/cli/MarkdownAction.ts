@@ -13,7 +13,7 @@ export class MarkdownAction extends BaseAction {
       summary: 'Generate documentation as Markdown files (*.md)',
       documentation:
         'Generates API documentation as a collection of files in' +
-        ' Markdown format, suitable for example for publishing on a GitHub site.',
+        ' Markdown format, suitable for example for publishing on a GitHub site.'
     });
   }
 

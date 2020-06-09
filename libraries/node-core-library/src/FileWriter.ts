@@ -62,7 +62,7 @@ export class FileWriter {
     flags = {
       append: false,
       exclusive: false,
-      ...flags,
+      ...flags
     };
     return [flags.append ? 'a' : 'w', flags.exclusive ? 'x' : ''].join('') as NodeFileFlags;
   }

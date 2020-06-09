@@ -168,7 +168,7 @@ export class VersionManager {
         {
           changes: [],
           packageName: packageName,
-          email: this._userEmail,
+          email: this._userEmail
         },
         this._rushConfiguration
       );
@@ -316,7 +316,7 @@ export class VersionManager {
     if (!semver.satisfies(updatedDependentProject.version, oldDependencyVersion) && !projectVersionChanged) {
       this._addChange(changes, {
         changeType: ChangeType.patch,
-        packageName: clonedProject.name,
+        packageName: clonedProject.name
       });
     }
 
@@ -328,7 +328,7 @@ export class VersionManager {
         comment:
           `Dependency ${updatedDependentProject.name} version bump from ${oldDependencyVersion}` +
           ` to ${newDependencyVersion}.`,
-        packageName: clonedProject.name,
+        packageName: clonedProject.name
       });
     }
   }
@@ -370,7 +370,7 @@ export class VersionManager {
       changeType: ChangeType.none,
       newVersion: newPackageJson.version,
       packageName: newPackageJson.name,
-      comment: '',
+      comment: ''
     };
   }
 }

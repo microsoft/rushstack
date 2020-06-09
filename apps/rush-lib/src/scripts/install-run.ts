@@ -237,7 +237,7 @@ function _resolvePackageVersion(rushCommonFolder: string, { name, version }: IPa
         ['view', `${name}@${version}`, 'version', '--no-update-notifier'],
         {
           cwd: rushTempFolder,
-          stdio: [],
+          stdio: []
         }
       );
 
@@ -342,11 +342,11 @@ function _createPackageJson(packageInstallFolder: string, name: string, version:
       name: 'ci-rush',
       version: '0.0.0',
       dependencies: {
-        [name]: version,
+        [name]: version
       },
       description: "DON'T WARN",
       repository: "DON'T WARN",
-      license: 'MIT',
+      license: 'MIT'
     };
 
     const packageJsonPath: string = path.join(packageInstallFolder, PACKAGE_JSON_FILENAME);
@@ -366,7 +366,7 @@ function _installPackage(packageInstallFolder: string, name: string, version: st
     const result: childProcess.SpawnSyncReturns<Buffer> = childProcess.spawnSync(npmPath, ['install'], {
       stdio: 'inherit',
       cwd: packageInstallFolder,
-      env: process.env,
+      env: process.env
     });
 
     if (result.status !== 0) {
@@ -438,8 +438,8 @@ export function installAndRun(
     cwd: process.cwd(),
     env: {
       ...process.env,
-      PATH: [binFolderPath, process.env.PATH].join(path.delimiter),
-    },
+      PATH: [binFolderPath, process.env.PATH].join(path.delimiter)
+    }
   });
 
   if (result.status !== null) {

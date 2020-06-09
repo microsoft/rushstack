@@ -13,7 +13,7 @@ export class CleanAction extends CommandLineAction {
     super({
       actionName: 'clean',
       summary: 'Cleans up generated BuildXL configuration for the current Rush repository.',
-      documentation: 'Cleans up generated BuildXL configuration for the current Rush repository.',
+      documentation: 'Cleans up generated BuildXL configuration for the current Rush repository.'
     });
 
     this._terminal = terminal;

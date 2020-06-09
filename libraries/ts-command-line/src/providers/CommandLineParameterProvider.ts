@@ -8,12 +8,12 @@ import {
   ICommandLineStringListDefinition,
   ICommandLineIntegerDefinition,
   ICommandLineChoiceDefinition,
-  ICommandLineRemainderDefinition,
+  ICommandLineRemainderDefinition
 } from '../parameters/CommandLineDefinition';
 import {
   CommandLineParameter,
   CommandLineParameterWithArgument,
-  CommandLineParameterKind,
+  CommandLineParameterKind
 } from '../parameters/BaseClasses';
 import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
 import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
@@ -207,7 +207,7 @@ export abstract class CommandLineParameterProvider {
     const argparseOptions: argparse.ArgumentOptions = {
       help: this._remainder.description,
       nargs: argparse.Const.REMAINDER,
-      metavar: '"..."',
+      metavar: '"..."'
     };
 
     this._getArgumentParser().addArgument(argparse.Const.REMAINDER, argparseOptions);
@@ -312,7 +312,7 @@ export abstract class CommandLineParameterProvider {
       help: finalDescription,
       dest: parameter._parserKey,
       metavar: (parameter as CommandLineParameterWithArgument).argumentName || undefined,
-      required: parameter.required,
+      required: parameter.required
     };
 
     switch (parameter.kind) {

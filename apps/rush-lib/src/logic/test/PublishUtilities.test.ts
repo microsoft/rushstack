@@ -299,7 +299,7 @@ describe('getNewDependencyVersion', () => {
     const dependencies: { [key: string]: string } = {
       a: '~1.0.0',
       b: '^1.0.0',
-      c: '>=1.0.0 <2.0.0',
+      c: '>=1.0.0 <2.0.0'
     };
     expect(PublishUtilities.getNewDependencyVersion(dependencies, 'a', '1.1.0')).toEqual('~1.1.0');
     expect(PublishUtilities.getNewDependencyVersion(dependencies, 'b', '1.2.0')).toEqual('^1.2.0');
@@ -310,7 +310,7 @@ describe('getNewDependencyVersion', () => {
     const dependencies: { [key: string]: string } = {
       a: '~1.0.0-pr.1',
       b: '^1.0.0-pr.1',
-      c: '>=1.0.0-pr.1 <2.0.0',
+      c: '>=1.0.0-pr.1 <2.0.0'
     };
     expect(PublishUtilities.getNewDependencyVersion(dependencies, 'a', '1.1.0-pr.1')).toEqual('~1.1.0-pr.1');
     expect(PublishUtilities.getNewDependencyVersion(dependencies, 'b', '1.2.0-pr.2')).toEqual('^1.2.0-pr.2');
@@ -323,7 +323,7 @@ describe('getNewDependencyVersion', () => {
     const dependencies: { [key: string]: string } = {
       a: '~1.0.0',
       b: '^1.0.0',
-      c: '>=1.0.0 <2.0.0',
+      c: '>=1.0.0 <2.0.0'
     };
     expect(PublishUtilities.getNewDependencyVersion(dependencies, 'a', '1.0.0-hotfix.0')).toEqual(
       '~1.0.0-hotfix.0'

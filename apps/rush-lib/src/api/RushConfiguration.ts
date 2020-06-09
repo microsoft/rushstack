@@ -42,7 +42,7 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.nonbrowserApprovedPackagesFilename,
   RushConstants.versionPoliciesFilename,
   RushConstants.commandLineFilename,
-  RushConstants.experimentsFilename,
+  RushConstants.experimentsFilename
 ];
 
 /**

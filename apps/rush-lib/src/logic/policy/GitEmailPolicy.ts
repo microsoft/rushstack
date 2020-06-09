@@ -53,7 +53,7 @@ export class GitEmailPolicy {
             `To configure your Git email address, try something like this:`,
             '',
             ...GitEmailPolicy.getEmailExampleLines(rushConfiguration),
-            '',
+            ''
           ].join(os.EOL)
         );
         throw new AlreadyReportedError();
@@ -115,7 +115,7 @@ export class GitEmailPolicy {
         'To fix it, you can use commands like this:',
         '',
         ...GitEmailPolicy.getEmailExampleLines(rushConfiguration),
-        '',
+        ''
       ].join(os.EOL)
     );
 
@@ -128,7 +128,7 @@ export class GitEmailPolicy {
       colors.cyan('    git config --local user.name "Mr. Example"'),
       colors.cyan(
         `    git config --local user.email "${rushConfiguration.gitSampleEmail || 'example@contoso.com'}"`
-      ),
+      )
     ];
   }
 }

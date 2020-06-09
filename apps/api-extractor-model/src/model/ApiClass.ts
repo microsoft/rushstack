@@ -5,7 +5,7 @@ import {
   DeclarationReference,
   Meaning,
   Navigation,
-  Component,
+  Component
 } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
@@ -17,7 +17,7 @@ import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 import {
   ApiTypeParameterListMixin,
   IApiTypeParameterListMixinOptions,
-  IApiTypeParameterListMixinJson,
+  IApiTypeParameterListMixinJson
 } from '../mixins/ApiTypeParameterListMixin';
 import { DeserializerContext } from './DeserializerContext';
 

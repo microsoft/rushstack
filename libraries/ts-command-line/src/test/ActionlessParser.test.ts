@@ -9,14 +9,14 @@ class TestCommandLine extends CommandLineParser {
   public constructor() {
     super({
       toolFilename: 'example',
-      toolDescription: 'An example project',
+      toolDescription: 'An example project'
     });
   }
 
   protected onDefineParameters(): void {
     this.flag = this.defineFlagParameter({
       parameterLongName: '--flag',
-      description: 'The flag',
+      description: 'The flag'
     });
   }
 }
@@ -35,7 +35,7 @@ describe('Actionless CommandLineParser', () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
 
     commandLineParser.defineCommandLineRemainder({
-      description: 'remainder description',
+      description: 'remainder description'
     });
 
     return commandLineParser.execute(['--flag', 'the', 'remaining', 'args']).then(() => {

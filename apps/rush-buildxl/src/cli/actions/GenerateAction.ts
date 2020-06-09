@@ -14,7 +14,7 @@ export class GenerateAction extends CommandLineAction {
     super({
       actionName: 'generate',
       summary: 'Generates a BuildXL configuration for the current Rush repository.',
-      documentation: 'Generates a BuildXL configuration for the current Rush repository.',
+      documentation: 'Generates a BuildXL configuration for the current Rush repository.'
     });
 
     this._terminal = terminal;

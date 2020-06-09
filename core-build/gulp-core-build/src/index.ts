@@ -21,7 +21,7 @@ import {
   initialize as initializeLogging,
   markTaskCreationTime,
   generateGulpError,
-  setWatchMode,
+  setWatchMode
 } from './logging';
 import { getFlagValue } from './config';
 import * as Gulp from 'gulp';
@@ -44,7 +44,7 @@ export {
   fileWarning,
   reset,
   log,
-  logSummary,
+  logSummary
 } from './logging';
 export { GCBTerminalProvider } from './utilities/GCBTerminalProvider';
 export * from './tasks/CopyTask';
@@ -86,7 +86,7 @@ let _buildConfig: IBuildConfig = {
   verbose: getFlagValue('verbose', false),
   production: getFlagValue('production', false),
   args: args,
-  shouldWarningsFailBuild: false,
+  shouldWarningsFailBuild: false
 };
 
 /**
@@ -235,7 +235,7 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
                     notifier.notify({
                       title: successMessage,
                       message: builtPackage ? builtPackage.name : '',
-                      icon: buildConfig.buildSuccessIconPath,
+                      icon: buildConfig.buildSuccessIconPath
                     });
                   } else {
                     log(successMessage);
@@ -251,7 +251,7 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
                     notifier.notify({
                       title: failureMessage,
                       message: error.toString(),
-                      icon: buildConfig.buildErrorIconPath,
+                      icon: buildConfig.buildErrorIconPath
                     });
                   } else {
                     log(failureMessage);
@@ -278,7 +278,7 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
 
         _runWatch().catch(console.error);
       });
-    },
+    }
   };
 }
 
@@ -305,7 +305,7 @@ export function serial(...tasks: (IExecutable[] | IExecutable)[]): IExecutable {
       }
 
       return output;
-    },
+    }
   };
 }
 
@@ -335,7 +335,7 @@ export function parallel(...tasks: (IExecutable[] | IExecutable)[]): IExecutable
         // Use promise all to make sure errors are propagated correctly
         Promise.all<void>(promises).then(resolve, reject);
       });
-    },
+    }
   };
 }
 

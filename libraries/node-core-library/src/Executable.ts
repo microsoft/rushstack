@@ -173,7 +173,7 @@ export class Executable {
       encoding: 'utf8',
 
       // NOTE: This is always false, because Rushell is recommended instead of relying on the OS shell.
-      shell: false,
+      shell: false
     } as child_process.SpawnSyncOptionsWithStringEncoding;
 
     // PROBLEM: Given an "args" array of strings that may contain special characters (e.g. spaces,
@@ -427,7 +427,7 @@ export class Executable {
     return {
       environment,
       currentWorkingDirectory,
-      windowsExecutableExtensions,
+      windowsExecutableExtensions
     };
   }
 

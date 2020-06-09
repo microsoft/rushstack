@@ -16,7 +16,7 @@ describe('ChangeFile', () => {
       {
         packageName: 'a',
         changes: [],
-        email: 'fake@microsoft.com',
+        email: 'fake@microsoft.com'
       },
       rushConfiguration
     );
@@ -24,13 +24,13 @@ describe('ChangeFile', () => {
     changeFile.addChange({
       packageName: 'a',
       changeType: ChangeType.minor,
-      comment: 'for minor',
+      comment: 'for minor'
     });
 
     changeFile.addChange({
       packageName: 'a',
       changeType: ChangeType.patch,
-      comment: 'for patch',
+      comment: 'for patch'
     });
 
     expect(changeFile.getChanges('a')).toHaveLength(2);

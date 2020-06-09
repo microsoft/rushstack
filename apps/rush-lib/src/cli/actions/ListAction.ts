@@ -29,7 +29,7 @@ export class ListAction extends BaseRushAction {
         'List package names, and optionally version (--version) and ' +
         'path (--path) or full path (--full-path), for projects in the ' +
         'current rush config.',
-      parser,
+      parser
     });
   }
 
@@ -39,7 +39,7 @@ export class ListAction extends BaseRushAction {
       parameterShortName: '-v',
       description:
         'If this flag is specified, the project version will be ' +
-        'displayed in a column along with the package name.',
+        'displayed in a column along with the package name.'
     });
 
     this._path = this.defineFlagParameter({
@@ -47,7 +47,7 @@ export class ListAction extends BaseRushAction {
       parameterShortName: '-p',
       description:
         'If this flag is specified, the project path will be ' +
-        'displayed in a column along with the package name.',
+        'displayed in a column along with the package name.'
     });
 
     this._fullPath = this.defineFlagParameter({
@@ -55,12 +55,12 @@ export class ListAction extends BaseRushAction {
       parameterShortName: '-f',
       description:
         'If this flag is specified, the project full path will ' +
-        'be displayed in a column along with the package name.',
+        'be displayed in a column along with the package name.'
     });
 
     this._jsonFlag = this.defineFlagParameter({
       parameterLongName: '--json',
-      description: 'If this flag is specified, output will be in JSON format.',
+      description: 'If this flag is specified, output will be in JSON format.'
     });
   }
 
@@ -82,13 +82,13 @@ export class ListAction extends BaseRushAction {
         name: name,
         version: _config.packageJson.version,
         path: _config.projectRelativeFolder,
-        fullPath: _config.projectFolder,
+        fullPath: _config.projectFolder
       };
       projects.push(project);
     });
 
     const output: IJsonOutput = {
-      projects,
+      projects
     };
     console.log(JSON.stringify(output, undefined, 2));
   }
@@ -111,7 +111,7 @@ export class ListAction extends BaseRushAction {
       tableHeader.push('Full Path');
     }
     const table: Table = new Table({
-      head: tableHeader,
+      head: tableHeader
     });
 
     allPackages.forEach((config: RushConfigurationProject, name: string) => {

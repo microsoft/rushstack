@@ -14,7 +14,7 @@ export const enum ExcerptTokenKind {
   /**
    * A reference to an API declaration
    */
-  Reference = 'Reference',
+  Reference = 'Reference'
 }
 
 /**

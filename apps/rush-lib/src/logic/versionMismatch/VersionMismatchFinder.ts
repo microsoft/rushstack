@@ -66,7 +66,7 @@ export class VersionMismatchFinder {
   ): void {
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
       ...options,
-      isRushCheckCommand: true,
+      isRushCheckCommand: true
     });
   }
 
@@ -76,7 +76,7 @@ export class VersionMismatchFinder {
   ): void {
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
       ...options,
-      isRushCheckCommand: false,
+      isRushCheckCommand: false
     });
   }
 
@@ -171,19 +171,19 @@ export class VersionMismatchFinder {
         });
         const mismatchDependencyVersion: IMismatchDependencyVersion = {
           version: version,
-          projects: projects,
+          projects: projects
         };
         mismatchDependencyVersionArray.push(mismatchDependencyVersion);
       });
       const mismatchDependency: IMismatchDependency = {
         dependencyName: dependency,
-        versions: mismatchDependencyVersionArray,
+        versions: mismatchDependencyVersionArray
       };
       mismatchDependencies.push(mismatchDependency);
     });
 
     const output: IMismatchDependencies = {
-      mismatchedVersions: mismatchDependencies,
+      mismatchedVersions: mismatchDependencies
     };
 
     console.log(JSON.stringify(output, undefined, 2));

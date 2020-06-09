@@ -68,7 +68,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       description: this._options.toolDescription,
       epilog: colors.bold(
         `For detailed help about a specific command, use: ${this._options.toolFilename} <command> -h`
-      ),
+      )
     });
 
     this.onDefineParameters();
@@ -88,7 +88,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     if (!this._actionsSubParser) {
       this._actionsSubParser = this._argumentParser.addSubparsers({
         metavar: '<command>',
-        dest: 'action',
+        dest: 'action'
       });
     }
 

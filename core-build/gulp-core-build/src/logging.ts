@@ -81,7 +81,7 @@ const localCache: ILocalCache = (globalInstance.__loggingCache = globalInstance.
   gulpErrorCallback: undefined,
   gulpStopCallback: undefined,
   shouldLogErrorsDuringSummary: false,
-  shouldLogWarningsDuringSummary: false,
+  shouldLogWarningsDuringSummary: false
 });
 
 if (!localCache.start) {
@@ -365,7 +365,7 @@ export function log(...args: string[]): void {
     [
       padTimePart(currentTime.getHours()),
       padTimePart(currentTime.getMinutes()),
-      padTimePart(currentTime.getSeconds()),
+      padTimePart(currentTime.getSeconds())
     ].join(':')
   );
   console.log(`[${timestamp}] ${args.join('')}`);
@@ -410,7 +410,7 @@ export enum TestResultState {
   Passed,
   Failed,
   FlakyFailed,
-  Skipped,
+  Skipped
 }
 
 /**
@@ -623,7 +623,7 @@ export function generateGulpError(err: any): any {
       showStack: false,
       toString: (): string => {
         return '';
-      },
+      }
     };
 
     markErrorAsWritten(output);
@@ -747,7 +747,7 @@ export function logEndSubtask(name: string, startTime: [number, number], errorOb
         err: errorObject,
         task: name,
         subTask: true,
-        hrDuration: duration,
+        hrDuration: duration
       });
     }
   }

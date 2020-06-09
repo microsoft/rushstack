@@ -37,7 +37,7 @@ export class VersionAction extends BaseRushAction {
       summary: '(EXPERIMENTAL) Manage package versions in the repo.',
       documentation:
         '(EXPERIMENTAL) use this "rush version" command to ensure version policies and bump versions.',
-      parser,
+      parser
     });
   }
 
@@ -46,31 +46,31 @@ export class VersionAction extends BaseRushAction {
       parameterLongName: '--target-branch',
       parameterShortName: '-b',
       argumentName: 'BRANCH',
-      description: 'If this flag is specified, changes will be committed and merged into the target branch.',
+      description: 'If this flag is specified, changes will be committed and merged into the target branch.'
     });
     this._ensureVersionPolicy = this.defineFlagParameter({
       parameterLongName: '--ensure-version-policy',
-      description: 'Updates package versions if needed to satisfy version policies.',
+      description: 'Updates package versions if needed to satisfy version policies.'
     });
     this._overrideVersion = this.defineStringParameter({
       parameterLongName: '--override-version',
       argumentName: 'NEW_VERSION',
       description:
         'Override the version in the specified --version-policy. ' +
-        'This setting only works for lock-step version policy and when --ensure-version-policy is specified.',
+        'This setting only works for lock-step version policy and when --ensure-version-policy is specified.'
     });
     this._bumpVersion = this.defineFlagParameter({
       parameterLongName: '--bump',
-      description: 'Bumps package version based on version policies.',
+      description: 'Bumps package version based on version policies.'
     });
     this._bypassPolicy = this.defineFlagParameter({
       parameterLongName: '--bypass-policy',
-      description: 'Overrides "gitPolicy" enforcement (use honorably!)',
+      description: 'Overrides "gitPolicy" enforcement (use honorably!)'
     });
     this._versionPolicy = this.defineStringParameter({
       parameterLongName: '--version-policy',
       argumentName: 'POLICY',
-      description: 'The name of the version policy',
+      description: 'The name of the version policy'
     });
     this._overwriteBump = this.defineStringParameter({
       parameterLongName: '--override-bump',
@@ -78,7 +78,7 @@ export class VersionAction extends BaseRushAction {
       description:
         'Overrides the bump type in the version-policy.json for the specified version policy. ' +
         'Valid BUMPTYPE values include: prerelease, patch, preminor, minor, major. ' +
-        'This setting only works for lock-step version policy in bump action.',
+        'This setting only works for lock-step version policy in bump action.'
     });
     this._prereleaseIdentifier = this.defineStringParameter({
       parameterLongName: '--override-prerelease-id',
@@ -88,7 +88,7 @@ export class VersionAction extends BaseRushAction {
         'for the specified version policy. ' +
         'This setting only works for lock-step version policy. ' +
         'This setting increases to new prerelease id when "--bump" is provided but only replaces the ' +
-        'prerelease name when "--ensure-version-policy" is provided.',
+        'prerelease name when "--ensure-version-policy" is provided.'
     });
   }
 

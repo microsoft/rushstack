@@ -27,7 +27,7 @@ class ExampleApi {
 
         // If the provided value is negative, clamp it to zero:
         return Math.max(value, 0);
-      },
+      }
     });
   }
 

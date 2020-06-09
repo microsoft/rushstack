@@ -16,7 +16,7 @@ import {
   DocNodeTransforms,
   DocEscapedText,
   DocErrorText,
-  DocBlockTag,
+  DocBlockTag
 } from '@microsoft/tsdoc';
 import { InternalError } from '@rushstack/node-core-library';
 
@@ -55,7 +55,7 @@ export class MarkdownEmitter {
       writingBold: false,
       writingItalic: false,
 
-      options,
+      options
     };
 
     this.writeNode(docNode, context, false);

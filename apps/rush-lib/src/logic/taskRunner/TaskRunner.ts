@@ -45,7 +45,7 @@ export class TaskRunner {
       parallelism,
       changedProjectsOnly,
       allowWarningsInSuccessfulBuild,
-      terminal = new Terminal(new ConsoleTerminalProvider()),
+      terminal = new Terminal(new ConsoleTerminalProvider())
     } = options;
     this._tasks = orderedTasks;
     this._buildQueue = orderedTasks.slice(0);

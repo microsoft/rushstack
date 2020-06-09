@@ -10,7 +10,7 @@ export class RunAction extends CommandLineAction {
     super({
       actionName: 'run',
       summary: 'This action (hypothetically) passes its command line arguments to the shell to be executed.',
-      documentation: 'This demonstrates how to use the defineCommandLineRemainder() API.',
+      documentation: 'This demonstrates how to use the defineCommandLineRemainder() API.'
     });
   }
 
@@ -28,11 +28,11 @@ export class RunAction extends CommandLineAction {
       parameterLongName: '--title',
       argumentName: 'TITLE',
       environmentVariable: 'WIDGET_TITLE',
-      description: 'An optional title to show in the console window',
+      description: 'An optional title to show in the console window'
     });
 
     this.defineCommandLineRemainder({
-      description: 'The remaining arguments are passed along to the command shell.',
+      description: 'The remaining arguments are passed along to the command shell.'
     });
   }
 }

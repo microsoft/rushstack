@@ -23,7 +23,7 @@ export class CheckAction extends BaseRushAction {
         "Checks each project's package.json files and ensures that all dependencies are of the " +
         'same version throughout the repository.',
       safeForSimultaneousRushProcesses: true,
-      parser,
+      parser
     });
   }
 
@@ -31,7 +31,7 @@ export class CheckAction extends BaseRushAction {
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
     this._jsonFlag = this.defineFlagParameter({
       parameterLongName: '--json',
-      description: 'If this flag is specified, output will be in JSON format.',
+      description: 'If this flag is specified, output will be in JSON format.'
     });
   }
 
@@ -49,7 +49,7 @@ export class CheckAction extends BaseRushAction {
 
     VersionMismatchFinder.rushCheck(this.rushConfiguration, {
       variant: this._variant.value,
-      printAsJson: this._jsonFlag.value,
+      printAsJson: this._jsonFlag.value
     });
     return Promise.resolve();
   }

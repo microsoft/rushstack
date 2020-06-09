@@ -20,5 +20,5 @@ export enum DocEnum {
   /**
    * These are some docs for Two
    */
-  Two = DocEnum.One + 1,
+  Two = DocEnum.One + 1
 }

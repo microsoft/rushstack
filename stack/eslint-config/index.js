@@ -10,7 +10,7 @@ module.exports = {
     '@typescript-eslint/eslint-plugin',
     'eslint-plugin-promise',
     'eslint-plugin-security',
-    'eslint-plugin-tsdoc',
+    'eslint-plugin-tsdoc'
   ],
 
   overrides: [
@@ -28,7 +28,7 @@ module.exports = {
         // parse whatever is encountered.
         ecmaVersion: 2018,
 
-        sourceType: 'module',
+        sourceType: 'module'
       },
 
       rules: {
@@ -49,8 +49,8 @@ module.exports = {
           'error',
           {
             default: 'array',
-            readonly: 'generic',
-          },
+            readonly: 'generic'
+          }
         ],
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
@@ -62,25 +62,25 @@ module.exports = {
             types: {
               String: {
                 message: "Use 'string' instead",
-                fixWith: 'string',
+                fixWith: 'string'
               },
               Boolean: {
                 message: "Use 'boolean' instead",
-                fixWith: 'boolean',
+                fixWith: 'boolean'
               },
               Number: {
                 message: "Use 'number' instead",
-                fixWith: 'number',
+                fixWith: 'number'
               },
               Object: {
-                message: "Use 'object' instead, or else define a proper TypeScript type:",
+                message: "Use 'object' instead, or else define a proper TypeScript type:"
               },
               Symbol: {
                 message: "Use 'symbol' instead",
-                fixWith: 'symbol',
-              },
-            },
-          },
+                fixWith: 'symbol'
+              }
+            }
+          }
         ],
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
@@ -89,16 +89,16 @@ module.exports = {
           {
             // This is a special exception for naming patterns that use an underscore to separate two camel-cased
             // parts.  Example:  "checkBox1_onChanged" or "_checkBox1_onChanged"
-            allow: ['^_?[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*_[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*$'],
-          },
+            allow: ['^_?[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*_[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*$']
+          }
         ],
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         '@typescript-eslint/class-name-casing': [
           'error',
           {
-            allowUnderscorePrefix: true,
-          },
+            allowUnderscorePrefix: true
+          }
         ],
 
         // RATIONALE:         We require "x as number" instead of "<number>x" to avoid conflicts with JSX.
@@ -120,8 +120,8 @@ module.exports = {
           {
             allowExpressions: true,
             allowTypedFunctionExpressions: true,
-            allowHigherOrderFunctions: false,
-          },
+            allowHigherOrderFunctions: false
+          }
         ],
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
@@ -138,8 +138,8 @@ module.exports = {
           'error',
           {
             prefixWithI: 'always',
-            allowUnderscorePrefix: true,
-          },
+            allowUnderscorePrefix: true
+          }
         ],
 
         // RATIONALE:         Requiring private members to be prefixed with an underscore prevents accidental access
@@ -161,8 +161,8 @@ module.exports = {
           'error',
           {
             default: 'never',
-            classes: ['field', 'constructor', 'method'],
-          },
+            classes: ['field', 'constructor', 'method']
+          }
         ],
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
@@ -208,8 +208,8 @@ module.exports = {
             allowDeclarations: false,
 
             // Allow it in .d.ts files that describe legacy libraries
-            allowDefinitionFiles: false,
-          },
+            allowDefinitionFiles: false
+          }
         ],
 
         // RATIONALE:         Parameter properties provide a shorthand such as "constructor(public title: string)"
@@ -233,8 +233,8 @@ module.exports = {
             // Unused function arguments often indicate a mistake in JavaScript code.  However in TypeScript code,
             // the compiler catches most of those mistakes, and unused arguments are fairly common for type signatures
             // that are overriding a base class method or implementing an interface.
-            args: 'none',
-          },
+            args: 'none'
+          }
         ],
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
@@ -270,8 +270,8 @@ module.exports = {
             parameter: true,
             objectDestructuring: false,
             propertyDeclaration: true,
-            variableDeclaration: true,
-          },
+            variableDeclaration: true
+          }
         ],
 
         // RATIONALE:         Catches a common coding mistake.
@@ -281,8 +281,8 @@ module.exports = {
         'dot-notation': [
           'error',
           {
-            allowPattern: '^_',
-          },
+            allowPattern: '^_'
+          }
         ],
 
         // RATIONALE:         Catches a common coding mistake.
@@ -319,9 +319,9 @@ module.exports = {
               '<<=',
               '>>=',
               '>>>=',
-              '~',
-            ],
-          },
+              '~'
+            ]
+          }
         ],
 
         // RATIONALE:         Deprecated language feature.
@@ -504,7 +504,7 @@ module.exports = {
         'tsdoc/syntax': 'off',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'use-isnan': 'error',
+        'use-isnan': 'error'
 
         // The "no-restricted-syntax" rule is a general purpose pattern matcher that we can use to experiment with
         // new rules.  If a rule works well, we should convert it to a proper rule so it gets its own name
@@ -515,7 +515,7 @@ module.exports = {
         //
         // "no-restricted-syntax": [
         // ],
-      },
-    },
-  ],
+      }
+    }
+  ]
 };

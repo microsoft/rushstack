@@ -77,7 +77,7 @@ export class CertificateManager {
 
     return {
       pemCertificate: this._certificateStore.certificateData,
-      pemKey: this._certificateStore.keyData,
+      pemKey: this._certificateStore.keyData
     };
   }
 
@@ -151,7 +151,7 @@ export class CertificateManager {
           'delete-certificate',
           '-Z',
           shaHash,
-          macKeychain,
+          macKeychain
         ]);
 
         if (macUntrustResult.code === 0) {
@@ -189,8 +189,8 @@ export class CertificateManager {
     const attrs: forge.pki.CertificateField[] = [
       {
         name: 'commonName',
-        value: 'localhost',
-      },
+        value: 'localhost'
+      }
     ];
 
     certificate.setSubject(attrs);
@@ -202,24 +202,24 @@ export class CertificateManager {
         altNames: [
           {
             type: 2, // DNS
-            value: 'localhost',
-          },
-        ],
+            value: 'localhost'
+          }
+        ]
       },
       {
         name: 'keyUsage',
         digitalSignature: true,
         keyEncipherment: true,
-        dataEncipherment: true,
+        dataEncipherment: true
       },
       {
         name: 'extKeyUsage',
-        serverAuth: true,
+        serverAuth: true
       },
       {
         name: 'friendlyName',
-        value: friendlyName,
-      },
+        value: friendlyName
+      }
     ]);
 
     // self-sign certificate
@@ -231,7 +231,7 @@ export class CertificateManager {
 
     return {
       pemCertificate: pem,
-      pemKey: pemKey,
+      pemKey: pemKey
     };
   }
 
@@ -313,7 +313,7 @@ export class CertificateManager {
           'trustRoot',
           '-k',
           macKeychain,
-          certificatePath,
+          certificatePath
         ];
         const result: ISudoSyncResult = runSudoSync(commands);
 
@@ -365,7 +365,7 @@ export class CertificateManager {
         'Signature = "$Windows NT$"',
         '[Properties]',
         `11 = "{text}${friendlyName}"`,
-        '',
+        ''
       ].join(EOL);
 
       FileSystem.writeFile(friendlyNamePath, friendlyNameFile);
@@ -403,7 +403,7 @@ export class CertificateManager {
     const pemFileContents: string | undefined = generatedCertificate.pemCertificate;
     if (pemFileContents) {
       FileSystem.writeFile(tempCertificatePath, pemFileContents, {
-        ensureFolderExists: true,
+        ensureFolderExists: true
       });
     }
 

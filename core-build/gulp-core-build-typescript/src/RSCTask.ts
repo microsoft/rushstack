@@ -9,7 +9,7 @@ import {
   IPackageJson,
   FileSystem,
   PackageJsonLookup,
-  Terminal,
+  Terminal
 } from '@rushstack/node-core-library';
 import { GulpTask, GCBTerminalProvider } from '@microsoft/gulp-core-build';
 import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.1';
@@ -88,7 +88,7 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
   public constructor(taskName: string, defaultConfig: Partial<TTaskConfig>) {
     super(taskName, {
       allowBuiltinCompiler: false,
-      ...defaultConfig,
+      ...defaultConfig
     } as TTaskConfig);
   }
 
@@ -173,9 +173,9 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
         packageFilter: (pkg: IPackageJson) => {
           return {
             ...pkg,
-            main: 'package.json',
+            main: 'package.json'
           };
-        },
+        }
       });
       extendsPathKind = 'a package path';
     }

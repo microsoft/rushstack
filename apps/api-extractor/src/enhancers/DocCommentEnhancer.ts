@@ -85,9 +85,9 @@ export class DocCommentEnhancer {
           new tsdoc.DocPlainText({ configuration, text: 'Constructs a new instance of the ' }),
           new tsdoc.DocCodeSpan({
             configuration,
-            code: classDeclaration.astSymbol.localName,
+            code: classDeclaration.astSymbol.localName
           }),
-          new tsdoc.DocPlainText({ configuration, text: ' class' }),
+          new tsdoc.DocPlainText({ configuration, text: ' class' })
         ]);
       }
 
@@ -105,8 +105,8 @@ export class DocCommentEnhancer {
             configuration,
             blockTag: new tsdoc.DocBlockTag({
               configuration,
-              tagName: tsdoc.StandardTags.remarks.tagName,
-            }),
+              tagName: tsdoc.StandardTags.remarks.tagName
+            })
           });
         }
 
@@ -116,13 +116,13 @@ export class DocCommentEnhancer {
               configuration,
               text:
                 `The constructor for this class is marked as internal. Third-party code should not` +
-                ` call the constructor directly or create subclasses that extend the `,
+                ` call the constructor directly or create subclasses that extend the `
             }),
             new tsdoc.DocCodeSpan({
               configuration,
-              code: classDeclaration.astSymbol.localName,
+              code: classDeclaration.astSymbol.localName
             }),
-            new tsdoc.DocPlainText({ configuration, text: ' class.' }),
+            new tsdoc.DocPlainText({ configuration, text: ' class.' })
           ])
         );
       }

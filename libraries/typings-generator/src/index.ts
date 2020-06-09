@@ -7,5 +7,5 @@ export {
   IStringValueTyping,
   IStringValueTypings,
   IStringValuesTypingsGeneratorOptions,
-  StringValuesTypingsGenerator,
+  StringValuesTypingsGenerator
 } from './StringValuesTypingsGenerator';

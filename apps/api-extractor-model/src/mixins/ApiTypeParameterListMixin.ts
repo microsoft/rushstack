@@ -88,7 +88,7 @@ export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor
               name: typeParameterOptions.typeParameterName,
               constraintExcerpt: this.buildExcerpt(typeParameterOptions.constraintTokenRange),
               defaultTypeExcerpt: this.buildExcerpt(typeParameterOptions.defaultTypeTokenRange),
-              parent: this,
+              parent: this
             });
 
             this[_typeParameters].push(typeParameter);
@@ -125,7 +125,7 @@ export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor
         typeParameterObjects.push({
           typeParameterName: typeParameter.name,
           constraintTokenRange: typeParameter.constraintExcerpt.tokenRange,
-          defaultTypeTokenRange: typeParameter.defaultTypeExcerpt.tokenRange,
+          defaultTypeTokenRange: typeParameter.defaultTypeExcerpt.tokenRange
         });
       }
 

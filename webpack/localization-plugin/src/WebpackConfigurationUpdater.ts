@@ -27,7 +27,7 @@ export class WebpackConfigurationUpdater {
     const loader: string = path.resolve(__dirname, 'loaders', 'LocLoader.js');
     const loaderOptions: ILocLoaderOptions = {
       pluginInstance: options.pluginInstance,
-      resxNewlineNormalization: options.resxNewlineNormalization,
+      resxNewlineNormalization: options.resxNewlineNormalization
     };
 
     WebpackConfigurationUpdater._addLoadersForLocFiles(options, loader, loaderOptions);
@@ -42,7 +42,7 @@ export class WebpackConfigurationUpdater {
   ): void {
     const loader: string = path.resolve(__dirname, 'loaders', 'InPlaceLocFileLoader.js');
     const loaderOptions: IBaseLoaderOptions = {
-      resxNewlineNormalization: options.resxNewlineNormalization,
+      resxNewlineNormalization: options.resxNewlineNormalization
     };
 
     WebpackConfigurationUpdater._addRulesToConfiguration(options.configuration, [
@@ -51,20 +51,20 @@ export class WebpackConfigurationUpdater {
         use: [
           {
             loader: loader,
-            options: loaderOptions,
-          },
-        ],
+            options: loaderOptions
+          }
+        ]
       },
       {
         test: Constants.RESX_REGEX,
         use: [
           {
             loader: loader,
-            options: loaderOptions,
-          },
+            options: loaderOptions
+          }
         ],
-        type: 'json',
-      },
+        type: 'json'
+      }
     ]);
   }
 
@@ -105,27 +105,27 @@ export class WebpackConfigurationUpdater {
     WebpackConfigurationUpdater._addRulesToConfiguration(options.configuration, [
       {
         test: {
-          and: [(filePath: string) => !options.filesToIgnore.has(filePath), Constants.LOC_JSON_REGEX],
+          and: [(filePath: string) => !options.filesToIgnore.has(filePath), Constants.LOC_JSON_REGEX]
         },
         use: [
           {
             loader: loader,
-            options: loaderOptions,
-          },
-        ],
+            options: loaderOptions
+          }
+        ]
       },
       {
         test: {
-          and: [(filePath: string) => !options.filesToIgnore.has(filePath), Constants.RESX_REGEX],
+          and: [(filePath: string) => !options.filesToIgnore.has(filePath), Constants.RESX_REGEX]
         },
         use: [
           {
             loader: loader,
-            options: loaderOptions,
-          },
+            options: loaderOptions
+          }
         ],
-        type: 'json',
-      },
+        type: 'json'
+      }
     ]);
   }
 
@@ -135,7 +135,7 @@ export class WebpackConfigurationUpdater {
   ): void {
     if (!configuration.module) {
       configuration.module = {
-        rules: [],
+        rules: []
       };
     }
 

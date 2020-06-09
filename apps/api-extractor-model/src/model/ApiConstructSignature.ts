@@ -9,7 +9,7 @@ import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiRel
 import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiReturnTypeMixin';
 import {
   ApiTypeParameterListMixin,
-  IApiTypeParameterListMixinOptions,
+  IApiTypeParameterListMixinOptions
 } from '../mixins/ApiTypeParameterListMixin';
 
 /**

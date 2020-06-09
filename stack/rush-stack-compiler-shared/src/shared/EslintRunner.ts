@@ -27,7 +27,7 @@ interface IEslintFileResult {
 enum EslintSeverity {
   Off = 0,
   Warn = 1,
-  Error = 2,
+  Error = 2
 }
 
 interface IEslintMessage {
@@ -62,7 +62,7 @@ export class EslintRunner extends RushStackCompilerBase<ILintRunnerConfig> {
     this._cmdRunner = new CmdRunner(this._standardBuildFolders, this._terminal, {
       packagePath: ToolPaths.eslintPackagePath,
       packageJson: ToolPaths.eslintPackageJson,
-      packageBinPath: path.join('bin', 'eslint.js'),
+      packageBinPath: path.join('bin', 'eslint.js')
     });
   }
 
@@ -110,7 +110,7 @@ export class EslintRunner extends RushStackCompilerBase<ILintRunnerConfig> {
         } else {
           resolve();
         }
-      },
+      }
     });
   }
 }

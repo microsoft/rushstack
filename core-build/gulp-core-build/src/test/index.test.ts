@@ -21,7 +21,7 @@ describe('serial', () => {
           'executing task 1',
           'complete task 1',
           'executing task 2',
-          'complete task 2',
+          'complete task 2'
         ]);
         done();
       })
@@ -43,7 +43,7 @@ describe('parallel', () => {
           'executing task 2',
           'complete task 0',
           'complete task 1',
-          'complete task 2',
+          'complete task 2'
         ]);
         done();
       })
@@ -77,7 +77,7 @@ describe('parallel', () => {
           'executing serial set 2 - 0',
           'complete serial set 2 - 0',
           'executing serial set 2 - 1',
-          'complete serial set 2 - 1',
+          'complete serial set 2 - 1'
         ]);
         done();
       })
@@ -102,7 +102,7 @@ describe('parallel', () => {
           'executing task 0',
           'complete task 0',
           'executing fail task',
-          'complete fail task',
+          'complete fail task'
         ]);
         done();
       });
@@ -118,7 +118,7 @@ describe('parallel', () => {
   it('can set the config', (done) => {
     const distFolder: string = 'testFolder';
     const newConfig: Partial<IBuildConfig> = {
-      distFolder: distFolder,
+      distFolder: distFolder
     };
 
     setConfig(newConfig);
@@ -156,6 +156,6 @@ function createTask(
             resolve();
           }
         }, 10);
-      }),
+      })
   };
 }

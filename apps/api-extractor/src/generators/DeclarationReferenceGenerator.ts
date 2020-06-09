@@ -8,7 +8,7 @@ import {
   ModuleSource,
   GlobalSource,
   Navigation,
-  Meaning,
+  Meaning
 } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { PackageJsonLookup, INodePackageJson, InternalError } from '@rushstack/node-core-library';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';

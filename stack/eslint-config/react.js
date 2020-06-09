@@ -6,8 +6,8 @@ module.exports = {
 
   settings: {
     react: {
-      version: 'detect',
-    },
+      version: 'detect'
+    }
   },
 
   overrides: [
@@ -64,8 +64,8 @@ module.exports = {
         'react/no-string-refs': 'error',
 
         // RATIONALE:         Improves syntax for some cases that are not already handled by Prettier.
-        'react/self-closing-comp': 'error',
-      },
-    },
-  ],
+        'react/self-closing-comp': 'error'
+      }
+    }
+  ]
 };

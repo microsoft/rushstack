@@ -68,7 +68,7 @@ describe('FileDeletionUtility', () => {
         '/c',
         '/c/a.txt',
         '/c/f/g/h/j/k/l/q',
-        '/d',
+        '/d'
       ];
       const expected: string[] = ['/a', '/b/f/g', '/b/f/ggg', '/c', '/d'];
       const actual: string[] = FileDeletionUtility.removeChildren(files);
@@ -89,7 +89,7 @@ describe('FileDeletionUtility', () => {
         '/c',
         '/c/a.txt',
         '/c/f/g/h/j/k/l/q',
-        '/d',
+        '/d'
       ];
       const expected: string[] = ['/'];
       const actual: string[] = FileDeletionUtility.removeChildren(files);

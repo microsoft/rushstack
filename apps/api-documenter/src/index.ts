@@ -15,6 +15,6 @@ export {
   MarkdownDocumenterFeatureContext,
   IMarkdownDocumenterFeatureOnBeforeWritePageArgs,
   IMarkdownDocumenterFeatureOnFinishedArgs,
-  MarkdownDocumenterFeature,
+  MarkdownDocumenterFeature
 } from './plugin/MarkdownDocumenterFeature';
 export { PluginFeature, PluginFeatureContext, PluginFeatureInitialization } from './plugin/PluginFeature';

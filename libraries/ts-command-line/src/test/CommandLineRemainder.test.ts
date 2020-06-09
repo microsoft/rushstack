@@ -11,29 +11,29 @@ import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction'
 function createParser(): DynamicCommandLineParser {
   const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser({
     toolFilename: 'example',
-    toolDescription: 'An example project',
+    toolDescription: 'An example project'
   });
   commandLineParser.defineFlagParameter({
     parameterLongName: '--verbose',
-    description: 'A flag that affects all actions',
+    description: 'A flag that affects all actions'
   });
 
   const action: DynamicCommandLineAction = new DynamicCommandLineAction({
     actionName: 'run',
     summary: 'does the job',
-    documentation: 'a longer description',
+    documentation: 'a longer description'
   });
   commandLineParser.addAction(action);
 
   action.defineStringParameter({
     parameterLongName: '--title',
     description: 'A string',
-    argumentName: 'TEXT',
+    argumentName: 'TEXT'
   });
 
   // Although this is defined BEFORE the parameter, but it should still capture the end
   action.defineCommandLineRemainder({
-    description: 'The action remainder',
+    description: 'The action remainder'
   });
 
   return commandLineParser;

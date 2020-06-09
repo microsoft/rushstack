@@ -14,7 +14,7 @@ function createDummyTask(name: string, action?: () => void): ITaskDefinition {
       }
       return Promise.resolve(TaskStatus.Success);
     },
-    hadEmptyScript: false,
+    hadEmptyScript: false
   };
 }
 
@@ -36,7 +36,7 @@ describe('TaskCollection', () => {
   describe('Dependencies', () => {
     beforeEach(() => {
       taskCollection = new TaskCollection({
-        quietMode: false,
+        quietMode: false
       });
     });
 
@@ -72,7 +72,7 @@ describe('TaskCollection', () => {
   describe('Error logging', () => {
     beforeEach(() => {
       taskCollection = new TaskCollection({
-        quietMode: false,
+        quietMode: false
       });
     });
   });

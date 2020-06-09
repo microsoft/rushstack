@@ -35,7 +35,7 @@ export class ApiExtractorTask extends RSCTask<IApiExtractorTaskConfig> {
     this.initializeRushStackCompiler();
 
     const extractorOptions: IExtractorInvokeOptions = {
-      localBuild: !this.buildConfig.production,
+      localBuild: !this.buildConfig.production
     };
 
     const ApiExtractorRunner: typeof TApiExtractorRunner = this._rushStackCompiler.ApiExtractorRunner;
@@ -46,7 +46,7 @@ export class ApiExtractorTask extends RSCTask<IApiExtractorTaskConfig> {
     const apiExtractorRunner: TApiExtractorRunner = new ApiExtractorRunner(
       {
         fileError: this.fileError.bind(this),
-        fileWarning: this.fileWarning.bind(this),
+        fileWarning: this.fileWarning.bind(this)
       },
       extractorConfig,
       extractorOptions,

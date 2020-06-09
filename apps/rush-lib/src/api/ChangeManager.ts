@@ -28,11 +28,11 @@ export class ChangeManager {
           {
             comment: '',
             packageName: projectName,
-            type: 'none',
-          },
+            type: 'none'
+          }
         ],
         packageName: projectName,
-        email: emailAddress,
+        email: emailAddress
       };
 
       return new ChangeFile(changefile, rushConfiguration).writeSync();

@@ -221,11 +221,11 @@ export class JsonSchema {
       const newValidator: Validator = new Validator({
         breakOnFirstError: false,
         noTypeless: true,
-        noExtraKeywords: true,
+        noExtraKeywords: true
       });
 
       const anythingSchema: JsonObject = {
-        type: ['array', 'boolean', 'integer', 'number', 'object', 'string'],
+        type: ['array', 'boolean', 'integer', 'number', 'object', 'string']
       };
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -288,7 +288,7 @@ export class JsonSchema {
       const errorDetails: string = JsonSchema._formatErrorDetails(this._validator!.getLastErrors());
 
       const args: IJsonSchemaErrorInfo = {
-        details: errorDetails,
+        details: errorDetails
       };
       errorCallback(args);
     }

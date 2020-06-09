@@ -359,7 +359,7 @@ export class Span {
 
     this._writeModifiedText({
       output,
-      separatorOverride: undefined,
+      separatorOverride: undefined
     });
 
     return output.toString();
@@ -368,7 +368,7 @@ export class Span {
   public writeModifiedText(output: StringBuilder): void {
     this._writeModifiedText({
       output,
-      separatorOverride: undefined,
+      separatorOverride: undefined
     });
   }
 

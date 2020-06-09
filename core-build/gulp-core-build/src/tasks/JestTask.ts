@@ -106,7 +106,7 @@ export class JestTask extends GulpTask<IJestConfig> {
       testPathIgnorePatterns: ['<rootDir>/(src|lib-amd|lib-es6|coverage|build|docs|node_modules)/'],
       // Some unit tests rely on data folders that look like packages.  This confuses jest-hast-map
       // when it tries to scan for package.json files.
-      modulePathIgnorePatterns: ['<rootDir>/(src|lib)/.*/package.json'],
+      modulePathIgnorePatterns: ['<rootDir>/(src|lib)/.*/package.json']
     });
   }
 
@@ -149,9 +149,9 @@ export class JestTask extends GulpTask<IJestConfig> {
           path.join(__dirname, 'JestReporter.js'),
           {
             outputFilePath: path.join(this.buildConfig.tempFolder, 'jest-results', 'test-results.xml'),
-            writeNUnitResults: this.taskConfig.writeNUnitResults,
-          },
-        ],
+            writeNUnitResults: this.taskConfig.writeNUnitResults
+          }
+        ]
       ],
       rootDir: this.buildConfig.rootPath,
       testMatch: this.taskConfig.testMatch ? this.taskConfig.testMatch : ['**/*.test.js?(x)'],
@@ -163,7 +163,7 @@ export class JestTask extends GulpTask<IJestConfig> {
       // https://github.com/facebook/jest/issues/5913
       // As a workaround, resolve it for Jest:
       testEnvironment: require.resolve('jest-environment-jsdom'),
-      cacheDirectory: path.join(this.buildConfig.rootPath, this.buildConfig.tempFolder, 'jest-cache'),
+      cacheDirectory: path.join(this.buildConfig.rootPath, this.buildConfig.tempFolder, 'jest-cache')
     };
 
     // suppress 'Running coverage on untested files...' warning
@@ -215,7 +215,7 @@ export class JestTask extends GulpTask<IJestConfig> {
     if (FileSystem.exists(testFile)) {
       FileSystem.copyFile({
         sourcePath: snapSourceFile,
-        destinationPath: snapDestFile,
+        destinationPath: snapDestFile
       });
       return true;
     } else {

@@ -25,7 +25,7 @@ export enum PackageDependencyKind {
   /**
    * The dependency should be a symlink to a project that is locally built by Rush..
    */
-  LocalLink,
+  LocalLink
 }
 
 export interface IPackageDependency {
@@ -96,7 +96,7 @@ export class NpmPackage extends BasePackage {
       package: packageJson,
       parent: null, // eslint-disable-line @rushstack/no-null
       path: installFolderName,
-      realpath: installFolderName,
+      realpath: installFolderName
     };
     return NpmPackage.createFromNpm(npmPackage);
   }
@@ -123,7 +123,7 @@ export class NpmPackage extends BasePackage {
           dependencies.push({
             name: dependencyName,
             versionRange: packageJson.optionalDependencies[dependencyName],
-            kind: PackageDependencyKind.Optional,
+            kind: PackageDependencyKind.Optional
           });
         }
       }
@@ -135,7 +135,7 @@ export class NpmPackage extends BasePackage {
           dependencies.push({
             name: dependencyName,
             versionRange: packageJson.dependencies[dependencyName],
-            kind: PackageDependencyKind.Normal,
+            kind: PackageDependencyKind.Normal
           });
         }
       }
@@ -147,7 +147,7 @@ export class NpmPackage extends BasePackage {
           dependencies.push({
             name: dependencyName,
             versionRange: packageJson.dependencies![dependencyName],
-            kind: PackageDependencyKind.LocalLink,
+            kind: PackageDependencyKind.LocalLink
           });
         }
       }

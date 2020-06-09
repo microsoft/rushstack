@@ -12,7 +12,7 @@ import {
   ApiItem,
   ApiItemContainerMixin,
   ApiDocumentedItem,
-  IResolveDeclarationReferenceResult,
+  IResolveDeclarationReferenceResult
 } from '@microsoft/api-extractor-model';
 
 export abstract class BaseAction extends CommandLineAction {
@@ -30,7 +30,7 @@ export abstract class BaseAction extends CommandLineAction {
       argumentName: 'FOLDER1',
       description:
         `Specifies the input folder containing the *.api.json files to be processed.` +
-        ` If omitted, the default is "./input"`,
+        ` If omitted, the default is "./input"`
     });
 
     this._outputFolderParameter = this.defineStringParameter({
@@ -40,7 +40,7 @@ export abstract class BaseAction extends CommandLineAction {
       description:
         `Specifies the output folder where the documentation will be written.` +
         ` ANY EXISTING CONTENTS WILL BE DELETED!` +
-        ` If omitted, the default is "./${this.actionName}"`,
+        ` If omitted, the default is "./${this.actionName}"`
     });
   }
 

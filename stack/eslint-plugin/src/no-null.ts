@@ -11,15 +11,15 @@ const noNullRule: TSESLint.RuleModule<MessageIds, Options> = {
     type: 'problem',
     messages: {
       'error-usage-of-null':
-        'Usage of "null" is deprecated except when received from legacy APIs; use "undefined" instead',
+        'Usage of "null" is deprecated except when received from legacy APIs; use "undefined" instead'
     },
     schema: [],
     docs: {
       description: 'Prevent usage of JavaScript\'s "null" keyword',
       category: 'Stylistic Issues',
       recommended: 'error',
-      url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin',
-    },
+      url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
+    }
   },
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {
     return {
@@ -37,9 +37,9 @@ const noNullRule: TSESLint.RuleModule<MessageIds, Options> = {
             context.report({ node, messageId: 'error-usage-of-null' });
           }
         }
-      },
+      }
     };
-  },
+  }
 };
 
 export { noNullRule };

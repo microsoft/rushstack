@@ -107,7 +107,7 @@ export class AstSymbolTable {
 
     this._exportAnalyzer = new ExportAnalyzer(this._program, this._typeChecker, bundledPackageNames, {
       analyze: this.analyze.bind(this),
-      fetchAstSymbol: this._fetchAstSymbol.bind(this),
+      fetchAstSymbol: this._fetchAstSymbol.bind(this)
     });
 
     this._alreadyWarnedGlobalNames = new Set<string>();
@@ -461,7 +461,7 @@ export class AstSymbolTable {
       followedSymbol: symbol,
       isExternal: isExternal,
       includeNominalAnalysis: true,
-      addIfMissing: true,
+      addIfMissing: true
     });
 
     if (!astSymbol) {
@@ -572,7 +572,7 @@ export class AstSymbolTable {
             followedSymbol: parentSymbol,
             isExternal: options.isExternal,
             includeNominalAnalysis: false,
-            addIfMissing: true,
+            addIfMissing: true
           });
           if (!parentAstSymbol) {
             throw new InternalError('Unable to construct a parent AstSymbol for ' + followedSymbol.name);
@@ -589,7 +589,7 @@ export class AstSymbolTable {
         isExternal: options.isExternal,
         nominalAnalysis: nominalAnalysis,
         parentAstSymbol: parentAstSymbol,
-        rootAstSymbol: parentAstSymbol ? parentAstSymbol.rootAstSymbol : undefined,
+        rootAstSymbol: parentAstSymbol ? parentAstSymbol.rootAstSymbol : undefined
       });
 
       this._astSymbolsBySymbol.set(followedSymbol, astSymbol);
@@ -614,7 +614,7 @@ export class AstSymbolTable {
         const astDeclaration: AstDeclaration = new AstDeclaration({
           declaration,
           astSymbol,
-          parent: parentAstDeclaration,
+          parent: parentAstDeclaration
         });
 
         this._astDeclarationsByDeclaration.set(declaration, astDeclaration);

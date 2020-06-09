@@ -95,7 +95,7 @@ export class PackageNameParser {
     const result: IParsedPackageNameOrError = {
       scope: '',
       unscopedName: '',
-      error: '',
+      error: ''
     };
 
     let input: string = packageName;

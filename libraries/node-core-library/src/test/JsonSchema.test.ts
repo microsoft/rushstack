@@ -19,7 +19,7 @@ describe('JsonSchema', () => {
     const jsonObject: JsonObject = JsonFile.loadAndValidate(jsonPath, schema);
     expect(jsonObject).toMatchObject({
       exampleString: 'This is a string',
-      exampleArray: ['apple', 'banana', 'coconut'],
+      exampleArray: ['apple', 'banana', 'coconut']
     });
   });
 

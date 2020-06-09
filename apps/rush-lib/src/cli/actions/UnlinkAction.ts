@@ -16,7 +16,7 @@ export class UnlinkAction extends BaseRushAction {
         'This removes the symlinks created by the "rush link" command. This is useful for' +
         ' cleaning a repo using "git clean" without accidentally deleting source files, or for using standard NPM' +
         ' commands on a project.',
-      parser,
+      parser
     });
   }
 

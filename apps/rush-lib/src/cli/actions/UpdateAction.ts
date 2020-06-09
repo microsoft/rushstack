@@ -28,7 +28,7 @@ export class UpdateAction extends BaseInstallAction {
         ' If there is nothing to do, "rush update" is instantaneous.' +
         ' NOTE: In certain cases "rush install" should be used instead of "rush update"' +
         ' -- for details, see the command help for "rush install".',
-      parser,
+      parser
     });
   }
 
@@ -43,7 +43,7 @@ export class UpdateAction extends BaseInstallAction {
         ' This conservative approach prevents your PR from getting involved with package updates that' +
         ' are unrelated to your work. Use "--full" when you really want to update all dependencies' +
         ' to the latest SemVer-compatible version.  This should be done periodically by a person' +
-        ' or robot whose role is to deal with potential upgrade regressions.',
+        ' or robot whose role is to deal with potential upgrade regressions.'
     });
     this._recheckParameter = this.defineFlagParameter({
       parameterLongName: '--recheck',
@@ -52,7 +52,7 @@ export class UpdateAction extends BaseInstallAction {
         ' then "rush update" will skip invoking the package manager at all.  In certain situations' +
         ' this heuristic may be inaccurate.  Use the "--recheck" flag to force the package manager' +
         " to process the shrinkwrap file.  This will also update your shrinkwrap file with Rush's fixups." +
-        ' (To minimize shrinkwrap churn, these fixups are normally performed only in the temporary folder.)',
+        ' (To minimize shrinkwrap churn, these fixups are normally performed only in the temporary folder.)'
     });
   }
 
@@ -69,7 +69,7 @@ export class UpdateAction extends BaseInstallAction {
       variant: this._variant.value,
       // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
       // it is safe to assume that the value is not null
-      maxInstallAttempts: this._maxInstallAttempts.value!,
+      maxInstallAttempts: this._maxInstallAttempts.value!
     };
   }
 }

@@ -13,7 +13,7 @@ import {
   ExtractorMessage,
   ExtractorMessageCategory,
   IExtractorMessageOptions,
-  IExtractorMessageProperties,
+  IExtractorMessageProperties
 } from '../api/ExtractorMessage';
 import { ExtractorMessageId, allExtractorMessageIds } from '../api/ExtractorMessageId';
 import { IExtractorMessagesConfig, IConfigMessageReportingRule } from '../api/IConfigFile';
@@ -53,11 +53,11 @@ export class MessageRouter {
   private _reportingRuleByMessageId: Map<string, IReportingRule> = new Map<string, IReportingRule>();
   private _compilerDefaultRule: IReportingRule = {
     logLevel: ExtractorLogLevel.None,
-    addToApiReportFile: false,
+    addToApiReportFile: false
   };
   private _extractorDefaultRule: IReportingRule = {
     logLevel: ExtractorLogLevel.None,
-    addToApiReportFile: false,
+    addToApiReportFile: false
   };
   private _tsdocDefaultRule: IReportingRule = { logLevel: ExtractorLogLevel.None, addToApiReportFile: false };
 
@@ -164,7 +164,7 @@ export class MessageRouter {
   private static _getNormalizedRule(rule: IConfigMessageReportingRule): IReportingRule {
     return {
       logLevel: rule.logLevel || 'none',
-      addToApiReportFile: rule.addToApiReportFile || false,
+      addToApiReportFile: rule.addToApiReportFile || false
     };
   }
 
@@ -186,7 +186,7 @@ export class MessageRouter {
     const options: IExtractorMessageOptions = {
       category: ExtractorMessageCategory.Compiler,
       messageId: `TS${diagnostic.code}`,
-      text: messageText,
+      text: messageText
     };
 
     if (diagnostic.file) {
@@ -252,7 +252,7 @@ export class MessageRouter {
         text: message.unformattedText,
         sourceFilePath: sourceFile.fileName,
         sourceFileLine: lineAndCharacter.line + 1,
-        sourceFileColumn: lineAndCharacter.character + 1,
+        sourceFileColumn: lineAndCharacter.character + 1
       };
 
       this._sourceMapper.updateExtractorMessageOptions(options);
@@ -354,7 +354,7 @@ export class MessageRouter {
       sourceFilePath: sourceFile.fileName,
       sourceFileLine: lineAndCharacter.line + 1,
       sourceFileColumn: lineAndCharacter.character + 1,
-      properties,
+      properties
     };
 
     this._sourceMapper.updateExtractorMessageOptions(options);
@@ -448,7 +448,7 @@ export class MessageRouter {
         messageId,
         text: message,
         properties,
-        logLevel: ExtractorLogLevel.Error,
+        logLevel: ExtractorLogLevel.Error
       })
     );
   }
@@ -464,7 +464,7 @@ export class MessageRouter {
         messageId,
         text: message,
         properties,
-        logLevel: ExtractorLogLevel.Warning,
+        logLevel: ExtractorLogLevel.Warning
       })
     );
   }
@@ -480,7 +480,7 @@ export class MessageRouter {
         messageId,
         text: message,
         properties,
-        logLevel: ExtractorLogLevel.Info,
+        logLevel: ExtractorLogLevel.Info
       })
     );
   }
@@ -496,7 +496,7 @@ export class MessageRouter {
         messageId,
         text: message,
         properties,
-        logLevel: ExtractorLogLevel.Verbose,
+        logLevel: ExtractorLogLevel.Verbose
       })
     );
   }

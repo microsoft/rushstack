@@ -16,7 +16,7 @@ export interface ISudoSyncResult {
 export function runSudoSync(params: string[]): ISudoSyncResult {
   const sudoResult: child_process.ChildProcess = sudo(params, {
     cachePassword: false,
-    prompt: 'Enter your password: ',
+    prompt: 'Enter your password: '
   });
 
   const stderr: string[] = [];

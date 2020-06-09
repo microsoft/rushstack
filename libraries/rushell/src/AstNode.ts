@@ -11,7 +11,7 @@ export const enum AstKind {
   Command = 'Command',
   CompoundWord = 'CompoundWord',
   VariableExpansion = 'VariableExpansion',
-  Text = 'Text',
+  Text = 'Text'
 }
 
 /**

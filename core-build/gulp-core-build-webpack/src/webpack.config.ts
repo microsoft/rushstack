@@ -18,30 +18,30 @@ const webpackConfiguration: Webpack.Configuration = {
   devtool: isProduction ? undefined : 'source-map',
 
   entry: {
-    [packageJSON.name]: path.join(__dirname, webpackTask.buildConfig.libFolder, 'index.js'),
+    [packageJSON.name]: path.join(__dirname, webpackTask.buildConfig.libFolder, 'index.js')
   },
 
   output: {
     libraryTarget: 'umd',
     path: path.join(__dirname, webpackTask.buildConfig.distFolder),
-    filename: `[name]${isProduction ? '.min' : ''}.js`,
+    filename: `[name]${isProduction ? '.min' : ''}.js`
   },
 
   // The typings are missing the "object" option here (https://webpack.js.org/configuration/externals/#object)
   externals: {
     react: {
       amd: 'react',
-      commonjs: 'react',
+      commonjs: 'react'
     },
     'react-dom': {
       amd: 'react-dom',
-      commonjs: 'react-dom',
-    },
+      commonjs: 'react-dom'
+    }
   } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
 
   plugins: [
     // new WebpackNotifierPlugin()
-  ],
+  ]
 };
 
 if (isProduction && webpackConfiguration.plugins) {
@@ -50,8 +50,8 @@ if (isProduction && webpackConfiguration.plugins) {
       mangle: true,
       compress: {
         dead_code: true,
-        warnings: false,
-      },
+        warnings: false
+      }
     })
   );
 }

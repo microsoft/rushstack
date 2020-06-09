@@ -25,7 +25,7 @@ export class ScanAction extends BaseConfiglessRushAction {
         ` "require('__')", "System.import('__'), etc.  The results are only approximate,` +
         ` but generally pretty accurate.`,
       safeForSimultaneousRushProcesses: true,
-      parser,
+      parser
     });
   }
 
@@ -71,7 +71,7 @@ export class ScanAction extends BaseConfiglessRushAction {
 
       // Example:
       // /// <reference types="something" />
-      /\/\/\/\s*<\s*reference\s+types\s*=\s*["]([^"]+)["]\s*\/>/,
+      /\/\/\/\s*<\s*reference\s+types\s*=\s*["]([^"]+)["]\s*\/>/
     ];
 
     // Example: "my-package/lad/dee/dah" --> "my-package"

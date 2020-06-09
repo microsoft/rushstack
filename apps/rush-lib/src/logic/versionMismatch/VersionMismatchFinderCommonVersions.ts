@@ -12,7 +12,7 @@ export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEn
   public constructor(commonVersionsConfiguration: CommonVersionsConfiguration) {
     super({
       friendlyName: `preferred versions from ${RushConstants.commonVersionsFilename}`,
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     });
 
     this._fileManager = commonVersionsConfiguration;

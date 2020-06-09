@@ -23,7 +23,7 @@ export class SourceFileLocationFormatter {
     return SourceFileLocationFormatter.formatPath(sourceFile.fileName, {
       sourceFileLine: lineAndCharacter.line + 1,
       sourceFileColumn: lineAndCharacter.character + 1,
-      workingPackageFolderPath,
+      workingPackageFolderPath
     });
   }
 

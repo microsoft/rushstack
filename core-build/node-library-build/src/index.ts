@@ -10,7 +10,7 @@ import {
   serial,
   parallel,
   IExecutable,
-  setConfig,
+  setConfig
 } from '@microsoft/gulp-core-build';
 import { tscCmd, lintCmd, apiExtractor } from '@microsoft/gulp-core-build-typescript';
 import { instrument, mocha } from '@microsoft/gulp-core-build-mocha';
@@ -36,7 +36,7 @@ const PRODUCTION: boolean =
   process.argv.indexOf('--production') !== -1 || process.argv.indexOf('--ship') !== -1;
 setConfig({
   production: PRODUCTION,
-  shouldWarningsFailBuild: PRODUCTION,
+  shouldWarningsFailBuild: PRODUCTION
 });
 
 const buildSubtask: IExecutable = serial(

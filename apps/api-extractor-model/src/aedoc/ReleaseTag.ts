@@ -41,7 +41,7 @@ export enum ReleaseTag {
    * Indicates that an API item has been officially released. It is part of the supported
    * contract (e.g. SemVer) for a package.
    */
-  Public = 4,
+  Public = 4
 }
 
 /**

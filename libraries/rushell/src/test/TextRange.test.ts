@@ -21,7 +21,7 @@ function matchSnapshot(textRange: TextRange): void {
       c: c,
       context: context,
       i: i,
-      location: textRange.getLocation(i),
+      location: textRange.getLocation(i)
     }).toMatchSnapshot();
   }
 }
@@ -42,7 +42,7 @@ test('getLocation() basic', () => {
       'L2',
       '', // (line 3 is blank)
       'L4',
-      'L5+CR\rL5+CRLF\r\nL6+LFCR\n\rL7',
+      'L5+CR\rL5+CRLF\r\nL6+LFCR\n\rL7'
     ].join('\n')
   );
   matchSnapshot(textRange);

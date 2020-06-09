@@ -12,7 +12,7 @@ export class WidgetCommandLine extends CommandLineParser {
   public constructor() {
     super({
       toolFilename: 'widget',
-      toolDescription: 'The "widget" tool is a code sample for using the @rushstack/ts-command-line library.',
+      toolDescription: 'The "widget" tool is a code sample for using the @rushstack/ts-command-line library.'
     });
 
     this.addAction(new PushAction());
@@ -24,7 +24,7 @@ export class WidgetCommandLine extends CommandLineParser {
     this._verbose = this.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
-      description: 'Show extra logging detail',
+      description: 'Show extra logging detail'
     });
   }
 

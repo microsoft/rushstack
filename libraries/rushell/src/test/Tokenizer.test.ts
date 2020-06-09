@@ -18,13 +18,13 @@ function matchSnapshot(input: string): void {
   const reportedTokens: { kind: string; value: string }[] = tokenizer.readTokens().map((token) => {
     return {
       kind: TokenKind[token.kind],
-      value: escape(token.toString()),
+      value: escape(token.toString())
     };
   });
 
   expect({
     input: escape(tokenizer.input.toString()),
-    tokens: reportedTokens,
+    tokens: reportedTokens
   }).toMatchSnapshot();
 }
 

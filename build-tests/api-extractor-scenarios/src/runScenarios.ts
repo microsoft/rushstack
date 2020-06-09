@@ -11,7 +11,7 @@ import {
   ExtractorResult,
   ExtractorMessage,
   ConsoleMessageId,
-  ExtractorLogLevel,
+  ExtractorLogLevel
 } from '@microsoft/api-extractor';
 
 export function runScenarios(buildConfigPath: string): void {
@@ -34,17 +34,17 @@ export function runScenarios(buildConfigPath: string): void {
 
       apiReport: {
         enabled: true,
-        reportFolder: `<projectFolder>/etc/test-outputs/${scenarioFolderName}`,
+        reportFolder: `<projectFolder>/etc/test-outputs/${scenarioFolderName}`
       },
 
       dtsRollup: {
         enabled: true,
-        untrimmedFilePath: `<projectFolder>/etc/test-outputs/${scenarioFolderName}/rollup.d.ts`,
+        untrimmedFilePath: `<projectFolder>/etc/test-outputs/${scenarioFolderName}/rollup.d.ts`
       },
 
       docModel: {
         enabled: true,
-        apiJsonFilePath: `<projectFolder>/etc/test-outputs/${scenarioFolderName}/<unscopedPackageName>.api.json`,
+        apiJsonFilePath: `<projectFolder>/etc/test-outputs/${scenarioFolderName}/<unscopedPackageName>.api.json`
       },
 
       messages: {
@@ -53,17 +53,17 @@ export function runScenarios(buildConfigPath: string): void {
           // TODO: Capture the full list of warnings in the tracked test output file
           'ae-cyclic-inherit-doc': {
             logLevel: 'warning',
-            addToApiReportFile: true,
+            addToApiReportFile: true
           },
           'ae-unresolved-link': {
             logLevel: 'warning',
-            addToApiReportFile: true,
-          },
-        },
+            addToApiReportFile: true
+          }
+        }
       },
 
       testMode: true,
-      ...apiExtractorJsonOverrides,
+      ...apiExtractorJsonOverrides
     };
 
     const apiExtractorJsonPath: string = `./temp/configs/api-extractor-${scenarioFolderName}.json`;
@@ -85,7 +85,7 @@ export function runScenarios(buildConfigPath: string): void {
 
     if (!compilerState) {
       compilerState = CompilerState.create(extractorConfig, {
-        additionalEntryPoints: entryPoints,
+        additionalEntryPoints: entryPoints
       });
     }
 
@@ -98,7 +98,7 @@ export function runScenarios(buildConfigPath: string): void {
           message.logLevel = ExtractorLogLevel.None;
         }
       },
-      compilerState,
+      compilerState
     });
 
     if (extractorResult.errorCount > 0) {

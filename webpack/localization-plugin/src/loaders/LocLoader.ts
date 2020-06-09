@@ -27,7 +27,7 @@ export default loaderFactory(function (
     content,
     terminal,
     filePath: locFilePath,
-    resxNewlineNormalization: options.resxNewlineNormalization,
+    resxNewlineNormalization: options.resxNewlineNormalization
   });
   const { additionalLoadedFilePaths, errors } = pluginInstance.addDefaultLocFile(
     terminal,

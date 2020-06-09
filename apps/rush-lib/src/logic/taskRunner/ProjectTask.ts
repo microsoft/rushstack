@@ -89,7 +89,7 @@ export class ProjectTask implements ITaskDefinition {
     try {
       deps = {
         files: this._packageChangeAnalyzer.getPackageDepsHash(this._rushProject.packageName)!.files,
-        arguments: this._commandToRun,
+        arguments: this._commandToRun
       };
     } catch (error) {
       writer.writeLine(
@@ -156,7 +156,7 @@ export class ProjectTask implements ITaskDefinition {
           // Write deps on success.
           if (currentPackageDeps) {
             JsonFile.save(currentPackageDeps, currentDepsPath, {
-              ensureFolderExists: true,
+              ensureFolderExists: true
             });
           }
 
@@ -172,8 +172,8 @@ export class ProjectTask implements ITaskDefinition {
           initCwd: this._rushConfiguration.commonTempFolder,
           handleOutput: true,
           environmentPathOptions: {
-            includeProjectBin: true,
-          },
+            includeProjectBin: true
+          }
         });
 
         // Hook into events, in order to get live streaming of build log
@@ -201,7 +201,7 @@ export class ProjectTask implements ITaskDefinition {
               // Write deps on success.
               if (currentPackageDeps) {
                 JsonFile.save(currentPackageDeps, currentDepsPath, {
-                  ensureFolderExists: true,
+                  ensureFolderExists: true
                 });
               }
               resolve(TaskStatus.Success);

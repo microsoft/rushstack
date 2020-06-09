@@ -106,7 +106,7 @@ export class Collector {
     this.workingPackage = new WorkingPackage({
       packageFolder: this.extractorConfig.packageFolder,
       packageJson: this.extractorConfig.packageJson,
-      entryPointSourceFile,
+      entryPointSourceFile
     });
 
     this.messageRouter = options.messageRouter;
@@ -543,7 +543,7 @@ export class Collector {
 
     // Update this last when we're sure no exceptions were thrown
     astSymbol.symbolMetadata = new SymbolMetadata({
-      maxEffectiveReleaseTag,
+      maxEffectiveReleaseTag
     });
   }
 
@@ -656,7 +656,7 @@ export class Collector {
       isSealed: false,
       isVirtual: false,
       isPreapproved: false,
-      releaseTagSameAsParent: false,
+      releaseTagSameAsParent: false
     };
 
     const parserContext: tsdoc.ParserContext | undefined = declarationMetadata.tsdocParserContext;

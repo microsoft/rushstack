@@ -84,17 +84,17 @@ export class SymlinkAnalyzer {
           currentNode = {
             kind: 'link',
             nodePath: currentPath,
-            linkTarget: resolvedLinkTargetPath,
+            linkTarget: resolvedLinkTargetPath
           };
         } else if (linkStats.isDirectory()) {
           currentNode = {
             kind: 'folder',
-            nodePath: currentPath,
+            nodePath: currentPath
           };
         } else if (linkStats.isFile()) {
           currentNode = {
             kind: 'file',
-            nodePath: currentPath,
+            nodePath: currentPath
           };
         } else {
           throw new Error('Unknown object type: ' + currentPath);
@@ -116,7 +116,7 @@ export class SymlinkAnalyzer {
             const linkInfo: ILinkInfo = {
               kind: targetIsDirectory ? 'folderLink' : 'fileLink',
               linkPath: currentNode.nodePath,
-              targetPath: targetNode.nodePath,
+              targetPath: targetNode.nodePath
             };
             this._linkInfosByPath.set(currentNode.nodePath, linkInfo);
           }

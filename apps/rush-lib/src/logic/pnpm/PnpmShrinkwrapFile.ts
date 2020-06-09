@@ -9,7 +9,7 @@ import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
 import {
   PackageManagerOptionsConfigurationBase,
-  PnpmOptionsConfiguration,
+  PnpmOptionsConfiguration
 } from '../../api/RushConfiguration';
 import { IPolicyValidatorOptions } from '../policy/PolicyValidator';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
@@ -20,7 +20,7 @@ const SHRINKWRAP_YAML_FORMAT: yaml.DumpOptions = {
   lineWidth: 1000,
   noCompatMode: true,
   noRefs: true,
-  sortKeys: true,
+  sortKeys: true
 };
 
 export interface IPeerDependenciesMetaYaml {

@@ -8,7 +8,7 @@ import * as os from 'os';
  * @public
  */
 export const enum Encoding {
-  Utf8 = 'utf8',
+  Utf8 = 'utf8'
 }
 
 /**
@@ -32,7 +32,7 @@ export const enum NewlineKind {
   /**
    * Default newline type for this operating system (`os.EOL`).
    */
-  OsDefault = 'os',
+  OsDefault = 'os'
 }
 
 /**

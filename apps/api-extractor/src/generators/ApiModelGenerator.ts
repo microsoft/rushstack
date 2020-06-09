@@ -30,7 +30,7 @@ import {
   ApiVariable,
   ApiTypeAlias,
   ApiCallSignature,
-  IApiTypeParameterOptions,
+  IApiTypeParameterOptions
 } from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';
@@ -66,7 +66,7 @@ export class ApiModelGenerator {
 
     const apiPackage: ApiPackage = new ApiPackage({
       name: this._collector.workingPackage.name,
-      docComment: packageDocComment,
+      docComment: packageDocComment
     });
     this._apiModel.addMember(apiPackage);
 
@@ -233,7 +233,7 @@ export class ApiModelGenerator {
         parameters,
         overloadIndex,
         excerptTokens,
-        returnTypeTokenRange,
+        returnTypeTokenRange
       });
 
       parentApiItem.addMember(apiCallSignature);
@@ -272,7 +272,7 @@ export class ApiModelGenerator {
         releaseTag,
         parameters,
         overloadIndex,
-        excerptTokens,
+        excerptTokens
       });
 
       parentApiItem.addMember(apiConstructor);
@@ -329,7 +329,7 @@ export class ApiModelGenerator {
         excerptTokens,
         typeParameters,
         extendsTokenRange,
-        implementsTokenRanges,
+        implementsTokenRanges
       });
 
       parentApiItem.addMember(apiClass);
@@ -380,7 +380,7 @@ export class ApiModelGenerator {
         parameters,
         overloadIndex,
         excerptTokens,
-        returnTypeTokenRange,
+        returnTypeTokenRange
       });
 
       parentApiItem.addMember(apiConstructSignature);
@@ -440,7 +440,7 @@ export class ApiModelGenerator {
         docComment,
         releaseTag,
         excerptTokens,
-        initializerTokenRange,
+        initializerTokenRange
       });
 
       parentApiItem.addMember(apiEnumMember);
@@ -493,7 +493,7 @@ export class ApiModelGenerator {
         parameters,
         overloadIndex,
         excerptTokens,
-        returnTypeTokenRange,
+        returnTypeTokenRange
       });
 
       parentApiItem.addMember(apiFunction);
@@ -536,7 +536,7 @@ export class ApiModelGenerator {
         parameters,
         overloadIndex,
         excerptTokens,
-        returnTypeTokenRange,
+        returnTypeTokenRange
       });
 
       parentApiItem.addMember(apiIndexSignature);
@@ -588,7 +588,7 @@ export class ApiModelGenerator {
         releaseTag,
         excerptTokens,
         typeParameters,
-        extendsTokenRanges,
+        extendsTokenRanges
       });
 
       parentApiItem.addMember(apiInterface);
@@ -645,7 +645,7 @@ export class ApiModelGenerator {
         parameters,
         overloadIndex,
         excerptTokens,
-        returnTypeTokenRange,
+        returnTypeTokenRange
       });
 
       parentApiItem.addMember(apiMethod);
@@ -697,7 +697,7 @@ export class ApiModelGenerator {
         parameters,
         overloadIndex,
         excerptTokens,
-        returnTypeTokenRange,
+        returnTypeTokenRange
       });
 
       parentApiItem.addMember(apiMethodSignature);
@@ -761,7 +761,7 @@ export class ApiModelGenerator {
         releaseTag,
         isStatic,
         excerptTokens,
-        propertyTypeTokenRange,
+        propertyTypeTokenRange
       });
       parentApiItem.addMember(apiProperty);
     } else {
@@ -800,7 +800,7 @@ export class ApiModelGenerator {
         docComment,
         releaseTag,
         excerptTokens,
-        propertyTypeTokenRange,
+        propertyTypeTokenRange
       });
 
       parentApiItem.addMember(apiPropertySignature);
@@ -847,7 +847,7 @@ export class ApiModelGenerator {
         typeParameters,
         releaseTag,
         excerptTokens,
-        typeTokenRange,
+        typeTokenRange
       });
 
       parentApiItem.addMember(apiTypeAlias);
@@ -928,7 +928,7 @@ export class ApiModelGenerator {
         typeParameters.push({
           typeParameterName: typeParameter.name.getText().trim(),
           constraintTokenRange,
-          defaultTypeTokenRange,
+          defaultTypeTokenRange
         });
       }
     }
@@ -945,7 +945,7 @@ export class ApiModelGenerator {
       nodesToCapture.push({ node: parameter.type, tokenRange: parameterTypeTokenRange });
       parameters.push({
         parameterName: parameter.name.getText().trim(),
-        parameterTypeTokenRange,
+        parameterTypeTokenRange
       });
     }
     return parameters;

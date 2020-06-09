@@ -277,7 +277,7 @@ export class PublishUtilities {
   private static _updateCommitDetails(filename: string, changes: IChangeInfo[] | undefined): void {
     try {
       const fileLog: string = execSync('git log -n 1 ' + filename, {
-        cwd: path.dirname(filename),
+        cwd: path.dirname(filename)
       }).toString();
       const author: string = fileLog.match(/Author: (.*)/)![1];
       const commit: string = fileLog.match(/commit (.*)/)![1];
@@ -491,7 +491,7 @@ export class PublishUtilities {
         packageName,
         changeType: change.changeType,
         order: 0,
-        changes: [change],
+        changes: [change]
       };
     } else {
       currentChange = allChanges[packageName];
@@ -636,7 +636,7 @@ export class PublishUtilities {
         const hasChanged: boolean = PublishUtilities._addChange(
           {
             packageName: parentPackageName,
-            changeType,
+            changeType
           },
           allChanges,
           allPackages,
@@ -685,7 +685,7 @@ export class PublishUtilities {
         changeType: ChangeType.dependency,
         comment:
           `Updating dependency "${dependencyName}" from \`${currentDependencyVersion}\`` +
-          ` to \`${dependencies[dependencyName]}\``,
+          ` to \`${dependencies[dependencyName]}\``
       },
       allChanges,
       allPackages,

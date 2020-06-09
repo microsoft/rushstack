@@ -65,7 +65,7 @@ export class PublishGit {
       tagName,
       '-m',
       `${packageName} v${packageVersion}`,
-      ...(commitId ? [commitId] : []),
+      ...(commitId ? [commitId] : [])
     ]);
   }
 

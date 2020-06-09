@@ -66,7 +66,7 @@ export class RushCommandLineParser extends CommandLineParser {
         ' and automates package publishing.  It can manage decoupled subsets of projects with different' +
         ' release and versioning strategies.  A full API is included to facilitate integration with other' +
         ' automation tools.  If you are looking for a proven turnkey solution for monorepo management,' +
-        ' Rush is for you.',
+        ' Rush is for you.'
     });
 
     this._rushOptions = this._normalizeOptions(options || {});
@@ -74,7 +74,7 @@ export class RushCommandLineParser extends CommandLineParser {
     try {
       const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation({
         startingFolder: this._rushOptions.cwd,
-        showVerbose: true,
+        showVerbose: true
       });
       if (rushJsonFilename) {
         this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
@@ -86,7 +86,7 @@ export class RushCommandLineParser extends CommandLineParser {
     NodeJsCompatibility.warnAboutCompatibilityIssues({
       isRushLib: true,
       alreadyReportedNodeTooNewError: this._rushOptions.alreadyReportedNodeTooNewError,
-      rushConfiguration: this.rushConfiguration,
+      rushConfiguration: this.rushConfiguration
     });
 
     this._populateActions();
@@ -106,7 +106,7 @@ export class RushCommandLineParser extends CommandLineParser {
     this._debugParameter = this.defineFlagParameter({
       parameterLongName: '--debug',
       parameterShortName: '-d',
-      description: 'Show the full call stack if an error occurs while executing the tool',
+      description: 'Show the full call stack if an error occurs while executing the tool'
     });
   }
 
@@ -135,7 +135,7 @@ export class RushCommandLineParser extends CommandLineParser {
   private _normalizeOptions(options: Partial<IRushCommandLineParserOptions>): IRushCommandLineParserOptions {
     return {
       cwd: options.cwd || process.cwd(),
-      alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError || false,
+      alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError || false
     };
   }
 
@@ -263,7 +263,7 @@ export class RushCommandLineParser extends CommandLineParser {
             ignoreMissingScript: command.ignoreMissingScript || false,
             ignoreDependencyOrder: command.ignoreDependencyOrder || false,
             incremental: command.incremental || false,
-            allowWarningsInSuccessfulBuild: !!command.allowWarningsInSuccessfulBuild,
+            allowWarningsInSuccessfulBuild: !!command.allowWarningsInSuccessfulBuild
           })
         );
         break;
@@ -279,7 +279,7 @@ export class RushCommandLineParser extends CommandLineParser {
             parser: this,
             commandLineConfiguration: commandLineConfiguration,
 
-            shellCommand: command.shellCommand,
+            shellCommand: command.shellCommand
           })
         );
         break;

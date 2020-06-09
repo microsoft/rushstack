@@ -18,7 +18,7 @@ export const enum CustomDocNodeKind {
   NoteBox = 'NoteBox',
   Table = 'Table',
   TableCell = 'TableCell',
-  TableRow = 'TableRow',
+  TableRow = 'TableRow'
 }
 
 export class CustomDocNodes {
@@ -34,22 +34,22 @@ export class CustomDocNodes {
         { docNodeKind: CustomDocNodeKind.NoteBox, constructor: DocNoteBox },
         { docNodeKind: CustomDocNodeKind.Table, constructor: DocTable },
         { docNodeKind: CustomDocNodeKind.TableCell, constructor: DocTableCell },
-        { docNodeKind: CustomDocNodeKind.TableRow, constructor: DocTableRow },
+        { docNodeKind: CustomDocNodeKind.TableRow, constructor: DocTableRow }
       ]);
 
       configuration.docNodeManager.registerAllowableChildren(CustomDocNodeKind.EmphasisSpan, [
         DocNodeKind.PlainText,
-        DocNodeKind.SoftBreak,
+        DocNodeKind.SoftBreak
       ]);
 
       configuration.docNodeManager.registerAllowableChildren(DocNodeKind.Section, [
         CustomDocNodeKind.Heading,
         CustomDocNodeKind.NoteBox,
-        CustomDocNodeKind.Table,
+        CustomDocNodeKind.Table
       ]);
 
       configuration.docNodeManager.registerAllowableChildren(DocNodeKind.Paragraph, [
-        CustomDocNodeKind.EmphasisSpan,
+        CustomDocNodeKind.EmphasisSpan
       ]);
 
       CustomDocNodes._configuration = configuration;

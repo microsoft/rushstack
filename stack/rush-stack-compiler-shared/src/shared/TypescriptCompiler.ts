@@ -64,7 +64,7 @@ export class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompile
     this._cmdRunner = new CmdRunner(this._standardBuildFolders, this._terminal, {
       packagePath: ToolPaths.typescriptPackagePath,
       packageJson: ToolPaths.typescriptPackageJson,
-      packageBinPath: path.join('bin', 'tsc'),
+      packageBinPath: path.join('bin', 'tsc')
     });
   }
 
@@ -85,7 +85,7 @@ export class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompile
             }
           }
         }
-      },
+      }
     });
   }
 }

@@ -26,7 +26,7 @@ export class PluginLoader {
       try {
         // Look for the package name in the same place as the config file
         const resolvedEntryPointPath: string = resolve.sync(configPlugin.packageName, {
-          basedir: configFileFolder,
+          basedir: configFileFolder
         });
 
         // Load the package
@@ -57,7 +57,7 @@ export class PluginLoader {
 
         const loadedPlugin: ILoadedPlugin = {
           packageName: configPlugin.packageName,
-          manifest,
+          manifest
         };
 
         const featureDefinitionsByName: Map<string, IFeatureDefinition> = new Map<

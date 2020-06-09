@@ -14,7 +14,7 @@ export class StandardScriptUpdater {
   private static readonly _scriptNames: string[] = [
     'install-run.js',
     'install-run-rush.js',
-    'install-run-rushx.js',
+    'install-run-rushx.js'
   ];
 
   /**
@@ -85,7 +85,7 @@ export class StandardScriptUpdater {
         console.log(`Script is out of date; updating "${targetFilePath}"`);
         FileSystem.copyFile({
           sourcePath: sourceFilePath,
-          destinationPath: targetFilePath,
+          destinationPath: targetFilePath
         });
       }
     }

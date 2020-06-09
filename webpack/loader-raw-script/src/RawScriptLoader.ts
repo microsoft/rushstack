@@ -12,7 +12,7 @@ const loaderFn: (content: string) => string = (content: string) => {
   const lines: string[] = [
     '(function (global) {',
     `  eval('${content}');`,
-    '}.call(exports, (function() { return this; }())))',
+    '}.call(exports, (function() { return this; }())))'
   ];
 
   return lines.join(EOL);

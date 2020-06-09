@@ -70,7 +70,7 @@ export class ChangeFiles {
             'detected for them:',
           ...projectsMissingChangeDescriptionsArray.map((projectName) => `- ${projectName}`),
           'To resolve this error, run "rush change." This will generate change description files that must be ' +
-            'committed to source control.',
+            'committed to source control.'
         ].join(EOL)
       );
     }

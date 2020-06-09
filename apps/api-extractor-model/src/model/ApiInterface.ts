@@ -5,19 +5,19 @@ import {
   DeclarationReference,
   Meaning,
   Navigation,
-  Component,
+  Component
 } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import {
   ApiItemContainerMixin,
   IApiItemContainerMixinOptions,
-  IApiItemContainerJson,
+  IApiItemContainerJson
 } from '../mixins/ApiItemContainerMixin';
 import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import {
   IApiReleaseTagMixinOptions,
   ApiReleaseTagMixin,
-  IApiReleaseTagMixinJson,
+  IApiReleaseTagMixinJson
 } from '../mixins/ApiReleaseTagMixin';
 import { IExcerptTokenRange } from '../mixins/Excerpt';
 import { HeritageType } from './HeritageType';
@@ -25,7 +25,7 @@ import { IApiNameMixinOptions, ApiNameMixin, IApiNameMixinJson } from '../mixins
 import {
   IApiTypeParameterListMixinOptions,
   IApiTypeParameterListMixinJson,
-  ApiTypeParameterListMixin,
+  ApiTypeParameterListMixin
 } from '../mixins/ApiTypeParameterListMixin';
 import { DeserializerContext } from './DeserializerContext';
 

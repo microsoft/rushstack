@@ -62,7 +62,7 @@ export class CmdRunner {
       args,
       onData = this._onData.bind(this),
       onError = this._onError.bind(this),
-      onClose = this._onClose.bind(this),
+      onClose = this._onClose.bind(this)
     }: IRunCmdOptions = options;
 
     const packageJson: IPackageJson | undefined = this._options.packageJson;
@@ -95,7 +95,7 @@ export class CmdRunner {
       const spawnResult: childProcess.ChildProcess = childProcess.spawn(nodePath, [binaryPath, ...args], {
         cwd: this._standardBuildFolders.projectFolderPath,
         env: process.env,
-        stdio: 'pipe',
+        stdio: 'pipe'
       });
 
       if (spawnResult.stdout !== null) {

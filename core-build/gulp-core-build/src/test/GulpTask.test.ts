@@ -44,7 +44,7 @@ class StreamTask extends GulpTask<IConfig> {
     setTimeout(() => {
       const file: Vinyl = new Vinyl({
         path: 'test.js',
-        contents: Buffer.from('test'),
+        contents: Buffer.from('test')
       });
 
       stream.push(file);
@@ -98,7 +98,7 @@ class SchemaTask extends GulpTask<ISimpleConfig> {
 
   public constructor() {
     super('schema-task', {
-      shouldDoThings: false,
+      shouldDoThings: false
     });
   }
 

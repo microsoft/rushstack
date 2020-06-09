@@ -68,7 +68,7 @@ export const enum EnvironmentVariableNames {
    * This environment variable can be used to specify the `--target-folder` parameter
    * for the "rush deploy" command.
    */
-  RUSH_DEPLOY_TARGET_FOLDER = 'RUSH_DEPLOY_TARGET_FOLDER',
+  RUSH_DEPLOY_TARGET_FOLDER = 'RUSH_DEPLOY_TARGET_FOLDER'
 }
 
 /**

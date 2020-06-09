@@ -18,7 +18,7 @@ import {
   AlreadyExistsBehavior,
   InternalError,
   NewlineKind,
-  Text,
+  Text
 } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
@@ -273,7 +273,7 @@ export class DeployManager {
                 }
               }
               return filePath;
-            },
+            }
           });
 
           if (!resolvedDependency) {
@@ -366,7 +366,7 @@ export class DeployManager {
       // Use npm-packlist to filter the files.  Using the WalkerSync class (instead of the sync() API) ensures
       // that "bundledDependencies" are not included.
       const walker: npmPacklist.WalkerSync = new npmPacklist.WalkerSync({
-        path: sourceFolderPath,
+        path: sourceFolderPath
       });
       walker.start();
       const npmPackFiles: string[] = walker.result;
@@ -381,7 +381,7 @@ export class DeployManager {
           FileSystem.copyFile({
             sourcePath: copySourcePath,
             destinationPath: copyDestinationPath,
-            alreadyExistsBehavior: AlreadyExistsBehavior.Error,
+            alreadyExistsBehavior: AlreadyExistsBehavior.Error
           });
         }
       }
@@ -395,7 +395,7 @@ export class DeployManager {
         '**/.git',
         '**/.svn',
         '**/.hg',
-        '**/.DS_Store',
+        '**/.DS_Store'
       ]);
 
       FileSystem.copyFiles({
@@ -419,7 +419,7 @@ export class DeployManager {
           } else {
             return true;
           }
-        },
+        }
       });
     }
   }
@@ -431,7 +431,7 @@ export class DeployManager {
     const linkInfo: ILinkInfo = {
       kind: originalLinkInfo.kind,
       linkPath: this._remapPathForDeployFolder(originalLinkInfo.linkPath, subdemploymentState),
-      targetPath: this._remapPathForDeployFolder(originalLinkInfo.targetPath, subdemploymentState),
+      targetPath: this._remapPathForDeployFolder(originalLinkInfo.targetPath, subdemploymentState)
     };
 
     // Has the link target been created yet?  If not, we should try again later
@@ -451,7 +451,7 @@ export class DeployManager {
         // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
         FileSystem.createSymbolicLinkJunction({
           linkTargetPath: relativeTargetPath,
-          newLinkPath: linkInfo.linkPath,
+          newLinkPath: linkInfo.linkPath
         });
       } else {
         // For files, we use a Windows "hard link", because creating a symbolic link requires
@@ -460,7 +460,7 @@ export class DeployManager {
         // NOTE: We cannot use the relative path for hard links
         FileSystem.createHardLink({
           linkTargetPath: relativeTargetPath,
-          newLinkPath: linkInfo.linkPath,
+          newLinkPath: linkInfo.linkPath
         });
       }
     } else {
@@ -469,12 +469,12 @@ export class DeployManager {
       if (linkInfo.kind === 'folderLink') {
         FileSystem.createSymbolicLinkFolder({
           linkTargetPath: relativeTargetPath,
-          newLinkPath: linkInfo.linkPath,
+          newLinkPath: linkInfo.linkPath
         });
       } else {
         FileSystem.createSymbolicLinkFile({
           linkTargetPath: relativeTargetPath,
-          newLinkPath: linkInfo.linkPath,
+          newLinkPath: linkInfo.linkPath
         });
       }
     }
@@ -513,7 +513,7 @@ export class DeployManager {
     const deployMetadataJson: IDeployMetadataJson = {
       scenarioName: subdemploymentState.scenarioName,
       mainProjectName: subdemploymentState.mainProjectName,
-      links: [],
+      links: []
     };
 
     // Remap the links to be relative to the subdeployment folder
@@ -521,13 +521,13 @@ export class DeployManager {
       const relativeInfo: ILinkInfo = {
         kind: absoluteLinkInfo.kind,
         linkPath: this._remapPathForDeployMetadata(absoluteLinkInfo.linkPath, subdemploymentState),
-        targetPath: this._remapPathForDeployMetadata(absoluteLinkInfo.targetPath, subdemploymentState),
+        targetPath: this._remapPathForDeployMetadata(absoluteLinkInfo.targetPath, subdemploymentState)
       };
       deployMetadataJson.links.push(relativeInfo);
     }
 
     JsonFile.save(deployMetadataJson, deployMetadataFilePath, {
-      newlineConversion: NewlineKind.OsDefault,
+      newlineConversion: NewlineKind.OsDefault
     });
   }
 
@@ -544,7 +544,7 @@ export class DeployManager {
       const projectFolder: string = FileSystem.getRealPath(rushProject.projectFolder);
       subdemploymentState.folderInfosByPath.set(projectFolder, {
         folderPath: projectFolder,
-        isRushProject: true,
+        isRushProject: true
       });
     }
 
@@ -576,7 +576,7 @@ export class DeployManager {
       FileSystem.copyFile({
         sourcePath: path.join(__dirname, '../../scripts/create-links.js'),
         destinationPath: path.join(subdemploymentState.targetSubdeploymentFolder, 'create-links.js'),
-        alreadyExistsBehavior: AlreadyExistsBehavior.Error,
+        alreadyExistsBehavior: AlreadyExistsBehavior.Error
       });
     }
 
@@ -686,7 +686,7 @@ export class DeployManager {
           targetSubdeploymentFolder: path.join(this._targetRootFolder, subdeploymentFolderName),
           foldersToCopy: new Set(),
           folderInfosByPath: new Map(),
-          symlinkAnalyzer: new SymlinkAnalyzer(),
+          symlinkAnalyzer: new SymlinkAnalyzer()
         };
 
         this._deploySubdeployment(subdemploymentState);
@@ -705,7 +705,7 @@ export class DeployManager {
         targetSubdeploymentFolder: this._targetRootFolder,
         foldersToCopy: new Set(),
         folderInfosByPath: new Map(),
-        symlinkAnalyzer: new SymlinkAnalyzer(),
+        symlinkAnalyzer: new SymlinkAnalyzer()
       };
 
       this._deploySubdeployment(subdemploymentState);

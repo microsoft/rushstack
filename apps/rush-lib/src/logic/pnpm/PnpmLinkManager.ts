@@ -29,7 +29,7 @@ export class PnpmLinkManager extends BaseLinkManager {
 
   protected async _linkProjects(): Promise<void> {
     const rushLinkJson: IRushLinkJson = {
-      localLinks: {},
+      localLinks: {}
     };
 
     // Use shrinkwrap from temp as the committed shrinkwrap may not always be up to date
@@ -226,7 +226,7 @@ export class PnpmLinkManager extends BaseLinkManager {
 
     const pnpmProjectDependencyManifest: PnpmProjectDependencyManifest = new PnpmProjectDependencyManifest({
       pnpmShrinkwrapFile,
-      project,
+      project
     });
 
     for (const dependencyName of Object.keys(commonPackage.packageJson!.dependencies || {})) {
@@ -277,7 +277,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     const projectBinFolder: string = path.join(localPackage.folderPath, 'node_modules', '.bin');
 
     await pnpmLinkBins(projectFolder, projectBinFolder, {
-      warn: (msg: string) => console.warn(colors.yellow(msg)),
+      warn: (msg: string) => console.warn(colors.yellow(msg))
     });
   }
 

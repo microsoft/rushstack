@@ -11,7 +11,7 @@ export class ReadmeAction extends CommandLineAction {
     super({
       actionName: 'readme',
       summary: 'Generates README.md project table based on rush.json inventory',
-      documentation: "Use this to update the repo's README.md",
+      documentation: "Use this to update the repo's README.md"
     });
   }
 

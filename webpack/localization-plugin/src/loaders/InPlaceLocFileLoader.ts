@@ -19,7 +19,7 @@ export default loaderFactory(function (
     content,
     filePath: locFilePath,
     terminal: new Terminal(LoaderTerminalProvider.getTerminalProviderForLoader(this)),
-    resxNewlineNormalization: options.resxNewlineNormalization,
+    resxNewlineNormalization: options.resxNewlineNormalization
   });
   const resultObject: { [stringName: string]: string } = {};
   // eslint-disable-next-line guard-for-in

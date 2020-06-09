@@ -71,7 +71,7 @@ function getCommandLineParserInstance(repoName: string, taskName: string): IPars
 
   return {
     parser,
-    spawnMock,
+    spawnMock
   };
 }
 

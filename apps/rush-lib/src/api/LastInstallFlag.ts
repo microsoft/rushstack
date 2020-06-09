@@ -90,7 +90,7 @@ export class LastInstallFlag {
    */
   public create(): void {
     JsonFile.save(this._state, this._path, {
-      ensureFolderExists: true,
+      ensureFolderExists: true
     });
   }
 

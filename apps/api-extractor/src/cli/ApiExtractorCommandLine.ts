@@ -21,7 +21,7 @@ export class ApiExtractorCommandLine extends CommandLineParser {
         ' point for your package, collects the inventory of exported declarations, and then generates three kinds' +
         ' of output:  an API report file (.api.md) to facilitate reviews, a declaration rollup (.d.ts) to be' +
         ' published with your NPM package, and a doc model file (.api.json) to be used with a documentation' +
-        ' tool such as api-documenter.  For details, please visit the web site.',
+        ' tool such as api-documenter.  For details, please visit the web site.'
     });
     this._populateActions();
   }
@@ -31,7 +31,7 @@ export class ApiExtractorCommandLine extends CommandLineParser {
     this._debugParameter = this.defineFlagParameter({
       parameterLongName: '--debug',
       parameterShortName: '-d',
-      description: 'Show the full call stack if an error occurs while executing the tool',
+      description: 'Show the full call stack if an error occurs while executing the tool'
     });
   }
 

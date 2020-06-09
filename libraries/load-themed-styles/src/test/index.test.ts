@@ -4,7 +4,7 @@ import {
   splitStyles,
   loadStyles,
   configureLoadStyles,
-  IThemingInstruction,
+  IThemingInstruction
 } from './../index';
 
 describe('detokenize', () => {
@@ -24,7 +24,7 @@ describe('detokenize', () => {
 
   it('respects theme', () => {
     loadTheme({
-      color: 'red',
+      color: 'red'
     });
 
     try {

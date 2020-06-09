@@ -18,7 +18,7 @@ describe('Telemetry', () => {
       result: 'Succeeded',
       timestamp: new Date().getTime(),
       platform: process.platform,
-      rushVersion: Rush.version,
+      rushVersion: Rush.version
     };
 
     const logData2: ITelemetryData = {
@@ -27,7 +27,7 @@ describe('Telemetry', () => {
       result: 'Failed',
       timestamp: new Date().getTime(),
       platform: process.platform,
-      rushVersion: Rush.version,
+      rushVersion: Rush.version
     };
 
     telemetry.log(logData1);
@@ -45,7 +45,7 @@ describe('Telemetry', () => {
       result: 'Succeeded',
       timestamp: new Date().getTime(),
       platform: process.platform,
-      rushVersion: Rush.version,
+      rushVersion: Rush.version
     };
 
     telemetry.log(logData);
@@ -62,7 +62,7 @@ describe('Telemetry', () => {
       result: 'Succeeded',
       timestamp: new Date().getTime(),
       platform: process.platform,
-      rushVersion: Rush.version,
+      rushVersion: Rush.version
     };
 
     telemetry.log(logData);
@@ -84,7 +84,7 @@ describe('Telemetry', () => {
     const logData: ITelemetryData = {
       name: 'testData1',
       duration: 100,
-      result: 'Succeeded',
+      result: 'Succeeded'
     };
 
     telemetry.log(logData);

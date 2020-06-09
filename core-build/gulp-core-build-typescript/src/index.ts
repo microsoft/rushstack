@@ -12,7 +12,7 @@ export {
   TslintCmdTask,
   ITslintCmdTaskConfig,
   LintCmdTask,
-  ILintCmdTaskConfig,
+  ILintCmdTaskConfig
 };
 
 /** @public */

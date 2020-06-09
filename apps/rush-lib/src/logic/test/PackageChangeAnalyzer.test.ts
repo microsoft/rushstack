@@ -23,8 +23,8 @@ describe('PackageChangeAnalyzer', () => {
     const repoHashDeps: IPackageDeps = {
       files: {
         [fileA]: HASH,
-        [path.posix.join('common', 'config', 'rush', 'pnpm-lock.yaml')]: HASH,
-      },
+        [path.posix.join('common', 'config', 'rush', 'pnpm-lock.yaml')]: HASH
+      }
     };
 
     PackageChangeAnalyzer.getPackageDeps = (packagePath: string, ignored: string[]) => repoHashDeps;
@@ -33,13 +33,13 @@ describe('PackageChangeAnalyzer', () => {
       projects: [
         {
           packageName: packageA,
-          projectRelativeFolder: packageAPath,
-        },
+          projectRelativeFolder: packageAPath
+        }
       ],
       rushJsonFolder: '',
       getCommittedShrinkwrapFilename(): string {
         return 'common/config/rush/pnpm-lock.yaml';
-      },
+      }
     } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     const packageChangeAnalyzer: PackageChangeAnalyzer = new PackageChangeAnalyzer(rushConfiguration);

@@ -38,7 +38,7 @@ export class CopyTask extends GulpTask<ICopyConfig> {
   public constructor() {
     super('copy', {
       copyTo: {},
-      shouldFlatten: true,
+      shouldFlatten: true
     });
   }
 

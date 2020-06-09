@@ -9,7 +9,7 @@ import {
   JsonFile,
   NewlineKind,
   INodePackageJson,
-  JsonObject,
+  JsonObject
 } from '@rushstack/node-core-library';
 import { Extractor } from '../api/Extractor';
 import { MessageRouter } from '../collector/MessageRouter';
@@ -129,9 +129,9 @@ export class PackageMetadataManager {
       toolPackages: [
         {
           packageName: '@microsoft/api-extractor',
-          packageVersion: Extractor.version,
-        },
-      ],
+          packageVersion: Extractor.version
+        }
+      ]
     };
 
     const fileContent: string =
@@ -141,7 +141,7 @@ export class PackageMetadataManager {
 
     FileSystem.writeFile(tsdocMetadataPath, fileContent, {
       convertLineEndings: newlineKind,
-      ensureFolderExists: true,
+      ensureFolderExists: true
     });
   }
 

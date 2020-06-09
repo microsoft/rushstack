@@ -13,7 +13,7 @@ export class VersionMismatchFinderProject extends VersionMismatchFinderEntity {
     super({
       friendlyName: project.packageName,
       cyclicDependencyProjects: project.cyclicDependencyProjects,
-      skipRushCheck: project.skipRushCheck,
+      skipRushCheck: project.skipRushCheck
     });
 
     this._fileManager = project.packageJsonEditor;

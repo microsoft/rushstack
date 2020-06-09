@@ -8,7 +8,7 @@ export class ToolboxCommandLine extends CommandLineParser {
   public constructor() {
     super({
       toolFilename: 'toolbox',
-      toolDescription: 'Used to execute various operations specific to this repo',
+      toolDescription: 'Used to execute various operations specific to this repo'
     });
 
     this.addAction(new ReadmeAction());

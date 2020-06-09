@@ -148,7 +148,7 @@ export const enum AlreadyExistsBehavior {
   /**
    * If the destination object exists, skip it and continue the operation.
    */
-  Ignore = 'ignore',
+  Ignore = 'ignore'
 }
 
 /**
@@ -264,38 +264,38 @@ export interface IFileSystemCreateLinkOptions {
 
 const MOVE_DEFAULT_OPTIONS: Partial<IFileSystemMoveOptions> = {
   overwrite: true,
-  ensureFolderExists: false,
+  ensureFolderExists: false
 };
 
 const READ_FOLDER_DEFAULT_OPTIONS: Partial<IFileSystemReadFolderOptions> = {
-  absolutePaths: false,
+  absolutePaths: false
 };
 
 const WRITE_FILE_DEFAULT_OPTIONS: Partial<IFileSystemWriteFileOptions> = {
   ensureFolderExists: false,
   convertLineEndings: undefined,
-  encoding: Encoding.Utf8,
+  encoding: Encoding.Utf8
 };
 
 const APPEND_TO_FILE_DEFAULT_OPTIONS: Partial<IFileSystemWriteFileOptions> = {
-  ...WRITE_FILE_DEFAULT_OPTIONS,
+  ...WRITE_FILE_DEFAULT_OPTIONS
 };
 
 const READ_FILE_DEFAULT_OPTIONS: Partial<IFileSystemReadFileOptions> = {
   encoding: Encoding.Utf8,
-  convertLineEndings: undefined,
+  convertLineEndings: undefined
 };
 
 const COPY_FILE_DEFAULT_OPTIONS: Partial<IFileSystemCopyFileOptions> = {
-  alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite,
+  alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
 };
 
 const COPY_FILES_DEFAULT_OPTIONS: Partial<IFileSystemCopyFilesOptions> = {
-  alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite,
+  alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
 };
 
 const DELETE_FILE_DEFAULT_OPTIONS: Partial<IFileSystemDeleteFileOptions> = {
-  throwIfNotExists: false,
+  throwIfNotExists: false
 };
 
 /**
@@ -460,7 +460,7 @@ export class FileSystem {
     FileSystem._wrapException(() => {
       options = {
         ...MOVE_DEFAULT_OPTIONS,
-        ...options,
+        ...options
       };
 
       try {
@@ -488,7 +488,7 @@ export class FileSystem {
     await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...MOVE_DEFAULT_OPTIONS,
-        ...options,
+        ...options
       };
 
       try {
@@ -545,7 +545,7 @@ export class FileSystem {
     return FileSystem._wrapException(() => {
       options = {
         ...READ_FOLDER_DEFAULT_OPTIONS,
-        ...options,
+        ...options
       };
 
       // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
@@ -568,7 +568,7 @@ export class FileSystem {
     return await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...READ_FOLDER_DEFAULT_OPTIONS,
-        ...options,
+        ...options
       };
 
       // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
@@ -647,7 +647,7 @@ export class FileSystem {
     FileSystem._wrapException(() => {
       options = {
         ...WRITE_FILE_DEFAULT_OPTIONS,
-        ...options,
+        ...options
       };
 
       if (options.convertLineEndings) {
@@ -683,7 +683,7 @@ export class FileSystem {
     await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...WRITE_FILE_DEFAULT_OPTIONS,
-        ...options,
+        ...options
       };
 
       if (options.convertLineEndings) {
@@ -725,7 +725,7 @@ export class FileSystem {
     FileSystem._wrapException(() => {
       options = {
         ...APPEND_TO_FILE_DEFAULT_OPTIONS,
-        ...options,
+        ...options
       };
 
       if (options.convertLineEndings) {
@@ -761,7 +761,7 @@ export class FileSystem {
     await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...APPEND_TO_FILE_DEFAULT_OPTIONS,
-        ...options,
+        ...options
       };
 
       if (options.convertLineEndings) {
@@ -796,7 +796,7 @@ export class FileSystem {
     return FileSystem._wrapException(() => {
       options = {
         ...READ_FILE_DEFAULT_OPTIONS,
-        ...options,
+        ...options
       };
 
       let contents: string = FileSystem.readFileToBuffer(filePath).toString(options.encoding);
@@ -815,7 +815,7 @@ export class FileSystem {
     return await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...READ_FILE_DEFAULT_OPTIONS,
-        ...options,
+        ...options
       };
 
       let contents: string = (await FileSystem.readFileToBufferAsync(filePath)).toString(options.encoding);
@@ -860,7 +860,7 @@ export class FileSystem {
   public static copyFile(options: IFileSystemCopyFileOptions): void {
     options = {
       ...COPY_FILE_DEFAULT_OPTIONS,
-      ...options,
+      ...options
     };
 
     if (FileSystem.getStatistics(options.sourcePath).isDirectory()) {
@@ -872,7 +872,7 @@ export class FileSystem {
     FileSystem._wrapException(() => {
       fsx.copySync(options.sourcePath, options.destinationPath, {
         errorOnExist: options.alreadyExistsBehavior === AlreadyExistsBehavior.Error,
-        overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite,
+        overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite
       });
     });
   }
@@ -883,7 +883,7 @@ export class FileSystem {
   public static async copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void> {
     options = {
       ...COPY_FILE_DEFAULT_OPTIONS,
-      ...options,
+      ...options
     };
 
     if (FileSystem.getStatistics(options.sourcePath).isDirectory()) {
@@ -895,7 +895,7 @@ export class FileSystem {
     await FileSystem._wrapExceptionAsync(() => {
       return fsx.copy(options.sourcePath, options.destinationPath, {
         errorOnExist: options.alreadyExistsBehavior === AlreadyExistsBehavior.Error,
-        overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite,
+        overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite
       });
     });
   }
@@ -913,7 +913,7 @@ export class FileSystem {
   public static copyFiles(options: IFileSystemCopyFilesOptions): void {
     options = {
       ...COPY_FILES_DEFAULT_OPTIONS,
-      ...options,
+      ...options
     };
 
     FileSystem._wrapException(() => {
@@ -922,7 +922,7 @@ export class FileSystem {
         errorOnExist: options.alreadyExistsBehavior === AlreadyExistsBehavior.Error,
         overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite,
         preserveTimestamps: !!options.preserveTimestamps,
-        filter: options.filter,
+        filter: options.filter
       });
     });
   }
@@ -933,7 +933,7 @@ export class FileSystem {
   public static async copyFilesAsync(options: IFileSystemCopyFilesOptions): Promise<void> {
     options = {
       ...COPY_FILES_DEFAULT_OPTIONS,
-      ...options,
+      ...options
     };
 
     await FileSystem._wrapExceptionAsync(async () => {
@@ -942,7 +942,7 @@ export class FileSystem {
         errorOnExist: options.alreadyExistsBehavior === AlreadyExistsBehavior.Error,
         overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite,
         preserveTimestamps: !!options.preserveTimestamps,
-        filter: options.filter,
+        filter: options.filter
       });
     });
   }
@@ -957,7 +957,7 @@ export class FileSystem {
     FileSystem._wrapException(() => {
       options = {
         ...DELETE_FILE_DEFAULT_OPTIONS,
-        ...options,
+        ...options
       };
 
       try {
@@ -980,7 +980,7 @@ export class FileSystem {
     await FileSystem._wrapExceptionAsync(async () => {
       options = {
         ...DELETE_FILE_DEFAULT_OPTIONS,
-        ...options,
+        ...options
       };
 
       try {

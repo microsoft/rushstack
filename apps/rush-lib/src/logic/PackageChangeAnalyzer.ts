@@ -45,7 +45,7 @@ export class PackageChangeAnalyzer {
     // pre-populate the map with the projects from the config
     for (const project of this._rushConfiguration.projects) {
       projectHashDeps.set(project.packageName, {
-        files: {},
+        files: {}
       });
     }
 

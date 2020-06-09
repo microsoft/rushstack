@@ -8,7 +8,7 @@ import * as globEscape from 'glob-escape';
 import * as decomment from 'decomment';
 import {
   TypescriptCompiler as TTypescriptCompiler,
-  Typescript as TTypescript,
+  Typescript as TTypescript
 } from '@microsoft/rush-stack-compiler-3.1';
 
 import { RSCTask, IRSCTaskConfig } from './RSCTask';
@@ -42,7 +42,7 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
   public constructor() {
     super('tsc', {
       staticMatch: ['src/**/*.js', 'src/**/*.json', 'src/**/*.jsx'],
-      removeCommentsFromJavaScript: false,
+      removeCommentsFromJavaScript: false
     });
   }
 
@@ -91,7 +91,7 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
       {
         customArgs: this.taskConfig.customArgs,
         fileError: this.fileError.bind(this),
-        fileWarning: this.fileWarning.bind(this),
+        fileWarning: this.fileWarning.bind(this)
       },
       this.buildFolder,
       this._terminalProvider
@@ -156,7 +156,7 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
         const sourceText: string = FileSystem.readFile(match);
         const decommentedText: string = decomment(sourceText, {
           // This option preserves comments that start with /*!, /**! or //! - typically copyright comments
-          safe: true,
+          safe: true
         });
         FileSystem.writeFile(match, decommentedText);
       }

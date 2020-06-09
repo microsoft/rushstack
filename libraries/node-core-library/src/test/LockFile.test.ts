@@ -159,7 +159,7 @@ describe('LockFile', () => {
         lockFileHandle.close();
         FileSystem.updateTimes(otherPidLockFileName, {
           accessedTime: 10000,
-          modifiedTime: 10000,
+          modifiedTime: 10000
         });
 
         const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);

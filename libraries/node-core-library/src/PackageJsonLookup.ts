@@ -30,7 +30,7 @@ export interface IPackageJsonLookupParameters {
  */
 export class PackageJsonLookup {
   private static _loadOwnPackageJsonLookup: PackageJsonLookup = new PackageJsonLookup({
-    loadExtraFields: true,
+    loadExtraFields: true
   });
 
   private _loadExtraFields: boolean = false;

@@ -17,7 +17,7 @@ export class InitAction extends CommandLineAction {
       documentation:
         `Use this command when setting up API Extractor for a new project.  It writes an` +
         ` ${ExtractorConfig.FILENAME} config file template with code comments that describe all the settings.` +
-        ` The file will be written in the current directory.`,
+        ` The file will be written in the current directory.`
     });
   }
 
@@ -40,7 +40,7 @@ export class InitAction extends CommandLineAction {
     console.log(colors.green('Writing file: ') + outputFilePath);
     FileSystem.copyFile({
       sourcePath: inputFilePath,
-      destinationPath: outputFilePath,
+      destinationPath: outputFilePath
     });
 
     console.log(

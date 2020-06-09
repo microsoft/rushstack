@@ -5,7 +5,7 @@ import {
   DeclarationReference,
   Meaning,
   Navigation,
-  Component,
+  Component
 } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyItem';

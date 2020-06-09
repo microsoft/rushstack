@@ -17,7 +17,7 @@ function normalizeSpawnMockConfig(maybeConfig) {
   const config = maybeConfig || {};
   return {
     emitError: typeof config.emitError !== 'undefined' ? config.emitError : false,
-    returnCode: typeof config.returnCode !== 'undefined' ? config.returnCode : 0,
+    returnCode: typeof config.returnCode !== 'undefined' ? config.returnCode : 0
   };
 }
 
@@ -44,7 +44,7 @@ function spawn(file, args, options) {
     stdout: new EventEmitter(),
     stderr: new EventEmitter(),
     on: cpEmitter.on,
-    emit: cpEmitter.emit,
+    emit: cpEmitter.emit
   });
 
   setTimeout(() => {

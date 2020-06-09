@@ -38,8 +38,8 @@ export class EventHooksManager {
             initCwd: this._commonTempFolder,
             handleOutput: true,
             environmentPathOptions: {
-              includeRepoBin: true,
-            },
+              includeRepoBin: true
+            }
           });
         } catch (error) {
           console.error(

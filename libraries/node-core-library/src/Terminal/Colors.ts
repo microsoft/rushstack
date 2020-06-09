@@ -13,7 +13,7 @@ export interface IColorableSequence {
 }
 
 export const eolSequence: IColorableSequence = {
-  isEol: true,
+  isEol: true
 } as IColorableSequence;
 
 /**
@@ -29,7 +29,7 @@ export enum ColorValue {
   Magenta,
   Cyan,
   White,
-  Gray,
+  Gray
 }
 
 /**
@@ -42,7 +42,7 @@ export enum TextAttribute {
   Underline,
   Blink,
   InvertColor,
-  Hidden,
+  Hidden
 }
 
 /**
@@ -58,126 +58,126 @@ export class Colors {
   public static black(text: string | IColorableSequence): IColorableSequence {
     return {
       ...Colors._normalizeStringOrColorableSequence(text),
-      foregroundColor: ColorValue.Black,
+      foregroundColor: ColorValue.Black
     };
   }
 
   public static red(text: string | IColorableSequence): IColorableSequence {
     return {
       ...Colors._normalizeStringOrColorableSequence(text),
-      foregroundColor: ColorValue.Red,
+      foregroundColor: ColorValue.Red
     };
   }
 
   public static green(text: string | IColorableSequence): IColorableSequence {
     return {
       ...Colors._normalizeStringOrColorableSequence(text),
-      foregroundColor: ColorValue.Green,
+      foregroundColor: ColorValue.Green
     };
   }
 
   public static yellow(text: string | IColorableSequence): IColorableSequence {
     return {
       ...Colors._normalizeStringOrColorableSequence(text),
-      foregroundColor: ColorValue.Yellow,
+      foregroundColor: ColorValue.Yellow
     };
   }
 
   public static blue(text: string | IColorableSequence): IColorableSequence {
     return {
       ...Colors._normalizeStringOrColorableSequence(text),
-      foregroundColor: ColorValue.Blue,
+      foregroundColor: ColorValue.Blue
     };
   }
 
   public static magenta(text: string | IColorableSequence): IColorableSequence {
     return {
       ...Colors._normalizeStringOrColorableSequence(text),
-      foregroundColor: ColorValue.Magenta,
+      foregroundColor: ColorValue.Magenta
     };
   }
 
   public static cyan(text: string | IColorableSequence): IColorableSequence {
     return {
       ...Colors._normalizeStringOrColorableSequence(text),
-      foregroundColor: ColorValue.Cyan,
+      foregroundColor: ColorValue.Cyan
     };
   }
 
   public static white(text: string | IColorableSequence): IColorableSequence {
     return {
       ...Colors._normalizeStringOrColorableSequence(text),
-      foregroundColor: ColorValue.White,
+      foregroundColor: ColorValue.White
     };
   }
 
   public static gray(text: string | IColorableSequence): IColorableSequence {
     return {
       ...Colors._normalizeStringOrColorableSequence(text),
-      foregroundColor: ColorValue.Gray,
+      foregroundColor: ColorValue.Gray
     };
   }
 
   public static blackBackground(text: string | IColorableSequence): IColorableSequence {
     return {
       ...Colors._normalizeStringOrColorableSequence(text),
-      backgroundColor: ColorValue.Black,
+      backgroundColor: ColorValue.Black
     };
   }
 
   public static redBackground(text: string | IColorableSequence): IColorableSequence {
     return {
       ...Colors._normalizeStringOrColorableSequence(text),
-      backgroundColor: ColorValue.Red,
+      backgroundColor: ColorValue.Red
     };
   }
 
   public static greenBackground(text: string | IColorableSequence): IColorableSequence {
     return {
       ...Colors._normalizeStringOrColorableSequence(text),
-      backgroundColor: ColorValue.Green,
+      backgroundColor: ColorValue.Green
     };
   }
 
   public static yellowBackground(text: string | IColorableSequence): IColorableSequence {
     return {
       ...Colors._normalizeStringOrColorableSequence(text),
-      backgroundColor: ColorValue.Yellow,
+      backgroundColor: ColorValue.Yellow
     };
   }
 
   public static blueBackground(text: string | IColorableSequence): IColorableSequence {
     return {
       ...Colors._normalizeStringOrColorableSequence(text),
-      backgroundColor: ColorValue.Blue,
+      backgroundColor: ColorValue.Blue
     };
   }
 
   public static magentaBackground(text: string | IColorableSequence): IColorableSequence {
     return {
       ...Colors._normalizeStringOrColorableSequence(text),
-      backgroundColor: ColorValue.Magenta,
+      backgroundColor: ColorValue.Magenta
     };
   }
 
   public static cyanBackground(text: string | IColorableSequence): IColorableSequence {
     return {
       ...Colors._normalizeStringOrColorableSequence(text),
-      backgroundColor: ColorValue.Cyan,
+      backgroundColor: ColorValue.Cyan
     };
   }
 
   public static whiteBackground(text: string | IColorableSequence): IColorableSequence {
     return {
       ...Colors._normalizeStringOrColorableSequence(text),
-      backgroundColor: ColorValue.White,
+      backgroundColor: ColorValue.White
     };
   }
 
   public static grayBackground(text: string | IColorableSequence): IColorableSequence {
     return {
       ...Colors._normalizeStringOrColorableSequence(text),
-      backgroundColor: ColorValue.Gray,
+      backgroundColor: ColorValue.Gray
     };
   }
 
@@ -214,7 +214,7 @@ export class Colors {
   public static _normalizeStringOrColorableSequence(value: string | IColorableSequence): IColorableSequence {
     if (typeof value === 'string') {
       return {
-        text: value,
+        text: value
       };
     } else {
       return value;

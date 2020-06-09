@@ -62,7 +62,7 @@ export class Rush {
     }
 
     const parser: RushCommandLineParser = new RushCommandLineParser({
-      alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError,
+      alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
     });
     parser.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise
   }

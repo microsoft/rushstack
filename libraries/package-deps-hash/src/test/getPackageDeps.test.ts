@@ -66,7 +66,7 @@ describe('getPackageDeps', () => {
     try {
       const expectedFiles: { [key: string]: string } = {
         'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576',
+        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
@@ -83,7 +83,7 @@ describe('getPackageDeps', () => {
     try {
       const expectedFiles: { [key: string]: string } = {
         'src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576',
+        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
@@ -110,7 +110,7 @@ describe('getPackageDeps', () => {
       const expectedFiles: { [key: string]: string } = {
         'a.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
         'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576',
+        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
@@ -141,7 +141,7 @@ describe('getPackageDeps', () => {
         'a.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
         'b.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
         'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576',
+        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
@@ -166,7 +166,7 @@ describe('getPackageDeps', () => {
     const results: IPackageDeps = getPackageDeps(TEST_PROJECT_PATH);
     try {
       const expectedFiles: { [key: string]: string } = {
-        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576',
+        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
@@ -192,7 +192,7 @@ describe('getPackageDeps', () => {
     try {
       const expectedFiles: { [key: string]: string } = {
         'file1.txt': 'f2ba8f84ab5c1bce84a7b441cb1959cfc7093b7f',
-        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576',
+        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
@@ -208,7 +208,7 @@ describe('getPackageDeps', () => {
     const results: IPackageDeps = getPackageDeps(TEST_PROJECT_PATH, ['file1.txt']);
     try {
       const expectedFiles: { [key: string]: string } = {
-        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576',
+        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
@@ -234,7 +234,7 @@ describe('getPackageDeps', () => {
     try {
       const expectedFiles: { [key: string]: string } = {
         'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576',
+        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 

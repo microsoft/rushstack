@@ -43,7 +43,7 @@ export class RushXCommandLine {
       NodeJsCompatibility.warnAboutCompatibilityIssues({
         isRushLib: true,
         alreadyReportedNodeTooNewError: !!options.alreadyReportedNodeTooNewError,
-        rushConfiguration,
+        rushConfiguration
       });
 
       // Find the governing package.json for this folder:
@@ -114,8 +114,8 @@ export class RushXCommandLine {
         initCwd: rushConfiguration ? rushConfiguration.commonTempFolder : packageFolder,
         handleOutput: false,
         environmentPathOptions: {
-          includeProjectBin: true,
-        },
+          includeProjectBin: true
+        }
       });
 
       if (exitCode > 0) {

@@ -57,7 +57,7 @@ describe('TaskRunner', () => {
             parallelism: 'tequila',
             changedProjectsOnly: false,
             terminal,
-            allowWarningsInSuccessfulBuild: false,
+            allowWarningsInSuccessfulBuild: false
           })
       ).toThrowErrorMatchingSnapshot();
     });
@@ -70,7 +70,7 @@ describe('TaskRunner', () => {
         parallelism: '1',
         changedProjectsOnly: false,
         terminal,
-        allowWarningsInSuccessfulBuild: false,
+        allowWarningsInSuccessfulBuild: false
       };
     });
 
@@ -85,7 +85,7 @@ describe('TaskRunner', () => {
           writer.writeError('Error: step 1 failed' + EOL);
           return Promise.resolve(TaskStatus.Failure);
         },
-        hadEmptyScript: false,
+        hadEmptyScript: false
       });
 
       return taskRunner
@@ -109,7 +109,7 @@ describe('TaskRunner', () => {
           writer.write('Error: step 1 failed' + EOL);
           return Promise.resolve(TaskStatus.Failure);
         },
-        hadEmptyScript: false,
+        hadEmptyScript: false
       });
 
       return taskRunner
@@ -133,7 +133,7 @@ describe('TaskRunner', () => {
           }
           return Promise.resolve(TaskStatus.Failure);
         },
-        hadEmptyScript: false,
+        hadEmptyScript: false
       });
 
       return taskRunner
@@ -159,7 +159,7 @@ describe('TaskRunner', () => {
           }
           return Promise.resolve(TaskStatus.Failure);
         },
-        hadEmptyScript: false,
+        hadEmptyScript: false
       });
 
       return taskRunner
@@ -183,7 +183,7 @@ describe('TaskRunner', () => {
           parallelism: '1',
           changedProjectsOnly: false,
           terminal,
-          allowWarningsInSuccessfulBuild: false,
+          allowWarningsInSuccessfulBuild: false
         };
       });
 
@@ -196,7 +196,7 @@ describe('TaskRunner', () => {
             writer.write('Warning: step 1 succeeded with warnings' + EOL);
             return Promise.resolve(TaskStatus.SuccessWithWarning);
           },
-          hadEmptyScript: false,
+          hadEmptyScript: false
         });
 
         return taskRunner
@@ -219,7 +219,7 @@ describe('TaskRunner', () => {
           parallelism: '1',
           changedProjectsOnly: false,
           terminal,
-          allowWarningsInSuccessfulBuild: true,
+          allowWarningsInSuccessfulBuild: true
         };
       });
 
@@ -232,7 +232,7 @@ describe('TaskRunner', () => {
             writer.write('Warning: step 1 succeeded with warnings' + EOL);
             return Promise.resolve(TaskStatus.SuccessWithWarning);
           },
-          hadEmptyScript: false,
+          hadEmptyScript: false
         });
 
         return taskRunner

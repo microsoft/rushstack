@@ -14,7 +14,7 @@ export class LoggingUtilities {
   public getDefaultRushStackCompilerBaseOptions(): IRushStackCompilerBaseOptions {
     return {
       fileError: this.fileError,
-      fileWarning: this.fileWarning,
+      fileWarning: this.fileWarning
     };
   }
 

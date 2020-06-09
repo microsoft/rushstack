@@ -14,8 +14,8 @@ const plugin: IPlugin = {
   rules: {
     // NOTE: The actual ESLint rule name will be "@rushstack/no-null".
     'no-null': noNullRule,
-    'no-untyped-underscore': noUntypedUnderscoreRule,
-  },
+    'no-untyped-underscore': noUntypedUnderscoreRule
+  }
 };
 
 export = plugin;

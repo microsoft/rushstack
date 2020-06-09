@@ -21,7 +21,7 @@ export class LoaderTerminalProvider {
             break;
           }
         }
-      },
+      }
     };
   }
 }

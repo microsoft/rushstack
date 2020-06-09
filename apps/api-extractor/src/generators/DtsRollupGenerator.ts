@@ -42,7 +42,7 @@ export enum DtsRollupKind {
    * This output file will contain all definitions that are reachable from the entry point,
    * except definitions marked as \@beta, \@alpha, or \@internal.
    */
-  PublicRelease,
+  PublicRelease
 }
 
 export class DtsRollupGenerator {
@@ -63,7 +63,7 @@ export class DtsRollupGenerator {
 
     FileSystem.writeFile(dtsFilename, stringWriter.toString(), {
       convertLineEndings: newlineKind,
-      ensureFolderExists: true,
+      ensureFolderExists: true
     });
   }
 
@@ -234,7 +234,7 @@ export class DtsRollupGenerator {
           // content (e.g. "var" from "var x=1, y=2").
           const list: ts.VariableDeclarationList | undefined = TypeScriptHelpers.matchAncestor(span.node, [
             ts.SyntaxKind.VariableDeclarationList,
-            ts.SyntaxKind.VariableDeclaration,
+            ts.SyntaxKind.VariableDeclaration
           ]);
           if (!list) {
             // This should not happen unless the compiler API changes somehow

@@ -4,7 +4,7 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const exportedObject: any = [
   ['A', 'STYLE 1'],
-  ['B', 'STYLE 2'],
+  ['B', 'STYLE 2']
 ];
 
 exportedObject.locals = 'locals';

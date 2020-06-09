@@ -20,7 +20,7 @@ export function createColorGrid(
     Colors.yellow,
     Colors.green,
     Colors.cyan,
-    Colors.blue,
+    Colors.blue
   ];
 
   const backgroundFunctions: ((text: string | IColorableSequence) => IColorableSequence)[] = [
@@ -33,7 +33,7 @@ export function createColorGrid(
     Colors.yellowBackground,
     Colors.greenBackground,
     Colors.cyanBackground,
-    Colors.blueBackground,
+    Colors.blueBackground
   ];
 
   const lines: IColorableSequence[][] = [];

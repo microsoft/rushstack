@@ -21,7 +21,7 @@ export class YamlAction extends BaseAction {
       documentation:
         'Generates API documentation as a collection of files conforming' +
         ' to the universal reference YAML format, which is used by the docs.microsoft.com' +
-        ' pipeline.',
+        ' pipeline.'
     });
   }
 
@@ -31,7 +31,7 @@ export class YamlAction extends BaseAction {
 
     this._officeParameter = this.defineFlagParameter({
       parameterLongName: '--office',
-      description: `Enables some additional features specific to Office Add-ins`,
+      description: `Enables some additional features specific to Office Add-ins`
     });
     this._newDocfxNamespacesParameter = this.defineFlagParameter({
       parameterLongName: '--new-docfx-namespaces',
@@ -39,7 +39,7 @@ export class YamlAction extends BaseAction {
         `This enables an experimental feature that will be officially released with the next major version` +
         ` of API Documenter.  It requires DocFX 2.46 or newer.  It enables documentation for namespaces and` +
         ` adds them to the table of contents.  This will also affect file layout as namespaced items will be nested` +
-        ` under a directory for the namespace instead of just within the package.`,
+        ` under a directory for the namespace instead of just within the package.`
     });
   }
 

@@ -10,7 +10,7 @@ export class VersionControl {
   public static getRepositoryRootPath(): string | undefined {
     const output: child_process.SpawnSyncReturns<string> = Executable.spawnSync('git', [
       'rev-parse',
-      '--show-toplevel',
+      '--show-toplevel'
     ]);
 
     if (output.status !== 0) {
@@ -187,7 +187,7 @@ export class VersionControl {
       'git',
       ['fetch', remoteName, branchName],
       {
-        stdio: 'ignore',
+        stdio: 'ignore'
       }
     );
     return spawnResult.status === 0;

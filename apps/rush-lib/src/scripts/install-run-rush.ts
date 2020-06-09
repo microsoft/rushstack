@@ -19,7 +19,7 @@ import {
   installAndRun,
   findRushJsonFolder,
   RUSH_JSON_FILENAME,
-  runWithErrorAndStatusCode,
+  runWithErrorAndStatusCode
 } from './install-run';
 
 const PACKAGE_NAME: string = '@microsoft/rush';

@@ -8,18 +8,18 @@ import { CommandLineAction, CommandLineParser, DynamicCommandLineParser, Dynamic
 function createParser(): DynamicCommandLineParser {
   const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser({
     toolFilename: 'example',
-    toolDescription: 'An example project',
+    toolDescription: 'An example project'
   });
   commandLineParser.defineFlagParameter({
     parameterLongName: '--global-flag',
     parameterShortName: '-g',
-    description: 'A flag that affects all actions',
+    description: 'A flag that affects all actions'
   });
 
   const action: DynamicCommandLineAction = new DynamicCommandLineAction({
     actionName: 'do:the-job',
     summary: 'does the job',
-    documentation: 'a longer description',
+    documentation: 'a longer description'
   });
   commandLineParser.addAction(action);
 
@@ -29,14 +29,14 @@ function createParser(): DynamicCommandLineParser {
     parameterShortName: '-c',
     description: 'A choice',
     alternatives: ['one', 'two', 'three', 'default'],
-    environmentVariable: 'ENV_CHOICE',
+    environmentVariable: 'ENV_CHOICE'
   });
   action.defineChoiceParameter({
     parameterLongName: '--choice-with-default',
     description: 'A choice with a default. This description ends with a "quoted word"',
     alternatives: ['one', 'two', 'three', 'default'],
     environmentVariable: 'ENV_CHOICE2',
-    defaultValue: 'default',
+    defaultValue: 'default'
   });
 
   // Flag
@@ -44,7 +44,7 @@ function createParser(): DynamicCommandLineParser {
     parameterLongName: '--flag',
     parameterShortName: '-f',
     description: 'A flag',
-    environmentVariable: 'ENV_FLAG',
+    environmentVariable: 'ENV_FLAG'
   });
 
   // Integer
@@ -53,14 +53,14 @@ function createParser(): DynamicCommandLineParser {
     parameterShortName: '-i',
     description: 'An integer',
     argumentName: 'NUMBER',
-    environmentVariable: 'ENV_INTEGER',
+    environmentVariable: 'ENV_INTEGER'
   });
   action.defineIntegerParameter({
     parameterLongName: '--integer-with-default',
     description: 'An integer with a default',
     argumentName: 'NUMBER',
     environmentVariable: 'ENV_INTEGER2',
-    defaultValue: 123,
+    defaultValue: 123
   });
   action.defineIntegerParameter({
     parameterLongName: '--integer-required',
@@ -68,7 +68,7 @@ function createParser(): DynamicCommandLineParser {
     argumentName: 'NUMBER',
     // Not yet supported
     // environmentVariable: 'ENV_INTEGER_REQUIRED',
-    required: true,
+    required: true
   });
 
   // String
@@ -77,14 +77,14 @@ function createParser(): DynamicCommandLineParser {
     parameterShortName: '-s',
     description: 'A string',
     argumentName: 'TEXT',
-    environmentVariable: 'ENV_STRING',
+    environmentVariable: 'ENV_STRING'
   });
   action.defineStringParameter({
     parameterLongName: '--string-with-default',
     description: 'A string with a default',
     argumentName: 'TEXT',
     environmentVariable: 'ENV_STRING2',
-    defaultValue: '123',
+    defaultValue: '123'
   });
 
   // String List
@@ -93,7 +93,7 @@ function createParser(): DynamicCommandLineParser {
     parameterShortName: '-l',
     description: 'This parameter be specified multiple times to make a list of strings',
     argumentName: 'LIST_ITEM',
-    environmentVariable: 'ENV_STRING_LIST',
+    environmentVariable: 'ENV_STRING_LIST'
   });
   return commandLineParser;
 }
@@ -118,7 +118,7 @@ const snapshotPropertyNames: string[] = [
   'environmentVariable',
   'required',
   'defaultValue',
-  'values',
+  'values'
 ];
 
 describe('CommandLineParameter', () => {
@@ -153,7 +153,7 @@ describe('CommandLineParameter', () => {
       '--string-list',
       'first',
       '--string-list',
-      'second',
+      'second'
     ];
 
     return commandLineParser.execute(args).then(() => {
@@ -247,7 +247,7 @@ describe('CommandLineParameter', () => {
       parameterLongName: '--json-string-list',
       description: 'Test JSON parsing',
       argumentName: 'LIST_ITEM',
-      environmentVariable: 'ENV_JSON_STRING_LIST',
+      environmentVariable: 'ENV_JSON_STRING_LIST'
     });
 
     const args: string[] = ['do:the-job', '--integer-required', '1'];

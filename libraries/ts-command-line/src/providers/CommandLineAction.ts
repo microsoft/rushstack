@@ -80,7 +80,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
   public _buildParser(actionsSubParser: argparse.SubParser): void {
     this._argumentParser = actionsSubParser.addParser(this.actionName, {
       help: this.summary,
-      description: this.documentation,
+      description: this.documentation
     });
 
     this.onDefineParameters();

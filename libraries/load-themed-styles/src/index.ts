@@ -85,7 +85,7 @@ interface IThemableArrayResolveResult {
  */
 export const enum Mode {
   sync,
-  async,
+  async
 }
 
 /**
@@ -98,7 +98,7 @@ export const enum ClearStyleOptions {
   /** only non-themable styles will be cleared */
   onlyNonThemable = 2,
   /** both themable and non-themable styles will be cleared */
-  all = 3,
+  all = 3
 }
 
 // Store the theming state in __themeState__ global scope for reuse in the case of duplicate
@@ -132,7 +132,7 @@ function initializeThemeState(): IThemeState {
   let state: IThemeState = _root.__themeState__ || {
     theme: undefined,
     lastStyleElement: undefined,
-    registeredStyles: [],
+    registeredStyles: []
   };
 
   if (!state.runState) {
@@ -140,19 +140,19 @@ function initializeThemeState(): IThemeState {
       ...state,
       perf: {
         count: 0,
-        duration: 0,
+        duration: 0
       },
       runState: {
         flushTimer: 0,
         mode: Mode.sync,
-        buffer: [],
-      },
+        buffer: []
+      }
     };
   }
   if (!state.registeredThemableStyles) {
     state = {
       ...state,
-      registeredThemableStyles: [],
+      registeredThemableStyles: []
     };
   }
   _root.__themeState__ = state;
@@ -343,7 +343,7 @@ function resolveThemableArray(splitStyleArray: ThemableArray): IThemableArrayRes
 
   return {
     styleString: resolvedArray.join(''),
-    themable: themable,
+    themable: themable
   };
 }
 
@@ -360,13 +360,13 @@ export function splitStyles(styles: string): ThemableArray {
       const matchIndex: number = tokenMatch.index;
       if (matchIndex > pos) {
         result.push({
-          rawString: styles.substring(pos, matchIndex),
+          rawString: styles.substring(pos, matchIndex)
         });
       }
 
       result.push({
         theme: tokenMatch[1],
-        defaultValue: tokenMatch[2], // May be undefined
+        defaultValue: tokenMatch[2] // May be undefined
       });
 
       // index of the first character after the current match
@@ -375,7 +375,7 @@ export function splitStyles(styles: string): ThemableArray {
 
     // Push the rest of the string after the last match.
     result.push({
-      rawString: styles.substring(pos),
+      rawString: styles.substring(pos)
     });
   }
 
@@ -407,13 +407,13 @@ function registerStyles(styleArray: ThemableArray): void {
   const ev: ICustomEvent<{ newStyle: HTMLStyleElement }> = document.createEvent('HTMLEvents');
   ev.initEvent('styleinsert', true /* bubbleEvent */, false /* cancelable */);
   ev.args = {
-    newStyle: styleElement,
+    newStyle: styleElement
   };
   document.dispatchEvent(ev);
 
   const record: IStyleRecord = {
     styleElement: styleElement,
-    themableStyle: styleArray,
+    themableStyle: styleArray
   };
 
   if (themable) {

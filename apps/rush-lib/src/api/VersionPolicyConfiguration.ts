@@ -38,7 +38,7 @@ export interface IIndividualVersionJson extends IVersionPolicyJson {
  */
 export enum VersionFormatForPublish {
   original = 'original',
-  exact = 'exact',
+  exact = 'exact'
 }
 
 /**
@@ -46,7 +46,7 @@ export enum VersionFormatForPublish {
  */
 export enum VersionFormatForCommit {
   wildcard = 'wildcard',
-  original = 'original',
+  original = 'original'
 }
 
 /**

@@ -6,6 +6,6 @@ module.exports = {
   parserOptions: { tsconfigRootDir: __dirname },
   rules: {
     // This predates the new ESLint ruleset; not worth fixing
-    '@typescript-eslint/no-use-before-define': 'off',
-  },
+    '@typescript-eslint/no-use-before-define': 'off'
+  }
 };

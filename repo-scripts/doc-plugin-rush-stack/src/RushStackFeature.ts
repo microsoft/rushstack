@@ -8,7 +8,7 @@ import { ApiItem } from '@microsoft/api-extractor-model';
 import {
   MarkdownDocumenterFeature,
   IMarkdownDocumenterFeatureOnBeforeWritePageArgs,
-  IMarkdownDocumenterFeatureOnFinishedArgs,
+  IMarkdownDocumenterFeatureOnFinishedArgs
 } from '@microsoft/api-documenter';
 
 interface INavigationNode {
@@ -35,7 +35,7 @@ export class RushStackFeature extends MarkdownDocumenterFeature {
       'navigation_source: api_nav',
       'improve_this_button: false',
       '---',
-      '',
+      ''
     ].join('\n');
     eventArgs.pageContent = header + eventArgs.pageContent;
 
@@ -47,9 +47,9 @@ export class RushStackFeature extends MarkdownDocumenterFeature {
       api_nav: [
         {
           title: 'API Reference',
-          url: '/pages/api/',
-        },
-      ],
+          url: '/pages/api/'
+        }
+      ]
     };
     this._buildNavigation(navigationFile.api_nav, this.context.apiModel);
 
@@ -66,7 +66,7 @@ export class RushStackFeature extends MarkdownDocumenterFeature {
           title: apiItem.displayName,
           url: path.posix
             .join('/pages/api/', this.context.documenter.getLinkForApiItem(apiItem)!)
-            .replace(/\.md$/, ''),
+            .replace(/\.md$/, '')
         };
         parentNodes.push(newNode);
 

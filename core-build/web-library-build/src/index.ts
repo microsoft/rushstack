@@ -12,7 +12,7 @@ import {
   task,
   watch,
   setConfig,
-  getConfig,
+  getConfig
 } from '@microsoft/gulp-core-build';
 import { apiExtractor, tscCmd, lintCmd } from '@microsoft/gulp-core-build-typescript';
 import { sass } from '@microsoft/gulp-core-build-sass';
@@ -45,7 +45,7 @@ const sourceMatch: string[] = ['src/**/*.{ts,tsx,scss,js,txt,html}', '!src/**/*.
 const PRODUCTION: boolean = !!getConfig().args['production'] || !!getConfig().args['ship'];
 setConfig({
   production: PRODUCTION,
-  shouldWarningsFailBuild: PRODUCTION,
+  shouldWarningsFailBuild: PRODUCTION
 });
 
 // Define default task groups.

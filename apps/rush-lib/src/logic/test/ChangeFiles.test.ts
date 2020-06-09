@@ -49,7 +49,7 @@ describe('ChangeFiles', () => {
       const changedPackages: string[] = ['d'];
       expect(() => {
         ChangeFiles.validate([changeFile], changedPackages, {
-          hotfixChangeEnabled: true,
+          hotfixChangeEnabled: true
         } as RushConfiguration);
       }).toThrow(Error);
     });
@@ -109,12 +109,12 @@ describe('ChangeFiles', () => {
       const updatedChangelogs: IChangelog[] = [
         {
           name: 'a',
-          entries: [],
+          entries: []
         },
         {
           name: 'b',
-          entries: [],
-        },
+          entries: []
+        }
       ];
       expect(changeFiles.deleteAll(false, updatedChangelogs)).toEqual(2);
     });

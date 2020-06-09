@@ -113,7 +113,7 @@ export class ExcerptBuilder {
       startingNode: span.node,
       stopBeforeChildKind,
       tokenRangesByNode,
-      disableMergingForNextToken: false,
+      disableMergingForNextToken: false
     });
   }
 

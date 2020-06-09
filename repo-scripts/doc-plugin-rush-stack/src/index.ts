@@ -10,7 +10,7 @@ export const apiDocumenterPluginManifest: IApiDocumenterPluginManifest = {
     {
       featureName: 'rush-stack-markdown-documenter',
       kind: 'MarkdownDocumenterFeature',
-      subclass: RushStackFeature,
-    },
-  ],
+      subclass: RushStackFeature
+    }
+  ]
 };

@@ -36,7 +36,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     OneNote: '/office/dev/add-ins/reference/requirement-sets/onenote-api-requirement-sets',
     Visio: '/office/dev/add-ins/reference/overview/visio-javascript-reference-overview',
     Outlook: '/office/dev/add-ins/reference/requirement-sets/outlook-api-requirement-sets',
-    Word: '/office/dev/add-ins/reference/requirement-sets/word-api-requirement-sets',
+    Word: '/office/dev/add-ins/reference/requirement-sets/word-api-requirement-sets'
   };
 
   public constructor(apiModel: ApiModel, inputFolder: string, newDocfxNamespaces?: boolean) {
@@ -68,7 +68,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     return {
       name: 'API reference',
       href: '~/docs-ref-autogen/overview/office.md',
-      items: [],
+      items: []
     };
   }
 

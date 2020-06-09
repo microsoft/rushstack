@@ -58,7 +58,7 @@ export class Terminal {
       messageParts.map(
         (part): IColorableSequence => ({
           ...Colors._normalizeStringOrColorableSequence(part),
-          foregroundColor: ColorValue.Yellow,
+          foregroundColor: ColorValue.Yellow
         })
       ),
       TerminalProviderSeverity.warning
@@ -77,10 +77,10 @@ export class Terminal {
         ...messageParts.map(
           (part): IColorableSequence => ({
             ...Colors._normalizeStringOrColorableSequence(part),
-            foregroundColor: ColorValue.Yellow,
+            foregroundColor: ColorValue.Yellow
           })
         ),
-        eolSequence,
+        eolSequence
       ],
       TerminalProviderSeverity.warning
     );
@@ -97,7 +97,7 @@ export class Terminal {
       messageParts.map(
         (part): IColorableSequence => ({
           ...Colors._normalizeStringOrColorableSequence(part),
-          foregroundColor: ColorValue.Red,
+          foregroundColor: ColorValue.Red
         })
       ),
       TerminalProviderSeverity.error
@@ -116,10 +116,10 @@ export class Terminal {
         ...messageParts.map(
           (part): IColorableSequence => ({
             ...Colors._normalizeStringOrColorableSequence(part),
-            foregroundColor: ColorValue.Red,
+            foregroundColor: ColorValue.Red
           })
         ),
-        eolSequence,
+        eolSequence
       ],
       TerminalProviderSeverity.error
     );

@@ -191,7 +191,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
 
     return {
       packageName,
-      semVerRange: result[2] || '',
+      semVerRange: result[2] || ''
     };
   }
 
@@ -215,7 +215,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
     // do any normalization.
     const key: string = YarnShrinkwrapFile._encodePackageNameAndSemVer({
       packageName: dependencySpecifier.packageName,
-      semVerRange: dependencySpecifier.versionSpecifier,
+      semVerRange: dependencySpecifier.versionSpecifier
     });
 
     // Check whether this exact key appears in the shrinkwrap file

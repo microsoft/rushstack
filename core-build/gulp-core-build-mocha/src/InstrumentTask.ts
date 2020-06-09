@@ -12,7 +12,7 @@ export interface IInstrumentTaskConfig {
 export class InstrumentTask extends GulpTask<IInstrumentTaskConfig> {
   public constructor() {
     super('instrument', {
-      coverageMatch: ['lib/**/*.js', '!lib/**/*.test.js'],
+      coverageMatch: ['lib/**/*.js', '!lib/**/*.test.js']
     });
   }
 

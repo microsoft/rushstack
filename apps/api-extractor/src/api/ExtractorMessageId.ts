@@ -95,7 +95,7 @@ export const enum ExtractorMessageId {
   /**
    * "The property ___ has a setter but no getter."
    */
-  MissingGetter = 'ae-missing-getter',
+  MissingGetter = 'ae-missing-getter'
 }
 
 export const allExtractorMessageIds: Set<string> = new Set<string>([
@@ -114,5 +114,5 @@ export const allExtractorMessageIds: Set<string> = new Set<string>([
   'ae-cyclic-inherit-doc',
   'ae-unresolved-link',
   'ae-setter-with-docs',
-  'ae-missing-getter',
+  'ae-missing-getter'
 ]);

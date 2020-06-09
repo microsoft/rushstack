@@ -24,12 +24,12 @@ test('will generate different hashes for different content', () => {
   const version1: IScopedNameArgs = {
     name: 'Button',
     fileName: path.join(__dirname, 'Sally', 'src', 'main.sass'),
-    css: 'color: blue;',
+    css: 'color: blue;'
   };
   const version2: IScopedNameArgs = {
     name: 'Button',
     fileName: path.join(__dirname, 'Sally', 'src', 'main.sass'),
-    css: 'color: pink;',
+    css: 'color: pink;'
   };
   const cssModules: ITestCSSModules = new TestCSSModules();
   const output1: string = cssModules.testGenerateScopedName(version1.name, version1.fileName, version1.css);
@@ -41,12 +41,12 @@ test('will generate the same hash in a different root path', () => {
   const version1: IScopedNameArgs = {
     name: 'Button',
     fileName: path.join(__dirname, 'Sally', 'src', 'main.sass'),
-    css: 'color: blue;',
+    css: 'color: blue;'
   };
   const version2: IScopedNameArgs = {
     name: 'Button',
     fileName: path.join(__dirname, 'Suzan', 'workspace', 'src', 'main.sass'),
-    css: 'color: blue;',
+    css: 'color: blue;'
   };
   const cssModules: ITestCSSModules = new TestCSSModules(path.join(__dirname, 'Sally'));
   const output1: string = cssModules.testGenerateScopedName(version1.name, version1.fileName, version1.css);
@@ -59,12 +59,12 @@ test('will generate a different hash in a different src path', () => {
   const version1: IScopedNameArgs = {
     name: 'Button',
     fileName: path.join(__dirname, 'Sally', 'src', 'main.sass'),
-    css: 'color: blue;',
+    css: 'color: blue;'
   };
   const version2: IScopedNameArgs = {
     name: 'Button',
     fileName: path.join(__dirname, 'Sally', 'src', 'lib', 'main.sass'),
-    css: 'color: blue;',
+    css: 'color: blue;'
   };
   const cssModules: ITestCSSModules = new TestCSSModules();
   const output1: string = cssModules.testGenerateScopedName(version1.name, version1.fileName, version1.css);

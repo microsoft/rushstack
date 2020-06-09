@@ -4,7 +4,7 @@
 import {
   CommandLineFlagParameter,
   CommandLineAction,
-  CommandLineChoiceParameter,
+  CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
 import { BusinessLogic } from './BusinessLogic';
 
@@ -16,7 +16,7 @@ export class PushAction extends CommandLineAction {
     super({
       actionName: 'push',
       summary: 'Pushes a widget to the service',
-      documentation: 'Here we provide a longer description of how our action works.',
+      documentation: 'Here we provide a longer description of how our action works.'
     });
   }
 
@@ -30,7 +30,7 @@ export class PushAction extends CommandLineAction {
     this._force = this.defineFlagParameter({
       parameterLongName: '--force',
       parameterShortName: '-f',
-      description: 'Push and overwrite any existing state',
+      description: 'Push and overwrite any existing state'
     });
 
     this._protocol = this.defineChoiceParameter({
@@ -38,7 +38,7 @@ export class PushAction extends CommandLineAction {
       description: 'Specify the protocol to use',
       alternatives: ['ftp', 'webdav', 'scp'],
       environmentVariable: 'WIDGET_PROTOCOL',
-      defaultValue: 'scp',
+      defaultValue: 'scp'
     });
   }
 }

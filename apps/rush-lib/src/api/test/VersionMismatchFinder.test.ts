@@ -20,12 +20,12 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             '@types/foo': '1.2.3',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject(({
       packageName: 'B',
@@ -33,12 +33,12 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             '@types/foo': '1.2.3',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
@@ -54,12 +54,12 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             '@types/foo': '1.2.3',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject(({
       packageName: 'B',
@@ -67,12 +67,12 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             '@types/foo': '2.0.0',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
@@ -92,12 +92,12 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             '@types/foo': '1.2.3',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(['@types/foo']),
+      cyclicDependencyProjects: new Set<string>(['@types/foo'])
     } as any) as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject(({
       packageName: 'B',
@@ -105,12 +105,12 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             '@types/foo': '2.0.0',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
@@ -126,12 +126,12 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             '@types/foo': '1.2.3',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject(({
       packageName: 'B',
@@ -139,12 +139,12 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             '@types/foo': '2.0.0',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
@@ -161,12 +161,12 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             '@types/foo': '1.2.3',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject(({
       packageName: 'B',
@@ -174,12 +174,12 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             '@types/foo': '2.0.0',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
     const projectC: VersionMismatchFinderEntity = new VersionMismatchFinderProject(({
       packageName: 'C',
@@ -187,12 +187,12 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             mocha: '1.2.3',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
     const projectD: VersionMismatchFinderEntity = new VersionMismatchFinderProject(({
       packageName: 'D',
@@ -200,19 +200,19 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             mocha: '2.0.0',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([
       projectA,
       projectB,
       projectC,
-      projectD,
+      projectD
     ]);
     expect(mismatchFinder.numberOfMismatches).toEqual(2);
     expect(mismatchFinder.getMismatches()).toHaveLength(2);
@@ -233,12 +233,12 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             '@types/foo': '1.2.3',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject(({
       packageName: 'B',
@@ -246,12 +246,12 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             '@types/foo': '2.0.0',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
     const projectC: VersionMismatchFinderEntity = new VersionMismatchFinderProject(({
       packageName: 'C',
@@ -259,12 +259,12 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             '@types/foo': '9.9.9',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB, projectC]);
@@ -285,12 +285,12 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             '@types/foo': '1.2.3',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject(({
       packageName: 'B',
@@ -298,12 +298,12 @@ describe('VersionMismatchFinder', () => {
         {
           devDependencies: {
             '@types/foo': '2.0.0',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
@@ -324,12 +324,12 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             '@types/foo': '1.2.3',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject(({
       packageName: 'B',
@@ -337,12 +337,12 @@ describe('VersionMismatchFinder', () => {
         {
           peerDependencies: {
             '@types/foo': '2.0.0',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
@@ -357,12 +357,12 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             '@types/foo': '1.2.3',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject(({
       packageName: 'B',
@@ -370,12 +370,12 @@ describe('VersionMismatchFinder', () => {
         {
           optionalDependencies: {
             '@types/foo': '2.0.0',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
@@ -395,12 +395,12 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             '@types/foo': '1.2.3',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject(({
       packageName: 'B',
@@ -408,12 +408,12 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             '@types/foo': '2.0.0',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
 
     const alternatives: Map<string, ReadonlyArray<string>> = new Map<string, ReadonlyArray<string>>();
@@ -434,12 +434,12 @@ describe('VersionMismatchFinder', () => {
         {
           dependencies: {
             '@scope/library-1': '1.2.3',
-            karma: '0.0.1',
-          },
+            karma: '0.0.1'
+          }
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(),
+      cyclicDependencyProjects: new Set<string>()
     } as any) as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderCommonVersions(
       CommonVersionsConfiguration.loadFromFile(path.resolve(__dirname, 'jsonFiles', 'common-versions.json'))

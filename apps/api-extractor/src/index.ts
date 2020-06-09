@@ -22,7 +22,7 @@ export { ExtractorLogLevel } from './api/ExtractorLogLevel';
 export {
   ExtractorMessage,
   IExtractorMessageProperties,
-  ExtractorMessageCategory,
+  ExtractorMessageCategory
 } from './api/ExtractorMessage';
 
 export { ExtractorMessageId } from './api/ExtractorMessageId';
@@ -36,5 +36,5 @@ export {
   IConfigMessageReportingRule,
   IConfigMessageReportingTable,
   IExtractorMessagesConfig,
-  IConfigFile,
+  IConfigFile
 } from './api/IConfigFile';

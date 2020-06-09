@@ -85,7 +85,7 @@ export class CompilerState {
     }
 
     return new CompilerState({
-      program,
+      program
     });
   }
 

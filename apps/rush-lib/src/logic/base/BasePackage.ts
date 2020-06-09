@@ -16,7 +16,7 @@ export enum PackageDependencyKind {
   /**
    * The dependency should be a symlink to a project that is locally built by Rush..
    */
-  LocalLink,
+  LocalLink
 }
 
 export interface IPackageDependency {

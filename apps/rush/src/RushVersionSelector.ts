@@ -31,7 +31,7 @@ export class RushVersionSelector {
     const expectedRushPath: string = path.join(this._rushGlobalFolder.nodeSpecificPath, `rush-${version}`);
 
     const installMarker: _LastInstallFlag = new _LastInstallFlag(expectedRushPath, {
-      node: process.versions.node,
+      node: process.versions.node
     });
 
     let installPromise: Promise<void> = Promise.resolve();
@@ -62,7 +62,7 @@ export class RushVersionSelector {
               // different implementations of the same version of the same package.
               // This was needed for: https://github.com/microsoft/rushstack/issues/691
               commonRushConfigFolder: configuration ? configuration.commonRushConfigFolder : undefined,
-              suppressOutput: true,
+              suppressOutput: true
             });
 
             console.log(`Successfully installed Rush version ${version} in ${expectedRushPath}.`);

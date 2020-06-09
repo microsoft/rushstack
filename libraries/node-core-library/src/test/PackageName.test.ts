@@ -17,13 +17,13 @@ describe('PackageName', () => {
       expect(PackageName.tryParse('@microsoft/example-package')).toEqual({
         scope: '@microsoft',
         unscopedName: 'example-package',
-        error: '',
+        error: ''
       });
 
       expect(PackageName.tryParse('')).toEqual({
         scope: '',
         unscopedName: '',
-        error: 'The package name must not be empty',
+        error: 'The package name must not be empty'
       });
 
       expect(
@@ -31,43 +31,43 @@ describe('PackageName', () => {
       ).toEqual({
         scope: '',
         unscopedName: '',
-        error: 'The package name must not be null or undefined',
+        error: 'The package name must not be null or undefined'
       });
 
       expect(PackageName.tryParse('@microsoft')).toEqual({
         scope: '@microsoft',
         unscopedName: '',
-        error: 'Error parsing "@microsoft": The scope must be followed by a slash',
+        error: 'Error parsing "@microsoft": The scope must be followed by a slash'
       });
 
       expect(PackageName.tryParse('@/example-package')).toEqual({
         scope: '@',
         unscopedName: 'example-package',
-        error: 'Error parsing "@/example-package": The scope name cannot be empty',
+        error: 'Error parsing "@/example-package": The scope name cannot be empty'
       });
 
       expect(PackageName.tryParse('@Microsoft/example-package')).toEqual({
         scope: '@Microsoft',
         unscopedName: 'example-package',
-        error: 'The package scope "@Microsoft" must not contain upper case characters',
+        error: 'The package scope "@Microsoft" must not contain upper case characters'
       });
 
       expect(PackageName.tryParse('@micro!soft/example-package')).toEqual({
         scope: '@micro!soft',
         unscopedName: 'example-package',
-        error: 'The package name "@micro!soft/example-package" contains an invalid character: "!"',
+        error: 'The package name "@micro!soft/example-package" contains an invalid character: "!"'
       });
 
       expect(PackageName.tryParse('@microsoft/node-co~re-library')).toEqual({
         scope: '@microsoft',
         unscopedName: 'node-co~re-library',
-        error: 'The package name "@microsoft/node-co~re-library" contains an invalid character: "~"',
+        error: 'The package name "@microsoft/node-co~re-library" contains an invalid character: "~"'
       });
 
       expect(PackageName.tryParse('@microsoft/example-package/path')).toEqual({
         scope: '@microsoft',
         unscopedName: 'example-package/path',
-        error: 'The package name "@microsoft/example-package/path" contains an invalid character: "/"',
+        error: 'The package name "@microsoft/example-package/path" contains an invalid character: "/"'
       });
     });
   });

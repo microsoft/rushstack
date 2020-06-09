@@ -24,12 +24,12 @@ if (os.platform() === 'win32') {
       path.join(executableFolder, 'skipped'),
       path.join(executableFolder, 'success'),
       path.join(executableFolder, 'fail'),
-      path.dirname(process.execPath), // the folder where node.exe can be found
+      path.dirname(process.execPath) // the folder where node.exe can be found
     ].join(path.delimiter),
 
     PATHEXT: '.COM;.EXE;.BAT;.CMD;.VBS',
 
-    TEST_VAR: '123',
+    TEST_VAR: '123'
   };
 } else {
   environment = {
@@ -41,17 +41,17 @@ if (os.platform() === 'win32') {
       // These are needed because our example script needs to find bash
       '/usr/local/bin',
       '/usr/bin',
-      '/bin',
+      '/bin'
     ].join(path.delimiter),
 
-    TEST_VAR: '123',
+    TEST_VAR: '123'
   };
 }
 
 const options: IExecutableSpawnSyncOptions = {
   environment: environment,
   currentWorkingDirectory: executableFolder,
-  stdio: 'pipe',
+  stdio: 'pipe'
 };
 
 beforeAll(() => {
@@ -165,7 +165,7 @@ test('Executable.spawnSync("npm-binary-wrapper") edge cases 2', () => {
     // Characters that are impossible to escape for cmd.exe:
     // %^&|<>  newline
     '~!@#$*()_+`={}[]:";\'?,./',
-    '~!@#$*()_+`={}[]:";\'?,./',
+    '~!@#$*()_+`={}[]:";\'?,./'
   ];
   expect(executeNpmBinaryWrapper(args)).toEqual(args);
 });
@@ -176,7 +176,7 @@ test('Executable.spawnSync("npm-binary-wrapper") edge cases 2', () => {
     // Characters that are impossible to escape for cmd.exe:
     // %^&|<>  newline
     '~!@#$*()_+`={}[]:";\'?,./',
-    '~!@#$*()_+`={}[]:";\'?,./',
+    '~!@#$*()_+`={}[]:";\'?,./'
   ];
   expect(executeNpmBinaryWrapper(args)).toEqual(args);
 });

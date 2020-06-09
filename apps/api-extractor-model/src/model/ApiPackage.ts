@@ -8,7 +8,7 @@ import {
   JsonFile,
   IJsonFileSaveOptions,
   PackageJsonLookup,
-  IPackageJson,
+  IPackageJson
 } from '@rushstack/node-core-library';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
 import { ApiEntryPoint } from './ApiEntryPoint';
@@ -161,7 +161,7 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
       apiJsonFilename,
       toolPackage: jsonObject.metadata.toolPackage,
       toolVersion: jsonObject.metadata.toolVersion,
-      versionToDeserialize: versionToDeserialize,
+      versionToDeserialize: versionToDeserialize
     });
 
     return ApiItem.deserialize(jsonObject, context) as ApiPackage;
@@ -208,8 +208,8 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
         // the version is bumped.  Instead we write a placeholder string.
         toolVersion: options.testMode ? '[test mode]' : options.toolVersion || packageJson.version,
         schemaVersion: ApiJsonSchemaVersion.LATEST,
-        oldestForwardsCompatibleVersion: ApiJsonSchemaVersion.OLDEST_FORWARDS_COMPATIBLE,
-      },
+        oldestForwardsCompatibleVersion: ApiJsonSchemaVersion.OLDEST_FORWARDS_COMPATIBLE
+      }
     } as IApiPackageJson;
     this.serializeInto(jsonObject);
     JsonFile.save(jsonObject, apiJsonFilename, options);

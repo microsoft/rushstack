@@ -4,7 +4,7 @@
 /** @internal @preapproved */
 export enum _PreapprovedEnum {
   ONE = 1,
-  TWO,
+  TWO
 }
 
 /** @internal @preapproved */

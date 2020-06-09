@@ -21,7 +21,7 @@ export interface ITaskWriter {
 enum TaskWriterState {
   Open = 1,
   ClosedUnwritten = 2,
-  Written = 3,
+  Written = 3
 }
 
 interface ITaskWriterInfo {
@@ -33,7 +33,7 @@ interface ITaskWriterInfo {
 
 enum ITaskOutputStream {
   stdout = 1,
-  stderr = 2,
+  stderr = 2
 }
 
 /**
@@ -68,7 +68,7 @@ export class Interleaver {
       quietMode: quietMode,
       state: TaskWriterState.Open,
       stderr: [],
-      stdout: [],
+      stdout: []
     });
 
     if (this._activeTask === undefined) {
@@ -81,7 +81,7 @@ export class Interleaver {
       getStdOutput: (): string => this._getTaskOutput(taskName),
       write: (data: string): void => this._writeTaskOutput(taskName, data),
       writeError: (data: string): void => this._writeTaskOutput(taskName, data, ITaskOutputStream.stderr),
-      writeLine: (data: string): void => this._writeTaskOutput(taskName, data + os.EOL),
+      writeLine: (data: string): void => this._writeTaskOutput(taskName, data + os.EOL)
     };
   }
 

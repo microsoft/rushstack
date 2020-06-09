@@ -23,12 +23,12 @@ export { IApiPropertyItemOptions, ApiPropertyItem } from './items/ApiPropertyIte
 export {
   IApiParameterListMixinOptions,
   IApiParameterOptions,
-  ApiParameterListMixin,
+  ApiParameterListMixin
 } from './mixins/ApiParameterListMixin';
 export {
   IApiTypeParameterOptions,
   IApiTypeParameterListMixinOptions,
-  ApiTypeParameterListMixin,
+  ApiTypeParameterListMixin
 } from './mixins/ApiTypeParameterListMixin';
 export { IApiItemContainerMixinOptions, ApiItemContainerMixin } from './mixins/ApiItemContainerMixin';
 export { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from './mixins/ApiReleaseTagMixin';

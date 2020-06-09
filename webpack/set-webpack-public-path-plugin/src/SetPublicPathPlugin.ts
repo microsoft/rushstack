@@ -163,7 +163,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
               source,
               chunk,
               hash,
-              requireFn: v4MainTemplate.requireFn,
+              requireFn: v4MainTemplate.requireFn
             });
           } else {
             return source;
@@ -227,7 +227,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
               source,
               chunk,
               hash,
-              requireFn: compilation.mainTemplate.requireFn,
+              requireFn: compilation.mainTemplate.requireFn
             });
           } else {
             return source;
@@ -282,7 +282,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
       getSetPublicPathCode(moduleOptions, console.error),
       '})();',
       '',
-      options.source,
+      options.source
     ].join(EOL);
   }
 }

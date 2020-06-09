@@ -10,7 +10,7 @@ import {
   PackageName,
   FileSystem,
   NewlineKind,
-  InternalError,
+  InternalError
 } from '@rushstack/node-core-library';
 import { StringBuilder, DocSection, DocComment } from '@microsoft/tsdoc';
 import {
@@ -37,7 +37,7 @@ import {
   ExcerptTokenKind,
   HeritageType,
   ApiVariable,
-  ApiTypeAlias,
+  ApiTypeAlias
 } from '@microsoft/api-extractor-model';
 import { DeclarationReference, Navigation, Meaning } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import {
@@ -47,7 +47,7 @@ import {
   IYamlParameter,
   IYamlReference,
   IYamlReferenceSpec,
-  IYamlInheritanceTree,
+  IYamlInheritanceTree
 } from '../yaml/IYamlApiFile';
 import { IYamlTocFile, IYamlTocItem } from '../yaml/IYamlTocFile';
 import { Utilities } from '../utils/Utilities';
@@ -71,7 +71,7 @@ const enum FlattenMode {
   /** Include entries for non-namespace immediate children. */
   ImmediateChildren,
   /** Include entries for nested non-namespace children. */
-  NestedChildren,
+  NestedChildren
 }
 
 interface INameOptions {
@@ -120,7 +120,7 @@ export class YamlDocumenter {
     return {
       name: 'SharePoint Framework reference',
       href: '~/overview/sharepoint.md',
-      items: [],
+      items: []
     };
   }
 
@@ -151,7 +151,7 @@ export class YamlDocumenter {
       parentYamlFile.items.push(yamlItem);
     } else {
       const newYamlFile: IYamlApiFile = {
-        items: [],
+        items: []
       };
       newYamlFile.items.push(yamlItem);
 
@@ -189,7 +189,7 @@ export class YamlDocumenter {
           this._getUid(apiItem),
           this._getYamlItemName(apiItem, {
             includeNamespace: !this.newDocfxNamespaces,
-            includeSignature: true,
+            includeSignature: true
           }),
           this._getYamlItemName(apiItem, { includeNamespace: true, includeSignature: true })
         );
@@ -281,7 +281,7 @@ export class YamlDocumenter {
   /** @virtual */
   protected buildYamlTocFile(apiItems: ReadonlyArray<ApiItem>): IYamlTocFile {
     const tocFile: IYamlTocFile = {
-      items: [],
+      items: []
     };
 
     const rootItem: IYamlTocItem = this.onGetTocRoot();
@@ -297,7 +297,7 @@ export class YamlDocumenter {
       let tocItem: IYamlTocItem;
       if (apiItem.kind === ApiItemKind.Namespace && !this.newDocfxNamespaces) {
         tocItem = {
-          name: this._getTocItemName(apiItem),
+          name: this._getTocItemName(apiItem)
         };
       } else {
         if (this._shouldEmbed(apiItem.kind)) {
@@ -307,7 +307,7 @@ export class YamlDocumenter {
 
         tocItem = {
           name: this._getTocItemName(apiItem),
-          uid: this._getUid(apiItem),
+          uid: this._getUid(apiItem)
         };
       }
 
@@ -370,7 +370,7 @@ export class YamlDocumenter {
 
     const uid: DeclarationReference = this._getUidObject(apiItem);
     const yamlItem: Partial<IYamlItem> = {
-      uid: uid.toString(),
+      uid: uid.toString()
     };
 
     if (apiItem.tsdocComment) {
@@ -405,7 +405,7 @@ export class YamlDocumenter {
 
     yamlItem.name = this._getYamlItemName(apiItem, {
       includeSignature: true,
-      includeNamespace: !this.newDocfxNamespaces,
+      includeNamespace: !this.newDocfxNamespaces
     });
     yamlItem.fullName = this._getYamlItemName(apiItem, { includeSignature: true, includeNamespace: true });
     yamlItem.langs = ['typeScript'];
@@ -507,7 +507,7 @@ export class YamlDocumenter {
     const typeParameters: IYamlParameter[] = [];
     for (const apiTypeParameter of apiItem.typeParameters) {
       const typeParameter: IYamlParameter = {
-        id: apiTypeParameter.name,
+        id: apiTypeParameter.name
       };
 
       if (apiTypeParameter.tsdocTypeParamBlock) {
@@ -580,7 +580,7 @@ export class YamlDocumenter {
     apiItem: ApiMethod | ApiMethodSignature | ApiConstructor | ApiFunction
   ): void {
     const syntax: IYamlSyntax = {
-      content: apiItem.getExcerptWithModifiers(),
+      content: apiItem.getExcerptWithModifiers()
     };
     yamlItem.syntax = syntax;
 
@@ -598,7 +598,7 @@ export class YamlDocumenter {
       if (returnType || returnDescription) {
         syntax.return = {
           type: [returnType],
-          description: returnDescription,
+          description: returnDescription
         };
       }
     }
@@ -613,7 +613,7 @@ export class YamlDocumenter {
       parameters.push({
         id: apiParameter.name,
         description: parameterDescription,
-        type: [this._renderType(uid, apiParameter.parameterTypeExcerpt)],
+        type: [this._renderType(uid, apiParameter.parameterTypeExcerpt)]
       } as IYamlParameter);
     }
 
@@ -635,13 +635,13 @@ export class YamlDocumenter {
     apiItem: ApiPropertyItem
   ): void {
     const syntax: IYamlSyntax = {
-      content: apiItem.getExcerptWithModifiers(),
+      content: apiItem.getExcerptWithModifiers()
     };
     yamlItem.syntax = syntax;
 
     if (apiItem.propertyTypeExcerpt.text) {
       syntax.return = {
-        type: [this._renderType(uid, apiItem.propertyTypeExcerpt)],
+        type: [this._renderType(uid, apiItem.propertyTypeExcerpt)]
       };
     }
   }
@@ -652,13 +652,13 @@ export class YamlDocumenter {
     apiItem: ApiVariable
   ): void {
     const syntax: IYamlSyntax = {
-      content: apiItem.getExcerptWithModifiers(),
+      content: apiItem.getExcerptWithModifiers()
     };
     yamlItem.syntax = syntax;
 
     if (apiItem.variableTypeExcerpt.text) {
       syntax.return = {
-        type: [this._renderType(uid, apiItem.variableTypeExcerpt)],
+        type: [this._renderType(uid, apiItem.variableTypeExcerpt)]
       };
     }
   }
@@ -669,7 +669,7 @@ export class YamlDocumenter {
     apiItem: ApiTypeAlias
   ): void {
     const syntax: IYamlSyntax = {
-      content: apiItem.getExcerptWithModifiers(),
+      content: apiItem.getExcerptWithModifiers()
     };
     yamlItem.syntax = syntax;
 
@@ -680,7 +680,7 @@ export class YamlDocumenter {
 
     if (apiItem.typeExcerpt.text) {
       syntax.return = {
-        type: [this._renderType(uid, apiItem.typeExcerpt)],
+        type: [this._renderType(uid, apiItem.typeExcerpt)]
       };
     }
   }
@@ -703,7 +703,7 @@ export class YamlDocumenter {
         return encodeURI(`xref:${this._getUid(apiItem)}`)
           .replace(/[#?]/g, (s) => encodeURIComponent(s))
           .replace(/(\([^(]*\))|[()]/g, (s, balanced) => balanced || '\\' + s);
-      },
+      }
     });
 
     return stringBuilder.toString().trim();
@@ -718,7 +718,7 @@ export class YamlDocumenter {
     JsonFile.validateNoUndefinedMembers(dataObject);
 
     let stringified: string = yaml.safeDump(dataObject, {
-      lineWidth: 120,
+      lineWidth: 120
     });
 
     if (yamlMimeType) {
@@ -727,7 +727,7 @@ export class YamlDocumenter {
 
     FileSystem.writeFile(filePath, stringified, {
       convertLineEndings: NewlineKind.CrLf,
-      ensureFolderExists: true,
+      ensureFolderExists: true
     });
 
     if (schema) {
@@ -775,7 +775,7 @@ export class YamlDocumenter {
       this._yamlReferences = {
         references: [],
         typeNameToUid: new Map(),
-        uidTypeReferenceCounters: new Map(),
+        uidTypeReferenceCounters: new Map()
       };
     }
     return this._yamlReferences;
@@ -794,7 +794,7 @@ export class YamlDocumenter {
         if (apiItem instanceof ApiClass) {
           if (apiItem.extendsType) {
             yamlInheritance.inheritance = this._renderInheritance(this._getUidObject(apiItem), [
-              apiItem.extendsType,
+              apiItem.extendsType
             ]);
           }
         } else if (apiItem instanceof ApiInterface) {
@@ -914,7 +914,7 @@ export class YamlDocumenter {
         } else {
           specs.push({
             name: token.text,
-            fullName: token.text,
+            fullName: token.text
           });
         }
       }

@@ -9,7 +9,7 @@ import { PackageJsonLookup, FileSystem, IPackageJson } from '@rushstack/node-cor
 import {
   CommandLineAction,
   CommandLineStringParameter,
-  CommandLineFlagParameter,
+  CommandLineFlagParameter
 } from '@rushstack/ts-command-line';
 
 import { Extractor, ExtractorResult } from '../api/Extractor';
@@ -29,7 +29,7 @@ export class RunAction extends CommandLineAction {
     super({
       actionName: 'run',
       summary: 'Invoke API Extractor on a project',
-      documentation: 'Invoke API Extractor on a project',
+      documentation: 'Invoke API Extractor on a project'
     });
   }
 
@@ -39,7 +39,7 @@ export class RunAction extends CommandLineAction {
       parameterLongName: '--config',
       parameterShortName: '-c',
       argumentName: 'FILE',
-      description: `Use the specified ${ExtractorConfig.FILENAME} file path, rather than guessing its location`,
+      description: `Use the specified ${ExtractorConfig.FILENAME} file path, rather than guessing its location`
     });
 
     this._localParameter = this.defineFlagParameter({
@@ -49,20 +49,20 @@ export class RunAction extends CommandLineAction {
         'Indicates that API Extractor is running as part of a local build,' +
         " e.g. on a developer's machine. This disables certain validation that would" +
         ' normally be performed for a ship/production build. For example, the *.api.md' +
-        ' report file is automatically copied in a local build.',
+        ' report file is automatically copied in a local build.'
     });
 
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
-      description: 'Show additional informational messages in the output.',
+      description: 'Show additional informational messages in the output.'
     });
 
     this._diagnosticsParameter = this.defineFlagParameter({
       parameterLongName: '--diagnostics',
       description:
         'Show diagnostic messages used for troubleshooting problems with API Extractor.' +
-        '  This flag also enables the "--verbose" flag.',
+        '  This flag also enables the "--verbose" flag.'
     });
 
     this._typescriptCompilerFolder = this.defineStringParameter({
@@ -73,7 +73,7 @@ export class RunAction extends CommandLineAction {
         ' is built with a significantly different TypeScript version, sometimes API Extractor may report compilation' +
         ' errors due to differences in the system typings (e.g. lib.dom.d.ts).  You can use the' +
         ' "--typescriptCompilerFolder" option to specify the folder path where you installed the TypeScript package,' +
-        " and API Extractor's compiler will use those system typings instead.",
+        " and API Extractor's compiler will use those system typings instead."
     });
   }
 
@@ -147,14 +147,14 @@ export class RunAction extends CommandLineAction {
     const extractorConfig: ExtractorConfig = ExtractorConfig.prepare({
       configObject: configObject,
       configObjectFullPath: configObjectFullPath,
-      packageJsonFullPath: lookup.tryGetPackageJsonFilePathFor(configObjectFullPath),
+      packageJsonFullPath: lookup.tryGetPackageJsonFilePathFor(configObjectFullPath)
     });
 
     const extractorResult: ExtractorResult = Extractor.invoke(extractorConfig, {
       localBuild: this._localParameter.value,
       showVerboseMessages: this._verboseParameter.value,
       showDiagnostics: this._diagnosticsParameter.value,
-      typescriptCompilerFolder: typescriptCompilerFolder,
+      typescriptCompilerFolder: typescriptCompilerFolder
     });
 
     if (extractorResult.succeeded) {

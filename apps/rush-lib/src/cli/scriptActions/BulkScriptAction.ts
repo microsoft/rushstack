@@ -8,7 +8,7 @@ import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
   CommandLineStringListParameter,
-  CommandLineParameterKind,
+  CommandLineParameterKind
 } from '@rushstack/ts-command-line';
 import { FileSystem, PackageJsonLookup, IPackageJson } from '@rushstack/node-core-library';
 
@@ -109,7 +109,7 @@ export class BulkScriptAction extends BaseScriptAction {
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
       ignoreMissingScript: this._ignoreMissingScript,
       ignoreDependencyOrder: this._ignoreDependencyOrder,
-      packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(this._commandToRun),
+      packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(this._commandToRun)
     });
 
     // Register all tasks with the task collection
@@ -119,7 +119,7 @@ export class BulkScriptAction extends BaseScriptAction {
       quietMode: isQuietMode,
       parallelism: parallelism,
       changedProjectsOnly: changedProjectsOnly,
-      allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild,
+      allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
     });
 
     return taskRunner
@@ -157,7 +157,7 @@ export class BulkScriptAction extends BaseScriptAction {
           'Specifies the maximum number of concurrent processes to launch during a build.' +
           ' The COUNT should be a positive integer or else the word "max" to specify a count that is equal to' +
           ' the number of CPU cores. If this parameter is omitted, then the default value depends on the' +
-          ' operating system and number of CPU cores.',
+          ' operating system and number of CPU cores.'
       });
     }
     this._toFlag = this.defineStringListParameter({
@@ -166,20 +166,20 @@ export class BulkScriptAction extends BaseScriptAction {
       argumentName: 'PROJECT1',
       description:
         'Run command in the specified project and all of its dependencies. "." can be used as shorthand ' +
-        'to specify the project in the current working directory.',
+        'to specify the project in the current working directory.'
     });
     this._fromVersionPolicy = this.defineStringListParameter({
       parameterLongName: '--from-version-policy',
       argumentName: 'VERSION_POLICY_NAME',
       description:
         'Run command in all projects with the specified version policy ' +
-        'and all projects that directly or indirectly depend on projects with the specified version policy',
+        'and all projects that directly or indirectly depend on projects with the specified version policy'
     });
     this._toVersionPolicy = this.defineStringListParameter({
       parameterLongName: '--to-version-policy',
       argumentName: 'VERSION_POLICY_NAME',
       description:
-        'Run command in all projects with the specified version policy and all of their dependencies',
+        'Run command in all projects with the specified version policy and all of their dependencies'
     });
     this._fromFlag = this.defineStringListParameter({
       parameterLongName: '--from',
@@ -187,12 +187,12 @@ export class BulkScriptAction extends BaseScriptAction {
       argumentName: 'PROJECT2',
       description:
         'Run command in all projects that directly or indirectly depend on the specified project. ' +
-        '"." can be used as shorthand to specify the project in the current working directory.',
+        '"." can be used as shorthand to specify the project in the current working directory.'
     });
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
-      description: 'Display the logs during the build, rather than just displaying the build status summary',
+      description: 'Display the logs during the build, rather than just displaying the build status summary'
     });
     if (this._isIncrementalBuildAllowed) {
       this._changedProjectsOnly = this.defineFlagParameter({
@@ -200,7 +200,7 @@ export class BulkScriptAction extends BaseScriptAction {
         parameterShortName: '-o',
         description:
           'If specified, the incremental build will only rebuild projects that have changed, ' +
-          'but not any projects that directly or indirectly depend on the changed package.',
+          'but not any projects that directly or indirectly depend on the changed package.'
       });
     }
 
@@ -290,7 +290,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
     const extraData: { [key: string]: string } = {
       command_to: (this._toFlag.values.length > 0).toString(),
-      command_from: (this._fromFlag.values.length > 0).toString(),
+      command_from: (this._fromFlag.values.length > 0).toString()
     };
 
     for (const customParameter of this.customParameters) {
@@ -312,7 +312,7 @@ export class BulkScriptAction extends BaseScriptAction {
         name: this.actionName,
         duration: stopwatch.duration,
         result: success ? 'Succeeded' : 'Failed',
-        extraData,
+        extraData
       });
     }
   }

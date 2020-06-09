@@ -7,7 +7,7 @@ import {
   JsonSchema,
   MapExtensions,
   ProtectableMap,
-  FileSystem,
+  FileSystem
 } from '@rushstack/node-core-library';
 import { PackageNameParsers } from './PackageNameParsers';
 import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
@@ -68,7 +68,7 @@ export class CommonVersionsConfiguration {
 
   private constructor(commonVersionsJson: ICommonVersionsJson | undefined, filePath: string) {
     this._preferredVersions = new ProtectableMap<string, string>({
-      onSet: this._onSetPreferredVersions.bind(this),
+      onSet: this._onSetPreferredVersions.bind(this)
     });
 
     if (commonVersionsJson && commonVersionsJson.implicitlyPreferredVersions !== undefined) {
@@ -78,11 +78,11 @@ export class CommonVersionsConfiguration {
     }
 
     this._xstitchPreferredVersions = new ProtectableMap<string, string>({
-      onSet: this._onSetPreferredVersions.bind(this),
+      onSet: this._onSetPreferredVersions.bind(this)
     });
 
     this._allowedAlternativeVersions = new ProtectableMap<string, string[]>({
-      onSet: this._onSetAllowedAlternativeVersions.bind(this),
+      onSet: this._onSetAllowedAlternativeVersions.bind(this)
     });
 
     if (commonVersionsJson) {
@@ -271,7 +271,7 @@ export class CommonVersionsConfiguration {
 
   private _serialize(): ICommonVersionsJson {
     const result: ICommonVersionsJson = {
-      $schema: JsonSchemaUrls.commonVersions,
+      $schema: JsonSchemaUrls.commonVersions
     };
 
     if (this._preferredVersions.size) {

@@ -38,7 +38,7 @@ export class CommandLineConfiguration {
     ignoreDependencyOrder: false,
     incremental: true,
     allowWarningsInSuccessfulBuild: false,
-    safeForSimultaneousRushProcesses: false,
+    safeForSimultaneousRushProcesses: false
   };
 
   public static readonly defaultRebuildCommandJson: CommandJson = {
@@ -58,7 +58,7 @@ export class CommandLineConfiguration {
     ignoreDependencyOrder: false,
     incremental: false,
     allowWarningsInSuccessfulBuild: false,
-    safeForSimultaneousRushProcesses: false,
+    safeForSimultaneousRushProcesses: false
   };
 
   /**
@@ -133,7 +133,7 @@ export class CommandLineConfiguration {
           // Merge the default parameters into the repo-specified parameters
           commandLineJson.commands[i] = {
             ...commandDefaultDefinition,
-            ...command,
+            ...command
           };
         }
 

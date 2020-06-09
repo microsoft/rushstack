@@ -30,7 +30,7 @@ export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
     this._cmdRunner = new CmdRunner(this._standardBuildFolders, this._terminal, {
       packagePath: ToolPaths.tslintPackagePath,
       packageJson: ToolPaths.tslintPackageJson,
-      packageBinPath: path.join('bin', 'tslint'),
+      packageBinPath: path.join('bin', 'tslint')
     });
   }
 
@@ -74,7 +74,7 @@ export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
         } else {
           resolve();
         }
-      },
+      }
     });
   }
 }
