@@ -235,7 +235,7 @@ export class AstReferenceResolver {
       }
 
       return new ResolverFailure(
-        `More than one declaration "${astSymbolName}" matches the` + ` TSDoc selector "${selectorName}"`
+        `More than one declaration "${astSymbolName}" matches the TSDoc selector "${selectorName}"`
       );
     }
     return matches[0];

@@ -385,7 +385,7 @@ export class PackageJsonUpdater {
       if (!this._rushConfiguration.ensureConsistentVersions) {
         console.log(
           colors.gray(
-            `The "ensureConsistentVersions" policy is NOT active,` + ` so we will assign the latest version.`
+            `The "ensureConsistentVersions" policy is NOT active, so we will assign the latest version.`
           )
         );
         console.log();

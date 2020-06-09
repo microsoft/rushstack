@@ -72,7 +72,7 @@ export class PluginLoader {
           const featureDefinition: IFeatureDefinition | undefined = featureDefinitionsByName.get(featureName);
           if (!featureDefinition) {
             throw new Error(
-              `The plugin ${loadedPlugin.packageName} does not have` + ` a feature with name "${featureName}"`
+              `The plugin ${loadedPlugin.packageName} does not have a feature with name "${featureName}"`
             );
           }
 

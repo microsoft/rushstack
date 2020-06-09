@@ -55,8 +55,8 @@ export class CopyTask extends GulpTask<ICopyConfig> {
   public executeTask(
     gulp: typeof Gulp,
     completeCallback: (error?: string | Error) => void
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<any> | NodeJS.ReadWriteStream | void {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
     /* eslint-disable */
     const flatten = require('gulp-flatten');
     const gulpif = require('gulp-if');

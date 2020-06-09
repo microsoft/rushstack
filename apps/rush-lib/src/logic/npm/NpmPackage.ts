@@ -108,7 +108,7 @@ export class NpmPackage extends BasePackage {
   public static createFromNpm(npmPackage: readPackageTree.Node): NpmPackage {
     if (npmPackage.error) {
       throw new Error(
-        `Failed to parse package.json for ${path.basename(npmPackage.path)}:` + ` ${npmPackage.error.message}`
+        `Failed to parse package.json for ${path.basename(npmPackage.path)}: ${npmPackage.error.message}`
       );
     }
 

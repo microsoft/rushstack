@@ -133,7 +133,7 @@ export class JsonSchema {
       }
       if (seenIds.has(schemaId)) {
         throw new Error(
-          `This schema ${dependentSchema.shortName} has the same "id" as` + ' another schema in this set'
+          `This schema ${dependentSchema.shortName} has the same "id" as another schema in this set`
         );
       }
 

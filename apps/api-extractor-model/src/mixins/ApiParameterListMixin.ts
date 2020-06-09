@@ -98,9 +98,8 @@ export interface ApiParameterListMixin extends ApiItem {
  */
 export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(
   baseClass: TBaseClass
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): TBaseClass & (new (...args: any[]) => ApiParameterListMixin) {
-  // eslint-disable-line @typescript-eslint/no-explicit-any
-
   abstract class MixedClass extends baseClass implements ApiParameterListMixin {
     public readonly [_overloadIndex]: number;
     public readonly [_parameters]: Parameter[];

@@ -77,10 +77,11 @@ export class Sort {
    * Sort.sortBy(array, x => x.length);  // [ 'c', 'bb', 'aaa' ]
    * ```
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static sortBy<T>(
     array: T[],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     keySelector: (element: T) => any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     comparer: (x: any, y: any) => number = Sort.compareByValue
   ): void {
     LegacyAdapters.sortStable(array, (x, y) => comparer(keySelector(x), keySelector(y)));
@@ -111,10 +112,11 @@ export class Sort {
    * Sort.isSortedBy(array, x => x.length); // true
    * ```
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static isSortedBy<T>(
     array: T[],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     keySelector: (element: T) => any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     comparer: (x: any, y: any) => number = Sort.compareByValue
   ): boolean {
     let previousKey: T | undefined = undefined;
@@ -177,9 +179,9 @@ export class Sort {
    * console.log(Array.from(set)); // ['c', 'bb', 'aaa']
    * ```
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static sortSetBy<T>(
     set: Set<T>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     keySelector: (element: T) => any,
     keyComparer: (x: T, y: T) => number = Sort.compareByValue
   ): void {

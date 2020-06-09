@@ -45,8 +45,8 @@ export class TypeScriptInternals {
    * for a computed property based on its type, rather than by the Binder).
    */
   public static isLateBoundSymbol(symbol: ts.Symbol): boolean {
-    // eslint-disable-next-line no-bitwise
     if (
+      // eslint-disable-next-line no-bitwise
       symbol.flags & ts.SymbolFlags.Transient &&
       (symbol as any).checkFlags === (ts as any).CheckFlags.Late
     ) {

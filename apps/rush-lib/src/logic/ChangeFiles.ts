@@ -147,7 +147,7 @@ export class ChangeFiles {
   private _deleteFiles(files: string[], shouldDelete: boolean): number {
     if (files.length) {
       console.log(
-        `${EOL}* ` + `${shouldDelete ? 'DELETING:' : 'DRYRUN: Deleting'} ` + `${files.length} change file(s).`
+        `${EOL}* ${shouldDelete ? 'DELETING:' : 'DRYRUN: Deleting'} ${files.length} change file(s).`
       );
 
       for (const filePath of files) {

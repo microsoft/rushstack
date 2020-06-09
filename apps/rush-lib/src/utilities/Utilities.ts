@@ -762,8 +762,8 @@ export class Utilities {
       options
     );
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (result.error && (result.error as any).errno === 'ENOENT') {
-      // eslint-disable-line @typescript-eslint/no-explicit-any
       // This is a workaround for GitHub issue #25330
       // https://github.com/nodejs/node-v0.x-archive/issues/25330
       result = child_process.spawnSync(command + '.cmd', args, options);

@@ -78,7 +78,7 @@ export class BulkScriptAction extends BaseScriptAction {
   public run(): Promise<void> {
     if (!FileSystem.exists(this.rushConfiguration.rushLinkJsonFilename)) {
       throw new Error(
-        `File not found: ${this.rushConfiguration.rushLinkJsonFilename}` + `${os.EOL}Did you run "rush link"?`
+        `File not found: ${this.rushConfiguration.rushLinkJsonFilename}${os.EOL}Did you run "rush link"?`
       );
     }
     this._doBeforeTask();

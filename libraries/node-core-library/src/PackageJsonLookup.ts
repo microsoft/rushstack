@@ -210,7 +210,7 @@ export class PackageJsonLookup {
     const packageJson: INodePackageJson = this.loadNodePackageJson(jsonFilename);
 
     if (!packageJson.version) {
-      throw new Error(`Error reading "${jsonFilename}":\n  ` + 'The required field "version" was not found');
+      throw new Error(`Error reading "${jsonFilename}":\n  The required field "version" was not found`);
     }
 
     return packageJson as IPackageJson;
@@ -237,7 +237,7 @@ export class PackageJsonLookup {
       // Make sure this is really a package.json file.  CommonJS has fairly strict requirements,
       // but NPM only requires "name" and "version"
       if (!loadedPackageJson.name) {
-        throw new Error(`Error reading "${jsonFilename}":\n  ` + 'The required field "name" was not found');
+        throw new Error(`Error reading "${jsonFilename}":\n  The required field "name" was not found`);
       }
 
       if (this._loadExtraFields) {

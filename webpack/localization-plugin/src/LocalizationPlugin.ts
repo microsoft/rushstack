@@ -607,8 +607,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
     // END configuration
 
     // START options.filesToIgnore
+    // eslint-disable-next-line no-lone-blocks
     {
-      // eslint-disable-line no-lone-blocks
       for (const filePath of this._options.filesToIgnore || []) {
         const normalizedFilePath: string = path.resolve(configuration.context!, filePath);
         this._filesToIgnore.add(normalizedFilePath);

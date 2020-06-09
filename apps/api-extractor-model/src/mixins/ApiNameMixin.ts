@@ -58,9 +58,8 @@ export interface ApiNameMixin extends ApiItem {
  */
 export function ApiNameMixin<TBaseClass extends IApiItemConstructor>(
   baseClass: TBaseClass
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): TBaseClass & (new (...args: any[]) => ApiNameMixin) {
-  // eslint-disable-line @typescript-eslint/no-explicit-any
-
   abstract class MixedClass extends baseClass implements ApiNameMixin {
     public readonly [_name]: string;
 

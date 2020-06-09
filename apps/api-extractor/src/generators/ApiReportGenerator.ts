@@ -184,8 +184,8 @@ export class ApiReportGenerator {
     insideTypeLiteral: boolean
   ): void {
     // Should we process this declaration at all?
+    // eslint-disable-next-line no-bitwise
     if ((astDeclaration.modifierFlags & ts.ModifierFlags.Private) !== 0) {
-      // eslint-disable-line no-bitwise
       span.modification.skipAll();
       return;
     }

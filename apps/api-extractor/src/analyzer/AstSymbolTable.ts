@@ -487,9 +487,10 @@ export class AstSymbolTable {
 
     const arbitraryDeclaration: ts.Declaration = followedSymbol.declarations[0];
 
-    // eslint-disable-next-line no-bitwise
     if (
+      // eslint-disable-next-line no-bitwise
       followedSymbol.flags &
+        // eslint-disable-next-line no-bitwise
         (ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral | ts.SymbolFlags.Transient) &&
       !TypeScriptInternals.isLateBoundSymbol(followedSymbol)
     ) {

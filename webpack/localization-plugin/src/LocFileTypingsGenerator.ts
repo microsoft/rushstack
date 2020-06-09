@@ -39,8 +39,8 @@ export class LocFileTypingsGenerator extends StringValuesTypingsGenerator {
 
         const typings: IStringValueTyping[] = [];
 
+        // eslint-disable-next-line guard-for-in
         for (const stringName in locFileData) {
-          // eslint-disable-line guard-for-in
           typings.push({
             exportName: stringName,
             comment: locFileData[stringName].comment,

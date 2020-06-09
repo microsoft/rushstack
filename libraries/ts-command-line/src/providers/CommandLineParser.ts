@@ -67,7 +67,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       prog: this._options.toolFilename,
       description: this._options.toolDescription,
       epilog: colors.bold(
-        'For detailed help about a specific command, use:' + ` ${this._options.toolFilename} <command> -h`
+        `For detailed help about a specific command, use: ${this._options.toolFilename} <command> -h`
       ),
     });
 

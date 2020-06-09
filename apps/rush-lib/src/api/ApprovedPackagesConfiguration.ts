@@ -172,8 +172,7 @@ export class ApprovedPackagesConfiguration {
     });
 
     // Add a header
-    body =
-      '// DO NOT ADD COMMENTS IN THIS FILE.' + '  They will be lost when the Rush tool resaves it.\n' + body;
+    body = '// DO NOT ADD COMMENTS IN THIS FILE.  They will be lost when the Rush tool resaves it.\n' + body;
 
     FileSystem.writeFile(this._jsonFilename, body, {
       convertLineEndings: NewlineKind.CrLf,

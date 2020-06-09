@@ -212,7 +212,7 @@ export class TaskRunner {
     if (task.status === TaskStatus.Ready) {
       this._completedTasks++;
       this._terminal.writeErrorLine(
-        `${this._getCurrentCompletedTaskString()}` + `[${task.name}] blocked by [${failedTask.name}]!`
+        `${this._getCurrentCompletedTaskString()}[${task.name}] blocked by [${failedTask.name}]!`
       );
       task.status = TaskStatus.Blocked;
       task.dependents.forEach((dependent: ITask) => {
@@ -227,7 +227,7 @@ export class TaskRunner {
   private _markTaskAsSuccess(task: ITask): void {
     if (task.hadEmptyScript) {
       this._terminal.writeLine(
-        Colors.green(`${this._getCurrentCompletedTaskString()}` + `[${task.name}] had an empty script`)
+        Colors.green(`${this._getCurrentCompletedTaskString()}[${task.name}] had an empty script`)
       );
     } else {
       this._terminal.writeLine(

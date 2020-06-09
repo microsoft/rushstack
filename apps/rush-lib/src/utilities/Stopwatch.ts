@@ -85,7 +85,7 @@ export class Stopwatch {
       const minutes: number = Math.floor(totalSeconds / 60);
       const seconds: number = totalSeconds % 60.0;
 
-      return `${minutes.toFixed(0)} minute${minutes === 1 ? '' : 's'}` + ` ${seconds.toFixed(1)} seconds`;
+      return `${minutes.toFixed(0)} minute${minutes === 1 ? '' : 's'} ${seconds.toFixed(1)} seconds`;
     } else {
       return `${totalSeconds.toFixed(2)} seconds`;
     }

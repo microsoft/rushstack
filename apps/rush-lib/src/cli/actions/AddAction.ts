@@ -65,7 +65,7 @@ export class AddAction extends BaseRushAction {
     this._devDependencyFlag = this.defineFlagParameter({
       parameterLongName: '--dev',
       description:
-        'If specified, the package will be added to the "devDependencies" section of' + ' the package.json',
+        'If specified, the package will be added to the "devDependencies" section of the package.json',
     });
     this._makeConsistentFlag = this.defineFlagParameter({
       parameterLongName: '--make-consistent',
@@ -78,7 +78,7 @@ export class AddAction extends BaseRushAction {
       parameterLongName: '--skip-update',
       parameterShortName: '-s',
       description:
-        'If specified, the "rush update" command will not be run after updating the' + ' package.json files.',
+        'If specified, the "rush update" command will not be run after updating the package.json files.',
     });
     this._allFlag = this.defineFlagParameter({
       parameterLongName: '--all',

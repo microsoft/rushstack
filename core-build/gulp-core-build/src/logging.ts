@@ -298,8 +298,8 @@ function wireUpProcessErrorHandling(shouldWarningsFailBuild: boolean): void {
 
     process.on('exit', (code: number) => {
       duringFastExit = true;
+      // eslint-disable-next-line dot-notation
       if (!global['dontWatchExit']) {
-        // eslint-disable-line dot-notation
         if (!localCache.wroteSummary) {
           localCache.wroteSummary = true;
           console.log('About to exit with code:', code);

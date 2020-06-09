@@ -18,14 +18,14 @@ export class RushCommandSelector {
   public static failIfNotInvokedAsRush(version: string): void {
     if (RushCommandSelector._getCommandName() === 'rushx') {
       RushCommandSelector._failWithError(
-        `This repository is using Rush version ${version}` + ` which does not support the "rushx" command`
+        `This repository is using Rush version ${version} which does not support the "rushx" command`
       );
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static execute(
     launcherVersion: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     selectedRushLib: any,
     options: rushLib.ILaunchOptions
   ): void {

@@ -326,10 +326,11 @@ describe('RushConfiguration', () => {
     it(`throws an error when invalid pnpmStore is defined`, (done: jest.DoneCallback) => {
       const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'repo', 'rush-pnpm-invalid-store.json');
       expect(() => {
-        //@ts-ignore
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
           RUSH_JSON_FILENAME
-        ); // eslint-disable-line @typescript-eslint/no-unused-vars
+        );
       }).toThrow();
 
       done();

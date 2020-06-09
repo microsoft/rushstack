@@ -43,8 +43,8 @@ export default loaderFactory(function (
   }
 
   const resultObject: { [stringName: string]: string } = {};
+  // eslint-disable-next-line guard-for-in
   for (const stringName in locFileData) {
-    // eslint-disable-line guard-for-in
     const stringKey: string = `${locFilePath}?${stringName}`;
     if (pluginInstance.stringKeys.has(stringKey)) {
       resultObject[stringName] = pluginInstance.stringKeys.get(stringKey)!.value;

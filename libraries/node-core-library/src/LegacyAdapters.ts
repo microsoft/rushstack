@@ -88,8 +88,8 @@ export class LegacyAdapters {
   /**
    * Normalizes an object into an `Error` object.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static scrubError(error: Error | string | any): Error {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
     if (error instanceof Error) {
       return error;
     } else if (typeof error === 'string') {

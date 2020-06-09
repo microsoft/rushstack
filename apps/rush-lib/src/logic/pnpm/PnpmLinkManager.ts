@@ -220,7 +220,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     );
     if (!parentShrinkwrapEntry) {
       throw new InternalError(
-        'Cannot find shrinkwrap entry using dependency key for temp project: ' + `${project.tempProjectName}`
+        `Cannot find shrinkwrap entry using dependency key for temp project: ${project.tempProjectName}`
       );
     }
 

@@ -31,13 +31,13 @@ class StreamTask extends GulpTask<IConfig> {
     super('stream', {});
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public executeTask(gulp: typeof Gulp): any {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
     const stream: Readable = new Readable({ objectMode: true });
 
     // Add no opt function to make it compat with through
+    // eslint-disable-next-line dot-notation
     stream['_read'] = () => {
-      // eslint-disable-line dot-notation
       // Do Nothing
     };
 

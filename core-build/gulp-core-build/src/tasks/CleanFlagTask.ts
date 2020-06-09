@@ -18,8 +18,8 @@ export class CleanFlagTask extends CleanTask {
   }
 
   public isEnabled(buildConfig: IBuildConfig): boolean {
-    // eslint-disable-next-line dot-notation
     const shouldRun: boolean =
+      // eslint-disable-next-line dot-notation
       (!!buildConfig.args['clean'] || !!buildConfig.args['c']) && this._hasRun === false;
     return shouldRun;
   }

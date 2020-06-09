@@ -135,7 +135,7 @@ export class VersionAction extends BaseRushAction {
     }
     if (this._overrideVersion.value && this._prereleaseIdentifier.value) {
       throw new Error(
-        `The parameters "--override-version" and` + ` "--override-prerelease-id" cannot be used together.`
+        `The parameters "--override-version" and "--override-prerelease-id" cannot be used together.`
       );
     }
 

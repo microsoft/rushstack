@@ -472,7 +472,7 @@ export class PublishUtilities {
 
     if (!project) {
       console.log(
-        `The package ${packageName} was requested for publishing but ` + `does not exist. Skip this change.`
+        `The package ${packageName} was requested for publishing but does not exist. Skip this change.`
       );
       return false;
     }

@@ -145,8 +145,8 @@ export abstract class CommandLineParameter {
   /**
    * Internal usage only.  Used to report unexpected output from the argparse library.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected reportInvalidData(data: any): never {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
     throw new Error(`Unexpected data object for parameter "${this.longName}": ` + JSON.stringify(data));
   }
 
@@ -158,7 +158,7 @@ export abstract class CommandLineParameter {
       // to be omitted.  If you sometimes don't have a suitable default value, then the better approach
       // is to throw a custom error explaining why the parameter is required in that case.
       throw new Error(
-        `A default value cannot be specified for "${this.longName}"` + ` because it is a "required" parameter`
+        `A default value cannot be specified for "${this.longName}" because it is a "required" parameter`
       );
     }
   }

@@ -278,8 +278,8 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
               readable: stream.readable,
               writable: stream.writable && !stream.readable,
             },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (err: any) => {
-              // eslint-disable-line @typescript-eslint/no-explicit-any
               if (err) {
                 reject(err);
               } else {
@@ -291,8 +291,8 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
           // Make sure the stream is completely read
           stream.pipe(
             through2.obj(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               (file: Vinyl, encoding: string, callback: (p?: any) => void) => {
-                // eslint-disable-line @typescript-eslint/no-explicit-any
                 callback();
               },
               (callback: () => void) => {
@@ -410,8 +410,8 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
     if (!FileSystem.exists(filePath)) {
       return undefined;
     } else {
+      // eslint-disable-next-line dot-notation
       if (args['verbose']) {
-        // eslint-disable-line dot-notation
         console.log(`Found config file: ${path.basename(filePath)}`);
       }
 

@@ -80,8 +80,8 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public loadSchema(): any {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
     return require('./webpack.schema.json');
   }
 

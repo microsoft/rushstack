@@ -57,7 +57,7 @@ export class PurgeAction extends BaseRushAction {
       console.log(
         os.EOL +
           colors.green(
-            `Rush purge started successfully and will complete asynchronously.` + ` (${stopwatch.toString()})`
+            `Rush purge started successfully and will complete asynchronously. (${stopwatch.toString()})`
           )
       );
     });

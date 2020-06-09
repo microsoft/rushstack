@@ -93,7 +93,7 @@ export class PackageJsonEditor {
         }
         if (Object.prototype.hasOwnProperty.call(peerDependencies, packageName)) {
           throw new Error(
-            `The package "${packageName}" cannot be listed in both ` + `"dependencies" and "peerDependencies"`
+            `The package "${packageName}" cannot be listed in both "dependencies" and "peerDependencies"`
           );
         }
 

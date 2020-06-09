@@ -93,7 +93,7 @@ export class ProjectTask implements ITaskDefinition {
       };
     } catch (error) {
       writer.writeLine(
-        'Unable to calculate incremental build state. ' + 'Instead running full rebuild. ' + error.toString()
+        'Unable to calculate incremental build state. Instead running full rebuild. ' + error.toString()
       );
     }
 

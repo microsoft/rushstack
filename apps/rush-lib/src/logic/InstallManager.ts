@@ -722,7 +722,7 @@ export class InstallManager {
             )
           ) {
             shrinkwrapWarnings.push(
-              `"${packageName}" (${packageVersion}) required by` + ` "${rushProject.packageName}"`
+              `"${packageName}" (${packageVersion}) required by "${rushProject.packageName}"`
             );
             shrinkwrapIsUpToDate = false;
           }
