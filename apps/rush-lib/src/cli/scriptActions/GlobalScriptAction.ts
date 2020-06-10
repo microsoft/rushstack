@@ -18,7 +18,7 @@ import { LastInstallFlag } from '../../api/LastInstallFlag';
  */
 export interface IGlobalScriptActionOptions extends IBaseScriptActionOptions {
   shellCommand: string;
-  autoinstallSubfolder: string | undefined;
+  autoinstallerName: string | undefined;
 }
 
 /**
@@ -33,44 +33,44 @@ export interface IGlobalScriptActionOptions extends IBaseScriptActionOptions {
  */
 export class GlobalScriptAction extends BaseScriptAction {
   private readonly _shellCommand: string;
-  private readonly _autoinstallSubfolder: string;
-  private readonly _autoinstallSubfolderFullPath: string;
+  private readonly _autoinstallerName: string;
+  private readonly _autoinstallerNameFullPath: string;
 
   public constructor(options: IGlobalScriptActionOptions) {
     super(options);
     this._shellCommand = options.shellCommand;
-    this._autoinstallSubfolder = options.autoinstallSubfolder || '';
+    this._autoinstallerName = options.autoinstallerName || '';
 
-    if (this._autoinstallSubfolder) {
-      const error: string = PackageName.tryParse(this._autoinstallSubfolder).error;
+    if (this._autoinstallerName) {
+      const error: string = PackageName.tryParse(this._autoinstallerName).error;
       if (error) {
         throw new Error(
-          `The custom command "${this.actionName}" specifies a "autoinstallSubfolder" containing` +
+          `The custom command "${this.actionName}" specifies a "autoinstallerName" containing` +
             ` invalid characters: ` +
             error
         );
       }
 
-      // Example: .../common/autoinstall/my-task
-      this._autoinstallSubfolderFullPath = path.join(
+      // Example: .../common/autoinstallers/my-task
+      this._autoinstallerNameFullPath = path.join(
         this.rushConfiguration.commonFolder,
-        'autoinstall',
-        this._autoinstallSubfolder
+        'autoinstallers',
+        this._autoinstallerName
       );
 
-      if (!FileSystem.exists(this._autoinstallSubfolderFullPath)) {
+      if (!FileSystem.exists(this._autoinstallerNameFullPath)) {
         throw new Error(
-          `The custom command "${this.actionName}" specifies an "autoinstallSubfolder" setting` +
+          `The custom command "${this.actionName}" specifies an "autoinstallerName" setting` +
             ' but the path does not exist: ' +
-            this._autoinstallSubfolderFullPath
+            this._autoinstallerNameFullPath
         );
       }
 
-      // Example: .../common/autoinstall/my-task/package.json
-      const packageJsonPath: string = path.join(this._autoinstallSubfolderFullPath, 'package.json');
+      // Example: .../common/autoinstallers/my-task/package.json
+      const packageJsonPath: string = path.join(this._autoinstallerNameFullPath, 'package.json');
       if (!FileSystem.exists(packageJsonPath)) {
         throw new Error(
-          `The custom command "${this.actionName}" specifies an "autoinstallSubfolder" setting` +
+          `The custom command "${this.actionName}" specifies an "autoinstallerName" setting` +
             ` whose package.json file was not found: ` +
             packageJsonPath
         );
@@ -78,43 +78,43 @@ export class GlobalScriptAction extends BaseScriptAction {
 
       const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
 
-      if (packageJson.name !== this._autoinstallSubfolder) {
+      if (packageJson.name !== this._autoinstallerName) {
         throw new Error(
-          `The custom command "${this.actionName}" specifies an "autoinstallSubfolder" setting,` +
-            ` but the package.json file's "name" field is not "${this._autoinstallSubfolder}": ` +
+          `The custom command "${this.actionName}" specifies an "autoinstallerName" setting,` +
+            ` but the package.json file's "name" field is not "${this._autoinstallerName}": ` +
             packageJsonPath
         );
       }
     } else {
-      this._autoinstallSubfolderFullPath = '';
+      this._autoinstallerNameFullPath = '';
     }
   }
 
-  private async _prepareAutoinstallSubfolder(): Promise<void> {
+  private async _prepareAutoinstallerName(): Promise<void> {
     await InstallHelpers.ensureLocalPackageManager(
       this.rushConfiguration,
       this.rushGlobalFolder,
       RushConstants.defaultMaxInstallAttempts
     );
 
-    // Example: common/autoinstall/my-task/package.json
+    // Example: common/autoinstallers/my-task/package.json
     const relativePathForLogs: string = path.relative(
       this.rushConfiguration.rushJsonFolder,
-      this._autoinstallSubfolderFullPath
+      this._autoinstallerNameFullPath
     );
 
     console.log(`Acquiring lock for "${relativePathForLogs}" folder...`);
 
-    const lock: LockFile = await LockFile.acquire(this._autoinstallSubfolderFullPath, 'autoinstall');
+    const lock: LockFile = await LockFile.acquire(this._autoinstallerNameFullPath, 'autoinstaller');
 
-    // Example: .../common/autoinstall/my-task/.rush/temp
+    // Example: .../common/autoinstallers/my-task/.rush/temp
     const lastInstallFlagPath: string = path.join(
-      this._autoinstallSubfolderFullPath,
+      this._autoinstallerNameFullPath,
       RushConstants.projectRushFolderName,
       'temp'
     );
 
-    const packageJsonPath: string = path.join(this._autoinstallSubfolderFullPath, 'package.json');
+    const packageJsonPath: string = path.join(this._autoinstallerNameFullPath, 'package.json');
     const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
 
     const lastInstallFlag: LastInstallFlag = new LastInstallFlag(lastInstallFlagPath, {
@@ -125,34 +125,34 @@ export class GlobalScriptAction extends BaseScriptAction {
     });
 
     if (!lastInstallFlag.isValid() || lock.dirtyWhenAcquired) {
-      // Example: ../common/autoinstall/my-task/node_modules
-      const nodeModulesFolder: string = path.join(this._autoinstallSubfolderFullPath, 'node_modules');
+      // Example: ../common/autoinstallers/my-task/node_modules
+      const nodeModulesFolder: string = path.join(this._autoinstallerNameFullPath, 'node_modules');
 
       if (FileSystem.exists(nodeModulesFolder)) {
         console.log('Deleting old files from ' + nodeModulesFolder);
         FileSystem.ensureEmptyFolder(nodeModulesFolder);
       }
 
-      // Copy: .../common/autoinstall/my-task/.npmrc
-      Utilities.syncNpmrc(this.rushConfiguration.commonRushConfigFolder, this._autoinstallSubfolderFullPath);
+      // Copy: .../common/autoinstallers/my-task/.npmrc
+      Utilities.syncNpmrc(this.rushConfiguration.commonRushConfigFolder, this._autoinstallerNameFullPath);
 
-      console.log(`Installing dependencies under ${this._autoinstallSubfolderFullPath}...\n`);
+      console.log(`Installing dependencies under ${this._autoinstallerNameFullPath}...\n`);
 
       Utilities.executeCommand(
         this.rushConfiguration.packageManagerToolFilename,
         ['install', '--frozen-lockfile'],
-        this._autoinstallSubfolderFullPath,
+        this._autoinstallerNameFullPath,
         undefined,
         /* suppressOutput */ false,
         /* keepEnvironment */ true
       );
 
-      // Create file: ../common/autoinstall/my-task/.rush/temp/last-install.flag
+      // Create file: ../common/autoinstallers/my-task/.rush/temp/last-install.flag
       lastInstallFlag.create();
 
       console.log('Autoinstall completed successfully\n');
     } else {
-      console.log('Autoinstall folder is already up to date\n');
+      console.log('Autoinstaller folder is already up to date\n');
     }
 
     lock.release();
@@ -161,15 +161,15 @@ export class GlobalScriptAction extends BaseScriptAction {
   public async run(): Promise<void> {
     const additionalPathFolders: string[] = [];
 
-    if (this._autoinstallSubfolder) {
-      await this._prepareAutoinstallSubfolder();
+    if (this._autoinstallerName) {
+      await this._prepareAutoinstallerName();
 
-      const autoinstallSubfolderBinPath: string = path.join(
-        this._autoinstallSubfolderFullPath,
+      const autoinstallerNameBinPath: string = path.join(
+        this._autoinstallerNameFullPath,
         'node_modules',
         '.bin'
       );
-      additionalPathFolders.push(autoinstallSubfolderBinPath);
+      additionalPathFolders.push(autoinstallerNameBinPath);
     }
 
     // Collect all custom parameter values

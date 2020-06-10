@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add new command-line.json setting \"autoinstallSubfolder\"",
+      "comment": "Add new command-line.json setting \"autoinstallerName\"",
       "type": "none"
     }
   ],
