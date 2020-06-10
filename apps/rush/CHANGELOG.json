@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.25.0",
+      "tag": "@microsoft/rush_v5.25.0",
+      "date": "Wed, 10 Jun 2020 23:53:27 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add new command-line.json setting \"autoinstallerName\""
+          }
+        ]
+      }
+    },
+    {
       "version": "5.24.4",
       "tag": "@microsoft/rush_v5.24.4",
       "date": "Mon, 08 Jun 2020 18:04:35 GMT",

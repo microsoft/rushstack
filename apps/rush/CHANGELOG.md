@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 08 Jun 2020 18:04:35 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Jun 2020 23:53:27 GMT and should not be manually modified.
+
+## 5.25.0
+Wed, 10 Jun 2020 23:53:27 GMT
+
+### Updates
+
+- Add new command-line.json setting "autoinstallerName"
 
 ## 5.24.4
 Mon, 08 Jun 2020 18:04:35 GMT
