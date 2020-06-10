@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.24.1",
+      "tag": "@rushstack/node-core-library_v3.24.1",
+      "date": "Wed, 10 Jun 2020 20:48:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve API docs for \"LockFile\""
+          }
+        ]
+      }
+    },
+    {
       "version": "3.24.0",
       "tag": "@rushstack/node-core-library_v3.24.0",
       "date": "Sat, 30 May 2020 02:59:54 GMT",

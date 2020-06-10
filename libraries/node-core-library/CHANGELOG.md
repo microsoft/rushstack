@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Sat, 30 May 2020 02:59:54 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Jun 2020 20:48:30 GMT and should not be manually modified.
+
+## 3.24.1
+Wed, 10 Jun 2020 20:48:30 GMT
+
+### Patches
+
+- Improve API docs for "LockFile"
 
 ## 3.24.0
 Sat, 30 May 2020 02:59:54 GMT
