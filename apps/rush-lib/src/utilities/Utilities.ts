@@ -70,6 +70,11 @@ export interface IEnvironmentPathOptions {
    * If true, include <repo root>/common/temp/node_modules/.bin in the PATH.
    */
   includeRepoBin?: boolean;
+
+  /**
+   * Additional folders to be prepended to the search PATH.
+   */
+  additionalPathFolders?: string[] | undefined;
 }
 
 interface ICreateEnvironmentForRushCommandPathOptions extends IEnvironmentPathOptions {
@@ -688,6 +693,12 @@ export class Utilities {
         environment.PATH = Utilities._prependNodeModulesBinToPath(
           environment.PATH,
           options.pathOptions.projectRoot
+        );
+      }
+
+      if (options.pathOptions.additionalPathFolders) {
+        environment.PATH = [...options.pathOptions.additionalPathFolders, environment.PATH].join(
+          path.delimiter
         );
       }
     }

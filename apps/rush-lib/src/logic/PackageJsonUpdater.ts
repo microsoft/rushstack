@@ -15,6 +15,7 @@ import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { VersionMismatchFinderEntity } from './versionMismatch/VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './versionMismatch/VersionMismatchFinderProject';
 import { RushConstants } from './RushConstants';
+import { InstallHelpers } from './InstallHelpers';
 
 /**
  * The type of SemVer range specifier that is prepended to the version
@@ -321,7 +322,12 @@ export class PackageJsonUpdater {
       return implicitlyPinnedVersion;
     }
 
-    await installManager.ensureLocalPackageManager();
+    await InstallHelpers.ensureLocalPackageManager(
+      this._rushConfiguration,
+      this._rushGlobalFolder,
+      RushConstants.defaultMaxInstallAttempts
+    );
+
     let selectedVersion: string | undefined;
 
     if (initialSpec && initialSpec !== 'latest') {

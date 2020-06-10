@@ -137,9 +137,13 @@ export function getProcessStartTime(pid: number): string | undefined {
 }
 
 /**
- * A helper utility for working with file-based locks.
- * This class should only be used for locking resources across processes,
- * but should not be used for attempting to lock a resource in the same process.
+ * The `LockFile` implements a file-based mutex for synchronizing access to a shared resource
+ * between multiple Node.js processes.  It is not recommended for synchronization solely within
+ * a single Node.js process.
+ * @remarks
+ * The implementation works on Windows, Mac, and Linux without requiring any native helpers.
+ * On non-Windows systems, the algorithm requires access to the `ps` shell command.  On Linux,
+ * it requires access the `/proc/${pidString}/stat` filesystem.
  * @public
  */
 export class LockFile {
@@ -156,10 +160,14 @@ export class LockFile {
   }
 
   /**
-   * Returns the path to the lockfile, should it be created successfully.
+   * Returns the path of the lockfile that will be created when a lock is successfully acquired.
+   * @param resourceFolder - The folder where the lock file will be created
+   * @param resourceName - An alphanumeric name that describes the resource being locked.  This will become
+   *   the filename of the temporary file created to manage the lock.
+   * @param pid - The PID for the current Node.js process (`process.pid`), which is used by the locking algorithm.
    */
   public static getLockFilePath(
-    resourceDir: string,
+    resourceFolder: string,
     resourceName: string,
     pid: number = process.pid
   ): string {
@@ -171,9 +179,9 @@ export class LockFile {
     }
 
     if (process.platform === 'win32') {
-      return path.join(path.resolve(resourceDir), `${resourceName}.lock`);
+      return path.join(path.resolve(resourceFolder), `${resourceName}.lock`);
     } else if (process.platform === 'linux' || process.platform === 'darwin') {
-      return path.join(path.resolve(resourceDir), `${resourceName}#${pid}.lock`);
+      return path.join(path.resolve(resourceFolder), `${resourceName}#${pid}.lock`);
     }
 
     throw new Error(`File locking not implemented for platform: "${process.platform}"`);
@@ -181,33 +189,41 @@ export class LockFile {
 
   /**
    * Attempts to create a lockfile with the given filePath.
-   * If successful, returns a LockFile instance.
-   * If unable to get a lock, returns undefined.
-   * @param resourceName - the name of the resource we are locking on. Should be an alphabetic string.
+   * @param resourceFolder - The folder where the lock file will be created
+   * @param resourceName - An alphanumeric name that describes the resource being locked.  This will become
+   *   the filename of the temporary file created to manage the lock.
+   * @returns If successful, returns a `LockFile` instance.  If unable to get a lock, returns `undefined`.
    */
-  public static tryAcquire(resourceDir: string, resourceName: string): LockFile | undefined {
-    FileSystem.ensureFolder(resourceDir);
+  public static tryAcquire(resourceFolder: string, resourceName: string): LockFile | undefined {
+    FileSystem.ensureFolder(resourceFolder);
     if (process.platform === 'win32') {
-      return LockFile._tryAcquireWindows(resourceDir, resourceName);
+      return LockFile._tryAcquireWindows(resourceFolder, resourceName);
     } else if (process.platform === 'linux' || process.platform === 'darwin') {
-      return LockFile._tryAcquireMacOrLinux(resourceDir, resourceName);
+      return LockFile._tryAcquireMacOrLinux(resourceFolder, resourceName);
     }
     throw new Error(`File locking not implemented for platform: "${process.platform}"`);
   }
 
   /**
-   * Attempts to create the lockfile.
-   * Will continue to loop at every 100ms until the lock becomes available or the maxWaitMs is surpassed.
-   * @remarks This function is subject to starvation, whereby it does not ensure that the process that has been
-   *          waiting the longest to acquire the lock will get it first. This means that a process could theoretically
-   *          wait for the lock forever, while other processes skipped it in line and acquired the lock first.
+   * Attempts to create the lockfile.  Will continue to loop at every 100ms until the lock becomes available
+   * or the maxWaitMs is surpassed.
+   *
+   * @remarks
+   * This function is subject to starvation, whereby it does not ensure that the process that has been
+   * waiting the longest to acquire the lock will get it first. This means that a process could theoretically
+   * wait for the lock forever, while other processes skipped it in line and acquired the lock first.
+   *
+   * @param resourceFolder - The folder where the lock file will be created
+   * @param resourceName - An alphanumeric name that describes the resource being locked.  This will become
+   *   the filename of the temporary file created to manage the lock.
+   * @param maxWaitMs - The maximum number of milliseconds to wait for the lock before reporting an error
    */
-  public static acquire(resourceDir: string, resourceName: string, maxWaitMs?: number): Promise<LockFile> {
+  public static acquire(resourceFolder: string, resourceName: string, maxWaitMs?: number): Promise<LockFile> {
     const interval: number = 100;
     const startTime: number = Date.now();
 
     const retryLoop: () => Promise<LockFile> = () => {
-      const lock: LockFile | undefined = LockFile.tryAcquire(resourceDir, resourceName);
+      const lock: LockFile | undefined = LockFile.tryAcquire(resourceFolder, resourceName);
       if (lock) {
         return Promise.resolve(lock);
       }
@@ -236,7 +252,7 @@ export class LockFile {
   /**
    * Attempts to acquire the lock on a Linux or OSX machine
    */
-  private static _tryAcquireMacOrLinux(resourceDir: string, resourceName: string): LockFile | undefined {
+  private static _tryAcquireMacOrLinux(resourceFolder: string, resourceName: string): LockFile | undefined {
     let dirtyWhenAcquired: boolean = false;
 
     // get the current process' pid
@@ -247,7 +263,7 @@ export class LockFile {
       throw new Error(`Unable to calculate start time for current process.`);
     }
 
-    const pidLockFilePath: string = LockFile.getLockFilePath(resourceDir, resourceName);
+    const pidLockFilePath: string = LockFile.getLockFilePath(resourceFolder, resourceName);
     let lockFileHandle: FileWriter | undefined;
 
     let lockFile: LockFile;
@@ -265,7 +281,7 @@ export class LockFile {
       let smallestBirthTimePid: string = pid.toString();
 
       // now, scan the directory for all lockfiles
-      const files: string[] = FileSystem.readFolder(resourceDir);
+      const files: string[] = FileSystem.readFolder(resourceFolder);
 
       // look for anything ending with # then numbers and ".lock"
       const lockFileRegExp: RegExp = /^(.+)#([0-9]+)\.lock$/;
@@ -279,7 +295,7 @@ export class LockFile {
           (otherPid = match[2]) !== pid.toString()
         ) {
           // we found at least one lockfile hanging around that isn't ours
-          const fileInFolderPath: string = path.join(resourceDir, fileInFolder);
+          const fileInFolderPath: string = path.join(resourceFolder, fileInFolder);
           dirtyWhenAcquired = true;
 
           // console.log(`FOUND OTHER LOCKFILE: ${otherPid}`);
@@ -360,8 +376,8 @@ export class LockFile {
    * Attempts to acquire the lock using Windows
    * This algorithm is much simpler since we can rely on the operating system
    */
-  private static _tryAcquireWindows(resourceDir: string, resourceName: string): LockFile | undefined {
-    const lockFilePath: string = LockFile.getLockFilePath(resourceDir, resourceName);
+  private static _tryAcquireWindows(resourceFolder: string, resourceName: string): LockFile | undefined {
+    const lockFilePath: string = LockFile.getLockFilePath(resourceFolder, resourceName);
     let dirtyWhenAcquired: boolean = false;
 
     let fileHandle: FileWriter | undefined;

@@ -279,7 +279,9 @@ export class RushCommandLineParser extends CommandLineParser {
             parser: this,
             commandLineConfiguration: commandLineConfiguration,
 
-            shellCommand: command.shellCommand
+            shellCommand: command.shellCommand,
+
+            autoinstallerName: command.autoinstallerName
           })
         );
         break;
