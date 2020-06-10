@@ -9,13 +9,13 @@
     "readme": "node ./lib/start.js readme"
   },
   "dependencies": {
-    "@rushstack/node-core-library": "3.24.0",
+    "@rushstack/node-core-library": "3.24.1",
     "@microsoft/rush-lib": "5.24.4",
     "@rushstack/ts-command-line": "4.4.2"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.5.2",
-    "@microsoft/node-library-build": "6.4.22",
+    "@microsoft/rush-stack-compiler-3.5": "0.5.3",
+    "@microsoft/node-library-build": "6.4.23",
     "@rushstack/eslint-config": "0.5.8",
     "@types/node": "10.17.13",
     "gulp": "~4.0.2"
