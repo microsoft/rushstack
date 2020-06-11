@@ -154,7 +154,9 @@
       "autoinstallerName": "rush-prettier",
 
       // This will invoke common/autoinstall/rush-prettier/node_modules/.bin/pretty-quick
-      "shellCommand": "pretty-quick --staged"
+      "shellCommand": "pretty-quick --staged",
+
+      "safeForSimultaneousRushProcesses": true
     }
   ],
 
