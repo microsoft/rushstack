@@ -20,21 +20,21 @@
   //    * SemVer range is usually restricted to a single version.
   //    */
   //   "definitionName": "lockStepVersion",
-  // 
+  //
   //   /**
   //    * (Required) The name that will be used for the "versionPolicyName" field in rush.json.
   //    * This name is also used command-line parameters such as "--version-policy"
   //    * and "--to-version-policy".
   //    */
   //   "policyName": "MyBigFramework",
-  // 
+  //
   //   /**
   //    * (Required) The current version.  All packages belonging to the set should have this version
   //    * in the current branch.  When bumping versions, Rush uses this to determine the next version.
   //    * (The "version" field in package.json is NOT considered.)
   //    */
   //   "version": "1.0.0",
-  // 
+  //
   //   /**
   //    * (Required) The type of bump that will be performed when publishing the next release.
   //    * When creating a release branch in Git, this field should be updated according to the
@@ -43,7 +43,7 @@
   //    * Valid values are: "prerelease", "release", "minor", "patch", "major"
   //    */
   //   "nextBump": "prerelease",
-  // 
+  //
   //   /**
   //    * (Optional) If specified, all packages in the set share a common CHANGELOG.md file.
   //    * This file is stored with the specified "main" project, which must be a member of the set.
@@ -53,7 +53,7 @@
   //    */
   //   "mainProject": "my-app"
   // },
-  // 
+  //
   // {
   //   /**
   //    * (Required) Indicates the kind of version policy being defined ("lockStepVersion" or "individualVersion").
@@ -66,9 +66,9 @@
   //    * is changed.
   //    */
   //   "definitionName": "individualVersion",
-  // 
+  //
   //   "policyName": "MyRandomLibraries",
-  // 
+  //
   //   /**
   //    * (Optional) This can be used to enforce that all packages in the set must share a common
   //    * major version number, e.g. because they are from the same major release branch.
@@ -77,7 +77,7 @@
   //    * to the types of changes made to each project, according to the "rush change" command.
   //    */
   //   "lockedMajor": 3,
-  // 
+  //
   //   /**
   //    * (Optional) When publishing is managed by Rush, by default the "rush change" command will
   //    * request changes for any projects that are modified by a pull request. These change entries
