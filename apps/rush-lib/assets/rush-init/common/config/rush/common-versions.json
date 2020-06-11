@@ -56,8 +56,7 @@
      * (in addition to whatever "usual" version is being used by other projects in the repo):
      */
     /*[LINE "HYPOTHETICAL"]*/ "typescript": [
-      /*[LINE "HYPOTHETICAL"]*/ "~2.4.0"
-      /*[LINE "HYPOTHETICAL"]*/
-    ]
+    /*[LINE "HYPOTHETICAL"]*/   "~2.4.0"
+    /*[LINE "HYPOTHETICAL"]*/ ]
   }
 }

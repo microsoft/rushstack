@@ -96,5 +96,8 @@ build-tests/*/etc
 dist-dev
 dist-prod
 
+# Prettier doesn't understand the /*[LINE "HYPOTHETICAL"]*/ macros in these files:
+apps/rush-lib/assets/rush-init/**/*.json
+
 # We'll consider enabling this later; Prettier reformats code blocks, which affects end-user content
 *.md
