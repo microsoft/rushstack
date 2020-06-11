@@ -292,7 +292,9 @@ export class InstallManager {
     const hookDestination: string | undefined = Git.getHooksFolder();
 
     if (FileSystem.exists(hookSource) && hookDestination) {
-      const hookFilenames: string[] = FileSystem.readFolder(hookSource);
+      const allHookFilenames: string[] = FileSystem.readFolder(hookSource);
+      // Ignore the ".sample" file(s) in this folder.
+      const hookFilenames: string[] = allHookFilenames.filter((x) => !/\.sample$/.test(x));
       if (hookFilenames.length > 0) {
         console.log(os.EOL + colors.bold('Found files in the "common/git-hooks" folder.'));
 
