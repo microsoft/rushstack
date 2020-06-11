@@ -20,7 +20,8 @@ import {
   FileConstants,
   Sort,
   PosixModeBits,
-  JsonObject
+  JsonObject,
+  NewlineKind
 } from '@rushstack/node-core-library';
 
 import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
@@ -304,10 +305,12 @@ export class InstallManager {
         // Only copy files that look like Git hook names
         const filteredHookFilenames: string[] = hookFilenames.filter((x) => /^[a-z\-]+/.test(x));
         for (const filename of filteredHookFilenames) {
-          FileSystem.copyFile({
-            sourcePath: path.join(hookSource, filename),
-            destinationPath: path.join(hookDestination, filename)
+          // Copy the file.  Important: For Bash scripts, the EOL must not be CRLF.
+          const hookFileContent: string = FileSystem.readFile(path.join(hookSource, filename));
+          FileSystem.writeFile(path.join(hookDestination, filename), hookFileContent, {
+            convertLineEndings: NewlineKind.Lf
           });
+
           FileSystem.changePosixModeBits(
             path.join(hookDestination, filename),
             PosixModeBits.UserRead | PosixModeBits.UserExecute
