@@ -32,22 +32,31 @@ export class PnpmLinkManager extends BaseLinkManager {
       localLinks: {}
     };
 
-    // Use shrinkwrap from temp as the committed shrinkwrap may not always be up to date
-    // See https://github.com/microsoft/rushstack/issues/1273#issuecomment-492779995
-    const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
-      this._rushConfiguration.tempShrinkwrapFilename,
-      this._rushConfiguration.pnpmOptions
-    );
-
-    if (!pnpmShrinkwrapFile) {
-      throw new InternalError(
-        `Cannot load shrinkwrap at "${this._rushConfiguration.tempShrinkwrapFilename}"`
+    if (this._rushConfiguration.projects.length > 0) {
+      // Use shrinkwrap from temp as the committed shrinkwrap may not always be up to date
+      // See https://github.com/microsoft/rushstack/issues/1273#issuecomment-492779995
+      const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
+        this._rushConfiguration.tempShrinkwrapFilename,
+        this._rushConfiguration.pnpmOptions
       );
-    }
 
-    for (const rushProject of this._rushConfiguration.projects) {
-      console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-      await this._linkProject(rushProject, rushLinkJson, pnpmShrinkwrapFile);
+      if (!pnpmShrinkwrapFile) {
+        throw new InternalError(
+          `Cannot load shrinkwrap at "${this._rushConfiguration.tempShrinkwrapFilename}"`
+        );
+      }
+
+      for (const rushProject of this._rushConfiguration.projects) {
+        console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
+        await this._linkProject(rushProject, rushLinkJson, pnpmShrinkwrapFile);
+      }
+    } else {
+      console.log(
+        colors.yellow(
+          '\nWarning: Nothing to do. Please edit rush.json and add at least one project' +
+            ' to the "projects" section.\n'
+        )
+      );
     }
 
     console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
