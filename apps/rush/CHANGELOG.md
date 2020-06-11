@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 10 Jun 2020 23:53:27 GMT and should not be manually modified.
+This log was last generated on Thu, 11 Jun 2020 05:05:30 GMT and should not be manually modified.
+
+## 5.25.1
+Thu, 11 Jun 2020 05:05:30 GMT
+
+### Updates
+
+- Fix some minor errors in the "rush init" template that occured when Prettier reformatted the template file macros
+- Add a sample Git hook file to the "rush init" template
+- Fix a minor issue where "rush link" failed if no projects were defined yet in rush.json
+- Add "--no-verify" for commits performed by "rush version", since Git hook scripts may fail on CI machines
 
 ## 5.25.0
 Wed, 10 Jun 2020 23:53:27 GMT

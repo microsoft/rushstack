@@ -2,6 +2,27 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.25.1",
+      "tag": "@microsoft/rush_v5.25.1",
+      "date": "Thu, 11 Jun 2020 05:05:30 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix some minor errors in the \"rush init\" template that occured when Prettier reformatted the template file macros"
+          },
+          {
+            "comment": "Add a sample Git hook file to the \"rush init\" template"
+          },
+          {
+            "comment": "Fix a minor issue where \"rush link\" failed if no projects were defined yet in rush.json"
+          },
+          {
+            "comment": "Add \"--no-verify\" for commits performed by \"rush version\", since Git hook scripts may fail on CI machines"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.25.0",
       "tag": "@microsoft/rush_v5.25.0",
       "date": "Wed, 10 Jun 2020 23:53:27 GMT",
