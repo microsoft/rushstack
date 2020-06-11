@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "2.15.1",
+  "pnpmVersion": "4.12.5",
 
   /*[LINE "HYPOTHETICAL"]*/ "npmVersion": "4.5.0",
   /*[LINE "HYPOTHETICAL"]*/ "yarnVersion": "1.9.4",
@@ -105,7 +105,7 @@
    * Specify a SemVer range to ensure developers use a Node.js version that is appropriate
    * for your repo.
    */
-  "nodeSupportedVersionRange": ">=10.13.0 <11.0.0",
+  "nodeSupportedVersionRange": ">=12.13.0 <13.0.0",
 
   /**
    * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
@@ -196,8 +196,8 @@
     "reviewCategories": [
       // Some example categories:
       "production", // projects that ship to production
-      "tools", // non-shipping projects that are part of the developer toolchain
-      "prototypes" // experiments that should mostly be ignored by the review process
+      "tools",      // non-shipping projects that are part of the developer toolchain
+      "prototypes"  // experiments that should mostly be ignored by the review process
     ],
 
     /**
@@ -227,7 +227,10 @@
      * RegExp escapes need two backspashes, and ordinary periods should be "\\.".
      */
     /*[BEGIN "DEMO"]*/
-    "allowedEmailRegExps": ["[^@]+@users\\.noreply\\.github\\.com", "travis@example\\.org"],
+    "allowedEmailRegExps": [
+      "[^@]+@users\\.noreply\\.github\\.com",
+      "travis@example\\.org"
+    ],
     /*[END "DEMO"]*/
 
     /**
@@ -285,7 +288,9 @@
     /**
      * The list of shell commands to run before the Rush installation starts
      */
-    "preRushInstall": [/*[LINE "HYPOTHETICAL"]*/ "common/scripts/pre-rush-install.js"],
+    "preRushInstall": [
+      /*[LINE "HYPOTHETICAL"]*/ "common/scripts/pre-rush-install.js"
+    ],
 
     /**
      * The list of shell commands to run after the Rush installation finishes
@@ -386,7 +391,9 @@
        * locally linked because it would create a cyclic dependency; instead, the last published
        * version will be installed in the Common folder.
        */
-      "cyclicDependencyProjects": [/*[LINE "HYPOTHETICAL"]*/ "my-toolchain"],
+      "cyclicDependencyProjects": [
+        /*[LINE "HYPOTHETICAL"]*/ "my-toolchain"
+      ],
 
       /**
        * If true, then this project will be ignored by the "rush check" command.
