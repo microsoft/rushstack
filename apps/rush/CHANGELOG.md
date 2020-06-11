@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 11 Jun 2020 05:05:30 GMT and should not be manually modified.
+This log was last generated on Thu, 11 Jun 2020 05:34:31 GMT and should not be manually modified.
+
+## 5.25.2
+Thu, 11 Jun 2020 05:34:31 GMT
+
+### Updates
+
+- Fix an issue where Git hook scripts failed in some environments due to CRLF newlines
 
 ## 5.25.1
 Thu, 11 Jun 2020 05:05:30 GMT

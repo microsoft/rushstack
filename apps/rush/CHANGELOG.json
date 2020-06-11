@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.25.2",
+      "tag": "@microsoft/rush_v5.25.2",
+      "date": "Thu, 11 Jun 2020 05:34:31 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where Git hook scripts failed in some environments due to CRLF newlines"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.25.1",
       "tag": "@microsoft/rush_v5.25.1",
       "date": "Thu, 11 Jun 2020 05:05:30 GMT",
