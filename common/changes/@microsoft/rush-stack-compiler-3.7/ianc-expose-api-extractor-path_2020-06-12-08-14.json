@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Expose the @microsoft/api-extractor package's path",
+      "type": "minor",
+      "packageName": "@microsoft/rush-stack-compiler-3.7"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-3.7",
+  "email": "iclanton@users.noreply.github.com"
+}
