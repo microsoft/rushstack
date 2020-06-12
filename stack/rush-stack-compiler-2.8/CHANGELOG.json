@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-stack-compiler-2.8",
   "entries": [
     {
+      "version": "0.6.0",
+      "tag": "@microsoft/rush-stack-compiler-2.8_v0.6.0",
+      "date": "Fri, 12 Jun 2020 09:19:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expose the @microsoft/api-extractor package's path"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.3",
       "tag": "@microsoft/rush-stack-compiler-2.8_v0.5.3",
       "date": "Wed, 10 Jun 2020 20:48:30 GMT",

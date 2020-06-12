@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush-stack-compiler-3.2
 
-This log was last generated on Wed, 10 Jun 2020 20:48:30 GMT and should not be manually modified.
+This log was last generated on Fri, 12 Jun 2020 09:19:21 GMT and should not be manually modified.
+
+## 0.8.0
+Fri, 12 Jun 2020 09:19:21 GMT
+
+### Minor changes
+
+- Expose the @microsoft/api-extractor package's path
 
 ## 0.7.3
 Wed, 10 Jun 2020 20:48:30 GMT
