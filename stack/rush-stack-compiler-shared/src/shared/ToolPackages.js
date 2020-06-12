@@ -8,4 +8,4 @@ const lazyImporter = importLazy(require);
 
 exports.Typescript = lazyImporter(ToolPaths.typescriptPackagePath);
 exports.Tslint = lazyImporter(ToolPaths.tslintPackagePath);
-exports.ApiExtractor = lazyImporter('@microsoft/api-extractor');
+exports.ApiExtractor = lazyImporter(ToolPaths.apiExtractorPackagePath);
