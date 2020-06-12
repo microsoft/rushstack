@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/loader-raw-script",
-  "version": "1.3.23",
+  "version": "1.3.24",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -16,11 +16,11 @@
     "loader-utils": "~1.1.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.5.3",
+    "@microsoft/rush-stack-compiler-3.5": "0.6.0",
     "@rushstack/eslint-config": "0.5.8",
     "@types/jest": "25.2.1",
     "@types/node": "10.17.13",
     "gulp": "~4.0.2",
-    "@microsoft/node-library-build": "6.4.23"
+    "@microsoft/node-library-build": "6.4.24"
   }
 }
