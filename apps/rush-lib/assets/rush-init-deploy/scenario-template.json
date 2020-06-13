@@ -1,7 +1,7 @@
 /**
  * This configuration file defines a deployment scenario for use with the "rush deploy" command.
- * The scenario files are located under the "common/config/deploy-scenarios" folder.
- * For full documentation, please see https://rushjs.io
+ * The default scenario file path is "deploy.json"; additional files use the naming pattern
+ * "deploy-<scenario-name>.json". For full documentation, please see https://rushjs.io
  */
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/deploy-scenario.schema.json",
