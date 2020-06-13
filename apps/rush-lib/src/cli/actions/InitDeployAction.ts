@@ -10,7 +10,7 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 export class InitDeployAction extends BaseRushAction {
   private static _CONFIG_TEMPLATE_PATH: string = path.join(
     __dirname,
-    '../../../assets/rush-deploy-init/scenario-template.json'
+    '../../../assets/rush-init-deploy/scenario-template.json'
   );
   private _scenario: CommandLineStringParameter;
   private _project: CommandLineStringParameter;
