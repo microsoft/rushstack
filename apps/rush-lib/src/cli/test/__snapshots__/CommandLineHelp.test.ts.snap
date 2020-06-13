@@ -226,7 +226,9 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: deploy 1`] = `
-"usage: rush deploy [-h] -s SCENARIO [--overwrite] [-t PATH]
+"usage: rush deploy [-h] [-p PROJECT_NAME] [-s SCENARIO_NAME] [--overwrite]
+                   [-t PATH]
+                   
 
 (EXPERIMENTAL) After building the repo, \\"rush deploy\\" can be used to copy a 
 subset of Rush projects and their dependencies to a deployment target folder, 
@@ -237,15 +239,23 @@ is specified by a scenario config file located under the
 
 Optional arguments:
   -h, --help            Show this help message and exit.
-  -s SCENARIO, --scenario SCENARIO
-                        Specifies the name of a config file describing the 
-                        deployment. For example if SCENARIO is \\"web\\", the 
-                        input file is: common/config/deploy/web.json
+  -p PROJECT_NAME, --project PROJECT_NAME
+                        Specifies the name of the main Rush project to be 
+                        deployed. It must appear in the 
+                        \\"deploymentProjectNames\\" setting in the deployment 
+                        config file.
+  -s SCENARIO_NAME, --scenario SCENARIO_NAME
+                        By default, the deployment configuration is specified 
+                        in \\"common/config/rush/deploy.json\\". You can use 
+                        \\"--scenario\\" to specify an alternate name. The name 
+                        must be lowercase and separated by dashes. For 
+                        example, if SCENARIO_NAME is \\"web\\", then the config 
+                        file would be \\"common/config/rush/deploy-web.json\\".
   --overwrite           By default, deployment will fail if the target folder 
                         is not empty. SPECIFYING THIS FLAG WILL RECURSIVELY 
                         DELETE EXISTING CONTENTS OF THE TARGET FOLDER.
   -t PATH, --target-folder PATH
-                        By default, files are deployed to the common/deploy 
+                        By default, files are deployed to the \\"common/deploy\\" 
                         folder inside the Rush repo. Use this parameter to 
                         specify a different location. WARNING: USE CAUTION 
                         WHEN COMBINING WITH \\"--overwrite\\". This parameter may 
@@ -324,20 +334,24 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: init-deploy 1`] = `
-"usage: rush init-deploy [-h] -s SCENARIO -p PROJECT_NAME
+"usage: rush init-deploy [-h] -p PROJECT_NAME [-s SCENARIO]
 
 The deployment config files are stored under \\"common/config/deploy\\" and are 
 used to configure behavior of the \\"rush deploy\\" command.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
-  -s SCENARIO, --scenario SCENARIO
-                        Specifies the name of the config file describing the 
-                        deployment. The name must be lower case and separated 
-                        by dashes. Example: \\"production-web\\"
   -p PROJECT_NAME, --project PROJECT_NAME
                         Specifies the name of the main Rush project to be 
-                        deployed in this scenario.
+                        deployed in this scenario. It will be added to the 
+                        \\"deploymentProjectNames\\" setting.
+  -s SCENARIO, --scenario SCENARIO
+                        By default, the deployment configuration will be 
+                        written to \\"common/config/rush/deploy.json\\". You can 
+                        use \\"--scenario\\" to specify an alternate name. The 
+                        name must be lowercase and separated by dashes. For 
+                        example, if the name is \\"web\\", then the config file 
+                        would be \\"common/config/rush/deploy-web.json\\".
 "
 `;
 

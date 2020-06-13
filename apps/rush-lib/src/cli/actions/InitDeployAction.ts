@@ -3,17 +3,17 @@ import * as colors from 'colors';
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
-import { DeployManager } from '../../logic/deploy/DeployManager';
 import { FileSystem, NewlineKind } from '@rushstack/node-core-library';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { DeployScenarioConfiguration } from '../../logic/deploy/DeployScenarioConfiguration';
 
 export class InitDeployAction extends BaseRushAction {
   private static _CONFIG_TEMPLATE_PATH: string = path.join(
     __dirname,
     '../../../assets/rush-init-deploy/scenario-template.json'
   );
-  private _scenario: CommandLineStringParameter;
   private _project: CommandLineStringParameter;
+  private _scenario: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -27,31 +27,31 @@ export class InitDeployAction extends BaseRushAction {
   }
 
   protected onDefineParameters(): void {
-    this._scenario = this.defineStringParameter({
-      parameterLongName: '--scenario',
-      parameterShortName: '-s',
-      argumentName: 'SCENARIO',
-      required: true,
-      description:
-        'Specifies the name of the config file describing the deployment. ' +
-        'The name must be lower case and separated by dashes.  Example: "production-web"'
-    });
     this._project = this.defineStringParameter({
       parameterLongName: '--project',
       parameterShortName: '-p',
       argumentName: 'PROJECT_NAME',
       required: true,
-      description: 'Specifies the name of the main Rush project to be deployed in this scenario.'
+      description:
+        'Specifies the name of the main Rush project to be deployed in this scenario.' +
+        ' It will be added to the "deploymentProjectNames" setting.'
+    });
+
+    this._scenario = this.defineStringParameter({
+      parameterLongName: '--scenario',
+      parameterShortName: '-s',
+      argumentName: 'SCENARIO',
+      description:
+        'By default, the deployment configuration will be written to "common/config/rush/deploy.json".' +
+        ' You can use "--scenario" to specify an alternate name. The name must be lowercase and separated by dashes.' +
+        ' For example, if the name is "web", then the config file would be "common/config/rush/deploy-web.json".'
     });
   }
 
   protected async run(): Promise<void> {
-    const scenarioName: string = this._scenario.value!;
-    DeployManager.validateScenarioName(scenarioName);
-
-    const scenarioFilePath: string = path.join(
-      this.rushConfiguration.commonDeployConfigFolder,
-      `${scenarioName}.json`
+    const scenarioFilePath: string = DeployScenarioConfiguration.getConfigFilePath(
+      this._scenario.value,
+      this.rushConfiguration
     );
 
     if (FileSystem.exists(scenarioFilePath)) {
