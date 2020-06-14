@@ -119,9 +119,11 @@ export class DeployManager {
 
       const packageJson: IPackageJson = JsonFile.load(path.join(packageJsonRealFolderPath, 'package.json'));
 
-      // Union of keys from regular dependencies, peerDependencies, and optionalDependencies
+      // Union of keys from regular dependencies, peerDependencies, optionalDependencies
+      // (and possibly devDependencies if includeDevDependencies=true)
       const allDependencyNames: Set<string> = new Set<string>();
-      // Just the keys from optionalDependencies
+
+      // Just the keys from optionalDependencies and peerDependencies
       const optionalDependencyNames: Set<string> = new Set<string>();
 
       for (const name of Object.keys(packageJson.dependencies || {})) {
@@ -147,8 +149,8 @@ export class DeployManager {
 
       for (const dependencyPackageName of allDependencyNames) {
         // The "resolve" library models the Node.js require() API, which gives precedence to "core" system modules
-        // over an NPM package with the same name.  But we are traversing package.json dependencies, which refer
-        // to system modules.  Appending a "/" forces require() to load the NPM package.
+        // over an NPM package with the same name.  But we are traversing package.json dependencies, which never
+        // refer to system modules.  Appending a "/" forces require() to look for the NPM package.
         const resolveSuffix: string =
           dependencyPackageName + resolve.isCore(dependencyPackageName) ? '/' : '';
 
@@ -206,7 +208,7 @@ export class DeployManager {
   }
 
   /**
-   * Maps a file path from DeployManager._sourceRootFolder --> IDeployState.targetRootFolder
+   * Maps a file path from IDeployState.sourceRootFolder --> IDeployState.targetRootFolder
    *
    * Example input: "C:\MyRepo\libraries\my-lib"
    * Example output: "C:\MyRepo\common\deploy\libraries\my-lib"
@@ -223,7 +225,7 @@ export class DeployManager {
   }
 
   /**
-   * Maps a file path from DeployManager._sourceRootFolder --> relative path
+   * Maps a file path from IDeployState.sourceRootFolder --> relative path
    *
    * Example input: "C:\MyRepo\libraries\my-lib"
    * Example output: "libraries/my-lib"
@@ -404,6 +406,9 @@ export class DeployManager {
     }
   }
 
+  /**
+   * Write the common/deploy/deploy-metadata.json file.
+   */
   private _writeDeployMetadata(deployState: IDeployState): void {
     const deployMetadataFilePath: string = path.join(deployState.targetRootFolder, 'deploy-metadata.json');
 
