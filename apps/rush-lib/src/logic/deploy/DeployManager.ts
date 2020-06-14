@@ -44,11 +44,11 @@ export interface IDeployMetadataJson {
 
 /**
  * Stores additional information about folders being copied.
- * Only some of the IDeploymentState.foldersToCopy items will an IFolderInfo object.
+ * Only some of the IDeployState.foldersToCopy items will an IFolderInfo object.
  */
 interface IFolderInfo {
   /**
-   * This is the lookup key for IDeploymentState.folderInfosByPath.
+   * This is the lookup key for IDeployState.folderInfosByPath.
    * It is an absolute real path.
    */
   folderPath: string;
@@ -61,13 +61,13 @@ interface IFolderInfo {
 /**
  * This object tracks DeployManager state during a deployment.
  */
-interface IDeploymentState {
+interface IDeployState {
   scenarioFilePath: string;
 
   /**
    * The parsed scenario config file, as defined by the "deploy-scenario.schema.json" JSON schema
    */
-  deployScenarioConfiguration: DeployScenarioConfiguration;
+  scenarioConfiguration: DeployScenarioConfiguration;
 
   mainProjectName: string;
 
@@ -109,13 +109,13 @@ export class DeployManager {
   }
 
   /**
-   * Recursively crawl the node_modules dependencies and collect the result in IDeploymentState.foldersToCopy.
+   * Recursively crawl the node_modules dependencies and collect the result in IDeployState.foldersToCopy.
    */
-  private _collectFoldersRecursive(packageJsonFolderPath: string, deploymentState: IDeploymentState): void {
+  private _collectFoldersRecursive(packageJsonFolderPath: string, deployState: IDeployState): void {
     const packageJsonRealFolderPath: string = FileSystem.getRealPath(packageJsonFolderPath);
 
-    if (!deploymentState.foldersToCopy.has(packageJsonRealFolderPath)) {
-      deploymentState.foldersToCopy.add(packageJsonRealFolderPath);
+    if (!deployState.foldersToCopy.has(packageJsonRealFolderPath)) {
+      deployState.foldersToCopy.add(packageJsonRealFolderPath);
 
       const packageJson: IPackageJson = JsonFile.load(path.join(packageJsonRealFolderPath, 'package.json'));
 
@@ -127,7 +127,7 @@ export class DeployManager {
       for (const name of Object.keys(packageJson.dependencies || {})) {
         allDependencyNames.add(name);
       }
-      if (deploymentState.deployScenarioConfiguration.deployScenarioJson.includeDevDependencies) {
+      if (deployState.scenarioConfiguration.json.includeDevDependencies) {
         for (const name of Object.keys(packageJson.devDependencies || {})) {
           allDependencyNames.add(name);
         }
@@ -167,7 +167,7 @@ export class DeployManager {
               try {
                 const resolvedPath: string = fs.realpathSync(filePath);
 
-                deploymentState.symlinkAnalyzer.analyzePath(filePath);
+                deployState.symlinkAnalyzer.analyzePath(filePath);
                 return resolvedPath;
               } catch (realpathErr) {
                 if (realpathErr.code !== 'ENOENT') {
@@ -193,7 +193,7 @@ export class DeployManager {
             throw new Error(`Error finding package.json folder for ${resolvedDependency}`);
           }
 
-          this._collectFoldersRecursive(dependencyPackageFolderPath, deploymentState);
+          this._collectFoldersRecursive(dependencyPackageFolderPath, deployState);
         } catch (resolveErr) {
           if (resolveErr.code === 'MODULE_NOT_FOUND' && optionalDependencyNames.has(dependencyPackageName)) {
             // Ignore missing optional dependency
@@ -206,22 +206,19 @@ export class DeployManager {
   }
 
   /**
-   * Maps a file path from DeployManager._sourceRootFolder --> IDeploymentState.targetRootFolder
+   * Maps a file path from DeployManager._sourceRootFolder --> IDeployState.targetRootFolder
    *
    * Example input: "C:\MyRepo\libraries\my-lib"
    * Example output: "C:\MyRepo\common\deploy\libraries\my-lib"
    */
-  private _remapPathForDeployFolder(
-    absolutePathInSourceFolder: string,
-    deploymentState: IDeploymentState
-  ): string {
-    if (!Path.isUnderOrEqual(absolutePathInSourceFolder, deploymentState.sourceRootFolder)) {
+  private _remapPathForDeployFolder(absolutePathInSourceFolder: string, deployState: IDeployState): string {
+    if (!Path.isUnderOrEqual(absolutePathInSourceFolder, deployState.sourceRootFolder)) {
       throw new Error(
-        `Source path is not under ${deploymentState.sourceRootFolder}\n${absolutePathInSourceFolder}`
+        `Source path is not under ${deployState.sourceRootFolder}\n${absolutePathInSourceFolder}`
       );
     }
-    const relativePath: string = path.relative(deploymentState.sourceRootFolder, absolutePathInSourceFolder);
-    const absolutePathInTargetFolder: string = path.join(deploymentState.targetRootFolder, relativePath);
+    const relativePath: string = path.relative(deployState.sourceRootFolder, absolutePathInSourceFolder);
+    const absolutePathInTargetFolder: string = path.join(deployState.targetRootFolder, relativePath);
     return absolutePathInTargetFolder;
   }
 
@@ -231,27 +228,24 @@ export class DeployManager {
    * Example input: "C:\MyRepo\libraries\my-lib"
    * Example output: "libraries/my-lib"
    */
-  private _remapPathForDeployMetadata(
-    absolutePathInSourceFolder: string,
-    deploymentState: IDeploymentState
-  ): string {
-    if (!Path.isUnderOrEqual(absolutePathInSourceFolder, deploymentState.sourceRootFolder)) {
+  private _remapPathForDeployMetadata(absolutePathInSourceFolder: string, deployState: IDeployState): string {
+    if (!Path.isUnderOrEqual(absolutePathInSourceFolder, deployState.sourceRootFolder)) {
       throw new Error(
-        `Source path is not under ${deploymentState.sourceRootFolder}\n${absolutePathInSourceFolder}`
+        `Source path is not under ${deployState.sourceRootFolder}\n${absolutePathInSourceFolder}`
       );
     }
-    const relativePath: string = path.relative(deploymentState.sourceRootFolder, absolutePathInSourceFolder);
+    const relativePath: string = path.relative(deployState.sourceRootFolder, absolutePathInSourceFolder);
     return Text.replaceAll(relativePath, '\\', '/');
   }
 
   /**
    * Copy one package folder to the deployment target folder.
    */
-  private _deployFolder(sourceFolderPath: string, deploymentState: IDeploymentState): void {
+  private _deployFolder(sourceFolderPath: string, deployState: IDeployState): void {
     let useNpmIgnoreFilter: boolean = false;
 
-    if (!deploymentState.deployScenarioConfiguration.deployScenarioJson.includeNpmIgnoreFiles) {
-      const sourceFolderInfo: IFolderInfo | undefined = deploymentState.folderInfosByPath.get(
+    if (!deployState.scenarioConfiguration.json.includeNpmIgnoreFiles) {
+      const sourceFolderInfo: IFolderInfo | undefined = deployState.folderInfosByPath.get(
         FileSystem.getRealPath(sourceFolderPath)
       );
       if (sourceFolderInfo) {
@@ -261,7 +255,7 @@ export class DeployManager {
       }
     }
 
-    const targetFolderPath: string = this._remapPathForDeployFolder(sourceFolderPath, deploymentState);
+    const targetFolderPath: string = this._remapPathForDeployFolder(sourceFolderPath, deployState);
 
     if (useNpmIgnoreFilter) {
       // Use npm-packlist to filter the files.  Using the WalkerSync class (instead of the sync() API) ensures
@@ -276,7 +270,7 @@ export class DeployManager {
         const copySourcePath: string = path.join(sourceFolderPath, npmPackFile);
         const copyDestinationPath: string = path.join(targetFolderPath, npmPackFile);
 
-        if (deploymentState.symlinkAnalyzer.analyzePath(copySourcePath).kind !== 'link') {
+        if (deployState.symlinkAnalyzer.analyzePath(copySourcePath).kind !== 'link') {
           FileSystem.ensureFolder(path.dirname(copyDestinationPath));
 
           FileSystem.copyFile({
@@ -315,7 +309,7 @@ export class DeployManager {
 
           const stats: FileSystemStats = FileSystem.getLinkStatistics(src);
           if (stats.isSymbolicLink()) {
-            deploymentState.symlinkAnalyzer.analyzePath(src);
+            deployState.symlinkAnalyzer.analyzePath(src);
             return false;
           } else {
             return true;
@@ -328,11 +322,11 @@ export class DeployManager {
   /**
    * Create a symlink as described by the ILinkInfo object.
    */
-  private _deploySymlink(originalLinkInfo: ILinkInfo, deploymentState: IDeploymentState): boolean {
+  private _deploySymlink(originalLinkInfo: ILinkInfo, deployState: IDeployState): boolean {
     const linkInfo: ILinkInfo = {
       kind: originalLinkInfo.kind,
-      linkPath: this._remapPathForDeployFolder(originalLinkInfo.linkPath, deploymentState),
-      targetPath: this._remapPathForDeployFolder(originalLinkInfo.targetPath, deploymentState)
+      linkPath: this._remapPathForDeployFolder(originalLinkInfo.linkPath, deployState),
+      targetPath: this._remapPathForDeployFolder(originalLinkInfo.targetPath, deployState)
     };
 
     // Has the link target been created yet?  If not, we should try again later
@@ -389,7 +383,7 @@ export class DeployManager {
   private _collectAdditionalProjectsToInclude(
     includedProjectNamesSet: Set<string>,
     projectName: string,
-    deploymentState: IDeploymentState
+    deployState: IDeployState
   ): void {
     if (includedProjectNamesSet.has(projectName)) {
       return;
@@ -398,38 +392,33 @@ export class DeployManager {
 
     const projectSettings:
       | IDeployScenarioProjectJson
-      | undefined = deploymentState.deployScenarioConfiguration.deployScenarioProjectJsonsByName.get(
-      projectName
-    );
+      | undefined = deployState.scenarioConfiguration.projectJsonsByName.get(projectName);
     if (projectSettings && projectSettings.additionalProjectsToInclude) {
       for (const additionalProjectToInclude of projectSettings.additionalProjectsToInclude) {
         this._collectAdditionalProjectsToInclude(
           includedProjectNamesSet,
           additionalProjectToInclude,
-          deploymentState
+          deployState
         );
       }
     }
   }
 
-  private _writeDeployMetadata(deploymentState: IDeploymentState): void {
-    const deployMetadataFilePath: string = path.join(
-      deploymentState.targetRootFolder,
-      'deploy-metadata.json'
-    );
+  private _writeDeployMetadata(deployState: IDeployState): void {
+    const deployMetadataFilePath: string = path.join(deployState.targetRootFolder, 'deploy-metadata.json');
 
     const deployMetadataJson: IDeployMetadataJson = {
-      scenarioName: path.basename(deploymentState.scenarioFilePath),
-      mainProjectName: deploymentState.mainProjectName,
+      scenarioName: path.basename(deployState.scenarioFilePath),
+      mainProjectName: deployState.mainProjectName,
       links: []
     };
 
     // Remap the links to be relative to target folder
-    for (const absoluteLinkInfo of deploymentState.symlinkAnalyzer.reportSymlinks()) {
+    for (const absoluteLinkInfo of deployState.symlinkAnalyzer.reportSymlinks()) {
       const relativeInfo: ILinkInfo = {
         kind: absoluteLinkInfo.kind,
-        linkPath: this._remapPathForDeployMetadata(absoluteLinkInfo.linkPath, deploymentState),
-        targetPath: this._remapPathForDeployMetadata(absoluteLinkInfo.targetPath, deploymentState)
+        linkPath: this._remapPathForDeployMetadata(absoluteLinkInfo.linkPath, deployState),
+        targetPath: this._remapPathForDeployMetadata(absoluteLinkInfo.targetPath, deployState)
       };
       deployMetadataJson.links.push(relativeInfo);
     }
@@ -439,18 +428,18 @@ export class DeployManager {
     });
   }
 
-  private _prepareDeployment(deploymentState: IDeploymentState): void {
+  private _prepareDeployment(deployState: IDeployState): void {
     // Calculate the set with additionalProjectsToInclude
     const includedProjectNamesSet: Set<string> = new Set();
     this._collectAdditionalProjectsToInclude(
       includedProjectNamesSet,
-      deploymentState.mainProjectName,
-      deploymentState
+      deployState.mainProjectName,
+      deployState
     );
 
     for (const rushProject of this._rushConfiguration.projects) {
       const projectFolder: string = FileSystem.getRealPath(rushProject.projectFolder);
-      deploymentState.folderInfosByPath.set(projectFolder, {
+      deployState.folderInfosByPath.set(projectFolder, {
         folderPath: projectFolder,
         isRushProject: true
       });
@@ -466,34 +455,34 @@ export class DeployManager {
         throw new Error(`The project ${projectName} is not defined in rush.json`);
       }
 
-      this._collectFoldersRecursive(project.projectFolder, deploymentState);
+      this._collectFoldersRecursive(project.projectFolder, deployState);
     }
 
-    Sort.sortSet(deploymentState.foldersToCopy);
+    Sort.sortSet(deployState.foldersToCopy);
 
     console.log('Copying folders...');
-    for (const folderToCopy of deploymentState.foldersToCopy) {
-      this._deployFolder(folderToCopy, deploymentState);
+    for (const folderToCopy of deployState.foldersToCopy) {
+      this._deployFolder(folderToCopy, deployState);
     }
 
     console.log('Writing deploy-metadata.json');
-    this._writeDeployMetadata(deploymentState);
+    this._writeDeployMetadata(deployState);
 
-    if (deploymentState.deployScenarioConfiguration.deployScenarioJson.linkCreation === 'script') {
+    if (deployState.scenarioConfiguration.json.linkCreation === 'script') {
       console.log('Copying create-links.js');
       FileSystem.copyFile({
         sourcePath: path.join(__dirname, '../../scripts/create-links.js'),
-        destinationPath: path.join(deploymentState.targetRootFolder, 'create-links.js'),
+        destinationPath: path.join(deployState.targetRootFolder, 'create-links.js'),
         alreadyExistsBehavior: AlreadyExistsBehavior.Error
       });
     }
 
-    if (deploymentState.deployScenarioConfiguration.deployScenarioJson.linkCreation === 'default') {
+    if (deployState.scenarioConfiguration.json.linkCreation === 'default') {
       console.log('Creating symlinks...');
-      const linksToCopy: ILinkInfo[] = deploymentState.symlinkAnalyzer.reportSymlinks();
+      const linksToCopy: ILinkInfo[] = deployState.symlinkAnalyzer.reportSymlinks();
 
       for (const linkToCopy of linksToCopy) {
-        if (!this._deploySymlink(linkToCopy, deploymentState)) {
+        if (!this._deploySymlink(linkToCopy, deployState)) {
           // TODO: If a symbolic link points to another symbolic link, then we should order the operations
           // so that the intermediary target is created first.  This case was procrastinated because it does
           // not seem to occur in practice.  If you encounter this, please report it.
@@ -516,15 +505,15 @@ export class DeployManager {
       scenarioName,
       this._rushConfiguration
     );
-    const deployScenarioConfiguration: DeployScenarioConfiguration = DeployScenarioConfiguration.loadFromFile(
+    const scenarioConfiguration: DeployScenarioConfiguration = DeployScenarioConfiguration.loadFromFile(
       scenarioFilePath,
       this._rushConfiguration
     );
 
     if (!mainProjectName) {
-      if (deployScenarioConfiguration.deployScenarioJson.deploymentProjectNames.length === 1) {
+      if (scenarioConfiguration.json.deploymentProjectNames.length === 1) {
         // If there is only one project, then "--project" is optional
-        mainProjectName = deployScenarioConfiguration.deployScenarioJson.deploymentProjectNames[0];
+        mainProjectName = scenarioConfiguration.json.deploymentProjectNames[0];
       } else {
         throw new Error(
           `The ${path.basename(scenarioFilePath)} configuration specifies multiple items for` +
@@ -532,9 +521,7 @@ export class DeployManager {
         );
       }
     } else {
-      if (
-        deployScenarioConfiguration.deployScenarioJson.deploymentProjectNames.indexOf(mainProjectName) < 0
-      ) {
+      if (scenarioConfiguration.json.deploymentProjectNames.indexOf(mainProjectName) < 0) {
         throw new Error(
           `The project "${mainProjectName}" does not appear in the list of "deploymentProjectNames"` +
             ` from ${path.basename(scenarioFilePath)}.`
@@ -573,9 +560,9 @@ export class DeployManager {
       }
     }
 
-    const deploymentState: IDeploymentState = {
+    const deployState: IDeployState = {
       scenarioFilePath,
-      deployScenarioConfiguration,
+      scenarioConfiguration,
       mainProjectName,
       sourceRootFolder,
       targetRootFolder,
@@ -584,7 +571,7 @@ export class DeployManager {
       symlinkAnalyzer: new SymlinkAnalyzer()
     };
 
-    this._prepareDeployment(deploymentState);
+    this._prepareDeployment(deployState);
 
     console.log('\n' + colors.green('The operation completed successfully.'));
   }

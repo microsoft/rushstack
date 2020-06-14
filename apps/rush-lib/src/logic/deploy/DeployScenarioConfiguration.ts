@@ -31,19 +31,19 @@ export class DeployScenarioConfiguration {
     path.join(__dirname, '../../schemas/deploy-scenario.schema.json')
   );
 
-  public readonly deployScenarioJson: IDeployScenarioJson;
+  public readonly json: IDeployScenarioJson;
 
   /**
    * Used to lookup items in IDeployScenarioJson.projectSettings based on their IDeployScenarioProjectJson.projectName
    */
-  public readonly deployScenarioProjectJsonsByName: Map<string, IDeployScenarioProjectJson>;
+  public readonly projectJsonsByName: Map<string, IDeployScenarioProjectJson>;
 
   private constructor(
-    deployScenarioJson: IDeployScenarioJson,
-    deployScenarioProjectJsonsByName: Map<string, IDeployScenarioProjectJson>
+    json: IDeployScenarioJson,
+    projectJsonsByName: Map<string, IDeployScenarioProjectJson>
   ) {
-    this.deployScenarioJson = deployScenarioJson;
-    this.deployScenarioProjectJsonsByName = deployScenarioProjectJsonsByName;
+    this.json = json;
+    this.projectJsonsByName = projectJsonsByName;
   }
 
   /**
