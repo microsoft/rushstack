@@ -22,12 +22,13 @@ Positional arguments:
     check         Checks each project's package.json files and ensures that 
                   all dependencies are of the same version throughout the 
                   repository.
-    deploy        (EXPERIMENTAL) Copy a subset of Rush projects and their 
-                  dependencies to a deployment folder
+    deploy        (EXPERIMENTAL) Prepares a deployment by copying a subset of 
+                  Rush projects and their dependencies to a target folder
     install       Install package dependencies for all projects in the repo 
                   according to the shrinkwrap file
     init          Initializes a new repository to be managed by Rush
-    init-deploy   Create the config file for a new deployment scenario.
+    init-deploy   (EXPERIMENTAL) Creates a deployment scenario config file 
+                  for use with \\"rush deploy\\".
     link          Create node_modules symlinks for all projects
     list          List package information for all projects in the repo
     publish       Reads and processes package publishing change requests 
@@ -230,12 +231,11 @@ exports[`CommandLineHelp prints the help for each action: deploy 1`] = `
                    [-t PATH]
                    
 
-(EXPERIMENTAL) After building the repo, \\"rush deploy\\" can be used to copy a 
-subset of Rush projects and their dependencies to a deployment target folder, 
-which can then be copied to a production machine. The \\"rush deploy\\" behavior 
-is specified by a scenario config file located under the 
-\\"common/config/deploy\\" folder. You can define multiple scenarios. Use the 
-\\"rush init-deploy\\" command to create a new config file.
+(EXPERIMENTAL) After building the repo, \\"rush deploy\\" can be used to prepare 
+a deployment by copying a subset of Rush projects and their dependencies to a 
+target folder, which can then be uploaded to a production server. The \\"rush 
+deploy\\" behavior is specified by a scenario config file that must be created 
+first, using the \\"rush init-deploy\\" command.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
@@ -336,8 +336,10 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: init-deploy 1`] = `
 "usage: rush init-deploy [-h] -p PROJECT_NAME [-s SCENARIO]
 
-The deployment config files are stored under \\"common/config/deploy\\" and are 
-used to configure behavior of the \\"rush deploy\\" command.
+(EXPERIMENTAL) Use this command to initialize a new scenario config file for 
+use with \\"rush deploy\\". The default filename is common/config/rush/deploy.
+json. However, if you need to manage multiple deployments with different 
+settings, you can use use \\"--scenario\\" to create additional config files.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
