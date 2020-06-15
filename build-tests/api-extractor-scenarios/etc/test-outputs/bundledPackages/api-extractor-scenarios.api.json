@@ -27,7 +27,7 @@
             {
               "kind": "Reference",
               "text": "Lib1Class",
-              "canonicalReference": "api-extractor-lib1-test!Lib1Class:class"
+              "canonicalReference": "api-extractor-scenarios!Lib1Class:class"
             },
             {
               "kind": "Content",
@@ -74,6 +74,87 @@
             }
           ],
           "name": "f"
+        },
+        {
+          "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!Lib1Class:class",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare class Lib1Class extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "Lib1ForgottenExport",
+              "canonicalReference": "api-extractor-scenarios!Lib1ForgottenExport:class"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "Lib1Class",
+          "members": [
+            {
+              "kind": "Property",
+              "canonicalReference": "api-extractor-scenarios!Lib1Class#readonlyProperty:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "readonly readonlyProperty: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "readonlyProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "api-extractor-scenarios!Lib1Class#writeableProperty:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "writeableProperty: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "writeableProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            }
+          ],
+          "extendsTokenRange": {
+            "startIndex": 1,
+            "endIndex": 3
+          },
+          "implementsTokenRanges": []
         }
       ]
     }
