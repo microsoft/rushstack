@@ -13,7 +13,6 @@ import {
   FileSystemStats,
   Sort,
   JsonFile,
-  JsonSchema,
   IPackageJson,
   AlreadyExistsBehavior,
   InternalError,
@@ -23,6 +22,7 @@ import {
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { DeployScenarioConfiguration, IDeployScenarioProjectJson } from './DeployScenarioConfiguration';
 
 // (@types/npm-packlist is missing this API)
 declare module 'npm-packlist' {
@@ -31,23 +31,6 @@ declare module 'npm-packlist' {
     public constructor(opts: { path: string });
     public start(): void;
   }
-}
-
-// Describes IDeployScenarioJson.projectSettings
-interface IDeployScenarioProjectJson {
-  projectName: string;
-  subdeploymentFolderName?: string;
-  additionalProjectsToInclude?: string[];
-}
-
-// The parsed JSON file structure, as defined by the "deploy-scenario.schema.json" JSON schema
-interface IDeployScenarioJson {
-  deploymentProjectNames: string[];
-  enableSubdeployments?: boolean;
-  includeDevDependencies?: boolean;
-  includeNpmIgnoreFiles?: boolean;
-  linkCreation?: 'default' | 'script' | 'none';
-  projectSettings?: IDeployScenarioProjectJson[];
 }
 
 /**
@@ -61,11 +44,11 @@ export interface IDeployMetadataJson {
 
 /**
  * Stores additional information about folders being copied.
- * Only some of the ISubdeploymentState.foldersToCopy items will an IFolderInfo object.
+ * Only some of the IDeployState.foldersToCopy items will an IFolderInfo object.
  */
 interface IFolderInfo {
   /**
-   * This is the lookup key for ISubdeploymentState.folderInfosByPath.
+   * This is the lookup key for IDeployState.folderInfosByPath.
    * It is an absolute real path.
    */
   folderPath: string;
@@ -76,18 +59,27 @@ interface IFolderInfo {
 }
 
 /**
- * This object tracks DeployManager state that is different for each subdeployment.
+ * This object tracks DeployManager state during a deployment.
  */
-interface ISubdeploymentState {
-  scenarioName: string;
+interface IDeployState {
+  scenarioFilePath: string;
+
+  /**
+   * The parsed scenario config file, as defined by the "deploy-scenario.schema.json" JSON schema
+   */
+  scenarioConfiguration: DeployScenarioConfiguration;
 
   mainProjectName: string;
 
   /**
-   * The absolute path of the target folder for the subdeployment. If enableSubdeployments=false,
-   * then this points to the DeployManager._targetRootFolder.
+   * The source folder that copying originates from.  Generally it is the repo root folder with rush.json.
    */
-  targetSubdeploymentFolder: string;
+  sourceRootFolder: string;
+
+  /**
+   * The target folder for the deployment.  By default it will be "common/deploy".
+   */
+  targetRootFolder: string;
 
   /**
    * During the analysis stage, _collectFoldersRecursive() uses this set to collect the absolute paths
@@ -108,124 +100,36 @@ interface ISubdeploymentState {
  * Manages the business logic for the "rush deploy" command.
  */
 export class DeployManager {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../../schemas/deploy-scenario.schema.json')
-  );
-
-  // Used by validateScenarioName()
-  // Matches lowercase words separated by dashes.
-  // Example: "deploy-the-thing123"
-  private static _scenarioNameRegExp: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _packageJsonLookup: PackageJsonLookup;
-
-  /**
-   * The target folder for the deployment.  By default it will be "common/deploy".
-   */
-  private _targetRootFolder: string;
-
-  /**
-   * The source folder that copying originates from.  Generally it is the repo root folder with rush.json.
-   */
-  private _sourceRootFolder: string;
-
-  /**
-   * The parsed scenario config file, as defined by the "deploy-scenario.schema.json" JSON schema
-   */
-  private _deployScenarioJson: IDeployScenarioJson;
-
-  /**
-   * Used to lookup items in IDeployScenarioJson.projectSettings based on their IDeployScenarioProjectJson.projectName
-   */
-  private _deployScenarioProjectJsonsByName: Map<string, IDeployScenarioProjectJson>;
 
   public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
     this._packageJsonLookup = new PackageJsonLookup();
-    this._deployScenarioProjectJsonsByName = new Map();
   }
 
   /**
-   * Validates that the input string conforms to the naming rules for a "rush deploy" scenario name.
+   * Recursively crawl the node_modules dependencies and collect the result in IDeployState.foldersToCopy.
    */
-  public static validateScenarioName(scenarioName: string): void {
-    if (!scenarioName) {
-      throw new Error('The scenario name cannot be an empty string');
-    }
-    if (!this._scenarioNameRegExp.test(scenarioName)) {
-      throw new Error(
-        `"${scenarioName}" is not a valid scenario name. The name must be comprised of` +
-          ' lowercase letters and numbers, separated by single hyphens. Example: "my-scenario"'
-      );
-    }
-  }
-
-  /**
-   * Load and validate the scenario config file.  The result is stored in this._deployScenarioJson.
-   */
-  private _loadConfigFile(scenarioName: string): void {
-    const scenarioFilePath: string = path.join(
-      this._rushConfiguration.commonDeployConfigFolder,
-      `${scenarioName}.json`
-    );
-
-    if (!FileSystem.exists(scenarioFilePath)) {
-      throw new Error('The scenario config file was not found: ' + scenarioFilePath);
-    }
-
-    console.log(colors.cyan('Loading deployment scenario: ') + scenarioFilePath);
-
-    this._deployScenarioJson = JsonFile.loadAndValidate(scenarioFilePath, DeployManager._jsonSchema);
-
-    // Apply the defaults
-    if (!this._deployScenarioJson.linkCreation) {
-      this._deployScenarioJson.linkCreation = 'default';
-    }
-
-    for (const projectSetting of this._deployScenarioJson.projectSettings || []) {
-      // Validate projectSetting.projectName
-      if (!this._rushConfiguration.getProjectByName(projectSetting.projectName)) {
-        throw new Error(
-          `The "projectSettings" section refers to the project name "${projectSetting.projectName}"` +
-            ` which was not found in rush.json`
-        );
-      }
-      for (const additionalProjectsToInclude of projectSetting.additionalProjectsToInclude || []) {
-        if (!this._rushConfiguration.getProjectByName(projectSetting.projectName)) {
-          throw new Error(
-            `The "additionalProjectsToInclude" setting refers to the` +
-              ` project name "${additionalProjectsToInclude}" which was not found in rush.json`
-          );
-        }
-      }
-      this._deployScenarioProjectJsonsByName.set(projectSetting.projectName, projectSetting);
-    }
-  }
-
-  /**
-   * Recursively crawl the node_modules dependencies and collect the result in ISubdeploymentState.foldersToCopy.
-   */
-  private _collectFoldersRecursive(
-    packageJsonFolderPath: string,
-    subdemploymentState: ISubdeploymentState
-  ): void {
+  private _collectFoldersRecursive(packageJsonFolderPath: string, deployState: IDeployState): void {
     const packageJsonRealFolderPath: string = FileSystem.getRealPath(packageJsonFolderPath);
 
-    if (!subdemploymentState.foldersToCopy.has(packageJsonRealFolderPath)) {
-      subdemploymentState.foldersToCopy.add(packageJsonRealFolderPath);
+    if (!deployState.foldersToCopy.has(packageJsonRealFolderPath)) {
+      deployState.foldersToCopy.add(packageJsonRealFolderPath);
 
       const packageJson: IPackageJson = JsonFile.load(path.join(packageJsonRealFolderPath, 'package.json'));
 
-      // Union of keys from regular dependencies, peerDependencies, and optionalDependencies
+      // Union of keys from regular dependencies, peerDependencies, optionalDependencies
+      // (and possibly devDependencies if includeDevDependencies=true)
       const allDependencyNames: Set<string> = new Set<string>();
-      // Just the keys from optionalDependencies
+
+      // Just the keys from optionalDependencies and peerDependencies
       const optionalDependencyNames: Set<string> = new Set<string>();
 
       for (const name of Object.keys(packageJson.dependencies || {})) {
         allDependencyNames.add(name);
       }
-      if (this._deployScenarioJson.includeDevDependencies) {
+      if (deployState.scenarioConfiguration.json.includeDevDependencies) {
         for (const name of Object.keys(packageJson.devDependencies || {})) {
           allDependencyNames.add(name);
         }
@@ -245,8 +149,8 @@ export class DeployManager {
 
       for (const dependencyPackageName of allDependencyNames) {
         // The "resolve" library models the Node.js require() API, which gives precedence to "core" system modules
-        // over an NPM package with the same name.  But we are traversing package.json dependencies, which refer
-        // to system modules.  Appending a "/" forces require() to load the NPM package.
+        // over an NPM package with the same name.  But we are traversing package.json dependencies, which never
+        // refer to system modules.  Appending a "/" forces require() to look for the NPM package.
         const resolveSuffix: string =
           dependencyPackageName + resolve.isCore(dependencyPackageName) ? '/' : '';
 
@@ -265,7 +169,7 @@ export class DeployManager {
               try {
                 const resolvedPath: string = fs.realpathSync(filePath);
 
-                subdemploymentState.symlinkAnalyzer.analyzePath(filePath);
+                deployState.symlinkAnalyzer.analyzePath(filePath);
                 return resolvedPath;
               } catch (realpathErr) {
                 if (realpathErr.code !== 'ENOENT') {
@@ -291,7 +195,7 @@ export class DeployManager {
             throw new Error(`Error finding package.json folder for ${resolvedDependency}`);
           }
 
-          this._collectFoldersRecursive(dependencyPackageFolderPath, subdemploymentState);
+          this._collectFoldersRecursive(dependencyPackageFolderPath, deployState);
         } catch (resolveErr) {
           if (resolveErr.code === 'MODULE_NOT_FOUND' && optionalDependencyNames.has(dependencyPackageName)) {
             // Ignore missing optional dependency
@@ -304,53 +208,46 @@ export class DeployManager {
   }
 
   /**
-   * Maps a file path from DeployManager._sourceRootFolder --> ISubdeploymentState.targetSubdeploymentFolder
+   * Maps a file path from IDeployState.sourceRootFolder --> IDeployState.targetRootFolder
    *
    * Example input: "C:\MyRepo\libraries\my-lib"
-   * Example output: "C:\MyRepo\common\deploy\my-scenario\libraries\my-lib"
+   * Example output: "C:\MyRepo\common\deploy\libraries\my-lib"
    */
-  private _remapPathForDeployFolder(
-    absolutePathInSourceFolder: string,
-    subdemploymentState: ISubdeploymentState
-  ): string {
-    if (!Path.isUnderOrEqual(absolutePathInSourceFolder, this._sourceRootFolder)) {
+  private _remapPathForDeployFolder(absolutePathInSourceFolder: string, deployState: IDeployState): string {
+    if (!Path.isUnderOrEqual(absolutePathInSourceFolder, deployState.sourceRootFolder)) {
       throw new Error(
-        'Source path is not under ' + this._sourceRootFolder + '\n' + absolutePathInSourceFolder
+        `Source path is not under ${deployState.sourceRootFolder}\n${absolutePathInSourceFolder}`
       );
     }
-    const relativePath: string = path.relative(this._sourceRootFolder, absolutePathInSourceFolder);
-    const absolutePathInTargetFolder: string = path.join(
-      subdemploymentState.targetSubdeploymentFolder,
-      relativePath
-    );
+    const relativePath: string = path.relative(deployState.sourceRootFolder, absolutePathInSourceFolder);
+    const absolutePathInTargetFolder: string = path.join(deployState.targetRootFolder, relativePath);
     return absolutePathInTargetFolder;
   }
 
   /**
-   * Maps a file path from DeployManager._sourceRootFolder --> relative path
+   * Maps a file path from IDeployState.sourceRootFolder --> relative path
    *
    * Example input: "C:\MyRepo\libraries\my-lib"
    * Example output: "libraries/my-lib"
    */
-  private _remapPathForDeployMetadata(
-    absolutePathInSourceFolder: string,
-    subdemploymentState: ISubdeploymentState
-  ): string {
-    if (!Path.isUnderOrEqual(absolutePathInSourceFolder, this._sourceRootFolder)) {
-      throw new Error(`Source path is not under ${this._sourceRootFolder}\n${absolutePathInSourceFolder}`);
+  private _remapPathForDeployMetadata(absolutePathInSourceFolder: string, deployState: IDeployState): string {
+    if (!Path.isUnderOrEqual(absolutePathInSourceFolder, deployState.sourceRootFolder)) {
+      throw new Error(
+        `Source path is not under ${deployState.sourceRootFolder}\n${absolutePathInSourceFolder}`
+      );
     }
-    const relativePath: string = path.relative(this._sourceRootFolder, absolutePathInSourceFolder);
+    const relativePath: string = path.relative(deployState.sourceRootFolder, absolutePathInSourceFolder);
     return Text.replaceAll(relativePath, '\\', '/');
   }
 
   /**
    * Copy one package folder to the deployment target folder.
    */
-  private _deployFolder(sourceFolderPath: string, subdemploymentState: ISubdeploymentState): void {
+  private _deployFolder(sourceFolderPath: string, deployState: IDeployState): void {
     let useNpmIgnoreFilter: boolean = false;
 
-    if (!this._deployScenarioJson.includeNpmIgnoreFiles) {
-      const sourceFolderInfo: IFolderInfo | undefined = subdemploymentState.folderInfosByPath.get(
+    if (!deployState.scenarioConfiguration.json.includeNpmIgnoreFiles) {
+      const sourceFolderInfo: IFolderInfo | undefined = deployState.folderInfosByPath.get(
         FileSystem.getRealPath(sourceFolderPath)
       );
       if (sourceFolderInfo) {
@@ -360,7 +257,7 @@ export class DeployManager {
       }
     }
 
-    const targetFolderPath: string = this._remapPathForDeployFolder(sourceFolderPath, subdemploymentState);
+    const targetFolderPath: string = this._remapPathForDeployFolder(sourceFolderPath, deployState);
 
     if (useNpmIgnoreFilter) {
       // Use npm-packlist to filter the files.  Using the WalkerSync class (instead of the sync() API) ensures
@@ -375,7 +272,7 @@ export class DeployManager {
         const copySourcePath: string = path.join(sourceFolderPath, npmPackFile);
         const copyDestinationPath: string = path.join(targetFolderPath, npmPackFile);
 
-        if (subdemploymentState.symlinkAnalyzer.analyzePath(copySourcePath).kind !== 'link') {
+        if (deployState.symlinkAnalyzer.analyzePath(copySourcePath).kind !== 'link') {
           FileSystem.ensureFolder(path.dirname(copyDestinationPath));
 
           FileSystem.copyFile({
@@ -414,7 +311,7 @@ export class DeployManager {
 
           const stats: FileSystemStats = FileSystem.getLinkStatistics(src);
           if (stats.isSymbolicLink()) {
-            subdemploymentState.symlinkAnalyzer.analyzePath(src);
+            deployState.symlinkAnalyzer.analyzePath(src);
             return false;
           } else {
             return true;
@@ -427,11 +324,11 @@ export class DeployManager {
   /**
    * Create a symlink as described by the ILinkInfo object.
    */
-  private _deploySymlink(originalLinkInfo: ILinkInfo, subdemploymentState: ISubdeploymentState): boolean {
+  private _deploySymlink(originalLinkInfo: ILinkInfo, deployState: IDeployState): boolean {
     const linkInfo: ILinkInfo = {
       kind: originalLinkInfo.kind,
-      linkPath: this._remapPathForDeployFolder(originalLinkInfo.linkPath, subdemploymentState),
-      targetPath: this._remapPathForDeployFolder(originalLinkInfo.targetPath, subdemploymentState)
+      linkPath: this._remapPathForDeployFolder(originalLinkInfo.linkPath, deployState),
+      targetPath: this._remapPathForDeployFolder(originalLinkInfo.targetPath, deployState)
     };
 
     // Has the link target been created yet?  If not, we should try again later
@@ -487,7 +384,8 @@ export class DeployManager {
    */
   private _collectAdditionalProjectsToInclude(
     includedProjectNamesSet: Set<string>,
-    projectName: string
+    projectName: string,
+    deployState: IDeployState
   ): void {
     if (includedProjectNamesSet.has(projectName)) {
       return;
@@ -496,32 +394,36 @@ export class DeployManager {
 
     const projectSettings:
       | IDeployScenarioProjectJson
-      | undefined = this._deployScenarioProjectJsonsByName.get(projectName);
+      | undefined = deployState.scenarioConfiguration.projectJsonsByName.get(projectName);
     if (projectSettings && projectSettings.additionalProjectsToInclude) {
       for (const additionalProjectToInclude of projectSettings.additionalProjectsToInclude) {
-        this._collectAdditionalProjectsToInclude(includedProjectNamesSet, additionalProjectToInclude);
+        this._collectAdditionalProjectsToInclude(
+          includedProjectNamesSet,
+          additionalProjectToInclude,
+          deployState
+        );
       }
     }
   }
 
-  private _writeDeployMetadata(subdemploymentState: ISubdeploymentState): void {
-    const deployMetadataFilePath: string = path.join(
-      subdemploymentState.targetSubdeploymentFolder,
-      'deploy-metadata.json'
-    );
+  /**
+   * Write the common/deploy/deploy-metadata.json file.
+   */
+  private _writeDeployMetadata(deployState: IDeployState): void {
+    const deployMetadataFilePath: string = path.join(deployState.targetRootFolder, 'deploy-metadata.json');
 
     const deployMetadataJson: IDeployMetadataJson = {
-      scenarioName: subdemploymentState.scenarioName,
-      mainProjectName: subdemploymentState.mainProjectName,
+      scenarioName: path.basename(deployState.scenarioFilePath),
+      mainProjectName: deployState.mainProjectName,
       links: []
     };
 
-    // Remap the links to be relative to the subdeployment folder
-    for (const absoluteLinkInfo of subdemploymentState.symlinkAnalyzer.reportSymlinks()) {
+    // Remap the links to be relative to target folder
+    for (const absoluteLinkInfo of deployState.symlinkAnalyzer.reportSymlinks()) {
       const relativeInfo: ILinkInfo = {
         kind: absoluteLinkInfo.kind,
-        linkPath: this._remapPathForDeployMetadata(absoluteLinkInfo.linkPath, subdemploymentState),
-        targetPath: this._remapPathForDeployMetadata(absoluteLinkInfo.targetPath, subdemploymentState)
+        linkPath: this._remapPathForDeployMetadata(absoluteLinkInfo.linkPath, deployState),
+        targetPath: this._remapPathForDeployMetadata(absoluteLinkInfo.targetPath, deployState)
       };
       deployMetadataJson.links.push(relativeInfo);
     }
@@ -531,18 +433,18 @@ export class DeployManager {
     });
   }
 
-  /**
-   * Process one subdeployment.  If `enableSubdeployments` is false, then this processes the entire
-   * deployment, and ISubdeploymentState.targetSubdeploymentFolder is simply the deployment target folder.
-   */
-  private _deploySubdeployment(subdemploymentState: ISubdeploymentState): void {
+  private _prepareDeployment(deployState: IDeployState): void {
     // Calculate the set with additionalProjectsToInclude
     const includedProjectNamesSet: Set<string> = new Set();
-    this._collectAdditionalProjectsToInclude(includedProjectNamesSet, subdemploymentState.mainProjectName);
+    this._collectAdditionalProjectsToInclude(
+      includedProjectNamesSet,
+      deployState.mainProjectName,
+      deployState
+    );
 
     for (const rushProject of this._rushConfiguration.projects) {
       const projectFolder: string = FileSystem.getRealPath(rushProject.projectFolder);
-      subdemploymentState.folderInfosByPath.set(projectFolder, {
+      deployState.folderInfosByPath.set(projectFolder, {
         folderPath: projectFolder,
         isRushProject: true
       });
@@ -558,34 +460,34 @@ export class DeployManager {
         throw new Error(`The project ${projectName} is not defined in rush.json`);
       }
 
-      this._collectFoldersRecursive(project.projectFolder, subdemploymentState);
+      this._collectFoldersRecursive(project.projectFolder, deployState);
     }
 
-    Sort.sortSet(subdemploymentState.foldersToCopy);
+    Sort.sortSet(deployState.foldersToCopy);
 
     console.log('Copying folders...');
-    for (const folderToCopy of subdemploymentState.foldersToCopy) {
-      this._deployFolder(folderToCopy, subdemploymentState);
+    for (const folderToCopy of deployState.foldersToCopy) {
+      this._deployFolder(folderToCopy, deployState);
     }
 
     console.log('Writing deploy-metadata.json');
-    this._writeDeployMetadata(subdemploymentState);
+    this._writeDeployMetadata(deployState);
 
-    if (this._deployScenarioJson.linkCreation === 'script') {
+    if (deployState.scenarioConfiguration.json.linkCreation === 'script') {
       console.log('Copying create-links.js');
       FileSystem.copyFile({
         sourcePath: path.join(__dirname, '../../scripts/create-links.js'),
-        destinationPath: path.join(subdemploymentState.targetSubdeploymentFolder, 'create-links.js'),
+        destinationPath: path.join(deployState.targetRootFolder, 'create-links.js'),
         alreadyExistsBehavior: AlreadyExistsBehavior.Error
       });
     }
 
-    if (this._deployScenarioJson.linkCreation === 'default') {
+    if (deployState.scenarioConfiguration.json.linkCreation === 'default') {
       console.log('Creating symlinks...');
-      const linksToCopy: ILinkInfo[] = subdemploymentState.symlinkAnalyzer.reportSymlinks();
+      const linksToCopy: ILinkInfo[] = deployState.symlinkAnalyzer.reportSymlinks();
 
       for (const linkToCopy of linksToCopy) {
-        if (!this._deploySymlink(linkToCopy, subdemploymentState)) {
+        if (!this._deploySymlink(linkToCopy, deployState)) {
           // TODO: If a symbolic link points to another symbolic link, then we should order the operations
           // so that the intermediary target is created first.  This case was procrastinated because it does
           // not seem to occur in practice.  If you encounter this, please report it.
@@ -598,41 +500,63 @@ export class DeployManager {
   /**
    * The main entry point for performing a deployment.
    */
-  public deployScenario(
-    scenarioName: string,
+  public deploy(
+    mainProjectName: string | undefined,
+    scenarioName: string | undefined,
     overwriteExisting: boolean,
     targetFolderParameter: string | undefined
   ): void {
-    DeployManager.validateScenarioName(scenarioName);
+    const scenarioFilePath: string = DeployScenarioConfiguration.getConfigFilePath(
+      scenarioName,
+      this._rushConfiguration
+    );
+    const scenarioConfiguration: DeployScenarioConfiguration = DeployScenarioConfiguration.loadFromFile(
+      scenarioFilePath,
+      this._rushConfiguration
+    );
 
-    if (this._targetRootFolder !== undefined) {
-      // We can remove this restriction, but currently there is no reason.
-      throw new InternalError('deployScenario() cannot be called twice');
+    if (!mainProjectName) {
+      if (scenarioConfiguration.json.deploymentProjectNames.length === 1) {
+        // If there is only one project, then "--project" is optional
+        mainProjectName = scenarioConfiguration.json.deploymentProjectNames[0];
+      } else {
+        throw new Error(
+          `The ${path.basename(scenarioFilePath)} configuration specifies multiple items for` +
+            ` "deploymentProjectNames". Use the "--project" parameter to indicate the project to be deployed.`
+        );
+      }
+    } else {
+      if (scenarioConfiguration.json.deploymentProjectNames.indexOf(mainProjectName) < 0) {
+        throw new Error(
+          `The project "${mainProjectName}" does not appear in the list of "deploymentProjectNames"` +
+            ` from ${path.basename(scenarioFilePath)}.`
+        );
+      }
     }
 
-    this._loadConfigFile(scenarioName);
-
+    let targetRootFolder: string;
     if (targetFolderParameter) {
-      this._targetRootFolder = path.resolve(targetFolderParameter);
-      if (!FileSystem.exists(this._targetRootFolder)) {
+      targetRootFolder = path.resolve(targetFolderParameter);
+      if (!FileSystem.exists(targetRootFolder)) {
         throw new Error(
           'The specified target folder does not exist: ' + JSON.stringify(targetFolderParameter)
         );
       }
     } else {
-      this._targetRootFolder = path.join(this._rushConfiguration.commonFolder, 'deploy');
+      targetRootFolder = path.join(this._rushConfiguration.commonFolder, 'deploy');
     }
-    this._sourceRootFolder = this._rushConfiguration.rushJsonFolder;
+    const sourceRootFolder: string = this._rushConfiguration.rushJsonFolder;
 
-    console.log(colors.cyan('Deploying to target folder:  ') + this._targetRootFolder + '\n');
+    console.log(colors.cyan('Deploying to target folder:  ') + targetRootFolder);
+    console.log(colors.cyan('Main project for deployment: ') + mainProjectName + '\n');
 
-    FileSystem.ensureFolder(this._targetRootFolder);
+    FileSystem.ensureFolder(targetRootFolder);
 
     // Is the target folder empty?
-    if (FileSystem.readFolder(this._targetRootFolder).length > 0) {
+    if (FileSystem.readFolder(targetRootFolder).length > 0) {
       if (overwriteExisting) {
         console.log('Deleting target folder contents because "--overwrite" was specified...');
-        FileSystem.ensureEmptyFolder(this._targetRootFolder);
+        FileSystem.ensureEmptyFolder(targetRootFolder);
       } else {
         throw new Error(
           'The deploy target folder is not empty. You can specify "--overwrite"' +
@@ -641,76 +565,19 @@ export class DeployManager {
       }
     }
 
-    // The JSON schema ensures this array has at least one item
-    const deploymentProjectNames: string[] = this._deployScenarioJson.deploymentProjectNames;
+    const deployState: IDeployState = {
+      scenarioFilePath,
+      scenarioConfiguration,
+      mainProjectName,
+      sourceRootFolder,
+      targetRootFolder,
+      foldersToCopy: new Set(),
+      folderInfosByPath: new Map(),
+      symlinkAnalyzer: new SymlinkAnalyzer()
+    };
 
-    if (this._deployScenarioJson.enableSubdeployments) {
-      const usedSubdeploymentFolderNames: Set<string> = new Set();
+    this._prepareDeployment(deployState);
 
-      for (const subdeploymentProjectName of deploymentProjectNames) {
-        const rushProject: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(
-          subdeploymentProjectName
-        );
-        if (!rushProject) {
-          throw new Error(
-            `The "deploymentProjectNames" setting specified the name "${subdeploymentProjectName}"` +
-              ` which was not found in rush.json`
-          );
-        }
-
-        let subdeploymentFolderName: string;
-
-        const projectSettings:
-          | IDeployScenarioProjectJson
-          | undefined = this._deployScenarioProjectJsonsByName.get(subdeploymentProjectName);
-        if (projectSettings && projectSettings.subdeploymentFolderName) {
-          subdeploymentFolderName = projectSettings.subdeploymentFolderName;
-        } else {
-          subdeploymentFolderName = this._rushConfiguration.packageNameParser.getUnscopedName(
-            subdeploymentProjectName
-          );
-        }
-        if (usedSubdeploymentFolderNames.has(subdeploymentFolderName)) {
-          throw new Error(
-            `The subdeployment folder name "${subdeploymentFolderName}" is not unique.` +
-              `  Use the "subdeploymentFolderName" setting to specify a different name.`
-          );
-        }
-        usedSubdeploymentFolderNames.add(subdeploymentFolderName);
-
-        console.log(colors.green(`\nPreparing subdeployment for "${subdeploymentFolderName}"`));
-
-        const subdemploymentState: ISubdeploymentState = {
-          scenarioName: scenarioName,
-          mainProjectName: subdeploymentProjectName,
-          targetSubdeploymentFolder: path.join(this._targetRootFolder, subdeploymentFolderName),
-          foldersToCopy: new Set(),
-          folderInfosByPath: new Map(),
-          symlinkAnalyzer: new SymlinkAnalyzer()
-        };
-
-        this._deploySubdeployment(subdemploymentState);
-      }
-    } else {
-      if (deploymentProjectNames.length !== 1) {
-        throw new Error(
-          `The "deploymentProjectNames" setting specifies specifies more than one project;` +
-            ' this is not supported unless the "enableSubdeployments" setting is true.'
-        );
-      }
-
-      const subdemploymentState: ISubdeploymentState = {
-        scenarioName: scenarioName,
-        mainProjectName: deploymentProjectNames[0],
-        targetSubdeploymentFolder: this._targetRootFolder,
-        foldersToCopy: new Set(),
-        folderInfosByPath: new Map(),
-        symlinkAnalyzer: new SymlinkAnalyzer()
-      };
-
-      this._deploySubdeployment(subdemploymentState);
-    }
-
-    console.log('\nThe operation completed successfully.');
+    console.log('\n' + colors.green('The operation completed successfully.'));
   }
 }
