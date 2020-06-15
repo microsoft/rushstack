@@ -69,10 +69,7 @@ export class ApiModelGenerator {
     });
     this._apiModel.addMember(apiPackage);
 
-    // TODO: make multiple entry points
     for (const [entryPoint, entities] of this._collector.entities.entries()) {
-
-      //TODO: specify entry point name in api-extractor.json
       const shortName = entryPoint.modulePath;
       console.log("this module name is ", shortName);
 

@@ -582,7 +582,6 @@ export class ExtractorConfig {
         throw new Error('The "mainEntryPointFilePath" path does not exist: ' + mainEntryPointFilePath);
       }
 
-      // TODO: remove mainEntryPointFilePath
       const additionalEntryPoints: IConfigEntryPoint[] = [];
       for(const entryPoint of configObject.additionalEntryPoints || []) {
         const absoluteEntryPointFilePath: string = ExtractorConfig._resolvePathWithTokens('entryPointFilePath',
@@ -694,6 +693,12 @@ export class ExtractorConfig {
 
       if (configObject.dtsRollup) {
         rollupEnabled = !!configObject.dtsRollup.enabled;
+
+        // d.ts rollup is not supported when there are more than one entry points.
+        if (rollupEnabled && additionalEntryPoints.length > 0) {
+          throw new Error(`It seems that you have dtsRollup enabled while you also have defined additionalEntryPoints. dtsRollup is not supported when there are multiple entry points in your package`);
+        }
+
         untrimmedFilePath = ExtractorConfig._resolvePathWithTokens('untrimmedFilePath',
           configObject.dtsRollup.untrimmedFilePath, tokenContext);
         betaTrimmedFilePath = ExtractorConfig._resolvePathWithTokens('betaTrimmedFilePath',
