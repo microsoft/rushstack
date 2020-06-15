@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 10 Jun 2020 20:48:30 GMT and should not be manually modified.
+This log was last generated on Mon, 15 Jun 2020 22:17:17 GMT and should not be manually modified.
+
+## 7.8.12
+Mon, 15 Jun 2020 22:17:17 GMT
+
+### Patches
+
+- Fix an issue where documentation hyperlinks were sometimes missing when using the "bundledPackages" feature (GitHub #1933)
 
 ## 7.8.11
 Wed, 10 Jun 2020 20:48:30 GMT
