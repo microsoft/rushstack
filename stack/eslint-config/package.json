@@ -20,22 +20,22 @@
     "typescript"
   ],
   "peerDependencies": {
-    "eslint": "^5.0.0 || ^6.0.0",
+    "eslint": "^6.0.0 || ^7.0.0",
     "typescript": ">=3.0.0"
   },
   "dependencies": {
     "@rushstack/eslint-plugin": "0.3.2",
-    "@typescript-eslint/eslint-plugin": "2.3.3",
-    "@typescript-eslint/experimental-utils": "2.3.3",
-    "@typescript-eslint/parser": "2.3.3",
-    "@typescript-eslint/typescript-estree": "2.3.3",
+    "@typescript-eslint/eslint-plugin": "3.3.0",
+    "@typescript-eslint/experimental-utils": "3.3.0",
+    "@typescript-eslint/parser": "3.3.0",
+    "@typescript-eslint/typescript-estree": "3.3.0",
     "eslint-plugin-promise": "~4.2.1",
-    "eslint-plugin-react": "~7.16.0",
+    "eslint-plugin-react": "~7.20.0",
     "eslint-plugin-security": "~1.4.0",
-    "eslint-plugin-tsdoc": "~0.2.4"
+    "eslint-plugin-tsdoc": "~0.2.5"
   },
   "devDependencies": {
-    "eslint": "~6.5.1",
+    "eslint": "~7.2.0",
     "typescript": "~3.5.3"
   }
 }
