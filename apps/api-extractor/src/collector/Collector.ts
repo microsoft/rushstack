@@ -77,7 +77,7 @@ export class Collector {
   private _astEntryPoints: AstModule[] | undefined;
 
   private readonly _entitiesByAstEntity: Map<AstEntity, CollectorEntity> = new Map<AstEntity, CollectorEntity>();
-  private readonly _entitiesByAstEntryPoint: Map<AstModule, CollectorEntity[]> = new Map<AstModule, CollectorEntity[]>();
+  private readonly _entitiesByAstEntryPoint: Map<IWorkingPackageEntryPoint, CollectorEntity[]> = new Map<IWorkingPackageEntryPoint, CollectorEntity[]>();
 
   private readonly _starExportedExternalModulePaths: string[] = [];
 
@@ -164,7 +164,7 @@ export class Collector {
     return this._dtsLibReferenceDirectives;
   }
 
-  public get entities(): ReadonlyMap<AstModule, CollectorEntity[]> {
+  public get entities(): ReadonlyMap<IWorkingPackageEntryPoint, CollectorEntity[]> {
     return this._entitiesByAstEntryPoint;
   }
 
@@ -218,8 +218,8 @@ export class Collector {
         this._astEntryPoints = [astEntryPoint];
       }
 
-      if (!this._entitiesByAstEntryPoint.has(astEntryPoint)) {
-        this._entitiesByAstEntryPoint.set(astEntryPoint, []);
+      if (!this._entitiesByAstEntryPoint.has(entryPoint)) {
+        this._entitiesByAstEntryPoint.set(entryPoint, []);
       }
 
       // Process pacakgeDocComment only for the default entry point
@@ -245,7 +245,7 @@ export class Collector {
 
       const astModuleExportInfo: AstModuleExportInfo = this.astSymbolTable.fetchAstModuleExportInfo(astEntryPoint);
       for (const [exportName, astEntity] of astModuleExportInfo.exportedLocalEntities) {
-        this._createCollectorEntity(astEntity, astEntryPoint, exportName);
+        this._createCollectorEntity(astEntity, entryPoint, exportName);
 
         exportedAstEntities.push(astEntity);
       }
@@ -257,7 +257,7 @@ export class Collector {
       for (const exportedAstEntity of exportedAstEntities) {
         this._createEntityForIndirectReferences(
           exportedAstEntity,
-          astEntryPoint,
+          entryPoint,
           alreadySeenAstSymbols
         );
 
@@ -266,7 +266,7 @@ export class Collector {
         }
       }
 
-      this._makeUniqueNames(astEntryPoint);
+      this._makeUniqueNames(entryPoint);
 
       for (const starExportedExternalModule of astModuleExportInfo.starExportedExternalModules) {
         if (starExportedExternalModule.externalModulePath !== undefined) {
@@ -409,7 +409,7 @@ export class Collector {
     return overloadIndex;
   }
 
-  private _createCollectorEntity(astEntity: AstEntity, astModule: AstModule, exportedName: string | undefined): void {
+  private _createCollectorEntity(astEntity: AstEntity, entryPoint: IWorkingPackageEntryPoint, exportedName: string | undefined): void {
     let entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astEntity);
 
     if (!entity) {
@@ -423,10 +423,10 @@ export class Collector {
     }
 
     // add collectorEntity to the corresponding entry point
-    const entitiesOfAstModule = this._entitiesByAstEntryPoint.get(astModule) || [];
+    const entitiesOfAstModule = this._entitiesByAstEntryPoint.get(entryPoint) || [];
     if (!entitiesOfAstModule.find(e => e === entity)) {
       entitiesOfAstModule.push(entity);
-      this._entitiesByAstEntryPoint.set(astModule, entitiesOfAstModule);
+      this._entitiesByAstEntryPoint.set(entryPoint, entitiesOfAstModule);
     }
 
     if (exportedName) {
@@ -436,7 +436,7 @@ export class Collector {
 
   private _createEntityForIndirectReferences(
     astEntity: AstEntity,
-    astModule: AstModule,
+    entryPoint: IWorkingPackageEntryPoint,
     alreadySeenAstEntities: Set<AstEntity>
   ): void {
     if (alreadySeenAstEntities.has(astEntity)) {
@@ -452,13 +452,13 @@ export class Collector {
             // For example, if a symbols is nested inside a namespace, only the root-level namespace
             // get a collector entity
             if (referencedAstEntity.parentAstSymbol === undefined) {
-              this._createCollectorEntity(referencedAstEntity, astModule, undefined);
+              this._createCollectorEntity(referencedAstEntity, entryPoint, undefined);
             }
           } else {
-            this._createCollectorEntity(referencedAstEntity, astModule, undefined);
+            this._createCollectorEntity(referencedAstEntity, entryPoint, undefined);
           }
 
-          this._createEntityForIndirectReferences(referencedAstEntity, astModule, alreadySeenAstEntities);
+          this._createEntityForIndirectReferences(referencedAstEntity, entryPoint, alreadySeenAstEntities);
         }
       });
     }
@@ -467,7 +467,7 @@ export class Collector {
   /**
    * Ensures a unique name for each item in the entry point typings file.
    */
-  private _makeUniqueNames(astModule: AstModule): void {
+  private _makeUniqueNames(entryPoint: IWorkingPackageEntryPoint): void {
     // The following examples illustrate the nameForEmit heuristics:
     //
     // Example 1:
@@ -489,7 +489,7 @@ export class Collector {
     // Set of names that should NOT be used when generating a unique nameForEmit
     const usedNames: Set<string> = new Set<string>();
 
-    const entities = this._entitiesByAstEntryPoint.get(astModule) || [];
+    const entities = this._entitiesByAstEntryPoint.get(entryPoint) || [];
 
     // First collect the names of explicit package exports, and perform a sanity check.
     for (const entity of entities) {
