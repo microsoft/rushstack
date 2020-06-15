@@ -7,5 +7,5 @@ export const VARIABLE: string = 'hello';
 /** @public */
 export namespace NamespaceContainingVariable {
   /** @internal */
-  export let variable: object[] = []
+  export let variable: object[] = [];
 }

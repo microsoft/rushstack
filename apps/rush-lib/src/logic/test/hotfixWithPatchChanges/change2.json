@@ -1,7 +1,9 @@
 {
-  "changes": [{
-    "packageName": "a",
-    "type": "hotfix",
-    "comment": "Hotfix change to a"
-  }]
+  "changes": [
+    {
+      "packageName": "a",
+      "type": "hotfix",
+      "comment": "Hotfix change to a"
+    }
+  ]
 }

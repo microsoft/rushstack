@@ -1,7 +1,9 @@
 {
-  "changes": [{
-    "packageName": "a",
-    "type": "minor",
-    "comment": "Minor change to a"
-  }]
+  "changes": [
+    {
+      "packageName": "a",
+      "type": "minor",
+      "comment": "Minor change to a"
+    }
+  ]
 }

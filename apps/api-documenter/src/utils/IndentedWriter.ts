@@ -4,32 +4,32 @@
 import { StringBuilder, IStringBuilder } from '@rushstack/node-core-library';
 
 /**
-  * A utility for writing indented text.
-  *
-  * @remarks
-  *
-  * Note that the indentation is inserted at the last possible opportunity.
-  * For example, this code...
-  *
-  * ```ts
-  *   writer.write('begin\n');
-  *   writer.increaseIndent();
-  *   writer.write('one\ntwo\n');
-  *   writer.decreaseIndent();
-  *   writer.increaseIndent();
-  *   writer.decreaseIndent();
-  *   writer.write('end');
-  * ```
-  *
-  * ...would produce this output:
-  *
-  * ```
-  *   begin
-  *     one
-  *     two
-  *   end
-  * ```
-  */
+ * A utility for writing indented text.
+ *
+ * @remarks
+ *
+ * Note that the indentation is inserted at the last possible opportunity.
+ * For example, this code...
+ *
+ * ```ts
+ *   writer.write('begin\n');
+ *   writer.increaseIndent();
+ *   writer.write('one\ntwo\n');
+ *   writer.decreaseIndent();
+ *   writer.increaseIndent();
+ *   writer.decreaseIndent();
+ *   writer.write('end');
+ * ```
+ *
+ * ...would produce this output:
+ *
+ * ```
+ *   begin
+ *     one
+ *     two
+ *   end
+ * ```
+ */
 export class IndentedWriter {
   /**
    * The text characters used to create one level of indentation.

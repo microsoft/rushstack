@@ -27,7 +27,10 @@ export class ApiReportGenerator {
    * might be introduced by a tool, e.g. Git newline normalization or an editor that strips
    * whitespace when saving.
    */
-  public static areEquivalentApiFileContents(actualFileContent: string, expectedFileContent: string): boolean {
+  public static areEquivalentApiFileContents(
+    actualFileContent: string,
+    expectedFileContent: string
+  ): boolean {
     // NOTE: "\s" also matches "\r" and "\n"
     const normalizedActual: string = actualFileContent.replace(/[\s]+/g, ' ');
     const normalizedExpected: string = expectedFileContent.replace(/[\s]+/g, ' ');
@@ -107,7 +110,9 @@ export class ApiReportGenerator {
                 messagesToReport.push(message);
               }
 
-              stringWriter.write(ApiReportGenerator._getAedocSynopsis(collector, astDeclaration, messagesToReport));
+            stringWriter.write(
+              ApiReportGenerator._getAedocSynopsis(collector, astDeclaration, messagesToReport)
+            );
 
               const span: Span = new Span(astDeclaration.declaration);
 
@@ -123,13 +128,15 @@ export class ApiReportGenerator {
             }
           }
 
-          // Now emit the export statements for this entity.
-          for (const exportToEmit of exportsToEmit.values()) {
-            // Write any associated messages
-            for (const message of exportToEmit.associatedMessages) {
-              ApiReportGenerator._writeLineAsComments(stringWriter,
-                'Warning: ' + message.formatMessageWithoutLocation());
-            }
+        // Now emit the export statements for this entity.
+        for (const exportToEmit of exportsToEmit.values()) {
+          // Write any associated messages
+          for (const message of exportToEmit.associatedMessages) {
+            ApiReportGenerator._writeLineAsComments(
+              stringWriter,
+              'Warning: ' + message.formatMessageWithoutLocation()
+            );
+          }
 
             DtsEmitHelpers.emitNamedExport(stringWriter, exportToEmit.exportName, entity);
             stringWriter.writeLine();
@@ -174,11 +181,16 @@ export class ApiReportGenerator {
   /**
    * Before writing out a declaration, _modifySpan() applies various fixups to make it nice.
    */
-  private static _modifySpan(collector: Collector, span: Span, entity: CollectorEntity,
-    astDeclaration: AstDeclaration, insideTypeLiteral: boolean): void {
-
+  private static _modifySpan(
+    collector: Collector,
+    span: Span,
+    entity: CollectorEntity,
+    astDeclaration: AstDeclaration,
+    insideTypeLiteral: boolean
+  ): void {
     // Should we process this declaration at all?
-    if ((astDeclaration.modifierFlags & ts.ModifierFlags.Private) !== 0) { // eslint-disable-line no-bitwise
+    // eslint-disable-next-line no-bitwise
+    if ((astDeclaration.modifierFlags & ts.ModifierFlags.Private) !== 0) {
       span.modification.skipAll();
       return;
     }
@@ -248,14 +260,17 @@ export class ApiReportGenerator {
           // Since we are emitting a separate declaration for each one, we need to look upwards
           // in the ts.Node tree and write a copy of the enclosing VariableDeclarationList
           // content (e.g. "var" from "var x=1, y=2").
-          const list: ts.VariableDeclarationList | undefined = TypeScriptHelpers.matchAncestor(span.node,
-            [ts.SyntaxKind.VariableDeclarationList, ts.SyntaxKind.VariableDeclaration]);
+          const list: ts.VariableDeclarationList | undefined = TypeScriptHelpers.matchAncestor(span.node, [
+            ts.SyntaxKind.VariableDeclarationList,
+            ts.SyntaxKind.VariableDeclaration
+          ]);
           if (!list) {
             // This should not happen unless the compiler API changes somehow
             throw new InternalError('Unsupported variable declaration');
           }
-          const listPrefix: string = list.getSourceFile().text
-            .substring(list.getStart(), list.declarations[0].getStart());
+          const listPrefix: string = list
+            .getSourceFile()
+            .text.substring(list.getStart(), list.declarations[0].getStart());
           span.modification.prefix = listPrefix + span.modification.prefix;
           span.modification.suffix = ';';
 
@@ -296,21 +311,31 @@ export class ApiReportGenerator {
         let childAstDeclaration: AstDeclaration = astDeclaration;
 
         if (AstDeclaration.isSupportedSyntaxKind(child.kind)) {
-          childAstDeclaration = collector.astSymbolTable.getChildAstDeclarationByNode(child.node, astDeclaration);
+          childAstDeclaration = collector.astSymbolTable.getChildAstDeclarationByNode(
+            child.node,
+            astDeclaration
+          );
 
           if (sortChildren) {
             span.modification.sortChildren = true;
             child.modification.sortKey = Collector.getSortKeyIgnoringUnderscore(
-              childAstDeclaration.astSymbol.localName);
+              childAstDeclaration.astSymbol.localName
+            );
           }
 
           if (!insideTypeLiteral) {
-            const messagesToReport: ExtractorMessage[] = collector.messageRouter
-              .fetchAssociatedMessagesForReviewFile(childAstDeclaration);
-            const aedocSynopsis: string = ApiReportGenerator._getAedocSynopsis(collector, childAstDeclaration,
-              messagesToReport);
-            const indentedAedocSynopsis: string = ApiReportGenerator._addIndentAfterNewlines(aedocSynopsis,
-              child.getIndent());
+            const messagesToReport: ExtractorMessage[] = collector.messageRouter.fetchAssociatedMessagesForReviewFile(
+              childAstDeclaration
+            );
+            const aedocSynopsis: string = ApiReportGenerator._getAedocSynopsis(
+              collector,
+              childAstDeclaration,
+              messagesToReport
+            );
+            const indentedAedocSynopsis: string = ApiReportGenerator._addIndentAfterNewlines(
+              aedocSynopsis,
+              child.getIndent()
+            );
 
             child.modification.prefix = indentedAedocSynopsis + child.modification.prefix;
           }
@@ -359,9 +384,7 @@ export class ApiReportGenerator {
 
     let skipRest: boolean = false;
     for (const child of span.children) {
-      if (skipRest
-        || child.kind === ts.SyntaxKind.SyntaxList
-        || child.kind === ts.SyntaxKind.JSDocComment) {
+      if (skipRest || child.kind === ts.SyntaxKind.SyntaxList || child.kind === ts.SyntaxKind.JSDocComment) {
         child.modification.skipAll();
       }
       if (child.kind === ts.SyntaxKind.Identifier) {
@@ -377,12 +400,18 @@ export class ApiReportGenerator {
    * whether the item has been documented, and any warnings that were detected
    * by the analysis.
    */
-  private static _getAedocSynopsis(collector: Collector, astDeclaration: AstDeclaration,
-    messagesToReport: ExtractorMessage[]): string {
+  private static _getAedocSynopsis(
+    collector: Collector,
+    astDeclaration: AstDeclaration,
+    messagesToReport: ExtractorMessage[]
+  ): string {
     const stringWriter: StringWriter = new StringWriter();
 
     for (const message of messagesToReport) {
-      ApiReportGenerator._writeLineAsComments(stringWriter, 'Warning: ' + message.formatMessageWithoutLocation());
+      ApiReportGenerator._writeLineAsComments(
+        stringWriter,
+        'Warning: ' + message.formatMessageWithoutLocation()
+      );
     }
 
     if (!collector.isAncillaryDeclaration(astDeclaration)) {
@@ -447,5 +476,4 @@ export class ApiReportGenerator {
     }
     return Text.replaceAll(text, '\n', '\n' + indent);
   }
-
 }

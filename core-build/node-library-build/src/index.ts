@@ -32,7 +32,8 @@ preCopy.name = 'pre-copy';
 export const postCopy: CopyTask = new CopyTask();
 postCopy.name = 'post-copy';
 
-const PRODUCTION: boolean = process.argv.indexOf('--production') !== -1 || process.argv.indexOf('--ship') !== -1;
+const PRODUCTION: boolean =
+  process.argv.indexOf('--production') !== -1 || process.argv.indexOf('--ship') !== -1;
 setConfig({
   production: PRODUCTION,
   shouldWarningsFailBuild: PRODUCTION

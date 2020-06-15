@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-stack-compiler-2.9",
-  "version": "0.11.1",
+  "version": "0.12.0",
   "description": "A plug-in for selecting the compiler used with the @microsoft/rush-stack toolchain. This version selects TypeScript 2.9.",
   "license": "MIT",
   "repository": {
@@ -19,8 +19,8 @@
   "main": "lib/shared/index.js",
   "typings": "lib/shared/index.d.ts",
   "dependencies": {
-    "@microsoft/api-extractor": "7.8.9",
-    "@rushstack/node-core-library": "3.24.0",
+    "@microsoft/api-extractor": "7.8.11",
+    "@rushstack/node-core-library": "3.24.1",
     "@rushstack/eslint-config": "0.5.8",
     "@types/node": "10.17.13",
     "import-lazy": "~4.0.0",

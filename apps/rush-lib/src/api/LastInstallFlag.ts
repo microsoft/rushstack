@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as _ from 'lodash';
 import { FileSystem, JsonFile, JsonObject } from '@rushstack/node-core-library';
 
-import { PackageManagerName } from './packageManager/PackageManager'
+import { PackageManagerName } from './packageManager/PackageManager';
 
 export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
 
@@ -21,7 +21,7 @@ export class LastInstallFlag {
    * Creates a new LastInstall flag
    * @param folderPath - the folder that this flag is managing
    * @param state - optional, the state that should be managed or compared
-  */
+   */
   public constructor(folderPath: string, state: JsonObject = {}) {
     this._path = path.join(folderPath, LAST_INSTALL_FLAG_FILE_NAME);
     this._state = state;
@@ -61,21 +61,21 @@ export class LastInstallFlag {
         const pkgManager: PackageManagerName = newState.packageManager;
         if (pkgManager === 'pnpm') {
           if (
-            ( // Only throw an error if the package manager hasn't changed from PNPM
-              oldState.packageManager === pkgManager
-            ) && ( // Throw if the store path changed
-              oldState.storePath &&
-              oldState.storePath !== newState.storePath
-            )
+            // Only throw an error if the package manager hasn't changed from PNPM
+            oldState.packageManager === pkgManager && // Throw if the store path changed
+            oldState.storePath &&
+            oldState.storePath !== newState.storePath
           ) {
             const oldStorePath: string = oldState.storePath || '<global>';
             const newStorePath: string = newState.storePath || '<global>';
 
-            throw new Error("Current PNPM store path does not match the last one used." +
-              "  This may cause inconsistency in your builds.\n\n" +
-              "If you wish to install with the new store path, please run \"rush update --purge\"\n\n" +
-              `Old Path: ${oldStorePath}\n` +
-              `New Path: ${newStorePath}`);
+            throw new Error(
+              'Current PNPM store path does not match the last one used.' +
+                '  This may cause inconsistency in your builds.\n\n' +
+                'If you wish to install with the new store path, please run "rush update --purge"\n\n' +
+                `Old Path: ${oldStorePath}\n` +
+                `New Path: ${newStorePath}`
+            );
           }
         }
       }

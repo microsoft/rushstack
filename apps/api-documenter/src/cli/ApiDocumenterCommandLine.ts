@@ -10,13 +10,15 @@ export class ApiDocumenterCommandLine extends CommandLineParser {
   public constructor() {
     super({
       toolFilename: 'api-documenter',
-      toolDescription: 'Reads *.api.json files produced by api-extractor, '
-        + ' and generates API documentation in various output formats.'
+      toolDescription:
+        'Reads *.api.json files produced by api-extractor, ' +
+        ' and generates API documentation in various output formats.'
     });
     this._populateActions();
   }
 
-  protected onDefineParameters(): void { // override
+  protected onDefineParameters(): void {
+    // override
     // No parameters
   }
 

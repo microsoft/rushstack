@@ -3,11 +3,7 @@
 
 import { WebpackTask } from './WebpackTask';
 
-export {
-  IWebpackTaskConfig,
-  IWebpackResources,
-  WebpackTask
-} from './WebpackTask';
+export { IWebpackTaskConfig, IWebpackResources, WebpackTask } from './WebpackTask';
 
 /**
  * @public

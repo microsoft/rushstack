@@ -33,5 +33,4 @@ export function importedModuleAsGenericParameter(): GenericInterface<semver2.Sem
  * A class that inherits from a type defined in the "semver" module imported from \@types/semver.
  * @public
  */
-export class ImportedModuleAsBaseClass extends semver3.SemVer {
-}
+export class ImportedModuleAsBaseClass extends semver3.SemVer {}

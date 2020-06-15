@@ -11,6 +11,11 @@ describe('CommandLineHelp', () => {
   let parser: RushCommandLineParser;
 
   beforeEach(() => {
+    // ts-command-line calls process.exit() which interferes with Jest
+    jest.spyOn(process, 'exit').mockImplementation((code?: number) => {
+      throw new Error('Test code called process.exit(${code})');
+    });
+
     oldCwd = process.cwd();
     const localCwd: string = path.join(__dirname, 'repo');
 

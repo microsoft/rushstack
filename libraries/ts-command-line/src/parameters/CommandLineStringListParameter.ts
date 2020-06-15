@@ -26,13 +26,14 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
    * @internal
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public _setValue(data: any): void { // abstract
+  public _setValue(data: any): void {
+    // abstract
     if (data !== null && data !== undefined) {
       if (!Array.isArray(data)) {
         this.reportInvalidData(data);
       }
       for (const arrayItem of data) {
-        if (typeof(arrayItem) !== 'string') {
+        if (typeof arrayItem !== 'string') {
           this.reportInvalidData(data);
         }
       }
@@ -57,20 +58,29 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
           // than a custom delimiter.
           try {
             const parsedJson: unknown = JSON.parse(environmentValue);
-            if (!Array.isArray(parsedJson)
-              || !parsedJson.every(x => typeof x === 'string' || typeof x === "boolean" || typeof x === "number")) {
-              throw new Error(`The ${environmentValue} environment variable value must be a JSON `
-                + ` array containing only strings, numbers, and booleans.`);
+            if (
+              !Array.isArray(parsedJson) ||
+              !parsedJson.every(
+                (x) => typeof x === 'string' || typeof x === 'boolean' || typeof x === 'number'
+              )
+            ) {
+              throw new Error(
+                `The ${environmentValue} environment variable value must be a JSON ` +
+                  ` array containing only strings, numbers, and booleans.`
+              );
             }
-            this._values = parsedJson.map(x => x.toString());
+            this._values = parsedJson.map((x) => x.toString());
           } catch (ex) {
-            throw new Error(`The ${environmentValue} environment variable value looks like a JSON array`
-              + ` but failed to parse: ` + ex.message);
+            throw new Error(
+              `The ${environmentValue} environment variable value looks like a JSON array` +
+                ` but failed to parse: ` +
+                ex.message
+            );
           }
         } else {
           // As a shorthand, a single value may be specified without JSON encoding, as long as it does not
           // start with the "[" character.
-          this._values = [ environmentValue ];
+          this._values = [environmentValue];
         }
 
         return;

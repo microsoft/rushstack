@@ -3,12 +3,7 @@
 
 import * as path from 'path';
 import * as ts from 'typescript';
-import {
-  FileSystem,
-  NewlineKind,
-  PackageJsonLookup,
-  IPackageJson
-} from '@rushstack/node-core-library';
+import { FileSystem, NewlineKind, PackageJsonLookup, IPackageJson } from '@rushstack/node-core-library';
 
 import { ExtractorConfig } from './ExtractorConfig';
 import { Collector } from '../collector/Collector';
@@ -171,7 +166,10 @@ export class Extractor {
   /**
    * Load the api-extractor.json config file from the specified path, and then invoke API Extractor.
    */
-  public static loadConfigAndInvoke(configFilePath: string, options?: IExtractorInvokeOptions): ExtractorResult {
+  public static loadConfigAndInvoke(
+    configFilePath: string,
+    options?: IExtractorInvokeOptions
+  ): ExtractorResult {
     const extractorConfig: ExtractorConfig = ExtractorConfig.loadFileAndPrepare(configFilePath);
 
     return Extractor.invoke(extractorConfig, options);
@@ -181,7 +179,6 @@ export class Extractor {
    * Invoke API Extractor using an already prepared `ExtractorConfig` object.
    */
   public static invoke(extractorConfig: ExtractorConfig, options?: IExtractorInvokeOptions): ExtractorResult {
-
     if (!options) {
       options = {};
     }
@@ -209,7 +206,9 @@ export class Extractor {
       messageRouter.logDiagnosticFooter();
 
       messageRouter.logDiagnosticHeader('Compiler options');
-      const serializedOptions: object = MessageRouter.buildJsonDumpObject((compilerState.program as ts.Program).getCompilerOptions());
+      const serializedOptions: object = MessageRouter.buildJsonDumpObject(
+        (compilerState.program as ts.Program).getCompilerOptions()
+      );
       messageRouter.logDiagnostic(JSON.stringify(serializedOptions, undefined, 2));
       messageRouter.logDiagnosticFooter();
     }
@@ -233,7 +232,10 @@ export class Extractor {
     }
 
     if (extractorConfig.docModelEnabled) {
-      messageRouter.logVerbose(ConsoleMessageId.WritingDocModelFile, 'Writing: ' + extractorConfig.apiJsonFilePath);
+      messageRouter.logVerbose(
+        ConsoleMessageId.WritingDocModelFile,
+        'Writing: ' + extractorConfig.apiJsonFilePath
+      );
       apiPackage.saveToJsonFile(extractorConfig.apiJsonFilePath, {
         toolPackage: Extractor.packageName,
         toolVersion: Extractor.version,
@@ -332,17 +334,31 @@ export class Extractor {
 
     if (extractorConfig.rollupEnabled) {
       Extractor._generateRollupDtsFile(
-        collector, extractorConfig.publicTrimmedFilePath, DtsRollupKind.PublicRelease, extractorConfig.newlineKind);
+        collector,
+        extractorConfig.publicTrimmedFilePath,
+        DtsRollupKind.PublicRelease,
+        extractorConfig.newlineKind
+      );
       Extractor._generateRollupDtsFile(
-        collector, extractorConfig.betaTrimmedFilePath, DtsRollupKind.BetaRelease, extractorConfig.newlineKind);
+        collector,
+        extractorConfig.betaTrimmedFilePath,
+        DtsRollupKind.BetaRelease,
+        extractorConfig.newlineKind
+      );
       Extractor._generateRollupDtsFile(
-        collector, extractorConfig.untrimmedFilePath, DtsRollupKind.InternalRelease, extractorConfig.newlineKind);
+        collector,
+        extractorConfig.untrimmedFilePath,
+        DtsRollupKind.InternalRelease,
+        extractorConfig.newlineKind
+      );
     }
 
     if (extractorConfig.tsdocMetadataEnabled) {
       // Write the tsdoc-metadata.json file for this project
       PackageMetadataManager.writeTsdocMetadataFile(
-        extractorConfig.tsdocMetadataFilePath, extractorConfig.newlineKind);
+        extractorConfig.tsdocMetadataFilePath,
+        extractorConfig.newlineKind
+      );
     }
 
     // Show all the messages that we collected during analysis
@@ -369,10 +385,16 @@ export class Extractor {
   }
 
   private static _generateRollupDtsFile(
-    collector: Collector, outputPath: string, dtsKind: DtsRollupKind, newlineKind: NewlineKind
+    collector: Collector,
+    outputPath: string,
+    dtsKind: DtsRollupKind,
+    newlineKind: NewlineKind
   ): void {
     if (outputPath !== '') {
-      collector.messageRouter.logVerbose(ConsoleMessageId.WritingDtsRollup, `Writing package typings: ${outputPath}`);
+      collector.messageRouter.logVerbose(
+        ConsoleMessageId.WritingDtsRollup,
+        `Writing package typings: ${outputPath}`
+      );
       DtsRollupGenerator.writeTypingsFile(collector, outputPath, dtsKind, newlineKind);
     }
   }

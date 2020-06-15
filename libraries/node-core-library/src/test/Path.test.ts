@@ -6,7 +6,6 @@ import { Path } from '../Path';
 
 describe('Path', () => {
   describe('Test', () => {
-
     if (os.platform() === 'win32') {
       test('Windows paths', () => {
         expect(Path.isUnder('C:\\a\\b.txt', 'C:\\a')).toEqual(true);

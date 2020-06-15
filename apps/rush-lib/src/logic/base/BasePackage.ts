@@ -1,10 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  JsonFile,
-  IPackageJson
-} from '@rushstack/node-core-library';
+import { JsonFile, IPackageJson } from '@rushstack/node-core-library';
 
 /**
  * The type of dependency; used by IPackageDependency.
@@ -108,11 +105,12 @@ export class BasePackage {
   public children: BasePackage[];
   private _childrenByName: Map<string, BasePackage>;
 
-  protected constructor(name: string,
+  protected constructor(
+    name: string,
     version: string | undefined,
     folderPath: string,
-    packageJson: IRushTempPackageJson | undefined) {
-
+    packageJson: IRushTempPackageJson | undefined
+  ) {
     this.name = name;
     this.packageJson = packageJson;
     this.version = version;
@@ -137,10 +135,12 @@ export class BasePackage {
    * Used by link managers, creates a virtual Package object that represents symbolic links
    * which will be created later
    */
-  public static createLinkedPackage(name: string,
+  public static createLinkedPackage(
+    name: string,
     version: string | undefined,
     folderPath: string,
-    packageJson?: IRushTempPackageJson): BasePackage {
+    packageJson?: IRushTempPackageJson
+  ): BasePackage {
     return new BasePackage(name, version, folderPath, packageJson);
   }
 
@@ -152,9 +152,17 @@ export class BasePackage {
    * @param targetFolderName - Filename where it should have been installed
    *        Example: `C:\MyRepo\common\temp\node_modules\@rush-temp\project1`
    */
-  public static createVirtualTempPackage(packageJsonFilename: string, installFolderName: string): BasePackage {
+  public static createVirtualTempPackage(
+    packageJsonFilename: string,
+    installFolderName: string
+  ): BasePackage {
     const packageJson: IRushTempPackageJson = JsonFile.load(packageJsonFilename);
-    return BasePackage.createLinkedPackage(packageJson.name, packageJson.version, installFolderName, packageJson);
+    return BasePackage.createLinkedPackage(
+      packageJson.name,
+      packageJson.version,
+      installFolderName,
+      packageJson
+    );
   }
 
   public get nameAndVersion(): string {

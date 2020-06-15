@@ -6,10 +6,7 @@ import { Parser } from '../Parser';
 import { AstScript } from '../AstNode';
 
 function escape(s: string): string {
-  return s.replace(/\n/g, '[n]')
-    .replace(/\r/g, '[r]')
-    .replace(/\t/g, '[t]')
-    .replace(/\\/g, '[b]');
+  return s.replace(/\n/g, '[n]').replace(/\r/g, '[r]').replace(/\t/g, '[t]').replace(/\\/g, '[b]');
 }
 
 function matchSnapshot(input: string): void {

@@ -105,7 +105,10 @@ function _copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string)
  * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities._syncNpmrc()
  */
 function _syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string, useNpmrcPublish?: boolean): void {
-  const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, !useNpmrcPublish ? '.npmrc' : '.npmrc-publish');
+  const sourceNpmrcPath: string = path.join(
+    sourceNpmrcFolder,
+    !useNpmrcPublish ? '.npmrc' : '.npmrc-publish'
+  );
   const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
   try {
     if (fs.existsSync(sourceNpmrcPath)) {
@@ -178,7 +181,9 @@ function _ensureAndJoinPath(baseFolder: string, ...pathSegments: string[]): stri
       }
     }
   } catch (e) {
-    throw new Error(`Error building local installation folder (${path.join(baseFolder, ...pathSegments)}): ${e}`);
+    throw new Error(
+      `Error building local installation folder (${path.join(baseFolder, ...pathSegments)}): ${e}`
+    );
   }
 
   return joinedPath;
@@ -322,15 +327,9 @@ function _cleanInstallFolder(rushTempFolder: string, packageInstallFolder: strin
 
     const nodeModulesFolder: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME);
     if (fs.existsSync(nodeModulesFolder)) {
-      const rushRecyclerFolder: string = _ensureAndJoinPath(
-        rushTempFolder,
-        'rush-recycler'
-      );
+      const rushRecyclerFolder: string = _ensureAndJoinPath(rushTempFolder, 'rush-recycler');
 
-      fs.renameSync(
-        nodeModulesFolder,
-        path.join(rushRecyclerFolder, `install-run-${Date.now().toString()}`)
-      );
+      fs.renameSync(nodeModulesFolder, path.join(rushRecyclerFolder, `install-run-${Date.now().toString()}`));
     }
   } catch (e) {
     throw new Error(`Error cleaning the package install folder (${packageInstallFolder}): ${e}`);
@@ -340,14 +339,14 @@ function _cleanInstallFolder(rushTempFolder: string, packageInstallFolder: strin
 function _createPackageJson(packageInstallFolder: string, name: string, version: string): void {
   try {
     const packageJsonContents: IPackageJson = {
-      'name': 'ci-rush',
-      'version': '0.0.0',
-      'dependencies': {
+      name: 'ci-rush',
+      version: '0.0.0',
+      dependencies: {
         [name]: version
       },
-      'description': 'DON\'T WARN',
-      'repository': 'DON\'T WARN',
-      'license': 'MIT'
+      description: "DON'T WARN",
+      repository: "DON'T WARN",
+      license: 'MIT'
     };
 
     const packageJsonPath: string = path.join(packageInstallFolder, PACKAGE_JSON_FILENAME);
@@ -364,15 +363,11 @@ function _installPackage(packageInstallFolder: string, name: string, version: st
   try {
     console.log(`Installing ${name}...`);
     const npmPath: string = getNpmPath();
-    const result: childProcess.SpawnSyncReturns<Buffer> = childProcess.spawnSync(
-      npmPath,
-      ['install'],
-      {
-        stdio: 'inherit',
-        cwd: packageInstallFolder,
-        env: process.env
-      }
-    );
+    const result: childProcess.SpawnSyncReturns<Buffer> = childProcess.spawnSync(npmPath, ['install'], {
+      stdio: 'inherit',
+      cwd: packageInstallFolder,
+      env: process.env
+    });
 
     if (result.status !== 0) {
       throw new Error('"npm install" encountered an error');
@@ -389,7 +384,7 @@ function _installPackage(packageInstallFolder: string, name: string, version: st
  */
 function _getBinPath(packageInstallFolder: string, binName: string): string {
   const binFolderPath: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
-  const resolvedBinName: string = (os.platform() === 'win32') ? `${binName}.cmd` : binName;
+  const resolvedBinName: string = os.platform() === 'win32' ? `${binName}.cmd` : binName;
   return path.resolve(binFolderPath, resolvedBinName);
 }
 
@@ -437,15 +432,15 @@ export function installAndRun(
   console.log(os.EOL + statusMessage + os.EOL + statusMessageLine + os.EOL);
 
   const binPath: string = _getBinPath(packageInstallFolder, packageBinName);
-  const result: childProcess.SpawnSyncReturns<Buffer>  = childProcess.spawnSync(
-    binPath,
-    packageBinArgs,
-    {
-      stdio: 'inherit',
-      cwd: process.cwd(),
-      env: process.env
+  const binFolderPath: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
+  const result: childProcess.SpawnSyncReturns<Buffer> = childProcess.spawnSync(binPath, packageBinArgs, {
+    stdio: 'inherit',
+    cwd: process.cwd(),
+    env: {
+      ...process.env,
+      PATH: [binFolderPath, process.env.PATH].join(path.delimiter)
     }
-  );
+  });
 
   if (result.status !== null) {
     return result.status;
@@ -467,10 +462,10 @@ export function runWithErrorAndStatusCode(fn: () => number): void {
 
 function _run(): void {
   const [
-    nodePath, /* Ex: /bin/node */
-    scriptPath, /* /repo/common/scripts/install-run-rush.js */
-    rawPackageSpecifier, /* qrcode@^1.2.0 */
-    packageBinName, /* qrcode */
+    nodePath /* Ex: /bin/node */,
+    scriptPath /* /repo/common/scripts/install-run-rush.js */,
+    rawPackageSpecifier /* qrcode@^1.2.0 */,
+    packageBinName /* qrcode */,
     ...packageBinArgs /* [-f, myproject/lib] */
   ]: string[] = process.argv;
 

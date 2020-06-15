@@ -9,13 +9,11 @@ export class AlphaClass {
   /**
    * This is a comment
    */
-  public undecoratedMember(): void {
-  }
+  public undecoratedMember(): void {}
 
   /**
    * This is an internal member
    * @internal
    */
-  public _internalMember(): void {
-  }
+  public _internalMember(): void {}
 }

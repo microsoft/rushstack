@@ -11,18 +11,17 @@ export class PostProcessSourceMaps extends GulpTask<void> {
 
   public executeTask(gulp: gulpType.Gulp): NodeJS.ReadWriteStream | void {
     if (this.buildConfig.args.hasOwnProperty('vscode')) {
-
       // eslint-disable-next-line
       const replace = require('gulp-replace');
 
-      return gulp.src(['dist/*!(.min).js.map'])
+      return gulp
+        .src(['dist/*!(.min).js.map'])
         .pipe(replace('webpack:///./', ''))
         .pipe(replace('webpack:////source/', ''))
         .pipe(replace('webpack:////src/', ''))
         .pipe(replace('webpack:///../~/', '../node_modules/'))
         .pipe(replace('"sourceRoot":""', '"sourceRoot":"/"'))
         .pipe(gulp.dest('dist/'));
-
     } else {
       return;
     }

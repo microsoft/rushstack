@@ -28,41 +28,41 @@ export function runScenarios(buildConfigPath: string): void {
     const overridesPath = path.resolve(`./src/${scenarioFolderName}/config/api-extractor-overrides.json`);
     const apiExtractorJsonOverrides = fs.existsSync(overridesPath) ? JsonFile.load(overridesPath) : {};
     const apiExtractorJson = {
-      '$schema': 'https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json',
+      $schema: 'https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json',
 
-      'mainEntryPointFilePath': entryPoint,
+      mainEntryPointFilePath: entryPoint,
 
-      'apiReport': {
-        'enabled': true,
-        'reportFolder': `<projectFolder>/etc/test-outputs/${scenarioFolderName}`
+      apiReport: {
+        enabled: true,
+        reportFolder: `<projectFolder>/etc/test-outputs/${scenarioFolderName}`
       },
 
-      'dtsRollup': {
-        'enabled': true,
-        'untrimmedFilePath': `<projectFolder>/etc/test-outputs/${scenarioFolderName}/rollup.d.ts`
+      dtsRollup: {
+        enabled: true,
+        untrimmedFilePath: `<projectFolder>/etc/test-outputs/${scenarioFolderName}/rollup.d.ts`
       },
 
-      'docModel': {
-        'enabled': true,
-        'apiJsonFilePath': `<projectFolder>/etc/test-outputs/${scenarioFolderName}/<unscopedPackageName>.api.json`
+      docModel: {
+        enabled: true,
+        apiJsonFilePath: `<projectFolder>/etc/test-outputs/${scenarioFolderName}/<unscopedPackageName>.api.json`
       },
 
-      'messages': {
-        'extractorMessageReporting': {
+      messages: {
+        extractorMessageReporting: {
           // For test purposes, write these warnings into .api.md
           // TODO: Capture the full list of warnings in the tracked test output file
           'ae-cyclic-inherit-doc': {
-            'logLevel': 'warning',
-            'addToApiReportFile': true
+            logLevel: 'warning',
+            addToApiReportFile: true
           },
           'ae-unresolved-link': {
-            'logLevel': 'warning',
-            'addToApiReportFile': true
+            logLevel: 'warning',
+            addToApiReportFile: true
           }
         }
       },
 
-      'testMode': true,
+      testMode: true,
       ...apiExtractorJsonOverrides
     };
 

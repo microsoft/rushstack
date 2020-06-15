@@ -3,7 +3,7 @@
 
   // ("mainEntryPointFilePath" is required)
 
-  "bundledPackages": [ ],
+  "bundledPackages": [],
 
   "newlineKind": "crlf",
 

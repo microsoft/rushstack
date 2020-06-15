@@ -10,8 +10,7 @@ import { ChangeType, IChangeInfo } from '../../api/ChangeManagement';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { VersionManager } from '../VersionManager';
 
-function _getChanges(changeFiles: Map<string, ChangeFile>,
-  packageName: string): IChangeInfo[] | undefined {
+function _getChanges(changeFiles: Map<string, ChangeFile>, packageName: string): IChangeInfo[] | undefined {
   const changeFile: ChangeFile | undefined = changeFiles.get(packageName);
   if (!changeFile) {
     return undefined;
@@ -25,8 +24,11 @@ describe('VersionManager', () => {
   let versionManager: VersionManager;
 
   beforeEach(() => {
-    versionManager = new VersionManager(rushConfiguration, 'test@microsoft.com',
-      rushConfiguration.versionPolicyConfiguration);
+    versionManager = new VersionManager(
+      rushConfiguration,
+      'test@microsoft.com',
+      rushConfiguration.versionPolicyConfiguration
+    );
   });
 
   /* eslint-disable dot-notation */
@@ -49,14 +51,14 @@ describe('VersionManager', () => {
 
       const changeFiles: Map<string, ChangeFile> = versionManager.changeFiles;
       expect(changeFiles.size).toEqual(4);
-      expect(_getChanges(changeFiles, 'a')!.length).toEqual(1);
+      expect(_getChanges(changeFiles, 'a')!).toHaveLength(1);
       expect(_getChanges(changeFiles, 'a')![0].changeType).toEqual(ChangeType.none);
-      expect(_getChanges(changeFiles, 'b')!.length).toEqual(1);
+      expect(_getChanges(changeFiles, 'b')!).toHaveLength(1);
       expect(_getChanges(changeFiles, 'b')![0].changeType).toEqual(ChangeType.none);
-      expect(_getChanges(changeFiles, 'c')!.length).toEqual(2);
+      expect(_getChanges(changeFiles, 'c')!).toHaveLength(2);
       expect(_getChanges(changeFiles, 'c')![0].changeType).toEqual(ChangeType.patch);
       expect(_getChanges(changeFiles, 'c')![1].changeType).toEqual(ChangeType.dependency);
-      expect(_getChanges(changeFiles, 'd')!.length).toEqual(2);
+      expect(_getChanges(changeFiles, 'd')!).toHaveLength(2);
       expect(_getChanges(changeFiles, 'd')![0].changeType).toEqual(ChangeType.patch);
       expect(_getChanges(changeFiles, 'd')![1].changeType).toEqual(ChangeType.dependency);
     });

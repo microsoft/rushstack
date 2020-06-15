@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/// <reference types="mocha" />
-
-import { assert } from 'chai';
 import { LoadThemedStylesLoader } from './../LoadThemedStylesLoader';
 import LoadThemedStylesMock = require('./testData/LoadThemedStylesMock');
 
@@ -21,37 +18,37 @@ describe('LoadThemedStylesLoader', () => {
   });
 
   it('follows the Webpack loader interface', () => {
-    assert.isDefined(LoadThemedStylesLoader);
-    assert.isDefined(LoadThemedStylesLoader.pitch);
+    expect(LoadThemedStylesLoader).toBeDefined();
+    expect(LoadThemedStylesLoader.pitch).toBeDefined();
 
-    assert.throws(() => new LoadThemedStylesLoader());
+    expect(() => new LoadThemedStylesLoader()).toThrow();
   });
 
   it('it correctly resolves load-themed-styles', () => {
     const expectedPath: string = require.resolve('@microsoft/load-themed-styles');
-    assert.equal(LoadThemedStylesLoader.loadedThemedStylesPath, expectedPath);
+    expect(LoadThemedStylesLoader.loadedThemedStylesPath).toEqual(expectedPath);
   });
 
   it('it inserts the resolved load-themed-styles path', () => {
     const expectedPath: string = require.resolve('@microsoft/load-themed-styles');
     const loaderResult: string = LoadThemedStylesLoader.pitch.call({}, '');
-    assert.isNotNull(loaderResult.indexOf(expectedPath));
+    expect(loaderResult.indexOf(expectedPath)).not.toBeNull();
   });
 
   it('it allows for override of load-themed-styles path', () => {
     let expectedPath: string = './testData/LoadThemedStylesMock';
     LoadThemedStylesLoader.loadedThemedStylesPath = expectedPath;
-    assert.equal(LoadThemedStylesLoader.loadedThemedStylesPath, expectedPath);
+    expect(LoadThemedStylesLoader.loadedThemedStylesPath).toEqual(expectedPath);
 
     LoadThemedStylesLoader.resetLoadedThemedStylesPath();
     expectedPath = require.resolve('@microsoft/load-themed-styles');
-    assert.equal(LoadThemedStylesLoader.loadedThemedStylesPath, expectedPath);
+    expect(LoadThemedStylesLoader.loadedThemedStylesPath).toEqual(expectedPath);
   });
 
   it('it inserts the overridden load-themed-styles path', () => {
     const expectedPath: string = './testData/LoadThemedStylesMock';
     const loaderResult: string = LoadThemedStylesLoader.pitch.call({}, '');
-    assert.isNotNull(loaderResult.indexOf(expectedPath));
+    expect(loaderResult.indexOf(expectedPath)).not.toBeNull();
   });
 
   it('correctly calls loadStyles in load-themed-styles with a module reference', () => {
@@ -63,13 +60,13 @@ describe('LoadThemedStylesLoader', () => {
 
     const returnedModule: { exports: string } = eval(loaderResult); // eslint-disable-line no-eval
 
-    assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1);
-    assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1);
-    assert.equal(LoadThemedStylesMock.loadedData.length, 2);
-    assert.isFalse(LoadThemedStylesMock.calledWithAsync[0]);
-    assert.isFalse(LoadThemedStylesMock.calledWithAsync[1]);
-    assert.equal(LoadThemedStylesMock.calledWithAsync.length, 2);
-    assert.equal(returnedModule.exports, 'locals');
+    expect(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1).toEqual(true);
+    expect(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1).toEqual(true);
+    expect(LoadThemedStylesMock.loadedData).toHaveLength(2);
+    expect(LoadThemedStylesMock.calledWithAsync[0]).toEqual(false);
+    expect(LoadThemedStylesMock.calledWithAsync[1]).toEqual(false);
+    expect(LoadThemedStylesMock.calledWithAsync).toHaveLength(2);
+    expect(returnedModule.exports).toEqual('locals');
   });
 
   it('correctly calls loadStyles in load-themed-styles with a string reference', () => {
@@ -81,9 +78,9 @@ describe('LoadThemedStylesLoader', () => {
 
     const returnedModule: { exports: string } = eval(loaderResult); // eslint-disable-line no-eval
 
-    assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('styles') !== -1);
-    assert.equal(LoadThemedStylesMock.loadedData.length, 1);
-    assert.deepEqual(returnedModule.exports, {});
+    expect(LoadThemedStylesMock.loadedData.indexOf('styles') !== -1).toEqual(true);
+    expect(LoadThemedStylesMock.loadedData).toHaveLength(1);
+    expect(returnedModule.exports).toEqual({});
   });
 
   it('correctly handles the namedExport option', () => {
@@ -96,13 +93,13 @@ describe('LoadThemedStylesLoader', () => {
 
     const returnedModule: { exports: string } = eval(loaderResult); // eslint-disable-line no-eval
 
-    assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1);
-    assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1);
-    assert.equal(LoadThemedStylesMock.loadedData.length, 2);
-    assert.isFalse(LoadThemedStylesMock.calledWithAsync[0]);
-    assert.isFalse(LoadThemedStylesMock.calledWithAsync[1]);
-    assert.equal(LoadThemedStylesMock.calledWithAsync.length, 2);
-    assert.deepEqual(returnedModule.exports, { default: 'locals' });
+    expect(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1).toEqual(true);
+    expect(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1).toEqual(true);
+    expect(LoadThemedStylesMock.loadedData).toHaveLength(2);
+    expect(LoadThemedStylesMock.calledWithAsync[0]).toEqual(false);
+    expect(LoadThemedStylesMock.calledWithAsync[1]).toEqual(false);
+    expect(LoadThemedStylesMock.calledWithAsync).toHaveLength(2);
+    expect(returnedModule.exports).toEqual({ default: 'locals' });
   });
 
   it('correctly handles the async option set to "true"', () => {
@@ -115,13 +112,13 @@ describe('LoadThemedStylesLoader', () => {
 
     const returnedModule: { exports: string } = eval(loaderResult); // eslint-disable-line no-eval
 
-    assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1);
-    assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1);
-    assert.equal(LoadThemedStylesMock.loadedData.length, 2);
-    assert.isTrue(LoadThemedStylesMock.calledWithAsync[0]);
-    assert.isTrue(LoadThemedStylesMock.calledWithAsync[1]);
-    assert.equal(LoadThemedStylesMock.calledWithAsync.length, 2);
-    assert.equal(returnedModule.exports, 'locals');
+    expect(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1).toEqual(true);
+    expect(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1).toEqual(true);
+    expect(LoadThemedStylesMock.loadedData).toHaveLength(2);
+    expect(LoadThemedStylesMock.calledWithAsync[0]).toEqual(true);
+    expect(LoadThemedStylesMock.calledWithAsync[1]).toEqual(true);
+    expect(LoadThemedStylesMock.calledWithAsync).toHaveLength(2);
+    expect(returnedModule.exports).toEqual('locals');
   });
 
   it('correctly handles the async option set to a non-boolean', () => {
@@ -133,12 +130,12 @@ describe('LoadThemedStylesLoader', () => {
 
     const returnedModule: { exports: string } = eval(loaderResult); // eslint-disable-line no-eval
 
-    assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1);
-    assert.isTrue(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1);
-    assert.equal(LoadThemedStylesMock.loadedData.length, 2);
-    assert.isFalse(LoadThemedStylesMock.calledWithAsync[0]);
-    assert.isFalse(LoadThemedStylesMock.calledWithAsync[1]);
-    assert.equal(LoadThemedStylesMock.calledWithAsync.length, 2);
-    assert.equal(returnedModule.exports, 'locals');
+    expect(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1).toEqual(true);
+    expect(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1).toEqual(true);
+    expect(LoadThemedStylesMock.loadedData).toHaveLength(2);
+    expect(LoadThemedStylesMock.calledWithAsync[0]).toEqual(false);
+    expect(LoadThemedStylesMock.calledWithAsync[1]).toEqual(false);
+    expect(LoadThemedStylesMock.calledWithAsync).toHaveLength(2);
+    expect(returnedModule.exports).toEqual('locals');
   });
 });

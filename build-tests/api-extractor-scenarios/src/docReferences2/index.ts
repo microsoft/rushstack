@@ -4,29 +4,23 @@
 /** @public */
 export class CyclicA {
   /** {@inheritDoc CyclicB.methodB2} */
-  public methodA1(): void {
-  }
+  public methodA1(): void {}
   /** {@inheritDoc CyclicB.methodB4} */
-  public methodA3(): void {
-  }
+  public methodA3(): void {}
 }
 
 /** @public */
 export class CyclicB {
   /** {@inheritDoc CyclicA.methodA3} */
-  public methodB2(): void {
-  }
+  public methodB2(): void {}
   /** THE COMMENT */
-  public methodB4(): void {
-  }
+  public methodB4(): void {}
 }
 
 /** @public */
 export class FailWithSelfReference {
   /** {@inheritDoc FailWithSelfReference.method2} */
-  public method1(): void {
-  }
+  public method1(): void {}
   /** {@inheritDoc FailWithSelfReference.method1} */
-  public method2(): void {
-  }
+  public method2(): void {}
 }

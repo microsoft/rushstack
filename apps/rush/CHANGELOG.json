@@ -2,6 +2,132 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.26.0",
+      "tag": "@microsoft/rush_v5.26.0",
+      "date": "Mon, 15 Jun 2020 01:26:24 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Breaking change for the experimental \"rush deploy\" feature: Simplify the config file design, based on the discussion from GitHub #1906"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.25.2",
+      "tag": "@microsoft/rush_v5.25.2",
+      "date": "Thu, 11 Jun 2020 05:34:31 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where Git hook scripts failed in some environments due to CRLF newlines"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.25.1",
+      "tag": "@microsoft/rush_v5.25.1",
+      "date": "Thu, 11 Jun 2020 05:05:30 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix some minor errors in the \"rush init\" template that occured when Prettier reformatted the template file macros"
+          },
+          {
+            "comment": "Add a sample Git hook file to the \"rush init\" template"
+          },
+          {
+            "comment": "Fix a minor issue where \"rush link\" failed if no projects were defined yet in rush.json"
+          },
+          {
+            "comment": "Add \"--no-verify\" for commits performed by \"rush version\", since Git hook scripts may fail on CI machines"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.25.0",
+      "tag": "@microsoft/rush_v5.25.0",
+      "date": "Wed, 10 Jun 2020 23:53:27 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add new command-line.json setting \"autoinstallerName\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.24.4",
+      "tag": "@microsoft/rush_v5.24.4",
+      "date": "Mon, 08 Jun 2020 18:04:35 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Explicitly assigning the option value for --resolution-strategy. This fixes a crash with pnpm v5, which deprecated the option."
+          },
+          {
+            "comment": "Fix an issue where install-run.js is not able to find its own .bin in PATH"
+          },
+          {
+            "comment": "Fix an issue where \"rush install\" sometimes skipped regenerating temporary packages, which is incompatible with PNPM's \"--frozen-lockfile\" feature"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.24.3",
+      "tag": "@microsoft/rush_v5.24.3",
+      "date": "Thu, 04 Jun 2020 22:50:56 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where \"rush deploy\" generated incorrect symlinks on Mac OS if the target folder was symlinked (GitHub #1910)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.24.2",
+      "tag": "@microsoft/rush_v5.24.2",
+      "date": "Wed, 03 Jun 2020 05:35:19 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Expect error when trying to resolve optional dependency during deploy"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.24.1",
+      "tag": "@microsoft/rush_v5.24.1",
+      "date": "Tue, 02 Jun 2020 03:11:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where the \"linkCreation\" defaulted to \"none\" instead of \"default\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.24.0",
+      "tag": "@microsoft/rush_v5.24.0",
+      "date": "Mon, 01 Jun 2020 08:48:49 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Set next LTS node version to 14."
+          },
+          {
+            "comment": "Add new \"rush deploy\" command that copies subsets of files/symlinks to a deployment folder"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.23.5",
       "tag": "@microsoft/rush_v5.23.5",
       "date": "Thu, 28 May 2020 22:49:57 GMT",

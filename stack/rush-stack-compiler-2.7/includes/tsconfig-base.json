@@ -15,12 +15,6 @@
     "noUnusedLocals": true,
     "types": []
   },
-  "include": [
-    "../../../../src/**/*.ts",
-    "../../../../src/**/*.tsx"
-  ],
-  "exclude": [
-    "../../../../node_modules",
-    "../../../../lib"
-  ]
+  "include": ["../../../../src/**/*.ts", "../../../../src/**/*.tsx"],
+  "exclude": ["../../../../node_modules", "../../../../lib"]
 }

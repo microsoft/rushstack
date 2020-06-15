@@ -4,11 +4,7 @@
 import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
-import {
-  PackageJsonLookup,
-  FileSystem,
-  IPackageJson
-} from '@rushstack/node-core-library';
+import { PackageJsonLookup, FileSystem, IPackageJson } from '@rushstack/node-core-library';
 
 import {
   CommandLineAction,
@@ -37,7 +33,8 @@ export class RunAction extends CommandLineAction {
     });
   }
 
-  protected onDefineParameters(): void { // override
+  protected onDefineParameters(): void {
+    // override
     this._configFileParameter = this.defineStringParameter({
       parameterLongName: '--config',
       parameterShortName: '-c',
@@ -48,10 +45,11 @@ export class RunAction extends CommandLineAction {
     this._localParameter = this.defineFlagParameter({
       parameterLongName: '--local',
       parameterShortName: '-l',
-      description: 'Indicates that API Extractor is running as part of a local build,'
-        + ' e.g. on a developer\'s machine. This disables certain validation that would'
-        + ' normally be performed for a ship/production build. For example, the *.api.md'
-        + ' report file is automatically copied in a local build.'
+      description:
+        'Indicates that API Extractor is running as part of a local build,' +
+        " e.g. on a developer's machine. This disables certain validation that would" +
+        ' normally be performed for a ship/production build. For example, the *.api.md' +
+        ' report file is automatically copied in a local build.'
     });
 
     this._verboseParameter = this.defineFlagParameter({
@@ -62,22 +60,25 @@ export class RunAction extends CommandLineAction {
 
     this._diagnosticsParameter = this.defineFlagParameter({
       parameterLongName: '--diagnostics',
-      description: 'Show diagnostic messages used for troubleshooting problems with API Extractor.'
-        + '  This flag also enables the "--verbose" flag.'
+      description:
+        'Show diagnostic messages used for troubleshooting problems with API Extractor.' +
+        '  This flag also enables the "--verbose" flag.'
     });
 
     this._typescriptCompilerFolder = this.defineStringParameter({
       parameterLongName: '--typescript-compiler-folder',
       argumentName: 'PATH',
-      description:  'API Extractor uses its own TypeScript compiler engine to analyze your project.  If your project'
-      + ' is built with a significantly different TypeScript version, sometimes API Extractor may report compilation'
-      + ' errors due to differences in the system typings (e.g. lib.dom.d.ts).  You can use the'
-      + ' "--typescriptCompilerFolder" option to specify the folder path where you installed the TypeScript package,'
-      + ' and API Extractor\'s compiler will use those system typings instead.'
+      description:
+        'API Extractor uses its own TypeScript compiler engine to analyze your project.  If your project' +
+        ' is built with a significantly different TypeScript version, sometimes API Extractor may report compilation' +
+        ' errors due to differences in the system typings (e.g. lib.dom.d.ts).  You can use the' +
+        ' "--typescriptCompilerFolder" option to specify the folder path where you installed the TypeScript package,' +
+        " and API Extractor's compiler will use those system typings instead."
     });
   }
 
-  protected onExecute(): Promise<void> { // override
+  protected onExecute(): Promise<void> {
+    // override
     const lookup: PackageJsonLookup = new PackageJsonLookup();
     let configFilename: string;
 
@@ -96,8 +97,8 @@ export class RunAction extends CommandLineAction {
           );
         } else if (typescriptCompilerPackageJson.name !== 'typescript') {
           throw new Error(
-            `The path specified in the ${this._typescriptCompilerFolder.longName} parameter is not a TypeScript`
-            + ' compiler package.'
+            `The path specified in the ${this._typescriptCompilerFolder.longName} parameter is not a TypeScript` +
+              ' compiler package.'
           );
         }
       } else {
@@ -124,7 +125,9 @@ export class RunAction extends CommandLineAction {
       configFilename = path.join(baseFolder, 'config', ExtractorConfig.FILENAME);
       if (FileSystem.exists(configFilename)) {
         if (FileSystem.exists(path.join(baseFolder, ExtractorConfig.FILENAME))) {
-          throw new Error(`Found conflicting ${ExtractorConfig.FILENAME} files in "." and "./config" folders`);
+          throw new Error(
+            `Found conflicting ${ExtractorConfig.FILENAME} files in "." and "./config" folders`
+          );
         }
       } else {
         // Otherwise try the top-level folder
@@ -147,14 +150,12 @@ export class RunAction extends CommandLineAction {
       packageJsonFullPath: lookup.tryGetPackageJsonFilePathFor(configObjectFullPath)
     });
 
-    const extractorResult: ExtractorResult = Extractor.invoke(extractorConfig,
-      {
-        localBuild: this._localParameter.value,
-        showVerboseMessages: this._verboseParameter.value,
-        showDiagnostics: this._diagnosticsParameter.value,
-        typescriptCompilerFolder: typescriptCompilerFolder
-      }
-    );
+    const extractorResult: ExtractorResult = Extractor.invoke(extractorConfig, {
+      localBuild: this._localParameter.value,
+      showVerboseMessages: this._verboseParameter.value,
+      showDiagnostics: this._diagnosticsParameter.value,
+      typescriptCompilerFolder: typescriptCompilerFolder
+    });
 
     if (extractorResult.succeeded) {
       console.log(os.EOL + 'API Extractor completed successfully');

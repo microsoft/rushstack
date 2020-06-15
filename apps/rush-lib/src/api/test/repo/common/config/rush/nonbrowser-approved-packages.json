@@ -3,7 +3,7 @@
   "packages": [
     {
       "name": "example",
-      "allowedCategories": [ "first-party", "prototype", "third-party" ]
+      "allowedCategories": ["first-party", "prototype", "third-party"]
     }
   ]
 }

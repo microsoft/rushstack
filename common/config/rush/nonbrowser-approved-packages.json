@@ -115,6 +115,14 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@microsoft/rush-stack-compiler-3.8",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-3.9",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@microsoft/rush-stack-compiler-shared",
       "allowedCategories": [ "libraries" ]
     },
@@ -423,6 +431,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "ignore",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "import-lazy",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "inquirer",
       "allowedCategories": [ "libraries" ]
     },
@@ -460,10 +476,6 @@
     },
     {
       "name": "jsdom",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "import-lazy",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -520,6 +532,10 @@
     },
     {
       "name": "npm-package-arg",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "npm-packlist",
       "allowedCategories": [ "libraries" ]
     },
     {

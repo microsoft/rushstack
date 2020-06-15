@@ -72,9 +72,9 @@ export class LegacyAdapters {
           fn(arg1, arg2, arg3, arg4, cb);
         } else if (arg1 !== undefined && arg2 !== undefined && arg3 !== undefined) {
           fn(arg1, arg2, arg3, cb);
-        } else if (arg1 !== undefined && arg2 !== undefined ) {
+        } else if (arg1 !== undefined && arg2 !== undefined) {
           fn(arg1, arg2, cb);
-        } else if (arg1 !== undefined ) {
+        } else if (arg1 !== undefined) {
           fn(arg1, cb);
         } else {
           fn(cb);
@@ -88,7 +88,8 @@ export class LegacyAdapters {
   /**
    * Normalizes an object into an `Error` object.
    */
-  public static scrubError(error: Error | string | any): Error { // eslint-disable-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static scrubError(error: Error | string | any): Error {
     if (error instanceof Error) {
       return error;
     } else if (typeof error === 'string') {

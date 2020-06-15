@@ -23,7 +23,7 @@ export class CertificateStore {
     const unresolvedUserFolder: string = homedir();
     this._userProfilePath = path.resolve(unresolvedUserFolder);
     if (!FileSystem.exists(this._userProfilePath)) {
-      throw new Error('Unable to determine the current user\'s home directory');
+      throw new Error("Unable to determine the current user's home directory");
     }
 
     this._serveDataPath = path.join(this._userProfilePath, '.rushstack');

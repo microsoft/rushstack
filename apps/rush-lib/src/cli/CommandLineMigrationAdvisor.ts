@@ -7,7 +7,6 @@ import { RushConstants } from '../logic/RushConstants';
 import { Utilities } from '../utilities/Utilities';
 
 export class CommandLineMigrationAdvisor {
-
   // NOTE: THIS RUNS BEFORE THE REAL COMMAND-LINE PARSING.
   // TAKE EXTREME CARE THAT THE HEURISTICS CANNOT FALSELY MATCH A VALID COMMAND LINE.
   public static checkArgv(argv: string[]): boolean {
@@ -15,32 +14,36 @@ export class CommandLineMigrationAdvisor {
     const args: string[] = process.argv.slice(2);
 
     if (args.length > 0) {
-
       if (args[0] === 'generate') {
         CommandLineMigrationAdvisor._reportDeprecated(
-          'Instead of "rush generate", use "rush update" or "rush update --full".');
+          'Instead of "rush generate", use "rush update" or "rush update --full".'
+        );
         return false;
       }
 
       if (args[0] === 'install') {
         if (args.indexOf('--full-clean') >= 0) {
           CommandLineMigrationAdvisor._reportDeprecated(
-            'Instead of "rush install --full-clean", use "rush purge --unsafe".');
+            'Instead of "rush install --full-clean", use "rush purge --unsafe".'
+          );
           return false;
         }
         if (args.indexOf('-C') >= 0) {
           CommandLineMigrationAdvisor._reportDeprecated(
-            'Instead of "rush install -C", use "rush purge --unsafe".');
+            'Instead of "rush install -C", use "rush purge --unsafe".'
+          );
           return false;
         }
         if (args.indexOf('--clean') >= 0) {
           CommandLineMigrationAdvisor._reportDeprecated(
-            'Instead of "rush install --clean", use "rush install --purge".');
+            'Instead of "rush install --clean", use "rush install --purge".'
+          );
           return false;
         }
         if (args.indexOf('-c') >= 0) {
           CommandLineMigrationAdvisor._reportDeprecated(
-            'Instead of "rush install -c", use "rush install --purge".');
+            'Instead of "rush install -c", use "rush install --purge".'
+          );
           return false;
         }
       }
@@ -51,13 +54,20 @@ export class CommandLineMigrationAdvisor {
   }
 
   private static _reportDeprecated(message: string): void {
-    console.error(colors.red(Utilities.wrapWords(
-     'ERROR: You specified an outdated command-line that is no longer supported by this version of Rush:'
-    )));
+    console.error(
+      colors.red(
+        Utilities.wrapWords(
+          'ERROR: You specified an outdated command-line that is no longer supported by this version of Rush:'
+        )
+      )
+    );
     console.error(colors.yellow(Utilities.wrapWords(message)));
     console.error();
-    console.error(Utilities.wrapWords(`For command-line help, type "rush -h".  For migration instructions,`
-      + ` please visit ${RushConstants.rushWebSiteUrl}`));
+    console.error(
+      Utilities.wrapWords(
+        `For command-line help, type "rush -h".  For migration instructions,` +
+          ` please visit ${RushConstants.rushWebSiteUrl}`
+      )
+    );
   }
-
 }

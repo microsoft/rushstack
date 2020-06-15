@@ -13,7 +13,7 @@ import {
 import {
   CommandLineParameter,
   CommandLineParameterWithArgument,
-  CommandLineParameterKind,
+  CommandLineParameterKind
 } from '../parameters/BaseClasses';
 import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
 import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
@@ -175,7 +175,9 @@ export abstract class CommandLineParameterProvider {
    * example-tool --add file1.txt --add file2.txt --add file3.txt
    * ```
    */
-  public defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter {
+  public defineStringListParameter(
+    definition: ICommandLineStringListDefinition
+  ): CommandLineStringListParameter {
     const parameter: CommandLineStringListParameter = new CommandLineStringListParameter(definition);
     this._defineParameter(parameter);
     return parameter;
@@ -258,24 +260,29 @@ export abstract class CommandLineParameterProvider {
     return 'key_' + (CommandLineParameterProvider._keyCounter++).toString();
   }
 
-  private _getParameter<T extends CommandLineParameter>(parameterLongName: string,
-    expectedKind: CommandLineParameterKind): T {
-
+  private _getParameter<T extends CommandLineParameter>(
+    parameterLongName: string,
+    expectedKind: CommandLineParameterKind
+  ): T {
     const parameter: CommandLineParameter | undefined = this._parametersByLongName.get(parameterLongName);
     if (!parameter) {
       throw new Error(`The parameter "${parameterLongName}" is not defined`);
     }
     if (parameter.kind !== expectedKind) {
-      throw new Error(`The parameter "${parameterLongName}" is of type "${CommandLineParameterKind[parameter.kind]}"`
-        + ` whereas the caller was expecting "${CommandLineParameterKind[expectedKind]}".`);
+      throw new Error(
+        `The parameter "${parameterLongName}" is of type "${CommandLineParameterKind[parameter.kind]}"` +
+          ` whereas the caller was expecting "${CommandLineParameterKind[expectedKind]}".`
+      );
     }
     return parameter as T;
   }
 
   private _defineParameter(parameter: CommandLineParameter): void {
     if (this._remainder) {
-      throw new Error('defineCommandLineRemainder() was already called for this provider;'
-        + ' no further parameters can be defined');
+      throw new Error(
+        'defineCommandLineRemainder() was already called for this provider;' +
+          ' no further parameters can be defined'
+      );
     }
 
     const names: string[] = [];

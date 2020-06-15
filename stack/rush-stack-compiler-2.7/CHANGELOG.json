@@ -2,6 +2,45 @@
   "name": "@microsoft/rush-stack-compiler-2.7",
   "entries": [
     {
+      "version": "0.11.0",
+      "tag": "@microsoft/rush-stack-compiler-2.7_v0.11.0",
+      "date": "Fri, 12 Jun 2020 09:19:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expose the @microsoft/api-extractor package's path"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.3",
+      "tag": "@microsoft/rush-stack-compiler-2.7_v0.10.3",
+      "date": "Wed, 10 Jun 2020 20:48:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.8.10` to `7.8.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.24.0` to `3.24.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.2",
+      "tag": "@microsoft/rush-stack-compiler-2.7_v0.10.2",
+      "date": "Mon, 01 Jun 2020 08:34:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.8.9` to `7.8.10`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.1",
       "tag": "@microsoft/rush-stack-compiler-2.7_v0.10.1",
       "date": "Sat, 30 May 2020 02:59:54 GMT",

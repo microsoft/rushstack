@@ -1,6 +1,23 @@
 # Change Log - @microsoft/rush-stack-compiler-2.4
 
-This log was last generated on Sat, 30 May 2020 02:59:54 GMT and should not be manually modified.
+This log was last generated on Fri, 12 Jun 2020 09:19:21 GMT and should not be manually modified.
+
+## 0.11.0
+Fri, 12 Jun 2020 09:19:21 GMT
+
+### Minor changes
+
+- Expose the @microsoft/api-extractor package's path
+
+## 0.10.3
+Wed, 10 Jun 2020 20:48:30 GMT
+
+*Version update only*
+
+## 0.10.2
+Mon, 01 Jun 2020 08:34:17 GMT
+
+*Version update only*
 
 ## 0.10.1
 Sat, 30 May 2020 02:59:54 GMT

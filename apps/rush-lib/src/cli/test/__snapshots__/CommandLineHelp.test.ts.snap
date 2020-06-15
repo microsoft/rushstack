@@ -22,9 +22,13 @@ Positional arguments:
     check         Checks each project's package.json files and ensures that 
                   all dependencies are of the same version throughout the 
                   repository.
+    deploy        (EXPERIMENTAL) Prepares a deployment by copying a subset of 
+                  Rush projects and their dependencies to a target folder
     install       Install package dependencies for all projects in the repo 
                   according to the shrinkwrap file
     init          Initializes a new repository to be managed by Rush
+    init-deploy   (EXPERIMENTAL) Creates a deployment scenario config file 
+                  for use with \\"rush deploy\\".
     link          Create node_modules symlinks for all projects
     list          List package information for all projects in the repo
     publish       Reads and processes package publishing change requests 
@@ -39,7 +43,7 @@ Positional arguments:
     version       (EXPERIMENTAL) Manage package versions in the repo.
     import-strings
                   Imports translated strings into each project.
-    deploy        Deploys the build
+    upload        Uploads the built files to the server
     build         Build all projects that haven't been built, or have changed 
                   since they were last built.
     rebuild       Clean and rebuild the entire set of projects
@@ -223,16 +227,40 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: deploy 1`] = `
-"usage: rush deploy [-h] [--locale {en-us,fr-fr,es-es,zh-cn}]
+"usage: rush deploy [-h] [-p PROJECT_NAME] [-s SCENARIO_NAME] [--overwrite]
+                   [-t PATH]
+                   
 
-Uploads all the built assets to the CDN
+(EXPERIMENTAL) After building the repo, \\"rush deploy\\" can be used to prepare 
+a deployment by copying a subset of Rush projects and their dependencies to a 
+target folder, which can then be uploaded to a production server. The \\"rush 
+deploy\\" behavior is specified by a scenario config file that must be created 
+first, using the \\"rush init-deploy\\" command.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
-  --locale {en-us,fr-fr,es-es,zh-cn}
-                        Selects a single instead of the default locale 
-                        (en-us) for non-ship builds or all locales for ship 
-                        builds.
+  -p PROJECT_NAME, --project PROJECT_NAME
+                        Specifies the name of the main Rush project to be 
+                        deployed. It must appear in the 
+                        \\"deploymentProjectNames\\" setting in the deployment 
+                        config file.
+  -s SCENARIO_NAME, --scenario SCENARIO_NAME
+                        By default, the deployment configuration is specified 
+                        in \\"common/config/rush/deploy.json\\". You can use 
+                        \\"--scenario\\" to specify an alternate name. The name 
+                        must be lowercase and separated by dashes. For 
+                        example, if SCENARIO_NAME is \\"web\\", then the config 
+                        file would be \\"common/config/rush/deploy-web.json\\".
+  --overwrite           By default, deployment will fail if the target folder 
+                        is not empty. SPECIFYING THIS FLAG WILL RECURSIVELY 
+                        DELETE EXISTING CONTENTS OF THE TARGET FOLDER.
+  -t PATH, --target-folder PATH
+                        By default, files are deployed to the \\"common/deploy\\" 
+                        folder inside the Rush repo. Use this parameter to 
+                        specify a different location. WARNING: USE CAUTION 
+                        WHEN COMBINING WITH \\"--overwrite\\". This parameter may 
+                        alternatively be specified via the 
+                        RUSH_DEPLOY_TARGET_FOLDER environment variable.
 "
 `;
 
@@ -302,6 +330,30 @@ Optional arguments:
                         monorepo that illustrates many Rush features. This 
                         option is primarily intended for maintaining that 
                         example.
+"
+`;
+
+exports[`CommandLineHelp prints the help for each action: init-deploy 1`] = `
+"usage: rush init-deploy [-h] -p PROJECT_NAME [-s SCENARIO]
+
+(EXPERIMENTAL) Use this command to initialize a new scenario config file for 
+use with \\"rush deploy\\". The default filename is common/config/rush/deploy.
+json. However, if you need to manage multiple deployments with different 
+settings, you can use use \\"--scenario\\" to create additional config files.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -p PROJECT_NAME, --project PROJECT_NAME
+                        Specifies the name of the main Rush project to be 
+                        deployed in this scenario. It will be added to the 
+                        \\"deploymentProjectNames\\" setting.
+  -s SCENARIO, --scenario SCENARIO
+                        By default, the deployment configuration will be 
+                        written to \\"common/config/rush/deploy.json\\". You can 
+                        use \\"--scenario\\" to specify an alternate name. The 
+                        name must be lowercase and separated by dashes. For 
+                        example, if the name is \\"web\\", then the config file 
+                        would be \\"common/config/rush/deploy-web.json\\".
 "
 `;
 
@@ -634,6 +686,20 @@ Optional arguments:
                         your shrinkwrap file with Rush's fixups. (To minimize 
                         shrinkwrap churn, these fixups are normally performed 
                         only in the temporary folder.)
+"
+`;
+
+exports[`CommandLineHelp prints the help for each action: upload 1`] = `
+"usage: rush upload [-h] [--locale {en-us,fr-fr,es-es,zh-cn}]
+
+Uploads all the built assets to the CDN
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  --locale {en-us,fr-fr,es-es,zh-cn}
+                        Selects a single instead of the default locale 
+                        (en-us) for non-ship builds or all locales for ship 
+                        builds.
 "
 `;
 
