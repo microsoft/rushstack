@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/package-deps-hash",
-  "version": "2.4.24",
+  "version": "2.4.25",
   "description": "",
   "main": "lib/index.js",
   "typings": "dist/package-deps-hash.d.ts",
@@ -13,8 +13,8 @@
     "build": "gulp test --clean"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.6.0",
-    "@microsoft/node-library-build": "6.4.24",
+    "@microsoft/rush-stack-compiler-3.5": "0.6.1",
+    "@microsoft/node-library-build": "6.4.25",
     "@rushstack/node-core-library": "3.24.1",
     "@rushstack/eslint-config": "0.5.8",
     "@types/jest": "25.2.1",
