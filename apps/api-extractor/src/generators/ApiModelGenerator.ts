@@ -71,7 +71,6 @@ export class ApiModelGenerator {
 
     for (const [entryPoint, entities] of this._collector.entities.entries()) {
       const shortName = entryPoint.modulePath;
-      console.log("this module name is ", shortName);
 
       const apiEntryPoint: ApiEntryPoint = new ApiEntryPoint({ name: shortName });
       apiPackage.addMember(apiEntryPoint);

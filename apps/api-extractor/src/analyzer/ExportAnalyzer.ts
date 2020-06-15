@@ -11,7 +11,6 @@ import { AstModule, AstModuleExportInfo } from './AstModule';
 import { TypeScriptInternals } from './TypeScriptInternals';
 import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
 import { IFetchAstSymbolOptions, AstEntity } from './AstSymbolTable';
-import { IWorkingPackageEntryPoint } from '../collector/WorkingPackage';
 
 /**
  * Exposes the minimal APIs from AstSymbolTable that are needed by ExportAnalyzer.
@@ -664,7 +663,6 @@ export class ExportAnalyzer {
 
     // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
     // but ignore:  "../folder/LocalFile"
-    // Also Match import path from other entry points
     if (this._isExternalModulePath(moduleSpecifier)) {
       return moduleSpecifier;
     }

@@ -696,7 +696,9 @@ export class ExtractorConfig {
 
         // d.ts rollup is not supported when there are more than one entry points.
         if (rollupEnabled && additionalEntryPoints.length > 0) {
-          throw new Error(`It seems that you have dtsRollup enabled while you also have defined additionalEntryPoints. dtsRollup is not supported when there are multiple entry points in your package`);
+          throw new Error(
+            `It seems that you have dtsRollup enabled while you also have defined additionalEntryPoints.`
+          + `dtsRollup is not supported when there are multiple entry points in your package`);
         }
 
         untrimmedFilePath = ExtractorConfig._resolvePathWithTokens('untrimmedFilePath',
