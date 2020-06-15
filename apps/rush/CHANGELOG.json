@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.26.0",
+      "tag": "@microsoft/rush_v5.26.0",
+      "date": "Mon, 15 Jun 2020 01:26:24 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Breaking change for the experimental \"rush deploy\" feature: Simplify the config file design, based on the discussion from GitHub #1906"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.25.2",
       "tag": "@microsoft/rush_v5.25.2",
       "date": "Thu, 11 Jun 2020 05:34:31 GMT",

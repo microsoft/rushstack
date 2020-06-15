@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 11 Jun 2020 05:34:31 GMT and should not be manually modified.
+This log was last generated on Mon, 15 Jun 2020 01:26:24 GMT and should not be manually modified.
+
+## 5.26.0
+Mon, 15 Jun 2020 01:26:24 GMT
+
+### Updates
+
+- Breaking change for the experimental "rush deploy" feature: Simplify the config file design, based on the discussion from GitHub #1906
 
 ## 5.25.2
 Thu, 11 Jun 2020 05:34:31 GMT
