@@ -15,7 +15,6 @@ import { MessageRouter } from '../collector/MessageRouter';
 import { TypeScriptInternals, IGlobalVariableAnalyzer } from './TypeScriptInternals';
 import { StringChecks } from './StringChecks';
 import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
-import { IWorkingPackageEntryPoint } from '../collector/WorkingPackage';
 
 export type AstEntity = AstSymbol | AstImport;
 
@@ -591,9 +590,9 @@ export class AstSymbolTable {
     }
 
     if (options.isExternal !== astSymbol.isExternal) {
-      // throw new InternalError(`Cannot assign isExternal=${options.isExternal} for`
-      //   + ` the symbol ${astSymbol.localName} because it was previously registered`
-      //   + ` with isExternal=${astSymbol.isExternal}`);
+      throw new InternalError(`Cannot assign isExternal=${options.isExternal} for`
+        + ` the symbol ${astSymbol.localName} because it was previously registered`
+        + ` with isExternal=${astSymbol.isExternal}`);
     }
 
     return astSymbol;
