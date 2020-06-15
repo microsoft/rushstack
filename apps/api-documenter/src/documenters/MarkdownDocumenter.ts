@@ -143,13 +143,11 @@ export class MarkdownDocumenter {
         output.appendNode(new DocHeading({ configuration, title: `${scopedName} namespace` }));
         break;
       case ApiItemKind.Package:
-        console.log(`Writing ${apiItem.displayName} package`);
         const unscopedPackageName: string = PackageName.getUnscopedName(apiItem.displayName);
         output.appendNode(new DocHeading({ configuration, title: `${unscopedPackageName} package` }));
         break;
       case ApiItemKind.EntryPoint:
         const packageName = apiItem.parent!.displayName;
-        console.log(`Writing ${packageName} package, entry point ${apiItem.displayName}`);
         output.appendNode(new DocHeading({ configuration, title: `${packageName}${apiItem.displayName && ('/' + apiItem.displayName)}` }));
         break;
       case ApiItemKind.Property:
