@@ -63,6 +63,11 @@ export class Collector {
 
   public readonly extractorConfig: ExtractorConfig;
 
+  /**
+   * The `ExtractorConfig.bundledPackages` names in a set.
+   */
+  public readonly bundledPackageNames: ReadonlySet<string>;
+
   private readonly _program: ts.Program;
 
   private readonly _tsdocParser: tsdoc.TSDocParser;
@@ -117,13 +122,13 @@ export class Collector {
 
     this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
 
-    const bundledPackageNames: Set<string> = new Set<string>(this.extractorConfig.bundledPackages);
+    this.bundledPackageNames = new Set<string>(this.extractorConfig.bundledPackages);
 
     this.astSymbolTable = new AstSymbolTable(
       this.program,
       this.typeChecker,
       this.packageJsonLookup,
-      bundledPackageNames,
+      this.bundledPackageNames,
       this.messageRouter
     );
     this.astReferenceResolver = new AstReferenceResolver(this);

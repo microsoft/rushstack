@@ -27,7 +27,7 @@
             {
               "kind": "Reference",
               "text": "Lib1Class",
-              "canonicalReference": "api-extractor-lib1-test!Lib1Class:class"
+              "canonicalReference": "api-extractor-scenarios!Lib1Class:class"
             },
             {
               "kind": "Content",
@@ -87,7 +87,7 @@
             {
               "kind": "Reference",
               "text": "Lib1ForgottenExport",
-              "canonicalReference": "api-extractor-lib1-test!Lib1ForgottenExport:class"
+              "canonicalReference": "api-extractor-scenarios!Lib1ForgottenExport:class"
             },
             {
               "kind": "Content",
