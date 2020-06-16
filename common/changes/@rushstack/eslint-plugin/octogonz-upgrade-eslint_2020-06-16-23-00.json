@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Upgrade to ESLint 7",
+      "type": "minor",
+      "packageName": "@rushstack/eslint-plugin"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

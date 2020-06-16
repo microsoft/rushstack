@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Upgrade to ESLint 7",
+      "type": "minor",
+      "packageName": "@microsoft/rush-stack-compiler-3.4"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-3.4",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
