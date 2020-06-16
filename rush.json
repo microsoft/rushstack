@@ -763,7 +763,7 @@
       "projectFolder": "stack/eslint-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.9"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-2.4",
