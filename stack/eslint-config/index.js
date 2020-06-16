@@ -83,24 +83,6 @@ module.exports = {
           }
         ],
 
-        // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/camelcase': [
-          'error',
-          {
-            // This is a special exception for naming patterns that use an underscore to separate two camel-cased
-            // parts.  Example:  "checkBox1_onChanged" or "_checkBox1_onChanged"
-            allow: ['^_?[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*_[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*$']
-          }
-        ],
-
-        // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/class-name-casing': [
-          'error',
-          {
-            allowUnderscorePrefix: true
-          }
-        ],
-
         // RATIONALE:         We require "x as number" instead of "<number>x" to avoid conflicts with JSX.
         '@typescript-eslint/consistent-type-assertions': 'error',
 
@@ -127,27 +109,6 @@ module.exports = {
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         '@typescript-eslint/explicit-member-accessibility': 'error',
 
-        // RATIONALE:         It is very common for a class to implement an interface of the same name.
-        //                    For example, the Widget class may implement the IWidget interface.  The "I" prefix
-        //                    avoids the need to invent a separate name such as "AbstractWidget" or "WidgetInterface".
-        //                    In TypeScript it is also common to declare interfaces that are implemented by primitive
-        //                    objects, here the "I" prefix also helps by avoiding spurious conflicts with classes
-        //                    by the same name.
-        //
-        '@typescript-eslint/interface-name-prefix': [
-          'error',
-          {
-            prefixWithI: 'always',
-            allowUnderscorePrefix: true
-          }
-        ],
-
-        // RATIONALE:         Requiring private members to be prefixed with an underscore prevents accidental access
-        //                    by scripts that are coded in plain JavaScript and cannot see the TypeScript visibility
-        //                    declarations.  Also, using underscore prefixes allows the private field to be exposed
-        //                    by a public getter/setter with the same name (but omitting the underscore).
-        '@typescript-eslint/member-naming': ['error', { private: '^_' }],
-
         // RATIONALE:         Object-oriented programming organizes code into "classes" that associate
         //                    data structures (the class's fields) and the operations performed on those
         //                    data structures (the class's members).  Studying the fields often reveals the "idea"
@@ -162,6 +123,82 @@ module.exports = {
           {
             default: 'never',
             classes: ['field', 'constructor', 'method']
+          }
+        ],
+
+        // NOTE: This replaces several deprecated rules from @typescript-eslint/eslint-plugin@2.3.3:
+        // - @typescript-eslint/camelcase
+        // - @typescript-eslint/class-name-casing
+        // - @typescript-eslint/interface-name-prefix
+        // - @typescript-eslint/member-naming
+        '@typescript-eslint/naming-convention': [
+          'error',
+          {
+            selector: 'default',
+
+            format: ['camelCase', 'UPPER_CASE'],
+            leadingUnderscore: 'allow',
+            trailingUnderscore: 'allow',
+
+            filter: {
+              // This is a special exception for naming patterns that use an underscore to separate two camel-cased
+              // parts.  Example:  "checkBox1_onChanged" or "_checkBox1_onChanged"
+              regex: '^_?[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*_[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*$',
+              match: false
+            }
+          },
+
+          {
+            selector: 'default',
+
+            // Requiring private members to be prefixed with an underscore prevents accidental access
+            // by scripts that are coded in plain JavaScript and cannot see the TypeScript visibility
+            // declarations.  Also, using underscore prefixes allows the private field to be exposed
+            // by a public getter/setter with the same name (but omitting the underscore).
+            modifiers: ['private'],
+
+            format: ['camelCase', 'UPPER_CASE'],
+            trailingUnderscore: 'allow',
+            leadingUnderscore: 'require',
+
+            filter: {
+              // This is a special exception for naming patterns that use an underscore to separate two camel-cased
+              // parts.  Example:  "checkBox1_onChanged" or "_checkBox1_onChanged"
+              regex: '^_?[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*_[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*$',
+              match: false
+            }
+          },
+
+          {
+            selector: 'variable',
+            format: ['camelCase', 'UPPER_CASE'],
+            leadingUnderscore: 'allow',
+            trailingUnderscore: 'allow'
+          },
+
+          {
+            selector: 'typeLike',
+            format: ['PascalCase']
+          },
+
+          {
+            selector: 'enumMember',
+            format: ['PascalCase', 'camelCase', 'UPPER_CASE']
+          },
+
+          // It is very common for a class to implement an interface of the same name.
+          // For example, the Widget class may implement the IWidget interface.  The "I" prefix
+          // avoids the need to invent a separate name such as "AbstractWidget" or "WidgetInterface".
+          // In TypeScript it is also common to declare interfaces that are implemented by primitive
+          // objects, here the "I" prefix also helps by avoiding spurious conflicts with classes
+          // by the same name.
+          {
+            selector: 'interface',
+            format: ['PascalCase'],
+            custom: {
+              regex: '^I[A-Z]',
+              match: true
+            }
           }
         ],
 
