@@ -201,7 +201,11 @@ export class PackageJsonEditor {
       this._onChange.bind(this)
     );
 
-    if (dependencyType === DependencyType.Regular || dependencyType === DependencyType.Optional) {
+    if (
+      dependencyType === DependencyType.Regular ||
+      dependencyType === DependencyType.Optional ||
+      dependencyType === DependencyType.Peer
+    ) {
       this._dependencies.set(packageName, dependency);
     } else {
       this._devDependencies.set(packageName, dependency);

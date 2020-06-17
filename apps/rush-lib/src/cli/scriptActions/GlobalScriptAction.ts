@@ -9,7 +9,7 @@ import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { Utilities } from '../../utilities/Utilities';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { FileSystem, LockFile, IPackageJson, JsonFile, PackageName } from '@rushstack/node-core-library';
-import { InstallHelpers } from '../../logic/InstallHelpers';
+import { InstallHelpers } from '../../logic/installManager/InstallHelpers';
 import { RushConstants } from '../../logic/RushConstants';
 import { LastInstallFlag } from '../../api/LastInstallFlag';
 

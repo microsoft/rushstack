@@ -97,7 +97,7 @@ export class PublishUtilities {
           // For hotfix changes, do not re-write new version
           change.newVersion =
             change.changeType! >= ChangeType.patch
-              ? semver.inc(pkg.version, PublishUtilities._getReleaseType(change.changeType!))
+              ? semver.inc(pkg.version, PublishUtilities._getReleaseType(change.changeType!))!
               : change.changeType === ChangeType.hotfix
               ? change.newVersion
               : pkg.version;
@@ -253,9 +253,9 @@ export class PublishUtilities {
     let upperLimit: string = newVersion;
     if (semver.prerelease(newVersion)) {
       // Remove the prerelease first, then bump major.
-      upperLimit = semver.inc(newVersion, 'patch');
+      upperLimit = semver.inc(newVersion, 'patch')!;
     }
-    upperLimit = semver.inc(upperLimit, 'major');
+    upperLimit = semver.inc(upperLimit, 'major')!;
 
     return `>=${newVersion} <${upperLimit}`;
   }
@@ -445,7 +445,7 @@ export class PublishUtilities {
         return newVersion;
       }
       if (prereleaseToken.isPrerelease && change.changeType === ChangeType.dependency) {
-        newVersion = semver.inc(newVersion, 'patch');
+        newVersion = semver.inc(newVersion, 'patch')!;
       }
       return `${newVersion}-${prereleaseToken.name}`;
     } else {
@@ -526,7 +526,7 @@ export class PublishUtilities {
       currentChange.changeType = ChangeType.none;
     } else {
       if (change.changeType === ChangeType.hotfix) {
-        const prereleaseComponents: string[] = semver.prerelease(pkg.version);
+        const prereleaseComponents: ReadonlyArray<string> | null = semver.prerelease(pkg.version);
         if (!rushConfiguration.hotfixChangeEnabled) {
           throw new Error(`Cannot add hotfix change; hotfixChangeEnabled is false in configuration.`);
         }
@@ -535,7 +535,7 @@ export class PublishUtilities {
         if (!prereleaseComponents) {
           currentChange.newVersion += '-hotfix';
         }
-        currentChange.newVersion = semver.inc(currentChange.newVersion, 'prerelease');
+        currentChange.newVersion = semver.inc(currentChange.newVersion, 'prerelease')!;
       } else {
         // When there are multiple changes of this package, the final value of new version
         // should not depend on the order of the changes.
@@ -545,7 +545,7 @@ export class PublishUtilities {
         }
         currentChange.newVersion =
           change.changeType! >= ChangeType.patch
-            ? semver.inc(pkg.version, PublishUtilities._getReleaseType(currentChange.changeType!))
+            ? semver.inc(pkg.version, PublishUtilities._getReleaseType(currentChange.changeType!))!
             : packageVersion;
       }
 

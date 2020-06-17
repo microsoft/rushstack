@@ -5,7 +5,8 @@ import * as colors from 'colors';
 import * as semver from 'semver';
 
 import { RushConfiguration } from '../api/RushConfiguration';
-import { InstallManager, IInstallManagerOptions } from './InstallManager';
+import { BaseInstallManager, IInstallManagerOptions } from './base/BaseInstallManager';
+import { InstallManagerFactory } from './InstallManagerFactory';
 import { VersionMismatchFinder } from './versionMismatch/VersionMismatchFinder';
 import { PurgeManager } from './PurgeManager';
 import { Utilities } from '../utilities/Utilities';
@@ -15,7 +16,7 @@ import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { VersionMismatchFinderEntity } from './versionMismatch/VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './versionMismatch/VersionMismatchFinderProject';
 import { RushConstants } from './RushConstants';
-import { InstallHelpers } from './InstallHelpers';
+import { InstallHelpers } from './installManager/InstallHelpers';
 
 /**
  * The type of SemVer range specifier that is prepended to the version
@@ -123,7 +124,7 @@ export class PackageJsonUpdater {
       variant
     } = options;
 
-    const implicitlyPinned: Map<string, string> = InstallManager.collectImplicitlyPreferredVersions(
+    const implicitlyPinned: Map<string, string> = InstallHelpers.collectImplicitlyPreferredVersions(
       this._rushConfiguration,
       {
         variant
@@ -143,7 +144,7 @@ export class PackageJsonUpdater {
       variant: variant,
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts
     };
-    const installManager: InstallManager = new InstallManager(
+    const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
       this._rushConfiguration,
       this._rushGlobalFolder,
       purgeManager,
@@ -281,7 +282,7 @@ export class PackageJsonUpdater {
    */
   private async _getNormalizedVersionSpec(
     projects: RushConfigurationProject[],
-    installManager: InstallManager,
+    installManager: BaseInstallManager,
     packageName: string,
     initialSpec: string | undefined,
     implicitlyPinnedVersion: string | undefined,

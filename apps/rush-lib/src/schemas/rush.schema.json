@@ -106,6 +106,14 @@
         "preventManualShrinkwrapChanges": {
           "description": "If true, then \"rush install\" will report an error if manual modifications were made to the PNPM shrinkwrap file without running `rush update` afterwards. To temporarily disable this validation when invoking \"rush install\", use the \"--bypassPolicy\" command-line parameter. The default value is false.",
           "type": "boolean"
+        },
+        "useWorkspaces": {
+          "description": "If true, then Rush will use the workspaces feature to install and link packages when invoking PNPM. The default value is false.",
+          "type": "boolean"
+        },
+        "useShimPnpmfile": {
+          "description": "If true, then Rush will create a pnpmfile that runs before the provided pnpmfile. This shim pnpmfile is used to inject preferred versions support into the PNPM package resolver. The default value is false.",
+          "type": "boolean"
         }
       },
       "additionalProperties": false

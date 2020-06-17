@@ -15,8 +15,14 @@ import { BasePackage } from '../base/BasePackage';
 import { RushConstants } from '../../logic/RushConstants';
 import { IRushLinkJson } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from './PnpmShrinkwrapFile';
+import {
+  PnpmShrinkwrapFile,
+  IPnpmShrinkwrapDependencyYaml,
+  IPnpmShrinkwrapImporterYaml
+} from './PnpmShrinkwrapFile';
 import { PnpmProjectDependencyManifest } from './PnpmProjectDependencyManifest';
+import { PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
+import { DependencySpecifier } from '../DependencySpecifier';
 
 // special flag for debugging, will print extra diagnostic information,
 // but comes with performance cost
@@ -46,9 +52,18 @@ export class PnpmLinkManager extends BaseLinkManager {
         );
       }
 
+      const useWorkspaces: boolean =
+        this._rushConfiguration.packageManager === 'pnpm' &&
+        this._rushConfiguration.pnpmOptions &&
+        this._rushConfiguration.pnpmOptions.useWorkspaces;
+
       for (const rushProject of this._rushConfiguration.projects) {
         console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-        await this._linkProject(rushProject, rushLinkJson, pnpmShrinkwrapFile);
+        if (useWorkspaces) {
+          await this._linkWorkspaceProject(rushProject, rushLinkJson, pnpmShrinkwrapFile);
+        } else {
+          await this._linkProject(rushProject, rushLinkJson, pnpmShrinkwrapFile);
+        }
       }
     } else {
       console.log(
@@ -290,6 +305,116 @@ export class PnpmLinkManager extends BaseLinkManager {
     });
   }
 
+  /**
+   * This is called once for each local project from Rush.json.
+   * @param project             The local project that we will create symlinks for
+   * @param rushLinkJson        The common/temp/rush-link.json output file
+   */
+  private async _linkWorkspaceProject(
+    project: RushConfigurationProject,
+    rushLinkJson: IRushLinkJson,
+    pnpmShrinkwrapFile: PnpmShrinkwrapFile
+  ): Promise<void> {
+    // First, generate the local dependency graph. When using workspaces, Rush forces `workspace:`
+    // notation for all locally-referenced projects.
+    const localDependencies: PackageJsonDependency[] = [
+      ...project.packageJsonEditor.dependencyList,
+      ...project.packageJsonEditor.devDependencyList
+    ].filter((x) => new DependencySpecifier(x.name, x.version).specifierType === 'workspace');
+
+    for (const { name } of localDependencies) {
+      const matchedRushPackage:
+        | RushConfigurationProject
+        | undefined = this._rushConfiguration.getProjectByName(name);
+
+      if (matchedRushPackage) {
+        // We found a suitable match, so add the local package as a local link
+        let localLinks: string[] = rushLinkJson.localLinks[project.packageName];
+        if (!localLinks) {
+          localLinks = [];
+          rushLinkJson.localLinks[project.packageName] = localLinks;
+        }
+        localLinks.push(name);
+      } else {
+        throw new InternalError(
+          `Cannot find dependency "${name}" for "${project.packageName}" in the Rush configuration`
+        );
+      }
+    }
+
+    const importerKey: string = pnpmShrinkwrapFile.getWorkspaceKeyByPath(
+      this._rushConfiguration.commonTempFolder,
+      project.projectFolder
+    );
+    const workspaceImporter:
+      | IPnpmShrinkwrapImporterYaml
+      | undefined = pnpmShrinkwrapFile.getWorkspaceImporter(importerKey);
+    if (!workspaceImporter) {
+      throw new InternalError(
+        `Cannot find shrinkwrap entry using importer key for workspace project: ${importerKey}`
+      );
+    }
+    const pnpmProjectDependencyManifest: PnpmProjectDependencyManifest = new PnpmProjectDependencyManifest({
+      pnpmShrinkwrapFile,
+      project
+    });
+    const useProjectDependencyManifest: boolean = !this._rushConfiguration.experimentsConfiguration
+      .configuration.legacyIncrementalBuildDependencyDetection;
+
+    // Then, do non-local dependencies. Dev dependencies take priority over normal dependencies
+    const dependencies: PackageJsonDependency[] = [
+      ...project.packageJsonEditor.dependencyList,
+      ...project.packageJsonEditor.devDependencyList
+    ].filter((x) => new DependencySpecifier(x.name, x.version).specifierType !== 'workspace');
+
+    for (const { name, dependencyType } of dependencies) {
+      // read the version number from the shrinkwrap entry
+      let version: string | undefined;
+      switch (dependencyType) {
+        case DependencyType.Regular:
+          version = (workspaceImporter.dependencies || {})[name];
+          break;
+        case DependencyType.Dev:
+          version = (workspaceImporter.devDependencies || {})[name];
+          break;
+        case DependencyType.Optional:
+          version = (workspaceImporter.optionalDependencies || {})[name];
+          break;
+        case DependencyType.Peer:
+          // Peer dependencies do not need to be considered since they aren't a true
+          // dependency, and would be satisfied in the consuming package. They are
+          // also not specified in the workspace importer
+          continue;
+      }
+
+      if (!version) {
+        // Optional dependencies by definition may not exist, so avoid throwing on these
+        if (dependencyType !== DependencyType.Optional) {
+          throw new InternalError(
+            `Cannot find shrinkwrap entry dependency "${name}" for workspace project: ${project.packageName}`
+          );
+        }
+        continue;
+      }
+
+      if (useProjectDependencyManifest) {
+        // Add to the manifest and provide all the parent dependencies. Peer dependencies are not mapped at
+        // the importer level, so provide an empty object for that
+        pnpmProjectDependencyManifest.addDependency(name, version, {
+          dependencies: { ...workspaceImporter.dependencies, ...workspaceImporter.devDependencies },
+          optionalDependencies: { ...workspaceImporter.optionalDependencies },
+          peerDependencies: {}
+        });
+      }
+    }
+
+    if (useProjectDependencyManifest) {
+      pnpmProjectDependencyManifest.save();
+    } else {
+      pnpmProjectDependencyManifest.deleteIfExists();
+    }
+  }
+
   private _getPathToLocalInstallation(folderNameInLocalInstallationRoot: string): string {
     // See https://github.com/pnpm/pnpm/releases/tag/v4.0.0
     if (this._pnpmVersion.major >= 4) {
@@ -341,7 +466,8 @@ export class PnpmLinkManager extends BaseLinkManager {
       );
     }
 
-    // read the version number from the shrinkwrap entry
+    // read the version number from the shrinkwrap entry and return if no version is specified
+    // and the dependency is optional
     const version: string | undefined = isOptional
       ? (parentShrinkwrapEntry.optionalDependencies || {})[dependencyName]
       : (parentShrinkwrapEntry.dependencies || {})[dependencyName];
@@ -370,7 +496,11 @@ export class PnpmLinkManager extends BaseLinkManager {
       !this._rushConfiguration.experimentsConfiguration.configuration
         .legacyIncrementalBuildDependencyDetection
     ) {
-      pnpmProjectDependencyManifest.addDependency(newLocalPackage, parentShrinkwrapEntry);
+      pnpmProjectDependencyManifest.addDependency(
+        newLocalPackage.name,
+        newLocalPackage.version!,
+        parentShrinkwrapEntry
+      );
     }
 
     return newLocalPackage;

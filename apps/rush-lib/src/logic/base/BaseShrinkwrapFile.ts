@@ -121,6 +121,57 @@ export abstract class BaseShrinkwrapFile {
   /** @virtual */
   protected abstract getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined;
 
+  /**
+   * Returns true if the specified workspace in the shrinkwrap file includes a package that would
+   * satisfy the specified SemVer version range.
+   *
+   * Consider this example:
+   *
+   * - project-a\
+   *   - lib-a@1.2.3
+   *   - lib-b@1.0.0
+   * - lib-b@2.0.0
+   *
+   * In this example, hasCompatibleWorkspaceDependency("lib-b", ">= 1.1.0", "workspace-key-for-project-a")
+   * would fail because it finds lib-b@1.0.0 which does not satisfy the pattern ">= 1.1.0".
+   *
+   * @virtual
+   */
+  public hasCompatibleWorkspaceDependency(
+    dependencySpecifier: DependencySpecifier,
+    workspaceKey: string
+  ): boolean {
+    const shrinkwrapDependency: DependencySpecifier | undefined = this.getWorkspaceDependencyVersion(
+      dependencySpecifier,
+      workspaceKey
+    );
+    return shrinkwrapDependency
+      ? this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency)
+      : false;
+  }
+
+  /**
+   * Returns the list of keys to workspace projects specified in the shrinkwrap.
+   * Example: [ '../../apps/project1', '../../apps/project2' ]
+   *
+   * @virtual
+   */
+  public abstract getWorkspaceKeys(): ReadonlyArray<string>;
+
+  /**
+   * Returns the key to the project in the workspace specified by the shrinkwrap.
+   * Example: '../../apps/project1'
+   *
+   * @virtual
+   */
+  public abstract getWorkspaceKeyByPath(workspaceRoot: string, projectFolder: string): string;
+
+  /** @virtual */
+  protected abstract getWorkspaceDependencyVersion(
+    dependencySpecifier: DependencySpecifier,
+    workspaceKey: string
+  ): DependencySpecifier | undefined;
+
   /** @virtual */
   protected abstract serialize(): string;
 
