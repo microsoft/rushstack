@@ -253,7 +253,7 @@ export class PnpmProjectDependencyManifest {
       const combinedPeerDependencies: string = specifierMatches[1];
       // "eslint@6.6.0+typescript@3.6.4+@types+webpack@4.1.9" --> ["eslint@6.6.0", "typescript@3.6.4", "@types", "webpack@4.1.9"]
       const peerDependencies: string[] = combinedPeerDependencies.split('+');
-      for (let i = 0; i < peerDependencies.length; i++) {
+      for (let i: number = 0; i < peerDependencies.length; i++) {
         // Scopes are also separated by '+', so reduce the proceeding value into it
         if (peerDependencies[i].indexOf('@') === 0) {
           peerDependencies[i] = `${peerDependencies[i]}/${peerDependencies[i + 1]}`;
