@@ -87,14 +87,18 @@ module.exports = {
                   'It also accepts things like class declarations, which will throw at runtime as they will not be called with "new".',
                   'If you are expecting the function to accept certain arguments, you should explicitly define the function shape.'
                 ].join('\n')
-              },
-              '{}': {
-                message: [
-                  '"{}" actually means "any non-nullish value".',
-                  '- If you want a type meaning "any object", you probably want "Record<string, unknown>" instead.',
-                  '- If you want a type meaning "any value", you probably want "unknown" instead.'
-                ].join('\n')
               }
+
+              // This is a good idea, but before enabling it we need to put some thought into the recommended
+              // coding practices; the default suggestions are too vague.
+              //
+              // '{}': {
+              //   message: [
+              //     '"{}" actually means "any non-nullish value".',
+              //     '- If you want a type meaning "any object", you probably want "Record<string, unknown>" instead.',
+              //     '- If you want a type meaning "any value", you probably want "unknown" instead.'
+              //   ].join('\n')
+              // }
             }
           }
         ],
@@ -147,6 +151,8 @@ module.exports = {
         // - @typescript-eslint/class-name-casing
         // - @typescript-eslint/interface-name-prefix
         // - @typescript-eslint/member-naming
+        //
+        // Docs: https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/naming-convention.md
         '@typescript-eslint/naming-convention': [
           'error',
           {
@@ -164,18 +170,17 @@ module.exports = {
             }
           },
 
+          // Requiring private members to be prefixed with an underscore prevents accidental access
+          // by scripts that are coded in plain JavaScript and cannot see the TypeScript visibility
+          // declarations.  Also, using underscore prefixes allows the private field to be exposed
+          // by a public getter/setter with the same name (but omitting the underscore).
           {
-            selector: 'default',
-
-            // Requiring private members to be prefixed with an underscore prevents accidental access
-            // by scripts that are coded in plain JavaScript and cannot see the TypeScript visibility
-            // declarations.  Also, using underscore prefixes allows the private field to be exposed
-            // by a public getter/setter with the same name (but omitting the underscore).
+            selector: 'memberLike',
             modifiers: ['private'],
 
             format: ['camelCase', 'UPPER_CASE'],
-            trailingUnderscore: 'allow',
             leadingUnderscore: 'require',
+            trailingUnderscore: 'allow',
 
             filter: {
               // This is a special exception for naming patterns that use an underscore to separate two camel-cased
@@ -185,18 +190,16 @@ module.exports = {
             }
           },
 
+          // Types should use PascalCase
           {
-            selector: 'variable',
-            format: ['camelCase', 'UPPER_CASE'],
+            selector: 'typeLike',
+            format: ['PascalCase'],
             leadingUnderscore: 'allow',
             trailingUnderscore: 'allow'
           },
 
-          {
-            selector: 'typeLike',
-            format: ['PascalCase']
-          },
-
+          // Enum members should use PascalCase.  The compiler documentation has always used this convention.
+          // (But enums frequently act as lightweight namespaces, in which case other conventions are acceptable.)
           {
             selector: 'enumMember',
             format: ['PascalCase', 'camelCase', 'UPPER_CASE']
@@ -212,7 +215,7 @@ module.exports = {
             selector: 'interface',
             format: ['PascalCase'],
             custom: {
-              regex: '^I[A-Z]',
+              regex: '^_?I[A-Z]',
               match: true
             }
           }
@@ -293,10 +296,8 @@ module.exports = {
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         '@typescript-eslint/no-use-before-define': 'error',
 
-        // RATIONALE:         The require() API is generally obsolete.  Use "import" instead.
-        //
-        // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/no-var-requires': 'error',
+        // TODO: This is a good rule for web browser apps, but it is commonly needed API for Node.js tools.
+        // '@typescript-eslint/no-var-requires': 'error',
 
         // RATIONALE:         The "module" keyword is deprecated except when describing legacy libraries.
         //
