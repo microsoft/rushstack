@@ -22,6 +22,7 @@ dependencies:
   '@rush-temp/debug-certificate-manager': 'file:projects/debug-certificate-manager.tgz'
   '@rush-temp/doc-plugin-rush-stack': 'file:projects/doc-plugin-rush-stack.tgz'
   '@rush-temp/eslint-config': 'file:projects/eslint-config.tgz'
+  '@rush-temp/eslint-patch': 'file:projects/eslint-patch.tgz'
   '@rush-temp/eslint-plugin': 'file:projects/eslint-plugin.tgz'
   '@rush-temp/generate-api-docs': 'file:projects/generate-api-docs.tgz'
   '@rush-temp/gulp-core-build': 'file:projects/gulp-core-build.tgz'
@@ -14303,8 +14304,20 @@ packages:
     dev: false
     name: '@rush-temp/eslint-config'
     resolution:
-      integrity: sha512-+ywmPm7jMT2HyB8/CpM/TWi0pKypmJZEN6sIOtRAiHWvxmNin2US9urEtwLM18njI6Z2A2VMyUzZbN5Ntk86tw==
+      integrity: sha512-jE8/kbsFcST9R2frTgth/kE8/uAvOVouEyly8Tns8BhfR/OkOb7Ok4pzvkcyl7C0JWDSMU6PCXltv+JPqqF/qQ==
       tarball: 'file:projects/eslint-config.tgz'
+    version: 0.0.0
+  'file:projects/eslint-patch.tgz':
+    dependencies:
+      '@microsoft/node-library-build': 6.4.10
+      '@microsoft/rush-stack-compiler-3.5': 0.4.4
+      '@types/node': 10.17.13
+      gulp: 4.0.2
+    dev: false
+    name: '@rush-temp/eslint-patch'
+    resolution:
+      integrity: sha512-9Tk8VDdnvofysUc0iWkZPOmDZiHBvTwPsG1u1QREkFFcU9PIDM0w4DKw/+G1Xz14tyNl4QSFHYyWvpfLeXJG2Q==
+      tarball: 'file:projects/eslint-patch.tgz'
     version: 0.0.0
   'file:projects/eslint-plugin.tgz':
     dependencies:
@@ -15262,6 +15275,7 @@ specifiers:
   '@rush-temp/debug-certificate-manager': 'file:./projects/debug-certificate-manager.tgz'
   '@rush-temp/doc-plugin-rush-stack': 'file:./projects/doc-plugin-rush-stack.tgz'
   '@rush-temp/eslint-config': 'file:./projects/eslint-config.tgz'
+  '@rush-temp/eslint-patch': 'file:./projects/eslint-patch.tgz'
   '@rush-temp/eslint-plugin': 'file:./projects/eslint-plugin.tgz'
   '@rush-temp/generate-api-docs': 'file:./projects/generate-api-docs.tgz'
   '@rush-temp/gulp-core-build': 'file:./projects/gulp-core-build.tgz'
@@ -15468,4 +15482,4 @@ specifiers:
   xmldoc: ~1.1.2
   yargs: ~4.6.0
   z-schema: ~3.18.3
-# shrinkwrap hash: f47c0398647f09632b739bef5878d108a9ae5e6d
+# shrinkwrap hash: 70ea4fa4e5173ba1b828d7689eec53921a7db193
