@@ -63,7 +63,7 @@ export class ExportAnalyzer {
 
   private readonly _program: ts.Program;
   private readonly _typeChecker: ts.TypeChecker;
-  private readonly _bundledPackageNames: Set<string>;
+  private readonly _bundledPackageNames: ReadonlySet<string>;
   private readonly _astSymbolTable: IAstSymbolTable;
 
   private readonly _astModulesByModuleSymbol: Map<ts.Symbol, AstModule> = new Map<ts.Symbol, AstModule>();
@@ -76,7 +76,7 @@ export class ExportAnalyzer {
   public constructor(
     program: ts.Program,
     typeChecker: ts.TypeChecker,
-    bundledPackageNames: Set<string>,
+    bundledPackageNames: ReadonlySet<string>,
     astSymbolTable: IAstSymbolTable
   ) {
     this._program = program;

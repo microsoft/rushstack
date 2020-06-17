@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.8.12",
+      "tag": "@microsoft/api-extractor_v7.8.12",
+      "date": "Mon, 15 Jun 2020 22:17:17 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where documentation hyperlinks were sometimes missing when using the \"bundledPackages\" feature (GitHub #1933)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.8.11",
       "tag": "@microsoft/api-extractor_v7.8.11",
       "date": "Wed, 10 Jun 2020 20:48:30 GMT",
