@@ -24,6 +24,7 @@
     "typescript": ">=3.0.0"
   },
   "dependencies": {
+    "@rushstack/eslint-patch": "1.0.0",
     "@rushstack/eslint-plugin": "0.3.2",
     "@typescript-eslint/eslint-plugin": "3.3.0",
     "@typescript-eslint/experimental-utils": "3.3.0",

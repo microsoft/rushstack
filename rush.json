@@ -759,6 +759,13 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/eslint-patch",
+      "projectFolder": "stack/eslint-patch",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
+    },
+    {
       "packageName": "@rushstack/eslint-plugin",
       "projectFolder": "stack/eslint-plugin",
       "reviewCategory": "libraries",

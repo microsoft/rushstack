@@ -163,6 +163,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/eslint-patch",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/eslint-plugin",
       "allowedCategories": [ "libraries" ]
     },
