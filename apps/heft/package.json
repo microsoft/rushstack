@@ -1,0 +1,33 @@
+{
+  "name": "@rushstack/heft",
+  "version": "0.1.0",
+  "description": "Heft extensible build framework's base package.",
+  "license": "MIT",
+  "scripts": {
+    "build": "node ./build.js",
+    "start": "node ./watch.js"
+  },
+  "bin": {
+    "heft": "./bin/dev"
+  },
+  "main": "lib/index.js",
+  "types": "dist/heft.d.ts",
+  "devDependencies": {
+    "@types/glob": "7.1.1",
+    "@types/node": "10.17.13",
+    "@types/resolve": "1.17.1",
+    "@rushstack/eslint-config": "0.5.8"
+  },
+  "dependencies": {
+    "@microsoft/rush-stack-compiler-3.7": "0.4.1",
+    "@rushstack/node-core-library": "3.24.1",
+    "@rushstack/ts-command-line": "4.4.2",
+    "@types/tapable": "1.0.5",
+    "glob": "~7.0.5",
+    "resolve": "~1.17.0",
+    "tapable": "1.1.3"
+  },
+  "jest": {
+    "rootDir": "lib"
+  }
+}
