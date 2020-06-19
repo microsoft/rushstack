@@ -595,6 +595,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "tapable",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "tar",
       "allowedCategories": [ "libraries" ]
     },

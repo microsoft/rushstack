@@ -443,6 +443,11 @@
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
     },
+    {
+      "packageName": "@rushstack/heft",
+      "projectFolder": "apps/heft",
+      "reviewCategory": "libraries"
+    },
 
     // "build-tests" folder (alphabetical order)
     {
