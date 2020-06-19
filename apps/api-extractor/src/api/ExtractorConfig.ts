@@ -21,6 +21,8 @@ import { RigConfig } from '@rushstack/rig-package';
 import { IConfigFile, IExtractorMessagesConfig } from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { MessageRouter } from '../collector/MessageRouter';
+import { TSDocConfiguration } from '@microsoft/tsdoc';
+import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 
 /**
  * Tokens used during variable expansion of path fields from api-extractor.json.
@@ -149,6 +151,7 @@ interface IExtractorConfigParameters {
   omitTrimmingComments: boolean;
   tsdocMetadataEnabled: boolean;
   tsdocMetadataFilePath: string;
+  tsdocConfiguration: TSDocConfiguration;
   newlineKind: NewlineKind;
   messages: IExtractorMessagesConfig;
   testMode: boolean;
@@ -237,6 +240,11 @@ export class ExtractorConfig {
   public readonly tsdocMetadataFilePath: string;
 
   /**
+   * The TSDocConfiguration to use for parsing TSDoc comments
+   */
+  public readonly tsdocConfiguration: TSDocConfiguration;
+
+  /**
    * Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files
    * will be written with Windows-style newlines.
    */
@@ -269,6 +277,7 @@ export class ExtractorConfig {
     this.omitTrimmingComments = parameters.omitTrimmingComments;
     this.tsdocMetadataEnabled = parameters.tsdocMetadataEnabled;
     this.tsdocMetadataFilePath = parameters.tsdocMetadataFilePath;
+    this.tsdocConfiguration = parameters.tsdocConfiguration;
     this.newlineKind = parameters.newlineKind;
     this.messages = parameters.messages;
     this.testMode = parameters.testMode;
@@ -901,6 +910,15 @@ export class ExtractorConfig {
           break;
       }
 
+      const tsdocConfigFile: TSDocConfigFile = TSDocConfigFile.loadForFolder(__filename);
+
+      if (tsdocConfigFile.hasErrors) {
+        throw new Error(tsdocConfigFile.getErrorSummary());
+      }
+
+      const tsdocConfiguration: TSDocConfiguration = new TSDocConfiguration();
+      tsdocConfigFile.configureParser(tsdocConfiguration);
+
       return new ExtractorConfig({
         projectFolder: projectFolder,
         packageJson,
@@ -922,6 +940,7 @@ export class ExtractorConfig {
         omitTrimmingComments,
         tsdocMetadataEnabled,
         tsdocMetadataFilePath,
+        tsdocConfiguration,
         newlineKind,
         messages: configObject.messages || {},
         testMode: !!configObject.testMode
