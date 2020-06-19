@@ -10,6 +10,7 @@
 ```typescript
 export interface IDocInterface2 extends IDocInterface1 
 ```
+<b>Extends:</b> [IDocInterface1](./api-documenter-test.idocinterface1.md)
 
 ## Methods
 
