@@ -10,6 +10,7 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { PackageJsonUpdater, SemVerStyle } from '../../logic/PackageJsonUpdater';
+import { DependencySpecifier } from '../../logic/DependencySpecifier';
 
 export class AddAction extends BaseRushAction {
   private _allFlag: CommandLineFlagParameter;
@@ -128,8 +129,11 @@ export class AddAction extends BaseRushAction {
       throw new Error(`The package name "${packageName}" is not valid.`);
     }
 
-    if (version && version !== 'latest' && !semver.validRange(version) && !semver.valid(version)) {
-      throw new Error(`The SemVer specifier "${version}" is not valid.`);
+    if (version && version !== 'latest') {
+      const specifier: DependencySpecifier = new DependencySpecifier(packageName, version);
+      if (!semver.validRange(specifier.versionSpecifier) && !semver.valid(specifier.versionSpecifier)) {
+        throw new Error(`The SemVer specifier "${version}" is not valid.`);
+      }
     }
 
     const updater: PackageJsonUpdater = new PackageJsonUpdater(this.rushConfiguration, this.rushGlobalFolder);
