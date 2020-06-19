@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "@microsoft/api-extractor-model": "workspace:*",
+    "@microsoft/tsdoc-config": "~0.13.4",
     "@microsoft/tsdoc": "0.12.24",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rig-package": "workspace:*",
