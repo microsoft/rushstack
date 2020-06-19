@@ -19,6 +19,7 @@ import { execSync } from 'child_process';
 import { PrereleaseToken } from './PrereleaseToken';
 import { ChangeFiles } from './ChangeFiles';
 import { RushConfiguration } from '../api/RushConfiguration';
+import { DependencySpecifier } from './DependencySpecifier';
 
 export interface IChangeInfoHash {
   [key: string]: IChangeInfo;
@@ -220,9 +221,16 @@ export class PublishUtilities {
     dependencyName: string,
     newProjectVersion: string
   ): string {
-    const currentDependencyVersion: string = dependencies[dependencyName];
+    const currentDependencySpecifier: DependencySpecifier = new DependencySpecifier(
+      dependencyName,
+      dependencies[dependencyName]
+    );
+    const currentDependencyVersion: string = currentDependencySpecifier.versionSpecifier;
     let newDependencyVersion: string;
-    if (PublishUtilities.isRangeDependency(currentDependencyVersion)) {
+
+    if (currentDependencyVersion === '*') {
+      newDependencyVersion = '*';
+    } else if (PublishUtilities.isRangeDependency(currentDependencyVersion)) {
       newDependencyVersion = PublishUtilities._getNewRangeDependency(newProjectVersion);
     } else if (currentDependencyVersion.lastIndexOf('~', 0) === 0) {
       newDependencyVersion = '~' + newProjectVersion;
@@ -231,7 +239,9 @@ export class PublishUtilities {
     } else {
       newDependencyVersion = newProjectVersion;
     }
-    return newDependencyVersion;
+    return currentDependencySpecifier.specifierType === 'workspace'
+      ? `workspace:${newDependencyVersion}`
+      : newDependencyVersion;
   }
 
   private static _getReleaseType(changeType: ChangeType): semver.ReleaseType {
@@ -411,7 +421,13 @@ export class PublishUtilities {
             // TODO: treat prerelease version the same as non-prerelease version.
             // For prerelease, the newVersion needs to be appended with prerelease name.
             // And dependency should specify the specific prerelease version.
-            dependencies[depName] = PublishUtilities._getChangeInfoNewVersion(depChange, prereleaseToken);
+            const currentSpecifier: DependencySpecifier = new DependencySpecifier(
+              depName,
+              dependencies[depName]
+            );
+            const newVersion: string = PublishUtilities._getChangeInfoNewVersion(depChange, prereleaseToken);
+            dependencies[depName] =
+              currentSpecifier.specifierType === 'workspace' ? `workspace:${newVersion}` : newVersion;
           } else if (depChange && depChange.changeType! >= ChangeType.hotfix) {
             PublishUtilities._updateDependencyVersion(
               packageName,
@@ -615,7 +631,10 @@ export class PublishUtilities {
       dependencies[change.packageName] &&
       !PublishUtilities._isCyclicDependency(allPackages, parentPackageName, change.packageName)
     ) {
-      const requiredVersion: string = dependencies[change.packageName];
+      const requiredVersion: string = new DependencySpecifier(
+        change.packageName,
+        dependencies[change.packageName]
+      ).versionSpecifier;
       const alwaysUpdate: boolean =
         !!prereleaseToken && prereleaseToken.hasValue && !allChanges.hasOwnProperty(parentPackageName);
 
@@ -670,13 +689,35 @@ export class PublishUtilities {
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration
   ): void {
-    const currentDependencyVersion: string = dependencies[dependencyName];
-
-    dependencies[dependencyName] = PublishUtilities.getNewDependencyVersion(
+    let currentDependencyVersion: string | undefined = dependencies[dependencyName];
+    let newDependencyVersion: string = PublishUtilities.getNewDependencyVersion(
       dependencies,
       dependencyName,
       dependencyChange.newVersion!
     );
+    dependencies[dependencyName] = newDependencyVersion;
+
+    // "*" is a special case for workspace ranges, since it will publish using the exact
+    // version of the local dependency, so we need to modify what we write for our change
+    // comment
+    const currentDependencySpecifier: DependencySpecifier = new DependencySpecifier(
+      dependencyName,
+      currentDependencyVersion
+    );
+    currentDependencyVersion =
+      currentDependencySpecifier.specifierType === 'workspace' &&
+      currentDependencySpecifier.versionSpecifier === '*'
+        ? undefined
+        : currentDependencySpecifier.versionSpecifier;
+
+    const newDependencySpecifier: DependencySpecifier = new DependencySpecifier(
+      dependencyName,
+      newDependencyVersion
+    );
+    newDependencyVersion =
+      newDependencySpecifier.specifierType === 'workspace' && newDependencySpecifier.versionSpecifier === '*'
+        ? dependencyChange.newVersion!
+        : newDependencySpecifier.versionSpecifier;
 
     // Add dependency version update comment.
     PublishUtilities._addChange(
@@ -684,8 +725,9 @@ export class PublishUtilities {
         packageName: packageName,
         changeType: ChangeType.dependency,
         comment:
-          `Updating dependency "${dependencyName}" from \`${currentDependencyVersion}\`` +
-          ` to \`${dependencies[dependencyName]}\``
+          `Updating dependency "${dependencyName}" ` +
+          (currentDependencyVersion ? `from \`${currentDependencyVersion}\` ` : '') +
+          `to \`${newDependencyVersion}\``
       },
       allChanges,
       allPackages,
