@@ -166,6 +166,35 @@ export class DeployManager {
           throw resolveErr;
         }
       }
+
+      if (this._rushConfiguration.packageManager === 'pnpm') {
+        // Replicate the PNPM workaround links.
+
+        // Only apply this logic for packages that were actually installed under the common/temp folder.
+        if (Path.isUnder(packageJsonFolderPath, this._rushConfiguration.commonTempFolder)) {
+          try {
+            // The PNPM workaround links are created in this folder.  We will resolve the current package
+            // from that location and collect any additional links encountered along the way.
+            const pnpmDotFolderPath: string = path.join(
+              this._rushConfiguration.commonTempFolder,
+              'node_modules',
+              '.pnpm'
+            );
+
+            // TODO: Investigate how package aliases are handled by PNPM in this case.  For example:
+            //
+            // "dependencies": {
+            //   "alias-name": "npm:real-name@^1.2.3"
+            // }
+            this._traceResolveDependency(packageJson.name, pnpmDotFolderPath, deployState);
+          } catch (resolveErr) {
+            if (resolveErr.code === 'MODULE_NOT_FOUND') {
+              // The workaround link isn't guaranteed to exist, so ignore if it's missing
+              console.log('Ignoring missing PNPM workaround link for ' + packageJsonFolderPath);
+            }
+          }
+        }
+      }
     }
   }
 
