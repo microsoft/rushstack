@@ -120,7 +120,9 @@ export class DeployManager {
     if (!deployState.foldersToCopy.has(packageJsonRealFolderPath)) {
       deployState.foldersToCopy.add(packageJsonRealFolderPath);
 
-      const originalPackageJson: IPackageJson = JsonFile.load(path.join(packageJsonRealFolderPath, 'package.json'));
+      const originalPackageJson: IPackageJson = JsonFile.load(
+        path.join(packageJsonRealFolderPath, 'package.json')
+      );
 
       // Transform packageJson using pnpmfile.js
       const packageJson: IPackageJson = deployState.pnpmfileConfiguration.transform(originalPackageJson);
@@ -582,6 +584,8 @@ export class DeployManager {
       symlinkAnalyzer: new SymlinkAnalyzer(),
       pnpmfileConfiguration: new PnpmfileConfiguration(this._rushConfiguration)
     };
+
+    console.log();
 
     this._prepareDeployment(deployState);
 

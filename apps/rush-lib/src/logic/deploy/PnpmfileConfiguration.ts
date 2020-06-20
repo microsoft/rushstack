@@ -2,10 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import {
-  FileSystem,
-  IPackageJson,
-} from '@rushstack/node-core-library';
+import { FileSystem, IPackageJson } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../../api/RushConfiguration';
 
 /**
@@ -27,7 +24,7 @@ type ReadPackageHook = (packageJson: IPackageJson, context: IPnpmFileModuleConte
 interface IPnpmFileModule {
   hooks?: {
     readPackage?: ReadPackageHook;
-  }
+  };
 }
 
 /**
@@ -39,13 +36,13 @@ export class PnpmfileConfiguration {
 
   public constructor(rushConfiguration: RushConfiguration) {
     this._context = {
-      log: (message: string) => { }
+      log: (message: string) => {}
     };
 
-    if (rushConfiguration.packageManager === "pnpm") {
+    if (rushConfiguration.packageManager === 'pnpm') {
       const pnpmFilePath: string = rushConfiguration.getPnpmfilePath();
       if (FileSystem.exists(pnpmFilePath)) {
-        console.log('Loading ' + path.relative(rushConfiguration.rushJsonFolder, pnpmFilePath) + '\n');
+        console.log('Loading ' + path.relative(rushConfiguration.rushJsonFolder, pnpmFilePath));
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const pnpmFileModule: IPnpmFileModule = require(pnpmFilePath);
         if (pnpmFileModule.hooks && pnpmFileModule.hooks.readPackage) {
