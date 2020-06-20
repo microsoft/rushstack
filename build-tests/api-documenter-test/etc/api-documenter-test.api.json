@@ -3,7 +3,24 @@
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
     "schemaVersion": 1003,
-    "oldestForwardsCompatibleVersion": 1001
+    "oldestForwardsCompatibleVersion": 1001,
+    "nonStandardTSDocTags": [
+      {
+        "tagName": "@betaDocumentation",
+        "syntaxKind": 2,
+        "allowMultiple": false
+      },
+      {
+        "tagName": "@internalRemarks",
+        "syntaxKind": 1,
+        "allowMultiple": false
+      },
+      {
+        "tagName": "@preapproved",
+        "syntaxKind": 2,
+        "allowMultiple": false
+      }
+    ]
   },
   "kind": "Package",
   "canonicalReference": "api-documenter-test!",
