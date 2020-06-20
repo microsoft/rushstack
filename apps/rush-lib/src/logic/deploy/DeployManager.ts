@@ -5,6 +5,10 @@ import * as colors from 'colors';
 import * as path from 'path';
 import * as resolve from 'resolve';
 import * as npmPacklist from 'npm-packlist';
+
+// (Used only by the legacy code fragment in the resolve.sync() hook below)
+import * as fsForResolve from 'fs';
+
 import ignore, { Ignore } from 'ignore';
 import {
   Path,
@@ -151,59 +155,9 @@ export class DeployManager {
         optionalDependencyNames.add(name);
       }
 
-      // (Used only by the legacy code fragment in the resolve.sync() hook below)
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const fs: typeof import('fs') = require('fs');
-
       for (const dependencyPackageName of allDependencyNames) {
-        // The "resolve" library models the Node.js require() API, which gives precedence to "core" system modules
-        // over an NPM package with the same name.  But we are traversing package.json dependencies, which never
-        // refer to system modules.  Appending a "/" forces require() to look for the NPM package.
-        const resolveSuffix: string =
-          dependencyPackageName + resolve.isCore(dependencyPackageName) ? '/' : '';
-
         try {
-          const resolvedDependency: string = resolve.sync(dependencyPackageName + resolveSuffix, {
-            basedir: packageJsonRealFolderPath,
-            preserveSymlinks: false,
-            packageFilter: (pkg, dir) => {
-              // point "main" at a file that is guaranteed to exist
-              // This helps resolve packages such as @types/node that have no entry point
-              pkg.main = './package.json';
-              return pkg;
-            },
-            realpathSync: (filePath) => {
-              // This code fragment is a modification of the documented default implementation from the "fs-extra" docs
-              try {
-                const resolvedPath: string = fs.realpathSync(filePath);
-
-                deployState.symlinkAnalyzer.analyzePath(filePath);
-                return resolvedPath;
-              } catch (realpathErr) {
-                if (realpathErr.code !== 'ENOENT') {
-                  throw realpathErr;
-                }
-              }
-              return filePath;
-            }
-          });
-
-          if (!resolvedDependency) {
-            if (optionalDependencyNames.has(dependencyPackageName)) {
-              // Ignore missing optional dependency
-              continue;
-            }
-            throw new Error(`Error resolving ${dependencyPackageName} from ${packageJsonRealFolderPath}`);
-          }
-
-          const dependencyPackageFolderPath:
-            | string
-            | undefined = this._packageJsonLookup.tryGetPackageFolderFor(resolvedDependency);
-          if (!dependencyPackageFolderPath) {
-            throw new Error(`Error finding package.json folder for ${resolvedDependency}`);
-          }
-
-          this._collectFoldersRecursive(dependencyPackageFolderPath, deployState);
+          this._traceResolveDependency(dependencyPackageName, packageJsonRealFolderPath, deployState);
         } catch (resolveErr) {
           if (resolveErr.code === 'MODULE_NOT_FOUND' && optionalDependencyNames.has(dependencyPackageName)) {
             // Ignore missing optional dependency
@@ -213,6 +167,57 @@ export class DeployManager {
         }
       }
     }
+  }
+
+  private _traceResolveDependency(
+    packageName: string,
+    startingFolder: string,
+    deployState: IDeployState
+  ): void {
+    // The "resolve" library models the Node.js require() API, which gives precedence to "core" system modules
+    // over an NPM package with the same name.  But we are traversing package.json dependencies, which never
+    // refer to system modules.  Appending a "/" forces require() to look for the NPM package.
+    const resolveSuffix: string = packageName + resolve.isCore(packageName) ? '/' : '';
+
+    const resolvedDependency: string = resolve.sync(packageName + resolveSuffix, {
+      basedir: startingFolder,
+      preserveSymlinks: false,
+      packageFilter: (pkg, dir) => {
+        // point "main" at a file that is guaranteed to exist
+        // This helps resolve packages such as @types/node that have no entry point
+        pkg.main = './package.json';
+        return pkg;
+      },
+      realpathSync: (filePath) => {
+        // This code fragment is a modification of the documented default implementation from the "fs-extra" docs
+        try {
+          const resolvedPath: string = fsForResolve.realpathSync(filePath);
+
+          deployState.symlinkAnalyzer.analyzePath(filePath);
+          return resolvedPath;
+        } catch (realpathErr) {
+          if (realpathErr.code !== 'ENOENT') {
+            throw realpathErr;
+          }
+        }
+        return filePath;
+      }
+    });
+
+    if (!resolvedDependency) {
+      // This should not happen, since the resolve.sync() docs say it will throw an exception instead
+      throw new InternalError(`Error resolving ${packageName} from ${startingFolder}`);
+    }
+
+    const dependencyPackageFolderPath: string | undefined = this._packageJsonLookup.tryGetPackageFolderFor(
+      resolvedDependency
+    );
+
+    if (!dependencyPackageFolderPath) {
+      throw new Error(`Error finding package.json folder for ${resolvedDependency}`);
+    }
+
+    this._collectFoldersRecursive(dependencyPackageFolderPath, deployState);
   }
 
   /**
