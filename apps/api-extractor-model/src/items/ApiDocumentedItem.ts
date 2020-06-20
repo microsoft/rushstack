@@ -3,7 +3,6 @@
 
 import * as tsdoc from '@microsoft/tsdoc';
 import { ApiItem, IApiItemOptions, IApiItemJson } from './ApiItem';
-import { AedocDefinitions } from '../aedoc/AedocDefinitions';
 import { DeserializerContext } from '../model/DeserializerContext';
 
 /**
@@ -47,7 +46,21 @@ export class ApiDocumentedItem extends ApiItem {
     const documentedJson: IApiDocumentedItemJson = jsonObject as IApiDocumentedItemJson;
 
     if (documentedJson.docComment) {
-      const tsdocParser: tsdoc.TSDocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
+      const tsdocConfiguration: tsdoc.TSDocConfiguration = new tsdoc.TSDocConfiguration();
+
+      // Set support for standard tags
+      tsdocConfiguration.setSupportForTags(tsdocConfiguration.tagDefinitions, true);
+
+      if (Array.isArray(context.nonStandardTSDocTags)) {
+        tsdocConfiguration.addTagDefinitions(
+          context.nonStandardTSDocTags.map(
+            (tag: tsdoc.ITSDocTagDefinitionParameters) => new tsdoc.TSDocTagDefinition(tag)
+          ),
+          true
+        );
+      }
+
+      const tsdocParser: tsdoc.TSDocParser = new tsdoc.TSDocParser(tsdocConfiguration);
 
       // NOTE: For now, we ignore TSDoc errors found in a serialized .api.json file.
       // Normally these errors would have already been reported by API Extractor during analysis.

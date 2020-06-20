@@ -14,6 +14,7 @@ import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocume
 import { ApiEntryPoint } from './ApiEntryPoint';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 import { DeserializerContext, ApiJsonSchemaVersion } from './DeserializerContext';
+import { ITSDocTagDefinitionParameters } from '@microsoft/tsdoc';
 
 /**
  * Constructor options for {@link ApiPackage}.
@@ -22,7 +23,12 @@ import { DeserializerContext, ApiJsonSchemaVersion } from './DeserializerContext
 export interface IApiPackageOptions
   extends IApiItemContainerMixinOptions,
     IApiNameMixinOptions,
-    IApiDocumentedItemOptions {}
+    IApiDocumentedItemOptions {
+  /**
+   * Any non-standard TSDoc tag definitions the package uses.
+   */
+  nonStandardTSDocTags?: ITSDocTagDefinitionParameters[];
+}
 
 export interface IApiPackageMetadataJson {
   /**
@@ -58,6 +64,11 @@ export interface IApiPackageMetadataJson {
    * `IApiPackageMetadataJson.schemaVersion`.
    */
   oldestForwardsCompatibleVersion?: ApiJsonSchemaVersion;
+
+  /**
+   * The TSDoc tags used by the package
+   */
+  nonStandardTSDocTags?: ITSDocTagDefinitionParameters[];
 }
 
 export interface IApiPackageJson extends IApiItemJson {
@@ -105,8 +116,17 @@ export interface IApiPackageSaveOptions extends IJsonFileSaveOptions {
  * @public
  */
 export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumentedItem)) {
+  /**
+   * Non-standard TSDoc Tags associated to the package.
+   */
+  public readonly nonStandardTSDocTags: ITSDocTagDefinitionParameters[] | void;
+
   public constructor(options: IApiPackageOptions) {
     super(options);
+
+    if (Array.isArray(options.nonStandardTSDocTags)) {
+      this.nonStandardTSDocTags = options.nonStandardTSDocTags;
+    }
   }
 
   public static loadFromJsonFile(apiJsonFilename: string): ApiPackage {
@@ -161,7 +181,8 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
       apiJsonFilename,
       toolPackage: jsonObject.metadata.toolPackage,
       toolVersion: jsonObject.metadata.toolVersion,
-      versionToDeserialize: versionToDeserialize
+      versionToDeserialize: versionToDeserialize,
+      nonStandardTSDocTags: jsonObject.metadata.nonStandardTSDocTags
     });
 
     return ApiItem.deserialize(jsonObject, context) as ApiPackage;
@@ -208,7 +229,8 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
         // the version is bumped.  Instead we write a placeholder string.
         toolVersion: options.testMode ? '[test mode]' : options.toolVersion || packageJson.version,
         schemaVersion: ApiJsonSchemaVersion.LATEST,
-        oldestForwardsCompatibleVersion: ApiJsonSchemaVersion.OLDEST_FORWARDS_COMPATIBLE
+        oldestForwardsCompatibleVersion: ApiJsonSchemaVersion.OLDEST_FORWARDS_COMPATIBLE,
+        nonStandardTSDocTags: this.nonStandardTSDocTags
       }
     } as IApiPackageJson;
     this.serializeInto(jsonObject);

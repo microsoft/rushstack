@@ -910,7 +910,10 @@ export class ExtractorConfig {
           break;
       }
 
-      const tsdocConfigFile: TSDocConfigFile = TSDocConfigFile.loadForFolder(__filename);
+      const packageTSDocConfigPath: string = TSDocConfigFile.findConfigPathForFolder(projectFolder);
+      const tsdocConfigFile: TSDocConfigFile = TSDocConfigFile.loadForFolder(
+        FileSystem.exists(packageTSDocConfigPath) ? packageTSDocConfigPath : __filename
+      );
 
       if (tsdocConfigFile.hasErrors) {
         throw new Error(tsdocConfigFile.getErrorSummary());

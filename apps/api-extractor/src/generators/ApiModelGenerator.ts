@@ -64,10 +64,22 @@ export class ApiModelGenerator {
 
   public buildApiPackage(): ApiPackage {
     const packageDocComment: tsdoc.DocComment | undefined = this._collector.workingPackage.tsdocComment;
+    const nonStandardTSDocTags: tsdoc.ITSDocTagDefinitionParameters[] = this._collector.extractorConfig.tsdocConfiguration.tagDefinitions
+      .filter((tag: tsdoc.TSDocTagDefinition) => tag.standardization === tsdoc.Standardization.None)
+      .map(
+        (tag: tsdoc.TSDocTagDefinition): tsdoc.ITSDocTagDefinitionParameters => {
+          return {
+            tagName: tag.tagName,
+            syntaxKind: tag.syntaxKind,
+            allowMultiple: tag.allowMultiple
+          };
+        }
+      );
 
     const apiPackage: ApiPackage = new ApiPackage({
       name: this._collector.workingPackage.name,
-      docComment: packageDocComment
+      docComment: packageDocComment,
+      nonStandardTSDocTags
     });
     this._apiModel.addMember(apiPackage);
 
