@@ -10,7 +10,7 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@microsoft/api-documenter": "7.8.13",
+    "@microsoft/api-documenter": "7.8.14",
     "@microsoft/api-extractor-model": "7.8.8",
     "@rushstack/node-core-library": "3.24.1",
     "@microsoft/tsdoc": "0.12.19",
