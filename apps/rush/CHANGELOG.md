@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 15 Jun 2020 01:26:24 GMT and should not be manually modified.
+This log was last generated on Sun, 21 Jun 2020 04:48:53 GMT and should not be manually modified.
+
+## 5.27.0
+Sun, 21 Jun 2020 04:48:53 GMT
+
+### Updates
+
+- Improve "rush deploy" to apply pnpmfile.js when calculating dependencies
 
 ## 5.26.0
 Mon, 15 Jun 2020 01:26:24 GMT
