@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.8.14",
+      "tag": "@microsoft/api-documenter_v7.8.14",
+      "date": "Sun, 21 Jun 2020 04:21:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve the Markdown target to show hyperlinked \"extends\" and \"implements\" types for class and interface APIs"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.8.13",
       "tag": "@microsoft/api-documenter_v7.8.13",
       "date": "Mon, 15 Jun 2020 22:17:17 GMT",

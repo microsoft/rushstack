@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Mon, 15 Jun 2020 22:17:17 GMT and should not be manually modified.
+This log was last generated on Sun, 21 Jun 2020 04:21:01 GMT and should not be manually modified.
+
+## 7.8.14
+Sun, 21 Jun 2020 04:21:01 GMT
+
+### Patches
+
+- Improve the Markdown target to show hyperlinked "extends" and "implements" types for class and interface APIs
 
 ## 7.8.13
 Mon, 15 Jun 2020 22:17:17 GMT
