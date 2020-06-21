@@ -23,6 +23,7 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { DeployScenarioConfiguration, IDeployScenarioProjectJson } from './DeployScenarioConfiguration';
+import { PnpmfileConfiguration } from './PnpmfileConfiguration';
 
 // (@types/npm-packlist is missing this API)
 declare module 'npm-packlist' {
@@ -94,6 +95,8 @@ interface IDeployState {
   folderInfosByPath: Map<string, IFolderInfo>;
 
   symlinkAnalyzer: SymlinkAnalyzer;
+
+  pnpmfileConfiguration: PnpmfileConfiguration;
 }
 
 /**
@@ -117,7 +120,12 @@ export class DeployManager {
     if (!deployState.foldersToCopy.has(packageJsonRealFolderPath)) {
       deployState.foldersToCopy.add(packageJsonRealFolderPath);
 
-      const packageJson: IPackageJson = JsonFile.load(path.join(packageJsonRealFolderPath, 'package.json'));
+      const originalPackageJson: IPackageJson = JsonFile.load(
+        path.join(packageJsonRealFolderPath, 'package.json')
+      );
+
+      // Transform packageJson using pnpmfile.js
+      const packageJson: IPackageJson = deployState.pnpmfileConfiguration.transform(originalPackageJson);
 
       // Union of keys from regular dependencies, peerDependencies, optionalDependencies
       // (and possibly devDependencies if includeDevDependencies=true)
@@ -573,8 +581,11 @@ export class DeployManager {
       targetRootFolder,
       foldersToCopy: new Set(),
       folderInfosByPath: new Map(),
-      symlinkAnalyzer: new SymlinkAnalyzer()
+      symlinkAnalyzer: new SymlinkAnalyzer(),
+      pnpmfileConfiguration: new PnpmfileConfiguration(this._rushConfiguration)
     };
+
+    console.log();
 
     this._prepareDeployment(deployState);
 
