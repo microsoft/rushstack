@@ -45,6 +45,35 @@ export enum DtsRollupKind {
   PublicRelease
 }
 
+/**
+ * Compute a relative path between two absolute paths.
+ */
+function computeRelativePath(fromPath: string, toPath: string): string {
+  const fromPathComponents: string[] = fromPath.split('/').reverse();
+  const toPathComponents: string[] = toPath.split('/').reverse();
+
+  // Remove all common parts of the paths
+  while (
+    fromPathComponents.length > 0 &&
+    toPathComponents.length > 0 &&
+    fromPathComponents[fromPathComponents.length - 1] === toPathComponents[toPathComponents.length - 1]
+  ) {
+    fromPathComponents.length -= 1;
+    toPathComponents.length -= 1;
+  }
+
+  // The final relative path consists of enough parent selectors to move up
+  // from the remaining "from path" directory components joined to the
+  // remaining "to path" components
+  return (
+    Array(fromPathComponents.length - 1)
+      .fill('..')
+      .join('/') +
+    '/' +
+    toPathComponents.join('/')
+  );
+}
+
 export class DtsRollupGenerator {
   /**
    * Generates the typings file and writes it to disk.
@@ -59,7 +88,7 @@ export class DtsRollupGenerator {
   ): void {
     const stringWriter: StringWriter = new StringWriter();
 
-    DtsRollupGenerator._generateTypingsFileContent(collector, stringWriter, dtsKind);
+    DtsRollupGenerator._generateTypingsFileContent(collector, dtsFilename, stringWriter, dtsKind);
 
     FileSystem.writeFile(dtsFilename, stringWriter.toString(), {
       convertLineEndings: newlineKind,
@@ -69,6 +98,7 @@ export class DtsRollupGenerator {
 
   private static _generateTypingsFileContent(
     collector: Collector,
+    dtsFilename: string,
     stringWriter: StringWriter,
     dtsKind: DtsRollupKind
   ): void {
@@ -85,6 +115,11 @@ export class DtsRollupGenerator {
 
     for (const libDirectiveReference of collector.dtsLibReferenceDirectives) {
       stringWriter.writeLine(`/// <reference lib="${libDirectiveReference}" />`);
+    }
+
+    for (const fileDirectiveReference of collector.dtsFileReferenceDirectives) {
+      const correctedRelativePath: string = computeRelativePath(dtsFilename, fileDirectiveReference);
+      stringWriter.writeLine(`/// <reference path="${correctedRelativePath}" />`);
     }
 
     // Emit the imports

@@ -44,6 +44,29 @@ export interface ICollectorOptions {
 }
 
 /**
+ * Resolve the name of a file to an absolute path relative to a TypeScript SourceFile node.
+ */
+function resolveNameRelativeToSourceFile(name: string, source: ts.SourceFile): string {
+  const output: string[] = source.fileName.split('/').slice(0, -1);
+
+  // Process the file name, treating special selectors such as '..' and '.' and '' correctly
+  for (const fragment of name.split('/')) {
+    switch (fragment) {
+      case '..': // parent selector
+        output.pop();
+        break;
+      case '.': // same-dir selectors
+      case '':
+        break;
+      default:
+        output.push(fragment);
+    }
+  }
+
+  return output.join('/');
+}
+
+/**
  * The `Collector` manages the overall data set that is used by `ApiModelGenerator`,
  * `DtsRollupGenerator`, and `ApiReportGenerator`.  Starting from the working package's entry point,
  * the `Collector` collects all exported symbols, determines how to import any symbols they reference,
@@ -84,6 +107,7 @@ export class Collector {
 
   private readonly _dtsTypeReferenceDirectives: Set<string> = new Set<string>();
   private readonly _dtsLibReferenceDirectives: Set<string> = new Set<string>();
+  private readonly _dtsFileReferenceDirectives: Set<string> = new Set<string>();
 
   // Used by getOverloadIndex()
   private readonly _cachedOverloadIndexesByDeclaration: Map<AstDeclaration, number>;
@@ -156,6 +180,17 @@ export class Collector {
    */
   public get dtsLibReferenceDirectives(): ReadonlySet<string> {
     return this._dtsLibReferenceDirectives;
+  }
+
+  /**
+   * A list of names (e.g. "runtime-library") that should appear in a path-based reference like this:
+   *
+   * ```
+   * /// <reference path="runtime-library" />
+   * ```
+   */
+  public get dtsFileReferenceDirectives(): ReadonlySet<string> {
+    return this._dtsFileReferenceDirectives;
   }
 
   public get entities(): ReadonlyArray<CollectorEntity> {
@@ -262,6 +297,7 @@ export class Collector {
     Sort.sortBy(this._entities, (x) => x.getSortKey());
     Sort.sortSet(this._dtsTypeReferenceDirectives);
     Sort.sortSet(this._dtsLibReferenceDirectives);
+    Sort.sortSet(this._dtsFileReferenceDirectives);
     this._starExportedExternalModulePaths.sort();
   }
 
@@ -874,6 +910,11 @@ export class Collector {
               libReferenceDirective.end
             );
             this._dtsLibReferenceDirectives.add(name);
+          }
+
+          for (const referencedFile of sourceFile.referencedFiles) {
+            const name: string = sourceFile.text.substring(referencedFile.pos, referencedFile.end);
+            this._dtsFileReferenceDirectives.add(resolveNameRelativeToSourceFile(name, sourceFile));
           }
         }
       }
