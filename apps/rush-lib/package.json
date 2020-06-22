@@ -28,7 +28,7 @@
     "cli-table": "~0.3.1",
     "colors": "~1.2.1",
     "git-repo-info": "~2.1.0",
-    "glob-escape": "~0.0.1",
+    "glob-escape": "~0.0.2",
     "glob": "~7.0.5",
     "https-proxy-agent": "~2.2.1",
     "ignore": "~5.1.6",

@@ -26,6 +26,9 @@ export {
   IBuildPhase,
   BuildPhaseHooksBase,
   ICompilePhase,
+  ISharedCopyStaticAssetsConfiguration,
+  ICopyStaticAssetsConfiguration,
+  CompilePhaseHooks,
   IBundlePhase
 } from './cli/actions/BuildAction';
 export { ICleanActionData, CleanHooks } from './cli/actions/CleanAction';

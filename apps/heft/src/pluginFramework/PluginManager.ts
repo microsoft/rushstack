@@ -14,6 +14,7 @@ import { RushActionConfigurationFilesPlugin } from '../plugins/ActionConfigurati
 import { ProjectActionConfigurationFilesPlugin } from '../plugins/ActionConfigurationLoaders/ProjectActionConfigurationFilesPlugin';
 import { ResolveActionConfigurationPathsPlugin } from '../plugins/ResolveActionConfigurationPathsPlugin';
 import { cleanPlugin } from '../plugins/CleanPlugin';
+import { copyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
@@ -43,6 +44,7 @@ export class PluginManager {
     this._applyPlugin(new RushActionConfigurationFilesPlugin());
     this._applyPlugin(new ProjectActionConfigurationFilesPlugin());
     this._applyPlugin(new ResolveActionConfigurationPathsPlugin());
+    this._applyPlugin(copyStaticAssetsPlugin);
     this._applyPlugin(cleanPlugin);
   }
 

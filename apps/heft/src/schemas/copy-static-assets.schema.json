@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Clean Action Configuration",
+  "description": "Defines the heft configuration for the clean action.",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "fileExtensions": {
+      "type": "array",
+      "description": "File extensions that should be copied from the src folder to the destination folder(s)",
+      "items": {
+        "type": "string",
+        "pattern": "\\..+"
+      }
+    },
+
+    "exclude": {
+      "type": "array",
+      "description": "Paths or globs that should be explicitly excluded.",
+      "items": {
+        "type": "string",
+        "pattern": "[^\\\\]"
+      }
+    },
+
+    "include": {
+      "type": "array",
+      "description": "Paths or globs that should be explicitly included. This takes precedence over paths listed in \"exclude\".",
+      "items": {
+        "type": "string",
+        "pattern": "[^\\\\]"
+      }
+    }
+  }
+}

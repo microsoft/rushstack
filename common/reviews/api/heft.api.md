@@ -55,6 +55,12 @@ export class CleanHooks extends ActionHooksBase {
 }
 
 // @public (undocumented)
+export class CompilePhaseHooks extends BuildPhaseHooksBase {
+    // (undocumented)
+    readonly configureCopyStaticAssets: AsyncSeriesHook;
+}
+
+// @public (undocumented)
 export type DevDeploy = IDevDeployActionData;
 
 // @public (undocumented)
@@ -127,7 +133,15 @@ export interface ICleanActionData extends IActionDataBase<CleanHooks> {
 }
 
 // @public (undocumented)
-export interface ICompilePhase extends IBuildPhase<BuildPhaseHooksBase> {
+export interface ICompilePhase extends IBuildPhase<CompilePhaseHooks> {
+    // (undocumented)
+    copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
+}
+
+// @public (undocumented)
+export interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsConfiguration {
+    destinationFolders: string[];
+    sourceFolderName: string | undefined;
 }
 
 // @public (undocumented)
@@ -169,6 +183,13 @@ export interface IPluginPackage<TOptions = void> {
     apply: (heftCompilation: HeftCompilation, heftConfiguration: HeftConfiguration, options?: TOptions) => void;
     // (undocumented)
     displayName: string;
+}
+
+// @public (undocumented)
+export interface ISharedCopyStaticAssetsConfiguration {
+    exclude?: string[];
+    fileExtensions?: string[];
+    include?: string[];
 }
 
 // @public (undocumented)

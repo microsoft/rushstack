@@ -6,7 +6,7 @@ import {
   CommandLineStringParameter,
   ICommandLineActionOptions
 } from '@rushstack/ts-command-line';
-import { SyncHook, AsyncParallelHook } from 'tapable';
+import { SyncHook, AsyncParallelHook, AsyncSeriesHook } from 'tapable';
 import { performance } from 'perf_hooks';
 
 import { HeftActionBase, IHeftActionBaseOptions, ActionHooksBase, IActionDataBase } from './HeftActionBase';
@@ -33,7 +33,51 @@ export interface IBuildPhase<TBuildPhaseHooks extends BuildPhaseHooksBase = Buil
 /**
  * @public
  */
-export interface ICompilePhase extends IBuildPhase<BuildPhaseHooksBase> {}
+export interface ISharedCopyStaticAssetsConfiguration {
+  /**
+   * File extensions that should be copied from the src folder to the destination folder(s)
+   */
+  fileExtensions?: string[];
+
+  /**
+   * Paths or globs that should be explicitly excluded. This takes precedence over paths listed in \"include\".
+   */
+  exclude?: string[];
+
+  /**
+   * Paths or globs that should be explicitly included.
+   */
+  include?: string[];
+}
+
+/**
+ * @public
+ */
+export interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsConfiguration {
+  /**
+   * The folder from which assets should be copied
+   */
+  sourceFolderName: string | undefined;
+
+  /**
+   * The folder(s) to which assets should be copied
+   */
+  destinationFolders: string[];
+}
+
+/**
+ * @public
+ */
+export class CompilePhaseHooks extends BuildPhaseHooksBase {
+  public readonly configureCopyStaticAssets: AsyncSeriesHook = new AsyncSeriesHook();
+}
+
+/**
+ * @public
+ */
+export interface ICompilePhase extends IBuildPhase<CompilePhaseHooks> {
+  copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
+}
 
 /**
  * @public
@@ -141,7 +185,16 @@ export class BuildAction extends HeftActionBase<IBuildActionData, BuildHooks> {
     const preCompilePhase: IBuildPhase = { hooks: new BuildPhaseHooksBase() };
     actionData.hooks.preCompile.call(preCompilePhase);
 
-    const compilePhase: ICompilePhase = { hooks: new BuildPhaseHooksBase() };
+    const compilePhase: ICompilePhase = {
+      hooks: new CompilePhaseHooks(),
+      copyStaticAssetsConfiguration: {
+        fileExtensions: [],
+        exclude: [],
+        include: [],
+        sourceFolderName: undefined,
+        destinationFolders: []
+      }
+    };
     actionData.hooks.compile.call(compilePhase);
 
     const bundlePhase: IBundlePhase = { hooks: new BuildPhaseHooksBase() };
@@ -155,6 +208,8 @@ export class BuildAction extends HeftActionBase<IBuildActionData, BuildHooks> {
       // concurrently with the expectation that the their promises will never resolve
       // and that they will handle watching filesystem changes
 
+      await compilePhase.hooks.configureCopyStaticAssets.promise();
+
       await Promise.all([
         this._runPhaseWithLogging('Pre-compile', preCompilePhase),
         this._runPhaseWithLogging('Compile', compilePhase),
@@ -164,6 +219,7 @@ export class BuildAction extends HeftActionBase<IBuildActionData, BuildHooks> {
     } else {
       await this._runPhaseWithLogging('Pre-compile', preCompilePhase);
 
+      await compilePhase.hooks.configureCopyStaticAssets.promise();
       await this._runPhaseWithLogging('Compile', compilePhase);
 
       await this._runPhaseWithLogging('Bundle', bundlePhase);

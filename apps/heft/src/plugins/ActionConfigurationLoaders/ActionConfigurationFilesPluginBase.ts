@@ -6,13 +6,18 @@ import { JsonSchema, FileSystem, JsonFile } from '@rushstack/node-core-library';
 
 import { IPluginPackage } from '../../pluginFramework/IPluginPackage';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
-import { Clean, HeftCompilation } from '../../pluginFramework/HeftCompilation';
+import { Clean, HeftCompilation, Build } from '../../pluginFramework/HeftCompilation';
+import { ISharedCopyStaticAssetsConfiguration } from '../../cli/actions/BuildAction';
 
 interface IConfigurationJsonBase {}
 
 interface ICleanConfigurationJson extends IConfigurationJsonBase {
   pathsToDelete: string[];
 }
+
+interface ICopyStaticAssetsConfigurationJson
+  extends IConfigurationJsonBase,
+    ISharedCopyStaticAssetsConfiguration {}
 
 export abstract class ActionConfigurationFilesPluginBase implements IPluginPackage {
   private static _schemaCache: Map<string, JsonSchema> = new Map<string, JsonSchema>();
@@ -29,6 +34,44 @@ export abstract class ActionConfigurationFilesPluginBase implements IPluginPacka
         if (cleanActionConfiguration) {
           clean.pathsToDelete.push(...cleanActionConfiguration.pathsToDelete);
         }
+      });
+    });
+
+    heftCompilation.hooks.build.tap(this.displayName, (build: Build) => {
+      build.hooks.compile.tap(this.displayName, (compile) => {
+        compile.hooks.configureCopyStaticAssets.tapPromise(this.displayName, async () => {
+          const copyStaticAssetsConfiguration:
+            | ICopyStaticAssetsConfigurationJson
+            | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'copy-static-assets');
+
+          if (copyStaticAssetsConfiguration) {
+            if (copyStaticAssetsConfiguration.fileExtensions) {
+              if (!compile.copyStaticAssetsConfiguration.fileExtensions) {
+                compile.copyStaticAssetsConfiguration.fileExtensions = [];
+              }
+
+              compile.copyStaticAssetsConfiguration.fileExtensions.push(
+                ...copyStaticAssetsConfiguration.fileExtensions
+              );
+            }
+
+            if (copyStaticAssetsConfiguration.include) {
+              if (!compile.copyStaticAssetsConfiguration.include) {
+                compile.copyStaticAssetsConfiguration.include = [];
+              }
+
+              compile.copyStaticAssetsConfiguration.include.push(...copyStaticAssetsConfiguration.include);
+            }
+
+            if (copyStaticAssetsConfiguration.exclude) {
+              if (!compile.copyStaticAssetsConfiguration.exclude) {
+                compile.copyStaticAssetsConfiguration.exclude = [];
+              }
+
+              compile.copyStaticAssetsConfiguration.exclude.push(...copyStaticAssetsConfiguration.exclude);
+            }
+          }
+        });
       });
     });
   }
