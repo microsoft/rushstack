@@ -6,15 +6,52 @@ import {
   CommandLineStringParameter,
   ICommandLineActionOptions
 } from '@rushstack/ts-command-line';
+import { SyncHook, AsyncParallelHook } from 'tapable';
+import { performance } from 'perf_hooks';
 
 import { HeftActionBase, IHeftActionBaseOptions, ActionHooksBase, IActionDataBase } from './HeftActionBase';
+import { CleanAction } from './CleanAction';
 
-export interface IBuildActionOptions extends IHeftActionBaseOptions {}
+export interface IBuildActionOptions extends IHeftActionBaseOptions {
+  cleanAction: CleanAction;
+}
 
 /**
  * @public
  */
-export class BuildHooks extends ActionHooksBase {}
+export class BuildPhaseHooksBase {
+  public readonly run: AsyncParallelHook = new AsyncParallelHook();
+}
+
+/**
+ * @public
+ */
+export interface IBuildPhase<TBuildPhaseHooks extends BuildPhaseHooksBase = BuildPhaseHooksBase> {
+  hooks: TBuildPhaseHooks;
+}
+
+/**
+ * @public
+ */
+export interface ICompilePhase extends IBuildPhase<BuildPhaseHooksBase> {}
+
+/**
+ * @public
+ */
+export interface IBundlePhase extends IBuildPhase<BuildPhaseHooksBase> {}
+
+/**
+ * @public
+ */
+export class BuildHooks extends ActionHooksBase {
+  public readonly preCompile: SyncHook<IBuildPhase> = new SyncHook<IBuildPhase>(['preCompile']);
+
+  public readonly compile: SyncHook<ICompilePhase> = new SyncHook<ICompilePhase>(['compile']);
+
+  public readonly bundle: SyncHook<IBundlePhase> = new SyncHook<IBundlePhase>(['bundle']);
+
+  public readonly postBuild: SyncHook<IBuildPhase> = new SyncHook<IBuildPhase>(['postBuild']);
+}
 
 /**
  * @public
@@ -39,6 +76,8 @@ export class BuildAction extends HeftActionBase<IBuildActionData, BuildHooks> {
   private _cleanFlag: CommandLineFlagParameter;
   private _maxOldSpaceSizeParameter: CommandLineStringParameter;
 
+  private _cleanAction: CleanAction;
+
   public constructor(
     heftActionOptions: IBuildActionOptions,
     commandLineOptions: ICommandLineActionOptions = {
@@ -48,6 +87,8 @@ export class BuildAction extends HeftActionBase<IBuildActionData, BuildHooks> {
     }
   ) {
     super(commandLineOptions, heftActionOptions, BuildHooks);
+
+    this._cleanAction = heftActionOptions.cleanAction;
   }
 
   public onDefineParameters(): void {
@@ -93,7 +134,42 @@ export class BuildAction extends HeftActionBase<IBuildActionData, BuildHooks> {
   }
 
   protected async actionExecute(actionData: IBuildActionData): Promise<void> {
-    throw new Error('Not implemented yet...');
+    if (this._cleanFlag.value) {
+      await this._runWithLogging('Clean', async () => await this._cleanAction.executeInner());
+    }
+
+    const preCompilePhase: IBuildPhase = { hooks: new BuildPhaseHooksBase() };
+    actionData.hooks.preCompile.call(preCompilePhase);
+
+    const compilePhase: ICompilePhase = { hooks: new BuildPhaseHooksBase() };
+    actionData.hooks.compile.call(compilePhase);
+
+    const bundlePhase: IBundlePhase = { hooks: new BuildPhaseHooksBase() };
+    actionData.hooks.bundle.call(bundlePhase);
+
+    const postBuildPhase: IBuildPhase = { hooks: new BuildPhaseHooksBase() };
+    actionData.hooks.postBuild.call(postBuildPhase);
+
+    if (actionData.watchMode) {
+      // In --watch mode, run all configuration upfront and then kick off all phases
+      // concurrently with the expectation that the their promises will never resolve
+      // and that they will handle watching filesystem changes
+
+      await Promise.all([
+        this._runPhaseWithLogging('Pre-compile', preCompilePhase),
+        this._runPhaseWithLogging('Compile', compilePhase),
+        this._runPhaseWithLogging('Bundle', bundlePhase),
+        this._runPhaseWithLogging('Post-build', postBuildPhase)
+      ]);
+    } else {
+      await this._runPhaseWithLogging('Pre-compile', preCompilePhase);
+
+      await this._runPhaseWithLogging('Compile', compilePhase);
+
+      await this._runPhaseWithLogging('Bundle', bundlePhase);
+
+      await this._runPhaseWithLogging('Post-build', postBuildPhase);
+    }
   }
 
   protected getDefaultActionData(): Omit<IBuildActionData, 'hooks'> {
@@ -107,5 +183,26 @@ export class BuildAction extends HeftActionBase<IBuildActionData, BuildHooks> {
       verboseFlag: this.verboseFlag.value,
       watchMode: this._watchFlag.value
     };
+  }
+
+  protected async _runPhaseWithLogging(buildPhaseName: string, buildPhase: IBuildPhase): Promise<void> {
+    if (buildPhase.hooks.run.isUsed()) {
+      await this._runWithLogging(buildPhaseName, async () => await buildPhase.hooks.run.promise());
+    }
+  }
+
+  private async _runWithLogging(buildPhaseName: string, fn: () => Promise<void>): Promise<void> {
+    this.terminal.writeLine(` ---- ${buildPhaseName} started ---- `);
+    const startTime: number = performance.now();
+    let finishedLoggingWord: string = 'finished';
+    try {
+      await fn();
+    } catch (e) {
+      finishedLoggingWord = 'encountered an error';
+      throw e;
+    } finally {
+      const executionTime: number = Math.round(performance.now() - startTime);
+      this.terminal.writeLine(` ---- ${buildPhaseName} ${finishedLoggingWord} (${executionTime}ms) ---- `);
+    }
   }
 }

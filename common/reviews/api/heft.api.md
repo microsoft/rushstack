@@ -4,6 +4,7 @@
 
 ```ts
 
+import { AsyncParallelHook } from 'tapable';
 import { AsyncSeriesBailHook } from 'tapable';
 import { AsyncSeriesHook } from 'tapable';
 import { CommandLineAction } from '@rushstack/ts-command-line';
@@ -28,6 +29,20 @@ export type Build = IBuildActionData;
 
 // @public (undocumented)
 export class BuildHooks extends ActionHooksBase {
+    // (undocumented)
+    readonly bundle: SyncHook<IBundlePhase>;
+    // (undocumented)
+    readonly compile: SyncHook<ICompilePhase>;
+    // (undocumented)
+    readonly postBuild: SyncHook<IBuildPhase>;
+    // (undocumented)
+    readonly preCompile: SyncHook<IBuildPhase>;
+}
+
+// @public (undocumented)
+export class BuildPhaseHooksBase {
+    // (undocumented)
+    readonly run: AsyncParallelHook;
 }
 
 // @public (undocumented)
@@ -96,9 +111,23 @@ export interface IBuildActionData extends IActionDataBase<BuildHooks> {
 }
 
 // @public (undocumented)
+export interface IBuildPhase<TBuildPhaseHooks extends BuildPhaseHooksBase = BuildPhaseHooksBase> {
+    // (undocumented)
+    hooks: TBuildPhaseHooks;
+}
+
+// @public (undocumented)
+export interface IBundlePhase extends IBuildPhase<BuildPhaseHooksBase> {
+}
+
+// @public (undocumented)
 export interface ICleanActionData extends IActionDataBase<CleanHooks> {
     // (undocumented)
     pathsToDelete: string[];
+}
+
+// @public (undocumented)
+export interface ICompilePhase extends IBuildPhase<BuildPhaseHooksBase> {
 }
 
 // @public (undocumented)

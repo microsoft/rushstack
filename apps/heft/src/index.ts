@@ -20,7 +20,14 @@ export {
 } from './pluginFramework/HeftCompilation';
 
 // Actions
-export { IBuildActionData, BuildHooks } from './cli/actions/BuildAction';
+export {
+  IBuildActionData,
+  BuildHooks,
+  IBuildPhase,
+  BuildPhaseHooksBase,
+  ICompilePhase,
+  IBundlePhase
+} from './cli/actions/BuildAction';
 export { ICleanActionData, CleanHooks } from './cli/actions/CleanAction';
 export { IDevDeployActionData, DevDeployHooks } from './cli/actions/DevDeployAction';
 export { IStartActionData, StartHooks } from './cli/actions/StartAction';

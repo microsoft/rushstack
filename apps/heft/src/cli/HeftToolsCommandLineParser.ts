@@ -38,10 +38,10 @@ export class HeftToolsCommandLineParser extends CommandLineParserBase {
     };
 
     const cleanAction: CleanAction = new CleanAction(actionOptions);
-    const buildAction: BuildAction = new BuildAction(actionOptions);
+    const buildAction: BuildAction = new BuildAction({ ...actionOptions, cleanAction });
     const devDeployAction: DevDeployAction = new DevDeployAction(actionOptions);
     const startAction: StartAction = new StartAction(actionOptions);
-    const testAction: TestAction = new TestAction(actionOptions);
+    const testAction: TestAction = new TestAction({ ...actionOptions, cleanAction });
 
     this._heftCompilation = new HeftCompilation({
       getIsDebugMode: () => this.isDebug,
