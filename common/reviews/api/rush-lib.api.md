@@ -179,6 +179,24 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
 }
 
 // @public
+export interface IRushConfigurationProjectJson {
+    // (undocumented)
+    cyclicDependencyProjects: string[];
+    // (undocumented)
+    packageName: string;
+    // (undocumented)
+    projectFolder: string;
+    // (undocumented)
+    reviewCategory?: string;
+    // (undocumented)
+    shouldPublish?: boolean;
+    // (undocumented)
+    skipRushCheck?: boolean;
+    // (undocumented)
+    versionPolicyName?: string;
+}
+
+// @public
 export interface ITryFindRushJsonLocationOptions {
     showVerbose?: boolean;
     startingFolder?: string;
@@ -379,8 +397,6 @@ export class RushConfiguration {
 
 // @public
 export class RushConfigurationProject {
-    // Warning: (ae-forgotten-export) The symbol "IRushConfigurationProjectJson" needs to be exported by the entry point index.d.ts
-    //
     // @internal
     constructor(projectJson: IRushConfigurationProjectJson, rushConfiguration: RushConfiguration, tempProjectName: string);
     readonly cyclicDependencyProjects: Set<string>;
