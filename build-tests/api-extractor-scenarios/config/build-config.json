@@ -21,6 +21,7 @@
     "exportStar",
     "exportStar2",
     "exportStar3",
+    "fileReferenceDirectives",
     "functionOverload",
     "importEquals",
     "inconsistentReleaseTags",

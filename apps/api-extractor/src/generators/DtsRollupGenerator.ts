@@ -3,6 +3,8 @@
 
 /* eslint-disable no-bitwise */
 
+import * as path from 'path';
+
 import * as ts from 'typescript';
 import { FileSystem, NewlineKind, InternalError } from '@rushstack/node-core-library';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
@@ -43,35 +45,6 @@ export enum DtsRollupKind {
    * except definitions marked as \@beta, \@alpha, or \@internal.
    */
   PublicRelease
-}
-
-/**
- * Compute a relative path between two absolute paths.
- */
-function computeRelativePath(fromPath: string, toPath: string): string {
-  const fromPathComponents: string[] = fromPath.split('/').reverse();
-  const toPathComponents: string[] = toPath.split('/').reverse();
-
-  // Remove all common parts of the paths
-  while (
-    fromPathComponents.length > 0 &&
-    toPathComponents.length > 0 &&
-    fromPathComponents[fromPathComponents.length - 1] === toPathComponents[toPathComponents.length - 1]
-  ) {
-    fromPathComponents.length -= 1;
-    toPathComponents.length -= 1;
-  }
-
-  // The final relative path consists of enough parent selectors to move up
-  // from the remaining "from path" directory components joined to the
-  // remaining "to path" components
-  return (
-    Array(fromPathComponents.length - 1)
-      .fill('..')
-      .join('/') +
-    '/' +
-    toPathComponents.join('/')
-  );
 }
 
 export class DtsRollupGenerator {
@@ -118,7 +91,8 @@ export class DtsRollupGenerator {
     }
 
     for (const fileDirectiveReference of collector.dtsFileReferenceDirectives) {
-      const correctedRelativePath: string = computeRelativePath(dtsFilename, fileDirectiveReference);
+      const dtsDirname: string = path.dirname(dtsFilename);
+      const correctedRelativePath: string = path.relative(dtsDirname, fileDirectiveReference);
       stringWriter.writeLine(`/// <reference path="${correctedRelativePath}" />`);
     }
 

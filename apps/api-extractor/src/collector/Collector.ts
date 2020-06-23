@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
+
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 import { PackageJsonLookup, Sort, InternalError } from '@rushstack/node-core-library';
@@ -47,7 +49,7 @@ export interface ICollectorOptions {
  * Resolve the name of a file to an absolute path relative to a TypeScript SourceFile node.
  */
 function resolveNameRelativeToSourceFile(name: string, source: ts.SourceFile): string {
-  const output: string[] = source.fileName.split('/').slice(0, -1);
+  const output: string[] = source.fileName.split(path.sep).slice(0, -1);
 
   // Process the file name, treating special selectors such as '..' and '.' and '' correctly
   for (const fragment of name.split('/')) {
@@ -63,7 +65,7 @@ function resolveNameRelativeToSourceFile(name: string, source: ts.SourceFile): s
     }
   }
 
-  return output.join('/');
+  return output.join(path.sep);
 }
 
 /**
@@ -186,7 +188,7 @@ export class Collector {
    * A list of names (e.g. "runtime-library") that should appear in a path-based reference like this:
    *
    * ```
-   * /// <reference path="runtime-library" />
+   * /// <reference path="path/to/example.d.ts" />
    * ```
    */
   public get dtsFileReferenceDirectives(): ReadonlySet<string> {
