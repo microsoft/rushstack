@@ -1,0 +1,13 @@
+# This file has the same behavior as common/config/rush/.npmrc -- the only difference is that
+# .npmrc-publish is used with "rush publish", because publishing often involves different credentials
+# and registries than installation.  See the the .npmrc comments for details.
+#
+# * * * SECURITY WARNING * * *
+#
+# It is NOT recommended to store authentication tokens in a text file on a lab machine, because
+# other unrelated processes may be able to read the file.  Also, the file may persist indefinitely,
+# for example if the machine loses power.  A safer practice is to pass the token via an
+# environment variable, which can be referenced from .npmrc using ${} expansion.  For example:
+#
+#   //registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}
+#
