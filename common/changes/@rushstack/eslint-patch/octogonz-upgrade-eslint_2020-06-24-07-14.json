@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-patch",
+      "comment": "Initial release",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-patch",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
