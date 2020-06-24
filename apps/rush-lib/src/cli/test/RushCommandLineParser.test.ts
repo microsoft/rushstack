@@ -38,7 +38,6 @@ interface IParserTestInstance {
  * in `__mocks__/child_process.js`.
  */
 function setSpawnMock(options?: ISpawnMockConfig): jest.Mock {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const cpMocked: IChildProcessModuleMock = require('child_process');
   cpMocked.__setSpawnMockConfig(options);
 

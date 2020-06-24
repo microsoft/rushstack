@@ -274,6 +274,9 @@ module.exports = {
 
               filter: {
                 regex: [
+                  // Silently accept names with a double-underscore prefix; we would like to be more strict about this,
+                  // pending a fix for https://github.com/typescript-eslint/typescript-eslint/issues/2240
+                  '^__',
                   // This is a special exception for naming patterns that use an underscore to separate two camel-cased
                   // parts.  Example:  "checkBox1_onChanged" or "_checkBox1_onChanged"
                   '^_?[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*_[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*$'

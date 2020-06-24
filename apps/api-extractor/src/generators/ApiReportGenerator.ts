@@ -18,7 +18,7 @@ import { StringWriter } from './StringWriter';
 import { DtsEmitHelpers } from './DtsEmitHelpers';
 
 export class ApiReportGenerator {
-  private static _TrimSpacesRegExp: RegExp = / +$/gm;
+  private static _trimSpacesRegExp: RegExp = / +$/gm;
 
   /**
    * Compares the contents of two API files that were created using ApiFileGenerator,
@@ -170,7 +170,7 @@ export class ApiReportGenerator {
     stringWriter.writeLine('\n```');
 
     // Remove any trailing spaces
-    return stringWriter.toString().replace(ApiReportGenerator._TrimSpacesRegExp, '');
+    return stringWriter.toString().replace(ApiReportGenerator._trimSpacesRegExp, '');
   }
 
   /**

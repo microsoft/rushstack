@@ -144,7 +144,6 @@ export class DeployManager {
       }
 
       // (Used only by the legacy code fragment in the resolve.sync() hook below)
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const fs: typeof import('fs') = require('fs');
 
       for (const dependencyPackageName of allDependencyNames) {

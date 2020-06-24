@@ -85,7 +85,6 @@ export class ProjectTask implements ITaskDefinition {
 
   private _getPackageDependencies(writer: ITaskWriter): IPackageDependencies | undefined {
     let deps: IPackageDependencies | undefined = undefined;
-    this._rushConfiguration = this._rushConfiguration;
     try {
       deps = {
         files: this._packageChangeAnalyzer.getPackageDepsHash(this._rushProject.packageName)!.files,
