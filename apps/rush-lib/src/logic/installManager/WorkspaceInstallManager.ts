@@ -19,6 +19,8 @@ import { RushConstants } from '../../logic/RushConstants';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from './InstallHelpers';
+import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
+import { RepoStateFile } from '../../api/RepoStateFile';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -105,37 +107,24 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
     }
 
-    // dependency name --> version specifier
-    const allExplicitPreferredVersions: Map<string, string> = this.rushConfiguration
-      .getCommonVersions(this.options.variant)
-      .getAllPreferredVersions();
-
     if (shrinkwrapFile) {
-      // Check any (explicitly) preferred dependencies first
-      allExplicitPreferredVersions.forEach((version: string, dependency: string) => {
-        const dependencySpecifier: DependencySpecifier = new DependencySpecifier(dependency, version);
-
-        // The common package.json is used to ensure common versions are installed, so look for this workspace
-        // and validate that the requested dependency is specified
-        if (
-          !shrinkwrapFile.hasCompatibleWorkspaceDependency(
-            dependencySpecifier,
-            WorkspaceInstallManager.getCommonWorkspaceKey(this.rushConfiguration)
-          )
-        ) {
-          shrinkwrapWarnings.push(
-            `Missing dependency "${dependency}" (${version}) required by the preferred versions from ` +
-              RushConstants.commonVersionsFilename
-          );
-          shrinkwrapIsUpToDate = false;
-        }
-      });
-
       if (this._findOrphanedWorkspaceProjects(shrinkwrapFile)) {
         // If there are any orphaned projects, then install would fail because the shrinkwrap
         // contains references that refer to nonexistent file paths.
         shrinkwrapIsUpToDate = false;
       }
+    }
+
+    // If preferred versions have been updated, then we can't be certain of the state of the shrinkwrap
+    const repoState: RepoStateFile = this.rushConfiguration.getRepoState(this.options.variant);
+    const commonVersions: CommonVersionsConfiguration = this.rushConfiguration.getCommonVersions(
+      this.options.variant
+    );
+    if (repoState.preferredVersionsHash !== commonVersions.preferredVersionsHash) {
+      shrinkwrapWarnings.push(
+        `Preferred versions from ${RushConstants.commonVersionsFilename} have been modified.`
+      );
+      shrinkwrapIsUpToDate = false;
     }
 
     // To generate the workspace file, we will add each project to the file as we loop through and validate
@@ -249,16 +238,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
     }
 
-    const allPreferredVersions: Map<string, string> = InstallHelpers.collectPreferredVersions(
-      this.rushConfiguration,
-      {
-        explicitPreferredVersions: allExplicitPreferredVersions,
-        variant: this.options.variant
-      }
-    );
-
     // Write the common package.json
-    InstallHelpers.generateCommonPackageJson(this.rushConfiguration, allPreferredVersions);
+    InstallHelpers.generateCommonPackageJson(this.rushConfiguration);
 
     // Save the generated workspace file. Don't update the file timestamp unless the content has changed,
     // since "rush install" will consider this timestamp
@@ -436,6 +417,21 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     console.log('');
+
+    // We need to update the repo state with the information from the install
+    const repoState: RepoStateFile = this.rushConfiguration.getRepoState(this.options.variant);
+    const commonVersions: CommonVersionsConfiguration = this.rushConfiguration.getCommonVersions(
+      this.options.variant
+    );
+    repoState.preferredVersionsHash = commonVersions.preferredVersionsHash;
+    if (repoState.saveIfModified()) {
+      console.log(
+        colors.yellow(
+          `${RushConstants.repoStateFilename} has been modified and must be committed to source control.`
+        )
+      );
+      console.log('');
+    }
   }
 
   /**

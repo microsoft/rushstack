@@ -24,6 +24,7 @@ import { YarnPackageManager } from './packageManager/YarnPackageManager';
 import { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { ExperimentsConfiguration } from './ExperimentsConfiguration';
 import { PackageNameParsers } from './PackageNameParsers';
+import { RepoStateFile } from './RepoStateFile';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'master';
@@ -38,6 +39,7 @@ const knownRushConfigFilenames: string[] = [
   '.npmrc-publish',
   RushConstants.pinnedVersionsFilename,
   RushConstants.commonVersionsFilename,
+  RushConstants.repoStateFilename,
   RushConstants.browserApprovedPackagesFilename,
   RushConstants.nonbrowserApprovedPackagesFilename,
   RushConstants.versionPoliciesFilename,
@@ -1436,6 +1438,28 @@ export class RushConfiguration {
   public getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration {
     const commonVersionsFilename: string = this.getCommonVersionsFilePath(variant);
     return CommonVersionsConfiguration.loadFromFile(commonVersionsFilename);
+  }
+
+  /**
+   * Gets the path to the repo-state.json file for a specific variant.
+   * @param variant - The name of the current variant in use by the active command.
+   */
+  public getRepoStateFilePath(variant?: string | undefined): string {
+    const repoStateFilename: string = path.join(
+      this.commonRushConfigFolder,
+      ...(variant ? [RushConstants.rushVariantsFolderName, variant] : []),
+      RushConstants.repoStateFilename
+    );
+    return repoStateFilename;
+  }
+
+  /**
+   * Gets the contents from the repo-state.json file for a specific variant.
+   * @param variant - The name of the current variant in use by the active command.
+   */
+  public getRepoState(variant?: string | undefined): RepoStateFile {
+    const repoStateFilename: string = this.getRepoStateFilePath(variant);
+    return RepoStateFile.loadFromFile(repoStateFilename);
   }
 
   /**

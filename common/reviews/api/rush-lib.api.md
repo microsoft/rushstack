@@ -71,6 +71,7 @@ export class CommonVersionsConfiguration {
     readonly implicitlyPreferredVersions: boolean | undefined;
     static loadFromFile(jsonFilename: string): CommonVersionsConfiguration;
     readonly preferredVersions: Map<string, string>;
+    readonly preferredVersionsHash: string;
     save(): boolean;
     readonly xstitchPreferredVersions: Map<string, string>;
     }
@@ -176,7 +177,6 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     preventManualShrinkwrapChanges?: boolean;
     resolutionStrategy?: ResolutionStrategy;
     strictPeerDependencies?: boolean;
-    useShimPnpmfile?: boolean;
     useWorkspaces?: boolean;
 }
 
@@ -291,7 +291,6 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly preventManualShrinkwrapChanges: boolean;
     readonly resolutionStrategy: ResolutionStrategy;
     readonly strictPeerDependencies: boolean;
-    readonly useShimPnpmfile: boolean;
     readonly useWorkspaces: boolean;
 }
 
@@ -335,6 +334,9 @@ export class RushConfiguration {
     getCommonVersionsFilePath(variant?: string | undefined): string;
     getPnpmfilePath(variant?: string | undefined): string;
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
+    // Warning: (ae-forgotten-export) The symbol "RepoStateFile" needs to be exported by the entry point index.d.ts
+    getRepoState(variant?: string | undefined): RepoStateFile;
+    getRepoStateFilePath(variant?: string | undefined): string;
     readonly gitAllowedEmailRegExps: string[];
     readonly gitSampleEmail: string;
     readonly gitVersionBumpCommitMessage: string | undefined;

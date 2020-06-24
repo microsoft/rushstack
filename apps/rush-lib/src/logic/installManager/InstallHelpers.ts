@@ -115,7 +115,7 @@ export class InstallHelpers {
 
   public static generateCommonPackageJson(
     rushConfiguration: RushConfiguration,
-    dependencies: Map<string, string>
+    dependencies: Map<string, string> = new Map<string, string>()
   ): void {
     const commonPackageJson: IPackageJson = {
       dependencies: {},
