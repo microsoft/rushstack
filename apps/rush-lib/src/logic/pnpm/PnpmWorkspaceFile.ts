@@ -41,12 +41,8 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
   private _workspacePackages: Set<string>;
 
   /**
-   *
- @halfnibble
-halfnibble 5 days ago Member
-Empty comment.
-
-@D4N14L	Reply…
+   * The PNPM workspace file is used to specify the location of workspaces relative to the root
+   * of your PNPM install.
    */
   public constructor(workspaceYamlFilename: string) {
     super();

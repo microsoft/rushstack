@@ -110,10 +110,6 @@
         "useWorkspaces": {
           "description": "If true, then Rush will use the workspaces feature to install and link packages when invoking PNPM. The default value is false.",
           "type": "boolean"
-        },
-        "useShimPnpmfile": {
-          "description": "If true, then Rush will create a pnpmfile that runs before the provided pnpmfile. This shim pnpmfile is used to inject preferred versions support into the PNPM package resolver. The default value is false.",
-          "type": "boolean"
         }
       },
       "additionalProperties": false

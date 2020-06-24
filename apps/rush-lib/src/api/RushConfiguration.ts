@@ -172,10 +172,6 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    * {@inheritDoc PnpmOptionsConfiguration.useWorkspaces}
    */
   useWorkspaces?: boolean;
-  /**
-   * {@inheritDoc PnpmOptionsConfiguration.useShimPnpmfile}
-   */
-  useShimPnpmfile?: boolean;
 }
 
 /**
@@ -362,20 +358,6 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    */
   public readonly useWorkspaces: boolean;
 
-  /**
-   * If true, then Rush will create a pnpmfile that runs before the provided pnpmfile. This shim
-   * pnpmfile is used to inject preferred versions support into the PNPM package resolver.
-   *
-   * @remarks
-   * Preferred versions are supported using pnpmfile by substituting any dependency version specifier
-   * for the preferred version during package resolution. This is only done if the preferred version range
-   * is a subset of the dependency version range. Allowed alternate versions are not modified. The pnpmfile
-   * shim will subsequently call into the provided pnpmfile, if one exists.
-   *
-   * The default value is false. (For now.)
-   */
-  public readonly useShimPnpmfile: boolean;
-
   /** @internal */
   public constructor(json: IPnpmOptionsJson, commonTempFolder: string) {
     super(json);
@@ -391,7 +373,6 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
     this.preventManualShrinkwrapChanges = !!json.preventManualShrinkwrapChanges;
     this.useWorkspaces = !!json.useWorkspaces;
-    this.useShimPnpmfile = !!json.useShimPnpmfile;
   }
 }
 

@@ -5,7 +5,7 @@ import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import { FileSystem, InternalError } from '@rushstack/node-core-library';
+import { FileSystem, InternalError, MapExtensions, NewlineKind } from '@rushstack/node-core-library';
 
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
@@ -68,6 +68,17 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     console.log(
       os.EOL + colors.bold('Updating workspace files in ' + this.rushConfiguration.commonTempFolder)
     );
+
+    // Shim support for common versions resolution into the pnpmfile. When using workspaces, there are no
+    // "hoisted" packages, so we need to apply the correct versions to indirect dependencies through the
+    // pnpmfile.
+    if (this.rushConfiguration.packageManager === 'pnpm') {
+      const tempPnpmFilePath: string = path.join(
+        this.rushConfiguration.commonTempFolder,
+        RushConstants.pnpmfileFilename
+      );
+      await this.createShimPnpmfile(tempPnpmFilePath);
+    }
 
     const shrinkwrapWarnings: string[] = [];
 
@@ -419,6 +430,109 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     console.log('');
+  }
+
+  /**
+   * Preferred versions are supported using pnpmfile by substituting any dependency version specifier
+   * for the preferred version during package resolution. This is only done if the preferred version range
+   * is a subset of the dependency version range. Allowed alternate versions are not modified. The pnpmfile
+   * shim will subsequently call into the provided pnpmfile, if one exists.
+   */
+  protected async createShimPnpmfile(filename: string): Promise<void> {
+    // Get the versions we want to add to the shim pnpmfile
+    const allPreferredVersions: Map<string, string> = InstallHelpers.collectPreferredVersions(
+      this.rushConfiguration,
+      this.options
+    );
+    const allowedAlternativeVersions: Map<
+      string,
+      ReadonlyArray<string>
+    > = this.rushConfiguration.getCommonVersions(this.options.variant).allowedAlternativeVersions;
+
+    const clientPnpmfileName: string = 'clientPnpmfile.js';
+    const pnpmfileContent: string[] = [
+      '// THIS IS A GENERATED FILE. DO NOT MODIFY.',
+      '"use strict";',
+      'module.exports = { hooks: { readPackage, afterAllResolved } };',
+
+      // Obtain the original pnpmfile provided by the repo, if it exists.
+      'const { existsSync } = require("fs");',
+      'const clientPnpmfile = ',
+      `  existsSync("${clientPnpmfileName}") ? require("./${path.basename(
+        clientPnpmfileName,
+        '.js'
+      )}") : undefined;`,
+      // We will require semver from this path on disk, since this is the version of semver shipping with Rush
+      `const semver = require(${JSON.stringify(require.resolve('semver'))});`,
+
+      // Include all the preferredVersions and allowedAlternativeVersions directly since there is no need to
+      // generate them on the fly
+      `const allPreferredVersions = ${JSON.stringify(MapExtensions.toObject(allPreferredVersions))};`,
+      `const allowedAlternativeVersions = ${JSON.stringify(
+        MapExtensions.toObject(allowedAlternativeVersions)
+      )};`,
+
+      // Call the original pnpmfile (if it exists)
+      'function afterAllResolved(lockfile, context) {',
+      '  return (clientPnpmfile && clientPnpmfile.hooks && clientPnpmfile.hooks.afterAllResolved)',
+      '    ? clientPnpmfile.hooks.afterAllResolved(lockfile, context)',
+      '    : lockfile;',
+      '}',
+
+      // Set the preferred versions in the package, then call the original pnpmfile (if it exists)
+      'function readPackage(pkg, context) {',
+      '  setPreferredVersions(pkg.dependencies);',
+      '  setPreferredVersions(pkg.devDependencies);',
+      '  setPreferredVersions(pkg.optionalDependencies);',
+      '  return (clientPnpmfile && clientPnpmfile.hooks && clientPnpmfile.hooks.readPackage)',
+      '    ? clientPnpmfile.hooks.readPackage(pkg, context)',
+      '    : pkg;',
+      '}',
+
+      // Set the preferred versions on the dependency map. If the version on the map is an allowedAlternativeVersion
+      // then skip it. Otherwise, check to ensure that the common version is a subset of the specified version. If
+      // it is, then replace the specified version with the preferredVersion
+      'function setPreferredVersions(dependencies) {',
+      '  for (const name of Object.keys(dependencies || {})) {',
+      '    if (allPreferredVersions.hasOwnProperty(name)) {',
+      '      const preferredVersion = allPreferredVersions[name];',
+      '      const version = dependencies[name];',
+      '      if (allowedAlternativeVersions.hasOwnProperty(name)) {',
+      '        const allowedAlternatives = allowedAlternativeVersions[name];',
+      '        if (allowedAlternatives && allowedAlternatives.indexOf(version) > -1) {',
+      '          continue;',
+      '        }',
+      '      }',
+      '      let isValidRange = false;',
+      '      try {',
+      '        isValidRange = !!semver.validRange(preferredVersion) && !!semver.validRange(version);',
+      '      } catch {',
+      '      }',
+      '      if (isValidRange && semver.subset(preferredVersion, version)) {',
+      '        dependencies[name] = preferredVersion;',
+      '      }',
+      '    }',
+      '  }',
+      '}'
+    ];
+
+    // Attempt to move the existing pnpmfile if there is one
+    try {
+      const pnpmfileDir: string = path.dirname(filename);
+      await FileSystem.moveAsync({
+        sourcePath: filename,
+        destinationPath: path.join(pnpmfileDir, clientPnpmfileName)
+      });
+    } catch (error) {
+      if (!FileSystem.isNotExistError(error)) {
+        throw error;
+      }
+    }
+
+    // Write the shim pnpmfile to the original file path
+    await FileSystem.writeFileAsync(filename, pnpmfileContent.join(NewlineKind.Lf), {
+      ensureFolderExists: true
+    });
   }
 
   /**
