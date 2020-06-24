@@ -5,7 +5,7 @@
 //
 // To correct how ESLint searches for plugin packages, add this line to the top of your project's .eslintrc.js file:
 //
-//    require("@rushstack/eslint-config/patch-eslint-resolver");
+//    require("@rushstack/eslint-patch/modern-module-resolution");
 //
 const path = require('path');
 const fs = require('fs');
