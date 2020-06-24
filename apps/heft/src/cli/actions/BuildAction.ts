@@ -40,7 +40,8 @@ export interface ISharedCopyStaticAssetsConfiguration {
   fileExtensions?: string[];
 
   /**
-   * Paths or globs that should be explicitly excluded. This takes precedence over paths listed in \"include\".
+   * Paths or globs that should be explicitly excluded. This takes precedence over paths listed in "include" and
+   * files that match the file extensions provided in "fileExtensions".
    */
   exclude?: string[];
 
