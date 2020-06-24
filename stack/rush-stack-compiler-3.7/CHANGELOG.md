@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush-stack-compiler-3.7
 
-This log was last generated on Mon, 15 Jun 2020 22:17:18 GMT and should not be manually modified.
+This log was last generated on Wed, 24 Jun 2020 09:04:28 GMT and should not be manually modified.
+
+## 0.5.0
+Wed, 24 Jun 2020 09:04:28 GMT
+
+### Minor changes
+
+- Upgrade to ESLint 7
 
 ## 0.4.1
 Mon, 15 Jun 2020 22:17:18 GMT

@@ -1,6 +1,11 @@
 # Change Log - @microsoft/gulp-core-build-webpack
 
-This log was last generated on Mon, 15 Jun 2020 22:17:18 GMT and should not be manually modified.
+This log was last generated on Wed, 24 Jun 2020 09:04:28 GMT and should not be manually modified.
+
+## 5.0.22
+Wed, 24 Jun 2020 09:04:28 GMT
+
+*Version update only*
 
 ## 5.0.21
 Mon, 15 Jun 2020 22:17:18 GMT

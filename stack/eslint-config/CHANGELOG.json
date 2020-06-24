@@ -2,6 +2,26 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "1.0.0",
+      "tag": "@rushstack/eslint-config_v1.0.0",
+      "date": "Wed, 24 Jun 2020 09:04:28 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Upgrade to ESLint 7. Breaking change: patch-eslint6.js has been renamed to patch-eslint-resolver.js"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" from `1.0.0` to `1.0.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" from `0.3.2` to `0.4.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.8",
       "tag": "@rushstack/eslint-config_v0.5.8",
       "date": "Wed, 27 May 2020 05:15:10 GMT",

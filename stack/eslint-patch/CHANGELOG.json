@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/eslint-patch",
+  "entries": [
+    {
+      "version": "1.0.1",
+      "tag": "@rushstack/eslint-patch_v1.0.1",
+      "date": "Wed, 24 Jun 2020 09:04:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Initial release"
+          }
+        ]
+      }
+    }
+  ]
+}
