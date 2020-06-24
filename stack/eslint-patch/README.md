@@ -23,7 +23,7 @@ for additional technical background.
 ## Why it's a patch
 
 ESLint's long awaited module resolver overhaul still has not materialized as of ESLint 7.  As a stopgap,
-we created a small ***.eslintrc.js** patch that solves the problem adequately for most real world scenarios.
+we created a small **.eslintrc.js** patch that solves the problem adequately for most real world scenarios.
 This patch was proposed as an ESLint feature with [PR 12460](https://github.com/eslint/eslint/pull/12460), however
 the maintainers were not able to accept it unless it is reworked into a fully correct design.  Such a requirement
 would impose the same hurdles as the original GitHub issue; thus, it seems best to stay with the patch approach.
