@@ -2,7 +2,7 @@
   "changes": [
     {
       "comment": "Upgrade to ESLint 7. Breaking change: patch-eslint6.js has been renamed to patch-eslint-resolver.js",
-      "type": "minor",
+      "type": "major",
       "packageName": "@rushstack/eslint-config"
     }
   ],
