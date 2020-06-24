@@ -4,10 +4,14 @@
 import * as path from 'path';
 import { JsonSchema, FileSystem, JsonFile } from '@rushstack/node-core-library';
 
+import {
+  ISharedCopyStaticAssetsConfiguration,
+  ICopyStaticAssetsConfiguration
+} from '../../cli/actions/BuildAction';
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { Clean, HeftSession, Build } from '../../pluginFramework/HeftSession';
-import { ISharedCopyStaticAssetsConfiguration } from '../../cli/actions/BuildAction';
+import { ICleanActionData } from '../../cli/actions/CleanAction';
 
 interface IConfigurationJsonBase {}
 
@@ -27,54 +31,17 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     heftSession.hooks.clean.tap(this.displayName, (clean: Clean) => {
       clean.hooks.loadActionConfiguration.tapPromise(this.displayName, async () => {
-        const cleanActionConfiguration:
-          | ICleanConfigurationJson
-          | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'clean');
-
-        if (cleanActionConfiguration) {
-          clean.pathsToDelete.push(...cleanActionConfiguration.pathsToDelete);
-        }
+        await this._updateCleanConfigurationAsync(heftConfiguration, clean);
       });
     });
 
     heftSession.hooks.build.tap(this.displayName, (build: Build) => {
       build.hooks.compile.tap(this.displayName, (compile) => {
         compile.hooks.configureCopyStaticAssets.tapPromise(this.displayName, async () => {
-          const copyStaticAssetsConfiguration:
-            | ICopyStaticAssetsConfigurationJson
-            | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'copy-static-assets');
-
-          if (copyStaticAssetsConfiguration) {
-            if (copyStaticAssetsConfiguration.fileExtensions) {
-              if (!compile.copyStaticAssetsConfiguration.fileExtensions) {
-                compile.copyStaticAssetsConfiguration.fileExtensions = [];
-              }
-
-              compile.copyStaticAssetsConfiguration.fileExtensions.push(
-                ...copyStaticAssetsConfiguration.fileExtensions
-              );
-            }
-
-            if (copyStaticAssetsConfiguration.includeGlobs) {
-              if (!compile.copyStaticAssetsConfiguration.includeGlobs) {
-                compile.copyStaticAssetsConfiguration.includeGlobs = [];
-              }
-
-              compile.copyStaticAssetsConfiguration.includeGlobs.push(
-                ...copyStaticAssetsConfiguration.includeGlobs
-              );
-            }
-
-            if (copyStaticAssetsConfiguration.excludeGlobs) {
-              if (!compile.copyStaticAssetsConfiguration.excludeGlobs) {
-                compile.copyStaticAssetsConfiguration.excludeGlobs = [];
-              }
-
-              compile.copyStaticAssetsConfiguration.excludeGlobs.push(
-                ...copyStaticAssetsConfiguration.excludeGlobs
-              );
-            }
-          }
+          await this._updateCopyStaticAssetsConfigurationAsync(
+            heftConfiguration,
+            compile.copyStaticAssetsConfiguration
+          );
         });
       });
     });
@@ -84,6 +51,57 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
     actionName: string,
     heftConfiguration: HeftConfiguration
   ): string | undefined;
+
+  private async _updateCleanConfigurationAsync(
+    heftConfiguration: HeftConfiguration,
+    cleanConfiguration: ICleanActionData
+  ): Promise<void> {
+    const cleanActionConfiguration:
+      | ICleanConfigurationJson
+      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'clean');
+
+    if (cleanActionConfiguration) {
+      cleanConfiguration.pathsToDelete.push(...cleanActionConfiguration.pathsToDelete);
+    }
+  }
+
+  private async _updateCopyStaticAssetsConfigurationAsync(
+    heftConfiguration: HeftConfiguration,
+    copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration
+  ): Promise<void> {
+    // tslint:disable-next-line:max-line-length
+    const copyStaticAssetsConfigurationJson:
+      | ICopyStaticAssetsConfigurationJson
+      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'copy-static-assets');
+
+    if (copyStaticAssetsConfigurationJson) {
+      if (copyStaticAssetsConfigurationJson.fileExtensions) {
+        if (!copyStaticAssetsConfiguration.fileExtensions) {
+          copyStaticAssetsConfiguration.fileExtensions = [];
+        }
+
+        copyStaticAssetsConfiguration.fileExtensions.push(
+          ...copyStaticAssetsConfigurationJson.fileExtensions
+        );
+      }
+
+      if (copyStaticAssetsConfigurationJson.includeGlobs) {
+        if (!copyStaticAssetsConfiguration.includeGlobs) {
+          copyStaticAssetsConfiguration.includeGlobs = [];
+        }
+
+        copyStaticAssetsConfiguration.includeGlobs.push(...copyStaticAssetsConfigurationJson.includeGlobs);
+      }
+
+      if (copyStaticAssetsConfigurationJson.excludeGlobs) {
+        if (!copyStaticAssetsConfiguration.excludeGlobs) {
+          copyStaticAssetsConfiguration.excludeGlobs = [];
+        }
+
+        copyStaticAssetsConfiguration.excludeGlobs.push(...copyStaticAssetsConfigurationJson.excludeGlobs);
+      }
+    }
+  }
 
   private async _getConfigDataByNameAsync<TConfigJson>(
     heftConfiguration: HeftConfiguration,
