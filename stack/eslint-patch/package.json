@@ -1,7 +1,7 @@
 {
   "name": "@rushstack/eslint-patch",
   "version": "1.0.0",
-  "description": "A patch that enables ESLint to work better with a shared toolchain in a monorepo",
+  "description": "A patch that improves how ESLint loads plugins when working in a monorepo with a reusable toolchain",
   "main": "lib/usage.js",
   "license": "MIT",
   "repository": {

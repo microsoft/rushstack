@@ -1,6 +1,6 @@
 # @rushstack/eslint-patch
 
-A patch that enables ESLint to work better with a shared toolchain in a monorepo
+A patch that improves how ESLint loads plugins when working in a monorepo with a reusable toolchain
 
 
 ## What it does
