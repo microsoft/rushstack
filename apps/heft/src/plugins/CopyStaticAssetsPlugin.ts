@@ -14,134 +14,188 @@ import { Build, HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { ICompileStage, ICopyStaticAssetsConfiguration } from '../cli/actions/BuildAction';
 import { PrefixProxyTerminalProvider } from '../utilities/PrefixProxyTerminalProvider';
-
 const PLUGIN_NAME: string = 'CopyStaticAssetsPlugin';
 
-export const copyStaticAssetsPlugin: IHeftPlugin = {
-  displayName: PLUGIN_NAME,
-  apply: (heftSession: HeftSession, heftConfiguration: HeftConfiguration) => {
+interface ICopyStaticAssetsOptions {
+  terminal: Terminal;
+  buildFolder: string;
+  copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
+  watchMode: boolean;
+}
+
+interface IRunWatchOptions extends ICopyStaticAssetsOptions {
+  fileExtensionsGlobPattern: string | undefined;
+  resolvedSourceFolderPath: string;
+  resolvedDestinationFolderPaths: string[];
+}
+
+export class CopyStaticAssetsPlugin implements IHeftPlugin {
+  public readonly displayName: string = PLUGIN_NAME;
+
+  public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: Build) => {
       build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileStage) => {
-        const terminal: Terminal = new Terminal(
-          new PrefixProxyTerminalProvider(heftConfiguration.terminalProvider, '[copy-static-assets] ')
-        );
-
         compile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          const startTime: number = performance.now();
-
-          const configuration: ICopyStaticAssetsConfiguration = compile.copyStaticAssetsConfiguration;
-          if (!configuration.sourceFolderName) {
-            return;
-          }
-          const sourceFolderPath: string = path.join(
-            heftConfiguration.buildFolder,
-            configuration.sourceFolderName
+          const terminal: Terminal = new Terminal(
+            new PrefixProxyTerminalProvider(heftConfiguration.terminalProvider, '[copy-static-assets] ')
           );
 
-          async function expandGlobPattern(pattern: string): Promise<Set<string>> {
-            const results: string[] = await LegacyAdapters.convertCallbackToPromise(glob, pattern, {
-              cwd: sourceFolderPath,
-              nodir: true,
-              ignore: configuration.exclude
-            });
-
-            return new Set<string>(results);
-          }
-
-          let fileExtensionsGlobPattern: string | undefined = undefined;
-          if (configuration.fileExtensions?.length) {
-            const escapedExtensions: string[] = globEscape(
-              compile.copyStaticAssetsConfiguration.fileExtensions
-            );
-            fileExtensionsGlobPattern = `**/*+(${escapedExtensions.join('|')})`;
-          }
-
-          const resolvedDestinationFolders: string[] = configuration.destinationFolderNames.map(
-            (destinationFolder) => path.join(heftConfiguration.buildFolder, destinationFolder)
-          );
-
-          async function copyStaticAssetsAsync(
-            assetPathsToCopy: string[],
-            logDuration: boolean
-          ): Promise<void> {
-            if (assetPathsToCopy.length === 0) {
-              return;
-            }
-
-            let copyCount: number = 0;
-            for (const resolvedDestinationFolder of resolvedDestinationFolders) {
-              await Async.forEachLimitAsync(assetPathsToCopy, 100, async (assetPath: string) => {
-                await FileSystem.copyFileAsync({
-                  sourcePath: path.join(sourceFolderPath, assetPath),
-                  destinationPath: path.join(resolvedDestinationFolder, assetPath)
-                });
-                copyCount++;
-              });
-            }
-
-            if (logDuration) {
-              const duration: number = performance.now() - startTime;
-              terminal.writeLine(
-                `Copied ${copyCount} static asset${copyCount === 1 ? '' : 's'} in ${Math.round(duration)}ms`
-              );
-            } else {
-              terminal.writeLine(`Copied ${copyCount} static asset${copyCount === 1 ? '' : 's'}`);
-            }
-          }
-
-          let assetsToCopy: Set<string>;
-          if (configuration.fileExtensions?.length) {
-            const escapedExtensions: string[] = globEscape(
-              compile.copyStaticAssetsConfiguration.fileExtensions
-            );
-            const pattern: string = `**/*+(${escapedExtensions.join('|')})`;
-            assetsToCopy = await expandGlobPattern(pattern);
-          } else {
-            assetsToCopy = new Set<string>();
-          }
-
-          for (const include of configuration.include || []) {
-            const explicitlyIncludedPaths: Set<string> = await expandGlobPattern(include);
-            for (const explicitlyIncludedPath of explicitlyIncludedPaths) {
-              assetsToCopy.add(explicitlyIncludedPath);
-            }
-          }
-
-          await copyStaticAssetsAsync(Array.from(assetsToCopy), true);
-
-          if (build.watchMode) {
-            if (fileExtensionsGlobPattern) {
-              const watcher: chokidar.FSWatcher = chokidar.watch(
-                [fileExtensionsGlobPattern, ...(configuration.include || [])],
-                {
-                  cwd: sourceFolderPath,
-                  ignoreInitial: true,
-                  ignored: configuration.exclude
-                }
-              );
-
-              async function copyAsset(assetPath: string): Promise<void> {
-                await copyStaticAssetsAsync([assetPath], false);
-              }
-
-              watcher.on('add', copyAsset);
-              watcher.on('change', copyAsset);
-              watcher.on('unlink', (assetPath) => {
-                let deleteCount: number = 0;
-                for (const resolvedDestinationFolder of resolvedDestinationFolders) {
-                  FileSystem.deleteFile(path.resolve(resolvedDestinationFolder, assetPath));
-                  deleteCount++;
-                }
-                terminal.writeLine(`Deleted ${deleteCount} static asset${deleteCount === 1 ? '' : 's'}`);
-              });
-            }
-
-            return new Promise(() => {
-              /* never resolve */
-            });
-          }
+          await this._runCopyAsync({
+            terminal,
+            buildFolder: heftConfiguration.buildFolder,
+            copyStaticAssetsConfiguration: compile.copyStaticAssetsConfiguration,
+            watchMode: build.watchMode
+          });
         });
       });
     });
   }
-};
+
+  private async _expandGlobPatternAsync(
+    resolvedSourceFolderPath: string,
+    pattern: string,
+    exclude: string[] | undefined
+  ): Promise<Set<string>> {
+    const results: string[] = await LegacyAdapters.convertCallbackToPromise(glob, pattern, {
+      cwd: resolvedSourceFolderPath,
+      nodir: true,
+      ignore: exclude
+    });
+
+    return new Set<string>(results);
+  }
+
+  private async _copyStaticAssetsAsync(
+    assetPathsToCopy: string[],
+    resolvedSourceFolderPath: string,
+    resolvedDestinationFolders: string[]
+  ): Promise<number> {
+    if (assetPathsToCopy.length === 0) {
+      return 0;
+    }
+
+    let copyCount: number = 0;
+    for (const resolvedDestinationFolder of resolvedDestinationFolders) {
+      await Async.forEachLimitAsync(assetPathsToCopy, 100, async (assetPath: string) => {
+        await FileSystem.copyFileAsync({
+          sourcePath: path.join(resolvedSourceFolderPath, assetPath),
+          destinationPath: path.join(resolvedDestinationFolder, assetPath)
+        });
+        copyCount++;
+      });
+    }
+
+    return copyCount;
+  }
+
+  private async _runCopyAsync(options: ICopyStaticAssetsOptions): Promise<void> {
+    const { terminal, buildFolder, copyStaticAssetsConfiguration, watchMode } = options;
+
+    if (!copyStaticAssetsConfiguration.sourceFolderName) {
+      return;
+    }
+
+    const startTime: number = performance.now();
+    const resolvedSourceFolderPath: string = path.join(
+      buildFolder,
+      copyStaticAssetsConfiguration.sourceFolderName
+    );
+    const resolvedDestinationFolderPaths: string[] = copyStaticAssetsConfiguration.destinationFolderNames.map(
+      (destinationFolder) => path.join(buildFolder, destinationFolder)
+    );
+
+    let fileExtensionsGlobPattern: string | undefined = undefined;
+    if (copyStaticAssetsConfiguration.fileExtensions?.length) {
+      const escapedExtensions: string[] = globEscape(copyStaticAssetsConfiguration.fileExtensions);
+      fileExtensionsGlobPattern = `**/*+(${escapedExtensions.join('|')})`;
+    }
+
+    let assetsToCopy: Set<string>;
+    if (copyStaticAssetsConfiguration.fileExtensions?.length) {
+      const escapedExtensions: string[] = globEscape(copyStaticAssetsConfiguration.fileExtensions);
+      const pattern: string = `**/*+(${escapedExtensions.join('|')})`;
+      assetsToCopy = await this._expandGlobPatternAsync(
+        resolvedSourceFolderPath,
+        pattern,
+        copyStaticAssetsConfiguration.exclude
+      );
+    } else {
+      assetsToCopy = new Set<string>();
+    }
+
+    for (const include of copyStaticAssetsConfiguration.include || []) {
+      const explicitlyIncludedPaths: Set<string> = await this._expandGlobPatternAsync(
+        resolvedSourceFolderPath,
+        include,
+        copyStaticAssetsConfiguration.exclude
+      );
+      for (const explicitlyIncludedPath of explicitlyIncludedPaths) {
+        assetsToCopy.add(explicitlyIncludedPath);
+      }
+    }
+
+    const copyCount: number = await this._copyStaticAssetsAsync(
+      Array.from(assetsToCopy),
+      resolvedSourceFolderPath,
+      resolvedDestinationFolderPaths
+    );
+    const duration: number = performance.now() - startTime;
+    terminal.writeLine(
+      `Copied ${copyCount} static asset${copyCount === 1 ? '' : 's'} in ${Math.round(duration)}ms`
+    );
+
+    if (watchMode) {
+      await this._runWatchAsync({
+        ...options,
+        resolvedSourceFolderPath,
+        resolvedDestinationFolderPaths,
+        fileExtensionsGlobPattern
+      });
+    }
+  }
+
+  private async _runWatchAsync(options: IRunWatchOptions): Promise<void> {
+    const {
+      terminal,
+      fileExtensionsGlobPattern,
+      resolvedSourceFolderPath,
+      resolvedDestinationFolderPaths,
+      copyStaticAssetsConfiguration
+    } = options;
+
+    if (fileExtensionsGlobPattern) {
+      const watcher: chokidar.FSWatcher = chokidar.watch(
+        [fileExtensionsGlobPattern, ...(copyStaticAssetsConfiguration.include || [])],
+        {
+          cwd: resolvedSourceFolderPath,
+          ignoreInitial: true,
+          ignored: copyStaticAssetsConfiguration.exclude
+        }
+      );
+
+      const copyAsset: (assetPath: string) => Promise<void> = async (assetPath: string) => {
+        const copyCount: number = await this._copyStaticAssetsAsync(
+          [assetPath],
+          resolvedSourceFolderPath,
+          resolvedDestinationFolderPaths
+        );
+        terminal.writeLine(`Copied ${copyCount} static asset${copyCount === 1 ? '' : 's'}`);
+      };
+
+      watcher.on('add', copyAsset);
+      watcher.on('change', copyAsset);
+      watcher.on('unlink', (assetPath) => {
+        let deleteCount: number = 0;
+        for (const resolvedDestinationFolder of resolvedDestinationFolderPaths) {
+          FileSystem.deleteFile(path.resolve(resolvedDestinationFolder, assetPath));
+          deleteCount++;
+        }
+        terminal.writeLine(`Deleted ${deleteCount} static asset${deleteCount === 1 ? '' : 's'}`);
+      });
+    }
+
+    return new Promise(() => {
+      /* never resolve */
+    });
+  }
+}
