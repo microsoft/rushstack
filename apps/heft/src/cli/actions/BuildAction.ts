@@ -19,15 +19,15 @@ export interface IBuildActionOptions extends IHeftActionBaseOptions {
 /**
  * @public
  */
-export class BuildPhaseHooksBase {
+export class BuildStageHooksBase {
   public readonly run: AsyncParallelHook = new AsyncParallelHook();
 }
 
 /**
  * @public
  */
-export interface IBuildPhase<TBuildPhaseHooks extends BuildPhaseHooksBase = BuildPhaseHooksBase> {
-  hooks: TBuildPhaseHooks;
+export interface IBuildStage<TBuildStageHooks extends BuildStageHooksBase = BuildStageHooksBase> {
+  hooks: TBuildStageHooks;
 }
 
 /**
@@ -68,33 +68,33 @@ export interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsC
 /**
  * @public
  */
-export class CompilePhaseHooks extends BuildPhaseHooksBase {
+export class CompileStageHooks extends BuildStageHooksBase {
   public readonly configureCopyStaticAssets: AsyncSeriesHook = new AsyncSeriesHook();
 }
 
 /**
  * @public
  */
-export interface ICompilePhase extends IBuildPhase<CompilePhaseHooks> {
+export interface ICompileStage extends IBuildStage<CompileStageHooks> {
   copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
 }
 
 /**
  * @public
  */
-export interface IBundlePhase extends IBuildPhase<BuildPhaseHooksBase> {}
+export interface IBundleStage extends IBuildStage<BuildStageHooksBase> {}
 
 /**
  * @public
  */
 export class BuildHooks extends ActionHooksBase {
-  public readonly preCompile: SyncHook<IBuildPhase> = new SyncHook<IBuildPhase>(['preCompile']);
+  public readonly preCompile: SyncHook<IBuildStage> = new SyncHook<IBuildStage>(['preCompile']);
 
-  public readonly compile: SyncHook<ICompilePhase> = new SyncHook<ICompilePhase>(['compile']);
+  public readonly compile: SyncHook<ICompileStage> = new SyncHook<ICompileStage>(['compile']);
 
-  public readonly bundle: SyncHook<IBundlePhase> = new SyncHook<IBundlePhase>(['bundle']);
+  public readonly bundle: SyncHook<IBundleStage> = new SyncHook<IBundleStage>(['bundle']);
 
-  public readonly postBuild: SyncHook<IBuildPhase> = new SyncHook<IBuildPhase>(['postBuild']);
+  public readonly postBuild: SyncHook<IBuildStage> = new SyncHook<IBuildStage>(['postBuild']);
 }
 
 /**
@@ -182,11 +182,11 @@ export class BuildAction extends HeftActionBase<IBuildActionData, BuildHooks> {
       await this._runWithLogging('Clean', async () => await this._cleanAction.executeInner());
     }
 
-    const preCompilePhase: IBuildPhase = { hooks: new BuildPhaseHooksBase() };
-    actionData.hooks.preCompile.call(preCompilePhase);
+    const preCompileStage: IBuildStage = { hooks: new BuildStageHooksBase() };
+    actionData.hooks.preCompile.call(preCompileStage);
 
-    const compilePhase: ICompilePhase = {
-      hooks: new CompilePhaseHooks(),
+    const compileStage: ICompileStage = {
+      hooks: new CompileStageHooks(),
       copyStaticAssetsConfiguration: {
         fileExtensions: [],
         exclude: [],
@@ -195,36 +195,36 @@ export class BuildAction extends HeftActionBase<IBuildActionData, BuildHooks> {
         destinationFolders: []
       }
     };
-    actionData.hooks.compile.call(compilePhase);
+    actionData.hooks.compile.call(compileStage);
 
-    const bundlePhase: IBundlePhase = { hooks: new BuildPhaseHooksBase() };
-    actionData.hooks.bundle.call(bundlePhase);
+    const bundleStage: IBundleStage = { hooks: new BuildStageHooksBase() };
+    actionData.hooks.bundle.call(bundleStage);
 
-    const postBuildPhase: IBuildPhase = { hooks: new BuildPhaseHooksBase() };
-    actionData.hooks.postBuild.call(postBuildPhase);
+    const postBuildStage: IBuildStage = { hooks: new BuildStageHooksBase() };
+    actionData.hooks.postBuild.call(postBuildStage);
 
     if (actionData.watchMode) {
-      // In --watch mode, run all configuration upfront and then kick off all phases
+      // In --watch mode, run all configuration upfront and then kick off all stages
       // concurrently with the expectation that the their promises will never resolve
       // and that they will handle watching filesystem changes
 
-      await compilePhase.hooks.configureCopyStaticAssets.promise();
+      await compileStage.hooks.configureCopyStaticAssets.promise();
 
       await Promise.all([
-        this._runPhaseWithLogging('Pre-compile', preCompilePhase),
-        this._runPhaseWithLogging('Compile', compilePhase),
-        this._runPhaseWithLogging('Bundle', bundlePhase),
-        this._runPhaseWithLogging('Post-build', postBuildPhase)
+        this._runStageWithLogging('Pre-compile', preCompileStage),
+        this._runStageWithLogging('Compile', compileStage),
+        this._runStageWithLogging('Bundle', bundleStage),
+        this._runStageWithLogging('Post-build', postBuildStage)
       ]);
     } else {
-      await this._runPhaseWithLogging('Pre-compile', preCompilePhase);
+      await this._runStageWithLogging('Pre-compile', preCompileStage);
 
-      await compilePhase.hooks.configureCopyStaticAssets.promise();
-      await this._runPhaseWithLogging('Compile', compilePhase);
+      await compileStage.hooks.configureCopyStaticAssets.promise();
+      await this._runStageWithLogging('Compile', compileStage);
 
-      await this._runPhaseWithLogging('Bundle', bundlePhase);
+      await this._runStageWithLogging('Bundle', bundleStage);
 
-      await this._runPhaseWithLogging('Post-build', postBuildPhase);
+      await this._runStageWithLogging('Post-build', postBuildStage);
     }
   }
 
@@ -241,14 +241,14 @@ export class BuildAction extends HeftActionBase<IBuildActionData, BuildHooks> {
     };
   }
 
-  protected async _runPhaseWithLogging(buildPhaseName: string, buildPhase: IBuildPhase): Promise<void> {
-    if (buildPhase.hooks.run.isUsed()) {
-      await this._runWithLogging(buildPhaseName, async () => await buildPhase.hooks.run.promise());
+  protected async _runStageWithLogging(buildStageName: string, buildStage: IBuildStage): Promise<void> {
+    if (buildStage.hooks.run.isUsed()) {
+      await this._runWithLogging(buildStageName, async () => await buildStage.hooks.run.promise());
     }
   }
 
-  private async _runWithLogging(buildPhaseName: string, fn: () => Promise<void>): Promise<void> {
-    this.terminal.writeLine(` ---- ${buildPhaseName} started ---- `);
+  private async _runWithLogging(buildStageName: string, fn: () => Promise<void>): Promise<void> {
+    this.terminal.writeLine(` ---- ${buildStageName} started ---- `);
     const startTime: number = performance.now();
     let finishedLoggingWord: string = 'finished';
     try {
@@ -258,7 +258,7 @@ export class BuildAction extends HeftActionBase<IBuildActionData, BuildHooks> {
       throw e;
     } finally {
       const executionTime: number = Math.round(performance.now() - startTime);
-      this.terminal.writeLine(` ---- ${buildPhaseName} ${finishedLoggingWord} (${executionTime}ms) ---- `);
+      this.terminal.writeLine(` ---- ${buildStageName} ${finishedLoggingWord} (${executionTime}ms) ---- `);
     }
   }
 }

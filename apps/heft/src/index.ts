@@ -23,13 +23,13 @@ export {
 export {
   IBuildActionData,
   BuildHooks,
-  IBuildPhase,
-  BuildPhaseHooksBase,
-  ICompilePhase,
+  IBuildStage,
+  BuildStageHooksBase,
+  ICompileStage,
   ISharedCopyStaticAssetsConfiguration,
   ICopyStaticAssetsConfiguration,
-  CompilePhaseHooks,
-  IBundlePhase
+  CompileStageHooks,
+  IBundleStage
 } from './cli/actions/BuildAction';
 export { ICleanActionData, CleanHooks } from './cli/actions/CleanAction';
 export { IDevDeployActionData, DevDeployHooks } from './cli/actions/DevDeployAction';

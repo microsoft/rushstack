@@ -30,17 +30,17 @@ export type Build = IBuildActionData;
 // @public (undocumented)
 export class BuildHooks extends ActionHooksBase {
     // (undocumented)
-    readonly bundle: SyncHook<IBundlePhase>;
+    readonly bundle: SyncHook<IBundleStage>;
     // (undocumented)
-    readonly compile: SyncHook<ICompilePhase>;
+    readonly compile: SyncHook<ICompileStage>;
     // (undocumented)
-    readonly postBuild: SyncHook<IBuildPhase>;
+    readonly postBuild: SyncHook<IBuildStage>;
     // (undocumented)
-    readonly preCompile: SyncHook<IBuildPhase>;
+    readonly preCompile: SyncHook<IBuildStage>;
 }
 
 // @public (undocumented)
-export class BuildPhaseHooksBase {
+export class BuildStageHooksBase {
     // (undocumented)
     readonly run: AsyncParallelHook;
 }
@@ -55,7 +55,7 @@ export class CleanHooks extends ActionHooksBase {
 }
 
 // @public (undocumented)
-export class CompilePhaseHooks extends BuildPhaseHooksBase {
+export class CompileStageHooks extends BuildStageHooksBase {
     // (undocumented)
     readonly configureCopyStaticAssets: AsyncSeriesHook;
 }
@@ -117,13 +117,13 @@ export interface IBuildActionData extends IActionDataBase<BuildHooks> {
 }
 
 // @public (undocumented)
-export interface IBuildPhase<TBuildPhaseHooks extends BuildPhaseHooksBase = BuildPhaseHooksBase> {
+export interface IBuildStage<TBuildStageHooks extends BuildStageHooksBase = BuildStageHooksBase> {
     // (undocumented)
-    hooks: TBuildPhaseHooks;
+    hooks: TBuildStageHooks;
 }
 
 // @public (undocumented)
-export interface IBundlePhase extends IBuildPhase<BuildPhaseHooksBase> {
+export interface IBundleStage extends IBuildStage<BuildStageHooksBase> {
 }
 
 // @public (undocumented)
@@ -133,7 +133,7 @@ export interface ICleanActionData extends IActionDataBase<CleanHooks> {
 }
 
 // @public (undocumented)
-export interface ICompilePhase extends IBuildPhase<CompilePhaseHooks> {
+export interface ICompileStage extends IBuildStage<CompileStageHooks> {
     // (undocumented)
     copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
 }

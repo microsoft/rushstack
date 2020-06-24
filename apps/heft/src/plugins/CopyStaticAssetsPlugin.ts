@@ -12,7 +12,7 @@ import { performance } from 'perf_hooks';
 import { IPluginPackage } from '../pluginFramework/IPluginPackage';
 import { Build, HeftCompilation } from '../pluginFramework/HeftCompilation';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { ICompilePhase, ICopyStaticAssetsConfiguration } from '../cli/actions/BuildAction';
+import { ICompileStage, ICopyStaticAssetsConfiguration } from '../cli/actions/BuildAction';
 import { PrefixProxyTerminalProvider } from '../utilities/PrefixProxyTerminalProvider';
 
 const PLUGIN_NAME: string = 'CopyStaticAssetsPlugin';
@@ -21,7 +21,7 @@ export const copyStaticAssetsPlugin: IPluginPackage = {
   displayName: PLUGIN_NAME,
   apply: (heftCompilation: HeftCompilation, heftConfiguration: HeftConfiguration) => {
     heftCompilation.hooks.build.tap(PLUGIN_NAME, (build: Build) => {
-      build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompilePhase) => {
+      build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileStage) => {
         const terminal: Terminal = new Terminal(
           new PrefixProxyTerminalProvider(heftConfiguration.terminalProvider, '[copy-static-assets] ')
         );
