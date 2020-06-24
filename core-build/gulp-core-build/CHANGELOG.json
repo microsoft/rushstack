@@ -2,6 +2,36 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.16.10",
+      "tag": "@microsoft/gulp-core-build_v3.16.10",
+      "date": "Wed, 24 Jun 2020 09:50:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.24.2` to `3.24.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `1.0.0` to `1.0.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.16.9",
+      "tag": "@microsoft/gulp-core-build_v3.16.9",
+      "date": "Wed, 24 Jun 2020 09:04:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.24.1` to `3.24.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.8` to `1.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.16.8",
       "tag": "@microsoft/gulp-core-build_v3.16.8",
       "date": "Wed, 10 Jun 2020 20:48:30 GMT",

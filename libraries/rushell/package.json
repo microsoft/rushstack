@@ -14,12 +14,12 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@rushstack/node-core-library": "3.24.1"
+    "@rushstack/node-core-library": "3.24.3"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.6.1",
-    "@microsoft/node-library-build": "6.4.25",
-    "@rushstack/eslint-config": "0.5.8",
+    "@microsoft/rush-stack-compiler-3.5": "0.7.1",
+    "@microsoft/node-library-build": "6.4.27",
+    "@rushstack/eslint-config": "1.0.1",
     "@types/jest": "25.2.1",
     "@types/node": "10.17.13",
     "gulp": "~4.0.2",

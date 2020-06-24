@@ -14,7 +14,7 @@
     "semver": "~7.3.0"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "7.8.12",
+    "@microsoft/api-extractor": "7.8.14",
     "@types/node": "10.17.13",
     "fs-extra": "~7.0.1",
     "typescript": "~3.7.2"

@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.27.0",
+      "tag": "@microsoft/rush_v5.27.0",
+      "date": "Sun, 21 Jun 2020 04:48:53 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve \"rush deploy\" to apply pnpmfile.js when calculating dependencies"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.26.0",
       "tag": "@microsoft/rush_v5.26.0",
       "date": "Mon, 15 Jun 2020 01:26:24 GMT",

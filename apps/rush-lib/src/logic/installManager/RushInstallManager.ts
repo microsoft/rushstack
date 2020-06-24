@@ -26,7 +26,7 @@ import { InstallHelpers } from './InstallHelpers';
  * As a temporary workaround, augment the type.
  */
 declare module 'tar' {
-  // eslint-disable-next-line @typescript-eslint/interface-name-prefix
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   export interface CreateOptions {
     /**
      * "Set to true to omit writing mtime values for entries. Note that this prevents using other
