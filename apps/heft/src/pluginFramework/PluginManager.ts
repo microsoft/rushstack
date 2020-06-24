@@ -13,8 +13,8 @@ import { HeftSession } from './HeftSession';
 import { RushActionConfigurationFilesPlugin } from '../plugins/ActionConfigurationLoaders/RushActionConfigurationFilesPlugin';
 import { ProjectActionConfigurationFilesPlugin } from '../plugins/ActionConfigurationLoaders/ProjectActionConfigurationFilesPlugin';
 import { ResolveActionConfigurationPathsPlugin } from '../plugins/ResolveActionConfigurationPathsPlugin';
-import { cleanPlugin } from '../plugins/CleanPlugin';
 import { CopyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
+import { CleanPlugin } from '../plugins/CleanPlugin';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
@@ -45,7 +45,7 @@ export class PluginManager {
     this._applyPlugin(new ProjectActionConfigurationFilesPlugin());
     this._applyPlugin(new ResolveActionConfigurationPathsPlugin());
     this._applyPlugin(new CopyStaticAssetsPlugin());
-    this._applyPlugin(cleanPlugin);
+    this._applyPlugin(new CleanPlugin());
   }
 
   public initializePlugin(pluginSpecifier: string, options?: object): void {
