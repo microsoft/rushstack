@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@types/node": "10.17.13",
-    "@types/tapable": "1.0.4",
+    "@types/tapable": "1.0.5",
     "@rushstack/node-core-library": "3.24.1",
     "@rushstack/typings-generator": "0.1.21",
     "loader-utils": "~1.1.0",
