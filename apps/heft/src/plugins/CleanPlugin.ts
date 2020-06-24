@@ -3,14 +3,14 @@
 
 import { FileSystem } from '@rushstack/node-core-library';
 
-import { IPluginPackage } from '../pluginFramework/IPluginPackage';
+import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import { HeftCompilation } from '../pluginFramework/HeftCompilation';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { ICleanActionData } from '../cli/actions/CleanAction';
 
 const PLUGIN_NAME: string = 'CleanPlugin';
 
-export const cleanPlugin: IPluginPackage = {
+export const cleanPlugin: IHeftPlugin = {
   displayName: PLUGIN_NAME,
   apply: (heftCompilation: HeftCompilation, heftConfiguration: HeftConfiguration) => {
     heftCompilation.hooks.clean.tap(PLUGIN_NAME, (clean: ICleanActionData) => {

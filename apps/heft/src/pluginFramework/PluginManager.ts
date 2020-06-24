@@ -6,7 +6,7 @@ import { Terminal, InternalError, JsonFile, FileSystem, JsonSchema } from '@rush
 import * as resolve from 'resolve';
 
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { IPluginPackage } from './IPluginPackage';
+import { IHeftPlugin } from './IHeftPlugin';
 import { HeftCompilation } from './HeftCompilation';
 
 // Default plugins
@@ -50,9 +50,7 @@ export class PluginManager {
 
   public initializePlugin(pluginSpecifier: string, options?: object): void {
     const resolvedPluginPath: string = this._resolvePlugin(pluginSpecifier);
-    const pluginPackage: IPluginPackage<object | void> = this._loadAndValidatePluginPackage(
-      resolvedPluginPath
-    );
+    const pluginPackage: IHeftPlugin<object | void> = this._loadAndValidatePluginPackage(resolvedPluginPath);
     this._applyPlugin(pluginPackage, options);
   }
 
@@ -77,7 +75,7 @@ export class PluginManager {
     }
   }
 
-  private _applyPlugin(pluginPackage: IPluginPackage<object | void>, options?: object): void {
+  private _applyPlugin(pluginPackage: IHeftPlugin<object | void>, options?: object): void {
     try {
       // Todo: Use the plugin displayName in its logging.
       pluginPackage.apply(this._heftCompilation, this._heftConfiguration, options);
@@ -86,12 +84,12 @@ export class PluginManager {
     }
   }
 
-  private _loadAndValidatePluginPackage(resolvedPluginPath: string): IPluginPackage {
-    let pluginPackage: IPluginPackage;
+  private _loadAndValidatePluginPackage(resolvedPluginPath: string): IHeftPlugin {
+    let pluginPackage: IHeftPlugin;
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const loadedPluginPackage: IPluginPackage | { default: IPluginPackage } = require(resolvedPluginPath);
-      pluginPackage = (loadedPluginPackage as { default: IPluginPackage }).default || loadedPluginPackage;
+      const loadedPluginPackage: IHeftPlugin | { default: IHeftPlugin } = require(resolvedPluginPath);
+      pluginPackage = (loadedPluginPackage as { default: IHeftPlugin }).default || loadedPluginPackage;
     } catch (e) {
       throw new InternalError(`Error loading plugin package: ${e}`);
     }

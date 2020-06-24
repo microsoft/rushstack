@@ -4,7 +4,7 @@
 import * as path from 'path';
 import { JsonSchema, FileSystem, JsonFile } from '@rushstack/node-core-library';
 
-import { IPluginPackage } from '../../pluginFramework/IPluginPackage';
+import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { Clean, HeftCompilation, Build } from '../../pluginFramework/HeftCompilation';
 import { ISharedCopyStaticAssetsConfiguration } from '../../cli/actions/BuildAction';
@@ -19,7 +19,7 @@ interface ICopyStaticAssetsConfigurationJson
   extends IConfigurationJsonBase,
     ISharedCopyStaticAssetsConfiguration {}
 
-export abstract class ActionConfigurationFilesPluginBase implements IPluginPackage {
+export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin {
   private static _schemaCache: Map<string, JsonSchema> = new Map<string, JsonSchema>();
 
   public abstract displayName: string;

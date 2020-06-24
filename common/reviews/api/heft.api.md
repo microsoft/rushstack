@@ -178,7 +178,7 @@ export interface _IHeftConfigurationInitializationOptions {
 }
 
 // @public (undocumented)
-export interface IPluginPackage<TOptions = void> {
+export interface IHeftPlugin<TOptions = void> {
     // (undocumented)
     apply: (heftCompilation: HeftCompilation, heftConfiguration: HeftConfiguration, options?: TOptions) => void;
     // (undocumented)

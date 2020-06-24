@@ -5,14 +5,14 @@ import * as glob from 'glob';
 import * as path from 'path';
 import { LegacyAdapters } from '@rushstack/node-core-library';
 
-import { IPluginPackage } from '../pluginFramework/IPluginPackage';
+import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { HeftCompilation, Clean } from '../pluginFramework/HeftCompilation';
 
 const PLUGIN_NAME: string = 'ResolveConfigPaths';
 const GLOB_PATTERN_REGEX: RegExp = /\/\*[^\*]/;
 
-export class ResolveActionConfigurationPathsPlugin implements IPluginPackage {
+export class ResolveActionConfigurationPathsPlugin implements IHeftPlugin {
   public readonly displayName: string = PLUGIN_NAME;
 
   public apply(heftCompilation: HeftCompilation, heftConfiguration: HeftConfiguration): void {

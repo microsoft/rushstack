@@ -9,7 +9,7 @@ import * as chokidar from 'chokidar';
 
 import { Async } from '../utilities/Async';
 import { performance } from 'perf_hooks';
-import { IPluginPackage } from '../pluginFramework/IPluginPackage';
+import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import { Build, HeftCompilation } from '../pluginFramework/HeftCompilation';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { ICompileStage, ICopyStaticAssetsConfiguration } from '../cli/actions/BuildAction';
@@ -17,7 +17,7 @@ import { PrefixProxyTerminalProvider } from '../utilities/PrefixProxyTerminalPro
 
 const PLUGIN_NAME: string = 'CopyStaticAssetsPlugin';
 
-export const copyStaticAssetsPlugin: IPluginPackage = {
+export const copyStaticAssetsPlugin: IHeftPlugin = {
   displayName: PLUGIN_NAME,
   apply: (heftCompilation: HeftCompilation, heftConfiguration: HeftConfiguration) => {
     heftCompilation.hooks.build.tap(PLUGIN_NAME, (build: Build) => {

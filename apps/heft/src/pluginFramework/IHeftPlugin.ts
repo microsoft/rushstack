@@ -7,7 +7,7 @@ import { HeftCompilation } from './HeftCompilation';
 /**
  * @public
  */
-export interface IPluginPackage<TOptions = void> {
+export interface IHeftPlugin<TOptions = void> {
   apply: (heftCompilation: HeftCompilation, heftConfiguration: HeftConfiguration, options?: TOptions) => void;
   displayName: string;
 }
