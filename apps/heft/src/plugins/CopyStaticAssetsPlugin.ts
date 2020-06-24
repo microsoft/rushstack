@@ -26,10 +26,6 @@ export const copyStaticAssetsPlugin: IPluginPackage = {
           new PrefixProxyTerminalProvider(heftConfiguration.terminalProvider, '[copy-static-assets] ')
         );
 
-        // For now - this may need to be revised later
-        compile.copyStaticAssetsConfiguration.sourceFolderName = 'src';
-        compile.copyStaticAssetsConfiguration.destinationFolders = ['lib'];
-
         compile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
           const startTime: number = performance.now();
 
@@ -60,7 +56,7 @@ export const copyStaticAssetsPlugin: IPluginPackage = {
             fileExtensionsGlobPattern = `**/*+(${escapedExtensions.join('|')})`;
           }
 
-          const resolvedDestinationFolders: string[] = configuration.destinationFolders.map(
+          const resolvedDestinationFolders: string[] = configuration.destinationFolderNames.map(
             (destinationFolder) => path.join(heftConfiguration.buildFolder, destinationFolder)
           );
 

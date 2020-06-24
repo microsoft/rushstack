@@ -140,8 +140,8 @@ export interface ICompileStage extends IBuildStage<CompileStageHooks> {
 
 // @public (undocumented)
 export interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsConfiguration {
-    destinationFolders: string[];
-    sourceFolderName: string | undefined;
+    destinationFolderNames: string[];
+    sourceFolderName: string;
 }
 
 // @public (undocumented)

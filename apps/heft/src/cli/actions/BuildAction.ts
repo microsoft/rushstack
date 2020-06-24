@@ -56,14 +56,18 @@ export interface ISharedCopyStaticAssetsConfiguration {
  */
 export interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsConfiguration {
   /**
-   * The folder from which assets should be copied
+   * The folder from which assets should be copied. For example, "src". This defaults to "src".
+   *
+   * This folder is directly under the folder containing the project's package.json file
    */
-  sourceFolderName: string | undefined;
+  sourceFolderName: string;
 
   /**
-   * The folder(s) to which assets should be copied
+   * The folder(s) to which assets should be copied. For example ["lib", "lib-cjs"]. This defaults to ["lib"]
+   *
+   * These folders are directly under the folder containing the project's package.json file
    */
-  destinationFolders: string[];
+  destinationFolderNames: string[];
 }
 
 /**
@@ -192,8 +196,10 @@ export class BuildAction extends HeftActionBase<IBuildActionData, BuildHooks> {
         fileExtensions: [],
         exclude: [],
         include: [],
-        sourceFolderName: undefined,
-        destinationFolders: []
+
+        // For now - these may need to be revised later
+        sourceFolderName: 'src',
+        destinationFolderNames: ['lib']
       }
     };
     actionData.hooks.compile.call(compileStage);
