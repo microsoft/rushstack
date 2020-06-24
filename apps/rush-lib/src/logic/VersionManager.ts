@@ -23,14 +23,14 @@ export class VersionManager {
   private _changeFiles: Map<string, ChangeFile>;
 
   public constructor(
-    _rushConfiguration: RushConfiguration,
-    _userEmail: string,
-    _versionPolicyConfiguration?: VersionPolicyConfiguration
+    rushConfiguration: RushConfiguration,
+    userEmail: string,
+    versionPolicyConfiguration?: VersionPolicyConfiguration
   ) {
-    this._rushConfiguration = _rushConfiguration;
-    this._userEmail = _userEmail;
-    this._versionPolicyConfiguration = _versionPolicyConfiguration
-      ? _versionPolicyConfiguration
+    this._rushConfiguration = rushConfiguration;
+    this._userEmail = userEmail;
+    this._versionPolicyConfiguration = versionPolicyConfiguration
+      ? versionPolicyConfiguration
       : this._rushConfiguration.versionPolicyConfiguration;
 
     this._updatedProjects = new Map<string, IPackageJson>();

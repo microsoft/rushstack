@@ -24,7 +24,7 @@
     "@rushstack/eslint-config": "0.5.8",
     "@types/node": "10.17.13",
     "import-lazy": "~4.0.0",
-    "eslint": "~6.5.1",
+    "eslint": "~7.2.0",
     "tslint": "~5.20.1",
     "tslint-microsoft-contrib": "~6.2.0",
     "typescript": "~3.6.4"

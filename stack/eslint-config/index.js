@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+const macros = require('./macros');
+
 module.exports = {
   // Disable the parser by default
   parser: '',
@@ -59,45 +61,47 @@ module.exports = {
         '@typescript-eslint/ban-types': [
           'error',
           {
+            extendDefaults: false, // (the complete list is in this file)
             types: {
               String: {
-                message: "Use 'string' instead",
+                message: 'Use "string" instead',
                 fixWith: 'string'
               },
               Boolean: {
-                message: "Use 'boolean' instead",
+                message: 'Use "boolean" instead',
                 fixWith: 'boolean'
               },
               Number: {
-                message: "Use 'number' instead",
+                message: 'Use "number" instead',
                 fixWith: 'number'
               },
               Object: {
-                message: "Use 'object' instead, or else define a proper TypeScript type:"
+                message: 'Use "object" instead, or else define a proper TypeScript type:'
               },
               Symbol: {
-                message: "Use 'symbol' instead",
+                message: 'Use "symbol" instead',
                 fixWith: 'symbol'
+              },
+              Function: {
+                message: [
+                  'The "Function" type accepts any function-like value.',
+                  'It provides no type safety when calling the function, which can be a common source of bugs.',
+                  'It also accepts things like class declarations, which will throw at runtime as they will not be called with "new".',
+                  'If you are expecting the function to accept certain arguments, you should explicitly define the function shape.'
+                ].join('\n')
               }
+
+              // This is a good idea, but before enabling it we need to put some thought into the recommended
+              // coding practices; the default suggestions are too vague.
+              //
+              // '{}': {
+              //   message: [
+              //     '"{}" actually means "any non-nullish value".',
+              //     '- If you want a type meaning "any object", you probably want "Record<string, unknown>" instead.',
+              //     '- If you want a type meaning "any value", you probably want "unknown" instead.'
+              //   ].join('\n')
+              // }
             }
-          }
-        ],
-
-        // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/camelcase': [
-          'error',
-          {
-            // This is a special exception for naming patterns that use an underscore to separate two camel-cased
-            // parts.  Example:  "checkBox1_onChanged" or "_checkBox1_onChanged"
-            allow: ['^_?[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*_[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*$']
-          }
-        ],
-
-        // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/class-name-casing': [
-          'error',
-          {
-            allowUnderscorePrefix: true
           }
         ],
 
@@ -127,27 +131,6 @@ module.exports = {
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         '@typescript-eslint/explicit-member-accessibility': 'error',
 
-        // RATIONALE:         It is very common for a class to implement an interface of the same name.
-        //                    For example, the Widget class may implement the IWidget interface.  The "I" prefix
-        //                    avoids the need to invent a separate name such as "AbstractWidget" or "WidgetInterface".
-        //                    In TypeScript it is also common to declare interfaces that are implemented by primitive
-        //                    objects, here the "I" prefix also helps by avoiding spurious conflicts with classes
-        //                    by the same name.
-        //
-        '@typescript-eslint/interface-name-prefix': [
-          'error',
-          {
-            prefixWithI: 'always',
-            allowUnderscorePrefix: true
-          }
-        ],
-
-        // RATIONALE:         Requiring private members to be prefixed with an underscore prevents accidental access
-        //                    by scripts that are coded in plain JavaScript and cannot see the TypeScript visibility
-        //                    declarations.  Also, using underscore prefixes allows the private field to be exposed
-        //                    by a public getter/setter with the same name (but omitting the underscore).
-        '@typescript-eslint/member-naming': ['error', { private: '^_' }],
-
         // RATIONALE:         Object-oriented programming organizes code into "classes" that associate
         //                    data structures (the class's fields) and the operations performed on those
         //                    data structures (the class's members).  Studying the fields often reveals the "idea"
@@ -163,6 +146,172 @@ module.exports = {
             default: 'never',
             classes: ['field', 'constructor', 'method']
           }
+        ],
+
+        // NOTE: This new rule replaces several deprecated rules from @typescript-eslint/eslint-plugin@2.3.3:
+        //
+        // - @typescript-eslint/camelcase
+        // - @typescript-eslint/class-name-casing
+        // - @typescript-eslint/interface-name-prefix
+        // - @typescript-eslint/member-naming
+        //
+        // Docs: https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/naming-convention.md
+        '@typescript-eslint/naming-convention': [
+          'error',
+          ...macros.expandNamingConventionSelectors([
+            {
+              // We should be stricter about 'enumMember', but it often functions legitimately as an ad hoc namespace.
+              selectors: ['variable', 'enumMember', 'function'],
+
+              format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+              leadingUnderscore: 'allow',
+
+              filter: {
+                regex: [
+                  // This is a special exception for naming patterns that use an underscore to separate two camel-cased
+                  // parts.  Example:  "checkBox1_onChanged" or "_checkBox1_onChanged"
+                  '^_?[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*_[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*$'
+                ]
+                  .map((x) => `(${x})`)
+                  .join('|'),
+                match: false
+              }
+            },
+
+            {
+              selectors: ['parameter'],
+
+              format: ['camelCase'],
+
+              filter: {
+                regex: [
+                  // Silently accept names with a double-underscore prefix; we would like to be more strict about this,
+                  // pending a fix for https://github.com/typescript-eslint/typescript-eslint/issues/2240
+                  '^__'
+                ]
+                  .map((x) => `(${x})`)
+                  .join('|'),
+                match: false
+              }
+            },
+
+            // Genuine properties
+            {
+              selectors: ['parameterProperty', 'accessor'],
+              enforceLeadingUnderscoreWhenPrivate: true,
+
+              format: ['camelCase', 'UPPER_CASE'],
+
+              filter: {
+                regex: [
+                  // Silently accept names with a double-underscore prefix; we would like to be more strict about this,
+                  // pending a fix for https://github.com/typescript-eslint/typescript-eslint/issues/2240
+                  '^__',
+                  // Ignore quoted identifiers such as { "X+Y": 123 }.  Currently @typescript-eslint/naming-convention
+                  // cannot detect whether an identifier is quoted or not, so we simply assume that it is quoted
+                  // if-and-only-if it contains characters that require quoting.
+                  '[^a-zA-Z0-9_]',
+                  // This is a special exception for naming patterns that use an underscore to separate two camel-cased
+                  // parts.  Example:  "checkBox1_onChanged" or "_checkBox1_onChanged"
+                  '^_?[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*_[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*$'
+                ]
+                  .map((x) => `(${x})`)
+                  .join('|'),
+                match: false
+              }
+            },
+
+            // Properties that incorrectly match other contexts
+            // See issue https://github.com/typescript-eslint/typescript-eslint/issues/2244
+            {
+              selectors: ['property'],
+              enforceLeadingUnderscoreWhenPrivate: true,
+
+              // The @typescript-eslint/naming-convention "property" selector matches cases like this:
+              //
+              //   someLegacyApiWeCannotChange.invokeMethod({ SomeProperty: 123 });
+              //
+              // and this:
+              //
+              //   const { CONSTANT1, CONSTANT2 } = someNamespace.constants;
+              //
+              // Thus for now "property" is more like a variable than a class member.
+              format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+              leadingUnderscore: 'allow',
+
+              filter: {
+                regex: [
+                  // Silently accept names with a double-underscore prefix; we would like to be more strict about this,
+                  // pending a fix for https://github.com/typescript-eslint/typescript-eslint/issues/2240
+                  '^__',
+                  // Ignore quoted identifiers such as { "X+Y": 123 }.  Currently @typescript-eslint/naming-convention
+                  // cannot detect whether an identifier is quoted or not, so we simply assume that it is quoted
+                  // if-and-only-if it contains characters that require quoting.
+                  '[^a-zA-Z0-9_]',
+                  // This is a special exception for naming patterns that use an underscore to separate two camel-cased
+                  // parts.  Example:  "checkBox1_onChanged" or "_checkBox1_onChanged"
+                  '^_?[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*_[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*$'
+                ]
+                  .map((x) => `(${x})`)
+                  .join('|'),
+                match: false
+              }
+            },
+
+            {
+              selectors: ['method'],
+              enforceLeadingUnderscoreWhenPrivate: true,
+
+              // A PascalCase method can arise somewhat legitimately in this way:
+              //
+              // class MyClass {
+              //    public static MyReactButton(props: IButtonProps): JSX.Element {
+              //      . . .
+              //    }
+              // }
+              format: ['camelCase', 'PascalCase'],
+              leadingUnderscore: 'allow',
+
+              filter: {
+                regex: [
+                  // Silently accept names with a double-underscore prefix; we would like to be more strict about this,
+                  // pending a fix for https://github.com/typescript-eslint/typescript-eslint/issues/2240
+                  '^__',
+                  // This is a special exception for naming patterns that use an underscore to separate two camel-cased
+                  // parts.  Example:  "checkBox1_onChanged" or "_checkBox1_onChanged"
+                  '^_?[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*_[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*$'
+                ]
+                  .map((x) => `(${x})`)
+                  .join('|'),
+                match: false
+              }
+            },
+
+            // Types should use PascalCase
+            {
+              // Group selector for: class, interface, typeAlias, enum, typeParameter
+              selectors: ['class', 'typeAlias', 'enum', 'typeParameter'],
+              format: ['PascalCase'],
+              leadingUnderscore: 'allow'
+            },
+
+            {
+              selectors: ['interface'],
+
+              // It is very common for a class to implement an interface of the same name.
+              // For example, the Widget class may implement the IWidget interface.  The "I" prefix
+              // avoids the need to invent a separate name such as "AbstractWidget" or "WidgetInterface".
+              // In TypeScript it is also common to declare interfaces that are implemented by primitive
+              // objects, here the "I" prefix also helps by avoiding spurious conflicts with classes
+              // by the same name.
+              format: ['PascalCase'],
+
+              custom: {
+                regex: '^_?I[A-Z]',
+                match: true
+              }
+            }
+          ])
         ],
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
@@ -240,10 +389,8 @@ module.exports = {
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         '@typescript-eslint/no-use-before-define': 'error',
 
-        // RATIONALE:         The require() API is generally obsolete.  Use "import" instead.
-        //
-        // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/no-var-requires': 'error',
+        // TODO: This is a good rule for web browser apps, but it is commonly needed API for Node.js tools.
+        // '@typescript-eslint/no-var-requires': 'error',
 
         // RATIONALE:         The "module" keyword is deprecated except when describing legacy libraries.
         //

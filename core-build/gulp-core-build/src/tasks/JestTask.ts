@@ -8,7 +8,6 @@ import * as glob from 'glob';
 
 // runCLI is not exported from 'jest' anymore.
 // See https://github.com/facebook/jest/issues/9512#issuecomment-581835474
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { runCLI } = require('@jest/core');
 import { Config, AggregatedResult } from '@jest/reporters';
 import { FileSystem, JsonObject } from '@rushstack/node-core-library';
@@ -86,7 +85,6 @@ export function _isJestEnabled(rootFolder: string): boolean {
   if (!FileSystem.exists(taskConfigFile)) {
     return false;
   }
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const taskConfig: {} = require(taskConfigFile);
   // eslint-disable-next-line dot-notation
   return !!taskConfig['isEnabled'];
