@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/eslint-config",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A TypeScript ESLint ruleset designed for large teams and projects",
   "license": "MIT",
   "repository": {
@@ -24,8 +24,8 @@
     "typescript": ">=3.0.0"
   },
   "dependencies": {
-    "@rushstack/eslint-patch": "1.0.1",
-    "@rushstack/eslint-plugin": "0.4.0",
+    "@rushstack/eslint-patch": "1.0.2",
+    "@rushstack/eslint-plugin": "0.4.1",
     "@typescript-eslint/eslint-plugin": "3.3.0",
     "@typescript-eslint/experimental-utils": "3.3.0",
     "@typescript-eslint/parser": "3.3.0",
