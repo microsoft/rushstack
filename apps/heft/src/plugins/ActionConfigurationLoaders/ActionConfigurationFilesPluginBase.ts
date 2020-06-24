@@ -6,7 +6,7 @@ import { JsonSchema, FileSystem, JsonFile } from '@rushstack/node-core-library';
 
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
-import { Clean, HeftCompilation, Build } from '../../pluginFramework/HeftCompilation';
+import { Clean, HeftSession, Build } from '../../pluginFramework/HeftSession';
 import { ISharedCopyStaticAssetsConfiguration } from '../../cli/actions/BuildAction';
 
 interface IConfigurationJsonBase {}
@@ -24,8 +24,8 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
 
   public abstract displayName: string;
 
-  public apply(heftCompilation: HeftCompilation, heftConfiguration: HeftConfiguration): void {
-    heftCompilation.hooks.clean.tap(this.displayName, (clean: Clean) => {
+  public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
+    heftSession.hooks.clean.tap(this.displayName, (clean: Clean) => {
       clean.hooks.loadActionConfiguration.tapPromise(this.displayName, async () => {
         const cleanActionConfiguration:
           | ICleanConfigurationJson
@@ -37,7 +37,7 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
       });
     });
 
-    heftCompilation.hooks.build.tap(this.displayName, (build: Build) => {
+    heftSession.hooks.build.tap(this.displayName, (build: Build) => {
       build.hooks.compile.tap(this.displayName, (compile) => {
         compile.hooks.configureCopyStaticAssets.tapPromise(this.displayName, async () => {
           const copyStaticAssetsConfiguration:

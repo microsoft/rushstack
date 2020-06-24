@@ -37,7 +37,7 @@ export type Test = ITestActionData;
 /**
  * @public
  */
-export interface IHeftCompilationHooks {
+export interface IHeftSessionHooks {
   build: SyncHook<Build>;
   clean: SyncHook<Clean>;
   devDeploy: SyncHook<DevDeploy>;
@@ -48,7 +48,7 @@ export interface IHeftCompilationHooks {
 /**
  * @internal
  */
-export interface IHeftCompilationOptions {
+export interface IHeftSessionOptions {
   buildAction: BuildAction;
   cleanAction: CleanAction;
   devDeployAction: DevDeployAction;
@@ -61,8 +61,8 @@ export interface IHeftCompilationOptions {
 /**
  * @public
  */
-export class HeftCompilation {
-  public readonly hooks: IHeftCompilationHooks;
+export class HeftSession {
+  public readonly hooks: IHeftSessionHooks;
 
   /**
    * If set to true, the build is running with the --debug flag
@@ -71,12 +71,12 @@ export class HeftCompilation {
     return this._options.getIsDebugMode();
   }
 
-  private _options: IHeftCompilationOptions;
+  private _options: IHeftSessionOptions;
 
   /**
    * @internal
    */
-  public constructor(options: IHeftCompilationOptions) {
+  public constructor(options: IHeftSessionOptions) {
     this._options = options;
     const { buildAction, cleanAction, devDeployAction, startAction, testAction } = options;
 

@@ -68,17 +68,6 @@ export class DevDeployHooks extends ActionHooksBase {
 }
 
 // @public (undocumented)
-export class HeftCompilation {
-    // Warning: (ae-forgotten-export) The symbol "IHeftCompilationOptions" needs to be exported by the entry point index.d.ts
-    //
-    // @internal
-    constructor(options: IHeftCompilationOptions);
-    get debugMode(): boolean;
-    // (undocumented)
-    readonly hooks: IHeftCompilationHooks;
-    }
-
-// @public (undocumented)
 export class HeftConfiguration {
     get buildFolder(): string;
     get heftPackageJson(): IPackageJson;
@@ -88,6 +77,17 @@ export class HeftConfiguration {
     get projectPackageJson(): IPackageJson;
     get terminal(): Terminal;
     get terminalProvider(): ITerminalProvider;
+    }
+
+// @public (undocumented)
+export class HeftSession {
+    // Warning: (ae-forgotten-export) The symbol "IHeftSessionOptions" needs to be exported by the entry point index.d.ts
+    //
+    // @internal
+    constructor(options: IHeftSessionOptions);
+    get debugMode(): boolean;
+    // (undocumented)
+    readonly hooks: IHeftSessionHooks;
     }
 
 // @public (undocumented)
@@ -157,8 +157,22 @@ export interface IHeftActionConfigurationOptions {
     mergeArrays?: boolean;
 }
 
+// @internal (undocumented)
+export interface _IHeftConfigurationInitializationOptions {
+    cwd: string;
+    terminalProvider: ITerminalProvider;
+}
+
 // @public (undocumented)
-export interface IHeftCompilationHooks {
+export interface IHeftPlugin<TOptions = void> {
+    // (undocumented)
+    apply: (heftSession: HeftSession, heftConfiguration: HeftConfiguration, options?: TOptions) => void;
+    // (undocumented)
+    displayName: string;
+}
+
+// @public (undocumented)
+export interface IHeftSessionHooks {
     // (undocumented)
     build: SyncHook<Build>;
     // (undocumented)
@@ -169,20 +183,6 @@ export interface IHeftCompilationHooks {
     start: SyncHook<Start>;
     // (undocumented)
     test: SyncHook<Test>;
-}
-
-// @internal (undocumented)
-export interface _IHeftConfigurationInitializationOptions {
-    cwd: string;
-    terminalProvider: ITerminalProvider;
-}
-
-// @public (undocumented)
-export interface IHeftPlugin<TOptions = void> {
-    // (undocumented)
-    apply: (heftCompilation: HeftCompilation, heftConfiguration: HeftConfiguration, options?: TOptions) => void;
-    // (undocumented)
-    displayName: string;
 }
 
 // @public (undocumented)

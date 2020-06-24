@@ -4,7 +4,7 @@
 import { FileSystem } from '@rushstack/node-core-library';
 
 import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
-import { HeftCompilation } from '../pluginFramework/HeftCompilation';
+import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { ICleanActionData } from '../cli/actions/CleanAction';
 
@@ -12,8 +12,8 @@ const PLUGIN_NAME: string = 'CleanPlugin';
 
 export const cleanPlugin: IHeftPlugin = {
   displayName: PLUGIN_NAME,
-  apply: (heftCompilation: HeftCompilation, heftConfiguration: HeftConfiguration) => {
-    heftCompilation.hooks.clean.tap(PLUGIN_NAME, (clean: ICleanActionData) => {
+  apply: (heftSession: HeftSession, heftConfiguration: HeftConfiguration) => {
+    heftSession.hooks.clean.tap(PLUGIN_NAME, (clean: ICleanActionData) => {
       clean.hooks.deletePath.tapPromise(PLUGIN_NAME, async (pathToDelete: string) => {
         try {
           FileSystem.deleteFile(pathToDelete, { throwIfNotExists: true });

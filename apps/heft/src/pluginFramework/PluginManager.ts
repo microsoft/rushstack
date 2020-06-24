@@ -7,7 +7,7 @@ import * as resolve from 'resolve';
 
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IHeftPlugin } from './IHeftPlugin';
-import { HeftCompilation } from './HeftCompilation';
+import { HeftSession } from './HeftSession';
 
 // Default plugins
 import { RushActionConfigurationFilesPlugin } from '../plugins/ActionConfigurationLoaders/RushActionConfigurationFilesPlugin';
@@ -19,7 +19,7 @@ import { copyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
 export interface IPluginManagerOptions {
   terminal: Terminal;
   heftConfiguration: HeftConfiguration;
-  heftCompilation: HeftCompilation;
+  heftSession: HeftSession;
 }
 
 interface IPluginConfigurationJson {
@@ -32,12 +32,12 @@ interface IPluginConfigurationJson {
 export class PluginManager {
   private _terminal: Terminal;
   private _heftConfiguration: HeftConfiguration;
-  private _heftCompilation: HeftCompilation;
+  private _heftSession: HeftSession;
 
   public constructor(options: IPluginManagerOptions) {
     this._terminal = options.terminal;
     this._heftConfiguration = options.heftConfiguration;
-    this._heftCompilation = options.heftCompilation;
+    this._heftSession = options.heftSession;
   }
 
   public initializeDefaultPlugins(): void {
@@ -78,7 +78,7 @@ export class PluginManager {
   private _applyPlugin(pluginPackage: IHeftPlugin<object | void>, options?: object): void {
     try {
       // Todo: Use the plugin displayName in its logging.
-      pluginPackage.apply(this._heftCompilation, this._heftConfiguration, options);
+      pluginPackage.apply(this._heftSession, this._heftConfiguration, options);
     } catch (e) {
       throw new InternalError(`Error applying "${pluginPackage.displayName}": ${e}`);
     }

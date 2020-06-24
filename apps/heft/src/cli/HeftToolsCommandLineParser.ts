@@ -13,12 +13,12 @@ import { TestAction } from './actions/TestAction';
 import { PluginManager } from '../pluginFramework/PluginManager';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IHeftActionBaseOptions } from './actions/HeftActionBase';
-import { HeftCompilation } from '../pluginFramework/HeftCompilation';
+import { HeftSession } from '../pluginFramework/HeftSession';
 
 export class HeftToolsCommandLineParser extends CommandLineParserBase {
   private _pluginManager: PluginManager;
   private _heftConfiguration: HeftConfiguration;
-  private _heftCompilation: HeftCompilation;
+  private _heftSession: HeftSession;
 
   public constructor() {
     super({
@@ -43,7 +43,7 @@ export class HeftToolsCommandLineParser extends CommandLineParserBase {
     const startAction: StartAction = new StartAction(actionOptions);
     const testAction: TestAction = new TestAction({ ...actionOptions, cleanAction });
 
-    this._heftCompilation = new HeftCompilation({
+    this._heftSession = new HeftSession({
       getIsDebugMode: () => this.isDebug,
 
       cleanAction,
@@ -55,7 +55,7 @@ export class HeftToolsCommandLineParser extends CommandLineParserBase {
     this._pluginManager = new PluginManager({
       terminal: this.terminal,
       heftConfiguration: this._heftConfiguration,
-      heftCompilation: this._heftCompilation
+      heftSession: this._heftSession
     });
 
     this.addAction(cleanAction);

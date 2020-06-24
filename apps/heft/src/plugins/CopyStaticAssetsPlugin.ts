@@ -10,7 +10,7 @@ import * as chokidar from 'chokidar';
 import { Async } from '../utilities/Async';
 import { performance } from 'perf_hooks';
 import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
-import { Build, HeftCompilation } from '../pluginFramework/HeftCompilation';
+import { Build, HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { ICompileStage, ICopyStaticAssetsConfiguration } from '../cli/actions/BuildAction';
 import { PrefixProxyTerminalProvider } from '../utilities/PrefixProxyTerminalProvider';
@@ -19,8 +19,8 @@ const PLUGIN_NAME: string = 'CopyStaticAssetsPlugin';
 
 export const copyStaticAssetsPlugin: IHeftPlugin = {
   displayName: PLUGIN_NAME,
-  apply: (heftCompilation: HeftCompilation, heftConfiguration: HeftConfiguration) => {
-    heftCompilation.hooks.build.tap(PLUGIN_NAME, (build: Build) => {
+  apply: (heftSession: HeftSession, heftConfiguration: HeftConfiguration) => {
+    heftSession.hooks.build.tap(PLUGIN_NAME, (build: Build) => {
       build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileStage) => {
         const terminal: Terminal = new Terminal(
           new PrefixProxyTerminalProvider(heftConfiguration.terminalProvider, '[copy-static-assets] ')

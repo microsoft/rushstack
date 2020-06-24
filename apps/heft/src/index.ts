@@ -10,14 +10,14 @@ export {
 } from './configuration/HeftConfiguration';
 export { ActionHooksBase, IActionDataBase } from './cli/actions/HeftActionBase';
 export {
-  HeftCompilation,
-  IHeftCompilationHooks,
+  HeftSession,
+  IHeftSessionHooks,
   Build,
   Clean,
   DevDeploy,
   Start,
   Test
-} from './pluginFramework/HeftCompilation';
+} from './pluginFramework/HeftSession';
 
 // Actions
 export {
