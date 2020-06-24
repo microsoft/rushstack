@@ -117,17 +117,17 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
       assetsToCopy = await this._expandGlobPatternAsync(
         resolvedSourceFolderPath,
         pattern,
-        copyStaticAssetsConfiguration.exclude
+        copyStaticAssetsConfiguration.excludeGlobs
       );
     } else {
       assetsToCopy = new Set<string>();
     }
 
-    for (const include of copyStaticAssetsConfiguration.include || []) {
+    for (const include of copyStaticAssetsConfiguration.includeGlobs || []) {
       const explicitlyIncludedPaths: Set<string> = await this._expandGlobPatternAsync(
         resolvedSourceFolderPath,
         include,
-        copyStaticAssetsConfiguration.exclude
+        copyStaticAssetsConfiguration.excludeGlobs
       );
       for (const explicitlyIncludedPath of explicitlyIncludedPaths) {
         assetsToCopy.add(explicitlyIncludedPath);
@@ -165,11 +165,11 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
 
     if (fileExtensionsGlobPattern) {
       const watcher: chokidar.FSWatcher = chokidar.watch(
-        [fileExtensionsGlobPattern, ...(copyStaticAssetsConfiguration.include || [])],
+        [fileExtensionsGlobPattern, ...(copyStaticAssetsConfiguration.includeGlobs || [])],
         {
           cwd: resolvedSourceFolderPath,
           ignoreInitial: true,
-          ignored: copyStaticAssetsConfiguration.exclude
+          ignored: copyStaticAssetsConfiguration.excludeGlobs
         }
       );
 

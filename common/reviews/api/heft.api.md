@@ -187,9 +187,9 @@ export interface IHeftSessionHooks {
 
 // @public (undocumented)
 export interface ISharedCopyStaticAssetsConfiguration {
-    exclude?: string[];
+    excludeGlobs?: string[];
     fileExtensions?: string[];
-    include?: string[];
+    includeGlobs?: string[];
 }
 
 // @public (undocumented)

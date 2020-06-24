@@ -21,18 +21,18 @@
       }
     },
 
-    "exclude": {
+    "excludeGlobs": {
       "type": "array",
-      "description": "Paths or globs that should be explicitly excluded. This takes precedence over paths listed in \"include\" and files that match the file extensions provided in \"fileExtensions\".",
+      "description": "Globs that should be explicitly excluded. This takes precedence over globs listed in \"includeGlobs\" and files that match the file extensions provided in \"fileExtensions\".",
       "items": {
         "type": "string",
         "pattern": "[^\\\\]"
       }
     },
 
-    "include": {
+    "includeGlobs": {
       "type": "array",
-      "description": "Paths or globs that should be explicitly included. This takes precedence over paths listed in \"exclude\".",
+      "description": "Globs that should be explicitly included.",
       "items": {
         "type": "string",
         "pattern": "[^\\\\]"

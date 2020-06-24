@@ -55,20 +55,24 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
               );
             }
 
-            if (copyStaticAssetsConfiguration.include) {
-              if (!compile.copyStaticAssetsConfiguration.include) {
-                compile.copyStaticAssetsConfiguration.include = [];
+            if (copyStaticAssetsConfiguration.includeGlobs) {
+              if (!compile.copyStaticAssetsConfiguration.includeGlobs) {
+                compile.copyStaticAssetsConfiguration.includeGlobs = [];
               }
 
-              compile.copyStaticAssetsConfiguration.include.push(...copyStaticAssetsConfiguration.include);
+              compile.copyStaticAssetsConfiguration.includeGlobs.push(
+                ...copyStaticAssetsConfiguration.includeGlobs
+              );
             }
 
-            if (copyStaticAssetsConfiguration.exclude) {
-              if (!compile.copyStaticAssetsConfiguration.exclude) {
-                compile.copyStaticAssetsConfiguration.exclude = [];
+            if (copyStaticAssetsConfiguration.excludeGlobs) {
+              if (!compile.copyStaticAssetsConfiguration.excludeGlobs) {
+                compile.copyStaticAssetsConfiguration.excludeGlobs = [];
               }
 
-              compile.copyStaticAssetsConfiguration.exclude.push(...copyStaticAssetsConfiguration.exclude);
+              compile.copyStaticAssetsConfiguration.excludeGlobs.push(
+                ...copyStaticAssetsConfiguration.excludeGlobs
+              );
             }
           }
         });

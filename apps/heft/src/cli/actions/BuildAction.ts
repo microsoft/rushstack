@@ -40,15 +40,15 @@ export interface ISharedCopyStaticAssetsConfiguration {
   fileExtensions?: string[];
 
   /**
-   * Paths or globs that should be explicitly excluded. This takes precedence over paths listed in "include" and
+   * Globs that should be explicitly excluded. This takes precedence over globs listed in "includeGlobs" and
    * files that match the file extensions provided in "fileExtensions".
    */
-  exclude?: string[];
+  excludeGlobs?: string[];
 
   /**
-   * Paths or globs that should be explicitly included.
+   * Globs that should be explicitly included.
    */
-  include?: string[];
+  includeGlobs?: string[];
 }
 
 /**
@@ -194,8 +194,8 @@ export class BuildAction extends HeftActionBase<IBuildActionData, BuildHooks> {
       hooks: new CompileStageHooks(),
       copyStaticAssetsConfiguration: {
         fileExtensions: [],
-        exclude: [],
-        include: [],
+        excludeGlobs: [],
+        includeGlobs: [],
 
         // For now - these may need to be revised later
         sourceFolderName: 'src',
