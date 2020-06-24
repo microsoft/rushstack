@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin",
   "entries": [
     {
+      "version": "0.4.1",
+      "tag": "@rushstack/eslint-plugin_v0.4.1",
+      "date": "Wed, 24 Jun 2020 09:50:48 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with the published file set"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.0",
       "tag": "@rushstack/eslint-plugin_v0.4.0",
       "date": "Wed, 24 Jun 2020 09:04:28 GMT",
