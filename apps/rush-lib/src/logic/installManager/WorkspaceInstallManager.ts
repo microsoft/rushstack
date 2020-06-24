@@ -199,8 +199,14 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             throw new AlreadyReportedError();
           }
 
-          // We will update to `workspace:*` by default to ensure we're always using the workspace package.
-          packageJson.addOrUpdateDependency(name, 'workspace:*', dependencyType);
+          // We will update to `workspace` notation. If the version specified is a range, then use the provided range.
+          // Otherwise, use `workspace:*` to ensure we're always using the workspace package.
+          const workspaceRange: string =
+            !!semver.validRange(dependencySpecifier.versionSpecifier) &&
+            !semver.valid(dependencySpecifier.versionSpecifier)
+              ? dependencySpecifier.versionSpecifier
+              : '*';
+          packageJson.addOrUpdateDependency(name, `workspace:${workspaceRange}`, dependencyType);
           shrinkwrapIsUpToDate = false;
           continue;
         } else if (dependencySpecifier.specifierType === 'workspace') {
