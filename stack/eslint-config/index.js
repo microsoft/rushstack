@@ -398,14 +398,29 @@ module.exports = {
         '@typescript-eslint/prefer-namespace-keyword': 'error',
 
         // RATIONALE:         We require explicit type annotations, even when the compiler could infer the type.
-        //                    This is a controversial rule because it makes code more verbose.  The reason is that
-        //                    type inference is useless when reviewing the diff for a pull request or a Git history.
-        //                    Unless the person is already familiar with every file (unlikely in a large project),
-        //                    it can be very difficult to guess the types for a typical statement such as
-        //                    "let item = provider.fetch(options);".  In this situation, explicit type annotations
-        //                    greatly increase readability and justify the extra effort required to write them.
-        //                    Requiring type annotations also discourages anonymous type algebra, and code is easier
-        //                    to reason about when its authors went through the exercise of choosing meaningful names.
+        //                    This can be a controversial policy because it makes code more verbose.  There are
+        //                    a couple downsides to type inference, however.  First, it is not always available.
+        //                    For example, when reviewing a pull request or examining a Git history, we may see
+        //                    code like this:
+        //
+        //                        // What is the type of "y" here? The compiler knows, but the
+        //                        // person reading the code may have no clue.
+        //                        const x = f.();
+        //                        const y = x.z;
+        //
+        //                    Second, relying on implicit types also discourages design discussions and documentation.
+        //                    Consider this example:
+        //
+        //                        // Where's the documentation for "correlation" and "inventory"?
+        //                        // Where would you even write the TSDoc comments?
+        //                        function g() {
+        //                          return { correlation: 123, inventory: 'xyz' };
+        //                        }
+        //
+        //                    Implicit types make sense for small scale scenarios, where everyone is familiar with
+        //                    the project, and code should be "easy to write".  Explicit types are preferable
+        //                    for large scale scenarios, where people regularly work with source files they've never
+        //                    seen before, and code should be "easy to read."
         //
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         '@typescript-eslint/typedef': [
@@ -414,10 +429,31 @@ module.exports = {
             arrayDestructuring: false,
             arrowParameter: false,
             memberVariableDeclaration: true,
-            parameter: true,
             objectDestructuring: false,
+            parameter: true,
             propertyDeclaration: true,
-            variableDeclaration: true
+            variableDeclaration: true,
+
+            // Normally we require type declarations for class members.  However, that rule is relaxed
+            // for situations where we need to bind the "this" pointer for a callback.  For example, consider
+            // this event handler for a React component:
+            //
+            //     class MyComponent {
+            //       public render(): React.ReactNode {
+            //          return (
+            //            <a href="#" onClick={this._onClick}> click me </a>
+            //          );
+            //        }
+            //
+            //        // The assignment here avoids the need for "this._onClick.bind(this)"
+            //        private _onClick = (event: React.MouseEvent<HTMLAnchorElement>): void => {
+            //          console.log("Clicked! " + this.props.title);
+            //        };
+            //      }
+            //
+            // This coding style has limitations and should be used sparingly.  For example, "_onClick"
+            // will not participate correctly in "virtual"/"override" inheritance.
+            variableDeclarationIgnoreFunction: true
           }
         ],
 
