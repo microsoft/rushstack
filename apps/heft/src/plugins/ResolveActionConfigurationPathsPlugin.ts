@@ -8,7 +8,7 @@ import { LegacyAdapters } from '@rushstack/node-core-library';
 import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { HeftSession } from '../pluginFramework/HeftSession';
-import { ICleanActionData } from '../cli/actions/CleanAction';
+import { ICleanActionContext } from '../cli/actions/CleanAction';
 
 const PLUGIN_NAME: string = 'ResolveConfigPaths';
 const GLOB_PATTERN_REGEX: RegExp = /\/\*[^\*]/;
@@ -17,10 +17,13 @@ export class ResolveActionConfigurationPathsPlugin implements IHeftPlugin {
   public readonly displayName: string = PLUGIN_NAME;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftSession.hooks.clean.tap(PLUGIN_NAME, (clean: ICleanActionData) => {
+    heftSession.hooks.clean.tap(PLUGIN_NAME, (clean: ICleanActionContext) => {
       clean.hooks.afterLoadActionConfiguration.tapPromise(PLUGIN_NAME, async () => {
         // eslint-disable-next-line require-atomic-updates
-        clean.pathsToDelete = await this._resolvePaths(clean.pathsToDelete, heftConfiguration);
+        clean.properties.pathsToDelete = await this._resolvePaths(
+          clean.properties.pathsToDelete,
+          heftConfiguration
+        );
       });
     });
   }

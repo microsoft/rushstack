@@ -3,22 +3,22 @@
 
 import { SyncHook } from 'tapable';
 
-import { BuildAction, IBuildActionData } from '../cli/actions/BuildAction';
-import { CleanAction, ICleanActionData } from '../cli/actions/CleanAction';
-import { DevDeployAction, IDevDeployActionData } from '../cli/actions/DevDeployAction';
-import { StartAction, IStartActionData } from '../cli/actions/StartAction';
-import { TestAction, ITestActionData } from '../cli/actions/TestAction';
+import { BuildAction, IBuildActionContext } from '../cli/actions/BuildAction';
+import { CleanAction, ICleanActionContext } from '../cli/actions/CleanAction';
+import { DevDeployAction, IDevDeployActionContext } from '../cli/actions/DevDeployAction';
+import { StartAction, IStartActionContext } from '../cli/actions/StartAction';
+import { TestAction, ITestActionContext } from '../cli/actions/TestAction';
 import { MetricsCollector, MetricsCollectorHooks } from '../metrics/MetricsCollector';
 
 /**
  * @public
  */
 export interface IHeftSessionHooks {
-  build: SyncHook<IBuildActionData>;
-  clean: SyncHook<ICleanActionData>;
-  devDeploy: SyncHook<IDevDeployActionData>;
-  start: SyncHook<IStartActionData>;
-  test: SyncHook<ITestActionData>;
+  build: SyncHook<IBuildActionContext>;
+  clean: SyncHook<ICleanActionContext>;
+  devDeploy: SyncHook<IDevDeployActionContext>;
+  start: SyncHook<IStartActionContext>;
+  test: SyncHook<ITestActionContext>;
   metricsCollector: MetricsCollectorHooks;
 }
 

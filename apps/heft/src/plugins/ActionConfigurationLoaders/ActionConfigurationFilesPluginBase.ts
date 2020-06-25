@@ -7,12 +7,12 @@ import { JsonSchema, FileSystem, JsonFile } from '@rushstack/node-core-library';
 import {
   ISharedCopyStaticAssetsConfiguration,
   ICopyStaticAssetsConfiguration,
-  IBuildActionData
+  IBuildActionContext
 } from '../../cli/actions/BuildAction';
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { HeftSession } from '../../pluginFramework/HeftSession';
-import { ICleanActionData } from '../../cli/actions/CleanAction';
+import { ICleanActionProperties, ICleanActionContext } from '../../cli/actions/CleanAction';
 
 interface IConfigurationJsonBase {}
 
@@ -30,13 +30,13 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
   public abstract displayName: string;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftSession.hooks.clean.tap(this.displayName, (clean: ICleanActionData) => {
+    heftSession.hooks.clean.tap(this.displayName, (clean: ICleanActionContext) => {
       clean.hooks.loadActionConfiguration.tapPromise(this.displayName, async () => {
-        await this._updateCleanConfigurationAsync(heftConfiguration, clean);
+        await this._updateCleanConfigurationAsync(heftConfiguration, clean.properties);
       });
     });
 
-    heftSession.hooks.build.tap(this.displayName, (build: IBuildActionData) => {
+    heftSession.hooks.build.tap(this.displayName, (build: IBuildActionContext) => {
       build.hooks.compile.tap(this.displayName, (compile) => {
         compile.hooks.configureCopyStaticAssets.tapPromise(this.displayName, async () => {
           await this._updateCopyStaticAssetsConfigurationAsync(
@@ -55,7 +55,7 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
 
   private async _updateCleanConfigurationAsync(
     heftConfiguration: HeftConfiguration,
-    cleanConfiguration: ICleanActionData
+    cleanConfiguration: ICleanActionProperties
   ): Promise<void> {
     const cleanActionConfiguration:
       | ICleanConfigurationJson

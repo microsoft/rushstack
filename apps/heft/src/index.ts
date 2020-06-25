@@ -8,14 +8,15 @@ export {
   IHeftActionConfigurationOptions,
   IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
 } from './configuration/HeftConfiguration';
-export { ActionHooksBase, IActionDataBase } from './cli/actions/HeftActionBase';
+export { ActionHooksBase, IActionContext } from './cli/actions/HeftActionBase';
 export { HeftSession, IHeftSessionHooks } from './pluginFramework/HeftSession';
 export { MetricsCollectorHooks, IMetricsData } from './metrics/MetricsCollector';
 
 // Actions
 export {
-  IBuildActionData,
+  IBuildActionProperties,
   BuildHooks,
+  IBuildActionContext,
   IBuildStage,
   BuildStageHooksBase,
   ICompileStage,
@@ -24,7 +25,11 @@ export {
   CompileStageHooks,
   IBundleStage
 } from './cli/actions/BuildAction';
-export { ICleanActionData, CleanHooks } from './cli/actions/CleanAction';
-export { IDevDeployActionData, DevDeployHooks } from './cli/actions/DevDeployAction';
-export { IStartActionData, StartHooks } from './cli/actions/StartAction';
-export { ITestActionData, TestHooks } from './cli/actions/TestAction';
+export { ICleanActionProperties, CleanHooks, ICleanActionContext } from './cli/actions/CleanAction';
+export {
+  IDevDeployActionProperties,
+  DevDeployHooks,
+  IDevDeployActionContext
+} from './cli/actions/DevDeployAction';
+export { IStartActionProperties, StartHooks, IStartActionContext } from './cli/actions/StartAction';
+export { ITestActionProperties, TestHooks, ITestActionContext } from './cli/actions/TestAction';

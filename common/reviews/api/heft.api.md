@@ -16,16 +16,16 @@ import { SyncHook } from 'tapable';
 import { Terminal } from '@rushstack/node-core-library';
 
 // @public (undocumented)
-export abstract class ActionHooksBase {
+export abstract class ActionHooksBase<TActionProperties extends object> {
     // (undocumented)
     readonly afterLoadActionConfiguration: AsyncSeriesHook;
     // (undocumented)
     readonly loadActionConfiguration: AsyncSeriesHook;
-    readonly override: AsyncSeriesBailHook<IActionDataBase<ActionHooksBase>>;
+    readonly override: AsyncSeriesBailHook<TActionProperties>;
 }
 
 // @public (undocumented)
-export class BuildHooks extends ActionHooksBase {
+export class BuildHooks extends ActionHooksBase<IBuildActionProperties> {
     // (undocumented)
     readonly bundle: SyncHook<IBundleStage>;
     // (undocumented)
@@ -43,7 +43,7 @@ export class BuildStageHooksBase {
 }
 
 // @public (undocumented)
-export class CleanHooks extends ActionHooksBase {
+export class CleanHooks extends ActionHooksBase<ICleanActionProperties> {
     // (undocumented)
     readonly deletePath: AsyncSeriesBailHook<string>;
 }
@@ -55,7 +55,7 @@ export class CompileStageHooks extends BuildStageHooksBase {
 }
 
 // @public (undocumented)
-export class DevDeployHooks extends ActionHooksBase {
+export class DevDeployHooks extends ActionHooksBase<IDevDeployActionProperties> {
 }
 
 // @public (undocumented)
@@ -82,13 +82,19 @@ export class HeftSession {
     }
 
 // @public (undocumented)
-export interface IActionDataBase<THooks extends ActionHooksBase> {
+export interface IActionContext<THooks extends ActionHooksBase<TActionProperties>, TActionProperties extends object> {
     // (undocumented)
     hooks: THooks;
+    // (undocumented)
+    properties: TActionProperties;
 }
 
 // @public (undocumented)
-export interface IBuildActionData extends IActionDataBase<BuildHooks> {
+export interface IBuildActionContext extends IActionContext<BuildHooks, IBuildActionProperties> {
+}
+
+// @public (undocumented)
+export interface IBuildActionProperties {
     // (undocumented)
     cleanFlag: boolean;
     // (undocumented)
@@ -118,7 +124,11 @@ export interface IBundleStage extends IBuildStage<BuildStageHooksBase> {
 }
 
 // @public (undocumented)
-export interface ICleanActionData extends IActionDataBase<CleanHooks> {
+export interface ICleanActionContext extends IActionContext<CleanHooks, ICleanActionProperties> {
+}
+
+// @public (undocumented)
+export interface ICleanActionProperties {
     // (undocumented)
     pathsToDelete: string[];
 }
@@ -136,7 +146,11 @@ export interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsC
 }
 
 // @public (undocumented)
-export interface IDevDeployActionData extends IActionDataBase<DevDeployHooks> {
+export interface IDevDeployActionContext extends IActionContext<DevDeployHooks, IDevDeployActionProperties> {
+}
+
+// @public (undocumented)
+export interface IDevDeployActionProperties {
 }
 
 // @public
@@ -165,17 +179,17 @@ export interface IHeftPlugin<TOptions = void> {
 // @public (undocumented)
 export interface IHeftSessionHooks {
     // (undocumented)
-    build: SyncHook<IBuildActionData>;
+    build: SyncHook<IBuildActionContext>;
     // (undocumented)
-    clean: SyncHook<ICleanActionData>;
+    clean: SyncHook<ICleanActionContext>;
     // (undocumented)
-    devDeploy: SyncHook<IDevDeployActionData>;
+    devDeploy: SyncHook<IDevDeployActionContext>;
     // (undocumented)
     metricsCollector: MetricsCollectorHooks;
     // (undocumented)
-    start: SyncHook<IStartActionData>;
+    start: SyncHook<IStartActionContext>;
     // (undocumented)
-    test: SyncHook<ITestActionData>;
+    test: SyncHook<ITestActionContext>;
 }
 
 // @public (undocumented)
@@ -197,11 +211,19 @@ export interface ISharedCopyStaticAssetsConfiguration {
 }
 
 // @public (undocumented)
-export interface IStartActionData extends IActionDataBase<StartHooks> {
+export interface IStartActionContext extends IActionContext<StartHooks, IStartActionProperties> {
 }
 
 // @public (undocumented)
-export interface ITestActionData extends IActionDataBase<TestHooks> {
+export interface IStartActionProperties {
+}
+
+// @public (undocumented)
+export interface ITestActionContext extends IActionContext<TestHooks, ITestActionProperties> {
+}
+
+// @public (undocumented)
+export interface ITestActionProperties {
 }
 
 // @public
@@ -212,11 +234,11 @@ export class MetricsCollectorHooks {
 }
 
 // @public (undocumented)
-export class StartHooks extends ActionHooksBase {
+export class StartHooks extends ActionHooksBase<IStartActionProperties> {
 }
 
 // @public (undocumented)
-export class TestHooks extends ActionHooksBase {
+export class TestHooks extends ActionHooksBase<ITestActionProperties> {
 }
 
 

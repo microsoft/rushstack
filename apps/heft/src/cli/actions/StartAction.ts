@@ -1,19 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { HeftActionBase, IHeftActionBaseOptions, ActionHooksBase, IActionDataBase } from './HeftActionBase';
+import { HeftActionBase, IHeftActionBaseOptions, ActionHooksBase, IActionContext } from './HeftActionBase';
 
 /**
  * @public
  */
-export class StartHooks extends ActionHooksBase {}
+export class StartHooks extends ActionHooksBase<IStartActionProperties> {}
 
 /**
  * @public
  */
-export interface IStartActionData extends IActionDataBase<StartHooks> {}
+export interface IStartActionProperties {}
 
-export class StartAction extends HeftActionBase<IStartActionData, StartHooks> {
+/**
+ * @public
+ */
+export interface IStartActionContext extends IActionContext<StartHooks, IStartActionProperties> {}
+
+export class StartAction extends HeftActionBase<IStartActionProperties, StartHooks> {
   public constructor(options: IHeftActionBaseOptions) {
     super(
       {
@@ -26,7 +31,7 @@ export class StartAction extends HeftActionBase<IStartActionData, StartHooks> {
     );
   }
 
-  protected getDefaultActionData(): Omit<IStartActionData, 'hooks'> {
+  protected getDefaultActionProperties(): IStartActionProperties {
     return {};
   }
 }

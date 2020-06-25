@@ -1,19 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { HeftActionBase, IHeftActionBaseOptions, ActionHooksBase, IActionDataBase } from './HeftActionBase';
+import { HeftActionBase, IHeftActionBaseOptions, ActionHooksBase, IActionContext } from './HeftActionBase';
 
 /**
  * @public
  */
-export interface IDevDeployActionData extends IActionDataBase<DevDeployHooks> {}
+export interface IDevDeployActionProperties {}
 
 /**
  * @public
  */
-export class DevDeployHooks extends ActionHooksBase {}
+export class DevDeployHooks extends ActionHooksBase<IDevDeployActionProperties> {}
 
-export class DevDeployAction extends HeftActionBase<IDevDeployActionData, DevDeployHooks> {
+/**
+ * @public
+ */
+export interface IDevDeployActionContext extends IActionContext<DevDeployHooks, IDevDeployActionProperties> {}
+
+export class DevDeployAction extends HeftActionBase<IDevDeployActionProperties, DevDeployHooks> {
   public constructor(options: IHeftActionBaseOptions) {
     super(
       {
@@ -26,11 +31,11 @@ export class DevDeployAction extends HeftActionBase<IDevDeployActionData, DevDep
     );
   }
 
-  protected async actionExecute(actionData: IDevDeployActionData): Promise<void> {
+  protected async actionExecute(actionContext: IDevDeployActionContext): Promise<void> {
     throw new Error('Not implemented yet...');
   }
 
-  protected getDefaultActionData(): Omit<IDevDeployActionData, 'hooks'> {
+  protected getDefaultActionProperties(): IDevDeployActionProperties {
     return {};
   }
 }
