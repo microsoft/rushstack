@@ -192,8 +192,6 @@ export interface IMetricsData {
     // (undocumented)
     command: string;
     // (undocumented)
-    commandTime: number;
-    // (undocumented)
     machineArch: string;
     // (undocumented)
     machineCores: number;
@@ -203,6 +201,8 @@ export interface IMetricsData {
     machineProcessor: string;
     // (undocumented)
     machineTotalMemory: number;
+    // (undocumented)
+    taskTotalExecutionMs: number;
 }
 
 // @public (undocumented)

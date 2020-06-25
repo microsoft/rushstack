@@ -10,7 +10,7 @@ import { performance } from 'perf_hooks';
  */
 export interface IMetricsData {
   command: string;
-  commandTime: number;
+  taskTotalExecutionMs: number;
   machineOs: string;
   machineArch: string;
   machineCores: number;
@@ -47,7 +47,7 @@ export class MetricsCollectorHooks {
  * @internal
  */
 export interface IPerformanceData {
-  duration: number;
+  taskTotalExecutionMs: number;
 }
 
 /**
@@ -57,13 +57,13 @@ export interface IPerformanceData {
 export class MetricsCollector {
   public readonly hooks: MetricsCollectorHooks = new MetricsCollectorHooks();
   private _hasBeenTornDown: boolean = false;
-  private _startTime: number;
+  private _startTimeMs: number;
 
   /**
    * Start event log timer.
    */
   public setStartTime(): void {
-    this._startTime = performance.now();
+    this._startTimeMs = performance.now();
   }
 
   /**
@@ -81,13 +81,13 @@ export class MetricsCollector {
     }
 
     const filledPerformanceData: IPerformanceData = {
-      duration: (performance.now() - this._startTime) / 1000,
+      taskTotalExecutionMs: (performance.now() - this._startTimeMs) / 1000,
       ...(performanceData || {})
     };
 
     const eventData: IMetricsData = {
       command: command,
-      commandTime: filledPerformanceData.duration,
+      taskTotalExecutionMs: filledPerformanceData.taskTotalExecutionMs,
       machineOs: process.platform,
       machineArch: process.arch,
       machineCores: os.cpus().length,
