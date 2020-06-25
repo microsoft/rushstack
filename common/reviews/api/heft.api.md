@@ -189,19 +189,12 @@ export interface IHeftSessionHooks {
 
 // @public (undocumented)
 export interface IMetricsData {
-    // (undocumented)
     command: string;
-    // (undocumented)
     machineArch: string;
-    // (undocumented)
     machineCores: number;
-    // (undocumented)
     machineOs: string;
-    // (undocumented)
     machineProcessor: string;
-    // (undocumented)
-    machineTotalMemory: number;
-    // (undocumented)
+    machineTotalMemoryMB: number;
     taskTotalExecutionMs: number;
 }
 

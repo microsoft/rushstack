@@ -1,6 +1,3 @@
-// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
-// See LICENSE in the project root for license information.
-
 import * as os from 'os';
 import { AsyncParallelHook, SyncHook } from 'tapable';
 import { performance } from 'perf_hooks';
@@ -9,13 +6,40 @@ import { performance } from 'perf_hooks';
  * @public
  */
 export interface IMetricsData {
+  /**
+   * The command that was executed.
+   */
   command: string;
+
+  /**
+   * The amount of time the command took to execute, in milliseconds.
+   */
   taskTotalExecutionMs: number;
+
+  /**
+   * The name of the operating system provided by NodeJS.
+   */
   machineOs: string;
+
+  /**
+   * The processor's architecture.
+   */
   machineArch: string;
+
+  /**
+   * The number of processor cores.
+   */
   machineCores: number;
+
+  /**
+   * The processor's model name.
+   */
   machineProcessor: string;
-  machineTotalMemory: number;
+
+  /**
+   * The total amount of memory the machine has, in megabytes.
+   */
+  machineTotalMemoryMB: number;
 }
 
 /**
@@ -92,7 +116,7 @@ export class MetricsCollector {
       machineArch: process.arch,
       machineCores: os.cpus().length,
       machineProcessor: os.cpus()[0].model,
-      machineTotalMemory: os.totalmem()
+      machineTotalMemoryMB: os.totalmem()
     };
 
     this.hooks.recordEvent.call('inner_loop_heft', eventData);
