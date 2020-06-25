@@ -18,7 +18,7 @@
     "@types/node": "10.17.13",
     "decomment": "~0.9.1",
     "glob": "~7.0.5",
-    "glob-escape": "~0.0.1",
+    "glob-escape": "~0.0.2",
     "resolve": "~1.17.0"
   },
   "devDependencies": {

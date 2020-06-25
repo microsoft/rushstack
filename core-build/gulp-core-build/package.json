@@ -27,7 +27,7 @@
     "colors": "~1.2.1",
     "del": "^2.2.2",
     "end-of-stream": "~1.1.0",
-    "glob-escape": "~0.0.1",
+    "glob-escape": "~0.0.2",
     "globby": "~5.0.0",
     "glob": "~7.0.5",
     "gulp": "~4.0.2",

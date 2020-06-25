@@ -4,6 +4,7 @@
 
 ```ts
 
+import { AsyncParallelHook } from 'tapable';
 import { AsyncSeriesBailHook } from 'tapable';
 import { AsyncSeriesHook } from 'tapable';
 import { CommandLineAction } from '@rushstack/ts-command-line';
@@ -28,6 +29,20 @@ export type Build = IBuildActionData;
 
 // @public (undocumented)
 export class BuildHooks extends ActionHooksBase {
+    // (undocumented)
+    readonly bundle: SyncHook<IBundleStage>;
+    // (undocumented)
+    readonly compile: SyncHook<ICompileStage>;
+    // (undocumented)
+    readonly postBuild: SyncHook<IBuildStage>;
+    // (undocumented)
+    readonly preCompile: SyncHook<IBuildStage>;
+}
+
+// @public (undocumented)
+export class BuildStageHooksBase {
+    // (undocumented)
+    readonly run: AsyncParallelHook;
 }
 
 // @public (undocumented)
@@ -40,22 +55,17 @@ export class CleanHooks extends ActionHooksBase {
 }
 
 // @public (undocumented)
+export class CompileStageHooks extends BuildStageHooksBase {
+    // (undocumented)
+    readonly configureCopyStaticAssets: AsyncSeriesHook;
+}
+
+// @public (undocumented)
 export type DevDeploy = IDevDeployActionData;
 
 // @public (undocumented)
 export class DevDeployHooks extends ActionHooksBase {
 }
-
-// @public (undocumented)
-export class HeftCompilation {
-    // Warning: (ae-forgotten-export) The symbol "IHeftCompilationOptions" needs to be exported by the entry point index.d.ts
-    //
-    // @internal
-    constructor(options: IHeftCompilationOptions);
-    get debugMode(): boolean;
-    // (undocumented)
-    readonly hooks: IHeftCompilationHooks;
-    }
 
 // @public (undocumented)
 export class HeftConfiguration {
@@ -67,6 +77,17 @@ export class HeftConfiguration {
     get projectPackageJson(): IPackageJson;
     get terminal(): Terminal;
     get terminalProvider(): ITerminalProvider;
+    }
+
+// @public (undocumented)
+export class HeftSession {
+    // Warning: (ae-forgotten-export) The symbol "IHeftSessionOptions" needs to be exported by the entry point index.d.ts
+    //
+    // @internal
+    constructor(options: IHeftSessionOptions);
+    get debugMode(): boolean;
+    // (undocumented)
+    readonly hooks: IHeftSessionHooks;
     }
 
 // @public (undocumented)
@@ -96,9 +117,31 @@ export interface IBuildActionData extends IActionDataBase<BuildHooks> {
 }
 
 // @public (undocumented)
+export interface IBuildStage<TBuildStageHooks extends BuildStageHooksBase = BuildStageHooksBase> {
+    // (undocumented)
+    hooks: TBuildStageHooks;
+}
+
+// @public (undocumented)
+export interface IBundleStage extends IBuildStage<BuildStageHooksBase> {
+}
+
+// @public (undocumented)
 export interface ICleanActionData extends IActionDataBase<CleanHooks> {
     // (undocumented)
     pathsToDelete: string[];
+}
+
+// @public (undocumented)
+export interface ICompileStage extends IBuildStage<CompileStageHooks> {
+    // (undocumented)
+    copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
+}
+
+// @public (undocumented)
+export interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsConfiguration {
+    destinationFolderNames: string[];
+    sourceFolderName: string;
 }
 
 // @public (undocumented)
@@ -114,8 +157,22 @@ export interface IHeftActionConfigurationOptions {
     mergeArrays?: boolean;
 }
 
+// @internal (undocumented)
+export interface _IHeftConfigurationInitializationOptions {
+    cwd: string;
+    terminalProvider: ITerminalProvider;
+}
+
 // @public (undocumented)
-export interface IHeftCompilationHooks {
+export interface IHeftPlugin<TOptions = void> {
+    // (undocumented)
+    apply: (heftSession: HeftSession, heftConfiguration: HeftConfiguration, options?: TOptions) => void;
+    // (undocumented)
+    displayName: string;
+}
+
+// @public (undocumented)
+export interface IHeftSessionHooks {
     // (undocumented)
     build: SyncHook<Build>;
     // (undocumented)
@@ -128,18 +185,11 @@ export interface IHeftCompilationHooks {
     test: SyncHook<Test>;
 }
 
-// @internal (undocumented)
-export interface _IHeftConfigurationInitializationOptions {
-    cwd: string;
-    terminalProvider: ITerminalProvider;
-}
-
 // @public (undocumented)
-export interface IPluginPackage<TOptions = void> {
-    // (undocumented)
-    apply: (heftCompilation: HeftCompilation, heftConfiguration: HeftConfiguration, options?: TOptions) => void;
-    // (undocumented)
-    displayName: string;
+export interface ISharedCopyStaticAssetsConfiguration {
+    excludeGlobs?: string[];
+    fileExtensions?: string[];
+    includeGlobs?: string[];
 }
 
 // @public (undocumented)

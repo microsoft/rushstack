@@ -6,19 +6,20 @@ import { Terminal, InternalError, JsonFile, FileSystem, JsonSchema } from '@rush
 import * as resolve from 'resolve';
 
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { IPluginPackage } from './IPluginPackage';
-import { HeftCompilation } from './HeftCompilation';
+import { IHeftPlugin } from './IHeftPlugin';
+import { HeftSession } from './HeftSession';
 
 // Default plugins
 import { RushActionConfigurationFilesPlugin } from '../plugins/ActionConfigurationLoaders/RushActionConfigurationFilesPlugin';
 import { ProjectActionConfigurationFilesPlugin } from '../plugins/ActionConfigurationLoaders/ProjectActionConfigurationFilesPlugin';
 import { ResolveActionConfigurationPathsPlugin } from '../plugins/ResolveActionConfigurationPathsPlugin';
-import { cleanPlugin } from '../plugins/CleanPlugin';
+import { CopyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
+import { CleanPlugin } from '../plugins/CleanPlugin';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
   heftConfiguration: HeftConfiguration;
-  heftCompilation: HeftCompilation;
+  heftSession: HeftSession;
 }
 
 interface IPluginConfigurationJson {
@@ -31,26 +32,25 @@ interface IPluginConfigurationJson {
 export class PluginManager {
   private _terminal: Terminal;
   private _heftConfiguration: HeftConfiguration;
-  private _heftCompilation: HeftCompilation;
+  private _heftSession: HeftSession;
 
   public constructor(options: IPluginManagerOptions) {
     this._terminal = options.terminal;
     this._heftConfiguration = options.heftConfiguration;
-    this._heftCompilation = options.heftCompilation;
+    this._heftSession = options.heftSession;
   }
 
   public initializeDefaultPlugins(): void {
     this._applyPlugin(new RushActionConfigurationFilesPlugin());
     this._applyPlugin(new ProjectActionConfigurationFilesPlugin());
     this._applyPlugin(new ResolveActionConfigurationPathsPlugin());
-    this._applyPlugin(cleanPlugin);
+    this._applyPlugin(new CopyStaticAssetsPlugin());
+    this._applyPlugin(new CleanPlugin());
   }
 
   public initializePlugin(pluginSpecifier: string, options?: object): void {
     const resolvedPluginPath: string = this._resolvePlugin(pluginSpecifier);
-    const pluginPackage: IPluginPackage<object | void> = this._loadAndValidatePluginPackage(
-      resolvedPluginPath
-    );
+    const pluginPackage: IHeftPlugin<object | void> = this._loadAndValidatePluginPackage(resolvedPluginPath);
     this._applyPlugin(pluginPackage, options);
   }
 
@@ -75,21 +75,21 @@ export class PluginManager {
     }
   }
 
-  private _applyPlugin(pluginPackage: IPluginPackage<object | void>, options?: object): void {
+  private _applyPlugin(pluginPackage: IHeftPlugin<object | void>, options?: object): void {
     try {
       // Todo: Use the plugin displayName in its logging.
-      pluginPackage.apply(this._heftCompilation, this._heftConfiguration, options);
+      pluginPackage.apply(this._heftSession, this._heftConfiguration, options);
     } catch (e) {
       throw new InternalError(`Error applying "${pluginPackage.displayName}": ${e}`);
     }
   }
 
-  private _loadAndValidatePluginPackage(resolvedPluginPath: string): IPluginPackage {
-    let pluginPackage: IPluginPackage;
+  private _loadAndValidatePluginPackage(resolvedPluginPath: string): IHeftPlugin {
+    let pluginPackage: IHeftPlugin;
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const loadedPluginPackage: IPluginPackage | { default: IPluginPackage } = require(resolvedPluginPath);
-      pluginPackage = (loadedPluginPackage as { default: IPluginPackage }).default || loadedPluginPackage;
+      const loadedPluginPackage: IHeftPlugin | { default: IHeftPlugin } = require(resolvedPluginPath);
+      pluginPackage = (loadedPluginPackage as { default: IHeftPlugin }).default || loadedPluginPackage;
     } catch (e) {
       throw new InternalError(`Error loading plugin package: ${e}`);
     }
