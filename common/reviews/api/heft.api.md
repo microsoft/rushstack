@@ -244,7 +244,7 @@ export interface ITestActionProperties {
 export class MetricsCollectorHooks {
     flush: AsyncParallelHook;
     flushAndTeardown: AsyncParallelHook;
-    recordEvent: SyncHook<string, IMetricsData>;
+    recordMetric: SyncHook<string, IMetricsData>;
 }
 
 // @public (undocumented)

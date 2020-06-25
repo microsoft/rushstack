@@ -46,26 +46,26 @@ export interface IMetricsData {
 }
 
 /**
- * Tap these hooks to record events, to a file, for example.
+ * Tap these hooks to record build metrics, to a file, for example.
  *
  * @public
  */
 export class MetricsCollectorHooks {
   /**
-   * This hook is called when an event is recorded.
+   * This hook is called when a metric is recorded.
    */
-  public recordEvent: SyncHook<string, IMetricsData> = new SyncHook<string, IMetricsData>([
-    'eventName',
+  public recordMetric: SyncHook<string, IMetricsData> = new SyncHook<string, IMetricsData>([
+    'metricName',
     'metricsData'
   ]);
 
   /**
-   * This hook is called when events should be flushed
+   * This hook is called when collected metrics should be flushed
    */
   public flush: AsyncParallelHook = new AsyncParallelHook();
 
   /**
-   * This hook is called when events should be flushed and no more events will be logged.
+   * This hook is called when collected metrics should be flushed and no more metrics will be collected.
    */
   public flushAndTeardown: AsyncParallelHook = new AsyncParallelHook();
 }
@@ -79,7 +79,7 @@ export interface IPerformanceData {
 
 /**
  * @internal
- * A simple performance metrics collector. A plugin is required to pipe events anywhere.
+ * A simple performance metrics collector. A plugin is required to pipe data anywhere.
  */
 export class MetricsCollector {
   public readonly hooks: MetricsCollectorHooks = new MetricsCollectorHooks();
@@ -87,14 +87,15 @@ export class MetricsCollector {
   private _startTimeMs: number;
 
   /**
-   * Start event log timer.
+   * Start metrics log timer.
    */
   public setStartTime(): void {
     this._startTimeMs = performance.now();
   }
 
   /**
-   * Set the event log end time and log the event in aria.
+   * Record metrics to the installed plugin(s).
+   *
    * @param command - Describe the user command, e.g. `start` or `build`
    * @param params - Optional parameters
    */
@@ -112,7 +113,7 @@ export class MetricsCollector {
       ...(performanceData || {})
     };
 
-    const eventData: IMetricsData = {
+    const metricsData: IMetricsData = {
       command: command,
       taskTotalExecutionMs: filledPerformanceData.taskTotalExecutionMs,
       machineOs: process.platform,
@@ -122,11 +123,11 @@ export class MetricsCollector {
       machineTotalMemoryMB: os.totalmem()
     };
 
-    this.hooks.recordEvent.call('inner_loop_heft', eventData);
+    this.hooks.recordMetric.call('inner_loop_heft', metricsData);
   }
 
   /**
-   * Flushes all pending logged events.
+   * Flushes all pending logged metrics.
    */
   public async flushAsync(): Promise<void> {
     if (this._hasBeenTornDown) {
@@ -137,7 +138,7 @@ export class MetricsCollector {
   }
 
   /**
-   * Flushes all pending logged events and closes the MetricsCollector instance.
+   * Flushes all pending logged metrics and closes the MetricsCollector instance.
    */
   public async flushAndTeardownAsync(): Promise<void> {
     if (this._hasBeenTornDown) {
