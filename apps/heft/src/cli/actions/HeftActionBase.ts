@@ -50,8 +50,8 @@ export interface IHeftActionBaseOptions {
 }
 
 export abstract class HeftActionBase<
-  TActionProperties extends object,
-  THooks extends ActionHooksBase<TActionProperties>
+  THooks extends ActionHooksBase<TActionProperties>,
+  TActionProperties extends object
 > extends CommandLineAction {
   public readonly actionHook: SyncHook<IActionContext<THooks, TActionProperties>>;
   protected readonly terminal: Terminal;

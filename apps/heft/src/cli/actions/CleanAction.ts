@@ -25,7 +25,7 @@ export interface ICleanActionProperties {
  */
 export interface ICleanActionContext extends IActionContext<CleanHooks, ICleanActionProperties> {}
 
-export class CleanAction extends HeftActionBase<ICleanActionProperties, CleanHooks> {
+export class CleanAction extends HeftActionBase<CleanHooks, ICleanActionProperties> {
   public constructor(options: IHeftActionBaseOptions) {
     super(
       {

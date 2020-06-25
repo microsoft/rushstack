@@ -18,7 +18,7 @@ export class DevDeployHooks extends ActionHooksBase<IDevDeployActionProperties> 
  */
 export interface IDevDeployActionContext extends IActionContext<DevDeployHooks, IDevDeployActionProperties> {}
 
-export class DevDeployAction extends HeftActionBase<IDevDeployActionProperties, DevDeployHooks> {
+export class DevDeployAction extends HeftActionBase<DevDeployHooks, IDevDeployActionProperties> {
   public constructor(options: IHeftActionBaseOptions) {
     super(
       {

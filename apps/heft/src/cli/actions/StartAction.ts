@@ -18,7 +18,7 @@ export interface IStartActionProperties {}
  */
 export interface IStartActionContext extends IActionContext<StartHooks, IStartActionProperties> {}
 
-export class StartAction extends HeftActionBase<IStartActionProperties, StartHooks> {
+export class StartAction extends HeftActionBase<StartHooks, IStartActionProperties> {
   public constructor(options: IHeftActionBaseOptions) {
     super(
       {

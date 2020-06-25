@@ -142,7 +142,7 @@ export interface IBuildActionProperties {
  */
 export interface IBuildActionContext extends IActionContext<BuildHooks, IBuildActionProperties> {}
 
-export class BuildAction extends HeftActionBase<IBuildActionProperties, BuildHooks> {
+export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperties> {
   protected _noTestFlag: CommandLineFlagParameter;
   protected _watchFlag: CommandLineFlagParameter;
   private _productionFlag: CommandLineFlagParameter;
