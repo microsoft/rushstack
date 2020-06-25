@@ -13,9 +13,9 @@ import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import {
-  ICompileStage,
   ICopyStaticAssetsConfiguration,
-  IBuildActionContext
+  IBuildActionContext,
+  ICompileStage
 } from '../cli/actions/BuildAction';
 import { PrefixProxyTerminalProvider } from '../utilities/PrefixProxyTerminalProvider';
 const PLUGIN_NAME: string = 'CopyStaticAssetsPlugin';
@@ -47,7 +47,7 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
           await this._runCopyAsync({
             terminal,
             buildFolder: heftConfiguration.buildFolder,
-            copyStaticAssetsConfiguration: compile.copyStaticAssetsConfiguration,
+            copyStaticAssetsConfiguration: compile.properties.copyStaticAssetsConfiguration,
             watchMode: build.properties.watchMode
           });
         });

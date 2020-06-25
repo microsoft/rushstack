@@ -26,8 +26,12 @@ export class BuildStageHooksBase {
 /**
  * @public
  */
-export interface IBuildStage<TBuildStageHooks extends BuildStageHooksBase = BuildStageHooksBase> {
+export interface IBuildStage<
+  TBuildStageHooks extends BuildStageHooksBase,
+  TBuildStageProperties extends object
+> {
   hooks: TBuildStageHooks;
+  properties: TBuildStageProperties;
 }
 
 /**
@@ -80,26 +84,43 @@ export class CompileStageHooks extends BuildStageHooksBase {
 /**
  * @public
  */
-export interface ICompileStage extends IBuildStage<CompileStageHooks> {
+export interface ICompileStageProperties {
   copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
 }
 
 /**
  * @public
  */
-export interface IBundleStage extends IBuildStage<BuildStageHooksBase> {}
+export interface IPreCompileStage extends IBuildStage<BuildStageHooksBase, {}> {}
+
+/**
+ * @public
+ */
+export interface ICompileStage extends IBuildStage<CompileStageHooks, ICompileStageProperties> {}
+
+/**
+ * @public
+ */
+export interface IBundleStage extends IBuildStage<BuildStageHooksBase, {}> {}
+
+/**
+ * @public
+ */
+export interface IPostBuildStage extends IBuildStage<BuildStageHooksBase, {}> {}
 
 /**
  * @public
  */
 export class BuildHooks extends ActionHooksBase<IBuildActionProperties> {
-  public readonly preCompile: SyncHook<IBuildStage> = new SyncHook<IBuildStage>(['preCompile']);
+  public readonly preCompile: SyncHook<IPreCompileStage> = new SyncHook<IPreCompileStage>([
+    'preCompileStage'
+  ]);
 
-  public readonly compile: SyncHook<ICompileStage> = new SyncHook<ICompileStage>(['compile']);
+  public readonly compile: SyncHook<ICompileStage> = new SyncHook<ICompileStage>(['compileStage']);
 
-  public readonly bundle: SyncHook<IBundleStage> = new SyncHook<IBundleStage>(['bundle']);
+  public readonly bundle: SyncHook<IBundleStage> = new SyncHook<IBundleStage>(['bundleStage']);
 
-  public readonly postBuild: SyncHook<IBuildStage> = new SyncHook<IBuildStage>(['postBuild']);
+  public readonly postBuild: SyncHook<IPostBuildStage> = new SyncHook<IPostBuildStage>(['postBuildStage']);
 }
 
 /**
@@ -192,27 +213,38 @@ export class BuildAction extends HeftActionBase<IBuildActionProperties, BuildHoo
       await this._runWithLogging('Clean', async () => await this._cleanAction.executeInner());
     }
 
-    const preCompileStage: IBuildStage = { hooks: new BuildStageHooksBase() };
+    const preCompileStage: IPreCompileStage = {
+      hooks: new BuildStageHooksBase(),
+      properties: {}
+    };
     actionContext.hooks.preCompile.call(preCompileStage);
 
     const compileStage: ICompileStage = {
       hooks: new CompileStageHooks(),
-      copyStaticAssetsConfiguration: {
-        fileExtensions: [],
-        excludeGlobs: [],
-        includeGlobs: [],
+      properties: {
+        copyStaticAssetsConfiguration: {
+          fileExtensions: [],
+          excludeGlobs: [],
+          includeGlobs: [],
 
-        // For now - these may need to be revised later
-        sourceFolderName: 'src',
-        destinationFolderNames: ['lib']
+          // For now - these may need to be revised later
+          sourceFolderName: 'src',
+          destinationFolderNames: ['lib']
+        }
       }
     };
     actionContext.hooks.compile.call(compileStage);
 
-    const bundleStage: IBundleStage = { hooks: new BuildStageHooksBase() };
+    const bundleStage: IBundleStage = {
+      hooks: new BuildStageHooksBase(),
+      properties: {}
+    };
     actionContext.hooks.bundle.call(bundleStage);
 
-    const postBuildStage: IBuildStage = { hooks: new BuildStageHooksBase() };
+    const postBuildStage: IPostBuildStage = {
+      hooks: new BuildStageHooksBase(),
+      properties: {}
+    };
     actionContext.hooks.postBuild.call(postBuildStage);
 
     if (actionContext.properties.watchMode) {
@@ -253,7 +285,10 @@ export class BuildAction extends HeftActionBase<IBuildActionProperties, BuildHoo
     };
   }
 
-  protected async _runStageWithLogging(buildStageName: string, buildStage: IBuildStage): Promise<void> {
+  protected async _runStageWithLogging(
+    buildStageName: string,
+    buildStage: IBuildStage<BuildStageHooksBase, object>
+  ): Promise<void> {
     if (buildStage.hooks.run.isUsed()) {
       await this._runWithLogging(buildStageName, async () => await buildStage.hooks.run.promise());
     }

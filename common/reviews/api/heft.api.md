@@ -31,9 +31,9 @@ export class BuildHooks extends ActionHooksBase<IBuildActionProperties> {
     // (undocumented)
     readonly compile: SyncHook<ICompileStage>;
     // (undocumented)
-    readonly postBuild: SyncHook<IBuildStage>;
+    readonly postBuild: SyncHook<IPostBuildStage>;
     // (undocumented)
-    readonly preCompile: SyncHook<IBuildStage>;
+    readonly preCompile: SyncHook<IPreCompileStage>;
 }
 
 // @public (undocumented)
@@ -114,13 +114,15 @@ export interface IBuildActionProperties {
 }
 
 // @public (undocumented)
-export interface IBuildStage<TBuildStageHooks extends BuildStageHooksBase = BuildStageHooksBase> {
+export interface IBuildStage<TBuildStageHooks extends BuildStageHooksBase, TBuildStageProperties extends object> {
     // (undocumented)
     hooks: TBuildStageHooks;
+    // (undocumented)
+    properties: TBuildStageProperties;
 }
 
 // @public (undocumented)
-export interface IBundleStage extends IBuildStage<BuildStageHooksBase> {
+export interface IBundleStage extends IBuildStage<BuildStageHooksBase, {}> {
 }
 
 // @public (undocumented)
@@ -134,7 +136,11 @@ export interface ICleanActionProperties {
 }
 
 // @public (undocumented)
-export interface ICompileStage extends IBuildStage<CompileStageHooks> {
+export interface ICompileStage extends IBuildStage<CompileStageHooks, ICompileStageProperties> {
+}
+
+// @public (undocumented)
+export interface ICompileStageProperties {
     // (undocumented)
     copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
 }
@@ -201,6 +207,14 @@ export interface IMetricsData {
     machineProcessor: string;
     machineTotalMemoryMB: number;
     taskTotalExecutionMs: number;
+}
+
+// @public (undocumented)
+export interface IPostBuildStage extends IBuildStage<BuildStageHooksBase, {}> {
+}
+
+// @public (undocumented)
+export interface IPreCompileStage extends IBuildStage<BuildStageHooksBase, {}> {
 }
 
 // @public (undocumented)

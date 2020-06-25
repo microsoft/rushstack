@@ -19,11 +19,14 @@ export {
   IBuildActionContext,
   IBuildStage,
   BuildStageHooksBase,
+  ICompileStageProperties,
   ICompileStage,
   ISharedCopyStaticAssetsConfiguration,
   ICopyStaticAssetsConfiguration,
   CompileStageHooks,
-  IBundleStage
+  IBundleStage,
+  IPostBuildStage,
+  IPreCompileStage
 } from './cli/actions/BuildAction';
 export { ICleanActionProperties, CleanHooks, ICleanActionContext } from './cli/actions/CleanAction';
 export {

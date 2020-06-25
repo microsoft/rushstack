@@ -41,7 +41,7 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
         compile.hooks.configureCopyStaticAssets.tapPromise(this.displayName, async () => {
           await this._updateCopyStaticAssetsConfigurationAsync(
             heftConfiguration,
-            compile.copyStaticAssetsConfiguration
+            compile.properties.copyStaticAssetsConfiguration
           );
         });
       });
