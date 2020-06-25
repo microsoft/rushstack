@@ -435,7 +435,8 @@ module.exports = {
             variableDeclaration: true,
 
             // Normally we require type declarations for class members.  However, that rule is relaxed
-            // for situations where we need to bind the "this" pointer for a callback.
+            // for situations where we need to bind the "this" pointer for a callback.  For example, consider
+            // this event handler for a React component:
             //
             //     class MyComponent {
             //       public render(): React.ReactNode {
@@ -444,8 +445,9 @@ module.exports = {
             //          );
             //        }
             //
+            //        // The assignment here avoids the need for "this._onClick.bind(this)"
             //        private _onClick = (event: React.MouseEvent<HTMLAnchorElement>): void => {
-            //          console.log("Clicked!");
+            //          console.log("Clicked! " + this.props.title);
             //        };
             //      }
             //
