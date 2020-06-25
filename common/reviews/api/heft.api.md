@@ -21,7 +21,8 @@ export abstract class ActionHooksBase<TActionProperties extends object> {
     readonly afterLoadActionConfiguration: AsyncSeriesHook;
     // (undocumented)
     readonly loadActionConfiguration: AsyncSeriesHook;
-    readonly override: AsyncSeriesBailHook<TActionProperties>;
+    // @beta
+    readonly overrideAction: AsyncSeriesBailHook<TActionProperties>;
 }
 
 // @public (undocumented)

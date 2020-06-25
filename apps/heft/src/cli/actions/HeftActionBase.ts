@@ -32,9 +32,11 @@ export abstract class ActionHooksBase<TActionProperties extends object> {
   /**
    * This hook allows the action's execution to be completely overridden. Only the last-registered plugin
    * with an override hook provided applies.
+   *
+   * @beta
    */
-  public readonly override: AsyncSeriesBailHook<TActionProperties> = new AsyncSeriesBailHook([
-    'actionContext'
+  public readonly overrideAction: AsyncSeriesBailHook<TActionProperties> = new AsyncSeriesBailHook([
+    'actionProperties'
   ]);
 
   public readonly loadActionConfiguration: AsyncSeriesHook = new AsyncSeriesHook();
@@ -148,8 +150,8 @@ export abstract class HeftActionBase<
     await hooks.loadActionConfiguration.promise();
     await hooks.afterLoadActionConfiguration.promise();
 
-    if (hooks.override.isUsed()) {
-      await hooks.override.promise(actionProperties);
+    if (hooks.overrideAction.isUsed()) {
+      await hooks.overrideAction.promise(actionProperties);
     } else {
       await actionExecute(actionContext);
     }
