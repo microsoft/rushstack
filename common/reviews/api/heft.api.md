@@ -174,15 +174,35 @@ export interface IHeftPlugin<TOptions = void> {
 // @public (undocumented)
 export interface IHeftSessionHooks {
     // (undocumented)
-    build: SyncHook<Build>;
+    build: SyncHook<IBuildActionData>;
     // (undocumented)
-    clean: SyncHook<Clean>;
+    clean: SyncHook<ICleanActionData>;
     // (undocumented)
-    devDeploy: SyncHook<DevDeploy>;
+    devDeploy: SyncHook<IDevDeployActionData>;
     // (undocumented)
-    start: SyncHook<Start>;
+    metricsCollector: MetricsCollectorHooks;
     // (undocumented)
-    test: SyncHook<Test>;
+    start: SyncHook<IStartActionData>;
+    // (undocumented)
+    test: SyncHook<ITestActionData>;
+}
+
+// @public (undocumented)
+export interface IMetricsData {
+    // (undocumented)
+    command: string;
+    // (undocumented)
+    commandTime: number;
+    // (undocumented)
+    machineArch: string;
+    // (undocumented)
+    machineCores: number;
+    // (undocumented)
+    machineOs: string;
+    // (undocumented)
+    machineProcessor: string;
+    // (undocumented)
+    machineTotalMemory: number;
 }
 
 // @public (undocumented)
@@ -198,6 +218,13 @@ export interface IStartActionData extends IActionDataBase<StartHooks> {
 
 // @public (undocumented)
 export interface ITestActionData extends IActionDataBase<TestHooks> {
+}
+
+// @public
+export class MetricsCollectorHooks {
+    flush: AsyncParallelHook;
+    flushAndTeardown: AsyncParallelHook;
+    recordEvent: SyncHook<string, IMetricsData>;
 }
 
 // @public (undocumented)

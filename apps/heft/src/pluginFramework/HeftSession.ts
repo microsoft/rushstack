@@ -8,6 +8,7 @@ import { CleanAction, ICleanActionData } from '../cli/actions/CleanAction';
 import { DevDeployAction, IDevDeployActionData } from '../cli/actions/DevDeployAction';
 import { StartAction, IStartActionData } from '../cli/actions/StartAction';
 import { TestAction, ITestActionData } from '../cli/actions/TestAction';
+import { MetricsCollector, MetricsCollectorHooks } from '../metrics/MetricsCollector';
 
 /**
  * @public
@@ -38,11 +39,12 @@ export type Test = ITestActionData;
  * @public
  */
 export interface IHeftSessionHooks {
-  build: SyncHook<Build>;
-  clean: SyncHook<Clean>;
-  devDeploy: SyncHook<DevDeploy>;
-  start: SyncHook<Start>;
-  test: SyncHook<Test>;
+  build: SyncHook<IBuildActionData>;
+  clean: SyncHook<ICleanActionData>;
+  devDeploy: SyncHook<IDevDeployActionData>;
+  start: SyncHook<IStartActionData>;
+  test: SyncHook<ITestActionData>;
+  metricsCollector: MetricsCollectorHooks;
 }
 
 /**
@@ -55,6 +57,7 @@ export interface IHeftSessionOptions {
   startAction: StartAction;
   testAction: TestAction;
 
+  metricsCollector: MetricsCollector;
   getIsDebugMode(): boolean;
 }
 
@@ -78,14 +81,15 @@ export class HeftSession {
    */
   public constructor(options: IHeftSessionOptions) {
     this._options = options;
-    const { buildAction, cleanAction, devDeployAction, startAction, testAction } = options;
+    const { buildAction, cleanAction, devDeployAction, startAction, testAction, metricsCollector } = options;
 
     this.hooks = {
       build: buildAction.actionHook,
       clean: cleanAction.actionHook,
       devDeploy: devDeployAction.actionHook,
       start: startAction.actionHook,
-      test: testAction.testActionHook
+      test: testAction.testActionHook,
+      metricsCollector: metricsCollector.hooks
     };
   }
 }

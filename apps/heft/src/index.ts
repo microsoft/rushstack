@@ -18,6 +18,7 @@ export {
   Start,
   Test
 } from './pluginFramework/HeftSession';
+export { MetricsCollectorHooks, IMetricsData } from './metrics/MetricsCollector';
 
 // Actions
 export {
