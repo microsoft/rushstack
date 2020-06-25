@@ -69,7 +69,6 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
     heftConfiguration: HeftConfiguration,
     copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration
   ): Promise<void> {
-    // tslint:disable-next-line:max-line-length
     const copyStaticAssetsConfigurationJson:
       | ICopyStaticAssetsConfigurationJson
       | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'copy-static-assets');

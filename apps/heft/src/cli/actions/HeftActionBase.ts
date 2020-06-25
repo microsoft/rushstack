@@ -10,6 +10,7 @@ import { Terminal, IPackageJson, Colors, ConsoleTerminalProvider } from '@rushst
 import { AsyncSeriesBailHook, SyncHook, AsyncSeriesHook } from 'tapable';
 import { performance } from 'perf_hooks';
 
+import { MetricsCollector } from '../../metrics/MetricsCollector';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { PluginManager } from '../../pluginFramework/PluginManager';
 
@@ -39,6 +40,7 @@ export abstract class ActionHooksBase {
 
 export interface IHeftActionBaseOptions {
   terminal: Terminal;
+  metricsCollector: MetricsCollector;
   heftConfiguration: HeftConfiguration;
   pluginManager: PluginManager;
 }
@@ -47,8 +49,9 @@ export abstract class HeftActionBase<
   TActionData extends IActionDataBase<THooks>,
   THooks extends ActionHooksBase
 > extends CommandLineAction {
-  public /* readonly */ actionHook: SyncHook<TActionData & IActionDataBase<THooks>>;
+  public readonly actionHook: SyncHook<TActionData & IActionDataBase<THooks>>;
   protected readonly terminal: Terminal;
+  protected readonly metricsCollector: MetricsCollector;
   protected readonly heftConfiguration: HeftConfiguration;
   protected verboseFlag: CommandLineFlagParameter;
   protected _actionDataUpdaters: ((actionOptions: TActionData) => void)[] = [];
@@ -61,9 +64,11 @@ export abstract class HeftActionBase<
   ) {
     super(commandLineOptions);
     this.terminal = heftActionOptions.terminal;
+    this.metricsCollector = heftActionOptions.metricsCollector;
     this.heftConfiguration = heftActionOptions.heftConfiguration;
     this.actionHook = new SyncHook<TActionData & IActionDataBase<THooks>>(['action']);
     this._innerHooksType = innerHooksType;
+    this.setStartTime();
   }
 
   public onDefineParameters(): void {
@@ -72,6 +77,14 @@ export abstract class HeftActionBase<
       parameterShortName: '-v',
       description: 'If specified, log information useful for debugging.'
     });
+  }
+
+  public setStartTime(): void {
+    this.metricsCollector.setStartTime();
+  }
+
+  public recordMetrics(): void {
+    this.metricsCollector.record(this.actionName);
   }
 
   public async onExecute(): Promise<void> {
@@ -91,6 +104,8 @@ export abstract class HeftActionBase<
       encounteredError = true;
       throw e;
     } finally {
+      this.recordMetrics();
+
       this.terminal.writeLine(
         Colors.bold(
           (encounteredError ? Colors.red : Colors.green)(
