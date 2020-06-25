@@ -9,15 +9,7 @@ export {
   IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
 } from './configuration/HeftConfiguration';
 export { ActionHooksBase, IActionDataBase } from './cli/actions/HeftActionBase';
-export {
-  HeftSession,
-  IHeftSessionHooks,
-  Build,
-  Clean,
-  DevDeploy,
-  Start,
-  Test
-} from './pluginFramework/HeftSession';
+export { HeftSession, IHeftSessionHooks } from './pluginFramework/HeftSession';
 export { MetricsCollectorHooks, IMetricsData } from './metrics/MetricsCollector';
 
 // Actions

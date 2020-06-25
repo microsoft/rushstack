@@ -13,31 +13,6 @@ import { MetricsCollector, MetricsCollectorHooks } from '../metrics/MetricsColle
 /**
  * @public
  */
-export type Build = IBuildActionData;
-
-/**
- * @public
- */
-export type Clean = ICleanActionData;
-
-/**
- * @public
- */
-export type DevDeploy = IDevDeployActionData;
-
-/**
- * @public
- */
-export type Start = IStartActionData;
-
-/**
- * @public
- */
-export type Test = ITestActionData;
-
-/**
- * @public
- */
 export interface IHeftSessionHooks {
   build: SyncHook<IBuildActionData>;
   clean: SyncHook<ICleanActionData>;

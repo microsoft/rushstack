@@ -25,9 +25,6 @@ export abstract class ActionHooksBase {
 }
 
 // @public (undocumented)
-export type Build = IBuildActionData;
-
-// @public (undocumented)
 export class BuildHooks extends ActionHooksBase {
     // (undocumented)
     readonly bundle: SyncHook<IBundleStage>;
@@ -46,9 +43,6 @@ export class BuildStageHooksBase {
 }
 
 // @public (undocumented)
-export type Clean = ICleanActionData;
-
-// @public (undocumented)
 export class CleanHooks extends ActionHooksBase {
     // (undocumented)
     readonly deletePath: AsyncSeriesBailHook<string>;
@@ -59,9 +53,6 @@ export class CompileStageHooks extends BuildStageHooksBase {
     // (undocumented)
     readonly configureCopyStaticAssets: AsyncSeriesHook;
 }
-
-// @public (undocumented)
-export type DevDeploy = IDevDeployActionData;
 
 // @public (undocumented)
 export class DevDeployHooks extends ActionHooksBase {
@@ -221,14 +212,8 @@ export class MetricsCollectorHooks {
 }
 
 // @public (undocumented)
-export type Start = IStartActionData;
-
-// @public (undocumented)
 export class StartHooks extends ActionHooksBase {
 }
-
-// @public (undocumented)
-export type Test = ITestActionData;
 
 // @public (undocumented)
 export class TestHooks extends ActionHooksBase {

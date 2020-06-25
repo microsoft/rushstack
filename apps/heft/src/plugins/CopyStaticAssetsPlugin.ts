@@ -10,9 +10,9 @@ import * as chokidar from 'chokidar';
 import { Async } from '../utilities/Async';
 import { performance } from 'perf_hooks';
 import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
-import { Build, HeftSession } from '../pluginFramework/HeftSession';
+import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { ICompileStage, ICopyStaticAssetsConfiguration } from '../cli/actions/BuildAction';
+import { ICompileStage, ICopyStaticAssetsConfiguration, IBuildActionData } from '../cli/actions/BuildAction';
 import { PrefixProxyTerminalProvider } from '../utilities/PrefixProxyTerminalProvider';
 const PLUGIN_NAME: string = 'CopyStaticAssetsPlugin';
 
@@ -33,7 +33,7 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
   public readonly displayName: string = PLUGIN_NAME;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftSession.hooks.build.tap(PLUGIN_NAME, (build: Build) => {
+    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildActionData) => {
       build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileStage) => {
         compile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
           const terminal: Terminal = new Terminal(
