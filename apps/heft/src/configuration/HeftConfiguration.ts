@@ -3,8 +3,10 @@
 
 import * as path from 'path';
 import { Terminal, ITerminalProvider, IPackageJson } from '@rushstack/node-core-library';
+import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.7';
 import { trueCasePathSync } from 'true-case-path';
 
+import { RushStackCompilerUtilities } from '../utilities/RushStackCompilerUtilities';
 import { Utilities } from '../utilities/Utilities';
 import { Constants } from '../utilities/Constants';
 
@@ -49,8 +51,12 @@ export interface IHeftActionConfigurationOptions {
 export class HeftConfiguration {
   private _buildFolder: string;
   private _projectHeftDataFolder: string | undefined;
+  private _buildCacheFolder: string | undefined;
   private _terminal: Terminal;
   private _terminalProvider: ITerminalProvider;
+
+  private _rushStackCompilerPackage: typeof TRushStackCompiler | undefined;
+  private _hasRscPackageBeenAccessed: boolean = false;
 
   /**
    * Project build folder. This is the folder containing the project's package.json file.
@@ -68,6 +74,17 @@ export class HeftConfiguration {
     }
 
     return this._projectHeftDataFolder;
+  }
+
+  /**
+   * The project's build cache folder.
+   */
+  public get buildCacheFolder(): string {
+    if (!this._buildCacheFolder) {
+      this._buildCacheFolder = path.join(this.projectHeftDataFolder, Constants.buildCacheFolderName);
+    }
+
+    return this._buildCacheFolder;
   }
 
   /**
@@ -96,6 +113,22 @@ export class HeftConfiguration {
    */
   public get projectPackageJson(): IPackageJson {
     return Utilities.packageJsonLookup.tryLoadPackageJsonFor(this.buildFolder)!;
+  }
+
+  /**
+   * If used by the project being built, the rush-stack-compiler-* package.
+   */
+  public get rushStackCompilerPackage(): typeof TRushStackCompiler | undefined {
+    if (!this._hasRscPackageBeenAccessed) {
+      this._rushStackCompilerPackage = RushStackCompilerUtilities.tryLoadRushStackCompilerPackageForFolder(
+        this.terminal,
+        this._buildFolder
+      );
+
+      this._hasRscPackageBeenAccessed = true;
+    }
+
+    return this._rushStackCompilerPackage;
   }
 
   private constructor() {}

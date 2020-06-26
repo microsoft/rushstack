@@ -5,8 +5,10 @@ import * as path from 'path';
 import { JsonSchema, FileSystem, JsonFile } from '@rushstack/node-core-library';
 
 import {
+  ISharedTypescriptConfiguration,
   ISharedCopyStaticAssetsConfiguration,
   ICopyStaticAssetsConfiguration,
+  ITypescriptConfiguration,
   IBuildActionContext
 } from '../../cli/actions/BuildAction';
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
@@ -23,6 +25,10 @@ interface ICleanConfigurationJson extends IConfigurationJsonBase {
 interface ICopyStaticAssetsConfigurationJson
   extends IConfigurationJsonBase,
     ISharedCopyStaticAssetsConfiguration {}
+
+interface ITypescriptConfigurationJson extends IConfigurationJsonBase, ISharedTypescriptConfiguration {
+  disableTslint?: boolean;
+}
 
 export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin {
   private static _schemaCache: Map<string, JsonSchema> = new Map<string, JsonSchema>();
@@ -44,6 +50,13 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
             compile.properties.copyStaticAssetsConfiguration
           );
         });
+
+        compile.hooks.configureTypescript.tapPromise(this.displayName, async () => {
+          await this._updateTypescriptConfigurationAsync(
+            heftConfiguration,
+            compile.properties.typescriptConfiguration
+          );
+        });
       });
     });
   }
@@ -63,6 +76,28 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
 
     if (cleanActionConfiguration) {
       cleanConfiguration.pathsToDelete.push(...cleanActionConfiguration.pathsToDelete);
+    }
+  }
+
+  private async _updateTypescriptConfigurationAsync(
+    heftConfiguration: HeftConfiguration,
+    typescriptConfiguration: ITypescriptConfiguration
+  ): Promise<void> {
+    const typescriptConfigurationJson:
+      | ITypescriptConfigurationJson
+      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'typescript');
+
+    if (typescriptConfigurationJson?.copyFromCacheMode) {
+      typescriptConfiguration.copyFromCacheMode = typescriptConfigurationJson.copyFromCacheMode;
+    }
+
+    if (typescriptConfigurationJson?.additionalModuleKindsToEmit !== undefined) {
+      typescriptConfiguration.additionalModuleKindsToEmit =
+        typescriptConfigurationJson.additionalModuleKindsToEmit || undefined;
+    }
+
+    if (typescriptConfigurationJson?.disableTslint !== undefined) {
+      typescriptConfiguration.isLintingEnabled = !typescriptConfigurationJson.disableTslint;
     }
   }
 

@@ -28,7 +28,12 @@ export {
   ICompileStage,
   ISharedCopyStaticAssetsConfiguration,
   ICopyStaticAssetsConfiguration,
+  ITypescriptConfiguration,
   CompileStageHooks,
+  IEmitModuleKind,
+  IEmitModuleKindBase,
+  ISharedTypescriptConfiguration,
+  CopyFromCacheMode,
   IBundleStage,
   IPostBuildStage,
   IPreCompileStage

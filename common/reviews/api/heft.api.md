@@ -14,6 +14,7 @@ import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { SyncHook } from 'tapable';
 import { Terminal } from '@rushstack/node-core-library';
+import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.7';
 
 // @public (undocumented)
 export abstract class ActionHooksBase<TActionProperties extends object> {
@@ -52,8 +53,17 @@ export class CleanHooks extends ActionHooksBase<ICleanActionProperties> {
 // @public (undocumented)
 export class CompileStageHooks extends BuildStageHooksBase {
     // (undocumented)
+    readonly afterConfigureCopyStaticAssets: AsyncSeriesHook;
+    // (undocumented)
+    readonly afterConfigureTypescript: AsyncSeriesHook;
+    // (undocumented)
     readonly configureCopyStaticAssets: AsyncSeriesHook;
+    // (undocumented)
+    readonly configureTypescript: AsyncSeriesHook;
 }
+
+// @public (undocumented)
+export type CopyFromCacheMode = 'hardlink' | 'copy';
 
 // @public (undocumented)
 export class DevDeployHooks extends ActionHooksBase<IDevDeployActionProperties> {
@@ -61,12 +71,14 @@ export class DevDeployHooks extends ActionHooksBase<IDevDeployActionProperties> 
 
 // @public (undocumented)
 export class HeftConfiguration {
+    get buildCacheFolder(): string;
     get buildFolder(): string;
     get heftPackageJson(): IPackageJson;
     // @internal (undocumented)
     static initialize(options: _IHeftConfigurationInitializationOptions): HeftConfiguration;
     get projectHeftDataFolder(): string;
     get projectPackageJson(): IPackageJson;
+    get rushStackCompilerPackage(): typeof TRushStackCompiler | undefined;
     get terminal(): Terminal;
     get terminalProvider(): ITerminalProvider;
     }
@@ -146,6 +158,8 @@ export interface ICompileStage extends IBuildStage<CompileStageHooks, ICompileSt
 export interface ICompileStageProperties {
     // (undocumented)
     copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
+    // (undocumented)
+    typescriptConfiguration: ITypescriptConfiguration;
 }
 
 // @public (undocumented)
@@ -160,6 +174,17 @@ export interface IDevDeployActionContext extends IActionContext<DevDeployHooks, 
 
 // @public (undocumented)
 export interface IDevDeployActionProperties {
+}
+
+// @public (undocumented)
+export type IEmitModuleKind = IEmitModuleKindBase<'commonjs' | 'amd' | 'umd' | 'system' | 'es2015' | 'esnext'>;
+
+// @public (undocumented)
+export interface IEmitModuleKindBase<TModuleKind> {
+    // (undocumented)
+    moduleKind: TModuleKind;
+    // (undocumented)
+    outFolderPath: string;
 }
 
 // @public
@@ -234,6 +259,12 @@ export interface ISharedCopyStaticAssetsConfiguration {
 }
 
 // @public (undocumented)
+export interface ISharedTypescriptConfiguration {
+    additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
+    copyFromCacheMode?: CopyFromCacheMode | undefined;
+}
+
+// @public (undocumented)
 export interface IStartActionContext extends IActionContext<StartHooks, IStartActionProperties> {
 }
 
@@ -247,6 +278,16 @@ export interface ITestActionContext extends IActionContext<TestHooks, ITestActio
 
 // @public (undocumented)
 export interface ITestActionProperties {
+}
+
+// @public (undocumented)
+export interface ITypescriptConfiguration extends ISharedTypescriptConfiguration {
+    // (undocumented)
+    isLintingEnabled: boolean | undefined;
+    // (undocumented)
+    tsconfigPaths: string[];
+    // (undocumented)
+    tslintConfigPath: string | undefined;
 }
 
 // @internal

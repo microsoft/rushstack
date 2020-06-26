@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "TypeScript Build Configuration",
+  "description": "Defines optional options for TypeScript build.",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "copyFromCacheMode": {
+      "description": "Can be set to \"copy\" or \"hardlink\". If set to \"copy\", copy files from cache. If set to \"hardlink\", files will be hardlinked to the cache location. This option is useful when producing a tarball of build output as TAR files don't handle these hardlinks correctly. \"hardlink\" is the default behavior.",
+      "type": "string",
+      "enum": ["hardlink", "copy"]
+    },
+
+    "additionalModuleKindsToEmit": {
+      "type": "array",
+      "description": "If provided, emit these module kinds in addition to the modules specified in the tsconfig. Note that this option only applies to the main tsconfig.json configuration.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "moduleKind": {
+            "type": "string",
+            "enum": ["commonjs", "amd", "umd", "system", "es2015", "esnext"]
+          },
+
+          "outFolderPath": {
+            "type": "string",
+            "pattern": "[^\\\\\\/]"
+          }
+        },
+        "required": ["moduleKind", "outFolderPath"]
+      }
+    },
+
+    "disableTslint": {
+      "description": "If set to \"true\", disable TSlint.",
+      "type": "boolean"
+    }
+  }
+}

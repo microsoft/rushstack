@@ -77,14 +77,66 @@ export interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsC
 /**
  * @public
  */
+export interface IEmitModuleKindBase<TModuleKind> {
+  moduleKind: TModuleKind;
+  outFolderPath: string;
+}
+
+/**
+ * @public
+ */
+export type IEmitModuleKind = IEmitModuleKindBase<
+  'commonjs' | 'amd' | 'umd' | 'system' | 'es2015' | 'esnext'
+>;
+
+/**
+ * @public
+ */
+export type CopyFromCacheMode = 'hardlink' | 'copy';
+
+/**
+ * @public
+ */
+export interface ISharedTypescriptConfiguration {
+  /**
+   * Can be set to 'copy' or 'hardlink'. If set to 'copy', copy files from cache. If set to 'hardlink', files will be
+   * hardlinked to the cache location. This option is useful when producing a tarball of build output as TAR files
+   * don't handle these hardlinks correctly. 'hardlink' is the default behavior.
+   */
+  copyFromCacheMode?: CopyFromCacheMode | undefined;
+
+  /**
+   * If provided, emit these module kinds in addition to the modules specified in the tsconfig.
+   * Note that this option only applies to the main tsconfig.json configuration.
+   */
+  additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
+}
+
+/**
+ * @public
+ */
+export interface ITypescriptConfiguration extends ISharedTypescriptConfiguration {
+  tsconfigPaths: string[];
+  tslintConfigPath: string | undefined;
+  isLintingEnabled: boolean | undefined;
+}
+
+/**
+ * @public
+ */
 export class CompileStageHooks extends BuildStageHooksBase {
+  public readonly configureTypescript: AsyncSeriesHook = new AsyncSeriesHook();
   public readonly configureCopyStaticAssets: AsyncSeriesHook = new AsyncSeriesHook();
+
+  public readonly afterConfigureTypescript: AsyncSeriesHook = new AsyncSeriesHook();
+  public readonly afterConfigureCopyStaticAssets: AsyncSeriesHook = new AsyncSeriesHook();
 }
 
 /**
  * @public
  */
 export interface ICompileStageProperties {
+  typescriptConfiguration: ITypescriptConfiguration;
   copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
 }
 
@@ -222,6 +274,13 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
     const compileStage: ICompileStage = {
       hooks: new CompileStageHooks(),
       properties: {
+        typescriptConfiguration: {
+          tsconfigPaths: [],
+          tslintConfigPath: undefined,
+          isLintingEnabled: !actionContext.properties.liteFlag,
+          copyFromCacheMode: 'hardlink',
+          additionalModuleKindsToEmit: undefined
+        },
         copyStaticAssetsConfiguration: {
           fileExtensions: [],
           excludeGlobs: [],
@@ -252,7 +311,14 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
       // concurrently with the expectation that the their promises will never resolve
       // and that they will handle watching filesystem changes
 
-      await compileStage.hooks.configureCopyStaticAssets.promise();
+      await Promise.all([
+        compileStage.hooks.configureTypescript.promise(),
+        compileStage.hooks.configureCopyStaticAssets.promise()
+      ]);
+      await Promise.all([
+        compileStage.hooks.afterConfigureTypescript.promise(),
+        compileStage.hooks.afterConfigureCopyStaticAssets.promise()
+      ]);
 
       await Promise.all([
         this._runStageWithLogging('Pre-compile', preCompileStage),
@@ -263,7 +329,14 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
     } else {
       await this._runStageWithLogging('Pre-compile', preCompileStage);
 
-      await compileStage.hooks.configureCopyStaticAssets.promise();
+      await Promise.all([
+        compileStage.hooks.configureTypescript.promise(),
+        compileStage.hooks.configureCopyStaticAssets.promise()
+      ]);
+      await Promise.all([
+        compileStage.hooks.afterConfigureTypescript.promise(),
+        compileStage.hooks.afterConfigureCopyStaticAssets.promise()
+      ]);
       await this._runStageWithLogging('Compile', compileStage);
 
       await this._runStageWithLogging('Bundle', bundleStage);
