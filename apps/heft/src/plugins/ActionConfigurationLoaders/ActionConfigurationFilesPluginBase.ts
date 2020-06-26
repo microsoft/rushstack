@@ -159,7 +159,7 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
       return loadedConfigJson;
     } else {
       heftConfiguration.terminal.writeVerboseLine(
-        `Config file "${actionConfigurationFilePath}" doesn't exit. Skipping.`
+        `Config file "${actionConfigurationFilePath}" doesn't exist. Skipping.`
       );
 
       return undefined;
