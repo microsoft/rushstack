@@ -479,6 +479,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jest-snapshot",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jju",
       "allowedCategories": [ "libraries" ]
     },

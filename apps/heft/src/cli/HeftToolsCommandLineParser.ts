@@ -77,7 +77,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     const buildAction: BuildAction = new BuildAction({ ...actionOptions, cleanAction });
     const devDeployAction: DevDeployAction = new DevDeployAction(actionOptions);
     const startAction: StartAction = new StartAction(actionOptions);
-    const testAction: TestAction = new TestAction({ ...actionOptions, cleanAction });
+    const testAction: TestAction = new TestAction({ ...actionOptions, cleanAction, buildAction });
 
     this._heftSession = new HeftSession({
       getIsDebugMode: () => this.isDebug,
