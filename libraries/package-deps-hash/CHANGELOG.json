@@ -2,6 +2,18 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "2.4.29",
+      "tag": "@rushstack/package-deps-hash_v2.4.29",
+      "date": "Fri, 26 Jun 2020 22:16:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.28` to `6.4.29`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.4.28",
       "tag": "@rushstack/package-deps-hash_v2.4.28",
       "date": "Thu, 25 Jun 2020 06:43:35 GMT",

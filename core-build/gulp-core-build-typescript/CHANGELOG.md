@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Thu, 25 Jun 2020 06:43:34 GMT and should not be manually modified.
+This log was last generated on Fri, 26 Jun 2020 22:16:39 GMT and should not be manually modified.
+
+## 8.4.29
+Fri, 26 Jun 2020 22:16:39 GMT
+
+### Patches
+
+- Move rush-stack-compiler-3.1 from devDependencies to dependencies
 
 ## 8.4.28
 Thu, 25 Jun 2020 06:43:34 GMT
