@@ -8,7 +8,7 @@
     "start": "node ./watch.js"
   },
   "bin": {
-    "heft": "./bin/dev"
+    "heft": "./bin/heft"
   },
   "main": "lib/index.js",
   "types": "dist/heft.d.ts",
