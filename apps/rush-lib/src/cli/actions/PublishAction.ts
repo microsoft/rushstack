@@ -109,7 +109,10 @@ export class PublishAction extends BaseRushAction {
       parameterShortName: '-n',
       argumentName: 'TOKEN',
       description:
-        'Provide the default scope NPM auth token to be passed into npm publish for global package publishing.'
+        '(DEPRECATED) Specifies the authentication token to use during publishing. This parameter is deprecated' +
+        ' because command line parameters may be readable by unrelated processes on a lab machine. Instead, a' +
+        ' safer practice is to pass the token via an environment variable and reference it from your ' +
+        ' common/config/rush/.npmrc-publish file.'
     });
     this._npmTag = this.defineStringParameter({
       parameterLongName: '--tag',

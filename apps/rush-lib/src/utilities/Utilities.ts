@@ -526,26 +526,38 @@ export class Utilities {
    * we'd prefer to skip that line and continue looking in other places such as the user's
    * home directory.
    *
-   * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _copyNpmrcFile() FROM scripts/install-run.ts
+   * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _copyAndTrimNpmrcFile() FROM scripts/install-run.ts
    */
   public static copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string): void {
     console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`); // Verbose
     let npmrcFileLines: string[] = FileSystem.readFile(sourceNpmrcPath).split('\n');
     npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
     const resultLines: string[] = [];
+
+    // This finds environment variable tokens that look like "${VAR_NAME}"
+    const expansionRegExp: RegExp = /\$\{([^\}]+)\}/g;
+
+    // Comment lines start with "#" or ";"
+    const commentRegExp: RegExp = /^\s*[#;]/;
+
     // Trim out lines that reference environment variables that aren't defined
     for (const line of npmrcFileLines) {
-      // This finds environment variable tokens that look like "${VAR_NAME}"
-      const regex: RegExp = /\$\{([^\}]+)\}/g;
-      const environmentVariables: string[] | null = line.match(regex);
       let lineShouldBeTrimmed: boolean = false;
-      if (environmentVariables) {
-        for (const token of environmentVariables) {
-          // Remove the leading "${" and the trailing "}" from the token
-          const environmentVariableName: string = token.substring(2, token.length - 1);
-          if (!process.env[environmentVariableName]) {
-            lineShouldBeTrimmed = true;
-            break;
+
+      // Ignore comment lines
+      if (!commentRegExp.test(line)) {
+        const environmentVariables: string[] | null = line.match(expansionRegExp);
+        if (environmentVariables) {
+          for (const token of environmentVariables) {
+            // Remove the leading "${" and the trailing "}" from the token
+            const environmentVariableName: string = token.substring(2, token.length - 1);
+
+            // Is the environment variable defined?
+            if (!process.env[environmentVariableName]) {
+              // No, so trim this line
+              lineShouldBeTrimmed = true;
+              break;
+            }
           }
         }
       }

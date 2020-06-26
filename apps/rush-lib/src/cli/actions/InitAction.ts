@@ -160,6 +160,7 @@ export class InitAction extends BaseConfiglessRushAction {
       '[dot]gitignore',
       '[dot]travis.yml',
       'common/config/rush/[dot]npmrc',
+      'common/config/rush/[dot]npmrc-publish',
       'common/config/rush/command-line.json',
       'common/config/rush/common-versions.json',
       'common/config/rush/experiments.json',
