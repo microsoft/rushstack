@@ -2,6 +2,18 @@
   "name": "@rushstack/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "2.4.26",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v2.4.26",
+      "date": "Fri, 26 Jun 2020 22:16:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.28` to `6.4.29`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.4.25",
       "tag": "@rushstack/set-webpack-public-path-plugin_v2.4.25",
       "date": "Thu, 25 Jun 2020 06:43:35 GMT",

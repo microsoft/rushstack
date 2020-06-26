@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "8.4.29",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.4.29",
+      "date": "Fri, 26 Jun 2020 22:16:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Move rush-stack-compiler-3.1 from devDependencies to dependencies"
+          }
+        ]
+      }
+    },
+    {
       "version": "8.4.28",
       "tag": "@microsoft/gulp-core-build-typescript_v8.4.28",
       "date": "Thu, 25 Jun 2020 06:43:34 GMT",
