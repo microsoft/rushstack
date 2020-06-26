@@ -80,6 +80,8 @@ export class HeftSession {
     get debugMode(): boolean;
     // (undocumented)
     readonly hooks: IHeftSessionHooks;
+    // @internal (undocumented)
+    readonly metricsCollector: _MetricsCollector;
     }
 
 // @public (undocumented)
@@ -210,6 +212,12 @@ export interface IMetricsData {
     taskTotalExecutionMs: number;
 }
 
+// @internal (undocumented)
+export interface _IPerformanceData {
+    // (undocumented)
+    taskTotalExecutionMs: number;
+}
+
 // @public (undocumented)
 export interface IPostBuildStage extends IBuildStage<BuildStageHooksBase, {}> {
 }
@@ -240,6 +248,16 @@ export interface ITestActionContext extends IActionContext<TestHooks, ITestActio
 // @public (undocumented)
 export interface ITestActionProperties {
 }
+
+// @internal
+export class _MetricsCollector {
+    flushAndTeardownAsync(): Promise<void>;
+    flushAsync(): Promise<void>;
+    // (undocumented)
+    readonly hooks: MetricsCollectorHooks;
+    record(command: string, performanceData?: Partial<_IPerformanceData>): void;
+    setStartTime(): void;
+    }
 
 // @public
 export class MetricsCollectorHooks {
