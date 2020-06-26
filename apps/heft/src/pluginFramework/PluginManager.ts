@@ -13,8 +13,8 @@ import { HeftSession } from './HeftSession';
 import { RushActionConfigurationFilesPlugin } from '../plugins/ActionConfigurationLoaders/RushActionConfigurationFilesPlugin';
 import { ProjectActionConfigurationFilesPlugin } from '../plugins/ActionConfigurationLoaders/ProjectActionConfigurationFilesPlugin';
 import { ResolveActionConfigurationPathsPlugin } from '../plugins/ResolveActionConfigurationPathsPlugin';
-import { CopyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
 import { CleanPlugin } from '../plugins/CleanPlugin';
+import { CopyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
