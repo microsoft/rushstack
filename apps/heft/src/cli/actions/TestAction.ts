@@ -3,23 +3,29 @@
 
 import { SyncHook } from 'tapable';
 
-import { BuildAction, IBuildActionData, IBuildActionOptions } from './BuildAction';
-import { IActionDataBase, ActionHooksBase } from './HeftActionBase';
+import { BuildAction, IBuildActionOptions, IBuildActionContext } from './BuildAction';
+import { ActionHooksBase, IActionContext } from './HeftActionBase';
 
 /**
  * @public
  */
-export class TestHooks extends ActionHooksBase {}
+export class TestHooks extends ActionHooksBase<ITestActionProperties> {}
 
 /**
  * @public
  */
-export interface ITestActionData extends IActionDataBase<TestHooks> {}
+export interface ITestActionProperties {}
+
+/**
+ * @public
+ */
+export interface ITestActionContext extends IActionContext<TestHooks, ITestActionProperties> {}
 
 export interface ITestActionOptions extends IBuildActionOptions {}
 
 export class TestAction extends BuildAction {
-  public testActionHook: SyncHook<ITestActionData> = new SyncHook<ITestActionData>(['action']);
+  public testActionHook: SyncHook<ITestActionContext> = new SyncHook<ITestActionContext>(['action']);
+
   public constructor(options: ITestActionOptions) {
     super(options, {
       actionName: 'test',
@@ -28,7 +34,7 @@ export class TestAction extends BuildAction {
     });
   }
 
-  protected async actionExecute(buildActionData: IBuildActionData): Promise<void> {
+  protected async actionExecute(buildActionContext: IBuildActionContext): Promise<void> {
     throw new Error('Not implemented yet...');
   }
 }
