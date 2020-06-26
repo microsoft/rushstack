@@ -10,7 +10,7 @@ import {
   CommandLineStringListParameter,
   CommandLineParameterKind
 } from '@rushstack/ts-command-line';
-import { FileSystem, PackageJsonLookup, IPackageJson } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 import { Event } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
@@ -101,8 +101,8 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const taskSelector: TaskSelector = new TaskSelector({
       rushConfiguration: this.rushConfiguration,
-      toFlags: this._mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy),
-      fromFlags: this._mergeProjectsWithVersionPolicy(this._fromFlag, this._fromVersionPolicy),
+      toFlags: this.mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy),
+      fromFlags: this.mergeProjectsWithVersionPolicy(this._fromFlag, this._fromVersionPolicy),
       commandToRun: this._commandToRun,
       customParameterValues,
       isQuietMode: isQuietMode,
@@ -186,8 +186,8 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterShortName: '-f',
       argumentName: 'PROJECT2',
       description:
-        'Run command in all projects that directly or indirectly depend on the specified project. ' +
-        '"." can be used as shorthand to specify the project in the current working directory.'
+        'Run command in the specified project and all projects that directly or indirectly depend on the ' +
+        'specified project. "." can be used as shorthand to specify the project in the current working directory.'
     });
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
@@ -205,59 +205,6 @@ export class BulkScriptAction extends BaseScriptAction {
     }
 
     this.defineScriptParameters();
-  }
-
-  private _mergeProjectsWithVersionPolicy(
-    projectsParameters: CommandLineStringListParameter,
-    versionPoliciesParameters: CommandLineStringListParameter
-  ): string[] {
-    const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-
-    const projects: string[] = [];
-    for (const projectParameter of projectsParameters.values) {
-      if (projectParameter === '.') {
-        const packageJson: IPackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(process.cwd());
-        if (packageJson) {
-          const projectName: string = packageJson.name;
-          if (this.rushConfiguration.projectsByName.has(projectName)) {
-            projects.push(projectName);
-          } else {
-            console.log(
-              colors.red(
-                'Rush is not currently running in a project directory specified in rush.json. ' +
-                  `The "." value for the ${this._toFlag.longName} parameter or the ${this._fromFlag.longName} parameter ` +
-                  'is not allowed.'
-              )
-            );
-            throw new AlreadyReportedError();
-          }
-        } else {
-          console.log(
-            colors.red(
-              'Rush is not currently running in a project directory. ' +
-                `The "." value for the ${this._toFlag.longName} parameter or the ${this._fromFlag.longName} parameter ` +
-                'is not allowed.'
-            )
-          );
-          throw new AlreadyReportedError();
-        }
-      } else {
-        projects.push(projectParameter);
-      }
-    }
-
-    if (versionPoliciesParameters.values && versionPoliciesParameters.values.length > 0) {
-      this.rushConfiguration.projects.forEach((project) => {
-        const matches: boolean = versionPoliciesParameters.values.some((policyName) => {
-          return project.versionPolicyName === policyName;
-        });
-        if (matches) {
-          projects.push(project.packageName);
-        }
-      });
-    }
-
-    return projects;
   }
 
   private _doBeforeTask(): void {

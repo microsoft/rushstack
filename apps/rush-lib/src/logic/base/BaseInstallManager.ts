@@ -85,6 +85,16 @@ export interface IInstallManagerOptions {
    * Retry the install the specified number of times
    */
   maxInstallAttempts: number;
+
+  /**
+   * The list of projects that should be installed, along with project dependencies.
+   */
+  toFlags?: ReadonlyArray<string>;
+
+  /**
+   * The list of projects from which dependent projects will be installed.
+   */
+  fromFlags?: ReadonlyArray<string>;
 }
 
 /**

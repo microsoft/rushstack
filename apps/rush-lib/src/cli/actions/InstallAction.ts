@@ -4,8 +4,16 @@
 import { BaseInstallAction } from './BaseInstallAction';
 import { IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
+import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 
 export class InstallAction extends BaseInstallAction {
+  protected _fromFlag: CommandLineStringListParameter;
+  protected _fromVersionPolicy: CommandLineStringListParameter;
+  protected _toFlag: CommandLineStringListParameter;
+  protected _toVersionPolicy: CommandLineStringListParameter;
+
+  private _filterSupported: boolean;
+
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'install',
@@ -23,6 +31,48 @@ export class InstallAction extends BaseInstallAction {
         ' accidentally updating their shrinkwrap file.',
       parser
     });
+
+    this._filterSupported =
+      this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
+  }
+
+  /**
+   * @override
+   */
+  protected onDefineParameters(): void {
+    super.onDefineParameters();
+
+    if (this._filterSupported) {
+      this._fromFlag = this.defineStringListParameter({
+        parameterLongName: '--from',
+        parameterShortName: '-f',
+        argumentName: 'PROJECT2',
+        description:
+          'Run install in the specified project and all projects that directly or indirectly depend on the ' +
+          'specified project. "." can be used as shorthand to specify the project in the current working directory.'
+      });
+      this._fromVersionPolicy = this.defineStringListParameter({
+        parameterLongName: '--from-version-policy',
+        argumentName: 'VERSION_POLICY_NAME',
+        description:
+          'Run install in all projects with the specified version policy ' +
+          'and all projects that directly or indirectly depend on projects with the specified version policy'
+      });
+      this._toFlag = this.defineStringListParameter({
+        parameterLongName: '--to',
+        parameterShortName: '-t',
+        argumentName: 'PROJECT1',
+        description:
+          'Run install in the specified project and all of its dependencies. "." can be used as shorthand ' +
+          'to specify the project in the current working directory.'
+      });
+      this._toVersionPolicy = this.defineStringListParameter({
+        parameterLongName: '--to-version-policy',
+        argumentName: 'VERSION_POLICY_NAME',
+        description:
+          'Run install in all projects with the specified version policy and all of their dependencies'
+      });
+    }
   }
 
   protected buildInstallOptions(): IInstallManagerOptions {
@@ -38,7 +88,14 @@ export class InstallAction extends BaseInstallAction {
       variant: this._variant.value,
       // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
       // it is safe to assume that the value is not null
-      maxInstallAttempts: this._maxInstallAttempts.value!
+      maxInstallAttempts: this._maxInstallAttempts.value!,
+      // Only define the flags if the install type is supported
+      toFlags: this._filterSupported
+        ? this.mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy)
+        : undefined,
+      fromFlags: this._filterSupported
+        ? this.mergeProjectsWithVersionPolicy(this._fromFlag, this._fromVersionPolicy)
+        : undefined
     };
   }
 }

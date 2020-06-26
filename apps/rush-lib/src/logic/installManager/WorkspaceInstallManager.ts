@@ -51,6 +51,22 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       throw new AlreadyReportedError();
     }
 
+    // Workspaces do not support "--to" and "--from" flags when running "rush update"
+    if (
+      this.options.allowShrinkwrapUpdates &&
+      ((this.options.toFlags && this.options.toFlags.length !== 0) ||
+        (this.options.fromFlags && this.options.fromFlags.length !== 0))
+    ) {
+      console.log();
+      console.log(
+        colors.red(
+          'The "--to" and "--from" options cannot be used when running "rush update". Run the command again ' +
+            'without specifying these arguments.'
+        )
+      );
+      throw new AlreadyReportedError();
+    }
+
     await super.doInstall();
   }
 
@@ -548,7 +564,35 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (this.rushConfiguration.packageManager === 'pnpm') {
       args.push('--recursive');
       args.push('--link-workspace-packages', 'false');
+
+      // "<package>..." selects the specified package and all direct and indirect dependencies
+      if (this.options.toFlags) {
+        for (const flag of this.options.toFlags) {
+          args.push('--filter', `${this._getPackageName(flag)}...`);
+        }
+      }
+
+      // "...<package>" selects the specified package and all direct and indirect dependent packages
+      if (this.options.fromFlags) {
+        for (const flag of this.options.fromFlags) {
+          args.push('--filter', `...${this._getPackageName(flag)}`);
+        }
+      }
     }
+  }
+
+  /**
+   * Gets the fully-qualified package name of a local project.
+   */
+  private _getPackageName(projectName: string): string {
+    const localProject:
+      | RushConfigurationProject
+      | undefined = this.rushConfiguration.findProjectByShorthandName(projectName);
+    if (!localProject) {
+      throw new Error(`The project '${projectName}' does not exist in rush.json`);
+    }
+
+    return localProject.packageName;
   }
 
   /**

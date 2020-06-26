@@ -5,15 +5,20 @@ import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 
-import { CommandLineAction, ICommandLineActionOptions } from '@rushstack/ts-command-line';
+import {
+  CommandLineAction,
+  ICommandLineActionOptions,
+  CommandLineStringListParameter
+} from '@rushstack/ts-command-line';
 
-import { LockFile } from '@rushstack/node-core-library';
+import { LockFile, PackageJsonLookup, IPackageJson } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { EventHooksManager } from '../../logic/EventHooksManager';
 import { RushCommandLineParser } from './../RushCommandLineParser';
 import { Utilities } from '../../utilities/Utilities';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
+import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 export interface IBaseRushActionOptions extends ICommandLineActionOptions {
   /**
@@ -100,6 +105,14 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction {
 export abstract class BaseRushAction extends BaseConfiglessRushAction {
   private _eventHooksManager: EventHooksManager;
 
+  protected get eventHooksManager(): EventHooksManager {
+    if (!this._eventHooksManager) {
+      this._eventHooksManager = new EventHooksManager(this.rushConfiguration);
+    }
+
+    return this._eventHooksManager;
+  }
+
   protected get rushConfiguration(): RushConfiguration {
     return super.rushConfiguration!;
   }
@@ -112,11 +125,54 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
     return super.onExecute();
   }
 
-  protected get eventHooksManager(): EventHooksManager {
-    if (!this._eventHooksManager) {
-      this._eventHooksManager = new EventHooksManager(this.rushConfiguration);
+  protected mergeProjectsWithVersionPolicy(
+    projectsParameters: CommandLineStringListParameter,
+    versionPoliciesParameters: CommandLineStringListParameter
+  ): string[] {
+    const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
+
+    const projects: string[] = [];
+    for (const projectParameter of projectsParameters.values) {
+      if (projectParameter === '.') {
+        const packageJson: IPackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(process.cwd());
+        if (packageJson) {
+          const projectName: string = packageJson.name;
+          if (this.rushConfiguration.projectsByName.has(projectName)) {
+            projects.push(projectName);
+          } else {
+            console.log(
+              colors.red(
+                'Rush is not currently running in a project directory specified in rush.json. ' +
+                  `The "." value for the ${projectsParameters.longName} parameter is not allowed.`
+              )
+            );
+            throw new AlreadyReportedError();
+          }
+        } else {
+          console.log(
+            colors.red(
+              'Rush is not currently running in a project directory. ' +
+                `The "." value for the ${projectsParameters.longName} parameter is not allowed.`
+            )
+          );
+          throw new AlreadyReportedError();
+        }
+      } else {
+        projects.push(projectParameter);
+      }
     }
 
-    return this._eventHooksManager;
+    if (versionPoliciesParameters.values && versionPoliciesParameters.values.length > 0) {
+      this.rushConfiguration.projects.forEach((project) => {
+        const matches: boolean = versionPoliciesParameters.values.some((policyName) => {
+          return project.versionPolicyName === policyName;
+        });
+        if (matches) {
+          projects.push(project.packageName);
+        }
+      });
+    }
+
+    return projects;
   }
 }
