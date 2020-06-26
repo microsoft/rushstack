@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/gulp-core-build-typescript",
-      "comment": "",
-      "type": "none"
+      "comment": "Move rush-stack-compiler-3.1 from devDependencies to dependencies",
+      "type": "patch"
     }
   ],
   "packageName": "@microsoft/gulp-core-build-typescript",
