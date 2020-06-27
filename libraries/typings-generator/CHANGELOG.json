@@ -2,6 +2,18 @@
   "name": "@rushstack/typings-generator",
   "entries": [
     {
+      "version": "0.1.26",
+      "tag": "@rushstack/typings-generator_v0.1.26",
+      "date": "Sat, 27 Jun 2020 00:09:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.29` to `6.4.30`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.25",
       "tag": "@rushstack/typings-generator_v0.1.25",
       "date": "Fri, 26 Jun 2020 22:16:39 GMT",

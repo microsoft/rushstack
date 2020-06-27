@@ -2,6 +2,18 @@
   "name": "@rushstack/stream-collator",
   "entries": [
     {
+      "version": "3.2.30",
+      "tag": "@rushstack/stream-collator_v3.2.30",
+      "date": "Sat, 27 Jun 2020 00:09:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.29` to `6.4.30`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.29",
       "tag": "@rushstack/stream-collator_v3.2.29",
       "date": "Fri, 26 Jun 2020 22:16:39 GMT",

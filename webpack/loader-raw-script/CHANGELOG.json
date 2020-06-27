@@ -2,6 +2,18 @@
   "name": "@rushstack/loader-raw-script",
   "entries": [
     {
+      "version": "1.3.30",
+      "tag": "@rushstack/loader-raw-script_v1.3.30",
+      "date": "Sat, 27 Jun 2020 00:09:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.29` to `6.4.30`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.29",
       "tag": "@rushstack/loader-raw-script_v1.3.29",
       "date": "Fri, 26 Jun 2020 22:16:39 GMT",
