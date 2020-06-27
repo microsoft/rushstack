@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Wed, 24 Jun 2020 09:50:48 GMT and should not be manually modified.
+This log was last generated on Thu, 25 Jun 2020 06:43:34 GMT and should not be manually modified.
+
+## 1.0.2
+Thu, 25 Jun 2020 06:43:34 GMT
+
+### Patches
+
+- Enable variableDeclarationIgnoreFunction for the "@typescript-eslint/typedef" rule
 
 ## 1.0.1
 Wed, 24 Jun 2020 09:50:48 GMT

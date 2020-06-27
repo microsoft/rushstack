@@ -29,9 +29,9 @@
     "@types/eslint": "7.2.0",
     "@types/estree": "0.0.44",
     "@types/node": "10.17.13",
-    "@typescript-eslint/experimental-utils": "3.3.0",
-    "@typescript-eslint/parser": "3.3.0",
-    "@typescript-eslint/typescript-estree": "3.3.0",
+    "@typescript-eslint/experimental-utils": "3.4.0",
+    "@typescript-eslint/parser": "3.4.0",
+    "@typescript-eslint/typescript-estree": "3.4.0",
     "eslint": "~7.2.0",
     "gulp": "~4.0.2",
     "typescript": "~3.9.5"

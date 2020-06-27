@@ -2,6 +2,51 @@
   "name": "@rushstack/typings-generator",
   "entries": [
     {
+      "version": "0.1.26",
+      "tag": "@rushstack/typings-generator_v0.1.26",
+      "date": "Sat, 27 Jun 2020 00:09:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.29` to `6.4.30`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.25",
+      "tag": "@rushstack/typings-generator_v0.1.25",
+      "date": "Fri, 26 Jun 2020 22:16:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.28` to `6.4.29`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.24",
+      "tag": "@rushstack/typings-generator_v0.1.24",
+      "date": "Thu, 25 Jun 2020 06:43:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.24.3` to `3.24.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.7.1` to `0.7.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.27` to `6.4.28`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `1.0.1` to `1.0.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.23",
       "tag": "@rushstack/typings-generator_v0.1.23",
       "date": "Wed, 24 Jun 2020 09:50:48 GMT",

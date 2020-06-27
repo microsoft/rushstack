@@ -12,7 +12,6 @@ import {
   Terminal
 } from '@rushstack/node-core-library';
 import { GulpTask, GCBTerminalProvider } from '@microsoft/gulp-core-build';
-import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.1';
 
 export interface IRSCTaskConfig extends Object {
   buildDirectory: string;
@@ -45,7 +44,7 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
   /**
    * @internal
    */
-  protected _rushStackCompiler: typeof TRushStackCompiler;
+  protected _rushStackCompiler: unknown;
 
   private get _rushStackCompilerPackagePath(): string {
     if (!RSCTask._rushStackCompilerPackagePathCache.has(this.buildFolder)) {

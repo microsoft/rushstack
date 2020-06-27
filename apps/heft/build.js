@@ -15,7 +15,7 @@ try {
   FileSystem.ensureEmptyFolder(path.resolve(__dirname, 'dist'));
   FileSystem.ensureEmptyFolder(path.resolve(__dirname, 'temp'));
 
-  console.log('-- TYPESCRIPT --\n');
+  console.log(`-- TYPESCRIPT (${ToolPaths.typescriptPackageJson.version}) --\n`);
   callNodeScript(path.resolve(ToolPaths.typescriptPackagePath, 'bin', 'tsc'));
 
   console.log('-- COPY JSON FILES --\n');
@@ -27,14 +27,14 @@ try {
     });
   }
 
-  console.log('-- API EXTRACTOR --\n');
+  console.log(`-- API EXTRACTOR (${ToolPaths.apiExtractorPackageJson.version}) --\n`);
   const apiExtractorPath = path.join(__dirname, 'node_modules', '.bin', 'rush-api-extractor');
   child_process.execSync(`${apiExtractorPath} run ${isProductionBuild ? '' : '--local'}`, {
     stdio: 'inherit',
     cwd: __dirname
   });
 
-  console.log('-- ESLINT --\n');
+  console.log(`-- ESLINT (${ToolPaths.eslintPackageJson.version}) --\n`);
   callNodeScript(path.join(ToolPaths.eslintPackagePath, 'bin', 'eslint'), [
     '-f',
     'unix',

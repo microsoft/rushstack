@@ -2,6 +2,69 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.3.24",
+      "tag": "@rushstack/localization-plugin_v0.3.24",
+      "date": "Sat, 27 Jun 2020 00:09:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" from `0.1.25` to `0.1.26`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.29` to `6.4.30`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `2.4.26` to `2.4.27`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.23",
+      "tag": "@rushstack/localization-plugin_v0.3.23",
+      "date": "Fri, 26 Jun 2020 22:16:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" from `0.1.24` to `0.1.25`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.28` to `6.4.29`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `2.4.25` to `2.4.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.22",
+      "tag": "@rushstack/localization-plugin_v0.3.22",
+      "date": "Thu, 25 Jun 2020 06:43:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.24.3` to `3.24.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" from `0.1.23` to `0.1.24`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.7.1` to `0.7.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.27` to `6.4.28`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `2.4.24` to `2.4.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `1.0.1` to `1.0.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.21",
       "tag": "@rushstack/localization-plugin_v0.3.21",
       "date": "Wed, 24 Jun 2020 09:50:48 GMT",
