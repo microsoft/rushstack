@@ -10,8 +10,8 @@
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.5": "0.7.2",
-    "@microsoft/load-themed-styles": "1.10.62",
-    "@microsoft/web-library-build": "7.4.31",
+    "@microsoft/load-themed-styles": "1.10.63",
+    "@microsoft/web-library-build": "7.4.32",
     "@types/jest": "25.2.1",
     "gulp": "~4.0.2",
     "jest": "25.4.0",
