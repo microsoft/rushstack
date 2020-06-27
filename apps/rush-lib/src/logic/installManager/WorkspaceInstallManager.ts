@@ -20,7 +20,7 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from './InstallHelpers';
 import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
-import { RepoStateFile } from '../../api/RepoStateFile';
+import { RepoStateFile } from '../RepoStateFile';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
