@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.27.1",
+      "tag": "@microsoft/rush_v5.27.1",
+      "date": "Mon, 29 Jun 2020 18:39:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where environment variable trimming for .npmrc was unnecessarily performed on comment lines"
+          },
+          {
+            "comment": "Add a \"rush init\" template for .npmrc-publish"
+          },
+          {
+            "comment": "Fix a regression affecting GitHub specifiers for package.json dependencies (issue #1749)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.27.0",
       "tag": "@microsoft/rush_v5.27.0",
       "date": "Sun, 21 Jun 2020 04:48:53 GMT",
