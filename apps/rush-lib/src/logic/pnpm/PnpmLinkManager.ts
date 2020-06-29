@@ -361,7 +361,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     const useProjectDependencyManifest: boolean = !this._rushConfiguration.experimentsConfiguration
       .configuration.legacyIncrementalBuildDependencyDetection;
 
-    // Then, do non-local dependencies. Dev dependencies take priority over normal dependencies
+    // Then, do non-local dependencies
     const dependencies: PackageJsonDependency[] = [
       ...project.packageJsonEditor.dependencyList,
       ...project.packageJsonEditor.devDependencyList
@@ -375,7 +375,10 @@ export class PnpmLinkManager extends BaseLinkManager {
           version = (workspaceImporter.dependencies || {})[name];
           break;
         case DependencyType.Dev:
-          version = (workspaceImporter.devDependencies || {})[name];
+          // Dev dependencies are folded into dependencies if there is a duplicate
+          // definition, so we should also check there
+          version =
+            (workspaceImporter.devDependencies || {})[name] || (workspaceImporter.dependencies || {})[name];
           break;
         case DependencyType.Optional:
           version = (workspaceImporter.optionalDependencies || {})[name];
