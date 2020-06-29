@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { HeftCompilation } from './HeftCompilation';
+import { HeftSession } from './HeftSession';
 
 /**
  * @public
  */
-export interface IPluginPackage<TOptions = void> {
-  apply: (heftCompilation: HeftCompilation, heftConfiguration: HeftConfiguration, options?: TOptions) => void;
+export interface IHeftPlugin<TOptions = void> {
+  apply: (heftSession: HeftSession, heftConfiguration: HeftConfiguration, options?: TOptions) => void;
   displayName: string;
 }

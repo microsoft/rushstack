@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, JsonSchema, NewlineKind } from '@rushstack/node-core-library';
 
 /**
  * This interface represents the raw pnpm-workspace.YAML file
@@ -17,7 +17,8 @@ interface IRepoStateJson {
 }
 
 /**
- * Th
+ * This file is used to track the state of various Rush-related features. It is generated
+ * and updated by Rush.
  */
 export class RepoStateFile {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
@@ -74,7 +75,10 @@ export class RepoStateFile {
    */
   public saveIfModified(): boolean {
     if (this._modified) {
-      JsonFile.save(this._serialize(), this._repoStateFilePath, { updateExistingFile: true });
+      const content: string =
+        `// DO NOT MODIFY THIS FILE. It is generated and used by Rush.${NewlineKind.Lf}` +
+        `${JsonFile.stringify(this._serialize(), { newlineConversion: NewlineKind.Lf })}`;
+      FileSystem.writeFile(this._repoStateFilePath, content);
       this._modified = false;
       return true;
     }

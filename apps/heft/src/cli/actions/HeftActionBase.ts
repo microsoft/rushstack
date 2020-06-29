@@ -10,26 +10,33 @@ import { Terminal, IPackageJson, Colors, ConsoleTerminalProvider } from '@rushst
 import { AsyncSeriesBailHook, SyncHook, AsyncSeriesHook } from 'tapable';
 import { performance } from 'perf_hooks';
 
+import { MetricsCollector } from '../../metrics/MetricsCollector';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { PluginManager } from '../../pluginFramework/PluginManager';
 
 /**
  * @public
  */
-export interface IActionDataBase<THooks extends ActionHooksBase> {
+export interface IActionContext<
+  THooks extends ActionHooksBase<TActionProperties>,
+  TActionProperties extends object
+> {
   hooks: THooks;
+  properties: TActionProperties;
 }
 
 /**
  * @public
  */
-export abstract class ActionHooksBase {
+export abstract class ActionHooksBase<TActionProperties extends object> {
   /**
    * This hook allows the action's execution to be completely overridden. Only the last-registered plugin
    * with an override hook provided applies.
+   *
+   * @beta
    */
-  public readonly override: AsyncSeriesBailHook<IActionDataBase<ActionHooksBase>> = new AsyncSeriesBailHook([
-    'actionData'
+  public readonly overrideAction: AsyncSeriesBailHook<TActionProperties> = new AsyncSeriesBailHook([
+    'actionProperties'
   ]);
 
   public readonly loadActionConfiguration: AsyncSeriesHook = new AsyncSeriesHook();
@@ -39,19 +46,21 @@ export abstract class ActionHooksBase {
 
 export interface IHeftActionBaseOptions {
   terminal: Terminal;
+  metricsCollector: MetricsCollector;
   heftConfiguration: HeftConfiguration;
   pluginManager: PluginManager;
 }
 
 export abstract class HeftActionBase<
-  TActionData extends IActionDataBase<THooks>,
-  THooks extends ActionHooksBase
+  THooks extends ActionHooksBase<TActionProperties>,
+  TActionProperties extends object
 > extends CommandLineAction {
-  public /* readonly */ actionHook: SyncHook<TActionData & IActionDataBase<THooks>>;
+  public readonly actionHook: SyncHook<IActionContext<THooks, TActionProperties>>;
   protected readonly terminal: Terminal;
+  protected readonly metricsCollector: MetricsCollector;
   protected readonly heftConfiguration: HeftConfiguration;
   protected verboseFlag: CommandLineFlagParameter;
-  protected _actionDataUpdaters: ((actionOptions: TActionData) => void)[] = [];
+  protected _actionPropertiesUpdaters: ((actionOptions: TActionProperties) => void)[] = [];
   private readonly _innerHooksType: new () => THooks;
 
   public constructor(
@@ -61,9 +70,11 @@ export abstract class HeftActionBase<
   ) {
     super(commandLineOptions);
     this.terminal = heftActionOptions.terminal;
+    this.metricsCollector = heftActionOptions.metricsCollector;
     this.heftConfiguration = heftActionOptions.heftConfiguration;
-    this.actionHook = new SyncHook<TActionData & IActionDataBase<THooks>>(['action']);
+    this.actionHook = new SyncHook<IActionContext<THooks, TActionProperties>>(['action']);
     this._innerHooksType = innerHooksType;
+    this.setStartTime();
   }
 
   public onDefineParameters(): void {
@@ -72,6 +83,14 @@ export abstract class HeftActionBase<
       parameterShortName: '-v',
       description: 'If specified, log information useful for debugging.'
     });
+  }
+
+  public setStartTime(): void {
+    this.metricsCollector.setStartTime();
+  }
+
+  public recordMetrics(): void {
+    this.metricsCollector.record(this.actionName);
   }
 
   public async onExecute(): Promise<void> {
@@ -91,6 +110,8 @@ export abstract class HeftActionBase<
       encounteredError = true;
       throw e;
     } finally {
+      this.recordMetrics();
+
       this.terminal.writeLine(
         Colors.bold(
           (encounteredError ? Colors.red : Colors.green)(
@@ -113,50 +134,47 @@ export abstract class HeftActionBase<
    */
   public async executeInner(
     // Remove this when build and test are separated
-    actionExecute: (actionData: TActionData) => Promise<void> = this.actionExecute.bind(this)
+    actionExecute: (
+      actionContext: IActionContext<THooks, TActionProperties>
+    ) => Promise<void> = this.actionExecute.bind(this)
   ): Promise<void> {
-    const actionData: TActionData = this._getActionData();
+    const actionProperties: TActionProperties = this._getActionProperties();
+    const hooks: THooks = new this._innerHooksType();
+    const actionContext: IActionContext<THooks, TActionProperties> = {
+      hooks,
+      properties: actionProperties
+    };
 
-    this.actionHook.call(actionData);
+    this.actionHook.call(actionContext);
 
-    await actionData.hooks.loadActionConfiguration.promise();
-    await actionData.hooks.afterLoadActionConfiguration.promise();
+    await hooks.loadActionConfiguration.promise();
+    await hooks.afterLoadActionConfiguration.promise();
 
-    if (actionData.hooks.override.isUsed()) {
-      // Call this with actionData to get around the issue of the gulpPlugin's override of test needing build's
-      // actionData
-      await actionData.hooks.override.promise(actionData);
+    if (hooks.overrideAction.isUsed()) {
+      await hooks.overrideAction.promise(actionProperties);
     } else {
-      await actionExecute(actionData);
+      await actionExecute(actionContext);
     }
   }
 
   /**
    * @virtual
    */
-  protected async actionExecute(actionData: TActionData): Promise<void> {
+  protected async actionExecute(actionContext: IActionContext<THooks, TActionProperties>): Promise<void> {
     throw new Error(
       `${this.actionName}: override hook is not used and no default action executor is provided.`
     );
   }
 
-  protected abstract getDefaultActionData(): Omit<TActionData, 'hooks'>;
+  protected abstract getDefaultActionProperties(): TActionProperties;
 
-  private _getActionData(): TActionData {
-    const actionData: TActionData = this.getDefaultActionData() as TActionData;
-    if (actionData.hasOwnProperty('hooks')) {
-      throw new Error(
-        'A "hooks" property must not be provided by getDefaultActionData. Hooks must be specified in the ' +
-          'HeftBaseAction constructor'
-      );
+  private _getActionProperties(): TActionProperties {
+    const actionProperties: TActionProperties = this.getDefaultActionProperties();
+
+    for (const actionPropertiesUpdater of this._actionPropertiesUpdaters) {
+      actionPropertiesUpdater(actionProperties);
     }
 
-    actionData.hooks = new this._innerHooksType();
-
-    for (const actionDataUpdater of this._actionDataUpdaters) {
-      actionDataUpdater(actionData);
-    }
-
-    return actionData;
+    return actionProperties;
   }
 }

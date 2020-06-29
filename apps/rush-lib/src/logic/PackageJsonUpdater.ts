@@ -352,7 +352,7 @@ export class PackageJsonUpdater {
           // For workspaces, assume that specifying the exact version means you always want to consume
           // the local project. Otherwise, use the exact local package version
           if (useWorkspaces) {
-            selectedVersion = semver.clean(initialSpec) === semver.clean(version) ? '*' : initialSpec;
+            selectedVersion = initialSpec === version ? '*' : initialSpec;
             selectedVersionPrefix = workspacePrefix;
           } else {
             selectedVersion = version;

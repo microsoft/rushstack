@@ -90,8 +90,9 @@ export class PnpmLinkManager extends BaseLinkManager {
     rushLinkJson: IRushLinkJson,
     pnpmShrinkwrapFile: PnpmShrinkwrapFile
   ): Promise<void> {
-    // first, read the temp package.json information
+    console.log(os.EOL + 'LINKING: ' + project.packageName);
 
+    // first, read the temp package.json information
     // Example: "project1"
     const unscopedTempProjectName: string = this._rushConfiguration.packageNameParser.getUnscopedName(
       project.tempProjectName

@@ -3,24 +3,29 @@
 
 import { AsyncSeriesBailHook } from 'tapable';
 
-import { HeftActionBase, IHeftActionBaseOptions, ActionHooksBase, IActionDataBase } from './HeftActionBase';
+import { HeftActionBase, IHeftActionBaseOptions, ActionHooksBase, IActionContext } from './HeftActionBase';
 import { Async } from '../../utilities/Async';
 
 /**
  * @public
  */
-export class CleanHooks extends ActionHooksBase {
+export class CleanHooks extends ActionHooksBase<ICleanActionProperties> {
   public readonly deletePath: AsyncSeriesBailHook<string> = new AsyncSeriesBailHook<string>(['pathToDelete']);
 }
 
 /**
  * @public
  */
-export interface ICleanActionData extends IActionDataBase<CleanHooks> {
+export interface ICleanActionProperties {
   pathsToDelete: string[];
 }
 
-export class CleanAction extends HeftActionBase<ICleanActionData, CleanHooks> {
+/**
+ * @public
+ */
+export interface ICleanActionContext extends IActionContext<CleanHooks, ICleanActionProperties> {}
+
+export class CleanAction extends HeftActionBase<CleanHooks, ICleanActionProperties> {
   public constructor(options: IHeftActionBaseOptions) {
     super(
       {
@@ -33,15 +38,15 @@ export class CleanAction extends HeftActionBase<ICleanActionData, CleanHooks> {
     );
   }
 
-  protected async actionExecute(actionData: ICleanActionData): Promise<void> {
-    await Async.forEachLimitAsync(actionData.pathsToDelete, 100, (pathToDelete) =>
-      actionData.hooks.deletePath.promise(pathToDelete)
+  protected async actionExecute(actionContext: ICleanActionContext): Promise<void> {
+    await Async.forEachLimitAsync(actionContext.properties.pathsToDelete, 100, (pathToDelete) =>
+      actionContext.hooks.deletePath.promise(pathToDelete)
     );
 
-    this.terminal.writeLine(`Deleted ${actionData.pathsToDelete.length} paths`);
+    this.terminal.writeLine(`Deleted ${actionContext.properties.pathsToDelete.length} paths`);
   }
 
-  protected getDefaultActionData(): Omit<ICleanActionData, 'hooks'> {
+  protected getDefaultActionProperties(): ICleanActionProperties {
     return {
       pathsToDelete: []
     };
