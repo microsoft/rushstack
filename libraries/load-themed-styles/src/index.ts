@@ -52,8 +52,8 @@ interface IRunState {
 interface IThemeState {
   theme: ITheme | undefined;
   lastStyleElement: IExtendedHtmlStyleElement;
-  registeredStyles: IStyleRecord[];  // records of already registered non-themable styles
-  registeredThemableStyles: IStyleRecord[];  // records of already registered themable styles
+  registeredStyles: IStyleRecord[]; // records of already registered non-themable styles
+  registeredThemableStyles: IStyleRecord[]; // records of already registered themable styles
   loadStyles: ((processedStyles: string, rawStyles?: string | ThemableArray) => void) | undefined;
   perf: IMeasurement;
   runState: IRunState;
@@ -103,7 +103,7 @@ export const enum ClearStyleOptions {
 
 // Store the theming state in __themeState__ global scope for reuse in the case of duplicate
 // load-themed-styles hosted on the page.
-const _root: any = (typeof window === 'undefined') ? global : window; // eslint-disable-line @typescript-eslint/no-explicit-any
+const _root: any = typeof window === 'undefined' ? global : window; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 // Nonce string to inject into script tag if one provided. This is used in CSP (Content Security Policy).
 const _styleNonce: string = _root && _root.CSPSettings && _root.CSPSettings.nonce;
@@ -115,8 +115,8 @@ const _themeState: IThemeState = initializeThemeState();
  */
 const _themeTokenRegex: RegExp = /[\'\"]\[theme:\s*(\w+)\s*(?:\,\s*default:\s*([\\"\']?[\.\,\(\)\#\-\s\w]*[\.\,\(\)\#\-\w][\"\']?))?\s*\][\'\"]/g;
 
-const now: () => number =
-  () => (typeof performance !== 'undefined' && !!performance.now) ? performance.now() : Date.now();
+const now: () => number = () =>
+  typeof performance !== 'undefined' && !!performance.now ? performance.now() : Date.now();
 
 function measure(func: () => void): void {
   const start: number = now();
@@ -137,7 +137,7 @@ function initializeThemeState(): IThemeState {
 
   if (!state.runState) {
     state = {
-      ...(state),
+      ...state,
       perf: {
         count: 0,
         duration: 0
@@ -151,7 +151,7 @@ function initializeThemeState(): IThemeState {
   }
   if (!state.registeredThemableStyles) {
     state = {
-      ...(state),
+      ...state,
       registeredThemableStyles: []
     };
   }
@@ -168,11 +168,7 @@ function initializeThemeState(): IThemeState {
 export function loadStyles(styles: string | ThemableArray, loadAsync: boolean = false): void {
   measure(() => {
     const styleParts: ThemableArray = Array.isArray(styles) ? styles : splitStyles(styles);
-    const {
-      mode,
-      buffer,
-      flushTimer
-    } = _themeState.runState;
+    const { mode, buffer, flushTimer } = _themeState.runState;
     if (loadAsync || mode === Mode.async) {
       buffer.push(styleParts);
       if (!flushTimer) {
@@ -237,7 +233,7 @@ function applyThemableStyles(stylesArray: ThemableArray, styleRecord?: IStyleRec
   if (_themeState.loadStyles) {
     _themeState.loadStyles(resolveThemableArray(stylesArray).styleString, stylesArray);
   } else {
-      registerStyles(stylesArray);
+    registerStyles(stylesArray);
   }
 }
 
@@ -271,7 +267,7 @@ export function clearStyles(option: ClearStyleOptions = ClearStyleOptions.all): 
 
 function clearStylesInternal(records: IStyleRecord[]): void {
   records.forEach((styleRecord: IStyleRecord) => {
-    const styleElement: HTMLStyleElement = styleRecord && styleRecord.styleElement as HTMLStyleElement;
+    const styleElement: HTMLStyleElement = styleRecord && (styleRecord.styleElement as HTMLStyleElement);
     if (styleElement && styleElement.parentElement) {
       styleElement.parentElement.removeChild(styleElement);
     }
@@ -315,26 +311,35 @@ function resolveThemableArray(splitStyleArray: ThemableArray): IThemableArrayRes
   let themable: boolean = false;
   // Resolve the array of theming instructions to an array of strings.
   // Then join the array to produce the final CSS string.
-  const resolvedArray: (string | undefined)[] = (splitStyleArray || []).map((currentValue: IThemingInstruction) => {
-    const themeSlot: string | undefined = currentValue.theme;
-    if (themeSlot) {
-      themable = true;
-      // A theming annotation. Resolve it.
-      const themedValue: string | undefined = theme ? theme[themeSlot] : undefined;
-      const defaultValue: string = currentValue.defaultValue || 'inherit';
+  const resolvedArray: (string | undefined)[] = (splitStyleArray || []).map(
+    (currentValue: IThemingInstruction) => {
+      const themeSlot: string | undefined = currentValue.theme;
+      if (themeSlot) {
+        themable = true;
+        // A theming annotation. Resolve it.
+        const themedValue: string | undefined = theme ? theme[themeSlot] : undefined;
+        const defaultValue: string = currentValue.defaultValue || 'inherit';
 
-      // Warn to console if we hit an unthemed value even when themes are provided, but only if "DEBUG" is true.
-      // Allow the themedValue to be undefined to explicitly request the default value.
-      if (theme && !themedValue && console && !(themeSlot in theme) && typeof DEBUG !== 'undefined' && DEBUG) {
-        console.warn(`Theming value not provided for "${themeSlot}". Falling back to "${defaultValue}".`);
+        // Warn to console if we hit an unthemed value even when themes are provided, but only if "DEBUG" is true.
+        // Allow the themedValue to be undefined to explicitly request the default value.
+        if (
+          theme &&
+          !themedValue &&
+          console &&
+          !(themeSlot in theme) &&
+          typeof DEBUG !== 'undefined' &&
+          DEBUG
+        ) {
+          console.warn(`Theming value not provided for "${themeSlot}". Falling back to "${defaultValue}".`);
+        }
+
+        return themedValue || defaultValue;
+      } else {
+        // A non-themable string. Preserve it.
+        return currentValue.rawString;
       }
-
-      return themedValue || defaultValue;
-    } else {
-      // A non-themable string. Preserve it.
-      return currentValue.rawString;
     }
-  });
+  );
 
   return {
     styleString: resolvedArray.join(''),
@@ -389,10 +394,7 @@ function registerStyles(styleArray: ThemableArray): void {
   }
   const head: HTMLHeadElement = document.getElementsByTagName('head')[0];
   const styleElement: HTMLStyleElement = document.createElement('style');
-  const {
-    styleString,
-    themable
-  } = resolveThemableArray(styleArray);
+  const { styleString, themable } = resolveThemableArray(styleArray);
 
   styleElement.setAttribute('data-load-themed-styles', 'true');
   if (_styleNonce) {
@@ -402,7 +404,7 @@ function registerStyles(styleArray: ThemableArray): void {
   _themeState.perf.count++;
   head.appendChild(styleElement);
 
-  const ev: ICustomEvent<{ newStyle: HTMLStyleElement}> = document.createEvent('HTMLEvents');
+  const ev: ICustomEvent<{ newStyle: HTMLStyleElement }> = document.createEvent('HTMLEvents');
   ev.initEvent('styleinsert', true /* bubbleEvent */, false /* cancelable */);
   ev.args = {
     newStyle: styleElement

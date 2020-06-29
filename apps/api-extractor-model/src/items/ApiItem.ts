@@ -42,8 +42,7 @@ export const enum ApiItemKind {
  * Constructor options for {@link ApiItem}.
  * @public
  */
-export interface IApiItemOptions {
-}
+export interface IApiItemOptions {}
 
 export interface IApiItemJson {
   kind: ApiItemKind;
@@ -73,14 +72,16 @@ export class ApiItem {
   public static deserialize(jsonObject: IApiItemJson, context: DeserializerContext): ApiItem {
     // The Deserializer class is coupled with a ton of other classes, so  we delay loading it
     // to avoid ES5 circular imports.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const deserializerModule: typeof import('../model/Deserializer') = require('../model/Deserializer');
     return deserializerModule.Deserializer.deserialize(context, jsonObject);
   }
 
   /** @virtual */
-  public static onDeserializeInto(options: Partial<IApiItemOptions>,  context: DeserializerContext,
-    jsonObject: IApiItemJson): void {
+  public static onDeserializeInto(
+    options: Partial<IApiItemOptions>,
+    context: DeserializerContext,
+    jsonObject: IApiItemJson
+  ): void {
     // (implemented by subclasses)
   }
 
@@ -113,8 +114,7 @@ export class ApiItem {
         this._canonicalReference = this.buildCanonicalReference();
       } catch (e) {
         const name: string = this.getScopedNameWithinPackage() || this.displayName;
-        throw new InternalError(`Error building canonical reference for ${name}:\n`
-          + e.message);
+        throw new InternalError(`Error building canonical reference for ${name}:\n` + e.message);
       }
     }
     return this._canonicalReference;
@@ -145,13 +145,18 @@ export class ApiItem {
    */
   public get displayName(): string {
     switch (this.kind) {
-      case ApiItemKind.CallSignature: return '(call)';
-      case ApiItemKind.Constructor: return '(constructor)';
-      case ApiItemKind.ConstructSignature: return '(new)';
-      case ApiItemKind.IndexSignature: return '(indexer)';
-      case ApiItemKind.Model: return '(model)';
+      case ApiItemKind.CallSignature:
+        return '(call)';
+      case ApiItemKind.Constructor:
+        return '(constructor)';
+      case ApiItemKind.ConstructSignature:
+        return '(new)';
+      case ApiItemKind.IndexSignature:
+        return '(indexer)';
+      case ApiItemKind.Model:
+        return '(model)';
     }
-    return '(???)';  // All other types should inherit ApiNameMixin which will override this property
+    return '(???)'; // All other types should inherit ApiNameMixin which will override this property
   }
 
   /**
@@ -215,9 +220,11 @@ export class ApiItem {
     const reversedParts: string[] = [];
 
     for (let current: ApiItem | undefined = this; current !== undefined; current = current.parent) {
-      if (current.kind === ApiItemKind.Model
-        || current.kind === ApiItemKind.Package
-        || current.kind === ApiItemKind.EntryPoint) {
+      if (
+        current.kind === ApiItemKind.Model ||
+        current.kind === ApiItemKind.Package ||
+        current.kind === ApiItemKind.EntryPoint
+      ) {
         break;
       }
       if (reversedParts.length !== 0) {
@@ -288,4 +295,4 @@ export class ApiItem {
  *
  * @public
  */
-export interface IApiItemConstructor extends Constructor<ApiItem>, PropertiesOf<typeof ApiItem> { }
+export interface IApiItemConstructor extends Constructor<ApiItem>, PropertiesOf<typeof ApiItem> {}

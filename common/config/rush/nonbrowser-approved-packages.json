@@ -3,10 +3,6 @@
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
   "packages": [
     {
-      "name": "@microsoft/ts-command-line",
-      "allowedCategories": [ "tests" ]
-    },
-    {
       "name": "@jest/core",
       "allowedCategories": [ "libraries" ]
     },
@@ -119,6 +115,14 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@microsoft/rush-stack-compiler-3.8",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-3.9",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "@microsoft/rush-stack-compiler-shared",
       "allowedCategories": [ "libraries" ]
     },
@@ -128,6 +132,10 @@
     },
     {
       "name": "@microsoft/teams-js",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@microsoft/ts-command-line",
       "allowedCategories": [ "tests" ]
     },
     {
@@ -153,6 +161,10 @@
     {
       "name": "@rushstack/eslint-config",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@rushstack/eslint-patch",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/eslint-plugin",
@@ -423,6 +435,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "ignore",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "import-lazy",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "inquirer",
       "allowedCategories": [ "libraries" ]
     },
@@ -519,6 +539,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "npm-packlist",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "object-assign",
       "allowedCategories": [ "libraries" ]
     },
@@ -572,6 +596,10 @@
     },
     {
       "name": "sudo",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "tapable",
       "allowedCategories": [ "libraries" ]
     },
     {

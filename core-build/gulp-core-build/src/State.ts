@@ -11,9 +11,11 @@ export const args: { [flat: string]: boolean | string } = clArgs;
 export interface IPackageJSON {
   name?: string;
   version?: string;
-  directories: {
-    packagePath: string | undefined;
-  } | undefined;
+  directories:
+    | {
+        packagePath: string | undefined;
+      }
+    | undefined;
 }
 
 // There appears to be a TypeScript compiler bug that isn't allowing us to say
@@ -31,6 +33,5 @@ try {
 }
 
 export const builtPackage: IPackageJSON = packageJson;
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 export const coreBuildPackage: IPackageJSON = require('../package.json');
 export const nodeVersion: string = process.version;

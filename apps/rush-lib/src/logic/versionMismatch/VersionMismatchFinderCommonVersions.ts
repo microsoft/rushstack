@@ -45,9 +45,15 @@ export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEn
     return undefined; // common-versions.json doesn't have a distinction between dev and non-dev dependencies
   }
 
-  public addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void {
+  public addOrUpdateDependency(
+    packageName: string,
+    newVersion: string,
+    dependencyType: DependencyType
+  ): void {
     if (dependencyType !== DependencyType.Regular) {
-      throw new Error(`${RushConstants.commonVersionsFilename} only accepts "${DependencyType.Regular}" dependencies`);
+      throw new Error(
+        `${RushConstants.commonVersionsFilename} only accepts "${DependencyType.Regular}" dependencies`
+      );
     }
 
     if (this._fileManager.xstitchPreferredVersions.has(packageName)) {
@@ -62,11 +68,8 @@ export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEn
   }
 
   private _getPackageJsonDependency(dependencyName: string, version: string): PackageJsonDependency {
-    return new PackageJsonDependency(
-      dependencyName,
-      version,
-      DependencyType.Regular,
-      () => this.addOrUpdateDependency(dependencyName, version, DependencyType.Regular)
+    return new PackageJsonDependency(dependencyName, version, DependencyType.Regular, () =>
+      this.addOrUpdateDependency(dependencyName, version, DependencyType.Regular)
     );
   }
 }

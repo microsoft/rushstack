@@ -21,8 +21,7 @@ export class BxlModuleConfig {
   }
 
   public async writeFile(): Promise<void> {
-    const contents: string =
-`package({
+    const contents: string = `package({
   name: "${this._name}",
   nameResolutionSemantics: NameResolutionSemantics.implicitProjectReferences,
   projects: [

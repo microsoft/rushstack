@@ -62,7 +62,13 @@ export const enum EnvironmentVariableNames {
    * If a relative path is used, then the store path will be resolved relative to the process's
    * current working directory.  An absolute path is recommended.
    */
-  RUSH_PNPM_STORE_PATH = 'RUSH_PNPM_STORE_PATH'
+  RUSH_PNPM_STORE_PATH = 'RUSH_PNPM_STORE_PATH',
+
+  /**
+   * This environment variable can be used to specify the `--target-folder` parameter
+   * for the "rush deploy" command.
+   */
+  RUSH_DEPLOY_TARGET_FOLDER = 'RUSH_DEPLOY_TARGET_FOLDER'
 }
 
 /**
@@ -132,12 +138,14 @@ export class EnvironmentConfiguration {
       if (process.env.hasOwnProperty(envVarName) && envVarName.match(/^RUSH_/i)) {
         const value: string | undefined = process.env[envVarName];
         // Environment variables are only case-insensitive on Windows
-        const normalizedEnvVarName: string = os.platform() === 'win32' ? envVarName.toUpperCase() : envVarName;
+        const normalizedEnvVarName: string =
+          os.platform() === 'win32' ? envVarName.toUpperCase() : envVarName;
         switch (normalizedEnvVarName) {
           case EnvironmentVariableNames.RUSH_TEMP_FOLDER: {
-            EnvironmentConfiguration._rushTempFolderOverride = (value && !options.doNotNormalizePaths)
-              ? EnvironmentConfiguration._normalizeDeepestParentFolderPath(value) || value
-              : value;
+            EnvironmentConfiguration._rushTempFolderOverride =
+              value && !options.doNotNormalizePaths
+                ? EnvironmentConfiguration._normalizeDeepestParentFolderPath(value) || value
+                : value;
             break;
           }
 
@@ -152,15 +160,17 @@ export class EnvironmentConfiguration {
           }
 
           case EnvironmentVariableNames.RUSH_PNPM_STORE_PATH: {
-            EnvironmentConfiguration._pnpmStorePathOverride = (value && !options.doNotNormalizePaths)
-              ? EnvironmentConfiguration._normalizeDeepestParentFolderPath(value) || value
-              : value;
+            EnvironmentConfiguration._pnpmStorePathOverride =
+              value && !options.doNotNormalizePaths
+                ? EnvironmentConfiguration._normalizeDeepestParentFolderPath(value) || value
+                : value;
             break;
           }
 
           case EnvironmentVariableNames.RUSH_PARALLELISM:
           case EnvironmentVariableNames.RUSH_PREVIEW_VERSION:
           case EnvironmentVariableNames.RUSH_VARIANT:
+          case EnvironmentVariableNames.RUSH_DEPLOY_TARGET_FOLDER:
             // Handled by @microsoft/rush front end
             break;
           default:
@@ -174,7 +184,7 @@ export class EnvironmentConfiguration {
     if (unknownEnvVariables.length > 0) {
       throw new Error(
         'The following environment variables were found with the "RUSH_" prefix, but they are not ' +
-        `recognized by this version of Rush: ${unknownEnvVariables.join(', ')}`
+          `recognized by this version of Rush: ${unknownEnvVariables.join(', ')}`
       );
     }
 
@@ -214,7 +224,9 @@ export class EnvironmentConfiguration {
     const parsedPath: path.ParsedPath = path.parse(folderPath);
     const pathRoot: string = parsedPath.root;
     const pathWithoutRoot: string = parsedPath.dir.substr(pathRoot.length);
-    const pathParts: string[] = [...pathWithoutRoot.split(path.sep), parsedPath.name].filter((part) => !!part);
+    const pathParts: string[] = [...pathWithoutRoot.split(path.sep), parsedPath.name].filter(
+      (part) => !!part
+    );
 
     // Starting with all path sections, and eliminating one from the end during each loop iteration,
     // run trueCasePathSync. If trueCasePathSync returns without exception, we've found a subset

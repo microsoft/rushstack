@@ -108,7 +108,7 @@ export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition
  *
  * @public
  */
-export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition { }
+export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition {}
 
 /**
  * For use with {@link CommandLineParameterProvider.defineIntegerParameter},
@@ -148,7 +148,7 @@ export interface ICommandLineStringDefinition extends IBaseCommandLineDefinition
  *
  * @public
  */
-export interface ICommandLineStringListDefinition extends IBaseCommandLineDefinitionWithArgument { }
+export interface ICommandLineStringListDefinition extends IBaseCommandLineDefinitionWithArgument {}
 
 /**
  * For use with {@link CommandLineParameterProvider.defineCommandLineRemainder},

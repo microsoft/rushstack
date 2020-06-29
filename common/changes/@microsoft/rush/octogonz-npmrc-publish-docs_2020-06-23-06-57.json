@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a \"rush init\" template for .npmrc-publish",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

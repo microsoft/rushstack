@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "2.15.1",
+  "pnpmVersion": "4.12.5",
 
   /*[LINE "HYPOTHETICAL"]*/ "npmVersion": "4.5.0",
   /*[LINE "HYPOTHETICAL"]*/ "yarnVersion": "1.9.4",
@@ -64,7 +64,6 @@
      */
     /*[LINE "DEMO"]*/ "strictPeerDependencies": true,
 
-
     /**
      * Configures the strategy used to select versions during installation.
      *
@@ -95,7 +94,7 @@
      *
      * The default value is false.
      */
-     /*[LINE "HYPOTHETICAL"]*/ "preventManualShrinkwrapChanges": true
+    /*[LINE "HYPOTHETICAL"]*/ "preventManualShrinkwrapChanges": true
   },
 
   /**
@@ -106,19 +105,19 @@
    * Specify a SemVer range to ensure developers use a Node.js version that is appropriate
    * for your repo.
    */
-  "nodeSupportedVersionRange": ">=10.13.0 <11.0.0",
+  "nodeSupportedVersionRange": ">=12.13.0 <13.0.0",
 
   /**
-  * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
-  * spend six months in a stabilization period before the first Long Term Support (LTS) version.
-  * For example, 8.9.0 was the first LTS version of Node.js 8.  Pre-LTS versions are not recommended
-  * for production usage because they frequently have bugs.  They may cause Rush itself
-  * to malfunction.
-  *
-  * Rush normally prints a warning if it detects a pre-LTS Node.js version.  If you are testing
-  * pre-LTS versions in preparation for supporting the first LTS version, you can use this setting
-  * to disable Rush's warning.
-  */
+   * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
+   * spend six months in a stabilization period before the first Long Term Support (LTS) version.
+   * For example, 8.9.0 was the first LTS version of Node.js 8.  Pre-LTS versions are not recommended
+   * for production usage because they frequently have bugs.  They may cause Rush itself
+   * to malfunction.
+   *
+   * Rush normally prints a warning if it detects a pre-LTS Node.js version.  If you are testing
+   * pre-LTS versions in preparation for supporting the first LTS version, you can use this setting
+   * to disable Rush's warning.
+   */
   /*[LINE "HYPOTHETICAL"]*/ "suppressNodeLtsWarning": false,
 
   /**
@@ -132,7 +131,7 @@
    * version. In those cases, you will need to add an entry to the "allowedAlternativeVersions"
    * section of the common-versions.json.
    */
-   /*[LINE "HYPOTHETICAL"]*/ "ensureConsistentVersions": true,
+  /*[LINE "HYPOTHETICAL"]*/ "ensureConsistentVersions": true,
 
   /**
    * Large monorepos can become intimidating for newcomers if project folder paths don't follow
@@ -207,7 +206,7 @@
      * if the underlying package was already approved, this would imply that the typings
      * are also approved.
      */
-    /*[LINE "HYPOTHETICAL"]*/ "ignoredNpmScopes": [ "@types" ]
+    /*[LINE "HYPOTHETICAL"]*/ "ignoredNpmScopes": ["@types"]
   },
   /*[END "DEMO"]*/
 

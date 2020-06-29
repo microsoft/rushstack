@@ -8,11 +8,20 @@ import * as fsx from 'fs-extra';
 import { Text, NewlineKind, Encoding } from './Text';
 import { PosixModeBits } from './PosixModeBits';
 
+/**
+ * An alias for the Node.js `fs.Stats` object.
+ *
+ * @remarks
+ * This avoids the need to import the `fs` package when using the {@link FileSystem} API.
+ * @public
+ */
+export type FileSystemStats = fs.Stats;
+
 // The PosixModeBits are intended to be used with bitwise operations.
 /* eslint-disable no-bitwise */
 
 /**
- * The options for FileSystem.readFolder()
+ * The options for {@link FileSystem.readFolder}
  * @public
  */
 export interface IFileSystemReadFolderOptions {
@@ -24,7 +33,7 @@ export interface IFileSystemReadFolderOptions {
 }
 
 /**
- * The options for FileSystem.writeFile()
+ * The options for {@link FileSystem.writeFile}
  * @public
  */
 export interface IFileSystemWriteFileOptions {
@@ -48,7 +57,7 @@ export interface IFileSystemWriteFileOptions {
 }
 
 /**
- * The options for FileSystem.readFile()
+ * The options for {@link FileSystem.readFile}
  * @public
  */
 export interface IFileSystemReadFileOptions {
@@ -66,7 +75,7 @@ export interface IFileSystemReadFileOptions {
 }
 
 /**
- * The options for FileSystem.move()
+ * The options for {@link FileSystem.move}
  * @public
  */
 export interface IFileSystemMoveOptions {
@@ -96,7 +105,7 @@ export interface IFileSystemMoveOptions {
 }
 
 /**
- * The options for FileSystem.copyFile()
+ * The options for {@link FileSystem.copyFile}
  * @public
  */
 export interface IFileSystemCopyFileOptions {
@@ -111,12 +120,105 @@ export interface IFileSystemCopyFileOptions {
    * The path may be absolute or relative.
    */
   destinationPath: string;
+
+  /**
+   * Specifies what to do if the target object already exists.
+   * @defaultValue {@link AlreadyExistsBehavior.Overwrite}
+   */
+  alreadyExistsBehavior?: AlreadyExistsBehavior;
 }
 
 /**
- * The options for FileSystem.deleteFile()
+ * Specifies the behavior of {@link FileSystem.copyFiles} in a situation where the target object
+ * already exists.
  * @public
-*/
+ */
+export const enum AlreadyExistsBehavior {
+  /**
+   * If the destination object exists, overwrite it.
+   * This is the default behavior for {@link FileSystem.copyFiles}.
+   */
+  Overwrite = 'overwrite',
+
+  /**
+   * If the destination object exists, report an error.
+   */
+  Error = 'error',
+
+  /**
+   * If the destination object exists, skip it and continue the operation.
+   */
+  Ignore = 'ignore'
+}
+
+/**
+ * Callback function type for {@link IFileSystemCopyFilesAsyncOptions.filter}
+ * @public
+ */
+export type FileSystemCopyFilesAsyncFilter = (
+  sourcePath: string,
+  destinationPath: string
+) => Promise<boolean>;
+
+/**
+ * Callback function type for {@link IFileSystemCopyFilesOptions.filter}
+ * @public
+ */
+export type FileSystemCopyFilesFilter = (sourcePath: string, destinationPath: string) => boolean;
+
+/**
+ * The options for {@link FileSystem.copyFilesAsync}
+ * @public
+ */
+export interface IFileSystemCopyFilesAsyncOptions {
+  /**
+   * The starting path of the file or folder to be copied.
+   * The path may be absolute or relative.
+   */
+  sourcePath: string;
+
+  /**
+   * The path that the files will be copied to.
+   * The path may be absolute or relative.
+   */
+  destinationPath: string;
+
+  /**
+   * If true, then when copying symlinks, copy the target object instead of copying the link.
+   */
+  dereferenceSymlinks?: boolean;
+
+  /**
+   * Specifies what to do if the target object already exists.
+   */
+  alreadyExistsBehavior?: AlreadyExistsBehavior;
+
+  /**
+   * If true, then the target object will be assigned "last modification" and "last access" timestamps
+   * that are the same as the source.  Otherwise, the OS default timestamps are assigned.
+   */
+  preserveTimestamps?: boolean;
+
+  /**
+   * A callback that will be invoked for each path that is copied.  The callback can return `false`
+   * to cause the object to be excluded from the operation.
+   */
+  filter?: FileSystemCopyFilesAsyncFilter | FileSystemCopyFilesFilter;
+}
+
+/**
+ * The options for {@link FileSystem.copyFiles}
+ * @public
+ */
+export interface IFileSystemCopyFilesOptions extends IFileSystemCopyFilesAsyncOptions {
+  /**  {@inheritdoc IFileSystemCopyFilesAsyncOptions.filter} */
+  filter?: FileSystemCopyFilesFilter; // narrow the type to exclude FileSystemCopyFilesAsyncFilter
+}
+
+/**
+ * The options for {@link FileSystem.deleteFile}
+ * @public
+ */
 export interface IFileSystemDeleteFileOptions {
   /**
    * If true, will throw an exception if the file did not exist before `deleteFile()` was called.
@@ -126,7 +228,7 @@ export interface IFileSystemDeleteFileOptions {
 }
 
 /**
- * The parameters for `updateTimes()`.
+ * The options for {@link FileSystem.updateTimes}
  * Both times must be specified.
  * @public
  */
@@ -143,8 +245,8 @@ export interface IFileSystemUpdateTimeParameters {
 }
 
 /**
- * The options for `FileSystem.createSymbolicLinkJunction()`, `createSymbolicLinkFile()`,
- * `createSymbolicLinkFolder()`,  and `createHardLink()`.
+ * The options for {@link FileSystem.createSymbolicLinkJunction}, {@link FileSystem.createSymbolicLinkFile},
+ * {@link FileSystem.createSymbolicLinkFolder}, and {@link FileSystem.createHardLink}.
  *
  * @public
  */
@@ -184,6 +286,14 @@ const READ_FILE_DEFAULT_OPTIONS: Partial<IFileSystemReadFileOptions> = {
   convertLineEndings: undefined
 };
 
+const COPY_FILE_DEFAULT_OPTIONS: Partial<IFileSystemCopyFileOptions> = {
+  alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
+};
+
+const COPY_FILES_DEFAULT_OPTIONS: Partial<IFileSystemCopyFilesOptions> = {
+  alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
+};
+
 const DELETE_FILE_DEFAULT_OPTIONS: Partial<IFileSystemDeleteFileOptions> = {
   throwIfNotExists: false
 };
@@ -205,7 +315,6 @@ const DELETE_FILE_DEFAULT_OPTIONS: Partial<IFileSystemDeleteFileOptions> = {
  * @public
  */
 export class FileSystem {
-
   // ===============
   // COMMON OPERATIONS
   // ===============
@@ -222,7 +331,9 @@ export class FileSystem {
    * @param path - The absolute or relative path to the filesystem object.
    */
   public static exists(path: string): boolean {
-    return fsx.existsSync(path);
+    return FileSystem._wrapException(() => {
+      return fsx.existsSync(path);
+    });
   }
 
   /**
@@ -231,15 +342,19 @@ export class FileSystem {
    * Behind the scenes it uses `fs.statSync()`.
    * @param path - The absolute or relative path to the filesystem object.
    */
-  public static getStatistics(path: string): fs.Stats {
-    return fsx.statSync(path);
+  public static getStatistics(path: string): FileSystemStats {
+    return FileSystem._wrapException(() => {
+      return fsx.statSync(path);
+    });
   }
 
   /**
    * An async version of {@link FileSystem.getStatistics}.
    */
-  public static getStatisticsAsync(path: string): Promise<fs.Stats> {
-    return fsx.stat(path);
+  public static async getStatisticsAsync(path: string): Promise<FileSystemStats> {
+    return await FileSystem._wrapExceptionAsync(() => {
+      return fsx.stat(path);
+    });
   }
 
   /**
@@ -250,18 +365,21 @@ export class FileSystem {
    * @param times - The times that the object should be updated to reflect.
    */
   public static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void {
-    fsx.utimesSync(path, times.accessedTime, times.modifiedTime);
+    return FileSystem._wrapException(() => {
+      fsx.utimesSync(path, times.accessedTime, times.modifiedTime);
+    });
   }
 
   /**
    * An async version of {@link FileSystem.updateTimes}.
    */
-  public static updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void> {
-    // This cast is needed because the fs-extra typings require both parameters
-    // to have the same type (number or Date), whereas Node.js does not require that.
-    return fsx.utimes(path, times.accessedTime as number, times.modifiedTime as number);
+  public static async updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void> {
+    await FileSystem._wrapExceptionAsync(() => {
+      // This cast is needed because the fs-extra typings require both parameters
+      // to have the same type (number or Date), whereas Node.js does not require that.
+      return fsx.utimes(path, times.accessedTime as number, times.modifiedTime as number);
+    });
   }
-
 
   /**
    * Changes the permissions (i.e. file mode bits) for a filesystem object.
@@ -270,14 +388,18 @@ export class FileSystem {
    * @param modeBits - POSIX-style file mode bits specified using the {@link PosixModeBits} enum
    */
   public static changePosixModeBits(path: string, mode: PosixModeBits): void {
-    fs.chmodSync(path, mode);
+    FileSystem._wrapException(() => {
+      fs.chmodSync(path, mode);
+    });
   }
 
   /**
    * An async version of {@link FileSystem.changePosixModeBits}.
    */
-  public static changePosixModeBitsAsync(path: string, mode: PosixModeBits): Promise<void> {
-    return fsx.chmod(path, mode);
+  public static async changePosixModeBitsAsync(path: string, mode: PosixModeBits): Promise<void> {
+    await FileSystem._wrapExceptionAsync(() => {
+      return fsx.chmod(path, mode);
+    });
   }
 
   /**
@@ -291,14 +413,18 @@ export class FileSystem {
    * to call {@link FileSystem.getStatistics} directly instead.
    */
   public static getPosixModeBits(path: string): PosixModeBits {
-    return FileSystem.getStatistics(path).mode;
+    return FileSystem._wrapException(() => {
+      return FileSystem.getStatistics(path).mode;
+    });
   }
 
   /**
    * An async version of {@link FileSystem.getPosixModeBits}.
    */
   public static async getPosixModeBitsAsync(path: string): Promise<PosixModeBits> {
-    return (await FileSystem.getStatisticsAsync(path)).mode;
+    return await FileSystem._wrapExceptionAsync(async () => {
+      return (await FileSystem.getStatisticsAsync(path)).mode;
+    });
   }
 
   /**
@@ -309,19 +435,19 @@ export class FileSystem {
    * @param modeBits - POSIX-style file mode bits specified using the {@link PosixModeBits} enum
    */
   public static formatPosixModeBits(modeBits: PosixModeBits): string {
-    let result: string = '-';  // (later we may add support for additional states such as S_IFDIR or S_ISUID)
+    let result: string = '-'; // (later we may add support for additional states such as S_IFDIR or S_ISUID)
 
-    result += (modeBits & PosixModeBits.UserRead) ? 'r' : '-';
-    result += (modeBits & PosixModeBits.UserWrite) ? 'w' : '-';
-    result += (modeBits & PosixModeBits.UserExecute) ? 'x' : '-';
+    result += modeBits & PosixModeBits.UserRead ? 'r' : '-';
+    result += modeBits & PosixModeBits.UserWrite ? 'w' : '-';
+    result += modeBits & PosixModeBits.UserExecute ? 'x' : '-';
 
-    result += (modeBits & PosixModeBits.GroupRead) ? 'r' : '-';
-    result += (modeBits & PosixModeBits.GroupWrite) ? 'w' : '-';
-    result += (modeBits & PosixModeBits.GroupExecute) ? 'x' : '-';
+    result += modeBits & PosixModeBits.GroupRead ? 'r' : '-';
+    result += modeBits & PosixModeBits.GroupWrite ? 'w' : '-';
+    result += modeBits & PosixModeBits.GroupExecute ? 'x' : '-';
 
-    result += (modeBits & PosixModeBits.OthersRead) ? 'r' : '-';
-    result += (modeBits & PosixModeBits.OthersWrite) ? 'w' : '-';
-    result += (modeBits & PosixModeBits.OthersExecute) ? 'x' : '-';
+    result += modeBits & PosixModeBits.OthersRead ? 'r' : '-';
+    result += modeBits & PosixModeBits.OthersWrite ? 'w' : '-';
+    result += modeBits & PosixModeBits.OthersExecute ? 'x' : '-';
 
     return result;
   }
@@ -331,52 +457,56 @@ export class FileSystem {
    * Behind the scenes it uses `fs-extra.moveSync()`
    */
   public static move(options: IFileSystemMoveOptions): void {
-    options = {
-      ...MOVE_DEFAULT_OPTIONS,
-      ...options
-    };
+    FileSystem._wrapException(() => {
+      options = {
+        ...MOVE_DEFAULT_OPTIONS,
+        ...options
+      };
 
-    try {
-      fsx.moveSync(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
-    } catch (error) {
-      if (options.ensureFolderExists) {
-        if (!FileSystem.isNotExistError(error)) {
+      try {
+        fsx.moveSync(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
+      } catch (error) {
+        if (options.ensureFolderExists) {
+          if (!FileSystem.isNotExistError(error)) {
+            throw error;
+          }
+
+          const folderPath: string = nodeJsPath.dirname(options.destinationPath);
+          FileSystem.ensureFolder(folderPath);
+          fsx.moveSync(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
+        } else {
           throw error;
         }
-
-        const folderPath: string = nodeJsPath.dirname(options.destinationPath);
-        FileSystem.ensureFolder(folderPath);
-        fsx.moveSync(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
-      } else {
-        throw error;
       }
-    }
+    });
   }
 
   /**
    * An async version of {@link FileSystem.move}.
    */
   public static async moveAsync(options: IFileSystemMoveOptions): Promise<void> {
-    options = {
-      ...MOVE_DEFAULT_OPTIONS,
-      ...options
-    };
+    await FileSystem._wrapExceptionAsync(async () => {
+      options = {
+        ...MOVE_DEFAULT_OPTIONS,
+        ...options
+      };
 
-    try {
-      await fsx.move(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
-    } catch (error) {
-      if (options.ensureFolderExists) {
-        if (!FileSystem.isNotExistError(error)) {
+      try {
+        await fsx.move(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
+      } catch (error) {
+        if (options.ensureFolderExists) {
+          if (!FileSystem.isNotExistError(error)) {
+            throw error;
+          }
+
+          const folderPath: string = nodeJsPath.dirname(options.destinationPath);
+          await FileSystem.ensureFolderAsync(nodeJsPath.dirname(folderPath));
+          await fsx.move(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
+        } else {
           throw error;
         }
-
-        const folderPath: string = nodeJsPath.dirname(options.destinationPath);
-        await FileSystem.ensureFolderAsync(nodeJsPath.dirname(folderPath));
-        await fsx.move(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
-      } else {
-        throw error;
       }
-    }
+    });
   }
 
   // ===============
@@ -391,14 +521,18 @@ export class FileSystem {
    * @param folderPath - The absolute or relative path of the folder which should be created.
    */
   public static ensureFolder(folderPath: string): void {
-    fsx.ensureDirSync(folderPath);
+    FileSystem._wrapException(() => {
+      fsx.ensureDirSync(folderPath);
+    });
   }
 
   /**
    * An async version of {@link FileSystem.ensureFolder}.
    */
-  public static ensureFolderAsync(folderPath: string): Promise<void> {
-    return fsx.ensureDir(folderPath);
+  public static async ensureFolderAsync(folderPath: string): Promise<void> {
+    await FileSystem._wrapExceptionAsync(() => {
+      return fsx.ensureDir(folderPath);
+    });
   }
 
   /**
@@ -408,56 +542,43 @@ export class FileSystem {
    * @param options - Optional settings that can change the behavior. Type: `IReadFolderOptions`
    */
   public static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[] {
-    options = {
-      ...READ_FOLDER_DEFAULT_OPTIONS,
-      ...options
-    };
+    return FileSystem._wrapException(() => {
+      options = {
+        ...READ_FOLDER_DEFAULT_OPTIONS,
+        ...options
+      };
 
-    let fileNames: string[]
-    try {
       // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
-      fileNames = fsx.readdirSync(folderPath);
-    } catch (e) {
-      if (FileSystem.isNotExistError(e)) {
-        throw new Error(`Folder does not exist: "${folderPath}"`);
+      const fileNames: string[] = fsx.readdirSync(folderPath);
+      if (options.absolutePaths) {
+        return fileNames.map((fileName) => nodeJsPath.resolve(folderPath, fileName));
       } else {
-        throw e;
+        return fileNames;
       }
-    }
-
-    if (options.absolutePaths) {
-      return fileNames.map(fileName => nodeJsPath.resolve(folderPath, fileName));
-    } else {
-      return fileNames;
-    }
+    });
   }
 
   /**
    * An async version of {@link FileSystem.readFolder}.
    */
-  public static async readFolderAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]> {
-    options = {
-      ...READ_FOLDER_DEFAULT_OPTIONS,
-      ...options
-    };
+  public static async readFolderAsync(
+    folderPath: string,
+    options?: IFileSystemReadFolderOptions
+  ): Promise<string[]> {
+    return await FileSystem._wrapExceptionAsync(async () => {
+      options = {
+        ...READ_FOLDER_DEFAULT_OPTIONS,
+        ...options
+      };
 
-    let fileNames: string[];
-    try {
       // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
-      fileNames = await fsx.readdir(folderPath);
-    } catch (e) {
-      if (FileSystem.isNotExistError(e)) {
-        throw new Error(`Folder does not exist: "${folderPath}"`);
+      const fileNames: string[] = await fsx.readdir(folderPath);
+      if (options.absolutePaths) {
+        return fileNames.map((fileName) => nodeJsPath.resolve(folderPath, fileName));
       } else {
-        throw e;
+        return fileNames;
       }
-    }
-
-    if (options.absolutePaths) {
-      return fileNames.map(fileName => nodeJsPath.resolve(folderPath, fileName));
-    } else {
-      return fileNames;
-    }
+    });
   }
 
   /**
@@ -468,14 +589,18 @@ export class FileSystem {
    * @param folderPath - The absolute or relative path to the folder which should be deleted.
    */
   public static deleteFolder(folderPath: string): void {
-    fsx.removeSync(folderPath);
+    FileSystem._wrapException(() => {
+      fsx.removeSync(folderPath);
+    });
   }
 
   /**
    * An async version of {@link FileSystem.deleteFolder}.
    */
-  public static deleteFolderAsync(folderPath: string): Promise<void> {
-    return fsx.remove(folderPath);
+  public static async deleteFolderAsync(folderPath: string): Promise<void> {
+    await FileSystem._wrapExceptionAsync(() => {
+      return fsx.remove(folderPath);
+    });
   }
 
   /**
@@ -487,14 +612,18 @@ export class FileSystem {
    * @param folderPath - The absolute or relative path to the folder which should have its contents deleted.
    */
   public static ensureEmptyFolder(folderPath: string): void {
-    fsx.emptyDirSync(folderPath);
+    FileSystem._wrapException(() => {
+      fsx.emptyDirSync(folderPath);
+    });
   }
 
   /**
    * An async version of {@link FileSystem.ensureEmptyFolder}.
    */
-  public static ensureEmptyFolderAsync(folderPath: string): Promise<void> {
-    return fsx.emptyDir(folderPath);
+  public static async ensureEmptyFolderAsync(folderPath: string): Promise<void> {
+    await FileSystem._wrapExceptionAsync(() => {
+      return fsx.emptyDir(folderPath);
+    });
   }
 
   // ===============
@@ -510,61 +639,73 @@ export class FileSystem {
    * @param contents - The text that should be written to the file.
    * @param options - Optional settings that can change the behavior. Type: `IWriteFileOptions`
    */
-  public static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void {
-    options = {
-      ...WRITE_FILE_DEFAULT_OPTIONS,
-      ...options
-    };
+  public static writeFile(
+    filePath: string,
+    contents: string | Buffer,
+    options?: IFileSystemWriteFileOptions
+  ): void {
+    FileSystem._wrapException(() => {
+      options = {
+        ...WRITE_FILE_DEFAULT_OPTIONS,
+        ...options
+      };
 
-    if (options.convertLineEndings) {
-      contents = Text.convertTo(contents.toString(), options.convertLineEndings);
-    }
+      if (options.convertLineEndings) {
+        contents = Text.convertTo(contents.toString(), options.convertLineEndings);
+      }
 
-    try {
-      fsx.writeFileSync(filePath, contents, { encoding: options.encoding });
-    } catch (error) {
-      if (options.ensureFolderExists) {
-        if (!FileSystem.isNotExistError(error)) {
+      try {
+        fsx.writeFileSync(filePath, contents, { encoding: options.encoding });
+      } catch (error) {
+        if (options.ensureFolderExists) {
+          if (!FileSystem.isNotExistError(error)) {
+            throw error;
+          }
+
+          const folderPath: string = nodeJsPath.dirname(filePath);
+          FileSystem.ensureFolder(folderPath);
+          fsx.writeFileSync(filePath, contents, { encoding: options.encoding });
+        } else {
           throw error;
         }
-
-        const folderPath: string = nodeJsPath.dirname(filePath);
-        FileSystem.ensureFolder(folderPath);
-        fsx.writeFileSync(filePath, contents, { encoding: options.encoding });
-      } else {
-        throw error;
       }
-    }
+    });
   }
 
   /**
    * An async version of {@link FileSystem.writeFile}.
    */
-  public static async writeFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void> {
-    options = {
-      ...WRITE_FILE_DEFAULT_OPTIONS,
-      ...options
-    };
+  public static async writeFileAsync(
+    filePath: string,
+    contents: string | Buffer,
+    options?: IFileSystemWriteFileOptions
+  ): Promise<void> {
+    await FileSystem._wrapExceptionAsync(async () => {
+      options = {
+        ...WRITE_FILE_DEFAULT_OPTIONS,
+        ...options
+      };
 
-    if (options.convertLineEndings) {
-      contents = Text.convertTo(contents.toString(), options.convertLineEndings);
-    }
+      if (options.convertLineEndings) {
+        contents = Text.convertTo(contents.toString(), options.convertLineEndings);
+      }
 
-    try {
-      await fsx.writeFile(filePath, contents, { encoding: options.encoding });
-    } catch (error) {
-      if (options.ensureFolderExists) {
-        if (!FileSystem.isNotExistError(error)) {
+      try {
+        await fsx.writeFile(filePath, contents, { encoding: options.encoding });
+      } catch (error) {
+        if (options.ensureFolderExists) {
+          if (!FileSystem.isNotExistError(error)) {
+            throw error;
+          }
+
+          const folderPath: string = nodeJsPath.dirname(filePath);
+          await FileSystem.ensureFolderAsync(folderPath);
+          await fsx.writeFile(filePath, contents, { encoding: options.encoding });
+        } else {
           throw error;
         }
-
-        const folderPath: string = nodeJsPath.dirname(filePath);
-        await FileSystem.ensureFolderAsync(folderPath);
-        await fsx.writeFile(filePath, contents, { encoding: options.encoding });
-      } else {
-        throw error;
       }
-    }
+    });
   }
 
   /**
@@ -576,61 +717,73 @@ export class FileSystem {
    * @param contents - The text that should be written to the file.
    * @param options - Optional settings that can change the behavior. Type: `IWriteFileOptions`
    */
-  public static appendToFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void {
-    options = {
-      ...APPEND_TO_FILE_DEFAULT_OPTIONS,
-      ...options
-    };
+  public static appendToFile(
+    filePath: string,
+    contents: string | Buffer,
+    options?: IFileSystemWriteFileOptions
+  ): void {
+    FileSystem._wrapException(() => {
+      options = {
+        ...APPEND_TO_FILE_DEFAULT_OPTIONS,
+        ...options
+      };
 
-    if (options.convertLineEndings) {
-      contents = Text.convertTo(contents.toString(), options.convertLineEndings);
-    }
+      if (options.convertLineEndings) {
+        contents = Text.convertTo(contents.toString(), options.convertLineEndings);
+      }
 
-    try {
-      fsx.appendFileSync(filePath, contents, { encoding: options.encoding });
-    } catch (error) {
-      if (options.ensureFolderExists) {
-        if (!FileSystem.isNotExistError(error)) {
+      try {
+        fsx.appendFileSync(filePath, contents, { encoding: options.encoding });
+      } catch (error) {
+        if (options.ensureFolderExists) {
+          if (!FileSystem.isNotExistError(error)) {
+            throw error;
+          }
+
+          const folderPath: string = nodeJsPath.dirname(filePath);
+          FileSystem.ensureFolder(folderPath);
+          fsx.appendFileSync(filePath, contents, { encoding: options.encoding });
+        } else {
           throw error;
         }
-
-        const folderPath: string = nodeJsPath.dirname(filePath);
-        FileSystem.ensureFolder(folderPath);
-        fsx.appendFileSync(filePath, contents, { encoding: options.encoding });
-      } else {
-        throw error;
       }
-    }
+    });
   }
 
   /**
    * An async version of {@link FileSystem.appendToFile}.
    */
-  public static async appendToFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void> {
-    options = {
-      ...APPEND_TO_FILE_DEFAULT_OPTIONS,
-      ...options
-    };
+  public static async appendToFileAsync(
+    filePath: string,
+    contents: string | Buffer,
+    options?: IFileSystemWriteFileOptions
+  ): Promise<void> {
+    await FileSystem._wrapExceptionAsync(async () => {
+      options = {
+        ...APPEND_TO_FILE_DEFAULT_OPTIONS,
+        ...options
+      };
 
-    if (options.convertLineEndings) {
-      contents = Text.convertTo(contents.toString(), options.convertLineEndings);
-    }
+      if (options.convertLineEndings) {
+        contents = Text.convertTo(contents.toString(), options.convertLineEndings);
+      }
 
-    try {
-      await fsx.appendFile(filePath, contents, { encoding: options.encoding });
-    } catch (error) {
-      if (options.ensureFolderExists) {
-        if (!FileSystem.isNotExistError(error)) {
+      try {
+        await fsx.appendFile(filePath, contents, { encoding: options.encoding });
+      } catch (error) {
+        if (options.ensureFolderExists) {
+          if (!FileSystem.isNotExistError(error)) {
+            throw error;
+          }
+
+          const folderPath: string = nodeJsPath.dirname(filePath);
+          await FileSystem.ensureFolderAsync(folderPath);
+          await fsx.appendFile(filePath, contents, { encoding: options.encoding });
+        } else {
           throw error;
         }
-
-        const folderPath: string = nodeJsPath.dirname(filePath);
-        await FileSystem.ensureFolderAsync(folderPath);
-        await fsx.appendFile(filePath, contents, { encoding: options.encoding });
-      } else {
-        throw error;
       }
-    }
+    });
   }
 
   /**
@@ -640,34 +793,38 @@ export class FileSystem {
    * @param options - Optional settings that can change the behavior. Type: `IReadFileOptions`
    */
   public static readFile(filePath: string, options?: IFileSystemReadFileOptions): string {
-    options = {
-      ...READ_FILE_DEFAULT_OPTIONS,
-      ...options
-    };
+    return FileSystem._wrapException(() => {
+      options = {
+        ...READ_FILE_DEFAULT_OPTIONS,
+        ...options
+      };
 
-    let contents: string = FileSystem.readFileToBuffer(filePath).toString(options.encoding);
-    if (options.convertLineEndings) {
-      contents = Text.convertTo(contents, options.convertLineEndings);
-    }
+      let contents: string = FileSystem.readFileToBuffer(filePath).toString(options.encoding);
+      if (options.convertLineEndings) {
+        contents = Text.convertTo(contents, options.convertLineEndings);
+      }
 
-    return contents;
+      return contents;
+    });
   }
 
   /**
    * An async version of {@link FileSystem.readFile}.
    */
   public static async readFileAsync(filePath: string, options?: IFileSystemReadFileOptions): Promise<string> {
-    options = {
-      ...READ_FILE_DEFAULT_OPTIONS,
-      ...options
-    };
+    return await FileSystem._wrapExceptionAsync(async () => {
+      options = {
+        ...READ_FILE_DEFAULT_OPTIONS,
+        ...options
+      };
 
-    let contents: string = (await FileSystem.readFileToBufferAsync(filePath)).toString(options.encoding);
-    if (options.convertLineEndings) {
-      contents = Text.convertTo(contents, options.convertLineEndings);
-    }
+      let contents: string = (await FileSystem.readFileToBufferAsync(filePath)).toString(options.encoding);
+      if (options.convertLineEndings) {
+        contents = Text.convertTo(contents, options.convertLineEndings);
+      }
 
-    return contents;
+      return contents;
+    });
   }
 
   /**
@@ -676,30 +833,118 @@ export class FileSystem {
    * @param filePath - The relative or absolute path to the file whose contents should be read.
    */
   public static readFileToBuffer(filePath: string): Buffer {
-    return fsx.readFileSync(filePath);
+    return FileSystem._wrapException(() => {
+      return fsx.readFileSync(filePath);
+    });
   }
 
   /**
    * An async version of {@link FileSystem.readFileToBuffer}.
    */
-  public static readFileToBufferAsync(filePath: string): Promise<Buffer> {
-    return fsx.readFile(filePath);
+  public static async readFileToBufferAsync(filePath: string): Promise<Buffer> {
+    return await FileSystem._wrapExceptionAsync(() => {
+      return fsx.readFile(filePath);
+    });
   }
 
   /**
-   * Copies a file from one location to another.
+   * Copies a single file from one location to another.
    * By default, destinationPath is overwritten if it already exists.
-   * Behind the scenes it uses `fs.copyFileSync()`.
+   *
+   * @remarks
+   * The `copyFile()` API cannot be used to copy folders.  It copies at most one file.
+   * Use {@link FileSystem.copyFiles} if you need to recursively copy a tree of folders.
+   *
+   * The implementation is based on `copySync()` from the `fs-extra` package.
    */
   public static copyFile(options: IFileSystemCopyFileOptions): void {
-    fsx.copySync(options.sourcePath, options.destinationPath);
+    options = {
+      ...COPY_FILE_DEFAULT_OPTIONS,
+      ...options
+    };
+
+    if (FileSystem.getStatistics(options.sourcePath).isDirectory()) {
+      throw new Error(
+        'The specified path refers to a folder; this operation expects a file object:\n' + options.sourcePath
+      );
+    }
+
+    FileSystem._wrapException(() => {
+      fsx.copySync(options.sourcePath, options.destinationPath, {
+        errorOnExist: options.alreadyExistsBehavior === AlreadyExistsBehavior.Error,
+        overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite
+      });
+    });
   }
 
   /**
    * An async version of {@link FileSystem.copyFile}.
    */
   public static async copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void> {
-    await fsx.copy(options.sourcePath, options.destinationPath);
+    options = {
+      ...COPY_FILE_DEFAULT_OPTIONS,
+      ...options
+    };
+
+    if (FileSystem.getStatistics(options.sourcePath).isDirectory()) {
+      throw new Error(
+        'The specified path refers to a folder; this operation expects a file object:\n' + options.sourcePath
+      );
+    }
+
+    await FileSystem._wrapExceptionAsync(() => {
+      return fsx.copy(options.sourcePath, options.destinationPath, {
+        errorOnExist: options.alreadyExistsBehavior === AlreadyExistsBehavior.Error,
+        overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite
+      });
+    });
+  }
+
+  /**
+   * Copies a file or folder from one location to another, recursively copying any folder contents.
+   * By default, destinationPath is overwritten if it already exists.
+   *
+   * @remarks
+   * If you only intend to copy a single file, it is recommended to use {@link FileSystem.copyFile}
+   * instead to more clearly communicate the intended operation.
+   *
+   * The implementation is based on `copySync()` from the `fs-extra` package.
+   */
+  public static copyFiles(options: IFileSystemCopyFilesOptions): void {
+    options = {
+      ...COPY_FILES_DEFAULT_OPTIONS,
+      ...options
+    };
+
+    FileSystem._wrapException(() => {
+      fsx.copySync(options.sourcePath, options.destinationPath, {
+        dereference: !!options.dereferenceSymlinks,
+        errorOnExist: options.alreadyExistsBehavior === AlreadyExistsBehavior.Error,
+        overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite,
+        preserveTimestamps: !!options.preserveTimestamps,
+        filter: options.filter
+      });
+    });
+  }
+
+  /**
+   * An async version of {@link FileSystem.copyFiles}.
+   */
+  public static async copyFilesAsync(options: IFileSystemCopyFilesOptions): Promise<void> {
+    options = {
+      ...COPY_FILES_DEFAULT_OPTIONS,
+      ...options
+    };
+
+    await FileSystem._wrapExceptionAsync(async () => {
+      fsx.copySync(options.sourcePath, options.destinationPath, {
+        dereference: !!options.dereferenceSymlinks,
+        errorOnExist: options.alreadyExistsBehavior === AlreadyExistsBehavior.Error,
+        overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite,
+        preserveTimestamps: !!options.preserveTimestamps,
+        filter: options.filter
+      });
+    });
   }
 
   /**
@@ -709,36 +954,43 @@ export class FileSystem {
    * @param options - Optional settings that can change the behavior. Type: `IDeleteFileOptions`
    */
   public static deleteFile(filePath: string, options?: IFileSystemDeleteFileOptions): void {
-    options = {
-      ...DELETE_FILE_DEFAULT_OPTIONS,
-      ...options
-    };
+    FileSystem._wrapException(() => {
+      options = {
+        ...DELETE_FILE_DEFAULT_OPTIONS,
+        ...options
+      };
 
-    try {
-      fsx.unlinkSync(filePath);
-    } catch (error) {
-      if (options.throwIfNotExists || !FileSystem.isNotExistError(error)) {
-        throw error;
+      try {
+        fsx.unlinkSync(filePath);
+      } catch (error) {
+        if (options.throwIfNotExists || !FileSystem.isNotExistError(error)) {
+          throw error;
+        }
       }
-    }
+    });
   }
 
   /**
    * An async version of {@link FileSystem.deleteFile}.
    */
-  public static async deleteFileAsync(filePath: string, options?: IFileSystemDeleteFileOptions): Promise<void> {
-    options = {
-      ...DELETE_FILE_DEFAULT_OPTIONS,
-      ...options
-    };
+  public static async deleteFileAsync(
+    filePath: string,
+    options?: IFileSystemDeleteFileOptions
+  ): Promise<void> {
+    await FileSystem._wrapExceptionAsync(async () => {
+      options = {
+        ...DELETE_FILE_DEFAULT_OPTIONS,
+        ...options
+      };
 
-    try {
-      await fsx.unlink(filePath);
-    } catch (error) {
-      if (options.throwIfNotExists || !FileSystem.isNotExistError(error)) {
-        throw error;
+      try {
+        await fsx.unlink(filePath);
+      } catch (error) {
+        if (options.throwIfNotExists || !FileSystem.isNotExistError(error)) {
+          throw error;
+        }
       }
-    }
+    });
   }
 
   // ===============
@@ -750,15 +1002,45 @@ export class FileSystem {
    * Behind the scenes it uses `fs.lstatSync()`.
    * @param path - The absolute or relative path to the filesystem object.
    */
-  public static getLinkStatistics(path: string): fs.Stats {
-    return fsx.lstatSync(path);
+  public static getLinkStatistics(path: string): FileSystemStats {
+    return FileSystem._wrapException(() => {
+      return fsx.lstatSync(path);
+    });
   }
 
   /**
    * An async version of {@link FileSystem.getLinkStatistics}.
    */
-  public static getLinkStatisticsAsync(path: string): Promise<fs.Stats> {
-    return fsx.lstat(path);
+  public static async getLinkStatisticsAsync(path: string): Promise<FileSystemStats> {
+    return await FileSystem._wrapExceptionAsync(() => {
+      return fsx.lstat(path);
+    });
+  }
+
+  /**
+   * If `path` refers to a symbolic link, this returns the path of the link target, which may be
+   * an absolute or relative path.
+   *
+   * @remarks
+   * If `path` refers to a filesystem object that is not a symbolic link, then an `ErrnoException` is thrown
+   * with code 'UNKNOWN'.  If `path` does not exist, then an `ErrnoException` is thrown with code `ENOENT`.
+   *
+   * @param path - The absolute or relative path to the symbolic link.
+   * @returns the path of the link target
+   */
+  public static readLink(path: string): string {
+    return FileSystem._wrapException(() => {
+      return fsx.readlinkSync(path);
+    });
+  }
+
+  /**
+   * An async version of {@link FileSystem.readLink}.
+   */
+  public static async readLinkAsync(path: string): Promise<string> {
+    return await FileSystem._wrapExceptionAsync(() => {
+      return fsx.readlink(path);
+    });
   }
 
   /**
@@ -766,16 +1048,20 @@ export class FileSystem {
    * Behind the scenes it uses `fs.symlinkSync()`.
    */
   public static createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void {
-    // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
-    fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'junction');
+    FileSystem._wrapException(() => {
+      // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
+      fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'junction');
+    });
   }
 
   /**
    * An async version of {@link FileSystem.createSymbolicLinkJunction}.
    */
-  public static createSymbolicLinkJunctionAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
-    return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'junction');
+  public static async createSymbolicLinkJunctionAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
+    await FileSystem._wrapExceptionAsync(() => {
+      // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
+      return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'junction');
+    });
   }
 
   /**
@@ -783,14 +1069,18 @@ export class FileSystem {
    * Behind the scenes it uses `fs.symlinkSync()`.
    */
   public static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void {
-    fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'file');
+    FileSystem._wrapException(() => {
+      fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'file');
+    });
   }
 
   /**
    * An async version of {@link FileSystem.createSymbolicLinkFile}.
    */
-  public static createSymbolicLinkFileAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'file');
+  public static async createSymbolicLinkFileAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
+    await FileSystem._wrapExceptionAsync(() => {
+      return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'file');
+    });
   }
 
   /**
@@ -798,14 +1088,18 @@ export class FileSystem {
    * Behind the scenes it uses `fs.symlinkSync()`.
    */
   public static createSymbolicLinkFolder(options: IFileSystemCreateLinkOptions): void {
-    fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'dir');
+    FileSystem._wrapException(() => {
+      fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'dir');
+    });
   }
 
   /**
    * An async version of {@link FileSystem.createSymbolicLinkFolder}.
    */
-  public static createSymbolicLinkFolderAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'dir');
+  public static async createSymbolicLinkFolderAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
+    await FileSystem._wrapExceptionAsync(() => {
+      return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'dir');
+    });
   }
 
   /**
@@ -813,14 +1107,18 @@ export class FileSystem {
    * Behind the scenes it uses `fs.linkSync()`.
    */
   public static createHardLink(options: IFileSystemCreateLinkOptions): void {
-    fsx.linkSync(options.linkTargetPath, options.newLinkPath);
+    FileSystem._wrapException(() => {
+      fsx.linkSync(options.linkTargetPath, options.newLinkPath);
+    });
   }
 
   /**
    * An async version of {@link FileSystem.createHardLink}.
    */
-  public static createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    return fsx.link(options.linkTargetPath, options.newLinkPath);
+  public static async createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
+    await FileSystem._wrapExceptionAsync(() => {
+      return fsx.link(options.linkTargetPath, options.newLinkPath);
+    });
   }
 
   /**
@@ -829,14 +1127,18 @@ export class FileSystem {
    * @param linkPath - The path to the link.
    */
   public static getRealPath(linkPath: string): string {
-    return fsx.realpathSync(linkPath);
+    return FileSystem._wrapException(() => {
+      return fsx.realpathSync(linkPath);
+    });
   }
 
   /**
    * An async version of {@link FileSystem.getRealPath}.
    */
-  public static getRealPathAsync(linkPath: string): Promise<string> {
-    return fsx.realpath(linkPath);
+  public static async getRealPathAsync(linkPath: string): Promise<string> {
+    return await FileSystem._wrapExceptionAsync(() => {
+      return fsx.realpath(linkPath);
+    });
   }
 
   // ===============
@@ -844,10 +1146,66 @@ export class FileSystem {
   // ===============
 
   /**
-   * Returns true if the error provided indicates the file or folder
-   * does not exist.
+   * Returns true if the error provided indicates the file or folder does not exist.
    */
-  public static isNotExistError(error: NodeJS.ErrnoException): boolean {
-    return error.code === 'ENOENT' || error.code === 'ENOTDIR';
+  public static isNotExistError(error: Error): boolean {
+    return FileSystem.isFileDoesNotExistError(error) || FileSystem.isFolderDoesNotExistError(error);
+  }
+
+  /**
+   * Returns true if the error provided indicates the file does not exist.
+   */
+  public static isFileDoesNotExistError(error: Error): boolean {
+    return FileSystem.isErrnoException(error) && error.code === 'ENOENT';
+  }
+
+  /**
+   * Returns true if the error provided indicates the folder does not exist.
+   */
+  public static isFolderDoesNotExistError(error: Error): boolean {
+    return FileSystem.isErrnoException(error) && error.code === 'ENOTDIR';
+  }
+
+  /**
+   * Detects if the provided error object is a `NodeJS.ErrnoException`
+   */
+  public static isErrnoException(error: Error): error is NodeJS.ErrnoException {
+    const typedError: NodeJS.ErrnoException = error;
+    return (
+      typeof typedError.code === 'string' &&
+      typeof typedError.errno === 'number' &&
+      typeof typedError.path === 'string' &&
+      typeof typedError.syscall === 'string'
+    );
+  }
+
+  private static _wrapException<TResult>(fn: () => TResult): TResult {
+    try {
+      return fn();
+    } catch (error) {
+      FileSystem._updateErrorMessage(error);
+      throw error;
+    }
+  }
+
+  private static async _wrapExceptionAsync<TResult>(fn: () => Promise<TResult>): Promise<TResult> {
+    try {
+      return await fn();
+    } catch (error) {
+      FileSystem._updateErrorMessage(error);
+      throw error;
+    }
+  }
+
+  private static _updateErrorMessage(error: Error): void {
+    if (FileSystem.isErrnoException(error)) {
+      if (FileSystem.isFileDoesNotExistError(error)) {
+        // eslint-disable-line @typescript-eslint/no-use-before-define
+        error.message = `File does not exist: ${error.path}\n${error.message}`;
+      } else if (FileSystem.isFolderDoesNotExistError(error)) {
+        // eslint-disable-line @typescript-eslint/no-use-before-define
+        error.message = `Folder does not exist: ${error.path}\n${error.message}`;
+      }
+    }
   }
 }

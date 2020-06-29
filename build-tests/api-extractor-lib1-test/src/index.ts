@@ -21,10 +21,8 @@ export class Lib1Class extends Lib1ForgottenExport {
   public get writeableProperty(): string {
     return 'hello';
   }
-  public set writeableProperty(value: string) {
-  }
+  public set writeableProperty(value: string) {}
 }
 
 /** @alpha */
-export interface Lib1Interface {
-}
+export interface Lib1Interface {}

@@ -19,7 +19,7 @@ export class SymbolMetadata {
   // `ApiItemMetadata.effectiveReleaseTag` value that is most public.
   public readonly maxEffectiveReleaseTag: ReleaseTag;
 
-  public constructor (options: ISymbolMetadataOptions) {
+  public constructor(options: ISymbolMetadataOptions) {
     this.maxEffectiveReleaseTag = options.maxEffectiveReleaseTag;
   }
 }

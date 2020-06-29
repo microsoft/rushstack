@@ -59,5 +59,4 @@ export class ParseError extends Error {
     }
     return message;
   }
-
 }

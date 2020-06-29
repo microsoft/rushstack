@@ -3,14 +3,8 @@
 
 import * as colors from 'colors';
 
-import {
-  DocNode, DocLinkTag, StringBuilder
-} from '@microsoft/tsdoc';
-import {
-  ApiModel,
-  IResolveDeclarationReferenceResult,
-  ApiItem
-} from '@microsoft/api-extractor-model';
+import { DocNode, DocLinkTag, StringBuilder } from '@microsoft/tsdoc';
+import { ApiModel, IResolveDeclarationReferenceResult, ApiItem } from '@microsoft/api-extractor-model';
 
 import { CustomDocNodeKind } from '../nodes/CustomDocNodeKind';
 import { DocHeading } from '../nodes/DocHeading';
@@ -18,11 +12,7 @@ import { DocNoteBox } from '../nodes/DocNoteBox';
 import { DocTable } from '../nodes/DocTable';
 import { DocTableCell } from '../nodes/DocTableCell';
 import { DocEmphasisSpan } from '../nodes/DocEmphasisSpan';
-import {
-  MarkdownEmitter,
-  IMarkdownEmitterContext,
-  IMarkdownEmitterOptions
-} from './MarkdownEmitter';
+import { MarkdownEmitter, IMarkdownEmitterContext, IMarkdownEmitterOptions } from './MarkdownEmitter';
 import { IndentedWriter } from '../utils/IndentedWriter';
 
 export interface ICustomMarkdownEmitterOptions extends IMarkdownEmitterOptions {
@@ -34,13 +24,17 @@ export interface ICustomMarkdownEmitterOptions extends IMarkdownEmitterOptions {
 export class CustomMarkdownEmitter extends MarkdownEmitter {
   private _apiModel: ApiModel;
 
-  public constructor (apiModel: ApiModel) {
+  public constructor(apiModel: ApiModel) {
     super();
 
     this._apiModel = apiModel;
   }
 
-  public emit(stringBuilder: StringBuilder, docNode: DocNode, options: ICustomMarkdownEmitterOptions): string {
+  public emit(
+    stringBuilder: StringBuilder,
+    docNode: DocNode,
+    options: ICustomMarkdownEmitterOptions
+  ): string {
     return super.emit(stringBuilder, docNode, options);
   }
 
@@ -55,9 +49,15 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
 
         let prefix: string;
         switch (docHeading.level) {
-          case 1: prefix = '##'; break;
-          case 2: prefix = '###'; break;
-          case 3: prefix = '###'; break;
+          case 1:
+            prefix = '##';
+            break;
+          case 2:
+            prefix = '###';
+            break;
+          case 3:
+            prefix = '###';
+            break;
           default:
             prefix = '####';
         }
@@ -152,13 +152,16 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
   }
 
   /** @override */
-  protected writeLinkTagWithCodeDestination(docLinkTag: DocLinkTag,
-    context: IMarkdownEmitterContext<ICustomMarkdownEmitterOptions>): void {
-
+  protected writeLinkTagWithCodeDestination(
+    docLinkTag: DocLinkTag,
+    context: IMarkdownEmitterContext<ICustomMarkdownEmitterOptions>
+  ): void {
     const options: ICustomMarkdownEmitterOptions = context.options;
 
-    const result: IResolveDeclarationReferenceResult
-      = this._apiModel.resolveDeclarationReference(docLinkTag.codeDestination!, options.contextApiItem);
+    const result: IResolveDeclarationReferenceResult = this._apiModel.resolveDeclarationReference(
+      docLinkTag.codeDestination!,
+      options.contextApiItem
+    );
 
     if (result.resolvedApiItem) {
       const filename: string | undefined = options.onGetFilenameForApiItem(result.resolvedApiItem);
@@ -166,7 +169,6 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
       if (filename) {
         let linkText: string = docLinkTag.linkText || '';
         if (linkText.length === 0) {
-
           // Generate a name such as Namespace1.Namespace2.MyClass.myMethod()
           linkText = result.resolvedApiItem.getScopedNameWithinPackage();
         }
@@ -181,9 +183,12 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
         }
       }
     } else if (result.errorMessage) {
-      console.log(colors.yellow(`WARNING: Unable to resolve reference "${docLinkTag.codeDestination!.emitAsTsdoc()}": `
-        + result.errorMessage));
+      console.log(
+        colors.yellow(
+          `WARNING: Unable to resolve reference "${docLinkTag.codeDestination!.emitAsTsdoc()}": ` +
+            result.errorMessage
+        )
+      );
     }
   }
-
 }

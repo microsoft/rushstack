@@ -34,7 +34,7 @@ const _name: unique symbol = Symbol('ApiNameMixin._name');
  *
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface ApiNameMixin extends ApiItem {
   /**
    * The exported name of this API item.
@@ -56,9 +56,10 @@ export interface ApiNameMixin extends ApiItem {
  *
  * @public
  */
-export function ApiNameMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiNameMixin) { // eslint-disable-line @typescript-eslint/no-explicit-any
-
+export function ApiNameMixin<TBaseClass extends IApiItemConstructor>(
+  baseClass: TBaseClass
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): TBaseClass & (new (...args: any[]) => ApiNameMixin) {
   abstract class MixedClass extends baseClass implements ApiNameMixin {
     public readonly [_name]: string;
 
@@ -71,9 +72,11 @@ export function ApiNameMixin<TBaseClass extends IApiItemConstructor>(baseClass: 
     }
 
     /** @override */
-    public static onDeserializeInto(options: Partial<IApiNameMixinOptions>, context: DeserializerContext,
-      jsonObject: IApiNameMixinJson): void {
-
+    public static onDeserializeInto(
+      options: Partial<IApiNameMixinOptions>,
+      context: DeserializerContext,
+      jsonObject: IApiNameMixinJson
+    ): void {
       baseClass.onDeserializeInto(options, context, jsonObject);
 
       options.name = jsonObject.name;

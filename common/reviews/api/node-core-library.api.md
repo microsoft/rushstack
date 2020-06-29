@@ -7,6 +7,13 @@
 import * as child_process from 'child_process';
 import * as fs from 'fs';
 
+// @public
+export const enum AlreadyExistsBehavior {
+    Error = "error",
+    Ignore = "ignore",
+    Overwrite = "overwrite"
+}
+
 // @beta
 export class Colors {
     // (undocumented)
@@ -123,6 +130,8 @@ export class FileSystem {
     static changePosixModeBitsAsync(path: string, mode: PosixModeBits): Promise<void>;
     static copyFile(options: IFileSystemCopyFileOptions): void;
     static copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void>;
+    static copyFiles(options: IFileSystemCopyFilesOptions): void;
+    static copyFilesAsync(options: IFileSystemCopyFilesOptions): Promise<void>;
     static createHardLink(options: IFileSystemCreateLinkOptions): void;
     static createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
     static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void;
@@ -141,15 +150,18 @@ export class FileSystem {
     static ensureFolderAsync(folderPath: string): Promise<void>;
     static exists(path: string): boolean;
     static formatPosixModeBits(modeBits: PosixModeBits): string;
-    static getLinkStatistics(path: string): fs.Stats;
-    static getLinkStatisticsAsync(path: string): Promise<fs.Stats>;
+    static getLinkStatistics(path: string): FileSystemStats;
+    static getLinkStatisticsAsync(path: string): Promise<FileSystemStats>;
     static getPosixModeBits(path: string): PosixModeBits;
     static getPosixModeBitsAsync(path: string): Promise<PosixModeBits>;
     static getRealPath(linkPath: string): string;
     static getRealPathAsync(linkPath: string): Promise<string>;
-    static getStatistics(path: string): fs.Stats;
-    static getStatisticsAsync(path: string): Promise<fs.Stats>;
-    static isNotExistError(error: NodeJS.ErrnoException): boolean;
+    static getStatistics(path: string): FileSystemStats;
+    static getStatisticsAsync(path: string): Promise<FileSystemStats>;
+    static isErrnoException(error: Error): error is NodeJS.ErrnoException;
+    static isFileDoesNotExistError(error: Error): boolean;
+    static isFolderDoesNotExistError(error: Error): boolean;
+    static isNotExistError(error: Error): boolean;
     static move(options: IFileSystemMoveOptions): void;
     static moveAsync(options: IFileSystemMoveOptions): Promise<void>;
     static readFile(filePath: string, options?: IFileSystemReadFileOptions): string;
@@ -158,11 +170,22 @@ export class FileSystem {
     static readFileToBufferAsync(filePath: string): Promise<Buffer>;
     static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[];
     static readFolderAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]>;
+    static readLink(path: string): string;
+    static readLinkAsync(path: string): Promise<string>;
     static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void;
     static updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void>;
     static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
     static writeFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void>;
 }
+
+// @public
+export type FileSystemCopyFilesAsyncFilter = (sourcePath: string, destinationPath: string) => Promise<boolean>;
+
+// @public
+export type FileSystemCopyFilesFilter = (sourcePath: string, destinationPath: string) => boolean;
+
+// @public
+export type FileSystemStats = fs.Stats;
 
 // @public
 export class FileWriter {
@@ -212,8 +235,24 @@ export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
 
 // @public
 export interface IFileSystemCopyFileOptions {
+    alreadyExistsBehavior?: AlreadyExistsBehavior;
     destinationPath: string;
     sourcePath: string;
+}
+
+// @public
+export interface IFileSystemCopyFilesAsyncOptions {
+    alreadyExistsBehavior?: AlreadyExistsBehavior;
+    dereferenceSymlinks?: boolean;
+    destinationPath: string;
+    filter?: FileSystemCopyFilesAsyncFilter | FileSystemCopyFilesFilter;
+    preserveTimestamps?: boolean;
+    sourcePath: string;
+}
+
+// @public
+export interface IFileSystemCopyFilesOptions extends IFileSystemCopyFilesAsyncOptions {
+    filter?: FileSystemCopyFilesFilter;
 }
 
 // @public
@@ -429,13 +468,13 @@ export type LegacyCallback<TResult, TError> = (error: TError | null | undefined,
 
 // @public
 export class LockFile {
-    static acquire(resourceDir: string, resourceName: string, maxWaitMs?: number): Promise<LockFile>;
+    static acquire(resourceFolder: string, resourceName: string, maxWaitMs?: number): Promise<LockFile>;
     readonly dirtyWhenAcquired: boolean;
     readonly filePath: string;
-    static getLockFilePath(resourceDir: string, resourceName: string, pid?: number): string;
+    static getLockFilePath(resourceFolder: string, resourceName: string, pid?: number): string;
     readonly isReleased: boolean;
     release(): void;
-    static tryAcquire(resourceDir: string, resourceName: string): LockFile | undefined;
+    static tryAcquire(resourceFolder: string, resourceName: string): LockFile | undefined;
     }
 
 // @public

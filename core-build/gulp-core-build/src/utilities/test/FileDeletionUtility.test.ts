@@ -1,89 +1,56 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { assert } from 'chai';
 import { FileDeletionUtility } from './../FileDeletionUtility';
 
 describe('FileDeletionUtility', () => {
   describe('constructor', () => {
     it('can be constructed', () => {
       const test: FileDeletionUtility = new FileDeletionUtility();
-      assert.isNotNull(test);
+      expect(test).not.toBeNull();
     });
   });
   describe('isParentDirectory', () => {
     it('can detect an immediate child', () => {
-      assert.isTrue(
-        FileDeletionUtility.isParentDirectory('/a', '/a/b.txt')
-      );
+      expect(FileDeletionUtility.isParentDirectory('/a', '/a/b.txt')).toEqual(true);
     });
     it('can detect a deep child', () => {
-      assert.isTrue(
-        FileDeletionUtility.isParentDirectory('/a', '/a/b/c/d.txt')
-      );
+      expect(FileDeletionUtility.isParentDirectory('/a', '/a/b/c/d.txt')).toEqual(true);
     });
     it('can detect if base path is longer', () => {
-      assert.isTrue(
-        FileDeletionUtility.isParentDirectory('/a/b/c/d', '/a/b/c/d/g.txt')
-      );
+      expect(FileDeletionUtility.isParentDirectory('/a/b/c/d', '/a/b/c/d/g.txt')).toEqual(true);
     });
     it('can detect siblings', () => {
-      assert.isFalse(
-        FileDeletionUtility.isParentDirectory('/a/b', '/a/c')
-      );
+      expect(FileDeletionUtility.isParentDirectory('/a/b', '/a/c')).toEqual(false);
     });
     it('can detect siblings with file extensions', () => {
-      assert.isFalse(
-        FileDeletionUtility.isParentDirectory('/a/b/c.txt', '/a/b/d.txt')
-      );
+      expect(FileDeletionUtility.isParentDirectory('/a/b/c.txt', '/a/b/d.txt')).toEqual(false);
     });
     it('can detect when not a parent', () => {
-      assert.isFalse(
-        FileDeletionUtility.isParentDirectory('/a/b/c', '/a')
-      );
-      assert.isFalse(
-        FileDeletionUtility.isParentDirectory('/a/b/c', '/a/b.txt')
-      );
+      expect(FileDeletionUtility.isParentDirectory('/a/b/c', '/a')).toEqual(false);
+      expect(FileDeletionUtility.isParentDirectory('/a/b/c', '/a/b.txt')).toEqual(false);
     });
     it('accepts anything under the root', () => {
-      assert.isTrue(
-        FileDeletionUtility.isParentDirectory('/', '/a.txt')
-      );
-      assert.isTrue(
-        FileDeletionUtility.isParentDirectory('/', '/a/b/c/d.txt')
-      );
+      expect(FileDeletionUtility.isParentDirectory('/', '/a.txt')).toEqual(true);
+      expect(FileDeletionUtility.isParentDirectory('/', '/a/b/c/d.txt')).toEqual(true);
     });
     it('it is case sensitive', () => {
-      assert.isFalse(
-        FileDeletionUtility.isParentDirectory('/a', '/A/b.txt')
-      );
-      assert.isTrue(
-        FileDeletionUtility.isParentDirectory('/a', '/a/b.txt')
-      );
-      assert.isFalse(
-        FileDeletionUtility.isParentDirectory('/a/B/c', '/a/b/c/d.txt')
-      );
+      expect(FileDeletionUtility.isParentDirectory('/a', '/A/b.txt')).toEqual(false);
+      expect(FileDeletionUtility.isParentDirectory('/a', '/a/b.txt')).toEqual(true);
+      expect(FileDeletionUtility.isParentDirectory('/a/B/c', '/a/b/c/d.txt')).toEqual(false);
     });
     it('it does not accept null or undefined', () => {
       /* eslint-disable @rushstack/no-null */
-      assert.isFalse(
-        FileDeletionUtility.isParentDirectory('', '/A/b.txt')
-      );
-      assert.isFalse(
-        FileDeletionUtility.isParentDirectory(undefined, '/a/b.txt')
-      );
-      assert.isFalse(
+      expect(FileDeletionUtility.isParentDirectory('', '/A/b.txt')).toEqual(false);
+      expect(FileDeletionUtility.isParentDirectory(undefined, '/a/b.txt')).toEqual(false);
+      expect(
         FileDeletionUtility.isParentDirectory(null as any, '/a/b/c/d.txt') // eslint-disable-line @typescript-eslint/no-explicit-any
-      );
-      assert.isFalse(
-        FileDeletionUtility.isParentDirectory('/A/b.txt', '')
-      );
-      assert.isFalse(
-        FileDeletionUtility.isParentDirectory('/a/b.txt', undefined)
-      );
-      assert.isFalse(
+      ).toEqual(false);
+      expect(FileDeletionUtility.isParentDirectory('/A/b.txt', '')).toEqual(false);
+      expect(FileDeletionUtility.isParentDirectory('/a/b.txt', undefined)).toEqual(false);
+      expect(
         FileDeletionUtility.isParentDirectory('/a/b/c/d.txt', null as any) // eslint-disable-line @typescript-eslint/no-explicit-any
-      );
+      ).toEqual(false);
       /* eslint-enable @rushstack/no-null */
     });
   });
@@ -103,17 +70,11 @@ describe('FileDeletionUtility', () => {
         '/c/f/g/h/j/k/l/q',
         '/d'
       ];
-      const expected: string[] = [
-        '/a',
-        '/b/f/g',
-        '/b/f/ggg',
-        '/c',
-        '/d'
-      ];
+      const expected: string[] = ['/a', '/b/f/g', '/b/f/ggg', '/c', '/d'];
       const actual: string[] = FileDeletionUtility.removeChildren(files);
 
-      assert.equal(actual.length, expected.length);
-      assert.includeMembers(expected, actual);
+      expect(actual).toHaveLength(expected.length);
+      expect(expected).toEqual(actual);
     });
     it('removes everything under the root', () => {
       const files: string[] = [
@@ -130,13 +91,11 @@ describe('FileDeletionUtility', () => {
         '/c/f/g/h/j/k/l/q',
         '/d'
       ];
-      const expected: string[] = [
-        '/'
-      ];
+      const expected: string[] = ['/'];
       const actual: string[] = FileDeletionUtility.removeChildren(files);
 
-      assert.equal(actual.length, expected.length);
-      assert.includeMembers(expected, actual);
+      expect(actual).toHaveLength(expected.length);
+      expect(expected).toEqual(actual);
     });
   });
 });

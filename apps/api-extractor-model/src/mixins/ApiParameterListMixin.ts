@@ -49,7 +49,7 @@ const _parameters: unique symbol = Symbol('ApiParameterListMixin._parameters');
  *
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface ApiParameterListMixin extends ApiItem {
   /**
    * When a function has multiple overloaded declarations, this zero-based integer index can be used to unqiuely
@@ -96,9 +96,10 @@ export interface ApiParameterListMixin extends ApiItem {
  *
  * @public
  */
-export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiParameterListMixin) { // eslint-disable-line @typescript-eslint/no-explicit-any
-
+export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(
+  baseClass: TBaseClass
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): TBaseClass & (new (...args: any[]) => ApiParameterListMixin) {
   abstract class MixedClass extends baseClass implements ApiParameterListMixin {
     public readonly [_overloadIndex]: number;
     public readonly [_parameters]: Parameter[];
@@ -115,7 +116,6 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(ba
       if (this instanceof ApiDeclaredItem) {
         if (options.parameters) {
           for (const parameterOptions of options.parameters) {
-
             const parameter: Parameter = new Parameter({
               name: parameterOptions.parameterName,
               parameterTypeExcerpt: this.buildExcerpt(parameterOptions.parameterTypeTokenRange),
@@ -131,9 +131,11 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(ba
     }
 
     /** @override */
-    public static onDeserializeInto(options: Partial<IApiParameterListMixinOptions>, context: DeserializerContext,
-      jsonObject: IApiParameterListJson): void {
-
+    public static onDeserializeInto(
+      options: Partial<IApiParameterListMixinOptions>,
+      context: DeserializerContext,
+      jsonObject: IApiParameterListJson
+    ): void {
       baseClass.onDeserializeInto(options, context, jsonObject);
 
       options.overloadIndex = jsonObject.overloadIndex;

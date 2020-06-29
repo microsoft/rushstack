@@ -34,12 +34,12 @@ function _getRushVersion() {
     }
     catch (e) {
         throw new Error(`Unable to determine the required version of Rush from rush.json (${rushJsonFolder}). ` +
-            'The \'rushVersion\' field is either not assigned in rush.json or was specified ' +
+            "The 'rushVersion' field is either not assigned in rush.json or was specified " +
             'using an unexpected syntax.');
     }
 }
 function _run() {
-    const [nodePath, /* Ex: /bin/node */ scriptPath, /* /repo/common/scripts/install-run-rush.js */ ...packageBinArgs /* [build, --to, myproject] */] = process.argv;
+    const [nodePath /* Ex: /bin/node */, scriptPath /* /repo/common/scripts/install-run-rush.js */, ...packageBinArgs /* [build, --to, myproject] */] = process.argv;
     // Detect if this script was directly invoked, or if the install-run-rushx script was invokved to select the
     // appropriate binary inside the rush package to run
     const scriptName = path.basename(scriptPath);

@@ -72,19 +72,18 @@ export class TypingsGenerator {
   public generateTypings(): void {
     FileSystem.ensureEmptyFolder(this._options.generatedTsFolder);
 
-    const filesToIgnore: Set<string> = new Set<string>((this._options.filesToIgnore!).map((fileToIgnore) => {
-      return path.resolve(this._options.srcFolder, fileToIgnore);
-    }));
-
-    const filePaths: string[] = glob.sync(
-      path.join('**', `*+(${this._options.fileExtensions.join('|')})`),
-      {
-        cwd: this._options.srcFolder,
-        absolute: true,
-        nosort: true,
-        nodir: true
-      }
+    const filesToIgnore: Set<string> = new Set<string>(
+      this._options.filesToIgnore!.map((fileToIgnore) => {
+        return path.resolve(this._options.srcFolder, fileToIgnore);
+      })
     );
+
+    const filePaths: string[] = glob.sync(path.join('**', `*+(${this._options.fileExtensions.join('|')})`), {
+      cwd: this._options.srcFolder,
+      absolute: true,
+      nosort: true,
+      nodir: true
+    });
 
     for (let filePath of filePaths) {
       filePath = path.resolve(this._options.srcFolder, filePath);
@@ -105,7 +104,9 @@ export class TypingsGenerator {
     const watcher: chokidar.FSWatcher = chokidar.watch(
       this._options.fileExtensions.map((fileExtension) => path.join(globBase, `*${fileExtension}`))
     );
-    const boundGenerateTypingsFunction: (filePath: string) => void = this._parseFileAndGenerateTypings.bind(this);
+    const boundGenerateTypingsFunction: (filePath: string) => void = this._parseFileAndGenerateTypings.bind(
+      this
+    );
     watcher.on('add', boundGenerateTypingsFunction);
     watcher.on('change', boundGenerateTypingsFunction);
     watcher.on('unlink', (filePath) => {
@@ -126,12 +127,10 @@ export class TypingsGenerator {
         typingsData
       ].join(EOL);
 
-      FileSystem.writeFile(
-        generatedTsFilePath,
-        prefixedTypingsData,
-        { ensureFolderExists: true, convertLineEndings: NewlineKind.OsDefault }
-      );
-
+      FileSystem.writeFile(generatedTsFilePath, prefixedTypingsData, {
+        ensureFolderExists: true,
+        convertLineEndings: NewlineKind.OsDefault
+      });
     } catch (e) {
       this._options.terminal!.writeError(
         `Error occurred parsing and generating typings for file "${locFilePath}": ${e}`

@@ -3,12 +3,9 @@
 
 import * as path from 'path';
 import { JsonFile, JsonObject } from '@rushstack/node-core-library';
-import { LintRunner as TLintRunner } from '@microsoft/rush-stack-compiler-3.1';
+import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.1';
 
-import {
-  RSCTask,
-  IRSCTaskConfig
-} from './RSCTask';
+import { RSCTask, IRSCTaskConfig } from './RSCTask';
 
 /**
  * @public
@@ -25,12 +22,9 @@ export interface ILintCmdTaskConfig extends IRSCTaskConfig {
  */
 export class LintCmdTask extends RSCTask<ILintCmdTaskConfig> {
   public constructor() {
-    super(
-      'lint',
-      {
-        displayAsError: false
-      }
-    );
+    super('lint', {
+      displayAsError: false
+    });
   }
 
   public loadSchema(): JsonObject {
@@ -40,7 +34,8 @@ export class LintCmdTask extends RSCTask<ILintCmdTaskConfig> {
   public executeTask(): Promise<void> {
     this.initializeRushStackCompiler();
 
-    const lintRunner: TLintRunner = new this._rushStackCompiler.LintRunner(
+    const rushStackCompiler: typeof TRushStackCompiler = this._rushStackCompiler as typeof TRushStackCompiler;
+    const lintRunner: TRushStackCompiler.LintRunner = new rushStackCompiler.LintRunner(
       {
         displayAsError: this.taskConfig.displayAsError,
 

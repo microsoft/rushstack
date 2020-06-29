@@ -3,7 +3,6 @@
 
 import { CommandLineAction, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
-
 export class RunAction extends CommandLineAction {
   private _title: CommandLineStringParameter;
 
@@ -15,14 +14,16 @@ export class RunAction extends CommandLineAction {
     });
   }
 
-  protected onExecute(): Promise<void> { // abstract
+  protected onExecute(): Promise<void> {
+    // abstract
     console.log(`Console Title: ${this._title.value || '(none)'}`);
     console.log('Arguments to be executed: ' + JSON.stringify(this.remainder!.values));
 
     return Promise.resolve();
   }
 
-  protected onDefineParameters(): void { // abstract
+  protected onDefineParameters(): void {
+    // abstract
     this._title = this.defineStringParameter({
       parameterLongName: '--title',
       argumentName: 'TITLE',

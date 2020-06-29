@@ -25,8 +25,7 @@ export class PluginFeatureInitialization {
  *
  * @public
  */
-export class PluginFeatureContext {
-}
+export class PluginFeatureContext {}
 
 /**
  * The abstract base class for all API Documenter plugin features.

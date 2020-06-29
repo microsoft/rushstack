@@ -37,38 +37,40 @@ export class WebpackConfigurationUpdater {
     WebpackConfigurationUpdater._tryUpdateSourceMapFilename(options.configuration);
   }
 
-  public static amendWebpackConfigurationForInPlaceLocFiles(options: IWebpackConfigurationUpdaterOptions): void {
+  public static amendWebpackConfigurationForInPlaceLocFiles(
+    options: IWebpackConfigurationUpdaterOptions
+  ): void {
     const loader: string = path.resolve(__dirname, 'loaders', 'InPlaceLocFileLoader.js');
     const loaderOptions: IBaseLoaderOptions = {
       resxNewlineNormalization: options.resxNewlineNormalization
     };
 
-    WebpackConfigurationUpdater._addRulesToConfiguration(
-      options.configuration,
-      [
-        {
-          test: Constants.LOC_JSON_REGEX,
-          use: [{
+    WebpackConfigurationUpdater._addRulesToConfiguration(options.configuration, [
+      {
+        test: Constants.LOC_JSON_REGEX,
+        use: [
+          {
             loader: loader,
             options: loaderOptions
-          }]
-        },
-        {
-          test: Constants.RESX_REGEX,
-          use: [{
+          }
+        ]
+      },
+      {
+        test: Constants.RESX_REGEX,
+        use: [
+          {
             loader: loader,
             options: loaderOptions
-          }],
-          type: 'json'
-        }
-      ]
-    );
+          }
+        ],
+        type: 'json'
+      }
+    ]);
   }
 
   private static _tryUpdateLocaleTokenInPublicPathPlugin(options: IWebpackConfigurationUpdaterOptions): void {
     let setPublicPathPlugin: typeof SetPublicPathPluginPackageType.SetPublicPathPlugin | undefined;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const pluginPackage: typeof SetPublicPathPluginPackageType = require('@rushstack/set-webpack-public-path-plugin');
       setPublicPathPlugin = pluginPackage.SetPublicPathPlugin;
     } catch (e) {
@@ -99,39 +101,37 @@ export class WebpackConfigurationUpdater {
     loader: string,
     loaderOptions: IBaseLoaderOptions
   ): void {
-    WebpackConfigurationUpdater._addRulesToConfiguration(
-      options.configuration,
-      [
-        {
-          test: {
-            and: [
-              (filePath: string) => !options.filesToIgnore.has(filePath),
-              Constants.LOC_JSON_REGEX
-            ]
-          },
-          use: [{
-            loader: loader,
-            options: loaderOptions
-          }]
+    WebpackConfigurationUpdater._addRulesToConfiguration(options.configuration, [
+      {
+        test: {
+          and: [(filePath: string) => !options.filesToIgnore.has(filePath), Constants.LOC_JSON_REGEX]
         },
-        {
-          test: {
-            and: [
-              (filePath: string) => !options.filesToIgnore.has(filePath),
-              Constants.RESX_REGEX
-            ]
-          },
-          use: [{
+        use: [
+          {
             loader: loader,
             options: loaderOptions
-          }],
-          type: 'json'
-        }
-      ]
-    );
+          }
+        ]
+      },
+      {
+        test: {
+          and: [(filePath: string) => !options.filesToIgnore.has(filePath), Constants.RESX_REGEX]
+        },
+        use: [
+          {
+            loader: loader,
+            options: loaderOptions
+          }
+        ],
+        type: 'json'
+      }
+    ]);
   }
 
-  private static _addRulesToConfiguration(configuration: Webpack.Configuration, rules: Webpack.RuleSetRule[]): void {
+  private static _addRulesToConfiguration(
+    configuration: Webpack.Configuration,
+    rules: Webpack.RuleSetRule[]
+  ): void {
     if (!configuration.module) {
       configuration.module = {
         rules: []
@@ -154,7 +154,7 @@ export class WebpackConfigurationUpdater {
       configuration.output.sourceMapFilename = configuration.output.sourceMapFilename.replace(
         FILE_TOKEN_REGEX,
         Constants.NO_LOCALE_SOURCE_MAP_FILENAME_TOKEN
-      )
+      );
     }
   }
 }

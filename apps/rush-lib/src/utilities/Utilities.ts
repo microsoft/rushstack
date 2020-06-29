@@ -7,12 +7,7 @@ import * as os from 'os';
 import * as tty from 'tty';
 import * as path from 'path';
 import * as wordwrap from 'wordwrap';
-import {
-  JsonFile,
-  IPackageJson,
-  FileSystem,
-  FileConstants
-} from '@rushstack/node-core-library';
+import { JsonFile, IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Stream } from 'stream';
 
@@ -75,6 +70,11 @@ export interface IEnvironmentPathOptions {
    * If true, include <repo root>/common/temp/node_modules/.bin in the PATH.
    */
   includeRepoBin?: boolean;
+
+  /**
+   * Additional folders to be prepended to the search PATH.
+   */
+  additionalPathFolders?: string[] | undefined;
 }
 
 interface ICreateEnvironmentForRushCommandPathOptions extends IEnvironmentPathOptions {
@@ -105,10 +105,9 @@ export class Utilities {
    * this looks something like "/usr/username/"
    */
   public static getHomeDirectory(): string {
-    const unresolvedUserFolder: string | undefined = process.env[
-      (process.platform === 'win32') ? 'USERPROFILE' : 'HOME'
-    ];
-    const dirError: string = 'Unable to determine the current user\'s home directory';
+    const unresolvedUserFolder: string | undefined =
+      process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
+    const dirError: string = "Unable to determine the current user's home directory";
     if (unresolvedUserFolder === undefined) {
       throw new Error(dirError);
     }
@@ -200,11 +199,12 @@ export class Utilities {
     return Utilities.retryUntilTimeout(
       () => FileSystem.ensureFolder(folderName),
       maxWaitTimeMs,
-      (e) => new Error(
-        `Error: ${e}${os.EOL}Often this is caused by a file lock ` +
-        'from a process such as your text editor, command prompt, ' +
-        'or a filesystem watcher.'
-      ),
+      (e) =>
+        new Error(
+          `Error: ${e}${os.EOL}Often this is caused by a file lock ` +
+            'from a process such as your text editor, command prompt, ' +
+            'or a filesystem watcher.'
+        ),
       'createFolderWithRetry'
     );
   }
@@ -218,7 +218,9 @@ export class Utilities {
     try {
       const lstat: fs.Stats = FileSystem.getLinkStatistics(filePath);
       exists = lstat.isFile();
-    } catch (e) { /* no-op */ }
+    } catch (e) {
+      /* no-op */
+    }
 
     return exists;
   }
@@ -232,7 +234,9 @@ export class Utilities {
     try {
       const lstat: fs.Stats = FileSystem.getLinkStatistics(directoryPath);
       exists = lstat.isDirectory();
-    } catch (e) { /* no-op */ }
+    } catch (e) {
+      /* no-op */
+    }
 
     return exists;
   }
@@ -248,7 +252,7 @@ export class Utilities {
     } catch (e) {
       throw new Error(
         `${e.message}${os.EOL}Often this is caused by a file lock from a process ` +
-        'such as your text editor, command prompt, or a filesystem watcher'
+          'such as your text editor, command prompt, or a filesystem watcher'
       );
     }
   }
@@ -322,12 +326,18 @@ export class Utilities {
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
    */
-  public static executeCommand(command: string, args: string[], workingDirectory: string,
-    environment?: IEnvironment, suppressOutput: boolean = false,
+  public static executeCommand(
+    command: string,
+    args: string[],
+    workingDirectory: string,
+    environment?: IEnvironment,
+    suppressOutput: boolean = false,
     keepEnvironment: boolean = false
   ): void {
-
-    Utilities._executeCommandInternal(command, args, workingDirectory,
+    Utilities._executeCommandInternal(
+      command,
+      args,
+      workingDirectory,
       suppressOutput ? undefined : [0, 1, 2],
       environment,
       keepEnvironment
@@ -338,12 +348,14 @@ export class Utilities {
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
    */
-  public static executeCommandAndCaptureOutput(command: string, args: string[], workingDirectory: string,
+  public static executeCommandAndCaptureOutput(
+    command: string,
+    args: string[],
+    workingDirectory: string,
     environment?: IEnvironment,
     keepEnvironment: boolean = false
   ): string {
-
-    const  result: child_process.SpawnSyncReturns<Buffer> = Utilities._executeCommandInternal(
+    const result: child_process.SpawnSyncReturns<Buffer> = Utilities._executeCommandInternal(
       command,
       args,
       workingDirectory,
@@ -358,10 +370,15 @@ export class Utilities {
   /**
    * Attempts to run Utilities.executeCommand() up to maxAttempts times before giving up.
    */
-  public static executeCommandWithRetry(maxAttempts: number, command: string, args: string[],
-    workingDirectory: string,  environment?: IEnvironment, suppressOutput: boolean = false,
-    retryCallback?: () => void): void {
-
+  public static executeCommandWithRetry(
+    maxAttempts: number,
+    command: string,
+    args: string[],
+    workingDirectory: string,
+    environment?: IEnvironment,
+    suppressOutput: boolean = false,
+    retryCallback?: () => void
+  ): void {
     if (maxAttempts < 1) {
       throw new Error('The maxAttempts parameter cannot be less than 1');
     }
@@ -399,10 +416,7 @@ export class Utilities {
    * @param command - the command to run on shell
    * @param options - options for how the command should be run
    */
-  public static executeLifecycleCommand(
-    command: string,
-    options: ILifecycleCommandOptions
-  ): number {
+  public static executeLifecycleCommand(command: string, options: ILifecycleCommandOptions): number {
     const result: child_process.SpawnSyncReturns<Buffer> = Utilities._executeLifecycleCommandInternal(
       command,
       child_process.spawnSync,
@@ -429,11 +443,7 @@ export class Utilities {
     command: string,
     options: ILifecycleCommandOptions
   ): child_process.ChildProcess {
-    return Utilities._executeLifecycleCommandInternal(
-      command,
-      child_process.spawn,
-      options
-    );
+    return Utilities._executeLifecycleCommandInternal(command, child_process.spawn, options);
   }
 
   /**
@@ -485,22 +495,24 @@ export class Utilities {
     );
   }
 
-  public static withFinally<T>(options: { promise: Promise<T>, finally: () => void }): Promise<T> {
-    return options.promise.then<T>((result: T) => {
-      try {
-        options.finally();
-      } catch (error) {
+  public static withFinally<T>(options: { promise: Promise<T>; finally: () => void }): Promise<T> {
+    return options.promise
+      .then<T>((result: T) => {
+        try {
+          options.finally();
+        } catch (error) {
+          return Promise.reject(error);
+        }
+        return result;
+      })
+      .catch<T>((error: Error) => {
+        try {
+          options.finally();
+        } catch (innerError) {
+          return Promise.reject(innerError);
+        }
         return Promise.reject(error);
-      }
-      return result;
-    }).catch<T>((error: Error) => {
-      try {
-        options.finally();
-      } catch (innerError) {
-        return Promise.reject(innerError);
-      }
-      return Promise.reject(error);
-    });
+      });
   }
 
   /**
@@ -514,26 +526,38 @@ export class Utilities {
    * we'd prefer to skip that line and continue looking in other places such as the user's
    * home directory.
    *
-   * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _copyNpmrcFile() FROM scripts/install-run.ts
+   * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _copyAndTrimNpmrcFile() FROM scripts/install-run.ts
    */
   public static copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string): void {
     console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`); // Verbose
     let npmrcFileLines: string[] = FileSystem.readFile(sourceNpmrcPath).split('\n');
     npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
     const resultLines: string[] = [];
+
+    // This finds environment variable tokens that look like "${VAR_NAME}"
+    const expansionRegExp: RegExp = /\$\{([^\}]+)\}/g;
+
+    // Comment lines start with "#" or ";"
+    const commentRegExp: RegExp = /^\s*[#;]/;
+
     // Trim out lines that reference environment variables that aren't defined
     for (const line of npmrcFileLines) {
-      // This finds environment variable tokens that look like "${VAR_NAME}"
-      const regex: RegExp = /\$\{([^\}]+)\}/g;
-      const environmentVariables: string[] | null = line.match(regex);
       let lineShouldBeTrimmed: boolean = false;
-      if (environmentVariables) {
-        for (const token of environmentVariables) {
-          // Remove the leading "${" and the trailing "}" from the token
-          const environmentVariableName: string = token.substring(2, token.length - 1);
-          if (!process.env[environmentVariableName]) {
-            lineShouldBeTrimmed = true;
-            break;
+
+      // Ignore comment lines
+      if (!commentRegExp.test(line)) {
+        const environmentVariables: string[] | null = line.match(expansionRegExp);
+        if (environmentVariables) {
+          for (const token of environmentVariables) {
+            // Remove the leading "${" and the trailing "}" from the token
+            const environmentVariableName: string = token.substring(2, token.length - 1);
+
+            // Is the environment variable defined?
+            if (!process.env[environmentVariableName]) {
+              // No, so trim this line
+              lineShouldBeTrimmed = true;
+              break;
+            }
           }
         }
       }
@@ -556,8 +580,15 @@ export class Utilities {
    *
    * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _syncNpmrc() FROM scripts/install-run.ts
    */
-  public static syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string, useNpmrcPublish?: boolean): void {
-    const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, !useNpmrcPublish ? '.npmrc' : '.npmrc-publish');
+  public static syncNpmrc(
+    sourceNpmrcFolder: string,
+    targetNpmrcFolder: string,
+    useNpmrcPublish?: boolean
+  ): void {
+    const sourceNpmrcPath: string = path.join(
+      sourceNpmrcFolder,
+      !useNpmrcPublish ? '.npmrc' : '.npmrc-publish'
+    );
     const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
     try {
       if (FileSystem.exists(sourceNpmrcPath)) {
@@ -582,7 +613,11 @@ export class Utilities {
 
   private static _executeLifecycleCommandInternal<TCommandResult>(
     command: string,
-    spawnFunction: (command: string, args: string[], spawnOptions: child_process.SpawnOptions) => TCommandResult,
+    spawnFunction: (
+      command: string,
+      args: string[],
+      spawnOptions: child_process.SpawnOptions
+    ) => TCommandResult,
     options: ILifecycleCommandOptions
   ): TCommandResult {
     let shellCommand: string = process.env.comspec || 'cmd';
@@ -594,34 +629,30 @@ export class Utilities {
       useShell = false;
     }
 
-    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(
-      {
-        initCwd: options.initCwd,
-        pathOptions: {
-          ...options.environmentPathOptions,
-          projectRoot: options.workingDirectory,
-          commonTempFolder: options.rushConfiguration ? options.rushConfiguration.commonTempFolder : undefined
-        }
+    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand({
+      initCwd: options.initCwd,
+      pathOptions: {
+        ...options.environmentPathOptions,
+        projectRoot: options.workingDirectory,
+        commonTempFolder: options.rushConfiguration ? options.rushConfiguration.commonTempFolder : undefined
       }
-    );
+    });
 
-    return spawnFunction(
-      shellCommand,
-      [commandFlags, command],
-      {
-        cwd: options.workingDirectory,
-        shell: useShell,
-        env: environment,
-        stdio: options.handleOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
-      }
-    );
+    return spawnFunction(shellCommand, [commandFlags, command], {
+      cwd: options.workingDirectory,
+      shell: useShell,
+      env: environment,
+      stdio: options.handleOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
+    });
   }
 
   /**
    * Returns a process.env environment suitable for executing lifecycle scripts.
    * @param initialEnvironment - an existing environment to copy instead of process.env
    */
-  private static _createEnvironmentForRushCommand(options: ICreateEnvironmentForRushCommandOptions): IEnvironment {
+  private static _createEnvironmentForRushCommand(
+    options: ICreateEnvironmentForRushCommandOptions
+  ): IEnvironment {
     if (options.initialEnvironment === undefined) {
       options.initialEnvironment = process.env;
     }
@@ -676,6 +707,12 @@ export class Utilities {
           options.pathOptions.projectRoot
         );
       }
+
+      if (options.pathOptions.additionalPathFolders) {
+        environment.PATH = [...options.pathOptions.additionalPathFolders, environment.PATH].join(
+          path.delimiter
+        );
+      }
     }
 
     return environment;
@@ -686,7 +723,10 @@ export class Utilities {
    * if `rootDirectory` is "/foobar" and `existingPath` is "/bin", this function will return
    * "/foobar/node_modules/.bin:/bin"
    */
-  private static _prependNodeModulesBinToPath(existingPath: string | undefined, rootDirectory: string): string {
+  private static _prependNodeModulesBinToPath(
+    existingPath: string | undefined,
+    rootDirectory: string
+  ): string {
     const binPath: string = path.resolve(rootDirectory, 'node_modules', '.bin');
     if (existingPath) {
       return `${binPath}${path.delimiter}${existingPath}`;
@@ -700,8 +740,15 @@ export class Utilities {
    * The current directory will be set to the specified workingDirectory.
    */
   private static _executeCommandInternal(
-    command: string, args: string[], workingDirectory: string,
-    stdio: 'pipe'|'ignore'|'inherit'|(number|'pipe'|'ignore'|'inherit'|'ipc'|Stream|null|undefined)[]|undefined,
+    command: string,
+    args: string[],
+    workingDirectory: string,
+    stdio:
+      | 'pipe'
+      | 'ignore'
+      | 'inherit'
+      | (number | 'pipe' | 'ignore' | 'inherit' | 'ipc' | Stream | null | undefined)[]
+      | undefined,
     environment?: IEnvironment,
     keepEnvironment: boolean = false
   ): child_process.SpawnSyncReturns<Buffer> {
@@ -727,16 +774,19 @@ export class Utilities {
     // into node-core-library, but for now this hack will unblock people:
 
     // Only escape the command if it actually contains spaces:
-    const escapedCommand: string = command.indexOf(' ') < 0
-      ? command
-      : Utilities.escapeShellParameter(command);
+    const escapedCommand: string =
+      command.indexOf(' ') < 0 ? command : Utilities.escapeShellParameter(command);
 
     const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
 
-    let result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(escapedCommand,
-      escapedArgs, options);
+    let result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(
+      escapedCommand,
+      escapedArgs,
+      options
+    );
 
-    if (result.error && (result.error as any).errno === 'ENOENT') { // eslint-disable-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (result.error && (result.error as any).errno === 'ENOENT') {
       // This is a workaround for GitHub issue #25330
       // https://github.com/nodejs/node-v0.x-archive/issues/25330
       result = child_process.spawnSync(command + '.cmd', args, options);
@@ -753,8 +803,12 @@ export class Utilities {
     }
 
     if (result.status) {
-      throw new Error('The command failed with exit code ' + result.status + os.EOL +
-        (result.stderr ? result.stderr.toString() : ''));
+      throw new Error(
+        'The command failed with exit code ' +
+          result.status +
+          os.EOL +
+          (result.stderr ? result.stderr.toString() : '')
+      );
     }
   }
 }

@@ -24,8 +24,7 @@ describe('MinimalRushConfiguration', () => {
     });
 
     it('correctly loads the rush.json file', () => {
-      const config: MinimalRushConfiguration =
-        MinimalRushConfiguration.loadFromDefaultLocation() as MinimalRushConfiguration;
+      const config: MinimalRushConfiguration = MinimalRushConfiguration.loadFromDefaultLocation() as MinimalRushConfiguration;
       assert.equal(config.rushVersion, '2.5.0');
     });
   });
@@ -36,8 +35,7 @@ describe('MinimalRushConfiguration', () => {
     });
 
     it('correctly loads the rush.json file', () => {
-      const config: MinimalRushConfiguration =
-        MinimalRushConfiguration.loadFromDefaultLocation() as MinimalRushConfiguration;
+      const config: MinimalRushConfiguration = MinimalRushConfiguration.loadFromDefaultLocation() as MinimalRushConfiguration;
       assert.equal(config.rushVersion, '4.0.0');
     });
   });

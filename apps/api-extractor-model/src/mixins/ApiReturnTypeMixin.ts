@@ -36,7 +36,7 @@ const _returnTypeExcerpt: unique symbol = Symbol('ApiReturnTypeMixin._returnType
  *
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface ApiReturnTypeMixin extends ApiItem {
   /**
    * An {@link Excerpt} that describes the type of the function's return value.
@@ -55,9 +55,10 @@ export interface ApiReturnTypeMixin extends ApiItem {
  *
  * @public
  */
-export function ApiReturnTypeMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiReturnTypeMixin) { // eslint-disable-line @typescript-eslint/no-explicit-any
-
+export function ApiReturnTypeMixin<TBaseClass extends IApiItemConstructor>(
+  baseClass: TBaseClass
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): TBaseClass & (new (...args: any[]) => ApiReturnTypeMixin) {
   abstract class MixedClass extends baseClass implements ApiReturnTypeMixin {
     public [_returnTypeExcerpt]: Excerpt;
 
@@ -75,9 +76,11 @@ export function ApiReturnTypeMixin<TBaseClass extends IApiItemConstructor>(baseC
     }
 
     /** @override */
-    public static onDeserializeInto(options: Partial<IApiReturnTypeMixinOptions>, context: DeserializerContext,
-      jsonObject: IApiReturnTypeMixinJson): void {
-
+    public static onDeserializeInto(
+      options: Partial<IApiReturnTypeMixinOptions>,
+      context: DeserializerContext,
+      jsonObject: IApiReturnTypeMixinJson
+    ): void {
       baseClass.onDeserializeInto(options, context, jsonObject);
 
       options.returnTypeTokenRange = jsonObject.returnTypeTokenRange;

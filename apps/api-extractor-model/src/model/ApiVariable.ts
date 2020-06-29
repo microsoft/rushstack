@@ -1,7 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DeclarationReference, Meaning, Navigation, Component } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+import {
+  DeclarationReference,
+  Meaning,
+  Navigation,
+  Component
+} from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
@@ -13,11 +18,10 @@ import { DeserializerContext } from './DeserializerContext';
  * Constructor options for {@link ApiVariable}.
  * @public
  */
-export interface IApiVariableOptions extends
-  IApiNameMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiDeclaredItemOptions {
-
+export interface IApiVariableOptions
+  extends IApiNameMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiDeclaredItemOptions {
   variableTypeTokenRange: IExcerptTokenRange;
 }
 
@@ -58,9 +62,11 @@ export class ApiVariable extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem
   }
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiVariableOptions>, context: DeserializerContext,
-    jsonObject: IApiVariableJson): void {
-
+  public static onDeserializeInto(
+    options: Partial<IApiVariableOptions>,
+    context: DeserializerContext,
+    jsonObject: IApiVariableJson
+  ): void {
     super.onDeserializeInto(options, context, jsonObject);
 
     options.variableTypeTokenRange = jsonObject.variableTypeTokenRange;

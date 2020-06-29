@@ -1,6 +1,57 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Fri, 22 May 2020 15:08:42 GMT and should not be manually modified.
+This log was last generated on Thu, 25 Jun 2020 06:43:35 GMT and should not be manually modified.
+
+## 3.24.4
+Thu, 25 Jun 2020 06:43:35 GMT
+
+*Version update only*
+
+## 3.24.3
+Wed, 24 Jun 2020 09:50:48 GMT
+
+*Version update only*
+
+## 3.24.2
+Wed, 24 Jun 2020 09:04:28 GMT
+
+*Version update only*
+
+## 3.24.1
+Wed, 10 Jun 2020 20:48:30 GMT
+
+### Patches
+
+- Improve API docs for "LockFile"
+
+## 3.24.0
+Sat, 30 May 2020 02:59:54 GMT
+
+### Minor changes
+
+- Add a FileSystem.copyFiles() API for recursively copying folders, and clarify that FileSystem.copyFile() only copies a single file
+
+## 3.23.1
+Thu, 28 May 2020 05:59:02 GMT
+
+### Patches
+
+- Improve async callstacks for FileSystem API (when using Node 12)
+
+## 3.23.0
+Wed, 27 May 2020 05:15:10 GMT
+
+### Minor changes
+
+- Add an "FileSystemStats" alias to avoid the need to import "fs" when using the FileSystem API
+- Add FileSystem.readLink() and readLinkAsync()
+
+## 3.22.1
+Tue, 26 May 2020 23:00:25 GMT
+
+### Patches
+
+- Make not-exist error messages more readable.
 
 ## 3.22.0
 Fri, 22 May 2020 15:08:42 GMT

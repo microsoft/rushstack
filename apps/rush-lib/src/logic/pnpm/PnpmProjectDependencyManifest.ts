@@ -4,11 +4,7 @@
 import * as path from 'path';
 import * as semver from 'semver';
 import * as crypto from 'crypto';
-import {
-  JsonFile,
-  InternalError,
-  FileSystem
-} from '@rushstack/node-core-library';
+import { JsonFile, InternalError, FileSystem } from '@rushstack/node-core-library';
 
 import {
   PnpmShrinkwrapFile,
@@ -48,7 +44,9 @@ export class PnpmProjectDependencyManifest {
   public constructor(options: IPnpmProjectDependencyManifestOptions) {
     this._pnpmShrinkwrapFile = options.pnpmShrinkwrapFile;
     this._project = options.project;
-    this._projectDependencyManifestFilename = PnpmProjectDependencyManifest.getFilePathForProject(this._project);
+    this._projectDependencyManifestFilename = PnpmProjectDependencyManifest.getFilePathForProject(
+      this._project
+    );
 
     this._projectDependencyManifestFile = new Map<string, string>();
   }
@@ -58,10 +56,7 @@ export class PnpmProjectDependencyManifest {
    * for the specified project.
    */
   public static getFilePathForProject(project: RushConfigurationProject): string {
-    return path.join(
-      project.projectRushTempFolder,
-      RushConstants.projectDependencyManifestFilename
-    );
+    return path.join(project.projectRushTempFolder, RushConstants.projectDependencyManifestFilename);
   }
 
   public addDependency(pkg: BasePackage, parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml): void {
@@ -82,11 +77,7 @@ export class PnpmProjectDependencyManifest {
       file[key] = this._projectDependencyManifestFile.get(key)!;
     }
 
-    JsonFile.save(
-      file,
-      this._projectDependencyManifestFilename,
-      { ensureFolderExists: true }
-    );
+    JsonFile.save(file, this._projectDependencyManifestFilename, { ensureFolderExists: true });
   }
 
   /**
@@ -102,10 +93,9 @@ export class PnpmProjectDependencyManifest {
     parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml,
     throwIfShrinkwrapEntryMissing: boolean = true
   ): void {
-    const shrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined = this._pnpmShrinkwrapFile.getShrinkwrapEntry(
-      name,
-      version
-    );
+    const shrinkwrapEntry:
+      | IPnpmShrinkwrapDependencyYaml
+      | undefined = this._pnpmShrinkwrapFile.getShrinkwrapEntry(name, version);
 
     if (!shrinkwrapEntry) {
       if (throwIfShrinkwrapEntryMissing) {
@@ -135,7 +125,10 @@ export class PnpmProjectDependencyManifest {
       //     tarball: 'https://codeload.github.com/chfritz/node-xmlrpc/tar.gz/948db2fbd0260e5d56ed5ba58df0f5b6599bbe38'
       //   version: 1.3.2
 
-      const sha256Digest: string = crypto.createHash('sha256').update(JSON.stringify(shrinkwrapEntry)).digest('hex');
+      const sha256Digest: string = crypto
+        .createHash('sha256')
+        .update(JSON.stringify(shrinkwrapEntry))
+        .digest('hex');
       integrity = `${name}@${version}:${sha256Digest}:`;
     }
 
@@ -166,7 +159,8 @@ export class PnpmProjectDependencyManifest {
           optionalDependencyName,
           dependencyVersion,
           shrinkwrapEntry,
-          throwIfShrinkwrapEntryMissing = false);
+          (throwIfShrinkwrapEntryMissing = false)
+        );
       }
     }
 
@@ -176,10 +170,7 @@ export class PnpmProjectDependencyManifest {
         const dependencySemVer: string = shrinkwrapEntry.peerDependencies[peerDependencyName];
 
         // Check the current package to see if the dependency is already satisfied
-        if (
-          shrinkwrapEntry.dependencies &&
-          shrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName)
-        ) {
+        if (shrinkwrapEntry.dependencies && shrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName)) {
           const dependencySpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(
             peerDependencyName,
             shrinkwrapEntry.dependencies[peerDependencyName]
@@ -215,15 +206,17 @@ export class PnpmProjectDependencyManifest {
 
         // The parent doesn't have a version that satisfies the range. As a last attempt, check
         // if it's been hoisted up as a top-level dependency
-        const topLevelDependencySpecifier: DependencySpecifier | undefined =
-          this._pnpmShrinkwrapFile.getTopLevelDependencyVersion(peerDependencyName);
+        const topLevelDependencySpecifier:
+          | DependencySpecifier
+          | undefined = this._pnpmShrinkwrapFile.getTopLevelDependencyVersion(peerDependencyName);
 
         // Sometimes peer dependencies are hoisted but are not represented in the shrinkwrap file
         // (such as when implicitlyPreferredVersions is false) so we need to find the correct key
         // and add it ourselves
         if (!topLevelDependencySpecifier) {
-          const peerDependencyKeys: { [peerDependencyName: string]: string } =
-            this._parsePeerDependencyKeysFromSpecifier(specifier);
+          const peerDependencyKeys: {
+            [peerDependencyName: string]: string;
+          } = this._parsePeerDependencyKeysFromSpecifier(specifier);
           if (peerDependencyKeys.hasOwnProperty(peerDependencyName)) {
             this._addDependencyInternal(
               peerDependencyName,
@@ -238,11 +231,9 @@ export class PnpmProjectDependencyManifest {
           if (
             !this._project.rushConfiguration.pnpmOptions ||
             !this._project.rushConfiguration.pnpmOptions.strictPeerDependencies ||
-            (
-              shrinkwrapEntry.peerDependenciesMeta &&
+            (shrinkwrapEntry.peerDependenciesMeta &&
               shrinkwrapEntry.peerDependenciesMeta.hasOwnProperty(peerDependencyName) &&
-              shrinkwrapEntry.peerDependenciesMeta[peerDependencyName].optional
-            )
+              shrinkwrapEntry.peerDependenciesMeta[peerDependencyName].optional)
           ) {
             // We couldn't find the peer dependency, but we determined it's by design, skip this dependency...
             continue;
@@ -273,7 +264,7 @@ export class PnpmProjectDependencyManifest {
     if (specifierMatches) {
       const combinedPeerDependencies: string = specifierMatches[1];
       // Parse "eslint@6.6.0+typescript@3.6.4" --> ["eslint@6.6.0", "typescript@3.6.4"]
-      const peerDependencies: string[] = combinedPeerDependencies.split("+");
+      const peerDependencies: string[] = combinedPeerDependencies.split('+');
       for (const peerDependencySpecifier of peerDependencies) {
         // Parse "eslint@6.6.0" --> "eslint", "6.6.0"
         const peerMatches: RegExpExecArray | null = /^([^+@]+)@(.+)$/.exec(peerDependencySpecifier);
