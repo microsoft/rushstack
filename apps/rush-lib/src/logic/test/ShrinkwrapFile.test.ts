@@ -158,6 +158,30 @@ describe('extractVersionFromPnpmVersionSpecifier', () => {
       'npm:@ms/sp-client-utilities@3.1.1'
     );
   });
+  it('detects urls', () => {
+    expect(
+      testParsePnpmDependencyKey('example', 'github.com/abc/def/abcdef2fbd0260e6e56ed5ba34df0f5b6599bbe64')
+    ).toEqual('github.com/abc/def/abcdef2fbd0260e6e56ed5ba34df0f5b6599bbe64');
+    expect(
+      testParsePnpmDependencyKey('example', 'bitbucket.com/abc/def/abcdef2fbd0260e6e56ed5ba34df0f5b6599bbe64')
+    ).toEqual('bitbucket.com/abc/def/abcdef2fbd0260e6e56ed5ba34df0f5b6599bbe64');
+    expect(
+      testParsePnpmDependencyKey(
+        'example',
+        'microsoft.github.com/abc/def/abcdef2fbd0260e6e56ed5ba34df0f5b6599bbe64'
+      )
+    ).toEqual('microsoft.github.com/abc/def/abcdef2fbd0260e6e56ed5ba34df0f5b6599bbe64');
+    expect(
+      testParsePnpmDependencyKey(
+        'example',
+        'microsoft.github/.com/abc/def/abcdef2fbd0260e6e56ed5ba34df0f5b6599bbe64'
+      )
+    ).toEqual('microsoft.github/.com/abc/def/abcdef2fbd0260e6e56ed5ba34df0f5b6599bbe64');
+    expect(
+      testParsePnpmDependencyKey('example', 'ab.cd.ef.gh/ijkl/abcdef2fbd0260e6e56ed5ba34df0f5b6599bbe64')
+    ).toEqual('ab.cd.ef.gh/ijkl/abcdef2fbd0260e6e56ed5ba34df0f5b6599bbe64');
+    expect(testParsePnpmDependencyKey('example', 'ab.cd/ef')).toEqual('ab.cd/ef');
+  });
   it('handles bad cases', () => {
     expect(testParsePnpmDependencyKey('example', '/foo/gulp-karma/0.0.5/karma@0.13.22')).toEqual(undefined);
     expect(testParsePnpmDependencyKey('example', '/@ms/3.1.1/foo@13.1.0')).toEqual(undefined);
@@ -169,5 +193,30 @@ describe('extractVersionFromPnpmVersionSpecifier', () => {
     expect(testParsePnpmDependencyKey('example', 'example.pkgs.visualstudio.com/@scope/testDep/')).toEqual(
       undefined
     );
+    expect(
+      testParsePnpmDependencyKey(
+        'example',
+        'microsoft.github.com/abc\\def/abcdef2fbd0260e6e56ed5ba34df0f5b6599bbe64'
+      )
+    ).toEqual(undefined);
+    expect(
+      testParsePnpmDependencyKey(
+        'example',
+        'microsoft.github.com/abc/def//abcdef2fbd0260e6e56ed5ba34df0f5b6599bbe64'
+      )
+    ).toEqual(undefined);
+    expect(
+      testParsePnpmDependencyKey(
+        'example',
+        'microsoft./github.com/abc/def/abcdef2fbd0260e6e56ed5ba34df0f5b6599bbe64'
+      )
+    ).toEqual(undefined);
+    expect(
+      testParsePnpmDependencyKey(
+        'example',
+        'microsoft/abc/github/abc/def/abcdef2fbd0260e6e56ed5ba34df0f5b6599bbe64'
+      )
+    ).toEqual(undefined);
+    expect(testParsePnpmDependencyKey('example', 'ab.cd/ef/')).toEqual(undefined);
   });
 });
