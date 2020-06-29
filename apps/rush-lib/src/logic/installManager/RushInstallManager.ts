@@ -121,9 +121,10 @@ export class RushInstallManager extends BaseInstallManager {
       const tarballFile: string = this._getTarballFilePath(rushProject);
 
       // Example: dependencies["@rush-temp/my-project-2"] = "file:./projects/my-project-2.tgz"
-      commonDependencies[
-        rushProject.tempProjectName
-      ] = `file:./${RushConstants.rushTempProjectsFolderName}/${rushProject.unscopedTempProjectName}.tgz`;
+      commonDependencies.set(
+        rushProject.tempProjectName,
+        `file:./${RushConstants.rushTempProjectsFolderName}/${rushProject.unscopedTempProjectName}.tgz`
+      );
 
       const tempPackageJson: IRushTempPackageJson = {
         name: rushProject.tempProjectName,
