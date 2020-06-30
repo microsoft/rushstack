@@ -14,7 +14,7 @@ import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocume
 import { ApiEntryPoint } from './ApiEntryPoint';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 import { DeserializerContext, ApiJsonSchemaVersion } from './DeserializerContext';
-import { ITSDocTagDefinitionParameters } from '@microsoft/tsdoc';
+import { ITSDocTagDefinitionParameters, TSDocConfiguration, TSDocTagDefinition } from '@microsoft/tsdoc';
 
 /**
  * Constructor options for {@link ApiPackage}.
@@ -177,12 +177,26 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
       }
     }
 
+    const tsdocConfiguration: TSDocConfiguration = new TSDocConfiguration();
+
+    // Set support for standard tags
+    tsdocConfiguration.setSupportForTags(tsdocConfiguration.tagDefinitions, true);
+
+    if (Array.isArray(jsonObject.metadata.nonStandardTSDocTags)) {
+      tsdocConfiguration.addTagDefinitions(
+        jsonObject.metadata.nonStandardTSDocTags.map(
+          (tag: ITSDocTagDefinitionParameters) => new TSDocTagDefinition(tag)
+        ),
+        true
+      );
+    }
+
     const context: DeserializerContext = new DeserializerContext({
       apiJsonFilename,
       toolPackage: jsonObject.metadata.toolPackage,
       toolVersion: jsonObject.metadata.toolVersion,
       versionToDeserialize: versionToDeserialize,
-      nonStandardTSDocTags: jsonObject.metadata.nonStandardTSDocTags
+      tsdocConfiguration
     });
 
     return ApiItem.deserialize(jsonObject, context) as ApiPackage;

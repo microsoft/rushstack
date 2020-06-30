@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITSDocTagDefinitionParameters } from '@microsoft/tsdoc';
+import { TSDocConfiguration } from '@microsoft/tsdoc';
 
 export enum ApiJsonSchemaVersion {
   /**
@@ -74,13 +74,16 @@ export class DeserializerContext {
    */
   public readonly versionToDeserialize: ApiJsonSchemaVersion;
 
-  public readonly nonStandardTSDocTags: ITSDocTagDefinitionParameters[] | void;
+  /**
+   * The TSDoc configuration for the context.
+   */
+  public readonly tsdocConfiguration: TSDocConfiguration;
 
   public constructor(options: DeserializerContext) {
     this.apiJsonFilename = options.apiJsonFilename;
     this.toolPackage = options.toolPackage;
     this.toolVersion = options.toolVersion;
     this.versionToDeserialize = options.versionToDeserialize;
-    this.nonStandardTSDocTags = options.nonStandardTSDocTags;
+    this.tsdocConfiguration = options.tsdocConfiguration;
   }
 }
