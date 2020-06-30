@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "",
-      "type": "none"
+      "comment": "Add preliminary workspaces support for PNPM",
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/rush",

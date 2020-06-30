@@ -9,6 +9,10 @@
       "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
       "type": "string"
     },
+    "pnpmShrinkwrapHash": {
+      "description": "A hash of the contents of the PNPM shrinkwrap file for the repository. This hash is used to determine whether or not the shrinkwrap has been modified prior to install.",
+      "type": "string"
+    },
     "preferredVersionsHash": {
       "description": "A hash of \"preferred versions\" for the repository. This hash is used to determine whether or not preferred versions have been modified prior to install.",
       "type": "string"

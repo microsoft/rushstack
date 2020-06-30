@@ -8,7 +8,15 @@ import * as path from 'path';
 import * as semver from 'semver';
 import * as tar from 'tar';
 import * as globEscape from 'glob-escape';
-import { JsonFile, Text, FileSystem, FileConstants, Sort, PosixModeBits } from '@rushstack/node-core-library';
+import {
+  JsonFile,
+  Text,
+  FileSystem,
+  FileConstants,
+  Sort,
+  PosixModeBits,
+  InternalError
+} from '@rushstack/node-core-library';
 
 import { BaseInstallManager } from '../base/BaseInstallManager';
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
@@ -17,9 +25,10 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../../logic/RushConstants';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { Utilities } from '../../utilities/Utilities';
-import { PackageJsonEditor, DependencyType } from '../../api/PackageJsonEditor';
+import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../../api/PackageJsonEditor';
 import { DependencySpecifier } from '../DependencySpecifier';
 import { InstallHelpers } from './InstallHelpers';
+import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 /**
  * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.
@@ -48,7 +57,7 @@ export class RushInstallManager extends BaseInstallManager {
    *
    * @override
    */
-  protected async prepareAndCheckShrinkwrap(
+  protected async prepareCommonTempAsync(
     shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
     const stopwatch: Stopwatch = Stopwatch.start();
@@ -71,6 +80,23 @@ export class RushInstallManager extends BaseInstallManager {
 
     if (!shrinkwrapFile) {
       shrinkwrapIsUpToDate = false;
+    } else {
+      let workspaceKeys: ReadonlyArray<string> = [];
+      try {
+        workspaceKeys = shrinkwrapFile.getWorkspaceKeys();
+      } catch {
+        // Swallow errors since not all shrinkwrap types support workspaces
+      }
+      if (workspaceKeys.length !== 0 && !this.options.fullUpgrade) {
+        console.log();
+        console.log(
+          colors.red(
+            'The shrinkwrap file had previously been updated to support workspaces. Run "rush update --full" ' +
+              'to update the shrinkwrap file.'
+          )
+        );
+        throw new AlreadyReportedError();
+      }
     }
 
     // dependency name --> version specifier
@@ -121,9 +147,10 @@ export class RushInstallManager extends BaseInstallManager {
       const tarballFile: string = this._getTarballFilePath(rushProject);
 
       // Example: dependencies["@rush-temp/my-project-2"] = "file:./projects/my-project-2.tgz"
-      commonDependencies[
-        rushProject.tempProjectName
-      ] = `file:./${RushConstants.rushTempProjectsFolderName}/${rushProject.unscopedTempProjectName}.tgz`;
+      commonDependencies.set(
+        rushProject.tempProjectName,
+        `file:./${RushConstants.rushTempProjectsFolderName}/${rushProject.unscopedTempProjectName}.tgz`
+      );
 
       const tempPackageJson: IRushTempPackageJson = {
         name: rushProject.tempProjectName,
@@ -138,6 +165,10 @@ export class RushInstallManager extends BaseInstallManager {
       // These can be regular, optional, or peer dependencies (but NOT dev dependencies).
       // (A given packageName will never appear more than once in this list.)
       for (const dependency of packageJson.dependencyList) {
+        if (this.options.fullUpgrade && this._revertWorkspaceNotation(dependency)) {
+          shrinkwrapIsUpToDate = false;
+        }
+
         // If there are any optional dependencies, copy directly into the optionalDependencies field.
         if (dependency.dependencyType === DependencyType.Optional) {
           if (!tempPackageJson.optionalDependencies) {
@@ -150,6 +181,10 @@ export class RushInstallManager extends BaseInstallManager {
       }
 
       for (const dependency of packageJson.devDependencyList) {
+        if (this.options.fullUpgrade && this._revertWorkspaceNotation(dependency)) {
+          shrinkwrapIsUpToDate = false;
+        }
+
         // If there are devDependencies, we need to merge them with the regular dependencies.  If the same
         // library appears in both places, then the dev dependency wins (because presumably it's saying what you
         // want right now for development, not the range that you support for consumers).
@@ -260,6 +295,27 @@ export class RushInstallManager extends BaseInstallManager {
           FileSystem.deleteFile(tempPackageJsonFilename);
         }
       }
+
+      // Remove the workspace file if it exists
+      if (this.rushConfiguration.packageManager === 'pnpm') {
+        const workspaceFilePath: string = path.join(
+          this.rushConfiguration.commonTempFolder,
+          'pnpm-workspace.yaml'
+        );
+        if (FileSystem.exists(workspaceFilePath)) {
+          FileSystem.deleteFile(workspaceFilePath);
+        }
+      }
+
+      // Save the package.json if we modified the version references and warn that the package.json was modified
+      if (packageJson.saveIfModified()) {
+        console.log(
+          colors.yellow(
+            `"${rushProject.packageName}" depends on one or more local packages which used "workspace:" ` +
+              'notation. The package.json has been modified and must be committed to source control.'
+          )
+        );
+      }
     }
 
     // Write the common package.json
@@ -314,6 +370,27 @@ export class RushInstallManager extends BaseInstallManager {
     } as tar.CreateOptions;
     // create the new tarball
     tar.create(tarOptions, [FileConstants.PackageJson]);
+  }
+
+  private _revertWorkspaceNotation(dependency: PackageJsonDependency): boolean {
+    const specifier: DependencySpecifier = new DependencySpecifier(dependency.name, dependency.version);
+    if (specifier.specifierType !== 'workspace') {
+      return false;
+    }
+    // Replace workspace notation with the supplied version range
+    if (specifier.versionSpecifier === '*') {
+      // When converting to workspaces, exact package versions are replaced with a '*', so undo this
+      const localProject: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(
+        specifier.packageName
+      );
+      if (!localProject) {
+        throw new InternalError(`Could not find local project with package name ${specifier.packageName}`);
+      }
+      dependency.setVersion(localProject.packageJson.version);
+    } else {
+      dependency.setVersion(specifier.versionSpecifier);
+    }
+    return true;
   }
 
   /**
@@ -372,7 +449,7 @@ export class RushInstallManager extends BaseInstallManager {
    *
    * @override
    */
-  protected async install(cleanInstall: boolean): Promise<void> {
+  protected async installAsync(cleanInstall: boolean): Promise<void> {
     // Since we are actually running npm/pnpm/yarn install, recreate all the temp project tarballs.
     // This ensures that any existing tarballs with older header bits will be regenerated.
     // It is safe to assume that temp project pacakge.jsons already exist.
@@ -431,11 +508,13 @@ export class RushInstallManager extends BaseInstallManager {
           this.pushConfigurationArgs(args, this.options);
 
           Utilities.executeCommandWithRetry(
-            this.options.maxInstallAttempts,
-            packageManagerFilename,
-            args,
-            this.rushConfiguration.commonTempFolder,
-            packageManagerEnv
+            {
+              command: packageManagerFilename,
+              args: args,
+              workingDirectory: this.rushConfiguration.commonTempFolder,
+              environment: packageManagerEnv
+            },
+            this.options.maxInstallAttempts
           );
 
           // Delete the (installed image of) the temp projects, since "npm install" does not
@@ -505,12 +584,14 @@ export class RushInstallManager extends BaseInstallManager {
 
     try {
       Utilities.executeCommandWithRetry(
+        {
+          command: packageManagerFilename,
+          args: installArgs,
+          workingDirectory: this.rushConfiguration.commonTempFolder,
+          environment: packageManagerEnv,
+          suppressOutput: false
+        },
         this.options.maxInstallAttempts,
-        packageManagerFilename,
-        installArgs,
-        this.rushConfiguration.commonTempFolder,
-        packageManagerEnv,
-        false,
         () => {
           if (this.rushConfiguration.packageManager === 'pnpm') {
             console.log(colors.yellow(`Deleting the "node_modules" folder`));
@@ -545,11 +626,11 @@ export class RushInstallManager extends BaseInstallManager {
       console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
       const npmArgs: string[] = ['shrinkwrap'];
       this.pushConfigurationArgs(npmArgs, this.options);
-      Utilities.executeCommand(
-        this.rushConfiguration.packageManagerToolFilename,
-        npmArgs,
-        this.rushConfiguration.commonTempFolder
-      );
+      Utilities.executeCommand({
+        command: this.rushConfiguration.packageManagerToolFilename,
+        args: npmArgs,
+        workingDirectory: this.rushConfiguration.commonTempFolder
+      });
       console.log('"npm shrinkwrap" completed' + os.EOL);
 
       this._fixupNpm5Regression();

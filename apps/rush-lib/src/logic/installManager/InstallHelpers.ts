@@ -106,7 +106,7 @@ export class InstallHelpers {
     const implicitlyPreferred: Map<string, string> = new Map<string, string>();
     versionsForDependencies.forEach((versions: Set<string>, dep: string) => {
       if (versions.size === 1) {
-        const version: string = versions.values().next().value;
+        const version: string = Array.from(versions)[0];
         implicitlyPreferred.set(dep, version);
       }
     });

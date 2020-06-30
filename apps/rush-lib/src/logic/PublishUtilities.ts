@@ -212,7 +212,14 @@ export class PublishUtilities {
     );
 
     if (shouldExecute) {
-      Utilities.executeCommand(command, args, workingDirectory, environment, false, true);
+      Utilities.executeCommand({
+        command,
+        args,
+        workingDirectory,
+        environment,
+        suppressOutput: false,
+        keepEnvironment: true
+      });
     }
   }
 
