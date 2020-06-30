@@ -164,10 +164,15 @@ export class RepoStateFile {
   }
 
   private _serialize(): string {
-    const repoStateJson: IRepoStateJson = {
-      pnpmShrinkwrapHash: this.pnpmShrinkwrapHash,
-      preferredVersionsHash: this.preferredVersionsHash
-    };
+    // We need to set these one-by-one, since JsonFile.stringify does not like undefined values
+    const repoStateJson: IRepoStateJson = {};
+    if (this._pnpmShrinkwrapHash) {
+      repoStateJson.pnpmShrinkwrapHash = this._pnpmShrinkwrapHash;
+    }
+    if (this._preferredVersionsHash) {
+      repoStateJson.preferredVersionsHash = this._preferredVersionsHash;
+    }
+
     return JsonFile.stringify(repoStateJson, { newlineConversion: NewlineKind.Lf });
   }
 }
