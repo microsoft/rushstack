@@ -13,7 +13,6 @@ import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
 import { PackageJsonEditor, DependencyType } from '../../api/PackageJsonEditor';
 import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
-import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../../logic/RushConstants';
 import { Stopwatch } from '../../utilities/Stopwatch';
@@ -26,15 +25,6 @@ import { RepoStateFile } from '../RepoStateFile';
  * This class implements common logic between "rush install" and "rush update".
  */
 export class WorkspaceInstallManager extends BaseInstallManager {
-  public static getCommonWorkspaceKey(rushConfiguration: RushConfiguration): string {
-    switch (rushConfiguration.packageManager) {
-      case 'pnpm':
-        return '.';
-      default:
-        throw new InternalError('Not implemented');
-    }
-  }
-
   /**
    * @override
    */
@@ -55,14 +45,14 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   }
 
   /**
-   * Regenerates the common/package.json and related workspace files.
+   * Regenerates the common/temp/package.json and related workspace files.
    * If shrinkwrapFile is provided, this function also validates whether it contains
    * everything we need to install and returns true if so; in all other cases,
    * the return value is false.
    *
    * @override
    */
-  protected async prepareAndCheckShrinkwrap(
+  protected async prepareCommonTempAsync(
     shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
     const stopwatch: Stopwatch = Stopwatch.start();
@@ -188,16 +178,18 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             throw new AlreadyReportedError();
           }
 
-          // We will update to `workspace` notation. If the version specified is a range, then use the provided range.
-          // Otherwise, use `workspace:*` to ensure we're always using the workspace package.
-          const workspaceRange: string =
-            !!semver.validRange(dependencySpecifier.versionSpecifier) &&
-            !semver.valid(dependencySpecifier.versionSpecifier)
-              ? dependencySpecifier.versionSpecifier
-              : '*';
-          packageJson.addOrUpdateDependency(name, `workspace:${workspaceRange}`, dependencyType);
-          shrinkwrapIsUpToDate = false;
-          continue;
+          if (this.options.fullUpgrade) {
+            // We will update to `workspace` notation. If the version specified is a range, then use the provided range.
+            // Otherwise, use `workspace:*` to ensure we're always using the workspace package.
+            const workspaceRange: string =
+              !!semver.validRange(dependencySpecifier.versionSpecifier) &&
+              !semver.valid(dependencySpecifier.versionSpecifier)
+                ? dependencySpecifier.versionSpecifier
+                : '*';
+            packageJson.addOrUpdateDependency(name, `workspace:${workspaceRange}`, dependencyType);
+            shrinkwrapIsUpToDate = false;
+            continue;
+          }
         } else if (dependencySpecifier.specifierType === 'workspace') {
           // Already specified as a local project. Allow the package manager to validate this
           continue;
@@ -269,8 +261,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       path.join(this.rushConfiguration.commonTempFolder, RushConstants.nodeModulesFolderName)
     );
 
-    // Additionally, if they pulled an updated npm-shrinkwrap.json file from Git,
-    // then we can't skip this install
+    // Additionally, if they pulled an updated shrinkwrap file from Git, then we can't skip this install
     potentiallyChangedFiles.push(this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant));
 
     // Add common-versions.json file to the potentially changed files list.
@@ -311,7 +302,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   /**
    * Runs "npm install" in the common folder.
    */
-  protected async install(cleanInstall: boolean): Promise<void> {
+  protected async installAsync(cleanInstall: boolean): Promise<void> {
     // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
     const packageManagerFilename: string = this.rushConfiguration.packageManagerToolFilename;
 
@@ -367,12 +358,14 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     try {
       Utilities.executeCommandWithRetry(
+        {
+          command: packageManagerFilename,
+          args: installArgs,
+          workingDirectory: this.rushConfiguration.commonTempFolder,
+          environment: packageManagerEnv,
+          suppressOutput: false
+        },
         this.options.maxInstallAttempts,
-        packageManagerFilename,
-        installArgs,
-        this.rushConfiguration.commonTempFolder,
-        packageManagerEnv,
-        false,
         () => {
           if (this.rushConfiguration.packageManager === 'pnpm') {
             console.log(colors.yellow(`Deleting the "node_modules" folder`));

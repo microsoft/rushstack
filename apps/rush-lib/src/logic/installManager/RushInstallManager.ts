@@ -57,7 +57,7 @@ export class RushInstallManager extends BaseInstallManager {
    *
    * @override
    */
-  protected async prepareAndCheckShrinkwrap(
+  protected async prepareCommonTempAsync(
     shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
     const stopwatch: Stopwatch = Stopwatch.start();
@@ -165,7 +165,7 @@ export class RushInstallManager extends BaseInstallManager {
       // These can be regular, optional, or peer dependencies (but NOT dev dependencies).
       // (A given packageName will never appear more than once in this list.)
       for (const dependency of packageJson.dependencyList) {
-        if (this._revertWorkspaceNotation(dependency)) {
+        if (this.options.fullUpgrade && this._revertWorkspaceNotation(dependency)) {
           shrinkwrapIsUpToDate = false;
         }
 
@@ -181,7 +181,7 @@ export class RushInstallManager extends BaseInstallManager {
       }
 
       for (const dependency of packageJson.devDependencyList) {
-        if (this._revertWorkspaceNotation(dependency)) {
+        if (this.options.fullUpgrade && this._revertWorkspaceNotation(dependency)) {
           shrinkwrapIsUpToDate = false;
         }
 
@@ -449,7 +449,7 @@ export class RushInstallManager extends BaseInstallManager {
    *
    * @override
    */
-  protected async install(cleanInstall: boolean): Promise<void> {
+  protected async installAsync(cleanInstall: boolean): Promise<void> {
     // Since we are actually running npm/pnpm/yarn install, recreate all the temp project tarballs.
     // This ensures that any existing tarballs with older header bits will be regenerated.
     // It is safe to assume that temp project pacakge.jsons already exist.
@@ -508,11 +508,13 @@ export class RushInstallManager extends BaseInstallManager {
           this.pushConfigurationArgs(args, this.options);
 
           Utilities.executeCommandWithRetry(
-            this.options.maxInstallAttempts,
-            packageManagerFilename,
-            args,
-            this.rushConfiguration.commonTempFolder,
-            packageManagerEnv
+            {
+              command: packageManagerFilename,
+              args: args,
+              workingDirectory: this.rushConfiguration.commonTempFolder,
+              environment: packageManagerEnv
+            },
+            this.options.maxInstallAttempts
           );
 
           // Delete the (installed image of) the temp projects, since "npm install" does not
@@ -582,12 +584,14 @@ export class RushInstallManager extends BaseInstallManager {
 
     try {
       Utilities.executeCommandWithRetry(
+        {
+          command: packageManagerFilename,
+          args: installArgs,
+          workingDirectory: this.rushConfiguration.commonTempFolder,
+          environment: packageManagerEnv,
+          suppressOutput: false
+        },
         this.options.maxInstallAttempts,
-        packageManagerFilename,
-        installArgs,
-        this.rushConfiguration.commonTempFolder,
-        packageManagerEnv,
-        false,
         () => {
           if (this.rushConfiguration.packageManager === 'pnpm') {
             console.log(colors.yellow(`Deleting the "node_modules" folder`));
@@ -622,11 +626,11 @@ export class RushInstallManager extends BaseInstallManager {
       console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
       const npmArgs: string[] = ['shrinkwrap'];
       this.pushConfigurationArgs(npmArgs, this.options);
-      Utilities.executeCommand(
-        this.rushConfiguration.packageManagerToolFilename,
-        npmArgs,
-        this.rushConfiguration.commonTempFolder
-      );
+      Utilities.executeCommand({
+        command: this.rushConfiguration.packageManagerToolFilename,
+        args: npmArgs,
+        workingDirectory: this.rushConfiguration.commonTempFolder
+      });
       console.log('"npm shrinkwrap" completed' + os.EOL);
 
       this._fixupNpm5Regression();

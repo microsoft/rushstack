@@ -155,11 +155,16 @@ export class CommonVersionsConfiguration {
    */
   public getPreferredVersionsHash(): string {
     // Sort so that the hash is stable
-    const preferredVersionsToHash: Map<string, string> = new Map<string, string>(
+    const orderedPreferredVersions: Map<string, string> = new Map<string, string>(
       this._preferredVersions.protectedView
     );
-    Sort.sortMapKeys(preferredVersionsToHash);
-    return crypto.createHash('sha1').update(JSON.stringify(preferredVersionsToHash)).digest('hex');
+    Sort.sortMapKeys(orderedPreferredVersions);
+
+    // JSON.stringify does not support maps, so we need to convert to an object first
+    const preferredVersionsObj: { [dependency: string]: string } = MapExtensions.toObject(
+      orderedPreferredVersions
+    );
+    return crypto.createHash('sha1').update(JSON.stringify(preferredVersionsObj)).digest('hex');
   }
 
   /**

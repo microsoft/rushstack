@@ -9,9 +9,10 @@ import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
 
 /**
- * This interface represents the raw pnpm-workspace.YAML file
+ * This interface represents the raw repo-state.json file
  * Example:
  *  {
+ *    "pnpmShrinkwrapHash": "...",
  *    "preferredVersionsHash": "..."
  *  }
  */
@@ -29,6 +30,8 @@ interface IRepoStateJson {
 /**
  * This file is used to track the state of various Rush-related features. It is generated
  * and updated by Rush.
+ *
+ * @public
  */
 export class RepoStateFile {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
@@ -78,6 +81,9 @@ export class RepoStateFile {
   /**
    * Loads the repo-state.json data from the specified file path.
    * If the file has not been created yet, then an empty object is returned.
+   *
+   * @param jsonFilename - The path to the repo-state.json file.
+   * @param variant - The variant currently being used by Rush.
    */
   public static loadFromFile(jsonFilename: string, variant: string | undefined): RepoStateFile {
     let repoStateJson: IRepoStateJson | undefined = undefined;
@@ -92,6 +98,14 @@ export class RepoStateFile {
     return new RepoStateFile(repoStateJson, jsonFilename, variant);
   }
 
+  /**
+   * Refresh the data contained in repo-state.json using the current state
+   * of the Rush repo, and save the file if changes were made.
+   *
+   * @param rushConfiguration - The Rush configuration for the repo.
+   *
+   * @returns true if the file was modified, otherwise false.
+   */
   public refreshState(rushConfiguration: RushConfiguration): boolean {
     // Only support saving the pnpm shrinkwrap hash if it was enabled
     const preventShrinkwrapChanges: boolean =

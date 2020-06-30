@@ -138,14 +138,12 @@ export class GlobalScriptAction extends BaseScriptAction {
 
       console.log(`Installing dependencies under ${this._autoinstallerNameFullPath}...\n`);
 
-      Utilities.executeCommand(
-        this.rushConfiguration.packageManagerToolFilename,
-        ['install', '--frozen-lockfile'],
-        this._autoinstallerNameFullPath,
-        undefined,
-        /* suppressOutput */ false,
-        /* keepEnvironment */ true
-      );
+      Utilities.executeCommand({
+        command: this.rushConfiguration.packageManagerToolFilename,
+        args: ['install', '--frozen-lockfile'],
+        workingDirectory: this._autoinstallerNameFullPath,
+        keepEnvironment: true
+      });
 
       // Create file: ../common/autoinstallers/my-task/.rush/temp/last-install.flag
       lastInstallFlag.create();

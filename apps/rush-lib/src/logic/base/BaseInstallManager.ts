@@ -147,7 +147,7 @@ export abstract class BaseInstallManager {
   }
 
   public async doInstall(): Promise<void> {
-    const { shrinkwrapIsUpToDate, variantIsUpToDate } = await this.prepare();
+    const { shrinkwrapIsUpToDate, variantIsUpToDate } = await this.prepareAsync();
 
     // This marker file indicates that the last "rush install" completed successfully.
     // If "--purge" was specified, or if the last install was interrupted, then we will need to
@@ -184,7 +184,7 @@ export abstract class BaseInstallManager {
       this._commonTempInstallFlag.clear();
 
       // Perform the actual install
-      await this.install(cleanInstall);
+      await this.installAsync(cleanInstall);
 
       const usePnpmFrozenLockfile: boolean =
         this._rushConfiguration.packageManager === 'pnpm' &&
@@ -228,15 +228,15 @@ export abstract class BaseInstallManager {
     }
   }
 
-  protected abstract prepareAndCheckShrinkwrap(
+  protected abstract prepareCommonTempAsync(
     shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }>;
 
   protected abstract canSkipInstall(lastInstallDate: Date): boolean;
 
-  protected abstract install(cleanInstall: boolean): Promise<void>;
+  protected abstract installAsync(cleanInstall: boolean): Promise<void>;
 
-  protected async prepare(): Promise<{ variantIsUpToDate: boolean; shrinkwrapIsUpToDate: boolean }> {
+  protected async prepareAsync(): Promise<{ variantIsUpToDate: boolean; shrinkwrapIsUpToDate: boolean }> {
     // Check the policies
     PolicyValidator.validatePolicy(this._rushConfiguration, this.options);
 
@@ -366,7 +366,7 @@ export abstract class BaseInstallManager {
 
     // Allow for package managers to do their own preparation and check that the shrinkwrap is up to date
     // eslint-disable-next-line prefer-const
-    let { shrinkwrapIsUpToDate, shrinkwrapWarnings } = await this.prepareAndCheckShrinkwrap(shrinkwrapFile);
+    let { shrinkwrapIsUpToDate, shrinkwrapWarnings } = await this.prepareCommonTempAsync(shrinkwrapFile);
     shrinkwrapIsUpToDate = shrinkwrapIsUpToDate && !this.options.recheckShrinkwrap;
 
     // Write out the reported warnings

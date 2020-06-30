@@ -307,6 +307,10 @@ export class PnpmLinkManager extends BaseLinkManager {
 
   /**
    * This is called once for each local project from Rush.json.
+   *
+   * TODO: This should be moved into WorkspaceInstallManager directly, since there is no actual linking
+   * being done by Rush for this style of install.
+   *
    * @param project             The local project that we will create symlinks for
    * @param rushLinkJson        The common/temp/rush-link.json output file
    */
