@@ -36,24 +36,29 @@ export interface IInstallManagerOptions {
    * Whether the global "--debug" flag was specified.
    */
   debug: boolean;
+
   /**
    * Whether or not Rush will automatically update the shrinkwrap file.
    * True for "rush update", false for "rush install".
    */
   allowShrinkwrapUpdates: boolean;
+
   /**
    * Whether to skip policy checks.
    */
   bypassPolicy: boolean;
+
   /**
    * Whether to skip linking, i.e. require "rush link" to be done manually later.
    */
   noLink: boolean;
+
   /**
    * Whether to delete the shrinkwrap file before installation, i.e. so that all dependencies
    * will be upgraded to the latest SemVer-compatible version.
    */
   fullUpgrade: boolean;
+
   /**
    * Whether to force an update to the shrinkwrap file even if it appears to be unnecessary.
    * Normally Rush uses heuristics to determine when "pnpm install" can be skipped,
@@ -187,16 +192,6 @@ export abstract class BaseInstallManager {
           true;
 
       if (this.options.allowShrinkwrapUpdates && (usePnpmFrozenLockfile || !shrinkwrapIsUpToDate)) {
-        // Shrinkwrap files may need to be post processed after install, so load and save it
-        const tempShrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
-          this._rushConfiguration.packageManager,
-          this._rushConfiguration.packageManagerOptions,
-          this._rushConfiguration.tempShrinkwrapFilename
-        );
-        if (tempShrinkwrapFile) {
-          tempShrinkwrapFile.save(this._rushConfiguration.tempShrinkwrapFilename);
-        }
-
         // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
         Utilities.syncFile(
           this._rushConfiguration.tempShrinkwrapFilename,
@@ -204,6 +199,17 @@ export abstract class BaseInstallManager {
         );
       } else {
         // TODO: Validate whether the package manager updated it in a nontrivial way
+      }
+
+      // Always update the state file if running "rush update"
+      if (this.options.allowShrinkwrapUpdates) {
+        if (this.rushConfiguration.getRepoState(this.options.variant).refreshState(this.rushConfiguration)) {
+          console.log(
+            colors.yellow(
+              `${RushConstants.repoStateFilename} has been modified and must be committed to source control.`
+            )
+          );
+        }
       }
 
       // Create the marker file to indicate a successful install
@@ -361,9 +367,7 @@ export abstract class BaseInstallManager {
     // Allow for package managers to do their own preparation and check that the shrinkwrap is up to date
     // eslint-disable-next-line prefer-const
     let { shrinkwrapIsUpToDate, shrinkwrapWarnings } = await this.prepareAndCheckShrinkwrap(shrinkwrapFile);
-    shrinkwrapIsUpToDate =
-      shrinkwrapIsUpToDate &&
-      !(this.options.recheckShrinkwrap || (shrinkwrapFile && shrinkwrapFile.shouldForceRecheck()));
+    shrinkwrapIsUpToDate = shrinkwrapIsUpToDate && !this.options.recheckShrinkwrap;
 
     // Write out the reported warnings
     if (shrinkwrapWarnings.length > 0) {

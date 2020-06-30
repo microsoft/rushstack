@@ -7,7 +7,7 @@ import { FileSystem } from '@rushstack/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
 import { DependencySpecifier } from '../DependencySpecifier';
-import { IPolicyValidatorOptions } from '../policy/PolicyValidator';
+import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
 import { PackageManagerOptionsConfigurationBase } from '../../api/RushConfiguration';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
 
@@ -25,15 +25,6 @@ export abstract class BaseShrinkwrapFile {
   }
 
   /**
-   * Return whether or not the committed shrinkwrap file should be forcibly rechecked for changes.
-   *
-   * @virtual
-   */
-  public shouldForceRecheck(): boolean {
-    return false;
-  }
-
-  /**
    * Serializes and saves the shrinkwrap file to specified location
    */
   public save(filePath: string): void {
@@ -47,7 +38,7 @@ export abstract class BaseShrinkwrapFile {
    */
   public validate(
     packageManagerOptionsConfig: PackageManagerOptionsConfigurationBase,
-    policyOptions: IPolicyValidatorOptions
+    policyOptions: IShrinkwrapFilePolicyValidatorOptions
   ): void {}
 
   /**

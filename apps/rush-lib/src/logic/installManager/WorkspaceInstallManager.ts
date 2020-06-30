@@ -120,7 +120,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     const commonVersions: CommonVersionsConfiguration = this.rushConfiguration.getCommonVersions(
       this.options.variant
     );
-    if (repoState.preferredVersionsHash !== commonVersions.preferredVersionsHash) {
+    if (repoState.preferredVersionsHash !== commonVersions.getPreferredVersionsHash()) {
       shrinkwrapWarnings.push(
         `Preferred versions from ${RushConstants.commonVersionsFilename} have been modified.`
       );
@@ -417,21 +417,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     console.log('');
-
-    // We need to update the repo state with the information from the install
-    const repoState: RepoStateFile = this.rushConfiguration.getRepoState(this.options.variant);
-    const commonVersions: CommonVersionsConfiguration = this.rushConfiguration.getCommonVersions(
-      this.options.variant
-    );
-    repoState.preferredVersionsHash = commonVersions.preferredVersionsHash;
-    if (repoState.saveIfModified()) {
-      console.log(
-        colors.yellow(
-          `${RushConstants.repoStateFilename} has been modified and must be committed to source control.`
-        )
-      );
-      console.log('');
-    }
   }
 
   /**

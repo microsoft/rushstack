@@ -153,7 +153,7 @@ export class CommonVersionsConfiguration {
   /**
    * Get a sha1 hash of the preferred versions.
    */
-  public get preferredVersionsHash(): string {
+  public getPreferredVersionsHash(): string {
     // Sort so that the hash is stable
     const preferredVersionsToHash: Map<string, string> = new Map<string, string>(
       this._preferredVersions.protectedView

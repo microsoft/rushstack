@@ -68,10 +68,10 @@ export class CommonVersionsConfiguration {
     readonly allowedAlternativeVersions: Map<string, ReadonlyArray<string>>;
     readonly filePath: string;
     getAllPreferredVersions(): Map<string, string>;
+    getPreferredVersionsHash(): string;
     readonly implicitlyPreferredVersions: boolean | undefined;
     static loadFromFile(jsonFilename: string): CommonVersionsConfiguration;
     readonly preferredVersions: Map<string, string>;
-    readonly preferredVersionsHash: string;
     save(): boolean;
     readonly xstitchPreferredVersions: Map<string, string>;
     }
