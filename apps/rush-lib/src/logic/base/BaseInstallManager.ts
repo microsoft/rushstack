@@ -158,9 +158,13 @@ export abstract class BaseInstallManager {
     const { shrinkwrapIsUpToDate, variantIsUpToDate } = await this.prepareAsync();
 
     // This marker file indicates that the last "rush install" completed successfully.
-    // If "--purge" was specified, or if the last install was interrupted, then we will need to
-    // perform a clean install.  Otherwise, we can do an incremental install.
-    const cleanInstall: boolean = !this._commonTempInstallFlag.checkValidAndReportStoreIssues();
+    // Always perform a clean install if filter flags were provided. Additionally, if
+    // "--purge" was specified, or if the last install was interrupted, then we will
+    // need to perform a clean install.  Otherwise, we can do an incremental install.
+    const isFilteredInstall: boolean = !!this.options.toFlags && !!this.options.toFlags.length;
+    const cleanInstall: boolean = isFilteredInstall
+      ? true
+      : !this._commonTempInstallFlag.checkValidAndReportStoreIssues();
 
     // Allow us to defer the file read until we need it
     const canSkipInstall: () => boolean = () => {
@@ -220,8 +224,10 @@ export abstract class BaseInstallManager {
         }
       }
 
-      // Create the marker file to indicate a successful install
-      this._commonTempInstallFlag.create();
+      // Create the marker file to indicate a successful install if it's not a filtered install
+      if (!isFilteredInstall) {
+        this._commonTempInstallFlag.create();
+      }
 
       console.log('');
     }
