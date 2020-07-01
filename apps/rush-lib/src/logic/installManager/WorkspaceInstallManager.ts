@@ -41,12 +41,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       throw new AlreadyReportedError();
     }
 
-    // Workspaces do not support "--to" and "--from" flags when running "rush update"
-    if (
-      this.options.allowShrinkwrapUpdates &&
-      ((this.options.toFlags && this.options.toFlags.length !== 0) ||
-        (this.options.fromFlags && this.options.fromFlags.length !== 0))
-    ) {
+    // Workspaces do not support "--to" flags when running "rush update"
+    if (this.options.allowShrinkwrapUpdates && this.options.toFlags && this.options.toFlags.length !== 0) {
       console.log();
       console.log(
         colors.red(
@@ -547,13 +543,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       if (this.options.toFlags) {
         for (const flag of this.options.toFlags) {
           args.push('--filter', `${this._getPackageName(flag)}...`);
-        }
-      }
-
-      // "...<package>" selects the specified package and all direct and indirect dependent packages
-      if (this.options.fromFlags) {
-        for (const flag of this.options.fromFlags) {
-          args.push('--filter', `...${this._getPackageName(flag)}`);
         }
       }
     }
