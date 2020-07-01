@@ -120,8 +120,11 @@ export abstract class BaseInstallManager {
       packageManagerVersion: rushConfiguration.packageManagerToolVersion
     };
 
-    if (lastInstallState.packageManager === 'pnpm') {
+    if (lastInstallState.packageManager === 'pnpm' && rushConfiguration.pnpmOptions) {
       lastInstallState.storePath = rushConfiguration.pnpmOptions.pnpmStorePath;
+      if (rushConfiguration.pnpmOptions.useWorkspaces) {
+        lastInstallState.workspaces = rushConfiguration.pnpmOptions.useWorkspaces;
+      }
     }
 
     this._commonTempInstallFlag = new LastInstallFlag(
