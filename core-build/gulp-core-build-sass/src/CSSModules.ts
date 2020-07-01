@@ -24,6 +24,7 @@ export interface ICSSModules {
 export default class CSSModules implements ICSSModules {
   private _classMap: IClassMap;
   private _rootPath: string;
+  private _generateScopedName: (name: string, fileName: string, css: string) => string;
 
   /**
    * CSSModules includes the source file's path relative to the project root
@@ -33,19 +34,22 @@ export default class CSSModules implements ICSSModules {
    * That is used in {@link ./SassTask#SassTask}
    * But will default the process' current working dir.
    */
-  public constructor(rootPath?: string) {
+  public constructor(rootPath?: string, generateScopedName?: (name: string, fileName: string, css: string) => string) {
     this._classMap = {};
     if (rootPath) {
       this._rootPath = rootPath;
     } else {
       this._rootPath = process.cwd();
     }
+    if (generateScopedName) {
+      this._generateScopedName = generateScopedName;
+    }
   }
 
   public getPlugin(): postcss.AcceptedPlugin {
     return cssModules({
       getJSON: this.saveJson.bind(this),
-      generateScopedName: this.generateScopedName.bind(this)
+      generateScopedName: this._generateScopedName || this.generateScopedName.bind(this)
     });
   }
 
