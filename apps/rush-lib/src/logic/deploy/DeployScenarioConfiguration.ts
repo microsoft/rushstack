@@ -18,6 +18,7 @@ export interface IDeployScenarioJson {
   includeDevDependencies?: boolean;
   includeNpmIgnoreFiles?: boolean;
   linkCreation?: 'default' | 'script' | 'none';
+  postCopySourceFolder?: string;
   projectSettings?: IDeployScenarioProjectJson[];
 }
 

@@ -8,6 +8,7 @@ export class DeployAction extends BaseRushAction {
   private _project: CommandLineStringParameter;
   private _overwrite: CommandLineFlagParameter;
   private _targetFolder: CommandLineStringParameter;
+  private _createArchive: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -61,6 +62,17 @@ export class DeployAction extends BaseRushAction {
         ' Use this parameter to specify a different location. ' +
         ' WARNING: USE CAUTION WHEN COMBINING WITH "--overwrite"'
     });
+
+    this._createArchive = this.defineStringParameter({
+      parameterLongName: '--create-archive',
+      parameterShortName: '-c',
+      argumentName: 'ARCHIVE_NAME',
+      description:
+        'If specified, after the deployment has been prepared, "rush deploy"' +
+        ' will create an archive containing the contents of the target folder.' +
+        ' The archive file will be placed in the target folder.' +
+        ' Supported file extensions: .zip'
+    });
   }
 
   protected async run(): Promise<void> {
@@ -69,7 +81,8 @@ export class DeployAction extends BaseRushAction {
       this._project.value,
       this._scenario.value,
       !!this._overwrite.value,
-      this._targetFolder.value
+      this._targetFolder.value,
+      this._createArchive.value
     );
   }
 }

@@ -44,7 +44,14 @@
    *   create the links described in the "deploy-metadata.json" output file.
    * - "none": Do nothing; some other tool may create the links later.
    */
-  // "linkCreation": "script",
+  // "linkCreation": "script",{
+
+  /**
+   * If this path is specified, then after "rush deploy", recursively copies the files from this folder to
+   * the deployment target folder (common/deploy). This can be used to provide
+   * additional configuration files or scripts needed by the server when deploying.
+   */
+  //  postCopySourceFolder: "repo-tools/assets/deploy-config"
 
   /**
    * Customize how Rush projects are processed during deployment.

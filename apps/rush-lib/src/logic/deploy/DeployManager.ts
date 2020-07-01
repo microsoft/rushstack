@@ -5,6 +5,8 @@ import * as colors from 'colors';
 import * as path from 'path';
 import * as resolve from 'resolve';
 import * as npmPacklist from 'npm-packlist';
+import * as JSZip from 'jszip';
+import * as fs from 'fs';
 import ignore, { Ignore } from 'ignore';
 import {
   Path,
@@ -24,6 +26,11 @@ import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { DeployScenarioConfiguration, IDeployScenarioProjectJson } from './DeployScenarioConfiguration';
 import { PnpmfileConfiguration } from './PnpmfileConfiguration';
+
+declare global {
+  // eslint-disable-next-line
+  type Blob = any;
+}
 
 // (@types/npm-packlist is missing this API)
 declare module 'npm-packlist' {
@@ -97,6 +104,11 @@ interface IDeployState {
   symlinkAnalyzer: SymlinkAnalyzer;
 
   pnpmfileConfiguration: PnpmfileConfiguration;
+
+  /**
+   * The desired name to be used when archiving the target folder. Supported file extensions: .zip".
+   */
+  createArchiveFileName: string | undefined;
 }
 
 /**
@@ -502,7 +514,91 @@ export class DeployManager {
         }
       }
     }
+    this._createArchive(deployState).catch((error) => {
+      throw error;
+    });
   }
+
+  private async _createArchive(deployState: IDeployState): Promise<void> {
+    if (deployState.scenarioConfiguration.json.postCopySourceFolder !== undefined) {
+      FileSystem.copyFiles({
+        sourcePath: deployState.scenarioConfiguration.json.postCopySourceFolder,
+        destinationPath: deployState.targetRootFolder,
+        alreadyExistsBehavior: AlreadyExistsBehavior.Error
+      });
+    }
+    if (
+      deployState.createArchiveFileName !== undefined &&
+      deployState.createArchiveFileName.endsWith('zip')
+    ) {
+      console.log('Invoking "JSZip"...\n');
+      const zip: JSZip = this._getZipOfFolder(deployState.targetRootFolder);
+      const zipContent: Buffer = await zip.generateAsync({
+        type: 'nodebuffer',
+        platform: 'UNIX'
+      });
+
+      fs.writeFileSync(
+        path.join(deployState.targetRootFolder, deployState.createArchiveFileName),
+        zipContent
+      );
+
+      console.log('\nCompleted "JSZip" successfully.');
+    }
+  }
+
+  private _getFilePathsRecursively = (dir: string): string[] => {
+    // returns a flat array of absolute paths of all files recursively contained in the dir
+    let results: string[] = [];
+    const list: string[] = fs.readdirSync(dir);
+
+    let pending: number = list.length;
+    if (!pending) return results;
+
+    for (let file of list) {
+      file = path.resolve(dir, file);
+
+      const stat: fs.Stats = fs.lstatSync(file);
+
+      if (stat && stat.isDirectory()) {
+        results = results.concat(this._getFilePathsRecursively(file));
+      } else {
+        results.push(file);
+      }
+
+      if (!--pending) return results;
+    }
+
+    return results;
+  };
+
+  private _getZipOfFolder = (dir: string): typeof JSZip => {
+    // returns a JSZip instance filled with contents of dir.
+    const allPaths: string[] = this._getFilePathsRecursively(dir);
+
+    const zip: JSZip = new JSZip();
+    for (const filePath of allPaths) {
+      // let addPath = path.relative(path.join(dir, '..'), filePath); // use this instead if you want the source folder itself in the zip
+      const addPath: string = path.relative(dir, filePath); // use this instead if you don't want the source folder itself in the zip
+      const stat: fs.Stats = fs.lstatSync(filePath);
+      const permissions: number = stat.mode;
+
+      if (stat.isSymbolicLink()) {
+        zip.file(addPath, fs.readlinkSync(filePath), {
+          unixPermissions: parseInt('120755', 8), // This permission can be more permissive than necessary for non-executables but we don't mind.
+          dir: stat.isDirectory()
+        });
+      } else {
+        const data: Buffer = fs.readFileSync(filePath);
+        zip.file(addPath, data, {
+          unixPermissions: permissions,
+          dir: stat.isDirectory()
+        });
+      }
+    }
+
+    return zip;
+  };
 
   /**
    * The main entry point for performing a deployment.
@@ -511,7 +607,8 @@ export class DeployManager {
     mainProjectName: string | undefined,
     scenarioName: string | undefined,
     overwriteExisting: boolean,
-    targetFolderParameter: string | undefined
+    targetFolderParameter: string | undefined,
+    createArchiveFileName: string | undefined
   ): void {
     const scenarioFilePath: string = DeployScenarioConfiguration.getConfigFilePath(
       scenarioName,
@@ -581,7 +678,8 @@ export class DeployManager {
       foldersToCopy: new Set(),
       folderInfosByPath: new Map(),
       symlinkAnalyzer: new SymlinkAnalyzer(),
-      pnpmfileConfiguration: new PnpmfileConfiguration(this._rushConfiguration)
+      pnpmfileConfiguration: new PnpmfileConfiguration(this._rushConfiguration),
+      createArchiveFileName
     };
 
     console.log();

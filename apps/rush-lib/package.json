@@ -46,7 +46,8 @@
     "tar": "~5.0.5",
     "true-case-path": "~2.2.1",
     "wordwrap": "~1.0.0",
-    "z-schema": "~3.18.3"
+    "z-schema": "~3.18.3",
+    "jszip": "~3.5.0"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "6.4.28",
