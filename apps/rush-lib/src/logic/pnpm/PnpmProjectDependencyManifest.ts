@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import * as semver from 'semver';
+import * as crypto from 'crypto';
 import { JsonFile, InternalError, FileSystem } from '@rushstack/node-core-library';
 
 import {
@@ -109,7 +110,33 @@ export class PnpmProjectDependencyManifest {
     }
 
     const specifier: string = `${name}@${version}`;
-    const integrity: string = shrinkwrapEntry.resolution.integrity;
+    let integrity: string = shrinkwrapEntry.resolution.integrity;
+
+    if (!integrity) {
+      // git dependency specifiers do not have an integrity entry
+
+      // Example ('integrity' doesn't exist in 'resolution'):
+      //
+      // github.com/chfritz/node-xmlrpc/948db2fbd0260e5d56ed5ba58df0f5b6599bbe38:
+      //   dependencies:
+      //     sax: 1.2.4
+      //     xmlbuilder: 8.2.2
+      //   dev: false
+      //   engines:
+      //     node: '>=0.8'
+      //     npm: '>=1.0.0'
+      //   name: xmlrpc
+      //   resolution:
+      //     tarball: 'https://codeload.github.com/chfritz/node-xmlrpc/tar.gz/948db2fbd0260e5d56ed5ba58df0f5b6599bbe38'
+      //   version: 1.3.2
+
+      const sha256Digest: string = crypto
+        .createHash('sha256')
+        .update(JSON.stringify(shrinkwrapEntry))
+        .digest('hex');
+      integrity = `${name}@${version}:${sha256Digest}:`;
+    }
+
     if (this._projectDependencyManifestFile.has(specifier)) {
       if (this._projectDependencyManifestFile.get(specifier) !== integrity) {
         throw new Error(`Collision: ${specifier} already exists in with a different integrity`);
