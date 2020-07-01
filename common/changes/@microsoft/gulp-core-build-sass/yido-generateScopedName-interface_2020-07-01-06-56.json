@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "comment": "add an interface to allow customize generateScopedName for CSS modules.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-sass",
+  "email": "yido@microsoft.com"
+}
