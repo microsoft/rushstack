@@ -52,10 +52,4 @@ export class MessagePortMinifier implements IModuleMinifier {
 
     this.port.postMessage(request);
   }
-
-  public ref(): () => Promise<void> {
-    return async () => {
-      // Nothing to do
-    };
-  }
 }

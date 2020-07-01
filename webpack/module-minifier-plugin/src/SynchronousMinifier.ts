@@ -61,10 +61,4 @@ export class SynchronousMinifier implements IModuleMinifier {
 
     callback(result);
   }
-
-  public ref(): () => Promise<void> {
-    return async () => {
-      // Nothing to do
-    };
-  }
 }

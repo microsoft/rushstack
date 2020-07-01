@@ -6,8 +6,8 @@ import { RawSourceMap } from 'source-map';
 import './Base54';
 
 declare module 'terser' {
+  // eslint-disable-next-line @typescript-eslint/interface-name-prefix
   interface SourceMapOptions {
-    // eslint-disable-line @typescript-eslint/interface-name-prefix
     asObject?: boolean;
   }
 }

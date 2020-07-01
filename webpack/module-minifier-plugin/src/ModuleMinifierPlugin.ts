@@ -10,7 +10,7 @@ import {
   SourceMapSource
 } from 'webpack-sources';
 import * as webpack from 'webpack';
-import { AsyncSeriesWaterfallHook, Tap } from 'tapable';
+import { AsyncSeriesWaterfallHook, SyncWaterfallHook, Tap } from 'tapable';
 import {
   CHUNK_MODULES_TOKEN,
   MODULE_WRAPPER_PREFIX,
@@ -31,7 +31,7 @@ import {
 } from './ModuleMinifierPlugin.types';
 import { generateLicenseFileForAsset } from './GenerateLicenseFileForAsset';
 import { rehydrateAsset } from './RehydrateAsset';
-import { PortableMinifierModuleIdsPlugin, ModuleIdRestorer } from './StableMinifierIdsPlugin';
+import { PortableMinifierModuleIdsPlugin } from './PortableMinifierIdsPlugin';
 import { createHash } from 'crypto';
 
 // The name of the plugin, for use in taps
@@ -45,6 +45,26 @@ const TAP_AFTER: Tap = {
   name: PLUGIN_NAME,
   stage: STAGE_AFTER
 } as Tap;
+
+
+
+/**
+ * https://github.com/webpack/webpack/blob/30e747a55d9e796ae22f67445ae42c7a95a6aa48/lib/Template.js#L36-47
+ * @param a first id to be sorted
+ * @param b second id to be sorted against
+ * @returns the sort value
+ */
+function stringifyIdSortPredicate(a: string | number, b: string | number): -1 | 0 | 1 {
+	const aId: string = a + "";
+	const bId: string = b + "";
+	if (aId < bId) return -1;
+	if (aId > bId) return 1;
+	return 0;
+}
+
+function hashCodeFragment(code: string): string {
+  return createHash('sha256').update(code).digest('hex');
+}
 
 /**
  * Base implementation of asset rehydration
@@ -81,20 +101,24 @@ function isMinificationResultError(
  * Webpack plugin that minifies code on a per-module basis rather than per-asset. The actual minification is handled by the input `minifier` object.
  * @public
  */
-export class ModuleMinifierPlugin {
+export class ModuleMinifierPlugin implements webpack.Plugin {
   public readonly hooks: IModuleMinifierPluginHooks;
   public minifier: IModuleMinifier;
-  public readonly portableIdsPlugin: PortableMinifierModuleIdsPlugin | undefined;
 
+  private readonly _portableIdsPlugin: PortableMinifierModuleIdsPlugin | undefined;
   private readonly _sourceMap: boolean;
 
   public constructor(options: IModuleMinifierPluginOptions) {
     this.hooks = {
-      rehydrateAssets: new AsyncSeriesWaterfallHook(['dehydratedContent', 'compilation'])
+      rehydrateAssets: new AsyncSeriesWaterfallHook(['dehydratedContent', 'compilation']),
+
+      finalModuleId: new SyncWaterfallHook(['id']),
+
+      postProcessCodeFragment: new SyncWaterfallHook(['code', 'context'])
     };
 
     if (options.usePortableModules) {
-      this.portableIdsPlugin = new PortableMinifierModuleIdsPlugin();
+      this._portableIdsPlugin = new PortableMinifierModuleIdsPlugin(this.hooks);
     }
 
     this.hooks.rehydrateAssets.tap(PLUGIN_NAME, defaultRehydrateAssets);
@@ -104,18 +128,13 @@ export class ModuleMinifierPlugin {
   }
 
   public apply(compiler: webpack.Compiler): void {
-    const { portableIdsPlugin: stableIdsPlugin } = this;
+    const { _portableIdsPlugin: stableIdsPlugin } = this;
 
     const useSourceMaps: boolean = this._sourceMap;
 
-    const moduleIdRestorer: ModuleIdRestorer | undefined = stableIdsPlugin && stableIdsPlugin.apply(compiler);
-
-    const postProcessCode: (code: ReplaceSource, context: string) => ReplaceSource = moduleIdRestorer
-      ? moduleIdRestorer.restoreIdsInCode.bind(moduleIdRestorer)
-      : (code: ReplaceSource) => code;
-    const getRealId: (id: string | number) => string | number | undefined = moduleIdRestorer
-      ? moduleIdRestorer.getMappedId.bind(moduleIdRestorer)
-      : (id: string | number) => id;
+    if (stableIdsPlugin) {
+      stableIdsPlugin.apply(compiler);
+    }
 
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: webpack.compilation.Compilation) => {
       /**
@@ -140,6 +159,12 @@ export class ModuleMinifierPlugin {
       let allRequestsIssued: boolean = false;
 
       let resolveMinifyPromise: () => void;
+
+      const getRealId: (id: number | string) => number | string | undefined =
+        (id: number | string) => this.hooks.finalModuleId.call(id);
+
+      const postProcessCode: (code: ReplaceSource, context: string) => ReplaceSource =
+        (code: ReplaceSource, context: string) => this.hooks.postProcessCodeFragment.call(code, context);
 
       /**
        * Callback to invoke when a file has finished minifying.
@@ -169,7 +194,7 @@ export class ModuleMinifierPlugin {
 
       const { minifier } = this;
 
-      const cleanupMinifier: () => Promise<void> = minifier.ref();
+      const cleanupMinifier: (() => Promise<void>) | undefined = minifier.ref && minifier.ref();
 
       const requestShortener: webpack.compilation.RequestShortener =
         compilation.runtimeTemplate.requestShortener;
@@ -208,7 +233,7 @@ export class ModuleMinifierPlugin {
                   map: undefined
                 };
 
-            const hash: string = createHash('sha256').update(wrappedCode).digest('hex');
+            const hash: string = hashCodeFragment(wrappedCode);
 
             ++pendingMinificationRequests;
 
@@ -298,9 +323,7 @@ export class ModuleMinifierPlugin {
             }
 
             // Sort by id before rehydration in case we rehydrate a given chunk multiple times
-            if (!hasNonNumber) {
-              chunkModules.sort((x: number, y: number) => x - y);
-            }
+            chunkModules.sort(hasNonNumber ? stringifyIdSortPredicate : (x: number, y: number) => x - y);
 
             for (const assetName of chunk.files) {
               const asset: Source = compilation.assets[assetName];
@@ -312,7 +335,7 @@ export class ModuleMinifierPlugin {
                 const rawCode: string = asset.source();
                 const nameForMap: string = `(chunks)/${assetName}`;
 
-                const hash: string = createHash('sha256').update(rawCode).digest('hex');
+                const hash: string = hashCodeFragment(rawCode);
 
                 minifier.minify(
                   {
@@ -330,7 +353,7 @@ export class ModuleMinifierPlugin {
 
                         let codeForMap: string = rawCode;
                         if (useSourceMaps) {
-                          // Pretend the __WEBPACK_CHUNK_MODULES__ token is an array of module ids, so that which chunk contains the modules can be tracked.
+                          // Pretend the __WEBPACK_CHUNK_MODULES__ token is an array of module ids, so that the source map contains information about the module ids in the chunk
                           codeForMap = codeForMap.replace(
                             CHUNK_MODULES_TOKEN,
                             JSON.stringify(chunkModules, undefined, 2)
@@ -388,7 +411,9 @@ export class ModuleMinifierPlugin {
           }
 
           // Handle any error from the minifier.
-          await cleanupMinifier();
+          if (cleanupMinifier) {
+            await cleanupMinifier();
+          }
 
           // All assets and modules have been minified, hand them off to be rehydrated
 

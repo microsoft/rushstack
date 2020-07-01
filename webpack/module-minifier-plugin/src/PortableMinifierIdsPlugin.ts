@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { compilation, Compiler } from 'webpack';
+import { compilation, Compiler, Plugin } from 'webpack';
 import { ReplaceSource } from 'webpack-sources';
 import { createHash } from 'crypto';
 import { Tap } from 'tapable';
 import * as RequestShortener from 'webpack/lib/RequestShortener';
 
 import { STAGE_AFTER, STAGE_BEFORE } from './Constants';
-import { INormalModuleFactoryModuleData, IExtendedModule } from './ModuleMinifierPlugin.types';
+import { INormalModuleFactoryModuleData, IExtendedModule, IModuleMinifierPluginHooks } from './ModuleMinifierPlugin.types';
 
 const PLUGIN_NAME: 'PortableMinifierModuleIdsPlugin' = 'PortableMinifierModuleIdsPlugin';
 
@@ -25,60 +25,19 @@ const TAP_AFTER: Tap = {
 const STABLE_MODULE_ID_PREFIX: '__MODULEID_SHA_' = '__MODULEID_SHA_';
 const STABLE_MODULE_ID_REGEX: RegExp = /['"]?(__MODULEID_SHA_[0-9a-f]+)['"]?/g;
 
-export class ModuleIdRestorer {
-  private readonly _idMap: Map<string | number, string | number>;
-
-  public constructor(idMap: Map<string | number, string | number>) {
-    this._idMap = idMap;
-  }
-
-  /**
-   * Replaces stable ids in code with the original output ids
-   * @param source - The webpack Source to transform
-   * @param context - Context information for error logging
-   */
-  public restoreIdsInCode(source: ReplaceSource, context: string): ReplaceSource {
-    const { _idMap: stableIdToFinalId } = this;
-
-    const code: string = source.original().source();
-
-    STABLE_MODULE_ID_REGEX.lastIndex = -1;
-    // RegExp.exec uses null or an array as the return type, explicitly
-    let match: RegExpExecArray | null = null; // eslint-disable-line @rushstack/no-null
-    while ((match = STABLE_MODULE_ID_REGEX.exec(code))) {
-      const id: string = match[1];
-      const mapped: string | number | undefined = stableIdToFinalId.get(id);
-
-      if (mapped === undefined) {
-        console.error(`Missing module id for ${id} in ${context}!`);
-      }
-
-      source.replace(match.index, STABLE_MODULE_ID_REGEX.lastIndex - 1, JSON.stringify(mapped));
-    }
-
-    return source;
-  }
-
-  /**
-   * Maps a module id to the expected output id
-   * @param id - The current value of `module.id`
-   */
-  public getMappedId(id: string | number): string | number | undefined {
-    return this._idMap.get(id);
-  }
-}
-
 /**
  * Plugin responsible for converting the Webpack module ids (of whatever variety) to stable ids before code is handed to the minifier, then back again.
  * Uses the node module identity of the target module. Will emit an error if it encounters multiple versions of the same package in the same compilation.
  * @public
  */
-export class PortableMinifierModuleIdsPlugin {
-  public constructor() {
-    // Nothing
+export class PortableMinifierModuleIdsPlugin implements Plugin {
+  private readonly _minifierHooks: IModuleMinifierPluginHooks;
+
+  public constructor(minifierHooks: IModuleMinifierPluginHooks) {
+    this._minifierHooks = minifierHooks;
   }
 
-  public apply(compiler: Compiler): ModuleIdRestorer {
+  public apply(compiler: Compiler): void {
     // Ensure that "EXTERNAL MODULE: " comments are portable and module version invariant
     const baseShorten: (request: string) => string = RequestShortener.prototype.shorten;
     RequestShortener.prototype.shorten = function (this: RequestShortener, request: string): string {
@@ -100,7 +59,6 @@ export class PortableMinifierModuleIdsPlugin {
     };
 
     const nameByResource: Map<string | undefined, string> = new Map();
-    const stableIdToFinalId: Map<string | number, string | number> = new Map();
 
     /**
      * Figure out portable ids for modules by using their id based on the node module resolution algorithm
@@ -124,7 +82,35 @@ export class PortableMinifierModuleIdsPlugin {
       });
     });
 
+    const stableIdToFinalId: Map<string | number, string | number> = new Map();
+
+    this._minifierHooks.finalModuleId.tap(PLUGIN_NAME, (id: string | number | undefined) => {
+      return id === undefined ? id : stableIdToFinalId.get(id);
+    });
+
+    this._minifierHooks.postProcessCodeFragment.tap(PLUGIN_NAME, (source: ReplaceSource, context: string) => {
+      const code: string = source.original().source();
+
+      STABLE_MODULE_ID_REGEX.lastIndex = -1;
+      // RegExp.exec uses null or an array as the return type, explicitly
+      let match: RegExpExecArray | null = null; // eslint-disable-line @rushstack/no-null
+      while ((match = STABLE_MODULE_ID_REGEX.exec(code))) {
+        const id: string = match[1];
+        const mapped: string | number | undefined = stableIdToFinalId.get(id);
+
+        if (mapped === undefined) {
+          console.error(`Missing module id for ${id} in ${context}!`);
+        }
+
+        source.replace(match.index, STABLE_MODULE_ID_REGEX.lastIndex - 1, JSON.stringify(mapped));
+      }
+
+      return source;
+    });
+
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: compilation.Compilation) => {
+      stableIdToFinalId.clear();
+
       // Make module ids portable immediately before rendering.
       // Unfortunately, other means of altering these ids don't work in Webpack 4 without a lot more code and work.
       // Namely, a number of functions reference "module.id" directly during code generation
@@ -176,7 +162,5 @@ export class PortableMinifierModuleIdsPlugin {
         }
       });
     });
-
-    return new ModuleIdRestorer(stableIdToFinalId);
   }
 }

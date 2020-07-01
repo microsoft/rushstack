@@ -28,10 +28,4 @@ export class NoopMinifier implements IModuleMinifier {
       extractedComments: []
     });
   }
-
-  public ref(): () => Promise<void> {
-    return async () => {
-      // Nothing to do
-    };
-  }
 }

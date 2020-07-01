@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import { RawSourceMap } from 'source-map';
-import { AsyncSeriesWaterfallHook } from 'tapable';
+import { AsyncSeriesWaterfallHook, SyncWaterfallHook } from 'tapable';
 import * as webpack from 'webpack';
-import { Source } from 'webpack-sources';
+import { ReplaceSource, Source } from 'webpack-sources';
 
 /**
  * Request to the minifier
@@ -173,15 +173,15 @@ export interface IExtendedModule extends webpack.compilation.Module, webpack.Mod
 }
 
 declare module 'webpack' {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace compilation {
-    // eslint-disable-line @typescript-eslint/no-namespace
+    // eslint-disable-next-line @typescript-eslint/interface-name-prefix
     interface RuntimeTemplate {
-      // eslint-disable-line @typescript-eslint/interface-name-prefix
       requestShortener: webpack.compilation.RequestShortener;
     }
 
+    // eslint-disable-next-line @typescript-eslint/interface-name-prefix
     interface RequestShortener {
-      // eslint-disable-line @typescript-eslint/interface-name-prefix
     }
   }
 }
@@ -243,9 +243,11 @@ export interface IModuleMinifier {
   minify: IModuleMinifierFunction;
 
   /**
-   * Prevents the minifier from shutting down
+   * Prevents the minifier from shutting down until the returned callback is invoked.
+   * The callback may be used to surface errors encountered by the minifier that may not be relevant to a specific file.
+   * It should be called to allow the minifier to cleanup
    */
-  ref(): () => Promise<void>;
+  ref?(): () => Promise<void>;
 }
 
 /**
@@ -290,5 +292,18 @@ export interface IDehydratedAssets {
  * @public
  */
 export interface IModuleMinifierPluginHooks {
+  /**
+   * Hook invoked at the start of optimizeChunkAssets to rehydrate the minified boilerplate and runtime into chunk assets.
+   */
   rehydrateAssets: AsyncSeriesWaterfallHook<IDehydratedAssets, webpack.compilation.Compilation>;
+
+  /**
+   * Hook invoked on a module id to get the final rendered id.
+   */
+  finalModuleId: SyncWaterfallHook<string | number | undefined>;
+
+  /**
+   * Hook invoked on code after it has been returned from the minifier.
+   */
+  postProcessCodeFragment: SyncWaterfallHook<ReplaceSource, string>;
 }
