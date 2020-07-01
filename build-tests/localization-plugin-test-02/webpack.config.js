@@ -43,6 +43,7 @@ function generateConfiguration(mode, outputFolderName) {
       minimizer: [
         new ModuleMinifierPlugin({
           minifier: new SynchronousMinifier(),
+          sourceMap: true,
           usePortableModules: true
         })
       ]
