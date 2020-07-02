@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/gulp-core-build-sass",
-      "comment": "add an interface to allow customize generateScopedName for CSS modules.",
+      "comment": "Allow customization of generated CSS module class names.",
       "type": "minor"
     }
   ],

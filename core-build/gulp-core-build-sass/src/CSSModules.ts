@@ -24,7 +24,7 @@ export interface ICSSModules {
 export default class CSSModules implements ICSSModules {
   private _classMap: IClassMap;
   private _rootPath: string;
-  private _generateScopedName: (name: string, fileName: string, css: string) => string;
+  private _customizedGenerateScopedName: ((name: string, fileName: string, css: string) => string) | undefined;
 
   /**
    * CSSModules includes the source file's path relative to the project root
@@ -41,15 +41,13 @@ export default class CSSModules implements ICSSModules {
     } else {
       this._rootPath = process.cwd();
     }
-    if (generateScopedName) {
-      this._generateScopedName = generateScopedName;
-    }
+    this._customizedGenerateScopedName = generateScopedName;
   }
 
   public getPlugin(): postcss.AcceptedPlugin {
     return cssModules({
       getJSON: this.saveJson.bind(this),
-      generateScopedName: this._generateScopedName || this.generateScopedName.bind(this)
+      generateScopedName: this._customizedGenerateScopedName || this.generateScopedName.bind(this)
     });
   }
 
