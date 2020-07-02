@@ -128,7 +128,9 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       InternalError.breakInDebugger = true;
     }
 
-    this.initializePlugins(this._pluginsParameter.values);
+    this._normalizeCwd();
+
+    this._initializePlugins(this._pluginsParameter.values);
 
     try {
       await super.onExecute();
@@ -141,7 +143,18 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     process.exitCode = 0;
   }
 
-  protected initializePlugins(pluginSpecifiers: ReadonlyArray<string>): void {
+  private _normalizeCwd(): void {
+    const buildFolder: string = this._heftConfiguration.buildFolder;
+    this.terminal.writeLine(`Project build folder is "${buildFolder}"`);
+    const currentCwd: string = process.cwd();
+    if (currentCwd !== buildFolder) {
+      // Update the CWD to the project's build root. Some tools, like Jest, use process.cwd()
+      this.terminal.writeVerboseLine(`CWD is "${currentCwd}". Normalizing to project build folder.`);
+      process.chdir(buildFolder);
+    }
+  }
+
+  private _initializePlugins(pluginSpecifiers: ReadonlyArray<string>): void {
     // Set up the gulp plugin by default if none are specified.
     if (
       pluginSpecifiers.length === 0 &&
