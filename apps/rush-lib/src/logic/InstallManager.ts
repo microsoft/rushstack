@@ -9,7 +9,6 @@ import HttpsProxyAgent = require('https-proxy-agent');
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import * as tar from 'tar';
 import * as globEscape from 'glob-escape';
 import {
   JsonFile,
@@ -49,6 +48,7 @@ import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
 import { DependencySpecifier } from './DependencySpecifier';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 import { InstallHelpers } from './InstallHelpers';
+import { TempProjectHelper } from './TempProjectHelper';
 
 // The PosixModeBits are intended to be used with bitwise operations.
 /* eslint-disable no-bitwise */
@@ -132,6 +132,7 @@ export class InstallManager {
   private _rushGlobalFolder: RushGlobalFolder;
   private _commonNodeModulesMarker: LastInstallFlag;
   private _commonTempFolderRecycler: AsyncRecycler;
+  private _tempProjectHelper: TempProjectHelper;
 
   private _options: IInstallManagerOptions;
 
@@ -160,6 +161,8 @@ export class InstallManager {
       this._rushConfiguration.commonTempFolder,
       lastInstallState
     );
+
+    this._tempProjectHelper = new TempProjectHelper(this._rushConfiguration);
   }
 
   /**
@@ -555,7 +558,7 @@ export class InstallManager {
       const packageJson: PackageJsonEditor = rushProject.packageJsonEditor;
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
-      const tarballFile: string = this._getTarballFilePath(rushProject);
+      const tarballFile: string = this._tempProjectHelper.getTarballFilePath(rushProject);
 
       // Example: dependencies["@rush-temp/my-project-2"] = "file:./projects/my-project-2.tgz"
       commonPackageJson.dependencies![
@@ -650,7 +653,7 @@ export class InstallManager {
       }
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2"
-      const tempProjectFolder: string = this._getTempProjectFolder(rushProject);
+      const tempProjectFolder: string = this._tempProjectHelper.getTempProjectFolder(rushProject);
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
       const tempPackageJsonFilename: string = path.join(tempProjectFolder, FileConstants.PackageJson);
@@ -687,7 +690,7 @@ export class InstallManager {
           JsonFile.save(tempPackageJson, tempPackageJsonFilename);
 
           // Delete the existing tarball and create a new one
-          this._createTempProjectTarball(rushProject);
+          this._tempProjectHelper.createTempProjectTarball(rushProject);
 
           console.log(`Updating ${tarballFile}`);
         } catch (error) {
@@ -763,50 +766,6 @@ export class InstallManager {
     return shrinkwrapIsUpToDate;
   }
 
-  private _getTempProjectFolder(rushProject: RushConfigurationProject): string {
-    const unscopedTempProjectName: string = rushProject.unscopedTempProjectName;
-    return path.join(
-      this._rushConfiguration.commonTempFolder,
-      RushConstants.rushTempProjectsFolderName,
-      unscopedTempProjectName
-    );
-  }
-
-  /**
-   * Deletes the existing tarball and creates a tarball for the given rush project
-   */
-  private _createTempProjectTarball(rushProject: RushConfigurationProject): void {
-    const tarballFile: string = this._getTarballFilePath(rushProject);
-    const tempProjectFolder: string = this._getTempProjectFolder(rushProject);
-
-    FileSystem.deleteFile(tarballFile);
-
-    // NPM expects the root of the tarball to have a directory called 'package'
-    const npmPackageFolder: string = 'package';
-
-    const tarOptions: tar.CreateOptions = {
-      gzip: true,
-      file: tarballFile,
-      cwd: tempProjectFolder,
-      portable: true,
-      noMtime: true,
-      noPax: true,
-      sync: true,
-      prefix: npmPackageFolder,
-      filter: (path: string, stat: tar.FileStat): boolean => {
-        if (
-          !this._rushConfiguration.experimentsConfiguration.configuration.noChmodFieldInTarHeaderNormalization
-        ) {
-          stat.mode =
-            (stat.mode & ~0x1ff) | PosixModeBits.AllRead | PosixModeBits.UserWrite | PosixModeBits.AllExecute;
-        }
-        return true;
-      }
-    } as tar.CreateOptions;
-    // create the new tarball
-    tar.create(tarOptions, [FileConstants.PackageJson]);
-  }
-
   /**
    * Runs "npm/pnpm/yarn install" in the "common/temp" folder.
    */
@@ -869,7 +828,7 @@ export class InstallManager {
         // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
         potentiallyChangedFiles.push(
           ...this._rushConfiguration.projects.map((x) => {
-            return this._getTarballFilePath(x);
+            return this._tempProjectHelper.getTarballFilePath(x);
           })
         );
 
@@ -885,7 +844,7 @@ export class InstallManager {
       // This ensures that any existing tarballs with older header bits will be regenerated.
       // It is safe to assume that temp project pacakge.jsons already exist.
       for (const rushProject of this._rushConfiguration.projects) {
-        this._createTempProjectTarball(rushProject);
+        this._tempProjectHelper.createTempProjectTarball(rushProject);
       }
 
       return this._checkIfReleaseIsPublished()
@@ -1407,18 +1366,6 @@ export class InstallManager {
         FileSystem.deleteFile(destinationPath);
       }
     }
-  }
-
-  /**
-   * Gets the path to the tarball
-   * Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
-   */
-  private _getTarballFilePath(project: RushConfigurationProject): string {
-    return path.join(
-      this._rushConfiguration.commonTempFolder,
-      RushConstants.rushTempProjectsFolderName,
-      `${project.unscopedTempProjectName}.tgz`
-    );
   }
 
   /**

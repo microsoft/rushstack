@@ -4,7 +4,9 @@
 import * as path from 'path';
 import * as semver from 'semver';
 import { cloneDeep } from 'lodash';
-import { IPackageJson, JsonFile, FileConstants } from '@rushstack/node-core-library';
+import * as ssri from 'ssri';
+import * as fs from 'fs';
+import { IPackageJson, JsonFile, FileConstants, InternalError } from '@rushstack/node-core-library';
 
 import { VersionPolicy, BumpType, LockStepVersionPolicy } from '../api/VersionPolicy';
 import { ChangeFile } from '../api/ChangeFile';
@@ -14,6 +16,8 @@ import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { VersionPolicyConfiguration } from '../api/VersionPolicyConfiguration';
 import { PublishUtilities } from './PublishUtilities';
 import { ChangeManager } from './ChangeManager';
+import { TempProjectHelper } from './TempProjectHelper';
+import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from './pnpm/PnpmShrinkwrapFile';
 
 export class VersionManager {
   private _rushConfiguration: RushConfiguration;
@@ -82,6 +86,51 @@ export class VersionManager {
       this._rushConfiguration,
       this._getLockStepProjects()
     );
+
+    if (this._rushConfiguration.packageManager == 'pnpm') {
+      const tempProjectHelper: TempProjectHelper = new TempProjectHelper(this._rushConfiguration);
+
+      const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
+        this._rushConfiguration.tempShrinkwrapFilename,
+        this._rushConfiguration.pnpmOptions
+      );
+
+      if (pnpmShrinkwrapFile) {
+        for (const rushProject of this._rushConfiguration.projects) {
+          tempProjectHelper.createTempProjectTarball(rushProject);
+
+          const tempProjectDependencyKey: string | undefined = pnpmShrinkwrapFile.getTempProjectDependencyKey(
+            rushProject.tempProjectName
+          );
+
+          if (!tempProjectDependencyKey) {
+            throw new Error(`Cannot get dependency key for temp project: ${rushProject.tempProjectName}`);
+          }
+
+          const parentShrinkwrapEntry:
+            | IPnpmShrinkwrapDependencyYaml
+            | undefined = pnpmShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(
+            tempProjectDependencyKey
+          );
+          if (!parentShrinkwrapEntry) {
+            throw new InternalError(
+              `Cannot find shrinkwrap entry using dependency key for temp project: ${rushProject.tempProjectName}`
+            );
+          }
+
+          parentShrinkwrapEntry.resolution.integrity = ssri
+            .fromData(fs.readFileSync(tempProjectHelper.getTarballFilePath(rushProject)))
+            .toString();
+        }
+
+        pnpmShrinkwrapFile.save(
+          this._rushConfiguration.getCommittedShrinkwrapFilename(
+            this._rushConfiguration.currentInstalledVariant
+          )
+        );
+      }
+    }
+
     changeManager.load(this._rushConfiguration.changesFolder);
     if (changeManager.hasChanges()) {
       changeManager.validateChanges(this._versionPolicyConfiguration);
