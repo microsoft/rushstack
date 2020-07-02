@@ -193,6 +193,7 @@ export class DeployManager {
           } catch (resolveErr) {
             if (resolveErr.code === 'MODULE_NOT_FOUND') {
               // The workaround link isn't guaranteed to exist, so ignore if it's missing
+              // NOTE: If you encounter this warning a lot, please report it to the Rush maintainers.
               console.log('Ignoring missing PNPM workaround link for ' + packageJsonFolderPath);
             }
           }
