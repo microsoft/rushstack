@@ -46,7 +46,11 @@ const TAP_AFTER: Tap = {
   stage: STAGE_AFTER
 } as Tap;
 
-
+interface IExtendedChunkTemplate {
+  hooks: {
+    modules: SyncWaterfallHook<webpack.compilation.Module[], webpack.compilation.Chunk>;
+  };
+}
 
 /**
  * https://github.com/webpack/webpack/blob/30e747a55d9e796ae22f67445ae42c7a95a6aa48/lib/Template.js#L36-47
@@ -55,11 +59,11 @@ const TAP_AFTER: Tap = {
  * @returns the sort value
  */
 function stringifyIdSortPredicate(a: string | number, b: string | number): -1 | 0 | 1 {
-	const aId: string = a + "";
-	const bId: string = b + "";
-	if (aId < bId) return -1;
-	if (aId > bId) return 1;
-	return 0;
+  const aId: string = a + '';
+  const bId: string = b + '';
+  if (aId < bId) return -1;
+  if (aId > bId) return 1;
+  return 0;
 }
 
 function hashCodeFragment(code: string): string {
@@ -160,11 +164,13 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
 
       let resolveMinifyPromise: () => void;
 
-      const getRealId: (id: number | string) => number | string | undefined =
-        (id: number | string) => this.hooks.finalModuleId.call(id);
+      const getRealId: (id: number | string) => number | string | undefined = (id: number | string) =>
+        this.hooks.finalModuleId.call(id);
 
-      const postProcessCode: (code: ReplaceSource, context: string) => ReplaceSource =
-        (code: ReplaceSource, context: string) => this.hooks.postProcessCodeFragment.call(code, context);
+      const postProcessCode: (code: ReplaceSource, context: string) => ReplaceSource = (
+        code: ReplaceSource,
+        context: string
+      ) => this.hooks.postProcessCodeFragment.call(code, context);
 
       /**
        * Callback to invoke when a file has finished minifying.
@@ -432,8 +438,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
       );
 
       for (const template of [compilation.chunkTemplate, compilation.mainTemplate]) {
-        // @ts-ignore Incompatible type definitions. Suffice to say, this hook exists.
-        template.hooks.modules.tap(TAP_AFTER, dehydrateAsset);
+        ((template as unknown) as IExtendedChunkTemplate).hooks.modules.tap(TAP_AFTER, dehydrateAsset);
       }
     });
   }
