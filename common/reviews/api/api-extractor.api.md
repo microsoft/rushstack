@@ -24,6 +24,7 @@ export const enum ConsoleMessageId {
     ApiReportUnchanged = "console-api-report-unchanged",
     Diagnostics = "console-diagnostics",
     FoundTSDocMetadata = "console-found-tsdoc-metadata",
+    Preamble = "console-preamble",
     WritingDocModelFile = "console-writing-doc-model-file",
     WritingDtsRollup = "console-writing-dts-rollup"
 }

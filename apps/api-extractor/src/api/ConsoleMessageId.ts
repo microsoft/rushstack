@@ -13,6 +13,11 @@
  */
 export const enum ConsoleMessageId {
   /**
+   * "Analysis will use the bundled TypeScript version ___"
+   */
+  Preamble = 'console-preamble',
+
+  /**
    * "Found metadata in ___"
    */
   FoundTSDocMetadata = 'console-found-tsdoc-metadata',

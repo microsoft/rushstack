@@ -200,7 +200,13 @@ export class Extractor {
       showDiagnostics: !!options.showDiagnostics
     });
 
+    messageRouter.logInfo(
+      ConsoleMessageId.Preamble,
+      `Analysis will use the bundled TypeScript version ${ts.version}`
+    );
+
     if (messageRouter.showDiagnostics) {
+      messageRouter.logDiagnostic('');
       messageRouter.logDiagnosticHeader('Final prepared ExtractorConfig');
       messageRouter.logDiagnostic(extractorConfig.getDiagnosticDump());
       messageRouter.logDiagnosticFooter();
