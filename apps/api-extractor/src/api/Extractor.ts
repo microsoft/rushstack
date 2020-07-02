@@ -2,8 +2,16 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import * as semver from 'semver';
 import * as ts from 'typescript';
-import { FileSystem, NewlineKind, PackageJsonLookup, IPackageJson } from '@rushstack/node-core-library';
+import * as resolve from 'resolve';
+import {
+  FileSystem,
+  NewlineKind,
+  PackageJsonLookup,
+  IPackageJson,
+  INodePackageJson
+} from '@rushstack/node-core-library';
 
 import { ExtractorConfig } from './ExtractorConfig';
 import { Collector } from '../collector/Collector';
@@ -200,10 +208,7 @@ export class Extractor {
       showDiagnostics: !!options.showDiagnostics
     });
 
-    messageRouter.logInfo(
-      ConsoleMessageId.Preamble,
-      `Analysis will use the bundled TypeScript version ${ts.version}`
-    );
+    this._checkCompilerCompatibility(extractorConfig, messageRouter);
 
     if (messageRouter.showDiagnostics) {
       messageRouter.logDiagnostic('');
@@ -399,6 +404,45 @@ export class Extractor {
       errorCount: messageRouter.errorCount,
       warningCount: messageRouter.warningCount
     });
+  }
+
+  private static _checkCompilerCompatibility(
+    extractorConfig: ExtractorConfig,
+    messageRouter: MessageRouter
+  ): void {
+    messageRouter.logInfo(
+      ConsoleMessageId.Preamble,
+      `Analysis will use the bundled TypeScript version ${ts.version}`
+    );
+
+    try {
+      const typescriptPath: string = resolve.sync('typescript', {
+        basedir: extractorConfig.projectFolder,
+        preserveSymlinks: false
+      });
+      const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
+      const packageJson: INodePackageJson | undefined = packageJsonLookup.tryLoadNodePackageJsonFor(
+        typescriptPath
+      );
+      if (packageJson && packageJson.version && semver.valid(packageJson.version)) {
+        // Consider a newer MINOR release to be incompatible
+        const ourMajor: number = semver.major(ts.version);
+        const ourMinor: number = semver.minor(ts.version);
+
+        const theirMajor: number = semver.major(packageJson.version);
+        const theirMinor: number = semver.minor(packageJson.version);
+
+        if (theirMajor > ourMajor || (theirMajor === ourMajor && theirMinor > ourMinor)) {
+          messageRouter.logInfo(
+            ConsoleMessageId.CompilerVersionNotice,
+            `*** The target project appears to use TypeScript ${packageJson.version} which is newer than the` +
+              ` bundled compiler engine; consider upgrading API Extractor.`
+          );
+        }
+      }
+    } catch (e) {
+      // The compiler detection heuristic is not expected to work in many configurations
+    }
   }
 
   private static _generateRollupDtsFile(

@@ -18,6 +18,12 @@ export const enum ConsoleMessageId {
   Preamble = 'console-preamble',
 
   /**
+   * "The target project appears to use TypeScript ___ which is newer than the bundled compiler engine;
+   * consider upgrading API Extractor."
+   */
+  CompilerVersionNotice = 'console-compiler-version-notice',
+
+  /**
    * "Found metadata in ___"
    */
   FoundTSDocMetadata = 'console-found-tsdoc-metadata',
