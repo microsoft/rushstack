@@ -521,8 +521,11 @@ export class DeployManager {
 
   private async _createArchive(deployState: IDeployState): Promise<void> {
     if (deployState.scenarioConfiguration.json.postCopySourceFolder !== undefined) {
+      const sourceFolderPath: string = FileSystem.getRealPath(
+        deployState.scenarioConfiguration.json.postCopySourceFolder
+      );
       FileSystem.copyFiles({
-        sourcePath: deployState.scenarioConfiguration.json.postCopySourceFolder,
+        sourcePath: sourceFolderPath,
         destinationPath: deployState.targetRootFolder,
         alreadyExistsBehavior: AlreadyExistsBehavior.Error
       });
@@ -578,14 +581,13 @@ export class DeployManager {
 
     const zip: JSZip = new JSZip();
     for (const filePath of allPaths) {
-      // let addPath = path.relative(path.join(dir, '..'), filePath); // use this instead if you want the source folder itself in the zip
-      const addPath: string = path.relative(dir, filePath); // use this instead if you don't want the source folder itself in the zip
+      const addPath: string = path.relative(dir, filePath);
       const stat: fs.Stats = fs.lstatSync(filePath);
       const permissions: number = stat.mode;
 
       if (stat.isSymbolicLink()) {
         zip.file(addPath, fs.readlinkSync(filePath), {
-          unixPermissions: parseInt('120755', 8), // This permission can be more permissive than necessary for non-executables but we don't mind.
+          unixPermissions: parseInt('120755', 8),
           dir: stat.isDirectory()
         });
       } else {
