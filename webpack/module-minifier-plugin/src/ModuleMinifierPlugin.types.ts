@@ -189,7 +189,8 @@ declare module 'webpack' {
  * This is the second parameter to the NormalModuleFactory `module` hook
  * @internal
  */
-export interface INormalModuleFactoryModuleData {
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export interface _INormalModuleFactoryModuleData {
   resourceResolveData?: {
     /**
      * Contents of the description file (package.json) for the module

@@ -20,8 +20,8 @@ base54.reset = (): void => {
 };
 base54.reset();
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 (terser.AST_Toplevel.prototype as {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   compute_char_frequency?: () => void;
 }).compute_char_frequency = (): void => {
   // TODO: Expose hook for exporting character frequency information for use in config

@@ -8,7 +8,11 @@ import { Tap } from 'tapable';
 import * as RequestShortener from 'webpack/lib/RequestShortener';
 
 import { STAGE_AFTER, STAGE_BEFORE } from './Constants';
-import { INormalModuleFactoryModuleData, IExtendedModule, IModuleMinifierPluginHooks } from './ModuleMinifierPlugin.types';
+import {
+  _INormalModuleFactoryModuleData,
+  IExtendedModule,
+  IModuleMinifierPluginHooks
+} from './ModuleMinifierPlugin.types';
 
 const PLUGIN_NAME: 'PortableMinifierModuleIdsPlugin' = 'PortableMinifierModuleIdsPlugin';
 
@@ -64,7 +68,7 @@ export class PortableMinifierModuleIdsPlugin implements Plugin {
      * Figure out portable ids for modules by using their id based on the node module resolution algorithm
      */
     compiler.hooks.normalModuleFactory.tap(PLUGIN_NAME, (nmf: compilation.NormalModuleFactory) => {
-      nmf.hooks.module.tap(PLUGIN_NAME, (mod: IExtendedModule, data: INormalModuleFactoryModuleData) => {
+      nmf.hooks.module.tap(PLUGIN_NAME, (mod: IExtendedModule, data: _INormalModuleFactoryModuleData) => {
         const { resourceResolveData: resolveData } = data;
 
         if (resolveData) {
