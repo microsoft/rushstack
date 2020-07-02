@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 29 Jun 2020 18:39:59 GMT and should not be manually modified.
+This log was last generated on Thu, 02 Jul 2020 01:52:18 GMT and should not be manually modified.
+
+## 5.27.2
+Thu, 02 Jul 2020 01:52:18 GMT
+
+### Updates
+
+- Improve "rush deploy" to copy PNPM workaround links (fixes GitHub #1942 and 1943)
 
 ## 5.27.1
 Mon, 29 Jun 2020 18:39:59 GMT
