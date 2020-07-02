@@ -175,14 +175,13 @@ export interface IExtendedModule extends webpack.compilation.Module, webpack.Mod
 declare module 'webpack' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace compilation {
-    // eslint-disable-next-line @typescript-eslint/interface-name-prefix
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     interface RuntimeTemplate {
       requestShortener: webpack.compilation.RequestShortener;
     }
 
-    // eslint-disable-next-line @typescript-eslint/interface-name-prefix
-    interface RequestShortener {
-    }
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    interface RequestShortener {}
   }
 }
 

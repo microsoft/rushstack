@@ -9,7 +9,7 @@ interface IBase54 {
   sort(): void;
 }
 
-const base54: IBase54 = (terser as unknown as { base54: IBase54 }).base54;
+const base54: IBase54 = ((terser as unknown) as { base54: IBase54 }).base54;
 const coreReset: () => void = base54.reset;
 base54.reset = (): void => {
   coreReset();
@@ -20,8 +20,10 @@ base54.reset = (): void => {
 };
 base54.reset();
 
-// eslint-disable-next-line @typescript-eslint/camelcase
-(terser.AST_Toplevel.prototype as { compute_char_frequency?: () => void }).compute_char_frequency = (): void => {
+// eslint-disable-next-line @typescript-eslint/naming-convention
+(terser.AST_Toplevel.prototype as {
+  compute_char_frequency?: () => void;
+}).compute_char_frequency = (): void => {
   // TODO: Expose hook for exporting character frequency information for use in config
   base54.reset();
 };
