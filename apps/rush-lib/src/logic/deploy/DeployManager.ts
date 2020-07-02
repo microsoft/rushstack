@@ -167,7 +167,10 @@ export class DeployManager {
         }
       }
 
-      if (this._rushConfiguration.packageManager === 'pnpm') {
+      if (
+        this._rushConfiguration.packageManager === 'pnpm' &&
+        !deployState.scenarioConfiguration.json.omitPnpmWorkaroundLinks
+      ) {
         // Replicate the PNPM workaround links.
 
         // Only apply this logic for packages that were actually installed under the common/temp folder.

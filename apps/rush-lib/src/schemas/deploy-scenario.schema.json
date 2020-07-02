@@ -29,6 +29,11 @@
       "type": "boolean"
     },
 
+    "omitPnpmWorkaroundLinks": {
+      "description": "To improve backwards compatibility with legacy packages, the PNPM package manager installs extra links in the node_modules folder that enable packages to import undeclared dependencies.  In some cases this workaround may significantly increase the installation footprint or cause other problems.  If your deployment does not require this workaround, you can set \"omitPnpmWorkaroundLinks\" to true to avoid creating the extra links.  The default value is false.",
+      "type": "boolean"
+    },
+
     "linkCreation": {
       "description": "Specify how links (symbolic links, hard links, and/or NTFS junctions) will be created in the deployed folder:\n\"default\": Create the links while copying the files; this is the default behavior.\n\"script\": A Node.js script called \"create-links.js\" will be written.  When executed, this script will create the links described in the \"deploy-metadata.json\" output file.\n\"none\": Do nothing; some other tool may create the links later.",
       "type": "string",
