@@ -5,8 +5,6 @@ import * as colors from 'colors';
 import * as path from 'path';
 import * as resolve from 'resolve';
 import * as npmPacklist from 'npm-packlist';
-import * as JSZip from 'jszip';
-import * as fs from 'fs';
 import ignore, { Ignore } from 'ignore';
 import {
   Path,
@@ -21,6 +19,7 @@ import {
   NewlineKind,
   Text
 } from '@rushstack/node-core-library';
+import { DeployArchiver } from './DeployArchiver';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -69,7 +68,7 @@ interface IFolderInfo {
 /**
  * This object tracks DeployManager state during a deployment.
  */
-interface IDeployState {
+export interface IDeployState {
   scenarioFilePath: string;
 
   /**
@@ -514,93 +513,10 @@ export class DeployManager {
         }
       }
     }
-    this._createArchive(deployState).catch((error) => {
+    DeployArchiver.createArchive(deployState).catch((error) => {
       throw error;
     });
   }
-
-  private async _createArchive(deployState: IDeployState): Promise<void> {
-    if (deployState.scenarioConfiguration.json.postCopySourceFolder !== undefined) {
-      const sourceFolderPath: string = FileSystem.getRealPath(
-        deployState.scenarioConfiguration.json.postCopySourceFolder
-      );
-      FileSystem.copyFiles({
-        sourcePath: sourceFolderPath,
-        destinationPath: deployState.targetRootFolder,
-        alreadyExistsBehavior: AlreadyExistsBehavior.Error
-      });
-    }
-    if (
-      deployState.createArchiveFileName !== undefined &&
-      deployState.createArchiveFileName.endsWith('zip')
-    ) {
-      console.log('Invoking "JSZip"...\n');
-      const zip: JSZip = this._getZipOfFolder(deployState.targetRootFolder);
-      const zipContent: Buffer = await zip.generateAsync({
-        type: 'nodebuffer',
-        platform: 'UNIX'
-      });
-
-      fs.writeFileSync(
-        path.join(deployState.targetRootFolder, deployState.createArchiveFileName),
-        zipContent
-      );
-
-      console.log('\nCompleted "JSZip" successfully.');
-    }
-  }
-
-  private _getFilePathsRecursively = (dir: string): string[] => {
-    // returns a flat array of absolute paths of all files recursively contained in the dir
-    let results: string[] = [];
-    const list: string[] = fs.readdirSync(dir);
-
-    let pending: number = list.length;
-    if (!pending) return results;
-
-    for (let file of list) {
-      file = path.resolve(dir, file);
-
-      const stat: fs.Stats = fs.lstatSync(file);
-
-      if (stat && stat.isDirectory()) {
-        results = results.concat(this._getFilePathsRecursively(file));
-      } else {
-        results.push(file);
-      }
-
-      if (!--pending) return results;
-    }
-
-    return results;
-  };
-
-  private _getZipOfFolder = (dir: string): typeof JSZip => {
-    // returns a JSZip instance filled with contents of dir.
-    const allPaths: string[] = this._getFilePathsRecursively(dir);
-
-    const zip: JSZip = new JSZip();
-    for (const filePath of allPaths) {
-      const addPath: string = path.relative(dir, filePath);
-      const stat: fs.Stats = fs.lstatSync(filePath);
-      const permissions: number = stat.mode;
-
-      if (stat.isSymbolicLink()) {
-        zip.file(addPath, fs.readlinkSync(filePath), {
-          unixPermissions: parseInt('120755', 8),
-          dir: stat.isDirectory()
-        });
-      } else {
-        const data: Buffer = fs.readFileSync(filePath);
-        zip.file(addPath, data, {
-          unixPermissions: permissions,
-          dir: stat.isDirectory()
-        });
-      }
-    }
-
-    return zip;
-  };
 
   /**
    * The main entry point for performing a deployment.
