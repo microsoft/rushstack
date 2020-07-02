@@ -3,6 +3,11 @@ import * as path from 'path';
 import { FileSystem, FileSystemStats, AlreadyExistsBehavior } from '@rushstack/node-core-library';
 import { IDeployState } from './DeployManager';
 
+// JSZip is dependant on Blob being declared.
+declare global {
+  // eslint-disable-next-line
+  type Blob = any;
+}
 export class DeployArchiver {
   public static async createArchive(deployState: IDeployState): Promise<void> {
     if (deployState.scenarioConfiguration.json.postCopySourceFolder !== undefined) {

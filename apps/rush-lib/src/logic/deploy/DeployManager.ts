@@ -26,11 +26,6 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { DeployScenarioConfiguration, IDeployScenarioProjectJson } from './DeployScenarioConfiguration';
 import { PnpmfileConfiguration } from './PnpmfileConfiguration';
 
-declare global {
-  // eslint-disable-next-line
-  type Blob = any;
-}
-
 // (@types/npm-packlist is missing this API)
 declare module 'npm-packlist' {
   export class WalkerSync {
@@ -105,7 +100,7 @@ export interface IDeployState {
   pnpmfileConfiguration: PnpmfileConfiguration;
 
   /**
-   * The desired name to be used when archiving the target folder. Supported file extensions: .zip".
+   * The desired name to be used when archiving the target folder. Supported file extensions: .zip.
    */
   createArchiveFileName: string | undefined;
 }
