@@ -33,7 +33,7 @@ const _isStatic: unique symbol = Symbol('ApiStaticMixin._isStatic');
  *
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface ApiStaticMixin extends ApiItem {
   /**
    * Whether the declaration has the TypeScript `static` keyword.

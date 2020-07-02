@@ -5,21 +5,25 @@ import * as glob from 'glob';
 import * as path from 'path';
 import { LegacyAdapters } from '@rushstack/node-core-library';
 
-import { IPluginPackage } from '../pluginFramework/IPluginPackage';
+import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { HeftCompilation, Clean } from '../pluginFramework/HeftCompilation';
+import { HeftSession } from '../pluginFramework/HeftSession';
+import { ICleanActionContext } from '../cli/actions/CleanAction';
 
 const PLUGIN_NAME: string = 'ResolveConfigPaths';
 const GLOB_PATTERN_REGEX: RegExp = /\/\*[^\*]/;
 
-export class ResolveActionConfigurationPathsPlugin implements IPluginPackage {
+export class ResolveActionConfigurationPathsPlugin implements IHeftPlugin {
   public readonly displayName: string = PLUGIN_NAME;
 
-  public apply(heftCompilation: HeftCompilation, heftConfiguration: HeftConfiguration): void {
-    heftCompilation.hooks.clean.tap(PLUGIN_NAME, (clean: Clean) => {
+  public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
+    heftSession.hooks.clean.tap(PLUGIN_NAME, (clean: ICleanActionContext) => {
       clean.hooks.afterLoadActionConfiguration.tapPromise(PLUGIN_NAME, async () => {
         // eslint-disable-next-line require-atomic-updates
-        clean.pathsToDelete = await this._resolvePaths(clean.pathsToDelete, heftConfiguration);
+        clean.properties.pathsToDelete = await this._resolvePaths(
+          clean.properties.pathsToDelete,
+          heftConfiguration
+        );
       });
     });
   }

@@ -4,6 +4,7 @@
 
 ```ts
 
+import { AsyncParallelHook } from 'tapable';
 import { AsyncSeriesBailHook } from 'tapable';
 import { AsyncSeriesHook } from 'tapable';
 import { CommandLineAction } from '@rushstack/ts-command-line';
@@ -15,47 +16,48 @@ import { SyncHook } from 'tapable';
 import { Terminal } from '@rushstack/node-core-library';
 
 // @public (undocumented)
-export abstract class ActionHooksBase {
+export abstract class ActionHooksBase<TActionProperties extends object> {
     // (undocumented)
     readonly afterLoadActionConfiguration: AsyncSeriesHook;
     // (undocumented)
     readonly loadActionConfiguration: AsyncSeriesHook;
-    readonly override: AsyncSeriesBailHook<IActionDataBase<ActionHooksBase>>;
+    // @beta
+    readonly overrideAction: AsyncSeriesBailHook<TActionProperties>;
 }
 
 // @public (undocumented)
-export type Build = IBuildActionData;
-
-// @public (undocumented)
-export class BuildHooks extends ActionHooksBase {
+export class BuildHooks extends ActionHooksBase<IBuildActionProperties> {
+    // (undocumented)
+    readonly bundle: SyncHook<IBundleStage>;
+    // (undocumented)
+    readonly compile: SyncHook<ICompileStage>;
+    // (undocumented)
+    readonly postBuild: SyncHook<IPostBuildStage>;
+    // (undocumented)
+    readonly preCompile: SyncHook<IPreCompileStage>;
 }
 
 // @public (undocumented)
-export type Clean = ICleanActionData;
+export class BuildStageHooksBase {
+    // (undocumented)
+    readonly run: AsyncParallelHook;
+}
 
 // @public (undocumented)
-export class CleanHooks extends ActionHooksBase {
+export class CleanHooks extends ActionHooksBase<ICleanActionProperties> {
     // (undocumented)
     readonly deletePath: AsyncSeriesBailHook<string>;
 }
 
 // @public (undocumented)
-export type DevDeploy = IDevDeployActionData;
-
-// @public (undocumented)
-export class DevDeployHooks extends ActionHooksBase {
+export class CompileStageHooks extends BuildStageHooksBase {
+    // (undocumented)
+    readonly configureCopyStaticAssets: AsyncSeriesHook;
 }
 
 // @public (undocumented)
-export class HeftCompilation {
-    // Warning: (ae-forgotten-export) The symbol "IHeftCompilationOptions" needs to be exported by the entry point index.d.ts
-    //
-    // @internal
-    constructor(options: IHeftCompilationOptions);
-    get debugMode(): boolean;
-    // (undocumented)
-    readonly hooks: IHeftCompilationHooks;
-    }
+export class DevDeployHooks extends ActionHooksBase<IDevDeployActionProperties> {
+}
 
 // @public (undocumented)
 export class HeftConfiguration {
@@ -70,13 +72,30 @@ export class HeftConfiguration {
     }
 
 // @public (undocumented)
-export interface IActionDataBase<THooks extends ActionHooksBase> {
+export class HeftSession {
+    // Warning: (ae-forgotten-export) The symbol "IHeftSessionOptions" needs to be exported by the entry point index.d.ts
+    //
+    // @internal
+    constructor(options: IHeftSessionOptions);
+    get debugMode(): boolean;
+    // (undocumented)
+    readonly hooks: IHeftSessionHooks;
+    }
+
+// @public (undocumented)
+export interface IActionContext<THooks extends ActionHooksBase<TActionProperties>, TActionProperties extends object> {
     // (undocumented)
     hooks: THooks;
+    // (undocumented)
+    properties: TActionProperties;
 }
 
 // @public (undocumented)
-export interface IBuildActionData extends IActionDataBase<BuildHooks> {
+export interface IBuildActionContext extends IActionContext<BuildHooks, IBuildActionProperties> {
+}
+
+// @public (undocumented)
+export interface IBuildActionProperties {
     // (undocumented)
     cleanFlag: boolean;
     // (undocumented)
@@ -96,13 +115,49 @@ export interface IBuildActionData extends IActionDataBase<BuildHooks> {
 }
 
 // @public (undocumented)
-export interface ICleanActionData extends IActionDataBase<CleanHooks> {
+export interface IBuildStage<TBuildStageHooks extends BuildStageHooksBase, TBuildStageProperties extends object> {
+    // (undocumented)
+    hooks: TBuildStageHooks;
+    // (undocumented)
+    properties: TBuildStageProperties;
+}
+
+// @public (undocumented)
+export interface IBundleStage extends IBuildStage<BuildStageHooksBase, {}> {
+}
+
+// @public (undocumented)
+export interface ICleanActionContext extends IActionContext<CleanHooks, ICleanActionProperties> {
+}
+
+// @public (undocumented)
+export interface ICleanActionProperties {
     // (undocumented)
     pathsToDelete: string[];
 }
 
 // @public (undocumented)
-export interface IDevDeployActionData extends IActionDataBase<DevDeployHooks> {
+export interface ICompileStage extends IBuildStage<CompileStageHooks, ICompileStageProperties> {
+}
+
+// @public (undocumented)
+export interface ICompileStageProperties {
+    // (undocumented)
+    copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
+}
+
+// @public (undocumented)
+export interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsConfiguration {
+    destinationFolderNames: string[];
+    sourceFolderName: string;
+}
+
+// @public (undocumented)
+export interface IDevDeployActionContext extends IActionContext<DevDeployHooks, IDevDeployActionProperties> {
+}
+
+// @public (undocumented)
+export interface IDevDeployActionProperties {
 }
 
 // @public
@@ -114,20 +169,6 @@ export interface IHeftActionConfigurationOptions {
     mergeArrays?: boolean;
 }
 
-// @public (undocumented)
-export interface IHeftCompilationHooks {
-    // (undocumented)
-    build: SyncHook<Build>;
-    // (undocumented)
-    clean: SyncHook<Clean>;
-    // (undocumented)
-    devDeploy: SyncHook<DevDeploy>;
-    // (undocumented)
-    start: SyncHook<Start>;
-    // (undocumented)
-    test: SyncHook<Test>;
-}
-
 // @internal (undocumented)
 export interface _IHeftConfigurationInitializationOptions {
     cwd: string;
@@ -135,33 +176,84 @@ export interface _IHeftConfigurationInitializationOptions {
 }
 
 // @public (undocumented)
-export interface IPluginPackage<TOptions = void> {
+export interface IHeftPlugin<TOptions = void> {
     // (undocumented)
-    apply: (heftCompilation: HeftCompilation, heftConfiguration: HeftConfiguration, options?: TOptions) => void;
+    apply: (heftSession: HeftSession, heftConfiguration: HeftConfiguration, options?: TOptions) => void;
     // (undocumented)
     displayName: string;
 }
 
 // @public (undocumented)
-export interface IStartActionData extends IActionDataBase<StartHooks> {
+export interface IHeftSessionHooks {
+    // (undocumented)
+    build: SyncHook<IBuildActionContext>;
+    // (undocumented)
+    clean: SyncHook<ICleanActionContext>;
+    // (undocumented)
+    devDeploy: SyncHook<IDevDeployActionContext>;
+    // (undocumented)
+    metricsCollector: MetricsCollectorHooks;
+    // (undocumented)
+    start: SyncHook<IStartActionContext>;
+    // (undocumented)
+    test: SyncHook<ITestActionContext>;
 }
 
 // @public (undocumented)
-export interface ITestActionData extends IActionDataBase<TestHooks> {
+export interface IMetricsData {
+    command: string;
+    machineArch: string;
+    machineCores: number;
+    machineOs: string;
+    machineProcessor: string;
+    machineTotalMemoryMB: number;
+    taskTotalExecutionMs: number;
 }
 
 // @public (undocumented)
-export type Start = IStartActionData;
-
-// @public (undocumented)
-export class StartHooks extends ActionHooksBase {
+export interface IPostBuildStage extends IBuildStage<BuildStageHooksBase, {}> {
 }
 
 // @public (undocumented)
-export type Test = ITestActionData;
+export interface IPreCompileStage extends IBuildStage<BuildStageHooksBase, {}> {
+}
 
 // @public (undocumented)
-export class TestHooks extends ActionHooksBase {
+export interface ISharedCopyStaticAssetsConfiguration {
+    excludeGlobs?: string[];
+    fileExtensions?: string[];
+    includeGlobs?: string[];
+}
+
+// @public (undocumented)
+export interface IStartActionContext extends IActionContext<StartHooks, IStartActionProperties> {
+}
+
+// @public (undocumented)
+export interface IStartActionProperties {
+}
+
+// @public (undocumented)
+export interface ITestActionContext extends IActionContext<TestHooks, ITestActionProperties> {
+}
+
+// @public (undocumented)
+export interface ITestActionProperties {
+}
+
+// @public
+export class MetricsCollectorHooks {
+    flush: AsyncParallelHook;
+    flushAndTeardown: AsyncParallelHook;
+    recordMetric: SyncHook<string, IMetricsData>;
+}
+
+// @public (undocumented)
+export class StartHooks extends ActionHooksBase<IStartActionProperties> {
+}
+
+// @public (undocumented)
+export class TestHooks extends ActionHooksBase<ITestActionProperties> {
 }
 
 

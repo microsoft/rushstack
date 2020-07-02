@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-sass",
-  "version": "4.11.7",
+  "version": "4.11.12",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,9 +13,9 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.16.8",
-    "@microsoft/load-themed-styles": "1.10.58",
-    "@rushstack/node-core-library": "3.24.1",
+    "@microsoft/gulp-core-build": "3.16.11",
+    "@microsoft/load-themed-styles": "1.10.63",
+    "@rushstack/node-core-library": "3.24.4",
     "@types/gulp": "4.0.6",
     "@types/node": "10.17.13",
     "autoprefixer": "~9.8.0",
@@ -26,9 +26,9 @@
     "postcss-modules": "~1.5.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.6.1",
-    "@microsoft/node-library-build": "6.4.25",
-    "@rushstack/eslint-config": "0.5.8",
+    "@microsoft/rush-stack-compiler-3.5": "0.7.2",
+    "@microsoft/node-library-build": "6.4.30",
+    "@rushstack/eslint-config": "1.0.2",
     "@types/autoprefixer": "9.7.2",
     "@types/clean-css": "4.2.1",
     "@types/glob": "7.1.1",

@@ -120,7 +120,7 @@
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.9",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-shared",
@@ -161,6 +161,10 @@
     {
       "name": "@rushstack/eslint-config",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@rushstack/eslint-patch",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/eslint-plugin",

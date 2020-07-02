@@ -8,7 +8,7 @@
     "start": "node ./lib/start.js"
   },
   "devDependencies": {
-    "@rushstack/ts-command-line": "4.4.2",
+    "@rushstack/ts-command-line": "4.4.5",
     "@types/node": "10.17.13",
     "fs-extra": "~7.0.1",
     "typescript": "~3.7.2"

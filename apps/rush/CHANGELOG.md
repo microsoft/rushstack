@@ -1,6 +1,22 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 15 Jun 2020 01:26:24 GMT and should not be manually modified.
+This log was last generated on Mon, 29 Jun 2020 18:39:59 GMT and should not be manually modified.
+
+## 5.27.1
+Mon, 29 Jun 2020 18:39:59 GMT
+
+### Updates
+
+- Fix an issue where environment variable trimming for .npmrc was unnecessarily performed on comment lines
+- Add a "rush init" template for .npmrc-publish
+- Fix a regression affecting GitHub specifiers for package.json dependencies (issue #1749)
+
+## 5.27.0
+Sun, 21 Jun 2020 04:48:53 GMT
+
+### Updates
+
+- Improve "rush deploy" to apply pnpmfile.js when calculating dependencies
 
 ## 5.26.0
 Mon, 15 Jun 2020 01:26:24 GMT

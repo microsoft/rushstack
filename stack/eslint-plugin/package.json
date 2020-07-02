@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/eslint-plugin",
-  "version": "0.3.2",
+  "version": "0.4.1",
   "description": "An ESLint plugin providing supplementary rules for use with the @rushstack/eslint-config package",
   "repository": {
     "url": "https://github.com/microsoft/rushstack/tree/master/stack/eslint-plugin"
@@ -21,19 +21,19 @@
     "build": "gulp test --clean"
   },
   "peerDependencies": {
-    "eslint": "^5.0.0 || ^6.0.0"
+    "eslint": "^6.0.0 || ^7.0.0"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "6.4.10",
-    "@microsoft/rush-stack-compiler-3.5": "0.4.4",
-    "@types/eslint": "6.1.3",
-    "@types/estree": "0.0.39",
+    "@microsoft/rush-stack-compiler-3.9": "0.2.1",
+    "@types/eslint": "7.2.0",
+    "@types/estree": "0.0.44",
     "@types/node": "10.17.13",
-    "@typescript-eslint/experimental-utils": "2.3.3",
-    "@typescript-eslint/parser": "2.3.3",
-    "@typescript-eslint/typescript-estree": "2.3.3",
-    "eslint": "~6.5.1",
+    "@typescript-eslint/experimental-utils": "3.4.0",
+    "@typescript-eslint/parser": "3.4.0",
+    "@typescript-eslint/typescript-estree": "3.4.0",
+    "eslint": "~7.2.0",
     "gulp": "~4.0.2",
-    "typescript": "~3.5.3"
+    "typescript": "~3.9.5"
   }
 }
