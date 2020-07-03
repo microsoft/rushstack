@@ -1,19 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminalProvider } from '@microsoft/node-core-library';
-import {
-  Extractor,
-  ExtractorConfig,
-  IExtractorInvokeOptions
-} from '@microsoft/api-extractor';
-import * as ApiExtractor from '@microsoft/api-extractor';
+import { ITerminalProvider } from '@rushstack/node-core-library';
 
-import {
-  RushStackCompilerBase,
-  IRushStackCompilerBaseOptions
-} from './RushStackCompilerBase';
-import { ToolPaths } from './ToolPaths';
+import { RushStackCompilerBase, IRushStackCompilerBaseOptions } from './RushStackCompilerBase';
+import { ApiExtractor } from './index';
 import { LoggingUtilities } from './LoggingUtilities';
 
 /**
@@ -23,46 +14,45 @@ import { LoggingUtilities } from './LoggingUtilities';
  * @beta
  */
 export class ApiExtractorRunner extends RushStackCompilerBase {
-  public static apiExtractor: typeof ApiExtractor = ApiExtractor;
-  private _extractorConfig: ExtractorConfig;
-  private _extractorOptions: IExtractorInvokeOptions;
+  private _extractorConfig: ApiExtractor.ExtractorConfig;
+  private _extractorOptions: ApiExtractor.IExtractorInvokeOptions;
 
-  constructor(
-    extractorConfig: ExtractorConfig,
-    extractorOptions: IExtractorInvokeOptions,
+  public constructor(
+    extractorConfig: ApiExtractor.ExtractorConfig,
+    extractorOptions: ApiExtractor.IExtractorInvokeOptions,
     rootPath: string,
     terminalProvider: ITerminalProvider
-  ) // Remove in the next major version
-  constructor(
+  ); // Remove in the next major version
+  public constructor(
     options: IRushStackCompilerBaseOptions,
-    extractorConfig: ExtractorConfig,
-    extractorOptions: IExtractorInvokeOptions,
+    extractorConfig: ApiExtractor.ExtractorConfig,
+    extractorOptions: ApiExtractor.IExtractorInvokeOptions,
     rootPath: string,
     terminalProvider: ITerminalProvider
-  )
-  constructor(
-    arg1: IRushStackCompilerBaseOptions| ExtractorConfig,
-    arg2: ExtractorConfig| IExtractorInvokeOptions,
-    arg3: IExtractorInvokeOptions| string,
+  );
+  public constructor(
+    arg1: IRushStackCompilerBaseOptions | ApiExtractor.ExtractorConfig,
+    arg2: ApiExtractor.ExtractorConfig | ApiExtractor.IExtractorInvokeOptions,
+    arg3: ApiExtractor.IExtractorInvokeOptions | string,
     arg4: string | ITerminalProvider,
     arg5?: ITerminalProvider
   ) {
     let options: IRushStackCompilerBaseOptions;
-    let extractorConfig: ExtractorConfig;
-    let extractorOptions: IExtractorInvokeOptions;
+    let extractorConfig: ApiExtractor.ExtractorConfig;
+    let extractorOptions: ApiExtractor.IExtractorInvokeOptions;
     let rootPath: string;
     let terminalProvider: ITerminalProvider;
-    if (arg1 instanceof ExtractorConfig) {
+    if (arg1 instanceof ApiExtractor.ExtractorConfig) {
       extractorConfig = arg1;
-      extractorOptions = arg2 as IExtractorInvokeOptions;
+      extractorOptions = arg2 as ApiExtractor.IExtractorInvokeOptions;
       rootPath = arg3 as string;
       terminalProvider = arg4 as ITerminalProvider;
       const loggingUtilities: LoggingUtilities = new LoggingUtilities(terminalProvider);
       options = loggingUtilities.getDefaultRushStackCompilerBaseOptions();
     } else {
       options = arg1;
-      extractorConfig = arg2 as ExtractorConfig;
-      extractorOptions = arg3 as IExtractorInvokeOptions;
+      extractorConfig = arg2 as ApiExtractor.ExtractorConfig;
+      extractorOptions = arg3 as ApiExtractor.IExtractorInvokeOptions;
       rootPath = arg4 as string;
       terminalProvider = arg5 as ITerminalProvider;
     }
@@ -75,7 +65,7 @@ export class ApiExtractorRunner extends RushStackCompilerBase {
 
   public invoke(): Promise<void> {
     try {
-      const extractorOptions: IExtractorInvokeOptions = {
+      const extractorOptions: ApiExtractor.IExtractorInvokeOptions = {
         ...this._extractorOptions,
         messageCallback: (message: ApiExtractor.ExtractorMessage) => {
           switch (message.logLevel) {
@@ -125,13 +115,16 @@ export class ApiExtractorRunner extends RushStackCompilerBase {
             }
           }
           message.handled = true;
-        },
-        typescriptCompilerFolder: ToolPaths.typescriptPackagePath
+        }
+        // In the past we configured API Extractor to use the TypeScript runtime declarations from
+        // the local compiler, however lately it seems to work better without this option.
+        //
+        // typescriptCompilerFolder: ToolPaths.typescriptPackagePath
       };
 
       // NOTE: ExtractorResult.succeeded indicates whether errors or warnings occurred, however we
       // already handle this above via our customLogger
-      Extractor.invoke(this._extractorConfig, extractorOptions);
+      ApiExtractor.Extractor.invoke(this._extractorConfig, extractorOptions);
 
       return Promise.resolve();
     } catch (e) {

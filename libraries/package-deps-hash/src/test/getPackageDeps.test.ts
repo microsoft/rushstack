@@ -3,18 +3,12 @@
 
 import { getPackageDeps, parseGitLsTree } from '../getPackageDeps';
 import { IPackageDeps } from '../IPackageDeps';
-import { expect, assert } from 'chai';
 import * as path from 'path';
 import { execSync } from 'child_process';
 
-import {
-  FileSystem,
-  FileConstants
-} from '@microsoft/node-core-library';
+import { FileSystem, FileConstants } from '@rushstack/node-core-library';
 
-const SOURCE_PATH: string = path.join(__dirname).replace(
-  path.join('lib', 'test'),
-  path.join('src', 'test'));
+const SOURCE_PATH: string = path.join(__dirname).replace(path.join('lib', 'test'), path.join('src', 'test'));
 
 const TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'testProject');
 const NESTED_TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'nestedTestProject');
@@ -27,8 +21,8 @@ describe('parseGitLsTree', () => {
     const output: string = `100644 blob ${hash}\t${filename}`;
     const changes: Map<string, string> = parseGitLsTree(output);
 
-    assert.equal(changes.size, 1, 'Expect there to be exactly 1 change');
-    assert.equal(changes.get(filename), hash, `Expect the hash to be ${hash}`);
+    expect(changes.size).toEqual(1); // Expect there to be exactly 1 change
+    expect(changes.get(filename)).toEqual(hash); // Expect the hash to be ${hash}
     done();
   });
 
@@ -39,8 +33,8 @@ describe('parseGitLsTree', () => {
     const output: string = `160000 commit ${hash}\t${filename}`;
     const changes: Map<string, string> = parseGitLsTree(output);
 
-    assert.equal(changes.size, 1, 'Expect there to be exactly 1 change');
-    assert.equal(changes.get(filename), hash, `Expect the hash to be ${hash}`);
+    expect(changes.size).toEqual(1); // Expect there to be exactly 1 change
+    expect(changes.get(filename)).toEqual(hash); // Expect the hash to be ${hash}
     done();
   });
 
@@ -54,34 +48,32 @@ describe('parseGitLsTree', () => {
     const output: string = `100644 blob ${hash1}\t${filename1}\n100666 blob ${hash2}\t${filename2}`;
     const changes: Map<string, string> = parseGitLsTree(output);
 
-    assert.equal(changes.size, 2, 'Expect there to be exactly 2 changes');
-    assert.equal(changes.get(filename1), hash1, `Expect the hash to be ${hash1}`);
-    assert.equal(changes.get(filename2), hash2, `Expect the hash to be ${hash2}`);
+    expect(changes.size).toEqual(2); // Expect there to be exactly 2 changes
+    expect(changes.get(filename1)).toEqual(hash1); // Expect the hash to be ${hash1}
+    expect(changes.get(filename2)).toEqual(hash2); // Expect the hash to be ${hash2}
     done();
   });
 
   it('throws with malformed input', (done) => {
-    assert.throws(parseGitLsTree.bind(undefined, 'some super malformed input'));
+    expect(parseGitLsTree.bind(undefined, 'some super malformed input')).toThrow();
     done();
   });
 });
 
 describe('getPackageDeps', () => {
-
   it('can parse committed file', (done) => {
     const results: IPackageDeps = getPackageDeps(TEST_PROJECT_PATH);
     try {
       const expectedFiles: { [key: string]: string } = {
         'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9'
+        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
-      filePaths.forEach(filePath => (
-        expect(results.files[filePath])
-          .equals(expectedFiles[filePath], `path: ${filePath}`)));
-
-    } catch (e) { return done(e); }
+      filePaths.forEach((filePath) => expect(results.files[filePath]).toEqual(expectedFiles[filePath]));
+    } catch (e) {
+      return done(e);
+    }
 
     done();
   });
@@ -91,20 +83,19 @@ describe('getPackageDeps', () => {
     try {
       const expectedFiles: { [key: string]: string } = {
         'src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9'
+        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
-      filePaths.forEach(filePath => (
-        expect(results.files[filePath])
-          .equals(expectedFiles[filePath], `path: ${filePath}`)));
-
-    } catch (e) { return done(e); }
+      filePaths.forEach((filePath) => expect(results.files[filePath]).toEqual(expectedFiles[filePath]));
+    } catch (e) {
+      return done(e);
+    }
 
     done();
   });
 
-  it('can handle adding one file', (done) => { // tslint:disable-line
+  it('can handle adding one file', (done) => {
     const tempFilePath: string = path.join(TEST_PROJECT_PATH, 'a.txt');
 
     FileSystem.writeFile(tempFilePath, 'a');
@@ -119,24 +110,19 @@ describe('getPackageDeps', () => {
       const expectedFiles: { [key: string]: string } = {
         'a.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
         'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9'
+        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
-      filePaths.forEach(filePath => (
-        expect(
-          results.files[filePath])
-            .equals(expectedFiles[filePath], `path: ${filePath}`)));
-
+      filePaths.forEach((filePath) => expect(results.files[filePath]).toEqual(expectedFiles[filePath]));
     } catch (e) {
       return _done(e);
     }
 
     _done();
-
   });
 
-  it('can handle adding two files', (done) => { // tslint:disable-line
+  it('can handle adding two files', (done) => {
     const tempFilePath1: string = path.join(TEST_PROJECT_PATH, 'a.txt');
     const tempFilePath2: string = path.join(TEST_PROJECT_PATH, 'b.txt');
 
@@ -155,15 +141,11 @@ describe('getPackageDeps', () => {
         'a.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
         'b.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
         'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9'
+        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
-      filePaths.forEach(filePath => (
-        expect(
-          results.files[filePath])
-            .equals(expectedFiles[filePath], `path: ${filePath}`)));
-
+      filePaths.forEach((filePath) => expect(results.files[filePath]).toEqual(expectedFiles[filePath]));
     } catch (e) {
       return _done(e);
     }
@@ -177,21 +159,18 @@ describe('getPackageDeps', () => {
     FileSystem.deleteFile(testFilePath);
 
     function _done(e?: Error): void {
-      execSync(`git checkout ${ testFilePath }`, { stdio: 'ignore' });
+      execSync(`git checkout ${testFilePath}`, { stdio: 'ignore' });
       done(e);
     }
 
     const results: IPackageDeps = getPackageDeps(TEST_PROJECT_PATH);
     try {
       const expectedFiles: { [key: string]: string } = {
-        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9'
+        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
-      filePaths.forEach(filePath => (
-        expect(results.files[filePath])
-          .equals(expectedFiles[filePath], `path: ${filePath}`)));
-
+      filePaths.forEach((filePath) => expect(results.files[filePath]).toEqual(expectedFiles[filePath]));
     } catch (e) {
       return _done(e);
     }
@@ -213,14 +192,11 @@ describe('getPackageDeps', () => {
     try {
       const expectedFiles: { [key: string]: string } = {
         'file1.txt': 'f2ba8f84ab5c1bce84a7b441cb1959cfc7093b7f',
-        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9'
+        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
-      filePaths.forEach(filePath => (
-        expect(results.files[filePath])
-          .equals(expectedFiles[filePath], `path: ${filePath}`)));
-
+      filePaths.forEach((filePath) => expect(results.files[filePath]).toEqual(expectedFiles[filePath]));
     } catch (e) {
       return _done(e);
     }
@@ -232,15 +208,14 @@ describe('getPackageDeps', () => {
     const results: IPackageDeps = getPackageDeps(TEST_PROJECT_PATH, ['file1.txt']);
     try {
       const expectedFiles: { [key: string]: string } = {
-        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9'
+        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
-      filePaths.forEach(filePath => (
-        expect(results.files[filePath])
-          .equals(expectedFiles[filePath], `path: ${filePath}`)));
-
-    } catch (e) { return done(e); }
+      filePaths.forEach((filePath) => expect(results.files[filePath]).toEqual(expectedFiles[filePath]));
+    } catch (e) {
+      return done(e);
+    }
 
     done();
   });
@@ -259,22 +234,17 @@ describe('getPackageDeps', () => {
     try {
       const expectedFiles: { [key: string]: string } = {
         'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        [FileConstants.PackageJson]: '33703d582243a41bdebff8ee7dd046a01fc054b9'
+        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
 
-      expect(filePaths.length).to.equal(Object.keys(expectedFiles).length, 'filePaths.length');
+      expect(filePaths).toHaveLength(Object.keys(expectedFiles).length);
 
-      filePaths.forEach(filePath => (
-        expect(
-          results.files[filePath])
-            .equals(expectedFiles[filePath], `path: ${filePath}`)));
-
+      filePaths.forEach((filePath) => expect(results.files[filePath]).toEqual(expectedFiles[filePath]));
     } catch (e) {
       return _done(e);
     }
 
     _done();
   });
-
 });

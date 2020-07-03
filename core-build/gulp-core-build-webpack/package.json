@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-webpack",
-  "version": "3.6.3",
+  "version": "5.0.28",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,20 +13,21 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.12.1",
+    "@microsoft/gulp-core-build": "3.16.12",
     "@types/gulp": "4.0.6",
-    "@types/node": "8.10.54",
+    "@types/node": "10.17.13",
     "colors": "~1.2.1",
     "gulp": "~4.0.2",
-    "webpack": "~3.11.0"
+    "webpack": "~4.31.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.2.3",
-    "@microsoft/rush-stack-compiler-3.4": "0.2.3",
+    "@microsoft/node-library-build": "6.4.32",
+    "@microsoft/rush-stack-compiler-3.5": "0.8.1",
+    "@rushstack/eslint-config": "1.0.2",
     "@types/orchestrator": "0.0.30",
     "@types/source-map": "0.5.0",
     "@types/uglify-js": "2.6.29",
-    "@types/webpack": "^4.0.0",
+    "@types/webpack": "4.39.8",
     "@types/webpack-dev-server": "3.1.7"
   }
 }

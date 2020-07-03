@@ -11,11 +11,10 @@ import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiRel
  * Constructor options for {@link ApiConstructor}.
  * @public
  */
-export interface IApiConstructorOptions extends
-  IApiParameterListMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiDeclaredItemOptions {
-}
+export interface IApiConstructorOptions
+  extends IApiParameterListMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiDeclaredItemOptions {}
 
 /**
  * Represents a TypeScript class constructor declaration that belongs to an `ApiClass`.
@@ -45,13 +44,12 @@ export interface IApiConstructorOptions extends
  * @public
  */
 export class ApiConstructor extends ApiParameterListMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
+  public constructor(options: IApiConstructorOptions) {
+    super(options);
+  }
 
   public static getContainerKey(overloadIndex: number): string {
     return `|${ApiItemKind.Constructor}|${overloadIndex}`;
-  }
-
-  public constructor(options: IApiConstructorOptions) {
-    super(options);
   }
 
   /** @override */
@@ -68,10 +66,8 @@ export class ApiConstructor extends ApiParameterListMixin(ApiReleaseTagMixin(Api
   public buildCanonicalReference(): DeclarationReference {
     const parent: DeclarationReference = this.parent
       ? this.parent.canonicalReference
-      // .withMeaning() requires some kind of component
-      : DeclarationReference.empty().addNavigationStep(Navigation.Members, '(parent)');
-    return parent
-      .withMeaning(Meaning.Constructor)
-      .withOverloadIndex(this.overloadIndex);
+      : // .withMeaning() requires some kind of component
+        DeclarationReference.empty().addNavigationStep(Navigation.Members, '(parent)');
+    return parent.withMeaning(Meaning.Constructor).withOverloadIndex(this.overloadIndex);
   }
 }

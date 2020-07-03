@@ -8,17 +8,19 @@ import {
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
   CommandLineStringParameter
-} from '@microsoft/ts-command-line';
+} from '@rushstack/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';
-import { InstallManager, IInstallManagerOptions } from '../../logic/InstallManager';
+import { BaseInstallManager, IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
+import { InstallManagerFactory } from '../../logic/InstallManagerFactory';
 import { PurgeManager } from '../../logic/PurgeManager';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { StandardScriptUpdater } from '../../logic/StandardScriptUpdater';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { Variants } from '../../api/Variants';
+import { RushConstants } from '../../logic/RushConstants';
 
 /**
  * This is the common base class for InstallAction and UpdateAction.
@@ -30,6 +32,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected _noLinkParameter: CommandLineFlagParameter;
   protected _networkConcurrencyParameter: CommandLineIntegerParameter;
   protected _debugPackageManagerParameter: CommandLineFlagParameter;
+  protected _maxInstallAttempts: CommandLineIntegerParameter;
 
   protected onDefineParameters(): void {
     this._purgeParameter = this.defineFlagParameter({
@@ -43,21 +46,30 @@ export abstract class BaseInstallAction extends BaseRushAction {
     });
     this._noLinkParameter = this.defineFlagParameter({
       parameterLongName: '--no-link',
-      description: 'If "--no-link" is specified, then project symlinks will NOT be created'
-        + ' after the installation completes.  You will need to run "rush link" manually.'
-        + ' This flag is useful for automated builds that want to report stages individually'
-        + ' or perform extra operations in between the two stages.'
+      description:
+        'If "--no-link" is specified, then project symlinks will NOT be created' +
+        ' after the installation completes.  You will need to run "rush link" manually.' +
+        ' This flag is useful for automated builds that want to report stages individually' +
+        ' or perform extra operations in between the two stages.'
     });
     this._networkConcurrencyParameter = this.defineIntegerParameter({
       parameterLongName: '--network-concurrency',
       argumentName: 'COUNT',
-      description: 'If specified, limits the maximum number of concurrent network requests.'
-        + '  This is useful when troubleshooting network failures.'
+      description:
+        'If specified, limits the maximum number of concurrent network requests.' +
+        '  This is useful when troubleshooting network failures.'
     });
     this._debugPackageManagerParameter = this.defineFlagParameter({
       parameterLongName: '--debug-package-manager',
-      description: 'Activates verbose logging for the package manager. You will probably want to pipe'
-        + ' the output of Rush to a file when using this command.'
+      description:
+        'Activates verbose logging for the package manager. You will probably want to pipe' +
+        ' the output of Rush to a file when using this command.'
+    });
+    this._maxInstallAttempts = this.defineIntegerParameter({
+      parameterLongName: '--max-install-attempts',
+      argumentName: 'NUMBER',
+      description: `Overrides the default maximum number of install attempts.`,
+      defaultValue: RushConstants.defaultMaxInstallAttempts
     });
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }
@@ -91,21 +103,30 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     if (this._networkConcurrencyParameter.value) {
       if (this.rushConfiguration.packageManager !== 'pnpm') {
-        throw new Error(`The "${this._networkConcurrencyParameter.longName}" parameter is`
-          + ` only supported when using the PNPM package manager.`);
+        throw new Error(
+          `The "${this._networkConcurrencyParameter.longName}" parameter is` +
+            ` only supported when using the PNPM package manager.`
+        );
       }
+    }
+
+    // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
+    // it is safe to assume that the value is not null
+    if (this._maxInstallAttempts.value! < 1) {
+      throw new Error(`The value of "${this._maxInstallAttempts.longName}" must be positive and nonzero.`);
     }
 
     const installManagerOptions: IInstallManagerOptions = this.buildInstallOptions();
 
-    const installManager: InstallManager = new InstallManager(
+    const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
       this.rushConfiguration,
       this.rushGlobalFolder,
       purgeManager,
       installManagerOptions
     );
 
-    return installManager.doInstall()
+    return installManager
+      .doInstall()
       .then(() => {
         purgeManager.deleteAll();
         stopwatch.stop();
@@ -114,12 +135,18 @@ export abstract class BaseInstallAction extends BaseRushAction {
         this.eventHooksManager.handle(Event.postRushInstall, this.parser.isDebug);
 
         if (warnAboutScriptUpdate) {
-          console.log(os.EOL + colors.yellow('Rush refreshed some files in the "common/scripts" folder.'
-            + '  Please commit this change to Git.'));
+          console.log(
+            os.EOL +
+              colors.yellow(
+                'Rush refreshed some files in the "common/scripts" folder.' +
+                  '  Please commit this change to Git.'
+              )
+          );
         }
 
-        console.log(os.EOL + colors.green(
-          `Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`));
+        console.log(
+          os.EOL + colors.green(`Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`)
+        );
       })
       .catch((error) => {
         purgeManager.deleteAll();
@@ -130,9 +157,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
       });
   }
 
-  private _collectTelemetry(stopwatch: Stopwatch, installManagerOptions: IInstallManagerOptions,
-    success: boolean): void {
-
+  private _collectTelemetry(
+    stopwatch: Stopwatch,
+    installManagerOptions: IInstallManagerOptions,
+    success: boolean
+  ): void {
     if (this.parser.telemetry) {
       this.parser.telemetry.log({
         name: 'install',
@@ -146,5 +175,4 @@ export abstract class BaseInstallAction extends BaseRushAction {
       });
     }
   }
-
 }

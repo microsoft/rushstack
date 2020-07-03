@@ -1,4 +1,3 @@
-
 /**
  * A class used to exposed events.
  * @public
@@ -8,8 +7,7 @@ export class SystemEvent {
   /**
    * Adds an handler for the event.
    */
-  public addHandler(handler: () => void): void {
-  }
+  public addHandler(handler: () => void): void {}
 }
 
 /**
@@ -28,8 +26,7 @@ export class DocBaseClass {
    */
   public constructor(x: number);
 
-  public constructor(x?: number) {
-  }
+  public constructor(x?: number) {}
 }
 
 /**
@@ -80,7 +77,7 @@ export interface IDocInterface3 {
   /**
    * Construct signature
    */
-  new(): IDocInterface1;
+  new (): IDocInterface1;
 
   /**
    * Indexer
@@ -96,19 +93,21 @@ export interface IDocInterface3 {
   /**
    * A quoted identifier with redundant quotes.
    */
+  // prettier-ignore
   "redundantQuotes": string;
 
   /**
-   * An identifier that does needs quotes.  It misleadingly looks like an ECMAScript symbol.
+   * An identifier that does need quotes.  It misleadingly looks like an ECMAScript symbol.
    */
-  "[not.a.symbol]": string
+  // prettier-ignore
+  "[not.a.symbol]": string;
 }
 
 /**
  * Generic class.
  * @public
  */
-export class Generic<T> { }
+export class Generic<T> {}
 
 /**
  * Type union in an interface.
@@ -140,8 +139,10 @@ export interface IDocInterface4 {
  * This is an example class.
  *
  * @remarks
- * These are some remarks.
- * @defaultValue a default value for this function
+ * {@link DocClass1.(exampleFunction:1)|Link to overload 1}
+ *
+ * {@link DocClass1.(exampleFunction:2)|Link to overload 2}
+ *
  * @public
  * {@docCategory DocClass1}
  */
@@ -158,6 +159,11 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
    * This is an overloaded function.
    * @param a - the first string
    * @param b - the second string
+   *
+   * @throws `Error`
+   *  The first throws line
+   *
+   * @throws The second throws line
    */
   exampleFunction(a: string, b: string): string;
 
@@ -170,6 +176,15 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
   public exampleFunction(x: number | string, y?: string): string | number {
     return x;
   }
+
+  public get readonlyProperty(): string {
+    return 'hello';
+  }
+
+  public get writeableProperty(): string {
+    return 'hello';
+  }
+  public set writeableProperty(value: string) {}
 
   /**
    * This event is fired whenever the object is modified.
@@ -198,22 +213,19 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
    *  </tr>
    * </table>
    */
-  tableExample(): void {
-  }
+  tableExample(): void {}
 
   /**
    * Example: "\{ \\"maxItemsToShow\\": 123 \}"
    *
    * The regular expression used to validate the constraints is /^[a-zA-Z0-9\\-_]+$/
    */
-  interestingEdgeCases(): void {
-  }
+  interestingEdgeCases(): void {}
 
   /**
    * @deprecated Use `otherThing()` instead.
    */
-  public deprecatedExample(): void {
-  }
+  public deprecatedExample(): void {}
 
   /**
    * Returns the sum of two numbers.
@@ -282,12 +294,10 @@ export interface IDocInterface6 {
  * Class that merges with interface
  * @public
  */
-export class DocClassInterfaceMerge {
-}
+export class DocClassInterfaceMerge {}
 
 /**
  * Interface that merges with class
  * @public
  */
-export interface DocClassInterfaceMerge {
-}
+export interface DocClassInterfaceMerge {}

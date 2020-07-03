@@ -1,6 +1,310 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Sun, 29 Sep 2019 23:56:29 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+
+## 4.12.2
+Fri, 03 Jul 2020 15:09:04 GMT
+
+*Version update only*
+
+## 4.12.1
+Fri, 03 Jul 2020 05:46:41 GMT
+
+*Version update only*
+
+## 4.12.0
+Fri, 03 Jul 2020 00:10:16 GMT
+
+### Minor changes
+
+- Allow customization of generated CSS module class names.
+
+## 4.11.12
+Sat, 27 Jun 2020 00:09:38 GMT
+
+*Version update only*
+
+## 4.11.11
+Fri, 26 Jun 2020 22:16:39 GMT
+
+*Version update only*
+
+## 4.11.10
+Thu, 25 Jun 2020 06:43:35 GMT
+
+*Version update only*
+
+## 4.11.9
+Wed, 24 Jun 2020 09:50:48 GMT
+
+*Version update only*
+
+## 4.11.8
+Wed, 24 Jun 2020 09:04:28 GMT
+
+*Version update only*
+
+## 4.11.7
+Mon, 15 Jun 2020 22:17:18 GMT
+
+*Version update only*
+
+## 4.11.6
+Fri, 12 Jun 2020 09:19:21 GMT
+
+*Version update only*
+
+## 4.11.5
+Wed, 10 Jun 2020 20:48:30 GMT
+
+*Version update only*
+
+## 4.11.4
+Mon, 01 Jun 2020 08:34:17 GMT
+
+*Version update only*
+
+## 4.11.3
+Sat, 30 May 2020 02:59:54 GMT
+
+*Version update only*
+
+## 4.11.2
+Fri, 29 May 2020 21:35:29 GMT
+
+### Patches
+
+- Fix static autoprefixer configuration options
+
+## 4.11.1
+Thu, 28 May 2020 05:59:02 GMT
+
+*Version update only*
+
+## 4.11.0
+Thu, 28 May 2020 00:09:21 GMT
+
+### Minor changes
+
+- Allow configuration of autoprefixer plugin
+
+## 4.10.19
+Wed, 27 May 2020 05:15:10 GMT
+
+*Version update only*
+
+## 4.10.18
+Tue, 26 May 2020 23:00:25 GMT
+
+*Version update only*
+
+## 4.10.17
+Fri, 22 May 2020 15:08:42 GMT
+
+*Version update only*
+
+## 4.10.16
+Thu, 21 May 2020 23:09:44 GMT
+
+*Version update only*
+
+## 4.10.15
+Thu, 21 May 2020 15:41:59 GMT
+
+*Version update only*
+
+## 4.10.14
+Tue, 19 May 2020 15:08:19 GMT
+
+*Version update only*
+
+## 4.10.13
+Fri, 15 May 2020 08:10:59 GMT
+
+*Version update only*
+
+## 4.10.12
+Wed, 06 May 2020 08:23:45 GMT
+
+*Version update only*
+
+## 4.10.11
+Sat, 02 May 2020 00:08:16 GMT
+
+*Version update only*
+
+## 4.10.10
+Wed, 08 Apr 2020 04:07:33 GMT
+
+*Version update only*
+
+## 4.10.9
+Fri, 03 Apr 2020 15:10:15 GMT
+
+*Version update only*
+
+## 4.10.8
+Sun, 29 Mar 2020 00:04:12 GMT
+
+*Version update only*
+
+## 4.10.7
+Sat, 28 Mar 2020 00:37:16 GMT
+
+*Version update only*
+
+## 4.10.6
+Wed, 18 Mar 2020 15:07:47 GMT
+
+*Version update only*
+
+## 4.10.5
+Tue, 17 Mar 2020 23:55:58 GMT
+
+### Patches
+
+- Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`
+
+## 4.10.4
+Tue, 28 Jan 2020 02:23:44 GMT
+
+*Version update only*
+
+## 4.10.3
+Fri, 24 Jan 2020 00:27:39 GMT
+
+*Version update only*
+
+## 4.10.2
+Thu, 23 Jan 2020 01:07:56 GMT
+
+*Version update only*
+
+## 4.10.1
+Tue, 21 Jan 2020 21:56:13 GMT
+
+*Version update only*
+
+## 4.10.0
+Sun, 19 Jan 2020 02:26:52 GMT
+
+### Minor changes
+
+- Upgrade Node typings to Node 10
+
+## 4.9.0
+Fri, 17 Jan 2020 01:08:23 GMT
+
+### Minor changes
+
+- Update autoprefixer to ~9.7.4
+
+## 4.8.24
+Tue, 14 Jan 2020 01:34:15 GMT
+
+*Version update only*
+
+## 4.8.23
+Sat, 11 Jan 2020 05:18:23 GMT
+
+*Version update only*
+
+## 4.8.22
+Fri, 10 Jan 2020 03:07:47 GMT
+
+*Version update only*
+
+## 4.8.21
+Thu, 09 Jan 2020 06:44:12 GMT
+
+*Version update only*
+
+## 4.8.20
+Wed, 08 Jan 2020 00:11:31 GMT
+
+*Version update only*
+
+## 4.8.19
+Mon, 23 Dec 2019 16:08:05 GMT
+
+*Version update only*
+
+## 4.8.18
+Wed, 04 Dec 2019 23:17:55 GMT
+
+*Version update only*
+
+## 4.8.17
+Tue, 03 Dec 2019 03:17:43 GMT
+
+*Version update only*
+
+## 4.8.16
+Sun, 24 Nov 2019 00:54:04 GMT
+
+*Version update only*
+
+## 4.8.15
+Wed, 20 Nov 2019 06:14:28 GMT
+
+*Version update only*
+
+## 4.8.14
+Fri, 15 Nov 2019 04:50:50 GMT
+
+*Version update only*
+
+## 4.8.13
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 4.8.12
+Wed, 06 Nov 2019 22:44:18 GMT
+
+*Version update only*
+
+## 4.8.11
+Tue, 05 Nov 2019 06:49:28 GMT
+
+*Version update only*
+
+## 4.8.10
+Tue, 05 Nov 2019 01:08:39 GMT
+
+*Version update only*
+
+## 4.8.9
+Fri, 25 Oct 2019 15:08:54 GMT
+
+*Version update only*
+
+## 4.8.8
+Tue, 22 Oct 2019 06:24:44 GMT
+
+### Patches
+
+- Refactor some code as part of migration from TSLint to ESLint
+
+## 4.8.7
+Mon, 21 Oct 2019 05:22:43 GMT
+
+*Version update only*
+
+## 4.8.6
+Fri, 18 Oct 2019 15:15:01 GMT
+
+*Version update only*
+
+## 4.8.5
+Sun, 06 Oct 2019 00:27:39 GMT
+
+*Version update only*
+
+## 4.8.4
+Fri, 04 Oct 2019 00:15:22 GMT
+
+*Version update only*
 
 ## 4.8.3
 Sun, 29 Sep 2019 23:56:29 GMT

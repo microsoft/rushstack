@@ -69,13 +69,34 @@ export interface IConfigPlugin {
 }
 
 /**
- * This interface represents the api-extractor.json file format.
+ * This interface represents the api-documenter.json file format.
  */
 export interface IConfigFile {
   /**
    * Specifies the output target.
    */
   outputTarget: 'docfx' | 'markdown';
+
+  /**
+   * Specifies what type of newlines API Documenter should use when writing output files.
+   *
+   * @remarks
+   * By default, the output files will be written with Windows-style newlines.
+   * To use POSIX-style newlines, specify "lf" instead.
+   * To use the OS's default newline kind, specify "os".
+   */
+  newlineKind?: 'crlf' | 'lf' | 'os';
+
+  /**
+   * This enables an experimental feature that will be officially released with the next major version
+   * of API Documenter.  It requires DocFX 2.46 or newer.  It enables documentation for namespaces and
+   * adds them to the table of contents.  This will also affect file layout as namespaced items will be nested
+   * under a directory for the namespace instead of just within the package.
+   *
+   * This setting currently only affects the 'docfx' output target.  It is equivalent to the `--new-docfx-namespaces`
+   * command-line parameter.
+   */
+  newDocfxNamespaces?: boolean;
 
   /** {@inheritDoc IConfigPlugin} */
   plugins?: IConfigPlugin[];

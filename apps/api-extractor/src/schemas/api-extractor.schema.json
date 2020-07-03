@@ -23,6 +23,14 @@
       "type": "string"
     },
 
+    "bundledPackages": {
+      "description": "A list of NPM package names whose exports should be treated as part of this package.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+
     "compiler": {
       "description": "Determines how the TypeScript compiler engine will be invoked by API Extractor.",
       "type": "object",
@@ -66,9 +74,8 @@
           "description": "Specifies the folder where the temporary report file is written.  The file name portion is determined by the \"reportFileName\" setting. After the temporary file is written to disk, it is compared with the file in the \"reportFolder\". If they are different, a production build will fail. The path is resolved relative to the folder of the config file that contains the setting; to change this, prepend a folder token such as \"<projectFolder>\".",
           "type": "string"
         }
-
       },
-      "required": [ "enabled" ],
+      "required": ["enabled"],
       "additionalProperties": false
     },
 
@@ -85,7 +92,7 @@
           "type": "string"
         }
       },
-      "required": [ "enabled" ],
+      "required": ["enabled"],
       "additionalProperties": false
     },
 
@@ -114,7 +121,7 @@
           "type": "boolean"
         }
       },
-      "required": [ "enabled" ],
+      "required": ["enabled"],
       "additionalProperties": false
     },
 
@@ -132,6 +139,13 @@
         }
       },
       "additionalProperties": false
+    },
+
+    "newlineKind": {
+      "description": "Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files will be written with Windows-style newlines.  To use POSIX-style newlines, specify \"lf\" instead. To use the OS's default newline kind, specify \"os\".",
+      "type": "string",
+      "enum": ["crlf", "lf", "os"],
+      "default": "crlf"
     },
 
     "messages": {
@@ -159,12 +173,12 @@
       "type": "boolean"
     }
   },
-  "required": [ "mainEntryPointFilePath" ],
+  "required": ["mainEntryPointFilePath"],
   "additionalProperties": false,
 
   "definitions": {
     "extractorMessageReportingTable": {
-      "type":"object",
+      "type": "object",
       "description": "Specifies a table of reporting rules for different message identifiers, and also the default rule used for identifiers that do not appear in the table. The key is a message identifier for the associated type of message, or \"default\" to specify the default policy. For example, the key might be \"TS2551\" (a compiler message), \"tsdoc-link-tag-unescaped-text\" (a TSDOc message), or \"ae-extra-release-tag\" (a message related to the API Extractor analysis).",
       "patternProperties": {
         ".+": {
@@ -174,7 +188,7 @@
             "logLevel": {
               "type": "string",
               "description": "Specifies whether the message should be written to the the tool's output log. Note that the \"addToApiReportFile\" property may supersede this option.",
-              "enum": [ "error", "warning", "none" ]
+              "enum": ["error", "warning", "none"]
             },
             "addToApiReportFile": {
               "type": "boolean",
@@ -182,7 +196,7 @@
             }
           },
           "additionalProperties": false,
-          "required": [ "logLevel" ]
+          "required": ["logLevel"]
         }
       },
       "additionalProperties": false

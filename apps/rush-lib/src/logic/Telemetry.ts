@@ -7,7 +7,7 @@ import { cloneDeep } from 'lodash';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Rush } from '../api/Rush';
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 export interface ITelemetryData {
   name: string;
@@ -70,25 +70,26 @@ export class Telemetry {
     if (FileSystem.exists(this._dataFolder)) {
       const files: string[] = FileSystem.readFolder(this._dataFolder);
       if (files.length > MAX_FILE_COUNT) {
-        const sortedFiles: string[] = files.map(fileName => {
-          const filePath: string = path.join(this._dataFolder, fileName);
-          const stats: fs.Stats = FileSystem.getStatistics(filePath);
-          return {
-            filePath: filePath,
-            modifiedTime: stats.mtime.getTime(),
-            isFile: stats.isFile()
-          };
-        })
-        .filter(value => {
-          // Only delete files
-          return value.isFile;
-        })
-        .sort((a, b) => {
-          return a.modifiedTime - b.modifiedTime;
-        })
-        .map(s => {
-          return s.filePath;
-        });
+        const sortedFiles: string[] = files
+          .map((fileName) => {
+            const filePath: string = path.join(this._dataFolder, fileName);
+            const stats: fs.Stats = FileSystem.getStatistics(filePath);
+            return {
+              filePath: filePath,
+              modifiedTime: stats.mtime.getTime(),
+              isFile: stats.isFile()
+            };
+          })
+          .filter((value) => {
+            // Only delete files
+            return value.isFile;
+          })
+          .sort((a, b) => {
+            return a.modifiedTime - b.modifiedTime;
+          })
+          .map((s) => {
+            return s.filePath;
+          });
         const filesToDelete: number = sortedFiles.length - MAX_FILE_COUNT;
         for (let i: number = 0; i < filesToDelete; i++) {
           FileSystem.deleteFile(sortedFiles[i]);

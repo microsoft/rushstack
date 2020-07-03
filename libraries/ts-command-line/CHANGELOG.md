@@ -1,6 +1,123 @@
-# Change Log - @microsoft/ts-command-line
+# Change Log - @rushstack/ts-command-line
 
-This log was last generated on Sun, 29 Sep 2019 23:56:29 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Jul 2020 05:46:41 GMT and should not be manually modified.
+
+## 4.4.6
+Fri, 03 Jul 2020 05:46:41 GMT
+
+### Patches
+
+- Improve formatting of errors reported by CommandLineParser.execute()
+
+## 4.4.5
+Thu, 25 Jun 2020 06:43:35 GMT
+
+*Version update only*
+
+## 4.4.4
+Wed, 24 Jun 2020 09:50:48 GMT
+
+*Version update only*
+
+## 4.4.3
+Wed, 24 Jun 2020 09:04:28 GMT
+
+*Version update only*
+
+## 4.4.2
+Mon, 01 Jun 2020 08:34:17 GMT
+
+### Patches
+
+- Fix a typo in the supplementary notes for parameters with environment variable mappings
+
+## 4.4.1
+Wed, 27 May 2020 05:15:10 GMT
+
+*Version update only*
+
+## 4.4.0
+Fri, 15 May 2020 08:10:59 GMT
+
+### Minor changes
+
+- Add a new feature defineCommandLineRemainder() which allows additional unvalidated CLI arguments, e.g. to pass along to another tool
+- Add the ability for an environment variable to specify multiple values for CommandLineStringListParameter, encoded as a JSON array
+- Fix some bugs that prevented a CommandLineParser from being defined without any actions
+
+### Patches
+
+- Fix a bug with environmentVariable mapping for CommandLineFlagParameter
+- Use API Extractor to trim internal APIs from the .d.ts rollup
+- Improve the README.md and API documentation
+
+## 4.3.14
+Wed, 08 Apr 2020 04:07:33 GMT
+
+*Version update only*
+
+## 4.3.13
+Sat, 28 Mar 2020 00:37:16 GMT
+
+*Version update only*
+
+## 4.3.12
+Wed, 18 Mar 2020 15:07:47 GMT
+
+### Patches
+
+- Upgrade cyclic dependencies
+
+## 4.3.11
+Tue, 17 Mar 2020 23:55:58 GMT
+
+### Patches
+
+- PACKAGE NAME CHANGE: The NPM scope was changed from `@microsoft/ts-command-line` to `@rushstack/ts-command-line`
+
+## 4.3.10
+Tue, 21 Jan 2020 21:56:14 GMT
+
+*Version update only*
+
+## 4.3.9
+Sun, 19 Jan 2020 02:26:52 GMT
+
+### Patches
+
+- Upgrade Node typings to Node 10
+
+## 4.3.8
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 4.3.7
+Thu, 09 Jan 2020 06:44:13 GMT
+
+*Version update only*
+
+## 4.3.6
+Wed, 08 Jan 2020 00:11:31 GMT
+
+*Version update only*
+
+## 4.3.5
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 4.3.4
+Tue, 22 Oct 2019 06:24:44 GMT
+
+*Version update only*
+
+## 4.3.3
+Fri, 18 Oct 2019 15:15:00 GMT
+
+### Patches
+
+- Fix Choice parameter error when only one alternative value is provided
 
 ## 4.3.2
 Sun, 29 Sep 2019 23:56:29 GMT

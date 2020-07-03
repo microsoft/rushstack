@@ -1,12 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 import * as path from 'path';
-import { GulpTask} from './GulpTask';
+import { GulpTask } from './GulpTask';
 import { IBuildConfig } from '../IBuildConfig';
 import * as Gulp from 'gulp';
-import * as Jest from 'jest-cli';
-import * as globby from 'globby';
-import { FileSystem } from '@microsoft/node-core-library';
+import * as glob from 'glob';
+
+// runCLI is not exported from 'jest' anymore.
+// See https://github.com/facebook/jest/issues/9512#issuecomment-581835474
+const { runCLI } = require('@jest/core');
+import { Config, AggregatedResult } from '@jest/reporters';
+import { FileSystem, JsonObject } from '@rushstack/node-core-library';
 
 /**
  * Configuration for JestTask
@@ -62,6 +66,11 @@ export interface IJestConfig {
    * Same as Jest CLI option testMatch
    */
   testMatch?: string[];
+
+  /**
+   * Indicate whether writing NUnit results is enabled when using the default reporter
+   */
+  writeNUnitResults?: boolean;
 }
 
 const DEFAULT_JEST_CONFIG_FILE_NAME: string = 'jest.config.json';
@@ -77,7 +86,7 @@ export function _isJestEnabled(rootFolder: string): boolean {
     return false;
   }
   const taskConfig: {} = require(taskConfigFile);
-  // tslint:disable-next-line:no-string-literal
+  // eslint-disable-next-line dot-notation
   return !!taskConfig['isEnabled'];
 }
 
@@ -86,14 +95,12 @@ export function _isJestEnabled(rootFolder: string): boolean {
  * @alpha
  */
 export class JestTask extends GulpTask<IJestConfig> {
-
-  constructor() {
-    super('jest',
-    {
+  public constructor() {
+    super('jest', {
       cache: true,
       collectCoverageFrom: ['lib/**/*.js?(x)', '!lib/**/test/**'],
       coverage: true,
-      coverageReporters: ['json', 'html'],
+      coverageReporters: ['json' /*, 'html' */], // Remove HTML reporter temporarily until the Handlebars issue is fixed
       testPathIgnorePatterns: ['<rootDir>/(src|lib-amd|lib-es6|coverage|build|docs|node_modules)/'],
       // Some unit tests rely on data folders that look like packages.  This confuses jest-hast-map
       // when it tries to scan for package.json files.
@@ -108,20 +115,21 @@ export class JestTask extends GulpTask<IJestConfig> {
   /**
    * Loads the z-schema object for this task
    */
-  public loadSchema(): Object {
+  public loadSchema(): JsonObject {
     return require('./jest.schema.json');
   }
 
-  public executeTask(
-    gulp: typeof Gulp,
-    completeCallback: (error?: string | Error) => void
-  ): void {
-    const configFileFullPath: string = path.join(this.buildConfig.rootPath,
-      'config', 'jest', DEFAULT_JEST_CONFIG_FILE_NAME);
+  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): void {
+    const configFileFullPath: string = path.join(
+      this.buildConfig.rootPath,
+      'config',
+      'jest',
+      DEFAULT_JEST_CONFIG_FILE_NAME
+    );
 
     this._copySnapshots(this.buildConfig.srcFolder, this.buildConfig.libFolder);
 
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const jestConfig: any = {
       ci: this.buildConfig.production,
       cache: !!this.taskConfig.cache,
@@ -130,15 +138,21 @@ export class JestTask extends GulpTask<IJestConfig> {
       coverage: this.taskConfig.coverage,
       coverageReporters: this.taskConfig.coverageReporters,
       coverageDirectory: path.join(this.buildConfig.tempFolder, 'coverage'),
-      maxWorkers: !!this.taskConfig.maxWorkers ?
-        this.taskConfig.maxWorkers : 1,
-      moduleDirectories: !!this.taskConfig.moduleDirectories ?
-        this.taskConfig.moduleDirectories :
-        ['node_modules', this.buildConfig.libFolder],
-      reporters: [path.join(__dirname, 'JestReporter.js')],
+      maxWorkers: this.taskConfig.maxWorkers ? this.taskConfig.maxWorkers : 1,
+      moduleDirectories: this.taskConfig.moduleDirectories
+        ? this.taskConfig.moduleDirectories
+        : ['node_modules', this.buildConfig.libFolder],
+      reporters: [
+        [
+          path.join(__dirname, 'JestReporter.js'),
+          {
+            outputFilePath: path.join(this.buildConfig.tempFolder, 'jest-results', 'test-results.xml'),
+            writeNUnitResults: this.taskConfig.writeNUnitResults
+          }
+        ]
+      ],
       rootDir: this.buildConfig.rootPath,
-      testMatch: !!this.taskConfig.testMatch ?
-        this.taskConfig.testMatch : ['**/*.test.js?(x)'],
+      testMatch: this.taskConfig.testMatch ? this.taskConfig.testMatch : ['**/*.test.js?(x)'],
       testPathIgnorePatterns: this.taskConfig.testPathIgnorePatterns,
       modulePathIgnorePatterns: this.taskConfig.modulePathIgnorePatterns,
       updateSnapshot: !this.buildConfig.production,
@@ -154,9 +168,8 @@ export class JestTask extends GulpTask<IJestConfig> {
     const oldTTY: true | undefined = process.stdout.isTTY;
     process.stdout.isTTY = undefined;
 
-    Jest.runCLI(jestConfig,
-      [this.buildConfig.rootPath]).then(
-      (result: { results: Jest.AggregatedResult, globalConfig: Jest.GlobalConfig }) => {
+    runCLI(jestConfig, [this.buildConfig.rootPath])
+      .then((result: { results: AggregatedResult; globalConfig: Config.GlobalConfig }) => {
         process.stdout.isTTY = oldTTY;
         if (result.results.numFailedTests || result.results.numFailedTestSuites) {
           completeCallback(new Error('Jest tests failed'));
@@ -166,16 +179,16 @@ export class JestTask extends GulpTask<IJestConfig> {
           }
           completeCallback();
         }
-      },
-      (err) => {
+      })
+      .catch((err) => {
         process.stdout.isTTY = oldTTY;
         completeCallback(err);
       });
   }
 
   private _copySnapshots(srcRoot: string, destRoot: string): void {
-    const pattern: string = path.join(srcRoot, '**/__snapshots__/*.snap');
-    globby.sync(pattern).forEach(snapFile => {
+    const pattern: string = path.join(srcRoot, '**', '__snapshots__', '*.snap');
+    glob.sync(pattern).forEach((snapFile) => {
       const destination: string = snapFile.replace(srcRoot, destRoot);
       if (this._copyIfMatchExtension(snapFile, destination, '.test.tsx.snap')) {
         this.logVerbose(`Snapshot file ${snapFile} is copied to match extension ".test.tsx.snap".`);
@@ -186,7 +199,9 @@ export class JestTask extends GulpTask<IJestConfig> {
       } else if (this._copyIfMatchExtension(snapFile, destination, '.test.js.snap')) {
         this.logVerbose(`Snapshot file ${snapFile} is copied to match extension ".test.js.snap".`);
       } else {
-        this.logWarning(`Snapshot file ${snapFile} is not copied because don't find that matching test file.`);
+        this.logWarning(
+          `Snapshot file ${snapFile} is not copied because don't find that matching test file.`
+        );
       }
     });
   }

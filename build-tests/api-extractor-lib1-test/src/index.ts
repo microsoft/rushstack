@@ -10,13 +10,19 @@
  * @packageDocumentation
  */
 
-class Lib1ForgottenExport {
-}
+import { Lib1ForgottenExport } from './Lib1ForgottenExport';
 
 /** @public */
 export class Lib1Class extends Lib1ForgottenExport {
+  public get readonlyProperty(): string {
+    return 'hello';
+  }
+
+  public get writeableProperty(): string {
+    return 'hello';
+  }
+  public set writeableProperty(value: string) {}
 }
 
 /** @alpha */
-export interface Lib1Interface {
-}
+export interface Lib1Interface {}

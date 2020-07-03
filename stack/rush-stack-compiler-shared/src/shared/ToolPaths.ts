@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { PackageJsonLookup, IPackageJson, JsonFile } from '@microsoft/node-core-library';
+import { PackageJsonLookup, IPackageJson, JsonFile } from '@rushstack/node-core-library';
 import * as path from 'path';
 
 /**
@@ -9,7 +9,9 @@ import * as path from 'path';
  */
 export class ToolPaths {
   private static _typescriptPackagePath: string | undefined;
+  private static _eslintPackagePath: string | undefined;
   private static _tslintPackagePath: string | undefined;
+  private static _apiExtractorPackagePath: string | undefined;
 
   public static get typescriptPackagePath(): string {
     if (!ToolPaths._typescriptPackagePath) {
@@ -27,6 +29,22 @@ export class ToolPaths {
     return JsonFile.load(path.join(ToolPaths.typescriptPackagePath, 'package.json'));
   }
 
+  public static get eslintPackagePath(): string {
+    if (!ToolPaths._eslintPackagePath) {
+      ToolPaths._eslintPackagePath = ToolPaths._getPackagePath('eslint');
+
+      if (!ToolPaths._eslintPackagePath) {
+        throw new Error('Unable to find "eslint" package.');
+      }
+    }
+
+    return ToolPaths._eslintPackagePath;
+  }
+
+  public static get eslintPackageJson(): IPackageJson {
+    return JsonFile.load(path.join(ToolPaths.eslintPackagePath, 'package.json'));
+  }
+
   public static get tslintPackagePath(): string {
     if (!ToolPaths._tslintPackagePath) {
       ToolPaths._tslintPackagePath = ToolPaths._getPackagePath('tslint');
@@ -41,6 +59,22 @@ export class ToolPaths {
 
   public static get tslintPackageJson(): IPackageJson {
     return JsonFile.load(path.join(ToolPaths.tslintPackagePath, 'package.json'));
+  }
+
+  public static get apiExtractorPackagePath(): string {
+    if (!ToolPaths._apiExtractorPackagePath) {
+      ToolPaths._apiExtractorPackagePath = ToolPaths._getPackagePath('@microsoft/api-extractor');
+
+      if (!ToolPaths._apiExtractorPackagePath) {
+        throw new Error('Unable to find "@microsoft/api-extractor" package.');
+      }
+    }
+
+    return ToolPaths._apiExtractorPackagePath;
+  }
+
+  public static get apiExtractorPackageJson(): IPackageJson {
+    return JsonFile.load(path.join(ToolPaths.apiExtractorPackagePath, 'package.json'));
   }
 
   private static _getPackagePath(packageName: string): string | undefined {

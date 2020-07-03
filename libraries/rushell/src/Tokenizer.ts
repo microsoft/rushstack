@@ -65,21 +65,21 @@ export class Tokenizer {
   public readonly input: TextRange;
   private _currentIndex: number;
 
+  public constructor(input: TextRange | string) {
+    if (typeof input === 'string') {
+      this.input = TextRange.fromString(input);
+    } else {
+      this.input = input;
+    }
+    this._currentIndex = this.input.pos;
+  }
+
   private static _isSpace(c: string | undefined): boolean {
     // You can empirically test whether shell treats a given character as whitespace like this:
     // echo $(echo -e a '\u0009' b)
     // If you get "a b" it means the tab character (Unicode 0009) is being collapsed away.
     // If you get "a   b" then the invisible character is being padded like a normal letter.
     return c === ' ' || c === '\t';
-  }
-
-  constructor(input: TextRange | string) {
-    if (typeof(input) === 'string') {
-      this.input = TextRange.fromString(input);
-    } else {
-      this.input = input;
-    }
-    this._currentIndex = this.input.pos;
   }
 
   public get currentIndex(): number {
@@ -128,12 +128,16 @@ export class Tokenizer {
       let c: string | undefined = this._peekCharacter();
       while (c !== '"') {
         if (c === undefined) {
-          throw new ParseError('The double-quoted string is missing the ending quote',
-            input.getNewRange(startIndex, this._currentIndex));
+          throw new ParseError(
+            'The double-quoted string is missing the ending quote',
+            input.getNewRange(startIndex, this._currentIndex)
+          );
         }
         if (c === '\r' || c === '\n') {
-          throw new ParseError('Newlines are not supported inside strings',
-            input.getNewRange(this._currentIndex, this._currentIndex + 1));
+          throw new ParseError(
+            'Newlines are not supported inside strings',
+            input.getNewRange(this._currentIndex, this._currentIndex + 1)
+          );
         }
 
         // NOTE: POSIX says that backslash acts as an escape character inside a double-quoted string
@@ -147,8 +151,10 @@ export class Tokenizer {
         if (c === '\\') {
           this._readCharacter(); // discard the backslash
           if (this._peekCharacter() === undefined) {
-            throw new ParseError('A backslash must be followed by another character',
-              input.getNewRange(this._currentIndex, this._currentIndex + 1));
+            throw new ParseError(
+              'A backslash must be followed by another character',
+              input.getNewRange(this._currentIndex, this._currentIndex + 1)
+            );
           }
           // Add the escaped character
           text += this._readCharacter();
@@ -171,8 +177,10 @@ export class Tokenizer {
         if (c === '\\') {
           this._readCharacter(); // discard the backslash
           if (this._peekCharacter() === undefined) {
-            throw new ParseError('A backslash must be followed by another character',
-              input.getNewRange(this._currentIndex, this._currentIndex + 1));
+            throw new ParseError(
+              'A backslash must be followed by another character',
+              input.getNewRange(this._currentIndex, this._currentIndex + 1)
+            );
           }
           // Add the escaped character
           text += this._readCharacter();
@@ -192,8 +200,10 @@ export class Tokenizer {
 
       let name: string = this._readCharacter() || '';
       if (!startVariableCharacterRegExp.test(name)) {
-        throw new ParseError('The "$" symbol must be followed by a letter or underscore',
-          input.getNewRange(startIndex, this._currentIndex));
+        throw new ParseError(
+          'The "$" symbol must be followed by a letter or underscore',
+          input.getNewRange(startIndex, this._currentIndex)
+        );
       }
 
       let c: string | undefined = this._peekCharacter();

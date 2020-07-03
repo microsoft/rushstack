@@ -21,13 +21,10 @@ export {
   WriteFileIssueFunction
 } from './RushStackCompilerBase';
 export { StandardBuildFolders } from './StandardBuildFolders';
-export {
-  TypescriptCompiler,
-  ITypescriptCompilerOptions
-} from './TypescriptCompiler';
-export {
-  ITslintRunnerConfig,
-  TslintRunner
-} from './TslintRunner';
+export { TypescriptCompiler, ITypescriptCompilerOptions } from './TypescriptCompiler';
+export { ILintRunnerConfig } from './ILintRunnerConfig';
+export { LintRunner } from './LintRunner';
+export { ITslintRunnerConfig, TslintRunner } from './TslintRunner';
 export { ToolPaths } from './ToolPaths';
-export { ToolPackages } from  './ToolPackages';
+
+export { Typescript, Tslint, ApiExtractor } from './ToolPackages';

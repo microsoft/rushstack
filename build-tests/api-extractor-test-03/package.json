@@ -7,10 +7,10 @@
     "build": "node build.js"
   },
   "devDependencies": {
-    "@types/jest": "23.3.11",
-    "@types/node": "8.10.54",
+    "@types/jest": "25.2.1",
+    "@types/node": "10.17.13",
     "api-extractor-test-02": "1.0.0",
     "fs-extra": "~7.0.1",
-    "typescript": "~3.1.6"
+    "typescript": "~3.9.5"
   }
 }

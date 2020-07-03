@@ -4,15 +4,15 @@
 
 ```ts
 
-import { INodePackageJson } from '@microsoft/node-core-library';
-import { JsonSchema } from '@microsoft/node-core-library';
-import * as ts from 'typescript';
+import { INodePackageJson } from '@rushstack/node-core-library';
+import { JsonSchema } from '@rushstack/node-core-library';
+import { NewlineKind } from '@rushstack/node-core-library';
 import * as tsdoc from '@microsoft/tsdoc';
 
 // @public
 export class CompilerState {
     static create(extractorConfig: ExtractorConfig, options?: ICompilerStateCreateOptions): CompilerState;
-    readonly program: ts.Program;
+    readonly program: unknown;
 }
 
 // @public
@@ -22,8 +22,10 @@ export const enum ConsoleMessageId {
     ApiReportFolderMissing = "console-api-report-folder-missing",
     ApiReportNotCopied = "console-api-report-not-copied",
     ApiReportUnchanged = "console-api-report-unchanged",
+    CompilerVersionNotice = "console-compiler-version-notice",
     Diagnostics = "console-diagnostics",
     FoundTSDocMetadata = "console-found-tsdoc-metadata",
+    Preamble = "console-preamble",
     WritingDocModelFile = "console-writing-doc-model-file",
     WritingDtsRollup = "console-writing-dts-rollup"
 }
@@ -41,6 +43,7 @@ export class ExtractorConfig {
     readonly apiJsonFilePath: string;
     readonly apiReportEnabled: boolean;
     readonly betaTrimmedFilePath: string;
+    readonly bundledPackages: string[];
     readonly docModelEnabled: boolean;
     static readonly FILENAME: string;
     getDiagnosticDump(): string;
@@ -52,6 +55,7 @@ export class ExtractorConfig {
     static loadFileAndPrepare(configJsonFilePath: string): ExtractorConfig;
     readonly mainEntryPointFilePath: string;
     readonly messages: IExtractorMessagesConfig;
+    readonly newlineKind: NewlineKind;
     readonly omitTrimmingComments: boolean;
     readonly overrideTsconfig: {} | undefined;
     readonly packageFolder: string | undefined;
@@ -82,7 +86,7 @@ export const enum ExtractorLogLevel {
 // @public
 export class ExtractorMessage {
     // Warning: (ae-forgotten-export) The symbol "IExtractorMessageOptions" needs to be exported by the entry point index.d.ts
-    // 
+    //
     // @internal
     constructor(options: IExtractorMessageOptions);
     readonly category: ExtractorMessageCategory;
@@ -117,9 +121,11 @@ export const enum ExtractorMessageId {
     InternalMissingUnderscore = "ae-internal-missing-underscore",
     InternalMixedReleaseTag = "ae-internal-mixed-release-tag",
     MisplacedPackageTag = "ae-misplaced-package-tag",
+    MissingGetter = "ae-missing-getter",
     MissingReleaseTag = "ae-missing-release-tag",
     PreapprovedBadReleaseTag = "ae-preapproved-bad-release-tag",
     PreapprovedUnsupportedType = "ae-preapproved-unsupported-type",
+    SetterWithDocs = "ae-setter-with-docs",
     UnresolvedInheritDocBase = "ae-unresolved-inheritdoc-base",
     UnresolvedInheritDocReference = "ae-unresolved-inheritdoc-reference",
     UnresolvedLink = "ae-unresolved-link"
@@ -176,6 +182,7 @@ export interface IConfigDtsRollup {
 // @public
 export interface IConfigFile {
     apiReport?: IConfigApiReport;
+    bundledPackages?: string[];
     compiler?: IConfigCompiler;
     docModel?: IConfigDocModel;
     // @beta
@@ -183,6 +190,7 @@ export interface IConfigFile {
     extends?: string;
     mainEntryPointFilePath: string;
     messages?: IExtractorMessagesConfig;
+    newlineKind?: 'crlf' | 'lf' | 'os';
     projectFolder?: string;
     testMode?: boolean;
     // @beta

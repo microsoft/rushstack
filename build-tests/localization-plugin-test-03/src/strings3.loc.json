@@ -1,0 +1,14 @@
+{
+  "string1": {
+    "value": "string three with a \n newline and a \t tab",
+    "comment": "the third string"
+  },
+  "string2": {
+    "value": "string four with an ' apostrophe",
+    "comment": "the fourth string"
+  },
+  "string3": {
+    "value": "UNUSED STRING",
+    "comment": "UNUSED STRING"
+  }
+}

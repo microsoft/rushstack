@@ -1,19 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DynamicCommandLineParser } from '../DynamicCommandLineParser';
-import { DynamicCommandLineAction } from '../DynamicCommandLineAction';
-import { CommandLineFlagParameter } from '../CommandLineParameter';
+import { DynamicCommandLineParser, DynamicCommandLineAction, CommandLineFlagParameter } from '..';
 
 describe('DynamicCommandLineParser', () => {
-
   it('parses an action', () => {
-    const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser(
-      {
-        toolFilename: 'example',
-        toolDescription: 'An example project'
-      }
-    );
+    const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser({
+      toolFilename: 'example',
+      toolDescription: 'An example project'
+    });
 
     const action: DynamicCommandLineAction = new DynamicCommandLineAction({
       actionName: 'do:the-job',

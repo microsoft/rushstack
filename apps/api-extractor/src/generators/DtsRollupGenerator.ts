@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* tslint:disable:no-bitwise */
+/* eslint-disable no-bitwise */
 
 import * as ts from 'typescript';
-import { FileSystem, NewlineKind, InternalError } from '@microsoft/node-core-library';
+import { FileSystem, NewlineKind, InternalError } from '@rushstack/node-core-library';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';
@@ -13,11 +13,12 @@ import { Span, SpanModification } from '../analyzer/Span';
 import { AstImport } from '../analyzer/AstImport';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { SymbolMetadata } from '../collector/SymbolMetadata';
 import { StringWriter } from './StringWriter';
 import { DtsEmitHelpers } from './DtsEmitHelpers';
+import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()
@@ -50,20 +51,27 @@ export class DtsRollupGenerator {
    *
    * @param dtsFilename    - The *.d.ts output filename
    */
-  public static writeTypingsFile(collector: Collector, dtsFilename: string, dtsKind: DtsRollupKind): void {
+  public static writeTypingsFile(
+    collector: Collector,
+    dtsFilename: string,
+    dtsKind: DtsRollupKind,
+    newlineKind: NewlineKind
+  ): void {
     const stringWriter: StringWriter = new StringWriter();
 
     DtsRollupGenerator._generateTypingsFileContent(collector, stringWriter, dtsKind);
 
     FileSystem.writeFile(dtsFilename, stringWriter.toString(), {
-      convertLineEndings: NewlineKind.CrLf,
+      convertLineEndings: newlineKind,
       ensureFolderExists: true
     });
   }
 
-  private static _generateTypingsFileContent(collector: Collector, stringWriter: StringWriter,
-    dtsKind: DtsRollupKind): void {
-
+  private static _generateTypingsFileContent(
+    collector: Collector,
+    stringWriter: StringWriter,
+    dtsKind: DtsRollupKind
+  ): void {
     if (collector.workingPackage.tsdocParserContext) {
       stringWriter.writeLine(collector.workingPackage.tsdocParserContext.sourceRange.toString());
       stringWriter.writeLine();
@@ -71,7 +79,6 @@ export class DtsRollupGenerator {
 
     // Emit the triple slash directives
     for (const typeDirectiveReference of collector.dtsTypeReferenceDirectives) {
-      // tslint:disable-next-line:max-line-length
       // https://github.com/microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
       stringWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
     }
@@ -88,9 +95,11 @@ export class DtsRollupGenerator {
         // For example, if the imported API comes from an external package that supports AEDoc,
         // and it was marked as `@internal`, then don't emit it.
         const symbolMetadata: SymbolMetadata | undefined = collector.tryFetchMetadataForAstEntity(astImport);
-        const releaseTag: ReleaseTag = symbolMetadata ? symbolMetadata.maxEffectiveReleaseTag : ReleaseTag.None;
+        const maxEffectiveReleaseTag: ReleaseTag = symbolMetadata
+          ? symbolMetadata.maxEffectiveReleaseTag
+          : ReleaseTag.None;
 
-        if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
+        if (this._shouldIncludeReleaseTag(maxEffectiveReleaseTag, dtsKind)) {
           DtsEmitHelpers.emitImport(stringWriter, entity, astImport);
         }
       }
@@ -98,10 +107,14 @@ export class DtsRollupGenerator {
 
     // Emit the regular declarations
     for (const entity of collector.entities) {
-      const symbolMetadata: SymbolMetadata | undefined = collector.tryFetchMetadataForAstEntity(entity.astEntity);
-      const releaseTag: ReleaseTag = symbolMetadata ? symbolMetadata.maxEffectiveReleaseTag : ReleaseTag.None;
+      const symbolMetadata: SymbolMetadata | undefined = collector.tryFetchMetadataForAstEntity(
+        entity.astEntity
+      );
+      const maxEffectiveReleaseTag: ReleaseTag = symbolMetadata
+        ? symbolMetadata.maxEffectiveReleaseTag
+        : ReleaseTag.None;
 
-      if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
+      if (!this._shouldIncludeReleaseTag(maxEffectiveReleaseTag, dtsKind)) {
         if (!collector.extractorConfig.omitTrimmingComments) {
           stringWriter.writeLine();
           stringWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
@@ -112,17 +125,16 @@ export class DtsRollupGenerator {
       if (entity.astEntity instanceof AstSymbol) {
         // Emit all the declarations for this entry
         for (const astDeclaration of entity.astEntity.astDeclarations || []) {
-          const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
+          const apiItemMetadata: ApiItemMetadata = collector.fetchApiItemMetadata(astDeclaration);
 
-          if (
-            !!declarationMetadata &&
-            !this._shouldIncludeReleaseTag(declarationMetadata.effectiveReleaseTag, dtsKind)
-          ) {
-              if (!collector.extractorConfig.omitTrimmingComments) {
-                stringWriter.writeLine();
-                stringWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
-              }
-              continue;
+          if (!this._shouldIncludeReleaseTag(apiItemMetadata.effectiveReleaseTag, dtsKind)) {
+            if (!collector.extractorConfig.omitTrimmingComments) {
+              stringWriter.writeLine();
+              stringWriter.writeLine(
+                `/* Excluded declaration from this release type: ${entity.nameForEmit} */`
+              );
+            }
+            continue;
           } else {
             const span: Span = new Span(astDeclaration.declaration);
             DtsRollupGenerator._modifySpan(collector, span, entity, astDeclaration, dtsKind);
@@ -150,9 +162,13 @@ export class DtsRollupGenerator {
   /**
    * Before writing out a declaration, _modifySpan() applies various fixups to make it nice.
    */
-  private static _modifySpan(collector: Collector, span: Span, entity: CollectorEntity,
-    astDeclaration: AstDeclaration, dtsKind: DtsRollupKind): void {
-
+  private static _modifySpan(
+    collector: Collector,
+    span: Span,
+    entity: CollectorEntity,
+    astDeclaration: AstDeclaration,
+    dtsKind: DtsRollupKind
+  ): void {
     const previousSpan: Span | undefined = span.previousSibling;
 
     let recurseChildren: boolean = true;
@@ -216,14 +232,17 @@ export class DtsRollupGenerator {
           // Since we are emitting a separate declaration for each one, we need to look upwards
           // in the ts.Node tree and write a copy of the enclosing VariableDeclarationList
           // content (e.g. "var" from "var x=1, y=2").
-          const list: ts.VariableDeclarationList | undefined = TypeScriptHelpers.matchAncestor(span.node,
-            [ts.SyntaxKind.VariableDeclarationList, ts.SyntaxKind.VariableDeclaration]);
+          const list: ts.VariableDeclarationList | undefined = TypeScriptHelpers.matchAncestor(span.node, [
+            ts.SyntaxKind.VariableDeclarationList,
+            ts.SyntaxKind.VariableDeclaration
+          ]);
           if (!list) {
             // This should not happen unless the compiler API changes somehow
             throw new InternalError('Unsupported variable declaration');
           }
-          const listPrefix: string = list.getSourceFile().text
-            .substring(list.getStart(), list.declarations[0].getStart());
+          const listPrefix: string = list
+            .getSourceFile()
+            .text.substring(list.getStart(), list.declarations[0].getStart());
           span.modification.prefix = 'declare ' + listPrefix + span.modification.prefix;
           span.modification.suffix = ';';
 
@@ -231,13 +250,13 @@ export class DtsRollupGenerator {
             span.modification.prefix = 'export ' + span.modification.prefix;
           }
 
-          const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
+          const declarationMetadata: DeclarationMetadata = collector.fetchDeclarationMetadata(astDeclaration);
           if (declarationMetadata.tsdocParserContext) {
             // Typically the comment for a variable declaration is attached to the outer variable statement
             // (which may possibly contain multiple variable declarations), so it's not part of the Span.
             // Instead we need to manually inject it.
             let originalComment: string = declarationMetadata.tsdocParserContext.sourceRange.toString();
-            if (!/[\r\n]\s*$/.test(originalComment)) {
+            if (!/\r?\n\s*$/.test(originalComment)) {
               originalComment += '\n';
             }
             span.modification.prefix = originalComment + span.modification.prefix;
@@ -274,8 +293,12 @@ export class DtsRollupGenerator {
         // Should we trim this node?
         let trimmed: boolean = false;
         if (AstDeclaration.isSupportedSyntaxKind(child.kind)) {
-          childAstDeclaration = collector.astSymbolTable.getChildAstDeclarationByNode(child.node, astDeclaration);
-          const releaseTag: ReleaseTag = collector.fetchMetadata(childAstDeclaration).effectiveReleaseTag;
+          childAstDeclaration = collector.astSymbolTable.getChildAstDeclarationByNode(
+            child.node,
+            astDeclaration
+          );
+          const releaseTag: ReleaseTag = collector.fetchApiItemMetadata(childAstDeclaration)
+            .effectiveReleaseTag;
 
           if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
             let nodeToTrim: Span = child;
@@ -283,8 +306,9 @@ export class DtsRollupGenerator {
             // If we are trimming a variable statement, then we need to trim the outer VariableDeclarationList
             // as well.
             if (child.kind === ts.SyntaxKind.VariableDeclaration) {
-              const variableStatement: Span | undefined
-                = child.findFirstParent(ts.SyntaxKind.VariableStatement);
+              const variableStatement: Span | undefined = child.findFirstParent(
+                ts.SyntaxKind.VariableStatement
+              );
               if (variableStatement !== undefined) {
                 nodeToTrim = variableStatement;
               }
@@ -331,13 +355,14 @@ export class DtsRollupGenerator {
   }
 
   private static _shouldIncludeReleaseTag(releaseTag: ReleaseTag, dtsKind: DtsRollupKind): boolean {
-
     switch (dtsKind) {
       case DtsRollupKind.InternalRelease:
         return true;
       case DtsRollupKind.BetaRelease:
         // NOTE: If the release tag is "None", then we don't have enough information to trim it
-        return releaseTag === ReleaseTag.Beta || releaseTag === ReleaseTag.Public || releaseTag === ReleaseTag.None;
+        return (
+          releaseTag === ReleaseTag.Beta || releaseTag === ReleaseTag.Public || releaseTag === ReleaseTag.None
+        );
       case DtsRollupKind.PublicRelease:
         return releaseTag === ReleaseTag.Public || releaseTag === ReleaseTag.None;
     }

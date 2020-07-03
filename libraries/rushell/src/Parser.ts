@@ -3,15 +3,7 @@
 
 import { ParseError } from './ParseError';
 import { Tokenizer, Token, TokenKind } from './Tokenizer';
-import {
-  AstNode,
-  AstScript,
-  AstCommand,
-  AstCompoundWord,
-  AstText
-} from './AstNode';
-
-// tslint:disable:no-constant-condition
+import { AstNode, AstScript, AstCommand, AstCompoundWord, AstText } from './AstNode';
 
 export class Parser {
   private readonly _tokenizer: Tokenizer;
@@ -69,7 +61,7 @@ export class Parser {
   private _parseCompoundWord(): AstCompoundWord | undefined {
     const compoundWord: AstCompoundWord = new AstCompoundWord();
 
-    while (true) {
+    for (;;) {
       const node: AstNode | undefined = this._parseText();
       if (!node) {
         break;

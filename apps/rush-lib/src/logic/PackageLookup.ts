@@ -6,7 +6,7 @@ import { BasePackage } from './base/BasePackage';
 export class PackageLookup {
   private _packageMap: Map<string, BasePackage>;
 
-  constructor() {
+  public constructor() {
     this._packageMap = new Map<string, BasePackage>();
   }
 
@@ -16,8 +16,7 @@ export class PackageLookup {
     // We want the lookup to return the shallowest match, so this is a breadth first
     // traversal
 
-    // tslint:disable-next-line:no-constant-condition
-    while (true) {
+    for (;;) {
       const current: BasePackage | undefined = queue.shift();
       if (!current) {
         break;

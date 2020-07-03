@@ -7,7 +7,6 @@ import { getConfig } from './index';
 const ENVIRONMENT_VARIABLE_PREFIX: string = 'GCB_';
 
 export function getConfigValue(name: string, defaultValue?: string | boolean): string | boolean {
-
   // Try to get config value from environment variable.
   const envVariable: string = ENVIRONMENT_VARIABLE_PREFIX + name.toUpperCase();
   const envValue: string | undefined = process.env[envVariable];
@@ -26,9 +25,8 @@ export function getFlagValue(name: string, defaultValue?: boolean): boolean {
   return configValue === 'true' || configValue === true;
 }
 
-/* tslint:disable:no-any */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function _firstDefinedValue(...values: (string | boolean | undefined)[]): any {
-/* tslint:enable:no-any */
   for (const value of values) {
     if (value !== undefined) {
       return value;

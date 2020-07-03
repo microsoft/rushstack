@@ -7,7 +7,7 @@ import * as tsdoc from '@microsoft/tsdoc';
 import { Collector } from '../collector/Collector';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import { AedocDefinitions, ReleaseTag } from '@microsoft/api-extractor-model';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import { VisitorState } from '../collector/VisitorState';
@@ -16,7 +16,7 @@ import { ResolverFailure } from '../analyzer/AstReferenceResolver';
 export class DocCommentEnhancer {
   private readonly _collector: Collector;
 
-  constructor(collector: Collector) {
+  public constructor(collector: Collector) {
     this._collector = collector;
   }
 
@@ -30,15 +30,15 @@ export class DocCommentEnhancer {
       if (entity.astEntity instanceof AstSymbol) {
         if (entity.exported) {
           entity.astEntity.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
-            this._analyzeDeclaration(astDeclaration);
+            this._analyzeApiItem(astDeclaration);
           });
         }
       }
     }
   }
 
-  private _analyzeDeclaration(astDeclaration: AstDeclaration): void {
-    const metadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
+  private _analyzeApiItem(astDeclaration: AstDeclaration): void {
+    const metadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
     if (metadata.docCommentEnhancerVisitorState === VisitorState.Visited) {
       return;
     }
@@ -64,8 +64,7 @@ export class DocCommentEnhancer {
     metadata.docCommentEnhancerVisitorState = VisitorState.Visited;
   }
 
-  private _analyzeNeedsDocumentation(astDeclaration: AstDeclaration, metadata: DeclarationMetadata): void {
-
+  private _analyzeNeedsDocumentation(astDeclaration: AstDeclaration, metadata: ApiItemMetadata): void {
     if (astDeclaration.declaration.kind === ts.SyntaxKind.Constructor) {
       // Constructors always do pretty much the same thing, so it's annoying to require people to write
       // descriptions for them.  Instead, if the constructor lacks a TSDoc summary, then API Extractor
@@ -92,10 +91,10 @@ export class DocCommentEnhancer {
         ]);
       }
 
-      const declarationMetadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
-      if (declarationMetadata.effectiveReleaseTag === ReleaseTag.Internal) {
+      const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
+      if (apiItemMetadata.effectiveReleaseTag === ReleaseTag.Internal) {
         // If the constructor is marked as internal, then add a boilerplate notice for the containing class
-        const classMetadata: DeclarationMetadata = this._collector.fetchMetadata(classDeclaration);
+        const classMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(classDeclaration);
 
         if (!classMetadata.tsdocComment) {
           classMetadata.tsdocComment = new tsdoc.DocComment({ configuration });
@@ -115,8 +114,9 @@ export class DocCommentEnhancer {
           new tsdoc.DocParagraph({ configuration }, [
             new tsdoc.DocPlainText({
               configuration,
-              text: `The constructor for this class is marked as internal. Third-party code should not`
-                + ` call the constructor directly or create subclasses that extend the `
+              text:
+                `The constructor for this class is marked as internal. Third-party code should not` +
+                ` call the constructor directly or create subclasses that extend the `
             }),
             new tsdoc.DocCodeSpan({
               configuration,
@@ -125,19 +125,22 @@ export class DocCommentEnhancer {
             new tsdoc.DocPlainText({ configuration, text: ' class.' })
           ])
         );
-
       }
+      return;
+    }
 
-    } else if (metadata.tsdocComment) {
+    if (metadata.tsdocComment) {
       // Require the summary to contain at least 10 non-spacing characters
       metadata.needsDocumentation = !tsdoc.PlainTextEmitter.hasAnyTextContent(
-        metadata.tsdocComment.summarySection, 10);
+        metadata.tsdocComment.summarySection,
+        10
+      );
     } else {
       metadata.needsDocumentation = true;
     }
   }
 
-  private _checkForBrokenLinks(astDeclaration: AstDeclaration, metadata: DeclarationMetadata): void {
+  private _checkForBrokenLinks(astDeclaration: AstDeclaration, metadata: ApiItemMetadata): void {
     if (!metadata.tsdocComment) {
       return;
     }
@@ -147,22 +150,24 @@ export class DocCommentEnhancer {
   private _checkForBrokenLinksRecursive(astDeclaration: AstDeclaration, node: tsdoc.DocNode): void {
     if (node instanceof tsdoc.DocLinkTag) {
       if (node.codeDestination) {
-
         // Is it referring to the working package?  If not, we don't do any link validation, because
         // AstReferenceResolver doesn't support it yet (but ModelReferenceResolver does of course).
         // Tracked by:  https://github.com/microsoft/rushstack/issues/1195
-        if (node.codeDestination.packageName === undefined
-          || node.codeDestination.packageName === this._collector.workingPackage.name) {
-
-          const referencedAstDeclaration: AstDeclaration | ResolverFailure = this._collector.astReferenceResolver
-            .resolve(node.codeDestination);
+        if (
+          node.codeDestination.packageName === undefined ||
+          node.codeDestination.packageName === this._collector.workingPackage.name
+        ) {
+          const referencedAstDeclaration:
+            | AstDeclaration
+            | ResolverFailure = this._collector.astReferenceResolver.resolve(node.codeDestination);
 
           if (referencedAstDeclaration instanceof ResolverFailure) {
-            this._collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.UnresolvedLink,
+            this._collector.messageRouter.addAnalyzerIssue(
+              ExtractorMessageId.UnresolvedLink,
               'The @link reference could not be resolved: ' + referencedAstDeclaration.reason,
-              astDeclaration);
+              astDeclaration
+            );
           }
-
         }
       }
     }
@@ -174,38 +179,51 @@ export class DocCommentEnhancer {
   /**
    * Follow an `{@inheritDoc ___}` reference and copy the content that we find in the referenced comment.
    */
-  private _applyInheritDoc(astDeclaration: AstDeclaration, docComment: tsdoc.DocComment,
-    inheritDocTag: tsdoc.DocInheritDocTag): void {
-
+  private _applyInheritDoc(
+    astDeclaration: AstDeclaration,
+    docComment: tsdoc.DocComment,
+    inheritDocTag: tsdoc.DocInheritDocTag
+  ): void {
     if (!inheritDocTag.declarationReference) {
-      this._collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.UnresolvedInheritDocBase,
+      this._collector.messageRouter.addAnalyzerIssue(
+        ExtractorMessageId.UnresolvedInheritDocBase,
         'The @inheritDoc tag needs a TSDoc declaration reference; signature matching is not supported yet',
-        astDeclaration);
+        astDeclaration
+      );
       return;
     }
 
     // Is it referring to the working package?
-    if (!(inheritDocTag.declarationReference.packageName === undefined
-      || inheritDocTag.declarationReference.packageName === this._collector.workingPackage.name)) {
-
+    if (
+      !(
+        inheritDocTag.declarationReference.packageName === undefined ||
+        inheritDocTag.declarationReference.packageName === this._collector.workingPackage.name
+      )
+    ) {
       // It's referencing an external package, so skip this inheritDoc tag, since AstReferenceResolver doesn't
       // support it yet.  As a workaround, this tag will get handled later by api-documenter.
       // Tracked by:  https://github.com/microsoft/rushstack/issues/1195
       return;
     }
 
-    const referencedAstDeclaration: AstDeclaration | ResolverFailure = this._collector.astReferenceResolver
-      .resolve(inheritDocTag.declarationReference);
+    const referencedAstDeclaration:
+      | AstDeclaration
+      | ResolverFailure = this._collector.astReferenceResolver.resolve(inheritDocTag.declarationReference);
 
     if (referencedAstDeclaration instanceof ResolverFailure) {
-      this._collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.UnresolvedInheritDocReference,
-        'The @inheritDoc reference could not be resolved: ' + referencedAstDeclaration.reason, astDeclaration);
+      this._collector.messageRouter.addAnalyzerIssue(
+        ExtractorMessageId.UnresolvedInheritDocReference,
+        'The @inheritDoc reference could not be resolved: ' + referencedAstDeclaration.reason,
+        astDeclaration
+      );
       return;
     }
 
-    this._analyzeDeclaration(referencedAstDeclaration);
+    this._analyzeApiItem(referencedAstDeclaration);
 
-    const referencedMetadata: DeclarationMetadata = this._collector.fetchMetadata(referencedAstDeclaration);
+    const referencedMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(
+      referencedAstDeclaration
+    );
 
     if (referencedMetadata.tsdocComment) {
       this._copyInheritedDocs(docComment, referencedMetadata.tsdocComment);
@@ -230,5 +248,4 @@ export class DocCommentEnhancer {
 
     targetDocComment.inheritDocTag = undefined;
   }
-
 }

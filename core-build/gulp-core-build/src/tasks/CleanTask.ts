@@ -17,7 +17,7 @@ export class CleanTask extends GulpTask<void> {
   /**
    * Instantiates a new CleanTask with the name 'clean'
    */
-  constructor() {
+  public constructor() {
     super('clean');
   }
 
@@ -26,16 +26,9 @@ export class CleanTask extends GulpTask<void> {
    * to the build, and by calling the getCleanMatch() function, collects a list of
    * glob patterns which are then passed to the `del` plugin to delete them from disk.
    */
-  public executeTask(
-    gulp: typeof Gulp,
-    completeCallback: (error?: string | Error) => void
-  ): void {
+  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): void {
     const { distFolder, libFolder, libAMDFolder, tempFolder }: IBuildConfig = this.buildConfig;
-    let cleanPaths: string[] = [
-      distFolder,
-      libFolder,
-      tempFolder
-    ];
+    let cleanPaths: string[] = [distFolder, libFolder, tempFolder];
 
     if (libAMDFolder) {
       cleanPaths.push(libAMDFolder);
@@ -52,8 +45,8 @@ export class CleanTask extends GulpTask<void> {
     const uniquePaths: { [key: string]: string } = {};
 
     // Create dictionary of unique paths. (Could be replaced with ES6 set.)
-    cleanPaths.forEach(cleanPath => {
-      if (!!cleanPath) {
+    cleanPaths.forEach((cleanPath) => {
+      if (cleanPath) {
         uniquePaths[cleanPath] = cleanPath;
       }
     });

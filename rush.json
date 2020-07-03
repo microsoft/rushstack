@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.13.0",
+  "rushVersion": "5.26.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "3.1.1",
+  "pnpmVersion": "4.12.5",
 
   // "npmVersion": "4.5.0",
   // "yarnVersion": "1.9.4",
@@ -35,6 +35,22 @@
    * Options that are only used when the PNPM package manager is selected
    */
   "pnpmOptions": {
+    /**
+     * Specifies the location of the PNPM store.  There are two possible values:
+     *
+     * - "local" - use the "pnpm-store" folder in the current configured temp folder:
+     *   "common/temp/pnpm-store" by default.
+     * - "global" - use PNPM's global store, which has the benefit of being shared
+     *    across multiple repo folders, but the disadvantage of less isolation for builds
+     *    (e.g. bugs or incompatibilities when two repos use different releases of PNPM)
+     *
+     * RUSH_PNPM_STORE_PATH will override the directory that will be used as the store
+     *
+     * In all cases, the store path will be overridden by the environment variable RUSH_PNPM_STORE_PATH.
+     *
+     * The default value is "local".
+     */
+    // "pnpmStore": "local",
 
     /**
      * If true, then Rush will add the "--strict-peer-dependencies" option when invoking PNPM.
@@ -48,7 +64,6 @@
      */
     "strictPeerDependencies": true,
 
-
     /**
      * Configures the strategy used to select versions during installation.
      *
@@ -57,19 +72,53 @@
      * be incompatible with certain packages, for example the "@types" packages from DefinitelyTyped.  Rush's default
      * is "fewer-dependencies", which causes PNPM to avoid installing a newer version if an already installed version
      * can be reused; this is more similar to NPM's algorithm.
+     *
+     * After modifying this field, it's recommended to run "rush update --full" so that the package manager
+     * will recalculate all version selections.
      */
-    // "resolutionStrategy": "fast"
+    // "resolutionStrategy": "fast",
+
+    /**
+     * If true, then `rush install` will report an error if manual modifications
+     * were made to the PNPM shrinkwrap file without running "rush update" afterwards.
+     *
+     * This feature protects against accidental inconsistencies that may be introduced
+     * if the PNPM shrinkwrap file ("pnpm-lock.yaml") is manually edited.  When this
+     * feature is enabled, "rush update" will append a hash to the file as a YAML comment,
+     * and then "rush update" and "rush install" will validate the hash.  Note that this does not prohibit
+     * manual modifications, but merely requires "rush update" be run
+     * afterwards, ensuring that PNPM can report or repair any potential inconsistencies.
+     *
+     * To temporarily disable this validation when invoking "rush install", use the
+     * "--bypass-policy" command-line parameter.
+     *
+     * The default value is false.
+     */
+    "preventManualShrinkwrapChanges": true
   },
 
   /**
-   * Older releases of the NodeJS engine may be missing features required by your system.
+   * Older releases of the Node.js engine may be missing features required by your system.
    * Other releases may have bugs.  In particular, the "latest" version will not be a
    * Long Term Support (LTS) version and is likely to have regressions.
    *
-   * Specify a SemVer range to ensure developers use a NodeJS version that is appropriate
+   * Specify a SemVer range to ensure developers use a Node.js version that is appropriate
    * for your repo.
    */
-  "nodeSupportedVersionRange": ">=8.9.4 <9.0.0 || >=10.13.0 <11.0.0 || >=12.0.0 <13.0.0",
+  "nodeSupportedVersionRange": ">=10.13.0 <11.0.0 || >=12.13.0 <13.0.0",
+
+  /**
+   * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
+   * spend six months in a stabilization period before the first Long Term Support (LTS) version.
+   * For example, 8.9.0 was the first LTS version of Node.js 8.  Pre-LTS versions are not recommended
+   * for production usage because they frequently have bugs.  They may cause Rush itself
+   * to malfunction.
+   *
+   * Rush normally prints a warning if it detects a pre-LTS Node.js version.  If you are testing
+   * pre-LTS versions in preparation for supporting the first LTS version, you can use this setting
+   * to disable Rush's warning.
+   */
+  // "suppressNodeLtsWarning": false,
 
   /**
    * If you would like the version specifiers for your dependencies to be consistent, then
@@ -82,7 +131,7 @@
    * version. In those cases, you will need to add an entry to the "allowedAlternativeVersions"
    * section of the common-versions.json.
    */
-   "ensureConsistentVersions": true,
+  "ensureConsistentVersions": true,
 
   /**
    * Large monorepos can become intimidating for newcomers if project folder paths don't follow
@@ -100,7 +149,7 @@
    * occasionally, but if that's painful, it's a warning sign that your development style may
    * discourage refactoring.  Reorganizing the categories should be an enlightening discussion
    * that brings people together, and maybe also identifies poor coding practices (e.g. file
-   * references that reach into other project's folders without using NodeJS module resolution).
+   * references that reach into other project's folders without using Node.js module resolution).
    *
    * The defaults are projectFolderMinDepth=1 and projectFolderMaxDepth=2.
    *
@@ -111,38 +160,51 @@
   "projectFolderMaxDepth": 2,
 
   /**
+   * Today the npmjs.com registry enforces fairly strict naming rules for packages, but in the early
+   * days there was no standard and hardly any enforcement.  A few large legacy projects are still using
+   * nonstandard package names, and private registries sometimes allow it.  Set "allowMostlyStandardPackageNames"
+   * to true to relax Rush's enforcement of package names.  This allows upper case letters and in the future may
+   * relax other rules, however we want to minimize these exceptions.  Many popular tools use certain punctuation
+   * characters as delimiters, based on the assumption that they will never appear in a package name; thus if we relax
+   * the rules too much it is likely to cause very confusing malfunctions.
+   *
+   * The default value is false.
+   */
+  // "allowMostlyStandardPackageNames": true,
+
+  /**
    * This feature helps you to review and approve new packages before they are introduced
    * to your monorepo.  For example, you may be concerned about licensing, code quality,
    * performance, or simply accumulating too many libraries with overlapping functionality.
    * The approvals are tracked in two config files "browser-approved-packages.json"
    * and "nonbrowser-approved-packages.json".  See the Rush documentation for details.
    */
-   "approvedPackagesPolicy": {
-     /**
-      * The review categories allow you to say for example "This library is approved for usage
-      * in prototypes, but not in production code."
-      *
-      * Each project can be associated with one review category, by assigning the "reviewCategory" field
-      * in the "projects" section of rush.json.  The approval is then recorded in the files
-      * "common/config/rush/browser-approved-packages.json" and "nonbrowser-approved-packages.json"
-      * which are automatically generated during "rush update".
-      *
-      * Designate categories with whatever granularity is appropriate for your review process,
-      * or you could just have a single category called "default".
-      */
-     "reviewCategories": [
-       "libraries",  // library projects that ship
-       "tests",      // non-shipping test projects
-     ],
+  "approvedPackagesPolicy": {
+    /**
+     * The review categories allow you to say for example "This library is approved for usage
+     * in prototypes, but not in production code."
+     *
+     * Each project can be associated with one review category, by assigning the "reviewCategory" field
+     * in the "projects" section of rush.json.  The approval is then recorded in the files
+     * "common/config/rush/browser-approved-packages.json" and "nonbrowser-approved-packages.json"
+     * which are automatically generated during "rush update".
+     *
+     * Designate categories with whatever granularity is appropriate for your review process,
+     * or you could just have a single category called "default".
+     */
+    "reviewCategories": [
+      "libraries", // library projects that ship
+      "tests" // non-shipping test projects
+    ],
 
-     /**
-      * A list of NPM package scopes that will be excluded from review.
-      * We recommend to exclude TypeScript typings (the "@types" scope), because
-      * if the underlying package was already approved, this would imply that the typings
-      * are also approved.
-      */
-     "ignoredNpmScopes": [ "@types" ]
-   },
+    /**
+     * A list of NPM package scopes that will be excluded from review.
+     * We recommend to exclude TypeScript typings (the "@types" scope), because
+     * if the underlying package was already approved, this would imply that the typings
+     * are also approved.
+     */
+    "ignoredNpmScopes": ["@types"]
+  },
 
   /**
    * If you use Git as your version control system, this section has some additional
@@ -160,14 +222,7 @@
      * IMPORTANT: Because these are regular expressions encoded as JSON string literals,
      * RegExp escapes need two backspashes, and ordinary periods should be "\\.".
      */
-    // "allowedEmailRegExps": [
-    //   "[^@]+@users\\.noreply\\.github\\.com",
-    //   "travis@example\\.org"
-    // ],
-    "allowedEmailRegExps": [
-      "[^@]+@users\\.noreply\\.github\\.com",
-      "travis@example\\.org"
-    ],
+    "allowedEmailRegExps": ["[^@]+@users\\.noreply\\.github\\.com"],
 
     /**
      * When Rush reports that the address is malformed, the notice can include an example
@@ -197,12 +252,24 @@
      * determined from Git alone, since the "pull request" feature is not a Git concept.  Ideally
      * Rush would use a vendor-specific protocol to query the information from GitHub, Azure DevOps, etc.
      * But to keep things simple, "rush change" simply assumes that your PR is against the "master" branch
-     * of the Git remote indicated by the respository.url setting in rush.json.  If you are working in
+     * of the Git remote indicated by the repository.url setting in rush.json.  If you are working in
      * a GitHub "fork" of the real repo, this setting will be different from the repository URL of your
      * your PR branch, and in this situation "rush change" will also automatically invoke "git fetch"
      * to retrieve the latest activity for the remote master branch.
      */
     "url": "https://github.com/microsoft/rushstack.git"
+
+    /**
+     * The default branch name. This tells "rush change" which remote branch to compare against.
+     * The default value is "master"
+     */
+    // "defaultBranch": "master",
+
+    /**
+     * The default remote. This tells "rush change" which remote to compare against if the remote URL is
+     * not set or if a remote matching the provided remote URL is not found.
+     */
+    // "defaultRemote": "origin"
   },
 
   /**
@@ -343,20 +410,14 @@
       "projectFolder": "apps/api-extractor",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/api-extractor-model",
       "projectFolder": "apps/api-extractor-model",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/api-documenter",
@@ -381,6 +442,11 @@
       "projectFolder": "apps/rush-lib",
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
+    },
+    {
+      "packageName": "@rushstack/heft",
+      "projectFolder": "apps/heft",
+      "reviewCategory": "libraries"
     },
 
     // "build-tests" folder (alphabetical order)
@@ -439,8 +505,32 @@
       "shouldPublish": false
     },
     {
-      "packageName": "node-library-build-test",
-      "projectFolder": "build-tests/node-library-build-test",
+      "packageName": "localization-plugin-test-01",
+      "projectFolder": "build-tests/localization-plugin-test-01",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "localization-plugin-test-02",
+      "projectFolder": "build-tests/localization-plugin-test-02",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "localization-plugin-test-03",
+      "projectFolder": "build-tests/localization-plugin-test-03",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "node-library-build-eslint-test",
+      "projectFolder": "build-tests/node-library-build-eslint-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "node-library-build-tslint-test",
+      "projectFolder": "build-tests/node-library-build-tslint-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -505,8 +595,32 @@
       "shouldPublish": false
     },
     {
-      "packageName": "rush-stack-library-test",
-      "projectFolder": "build-tests/rush-stack-library-test",
+      "packageName": "rush-stack-compiler-3.6-library-test",
+      "projectFolder": "build-tests/rush-stack-compiler-3.6-library-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "rush-stack-compiler-3.7-library-test",
+      "projectFolder": "build-tests/rush-stack-compiler-3.7-library-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "rush-stack-compiler-3.8-library-test",
+      "projectFolder": "build-tests/rush-stack-compiler-3.8-library-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "rush-stack-compiler-3.9-library-test",
+      "projectFolder": "build-tests/rush-stack-compiler-3.9-library-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "ts-command-line-test",
+      "projectFolder": "build-tests/ts-command-line-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -523,20 +637,14 @@
       "projectFolder": "core-build/gulp-core-build",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/gulp-core-build-mocha",
       "projectFolder": "core-build/gulp-core-build-mocha",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/gulp-core-build-sass",
@@ -555,10 +663,7 @@
       "projectFolder": "core-build/gulp-core-build-typescript",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/gulp-core-build-webpack",
@@ -581,8 +686,8 @@
 
     // "libraries" folder (alphabetical order)
     {
-      "packageName": "@microsoft/eslint-config-scalable-ts",
-      "projectFolder": "libraries/eslint-config-scalable-ts",
+      "packageName": "@rushstack/debug-certificate-manager",
+      "projectFolder": "libraries/debug-certificate-manager",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
@@ -593,17 +698,14 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@microsoft/node-core-library",
+      "packageName": "@rushstack/node-core-library",
       "projectFolder": "libraries/node-core-library",
       "reviewCategory": "libraries",
-     "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
-      ]
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
-      "packageName": "@microsoft/package-deps-hash",
+      "packageName": "@rushstack/package-deps-hash",
       "projectFolder": "libraries/package-deps-hash",
       "reviewCategory": "libraries",
       "shouldPublish": true
@@ -615,20 +717,23 @@
       "shouldPublish": false
     },
     {
-      "packageName": "@microsoft/stream-collator",
+      "packageName": "@rushstack/stream-collator",
       "projectFolder": "libraries/stream-collator",
       "reviewCategory": "libraries",
-     "shouldPublish": true
+      "shouldPublish": true
     },
     {
-      "packageName": "@microsoft/ts-command-line",
+      "packageName": "@rushstack/ts-command-line",
       "projectFolder": "libraries/ts-command-line",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
+    },
+    {
+      "packageName": "@rushstack/typings-generator",
+      "projectFolder": "libraries/typings-generator",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     },
 
     // "repo-scripts" folder (alphabetical order)
@@ -653,110 +758,122 @@
 
     // "stack" folder (alphabetical order)
     {
-      "packageName": "@microsoft/rush-stack",
-      "projectFolder": "stack/rush-stack",
+      "packageName": "@rushstack/eslint-config",
+      "projectFolder": "stack/eslint-config",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
     {
-      "packageName": "@microsoft/rush-stack-compiler-2.4",
-     "projectFolder": "stack/rush-stack-compiler-2.4",
+      "packageName": "@rushstack/eslint-patch",
+      "projectFolder": "stack/eslint-patch",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
+    },
+    {
+      "packageName": "@rushstack/eslint-plugin",
+      "projectFolder": "stack/eslint-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.9"]
+    },
+    {
+      "packageName": "@microsoft/rush-stack-compiler-2.4",
+      "projectFolder": "stack/rush-stack-compiler-2.4",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-2.7",
-     "projectFolder": "stack/rush-stack-compiler-2.7",
+      "projectFolder": "stack/rush-stack-compiler-2.7",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-2.8",
       "projectFolder": "stack/rush-stack-compiler-2.8",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-2.9",
       "projectFolder": "stack/rush-stack-compiler-2.9",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-3.0",
       "projectFolder": "stack/rush-stack-compiler-3.0",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-3.1",
       "projectFolder": "stack/rush-stack-compiler-3.1",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-3.2",
       "projectFolder": "stack/rush-stack-compiler-3.2",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-3.3",
       "projectFolder": "stack/rush-stack-compiler-3.3",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-3.4",
       "projectFolder": "stack/rush-stack-compiler-3.4",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-3.5",
       "projectFolder": "stack/rush-stack-compiler-3.5",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.4"
-      ]
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
+    },
+    {
+      "packageName": "@microsoft/rush-stack-compiler-3.6",
+      "projectFolder": "stack/rush-stack-compiler-3.6",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
+    },
+    {
+      "packageName": "@microsoft/rush-stack-compiler-3.7",
+      "projectFolder": "stack/rush-stack-compiler-3.7",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
+    },
+    {
+      "packageName": "@microsoft/rush-stack-compiler-3.8",
+      "projectFolder": "stack/rush-stack-compiler-3.8",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
+    },
+    {
+      "packageName": "@microsoft/rush-stack-compiler-3.9",
+      "projectFolder": "stack/rush-stack-compiler-3.9",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-shared",
@@ -772,25 +889,19 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@microsoft/loader-set-webpack-public-path",
-      "projectFolder": "webpack/loader-set-webpack-public-path",
+      "packageName": "@rushstack/localization-plugin",
+      "projectFolder": "webpack/localization-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
     {
-      "packageName": "@microsoft/loader-raw-script",
+      "packageName": "@rushstack/loader-raw-script",
       "projectFolder": "webpack/loader-raw-script",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
     {
-      "packageName": "@microsoft/resolve-chunk-plugin",
-      "projectFolder": "webpack/resolve-chunk-plugin",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@microsoft/set-webpack-public-path-plugin",
+      "packageName": "@rushstack/set-webpack-public-path-plugin",
       "projectFolder": "webpack/set-webpack-public-path-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true

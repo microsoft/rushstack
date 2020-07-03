@@ -2,17 +2,15 @@
   "rootDir": "../../",
   "globals": {
     "ts-jest": {
-      "skipBabel": true,
-      "tsConfigFile": "config/jest/tsconfig.json"
+      "tsConfig": "config/jest/tsconfig.json",
+      "packageJson": "package.json"
     }
   },
-  "moduleFileExtensions": [
-    "js"
-  ],
+  "moduleFileExtensions": ["js"],
   "moduleNameMapper": {
     "ts-jest": "<rootDir>/node_modules/ts-jest/index.js"
   },
   "transform": {
-    "^.+\\.(js|ts|tsx)$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    "^.+\\.(js|ts|tsx)$": "ts-jest"
   }
 }

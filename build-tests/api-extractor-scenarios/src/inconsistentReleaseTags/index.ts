@@ -23,4 +23,3 @@ export function alphaFunctionReturnsBeta(): IBeta {
 export function publicFunctionReturnsBeta(): IBeta {
   return { x: 123 };
 }
-

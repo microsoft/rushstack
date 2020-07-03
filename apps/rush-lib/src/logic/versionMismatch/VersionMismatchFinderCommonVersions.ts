@@ -7,25 +7,25 @@ import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfigurati
 import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
 
 export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEntity {
-  private fileManager: CommonVersionsConfiguration;
+  private _fileManager: CommonVersionsConfiguration;
 
-  constructor(commonVersionsConfiguration: CommonVersionsConfiguration) {
+  public constructor(commonVersionsConfiguration: CommonVersionsConfiguration) {
     super({
       friendlyName: `preferred versions from ${RushConstants.commonVersionsFilename}`,
       cyclicDependencyProjects: new Set<string>()
     });
 
-    this.fileManager = commonVersionsConfiguration;
+    this._fileManager = commonVersionsConfiguration;
   }
 
   public get filePath(): string {
-    return this.fileManager.filePath;
+    return this._fileManager.filePath;
   }
 
   public get allDependencies(): ReadonlyArray<PackageJsonDependency> {
     const dependencies: PackageJsonDependency[] = [];
 
-    this.fileManager.getAllPreferredVersions().forEach((version, dependencyName) => {
+    this._fileManager.getAllPreferredVersions().forEach((version, dependencyName) => {
       dependencies.push(this._getPackageJsonDependency(dependencyName, version));
     });
 
@@ -33,7 +33,7 @@ export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEn
   }
 
   public tryGetDependency(packageName: string): PackageJsonDependency | undefined {
-    const version: string | undefined = this.fileManager.getAllPreferredVersions().get(packageName);
+    const version: string | undefined = this._fileManager.getAllPreferredVersions().get(packageName);
     if (!version) {
       return undefined;
     } else {
@@ -45,28 +45,31 @@ export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEn
     return undefined; // common-versions.json doesn't have a distinction between dev and non-dev dependencies
   }
 
-  public addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void {
+  public addOrUpdateDependency(
+    packageName: string,
+    newVersion: string,
+    dependencyType: DependencyType
+  ): void {
     if (dependencyType !== DependencyType.Regular) {
-      throw new Error(`${RushConstants.commonVersionsFilename} only accepts "${DependencyType.Regular}" dependencies`);
+      throw new Error(
+        `${RushConstants.commonVersionsFilename} only accepts "${DependencyType.Regular}" dependencies`
+      );
     }
 
-    if (this.fileManager.xstitchPreferredVersions.has(packageName)) {
-      this.fileManager.xstitchPreferredVersions.set(packageName, newVersion);
+    if (this._fileManager.xstitchPreferredVersions.has(packageName)) {
+      this._fileManager.xstitchPreferredVersions.set(packageName, newVersion);
     } else {
-      this.fileManager.preferredVersions.set(packageName, newVersion);
+      this._fileManager.preferredVersions.set(packageName, newVersion);
     }
   }
 
   public saveIfModified(): boolean {
-    return this.fileManager.save();
+    return this._fileManager.save();
   }
 
   private _getPackageJsonDependency(dependencyName: string, version: string): PackageJsonDependency {
-    return new PackageJsonDependency(
-      dependencyName,
-      version,
-      DependencyType.Regular,
-      () => this.addOrUpdateDependency(dependencyName, version, DependencyType.Regular)
+    return new PackageJsonDependency(dependencyName, version, DependencyType.Regular, () =>
+      this.addOrUpdateDependency(dependencyName, version, DependencyType.Regular)
     );
   }
 }

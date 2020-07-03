@@ -2,12 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonFile } from '../JsonFile';
+import { JsonFile, JsonObject } from '../JsonFile';
 import { JsonSchema, IJsonSchemaErrorInfo } from '../JsonSchema';
 
 function normalize(text: string): string {
-  return text.replace(/[\r\n ]+/g, ' ')
-    .trim();
+  return text.replace(/[\r\n ]+/g, ' ').trim();
 }
 
 describe('JsonSchema', () => {
@@ -17,22 +16,16 @@ describe('JsonSchema', () => {
 
   test('loadAndValidate successfully validates a JSON file', () => {
     const jsonPath: string = path.resolve(path.join(__dirname, './test-data/test.json'));
-    const jsonObject: Object = JsonFile.loadAndValidate(jsonPath, schema);
-    expect(jsonObject).toMatchObject(
-      {
-        'exampleString': 'This is a string',
-        'exampleArray': [
-          'apple',
-          'banana',
-          'coconut'
-        ]
-      }
-    );
+    const jsonObject: JsonObject = JsonFile.loadAndValidate(jsonPath, schema);
+    expect(jsonObject).toMatchObject({
+      exampleString: 'This is a string',
+      exampleArray: ['apple', 'banana', 'coconut']
+    });
   });
 
   test('validateObjectWithCallback successfully reports a compound validation error', () => {
     const jsonPath2: string = path.resolve(path.join(__dirname, './test-data/test2.json'));
-    const jsonObject2: Object = JsonFile.load(jsonPath2);
+    const jsonObject2: JsonObject = JsonFile.load(jsonPath2);
 
     const expectedError: string = `
 Error: #/exampleOneOf (Description for exampleOneOf - this i...)

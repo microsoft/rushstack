@@ -1,0 +1,3 @@
+{
+  "extends": "@microsoft/rush-stack-compiler-3.7/includes/tslint.json"
+}

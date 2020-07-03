@@ -1,9 +1,6 @@
-import {
-  RushConfiguration,
-  IRushLinkJson
-} from '../api/RushConfiguration';
+import { RushConfiguration, IRushLinkJson } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile } from '@rushstack/node-core-library';
 
 import { ProjectTask, convertSlashesForWindows } from '../logic/taskRunner/ProjectTask';
 import { PackageChangeAnalyzer } from './PackageChangeAnalyzer';
@@ -35,7 +32,7 @@ export class TaskSelector {
   private _options: ITaskSelectorConstructor;
   private _packageChangeAnalyzer: PackageChangeAnalyzer;
 
-  constructor(options: ITaskSelectorConstructor) {
+  public constructor(options: ITaskSelectorConstructor) {
     this._options = options;
 
     this._packageChangeAnalyzer = new PackageChangeAnalyzer(options.rushConfiguration);
@@ -46,8 +43,10 @@ export class TaskSelector {
     try {
       this._rushLinkJson = JsonFile.load(this._options.rushConfiguration.rushLinkJsonFilename);
     } catch (error) {
-      throw new Error(`Could not read "${this._options.rushConfiguration.rushLinkJsonFilename}".`
-        + ` Did you run "rush install" or "rush update"?`);
+      throw new Error(
+        `Could not read "${this._options.rushConfiguration.rushLinkJsonFilename}".` +
+          ` Did you run "rush install" or "rush update"?`
+      );
     }
   }
 
@@ -69,8 +68,9 @@ export class TaskSelector {
     const dependencies: Set<string> = new Set<string>();
 
     for (const toFlag of toFlags) {
-      const toProject: RushConfigurationProject | undefined =
-        this._options.rushConfiguration.findProjectByShorthandName(toFlag);
+      const toProject:
+        | RushConfigurationProject
+        | undefined = this._options.rushConfiguration.findProjectByShorthandName(toFlag);
       if (!toProject) {
         throw new Error(`The project '${toFlag}' does not exist in rush.json`);
       }
@@ -86,10 +86,7 @@ export class TaskSelector {
     if (!this._options.ignoreDependencyOrder) {
       // Add ordering relationships for each dependency
       for (const dependency of dependencies) {
-        this._taskCollection.addDependencies(
-          dependency,
-          this._rushLinkJson.localLinks[dependency] || []
-        );
+        this._taskCollection.addDependencies(dependency, this._rushLinkJson.localLinks[dependency] || []);
       }
     }
   }
@@ -99,8 +96,9 @@ export class TaskSelector {
     const dependents: Set<string> = new Set<string>();
 
     for (const fromFlag of fromFlags) {
-      const fromProject: RushConfigurationProject | undefined
-        = this._options.rushConfiguration.findProjectByShorthandName(fromFlag);
+      const fromProject:
+        | RushConfigurationProject
+        | undefined = this._options.rushConfiguration.findProjectByShorthandName(fromFlag);
       if (!fromProject) {
         throw new Error(`The project '${fromFlag}' does not exist in rush.json`);
       }
@@ -119,7 +117,7 @@ export class TaskSelector {
       for (const dependent of dependents) {
         this._taskCollection.addDependencies(
           dependent,
-          (this._rushLinkJson.localLinks[dependent] || []).filter(dep => dependents.has(dep))
+          (this._rushLinkJson.localLinks[dependent] || []).filter((dep) => dependents.has(dep))
         );
       }
     }
@@ -159,7 +157,7 @@ export class TaskSelector {
     if (!result.has(project)) {
       result.add(project);
 
-      for (const dependent of (this._dependentList.get(project) || new Set<string>())) {
+      for (const dependent of this._dependentList.get(project) || new Set<string>()) {
         this._collectAllDependents(dependent, result);
       }
     }
@@ -203,8 +201,9 @@ export class TaskSelector {
     const script: string | undefined = this._getScriptCommand(rushProject, this._options.commandToRun);
 
     if (script === undefined && !this._options.ignoreMissingScript) {
-      // tslint:disable-next-line:max-line-length
-      throw new Error(`The project [${rushProject.packageName}] does not define a '${this._options.commandToRun}' command in the 'scripts' section of its package.json`);
+      throw new Error(
+        `The project [${rushProject.packageName}] does not define a '${this._options.commandToRun}' command in the 'scripts' section of its package.json`
+      );
     }
 
     if (!script) {
@@ -212,20 +211,17 @@ export class TaskSelector {
     }
 
     const taskCommand: string = `${script} ${this._options.customParameterValues.join(' ')}`;
-    return process.platform === 'win32'
-      ? convertSlashesForWindows(taskCommand)
-      : taskCommand;
+    return process.platform === 'win32' ? convertSlashesForWindows(taskCommand) : taskCommand;
   }
 
   private _getScriptCommand(rushProject: RushConfigurationProject, script: string): string | undefined {
-    // tslint:disable-next-line:no-string-literal
     if (!rushProject.packageJson.scripts) {
       return undefined;
     }
 
     const rawCommand: string = rushProject.packageJson.scripts[script];
 
-    // tslint:disable-next-line:no-null-keyword
+    // eslint-disable-next-line @rushstack/no-null
     if (rawCommand === undefined || rawCommand === null) {
       return undefined;
     }

@@ -5,22 +5,25 @@
 ```ts
 
 import * as ApiExtractor from '@microsoft/api-extractor';
-import { ExtractorConfig } from '@microsoft/api-extractor';
-import { IExtractorInvokeOptions } from '@microsoft/api-extractor';
-import { IPackageJson } from '@microsoft/node-core-library';
-import { ITerminalProvider } from '@microsoft/node-core-library';
-import { Terminal } from '@microsoft/node-core-library';
+import { IPackageJson } from '@rushstack/node-core-library';
+import { ITerminalProvider } from '@rushstack/node-core-library';
+import { Terminal } from '@rushstack/node-core-library';
 import * as Tslint from 'tslint';
 import * as Typescript from 'typescript';
 
+export { ApiExtractor }
+
 // @beta
 export class ApiExtractorRunner extends RushStackCompilerBase {
-    constructor(extractorConfig: ExtractorConfig, extractorOptions: IExtractorInvokeOptions, rootPath: string, terminalProvider: ITerminalProvider);
-    constructor(options: IRushStackCompilerBaseOptions, extractorConfig: ExtractorConfig, extractorOptions: IExtractorInvokeOptions, rootPath: string, terminalProvider: ITerminalProvider);
-    // (undocumented)
-    static apiExtractor: typeof ApiExtractor;
+    constructor(extractorConfig: ApiExtractor.ExtractorConfig, extractorOptions: ApiExtractor.IExtractorInvokeOptions, rootPath: string, terminalProvider: ITerminalProvider);
+    constructor(options: IRushStackCompilerBaseOptions, extractorConfig: ApiExtractor.ExtractorConfig, extractorOptions: ApiExtractor.IExtractorInvokeOptions, rootPath: string, terminalProvider: ITerminalProvider);
     // (undocumented)
     invoke(): Promise<void>;
+}
+
+// @public (undocumented)
+export interface ILintRunnerConfig extends IRushStackCompilerBaseOptions {
+    displayAsError?: boolean;
 }
 
 // @public (undocumented)
@@ -32,14 +35,20 @@ export interface IRushStackCompilerBaseOptions {
 }
 
 // @public (undocumented)
-export interface ITslintRunnerConfig extends IRushStackCompilerBaseOptions {
-    displayAsError?: boolean;
+export interface ITslintRunnerConfig extends ILintRunnerConfig {
 }
 
 // @beta (undocumented)
 export interface ITypescriptCompilerOptions extends IRushStackCompilerBaseOptions {
     customArgs?: string[];
 }
+
+// @beta (undocumented)
+export class LintRunner extends RushStackCompilerBase<ILintRunnerConfig> {
+    constructor(taskOptions: ILintRunnerConfig, rootPath: string, terminalProvider: ITerminalProvider);
+    // (undocumented)
+    invoke(): Promise<void>;
+    }
 
 // @beta (undocumented)
 export abstract class RushStackCompilerBase<TOptions extends IRushStackCompilerBaseOptions = IRushStackCompilerBaseOptions> {
@@ -71,18 +80,16 @@ export class StandardBuildFolders {
     readonly tempFolderPath: string;
     }
 
-// @alpha (undocumented)
-export class ToolPackages {
-    // (undocumented)
-    static apiExtractor: typeof ApiExtractor;
-    // (undocumented)
-    static tslint: typeof Tslint;
-    // (undocumented)
-    static typescript: typeof Typescript;
-}
-
 // @beta (undocumented)
 export class ToolPaths {
+    // (undocumented)
+    static readonly apiExtractorPackageJson: IPackageJson;
+    // (undocumented)
+    static readonly apiExtractorPackagePath: string;
+    // (undocumented)
+    static readonly eslintPackageJson: IPackageJson;
+    // (undocumented)
+    static readonly eslintPackagePath: string;
     // (undocumented)
     static readonly tslintPackageJson: IPackageJson;
     // (undocumented)
@@ -93,12 +100,16 @@ export class ToolPaths {
     static readonly typescriptPackagePath: string;
     }
 
+export { Tslint }
+
 // @beta (undocumented)
 export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
     constructor(taskOptions: ITslintRunnerConfig, rootPath: string, terminalProvider: ITerminalProvider);
     // (undocumented)
     invoke(): Promise<void>;
 }
+
+export { Typescript }
 
 // @beta (undocumented)
 export class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompilerOptions> {

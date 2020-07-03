@@ -1,6 +1,286 @@
 # Change Log - @microsoft/gulp-core-build-webpack
 
-This log was last generated on Sun, 29 Sep 2019 23:56:29 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+
+## 5.0.28
+Fri, 03 Jul 2020 15:09:04 GMT
+
+*Version update only*
+
+## 5.0.27
+Fri, 03 Jul 2020 05:46:42 GMT
+
+*Version update only*
+
+## 5.0.26
+Sat, 27 Jun 2020 00:09:38 GMT
+
+*Version update only*
+
+## 5.0.25
+Fri, 26 Jun 2020 22:16:39 GMT
+
+*Version update only*
+
+## 5.0.24
+Thu, 25 Jun 2020 06:43:35 GMT
+
+*Version update only*
+
+## 5.0.23
+Wed, 24 Jun 2020 09:50:48 GMT
+
+*Version update only*
+
+## 5.0.22
+Wed, 24 Jun 2020 09:04:28 GMT
+
+*Version update only*
+
+## 5.0.21
+Mon, 15 Jun 2020 22:17:18 GMT
+
+*Version update only*
+
+## 5.0.20
+Fri, 12 Jun 2020 09:19:21 GMT
+
+*Version update only*
+
+## 5.0.19
+Wed, 10 Jun 2020 20:48:30 GMT
+
+*Version update only*
+
+## 5.0.18
+Mon, 01 Jun 2020 08:34:17 GMT
+
+*Version update only*
+
+## 5.0.17
+Sat, 30 May 2020 02:59:54 GMT
+
+*Version update only*
+
+## 5.0.16
+Thu, 28 May 2020 05:59:02 GMT
+
+*Version update only*
+
+## 5.0.15
+Wed, 27 May 2020 05:15:11 GMT
+
+*Version update only*
+
+## 5.0.14
+Tue, 26 May 2020 23:00:25 GMT
+
+*Version update only*
+
+## 5.0.13
+Fri, 22 May 2020 15:08:42 GMT
+
+*Version update only*
+
+## 5.0.12
+Thu, 21 May 2020 23:09:44 GMT
+
+*Version update only*
+
+## 5.0.11
+Thu, 21 May 2020 15:41:59 GMT
+
+*Version update only*
+
+## 5.0.10
+Tue, 19 May 2020 15:08:19 GMT
+
+*Version update only*
+
+## 5.0.9
+Fri, 15 May 2020 08:10:59 GMT
+
+*Version update only*
+
+## 5.0.8
+Wed, 06 May 2020 08:23:45 GMT
+
+*Version update only*
+
+## 5.0.7
+Sat, 02 May 2020 00:08:16 GMT
+
+*Version update only*
+
+## 5.0.6
+Wed, 08 Apr 2020 04:07:33 GMT
+
+*Version update only*
+
+## 5.0.5
+Fri, 03 Apr 2020 15:10:15 GMT
+
+*Version update only*
+
+## 5.0.4
+Sun, 29 Mar 2020 00:04:12 GMT
+
+*Version update only*
+
+## 5.0.3
+Sat, 28 Mar 2020 00:37:16 GMT
+
+*Version update only*
+
+## 5.0.2
+Wed, 18 Mar 2020 15:07:47 GMT
+
+*Version update only*
+
+## 5.0.1
+Tue, 17 Mar 2020 23:55:58 GMT
+
+*Version update only*
+
+## 5.0.0
+Tue, 28 Jan 2020 02:23:44 GMT
+
+### Breaking changes
+
+- Upgrade to Webpack 4.
+
+## 4.1.3
+Fri, 24 Jan 2020 00:27:39 GMT
+
+*Version update only*
+
+## 4.1.2
+Thu, 23 Jan 2020 01:07:56 GMT
+
+*Version update only*
+
+## 4.1.1
+Tue, 21 Jan 2020 21:56:13 GMT
+
+*Version update only*
+
+## 4.1.0
+Sun, 19 Jan 2020 02:26:52 GMT
+
+### Minor changes
+
+- Upgrade Node typings to Node 10
+
+## 4.0.8
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 4.0.7
+Tue, 14 Jan 2020 01:34:15 GMT
+
+*Version update only*
+
+## 4.0.6
+Sat, 11 Jan 2020 05:18:23 GMT
+
+*Version update only*
+
+## 4.0.5
+Thu, 09 Jan 2020 06:44:13 GMT
+
+*Version update only*
+
+## 4.0.4
+Wed, 08 Jan 2020 00:11:31 GMT
+
+*Version update only*
+
+## 4.0.3
+Wed, 04 Dec 2019 23:17:55 GMT
+
+*Version update only*
+
+## 4.0.2
+Tue, 03 Dec 2019 03:17:44 GMT
+
+*Version update only*
+
+## 4.0.1
+Sun, 24 Nov 2019 00:54:04 GMT
+
+*Version update only*
+
+## 4.0.0
+Wed, 20 Nov 2019 06:14:28 GMT
+
+### Breaking changes
+
+- Upgrade to Webpack 4.
+
+## 3.7.9
+Fri, 15 Nov 2019 04:50:50 GMT
+
+*Version update only*
+
+## 3.7.8
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 3.7.7
+Wed, 06 Nov 2019 22:44:18 GMT
+
+*Version update only*
+
+## 3.7.6
+Tue, 05 Nov 2019 06:49:28 GMT
+
+*Version update only*
+
+## 3.7.5
+Tue, 05 Nov 2019 01:08:39 GMT
+
+*Version update only*
+
+## 3.7.4
+Fri, 25 Oct 2019 15:08:54 GMT
+
+*Version update only*
+
+## 3.7.3
+Tue, 22 Oct 2019 06:24:44 GMT
+
+### Patches
+
+- Refactor some code as part of migration from TSLint to ESLint
+
+## 3.7.2
+Mon, 21 Oct 2019 05:22:43 GMT
+
+*Version update only*
+
+## 3.7.1
+Fri, 18 Oct 2019 15:15:01 GMT
+
+*Version update only*
+
+## 3.7.0
+Mon, 07 Oct 2019 20:15:00 GMT
+
+### Minor changes
+
+- Add support for multi-compiler webpack config setting.
+
+## 3.6.5
+Sun, 06 Oct 2019 00:27:39 GMT
+
+*Version update only*
+
+## 3.6.4
+Fri, 04 Oct 2019 00:15:22 GMT
+
+*Version update only*
 
 ## 3.6.3
 Sun, 29 Sep 2019 23:56:29 GMT

@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { assert } from 'chai';
 import RawScriptLoader = require('./../RawScriptLoader');
 
 function wrapResult(result: string): string {
@@ -12,19 +11,18 @@ function wrapResult(result: string): string {
 
 describe('RawScriptLoader', () => {
   it('follows the Webpack loader interface', () => {
-    assert.isDefined(RawScriptLoader);
-    assert.isFunction(RawScriptLoader);
+    expect(RawScriptLoader).toBeDefined();
+    expect(typeof RawScriptLoader).toEqual('function');
   });
 
   it('returns a string', () => {
-    assert.isString(RawScriptLoader(''));
+    expect(typeof RawScriptLoader('')).toEqual('string');
   });
 
   it('correctly sets exported objects', () => {
     const testScript: string = 'var x = 123; this.exportedObject = x;';
-    /* tslint:disable:no-eval */
+    // eslint-disable-next-line no-eval
     const exports: { exportedObject: number } = eval(wrapResult(RawScriptLoader(testScript)));
-    /* tslint:enable:no-eval */
-    assert.equal(exports.exportedObject, 123);
+    expect(exports.exportedObject).toEqual(123);
   });
 });

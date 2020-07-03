@@ -8,13 +8,14 @@ import { BaseRushAction } from './BaseRushAction';
 import { UnlinkManager } from '../../logic/UnlinkManager';
 
 export class UnlinkAction extends BaseRushAction {
-  constructor(parser: RushCommandLineParser) {
+  public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'unlink',
       summary: 'Delete node_modules symlinks for all projects in the repo',
-      documentation: 'This removes the symlinks created by the "rush link" command. This is useful for'
-        + ' cleaning a repo using "git clean" without accidentally deleting source files, or for using standard NPM'
-        + ' commands on a project.',
+      documentation:
+        'This removes the symlinks created by the "rush link" command. This is useful for' +
+        ' cleaning a repo using "git clean" without accidentally deleting source files, or for using standard NPM' +
+        ' commands on a project.',
       parser
     });
   }

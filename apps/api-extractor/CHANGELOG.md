@@ -1,6 +1,266 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sun, 29 Sep 2019 23:56:29 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+
+## 7.9.1
+Fri, 03 Jul 2020 15:09:04 GMT
+
+*Version update only*
+
+## 7.9.0
+Fri, 03 Jul 2020 05:46:41 GMT
+
+### Minor changes
+
+- Add support for ECMAScript private fields (new in TypeScript 3.8)
+- Add support for "import type" imports (new in TypeScript 3.8)
+- Upgrade the bundled compiler engine to TypeScript 3.9
+
+### Patches
+
+- Fix an issue where chained compiler errors were not formatted correctly
+- Log the TypeScript bundled compiler version, and warn if it is outdated
+
+## 7.8.15
+Thu, 25 Jun 2020 06:43:35 GMT
+
+*Version update only*
+
+## 7.8.14
+Wed, 24 Jun 2020 09:50:48 GMT
+
+*Version update only*
+
+## 7.8.13
+Wed, 24 Jun 2020 09:04:28 GMT
+
+*Version update only*
+
+## 7.8.12
+Mon, 15 Jun 2020 22:17:17 GMT
+
+### Patches
+
+- Fix an issue where documentation hyperlinks were sometimes missing when using the "bundledPackages" feature (GitHub #1933)
+
+## 7.8.11
+Wed, 10 Jun 2020 20:48:30 GMT
+
+*Version update only*
+
+## 7.8.10
+Mon, 01 Jun 2020 08:34:17 GMT
+
+*Version update only*
+
+## 7.8.9
+Sat, 30 May 2020 02:59:54 GMT
+
+*Version update only*
+
+## 7.8.8
+Thu, 28 May 2020 05:59:02 GMT
+
+*Version update only*
+
+## 7.8.7
+Wed, 27 May 2020 05:15:10 GMT
+
+*Version update only*
+
+## 7.8.6
+Tue, 26 May 2020 23:00:25 GMT
+
+*Version update only*
+
+## 7.8.5
+Fri, 22 May 2020 15:08:42 GMT
+
+*Version update only*
+
+## 7.8.4
+Thu, 21 May 2020 23:09:44 GMT
+
+*Version update only*
+
+## 7.8.3
+Thu, 21 May 2020 15:41:59 GMT
+
+*Version update only*
+
+## 7.8.2
+Tue, 19 May 2020 15:08:19 GMT
+
+### Patches
+
+- Report an error to indicate that "import()" types are not supported
+
+## 7.8.1
+Fri, 15 May 2020 08:10:59 GMT
+
+*Version update only*
+
+## 7.8.0
+Wed, 06 May 2020 08:23:45 GMT
+
+### Minor changes
+
+- Version update only
+
+## 7.7.13
+Wed, 08 Apr 2020 04:07:33 GMT
+
+*Version update only*
+
+## 7.7.12
+Sun, 29 Mar 2020 00:04:12 GMT
+
+### Patches
+
+- Improve analysis of types exposed via global variables (fixes GitHub issues #1765, #1095, and #1316)
+
+## 7.7.11
+Sat, 28 Mar 2020 00:37:16 GMT
+
+### Patches
+
+- Upgrade to TSdoc 0.12.19 to fix an issue where `<h1>` wasn't allowed as an HTML tag in a doc comment
+
+## 7.7.10
+Wed, 18 Mar 2020 15:07:47 GMT
+
+### Patches
+
+- Upgrade cyclic dependencies
+
+## 7.7.9
+Tue, 17 Mar 2020 23:55:58 GMT
+
+### Patches
+
+- Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`
+
+## 7.7.8
+Tue, 28 Jan 2020 02:23:44 GMT
+
+*Version update only*
+
+## 7.7.7
+Thu, 23 Jan 2020 01:07:56 GMT
+
+*Version update only*
+
+## 7.7.6
+Tue, 21 Jan 2020 21:56:13 GMT
+
+*Version update only*
+
+## 7.7.5
+Sun, 19 Jan 2020 02:26:52 GMT
+
+### Patches
+
+- Upgrade Node typings to Node 10
+
+## 7.7.4
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 7.7.3
+Tue, 14 Jan 2020 01:34:15 GMT
+
+### Patches
+
+- Fix an issue where "ae-incompatible-release-tags" was sometimes reported incorectly for property setters (GitHub #1681)
+
+## 7.7.2
+Thu, 09 Jan 2020 06:44:12 GMT
+
+### Patches
+
+- Fix an error "Cannot read property 'externalModuleIndicator' of undefined" (GitHub #1652)
+
+## 7.7.1
+Wed, 08 Jan 2020 00:11:31 GMT
+
+*Version update only*
+
+## 7.7.0
+Tue, 03 Dec 2019 03:17:43 GMT
+
+### Minor changes
+
+- Improve declaration reference syntax to allow linking to overloaded functions/methods
+- Fix an issue with TypeScript 3.7, which now emits separate signatures for property getters/setters
+
+## 7.6.2
+Sun, 24 Nov 2019 00:54:04 GMT
+
+*Version update only*
+
+## 7.6.1
+Wed, 20 Nov 2019 06:14:28 GMT
+
+### Patches
+
+- Fix an issue where the newlineKind setting wasn't being applied correctly
+
+## 7.6.0
+Fri, 15 Nov 2019 04:50:50 GMT
+
+### Minor changes
+
+- Make newline type for generated files configurable
+
+## 7.5.6
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 7.5.5
+Wed, 06 Nov 2019 22:44:18 GMT
+
+### Patches
+
+- Add support for TypeScript 3.7
+
+## 7.5.4
+Tue, 05 Nov 2019 06:49:28 GMT
+
+### Patches
+
+- Fix an issue where API reports sometimes were ordered differently depending on the version of NodeJS (GitHub #1552)
+
+## 7.5.3
+Tue, 05 Nov 2019 01:08:39 GMT
+
+*Version update only*
+
+## 7.5.2
+Tue, 22 Oct 2019 06:24:44 GMT
+
+*Version update only*
+
+## 7.5.1
+Fri, 18 Oct 2019 15:15:01 GMT
+
+*Version update only*
+
+## 7.5.0
+Sun, 06 Oct 2019 00:27:39 GMT
+
+### Minor changes
+
+- Allow separate release tags for overloaded functions and methods
+- Add new api-extractor.json config setting "bundledPackages"
+
+## 7.4.7
+Fri, 04 Oct 2019 00:15:22 GMT
+
+### Patches
+
+- Fix an issue where IExtractorConfigPrepareOptions.packageJson was ignored (GitHub #1559)
 
 ## 7.4.6
 Sun, 29 Sep 2019 23:56:29 GMT

@@ -33,7 +33,7 @@ export interface IConfigCompiler {
    *
    * If omitted, then the tsconfig.json file will instead be read from the projectFolder.
    */
-  overrideTsconfig?: { };
+  overrideTsconfig?: {};
 
   /**
    * This option causes the compiler to be invoked with the `--skipLibCheck` option.
@@ -322,6 +322,25 @@ export interface IConfigFile {
   mainEntryPointFilePath: string;
 
   /**
+   * A list of NPM package names whose exports should be treated as part of this package.
+   *
+   * @remarks
+   *
+   * For example, suppose that Webpack is used to generate a distributed bundle for the project `library1`,
+   * and another NPM package `library2` is embedded in this bundle.  Some types from `library2` may become part
+   * of the exported API for `library1`, but by default API Extractor would generate a .d.ts rollup that explicitly
+   * imports `library2`.  To avoid this, we can specify:
+   *
+   * ```js
+   *   "bundledPackages": [ "library2" ],
+   * ```
+   *
+   * This would direct API Extractor to embed those types directly in the .d.ts rollup, as if they had been
+   * local files for `library1`.
+   */
+  bundledPackages?: string[];
+
+  /**
    * {@inheritDoc IConfigCompiler}
    */
   compiler?: IConfigCompiler;
@@ -347,6 +366,16 @@ export interface IConfigFile {
    * @beta
    */
   tsdocMetadata?: IConfigTsdocMetadata;
+
+  /**
+   * Specifies what type of newlines API Extractor should use when writing output files.
+   *
+   * @remarks
+   * By default, the output files will be written with Windows-style newlines.
+   * To use POSIX-style newlines, specify "lf" instead.
+   * To use the OS's default newline kind, specify "os".
+   */
+  newlineKind?: 'crlf' | 'lf' | 'os';
 
   /**
    * {@inheritDoc IExtractorMessagesConfig}

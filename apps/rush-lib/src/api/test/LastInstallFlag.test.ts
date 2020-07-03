@@ -1,7 +1,7 @@
 import * as path from 'path';
 
 import { LastInstallFlag } from '../LastInstallFlag';
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 const TEMP_DIR: string = path.join(__dirname, 'temp');
 
@@ -66,5 +66,37 @@ describe('LastInstallFlag', () => {
     // test state, should be invalid since the file is not JSON
     expect(flag.isValid()).toEqual(false);
     FileSystem.deleteFile(flag.path);
+  });
+
+  it("throws an error if new storePath doesn't match the old one", () => {
+    const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR, {
+      packageManager: 'pnpm',
+      storePath: path.join(TEMP_DIR, 'pnpm-store')
+    });
+    const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR, {
+      packageManager: 'pnpm',
+      storePath: path.join(TEMP_DIR, 'temp-store')
+    });
+
+    flag1.create();
+    expect(() => {
+      flag2.checkValidAndReportStoreIssues();
+    }).toThrowError(/PNPM store path/);
+  });
+
+  it("doesn't throw an error if conditions for error aren't met", () => {
+    const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR, {
+      packageManager: 'pnpm',
+      storePath: path.join(TEMP_DIR, 'pnpm-store')
+    });
+    const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR, {
+      packageManager: 'npm'
+    });
+
+    flag1.create();
+    expect(() => {
+      flag2.checkValidAndReportStoreIssues();
+    }).not.toThrow();
+    expect(flag2.checkValidAndReportStoreIssues()).toEqual(false);
   });
 });

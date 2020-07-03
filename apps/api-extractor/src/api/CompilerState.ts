@@ -5,13 +5,10 @@ import * as path from 'path';
 import * as ts from 'typescript';
 import colors = require('colors');
 
-import {
-  JsonFile
-} from '@microsoft/node-core-library';
+import { JsonFile } from '@rushstack/node-core-library';
 
 import { ExtractorConfig } from './ExtractorConfig';
 import { IExtractorInvokeOptions } from './Extractor';
-import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 
 /**
  * Options for {@link CompilerState.create}
@@ -37,7 +34,7 @@ export class CompilerState {
   /**
    * The TypeScript compiler's `Program` object, which represents a complete scope of analysis.
    */
-  public readonly program: ts.Program;
+  public readonly program: unknown;
 
   private constructor(properties: CompilerState) {
     this.program = properties.program;
@@ -46,8 +43,10 @@ export class CompilerState {
   /**
    * Create a compiler state for use with the specified `IExtractorInvokeOptions`.
    */
-  public static create(extractorConfig: ExtractorConfig, options?: ICompilerStateCreateOptions): CompilerState {
-
+  public static create(
+    extractorConfig: ExtractorConfig,
+    options?: ICompilerStateCreateOptions
+  ): CompilerState {
     let tsconfig: {} | undefined = extractorConfig.overrideTsconfig;
     let configBasePath: string = extractorConfig.projectFolder;
     if (!tsconfig) {
@@ -56,18 +55,16 @@ export class CompilerState {
       configBasePath = path.resolve(path.dirname(extractorConfig.tsconfigFilePath));
     }
 
-    const commandLine: ts.ParsedCommandLine = ts.parseJsonConfigFileContent(
-      tsconfig,
-      ts.sys,
-      configBasePath
-    );
+    const commandLine: ts.ParsedCommandLine = ts.parseJsonConfigFileContent(tsconfig, ts.sys, configBasePath);
 
     if (!commandLine.options.skipLibCheck && extractorConfig.skipLibCheck) {
       commandLine.options.skipLibCheck = true;
-      console.log(colors.cyan(
-        'API Extractor was invoked with skipLibCheck. This is not recommended and may cause ' +
-        'incorrect type analysis.'
-      ));
+      console.log(
+        colors.cyan(
+          'API Extractor was invoked with skipLibCheck. This is not recommended and may cause ' +
+            'incorrect type analysis.'
+        )
+      );
     }
 
     const inputFilePaths: string[] = commandLine.fileNames.concat(extractorConfig.mainEntryPointFilePath);
@@ -83,7 +80,7 @@ export class CompilerState {
     const program: ts.Program = ts.createProgram(analysisFilePaths, commandLine.options, compilerHost);
 
     if (commandLine.errors.length > 0) {
-      const errorText: string = TypeScriptMessageFormatter.format(commandLine.errors[0].messageText);
+      const errorText: string = ts.flattenDiagnosticMessageText(commandLine.errors[0].messageText, '\n');
       throw new Error(`Error parsing tsconfig.json content: ${errorText}`);
     }
 
@@ -92,7 +89,7 @@ export class CompilerState {
     });
   }
 
- /**
+  /**
    * Given a list of absolute file paths, return a list containing only the declaration
    * files.  Duplicates are also eliminated.
    *
@@ -129,9 +126,10 @@ export class CompilerState {
     return analysisFilePaths;
   }
 
-  private static _createCompilerHost(commandLine: ts.ParsedCommandLine,
-    options: IExtractorInvokeOptions | undefined):  ts.CompilerHost {
-
+  private static _createCompilerHost(
+    commandLine: ts.ParsedCommandLine,
+    options: IExtractorInvokeOptions | undefined
+  ): ts.CompilerHost {
     // Create a default CompilerHost that we will override
     const compilerHost: ts.CompilerHost = ts.createCompilerHost(commandLine.options);
 

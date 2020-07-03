@@ -12,7 +12,7 @@
 /// <reference types="jest" />
 /// <reference lib="es2015.symbol.wellknown" />
 /// <reference lib="es2018.intl" />
-import Long from 'long';
+import { default as Long_2 } from 'long';
 import { MAX_UNSIGNED_VALUE } from 'long';
 
 /**
@@ -59,7 +59,7 @@ export declare class AmbientConsumer {
      * Configured via tsconfig.json's "lib" setting, which specifies `@types/jest`.
      * The emitted index.d.ts gets a reference like this:  <reference types="jest" />
      */
-    definitelyTyped(): jest.Context;
+    definitelyTyped(): jest.MockContext<number, any>;
     /**
      * Found via tsconfig.json's "include" setting point to a *.d.ts file.
      * This is an old-style Definitely Typed definition, which is the worst possible kind,
@@ -92,7 +92,7 @@ export declare class ClassWithAccessModifiers {
     /** Doc comment */
     private privateMethod;
     /** Doc comment */
-    private readonly privateGetter;
+    private get privateGetter();
     /** Doc comment */
     private privateSetter;
     /** Doc comment */
@@ -102,7 +102,7 @@ export declare class ClassWithAccessModifiers {
     /** Doc comment */
     protected protectedField: number;
     /** Doc comment */
-    protected readonly protectedGetter: string;
+    protected get protectedGetter(): string;
     /** Doc comment */
     protected protectedSetter(x: string): void;
     /** Doc comment */
@@ -116,11 +116,11 @@ export declare class ClassWithAccessModifiers {
  */
 export declare class ClassWithSymbols {
     readonly [unexportedCustomSymbol]: number;
-    readonly [locallyExportedCustomSymbol]: string;
+    get [locallyExportedCustomSymbol](): string;
     [fullyExportedCustomSymbol](): void;
-    readonly [ANamespace.locallyExportedCustomSymbol]: string;
+    get [ANamespace.locallyExportedCustomSymbol](): string;
     [ANamespace.fullyExportedCustomSymbol](): void;
-    readonly [Symbol.toStringTag]: string;
+    get [Symbol.toStringTag](): string;
 }
 
 /**
@@ -330,7 +330,7 @@ declare const unexportedCustomSymbol: unique symbol;
 
 /** @public */
 export declare class UseLong {
-    use_long(): Long;
+    use_long(): Long_2;
 }
 
 /** @alpha */

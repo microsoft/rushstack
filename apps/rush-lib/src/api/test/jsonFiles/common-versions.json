@@ -6,6 +6,6 @@
     "library-2": "1.2.3"
   },
   "allowedAlternativeVersions": {
-    "library-3": [ "^1.2.3" ]
+    "library-3": ["^1.2.3"]
   }
 }

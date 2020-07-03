@@ -5,27 +5,20 @@
 
   "definitions": {
     "anything": {
-      "type": [
-        "array",
-        "boolean",
-        "integer",
-        "number",
-        "object",
-        "string"
-      ],
+      "type": ["array", "boolean", "integer", "number", "object", "string"],
       "items": { "$ref": "#/definitions/anything" }
     },
 
     "baseCommand": {
       "type": "object",
       "additionalProperties": true,
-      "required": [ "commandKind", "name", "summary" ],
+      "required": ["commandKind", "name", "summary"],
       "properties": {
         "commandKind": {
           "title": "Command Kind",
           "description": "Indicates the kind of command: \"bulk\" commands are run separately for each project; \"global\" commands are run once for the entire repository.",
           "type": "string",
-          "enum": [ "bulk", "global" ]
+          "enum": ["bulk", "global"]
         },
         "name": {
           "title": "Custom Command Name",
@@ -58,10 +51,10 @@
         {
           "type": "object",
           "additionalProperties": true,
-          "required": [ "enableParallelism" ],
+          "required": ["enableParallelism"],
           "properties": {
             "commandKind": {
-              "enum": [ "bulk" ]
+              "enum": ["bulk"]
             },
             "enableParallelism": {
               "title": "enableParallelism",
@@ -118,14 +111,19 @@
         {
           "type": "object",
           "additionalProperties": true,
-          "required": [ "shellCommand" ],
+          "required": ["shellCommand"],
           "properties": {
             "commandKind": {
-              "enum": [ "global" ]
+              "enum": ["global"]
             },
             "shellCommand": {
               "title": "Shell Command",
               "description": "A command that that will be invoked using the OS shell. The working directory will be the folder that contains rush.json. Additional command-line parameters may be appended to the end of this string.",
+              "type": "string"
+            },
+            "autoinstallerName": {
+              "title": "Autoinstaller Name",
+              "description": "If your \"shellCommand\" script depends on NPM packages, the recommended best practice is to make it into a regular Rush project that builds using your normal toolchain.  In cases where the command needs to work without first having to run \"rush build\", the recommended practice is to publish the project to an NPM registry and use common/scripts/install-run.js to launch it.\n\nAutoinstallers offer another possibility: They are folders under \"common/autoinstallers\" with a package.json file and shrinkwrap file. Rush will automatically invoke the package manager to install these dependencies before an associated command is invoked.  Autoinstallers have the advantage that they work even in a branch where \"rush install\" is broken, which makes them a good solution for Git hook scripts.  But they have the disadvantages of not being buildable projects, and of increasing the overall installation footprint for your monorepo.\n\nThe \"autoinstallerName\" setting must not contain a path and must be a valid NPM package name.\n\nFor example, the name \"my-task\" would map to \"common/autoinstallers/my-task/package.json\", and the \"common/autoinstallers/my-task/node_modules/.bin\" folder would be added to the shell PATH when invoking the \"shellCommand\".",
               "type": "string"
             }
           }
@@ -141,7 +139,8 @@
             "safeForSimultaneousRushProcesses": { "$ref": "#/definitions/anything" },
             "allowWarningsInSuccessfulBuild": { "$ref": "#/definitions/anything" },
 
-            "shellCommand": { "$ref": "#/definitions/anything" }
+            "shellCommand": { "$ref": "#/definitions/anything" },
+            "autoinstallerName": { "$ref": "#/definitions/anything" }
           }
         }
       ]
@@ -150,13 +149,13 @@
     "baseParameter": {
       "type": "object",
       "additionalProperties": true,
-      "required": [ "parameterKind", "longName", "description", "associatedCommands" ],
+      "required": ["parameterKind", "longName", "description", "associatedCommands"],
       "properties": {
         "parameterKind": {
           "title": "Parameter Kind",
           "description": "Indicates the kind of syntax for this command-line parameter: \"flag\" or \"choice\" or \"string\"",
           "type": "string",
-          "enum": [ "flag", "choice", "string" ]
+          "enum": ["flag", "choice", "string"]
         },
         "longName": {
           "title": "Long Name",
@@ -183,6 +182,11 @@
           "items": {
             "type": "string"
           }
+        },
+        "required": {
+          "title": "Required",
+          "description": "If true, then this parameter must be included on the command line",
+          "type": "boolean"
         }
       }
     },
@@ -197,7 +201,7 @@
           "additionalProperties": true,
           "properties": {
             "parameterKind": {
-              "enum": [ "flag" ]
+              "enum": ["flag"]
             }
           }
         },
@@ -209,14 +213,15 @@
             "longName": { "$ref": "#/definitions/anything" },
             "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
-            "associatedCommands": { "$ref": "#/definitions/anything" }
+            "associatedCommands": { "$ref": "#/definitions/anything" },
+            "required": { "$ref": "#/definitions/anything" }
           }
         }
       ]
     },
     "stringParameter": {
       "title": "String Parameter",
-      "description": "A custom command-line parameter whose value is intepreted as a string",
+      "description": "A custom command-line parameter whose value is interpreted as a string",
       "type": "object",
       "allOf": [
         { "$ref": "#/definitions/baseParameter" },
@@ -226,7 +231,7 @@
           "required": ["argumentName"],
           "properties": {
             "parameterKind": {
-              "enum": [ "string" ]
+              "enum": ["string"]
             },
             "argumentName": {
               "title": "Argument Name",
@@ -244,6 +249,8 @@
             "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "associatedCommands": { "$ref": "#/definitions/anything" },
+            "required": { "$ref": "#/definitions/anything" },
+
             "argumentName": { "$ref": "#/definitions/anything" }
           }
         }
@@ -258,10 +265,10 @@
         {
           "type": "object",
           "additionalProperties": true,
-          "required": [ "alternatives" ],
+          "required": ["alternatives"],
           "properties": {
             "parameterKind": {
-              "enum": [ "choice" ]
+              "enum": ["choice"]
             },
             "alternatives": {
               "title": "Alternatives",
@@ -271,7 +278,7 @@
               "items": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": [ "name", "description" ],
+                "required": ["name", "description"],
                 "properties": {
                   "name": {
                     "title": "Name of Alternative",
@@ -302,6 +309,7 @@
             "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "associatedCommands": { "$ref": "#/definitions/anything" },
+            "required": { "$ref": "#/definitions/anything" },
 
             "alternatives": { "$ref": "#/definitions/anything" },
             "defaultValue": { "$ref": "#/definitions/anything" }
@@ -326,10 +334,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "oneOf": [
-          { "$ref": "#/definitions/bulkCommand" },
-          { "$ref": "#/definitions/globalCommand" }
-        ]
+        "oneOf": [{ "$ref": "#/definitions/bulkCommand" }, { "$ref": "#/definitions/globalCommand" }]
       }
     },
 

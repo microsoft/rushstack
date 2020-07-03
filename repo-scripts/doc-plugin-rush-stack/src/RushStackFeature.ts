@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import yaml = require('js-yaml');
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 import { ApiItem } from '@microsoft/api-extractor-model';
 import {
   MarkdownDocumenterFeature,
@@ -64,7 +64,9 @@ export class RushStackFeature extends MarkdownDocumenterFeature {
       if (this._apiItemsWithPages.has(apiItem)) {
         const newNode: INavigationNode = {
           title: apiItem.displayName,
-          url: path.posix.join('/pages/api/', this.context.documenter.getLinkForApiItem(apiItem)!).replace(/\.md$/, '')
+          url: path.posix
+            .join('/pages/api/', this.context.documenter.getLinkForApiItem(apiItem)!)
+            .replace(/\.md$/, '')
         };
         parentNodes.push(newNode);
 

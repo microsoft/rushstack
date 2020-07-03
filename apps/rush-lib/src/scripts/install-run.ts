@@ -16,7 +16,7 @@ import * as childProcess from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { IPackageJson } from '@microsoft/node-core-library';
+import { IPackageJson } from '@rushstack/node-core-library';
 
 export const RUSH_JSON_FILENAME: string = 'rush.json';
 const RUSH_TEMP_FOLDER_ENV_VARIABLE_NAME: string = 'RUSH_TEMP_FOLDER';
@@ -50,6 +50,172 @@ function _parsePackageSpecifier(rawPackageSpecifier: string): IPackageSpecifier 
 
   return { name, version };
 }
+
+/**
+ * As a workaround, copyAndTrimNpmrcFile() copies the .npmrc file to the target folder, and also trims
+ * unusable lines from the .npmrc file.
+ *
+ * Why are we trimming the .npmrc lines?  NPM allows environment variables to be specified in
+ * the .npmrc file to provide different authentication tokens for different registry.
+ * However, if the environment variable is undefined, it expands to an empty string, which
+ * produces a valid-looking mapping with an invalid URL that causes an error.  Instead,
+ * we'd prefer to skip that line and continue looking in other places such as the user's
+ * home directory.
+ *
+ * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities.copyAndTrimNpmrcFile()
+ */
+function _copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string): void {
+  console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`); // Verbose
+  let npmrcFileLines: string[] = fs.readFileSync(sourceNpmrcPath).toString().split('\n');
+  npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
+  const resultLines: string[] = [];
+
+  // This finds environment variable tokens that look like "${VAR_NAME}"
+  const expansionRegExp: RegExp = /\$\{([^\}]+)\}/g;
+
+  // Comment lines start with "#" or ";"
+  const commentRegExp: RegExp = /^\s*[#;]/;
+
+  // Trim out lines that reference environment variables that aren't defined
+  for (const line of npmrcFileLines) {
+    let lineShouldBeTrimmed: boolean = false;
+
+    // Ignore comment lines
+    if (!commentRegExp.test(line)) {
+      const environmentVariables: string[] | null = line.match(expansionRegExp);
+      if (environmentVariables) {
+        for (const token of environmentVariables) {
+          // Remove the leading "${" and the trailing "}" from the token
+          const environmentVariableName: string = token.substring(2, token.length - 1);
+
+          // Is the environment variable defined?
+          if (!process.env[environmentVariableName]) {
+            // No, so trim this line
+            lineShouldBeTrimmed = true;
+            break;
+          }
+        }
+      }
+    }
+
+    if (lineShouldBeTrimmed) {
+      // Example output:
+      // "; MISSING ENVIRONMENT VARIABLE: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
+      resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
+    } else {
+      resultLines.push(line);
+    }
+  }
+
+  fs.writeFileSync(targetNpmrcPath, resultLines.join(os.EOL));
+}
+
+/**
+ * syncNpmrc() copies the .npmrc file to the target folder, and also trims unusable lines from the .npmrc file.
+ * If the source .npmrc file not exist, then syncNpmrc() will delete an .npmrc that is found in the target folder.
+ *
+ * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities._syncNpmrc()
+ */
+function _syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string, useNpmrcPublish?: boolean): void {
+  const sourceNpmrcPath: string = path.join(
+    sourceNpmrcFolder,
+    !useNpmrcPublish ? '.npmrc' : '.npmrc-publish'
+  );
+  const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
+  try {
+    if (fs.existsSync(sourceNpmrcPath)) {
+      _copyAndTrimNpmrcFile(sourceNpmrcPath, targetNpmrcPath);
+    } else if (fs.existsSync(targetNpmrcPath)) {
+      // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
+      console.log(`Deleting ${targetNpmrcPath}`); // Verbose
+      fs.unlinkSync(targetNpmrcPath);
+    }
+  } catch (e) {
+    throw new Error(`Error syncing .npmrc file: ${e}`);
+  }
+}
+
+let _npmPath: string | undefined = undefined;
+
+/**
+ * Get the absolute path to the npm executable
+ */
+export function getNpmPath(): string {
+  if (!_npmPath) {
+    try {
+      if (os.platform() === 'win32') {
+        // We're on Windows
+        const whereOutput: string = childProcess.execSync('where npm', { stdio: [] }).toString();
+        const lines: string[] = whereOutput.split(os.EOL).filter((line) => !!line);
+
+        // take the last result, we are looking for a .cmd command
+        // see https://github.com/microsoft/rushstack/issues/759
+        _npmPath = lines[lines.length - 1];
+      } else {
+        // We aren't on Windows - assume we're on *NIX or Darwin
+        _npmPath = childProcess.execSync('command -v npm', { stdio: [] }).toString();
+      }
+    } catch (e) {
+      throw new Error(`Unable to determine the path to the NPM tool: ${e}`);
+    }
+
+    _npmPath = _npmPath.trim();
+    if (!fs.existsSync(_npmPath)) {
+      throw new Error('The NPM executable does not exist');
+    }
+  }
+
+  return _npmPath;
+}
+
+function _ensureFolder(folderPath: string): void {
+  if (!fs.existsSync(folderPath)) {
+    const parentDir: string = path.dirname(folderPath);
+    _ensureFolder(parentDir);
+    fs.mkdirSync(folderPath);
+  }
+}
+
+/**
+ * Create missing directories under the specified base directory, and return the resolved directory.
+ *
+ * Does not support "." or ".." path segments.
+ * Assumes the baseFolder exists.
+ */
+function _ensureAndJoinPath(baseFolder: string, ...pathSegments: string[]): string {
+  let joinedPath: string = baseFolder;
+  try {
+    for (let pathSegment of pathSegments) {
+      pathSegment = pathSegment.replace(/[\\\/]/g, '+');
+      joinedPath = path.join(joinedPath, pathSegment);
+      if (!fs.existsSync(joinedPath)) {
+        fs.mkdirSync(joinedPath);
+      }
+    }
+  } catch (e) {
+    throw new Error(
+      `Error building local installation folder (${path.join(baseFolder, ...pathSegments)}): ${e}`
+    );
+  }
+
+  return joinedPath;
+}
+
+function _getRushTempFolder(rushCommonFolder: string): string {
+  const rushTempFolder: string | undefined = process.env[RUSH_TEMP_FOLDER_ENV_VARIABLE_NAME];
+  if (rushTempFolder !== undefined) {
+    _ensureFolder(rushTempFolder);
+    return rushTempFolder;
+  } else {
+    return _ensureAndJoinPath(rushCommonFolder, 'temp');
+  }
+}
+
+export interface IPackageSpecifier {
+  name: string;
+  version: string | undefined;
+}
+
 /**
  * Resolve a package specifier to a static version
  */
@@ -110,43 +276,6 @@ function _resolvePackageVersion(rushCommonFolder: string, { name, version }: IPa
   }
 }
 
-export interface IPackageSpecifier {
-  name: string;
-  version: string | undefined;
-}
-
-let _npmPath: string | undefined = undefined;
-/**
- * Get the absolute path to the npm executable
- */
-export function getNpmPath(): string {
-  if (!_npmPath) {
-    try {
-      if (os.platform() === 'win32') {
-        // We're on Windows
-        const whereOutput: string = childProcess.execSync('where npm', { stdio: [] }).toString();
-        const lines: string[] = whereOutput.split(os.EOL).filter((line) => !!line);
-
-        // take the last result, we are looking for a .cmd command
-        // see https://github.com/microsoft/rushstack/issues/759
-        _npmPath = lines[lines.length - 1];
-      } else {
-        // We aren't on Windows - assume we're on *NIX or Darwin
-        _npmPath = childProcess.execSync('which npm', { stdio: [] }).toString();
-      }
-    } catch (e) {
-      throw new Error(`Unable to determine the path to the NPM tool: ${e}`);
-    }
-
-    _npmPath = _npmPath.trim();
-    if (!fs.existsSync(_npmPath)) {
-      throw new Error('The NPM executable does not exist');
-    }
-  }
-
-  return _npmPath;
-}
-
 let _rushJsonFolder: string | undefined;
 /**
  * Find the absolute path to the folder containing rush.json
@@ -171,87 +300,6 @@ export function findRushJsonFolder(): string {
   }
 
   return _rushJsonFolder;
-}
-
-/**
- * Create missing directories under the specified base directory, and return the resolved directory.
- *
- * Does not support "." or ".." path segments.
- * Assumes the baseFolder exists.
- */
-function _ensureAndJoinPath(baseFolder: string, ...pathSegments: string[]): string {
-  let joinedPath: string = baseFolder;
-  try {
-    for (let pathSegment of pathSegments) {
-      pathSegment = pathSegment.replace(/[\\\/]/g, '+');
-      joinedPath = path.join(joinedPath, pathSegment);
-      if (!fs.existsSync(joinedPath)) {
-        fs.mkdirSync(joinedPath);
-      }
-    }
-  } catch (e) {
-    throw new Error(`Error building local installation folder (${path.join(baseFolder, ...pathSegments)}): ${e}`);
-  }
-
-  return joinedPath;
-}
-
-  /**
-   * As a workaround, _syncNpmrc() copies the .npmrc file to the target folder, and also trims
-   * unusable lines from the .npmrc file.  If the source .npmrc file not exist, then _syncNpmrc()
-   * will delete an .npmrc that is found in the target folder.
-   *
-   * Why are we trimming the .npmrc lines?  NPM allows environment variables to be specified in
-   * the .npmrc file to provide different authentication tokens for different registry.
-   * However, if the environment variable is undefined, it expands to an empty string, which
-   * produces a valid-looking mapping with an invalid URL that causes an error.  Instead,
-   * we'd prefer to skip that line and continue looking in other places such as the user's
-   * home directory.
-   *
-   * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities._syncNpmrc()
-   */
-function _syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string): void {
-  const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, '.npmrc');
-  const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
-  try {
-    if (fs.existsSync(sourceNpmrcPath)) {
-      let npmrcFileLines: string[] = fs.readFileSync(sourceNpmrcPath).toString().split('\n');
-      npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
-      const resultLines: string[] = [];
-      // Trim out lines that reference environment variables that aren't defined
-      for (const line of npmrcFileLines) {
-        // This finds environment variable tokens that look like "${VAR_NAME}"
-        const regex: RegExp = /\$\{([^\}]+)\}/g;
-        const environmentVariables: string[] | null = line.match(regex);
-        let lineShouldBeTrimmed: boolean = false;
-        if (environmentVariables) {
-          for (const token of environmentVariables) {
-            // Remove the leading "${" and the trailing "}" from the token
-            const environmentVariableName: string = token.substring(2, token.length - 1);
-            if (!process.env[environmentVariableName]) {
-              lineShouldBeTrimmed = true;
-              break;
-            }
-          }
-        }
-
-        if (lineShouldBeTrimmed) {
-          // Example output:
-          // "; MISSING ENVIRONMENT VARIABLE: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
-          resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
-        } else {
-          resultLines.push(line);
-        }
-      }
-
-      fs.writeFileSync(targetNpmrcPath, resultLines.join(os.EOL));
-    } else if (fs.existsSync(targetNpmrcPath)) {
-      // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
-      fs.unlinkSync(targetNpmrcPath);
-    }
-  } catch (e) {
-    throw new Error(`Error syncing .npmrc file: ${e}`);
-  }
 }
 
 /**
@@ -291,12 +339,9 @@ function _cleanInstallFolder(rushTempFolder: string, packageInstallFolder: strin
 
     const nodeModulesFolder: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME);
     if (fs.existsSync(nodeModulesFolder)) {
-      const rushRecyclerFolder: string = _ensureAndJoinPath(
-        rushTempFolder,
-        'rush-recycler',
-        `install-run-${Date.now().toString()}`
-      );
-      fs.renameSync(nodeModulesFolder, rushRecyclerFolder);
+      const rushRecyclerFolder: string = _ensureAndJoinPath(rushTempFolder, 'rush-recycler');
+
+      fs.renameSync(nodeModulesFolder, path.join(rushRecyclerFolder, `install-run-${Date.now().toString()}`));
     }
   } catch (e) {
     throw new Error(`Error cleaning the package install folder (${packageInstallFolder}): ${e}`);
@@ -306,14 +351,14 @@ function _cleanInstallFolder(rushTempFolder: string, packageInstallFolder: strin
 function _createPackageJson(packageInstallFolder: string, name: string, version: string): void {
   try {
     const packageJsonContents: IPackageJson = {
-      'name': 'ci-rush',
-      'version': '0.0.0',
-      'dependencies': {
+      name: 'ci-rush',
+      version: '0.0.0',
+      dependencies: {
         [name]: version
       },
-      'description': 'DON\'T WARN',
-      'repository': 'DON\'T WARN',
-      'license': 'MIT'
+      description: "DON'T WARN",
+      repository: "DON'T WARN",
+      license: 'MIT'
     };
 
     const packageJsonPath: string = path.join(packageInstallFolder, PACKAGE_JSON_FILENAME);
@@ -330,15 +375,11 @@ function _installPackage(packageInstallFolder: string, name: string, version: st
   try {
     console.log(`Installing ${name}...`);
     const npmPath: string = getNpmPath();
-    const result: childProcess.SpawnSyncReturns<Buffer> = childProcess.spawnSync(
-      npmPath,
-      ['install'],
-      {
-        stdio: 'inherit',
-        cwd: packageInstallFolder,
-        env: process.env
-      }
-    );
+    const result: childProcess.SpawnSyncReturns<Buffer> = childProcess.spawnSync(npmPath, ['install'], {
+      stdio: 'inherit',
+      cwd: packageInstallFolder,
+      env: process.env
+    });
 
     if (result.status !== 0) {
       throw new Error('"npm install" encountered an error');
@@ -355,7 +396,7 @@ function _installPackage(packageInstallFolder: string, name: string, version: st
  */
 function _getBinPath(packageInstallFolder: string, binName: string): string {
   const binFolderPath: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
-  const resolvedBinName: string = (os.platform() === 'win32') ? `${binName}.cmd` : binName;
+  const resolvedBinName: string = os.platform() === 'win32' ? `${binName}.cmd` : binName;
   return path.resolve(binFolderPath, resolvedBinName);
 }
 
@@ -368,24 +409,6 @@ function _writeFlagFile(packageInstallFolder: string): void {
     fs.writeFileSync(flagFilePath, process.version);
   } catch (e) {
     throw new Error(`Unable to create installed.flag file in ${packageInstallFolder}`);
-  }
-}
-
-function _getRushTempFolder(rushCommonFolder: string): string {
-  const rushTempFolder: string | undefined = process.env[RUSH_TEMP_FOLDER_ENV_VARIABLE_NAME];
-  if (rushTempFolder !== undefined) {
-    _ensureFolder(rushTempFolder);
-    return rushTempFolder;
-  } else {
-    return _ensureAndJoinPath(rushCommonFolder, 'temp');
-  }
-}
-
-function _ensureFolder(folderPath: string): void {
-  if (!fs.existsSync(folderPath)) {
-    const parentDir: string = path.dirname(folderPath);
-    _ensureFolder(parentDir);
-    fs.mkdirSync(folderPath);
   }
 }
 
@@ -421,17 +444,21 @@ export function installAndRun(
   console.log(os.EOL + statusMessage + os.EOL + statusMessageLine + os.EOL);
 
   const binPath: string = _getBinPath(packageInstallFolder, packageBinName);
-  const result: childProcess.SpawnSyncReturns<Buffer>  = childProcess.spawnSync(
-    binPath,
-    packageBinArgs,
-    {
-      stdio: 'inherit',
-      cwd: process.cwd(),
-      env: process.env
+  const binFolderPath: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
+  const result: childProcess.SpawnSyncReturns<Buffer> = childProcess.spawnSync(binPath, packageBinArgs, {
+    stdio: 'inherit',
+    cwd: process.cwd(),
+    env: {
+      ...process.env,
+      PATH: [binFolderPath, process.env.PATH].join(path.delimiter)
     }
-  );
+  });
 
-  return result.status;
+  if (result.status !== null) {
+    return result.status;
+  } else {
+    throw result.error || new Error('An unknown error occurred.');
+  }
 }
 
 export function runWithErrorAndStatusCode(fn: () => number): void {
@@ -447,10 +474,10 @@ export function runWithErrorAndStatusCode(fn: () => number): void {
 
 function _run(): void {
   const [
-    nodePath, /* Ex: /bin/node */
-    scriptPath, /* /repo/common/scripts/install-run-rush.js */
-    rawPackageSpecifier, /* qrcode@^1.2.0 */
-    packageBinName, /* qrcode */
+    nodePath /* Ex: /bin/node */,
+    scriptPath /* /repo/common/scripts/install-run-rush.js */,
+    rawPackageSpecifier /* qrcode@^1.2.0 */,
+    packageBinName /* qrcode */,
     ...packageBinArgs /* [-f, myproject/lib] */
   ]: string[] = process.argv;
 

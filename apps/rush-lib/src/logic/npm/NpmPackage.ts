@@ -1,14 +1,8 @@
 import * as path from 'path';
 import readPackageTree = require('read-package-tree');
-import {
-  JsonFile,
-  IPackageJson
-} from '@microsoft/node-core-library';
+import { JsonFile, IPackageJson } from '@rushstack/node-core-library';
 
-import {
-  BasePackage,
-  IRushTempPackageJson
-} from '../base/BasePackage';
+import { BasePackage, IRushTempPackageJson } from '../base/BasePackage';
 
 /**
  * Used by the "rush link" algorithm when doing NPM package resolution.
@@ -61,11 +55,26 @@ export class NpmPackage extends BasePackage {
    */
   public dependencies: IPackageDependency[];
 
+  private constructor(
+    name: string,
+    version: string | undefined,
+    dependencies: IPackageDependency[],
+    folderPath: string
+  ) {
+    super(name, version, folderPath, undefined);
+    this.dependencies = dependencies.slice(0); // clone the array
+    this.parent = undefined;
+  }
+
   /**
    * Used by "npm link" when creating a Package object that represents symbolic links to be created.
    */
-  public static createLinkedNpmPackage(name: string, version: string | undefined, dependencies: IPackageDependency[],
-    folderPath: string): NpmPackage {
+  public static createLinkedNpmPackage(
+    name: string,
+    version: string | undefined,
+    dependencies: IPackageDependency[],
+    folderPath: string
+  ): NpmPackage {
     return new NpmPackage(name, version, dependencies, folderPath);
   }
 
@@ -79,13 +88,13 @@ export class NpmPackage extends BasePackage {
    */
   public static createVirtualTempPackage(packageJsonFilename: string, installFolderName: string): NpmPackage {
     const packageJson: IPackageJson = JsonFile.load(packageJsonFilename);
-    const npmPackage: readPackageTree.PackageNode = {
+    const npmPackage: readPackageTree.Node = {
       children: [],
-      error: undefined,
+      error: null, // eslint-disable-line @rushstack/no-null
       id: 0,
       isLink: false,
       package: packageJson,
-      parent: undefined,
+      parent: null, // eslint-disable-line @rushstack/no-null
       path: installFolderName,
       realpath: installFolderName
     };
@@ -96,10 +105,11 @@ export class NpmPackage extends BasePackage {
    * Recursive constructs a tree of NpmPackage objects using information returned
    * by the "read-package-tree" library.
    */
-  public static createFromNpm(npmPackage: readPackageTree.PackageNode): NpmPackage {
+  public static createFromNpm(npmPackage: readPackageTree.Node): NpmPackage {
     if (npmPackage.error) {
-      throw new Error(`Failed to parse package.json for ${path.basename(npmPackage.path)}:`
-        + ` ${npmPackage.error.message}`);
+      throw new Error(
+        `Failed to parse package.json for ${path.basename(npmPackage.path)}: ${npmPackage.error.message}`
+      );
     }
 
     let dependencies: IPackageDependency[] = [];
@@ -178,8 +188,7 @@ export class NpmPackage extends BasePackage {
     let currentParent: NpmPackage = this;
     let parentForCreate: NpmPackage | undefined = undefined;
 
-    // tslint:disable-next-line:no-constant-condition
-    while (true) {
+    for (;;) {
       // Does any child match?
       for (const child of currentParent.children) {
         // The package.json name can differ from the installation folder name, in the case of an NPM package alias
@@ -202,8 +211,7 @@ export class NpmPackage extends BasePackage {
       // could add a missing dependency.
       parentForCreate = currentParent;
 
-      if (!currentParent.parent
-        || (cyclicSubtreeRoot && currentParent === cyclicSubtreeRoot)) {
+      if (!currentParent.parent || (cyclicSubtreeRoot && currentParent === cyclicSubtreeRoot)) {
         // We reached the root without finding a match
         // parentForCreate will be the root.
         return { found: undefined, parentForCreate };
@@ -220,15 +228,5 @@ export class NpmPackage extends BasePackage {
    */
   public resolve(dependencyName: string): NpmPackage | undefined {
     return this.resolveOrCreate(dependencyName).found as NpmPackage;
-  }
-
-  private constructor(name: string,
-    version: string | undefined,
-    dependencies: IPackageDependency[],
-    folderPath: string) {
-
-    super(name, version, folderPath, undefined);
-    this.dependencies = dependencies.slice(0); // clone the array
-    this.parent = undefined;
   }
 }

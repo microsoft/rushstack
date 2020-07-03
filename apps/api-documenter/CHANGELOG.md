@@ -1,6 +1,300 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Sun, 29 Sep 2019 23:56:29 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+
+## 7.8.21
+Fri, 03 Jul 2020 15:09:04 GMT
+
+*Version update only*
+
+## 7.8.20
+Fri, 03 Jul 2020 05:46:41 GMT
+
+*Version update only*
+
+## 7.8.19
+Sat, 27 Jun 2020 00:09:38 GMT
+
+*Version update only*
+
+## 7.8.18
+Fri, 26 Jun 2020 22:16:39 GMT
+
+*Version update only*
+
+## 7.8.17
+Thu, 25 Jun 2020 06:43:35 GMT
+
+*Version update only*
+
+## 7.8.16
+Wed, 24 Jun 2020 09:50:48 GMT
+
+*Version update only*
+
+## 7.8.15
+Wed, 24 Jun 2020 09:04:28 GMT
+
+*Version update only*
+
+## 7.8.14
+Sun, 21 Jun 2020 04:21:01 GMT
+
+### Patches
+
+- Improve the Markdown target to show hyperlinked "extends" and "implements" types for class and interface APIs
+
+## 7.8.13
+Mon, 15 Jun 2020 22:17:17 GMT
+
+*Version update only*
+
+## 7.8.12
+Fri, 12 Jun 2020 09:19:21 GMT
+
+*Version update only*
+
+## 7.8.11
+Wed, 10 Jun 2020 20:48:30 GMT
+
+*Version update only*
+
+## 7.8.10
+Mon, 01 Jun 2020 08:34:17 GMT
+
+*Version update only*
+
+## 7.8.9
+Sat, 30 May 2020 02:59:54 GMT
+
+*Version update only*
+
+## 7.8.8
+Thu, 28 May 2020 05:59:02 GMT
+
+*Version update only*
+
+## 7.8.7
+Wed, 27 May 2020 05:15:10 GMT
+
+*Version update only*
+
+## 7.8.6
+Tue, 26 May 2020 23:00:25 GMT
+
+*Version update only*
+
+## 7.8.5
+Fri, 22 May 2020 15:08:42 GMT
+
+*Version update only*
+
+## 7.8.4
+Thu, 21 May 2020 23:09:44 GMT
+
+*Version update only*
+
+## 7.8.3
+Thu, 21 May 2020 15:41:59 GMT
+
+*Version update only*
+
+## 7.8.2
+Tue, 19 May 2020 15:08:19 GMT
+
+*Version update only*
+
+## 7.8.1
+Fri, 15 May 2020 08:10:59 GMT
+
+*Version update only*
+
+## 7.8.0
+Wed, 06 May 2020 08:23:45 GMT
+
+### Minor changes
+
+- For markdown output, parameter types and return types are now hyperlinked to the corresponding API item
+
+## 7.7.20
+Sat, 02 May 2020 00:08:16 GMT
+
+*Version update only*
+
+## 7.7.19
+Fri, 24 Apr 2020 15:09:06 GMT
+
+### Patches
+
+- Properly encode xrefs that contain '#' characters.
+
+## 7.7.18
+Wed, 08 Apr 2020 04:07:33 GMT
+
+*Version update only*
+
+## 7.7.17
+Fri, 03 Apr 2020 15:10:15 GMT
+
+*Version update only*
+
+## 7.7.16
+Sun, 29 Mar 2020 00:04:12 GMT
+
+*Version update only*
+
+## 7.7.15
+Sat, 28 Mar 2020 00:37:16 GMT
+
+### Patches
+
+- Upgrade to TSdoc 0.12.19
+
+## 7.7.14
+Wed, 18 Mar 2020 15:07:47 GMT
+
+*Version update only*
+
+## 7.7.13
+Tue, 17 Mar 2020 23:55:58 GMT
+
+### Patches
+
+- Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`
+
+## 7.7.12
+Tue, 28 Jan 2020 02:23:44 GMT
+
+*Version update only*
+
+## 7.7.11
+Fri, 24 Jan 2020 00:27:39 GMT
+
+*Version update only*
+
+## 7.7.10
+Thu, 23 Jan 2020 01:07:56 GMT
+
+*Version update only*
+
+## 7.7.9
+Tue, 21 Jan 2020 21:56:13 GMT
+
+*Version update only*
+
+## 7.7.8
+Sun, 19 Jan 2020 02:26:52 GMT
+
+### Patches
+
+- Upgrade Node typings to Node 10
+
+## 7.7.7
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 7.7.6
+Tue, 14 Jan 2020 01:34:15 GMT
+
+*Version update only*
+
+## 7.7.5
+Sat, 11 Jan 2020 05:18:23 GMT
+
+*Version update only*
+
+## 7.7.4
+Thu, 09 Jan 2020 06:44:12 GMT
+
+*Version update only*
+
+## 7.7.3
+Wed, 08 Jan 2020 00:11:30 GMT
+
+*Version update only*
+
+## 7.7.2
+Wed, 04 Dec 2019 23:17:55 GMT
+
+*Version update only*
+
+## 7.7.1
+Tue, 03 Dec 2019 03:17:43 GMT
+
+*Version update only*
+
+## 7.7.0
+Sun, 24 Nov 2019 00:54:04 GMT
+
+### Minor changes
+
+- Add a new command-line option --new-docfx-namespaces to improve how namespaces are represented when generating YAML for DocFX
+- Added support for `@throws`
+
+## 7.6.1
+Wed, 20 Nov 2019 06:14:28 GMT
+
+*Version update only*
+
+## 7.6.0
+Fri, 15 Nov 2019 04:50:50 GMT
+
+### Minor changes
+
+- Make newline type for generated files configurable
+
+## 7.5.8
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 7.5.7
+Wed, 06 Nov 2019 22:44:18 GMT
+
+*Version update only*
+
+## 7.5.6
+Tue, 05 Nov 2019 06:49:28 GMT
+
+*Version update only*
+
+## 7.5.5
+Tue, 05 Nov 2019 01:08:39 GMT
+
+*Version update only*
+
+## 7.5.4
+Fri, 25 Oct 2019 15:08:54 GMT
+
+*Version update only*
+
+## 7.5.3
+Tue, 22 Oct 2019 06:24:44 GMT
+
+*Version update only*
+
+## 7.5.2
+Mon, 21 Oct 2019 05:22:43 GMT
+
+*Version update only*
+
+## 7.5.1
+Fri, 18 Oct 2019 15:15:00 GMT
+
+*Version update only*
+
+## 7.5.0
+Sun, 06 Oct 2019 00:27:39 GMT
+
+### Minor changes
+
+- For the markdown target, reorder the "Remarks" section to appear before the members for classes, interfaces, namespaces, and packages (GitHub #1550)
+
+## 7.4.9
+Fri, 04 Oct 2019 00:15:22 GMT
+
+*Version update only*
 
 ## 7.4.8
 Sun, 29 Sep 2019 23:56:29 GMT

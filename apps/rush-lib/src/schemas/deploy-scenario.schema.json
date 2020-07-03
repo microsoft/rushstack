@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Rush config file that defines a deployment scenario",
+  "description": "This configuration file defines a deployment scenario for use with the \"rush deploy\" command. The default scenario file path is \"deploy.json\"; additional files use the naming pattern \"deploy-<scenario-name>.json\". For full documentation, please see https://rushjs.io",
+
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "deploymentProjectNames": {
+      "description": "The \"rush deploy\" command prepares a deployment folder, starting from the main project and collecting all of its dependencies (both NPM packages and other Rush projects).  The main project is specified using the \"--project\" parameter.  The \"deploymentProjectNames\" setting lists the allowable choices for the \"--project\" parameter; this documents the intended deployments for your monorepo and helps validate that \"rush deploy\" is invoked correctly.  If there is only one item in the \"deploymentProjectNames\" array, then \"--project\" can be omitted.  The names should be complete package names as declared in rush.json.\n\nIf the main project should include other unrelated Rush projects, add it to the \"projectSettings\" section, and then specify those projects in the \"additionalProjectsToInclude\" list.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minItems": 1
+      }
+    },
+
+    "includeDevDependencies": {
+      "description": "When deploying a local Rush project, the package.json \"devDependencies\" are normally excluded. If you want to include them, set \"includeDevDependencies\" to true. The default value is false.",
+      "type": "boolean"
+    },
+
+    "includeNpmIgnoreFiles": {
+      "description": "When deploying a local Rush project, normally the .npmignore filter is applied so that Rush only copies files that would be packaged by \"npm pack\".  Setting \"includeNpmIgnoreFiles\" to true will disable this filtering so that all files are copied (with a few trivial exceptions such as the \"node_modules\" folder). The default value is false.",
+      "type": "boolean"
+    },
+
+    "omitPnpmWorkaroundLinks": {
+      "description": "To improve backwards compatibility with legacy packages, the PNPM package manager installs extra links in the node_modules folder that enable packages to import undeclared dependencies.  In some cases this workaround may significantly increase the installation footprint or cause other problems.  If your deployment does not require this workaround, you can set \"omitPnpmWorkaroundLinks\" to true to avoid creating the extra links.  The default value is false.",
+      "type": "boolean"
+    },
+
+    "linkCreation": {
+      "description": "Specify how links (symbolic links, hard links, and/or NTFS junctions) will be created in the deployed folder:\n\"default\": Create the links while copying the files; this is the default behavior.\n\"script\": A Node.js script called \"create-links.js\" will be written.  When executed, this script will create the links described in the \"deploy-metadata.json\" output file.\n\"none\": Do nothing; some other tool may create the links later.",
+      "type": "string",
+      "enum": ["default", "script", "none"]
+    },
+
+    "projectSettings": {
+      "description": "Customize how Rush projects are processed during deployment.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "projectName": {
+            "description": "The full package name of the project, which must be declared in rush.json.",
+            "type": "string"
+          },
+          "additionalProjectsToInclude": {
+            "description": " A list of additional local Rush projects to be deployed with this project (beyond the package.json dependencies).  Specify full package names, which must be declared in rush.json.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["projectName"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["deploymentProjectNames"],
+  "additionalProperties": false
+}

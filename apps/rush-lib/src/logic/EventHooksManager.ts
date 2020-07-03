@@ -32,21 +32,23 @@ export class EventHooksManager {
       console.log(os.EOL + colors.green(`Executing event hooks for ${Event[event]}`));
       scripts.forEach((script) => {
         try {
-          Utilities.executeLifecycleCommand(
-            script,
-            {
-              rushConfiguration: this._rushConfiguration,
-              workingDirectory: this._rushConfiguration.rushJsonFolder,
-              initCwd: this._commonTempFolder,
-              handleOutput: true,
-              environmentPathOptions: {
-                includeRepoBin: true
-              }
+          Utilities.executeLifecycleCommand(script, {
+            rushConfiguration: this._rushConfiguration,
+            workingDirectory: this._rushConfiguration.rushJsonFolder,
+            initCwd: this._commonTempFolder,
+            handleOutput: true,
+            environmentPathOptions: {
+              includeRepoBin: true
             }
-          );
+          });
         } catch (error) {
-          console.error(`${os.EOL} Event hook "${script}" failed. Run "rush" with --debug` +
-            ` to see detailed error information.`);
+          console.error(
+            os.EOL +
+              colors.yellow(
+                `Event hook "${script}" failed. Run "rush" with --debug` +
+                  ` to see detailed error information.`
+              )
+          );
           if (isDebug) {
             console.error(os.EOL + error.message);
           }

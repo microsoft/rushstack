@@ -1,5 +1,7 @@
+pool:
+  vmImage: 'ubuntu-latest'
 variables:
-  NodeVersion: 10
+  NodeVersion: 12
   VersionPolicy: rush
 steps:
-- template: templates/buildAndPublish.yaml
+  - template: templates/buildAndPublish.yaml

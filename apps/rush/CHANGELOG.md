@@ -1,6 +1,296 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 27 Sep 2019 22:34:50 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Jul 2020 06:16:09 GMT and should not be manually modified.
+
+## 5.27.3
+Fri, 03 Jul 2020 06:16:09 GMT
+
+### Updates
+
+- Added support for new format used by pnpm for tarball URLs that now begin with an @ symbol
+
+## 5.27.2
+Thu, 02 Jul 2020 01:52:18 GMT
+
+### Updates
+
+- Improve "rush deploy" to copy PNPM workaround links (fixes GitHub #1942 and 1943)
+
+## 5.27.1
+Mon, 29 Jun 2020 18:39:59 GMT
+
+### Updates
+
+- Fix an issue where environment variable trimming for .npmrc was unnecessarily performed on comment lines
+- Add a "rush init" template for .npmrc-publish
+- Fix a regression affecting GitHub specifiers for package.json dependencies (issue #1749)
+
+## 5.27.0
+Sun, 21 Jun 2020 04:48:53 GMT
+
+### Updates
+
+- Improve "rush deploy" to apply pnpmfile.js when calculating dependencies
+
+## 5.26.0
+Mon, 15 Jun 2020 01:26:24 GMT
+
+### Updates
+
+- Breaking change for the experimental "rush deploy" feature: Simplify the config file design, based on the discussion from GitHub #1906
+
+## 5.25.2
+Thu, 11 Jun 2020 05:34:31 GMT
+
+### Updates
+
+- Fix an issue where Git hook scripts failed in some environments due to CRLF newlines
+
+## 5.25.1
+Thu, 11 Jun 2020 05:05:30 GMT
+
+### Updates
+
+- Fix some minor errors in the "rush init" template that occured when Prettier reformatted the template file macros
+- Add a sample Git hook file to the "rush init" template
+- Fix a minor issue where "rush link" failed if no projects were defined yet in rush.json
+- Add "--no-verify" for commits performed by "rush version", since Git hook scripts may fail on CI machines
+
+## 5.25.0
+Wed, 10 Jun 2020 23:53:27 GMT
+
+### Updates
+
+- Add new command-line.json setting "autoinstallerName"
+
+## 5.24.4
+Mon, 08 Jun 2020 18:04:35 GMT
+
+### Updates
+
+- Explicitly assigning the option value for --resolution-strategy. This fixes a crash with pnpm v5, which deprecated the option.
+- Fix an issue where install-run.js is not able to find its own .bin in PATH
+- Fix an issue where "rush install" sometimes skipped regenerating temporary packages, which is incompatible with PNPM's "--frozen-lockfile" feature
+
+## 5.24.3
+Thu, 04 Jun 2020 22:50:56 GMT
+
+### Updates
+
+- Fix an issue where "rush deploy" generated incorrect symlinks on Mac OS if the target folder was symlinked (GitHub #1910)
+
+## 5.24.2
+Wed, 03 Jun 2020 05:35:19 GMT
+
+### Updates
+
+- Expect error when trying to resolve optional dependency during deploy
+
+## 5.24.1
+Tue, 02 Jun 2020 03:11:32 GMT
+
+### Updates
+
+- Fix an issue where the "linkCreation" defaulted to "none" instead of "default"
+
+## 5.24.0
+Mon, 01 Jun 2020 08:48:49 GMT
+
+### Updates
+
+- Set next LTS node version to 14.
+- Add new "rush deploy" command that copies subsets of files/symlinks to a deployment folder
+
+## 5.23.5
+Thu, 28 May 2020 22:49:57 GMT
+
+### Updates
+
+- Fix an issue where Rush cannot reinstall itself on Windows
+
+## 5.23.4
+Thu, 21 May 2020 15:41:59 GMT
+
+### Updates
+
+- Add a new rush.json setting "allowMostlyStandardPackageNames"
+- Add RUSH_PARALLELISM environment variable for specifying the --parallelism default
+
+## 5.23.3
+Fri, 15 May 2020 08:10:59 GMT
+
+### Updates
+
+- Fix a few instances of missing spaces in --help documentation.
+- Provide an option to pass --frozen-lockfile to pnpm for rush install
+
+## 5.23.2
+Wed, 22 Apr 2020 18:44:26 GMT
+
+### Updates
+
+- Add common-versions.json to the set of files that, when changed, will trigger reinstallation of dependencies.
+
+## 5.23.1
+Wed, 15 Apr 2020 03:33:55 GMT
+
+### Updates
+
+- Fix a regression in Rush 5.19.0 where customizing "rush rebuild" would call the "build" script instead of the "rebuild" script.
+- Fix an issue where, on some minimal systems, Rush used a missing shell command to detect an application path.
+- Fix an issue where the common/temp/*.tgz files resulted in different shrinkwrap files on different operating systems
+
+## 5.23.0
+Sat, 04 Apr 2020 00:38:29 GMT
+
+### Updates
+
+- Add a new rush.json setting "preventManualShrinkwrapChanges" which prevents against accidental mistakes in pnpm-lock.yaml.
+- Upgrade node-tar
+- Remove some misleading log output for "rush build" (GitHub #1733)
+
+## 5.22.0
+Wed, 18 Mar 2020 01:23:22 GMT
+
+### Updates
+
+- Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`
+- Support setting environment variables for package manager install processes in rush.json and expose --max-install-attempts as a parameter for rush install/update.
+
+## 5.21.0
+Sat, 07 Mar 2020 05:36:08 GMT
+
+### Updates
+
+- Make the event hook failure message print in yellow.
+- Improve phrasing of an error message.
+- Add a new command-line.json setting "required" for non-optional parameters
+- Implement `pnpmOptions.pnpmStore` and RUSH_PNPM_STORE_PATH, to allow the end-user to define where PNPM will place its store.
+- Add a --json flag for "rush check" to facilitate automation
+
+## 5.20.0
+Wed, 12 Feb 2020 21:51:19 GMT
+
+### Updates
+
+- Support "." as a value for the --to and --from parameters to build to the current project.
+- Improve security by allowing the "rush publish" authentication token to be specified via an environment variable.
+
+## 5.19.4
+Tue, 28 Jan 2020 03:57:30 GMT
+
+### Updates
+
+- Fix an issue where a missing "repository" property in rush.json would cause "rush change" to throw.
+
+## 5.19.3
+Tue, 28 Jan 2020 01:35:53 GMT
+
+*Version update only*
+
+## 5.19.2
+Tue, 28 Jan 2020 01:08:26 GMT
+
+### Updates
+
+- Fix an issue where the rushx command will always report error.
+- Fixes "too many params" and "unable to find ref v<version>" issues in git tagging while publishing.
+
+## 5.19.1
+Sat, 25 Jan 2020 05:15:10 GMT
+
+### Updates
+
+- Fix an issue with install-run.js, where successful executions exit with a nonzero exit code.
+
+## 5.19.0
+Sat, 25 Jan 2020 04:19:23 GMT
+
+### Updates
+
+- Make the default branch and default remote configurable.
+- Fix an issue where the Rush process terminates without any error message during installation/linking, due to a dependency package that broke its SemVer contract (GitHub #1713)
+- Update package.json files without reformatting or reordering properties and fields during "rush add", "rush version" and "rush publish".
+- Upgrade Node typings to Node 10
+- Update the "rush init" .gitignore file to ignore .rush/temp and .DS_Store folders
+- Improve command-line.json handling so that the "rush build" and "rush rebuild" commands can be extended without having to duplicate the built-in options (GitHub #1375)
+- Add a --json flag for "rush list" to facilitate automation
+
+## 5.18.0
+Sat, 11 Jan 2020 05:38:55 GMT
+
+### Updates
+
+- Don't use the `build` verb when printing task failures
+- Add a --commit command-line argument to the publish command to allow the git commit to be explicitly provided for tagging.
+- Update GitHub project URL in some resource files
+- fix typo in version-policies.json
+
+## 5.17.2
+Tue, 26 Nov 2019 00:53:52 GMT
+
+### Updates
+
+- Resolve an issue where git tags were not being applied when using pack or publish with --include-all
+
+## 5.17.1
+Thu, 21 Nov 2019 00:50:15 GMT
+
+### Updates
+
+- Fix an issue with Rush add, where Rush was unable to add unpublished local projects as dependencies.
+
+## 5.17.0
+Thu, 14 Nov 2019 22:52:48 GMT
+
+### Updates
+
+- Add a new setting "implicitlyPreferredVersions" in common-versions.json that can be used to solve some installation failures involving peer dependencies
+- Improve the generation of shrinkwrap-deps.json to consider optional peer dependencies and implicitlyPreferredVersions=false
+- Fix an issue where certain operations did not use a stable sort when executed on older versions of NodeJS
+
+## 5.16.1
+Fri, 25 Oct 2019 20:15:59 GMT
+
+### Updates
+
+- Log to console instead of throwing when an unmet peer dependency is encountered during linking, and strictPeerDependencies is false
+- Refactor some code as part of migration from TSLint to ESLint
+
+## 5.16.0
+Thu, 17 Oct 2019 00:41:01 GMT
+
+### Updates
+
+- Support PNPM 4 on Rush
+- Add support for "rush add" for repos using the Yarn package manager.
+
+## 5.15.1
+Thu, 10 Oct 2019 23:47:19 GMT
+
+### Updates
+
+- Fix an issue where build commands can fail because git commands used to track changes can be too long.
+- Fix compatibility issue where PNPM 4 requires --no-prefer-frozen-lockfile instead of --no-prefer-frozen-shrinkwrap
+
+## 5.15.0
+Tue, 08 Oct 2019 22:58:33 GMT
+
+### Updates
+
+- Improve 'rush build' to avoid rebuilding unnecessarily when the package-lock.json file has changed (pnpm only).
+
+## 5.14.0
+Wed, 02 Oct 2019 01:18:02 GMT
+
+### Updates
+
+- Add an --all flag to "rush add" to add a dependency to all projects.
+- Add options to rush change to allow creating changefiles for all changed projects.
+- Rush update now prints a message when the approved packages files are out-of-date, and rush install exits with an error if they are out-of-date.
+- Include peerDependencies in the approved packages files.
+- Make detection of changefiles and changes in projects safer.
+- Update repository URL
 
 ## 5.13.1
 Fri, 27 Sep 2019 22:34:50 GMT

@@ -55,6 +55,9 @@ export declare enum RegularEnum {
 /** @public */
 export declare class SimpleClass {
     member(): void;
+    get readonlyProperty(): string;
+    get writeableProperty(): string;
+    set writeableProperty(value: string);
 }
 
 /** @public */

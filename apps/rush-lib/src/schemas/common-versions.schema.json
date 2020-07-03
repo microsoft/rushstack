@@ -10,11 +10,15 @@
       "type": "string"
     },
     "preferredVersions": {
-      "description": "A table that specifies a \"preferred version\" for a dependency package. The \"preferred version\" is typically used to hold an indirect dependency back to a specific version, however generally it can be any SemVer range specifier (e.g. \"~1.2.3\"), and it will narrow any (compatible) SemVer range specifier. See the Rush documentation for details.",
+      "description": "A table that specifies a \"preferred version\" for a given NPM package.  This feature is typically used to hold back an indirect dependency to a specific older version, or to reduce duplication of indirect dependencies. The \"preferredVersions\" value can be any SemVer range specifier (e.g. \"~1.2.3\").  Rush injects these values into the \"dependencies\" field of the top-level common/temp/package.json, which influences how the package manager will calculate versions.  The specific effect depends on your package manager.  Generally it will have no effect on an incompatible or already constrained SemVer range.  If you are using PNPM, similar effects can be achieved using the pnpmfile.js hook.  See the Rush documentation for more details.",
       "type": "object",
       "additionalProperties": {
         "type": "string"
       }
+    },
+    "implicitlyPreferredVersions": {
+      "description": "When set to true, for all projects in the repo, all dependencies will be automatically added as preferredVersions, except in cases where different projects specify different version ranges for a given dependency.  For older package managers, this tended to reduce duplication of indirect dependencies.  However, it can sometimes cause trouble for indirect dependencies with incompatible peerDependencies ranges.",
+      "type": "boolean"
     },
     "xstitchPreferredVersions": {
       "description": "A table of specifies preferred versions maintained by the XStitch tool. See the Rush documentation for details.",

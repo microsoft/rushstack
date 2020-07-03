@@ -30,7 +30,7 @@ export interface IFeatureDefinition {
   /**
    * Your subclass that extends from the base class.
    */
-  subclass: { new(initialization: PluginFeatureInitialization): MarkdownDocumenterFeature };
+  subclass: { new (initialization: PluginFeatureInitialization): MarkdownDocumenterFeature };
 }
 
 /**

@@ -5,12 +5,9 @@ import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 
-import {
-  CommandLineAction,
-  ICommandLineActionOptions
-} from '@microsoft/ts-command-line';
+import { CommandLineAction, ICommandLineActionOptions } from '@rushstack/ts-command-line';
 
-import { LockFile } from '@microsoft/node-core-library';
+import { LockFile } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { EventHooksManager } from '../../logic/EventHooksManager';
@@ -54,7 +51,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction {
     return this._parser;
   }
 
-  constructor(options: IBaseRushActionOptions) {
+  public constructor(options: IBaseRushActionOptions) {
     super(options);
 
     this._parser = options.parser;
@@ -85,11 +82,13 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction {
 
   private _ensureEnvironment(): void {
     if (this.rushConfiguration) {
-      /* tslint:disable-next-line:no-string-literal */
+      // eslint-disable-next-line dot-notation
       let environmentPath: string | undefined = process.env['PATH'];
-      environmentPath = path.join(this.rushConfiguration.commonTempFolder, 'node_modules', '.bin') +
-        path.delimiter + environmentPath;
-      /* tslint:disable-next-line:no-string-literal */
+      environmentPath =
+        path.join(this.rushConfiguration.commonTempFolder, 'node_modules', '.bin') +
+        path.delimiter +
+        environmentPath;
+      // eslint-disable-next-line dot-notation
       process.env['PATH'] = environmentPath;
     }
   }

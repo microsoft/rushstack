@@ -19,10 +19,10 @@ const procStatStartTimePos: number = 22;
 
 /**
  * Parses the process start time from the contents of a linux /proc/[pid]/stat file.
- * @param stat The contents of a linux /proc/[pid]/stat file.
+ * @param stat - The contents of a linux /proc/[pid]/stat file.
  * @returns The process start time in jiffies, or undefined if stat has an unexpected format.
  */
-export function getProcessStartTimeFromProcStat (stat: string): string | undefined {
+export function getProcessStartTimeFromProcStat(stat: string): string | undefined {
   // Parse the value at position procStatStartTimePos.
   // We cannot just split stat on spaces, because value 2 may contain spaces.
   // For example, when running the following Shell commands:
@@ -36,10 +36,11 @@ export function getProcessStartTimeFromProcStat (stat: string): string | undefin
   // trimRight to remove the trailing line terminator.
   let values: string[] = stat.trimRight().split(' ');
   let i: number = values.length - 1;
-  while (i >= 0 &&
+  while (
+    i >= 0 &&
     // charAt returns an empty string if the index is out of bounds.
     values[i].charAt(values[i].length - 1) !== ')'
-    ) {
+  ) {
     i -= 1;
   }
   // i is the index of the last part of the second value (but i need not be 1).
@@ -90,7 +91,7 @@ export function getProcessStartTime(pid: number): string | undefined {
   // zero bytes are written to stdout.
   if (psResult.status !== 0 && !psStdout && process.platform === 'linux') {
     // Try to read /proc/[pid]/stat and get the value at position procStatStartTimePos.
-    let stat: undefined|string;
+    let stat: undefined | string;
     try {
       stat = FileSystem.readFile(`/proc/${pidString}/stat`);
     } catch (error) {
@@ -102,10 +103,12 @@ export function getProcessStartTime(pid: number): string | undefined {
       return undefined;
     }
     if (stat !== undefined) {
-      const startTimeJiffies: string|undefined = getProcessStartTimeFromProcStat(stat);
+      const startTimeJiffies: string | undefined = getProcessStartTimeFromProcStat(stat);
       if (startTimeJiffies === undefined) {
-        throw new Error(`Could not retrieve the start time of process ${pidString} from the OS because the `
-          + `contents of /proc/${pidString}/stat have an unexpected format`);
+        throw new Error(
+          `Could not retrieve the start time of process ${pidString} from the OS because the ` +
+            `contents of /proc/${pidString}/stat have an unexpected format`
+        );
       }
       return startTimeJiffies;
     }
@@ -134,27 +137,51 @@ export function getProcessStartTime(pid: number): string | undefined {
 }
 
 /**
- * A helper utility for working with file-based locks.
- * This class should only be used for locking resources across processes,
- * but should not be used for attempting to lock a resource in the same process.
+ * The `LockFile` implements a file-based mutex for synchronizing access to a shared resource
+ * between multiple Node.js processes.  It is not recommended for synchronization solely within
+ * a single Node.js process.
+ * @remarks
+ * The implementation works on Windows, Mac, and Linux without requiring any native helpers.
+ * On non-Windows systems, the algorithm requires access to the `ps` shell command.  On Linux,
+ * it requires access the `/proc/${pidString}/stat` filesystem.
  * @public
  */
 export class LockFile {
   private static _getStartTime: (pid: number) => string | undefined = getProcessStartTime;
 
+  private _fileWriter: FileWriter | undefined;
+  private _filePath: string;
+  private _dirtyWhenAcquired: boolean;
+
+  private constructor(fileWriter: FileWriter | undefined, filePath: string, dirtyWhenAcquired: boolean) {
+    this._fileWriter = fileWriter;
+    this._filePath = filePath;
+    this._dirtyWhenAcquired = dirtyWhenAcquired;
+  }
+
   /**
-   * Returns the path to the lockfile, should it be created successfully.
+   * Returns the path of the lockfile that will be created when a lock is successfully acquired.
+   * @param resourceFolder - The folder where the lock file will be created
+   * @param resourceName - An alphanumeric name that describes the resource being locked.  This will become
+   *   the filename of the temporary file created to manage the lock.
+   * @param pid - The PID for the current Node.js process (`process.pid`), which is used by the locking algorithm.
    */
-  public static getLockFilePath(resourceDir: string, resourceName: string, pid: number = process.pid): string {
+  public static getLockFilePath(
+    resourceFolder: string,
+    resourceName: string,
+    pid: number = process.pid
+  ): string {
     if (!resourceName.match(/^[a-zA-Z0-9][a-zA-Z0-9-.]+[a-zA-Z0-9]$/)) {
-      throw new Error(`The resource name "${resourceName}" is invalid.`
-        + ` It must be an alphanumberic string with only "-" or "." It must start with an alphanumeric character.`);
+      throw new Error(
+        `The resource name "${resourceName}" is invalid.` +
+          ` It must be an alphanumberic string with only "-" or "." It must start with an alphanumeric character.`
+      );
     }
 
     if (process.platform === 'win32') {
-      return path.join(path.resolve(resourceDir), `${resourceName}.lock`);
+      return path.join(path.resolve(resourceFolder), `${resourceName}.lock`);
     } else if (process.platform === 'linux' || process.platform === 'darwin') {
-      return path.join(path.resolve(resourceDir), `${resourceName}#${pid}.lock`);
+      return path.join(path.resolve(resourceFolder), `${resourceName}#${pid}.lock`);
     }
 
     throw new Error(`File locking not implemented for platform: "${process.platform}"`);
@@ -162,38 +189,48 @@ export class LockFile {
 
   /**
    * Attempts to create a lockfile with the given filePath.
-   * If successful, returns a LockFile instance.
-   * If unable to get a lock, returns undefined.
-   * @param resourceName - the name of the resource we are locking on. Should be an alphabetic string.
+   * @param resourceFolder - The folder where the lock file will be created
+   * @param resourceName - An alphanumeric name that describes the resource being locked.  This will become
+   *   the filename of the temporary file created to manage the lock.
+   * @returns If successful, returns a `LockFile` instance.  If unable to get a lock, returns `undefined`.
    */
-  public static tryAcquire(resourceDir: string, resourceName: string): LockFile | undefined {
-    FileSystem.ensureFolder(resourceDir);
+  public static tryAcquire(resourceFolder: string, resourceName: string): LockFile | undefined {
+    FileSystem.ensureFolder(resourceFolder);
     if (process.platform === 'win32') {
-      return LockFile._tryAcquireWindows(resourceDir, resourceName);
+      return LockFile._tryAcquireWindows(resourceFolder, resourceName);
     } else if (process.platform === 'linux' || process.platform === 'darwin') {
-      return LockFile._tryAcquireMacOrLinux(resourceDir, resourceName);
+      return LockFile._tryAcquireMacOrLinux(resourceFolder, resourceName);
     }
     throw new Error(`File locking not implemented for platform: "${process.platform}"`);
   }
 
   /**
-   * Attempts to create the lockfile.
-   * Will continue to loop at every 100ms until the lock becomes available or the maxWaitMs is surpassed.
-   * @remarks This function is subject to starvation, whereby it does not ensure that the process that has been
-   *          waiting the longest to acquire the lock will get it first. This means that a process could theoretically
-   *          wait for the lock forever, while other processes skipped it in line and acquired the lock first.
+   * Attempts to create the lockfile.  Will continue to loop at every 100ms until the lock becomes available
+   * or the maxWaitMs is surpassed.
+   *
+   * @remarks
+   * This function is subject to starvation, whereby it does not ensure that the process that has been
+   * waiting the longest to acquire the lock will get it first. This means that a process could theoretically
+   * wait for the lock forever, while other processes skipped it in line and acquired the lock first.
+   *
+   * @param resourceFolder - The folder where the lock file will be created
+   * @param resourceName - An alphanumeric name that describes the resource being locked.  This will become
+   *   the filename of the temporary file created to manage the lock.
+   * @param maxWaitMs - The maximum number of milliseconds to wait for the lock before reporting an error
    */
-  public static acquire(resourceDir: string, resourceName: string, maxWaitMs?: number): Promise<LockFile> {
+  public static acquire(resourceFolder: string, resourceName: string, maxWaitMs?: number): Promise<LockFile> {
     const interval: number = 100;
     const startTime: number = Date.now();
 
     const retryLoop: () => Promise<LockFile> = () => {
-      const lock: LockFile | undefined = LockFile.tryAcquire(resourceDir, resourceName);
+      const lock: LockFile | undefined = LockFile.tryAcquire(resourceFolder, resourceName);
       if (lock) {
         return Promise.resolve(lock);
       }
-      if (maxWaitMs && (Date.now() > startTime + maxWaitMs)) {
-        return Promise.reject(new Error(`Exceeded maximum wait time to acquire lock for resource "${resourceName}"`));
+      if (maxWaitMs && Date.now() > startTime + maxWaitMs) {
+        return Promise.reject(
+          new Error(`Exceeded maximum wait time to acquire lock for resource "${resourceName}"`)
+        );
       }
 
       return LockFile._sleepForMs(interval).then(() => {
@@ -215,7 +252,7 @@ export class LockFile {
   /**
    * Attempts to acquire the lock on a Linux or OSX machine
    */
-  private static _tryAcquireMacOrLinux(resourceDir: string, resourceName: string): LockFile | undefined {
+  private static _tryAcquireMacOrLinux(resourceFolder: string, resourceName: string): LockFile | undefined {
     let dirtyWhenAcquired: boolean = false;
 
     // get the current process' pid
@@ -226,7 +263,7 @@ export class LockFile {
       throw new Error(`Unable to calculate start time for current process.`);
     }
 
-    const pidLockFilePath: string = LockFile.getLockFilePath(resourceDir, resourceName);
+    const pidLockFilePath: string = LockFile.getLockFilePath(resourceFolder, resourceName);
     let lockFileHandle: FileWriter | undefined;
 
     let lockFile: LockFile;
@@ -244,7 +281,7 @@ export class LockFile {
       let smallestBirthTimePid: string = pid.toString();
 
       // now, scan the directory for all lockfiles
-      const files: string[] = FileSystem.readFolder(resourceDir);
+      const files: string[] = FileSystem.readFolder(resourceFolder);
 
       // look for anything ending with # then numbers and ".lock"
       const lockFileRegExp: RegExp = /^(.+)#([0-9]+)\.lock$/;
@@ -252,12 +289,13 @@ export class LockFile {
       let match: RegExpMatchArray | null;
       let otherPid: string;
       for (const fileInFolder of files) {
-        if ((match = fileInFolder.match(lockFileRegExp))
-          && (match[1] === resourceName)
-          && ((otherPid = match[2]) !== pid.toString())) {
-
+        if (
+          (match = fileInFolder.match(lockFileRegExp)) &&
+          match[1] === resourceName &&
+          (otherPid = match[2]) !== pid.toString()
+        ) {
           // we found at least one lockfile hanging around that isn't ours
-          const fileInFolderPath: string = path.join(resourceDir, fileInFolder);
+          const fileInFolderPath: string = path.join(resourceFolder, fileInFolder);
           dirtyWhenAcquired = true;
 
           // console.log(`FOUND OTHER LOCKFILE: ${otherPid}`);
@@ -285,8 +323,11 @@ export class LockFile {
               // will hold it
               // console.log(`Ignoring lock for pid ${otherPid} because its lockfile is newer than ours.`);
               continue;
-            } else if (otherBirthtimeMs - currentBirthTimeMs < 0        // it was created before us AND
-              && otherBirthtimeMs - currentBirthTimeMs > -1000) { // it was created less than a second before
+            } else if (
+              otherBirthtimeMs - currentBirthTimeMs < 0 && // it was created before us AND
+              otherBirthtimeMs - currentBirthTimeMs > -1000
+            ) {
+              // it was created less than a second before
 
               // conservatively be unable to keep the lock
               return undefined;
@@ -335,8 +376,8 @@ export class LockFile {
    * Attempts to acquire the lock using Windows
    * This algorithm is much simpler since we can rely on the operating system
    */
-  private static _tryAcquireWindows(resourceDir: string, resourceName: string): LockFile | undefined {
-    const lockFilePath: string = LockFile.getLockFilePath(resourceDir, resourceName);
+  private static _tryAcquireWindows(resourceFolder: string, resourceName: string): LockFile | undefined {
+    const lockFilePath: string = LockFile.getLockFilePath(resourceFolder, resourceName);
     let dirtyWhenAcquired: boolean = false;
 
     let fileHandle: FileWriter | undefined;
@@ -409,11 +450,5 @@ export class LockFile {
    */
   public get isReleased(): boolean {
     return this._fileWriter === undefined;
-  }
-
-  private constructor(
-    private _fileWriter: FileWriter | undefined,
-    private _filePath: string,
-    private _dirtyWhenAcquired: boolean) {
   }
 }

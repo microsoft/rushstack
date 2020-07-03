@@ -1,0 +1,45 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
+  "commands": [
+    {
+      "commandKind": "bulk",
+      "name": "build",
+      "summary": "Build all projects that haven't been built, or have changed since they were last built",
+      "enableParallelism": true,
+      "allowWarningsInSuccessfulBuild": true
+    },
+    {
+      "commandKind": "bulk",
+      "name": "my-bulk-command",
+      "summary": "Example bulk custom command",
+      "description": "This is an example custom command that runs separately for each project",
+      "safeForSimultaneousRushProcesses": false,
+      "enableParallelism": false,
+      "ignoreDependencyOrder": false,
+      "ignoreMissingScript": false,
+      "allowWarningsInSuccessfulBuild": false
+    },
+    {
+      "commandKind": "global",
+      "name": "my-global-command",
+      "summary": "Example global custom command",
+      "description": "This is an example custom command that runs once for the entire repo",
+      "safeForSimultaneousRushProcesses": false,
+      "shellCommand": "node common/scripts/my-global-command.js"
+    }
+  ],
+  "parameters": [
+    {
+      "longName": "--no-color",
+      "parameterKind": "flag",
+      "description": "disable colors in the build log, defaults to 'true'",
+      "associatedCommands": ["build", "rebuild"]
+    },
+    {
+      "longName": "--production",
+      "parameterKind": "flag",
+      "description": "Perform a production build, including minification and localization steps",
+      "associatedCommands": ["build", "rebuild"]
+    }
+  ]
+}

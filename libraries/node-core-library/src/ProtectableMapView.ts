@@ -14,28 +14,31 @@ export class ProtectableMapView<K, V> extends Map<K, V> {
   private readonly _owner: ProtectableMap<K, V>;
   private readonly _parameters: IProtectableMapParameters<K, V>;
 
-  constructor(owner: ProtectableMap<K, V>, parameters: IProtectableMapParameters<K, V>) {
+  public constructor(owner: ProtectableMap<K, V>, parameters: IProtectableMapParameters<K, V>) {
     super();
 
     this._owner = owner;
     this._parameters = parameters;
   }
 
-  public clear(): void { // override
+  public clear(): void {
+    // override
     if (this._parameters.onClear) {
       this._parameters.onClear(this._owner);
     }
     super.clear();
   }
 
-  public delete(key: K): boolean { // override
+  public delete(key: K): boolean {
+    // override
     if (this._parameters.onDelete) {
       this._parameters.onDelete(this._owner, key);
     }
     return super.delete(key);
   }
 
-  public set(key: K, value: V): this { // override
+  public set(key: K, value: V): this {
+    // override
     let modifiedValue: V = value;
     if (this._parameters.onSet) {
       modifiedValue = this._parameters.onSet(this._owner, key, modifiedValue);

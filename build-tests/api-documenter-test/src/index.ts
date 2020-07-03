@@ -27,11 +27,15 @@ export type ExampleTypeAlias = Promise<boolean>;
 export const constVariable: number = 123;
 
 /**
- * An exported function
+ * An exported function with hyperlinked parameters and return value.
+ *
+ * @param x - an API item that should get hyperlinked
+ * @param y - a system type that should NOT get hyperlinked
+ * @returns an interface that should get hyperlinked
  * @public
  */
-export function globalFunction(x: number): number {
-  return x;
+export function exampleFunction(x: ExampleTypeAlias, y: number): IDocInterface1 {
+  return (undefined as unknown) as IDocInterface1;
 }
 
 /**
@@ -61,3 +65,13 @@ export namespace OuterNamespace {
  * @public
  */
 export declare function yamlReferenceUniquenessTest(): IDocInterface1;
+
+/**
+ * @public
+ */
+export type TypeAlias = number;
+
+/**
+ * @public
+ */
+export type GenericTypeAlias<T> = T[];

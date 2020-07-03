@@ -7,19 +7,21 @@ import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredIt
 import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
 import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiReturnTypeMixin';
-import { ApiTypeParameterListMixin, IApiTypeParameterListMixinOptions } from '../mixins/ApiTypeParameterListMixin';
+import {
+  ApiTypeParameterListMixin,
+  IApiTypeParameterListMixinOptions
+} from '../mixins/ApiTypeParameterListMixin';
 
 /**
  * Constructor options for {@link ApiConstructor}.
  * @public
  */
-export interface IApiConstructSignatureOptions extends
-  IApiTypeParameterListMixinOptions,
-  IApiParameterListMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiReturnTypeMixinOptions,
-  IApiDeclaredItemOptions {
-}
+export interface IApiConstructSignatureOptions
+  extends IApiTypeParameterListMixinOptions,
+    IApiParameterListMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiReturnTypeMixinOptions,
+    IApiDeclaredItemOptions {}
 
 /**
  * Represents a TypeScript construct signature that belongs to an `ApiInterface`.
@@ -63,15 +65,15 @@ export interface IApiConstructSignatureOptions extends
  *
  * @public
  */
-export class ApiConstructSignature extends ApiTypeParameterListMixin(ApiParameterListMixin(ApiReleaseTagMixin(
-  ApiReturnTypeMixin(ApiDeclaredItem)))) {
+export class ApiConstructSignature extends ApiTypeParameterListMixin(
+  ApiParameterListMixin(ApiReleaseTagMixin(ApiReturnTypeMixin(ApiDeclaredItem)))
+) {
+  public constructor(options: IApiConstructSignatureOptions) {
+    super(options);
+  }
 
   public static getContainerKey(overloadIndex: number): string {
     return `|${ApiItemKind.ConstructSignature}|${overloadIndex}`;
-  }
-
-  public constructor(options: IApiConstructSignatureOptions) {
-    super(options);
   }
 
   /** @override */
@@ -88,10 +90,8 @@ export class ApiConstructSignature extends ApiTypeParameterListMixin(ApiParamete
   public buildCanonicalReference(): DeclarationReference {
     const parent: DeclarationReference = this.parent
       ? this.parent.canonicalReference
-      // .withMeaning() requires some kind of component
-      : DeclarationReference.empty().addNavigationStep(Navigation.Members, '(parent)');
-    return parent
-      .withMeaning(Meaning.ConstructSignature)
-      .withOverloadIndex(this.overloadIndex);
+      : // .withMeaning() requires some kind of component
+        DeclarationReference.empty().addNavigationStep(Navigation.Members, '(parent)');
+    return parent.withMeaning(Meaning.ConstructSignature).withOverloadIndex(this.overloadIndex);
   }
 }

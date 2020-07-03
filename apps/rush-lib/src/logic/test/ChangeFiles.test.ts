@@ -25,14 +25,14 @@ describe('ChangeFiles', () => {
     it('returns empty array when no change files', () => {
       const changesPath: string = path.join(__dirname, 'noChange');
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
-      expect(changeFiles.getFiles().length).toEqual(0);
+      expect(changeFiles.getFiles()).toHaveLength(0);
     });
 
     it('returns correctly when change files are categorized', () => {
       const changesPath: string = path.join(__dirname, 'categorizedChanges');
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
       const files: string[] = changeFiles.getFiles();
-      expect(files.length).toEqual(3);
+      expect(files).toHaveLength(3);
 
       const expectedPathA: string = path.join(changesPath, '@ms', 'a', 'changeA.json').replace(/\\/g, '/');
       const expectedPathB: string = path.join(changesPath, '@ms', 'b', 'changeB.json').replace(/\\/g, '/');
@@ -48,7 +48,9 @@ describe('ChangeFiles', () => {
       const changeFile: string = path.join(__dirname, 'leafChange', 'change1.json');
       const changedPackages: string[] = ['d'];
       expect(() => {
-        ChangeFiles.validate([changeFile], changedPackages, { hotfixChangeEnabled: true } as RushConfiguration);
+        ChangeFiles.validate([changeFile], changedPackages, {
+          hotfixChangeEnabled: true
+        } as RushConfiguration);
       }).toThrow(Error);
     });
 

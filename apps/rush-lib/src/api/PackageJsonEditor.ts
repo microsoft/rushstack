@@ -3,11 +3,7 @@
 
 import * as semver from 'semver';
 
-import {
-  IPackageJson,
-  JsonFile,
-  Sort
-} from '@microsoft/node-core-library';
+import { IPackageJson, JsonFile, Sort } from '@rushstack/node-core-library';
 
 /**
  * @beta
@@ -28,10 +24,7 @@ export class PackageJsonDependency {
   private _version: string;
   private _onChange: () => void;
 
-  public constructor(name: string,
-    version: string,
-    type: DependencyType,
-    onChange: () => void) {
+  public constructor(name: string, version: string, type: DependencyType, onChange: () => void) {
     this._name = name;
     this._version = version;
     this._type = type;
@@ -73,6 +66,86 @@ export class PackageJsonEditor {
   // and "peerDependencies" are mutually exclusive, but "devDependencies" is not.
   private readonly _devDependencies: Map<string, PackageJsonDependency>;
   private _modified: boolean;
+
+  private constructor(filepath: string, data: IPackageJson) {
+    this._filePath = filepath;
+    this._data = data;
+    this._modified = false;
+
+    this._dependencies = new Map<string, PackageJsonDependency>();
+    this._devDependencies = new Map<string, PackageJsonDependency>();
+
+    const dependencies: { [key: string]: string } = data.dependencies || {};
+    const optionalDependencies: { [key: string]: string } = data.optionalDependencies || {};
+    const peerDependencies: { [key: string]: string } = data.peerDependencies || {};
+
+    const devDependencies: { [key: string]: string } = data.devDependencies || {};
+
+    const _onChange: () => void = this._onChange.bind(this);
+
+    try {
+      Object.keys(dependencies || {}).forEach((packageName: string) => {
+        if (Object.prototype.hasOwnProperty.call(optionalDependencies, packageName)) {
+          throw new Error(
+            `The package "${packageName}" cannot be listed in both ` +
+              `"dependencies" and "optionalDependencies"`
+          );
+        }
+        if (Object.prototype.hasOwnProperty.call(peerDependencies, packageName)) {
+          throw new Error(
+            `The package "${packageName}" cannot be listed in both "dependencies" and "peerDependencies"`
+          );
+        }
+
+        this._dependencies.set(
+          packageName,
+          new PackageJsonDependency(packageName, dependencies[packageName], DependencyType.Regular, _onChange)
+        );
+      });
+
+      Object.keys(optionalDependencies || {}).forEach((packageName: string) => {
+        if (Object.prototype.hasOwnProperty.call(peerDependencies, packageName)) {
+          throw new Error(
+            `The package "${packageName}" cannot be listed in both ` +
+              `"optionalDependencies" and "peerDependencies"`
+          );
+        }
+        this._dependencies.set(
+          packageName,
+          new PackageJsonDependency(
+            packageName,
+            optionalDependencies[packageName],
+            DependencyType.Optional,
+            _onChange
+          )
+        );
+      });
+
+      Object.keys(peerDependencies || {}).forEach((packageName: string) => {
+        this._dependencies.set(
+          packageName,
+          new PackageJsonDependency(
+            packageName,
+            peerDependencies[packageName],
+            DependencyType.Peer,
+            _onChange
+          )
+        );
+      });
+
+      Object.keys(devDependencies || {}).forEach((packageName: string) => {
+        this._devDependencies.set(
+          packageName,
+          new PackageJsonDependency(packageName, devDependencies[packageName], DependencyType.Dev, _onChange)
+        );
+      });
+
+      Sort.sortMapKeys(this._dependencies);
+      Sort.sortMapKeys(this._devDependencies);
+    } catch (e) {
+      throw new Error(`Error loading "${filepath}": ${e.message}`);
+    }
+  }
 
   public static load(filePath: string): PackageJsonEditor {
     return new PackageJsonEditor(filePath, JsonFile.load(filePath));
@@ -116,7 +189,11 @@ export class PackageJsonEditor {
     return this._devDependencies.get(packageName);
   }
 
-  public addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void {
+  public addOrUpdateDependency(
+    packageName: string,
+    newVersion: string,
+    dependencyType: DependencyType
+  ): void {
     const dependency: PackageJsonDependency = new PackageJsonDependency(
       packageName,
       newVersion,
@@ -124,7 +201,13 @@ export class PackageJsonEditor {
       this._onChange.bind(this)
     );
 
-    if (dependencyType === DependencyType.Regular || dependencyType === DependencyType.Optional) {
+    // Rush collapses everything that isn't a devDependency into the dependencies
+    // field, so we need to set the value dependening on dependency type
+    if (
+      dependencyType === DependencyType.Regular ||
+      dependencyType === DependencyType.Optional ||
+      dependencyType === DependencyType.Peer
+    ) {
       this._dependencies.set(packageName, dependency);
     } else {
       this._devDependencies.set(packageName, dependency);
@@ -134,70 +217,11 @@ export class PackageJsonEditor {
 
   public saveIfModified(): boolean {
     if (this._modified) {
-      JsonFile.save(this._normalize(), this._filePath);
+      JsonFile.save(this._normalize(), this._filePath, { updateExistingFile: true });
       this._modified = false;
       return true;
     }
     return false;
-  }
-
-  private constructor(filepath: string, data: IPackageJson) {
-    this._filePath = filepath;
-    this._data = data;
-    this._modified = false;
-
-    this._dependencies = new Map<string, PackageJsonDependency>();
-    this._devDependencies = new Map<string, PackageJsonDependency>();
-
-    const dependencies: { [key: string]: string } = data.dependencies || {};
-    const optionalDependencies: { [key: string]: string } = data.optionalDependencies || {};
-    const peerDependencies: { [key: string]: string } = data.peerDependencies || {};
-
-    const devDependencies: { [key: string]: string } = data.devDependencies || {};
-
-    const _onChange: () => void = this._onChange.bind(this);
-
-    try {
-      Object.keys(dependencies || {}).forEach((packageName: string) => {
-        if (Object.prototype.hasOwnProperty.call(optionalDependencies, packageName)) {
-          throw new Error(`The package "${packageName}" cannot be listed in both `
-            + `"dependencies" and "optionalDependencies"`);
-        }
-        if (Object.prototype.hasOwnProperty.call(peerDependencies, packageName)) {
-          throw new Error(`The package "${packageName}" cannot be listed in both `
-            + `"dependencies" and "peerDependencies"`);
-        }
-
-        this._dependencies.set(packageName,
-          new PackageJsonDependency(packageName, dependencies[packageName], DependencyType.Regular, _onChange));
-      });
-
-      Object.keys(optionalDependencies || {}).forEach((packageName: string) => {
-        if (Object.prototype.hasOwnProperty.call(peerDependencies, packageName)) {
-          throw new Error(`The package "${packageName}" cannot be listed in both `
-            + `"optionalDependencies" and "peerDependencies"`);
-        }
-        this._dependencies.set(packageName,
-          new PackageJsonDependency(packageName, optionalDependencies[packageName], DependencyType.Optional, _onChange)
-        );
-      });
-
-      Object.keys(peerDependencies || {}).forEach((packageName: string) => {
-        this._dependencies.set(packageName,
-          new PackageJsonDependency(packageName, peerDependencies[packageName], DependencyType.Peer, _onChange));
-      });
-
-      Object.keys(devDependencies || {}).forEach((packageName: string) => {
-        this._devDependencies.set(packageName,
-          new PackageJsonDependency(packageName, devDependencies[packageName], DependencyType.Dev, _onChange));
-      });
-
-      Sort.sortMapKeys(this._dependencies);
-      Sort.sortMapKeys(this._devDependencies);
-
-    } catch (e) {
-      throw new Error(`Error loading "${filepath}": ${e.message}`);
-    }
   }
 
   private _onChange(): void {
@@ -210,7 +234,7 @@ export class PackageJsonEditor {
     delete this._data.peerDependencies;
     delete this._data.devDependencies;
 
-    const keys: Array<string> = [...this._dependencies.keys()].sort();
+    const keys: string[] = [...this._dependencies.keys()].sort();
 
     for (const packageName of keys) {
       const dependency: PackageJsonDependency = this._dependencies.get(packageName)!;
@@ -237,7 +261,7 @@ export class PackageJsonEditor {
       }
     }
 
-    const devDependenciesKeys: Array<string> = [...this._devDependencies.keys()].sort();
+    const devDependenciesKeys: string[] = [...this._devDependencies.keys()].sort();
 
     for (const packageName of devDependenciesKeys) {
       const dependency: PackageJsonDependency = this._devDependencies.get(packageName)!;

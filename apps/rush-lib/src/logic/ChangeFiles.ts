@@ -7,7 +7,7 @@ import * as glob from 'glob';
 import { Utilities } from '../utilities/Utilities';
 import { IChangeInfo } from '../api/ChangeManagement';
 import { IChangelog } from '../api/Changelog';
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../api/RushConfiguration';
 
 /**
@@ -15,12 +15,15 @@ import { RushConfiguration } from '../api/RushConfiguration';
  * for those change files.
  */
 export class ChangeFiles {
-
   /**
    * Change file path relative to changes folder.
    */
   private _files: string[];
   private _changesPath: string;
+
+  public constructor(changesPath: string) {
+    this._changesPath = changesPath;
+  }
 
   /**
    * Validate if the newly added change files match the changed packages.
@@ -42,14 +45,15 @@ export class ChangeFiles {
             if (change.type !== 'none' && change.type !== 'hotfix') {
               throw new Error(
                 `Change file ${filePath} specifies a type of '${change.type}' ` +
-                `but only 'hotfix' and 'none' change types may be used in a branch with 'hotfixChangeEnabled'.`);
+                  `but only 'hotfix' and 'none' change types may be used in a branch with 'hotfixChangeEnabled'.`
+              );
             }
           }
         }
       }
 
       if (changeFile && changeFile.changes) {
-        changeFile.changes.forEach(change => projectsWithChangeDescriptions.add(change.packageName));
+        changeFile.changes.forEach((change) => projectsWithChangeDescriptions.add(change.packageName));
       } else {
         throw new Error(`Invalid change file: ${filePath}`);
       }
@@ -59,27 +63,27 @@ export class ChangeFiles {
     projectsWithChangeDescriptions.forEach((name) => projectsMissingChangeDescriptions.delete(name));
     if (projectsMissingChangeDescriptions.size > 0) {
       const projectsMissingChangeDescriptionsArray: string[] = [];
-      projectsMissingChangeDescriptions.forEach(name => projectsMissingChangeDescriptionsArray.push(name));
-      throw new Error([
-        'The following projects have been changed and require change descriptions, but change descriptions were not ' +
-          'detected for them:',
-        ...projectsMissingChangeDescriptionsArray.map((projectName) => `- ${projectName}`),
-        'To resolve this error, run "rush change." This will generate change description files that must be ' +
-          'committed to source control.'
-      ].join(EOL));
+      projectsMissingChangeDescriptions.forEach((name) => projectsMissingChangeDescriptionsArray.push(name));
+      throw new Error(
+        [
+          'The following projects have been changed and require change descriptions, but change descriptions were not ' +
+            'detected for them:',
+          ...projectsMissingChangeDescriptionsArray.map((projectName) => `- ${projectName}`),
+          'To resolve this error, run "rush change." This will generate change description files that must be ' +
+            'committed to source control.'
+        ].join(EOL)
+      );
     }
   }
 
-  public static getChangeComments(
-    newChangeFilePaths: string[]
-  ): Map<string, string[]> {
+  public static getChangeComments(newChangeFilePaths: string[]): Map<string, string[]> {
     const changes: Map<string, string[]> = new Map<string, string[]>();
 
     newChangeFilePaths.forEach((filePath) => {
       console.log(`Found change file: ${filePath}`);
       const changeRequest: IChangeInfo = JsonFile.load(filePath);
       if (changeRequest && changeRequest.changes) {
-        changeRequest.changes!.forEach(change => {
+        changeRequest.changes!.forEach((change) => {
           if (!changes.get(change.packageName)) {
             changes.set(change.packageName, []);
           }
@@ -92,10 +96,6 @@ export class ChangeFiles {
       }
     });
     return changes;
-  }
-
-  constructor(changesPath: string) {
-    this._changesPath = changesPath;
   }
 
   /**
@@ -147,9 +147,7 @@ export class ChangeFiles {
   private _deleteFiles(files: string[], shouldDelete: boolean): number {
     if (files.length) {
       console.log(
-        `${EOL}* ` +
-        `${shouldDelete ? 'DELETING:' : 'DRYRUN: Deleting'} ` +
-        `${files.length} change file(s).`
+        `${EOL}* ${shouldDelete ? 'DELETING:' : 'DRYRUN: Deleting'} ${files.length} change file(s).`
       );
 
       for (const filePath of files) {

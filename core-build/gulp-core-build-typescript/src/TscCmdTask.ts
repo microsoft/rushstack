@@ -2,22 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import {
-  JsonFile,
-  FileSystem,
-  LegacyAdapters
-} from '@microsoft/node-core-library';
+import { JsonFile, FileSystem, LegacyAdapters, JsonObject } from '@rushstack/node-core-library';
 import * as glob from 'glob';
 import * as globEscape from 'glob-escape';
 import * as decomment from 'decomment';
-import { TypescriptCompiler as TTypescriptCompiler, ToolPackages } from '@microsoft/rush-stack-compiler-3.1';
+import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.1';
 
-type TTypescript = typeof ToolPackages.typescript;
-
-import {
-  RSCTask,
-  IRSCTaskConfig
-} from './RSCTask';
+import { RSCTask, IRSCTaskConfig } from './RSCTask';
 import { TsParseConfigHost } from './TsParseConfigHost';
 
 /**
@@ -42,24 +33,17 @@ export interface ITscCmdTaskConfig extends IRSCTaskConfig {
 }
 
 /**
- * @beta
+ * @public
  */
 export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
-  constructor() {
-    super(
-      'tsc',
-      {
-        staticMatch: [
-          'src/**/*.js',
-          'src/**/*.json',
-          'src/**/*.jsx'
-        ],
-        removeCommentsFromJavaScript: false
-      }
-    );
+  public constructor() {
+    super('tsc', {
+      staticMatch: ['src/**/*.js', 'src/**/*.json', 'src/**/*.jsx'],
+      removeCommentsFromJavaScript: false
+    });
   }
 
-  public loadSchema(): Object {
+  public loadSchema(): JsonObject {
     return JsonFile.load(path.resolve(__dirname, 'schemas', 'tsc-cmd.schema.json'));
   }
 
@@ -81,23 +65,27 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
       libFolders.push(this.buildConfig.libESNextFolder);
     }
 
-    const resolvedLibFolders: string[] = libFolders.map((libFolder) => path.join(this.buildConfig.rootPath, libFolder));
+    const resolvedLibFolders: string[] = libFolders.map((libFolder) =>
+      path.join(this.buildConfig.rootPath, libFolder)
+    );
     const promises: Promise<void>[] = (this.taskConfig.staticMatch || []).map((pattern) =>
-      LegacyAdapters.convertCallbackToPromise(glob, path.join(globEscape(this.buildConfig.rootPath), pattern)).then(
-        (matchPaths: string[]) => {
-          for (const matchPath of matchPaths) {
-            const fileContents: string = FileSystem.readFile(matchPath);
-            const relativePath: string = path.relative(srcPath, matchPath);
-            for (const resolvedLibFolder of resolvedLibFolders) {
-              const destPath: string = path.join(resolvedLibFolder, relativePath);
-              FileSystem.writeFile(destPath, fileContents, { ensureFolderExists: true });
-            }
+      LegacyAdapters.convertCallbackToPromise(
+        glob,
+        path.join(globEscape(this.buildConfig.rootPath), pattern)
+      ).then((matchPaths: string[]) => {
+        for (const matchPath of matchPaths) {
+          const fileContents: string = FileSystem.readFile(matchPath);
+          const relativePath: string = path.relative(srcPath, matchPath);
+          for (const resolvedLibFolder of resolvedLibFolders) {
+            const destPath: string = path.join(resolvedLibFolder, relativePath);
+            FileSystem.writeFile(destPath, fileContents, { ensureFolderExists: true });
           }
         }
-      )
+      })
     );
 
-    const typescriptCompiler: TTypescriptCompiler = new this._rushStackCompiler.TypescriptCompiler(
+    const rushStackCompiler: typeof TRushStackCompiler = this._rushStackCompiler as typeof TRushStackCompiler;
+    const typescriptCompiler: TRushStackCompiler.TypescriptCompiler = new rushStackCompiler.TypescriptCompiler(
       {
         customArgs: this.taskConfig.customArgs,
         fileError: this.fileError.bind(this),
@@ -112,12 +100,12 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
       promises.push(basePromise);
     }
 
-    let buildPromise: Promise<void> = Promise.all(promises).then(() => { /* collapse void[] to void */ });
+    let buildPromise: Promise<void> = Promise.all(promises).then(() => {
+      /* collapse void[] to void */
+    });
 
     if (this.taskConfig.removeCommentsFromJavaScript === true) {
-      buildPromise = buildPromise.then(
-        () => this._removeComments(this._rushStackCompiler.ToolPackages.typescript)
-      );
+      buildPromise = buildPromise.then(() => this._removeComments(rushStackCompiler.Typescript));
     }
 
     return buildPromise;
@@ -128,7 +116,7 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
     const dataLines: (string | undefined)[] = data.toString().split('\n');
     for (const dataLine of dataLines) {
       const trimmedLine: string = (dataLine || '').trim();
-      if (!!trimmedLine) {
+      if (trimmedLine) {
         if (trimmedLine.match(/\serror\s/i)) {
           // If the line looks like an error, log it as an error
           this.logError(trimmedLine);
@@ -139,14 +127,17 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
     }
   }
 
-  private _removeComments(typescript: TTypescript): Promise<void> {
-    const configFilePath: string | undefined = typescript.findConfigFile(this.buildConfig.rootPath, FileSystem.exists);
+  private _removeComments(typescript: typeof TRushStackCompiler.Typescript): Promise<void> {
+    const configFilePath: string | undefined = typescript.findConfigFile(
+      this.buildConfig.rootPath,
+      FileSystem.exists
+    );
     if (!configFilePath) {
       return Promise.reject(new Error('Unable to resolve tsconfig file to determine outDir.'));
     }
 
-    // tslint:disable-next-line:typedef
-    const tsConfig = typescript.parseJsonConfigFileContent(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const tsConfig: any = typescript.parseJsonConfigFileContent(
       JsonFile.load(configFilePath),
       new TsParseConfigHost(),
       path.dirname(configFilePath)
@@ -161,13 +152,10 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
     ).then((matches: string[]) => {
       for (const match of matches) {
         const sourceText: string = FileSystem.readFile(match);
-        const decommentedText: string = decomment(
-          sourceText,
-          {
-            // This option preserves comments that start with /*!, /**! or //! - typically copyright comments
-            safe: true
-          }
-        );
+        const decommentedText: string = decomment(sourceText, {
+          // This option preserves comments that start with /*!, /**! or //! - typically copyright comments
+          safe: true
+        });
         FileSystem.writeFile(match, decommentedText);
       }
     });

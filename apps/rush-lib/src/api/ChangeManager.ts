@@ -4,7 +4,7 @@ import { ChangeFile } from './ChangeFile';
 import { IChangeFile } from './ChangeManagement';
 
 /**
- * A class that helps with programatically interacting with Rush's change files.
+ * A class that helps with programmatically interacting with Rush's change files.
  * @public
  */
 export class ChangeManager {
@@ -18,18 +18,21 @@ export class ChangeManager {
   public static createEmptyChangeFiles(
     rushConfiguration: RushConfiguration,
     projectName: string,
-    emailAddress: string): string | undefined {
+    emailAddress: string
+  ): string | undefined {
     const projectInfo: RushConfigurationProject | undefined = rushConfiguration.getProjectByName(projectName);
     if (projectInfo && projectInfo.shouldPublish) {
-
-      const changefile: IChangeFile = { // tslint:disable-line:no-any
-        'changes': [{
-          comment: '',
-          packageName: projectName,
-          type: 'none'
-        }],
-        'packageName': projectName,
-        'email': emailAddress
+      const changefile: IChangeFile = {
+        // eslint-disable-line @typescript-eslint/no-explicit-any
+        changes: [
+          {
+            comment: '',
+            packageName: projectName,
+            type: 'none'
+          }
+        ],
+        packageName: projectName,
+        email: emailAddress
       };
 
       return new ChangeFile(changefile, rushConfiguration).writeSync();

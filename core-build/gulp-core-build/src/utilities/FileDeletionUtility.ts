@@ -5,17 +5,16 @@ import * as path from 'path';
 import globEscape = require('glob-escape');
 import globby = require('globby');
 
-/* tslint:disable:typedef */
+// eslint-disable-next-line
 const del = require('del');
-/* tslint:disable:typedef */
 
 export class FileDeletionUtility {
-  public static deletePatterns(patterns: string[]) {
+  public static deletePatterns(patterns: string[]): void {
     const files: string[] = globby.sync(patterns);
     this.deleteFiles(files);
   }
 
-  public static deleteFiles(files: string[]) {
+  public static deleteFiles(files: string[]): void {
     del.sync(this.escapeFilePaths(this.removeChildren(files)));
   }
 

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { StandardBuildFolders } from './StandardBuildFolders';
-import { ITerminalProvider, Terminal } from '@microsoft/node-core-library';
+import { ITerminalProvider, Terminal } from '@rushstack/node-core-library';
 
 /**
  * @public
@@ -35,7 +35,7 @@ export abstract class RushStackCompilerBase<
   protected _fileError: WriteFileIssueFunction;
   protected _fileWarning: WriteFileIssueFunction;
 
-  constructor(taskOptions: TOptions, rootPath: string, terminalProvider: ITerminalProvider) {
+  public constructor(taskOptions: TOptions, rootPath: string, terminalProvider: ITerminalProvider) {
     this._taskOptions = taskOptions;
     this._standardBuildFolders = new StandardBuildFolders(rootPath);
     this._terminal = new Terminal(terminalProvider);

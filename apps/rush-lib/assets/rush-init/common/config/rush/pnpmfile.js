@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  * When using the PNPM package manager, you can use pnpmfile.js to workaround

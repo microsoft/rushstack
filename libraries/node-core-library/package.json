@@ -1,6 +1,6 @@
 {
-  "name": "@microsoft/node-core-library",
-  "version": "3.15.1",
+  "name": "@rushstack/node-core-library",
+  "version": "3.25.0",
   "description": "Core libraries that every NodeJS toolchain project should use",
   "main": "lib/index.js",
   "typings": "dist/node-core-library.d.ts",
@@ -12,19 +12,24 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@types/node": "8.10.54",
+    "@types/node": "10.17.13",
     "colors": "~1.2.1",
     "fs-extra": "~7.0.1",
     "jju": "~1.4.0",
+    "semver": "~7.3.0",
+    "timsort": "~0.3.0",
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@types/fs-extra": "5.0.4",
-    "@types/jest": "23.3.11",
+    "@microsoft/node-library-build": "6.4.10",
+    "@microsoft/rush-stack-compiler-3.5": "0.4.4",
+    "@rushstack/eslint-config": "1.0.2",
+    "@types/fs-extra": "7.0.0",
+    "@types/jest": "25.2.1",
     "@types/jju": "1.4.1",
+    "@types/semver": "~7.3.1",
+    "@types/timsort": "0.3.0",
     "@types/z-schema": "3.16.31",
-    "gulp": "~4.0.2",
-    "@microsoft/node-library-build": "6.1.2",
-    "@microsoft/rush-stack-compiler-3.4": "0.1.15"
+    "gulp": "~4.0.2"
   }
 }

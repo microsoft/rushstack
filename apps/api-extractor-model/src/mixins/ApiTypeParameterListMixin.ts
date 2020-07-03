@@ -4,7 +4,7 @@
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
 import { IExcerptTokenRange } from './Excerpt';
 import { TypeParameter } from '../model/TypeParameter';
-import { InternalError } from '@microsoft/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 import { ApiDeclaredItem } from '../items/ApiDeclaredItem';
 import { DeserializerContext } from '../model/DeserializerContext';
 
@@ -47,7 +47,7 @@ const _typeParameters: unique symbol = Symbol('ApiTypeParameterListMixin._typePa
  *
  * @public
  */
-// tslint:disable-next-line:interface-name
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface ApiTypeParameterListMixin extends ApiItem {
   /**
    * The type parameters.
@@ -66,23 +66,15 @@ export interface ApiTypeParameterListMixin extends ApiItem {
  *
  * @public
  */
-export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiTypeParameterListMixin) { // tslint:disable-line:no-any
-
+export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor>(
+  baseClass: TBaseClass
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): TBaseClass & (new (...args: any[]) => ApiTypeParameterListMixin) {
   abstract class MixedClass extends baseClass implements ApiTypeParameterListMixin {
     public readonly [_typeParameters]: TypeParameter[];
 
-    /** @override */
-    public static onDeserializeInto(options: Partial<IApiTypeParameterListMixinOptions>, context: DeserializerContext,
-      jsonObject: IApiTypeParameterListMixinJson): void {
-
-      baseClass.onDeserializeInto(options, context, jsonObject);
-
-      options.typeParameters = jsonObject.typeParameters || [];
-    }
-
-    // tslint:disable-next-line:no-any
-    constructor(...args: any[]) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public constructor(...args: any[]) {
       super(...args);
 
       const options: IApiTypeParameterListMixinOptions = args[0];
@@ -92,7 +84,6 @@ export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor
       if (this instanceof ApiDeclaredItem) {
         if (options.typeParameters) {
           for (const typeParameterOptions of options.typeParameters) {
-
             const typeParameter: TypeParameter = new TypeParameter({
               name: typeParameterOptions.typeParameterName,
               constraintExcerpt: this.buildExcerpt(typeParameterOptions.constraintTokenRange),
@@ -104,8 +95,21 @@ export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor
           }
         }
       } else {
-        throw new InternalError('ApiTypeParameterListMixin expects a base class that inherits from ApiDeclaredItem');
+        throw new InternalError(
+          'ApiTypeParameterListMixin expects a base class that inherits from ApiDeclaredItem'
+        );
       }
+    }
+
+    /** @override */
+    public static onDeserializeInto(
+      options: Partial<IApiTypeParameterListMixinOptions>,
+      context: DeserializerContext,
+      jsonObject: IApiTypeParameterListMixinJson
+    ): void {
+      baseClass.onDeserializeInto(options, context, jsonObject);
+
+      options.typeParameters = jsonObject.typeParameters || [];
     }
 
     public get typeParameters(): ReadonlyArray<TypeParameter> {
@@ -118,13 +122,11 @@ export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor
 
       const typeParameterObjects: IApiTypeParameterOptions[] = [];
       for (const typeParameter of this.typeParameters) {
-        typeParameterObjects.push(
-          {
-            typeParameterName: typeParameter.name,
-            constraintTokenRange: typeParameter.constraintExcerpt.tokenRange,
-            defaultTypeTokenRange: typeParameter.defaultTypeExcerpt.tokenRange
-          }
-        );
+        typeParameterObjects.push({
+          typeParameterName: typeParameter.name,
+          constraintTokenRange: typeParameter.constraintExcerpt.tokenRange,
+          defaultTypeTokenRange: typeParameter.defaultTypeExcerpt.tokenRange
+        });
       }
 
       if (typeParameterObjects.length > 0) {

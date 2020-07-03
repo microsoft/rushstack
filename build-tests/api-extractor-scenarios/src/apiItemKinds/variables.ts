@@ -6,7 +6,7 @@ export const VARIABLE: string = 'hello';
 
 /** @public */
 export namespace NamespaceContainingVariable {
-  export let variable: object[] = []
+  export let variable: object[] = [];
 
-  export let constVariable: object[] = []
+  export let constVariable: object[] = [];
 }
