@@ -10,7 +10,7 @@ import { FileSystem, InternalError, MapExtensions, NewlineKind } from '@rushstac
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
-import { DependencySpecifier } from '../DependencySpecifier';
+import { DependencySpecifier, SpecifierType } from '../DependencySpecifier';
 import { PackageJsonEditor, DependencyType } from '../../api/PackageJsonEditor';
 import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -143,8 +143,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         // cyclic dependency, then it needs to be updated to specify `workspace:*` explicitly. Currently only
         // supporting versions and version ranges for specifying a local project.
         if (
-          (dependencySpecifier.specifierType === 'version' ||
-            dependencySpecifier.specifierType === 'range') &&
+          (dependencySpecifier.specifierType === SpecifierType.Version ||
+            dependencySpecifier.specifierType === SpecifierType.Range) &&
           referencedLocalProject &&
           !rushProject.cyclicDependencyProjects.has(name)
         ) {
@@ -190,7 +190,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             shrinkwrapIsUpToDate = false;
             continue;
           }
-        } else if (dependencySpecifier.specifierType === 'workspace') {
+        } else if (dependencySpecifier.specifierType === SpecifierType.Workspace) {
           // Already specified as a local project. Allow the package manager to validate this
           continue;
         }

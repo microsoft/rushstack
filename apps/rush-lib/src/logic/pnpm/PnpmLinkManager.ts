@@ -22,7 +22,7 @@ import {
 } from './PnpmShrinkwrapFile';
 import { PnpmProjectDependencyManifest } from './PnpmProjectDependencyManifest';
 import { PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
-import { DependencySpecifier } from '../DependencySpecifier';
+import { DependencySpecifier, SpecifierType } from '../DependencySpecifier';
 
 // special flag for debugging, will print extra diagnostic information,
 // but comes with performance cost
@@ -324,7 +324,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     const localDependencies: PackageJsonDependency[] = [
       ...project.packageJsonEditor.dependencyList,
       ...project.packageJsonEditor.devDependencyList
-    ].filter((x) => new DependencySpecifier(x.name, x.version).specifierType === 'workspace');
+    ].filter((x) => new DependencySpecifier(x.name, x.version).specifierType === SpecifierType.Workspace);
 
     for (const { name } of localDependencies) {
       const matchedRushPackage:
@@ -369,7 +369,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     const dependencies: PackageJsonDependency[] = [
       ...project.packageJsonEditor.dependencyList,
       ...project.packageJsonEditor.devDependencyList
-    ].filter((x) => new DependencySpecifier(x.name, x.version).specifierType !== 'workspace');
+    ].filter((x) => new DependencySpecifier(x.name, x.version).specifierType !== SpecifierType.Workspace);
 
     for (const { name, dependencyType } of dependencies) {
       // read the version number from the shrinkwrap entry
