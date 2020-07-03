@@ -155,8 +155,25 @@ export abstract class BaseInstallManager {
   }
 
   public async doInstall(): Promise<void> {
-    // Prevent update when using a filter, as modifications to the shrinkwrap shouldn't be saved
     const isFilteredInstall: boolean = this.options.toFlags.length > 0;
+
+    // Prevent filtered installs when workspaces is disabled
+    if (
+      this.rushConfiguration.pnpmOptions &&
+      this.rushConfiguration.pnpmOptions.useWorkspaces &&
+      isFilteredInstall
+    ) {
+      console.log();
+      console.log(
+        colors.red(
+          'The "--to" argument can only be used when running in a workspace environemnt. Run the ' +
+            'command again without specifying this argument.'
+        )
+      );
+      throw new AlreadyReportedError();
+    }
+
+    // Prevent update when using a filter, as modifications to the shrinkwrap shouldn't be saved
     if (this.options.allowShrinkwrapUpdates && isFilteredInstall) {
       console.log();
       console.log(

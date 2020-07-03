@@ -361,6 +361,7 @@ exports[`CommandLineHelp prints the help for each action: install 1`] = `
 "usage: rush install [-h] [-p] [--bypass-policy] [--no-link]
                     [--network-concurrency COUNT] [--debug-package-manager]
                     [--max-install-attempts NUMBER] [--variant VARIANT]
+                    [-t PROJECT1] [--to-version-policy VERSION_POLICY_NAME]
                     
 
 The \\"rush install\\" command installs package dependencies for all your 
@@ -400,6 +401,15 @@ Optional arguments:
   --variant VARIANT     Run command using a variant installation 
                         configuration. This parameter may alternatively be 
                         specified via the RUSH_VARIANT environment variable.
+  -t PROJECT1, --to PROJECT1
+                        Run install in the specified project and all of its 
+                        dependencies. \\".\\" can be used as shorthand to specify 
+                        the project in the current working directory. This 
+                        argument is only valid in workspace environments.
+  --to-version-policy VERSION_POLICY_NAME
+                        Run install in all projects with the specified 
+                        version policy and all of their dependencies. This 
+                        argument is only valid in workspace environments.
 "
 `;
 

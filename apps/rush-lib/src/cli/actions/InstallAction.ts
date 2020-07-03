@@ -35,23 +35,22 @@ export class InstallAction extends BaseInstallAction {
   protected onDefineParameters(): void {
     super.onDefineParameters();
 
-    // Only support install filtering in workspace environments
-    if (this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces) {
-      this._toFlag = this.defineStringListParameter({
-        parameterLongName: '--to',
-        parameterShortName: '-t',
-        argumentName: 'PROJECT1',
-        description:
-          'Run install in the specified project and all of its dependencies. "." can be used as shorthand ' +
-          'to specify the project in the current working directory.'
-      });
-      this._toVersionPolicy = this.defineStringListParameter({
-        parameterLongName: '--to-version-policy',
-        argumentName: 'VERSION_POLICY_NAME',
-        description:
-          'Run install in all projects with the specified version policy and all of their dependencies'
-      });
-    }
+    this._toFlag = this.defineStringListParameter({
+      parameterLongName: '--to',
+      parameterShortName: '-t',
+      argumentName: 'PROJECT1',
+      description:
+        'Run install in the specified project and all of its dependencies. "." can be used as shorthand ' +
+        'to specify the project in the current working directory. This argument is only valid in workspace ' +
+        'environments.'
+    });
+    this._toVersionPolicy = this.defineStringListParameter({
+      parameterLongName: '--to-version-policy',
+      argumentName: 'VERSION_POLICY_NAME',
+      description:
+        'Run install in all projects with the specified version policy and all of their dependencies. ' +
+        'This argument is only valid in workspace environments.'
+    });
   }
 
   protected buildInstallOptions(): IInstallManagerOptions {
