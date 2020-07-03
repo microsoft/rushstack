@@ -10,7 +10,7 @@ import { FileSystem, InternalError, MapExtensions } from '@rushstack/node-core-l
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
-import { DependencySpecifier, SpecifierType } from '../DependencySpecifier';
+import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 import { PackageJsonEditor, DependencyType } from '../../api/PackageJsonEditor';
 import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -69,7 +69,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         this.rushConfiguration.commonTempFolder,
         RushConstants.pnpmfileFilename
       );
-      await this.createShimPnpmfile(tempPnpmFilePath);
+      await this.createShimPnpmfileAsync(tempPnpmFilePath);
     }
 
     const shrinkwrapWarnings: string[] = [];
@@ -143,8 +143,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         // cyclic dependency, then it needs to be updated to specify `workspace:*` explicitly. Currently only
         // supporting versions and version ranges for specifying a local project.
         if (
-          (dependencySpecifier.specifierType === SpecifierType.Version ||
-            dependencySpecifier.specifierType === SpecifierType.Range) &&
+          (dependencySpecifier.specifierType === DependencySpecifierType.Version ||
+            dependencySpecifier.specifierType === DependencySpecifierType.Range) &&
           referencedLocalProject &&
           !rushProject.cyclicDependencyProjects.has(name)
         ) {
@@ -190,7 +190,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             shrinkwrapIsUpToDate = false;
             continue;
           }
-        } else if (dependencySpecifier.specifierType === SpecifierType.Workspace) {
+        } else if (dependencySpecifier.specifierType === DependencySpecifierType.Workspace) {
           // Already specified as a local project. Allow the package manager to validate this
           continue;
         }
@@ -418,14 +418,16 @@ export class WorkspaceInstallManager extends BaseInstallManager {
    * is a subset of the dependency version range. Allowed alternate versions are not modified. The pnpmfile
    * shim will subsequently call into the provided pnpmfile, if one exists.
    */
-  protected async createShimPnpmfile(filename: string): Promise<void> {
+  protected async createShimPnpmfileAsync(filename: string): Promise<void> {
     // Attempt to move the existing pnpmfile if there is one
+    let pnpmfileExists: boolean = false;
     try {
       const pnpmfileDir: string = path.dirname(filename);
       await FileSystem.moveAsync({
         sourcePath: filename,
         destinationPath: path.join(pnpmfileDir, 'clientPnpmfile.js')
       });
+      pnpmfileExists = true;
     } catch (error) {
       if (!FileSystem.isNotExistError(error)) {
         throw error;
@@ -437,11 +439,15 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       path.resolve(__dirname, '..', 'pnpm', 'PnpmfileShim.js')
     );
     pnpmfileContent = pnpmfileContent.replace(
-      /__semverPath/,
+      /__pnpmfileExists/g,
+      JSON.stringify(pnpmfileExists).replace(/^'|'$/g, '')
+    );
+    pnpmfileContent = pnpmfileContent.replace(
+      /__semverPath/g,
       JSON.stringify(require.resolve('semver')).replace(/^"|"$/g, '')
     );
     pnpmfileContent = pnpmfileContent.replace(
-      /__allowedAlternativeVersions/,
+      /__allowedAlternativeVersions/g,
       JSON.stringify(
         MapExtensions.toObject(
           this.rushConfiguration.getCommonVersions(this.options.variant).allowedAlternativeVersions
@@ -449,7 +455,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       )
     );
     pnpmfileContent = pnpmfileContent.replace(
-      /__allPreferredVersions/,
+      /__allPreferredVersions/g,
       JSON.stringify(
         MapExtensions.toObject(InstallHelpers.collectPreferredVersions(this.rushConfiguration, this.options))
       )

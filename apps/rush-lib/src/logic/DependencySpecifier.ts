@@ -7,7 +7,7 @@ import { InternalError } from '@rushstack/node-core-library';
 /**
  * The parsed format of a provided version specifier.
  */
-export const enum SpecifierType {
+export enum DependencySpecifierType {
   /**
    * A git repository
    */
@@ -74,7 +74,7 @@ export class DependencySpecifier {
   /**
    * The type of the `versionSpecifier`.
    */
-  public readonly specifierType: SpecifierType;
+  public readonly specifierType: DependencySpecifierType;
 
   /**
    * If `specifierType` is `alias`, then this is the parsed target dependency.
@@ -90,43 +90,16 @@ export class DependencySpecifier {
     // Workspace ranges are a feature from PNPM and Yarn. Set the version specifier
     // to the trimmed version range.
     if (versionSpecifier.startsWith('workspace:')) {
-      this.specifierType = SpecifierType.Workspace;
+      this.specifierType = DependencySpecifierType.Workspace;
       this.versionSpecifier = versionSpecifier.slice(this.specifierType.length + 1).trim();
       this.aliasTarget = undefined;
       return;
     }
 
     const result: npmPackageArg.Result = npmPackageArg.resolve(packageName, versionSpecifier);
-    switch (result.type) {
-      case 'git':
-        this.specifierType = SpecifierType.Git;
-        break;
-      case 'tag':
-        this.specifierType = SpecifierType.Tag;
-        break;
-      case 'version':
-        this.specifierType = SpecifierType.Version;
-        break;
-      case 'range':
-        this.specifierType = SpecifierType.Range;
-        break;
-      case 'file':
-        this.specifierType = SpecifierType.File;
-        break;
-      case 'directory':
-        this.specifierType = SpecifierType.Directory;
-        break;
-      case 'remote':
-        this.specifierType = SpecifierType.Remote;
-        break;
-      case 'alias':
-        this.specifierType = SpecifierType.Alias;
-        break;
-      default:
-        throw new InternalError(`Unexpected npm-package-arg result type "${result.type}"`);
-    }
+    this.specifierType = DependencySpecifier.getDependencySpecifierType(result.type);
 
-    if (this.specifierType === SpecifierType.Alias) {
+    if (this.specifierType === DependencySpecifierType.Alias) {
       const aliasResult: npmPackageArg.AliasResult = result as npmPackageArg.AliasResult;
       if (!aliasResult.subSpec || !aliasResult.subSpec.name) {
         throw new InternalError('Unexpected result from npm-package-arg');
@@ -134,6 +107,29 @@ export class DependencySpecifier {
       this.aliasTarget = new DependencySpecifier(aliasResult.subSpec.name, aliasResult.subSpec.rawSpec);
     } else {
       this.aliasTarget = undefined;
+    }
+  }
+
+  public static getDependencySpecifierType(specifierType: string): DependencySpecifierType {
+    switch (specifierType) {
+      case 'git':
+        return DependencySpecifierType.Git;
+      case 'tag':
+        return DependencySpecifierType.Tag;
+      case 'version':
+        return DependencySpecifierType.Version;
+      case 'range':
+        return DependencySpecifierType.Range;
+      case 'file':
+        return DependencySpecifierType.File;
+      case 'directory':
+        return DependencySpecifierType.Directory;
+      case 'remote':
+        return DependencySpecifierType.Remote;
+      case 'alias':
+        return DependencySpecifierType.Alias;
+      default:
+        throw new InternalError(`Unexpected npm-package-arg result type "${specifierType}"`);
     }
   }
 }

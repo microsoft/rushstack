@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { existsSync } from 'fs';
-
 interface ILockfile {}
 
 interface IPackageJson {
@@ -20,13 +18,13 @@ interface IPnpmfile {
   };
 }
 
+// Only require the client pnpmfile if it exists
+const clientPnpmfile: IPnpmfile | undefined = JSON.parse('__pnpmfileExists')
+  ? require('./clientPnpmfile')
+  : undefined;
 // We will require semver from this path on disk, since this is the version of semver shipping with Rush
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const semver: any = require('__semverPath');
-// Only require the client pnpmfile if it exists
-const clientPnpmfile: IPnpmfile | undefined = existsSync('clientPnpmfile.js')
-  ? require('./clientPnpmfile')
-  : undefined;
 const allPreferredVersions: { [dependencyName: string]: string } = JSON.parse('__allPreferredVersions');
 const allowedAlternativeVersions: { [dependencyName: string]: string[] } = JSON.parse(
   '__allowedAlternativeVersions'

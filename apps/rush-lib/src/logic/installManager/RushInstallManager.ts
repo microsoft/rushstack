@@ -26,7 +26,7 @@ import { RushConstants } from '../../logic/RushConstants';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { Utilities } from '../../utilities/Utilities';
 import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../../api/PackageJsonEditor';
-import { DependencySpecifier, SpecifierType } from '../DependencySpecifier';
+import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 import { InstallHelpers } from './InstallHelpers';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
@@ -374,7 +374,7 @@ export class RushInstallManager extends BaseInstallManager {
 
   private _revertWorkspaceNotation(dependency: PackageJsonDependency): boolean {
     const specifier: DependencySpecifier = new DependencySpecifier(dependency.name, dependency.version);
-    if (specifier.specifierType !== SpecifierType.Workspace) {
+    if (specifier.specifierType !== DependencySpecifierType.Workspace) {
       return false;
     }
     // Replace workspace notation with the supplied version range
