@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-interface ILockfile {}
+// Uncomment "/* type */" when we upgrade to TS 3.9
+import { /* type */ IPackageJson } from '@rushstack/node-core-library';
+import { /* type */ IPnpmfileShimSettings } from './IPnpmfileShimSettings';
+import /* type */ * as TSemver from 'semver';
 
-interface IPackageJson {
-  dependencies?: { [dependencyName: string]: string };
-  devDependencies?: { [dependencyName: string]: string };
-  optionalDependencies?: { [dependencyName: string]: string };
-}
+interface ILockfile {}
 
 interface IPnpmfile {
   hooks?: {
@@ -18,18 +17,10 @@ interface IPnpmfile {
   };
 }
 
-interface IPnpmfileSettings {
-  allPreferredVersions: { [dependencyName: string]: string };
-  allowedAlternativeVersions: { [dependencyName: string]: string[] };
-  semverPath: string;
-  useClientPnpmfile: boolean;
-}
-
 // Load in the generated settings file
-const pnpmfileSettings: IPnpmfileSettings = require('./pnpmfileSettings.json');
+const pnpmfileSettings: IPnpmfileShimSettings = require('./pnpmfileSettings.json');
 // We will require semver from this path on disk, since this is the version of semver shipping with Rush
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const semver: any = require(pnpmfileSettings.semverPath);
+const semver: typeof TSemver = require(pnpmfileSettings.semverPath);
 // Only require the client pnpmfile if requested
 const clientPnpmfile: IPnpmfile | undefined = pnpmfileSettings.useClientPnpmfile
   ? require('./clientPnpmfile')
@@ -44,7 +35,8 @@ function setPreferredVersions(dependencies?: { [dependencyName: string]: string 
       const preferredVersion: string = pnpmfileSettings.allPreferredVersions[name];
       const version: string = dependencies![name];
       if (pnpmfileSettings.allowedAlternativeVersions.hasOwnProperty(name)) {
-        const allowedAlternatives: string[] | undefined = pnpmfileSettings.allowedAlternativeVersions[name];
+        const allowedAlternatives: ReadonlyArray<string> | undefined =
+          pnpmfileSettings.allowedAlternativeVersions[name];
         if (allowedAlternatives && allowedAlternatives.indexOf(version) > -1) {
           continue;
         }
@@ -55,6 +47,7 @@ function setPreferredVersions(dependencies?: { [dependencyName: string]: string 
       } catch {
         // Swallow invalid range errors
       }
+
       if (isValidRange && semver.subset(preferredVersion, version)) {
         dependencies![name] = preferredVersion;
       }

@@ -20,6 +20,7 @@ import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from './InstallHelpers';
 import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 import { RepoStateFile } from '../RepoStateFile';
+import { IPnpmfileShimSettings } from '../pnpm/IPnpmfileShimSettings';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -434,21 +435,21 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
     }
 
+    const pnpmfileShimSettings: IPnpmfileShimSettings = {
+      allPreferredVersions: MapExtensions.toObject(
+        InstallHelpers.collectPreferredVersions(this.rushConfiguration, this.options)
+      ),
+      allowedAlternativeVersions: MapExtensions.toObject(
+        this.rushConfiguration.getCommonVersions(this.options.variant).allowedAlternativeVersions
+      ),
+      semverPath: require.resolve('semver'),
+      useClientPnpmfile: pnpmfileExists
+    };
+
     // Write the settings to be consumed by the pnpmfile
-    await JsonFile.saveAsync(
-      {
-        allPreferredVersions: MapExtensions.toObject(
-          InstallHelpers.collectPreferredVersions(this.rushConfiguration, this.options)
-        ),
-        allowedAlternativeVersions: MapExtensions.toObject(
-          this.rushConfiguration.getCommonVersions(this.options.variant).allowedAlternativeVersions
-        ),
-        semverPath: require.resolve('semver'),
-        useClientPnpmfile: pnpmfileExists
-      },
-      path.resolve(pnpmfileDir, 'pnpmfileSettings.json'),
-      { ensureFolderExists: true }
-    );
+    await JsonFile.saveAsync(pnpmfileShimSettings, path.resolve(pnpmfileDir, 'pnpmfileSettings.json'), {
+      ensureFolderExists: true
+    });
 
     // Copy the shim pnpmfile to the original path
     await FileSystem.copyFileAsync({
