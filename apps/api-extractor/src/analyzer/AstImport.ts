@@ -42,6 +42,7 @@ export interface IAstImportOptions {
   readonly importKind: AstImportKind;
   readonly modulePath: string;
   readonly exportName: string;
+  readonly isTypeOnly: boolean;
 }
 
 /**
@@ -83,6 +84,17 @@ export class AstImport {
   public readonly exportName: string;
 
   /**
+   * Whether it is a type-only import, for example:
+   *
+   * ```ts
+   * import type { X } from "y";
+   * ```
+   *
+   * This is set to true ONLY if the type-only form is used in *every* reference to this AstImport.
+   */
+  public isTypeOnlyEverywhere: boolean;
+
+  /**
    * If this import statement refers to an API from an external package that is tracked by API Extractor
    * (according to `PackageMetadataManager.isAedocSupportedFor()`), then this property will return the
    * corresponding AstSymbol.  Otherwise, it is undefined.
@@ -101,6 +113,9 @@ export class AstImport {
     this.importKind = options.importKind;
     this.modulePath = options.modulePath;
     this.exportName = options.exportName;
+
+    // We start with this assumption, but it may get changed later if non-type-only import is encountered.
+    this.isTypeOnlyEverywhere = options.isTypeOnly;
 
     this.key = AstImport.getKey(options);
   }

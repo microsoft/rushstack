@@ -19,7 +19,7 @@ import { execSync } from 'child_process';
 import { PrereleaseToken } from './PrereleaseToken';
 import { ChangeFiles } from './ChangeFiles';
 import { RushConfiguration } from '../api/RushConfiguration';
-import { DependencySpecifier } from './DependencySpecifier';
+import { DependencySpecifier, DependencySpecifierType } from './DependencySpecifier';
 
 export interface IChangeInfoHash {
   [key: string]: IChangeInfo;
@@ -246,7 +246,7 @@ export class PublishUtilities {
     } else {
       newDependencyVersion = newProjectVersion;
     }
-    return currentDependencySpecifier.specifierType === 'workspace'
+    return currentDependencySpecifier.specifierType === DependencySpecifierType.Workspace
       ? `workspace:${newDependencyVersion}`
       : newDependencyVersion;
   }
@@ -434,7 +434,9 @@ export class PublishUtilities {
             );
             const newVersion: string = PublishUtilities._getChangeInfoNewVersion(depChange, prereleaseToken);
             dependencies[depName] =
-              currentSpecifier.specifierType === 'workspace' ? `workspace:${newVersion}` : newVersion;
+              currentSpecifier.specifierType === DependencySpecifierType.Workspace
+                ? `workspace:${newVersion}`
+                : newVersion;
           } else if (depChange && depChange.changeType! >= ChangeType.hotfix) {
             PublishUtilities._updateDependencyVersion(
               packageName,
@@ -712,7 +714,7 @@ export class PublishUtilities {
       currentDependencyVersion
     );
     currentDependencyVersion =
-      currentDependencySpecifier.specifierType === 'workspace' &&
+      currentDependencySpecifier.specifierType === DependencySpecifierType.Workspace &&
       currentDependencySpecifier.versionSpecifier === '*'
         ? undefined
         : currentDependencySpecifier.versionSpecifier;
@@ -722,7 +724,8 @@ export class PublishUtilities {
       newDependencyVersion
     );
     newDependencyVersion =
-      newDependencySpecifier.specifierType === 'workspace' && newDependencySpecifier.versionSpecifier === '*'
+      newDependencySpecifier.specifierType === DependencySpecifierType.Workspace &&
+      newDependencySpecifier.versionSpecifier === '*'
         ? dependencyChange.newVersion!
         : newDependencySpecifier.versionSpecifier;
 

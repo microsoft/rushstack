@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush",
-  "version": "5.27.1",
+  "version": "5.27.3",
   "description": "A professional solution for consolidating all your JavaScript projects in one Git repo",
   "keywords": [
     "install",
@@ -31,18 +31,18 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@rushstack/node-core-library": "3.24.4",
-    "@microsoft/rush-lib": "5.27.1",
+    "@rushstack/node-core-library": "3.25.0",
+    "@microsoft/rush-lib": "5.27.3",
     "colors": "~1.2.1",
     "semver": "~7.3.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.7.2",
-    "@microsoft/node-library-build": "6.4.30",
+    "@microsoft/rush-stack-compiler-3.5": "0.8.1",
+    "@microsoft/node-library-build": "6.4.32",
     "@rushstack/eslint-config": "1.0.2",
     "@types/jest": "25.2.1",
     "@types/node": "10.17.13",
-    "@types/semver": "~7.2.0",
+    "@types/semver": "~7.3.1",
     "@types/sinon": "1.16.34",
     "chai": "~3.5.0",
     "gulp": "~4.0.2",

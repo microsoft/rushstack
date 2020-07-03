@@ -1,6 +1,18 @@
 # Change Log - @microsoft/rush-stack-compiler-3.5
 
-This log was last generated on Thu, 25 Jun 2020 06:43:35 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+
+## 0.8.1
+Fri, 03 Jul 2020 15:09:04 GMT
+
+*Version update only*
+
+## 0.8.0
+Fri, 03 Jul 2020 05:46:41 GMT
+
+### Minor changes
+
+- Disable the "--typescript-compiler-folder" setting for API Extractor, since it was causing errors with the latest TypeScript engine
 
 ## 0.7.2
 Thu, 25 Jun 2020 06:43:35 GMT

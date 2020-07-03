@@ -5,12 +5,12 @@ import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import { FileSystem, InternalError, MapExtensions, NewlineKind } from '@rushstack/node-core-library';
+import { FileSystem, InternalError, MapExtensions, JsonFile } from '@rushstack/node-core-library';
 
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
-import { DependencySpecifier } from '../DependencySpecifier';
+import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 import { PackageJsonEditor, DependencyType } from '../../api/PackageJsonEditor';
 import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -20,6 +20,7 @@ import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from './InstallHelpers';
 import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 import { RepoStateFile } from '../RepoStateFile';
+import { IPnpmfileShimSettings } from '../pnpm/IPnpmfileShimSettings';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -81,7 +82,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         this.rushConfiguration.commonTempFolder,
         RushConstants.pnpmfileFilename
       );
-      await this.createShimPnpmfile(tempPnpmFilePath);
+      await this.createShimPnpmfileAsync(tempPnpmFilePath);
     }
 
     const shrinkwrapWarnings: string[] = [];
@@ -155,8 +156,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         // cyclic dependency, then it needs to be updated to specify `workspace:*` explicitly. Currently only
         // supporting versions and version ranges for specifying a local project.
         if (
-          (dependencySpecifier.specifierType === 'version' ||
-            dependencySpecifier.specifierType === 'range') &&
+          (dependencySpecifier.specifierType === DependencySpecifierType.Version ||
+            dependencySpecifier.specifierType === DependencySpecifierType.Range) &&
           referencedLocalProject &&
           !rushProject.cyclicDependencyProjects.has(name)
         ) {
@@ -202,7 +203,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             shrinkwrapIsUpToDate = false;
             continue;
           }
-        } else if (dependencySpecifier.specifierType === 'workspace') {
+        } else if (dependencySpecifier.specifierType === DependencySpecifierType.Workspace) {
           // Already specified as a local project. Allow the package manager to validate this
           continue;
         }
@@ -430,100 +431,42 @@ export class WorkspaceInstallManager extends BaseInstallManager {
    * is a subset of the dependency version range. Allowed alternate versions are not modified. The pnpmfile
    * shim will subsequently call into the provided pnpmfile, if one exists.
    */
-  protected async createShimPnpmfile(filename: string): Promise<void> {
-    // Get the versions we want to add to the shim pnpmfile
-    const allPreferredVersions: Map<string, string> = InstallHelpers.collectPreferredVersions(
-      this.rushConfiguration,
-      this.options
-    );
-    const allowedAlternativeVersions: Map<
-      string,
-      ReadonlyArray<string>
-    > = this.rushConfiguration.getCommonVersions(this.options.variant).allowedAlternativeVersions;
-
-    const clientPnpmfileName: string = 'clientPnpmfile.js';
-    const pnpmfileContent: string[] = [
-      '// THIS IS A GENERATED FILE. DO NOT MODIFY.',
-      '"use strict";',
-      'module.exports = { hooks: { readPackage, afterAllResolved } };',
-
-      // Obtain the original pnpmfile provided by the repo, if it exists.
-      'const { existsSync } = require("fs");',
-      'const clientPnpmfile = ',
-      `  existsSync("${clientPnpmfileName}") ? require("./${path.basename(
-        clientPnpmfileName,
-        '.js'
-      )}") : undefined;`,
-      // We will require semver from this path on disk, since this is the version of semver shipping with Rush
-      `const semver = require(${JSON.stringify(require.resolve('semver'))});`,
-
-      // Include all the preferredVersions and allowedAlternativeVersions directly since there is no need to
-      // generate them on the fly
-      `const allPreferredVersions = ${JSON.stringify(MapExtensions.toObject(allPreferredVersions))};`,
-      `const allowedAlternativeVersions = ${JSON.stringify(
-        MapExtensions.toObject(allowedAlternativeVersions)
-      )};`,
-
-      // Call the original pnpmfile (if it exists)
-      'function afterAllResolved(lockfile, context) {',
-      '  return (clientPnpmfile && clientPnpmfile.hooks && clientPnpmfile.hooks.afterAllResolved)',
-      '    ? clientPnpmfile.hooks.afterAllResolved(lockfile, context)',
-      '    : lockfile;',
-      '}',
-
-      // Set the preferred versions in the package, then call the original pnpmfile (if it exists)
-      'function readPackage(pkg, context) {',
-      '  setPreferredVersions(pkg.dependencies);',
-      '  setPreferredVersions(pkg.devDependencies);',
-      '  setPreferredVersions(pkg.optionalDependencies);',
-      '  return (clientPnpmfile && clientPnpmfile.hooks && clientPnpmfile.hooks.readPackage)',
-      '    ? clientPnpmfile.hooks.readPackage(pkg, context)',
-      '    : pkg;',
-      '}',
-
-      // Set the preferred versions on the dependency map. If the version on the map is an allowedAlternativeVersion
-      // then skip it. Otherwise, check to ensure that the common version is a subset of the specified version. If
-      // it is, then replace the specified version with the preferredVersion
-      'function setPreferredVersions(dependencies) {',
-      '  for (const name of Object.keys(dependencies || {})) {',
-      '    if (allPreferredVersions.hasOwnProperty(name)) {',
-      '      const preferredVersion = allPreferredVersions[name];',
-      '      const version = dependencies[name];',
-      '      if (allowedAlternativeVersions.hasOwnProperty(name)) {',
-      '        const allowedAlternatives = allowedAlternativeVersions[name];',
-      '        if (allowedAlternatives && allowedAlternatives.indexOf(version) > -1) {',
-      '          continue;',
-      '        }',
-      '      }',
-      '      let isValidRange = false;',
-      '      try {',
-      '        isValidRange = !!semver.validRange(preferredVersion) && !!semver.validRange(version);',
-      '      } catch {',
-      '      }',
-      '      if (isValidRange && semver.subset(preferredVersion, version)) {',
-      '        dependencies[name] = preferredVersion;',
-      '      }',
-      '    }',
-      '  }',
-      '}'
-    ];
-
-    // Attempt to move the existing pnpmfile if there is one
+  protected async createShimPnpmfileAsync(filename: string): Promise<void> {
+    const pnpmfileDir: string = path.dirname(filename);
+    let pnpmfileExists: boolean = false;
     try {
-      const pnpmfileDir: string = path.dirname(filename);
+      // Attempt to move the existing pnpmfile if there is one
       await FileSystem.moveAsync({
         sourcePath: filename,
-        destinationPath: path.join(pnpmfileDir, clientPnpmfileName)
+        destinationPath: path.join(pnpmfileDir, 'clientPnpmfile.js')
       });
+      pnpmfileExists = true;
     } catch (error) {
       if (!FileSystem.isNotExistError(error)) {
         throw error;
       }
     }
 
-    // Write the shim pnpmfile to the original file path
-    await FileSystem.writeFileAsync(filename, pnpmfileContent.join(NewlineKind.Lf), {
+    const pnpmfileShimSettings: IPnpmfileShimSettings = {
+      allPreferredVersions: MapExtensions.toObject(
+        InstallHelpers.collectPreferredVersions(this.rushConfiguration, this.options)
+      ),
+      allowedAlternativeVersions: MapExtensions.toObject(
+        this.rushConfiguration.getCommonVersions(this.options.variant).allowedAlternativeVersions
+      ),
+      semverPath: require.resolve('semver'),
+      useClientPnpmfile: pnpmfileExists
+    };
+
+    // Write the settings to be consumed by the pnpmfile
+    await JsonFile.saveAsync(pnpmfileShimSettings, path.resolve(pnpmfileDir, 'pnpmfileSettings.json'), {
       ensureFolderExists: true
+    });
+
+    // Copy the shim pnpmfile to the original path
+    await FileSystem.copyFileAsync({
+      sourcePath: path.resolve(__dirname, '..', 'pnpm', 'PnpmfileShim.js'),
+      destinationPath: filename
     });
   }
 

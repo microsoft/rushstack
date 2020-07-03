@@ -6,7 +6,7 @@ import * as semver from 'semver';
 import { FileSystem } from '@rushstack/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
-import { DependencySpecifier } from '../DependencySpecifier';
+import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
 import { PackageManagerOptionsConfigurationBase } from '../../api/RushConfiguration';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
@@ -193,9 +193,9 @@ export abstract class BaseShrinkwrapFile {
     //
     // In this case, the shrinkwrap file will have a key equivalent to "npm:target-name@1.2.5",
     // and so we need to unwrap the target and compare "1.2.5" with "^1.2.3".
-    if (projectDependency.specifierType === 'alias') {
+    if (projectDependency.specifierType === DependencySpecifierType.Alias) {
       // Does the shrinkwrap install it as an alias?
-      if (shrinkwrapDependency.specifierType === 'alias') {
+      if (shrinkwrapDependency.specifierType === DependencySpecifierType.Alias) {
         // Does the shrinkwrap have the right package name?
         if (projectDependency.packageName === shrinkwrapDependency.packageName) {
           // Yes, the aliases match, so let's compare their targets in the logic below
@@ -212,8 +212,8 @@ export abstract class BaseShrinkwrapFile {
     }
 
     switch (normalizedProjectDependency.specifierType) {
-      case 'version':
-      case 'range':
+      case DependencySpecifierType.Version:
+      case DependencySpecifierType.Range:
         return semver.satisfies(
           normalizedShrinkwrapDependency.versionSpecifier,
           normalizedProjectDependency.versionSpecifier

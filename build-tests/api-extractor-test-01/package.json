@@ -14,9 +14,9 @@
     "long": "^4.0.0"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "7.8.15",
+    "@microsoft/api-extractor": "7.9.1",
     "@types/node": "10.17.13",
     "fs-extra": "~7.0.1",
-    "typescript": "~3.7.2"
+    "typescript": "~3.9.5"
   }
 }

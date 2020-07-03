@@ -1,6 +1,13 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Thu, 25 Jun 2020 06:43:35 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Jul 2020 05:46:41 GMT and should not be manually modified.
+
+## 4.4.6
+Fri, 03 Jul 2020 05:46:41 GMT
+
+### Patches
+
+- Improve formatting of errors reported by CommandLineParser.execute()
 
 ## 4.4.5
 Thu, 25 Jun 2020 06:43:35 GMT
