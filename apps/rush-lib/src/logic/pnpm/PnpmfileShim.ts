@@ -18,28 +18,33 @@ interface IPnpmfile {
   };
 }
 
-// Only require the client pnpmfile if it exists
-const clientPnpmfile: IPnpmfile | undefined = JSON.parse('__pnpmfileExists')
-  ? require('./clientPnpmfile')
-  : undefined;
+interface IPnpmfileSettings {
+  allPreferredVersions: { [dependencyName: string]: string };
+  allowedAlternativeVersions: { [dependencyName: string]: string[] };
+  semverPath: string;
+  useClientPnpmfile: boolean;
+}
+
+// Load in the generated settings file
+const pnpmfileSettings: IPnpmfileSettings = require('./pnpmfileSettings.json');
 // We will require semver from this path on disk, since this is the version of semver shipping with Rush
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const semver: any = require('__semverPath');
-const allPreferredVersions: { [dependencyName: string]: string } = JSON.parse('__allPreferredVersions');
-const allowedAlternativeVersions: { [dependencyName: string]: string[] } = JSON.parse(
-  '__allowedAlternativeVersions'
-);
+const semver: any = require(pnpmfileSettings.semverPath);
+// Only require the client pnpmfile if requested
+const clientPnpmfile: IPnpmfile | undefined = pnpmfileSettings.useClientPnpmfile
+  ? require('./clientPnpmfile')
+  : undefined;
 
 // Set the preferred versions on the dependency map. If the version on the map is an allowedAlternativeVersion
 // then skip it. Otherwise, check to ensure that the common version is a subset of the specified version. If
 // it is, then replace the specified version with the preferredVersion
 function setPreferredVersions(dependencies?: { [dependencyName: string]: string }): void {
   for (const name of Object.keys(dependencies || {})) {
-    if (allPreferredVersions.hasOwnProperty(name)) {
-      const preferredVersion: string = allPreferredVersions[name];
+    if (pnpmfileSettings.allPreferredVersions.hasOwnProperty(name)) {
+      const preferredVersion: string = pnpmfileSettings.allPreferredVersions[name];
       const version: string = dependencies![name];
-      if (allowedAlternativeVersions.hasOwnProperty(name)) {
-        const allowedAlternatives: string[] | undefined = allowedAlternativeVersions[name];
+      if (pnpmfileSettings.allowedAlternativeVersions.hasOwnProperty(name)) {
+        const allowedAlternatives: string[] | undefined = pnpmfileSettings.allowedAlternativeVersions[name];
         if (allowedAlternatives && allowedAlternatives.indexOf(version) > -1) {
           continue;
         }
