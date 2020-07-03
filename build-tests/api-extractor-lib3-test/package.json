@@ -12,7 +12,7 @@
     "api-extractor-lib1-test": "1.0.0"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "7.9.0",
+    "@microsoft/api-extractor": "7.9.1",
     "@types/jest": "25.2.1",
     "@types/node": "10.17.13",
     "fs-extra": "~7.0.1",

@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-serve",
-  "version": "3.7.28",
+  "version": "3.7.29",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,9 +13,9 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.16.11",
-    "@rushstack/node-core-library": "3.24.4",
-    "@rushstack/debug-certificate-manager": "0.2.28",
+    "@microsoft/gulp-core-build": "3.16.12",
+    "@rushstack/node-core-library": "3.25.0",
+    "@rushstack/debug-certificate-manager": "0.2.29",
     "@types/node": "10.17.13",
     "colors": "~1.2.1",
     "express": "~4.16.2",
@@ -25,8 +25,8 @@
     "sudo": "~1.0.3"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.8.0",
-    "@microsoft/node-library-build": "6.4.31",
+    "@microsoft/rush-stack-compiler-3.5": "0.8.1",
+    "@microsoft/node-library-build": "6.4.32",
     "@rushstack/eslint-config": "1.0.2",
     "@types/express": "4.11.0",
     "@types/express-serve-static-core": "4.11.0",
