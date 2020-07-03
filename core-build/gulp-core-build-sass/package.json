@@ -22,7 +22,7 @@
     "clean-css": "4.2.1",
     "glob": "~7.0.5",
     "node-sass": "4.14.1",
-    "postcss": "7.0.31",
+    "postcss": "7.0.32",
     "postcss-modules": "~1.5.0"
   },
   "devDependencies": {
