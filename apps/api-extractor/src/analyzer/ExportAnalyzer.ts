@@ -427,7 +427,10 @@ export class ExportAnalyzer {
         const exportSpecifier: ts.ExportSpecifier = declaration as ts.ExportSpecifier;
         exportName = (exportSpecifier.propertyName || exportSpecifier.name).getText().trim();
       } else {
-        throw new InternalError('Unimplemented export declaration kind: ' + declaration.getText());
+        throw new InternalError(
+          `Unimplemented export declaration kind: ${declaration.getText()}\n` +
+            SourceFileLocationFormatter.formatDeclaration(declaration)
+        );
       }
 
       // Ignore "export { A }" without a module specifier
@@ -485,9 +488,8 @@ export class ExportAnalyzer {
           // The implementation here only works when importing from an external module.
           // The full solution is tracked by: https://github.com/microsoft/rushstack/issues/1029
           throw new Error(
-            '"import * as ___ from ___;" is not supported yet for local files.' +
-              '\nFailure in: ' +
-              importDeclaration.getSourceFile().fileName
+            '"import * as ___ from ___;" is not supported yet for local files.\n' +
+              SourceFileLocationFormatter.formatDeclaration(importDeclaration)
           );
         }
 
@@ -571,7 +573,10 @@ export class ExportAnalyzer {
           declarationSymbol
         );
       } else {
-        throw new InternalError('Unimplemented import declaration kind: ' + declaration.getText());
+        throw new InternalError(
+          `Unimplemented import declaration kind: ${declaration.getText()}\n` +
+            SourceFileLocationFormatter.formatDeclaration(declaration)
+        );
       }
     }
 
@@ -715,7 +720,10 @@ export class ExportAnalyzer {
       importOrExportDeclaration
     );
     if (!moduleSpecifier) {
-      throw new InternalError('Unable to parse module specifier');
+      throw new InternalError(
+        'Unable to parse module specifier\n' +
+          SourceFileLocationFormatter.formatDeclaration(importOrExportDeclaration)
+      );
     }
 
     // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
@@ -740,7 +748,10 @@ export class ExportAnalyzer {
       importOrExportDeclaration
     );
     if (!moduleSpecifier) {
-      throw new InternalError('Unable to parse module specifier');
+      throw new InternalError(
+        'Unable to parse module specifier\n' +
+          SourceFileLocationFormatter.formatDeclaration(importOrExportDeclaration)
+      );
     }
 
     const resolvedModule: ts.ResolvedModuleFull | undefined = TypeScriptInternals.getResolvedModule(
@@ -751,8 +762,11 @@ export class ExportAnalyzer {
     if (resolvedModule === undefined) {
       // This should not happen, since getResolvedModule() specifically looks up names that the compiler
       // found in export declarations for this source file
+      //
+      // Encountered in https://github.com/microsoft/rushstack/issues/1914
       throw new InternalError(
-        'getResolvedModule() could not resolve module name ' + JSON.stringify(moduleSpecifier)
+        `getResolvedModule() could not resolve module name ${JSON.stringify(moduleSpecifier)}\n` +
+          SourceFileLocationFormatter.formatDeclaration(importOrExportDeclaration)
       );
     }
 
@@ -765,7 +779,8 @@ export class ExportAnalyzer {
       // This should not happen, since getResolvedModule() specifically looks up names that the compiler
       // found in export declarations for this source file
       throw new InternalError(
-        'getSourceFile() failed to locate ' + JSON.stringify(resolvedModule.resolvedFileName)
+        `getSourceFile() failed to locate ${JSON.stringify(resolvedModule.resolvedFileName)}\n` +
+          SourceFileLocationFormatter.formatDeclaration(importOrExportDeclaration)
       );
     }
 
