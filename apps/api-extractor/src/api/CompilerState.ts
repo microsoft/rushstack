@@ -80,7 +80,7 @@ export class CompilerState {
     const program: ts.Program = ts.createProgram(analysisFilePaths, commandLine.options, compilerHost);
 
     if (commandLine.errors.length > 0) {
-      const errorText: string = `${commandLine.errors[0].messageText}`;
+      const errorText: string = ts.flattenDiagnosticMessageText(commandLine.errors[0].messageText, '\n');
       throw new Error(`Error parsing tsconfig.json content: ${errorText}`);
     }
 
