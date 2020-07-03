@@ -10,8 +10,6 @@ export class InstallAction extends BaseInstallAction {
   protected _toFlag: CommandLineStringListParameter;
   protected _toVersionPolicy: CommandLineStringListParameter;
 
-  private _filterSupported: boolean;
-
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'install',
@@ -29,9 +27,6 @@ export class InstallAction extends BaseInstallAction {
         ' accidentally updating their shrinkwrap file.',
       parser
     });
-
-    this._filterSupported =
-      this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
   }
 
   /**
@@ -40,7 +35,8 @@ export class InstallAction extends BaseInstallAction {
   protected onDefineParameters(): void {
     super.onDefineParameters();
 
-    if (this._filterSupported) {
+    // Only support install filtering in workspace environments
+    if (this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces) {
       this._toFlag = this.defineStringListParameter({
         parameterLongName: '--to',
         parameterShortName: '-t',
@@ -72,10 +68,7 @@ export class InstallAction extends BaseInstallAction {
       // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
-      // Only define the flags if the install type is supported
-      toFlags: this._filterSupported
-        ? this.mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy)
-        : undefined
+      toFlags: this.mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy)
     };
   }
 }
