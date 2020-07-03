@@ -59,11 +59,8 @@ export class PnpmLinkManager extends BaseLinkManager {
 
       for (const rushProject of this._rushConfiguration.projects) {
         if (useWorkspaces) {
-          // Since we're mostly doing validation work here, no need to log out to the user that
-          // we are linking any projects
           await this._linkWorkspaceProject(rushProject, rushLinkJson, pnpmShrinkwrapFile);
         } else {
-          console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
           await this._linkProject(rushProject, rushLinkJson, pnpmShrinkwrapFile);
         }
       }
