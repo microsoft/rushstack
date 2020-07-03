@@ -14206,11 +14206,11 @@ packages:
       '@types/jest': 25.2.1
       '@types/node': 10.17.13
       fs-extra: 7.0.1
-      typescript: 3.7.5
+      typescript: 3.9.5
     dev: false
     name: '@rush-temp/api-documenter-test'
     resolution:
-      integrity: sha512-oSQHe/WAGn2pGDzHNxy/ebbHwgV5EkUiaHoDC5mFveZi/YbZt8DfhcFzCAIzP/7M19h4bhhD9dkmDencC/4Q/A==
+      integrity: sha512-Qk1biNNk3nWYenDTiIqYW70vLuReSnw31Rc2Fd85le2izmqMzpVYoisw+KF8ja6Xt9ypQd1h0eUvDy31hTEyDQ==
       tarball: 'file:projects/api-documenter-test.tgz'
     version: 0.0.0
   'file:projects/api-documenter.tgz':
@@ -14247,11 +14247,11 @@ packages:
       '@types/jest': 25.2.1
       '@types/node': 10.17.13
       fs-extra: 7.0.1
-      typescript: 3.7.5
+      typescript: 3.9.5
     dev: false
     name: '@rush-temp/api-extractor-lib2-test'
     resolution:
-      integrity: sha512-d/guVZZpVbV7X0N8WYQfltz0frTUO/Al4vq73fb9AF22TcWTmA+lFxlc7bMuXi/UZNtmpkH/kJ27YCSbeCuMkg==
+      integrity: sha512-0u0G7fscl+qgsZ7GNjTcRgAKGFVUvrk8UhgIe0bHUQhwruHEjrTvpjdM0HbsdOhfVt63fn+AkP4q0JCK15ZxKQ==
       tarball: 'file:projects/api-extractor-lib2-test.tgz'
     version: 0.0.0
   'file:projects/api-extractor-lib3-test.tgz':
@@ -14259,11 +14259,11 @@ packages:
       '@types/jest': 25.2.1
       '@types/node': 10.17.13
       fs-extra: 7.0.1
-      typescript: 3.7.5
+      typescript: 3.9.5
     dev: false
     name: '@rush-temp/api-extractor-lib3-test'
     resolution:
-      integrity: sha512-B3J22QVJJC5kWnBLgDh6XjcwyEwwFRKvdA43oi1wPCvlqLW6RTrH8YA2SJVAMNf3rVSYWJHnFpwekfeGuqJ0Kg==
+      integrity: sha512-W+ZrYIx1rYjFin/GB0CmDltXHLL3OsJ9xxoPcH5wuZQWODiP6bBD6rpeREeoZ3webIwF7yz5RWKZ27PDgUCJDg==
       tarball: 'file:projects/api-extractor-lib3-test.tgz'
     version: 0.0.0
   'file:projects/api-extractor-model.tgz':
@@ -14287,11 +14287,11 @@ packages:
       '@types/node': 10.17.13
       colors: 1.2.5
       fs-extra: 7.0.1
-      typescript: 3.7.5
+      typescript: 3.9.5
     dev: false
     name: '@rush-temp/api-extractor-scenarios'
     resolution:
-      integrity: sha512-dioxOVTQZgT+tuCvtcottdkiVTOvej/eLPIiz+W+vp71jbjzComxaKwxXokzw3XmvqIiW/HJajG55q+B0O+WDw==
+      integrity: sha512-eUE0t2GtLcGwT3WjFlgrRtxwNKaizkYauWQew1fRglDIMQp+KBwslGEVkqq60fy9vUQF5ccnP+Vp9l42kxrXAw==
       tarball: 'file:projects/api-extractor-scenarios.tgz'
     version: 0.0.0
   'file:projects/api-extractor-test-01.tgz':
@@ -14301,11 +14301,11 @@ packages:
       '@types/node': 10.17.13
       fs-extra: 7.0.1
       long: 4.0.0
-      typescript: 3.7.5
+      typescript: 3.9.5
     dev: false
     name: '@rush-temp/api-extractor-test-01'
     resolution:
-      integrity: sha512-gRBxDF1RjKcabsNcInRgWQ0cll2J0+XInXCpvuemXNl/oIRBPDbB6R8Hhfm5q7mw5mVOympHX9fRSnTeIw9fJg==
+      integrity: sha512-gtQg1x+6BbSPaQJzE2lXPhYuASORkogG94ctPkiyst6rEYlHifzW0rPB8TyEo+SjzcsVNil6Q8UygxxtBkR/dg==
       tarball: 'file:projects/api-extractor-test-01.tgz'
     version: 0.0.0
   'file:projects/api-extractor-test-02.tgz':
@@ -14314,11 +14314,11 @@ packages:
       '@types/semver': 5.3.33
       fs-extra: 7.0.1
       semver: 5.3.0
-      typescript: 3.7.5
+      typescript: 3.9.5
     dev: false
     name: '@rush-temp/api-extractor-test-02'
     resolution:
-      integrity: sha512-zioYlIsu+02fcftni+oXlINztGuAgxLhxQiO3l3OJ5pmeZ6T3XZUmMsiLWY2fbIKsNxqm1R5UMfsdX7Z5Jo14A==
+      integrity: sha512-Omu2+uEnL+lWKpDSyzZITCAMVmH8rx6Y18u84GNt5CYiVHatjpOTco0mt0vgXE6BZn4/W9SCNtSirUZt6hDzWA==
       tarball: 'file:projects/api-extractor-test-02.tgz'
     version: 0.0.0
   'file:projects/api-extractor-test-03.tgz':
@@ -14326,21 +14326,21 @@ packages:
       '@types/jest': 25.2.1
       '@types/node': 10.17.13
       fs-extra: 7.0.1
-      typescript: 3.7.5
+      typescript: 3.9.5
     dev: false
     name: '@rush-temp/api-extractor-test-03'
     resolution:
-      integrity: sha512-ZvlDjrJG25V7ogORzsOPh4nVRVeG/nrL76fjzlBBgloKTx8/IDbpesiwir9eFgL6mZKjW7Tsl69ueatf2x5NQQ==
+      integrity: sha512-18X0hgAkdqA62AK05QDSJhrdxEa29yRZ+lZ98jFzISa4ae0oovpvHfdkELnZCpzaSpDrsGO/iC8D2SRlPhWQ1w==
       tarball: 'file:projects/api-extractor-test-03.tgz'
     version: 0.0.0
   'file:projects/api-extractor-test-04.tgz':
     dependencies:
       fs-extra: 7.0.1
-      typescript: 3.7.5
+      typescript: 3.9.5
     dev: false
     name: '@rush-temp/api-extractor-test-04'
     resolution:
-      integrity: sha512-JwMGU3lYK4vjLm/0SnnM632y3lJNxBALjTcjnNQGVaT1DbLUS7wNWit9PM+cG7Wf4RUxxsRnLYLgEYVv12/SnQ==
+      integrity: sha512-kuJ7xZ9rFAB1Xha/iTothhJRqXIUF2s3t+c6hj6Ls8jufjpo+jwnk2ho4TrjzCI7hzGP7ydLnXywFKZhZ0GuIQ==
       tarball: 'file:projects/api-extractor-test-04.tgz'
     version: 0.0.0
   'file:projects/api-extractor.tgz':
@@ -14352,16 +14352,18 @@ packages:
       '@types/lodash': 4.14.116
       '@types/node': 10.17.13
       '@types/resolve': 1.17.1
+      '@types/semver': 5.3.33
       colors: 1.2.5
       gulp: 4.0.2
       lodash: 4.17.15
       resolve: 1.17.0
+      semver: 5.3.0
       source-map: 0.6.1
       typescript: 3.9.5
     dev: false
     name: '@rush-temp/api-extractor'
     resolution:
-      integrity: sha512-mVkgO7tYenwk5eQ1scHQeO6eL1vCjwQz3ht+4Btc+MJ1VVfSrtoSTHzpNtE3hOKXqkGxU2cdXC/kVPgiChd9sA==
+      integrity: sha512-SPDsuk+UHLaWEUHD7HIjB4jisVMV/JgIstW5vjnQADDENYwSEicA0vnH6j4CIfZHDMq8Gf2y73XMLLmtdS5DeQ==
       tarball: 'file:projects/api-extractor.tgz'
     version: 0.0.0
   'file:projects/debug-certificate-manager.tgz':
@@ -15343,11 +15345,11 @@ packages:
     dependencies:
       '@types/node': 10.17.13
       fs-extra: 7.0.1
-      typescript: 3.7.5
+      typescript: 3.9.5
     dev: false
     name: '@rush-temp/ts-command-line-test'
     resolution:
-      integrity: sha512-BXoCr1E3CZHjcqlnDYLLP1F18ExjaJ8/m2qUTxBHEnayfy0Xmt9L3ZmslWzt6hFWSkuUEt5NlxkdGBXlFFNZfQ==
+      integrity: sha512-AQxi+9T6peEEsJWdyCZVEzd6r4jQaQ5EVbQEoWAZ9NOIIVEpjUZLaiEO/d93ggEGQqKvHB479OgtbgJbUyXhFg==
       tarball: 'file:projects/ts-command-line-test.tgz'
     version: 0.0.0
   'file:projects/ts-command-line.tgz':
@@ -15637,4 +15639,4 @@ specifiers:
   xmldoc: ~1.1.2
   yargs: ~4.6.0
   z-schema: ~3.18.3
-# shrinkwrap hash: 5dbb16ec43a73e51b9dc3633732be8e124ae6574
+# shrinkwrap hash: bab8e24cea983bf1cf2b941875a9fe13cf462d64

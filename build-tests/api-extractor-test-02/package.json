@@ -17,6 +17,6 @@
     "@microsoft/api-extractor": "7.8.15",
     "@types/node": "10.17.13",
     "fs-extra": "~7.0.1",
-    "typescript": "~3.7.2"
+    "typescript": "~3.9.5"
   }
 }
