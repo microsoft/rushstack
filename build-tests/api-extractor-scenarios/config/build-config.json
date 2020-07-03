@@ -14,6 +14,7 @@
     "docReferences",
     "docReferences2",
     "docReferences3",
+    "ecmaScriptPrivateFields",
     "exportDuplicate",
     "exportEquals",
     "exportImportedExternal",

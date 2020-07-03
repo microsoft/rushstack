@@ -160,6 +160,9 @@ describe('extractVersionFromPnpmVersionSpecifier', () => {
   });
   it('detects urls', () => {
     expect(
+      testParsePnpmDependencyKey('example', '@github.com/abc/def/abcdef2fbd0260e6e56ed5ba34df0f5b6599bbe64')
+    ).toEqual('@github.com/abc/def/abcdef2fbd0260e6e56ed5ba34df0f5b6599bbe64');
+    expect(
       testParsePnpmDependencyKey('example', 'github.com/abc/def/abcdef2fbd0260e6e56ed5ba34df0f5b6599bbe64')
     ).toEqual('github.com/abc/def/abcdef2fbd0260e6e56ed5ba34df0f5b6599bbe64');
     expect(

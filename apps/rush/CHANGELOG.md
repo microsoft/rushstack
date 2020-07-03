@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 02 Jul 2020 01:52:18 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Jul 2020 06:16:09 GMT and should not be manually modified.
+
+## 5.27.3
+Fri, 03 Jul 2020 06:16:09 GMT
+
+### Updates
+
+- Added support for new format used by pnpm for tarball URLs that now begin with an @ symbol
 
 ## 5.27.2
 Thu, 02 Jul 2020 01:52:18 GMT

@@ -1,6 +1,20 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 25 Jun 2020 06:43:35 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Jul 2020 05:46:41 GMT and should not be manually modified.
+
+## 7.9.0
+Fri, 03 Jul 2020 05:46:41 GMT
+
+### Minor changes
+
+- Add support for ECMAScript private fields (new in TypeScript 3.8)
+- Add support for "import type" imports (new in TypeScript 3.8)
+- Upgrade the bundled compiler engine to TypeScript 3.9
+
+### Patches
+
+- Fix an issue where chained compiler errors were not formatted correctly
+- Log the TypeScript bundled compiler version, and warn if it is outdated
 
 ## 7.8.15
 Thu, 25 Jun 2020 06:43:35 GMT
