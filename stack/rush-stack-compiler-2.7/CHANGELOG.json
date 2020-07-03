@@ -2,6 +2,23 @@
   "name": "@microsoft/rush-stack-compiler-2.7",
   "entries": [
     {
+      "version": "0.13.0",
+      "tag": "@microsoft/rush-stack-compiler-2.7_v0.13.0",
+      "date": "Fri, 03 Jul 2020 05:46:41 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Disable the \"--typescript-compiler-folder\" setting for API Extractor, since it was causing errors with the latest TypeScript engine"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.8.15` to `7.9.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.2",
       "tag": "@microsoft/rush-stack-compiler-2.7_v0.12.2",
       "date": "Thu, 25 Jun 2020 06:43:35 GMT",

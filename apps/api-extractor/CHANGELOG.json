@@ -2,6 +2,37 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.9.0",
+      "tag": "@microsoft/api-extractor_v7.9.0",
+      "date": "Fri, 03 Jul 2020 05:46:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where chained compiler errors were not formatted correctly"
+          },
+          {
+            "comment": "Log the TypeScript bundled compiler version, and warn if it is outdated"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add support for ECMAScript private fields (new in TypeScript 3.8)"
+          },
+          {
+            "comment": "Add support for \"import type\" imports (new in TypeScript 3.8)"
+          },
+          {
+            "comment": "Upgrade the bundled compiler engine to TypeScript 3.9"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" from `4.4.5` to `4.4.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.8.15",
       "tag": "@microsoft/api-extractor_v7.8.15",
       "date": "Thu, 25 Jun 2020 06:43:35 GMT",
