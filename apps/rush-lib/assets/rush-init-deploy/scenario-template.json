@@ -37,6 +37,16 @@
   // "includeNpmIgnoreFiles": true,
 
   /**
+   * To improve backwards compatibility with legacy packages, the PNPM package manager installs extra links in the
+   * node_modules folder that enable packages to import undeclared dependencies.  In some cases this workaround may
+   * double the number of links created.  If your deployment does not require this workaround, you can set
+   * "omitPnpmWorkaroundLinks" to true to avoid creating the extra links.
+   *
+   * The default value is false.
+   */
+  // "omitPnpmWorkaroundLinks": true,
+
+  /**
    * Specify how links (symbolic links, hard links, and/or NTFS junctions) will be created in the deployed folder:
    *
    * - "default": Create the links while copying the files; this is the default behavior.

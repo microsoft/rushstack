@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Disable the \"--typescript-compiler-folder\" setting for API Extractor, since it was causing errors with the latest TypeScript engine",
+      "type": "minor",
+      "packageName": "@microsoft/rush-stack-compiler-3.4"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-3.4",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

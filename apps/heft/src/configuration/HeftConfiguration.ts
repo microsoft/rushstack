@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import { Terminal, ITerminalProvider, IPackageJson } from '@rushstack/node-core-library';
+import { trueCasePathSync } from 'true-case-path';
 
 import { Utilities } from '../utilities/Utilities';
 import { Constants } from '../utilities/Constants';
@@ -109,7 +110,13 @@ export class HeftConfiguration {
       options.cwd
     );
     if (packageJsonPath) {
-      configuration._buildFolder = path.dirname(packageJsonPath);
+      let buildFolder: string = path.dirname(packageJsonPath);
+      // The CWD path's casing may be incorrect on a case-insensitive filesystem. Some tools, like Jest
+      // expect the casing of the project path to be correct and produce unexpected behavior when the casing
+      // isn't correct.
+      // This ensures the casing of the project folder is correct.
+      buildFolder = trueCasePathSync(buildFolder);
+      configuration._buildFolder = buildFolder;
     } else {
       throw new Error('No package.json file found. Are you in a project folder?');
     }

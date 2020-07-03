@@ -78,6 +78,11 @@ export interface ISassTaskConfig {
    * Allows the override of the options passed to autoprefixer.
    */
   autoprefixerOptions?: autoprefixer.Options;
+
+  /**
+   * Allows the override of generateScopedName function in CSSModule.
+   */
+  generateScopedName?: (name: string, fileName: string, css: string) => string;
 }
 
 export class SassTask extends GulpTask<ISassTaskConfig> {
@@ -126,7 +131,10 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
     const isFileModuleCss: boolean = !!filePath.match(/\.module\.s(a|c)ss/);
     const processAsModuleCss: boolean = isFileModuleCss || !!this.taskConfig.useCSSModules;
-    const cssModules: ICSSModules = new CSSModules(this.buildConfig.rootPath);
+    const cssModules: ICSSModules = new CSSModules(
+      this.buildConfig.rootPath,
+      this.taskConfig.generateScopedName
+    );
 
     if (!processAsModuleCss && this.taskConfig.warnOnNonCSSModules) {
       const relativeFilePath: string = path.relative(this.buildConfig.rootPath, filePath);
