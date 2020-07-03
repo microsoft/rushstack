@@ -219,7 +219,9 @@ export function _isJestEnabled(rootFolder: string): boolean;
 // Warning: (ae-incompatible-release-tags) The symbol "jest" is marked as @public, but its signature references "JestTask" which is marked as @alpha
 //
 // @public (undocumented)
-export const jest: JestTask;
+const jest_2: JestTask;
+
+export { jest_2 as jest }
 
 // @alpha
 export class JestTask extends GulpTask<IJestConfig> {
