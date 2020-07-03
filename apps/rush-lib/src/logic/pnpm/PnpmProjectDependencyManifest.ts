@@ -13,7 +13,6 @@ import {
 } from './PnpmShrinkwrapFile';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../RushConstants';
-import { BasePackage } from '../base/BasePackage';
 import { DependencySpecifier } from '../DependencySpecifier';
 
 export interface IPnpmProjectDependencyManifestOptions {
@@ -59,12 +58,15 @@ export class PnpmProjectDependencyManifest {
     return path.join(project.projectRushTempFolder, RushConstants.projectDependencyManifestFilename);
   }
 
-  public addDependency(pkg: BasePackage, parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml): void {
-    if (!pkg.version) {
-      throw new InternalError(`Version missing from dependency ${pkg.name}`);
-    }
-
-    this._addDependencyInternal(pkg.name, pkg.version, parentShrinkwrapEntry);
+  public addDependency(
+    name: string,
+    version: string,
+    parentShrinkwrapEntry: Pick<
+      IPnpmShrinkwrapDependencyYaml,
+      'dependencies' | 'optionalDependencies' | 'peerDependencies'
+    >
+  ): void {
+    this._addDependencyInternal(name, version, parentShrinkwrapEntry);
   }
 
   /**
@@ -90,7 +92,10 @@ export class PnpmProjectDependencyManifest {
   private _addDependencyInternal(
     name: string,
     version: string,
-    parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml,
+    parentShrinkwrapEntry: Pick<
+      IPnpmShrinkwrapDependencyYaml,
+      'dependencies' | 'optionalDependencies' | 'peerDependencies'
+    >,
     throwIfShrinkwrapEntryMissing: boolean = true
   ): void {
     const shrinkwrapEntry:
@@ -162,6 +167,16 @@ export class PnpmProjectDependencyManifest {
           (throwIfShrinkwrapEntryMissing = false)
         );
       }
+    }
+
+    if (
+      this._project.rushConfiguration.pnpmOptions &&
+      this._project.rushConfiguration.pnpmOptions.useWorkspaces
+    ) {
+      // When using workspaces, hoisting of dependencies is not possible. Therefore, all packages that are consumed
+      // should be specified as direct dependencies in the shrinkwrap. Given this, there is no need to look for peer
+      // dependencies, since it is simply a constraint to be validated by the package manager.
+      return;
     }
 
     for (const peerDependencyName in shrinkwrapEntry.peerDependencies) {
@@ -263,11 +278,17 @@ export class PnpmProjectDependencyManifest {
     const specifierMatches: RegExpExecArray | null = /^[^_]+_(.+)$/.exec(specifier);
     if (specifierMatches) {
       const combinedPeerDependencies: string = specifierMatches[1];
-      // Parse "eslint@6.6.0+typescript@3.6.4" --> ["eslint@6.6.0", "typescript@3.6.4"]
+      // "eslint@6.6.0+typescript@3.6.4+@types+webpack@4.1.9" --> ["eslint@6.6.0", "typescript@3.6.4", "@types", "webpack@4.1.9"]
       const peerDependencies: string[] = combinedPeerDependencies.split('+');
-      for (const peerDependencySpecifier of peerDependencies) {
+      for (let i: number = 0; i < peerDependencies.length; i++) {
+        // Scopes are also separated by '+', so reduce the proceeding value into it
+        if (peerDependencies[i].indexOf('@') === 0) {
+          peerDependencies[i] = `${peerDependencies[i]}/${peerDependencies[i + 1]}`;
+          peerDependencies.splice(i + 1, 1);
+        }
+
         // Parse "eslint@6.6.0" --> "eslint", "6.6.0"
-        const peerMatches: RegExpExecArray | null = /^([^+@]+)@(.+)$/.exec(peerDependencySpecifier);
+        const peerMatches: RegExpExecArray | null = /^(@?[^+@]+)@(.+)$/.exec(peerDependencies[i]);
         if (peerMatches) {
           const peerDependencyName: string = peerMatches[1];
           const peerDependencyVersion: string = peerMatches[2];

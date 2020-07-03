@@ -247,4 +247,22 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   ): DependencySpecifier | undefined {
     throw new InternalError('Not implemented');
   }
+
+  /** @override */
+  public getWorkspaceKeys(): ReadonlyArray<string> {
+    throw new InternalError('Not implemented');
+  }
+
+  /** @override */
+  public getWorkspaceKeyByPath(workspaceRoot: string, projectFolder: string): string {
+    throw new InternalError('Not implemented');
+  }
+
+  /** @override */
+  protected getWorkspaceDependencyVersion(
+    dependencySpecifier: DependencySpecifier,
+    workspaceKey: string
+  ): DependencySpecifier | undefined {
+    throw new InternalError('Not implemented');
+  }
 }

@@ -39,7 +39,12 @@ export class PnpmfileConfiguration {
       log: (message: string) => {}
     };
 
-    if (rushConfiguration.packageManager === 'pnpm') {
+    // Avoid setting the hook when not using pnpm or when using pnpm workspaces, since workspaces mode
+    // already transforms the package.json
+    if (
+      rushConfiguration.packageManager === 'pnpm' &&
+      (!rushConfiguration.pnpmOptions || !rushConfiguration.pnpmOptions.useWorkspaces)
+    ) {
       const pnpmFilePath: string = rushConfiguration.getPnpmfilePath();
       if (FileSystem.exists(pnpmFilePath)) {
         console.log('Loading ' + path.relative(rushConfiguration.rushJsonFolder, pnpmFilePath));

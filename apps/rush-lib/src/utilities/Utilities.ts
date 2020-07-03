@@ -20,6 +20,18 @@ export interface IEnvironment {
 }
 
 /**
+ * Options for Utilities.executeCommand().
+ */
+export interface IExecuteCommandOptions {
+  command: string;
+  args: string[];
+  workingDirectory: string;
+  environment?: IEnvironment;
+  suppressOutput?: boolean;
+  keepEnvironment?: boolean;
+}
+
+/**
  * Options for Utilities.installPackageInDirectory().
  */
 export interface IInstallPackageInDirectoryOptions {
@@ -268,25 +280,20 @@ export class Utilities {
   }
 
   /*
-   * Returns true if outputFilename has a more recent last modified timestamp
-   * than all of the inputFilenames, which would imply that we don't need to rebuild it.
-   * Returns false if any of the files does not exist.
+   * Returns true if dateToCompare is more recent than all of the inputFilenames, which
+   * would imply that we don't need to rebuild it. Returns false if any of the files
+   * does not exist.
    * NOTE: The filenames can also be paths for directories, in which case the directory
    * timestamp is compared.
    */
-  public static isFileTimestampCurrent(outputFilename: string, inputFilenames: string[]): boolean {
-    if (!FileSystem.exists(outputFilename)) {
-      return false;
-    }
-    const outputStats: fs.Stats = FileSystem.getStatistics(outputFilename);
-
+  public static isFileTimestampCurrent(dateToCompare: Date, inputFilenames: string[]): boolean {
     for (const inputFilename of inputFilenames) {
       if (!FileSystem.exists(inputFilename)) {
         return false;
       }
 
       const inputStats: fs.Stats = FileSystem.getStatistics(inputFilename);
-      if (outputStats.mtime < inputStats.mtime) {
+      if (dateToCompare < inputStats.mtime) {
         return false;
       }
     }
@@ -326,21 +333,14 @@ export class Utilities {
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
    */
-  public static executeCommand(
-    command: string,
-    args: string[],
-    workingDirectory: string,
-    environment?: IEnvironment,
-    suppressOutput: boolean = false,
-    keepEnvironment: boolean = false
-  ): void {
+  public static executeCommand(options: IExecuteCommandOptions): void {
     Utilities._executeCommandInternal(
-      command,
-      args,
-      workingDirectory,
-      suppressOutput ? undefined : [0, 1, 2],
-      environment,
-      keepEnvironment
+      options.command,
+      options.args,
+      options.workingDirectory,
+      options.suppressOutput ? undefined : [0, 1, 2],
+      options.environment,
+      options.keepEnvironment
     );
   }
 
@@ -371,12 +371,8 @@ export class Utilities {
    * Attempts to run Utilities.executeCommand() up to maxAttempts times before giving up.
    */
   public static executeCommandWithRetry(
+    options: IExecuteCommandOptions,
     maxAttempts: number,
-    command: string,
-    args: string[],
-    workingDirectory: string,
-    environment?: IEnvironment,
-    suppressOutput: boolean = false,
     retryCallback?: () => void
   ): void {
     if (maxAttempts < 1) {
@@ -387,10 +383,10 @@ export class Utilities {
 
     for (;;) {
       try {
-        Utilities.executeCommand(command, args, workingDirectory, environment, suppressOutput);
+        Utilities.executeCommand(options);
       } catch (error) {
         console.log(os.EOL + 'The command failed:');
-        console.log(` ${command} ` + args.join(' '));
+        console.log(` ${options.command} ` + options.args.join(' '));
         console.log(`ERROR: ${error.toString()}`);
 
         if (attemptNumber < maxAttempts) {
@@ -486,12 +482,14 @@ export class Utilities {
 
     // NOTE: Here we use whatever version of NPM we happen to find in the PATH
     Utilities.executeCommandWithRetry(
-      options.maxInstallAttempts,
-      'npm',
-      ['install'],
-      directory,
-      Utilities._createEnvironmentForRushCommand({}),
-      options.suppressOutput
+      {
+        command: 'npm',
+        args: ['install'],
+        workingDirectory: directory,
+        environment: Utilities._createEnvironmentForRushCommand({}),
+        suppressOutput: options.suppressOutput
+      },
+      options.maxInstallAttempts
     );
   }
 
@@ -572,6 +570,23 @@ export class Utilities {
     }
 
     FileSystem.writeFile(targetNpmrcPath, resultLines.join(os.EOL));
+  }
+
+  /**
+   * Copies the file "sourcePath" to "destinationPath", overwriting the target file location.
+   * If the source file does not exist, then the target file is deleted.
+   */
+  public static syncFile(sourcePath: string, destinationPath: string): void {
+    if (FileSystem.exists(sourcePath)) {
+      console.log(`Updating ${destinationPath}`);
+      FileSystem.copyFile({ sourcePath, destinationPath });
+    } else {
+      if (FileSystem.exists(destinationPath)) {
+        // If the source file doesn't exist and there is one in the target, delete the one in the target
+        console.log(`Deleting ${destinationPath}`);
+        FileSystem.deleteFile(destinationPath);
+      }
+    }
   }
 
   /**
