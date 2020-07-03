@@ -5,13 +5,10 @@ import * as path from 'path';
 
 import gitInfo = require('git-repo-info');
 
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from './RushConfiguration';
-import {
-  IChangeFile,
-  IChangeInfo
-} from './ChangeManagement';
+import { IChangeFile, IChangeInfo } from './ChangeManagement';
 import { Git } from '../logic/Git';
 
 /**
@@ -24,10 +21,7 @@ export class ChangeFile {
   /**
    * @internal
    */
-  public constructor(
-    changeFileData: IChangeFile,
-    rushConfiguration: RushConfiguration
-  ) {
+  public constructor(changeFileData: IChangeFile, rushConfiguration: RushConfiguration) {
     if (!changeFileData) {
       throw new Error(`changeFileData does not have a value`);
     }
@@ -89,19 +83,21 @@ export class ChangeFile {
     }
 
     // example filename: yourbranchname_2017-05-01-20-20.json
-    const filename: string = (branch ?
-      this._escapeFilename(`${branch}_${this._getTimestamp()}.json`) :
-      `${this._getTimestamp()}.json`);
-    const filePath: string = path.join(this._rushConfiguration.changesFolder,
+    const filename: string = branch
+      ? this._escapeFilename(`${branch}_${this._getTimestamp()}.json`)
+      : `${this._getTimestamp()}.json`;
+    const filePath: string = path.join(
+      this._rushConfiguration.changesFolder,
       ...this._changeFileData.packageName.split('/'),
-      filename);
+      filename
+    );
     return filePath;
   }
 
   /**
-  * Gets the current time, formatted as YYYY-MM-DD-HH-MM
-  * Optionally will include seconds
-  */
+   * Gets the current time, formatted as YYYY-MM-DD-HH-MM
+   * Optionally will include seconds
+   */
   private _getTimestamp(useSeconds: boolean = false): string | undefined {
     // Create a date string with the current time
 

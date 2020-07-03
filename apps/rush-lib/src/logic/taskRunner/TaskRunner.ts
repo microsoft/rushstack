@@ -2,13 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
-import { Interleaver } from '@microsoft/stream-collator';
-import {
-  Terminal,
-  ConsoleTerminalProvider,
-  Colors,
-  IColorableSequence
-} from '@microsoft/node-core-library';
+import { Interleaver } from '@rushstack/stream-collator';
+import { Terminal, ConsoleTerminalProvider, Colors, IColorableSequence } from '@rushstack/node-core-library';
 
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { ITask } from './ITask';
@@ -44,7 +39,7 @@ export class TaskRunner {
   private _completedTasks: number;
   private _terminal: Terminal;
 
-  constructor(orderedTasks: ITask[], options: ITaskRunnerOptions) {
+  public constructor(orderedTasks: ITask[], options: ITaskRunnerOptions) {
     const {
       quietMode,
       parallelism,
@@ -99,13 +94,15 @@ export class TaskRunner {
     this._currentActiveTasks = 0;
     this._completedTasks = 0;
     this._totalTasks = this._buildQueue.length;
-    this._terminal.writeLine(`Executing a maximum of ${this._parallelism} simultaneous processes...${os.EOL}`);
+    this._terminal.writeLine(
+      `Executing a maximum of ${this._parallelism} simultaneous processes...${os.EOL}`
+    );
 
     return this._startAvailableTasks().then(() => {
       this._printTaskStatus();
 
       if (this._hasAnyFailures) {
-        return Promise.reject(new Error('Project(s) failed to build'));
+        return Promise.reject(new Error('Project(s) failed'));
       } else if (this._hasAnyWarnings && !this._allowWarningsInSuccessfulBuild) {
         this._terminal.writeWarningLine('Project(s) succeeded with warnings');
         return Promise.reject(new AlreadyReportedError());
@@ -153,49 +150,55 @@ export class TaskRunner {
       task.stopwatch = Stopwatch.start();
       task.writer = Interleaver.registerTask(task.name, this._quietMode);
 
-      taskPromises.push(task.execute(task.writer)
-        .then((result: TaskStatus) => {
-          task.stopwatch.stop();
-          task.writer.close();
+      taskPromises.push(
+        task
+          .execute(task.writer)
+          .then((result: TaskStatus) => {
+            task.stopwatch.stop();
+            task.writer.close();
 
-          this._currentActiveTasks--;
-          this._completedTasks++;
-          switch (result) {
-            case TaskStatus.Success:
-              this._markTaskAsSuccess(task);
-              break;
-            case TaskStatus.SuccessWithWarning:
-              this._hasAnyWarnings = true;
-              this._markTaskAsSuccessWithWarning(task);
-              break;
-            case TaskStatus.Skipped:
-              this._markTaskAsSkipped(task);
-              break;
-            case TaskStatus.Failure:
-              this._hasAnyFailures = true;
-              this._markTaskAsFailed(task);
-              break;
-          }
-        }).catch((error: TaskError) => {
-          task.writer.close();
+            this._currentActiveTasks--;
+            this._completedTasks++;
+            switch (result) {
+              case TaskStatus.Success:
+                this._markTaskAsSuccess(task);
+                break;
+              case TaskStatus.SuccessWithWarning:
+                this._hasAnyWarnings = true;
+                this._markTaskAsSuccessWithWarning(task);
+                break;
+              case TaskStatus.Skipped:
+                this._markTaskAsSkipped(task);
+                break;
+              case TaskStatus.Failure:
+                this._hasAnyFailures = true;
+                this._markTaskAsFailed(task);
+                break;
+            }
+          })
+          .catch((error: TaskError) => {
+            task.writer.close();
 
-          this._currentActiveTasks--;
+            this._currentActiveTasks--;
 
-          this._hasAnyFailures = true;
-          task.error = error;
-          this._markTaskAsFailed(task);
-        }
-        ).then(() => this._startAvailableTasks()));
+            this._hasAnyFailures = true;
+            task.error = error;
+            this._markTaskAsFailed(task);
+          })
+          .then(() => this._startAvailableTasks())
+      );
     }
 
-    return Promise.all(taskPromises).then(() => { /* collapse void[] to void */ });
+    return Promise.all(taskPromises).then(() => {
+      /* collapse void[] to void */
+    });
   }
 
   /**
    * Marks a task as having failed and marks each of its dependents as blocked
    */
   private _markTaskAsFailed(task: ITask): void {
-    this._terminal.writeErrorLine(`${os.EOL}${this._getCurrentCompletedTaskString()}[${task.name}] failed to build!`);
+    this._terminal.writeErrorLine(`${os.EOL}${this._getCurrentCompletedTaskString()}[${task.name}] failed!`);
     task.status = TaskStatus.Failure;
     task.dependents.forEach((dependent: ITask) => {
       this._markTaskAsBlocked(dependent, task);
@@ -208,8 +211,9 @@ export class TaskRunner {
   private _markTaskAsBlocked(task: ITask, failedTask: ITask): void {
     if (task.status === TaskStatus.Ready) {
       this._completedTasks++;
-      this._terminal.writeErrorLine(`${this._getCurrentCompletedTaskString()}`
-        + `[${task.name}] blocked by [${failedTask.name}]!`);
+      this._terminal.writeErrorLine(
+        `${this._getCurrentCompletedTaskString()}[${task.name}] blocked by [${failedTask.name}]!`
+      );
       task.status = TaskStatus.Blocked;
       task.dependents.forEach((dependent: ITask) => {
         this._markTaskAsBlocked(dependent, failedTask);
@@ -222,11 +226,16 @@ export class TaskRunner {
    */
   private _markTaskAsSuccess(task: ITask): void {
     if (task.hadEmptyScript) {
-      this._terminal.writeLine(Colors.green(`${this._getCurrentCompletedTaskString()}`
-      + `[${task.name}] had an empty script`));
+      this._terminal.writeLine(
+        Colors.green(`${this._getCurrentCompletedTaskString()}[${task.name}] had an empty script`)
+      );
     } else {
-      this._terminal.writeLine(Colors.green(`${this._getCurrentCompletedTaskString()}`
-      + `[${task.name}] completed successfully in ${task.stopwatch.toString()}`));
+      this._terminal.writeLine(
+        Colors.green(
+          `${this._getCurrentCompletedTaskString()}` +
+            `[${task.name}] completed successfully in ${task.stopwatch.toString()}`
+        )
+      );
     }
     task.status = TaskStatus.Success;
 
@@ -243,8 +252,10 @@ export class TaskRunner {
    * list of all its dependents
    */
   private _markTaskAsSuccessWithWarning(task: ITask): void {
-    this._terminal.writeWarningLine(`${this._getCurrentCompletedTaskString()}`
-      + `[${task.name}] completed with warnings in ${task.stopwatch.toString()}`);
+    this._terminal.writeWarningLine(
+      `${this._getCurrentCompletedTaskString()}` +
+        `[${task.name}] completed with warnings in ${task.stopwatch.toString()}`
+    );
     task.status = TaskStatus.SuccessWithWarning;
     task.dependents.forEach((dependent: ITask) => {
       if (!this._changedProjectsOnly) {
@@ -366,7 +377,7 @@ export class TaskRunner {
     const headSize: number = 10;
     const tailSize: number = 20;
     const margin: number = 10;
-    const lines: Array<string> = text.split(/\s*\r?\n/).filter(line => line);
+    const lines: string[] = text.split(/\s*\r?\n/).filter((line) => line);
     if (lines.length < headSize + tailSize + margin) {
       return lines.join(os.EOL);
     }
@@ -375,5 +386,4 @@ export class TaskRunner {
     const tail: string = lines.splice(-tailSize).join(os.EOL);
     return `${head}${os.EOL}[...${amountRemoved} lines omitted...]${os.EOL}${tail}`;
   }
-
 }

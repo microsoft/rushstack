@@ -40,6 +40,10 @@ export interface ILoadThemedStylesLoaderOptions {
 export class LoadThemedStylesLoader {
   private static _loadedThemedStylesPath: string = loadedThemedStylesPath;
 
+  public constructor() {
+    throw new Error('Constructing "LoadThemedStylesLoader" is not supported.');
+  }
+
   public static set loadedThemedStylesPath(value: string) {
     LoadThemedStylesLoader._loadedThemedStylesPath = value;
   }
@@ -59,10 +63,7 @@ export class LoadThemedStylesLoader {
   }
 
   public static pitch(this: loader.LoaderContext, remainingRequest: string): string {
-    const {
-      namedExport,
-      async = false
-    }: ILoadThemedStylesLoaderOptions = loaderUtils.getOptions(this) || {};
+    const { namedExport, async = false }: ILoadThemedStylesLoaderOptions = loaderUtils.getOptions(this) || {};
 
     let exportName: string = 'module.exports';
     if (namedExport) {
@@ -80,9 +81,5 @@ export class LoadThemedStylesLoader {
       '',
       `if(content.locals) ${exportName} = content.locals;`
     ].join('\n');
-  }
-
-  constructor() {
-    throw new Error('Constructing "LoadThemedStylesLoader" is not supported.');
   }
 }

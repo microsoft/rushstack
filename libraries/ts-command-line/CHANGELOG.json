@@ -1,6 +1,261 @@
 {
-  "name": "@microsoft/ts-command-line",
+  "name": "@rushstack/ts-command-line",
   "entries": [
+    {
+      "version": "4.4.6",
+      "tag": "@rushstack/ts-command-line_v4.4.6",
+      "date": "Fri, 03 Jul 2020 05:46:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve formatting of errors reported by CommandLineParser.execute()"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.4.5",
+      "tag": "@rushstack/ts-command-line_v4.4.5",
+      "date": "Thu, 25 Jun 2020 06:43:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `1.0.1` to `1.0.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.4.4",
+      "tag": "@rushstack/ts-command-line_v4.4.4",
+      "date": "Wed, 24 Jun 2020 09:50:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `1.0.0` to `1.0.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.4.3",
+      "tag": "@rushstack/ts-command-line_v4.4.3",
+      "date": "Wed, 24 Jun 2020 09:04:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.8` to `1.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.4.2",
+      "tag": "@rushstack/ts-command-line_v4.4.2",
+      "date": "Mon, 01 Jun 2020 08:34:17 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a typo in the supplementary notes for parameters with environment variable mappings"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.4.1",
+      "tag": "@rushstack/ts-command-line_v4.4.1",
+      "date": "Wed, 27 May 2020 05:15:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.7` to `0.5.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.4.0",
+      "tag": "@rushstack/ts-command-line_v4.4.0",
+      "date": "Fri, 15 May 2020 08:10:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a new feature defineCommandLineRemainder() which allows additional unvalidated CLI arguments, e.g. to pass along to another tool"
+          },
+          {
+            "comment": "Add the ability for an environment variable to specify multiple values for CommandLineStringListParameter, encoded as a JSON array"
+          },
+          {
+            "comment": "Fix some bugs that prevented a CommandLineParser from being defined without any actions"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix a bug with environmentVariable mapping for CommandLineFlagParameter"
+          },
+          {
+            "comment": "Use API Extractor to trim internal APIs from the .d.ts rollup"
+          },
+          {
+            "comment": "Improve the README.md and API documentation"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.14",
+      "tag": "@rushstack/ts-command-line_v4.3.14",
+      "date": "Wed, 08 Apr 2020 04:07:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.6` to `0.5.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.13",
+      "tag": "@rushstack/ts-command-line_v4.3.13",
+      "date": "Sat, 28 Mar 2020 00:37:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.5` to `0.5.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.12",
+      "tag": "@rushstack/ts-command-line_v4.3.12",
+      "date": "Wed, 18 Mar 2020 15:07:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade cyclic dependencies"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.4` to `0.5.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.11",
+      "tag": "@rushstack/ts-command-line_v4.3.11",
+      "date": "Tue, 17 Mar 2020 23:55:58 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "PACKAGE NAME CHANGE: The NPM scope was changed from `@microsoft/ts-command-line` to `@rushstack/ts-command-line`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.10",
+      "tag": "@microsoft/ts-command-line_v4.3.10",
+      "date": "Tue, 21 Jan 2020 21:56:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.3` to `0.5.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.9",
+      "tag": "@microsoft/ts-command-line_v4.3.9",
+      "date": "Sun, 19 Jan 2020 02:26:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade Node typings to Node 10"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.2` to `0.5.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.8",
+      "tag": "@microsoft/ts-command-line_v4.3.8",
+      "date": "Fri, 17 Jan 2020 01:08:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.1` to `0.5.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.7",
+      "tag": "@microsoft/ts-command-line_v4.3.7",
+      "date": "Thu, 09 Jan 2020 06:44:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.0` to `0.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.6",
+      "tag": "@microsoft/ts-command-line_v4.3.6",
+      "date": "Wed, 08 Jan 2020 00:11:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.4.2` to `0.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.5",
+      "tag": "@microsoft/ts-command-line_v4.3.5",
+      "date": "Mon, 11 Nov 2019 16:07:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.4.1` to `0.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.4",
+      "tag": "@microsoft/ts-command-line_v4.3.4",
+      "date": "Tue, 22 Oct 2019 06:24:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.4.0` to `0.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.3",
+      "tag": "@microsoft/ts-command-line_v4.3.3",
+      "date": "Fri, 18 Oct 2019 15:15:00 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix Choice parameter error when only one alternative value is provided"
+          }
+        ]
+      }
+    },
     {
       "version": "4.3.2",
       "tag": "@microsoft/ts-command-line_v4.3.2",

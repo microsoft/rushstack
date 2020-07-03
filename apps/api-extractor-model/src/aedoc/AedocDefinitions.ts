@@ -1,12 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  TSDocConfiguration,
-  TSDocTagDefinition,
-  TSDocTagSyntaxKind,
-  StandardTags
-} from '@microsoft/tsdoc';
+import { TSDocConfiguration, TSDocTagDefinition, TSDocTagSyntaxKind, StandardTags } from '@microsoft/tsdoc';
 
 /**
  * @internal
@@ -30,11 +25,14 @@ export class AedocDefinitions {
   public static get tsdocConfiguration(): TSDocConfiguration {
     if (!AedocDefinitions._tsdocConfiguration) {
       const configuration: TSDocConfiguration = new TSDocConfiguration();
-      configuration.addTagDefinitions([
-        AedocDefinitions.betaDocumentation,
-        AedocDefinitions.internalRemarks,
-        AedocDefinitions.preapprovedTag
-      ], true);
+      configuration.addTagDefinitions(
+        [
+          AedocDefinitions.betaDocumentation,
+          AedocDefinitions.internalRemarks,
+          AedocDefinitions.preapprovedTag
+        ],
+        true
+      );
 
       configuration.setSupportForTags(
         [
@@ -56,6 +54,7 @@ export class AedocDefinitions {
           StandardTags.remarks,
           StandardTags.returns,
           StandardTags.sealed,
+          StandardTags.throws,
           StandardTags.virtual
         ],
         true

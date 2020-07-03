@@ -7,10 +7,7 @@
  * @packageDocumentation
  */
 
-export {
-  CommandLineAction,
-  ICommandLineActionOptions
-} from './CommandLineAction';
+export { CommandLineAction, ICommandLineActionOptions } from './providers/CommandLineAction';
 
 export {
   IBaseCommandLineDefinition,
@@ -19,34 +16,30 @@ export {
   ICommandLineStringDefinition,
   ICommandLineStringListDefinition,
   ICommandLineIntegerDefinition,
-  ICommandLineChoiceDefinition
-} from './CommandLineDefinition';
+  ICommandLineChoiceDefinition,
+  ICommandLineRemainderDefinition
+} from './parameters/CommandLineDefinition';
 
 export {
   CommandLineParameterKind,
   CommandLineParameter,
-  CommandLineParameterWithArgument,
-  CommandLineStringParameter,
-  CommandLineStringListParameter,
-  CommandLineFlagParameter,
-  CommandLineIntegerParameter,
-  CommandLineChoiceParameter
-} from './CommandLineParameter';
+  CommandLineParameterWithArgument
+} from './parameters/BaseClasses';
+
+export { CommandLineFlagParameter } from './parameters/CommandLineFlagParameter';
+export { CommandLineStringParameter } from './parameters/CommandLineStringParameter';
+export { CommandLineStringListParameter } from './parameters/CommandLineStringListParameter';
+export { CommandLineIntegerParameter } from './parameters/CommandLineIntegerParameter';
+export { CommandLineChoiceParameter } from './parameters/CommandLineChoiceParameter';
+export { CommandLineRemainder } from './parameters/CommandLineRemainder';
 
 export {
   CommandLineParameterProvider,
   ICommandLineParserData as _ICommandLineParserData
-} from './CommandLineParameterProvider';
+} from './providers/CommandLineParameterProvider';
 
-export {
-  ICommandLineParserOptions,
-  CommandLineParser
-} from './CommandLineParser';
+export { ICommandLineParserOptions, CommandLineParser } from './providers/CommandLineParser';
 
-export {
-  DynamicCommandLineAction
-} from './DynamicCommandLineAction';
+export { DynamicCommandLineAction } from './providers/DynamicCommandLineAction';
 
-export {
-  DynamicCommandLineParser
-} from './DynamicCommandLineParser';
+export { DynamicCommandLineParser } from './providers/DynamicCommandLineParser';

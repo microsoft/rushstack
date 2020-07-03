@@ -11,12 +11,12 @@
  */
 export class PluginFeatureInitialization {
   /** @internal */
+  public _context: PluginFeatureContext;
+
+  /** @internal */
   public constructor() {
     // reserved for future use
   }
-
-  /** @internal */
-  public _context: PluginFeatureContext;
 }
 
 /**
@@ -25,8 +25,7 @@ export class PluginFeatureInitialization {
  *
  * @public
  */
-export class PluginFeatureContext {
-}
+export class PluginFeatureContext {}
 
 /**
  * The abstract base class for all API Documenter plugin features.

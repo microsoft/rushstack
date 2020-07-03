@@ -6,7 +6,7 @@ import * as path from 'path';
 import yaml = require('js-yaml');
 
 import { ApiModel } from '@microsoft/api-extractor-model';
-import { Text, FileSystem } from '@microsoft/node-core-library';
+import { Text, FileSystem } from '@rushstack/node-core-library';
 
 import { IYamlTocItem } from '../yaml/IYamlTocFile';
 import { IYamlItem } from '../yaml/IYamlApiFile';
@@ -31,16 +31,16 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
   private _apiSetUrlDefault: string = '/office/dev/add-ins/reference/javascript-api-for-office';
 
   // Hash set of API Set URLs based on product.
-  private _apiSetUrls: Object = {
-    'Excel': '/office/dev/add-ins/reference/requirement-sets/excel-api-requirement-sets',
-    'OneNote': '/office/dev/add-ins/reference/requirement-sets/onenote-api-requirement-sets',
-    'Visio': '/office/dev/add-ins/reference/overview/visio-javascript-reference-overview',
-    'Outlook': '/office/dev/add-ins/reference/requirement-sets/outlook-api-requirement-sets',
-    'Word': '/office/dev/add-ins/reference/requirement-sets/word-api-requirement-sets'
+  private _apiSetUrls: Record<string, string> = {
+    Excel: '/office/dev/add-ins/reference/requirement-sets/excel-api-requirement-sets',
+    OneNote: '/office/dev/add-ins/reference/requirement-sets/onenote-api-requirement-sets',
+    Visio: '/office/dev/add-ins/reference/overview/visio-javascript-reference-overview',
+    Outlook: '/office/dev/add-ins/reference/requirement-sets/outlook-api-requirement-sets',
+    Word: '/office/dev/add-ins/reference/requirement-sets/word-api-requirement-sets'
   };
 
-  public constructor(apiModel: ApiModel, inputFolder: string) {
-    super(apiModel);
+  public constructor(apiModel: ApiModel, inputFolder: string, newDocfxNamespaces?: boolean) {
+    super(apiModel, newDocfxNamespaces);
 
     const snippetsFilePath: string = path.join(inputFolder, 'snippets.yaml');
 
@@ -63,11 +63,12 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
   }
 
   /** @override */
-  protected onGetTocRoot(): IYamlTocItem { // override
+  protected onGetTocRoot(): IYamlTocItem {
+    // override
     return {
       name: 'API reference',
       href: '~/docs-ref-autogen/overview/office.md',
-      items: [ ]
+      items: []
     };
   }
 
@@ -83,10 +84,10 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
       yamlItem.remarks = this._fixBoldAndItalics(yamlItem.remarks);
     }
     if (yamlItem.syntax && yamlItem.syntax.parameters) {
-      yamlItem.syntax.parameters.forEach(part => {
-          if (part.description) {
-            part.description = this._fixBoldAndItalics(part.description);
-          }
+      yamlItem.syntax.parameters.forEach((part) => {
+        if (part.description) {
+          part.description = this._fixBoldAndItalics(part.description);
+        }
       });
     }
 
@@ -122,7 +123,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     for (const key of Object.keys(this._apiSetUrls)) {
       const regexp: RegExp = new RegExp(key, 'i');
       if (regexp.test(uid)) {
-          return this._apiSetUrls[key];
+        return this._apiSetUrls[key];
       }
     }
     return this._apiSetUrlDefault; // match not found.
@@ -137,7 +138,6 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     for (const snippet of snippets) {
       if (snippet.search(/await/) === -1) {
         text.push('```javascript');
-
       } else {
         text.push('```typescript');
       }

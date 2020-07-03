@@ -3,7 +3,7 @@
 
 import { EOL } from 'os';
 import * as colors from 'colors';
-import { PackageJsonLookup } from '@microsoft/node-core-library';
+import { PackageJsonLookup } from '@rushstack/node-core-library';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import { RushConstants } from '../logic/RushConstants';
@@ -94,24 +94,28 @@ export class Rush {
    * This function normalizes legacy options to the current {@link ILaunchOptions} object.
    */
   private static _normalizeLaunchOptions(arg: ILaunchOptions): ILaunchOptions {
-    return (typeof arg === 'boolean')
+    return typeof arg === 'boolean'
       ? { isManaged: arg } // In older versions of Rush, this the `launch` functions took a boolean arg for "isManaged"
       : arg;
   }
 
   private static _printStartupBanner(isManaged: boolean): void {
     const nodeVersion: string = process.versions.node;
-    const nodeReleaseLabel: string = (NodeJsCompatibility.isOddNumberedVersion)
-    ? 'unstable'
-    : (NodeJsCompatibility.isLtsVersion ? 'LTS' : 'pre-LTS');
+    const nodeReleaseLabel: string = NodeJsCompatibility.isOddNumberedVersion
+      ? 'unstable'
+      : NodeJsCompatibility.isLtsVersion
+      ? 'LTS'
+      : 'pre-LTS';
 
     console.log(
       EOL +
-      colors.bold(`Rush Multi-Project Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')) +
-      colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
-      EOL +
-      `Node.js version is ${nodeVersion} (${nodeReleaseLabel})` +
-      EOL
+        colors.bold(
+          `Rush Multi-Project Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')
+        ) +
+        colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
+        EOL +
+        `Node.js version is ${nodeVersion} (${nodeReleaseLabel})` +
+        EOL
     );
   }
 }

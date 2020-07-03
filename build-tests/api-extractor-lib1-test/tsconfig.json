@@ -5,25 +5,11 @@
     "module": "commonjs",
     "declaration": true,
     "sourceMap": true,
-    "declarationMap": true,
     "experimentalDecorators": true,
     "strictNullChecks": true,
-    "types": [
-      "node",
-      "jest"
-    ],
-    "lib": [
-      "es5",
-      "scripthost",
-      "es2015.collection",
-      "es2015.promise",
-      "es2015.iterable",
-      "dom"
-    ],
+    "types": ["node"],
+    "lib": ["es5", "scripthost", "es2015.collection", "es2015.promise", "es2015.iterable", "dom"],
     "outDir": "lib"
   },
-  "include": [
-    "src/**/*.ts",
-    "typings/tsd.d.ts"
-  ]
+  "include": ["src/**/*.ts", "typings/tsd.d.ts"]
 }

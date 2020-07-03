@@ -1,9 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineAction } from '../CommandLineAction';
-import { CommandLineParser } from '../CommandLineParser';
-import { CommandLineFlagParameter } from '../CommandLineParameter';
+import { CommandLineAction, CommandLineParser, CommandLineFlagParameter } from '..';
 
 class TestAction extends CommandLineAction {
   public done: boolean = false;
@@ -47,7 +45,6 @@ class TestCommandLine extends CommandLineParser {
 }
 
 describe('CommandLineParser', () => {
-
   it('executes an action', () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
 
@@ -59,5 +56,4 @@ describe('CommandLineParser', () => {
       expect(action.done).toBe(true);
     });
   });
-
 });

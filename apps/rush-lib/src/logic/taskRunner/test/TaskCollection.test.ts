@@ -1,8 +1,8 @@
 import { TaskCollection } from '../TaskCollection';
-import { ITaskWriter } from '@microsoft/stream-collator';
+import { ITaskWriter } from '@rushstack/stream-collator';
 import { TaskStatus } from '../TaskStatus';
 import { ITaskDefinition, ITask } from '../ITask';
-import { StringBufferTerminalProvider } from '@microsoft/node-core-library';
+import { StringBufferTerminalProvider } from '@rushstack/node-core-library';
 
 function createDummyTask(name: string, action?: () => void): ITaskDefinition {
   return {
@@ -36,19 +36,17 @@ describe('TaskCollection', () => {
   describe('Dependencies', () => {
     beforeEach(() => {
       taskCollection = new TaskCollection({
-          quietMode: false
+        quietMode: false
       });
     });
 
     it('throwsErrorOnNonExistentTask', () => {
-      expect(() => taskCollection.addDependencies('foo', []))
-        .toThrowErrorMatchingSnapshot();
+      expect(() => taskCollection.addDependencies('foo', [])).toThrowErrorMatchingSnapshot();
     });
 
     it('throwsErrorOnNonExistentDependency', () => {
       taskCollection.addTask(createDummyTask('foo'));
-      expect(() => taskCollection.addDependencies('foo', ['bar']))
-        .toThrowErrorMatchingSnapshot();
+      expect(() => taskCollection.addDependencies('foo', ['bar'])).toThrowErrorMatchingSnapshot();
     });
 
     it('detectsDependencyCycle', () => {
@@ -60,7 +58,7 @@ describe('TaskCollection', () => {
     });
 
     it('respectsDependencyOrder', () => {
-      const result: Array<string> = [];
+      const result: string[] = [];
       taskCollection.addTask(createDummyTask('two', () => result.push('2')));
       taskCollection.addTask(createDummyTask('one', () => result.push('1')));
       taskCollection.addDependencies('two', ['one']);

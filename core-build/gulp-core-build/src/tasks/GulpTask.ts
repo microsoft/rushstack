@@ -3,7 +3,7 @@
 
 import * as colors from 'colors';
 import * as path from 'path';
-import { JsonFile, JsonSchema, FileSystem } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema, FileSystem, JsonObject } from '@rushstack/node-core-library';
 
 import { GulpProxy } from '../GulpProxy';
 import { IExecutable } from '../IExecutable';
@@ -22,9 +22,8 @@ import Vinyl = require('vinyl');
 import gulp = require('gulp');
 import through2 = require('through2');
 
-/* tslint:disable:typedef */
+// eslint-disable-next-line
 const eos = require('end-of-stream');
-/* tslint:enable:typedef */
 
 import { args } from '../State';
 
@@ -67,7 +66,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
   /**
    * The memoized schema for this task. Should not be utilized by child classes, use schema property instead.
    */
-  private _schema: Object | undefined;
+  private _schema: JsonObject | undefined;
 
   /**
    * Initializes a new instance of the task with the specified initial task config
@@ -90,10 +89,11 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * A JSON Schema object which will be used to validate this task's configuration file.
    * @returns a z-schema schema definition
    */
-  public get schema(): Object | undefined {
-    return this._schema ?
-      this._schema :
+  public get schema(): JsonObject | undefined {
+    if (!this._schema) {
       this._schema = this.loadSchema();
+    }
+    return this._schema;
   }
 
   /**
@@ -102,9 +102,8 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * @param taskConfig - configuration settings which should be applied
    */
   public setConfig(taskConfig: Partial<TTaskConfig>): void {
-    /* tslint:disable:typedef */
+    // eslint-disable-next-line
     const objectAssign = require('object-assign');
-    /* tslint:enable:typedef */
 
     this.taskConfig = objectAssign({}, this.taskConfig, taskConfig);
   }
@@ -115,9 +114,8 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * @param taskConfig - configuration settings which should be applied
    */
   public mergeConfig(taskConfig: Partial<TTaskConfig>): void {
-    /* tslint:disable:typedef */
+    // eslint-disable-next-line
     const merge = require('lodash.merge');
-    /* tslint:enable:typedef */
 
     this.taskConfig = merge({}, this.taskConfig, taskConfig);
   }
@@ -136,7 +134,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    */
   public onRegister(): void {
     const configFilename: string = this._getConfigFilePath();
-    const schema: Object | undefined = this.schema;
+    const schema: JsonObject | undefined = this.schema;
 
     const rawConfig: TTaskConfig | undefined = this._readConfigFile(configFilename, schema);
 
@@ -155,7 +153,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
   public abstract executeTask(
     gulp: gulp.Gulp | GulpProxy,
     completeCallback?: (error?: string | Error) => void
-  ): Promise<Object | void> | NodeJS.ReadWriteStream | void;
+  ): Promise<any | void> | NodeJS.ReadWriteStream | void; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   /**
    * Logs a message to standard output.
@@ -210,7 +208,13 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * @param warningCode - the custom warning code representing this warning
    * @param message - a description of the warning
    */
-  public fileWarning(filePath: string, line: number, column: number, warningCode: string, message: string): void {
+  public fileWarning(
+    filePath: string,
+    line: number,
+    column: number,
+    warningCode: string,
+    message: string
+  ): void {
     fileWarning(this.name, filePath, line, column, warningCode, message);
   }
 
@@ -239,9 +243,8 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
     logStartSubtask(this.name);
 
     return new Promise((resolve, reject) => {
-      /* tslint:disable:typedef */
-      let stream;
-      /* tslint:enable:typedef */
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let stream: any = undefined;
 
       try {
         if (!this.executeTask) {
@@ -268,43 +271,50 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
         } else if (stream.pipe) {
           // wait for stream to end
 
-          eos(stream, {
-            error: true,
-            readable: stream.readable,
-            writable: stream.writable && !stream.readable
-          }, (err: Object) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve();
+          eos(
+            stream,
+            {
+              error: true,
+              readable: stream.readable,
+              writable: stream.writable && !stream.readable
+            },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (err: any) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve();
+              }
             }
-          });
+          );
 
           // Make sure the stream is completely read
-          stream.pipe(through2.obj(
-            (file: Vinyl,
-              encoding: string,
-              callback: (p?: Object) => void) => {
+          stream.pipe(
+            through2.obj(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (file: Vinyl, encoding: string, callback: (p?: any) => void) => {
                 callback();
-            },
-            (callback: () => void) => {
-              callback();
-            }));
-
+              },
+              (callback: () => void) => {
+                callback();
+              }
+            )
+          );
         } else if (this.executeTask.length === 1) {
           resolve(stream);
         }
       } else if (this.executeTask.length === 1) {
         resolve(stream);
       }
-    })
-      .then(() => {
+    }).then(
+      () => {
         logEndSubtask(this.name, startTime);
       },
       (ex) => {
         logEndSubtask(this.name, startTime, ex);
         throw ex;
-      });
+      }
+    );
   }
 
   /**
@@ -331,7 +341,9 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
 
     try {
       doesExist = FileSystem.getStatistics(fullPath).isFile();
-    } catch (e) { /* no-op */ }
+    } catch (e) {
+      /* no-op */
+    }
 
     return doesExist;
   }
@@ -345,7 +357,8 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
     const fullSourcePath: string = path.resolve(__dirname, localSourcePath);
     const fullDestPath: string = path.resolve(
       this.buildConfig.rootPath,
-      (localDestPath || path.basename(localSourcePath)));
+      localDestPath || path.basename(localSourcePath)
+    );
 
     FileSystem.copyFile({
       sourcePath: fullSourcePath,
@@ -357,14 +370,16 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * Read a JSON file into an object
    * @param localPath - the path to the JSON file
    */
-  public readJSONSync(localPath: string): Object | undefined {
+  public readJSONSync(localPath: string): JsonObject | undefined {
     const fullPath: string = this.resolvePath(localPath);
-    let result: Object | undefined = undefined;
+    let result: JsonObject | undefined = undefined;
 
     try {
       const content: string = FileSystem.readFile(fullPath);
       result = JSON.parse(content);
-    } catch (e) { /* no-op */ }
+    } catch (e) {
+      /* no-op */
+    }
 
     return result;
   }
@@ -374,7 +389,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * the task's configuration file. This function is called once per task instance.
    * @returns a z-schema schema definition
    */
-  protected loadSchema(): Object | undefined {
+  protected loadSchema(): JsonObject | undefined {
     return undefined;
   }
 
@@ -391,11 +406,12 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * @param schema - the z-schema schema object used to validate the configuration file
    * @returns If the configuration file is valid, returns the configuration as an object.
    */
-  private _readConfigFile(filePath: string, schema?: Object): TTaskConfig | undefined {
+  private _readConfigFile(filePath: string, schema?: JsonObject): TTaskConfig | undefined {
     if (!FileSystem.exists(filePath)) {
       return undefined;
     } else {
-      if (args['verbose']) { // tslint:disable-line:no-string-literal
+      // eslint-disable-next-line dot-notation
+      if (args['verbose']) {
         console.log(`Found config file: ${path.basename(filePath)}`);
       }
 

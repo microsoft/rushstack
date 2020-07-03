@@ -11,19 +11,33 @@ This is an example class.
 ```typescript
 export declare class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInterface2 
 ```
+<b>Extends:</b> [DocBaseClass](./api-documenter-test.docbaseclass.md)
+
+<b>Implements:</b> [IDocInterface1](./api-documenter-test.idocinterface1.md)<!-- -->, [IDocInterface2](./api-documenter-test.idocinterface2.md)
+
+## Remarks
+
+[Link to overload 1](./api-documenter-test.docclass1.examplefunction.md)
+
+[Link to overload 2](./api-documenter-test.docclass1.examplefunction_1.md)
+
+
+The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `DocClass1` class.
 
 ## Events
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [malformedEvent](./api-documenter-test.docclass1.malformedevent.md) |  | <code>SystemEvent</code> | This event should have been marked as readonly. |
-|  [modifiedEvent](./api-documenter-test.docclass1.modifiedevent.md) |  | <code>SystemEvent</code> | This event is fired whenever the object is modified. |
+|  [malformedEvent](./api-documenter-test.docclass1.malformedevent.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | This event should have been marked as readonly. |
+|  [modifiedEvent](./api-documenter-test.docclass1.modifiedevent.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | This event is fired whenever the object is modified. |
 
 ## Properties
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [regularProperty](./api-documenter-test.docclass1.regularproperty.md) |  | <code>SystemEvent</code> | This is a regular property that happens to use the SystemEvent type. |
+|  [readonlyProperty](./api-documenter-test.docclass1.readonlyproperty.md) |  | string |  |
+|  [regularProperty](./api-documenter-test.docclass1.regularproperty.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | This is a regular property that happens to use the SystemEvent type. |
+|  [writeableProperty](./api-documenter-test.docclass1.writeableproperty.md) |  | string |  |
 
 ## Methods
 
@@ -35,10 +49,4 @@ export declare class DocClass1 extends DocBaseClass implements IDocInterface1, I
 |  [interestingEdgeCases()](./api-documenter-test.docclass1.interestingedgecases.md) |  | Example: "<!-- -->{ \\<!-- -->"maxItemsToShow<!-- -->\\<!-- -->": 123 }<!-- -->"<!-- -->The regular expression used to validate the constraints is /^\[a-zA-Z0-9<!-- -->\\<!-- -->-\_\]+$/ |
 |  [sumWithExample(x, y)](./api-documenter-test.docclass1.sumwithexample.md) | <code>static</code> | Returns the sum of two numbers. |
 |  [tableExample()](./api-documenter-test.docclass1.tableexample.md) |  | An example with tables: |
-
-## Remarks
-
-These are some remarks.
-
-The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `DocClass1` class.
 

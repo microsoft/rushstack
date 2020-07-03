@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "2.15.1",
+  "pnpmVersion": "4.14.4",
 
   /*[LINE "HYPOTHETICAL"]*/ "npmVersion": "4.5.0",
   /*[LINE "HYPOTHETICAL"]*/ "yarnVersion": "1.9.4",
@@ -35,6 +35,22 @@
    * Options that are only used when the PNPM package manager is selected
    */
   "pnpmOptions": {
+    /**
+     * Specifies the location of the PNPM store.  There are two possible values:
+     *
+     * - "local" - use the "pnpm-store" folder in the current configured temp folder:
+     *   "common/temp/pnpm-store" by default.
+     * - "global" - use PNPM's global store, which has the benefit of being shared
+     *    across multiple repo folders, but the disadvantage of less isolation for builds
+     *    (e.g. bugs or incompatibilities when two repos use different releases of PNPM)
+     *
+     * RUSH_PNPM_STORE_PATH will override the directory that will be used as the store
+     *
+     * In all cases, the store path will be overridden by the environment variable RUSH_PNPM_STORE_PATH.
+     *
+     * The default value is "local".
+     */
+    /*[LINE "HYPOTHETICAL"]*/ "pnpmStore": "local",
 
     /**
      * If true, then Rush will add the "--strict-peer-dependencies" option when invoking PNPM.
@@ -48,7 +64,6 @@
      */
     /*[LINE "DEMO"]*/ "strictPeerDependencies": true,
 
-
     /**
      * Configures the strategy used to select versions during installation.
      *
@@ -61,7 +76,41 @@
      * After modifying this field, it's recommended to run "rush update --full" so that the package manager
      * will recalculate all version selections.
      */
-    /*[LINE "HYPOTHETICAL"]*/ "resolutionStrategy": "fast"
+    /*[LINE "HYPOTHETICAL"]*/ "resolutionStrategy": "fast",
+
+    /**
+     * If true, then `rush install` will report an error if manual modifications
+     * were made to the PNPM shrinkwrap file without running "rush update" afterwards.
+     *
+     * This feature protects against accidental inconsistencies that may be introduced
+     * if the PNPM shrinkwrap file ("pnpm-lock.yaml") is manually edited.  When this
+     * feature is enabled, "rush update" will append a hash to the file as a YAML comment,
+     * and then "rush update" and "rush install" will validate the hash.  Note that this does not prohibit
+     * manual modifications, but merely requires "rush update" be run
+     * afterwards, ensuring that PNPM can report or repair any potential inconsistencies.
+     *
+     * To temporarily disable this validation when invoking "rush install", use the
+     * "--bypass-policy" command-line parameter.
+     *
+     * The default value is false.
+     */
+    /*[LINE "HYPOTHETICAL"]*/ "preventManualShrinkwrapChanges": true,
+
+    /**
+     * If true, then `rush install` will use the PNPM workspaces feature to perform the
+     * install.
+     *
+     * This feature uses PNPM to peform the entire monorepo install. When using workspaces, Rush will
+     * generate a "pnpm-workspace.yaml" file referencing all local projects to install. Rush will
+     * also generate a "pnpmfile.js" which is used to provide preferred versions support. When install
+     * is run, this pnpmfile will be used to replace dependency version ranges with a smaller subset
+     * of the original range. If the preferred version is not fully a subset of the original version
+     * range, it will be left as-is. After this, the pnpmfile.js provided in the repository (if one
+     * exists) will be called to further modify package dependencies.
+     *
+     * The default value is false.
+     */
+    /*[LINE "HYPOTHETICAL"]*/ "useWorkspaces": true
   },
 
   /**
@@ -72,19 +121,19 @@
    * Specify a SemVer range to ensure developers use a Node.js version that is appropriate
    * for your repo.
    */
-  "nodeSupportedVersionRange": ">=10.13.0 <11.0.0",
+  "nodeSupportedVersionRange": ">=12.13.0 <13.0.0",
 
   /**
-  * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
-  * spend six months in a stabilization period before the first Long Term Support (LTS) version.
-  * For example, 8.9.0 was the first LTS version of Node.js 8.  Pre-LTS versions are not recommended
-  * for production usage because they frequently have bugs.  They may cause Rush itself
-  * to malfunction.
-  *
-  * Rush normally prints a warning if it detects a pre-LTS Node.js version.  If you are testing
-  * pre-LTS versions in preparation for supporting the first LTS version, you can use this setting
-  * to disable Rush's warning.
-  */
+   * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
+   * spend six months in a stabilization period before the first Long Term Support (LTS) version.
+   * For example, 8.9.0 was the first LTS version of Node.js 8.  Pre-LTS versions are not recommended
+   * for production usage because they frequently have bugs.  They may cause Rush itself
+   * to malfunction.
+   *
+   * Rush normally prints a warning if it detects a pre-LTS Node.js version.  If you are testing
+   * pre-LTS versions in preparation for supporting the first LTS version, you can use this setting
+   * to disable Rush's warning.
+   */
   /*[LINE "HYPOTHETICAL"]*/ "suppressNodeLtsWarning": false,
 
   /**
@@ -98,7 +147,7 @@
    * version. In those cases, you will need to add an entry to the "allowedAlternativeVersions"
    * section of the common-versions.json.
    */
-   /*[LINE "HYPOTHETICAL"]*/ "ensureConsistentVersions": true,
+  /*[LINE "HYPOTHETICAL"]*/ "ensureConsistentVersions": true,
 
   /**
    * Large monorepos can become intimidating for newcomers if project folder paths don't follow
@@ -125,6 +174,19 @@
    */
   /*[LINE "HYPOTHETICAL"]*/ "projectFolderMinDepth": 2,
   /*[LINE "HYPOTHETICAL"]*/ "projectFolderMaxDepth": 2,
+
+  /**
+   * Today the npmjs.com registry enforces fairly strict naming rules for packages, but in the early
+   * days there was no standard and hardly any enforcement.  A few large legacy projects are still using
+   * nonstandard package names, and private registries sometimes allow it.  Set "allowMostlyStandardPackageNames"
+   * to true to relax Rush's enforcement of package names.  This allows upper case letters and in the future may
+   * relax other rules, however we want to minimize these exceptions.  Many popular tools use certain punctuation
+   * characters as delimiters, based on the assumption that they will never appear in a package name; thus if we relax
+   * the rules too much it is likely to cause very confusing malfunctions.
+   *
+   * The default value is false.
+   */
+  /*[LINE "HYPOTHETICAL"]*/ "allowMostlyStandardPackageNames": true,
 
   /**
    * This feature helps you to review and approve new packages before they are introduced
@@ -160,7 +222,7 @@
      * if the underlying package was already approved, this would imply that the typings
      * are also approved.
      */
-    /*[LINE "HYPOTHETICAL"]*/ "ignoredNpmScopes": [ "@types" ]
+    /*[LINE "HYPOTHETICAL"]*/ "ignoredNpmScopes": ["@types"]
   },
   /*[END "DEMO"]*/
 
@@ -215,12 +277,24 @@
      * determined from Git alone, since the "pull request" feature is not a Git concept.  Ideally
      * Rush would use a vendor-specific protocol to query the information from GitHub, Azure DevOps, etc.
      * But to keep things simple, "rush change" simply assumes that your PR is against the "master" branch
-     * of the Git remote indicated by the respository.url setting in rush.json.  If you are working in
+     * of the Git remote indicated by the repository.url setting in rush.json.  If you are working in
      * a GitHub "fork" of the real repo, this setting will be different from the repository URL of your
      * your PR branch, and in this situation "rush change" will also automatically invoke "git fetch"
      * to retrieve the latest activity for the remote master branch.
      */
-    /*[LINE "HYPOTHETICAL"]*/ "url": "https://github.com/microsoft/rush-example"
+    /*[LINE "HYPOTHETICAL"]*/ "url": "https://github.com/microsoft/rush-example",
+
+    /**
+     * The default branch name. This tells "rush change" which remote branch to compare against.
+     * The default value is "master"
+     */
+    /*[LINE "HYPOTHETICAL"]*/ "defaultBranch": "master",
+
+    /**
+     * The default remote. This tells "rush change" which remote to compare against if the remote URL is
+     * not set or if a remote matching the provided remote URL is not found.
+     */
+    /*[LINE "HYPOTHETICAL"]*/ "defaultRemote": "origin"
   },
 
   /**

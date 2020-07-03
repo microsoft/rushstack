@@ -1,6 +1,177 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Sun, 29 Sep 2019 23:56:29 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+
+## 3.16.12
+Fri, 03 Jul 2020 15:09:04 GMT
+
+*Version update only*
+
+## 3.16.11
+Thu, 25 Jun 2020 06:43:34 GMT
+
+*Version update only*
+
+## 3.16.10
+Wed, 24 Jun 2020 09:50:48 GMT
+
+*Version update only*
+
+## 3.16.9
+Wed, 24 Jun 2020 09:04:28 GMT
+
+*Version update only*
+
+## 3.16.8
+Wed, 10 Jun 2020 20:48:30 GMT
+
+*Version update only*
+
+## 3.16.7
+Sat, 30 May 2020 02:59:54 GMT
+
+*Version update only*
+
+## 3.16.6
+Thu, 28 May 2020 05:59:02 GMT
+
+*Version update only*
+
+## 3.16.5
+Wed, 27 May 2020 05:15:11 GMT
+
+*Version update only*
+
+## 3.16.4
+Tue, 26 May 2020 23:00:25 GMT
+
+*Version update only*
+
+## 3.16.3
+Fri, 22 May 2020 15:08:43 GMT
+
+*Version update only*
+
+## 3.16.2
+Thu, 21 May 2020 23:09:44 GMT
+
+*Version update only*
+
+## 3.16.1
+Thu, 21 May 2020 15:42:00 GMT
+
+*Version update only*
+
+## 3.16.0
+Sat, 02 May 2020 00:08:16 GMT
+
+### Minor changes
+
+- Upgrade Jest to 25
+
+## 3.15.5
+Wed, 08 Apr 2020 04:07:34 GMT
+
+*Version update only*
+
+## 3.15.4
+Sat, 28 Mar 2020 00:37:16 GMT
+
+*Version update only*
+
+## 3.15.3
+Wed, 18 Mar 2020 15:07:47 GMT
+
+### Patches
+
+- Upgrade cyclic dependencies
+
+## 3.15.2
+Tue, 17 Mar 2020 23:55:58 GMT
+
+### Patches
+
+- Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`
+
+## 3.15.1
+Tue, 28 Jan 2020 02:23:44 GMT
+
+*Version update only*
+
+## 3.15.0
+Fri, 24 Jan 2020 00:27:39 GMT
+
+### Minor changes
+
+- Add GCBTerminalProvider for use in GulpTasks.
+
+## 3.14.2
+Thu, 23 Jan 2020 01:07:56 GMT
+
+*Version update only*
+
+## 3.14.1
+Tue, 21 Jan 2020 21:56:14 GMT
+
+*Version update only*
+
+## 3.14.0
+Sun, 19 Jan 2020 02:26:52 GMT
+
+### Minor changes
+
+- Upgrade Node typings to Node 10
+
+## 3.13.4
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 3.13.3
+Sat, 11 Jan 2020 05:18:23 GMT
+
+### Patches
+
+- Temporarily disable the HTML Jest reporter in the default config because of an issue with Handlebars.
+
+## 3.13.2
+Thu, 09 Jan 2020 06:44:13 GMT
+
+*Version update only*
+
+## 3.13.1
+Wed, 08 Jan 2020 00:11:31 GMT
+
+*Version update only*
+
+## 3.13.0
+Wed, 04 Dec 2019 23:17:55 GMT
+
+### Minor changes
+
+- Add ability to write Jest results as an NUnit compatible file
+
+## 3.12.5
+Fri, 15 Nov 2019 04:50:50 GMT
+
+*Version update only*
+
+## 3.12.4
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 3.12.3
+Tue, 05 Nov 2019 06:49:28 GMT
+
+*Version update only*
+
+## 3.12.2
+Tue, 22 Oct 2019 06:24:44 GMT
+
+### Patches
+
+- Refactor some code as part of migration from TSLint to ESLint
 
 ## 3.12.1
 Sun, 29 Sep 2019 23:56:29 GMT

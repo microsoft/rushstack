@@ -1,14 +1,6 @@
 {
-  "extends": "./node_modules/@microsoft/rush-stack-compiler-3.4/includes/tsconfig-node.json",
+  "extends": "./node_modules/@microsoft/rush-stack-compiler-3.5/includes/tsconfig-node.json",
   "compilerOptions": {
-    "types": [
-      "jest",
-      "node"
-    ]
-  },
-  "include": [
-    "./typings/tsd.d.ts",
-    "./src/**/*.ts",
-    "./src/**/*.tsx"
-  ]
+    "types": ["jest", "node"]
+  }
 }

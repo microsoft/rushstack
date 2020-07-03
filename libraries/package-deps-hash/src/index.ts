@@ -7,11 +7,11 @@
  *
  * @remarks
  *
- * For more info, please see the package {@link https://www.npmjs.com/package/@microsoft/package-deps-hash
+ * For more info, please see the package {@link https://www.npmjs.com/package/@rushstack/package-deps-hash
  * | README}.
  *
  * @packageDocumentation
  */
 
-export { getPackageDeps } from './getPackageDeps';
+export { getPackageDeps, getGitHashForFiles } from './getPackageDeps';
 export { IPackageDeps } from './IPackageDeps';

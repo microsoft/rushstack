@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonFile, JsonSchema, FileSystem } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
 import { VersionPolicy, BumpType, LockStepVersionPolicy } from './VersionPolicy';
 import { RushConfigurationProject } from './RushConfigurationProject';
@@ -65,7 +65,8 @@ export interface IVersionPolicyDependencyJson {
  */
 export class VersionPolicyConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/version-policies.schema.json'));
+    path.join(__dirname, '../schemas/version-policies.schema.json')
+  );
 
   private _versionPolicies: Map<string, VersionPolicy>;
   private _jsonFileName: string;
@@ -89,8 +90,10 @@ export class VersionPolicyConfiguration {
     this.versionPolicies.forEach((policy) => {
       const lockStepPolicy: LockStepVersionPolicy = policy as LockStepVersionPolicy;
       if (lockStepPolicy.mainProject && !projectsByName.get(lockStepPolicy.mainProject)) {
-        throw new Error(`Version policy \"${policy.policyName}\" has a non-existing mainProject:` +
-          ` ${lockStepPolicy.mainProject}.`);
+        throw new Error(
+          `Version policy \"${policy.policyName}\" has a non-existing mainProject:` +
+            ` ${lockStepPolicy.mainProject}.`
+        );
       }
     });
   }
@@ -123,7 +126,8 @@ export class VersionPolicyConfiguration {
    * @param identifier - prerelease identifier to override what policy has defined.
    * @param shouldCommit - should save to disk
    */
-  public bump(versionPolicyName?: string,
+  public bump(
+    versionPolicyName?: string,
     bumpType?: BumpType,
     identifier?: string,
     shouldCommit?: boolean
@@ -148,9 +152,7 @@ export class VersionPolicyConfiguration {
    * @param versionPolicyName - version policy name
    * @param newVersion - new version
    */
-  public update(versionPolicyName: string,
-    newVersion: string
-  ): void {
+  public update(versionPolicyName: string, newVersion: string): void {
     const policy: VersionPolicy | undefined = this.versionPolicies.get(versionPolicyName);
     if (!policy || !policy.isLockstepped) {
       throw new Error(`Lockstep Version policy with name "${versionPolicyName}" cannot be found`);
@@ -165,10 +167,12 @@ export class VersionPolicyConfiguration {
     if (!FileSystem.exists(this._jsonFileName)) {
       return;
     }
-    const versionPolicyJson: IVersionPolicyJson[] = JsonFile.loadAndValidate(this._jsonFileName,
-      VersionPolicyConfiguration._jsonSchema);
+    const versionPolicyJson: IVersionPolicyJson[] = JsonFile.loadAndValidate(
+      this._jsonFileName,
+      VersionPolicyConfiguration._jsonSchema
+    );
 
-    versionPolicyJson.forEach(policyJson => {
+    versionPolicyJson.forEach((policyJson) => {
       const policy: VersionPolicy | undefined = VersionPolicy.load(policyJson);
       if (policy) {
         this._versionPolicies.set(policy.policyName, policy);

@@ -2,6 +2,576 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.27.3",
+      "tag": "@microsoft/rush_v5.27.3",
+      "date": "Fri, 03 Jul 2020 06:16:09 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Added support for new format used by pnpm for tarball URLs that now begin with an @ symbol"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.27.2",
+      "tag": "@microsoft/rush_v5.27.2",
+      "date": "Thu, 02 Jul 2020 01:52:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve \"rush deploy\" to copy PNPM workaround links (fixes GitHub #1942 and 1943)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.27.1",
+      "tag": "@microsoft/rush_v5.27.1",
+      "date": "Mon, 29 Jun 2020 18:39:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where environment variable trimming for .npmrc was unnecessarily performed on comment lines"
+          },
+          {
+            "comment": "Add a \"rush init\" template for .npmrc-publish"
+          },
+          {
+            "comment": "Fix a regression affecting GitHub specifiers for package.json dependencies (issue #1749)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.27.0",
+      "tag": "@microsoft/rush_v5.27.0",
+      "date": "Sun, 21 Jun 2020 04:48:53 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve \"rush deploy\" to apply pnpmfile.js when calculating dependencies"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.26.0",
+      "tag": "@microsoft/rush_v5.26.0",
+      "date": "Mon, 15 Jun 2020 01:26:24 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Breaking change for the experimental \"rush deploy\" feature: Simplify the config file design, based on the discussion from GitHub #1906"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.25.2",
+      "tag": "@microsoft/rush_v5.25.2",
+      "date": "Thu, 11 Jun 2020 05:34:31 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where Git hook scripts failed in some environments due to CRLF newlines"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.25.1",
+      "tag": "@microsoft/rush_v5.25.1",
+      "date": "Thu, 11 Jun 2020 05:05:30 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix some minor errors in the \"rush init\" template that occured when Prettier reformatted the template file macros"
+          },
+          {
+            "comment": "Add a sample Git hook file to the \"rush init\" template"
+          },
+          {
+            "comment": "Fix a minor issue where \"rush link\" failed if no projects were defined yet in rush.json"
+          },
+          {
+            "comment": "Add \"--no-verify\" for commits performed by \"rush version\", since Git hook scripts may fail on CI machines"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.25.0",
+      "tag": "@microsoft/rush_v5.25.0",
+      "date": "Wed, 10 Jun 2020 23:53:27 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add new command-line.json setting \"autoinstallerName\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.24.4",
+      "tag": "@microsoft/rush_v5.24.4",
+      "date": "Mon, 08 Jun 2020 18:04:35 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Explicitly assigning the option value for --resolution-strategy. This fixes a crash with pnpm v5, which deprecated the option."
+          },
+          {
+            "comment": "Fix an issue where install-run.js is not able to find its own .bin in PATH"
+          },
+          {
+            "comment": "Fix an issue where \"rush install\" sometimes skipped regenerating temporary packages, which is incompatible with PNPM's \"--frozen-lockfile\" feature"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.24.3",
+      "tag": "@microsoft/rush_v5.24.3",
+      "date": "Thu, 04 Jun 2020 22:50:56 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where \"rush deploy\" generated incorrect symlinks on Mac OS if the target folder was symlinked (GitHub #1910)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.24.2",
+      "tag": "@microsoft/rush_v5.24.2",
+      "date": "Wed, 03 Jun 2020 05:35:19 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Expect error when trying to resolve optional dependency during deploy"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.24.1",
+      "tag": "@microsoft/rush_v5.24.1",
+      "date": "Tue, 02 Jun 2020 03:11:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where the \"linkCreation\" defaulted to \"none\" instead of \"default\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.24.0",
+      "tag": "@microsoft/rush_v5.24.0",
+      "date": "Mon, 01 Jun 2020 08:48:49 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Set next LTS node version to 14."
+          },
+          {
+            "comment": "Add new \"rush deploy\" command that copies subsets of files/symlinks to a deployment folder"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.23.5",
+      "tag": "@microsoft/rush_v5.23.5",
+      "date": "Thu, 28 May 2020 22:49:57 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where Rush cannot reinstall itself on Windows"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.23.4",
+      "tag": "@microsoft/rush_v5.23.4",
+      "date": "Thu, 21 May 2020 15:41:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new rush.json setting \"allowMostlyStandardPackageNames\""
+          },
+          {
+            "comment": "Add RUSH_PARALLELISM environment variable for specifying the --parallelism default"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.19.7` to `3.20.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.12` to `0.4.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.14` to `6.4.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.23.3",
+      "tag": "@microsoft/rush_v5.23.3",
+      "date": "Fri, 15 May 2020 08:10:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a few instances of missing spaces in --help documentation."
+          },
+          {
+            "comment": "Provide an option to pass --frozen-lockfile to pnpm for rush install"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.10` to `0.4.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.12` to `6.4.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.23.2",
+      "tag": "@microsoft/rush_v5.23.2",
+      "date": "Wed, 22 Apr 2020 18:44:26 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add common-versions.json to the set of files that, when changed, will trigger reinstallation of dependencies."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.23.1",
+      "tag": "@microsoft/rush_v5.23.1",
+      "date": "Wed, 15 Apr 2020 03:33:55 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a regression in Rush 5.19.0 where customizing \"rush rebuild\" would call the \"build\" script instead of the \"rebuild\" script."
+          },
+          {
+            "comment": "Fix an issue where, on some minimal systems, Rush used a missing shell command to detect an application path."
+          },
+          {
+            "comment": "Fix an issue where the common/temp/*.tgz files resulted in different shrinkwrap files on different operating systems"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.23.0",
+      "tag": "@microsoft/rush_v5.23.0",
+      "date": "Sat, 04 Apr 2020 00:38:29 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new rush.json setting \"preventManualShrinkwrapChanges\" which prevents against accidental mistakes in pnpm-lock.yaml."
+          },
+          {
+            "comment": "Upgrade node-tar"
+          },
+          {
+            "comment": "Remove some misleading log output for \"rush build\" (GitHub #1733)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.22.0",
+      "tag": "@microsoft/rush_v5.22.0",
+      "date": "Wed, 18 Mar 2020 01:23:22 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`"
+          },
+          {
+            "comment": "Support setting environment variables for package manager install processes in rush.json and expose --max-install-attempts as a parameter for rush install/update."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.21.0",
+      "tag": "@microsoft/rush_v5.21.0",
+      "date": "Sat, 07 Mar 2020 05:36:08 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Make the event hook failure message print in yellow."
+          },
+          {
+            "comment": "Improve phrasing of an error message."
+          },
+          {
+            "comment": "Add a new command-line.json setting \"required\" for non-optional parameters"
+          },
+          {
+            "comment": "Implement `pnpmOptions.pnpmStore` and RUSH_PNPM_STORE_PATH, to allow the end-user to define where PNPM will place its store."
+          },
+          {
+            "comment": "Add a --json flag for \"rush check\" to facilitate automation"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.20.0",
+      "tag": "@microsoft/rush_v5.20.0",
+      "date": "Wed, 12 Feb 2020 21:51:19 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Support \".\" as a value for the --to and --from parameters to build to the current project."
+          },
+          {
+            "comment": "Improve security by allowing the \"rush publish\" authentication token to be specified via an environment variable."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.19.4",
+      "tag": "@microsoft/rush_v5.19.4",
+      "date": "Tue, 28 Jan 2020 03:57:30 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where a missing \"repository\" property in rush.json would cause \"rush change\" to throw."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.19.3",
+      "tag": "@microsoft/rush_v5.19.3",
+      "date": "Tue, 28 Jan 2020 01:35:53 GMT",
+      "comments": {}
+    },
+    {
+      "version": "5.19.2",
+      "tag": "@microsoft/rush_v5.19.2",
+      "date": "Tue, 28 Jan 2020 01:08:26 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where the rushx command will always report error."
+          },
+          {
+            "comment": "Fixes \"too many params\" and \"unable to find ref v<version>\" issues in git tagging while publishing."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.19.1",
+      "tag": "@microsoft/rush_v5.19.1",
+      "date": "Sat, 25 Jan 2020 05:15:10 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue with install-run.js, where successful executions exit with a nonzero exit code."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.19.0",
+      "tag": "@microsoft/rush_v5.19.0",
+      "date": "Sat, 25 Jan 2020 04:19:23 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Make the default branch and default remote configurable."
+          },
+          {
+            "comment": "Fix an issue where the Rush process terminates without any error message during installation/linking, due to a dependency package that broke its SemVer contract (GitHub #1713)"
+          },
+          {
+            "comment": "Update package.json files without reformatting or reordering properties and fields during \"rush add\", \"rush version\" and \"rush publish\"."
+          },
+          {
+            "comment": "Upgrade Node typings to Node 10"
+          },
+          {
+            "comment": "Update the \"rush init\" .gitignore file to ignore .rush/temp and .DS_Store folders"
+          },
+          {
+            "comment": "Improve command-line.json handling so that the \"rush build\" and \"rush rebuild\" commands can be extended without having to duplicate the built-in options (GitHub #1375)"
+          },
+          {
+            "comment": "Add a --json flag for \"rush list\" to facilitate automation"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.18.0",
+      "tag": "@microsoft/rush_v5.18.0",
+      "date": "Sat, 11 Jan 2020 05:38:55 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Don't use the `build` verb when printing task failures"
+          },
+          {
+            "comment": "Add a --commit command-line argument to the publish command to allow the git commit to be explicitly provided for tagging."
+          },
+          {
+            "comment": "Update GitHub project URL in some resource files"
+          },
+          {
+            "comment": "fix typo in version-policies.json"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.17.2",
+      "tag": "@microsoft/rush_v5.17.2",
+      "date": "Tue, 26 Nov 2019 00:53:52 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Resolve an issue where git tags were not being applied when using pack or publish with --include-all"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.17.1",
+      "tag": "@microsoft/rush_v5.17.1",
+      "date": "Thu, 21 Nov 2019 00:50:15 GMT",
+      "comments": {
+        "undefined": [
+          {
+            "comment": "Remove an error thrown when the --registry and --pack arguments are used on rush publish, because --registry might be required to check if a package has already been published against a custom registry."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Fix an issue with Rush add, where Rush was unable to add unpublished local projects as dependencies."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.17.0",
+      "tag": "@microsoft/rush_v5.17.0",
+      "date": "Thu, 14 Nov 2019 22:52:48 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new setting \"implicitlyPreferredVersions\" in common-versions.json that can be used to solve some installation failures involving peer dependencies"
+          },
+          {
+            "comment": "Improve the generation of shrinkwrap-deps.json to consider optional peer dependencies and implicitlyPreferredVersions=false"
+          },
+          {
+            "comment": "Fix an issue where certain operations did not use a stable sort when executed on older versions of NodeJS"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.16.1",
+      "tag": "@microsoft/rush_v5.16.1",
+      "date": "Fri, 25 Oct 2019 20:15:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Log to console instead of throwing when an unmet peer dependency is encountered during linking, and strictPeerDependencies is false"
+          },
+          {
+            "comment": "Refactor some code as part of migration from TSLint to ESLint"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.16.0",
+      "tag": "@microsoft/rush_v5.16.0",
+      "date": "Thu, 17 Oct 2019 00:41:01 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Support PNPM 4 on Rush"
+          },
+          {
+            "comment": "Add support for \"rush add\" for repos using the Yarn package manager."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.15.1",
+      "tag": "@microsoft/rush_v5.15.1",
+      "date": "Thu, 10 Oct 2019 23:47:19 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where build commands can fail because git commands used to track changes can be too long."
+          },
+          {
+            "comment": "Fix compatibility issue where PNPM 4 requires --no-prefer-frozen-lockfile instead of --no-prefer-frozen-shrinkwrap"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.15.0",
+      "tag": "@microsoft/rush_v5.15.0",
+      "date": "Tue, 08 Oct 2019 22:58:33 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve 'rush build' to avoid rebuilding unnecessarily when the package-lock.json file has changed (pnpm only)."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.14.0",
+      "tag": "@microsoft/rush_v5.14.0",
+      "date": "Wed, 02 Oct 2019 01:18:02 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add an --all flag to \"rush add\" to add a dependency to all projects."
+          },
+          {
+            "comment": "Add options to rush change to allow creating changefiles for all changed projects."
+          },
+          {
+            "comment": "Rush update now prints a message when the approved packages files are out-of-date, and rush install exits with an error if they are out-of-date."
+          },
+          {
+            "comment": "Include peerDependencies in the approved packages files."
+          },
+          {
+            "comment": "Make detection of changefiles and changes in projects safer."
+          },
+          {
+            "comment": "Update repository URL"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.13.1",
       "tag": "@microsoft/rush_v5.13.1",
       "date": "Fri, 27 Sep 2019 22:34:50 GMT",

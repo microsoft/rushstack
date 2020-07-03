@@ -1,6 +1,263 @@
 # Change Log - @microsoft/rush-stack-compiler-3.3
 
-This log was last generated on Sun, 29 Sep 2019 23:56:29 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+
+## 0.9.1
+Fri, 03 Jul 2020 15:09:04 GMT
+
+*Version update only*
+
+## 0.9.0
+Fri, 03 Jul 2020 05:46:41 GMT
+
+### Minor changes
+
+- Disable the "--typescript-compiler-folder" setting for API Extractor, since it was causing errors with the latest TypeScript engine
+
+## 0.8.2
+Thu, 25 Jun 2020 06:43:35 GMT
+
+*Version update only*
+
+## 0.8.1
+Wed, 24 Jun 2020 09:50:48 GMT
+
+*Version update only*
+
+## 0.8.0
+Wed, 24 Jun 2020 09:04:28 GMT
+
+### Minor changes
+
+- Upgrade to ESLint 7
+
+## 0.7.1
+Mon, 15 Jun 2020 22:17:18 GMT
+
+*Version update only*
+
+## 0.7.0
+Fri, 12 Jun 2020 09:19:21 GMT
+
+### Minor changes
+
+- Expose the @microsoft/api-extractor package's path
+
+## 0.6.3
+Wed, 10 Jun 2020 20:48:30 GMT
+
+*Version update only*
+
+## 0.6.2
+Mon, 01 Jun 2020 08:34:17 GMT
+
+*Version update only*
+
+## 0.6.1
+Sat, 30 May 2020 02:59:54 GMT
+
+*Version update only*
+
+## 0.6.0
+Thu, 28 May 2020 05:59:02 GMT
+
+### Minor changes
+
+- Change the way the typescript, tslint, and api-extractor packages are exported.
+- Update TSLint to 5.20.1
+- Update tsconfig-node.json to target es2017 (supported by Node 8); this enables native async/await, and will show complete callstacks when using Node 12
+
+## 0.5.17
+Wed, 27 May 2020 05:15:11 GMT
+
+*Version update only*
+
+## 0.5.16
+Tue, 26 May 2020 23:00:25 GMT
+
+*Version update only*
+
+## 0.5.15
+Fri, 22 May 2020 15:08:43 GMT
+
+*Version update only*
+
+## 0.5.14
+Thu, 21 May 2020 23:09:44 GMT
+
+*Version update only*
+
+## 0.5.13
+Thu, 21 May 2020 15:42:00 GMT
+
+*Version update only*
+
+## 0.5.12
+Tue, 19 May 2020 15:08:20 GMT
+
+*Version update only*
+
+## 0.5.11
+Fri, 15 May 2020 08:10:59 GMT
+
+*Version update only*
+
+## 0.5.10
+Wed, 06 May 2020 08:23:45 GMT
+
+*Version update only*
+
+## 0.5.9
+Wed, 08 Apr 2020 04:07:33 GMT
+
+*Version update only*
+
+## 0.5.8
+Fri, 03 Apr 2020 15:10:15 GMT
+
+### Patches
+
+- Update tslint-microsoft-contrib to ~6.2.0
+
+## 0.5.7
+Sun, 29 Mar 2020 00:04:12 GMT
+
+*Version update only*
+
+## 0.5.6
+Sat, 28 Mar 2020 00:37:16 GMT
+
+*Version update only*
+
+## 0.5.5
+Wed, 18 Mar 2020 15:07:47 GMT
+
+### Patches
+
+- Upgrade cyclic dependencies
+
+## 0.5.4
+Tue, 17 Mar 2020 23:55:58 GMT
+
+### Patches
+
+- Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`
+
+## 0.5.3
+Tue, 28 Jan 2020 02:23:44 GMT
+
+*Version update only*
+
+## 0.5.2
+Thu, 23 Jan 2020 01:07:56 GMT
+
+*Version update only*
+
+## 0.5.1
+Tue, 21 Jan 2020 21:56:14 GMT
+
+*Version update only*
+
+## 0.5.0
+Sun, 19 Jan 2020 02:26:52 GMT
+
+### Minor changes
+
+- Upgrade Node typings to Node 10
+
+## 0.4.14
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 0.4.13
+Tue, 14 Jan 2020 01:34:16 GMT
+
+*Version update only*
+
+## 0.4.12
+Thu, 09 Jan 2020 06:44:13 GMT
+
+*Version update only*
+
+## 0.4.11
+Wed, 08 Jan 2020 00:11:31 GMT
+
+*Version update only*
+
+## 0.4.10
+Tue, 03 Dec 2019 03:17:44 GMT
+
+*Version update only*
+
+## 0.4.9
+Sun, 24 Nov 2019 00:54:04 GMT
+
+*Version update only*
+
+## 0.4.8
+Wed, 20 Nov 2019 06:14:28 GMT
+
+*Version update only*
+
+## 0.4.7
+Fri, 15 Nov 2019 04:50:50 GMT
+
+*Version update only*
+
+## 0.4.6
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 0.4.5
+Wed, 06 Nov 2019 22:44:18 GMT
+
+*Version update only*
+
+## 0.4.4
+Tue, 05 Nov 2019 06:49:29 GMT
+
+*Version update only*
+
+## 0.4.3
+Tue, 05 Nov 2019 01:08:39 GMT
+
+*Version update only*
+
+## 0.4.2
+Fri, 25 Oct 2019 15:08:54 GMT
+
+### Patches
+
+- Fix an issue where ESLint output would fail to parse when a large project is built on a Mac.
+
+## 0.4.1
+Tue, 22 Oct 2019 06:24:44 GMT
+
+*Version update only*
+
+## 0.4.0
+Mon, 21 Oct 2019 05:22:43 GMT
+
+### Minor changes
+
+- Add support for ESLint+TypeScript
+
+## 0.3.6
+Fri, 18 Oct 2019 15:15:01 GMT
+
+*Version update only*
+
+## 0.3.5
+Sun, 06 Oct 2019 00:27:40 GMT
+
+*Version update only*
+
+## 0.3.4
+Fri, 04 Oct 2019 00:15:22 GMT
+
+*Version update only*
 
 ## 0.3.3
 Sun, 29 Sep 2019 23:56:29 GMT

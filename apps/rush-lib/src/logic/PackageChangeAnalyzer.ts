@@ -4,14 +4,13 @@
 import * as path from 'path';
 import * as colors from 'colors';
 
-import {
-  getPackageDeps,
-  IPackageDeps
-} from '@microsoft/package-deps-hash';
-import { Path } from '@microsoft/node-core-library';
+import { getPackageDeps, getGitHashForFiles, IPackageDeps } from '@rushstack/package-deps-hash';
+import { Path, InternalError, FileSystem } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Git } from './Git';
+import { PnpmProjectDependencyManifest } from './pnpm/PnpmProjectDependencyManifest';
+import { RushConfigurationProject } from '../api/RushConfigurationProject';
 
 export class PackageChangeAnalyzer {
   // Allow this function to be overwritten during unit tests
@@ -63,9 +62,11 @@ export class PackageChangeAnalyzer {
     } catch (e) {
       // If getPackageDeps fails, don't fail the whole build. Treat this case as if we don't know anything about
       // the state of the files in the repo. This can happen if the environment doesn't have Git.
-      console.log(colors.yellow(
-        `Error calculating the state of the repo. (inner error: ${e}). Continuing without diffing files.`
-      ));
+      console.log(
+        colors.yellow(
+          `Error calculating the state of the repo. (inner error: ${e}). Continuing without diffing files.`
+        )
+      );
 
       return projectHashDeps;
     }
@@ -98,9 +99,11 @@ export class PackageChangeAnalyzer {
      *    files: {
      *      "src/index.ts": "478789a7fs8a78989afd8",
      *      "src/fileOne.ts": "a8sfa8979871fdjiojlk",
-     *      "common/api/review": "324598afasfdsd",     // this entry was added by the API Extractor task (for example)
-     *      "node_modules.json": "3428789dsafdsfaf"    // this is a file which will be created by rush link describing
-     *                                                 //   the state of the node_modules folder
+     *      "common/api/review": "324598afasfdsd",                      // this entry was added by the API Extractor
+     *                                                                  //  task (for example)
+     *      ".rush/temp/shrinkwrap-deps.json": "3428789dsafdsfaf"       // this is a file which will be created by rush
+     *                                                                  //  link describing the state of the
+     *                                                                  //  node_modules folder
      *    }
      *  }
      *
@@ -125,19 +128,63 @@ export class PackageChangeAnalyzer {
     //  });
     // }
 
-    // Determine the current variant from the link JSON.
-    const variant: string | undefined = this._rushConfiguration.currentInstalledVariant;
+    if (
+      this._rushConfiguration.packageManager === 'pnpm' &&
+      !this._rushConfiguration.experimentsConfiguration.configuration
+        .legacyIncrementalBuildDependencyDetection
+    ) {
+      const projects: RushConfigurationProject[] = [];
+      const projectDependencyManifestPaths: string[] = [];
 
-    // Add the shrinkwrap file to every project's dependencies
-    const shrinkwrapFile: string = path.relative(
-      this._rushConfiguration.rushJsonFolder,
-      this._rushConfiguration.getCommittedShrinkwrapFilename(variant)
-    ).replace(/\\/g, '/');
+      for (const project of this._rushConfiguration.projects) {
+        const dependencyManifestFilePath: string = PnpmProjectDependencyManifest.getFilePathForProject(
+          project
+        );
+        const relativeDependencyManifestFilePath: string = path
+          .relative(this._rushConfiguration.rushJsonFolder, dependencyManifestFilePath)
+          .replace(/\\/g, '/');
 
-    for (const project of this._rushConfiguration.projects) {
-      const shrinkwrapHash: string | undefined = noProjectHashes[shrinkwrapFile];
-      if (shrinkwrapHash) {
-        projectHashDeps.get(project.packageName)!.files[shrinkwrapFile] = shrinkwrapHash;
+        if (!FileSystem.exists(dependencyManifestFilePath)) {
+          throw new Error(
+            `A project dependency file (${relativeDependencyManifestFilePath}) is missing. You may need to run ` +
+              '"rush unlink" and "rush link".'
+          );
+        }
+
+        projects.push(project);
+        projectDependencyManifestPaths.push(relativeDependencyManifestFilePath);
+      }
+
+      const hashes: Map<string, string> = getGitHashForFiles(
+        projectDependencyManifestPaths,
+        this._rushConfiguration.rushJsonFolder
+      );
+      for (let i: number = 0; i < projects.length; i++) {
+        const project: RushConfigurationProject = projects[i];
+        const projectDependencyManifestPath: string = projectDependencyManifestPaths[i];
+        if (!hashes.has(projectDependencyManifestPath)) {
+          throw new InternalError(`Expected to get a hash for ${projectDependencyManifestPath}`);
+        }
+        const hash: string = hashes.get(projectDependencyManifestPath)!;
+        projectHashDeps.get(project.packageName)!.files[projectDependencyManifestPath] = hash;
+      }
+    } else {
+      // Determine the current variant from the link JSON.
+      const variant: string | undefined = this._rushConfiguration.currentInstalledVariant;
+
+      // Add the shrinkwrap file to every project's dependencies
+      const shrinkwrapFile: string = path
+        .relative(
+          this._rushConfiguration.rushJsonFolder,
+          this._rushConfiguration.getCommittedShrinkwrapFilename(variant)
+        )
+        .replace(/\\/g, '/');
+
+      for (const project of this._rushConfiguration.projects) {
+        const shrinkwrapHash: string | undefined = noProjectHashes[shrinkwrapFile];
+        if (shrinkwrapHash) {
+          projectHashDeps.get(project.packageName)!.files[shrinkwrapFile] = shrinkwrapHash;
+        }
       }
     }
 

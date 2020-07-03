@@ -1,27 +1,34 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DeclarationReference, Meaning, Navigation, Component } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+import {
+  DeclarationReference,
+  Meaning,
+  Navigation,
+  Component
+} from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
 import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
 import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiReturnTypeMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
-import { IApiTypeParameterListMixinOptions, ApiTypeParameterListMixin } from '../mixins/ApiTypeParameterListMixin';
+import {
+  IApiTypeParameterListMixinOptions,
+  ApiTypeParameterListMixin
+} from '../mixins/ApiTypeParameterListMixin';
 
 /**
  * Constructor options for {@link ApiFunction}.
  * @public
  */
-export interface IApiFunctionOptions extends
-  IApiNameMixinOptions,
-  IApiTypeParameterListMixinOptions,
-  IApiParameterListMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiReturnTypeMixinOptions,
-  IApiDeclaredItemOptions {
-}
+export interface IApiFunctionOptions
+  extends IApiNameMixinOptions,
+    IApiTypeParameterListMixinOptions,
+    IApiParameterListMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiReturnTypeMixinOptions,
+    IApiDeclaredItemOptions {}
 
 /**
  * Represents a TypeScript function declaration.
@@ -44,15 +51,15 @@ export interface IApiFunctionOptions extends
  *
  * @public
  */
-export class ApiFunction extends ApiNameMixin(ApiTypeParameterListMixin(ApiParameterListMixin(ApiReleaseTagMixin(
-  ApiReturnTypeMixin(ApiDeclaredItem))))) {
+export class ApiFunction extends ApiNameMixin(
+  ApiTypeParameterListMixin(ApiParameterListMixin(ApiReleaseTagMixin(ApiReturnTypeMixin(ApiDeclaredItem))))
+) {
+  public constructor(options: IApiFunctionOptions) {
+    super(options);
+  }
 
   public static getContainerKey(name: string, overloadIndex: number): string {
     return `${name}|${ApiItemKind.Function}|${overloadIndex}`;
-  }
-
-  public constructor(options: IApiFunctionOptions) {
-    super(options);
   }
 
   /** @override */

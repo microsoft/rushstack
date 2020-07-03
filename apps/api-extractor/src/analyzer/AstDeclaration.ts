@@ -4,7 +4,7 @@
 import * as ts from 'typescript';
 import { AstSymbol } from './AstSymbol';
 import { Span } from './Span';
-import { InternalError } from '@microsoft/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 import { AstEntity } from './AstSymbolTable';
 
 /**
@@ -49,9 +49,18 @@ export class AstDeclaration {
   public readonly modifierFlags: ts.ModifierFlags;
 
   /**
-   * Additional information applied later by the Collector.
+   * Additional information that is calculated later by the `Collector`.  The actual type is `DeclarationMetadata`,
+   * but we declare it as `unknown` because consumers must obtain this object by calling
+   * `Collector.fetchDeclarationMetadata()`.
    */
-  public metadata: unknown;
+  public declarationMetadata: unknown;
+
+  /**
+   * Additional information that is calculated later by the `Collector`.  The actual type is `ApiItemMetadata`,
+   * but we declare it as `unknown` because consumers must obtain this object by calling
+   * `Collector.fetchApiItemMetadata()`.
+   */
+  public apiItemMetadata: unknown;
 
   // NOTE: This array becomes immutable after astSymbol.analyze() sets astSymbol.analyzed=true
   private readonly _analyzedChildren: AstDeclaration[] = [];
@@ -73,6 +82,18 @@ export class AstDeclaration {
     }
 
     this.modifierFlags = ts.getCombinedModifierFlags(this.declaration);
+
+    // Check for ECMAScript private fields, for example:
+    //
+    //    class Person { #name: string; }
+    //
+    const declarationName: ts.DeclarationName | undefined = ts.getNameOfDeclaration(this.declaration);
+    if (declarationName) {
+      if (ts.isPrivateIdentifier(declarationName)) {
+        // eslint-disable-next-line no-bitwise
+        this.modifierFlags |= ts.ModifierFlags.Private;
+      }
+    }
   }
 
   /**
@@ -229,21 +250,26 @@ export class AstDeclaration {
     switch (kind) {
       case ts.SyntaxKind.CallSignature:
       case ts.SyntaxKind.ClassDeclaration:
-      case ts.SyntaxKind.ConstructSignature:    // Example: "new(x: number): IMyClass"
-      case ts.SyntaxKind.Constructor:           // Example: "constructor(x: number)"
+      case ts.SyntaxKind.ConstructSignature: // Example: "new(x: number): IMyClass"
+      case ts.SyntaxKind.Constructor: // Example: "constructor(x: number)"
       case ts.SyntaxKind.EnumDeclaration:
       case ts.SyntaxKind.EnumMember:
-      case ts.SyntaxKind.FunctionDeclaration:   // Example: "(x: number): number"
-      case ts.SyntaxKind.IndexSignature:        // Example: "[key: string]: string"
+      case ts.SyntaxKind.FunctionDeclaration: // Example: "(x: number): number"
+      case ts.SyntaxKind.GetAccessor:
+      case ts.SyntaxKind.SetAccessor:
+      case ts.SyntaxKind.IndexSignature: // Example: "[key: string]: string"
       case ts.SyntaxKind.InterfaceDeclaration:
       case ts.SyntaxKind.MethodDeclaration:
       case ts.SyntaxKind.MethodSignature:
-      case ts.SyntaxKind.ModuleDeclaration:     // Used for both "module" and "namespace" declarations
+      case ts.SyntaxKind.ModuleDeclaration: // Used for both "module" and "namespace" declarations
       case ts.SyntaxKind.PropertyDeclaration:
       case ts.SyntaxKind.PropertySignature:
-      case ts.SyntaxKind.TypeAliasDeclaration:  // Example: "type Shape = Circle | Square"
+      case ts.SyntaxKind.TypeAliasDeclaration: // Example: "type Shape = Circle | Square"
       case ts.SyntaxKind.VariableDeclaration:
         return true;
+
+      // NOTE: Prior to TypeScript 3.7, in the emitted .d.ts files, the compiler would merge a GetAccessor/SetAccessor
+      // pair into a single PropertyDeclaration.
 
       // NOTE: In contexts where a source file is treated as a module, we do create "nominal analysis"
       // AstSymbol objects corresponding to a ts.SyntaxKind.SourceFile node.  However, a source file
@@ -254,5 +280,4 @@ export class AstDeclaration {
 
     return false;
   }
-
 }

@@ -1,7 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DeclarationReference, Meaning, Navigation, Component } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+import {
+  DeclarationReference,
+  Meaning,
+  Navigation,
+  Component
+} from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
@@ -13,11 +18,10 @@ import { DeserializerContext } from './DeserializerContext';
  * Constructor options for {@link ApiEnumMember}.
  * @public
  */
-export interface IApiEnumMemberOptions extends
-  IApiNameMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiDeclaredItemOptions {
-
+export interface IApiEnumMemberOptions
+  extends IApiNameMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiDeclaredItemOptions {
   initializerTokenRange: IExcerptTokenRange;
 }
 
@@ -51,24 +55,26 @@ export class ApiEnumMember extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredIt
    */
   public readonly initializerExcerpt: Excerpt;
 
+  public constructor(options: IApiEnumMemberOptions) {
+    super(options);
+
+    this.initializerExcerpt = this.buildExcerpt(options.initializerTokenRange);
+  }
+
   public static getContainerKey(name: string): string {
     // No prefix needed, because ApiEnumMember is the only possible member of an ApiEnum
     return name;
   }
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiEnumMemberOptions>, context: DeserializerContext,
-    jsonObject: IApiEnumMemberJson): void {
-
+  public static onDeserializeInto(
+    options: Partial<IApiEnumMemberOptions>,
+    context: DeserializerContext,
+    jsonObject: IApiEnumMemberJson
+  ): void {
     super.onDeserializeInto(options, context, jsonObject);
 
     options.initializerTokenRange = jsonObject.initializerTokenRange;
-  }
-
-  public constructor(options: IApiEnumMemberOptions) {
-    super(options);
-
-    this.initializerExcerpt = this.buildExcerpt(options.initializerTokenRange);
   }
 
   /** @override */

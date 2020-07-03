@@ -33,7 +33,7 @@ const _isStatic: unique symbol = Symbol('ApiStaticMixin._isStatic');
  *
  * @public
  */
-// tslint:disable-next-line:interface-name
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface ApiStaticMixin extends ApiItem {
   /**
    * Whether the declaration has the TypeScript `static` keyword.
@@ -52,27 +52,30 @@ export interface ApiStaticMixin extends ApiItem {
  *
  * @public
  */
-export function ApiStaticMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiStaticMixin) { // tslint:disable-line:no-any
-
+export function ApiStaticMixin<TBaseClass extends IApiItemConstructor>(
+  baseClass: TBaseClass
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): TBaseClass & (new (...args: any[]) => ApiStaticMixin) {
   abstract class MixedClass extends baseClass implements ApiStaticMixin {
     public [_isStatic]: boolean;
 
-    /** @override */
-    public static onDeserializeInto(options: Partial<IApiStaticMixinOptions>, context: DeserializerContext,
-      jsonObject: IApiStaticMixinJson): void {
-
-      baseClass.onDeserializeInto(options, context, jsonObject);
-
-      options.isStatic = jsonObject.isStatic;
-    }
-
-    // tslint:disable-next-line:no-any
-    constructor(...args: any[]) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public constructor(...args: any[]) {
       super(...args);
 
       const options: IApiStaticMixinOptions = args[0];
       this[_isStatic] = options.isStatic;
+    }
+
+    /** @override */
+    public static onDeserializeInto(
+      options: Partial<IApiStaticMixinOptions>,
+      context: DeserializerContext,
+      jsonObject: IApiStaticMixinJson
+    ): void {
+      baseClass.onDeserializeInto(options, context, jsonObject);
+
+      options.isStatic = jsonObject.isStatic;
     }
 
     public get isStatic(): boolean {

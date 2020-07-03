@@ -7,7 +7,7 @@ export class PrereleaseToken {
   private _suffixName: string | undefined;
   private _partialPrerelease: boolean;
 
-  constructor(prereleaseName?: string, suffixName?: string, partialPrerelease: boolean = false) {
+  public constructor(prereleaseName?: string, suffixName?: string, partialPrerelease: boolean = false) {
     if (prereleaseName && suffixName) {
       throw new Error('Pre-release name and suffix cannot be provided at the same time.');
     }

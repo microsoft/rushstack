@@ -13,26 +13,21 @@ export interface IMochaTaskConfig {
 }
 
 export class MochaTask extends GulpTask<IMochaTaskConfig> {
-  constructor() {
-    super(
-      'mocha',
-      {
-        testMatch: ['lib/**/*.test.js'],
-        reportDir: 'coverage'
-      }
-    );
+  public constructor() {
+    super('mocha', {
+      testMatch: ['lib/**/*.test.js'],
+      reportDir: 'coverage'
+    });
   }
 
   public isEnabled(buildConfig: IBuildConfig): boolean {
-    return (
-      super.isEnabled(buildConfig) &&
-      !buildConfig.jestEnabled
-    );
+    return super.isEnabled(buildConfig) && !buildConfig.jestEnabled;
   }
 
-  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream
-    | Promise<void> {
-
+  public executeTask(
+    gulp: typeof Gulp,
+    completeCallback: (error?: string) => void
+  ): NodeJS.ReadWriteStream | Promise<void> {
     const istanbul: typeof gulpIstanbul = require('gulp-istanbul');
     const mocha: typeof gulpMocha = require('gulp-mocha');
 
@@ -43,11 +38,11 @@ export class MochaTask extends GulpTask<IMochaTaskConfig> {
       return Promise.resolve();
     }
 
-    /* tslint:disable:no-string-literal */
+    // eslint-disable-next-line dot-notation
     const matchString: string = this.buildConfig.args['match'] as string;
-    /* tslint:enable:no-string-literal */
 
-    return gulp.src(this.taskConfig.testMatch, { read: false })
+    return gulp
+      .src(this.taskConfig.testMatch, { read: false })
       .pipe(
         mocha({
           grep: matchString,
@@ -56,8 +51,10 @@ export class MochaTask extends GulpTask<IMochaTaskConfig> {
           completeCallback(error.toString());
         })
       )
-      .pipe(istanbul.writeReports({
-        dir: this.taskConfig.reportDir
-      }));
+      .pipe(
+        istanbul.writeReports({
+          dir: this.taskConfig.reportDir
+        })
+      );
   }
 }

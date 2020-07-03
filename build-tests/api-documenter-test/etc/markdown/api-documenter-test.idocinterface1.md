@@ -15,5 +15,5 @@ export interface IDocInterface1
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [regularProperty](./api-documenter-test.idocinterface1.regularproperty.md) | <code>SystemEvent</code> | Does something |
+|  [regularProperty](./api-documenter-test.idocinterface1.regularproperty.md) | [SystemEvent](./api-documenter-test.systemevent.md) | Does something |
 

@@ -5,8 +5,8 @@ import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 
-import { CommandLineParser, CommandLineFlagParameter, CommandLineAction } from '@microsoft/ts-command-line';
-import { InternalError } from '@microsoft/node-core-library';
+import { CommandLineParser, CommandLineFlagParameter, CommandLineAction } from '@rushstack/ts-command-line';
+import { InternalError } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
@@ -18,9 +18,11 @@ import { BaseScriptAction } from '../cli/scriptActions/BaseScriptAction';
 import { AddAction } from './actions/AddAction';
 import { ChangeAction } from './actions/ChangeAction';
 import { CheckAction } from './actions/CheckAction';
+import { DeployAction } from './actions/DeployAction';
 import { UpdateAction } from './actions/UpdateAction';
 import { InstallAction } from './actions/InstallAction';
 import { InitAction } from './actions/InitAction';
+import { InitDeployAction } from './actions/InitDeployAction';
 import { LinkAction } from './actions/LinkAction';
 import { ListAction } from './actions/ListAction';
 import { PublishAction } from './actions/PublishAction';
@@ -41,7 +43,7 @@ import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
  * Options for `RushCommandLineParser`.
  */
 export interface IRushCommandLineParserOptions {
-  cwd: string;   // Defaults to `cwd`
+  cwd: string; // Defaults to `cwd`
   alreadyReportedNodeTooNewError: boolean;
 }
 
@@ -53,17 +55,18 @@ export class RushCommandLineParser extends CommandLineParser {
   private _debugParameter: CommandLineFlagParameter;
   private _rushOptions: IRushCommandLineParserOptions;
 
-  constructor(options?: Partial<IRushCommandLineParserOptions>) {
+  public constructor(options?: Partial<IRushCommandLineParserOptions>) {
     super({
       toolFilename: 'rush',
-      toolDescription: 'Rush makes life easier for JavaScript developers who develop, build, and publish'
-        + ' many packages from a central Git repo.  It is designed to handle very large repositories'
-        + ' supporting many projects and people.  Rush provides policies, protections, and customizations'
-        + ' that help coordinate teams and safely onboard new contributors.  Rush also generates change logs'
-        + ' and automates package publishing.  It can manage decoupled subsets of projects with different'
-        + ' release and versioning strategies.  A full API is included to facilitate integration with other'
-        + ' automation tools.  If you are looking for a proven turnkey solution for monorepo management,'
-        + ' Rush is for you.'
+      toolDescription:
+        'Rush makes life easier for JavaScript developers who develop, build, and publish' +
+        ' many packages from a central Git repo.  It is designed to handle very large repositories' +
+        ' supporting many projects and people.  Rush provides policies, protections, and customizations' +
+        ' that help coordinate teams and safely onboard new contributors.  Rush also generates change logs' +
+        ' and automates package publishing.  It can manage decoupled subsets of projects with different' +
+        ' release and versioning strategies.  A full API is included to facilitate integration with other' +
+        ' automation tools.  If you are looking for a proven turnkey solution for monorepo management,' +
+        ' Rush is for you.'
     });
 
     this._rushOptions = this._normalizeOptions(options || {});
@@ -119,12 +122,14 @@ export class RushCommandLineParser extends CommandLineParser {
       InternalError.breakInDebugger = true;
     }
 
-    return this._wrapOnExecute().catch((error: Error) => {
-      this._reportErrorAndSetExitCode(error);
-    }).then(() => {
-      // If we make it here, everything went fine, so reset the exit code back to 0
-      process.exitCode = 0;
-    });
+    return this._wrapOnExecute()
+      .catch((error: Error) => {
+        this._reportErrorAndSetExitCode(error);
+      })
+      .then(() => {
+        // If we make it here, everything went fine, so reset the exit code back to 0
+        process.exitCode = 0;
+      });
   }
 
   private _normalizeOptions(options: Partial<IRushCommandLineParserOptions>): IRushCommandLineParserOptions {
@@ -156,8 +161,10 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new AddAction(this));
       this.addAction(new ChangeAction(this));
       this.addAction(new CheckAction(this));
+      this.addAction(new DeployAction(this));
       this.addAction(new InstallAction(this));
       this.addAction(new InitAction(this));
+      this.addAction(new InitDeployAction(this));
       this.addAction(new LinkAction(this));
       this.addAction(new ListAction(this));
       this.addAction(new PublishAction(this));
@@ -168,7 +175,6 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new VersionAction(this));
 
       this._populateScriptActions();
-
     } catch (error) {
       this._reportErrorAndSetExitCode(error);
     }
@@ -188,60 +194,26 @@ export class RushCommandLineParser extends CommandLineParser {
       commandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFile);
     }
 
-    // Build actions from the command line configuration supercede default build actions.
+    // Build actions from the command line configuration supersede default build actions.
     this._addCommandLineConfigActions(commandLineConfiguration);
     this._addDefaultBuildActions(commandLineConfiguration);
     this._validateCommandLineConfigParameterAssociations(commandLineConfiguration);
   }
 
   private _addDefaultBuildActions(commandLineConfiguration?: CommandLineConfiguration): void {
-    if (!this.tryGetAction('build')) {
-      // always create a build and a rebuild command
-      this.addAction(new BulkScriptAction({
-        actionName: 'build',
-        summary: '(EXPERIMENTAL) Build all projects that haven\'t been built, or have changed since they were last '
-          + 'built.',
-        documentation: 'This command is similar to "rush rebuild", except that "rush build" performs'
-          + ' an incremental build. In other words, it only builds projects whose source files have changed'
-          + ' since the last successful build. The analysis requires a Git working tree, and only considers'
-          + ' source files that are tracked by Git and whose path is under the project folder. (For more details'
-          + ' about this algorithm, see the documentation for the "package-deps-hash" NPM package.) The incremental'
-          + ' build state is tracked in a per-project folder called ".rush/temp" which should NOT be added to Git. The'
-          + ' build command is tracked by the "arguments" field in the "package-deps_build.json" file contained'
-          + ' therein; a full rebuild is forced whenever the command has changed (e.g. "--production" or not).',
-        parser: this,
-        commandLineConfiguration: commandLineConfiguration,
-
-        enableParallelism: true,
-        ignoreMissingScript: false,
-        ignoreDependencyOrder: false,
-        incremental: true,
-        allowWarningsInSuccessfulBuild: false
-      }));
+    if (!this.tryGetAction(RushConstants.buildCommandName)) {
+      this._addCommandLineConfigAction(
+        commandLineConfiguration,
+        CommandLineConfiguration.defaultBuildCommandJson
+      );
     }
 
-    if (!this.tryGetAction('rebuild')) {
-      this.addAction(new BulkScriptAction({
-        actionName: 'rebuild',
-        // To remain compatible with existing repos, `rebuild` defaults to calling the `build` command in each repo.
-        commandToRun: 'build',
-        summary: 'Clean and rebuild the entire set of projects',
-        documentation: 'This command assumes that the package.json file for each project contains'
-          + ' a "scripts" entry for "npm run build" that performs a full clean build.'
-          + ' Rush invokes this script to build each project that is registered in rush.json.'
-          + ' Projects are built in parallel where possible, but always respecting the dependency'
-          + ' graph for locally linked projects.  The number of simultaneous processes will be'
-          + ' based on the number of machine cores unless overridden by the --parallelism flag.'
-          + ' (For an incremental build, see "rush build" instead of "rush rebuild".)',
-        parser: this,
-        commandLineConfiguration: commandLineConfiguration,
-
-        enableParallelism: true,
-        ignoreMissingScript: false,
-        ignoreDependencyOrder: false,
-        incremental: false,
-        allowWarningsInSuccessfulBuild: false
-      }));
+    if (!this.tryGetAction(RushConstants.rebuildCommandName)) {
+      this._addCommandLineConfigAction(
+        commandLineConfiguration,
+        CommandLineConfiguration.defaultRebuildCommandJson,
+        RushConstants.buildCommandName
+      );
     }
   }
 
@@ -252,17 +224,34 @@ export class RushCommandLineParser extends CommandLineParser {
 
     // Register each custom command
     for (const command of commandLineConfiguration.commands) {
-      if (this.tryGetAction(command.name)) {
-        throw new Error(`${RushConstants.commandLineFilename} defines a command "${command.name}"`
-          + ` using a name that already exists`);
-      }
+      this._addCommandLineConfigAction(commandLineConfiguration, command);
+    }
+  }
 
-      this._validateCommandLineConfigCommand(command);
+  private _addCommandLineConfigAction(
+    commandLineConfiguration: CommandLineConfiguration | undefined,
+    command: CommandJson,
+    commandToRun?: string
+  ): void {
+    if (this.tryGetAction(command.name)) {
+      throw new Error(
+        `${RushConstants.commandLineFilename} defines a command "${command.name}"` +
+          ` using a name that already exists`
+      );
+    }
 
-      switch (command.commandKind) {
-        case 'bulk':
-          this.addAction(new BulkScriptAction({
+    this._validateCommandLineConfigCommand(command);
+
+    switch (command.commandKind) {
+      case RushConstants.bulkCommandKind:
+        this.addAction(
+          new BulkScriptAction({
             actionName: command.name,
+
+            // By default, the "rebuild" action runs the "build" script. However, if the command-line.json file
+            // overrides "rebuild," the "rebuild" script should be run.
+            commandToRun: commandToRun,
+
             summary: command.summary,
             documentation: command.description || command.summary,
             safeForSimultaneousRushProcesses: command.safeForSimultaneousRushProcesses,
@@ -275,10 +264,13 @@ export class RushCommandLineParser extends CommandLineParser {
             ignoreDependencyOrder: command.ignoreDependencyOrder || false,
             incremental: command.incremental || false,
             allowWarningsInSuccessfulBuild: !!command.allowWarningsInSuccessfulBuild
-          }));
-          break;
-        case 'global':
-          this.addAction(new GlobalScriptAction({
+          })
+        );
+        break;
+
+      case RushConstants.globalCommandKind:
+        this.addAction(
+          new GlobalScriptAction({
             actionName: command.name,
             summary: command.summary,
             documentation: command.description || command.summary,
@@ -287,17 +279,23 @@ export class RushCommandLineParser extends CommandLineParser {
             parser: this,
             commandLineConfiguration: commandLineConfiguration,
 
-            shellCommand: command.shellCommand
-          }));
-          break;
-        default:
-          throw new Error(`${RushConstants.commandLineFilename} defines a command "${command!.name}"`
-            + ` using an unsupported command kind "${command!.commandKind}"`);
-      }
+            shellCommand: command.shellCommand,
+
+            autoinstallerName: command.autoinstallerName
+          })
+        );
+        break;
+      default:
+        throw new Error(
+          `${RushConstants.commandLineFilename} defines a command "${command!.name}"` +
+            ` using an unsupported command kind "${command!.commandKind}"`
+        );
     }
   }
 
-  private _validateCommandLineConfigParameterAssociations(commandLineConfiguration?: CommandLineConfiguration): void {
+  private _validateCommandLineConfigParameterAssociations(
+    commandLineConfiguration?: CommandLineConfiguration
+  ): void {
     if (!commandLineConfiguration) {
       return;
     }
@@ -307,13 +305,17 @@ export class RushCommandLineParser extends CommandLineParser {
       for (const associatedCommand of parameter.associatedCommands) {
         const action: CommandLineAction | undefined = this.tryGetAction(associatedCommand);
         if (!action) {
-          throw new Error(`${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}"`
-            + ` that is associated with a nonexistent command "${associatedCommand}"`);
+          throw new Error(
+            `${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}"` +
+              ` that is associated with a nonexistent command "${associatedCommand}"`
+          );
         }
         if (!(action instanceof BaseScriptAction)) {
-          throw new Error(`${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}"`
-            + ` that is associated with a command "${associatedCommand}", but that command does not`
-            + ` support custom parameters`);
+          throw new Error(
+            `${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}"` +
+              ` that is associated with a command "${associatedCommand}", but that command does not` +
+              ` support custom parameters`
+          );
         }
       }
     }
@@ -321,17 +323,25 @@ export class RushCommandLineParser extends CommandLineParser {
 
   private _validateCommandLineConfigCommand(command: CommandJson): void {
     // There are some restrictions on the 'build' and 'rebuild' commands.
-    if (command.name !== 'build' && command.name !== 'rebuild') {
+    if (
+      command.name !== RushConstants.buildCommandName &&
+      command.name !== RushConstants.rebuildCommandName
+    ) {
       return;
     }
 
-    if (command.commandKind === 'global') {
-      throw new Error(`${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
-        `the command kind "global". This command can only be designated as a command kind "bulk".`);
+    if (command.commandKind === RushConstants.globalCommandKind) {
+      throw new Error(
+        `${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
+          `the command kind "${RushConstants.globalCommandKind}". This command can only be designated as a command ` +
+          `kind "${RushConstants.bulkCommandKind}".`
+      );
     }
     if (command.safeForSimultaneousRushProcesses) {
-      throw new Error(`${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
-        `"safeForSimultaneousRushProcesses=true". This configuration is not supported for "${command.name}".`);
+      throw new Error(
+        `${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
+          `"safeForSimultaneousRushProcesses=true". This configuration is not supported for "${command.name}".`
+      );
     }
   }
 
@@ -355,7 +365,7 @@ export class RushCommandLineParser extends CommandLineParser {
     // performs nontrivial work that can throw an exception.  Either the Rush class would need
     // to handle reporting for those exceptions, or else _populateActions() should be moved
     // to a RushCommandLineParser lifecycle stage that can handle it.
-    if (process.exitCode > 0) {
+    if (!process.exitCode || process.exitCode > 0) {
       process.exit(process.exitCode);
     } else {
       process.exit(1);

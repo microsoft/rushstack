@@ -1,14 +1,18 @@
+pool:
+  vmImage: 'ubuntu-latest'
 jobs:
-- job: PRBuild
-  condition: succeeded()
-  strategy:
-    matrix:
-      'NodeJs 8':
-        NodeVersion: 8
-      'NodeJs 10':
-        NodeVersion: 10
-      'NodeJs 12':
-        NodeVersion: 12
-  steps:
-  - checkout: self
-  - template: templates/build.yaml
+  - job: PRBuild
+    condition: succeeded()
+    strategy:
+      matrix:
+        'NodeJs 10':
+          NodeVersion: 10
+        'NodeJs 12':
+          NodeVersion: 12
+    # Currently broken by "[DEP0097] DeprecationWarning: Using a domain property in MakeCallback is deprecated."
+    # The "domain" package is deprecated, but these dependencies are still importing it:  "asap", "pn", "async-done"
+    #       'NodeJs 14':
+    #         NodeVersion: 14
+    steps:
+      - checkout: self
+      - template: templates/build.yaml

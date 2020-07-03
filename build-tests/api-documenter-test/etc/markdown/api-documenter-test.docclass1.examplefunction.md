@@ -16,10 +16,16 @@ exampleFunction(a: string, b: string): string;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  a | <code>string</code> | the first string |
-|  b | <code>string</code> | the second string |
+|  a | string | the first string |
+|  b | string | the second string |
 
 <b>Returns:</b>
 
-`string`
+string
+
+## Exceptions
+
+`Error` The first throws line
+
+The second throws line
 

@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { FileSystem, IFileSystemCreateLinkOptions, InternalError } from '@microsoft/node-core-library';
+import { FileSystem, IFileSystemCreateLinkOptions, InternalError } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
@@ -26,19 +26,20 @@ export interface IBaseLinkManagerCreateSymlinkOptions extends IFileSystemCreateL
 export abstract class BaseLinkManager {
   protected _rushConfiguration: RushConfiguration;
 
+  public constructor(rushConfiguration: RushConfiguration) {
+    this._rushConfiguration = rushConfiguration;
+  }
+
   protected static _createSymlink(options: IBaseLinkManagerCreateSymlinkOptions): void {
     const newLinkFolder: string = path.dirname(options.newLinkPath);
     FileSystem.ensureFolder(newLinkFolder);
 
     let targetPath: string;
     if (EnvironmentConfiguration.absoluteSymlinks) {
-        targetPath = options.linkTargetPath;
+      targetPath = options.linkTargetPath;
     } else {
       // Link to the relative path, to avoid going outside containers such as a Docker image
-      targetPath = path.relative(
-        fs.realpathSync(newLinkFolder),
-        options.linkTargetPath
-      );
+      targetPath = path.relative(fs.realpathSync(newLinkFolder), options.linkTargetPath);
     }
 
     if (process.platform === 'win32') {
@@ -145,7 +146,6 @@ export abstract class BaseLinkManager {
           const linkStats: fs.Stats = FileSystem.getLinkStatistics(linkTarget);
 
           if (linkStats.isSymbolicLink()) {
-
             const targetStats: fs.Stats = FileSystem.getStatistics(FileSystem.getRealPath(linkTarget));
             if (targetStats.isDirectory()) {
               // Neither a junction nor a directory-symlink can have a directory-symlink
@@ -179,20 +179,16 @@ export abstract class BaseLinkManager {
     }
   }
 
-  constructor(rushConfiguration: RushConfiguration) {
-    this._rushConfiguration = rushConfiguration;
-  }
-
   /**
    * Creates node_modules symlinks for all Rush projects defined in the RushConfiguration.
    * @param force - Normally the operation will be skipped if the links are already up to date;
    *   if true, this option forces the links to be recreated.
    */
-  public createSymlinksForProjects(force: boolean): Promise<void> {
+  public async createSymlinksForProjects(force: boolean): Promise<void> {
     if (!force) {
       if (FileSystem.exists(this._rushConfiguration.rushLinkJsonFilename)) {
         console.log(colors.green(`Skipping linking -- everything is already up to date.`));
-        return Promise.resolve();
+        return;
       }
     }
 
@@ -203,12 +199,11 @@ export abstract class BaseLinkManager {
     // a full "rush link" is required next time
     Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
 
-    return this._linkProjects()
-      .then(() => {
-        stopwatch.stop();
-        console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
-        console.log(os.EOL + 'Next you should probably run "rush build" or "rush rebuild"');
-      });
+    await this._linkProjects();
+
+    stopwatch.stop();
+    console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
+    console.log(os.EOL + 'Next you should probably run "rush build" or "rush rebuild"');
   }
 
   protected abstract _linkProjects(): Promise<void>;

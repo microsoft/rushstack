@@ -3,7 +3,7 @@
 
 import * as ts from 'typescript';
 import { AstDeclaration } from './AstDeclaration';
-import { InternalError } from '@microsoft/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 
 /**
  * Constructor options for AstSymbol
@@ -108,9 +108,11 @@ export class AstSymbol {
   public readonly rootAstSymbol: AstSymbol;
 
   /**
-   * Additional information applied later by the Collector.
+   * Additional information that is calculated later by the `Collector`.  The actual type is `SymbolMetadata`,
+   * but we declare it as `unknown` because consumers must obtain this object by calling
+   * `Collector.fetchSymbolMetadata()`.
    */
-  public metadata: unknown;
+  public symbolMetadata: unknown;
 
   private readonly _astDeclarations: AstDeclaration[];
 

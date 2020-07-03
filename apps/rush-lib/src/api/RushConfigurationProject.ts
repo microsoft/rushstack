@@ -2,18 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import {
-  JsonFile,
-  IPackageJson,
-  PackageName,
-  FileSystem,
-  FileConstants
-} from '@microsoft/node-core-library';
+import { JsonFile, IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
 import { PackageJsonEditor } from './PackageJsonEditor';
 import { RushConstants } from '../logic/RushConstants';
+import { PackageNameParsers } from './PackageNameParsers';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
@@ -52,7 +47,7 @@ export class RushConfigurationProject {
   private readonly _rushConfiguration: RushConfiguration;
 
   /** @internal */
-  constructor(
+  public constructor(
     projectJson: IRushConfigurationProjectJson,
     rushConfiguration: RushConfiguration,
     tempProjectName: string
@@ -64,14 +59,18 @@ export class RushConfigurationProject {
     // For example, the depth of "a/b/c" would be 3.  The depth of "a" is 1.
     const projectFolderDepth: number = projectJson.projectFolder.split('/').length;
     if (projectFolderDepth < rushConfiguration.projectFolderMinDepth) {
-      throw new Error(`To keep things organized, this repository has a projectFolderMinDepth policy`
-        + ` requiring project folders to be at least ${rushConfiguration.projectFolderMinDepth} levels deep.`
-        + `  Problem folder: "${projectJson.projectFolder}"`);
+      throw new Error(
+        `To keep things organized, this repository has a projectFolderMinDepth policy` +
+          ` requiring project folders to be at least ${rushConfiguration.projectFolderMinDepth} levels deep.` +
+          `  Problem folder: "${projectJson.projectFolder}"`
+      );
     }
     if (projectFolderDepth > rushConfiguration.projectFolderMaxDepth) {
-      throw new Error(`To keep things organized, this repository has a projectFolderMaxDepth policy`
-        + ` preventing project folders from being deeper than ${rushConfiguration.projectFolderMaxDepth} levels.`
-        + `  Problem folder:  "${projectJson.projectFolder}"`);
+      throw new Error(
+        `To keep things organized, this repository has a projectFolderMaxDepth policy` +
+          ` preventing project folders from being deeper than ${rushConfiguration.projectFolderMaxDepth} levels.` +
+          `  Problem folder:  "${projectJson.projectFolder}"`
+      );
     }
 
     this._projectFolder = path.join(rushConfiguration.rushJsonFolder, projectJson.projectFolder);
@@ -91,12 +90,16 @@ export class RushConfigurationProject {
       // If so, then every project needs to have a reviewCategory that was defined
       // by the reviewCategories array.
       if (!projectJson.reviewCategory) {
-        throw new Error(`The "approvedPackagesPolicy" feature is enabled rush.json, but a reviewCategory` +
-          ` was not specified for the project "${projectJson.packageName}".`);
+        throw new Error(
+          `The "approvedPackagesPolicy" feature is enabled rush.json, but a reviewCategory` +
+            ` was not specified for the project "${projectJson.packageName}".`
+        );
       }
       if (!rushConfiguration.approvedPackagesPolicy.reviewCategories.has(projectJson.reviewCategory)) {
-        throw new Error(`The project "${projectJson.packageName}" specifies its reviewCategory as`
-          + `"${projectJson.reviewCategory}" which is not one of the defined reviewCategories.`);
+        throw new Error(
+          `The project "${projectJson.packageName}" specifies its reviewCategory as` +
+            `"${projectJson.reviewCategory}" which is not one of the defined reviewCategories.`
+        );
       }
       this._reviewCategory = projectJson.reviewCategory;
     }
@@ -105,8 +108,10 @@ export class RushConfigurationProject {
     this._packageJson = JsonFile.load(packageJsonFilename);
 
     if (this._packageJson.name !== this._packageName) {
-      throw new Error(`The package name "${this._packageName}" specified in rush.json does not`
-        + ` match the name "${this._packageJson.name}" from package.json`);
+      throw new Error(
+        `The package name "${this._packageName}" specified in rush.json does not` +
+          ` match the name "${this._packageJson.name}" from package.json`
+      );
     }
 
     this._packageJsonEditor = PackageJsonEditor.load(packageJsonFilename);
@@ -116,7 +121,7 @@ export class RushConfigurationProject {
     // The "rushProject.tempProjectName" is guaranteed to be unique name (e.g. by adding the "-2"
     // suffix).  Even after we strip the NPM scope, it will still be unique.
     // Example: "my-project-2"
-    this._unscopedTempProjectName = PackageName.getUnscopedName(tempProjectName);
+    this._unscopedTempProjectName = PackageNameParsers.permissive.getUnscopedName(tempProjectName);
 
     this._cyclicDependencyProjects = new Set<string>();
     if (projectJson.cyclicDependencyProjects) {
@@ -165,6 +170,13 @@ export class RushConfigurationProject {
    */
   public get projectRushTempFolder(): string {
     return this._projectRushTempFolder;
+  }
+
+  /**
+   * The Rush configuration for the monorepo that the project belongs to.
+   */
+  public get rushConfiguration(): RushConfiguration {
+    return this._rushConfiguration;
   }
 
   /**
@@ -262,7 +274,8 @@ export class RushConfigurationProject {
     if (!this._versionPolicy) {
       if (this.versionPolicyName && this._rushConfiguration.versionPolicyConfiguration) {
         this._versionPolicy = this._rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
-          this.versionPolicyName);
+          this.versionPolicyName
+        );
       }
     }
     return this._versionPolicy;

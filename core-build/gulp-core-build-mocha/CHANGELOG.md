@@ -1,6 +1,165 @@
 # Change Log - @microsoft/gulp-core-build-mocha
 
-This log was last generated on Sun, 29 Sep 2019 23:56:29 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+
+## 3.8.21
+Fri, 03 Jul 2020 15:09:04 GMT
+
+*Version update only*
+
+## 3.8.20
+Thu, 25 Jun 2020 06:43:35 GMT
+
+*Version update only*
+
+## 3.8.19
+Wed, 24 Jun 2020 09:50:48 GMT
+
+*Version update only*
+
+## 3.8.18
+Wed, 24 Jun 2020 09:04:28 GMT
+
+*Version update only*
+
+## 3.8.17
+Wed, 10 Jun 2020 20:48:30 GMT
+
+*Version update only*
+
+## 3.8.16
+Sat, 30 May 2020 02:59:54 GMT
+
+*Version update only*
+
+## 3.8.15
+Thu, 28 May 2020 05:59:02 GMT
+
+*Version update only*
+
+## 3.8.14
+Wed, 27 May 2020 05:15:11 GMT
+
+*Version update only*
+
+## 3.8.13
+Tue, 26 May 2020 23:00:25 GMT
+
+*Version update only*
+
+## 3.8.12
+Fri, 22 May 2020 15:08:43 GMT
+
+*Version update only*
+
+## 3.8.11
+Thu, 21 May 2020 23:09:44 GMT
+
+*Version update only*
+
+## 3.8.10
+Thu, 21 May 2020 15:42:00 GMT
+
+*Version update only*
+
+## 3.8.9
+Sat, 02 May 2020 00:08:16 GMT
+
+*Version update only*
+
+## 3.8.8
+Wed, 08 Apr 2020 04:07:34 GMT
+
+*Version update only*
+
+## 3.8.7
+Sat, 28 Mar 2020 00:37:16 GMT
+
+*Version update only*
+
+## 3.8.6
+Wed, 18 Mar 2020 15:07:47 GMT
+
+### Patches
+
+- Upgrade cyclic dependencies
+
+## 3.8.5
+Tue, 17 Mar 2020 23:55:58 GMT
+
+*Version update only*
+
+## 3.8.4
+Tue, 28 Jan 2020 02:23:44 GMT
+
+*Version update only*
+
+## 3.8.3
+Fri, 24 Jan 2020 00:27:39 GMT
+
+*Version update only*
+
+## 3.8.2
+Thu, 23 Jan 2020 01:07:56 GMT
+
+*Version update only*
+
+## 3.8.1
+Tue, 21 Jan 2020 21:56:14 GMT
+
+*Version update only*
+
+## 3.8.0
+Sun, 19 Jan 2020 02:26:52 GMT
+
+### Minor changes
+
+- Upgrade Node typings to Node 10
+
+## 3.7.10
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 3.7.9
+Sat, 11 Jan 2020 05:18:23 GMT
+
+*Version update only*
+
+## 3.7.8
+Thu, 09 Jan 2020 06:44:13 GMT
+
+*Version update only*
+
+## 3.7.7
+Wed, 08 Jan 2020 00:11:31 GMT
+
+*Version update only*
+
+## 3.7.6
+Wed, 04 Dec 2019 23:17:55 GMT
+
+*Version update only*
+
+## 3.7.5
+Fri, 15 Nov 2019 04:50:50 GMT
+
+*Version update only*
+
+## 3.7.4
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 3.7.3
+Tue, 05 Nov 2019 06:49:28 GMT
+
+*Version update only*
+
+## 3.7.2
+Tue, 22 Oct 2019 06:24:44 GMT
+
+*Version update only*
 
 ## 3.7.1
 Sun, 29 Sep 2019 23:56:29 GMT

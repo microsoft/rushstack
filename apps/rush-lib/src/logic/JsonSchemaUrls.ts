@@ -4,10 +4,10 @@
 /**
  * JSON schema URLs that Rush writes into config files.
  */
-export namespace JsonSchemaUrls {
-  export const approvedPackages: string
-    = 'https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json';
+export class JsonSchemaUrls {
+  public static readonly approvedPackages: string =
+    'https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json';
 
-  export const commonVersions: string
-    = 'https://developer.microsoft.com/json-schemas/rush/v5/common-versions.schema.json';
+  public static readonly commonVersions: string =
+    'https://developer.microsoft.com/json-schemas/rush/v5/common-versions.schema.json';
 }

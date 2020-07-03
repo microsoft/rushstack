@@ -7,19 +7,21 @@ import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredIt
 import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
 import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiReturnTypeMixin';
-import { IApiTypeParameterListMixinOptions, ApiTypeParameterListMixin } from '../mixins/ApiTypeParameterListMixin';
+import {
+  IApiTypeParameterListMixinOptions,
+  ApiTypeParameterListMixin
+} from '../mixins/ApiTypeParameterListMixin';
 
 /**
  * Constructor options for {@link ApiCallSignature}.
  * @public
  */
-export interface IApiCallSignatureOptions extends
-  IApiTypeParameterListMixinOptions,
-  IApiParameterListMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiReturnTypeMixinOptions,
-  IApiDeclaredItemOptions {
-}
+export interface IApiCallSignatureOptions
+  extends IApiTypeParameterListMixinOptions,
+    IApiParameterListMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiReturnTypeMixinOptions,
+    IApiDeclaredItemOptions {}
 
 /**
  * Represents a TypeScript function call signature.
@@ -50,15 +52,15 @@ export interface IApiCallSignatureOptions extends
  *
  * @public
  */
-export class ApiCallSignature extends ApiTypeParameterListMixin(ApiParameterListMixin(ApiReleaseTagMixin(
-  ApiReturnTypeMixin(ApiDeclaredItem)))) {
+export class ApiCallSignature extends ApiTypeParameterListMixin(
+  ApiParameterListMixin(ApiReleaseTagMixin(ApiReturnTypeMixin(ApiDeclaredItem)))
+) {
+  public constructor(options: IApiCallSignatureOptions) {
+    super(options);
+  }
 
   public static getContainerKey(overloadIndex: number): string {
     return `|${ApiItemKind.CallSignature}|${overloadIndex}`;
-  }
-
-  public constructor(options: IApiCallSignatureOptions) {
-    super(options);
   }
 
   /** @override */
@@ -75,10 +77,8 @@ export class ApiCallSignature extends ApiTypeParameterListMixin(ApiParameterList
   public buildCanonicalReference(): DeclarationReference {
     const parent: DeclarationReference = this.parent
       ? this.parent.canonicalReference
-      // .withMeaning() requires some kind of component
-      : DeclarationReference.empty().addNavigationStep(Navigation.Members, '(parent)');
-    return parent
-      .withMeaning(Meaning.CallSignature)
-      .withOverloadIndex(this.overloadIndex);
+      : // .withMeaning() requires some kind of component
+        DeclarationReference.empty().addNavigationStep(Navigation.Members, '(parent)');
+    return parent.withMeaning(Meaning.CallSignature).withOverloadIndex(this.overloadIndex);
   }
 }

@@ -7,7 +7,7 @@ import { FileSystem } from '../FileSystem';
 import { FileWriter } from '../FileWriter';
 
 function setLockFileGetProcessStartTime(fn: (process: number) => string | undefined): void {
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (LockFile as any)._getStartTime = fn;
 }
 
@@ -50,7 +50,7 @@ describe('LockFile', () => {
   });
 
   describe('getProcessStartTimeFromProcStat', () => {
-    function createStatOutput (value2: string, n: number): string {
+    function createStatOutput(value2: string, n: number): string {
       let statOutput: string = `0 ${value2} S`;
       for (let i: number = 0; i < n; i++) {
         statOutput += ' 0';
@@ -60,34 +60,37 @@ describe('LockFile', () => {
 
     test('returns undefined if too few values are contained in /proc/[pid]/stat (1)', () => {
       const stat: string = createStatOutput('(bash)', 1);
-      const ret: string|undefined = getProcessStartTimeFromProcStat(stat);
+      const ret: string | undefined = getProcessStartTimeFromProcStat(stat);
       expect(ret).toBeUndefined();
     });
     test('returns undefined if too few values are contained in /proc/[pid]/stat (2)', () => {
       const stat: string = createStatOutput('(bash)', 0);
-      const ret: string|undefined = getProcessStartTimeFromProcStat(stat);
+      const ret: string | undefined = getProcessStartTimeFromProcStat(stat);
       expect(ret).toBeUndefined();
     });
     test('returns the correct start time if the second value in /proc/[pid]/stat contains spaces', () => {
       let stat: string = createStatOutput('(bash 2)', 18);
       const value22: string = '12345';
       stat += ` ${value22}`;
-      const ret: string|undefined = getProcessStartTimeFromProcStat(stat);
+      const ret: string | undefined = getProcessStartTimeFromProcStat(stat);
       expect(ret).toEqual(value22);
     });
-    test('returns the correct start time if there are 22 values in /proc/[pid]/stat, including a trailing line '
-      + 'terminator', () => {
-      let stat: string = createStatOutput('(bash)', 18);
-      const value22: string = '12345';
-      stat += ` ${value22}\n`;
-      const ret: string|undefined = getProcessStartTimeFromProcStat(stat);
-      expect(ret).toEqual(value22);
-    });
+    test(
+      'returns the correct start time if there are 22 values in /proc/[pid]/stat, including a trailing line ' +
+        'terminator',
+      () => {
+        let stat: string = createStatOutput('(bash)', 18);
+        const value22: string = '12345';
+        stat += ` ${value22}\n`;
+        const ret: string | undefined = getProcessStartTimeFromProcStat(stat);
+        expect(ret).toEqual(value22);
+      }
+    );
     test('returns the correct start time if the second value in /proc/[pid]/stat does not contain spaces', () => {
       let stat: string = createStatOutput('(bash)', 18);
       const value22: string = '12345';
       stat += ` ${value22}`;
-      const ret: string|undefined = getProcessStartTimeFromProcStat(stat);
+      const ret: string | undefined = getProcessStartTimeFromProcStat(stat);
       expect(ret).toEqual(value22);
     });
   });
@@ -96,17 +99,13 @@ describe('LockFile', () => {
     describe('Linux and Mac', () => {
       describe('getLockFilePath()', () => {
         test('returns a resolved path containing the pid', () => {
-          expect(
-            path.join(process.cwd(), `test#${process.pid}.lock`)
-          ).toEqual(
+          expect(path.join(process.cwd(), `test#${process.pid}.lock`)).toEqual(
             LockFile.getLockFilePath('./', 'test')
           );
         });
 
         test('allows for overridden pid', () => {
-          expect(
-            path.join(process.cwd(), `test#99.lock`)
-          ).toEqual(
+          expect(path.join(process.cwd(), `test#99.lock`)).toEqual(
             LockFile.getLockFilePath('./', 'test', 99)
           );
         });
@@ -173,20 +172,12 @@ describe('LockFile', () => {
 
   if (process.platform === 'win32') {
     describe('getLockFilePath()', () => {
-      test('returns a resolved path that doesn\'t contain', () => {
-        expect(
-          path.join(process.cwd(), `test.lock`)
-        ).toEqual(
-          LockFile.getLockFilePath('./', 'test')
-        );
+      test("returns a resolved path that doesn't contain", () => {
+        expect(path.join(process.cwd(), `test.lock`)).toEqual(LockFile.getLockFilePath('./', 'test'));
       });
 
       test('ignores pid that is passed in', () => {
-        expect(
-          path.join(process.cwd(), `test.lock`)
-        ).toEqual(
-          LockFile.getLockFilePath('./', 'test', 99)
-        );
+        expect(path.join(process.cwd(), `test.lock`)).toEqual(LockFile.getLockFilePath('./', 'test', 99));
       });
     });
 

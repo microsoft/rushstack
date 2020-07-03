@@ -3,7 +3,7 @@
 
 import * as ts from 'typescript';
 import { StringBuilder } from '@microsoft/tsdoc';
-import { Sort } from '@microsoft/node-core-library';
+import { Sort } from '@rushstack/node-core-library';
 
 /**
  * Specifies various transformations that will be performed by Span.getModifiedText().
@@ -33,12 +33,12 @@ export class SpanModification {
    */
   public sortKey: string | undefined;
 
-  private readonly span: Span;
+  private readonly _span: Span;
   private _prefix: string | undefined;
   private _suffix: string | undefined;
 
   public constructor(span: Span) {
-    this.span = span;
+    this._span = span;
     this.reset();
   }
 
@@ -46,7 +46,7 @@ export class SpanModification {
    * Allows the Span.prefix text to be changed.
    */
   public get prefix(): string {
-    return this._prefix !== undefined ? this._prefix : this.span.prefix;
+    return this._prefix !== undefined ? this._prefix : this._span.prefix;
   }
 
   public set prefix(value: string) {
@@ -57,7 +57,7 @@ export class SpanModification {
    * Allows the Span.suffix text to be changed.
    */
   public get suffix(): string {
-    return this._suffix !== undefined ? this._suffix : this.span.suffix;
+    return this._suffix !== undefined ? this._suffix : this._span.suffix;
   }
 
   public set suffix(value: string) {
@@ -403,20 +403,18 @@ export class Span {
     const childCount: number = this.children.length;
 
     if (!this.modification.omitChildren) {
-
       if (this.modification.sortChildren && childCount > 1) {
         // We will only sort the items with a sortKey
-        const sortedSubset: Span[] = this.children.filter(x => x.modification.sortKey !== undefined);
+        const sortedSubset: Span[] = this.children.filter((x) => x.modification.sortKey !== undefined);
         const sortedSubsetCount: number = sortedSubset.length;
 
         // Is there at least one of them?
         if (sortedSubsetCount > 1) {
-
           // Remember the separator for the first and last ones
           const firstSeparator: string = sortedSubset[0].getLastInnerSeparator();
           const lastSeparator: string = sortedSubset[sortedSubsetCount - 1].getLastInnerSeparator();
 
-          Sort.sortBy(sortedSubset, x => x.modification.sortKey);
+          Sort.sortBy(sortedSubset, (x) => x.modification.sortKey);
 
           const childOptions: IWriteModifiedTextOptions = { ...options };
 
@@ -456,9 +454,9 @@ export class Span {
           if (
             // Only the last child inherits the separatorOverride, because only it can contain
             // the "last inner separator" span
-            i < childCount - 1
+            i < childCount - 1 ||
             // If this.separator is specified, then we will write separatorOverride below, so don't pass it along
-            || this.separator
+            this.separator
           ) {
             const childOptions: IWriteModifiedTextOptions = { ...options };
             childOptions.separatorOverride = undefined;
@@ -489,7 +487,7 @@ export class Span {
   }
 
   private _getTrimmed(text: string): string {
-    const trimmed: string = text.replace(/[\r\n]/g, '\\n');
+    const trimmed: string = text.replace(/\r?\n/g, '\\n');
 
     if (trimmed.length > 100) {
       return trimmed.substr(0, 97) + '...';

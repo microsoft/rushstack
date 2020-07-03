@@ -21,7 +21,8 @@ export class ApprovedPackagesPolicy {
 
   /** @internal */
   public constructor(rushConfiguration: RushConfiguration, rushConfigurationJson: IRushConfigurationJson) {
-    const approvedPackagesPolicy: IApprovedPackagesPolicyJson = rushConfigurationJson.approvedPackagesPolicy || {};
+    const approvedPackagesPolicy: IApprovedPackagesPolicyJson =
+      rushConfigurationJson.approvedPackagesPolicy || {};
 
     this._enabled = !!rushConfigurationJson.approvedPackagesPolicy;
     this._ignoredNpmScopes = new Set<string>(approvedPackagesPolicy.ignoredNpmScopes);
@@ -29,8 +30,10 @@ export class ApprovedPackagesPolicy {
 
     if (this._enabled) {
       if (!this.reviewCategories.size) {
-        throw new Error(`The "approvedPackagesPolicy" feature is enabled rush.json, but the reviewCategories`
-          + ` list is not configured.`);
+        throw new Error(
+          `The "approvedPackagesPolicy" feature is enabled rush.json, but the reviewCategories` +
+            ` list is not configured.`
+        );
       }
     }
 

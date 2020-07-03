@@ -1,7 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DeclarationReference, Meaning, Navigation, Component } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+import {
+  DeclarationReference,
+  Meaning,
+  Navigation,
+  Component
+} from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
 import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
@@ -9,21 +14,23 @@ import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/
 import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
 import { ApiReturnTypeMixin, IApiReturnTypeMixinOptions } from '../mixins/ApiReturnTypeMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
-import { ApiTypeParameterListMixin, IApiTypeParameterListMixinOptions } from '../mixins/ApiTypeParameterListMixin';
+import {
+  ApiTypeParameterListMixin,
+  IApiTypeParameterListMixinOptions
+} from '../mixins/ApiTypeParameterListMixin';
 
 /**
  * Constructor options for {@link ApiMethod}.
  * @public
  */
-export interface IApiMethodOptions extends
-  IApiNameMixinOptions,
-  IApiTypeParameterListMixinOptions,
-  IApiParameterListMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiReturnTypeMixinOptions,
-  IApiStaticMixinOptions,
-  IApiDeclaredItemOptions {
-}
+export interface IApiMethodOptions
+  extends IApiNameMixinOptions,
+    IApiTypeParameterListMixinOptions,
+    IApiParameterListMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiReturnTypeMixinOptions,
+    IApiStaticMixinOptions,
+    IApiDeclaredItemOptions {}
 
 /**
  * Represents a TypeScript member function declaration that belongs to an `ApiClass`.
@@ -46,8 +53,14 @@ export interface IApiMethodOptions extends
  *
  * @public
  */
-export class ApiMethod extends ApiNameMixin(ApiTypeParameterListMixin(ApiParameterListMixin(
-  ApiReleaseTagMixin(ApiReturnTypeMixin(ApiStaticMixin(ApiDeclaredItem)))))) {
+export class ApiMethod extends ApiNameMixin(
+  ApiTypeParameterListMixin(
+    ApiParameterListMixin(ApiReleaseTagMixin(ApiReturnTypeMixin(ApiStaticMixin(ApiDeclaredItem))))
+  )
+) {
+  public constructor(options: IApiMethodOptions) {
+    super(options);
+  }
 
   public static getContainerKey(name: string, isStatic: boolean, overloadIndex: number): string {
     if (isStatic) {
@@ -55,10 +68,6 @@ export class ApiMethod extends ApiNameMixin(ApiTypeParameterListMixin(ApiParamet
     } else {
       return `${name}|${ApiItemKind.Method}|instance|${overloadIndex}`;
     }
-  }
-
-  public constructor(options: IApiMethodOptions) {
-    super(options);
   }
 
   /** @override */

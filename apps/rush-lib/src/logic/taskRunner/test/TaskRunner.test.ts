@@ -1,11 +1,27 @@
 import { EOL } from 'os';
 import { TaskRunner, ITaskRunnerOptions } from '../TaskRunner';
-import { ITaskWriter } from '@microsoft/stream-collator';
+import { ITaskWriter } from '@rushstack/stream-collator';
 import { TaskStatus } from '../TaskStatus';
 import { ITaskDefinition, ITask } from '../ITask';
-import { StringBufferTerminalProvider, Terminal } from '@microsoft/node-core-library';
+import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import { Utilities } from '../../../utilities/Utilities';
 
-function createTaskRunner(taskRunnerOptions: ITaskRunnerOptions, taskDefinition: ITaskDefinition): TaskRunner {
+// The TaskRunner prints "x.xx seconds" in TestRunner.test.ts.snap; ensure that the Stopwatch timing is deterministic
+jest.mock('../../../utilities/Utilities');
+const mockGetTimeInMs: jest.Mock = jest.fn();
+Utilities.getTimeInMs = mockGetTimeInMs;
+
+let mockTimeInMs: number = 0;
+mockGetTimeInMs.mockImplementation(() => {
+  console.log('CALLED mockGetTimeInMs');
+  mockTimeInMs += 100;
+  return mockTimeInMs;
+});
+
+function createTaskRunner(
+  taskRunnerOptions: ITaskRunnerOptions,
+  taskDefinition: ITaskDefinition
+): TaskRunner {
   const task: ITask = taskDefinition as ITask;
   task.dependencies = new Set<ITask>();
   task.dependents = new Set<ITask>();
@@ -34,13 +50,16 @@ describe('TaskRunner', () => {
 
   describe('Constructor', () => {
     it('throwsErrorOnInvalidParallelism', () => {
-      expect(() => new TaskRunner([], {
-        quietMode: false,
-        parallelism: 'tequila',
-        changedProjectsOnly: false,
-        terminal,
-        allowWarningsInSuccessfulBuild: false
-      })).toThrowErrorMatchingSnapshot();
+      expect(
+        () =>
+          new TaskRunner([], {
+            quietMode: false,
+            parallelism: 'tequila',
+            changedProjectsOnly: false,
+            terminal,
+            allowWarningsInSuccessfulBuild: false
+          })
+      ).toThrowErrorMatchingSnapshot();
     });
   });
 
@@ -72,7 +91,7 @@ describe('TaskRunner', () => {
       return taskRunner
         .execute()
         .then(() => fail(EXPECTED_FAIL))
-        .catch(err => {
+        .catch((err) => {
           expect(err.message).toMatchSnapshot();
           const allMessages: string = terminalProvider.getOutput();
           expect(allMessages).not.toContain('Build step 1');
@@ -96,7 +115,7 @@ describe('TaskRunner', () => {
       return taskRunner
         .execute()
         .then(() => fail(EXPECTED_FAIL))
-        .catch(err => {
+        .catch((err) => {
           expect(err.message).toMatchSnapshot();
           expect(terminalProvider.getOutput()).toMatch(/Build step 1.*Error: step 1 failed/);
           checkConsoleOutput(terminalProvider);
@@ -120,10 +139,11 @@ describe('TaskRunner', () => {
       return taskRunner
         .execute()
         .then(() => fail(EXPECTED_FAIL))
-        .catch(err => {
+        .catch((err) => {
           expect(err.message).toMatchSnapshot();
-          expect(terminalProvider.getOutput())
-            .toMatch(/Building units.* - unit #1;.* - unit #3;.*lines omitted.* - unit #48;.* - unit #50;/);
+          expect(terminalProvider.getOutput()).toMatch(
+            /Building units.* - unit #1;.* - unit #3;.*lines omitted.* - unit #48;.* - unit #50;/
+          );
           checkConsoleOutput(terminalProvider);
         });
     });
@@ -145,10 +165,11 @@ describe('TaskRunner', () => {
       return taskRunner
         .execute()
         .then(() => fail(EXPECTED_FAIL))
-        .catch(err => {
+        .catch((err) => {
           expect(err.message).toMatchSnapshot();
-          expect(terminalProvider.getOutput())
-            .toMatch(/List of errors:\S.* - error #1;\S.*lines omitted.* - error #48;\S.* - error #50;\S/);
+          expect(terminalProvider.getOutput()).toMatch(
+            /List of errors:\S.* - error #1;\S.*lines omitted.* - error #48;\S.* - error #50;\S/
+          );
           checkConsoleOutput(terminalProvider);
         });
     });
@@ -181,7 +202,7 @@ describe('TaskRunner', () => {
         return taskRunner
           .execute()
           .then(() => fail('Promise returned by execute() resolved but was expected to fail'))
-          .catch(err => {
+          .catch((err) => {
             expect(err.message).toMatchSnapshot();
             const allMessages: string = terminalProvider.getOutput();
             expect(allMessages).toContain('Build step 1');
@@ -222,7 +243,7 @@ describe('TaskRunner', () => {
             expect(allMessages).toContain('Warning: step 1 succeeded with warnings');
             checkConsoleOutput(terminalProvider);
           })
-          .catch(err => fail('Promise returned by execute() rejected but was expected to resolve'));
+          .catch((err) => fail('Promise returned by execute() rejected but was expected to resolve'));
       });
     });
   });

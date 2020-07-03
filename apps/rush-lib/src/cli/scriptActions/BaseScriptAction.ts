@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineParameter } from '@microsoft/ts-command-line';
+import { CommandLineParameter } from '@rushstack/ts-command-line';
 import { BaseRushAction, IBaseRushActionOptions } from '../actions/BaseRushAction';
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 import { RushConstants } from '../../logic/RushConstants';
@@ -27,9 +27,7 @@ export abstract class BaseScriptAction extends BaseRushAction {
   protected readonly _commandLineConfiguration: CommandLineConfiguration | undefined;
   protected readonly customParameters: CommandLineParameter[] = [];
 
-  constructor(
-    options: IBaseScriptActionOptions
-  ) {
+  public constructor(options: IBaseScriptActionOptions) {
     super(options);
     this._commandLineConfiguration = options.commandLineConfiguration;
   }
@@ -56,15 +54,17 @@ export abstract class BaseScriptAction extends BaseRushAction {
             customParameter = this.defineFlagParameter({
               parameterShortName: parameterJson.shortName,
               parameterLongName: parameterJson.longName,
-              description: parameterJson.description
+              description: parameterJson.description,
+              required: parameterJson.required
             });
             break;
           case 'choice':
-           customParameter = this.defineChoiceParameter({
+            customParameter = this.defineChoiceParameter({
               parameterShortName: parameterJson.shortName,
               parameterLongName: parameterJson.longName,
               description: parameterJson.description,
-              alternatives: parameterJson.alternatives.map(x => x.name),
+              required: parameterJson.required,
+              alternatives: parameterJson.alternatives.map((x) => x.name),
               defaultValue: parameterJson.defaultValue
             });
             break;
@@ -73,12 +73,15 @@ export abstract class BaseScriptAction extends BaseRushAction {
               parameterLongName: parameterJson.longName,
               parameterShortName: parameterJson.shortName,
               description: parameterJson.description,
+              required: parameterJson.required,
               argumentName: parameterJson.argumentName
             });
             break;
           default:
-            throw new Error(`${RushConstants.commandLineFilename} defines a parameter "${parameterJson!.longName}"`
-              + ` using an unsupported parameter kind "${parameterJson!.parameterKind}"`);
+            throw new Error(
+              `${RushConstants.commandLineFilename} defines a parameter "${parameterJson!.longName}"` +
+                ` using an unsupported parameter kind "${parameterJson!.parameterKind}"`
+            );
         }
 
         if (customParameter) {

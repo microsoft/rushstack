@@ -4,20 +4,24 @@
 
 ```ts
 
-import { ConsoleTerminalProvider } from '@microsoft/node-core-library';
+import { GCBTerminalProvider } from '@microsoft/gulp-core-build';
 import { GulpTask } from '@microsoft/gulp-core-build';
 import { IBuildConfig } from '@microsoft/gulp-core-build';
-import { Terminal } from '@microsoft/node-core-library';
-import { TerminalProviderSeverity } from '@microsoft/node-core-library';
-import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.1';
+import { JsonObject } from '@rushstack/node-core-library';
+import { Terminal } from '@rushstack/node-core-library';
 
 // Warning: (ae-forgotten-export) The symbol "ApiExtractorTask" needs to be exported by the entry point index.d.ts
-// 
+//
 // @public (undocumented)
 export const apiExtractor: ApiExtractorTask;
 
 // Warning: (ae-forgotten-export) The symbol "IRSCTaskConfig" needs to be exported by the entry point index.d.ts
-// 
+//
+// @public (undocumented)
+export interface ILintCmdTaskConfig extends IRSCTaskConfig {
+    displayAsError?: boolean;
+}
+
 // @public (undocumented)
 export interface ITscCmdTaskConfig extends IRSCTaskConfig {
     customArgs?: string[];
@@ -30,36 +34,44 @@ export interface ITslintCmdTaskConfig extends IRSCTaskConfig {
     displayAsError?: boolean;
 }
 
-// Warning: (ae-incompatible-release-tags) The symbol "tscCmd" is marked as @public, but its signature references "TscCmdTask" which is marked as @beta
-// 
+// @public (undocumented)
+export const lintCmd: LintCmdTask;
+
+// Warning: (ae-forgotten-export) The symbol "RSCTask" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export class LintCmdTask extends RSCTask<ILintCmdTaskConfig> {
+    constructor();
+    // (undocumented)
+    executeTask(): Promise<void>;
+    // (undocumented)
+    loadSchema(): JsonObject;
+}
+
 // @public (undocumented)
 export const tscCmd: TscCmdTask;
 
-// Warning: (ae-forgotten-export) The symbol "RSCTask" needs to be exported by the entry point index.d.ts
-// 
-// @beta (undocumented)
+// @public (undocumented)
 export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
     constructor();
     // (undocumented)
     executeTask(): Promise<void>;
     // (undocumented)
-    loadSchema(): Object;
+    loadSchema(): JsonObject;
     // (undocumented)
     protected _onData(data: Buffer): void;
     }
 
-// Warning: (ae-incompatible-release-tags) The symbol "tslintCmd" is marked as @public, but its signature references "TslintCmdTask" which is marked as @beta
-// 
 // @public (undocumented)
 export const tslintCmd: TslintCmdTask;
 
-// @beta (undocumented)
+// @public (undocumented)
 export class TslintCmdTask extends RSCTask<ITslintCmdTaskConfig> {
     constructor();
     // (undocumented)
     executeTask(): Promise<void>;
     // (undocumented)
-    loadSchema(): Object;
+    loadSchema(): JsonObject;
 }
 
 

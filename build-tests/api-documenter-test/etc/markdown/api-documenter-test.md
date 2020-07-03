@@ -28,7 +28,7 @@ This project tests various documentation generation scenarios and doc comment sy
 
 |  Function | Description |
 |  --- | --- |
-|  [globalFunction(x)](./api-documenter-test.globalfunction.md) | An exported function |
+|  [exampleFunction(x, y)](./api-documenter-test.examplefunction.md) | An exported function with hyperlinked parameters and return value. |
 |  [yamlReferenceUniquenessTest()](./api-documenter-test.yamlreferenceuniquenesstest.md) |  |
 
 ## Interfaces
@@ -61,4 +61,6 @@ This project tests various documentation generation scenarios and doc comment sy
 |  Type Alias | Description |
 |  --- | --- |
 |  [ExampleTypeAlias](./api-documenter-test.exampletypealias.md) | A type alias |
+|  [GenericTypeAlias](./api-documenter-test.generictypealias.md) |  |
+|  [TypeAlias](./api-documenter-test.typealias.md) |  |
 

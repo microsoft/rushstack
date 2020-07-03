@@ -1,6 +1,279 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Sun, 29 Sep 2019 23:56:29 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+
+## 3.7.29
+Fri, 03 Jul 2020 15:09:04 GMT
+
+*Version update only*
+
+## 3.7.28
+Fri, 03 Jul 2020 05:46:41 GMT
+
+*Version update only*
+
+## 3.7.27
+Sat, 27 Jun 2020 00:09:38 GMT
+
+*Version update only*
+
+## 3.7.26
+Fri, 26 Jun 2020 22:16:39 GMT
+
+*Version update only*
+
+## 3.7.25
+Thu, 25 Jun 2020 06:43:35 GMT
+
+*Version update only*
+
+## 3.7.24
+Wed, 24 Jun 2020 09:50:48 GMT
+
+*Version update only*
+
+## 3.7.23
+Wed, 24 Jun 2020 09:04:28 GMT
+
+*Version update only*
+
+## 3.7.22
+Mon, 15 Jun 2020 22:17:18 GMT
+
+*Version update only*
+
+## 3.7.21
+Fri, 12 Jun 2020 09:19:21 GMT
+
+*Version update only*
+
+## 3.7.20
+Wed, 10 Jun 2020 20:48:30 GMT
+
+*Version update only*
+
+## 3.7.19
+Mon, 01 Jun 2020 08:34:17 GMT
+
+*Version update only*
+
+## 3.7.18
+Sat, 30 May 2020 02:59:54 GMT
+
+*Version update only*
+
+## 3.7.17
+Thu, 28 May 2020 05:59:02 GMT
+
+*Version update only*
+
+## 3.7.16
+Wed, 27 May 2020 05:15:11 GMT
+
+*Version update only*
+
+## 3.7.15
+Tue, 26 May 2020 23:00:25 GMT
+
+*Version update only*
+
+## 3.7.14
+Fri, 22 May 2020 15:08:42 GMT
+
+*Version update only*
+
+## 3.7.13
+Thu, 21 May 2020 23:09:44 GMT
+
+*Version update only*
+
+## 3.7.12
+Thu, 21 May 2020 15:41:59 GMT
+
+*Version update only*
+
+## 3.7.11
+Tue, 19 May 2020 15:08:19 GMT
+
+*Version update only*
+
+## 3.7.10
+Fri, 15 May 2020 08:10:59 GMT
+
+*Version update only*
+
+## 3.7.9
+Wed, 06 May 2020 08:23:45 GMT
+
+*Version update only*
+
+## 3.7.8
+Sat, 02 May 2020 00:08:16 GMT
+
+*Version update only*
+
+## 3.7.7
+Wed, 08 Apr 2020 04:07:33 GMT
+
+*Version update only*
+
+## 3.7.6
+Fri, 03 Apr 2020 15:10:15 GMT
+
+*Version update only*
+
+## 3.7.5
+Sun, 29 Mar 2020 00:04:12 GMT
+
+*Version update only*
+
+## 3.7.4
+Sat, 28 Mar 2020 00:37:16 GMT
+
+*Version update only*
+
+## 3.7.3
+Wed, 18 Mar 2020 15:07:47 GMT
+
+*Version update only*
+
+## 3.7.2
+Tue, 17 Mar 2020 23:55:58 GMT
+
+### Patches
+
+- Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`
+
+## 3.7.1
+Tue, 28 Jan 2020 02:23:44 GMT
+
+*Version update only*
+
+## 3.7.0
+Fri, 24 Jan 2020 00:27:39 GMT
+
+### Minor changes
+
+- Extract debug certificate logic into separate package.
+
+## 3.6.2
+Thu, 23 Jan 2020 01:07:56 GMT
+
+*Version update only*
+
+## 3.6.1
+Tue, 21 Jan 2020 21:56:13 GMT
+
+*Version update only*
+
+## 3.6.0
+Sun, 19 Jan 2020 02:26:52 GMT
+
+### Minor changes
+
+- Upgrade Node typings to Node 10
+
+## 3.5.23
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 3.5.22
+Tue, 14 Jan 2020 01:34:15 GMT
+
+*Version update only*
+
+## 3.5.21
+Sat, 11 Jan 2020 05:18:23 GMT
+
+*Version update only*
+
+## 3.5.20
+Thu, 09 Jan 2020 06:44:13 GMT
+
+*Version update only*
+
+## 3.5.19
+Wed, 08 Jan 2020 00:11:31 GMT
+
+*Version update only*
+
+## 3.5.18
+Wed, 04 Dec 2019 23:17:55 GMT
+
+*Version update only*
+
+## 3.5.17
+Tue, 03 Dec 2019 03:17:44 GMT
+
+*Version update only*
+
+## 3.5.16
+Sun, 24 Nov 2019 00:54:04 GMT
+
+*Version update only*
+
+## 3.5.15
+Wed, 20 Nov 2019 06:14:28 GMT
+
+*Version update only*
+
+## 3.5.14
+Fri, 15 Nov 2019 04:50:50 GMT
+
+*Version update only*
+
+## 3.5.13
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 3.5.12
+Wed, 06 Nov 2019 22:44:18 GMT
+
+*Version update only*
+
+## 3.5.11
+Tue, 05 Nov 2019 06:49:28 GMT
+
+*Version update only*
+
+## 3.5.10
+Tue, 05 Nov 2019 01:08:39 GMT
+
+*Version update only*
+
+## 3.5.9
+Fri, 25 Oct 2019 15:08:54 GMT
+
+*Version update only*
+
+## 3.5.8
+Tue, 22 Oct 2019 06:24:44 GMT
+
+### Patches
+
+- Refactor some code as part of migration from TSLint to ESLint
+
+## 3.5.7
+Mon, 21 Oct 2019 05:22:43 GMT
+
+*Version update only*
+
+## 3.5.6
+Fri, 18 Oct 2019 15:15:01 GMT
+
+*Version update only*
+
+## 3.5.5
+Sun, 06 Oct 2019 00:27:39 GMT
+
+*Version update only*
+
+## 3.5.4
+Fri, 04 Oct 2019 00:15:22 GMT
+
+*Version update only*
 
 ## 3.5.3
 Sun, 29 Sep 2019 23:56:29 GMT

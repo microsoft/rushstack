@@ -48,10 +48,10 @@ function spawn(file, args, options) {
   });
 
   setTimeout(() => {
-    cp.stdout.emit('data', `${file} ${args}: Mock task is spawned`)
+    cp.stdout.emit('data', `${file} ${args}: Mock task is spawned`);
 
     if (spawnMockConfig.emitError) {
-      cp.stderr.emit('data', `${file} ${args}: A mock error occurred in the task`)
+      cp.stderr.emit('data', `${file} ${args}: A mock error occurred in the task`);
     }
 
     cp.emit('close', spawnMockConfig.returnCode);

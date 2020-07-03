@@ -7,13 +7,10 @@
  *
  * @remarks
  *
- * For more info, please see the package {@link https://www.npmjs.com/package/@microsoft/stream-collator
+ * For more info, please see the package {@link https://www.npmjs.com/package/@rushstack/stream-collator
  * | README}.
  *
  * @packageDocumentation
  */
 
-export {
-  Interleaver,
-  ITaskWriter
-} from './Interleaver';
+export { Interleaver, ITaskWriter } from './Interleaver';

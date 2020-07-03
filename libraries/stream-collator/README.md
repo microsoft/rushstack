@@ -33,17 +33,17 @@ This is where the **stream-collator** comes in!
 
 Install the stream-collator:
 
-`npm install --save @microsoft/stream-collator`
+`npm install --save @rushstack/stream-collator`
 
 
 Import the collator:
 
 ```javascript
-import StreamCollator from '@microsoft/stream-collator'; // es6
+import StreamCollator from '@rushstack/stream-collator'; // es6
 ```
 
 ```javascript
-const StreamCollator = require('@microsoft/stream-collator'); // commonjs
+const StreamCollator = require('@rushstack/stream-collator'); // commonjs
 ```
 
 A stream collator adheres to the [NodeJS Stream API](https://nodejs.org/api/stream.html), meaning that it effectively

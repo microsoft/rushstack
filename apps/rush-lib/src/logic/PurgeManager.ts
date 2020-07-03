@@ -55,8 +55,10 @@ export class PurgeManager {
     // Delete everything under common\temp except for the recycler folder itself
     console.log('Purging ' + this._rushConfiguration.commonTempFolder);
 
-    this._commonTempFolderRecycler.moveAllItemsInFolder(this._rushConfiguration.commonTempFolder,
-      this._getMembersToExclude(this._rushConfiguration.commonTempFolder, true));
+    this._commonTempFolderRecycler.moveAllItemsInFolder(
+      this._rushConfiguration.commonTempFolder,
+      this._getMembersToExclude(this._rushConfiguration.commonTempFolder, true)
+    );
   }
 
   /**
@@ -73,12 +75,25 @@ export class PurgeManager {
     // we cannot delete that folder.
 
     // First purge the node-specific folder, e.g. ~/.rush/node-v4.5.6/* except for rush-1.2.3:
-    this._rushUserFolderRecycler.moveAllItemsInFolder(this._rushGlobalFolder.nodeSpecificPath,
-      this._getMembersToExclude(this._rushGlobalFolder.nodeSpecificPath, true));
+    this._rushUserFolderRecycler.moveAllItemsInFolder(
+      this._rushGlobalFolder.nodeSpecificPath,
+      this._getMembersToExclude(this._rushGlobalFolder.nodeSpecificPath, true)
+    );
 
     // Then purge the the global folder, e.g. ~/.rush/* except for node-v4.5.6
-    this._rushUserFolderRecycler.moveAllItemsInFolder(this._rushGlobalFolder.path,
-      this._getMembersToExclude(this._rushGlobalFolder.path, false));
+    this._rushUserFolderRecycler.moveAllItemsInFolder(
+      this._rushGlobalFolder.path,
+      this._getMembersToExclude(this._rushGlobalFolder.path, false)
+    );
+
+    if (
+      this._rushConfiguration.packageManager === 'pnpm' &&
+      this._rushConfiguration.pnpmOptions.pnpmStore === 'global' &&
+      this._rushConfiguration.pnpmOptions.pnpmStorePath
+    ) {
+      console.warn(colors.yellow(`Purging the global pnpm-store`));
+      this._rushUserFolderRecycler.moveAllItemsInFolder(this._rushConfiguration.pnpmOptions.pnpmStorePath);
+    }
   }
 
   private _getMembersToExclude(folderToRecycle: string, showWarning: boolean): string[] {
@@ -103,8 +118,11 @@ export class PurgeManager {
 
         if (showWarning) {
           // Warn that we won't dispose this folder
-          console.log(colors.yellow('The active process\'s folder will not be deleted: '
-            + path.join(folderToRecycle, firstPart)));
+          console.log(
+            colors.yellow(
+              "The active process's folder will not be deleted: " + path.join(folderToRecycle, firstPart)
+            )
+          );
         }
       }
     }

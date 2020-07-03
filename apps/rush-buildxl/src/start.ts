@@ -1,10 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  Terminal,
-  ConsoleTerminalProvider
-} from '@microsoft/node-core-library';
+import { Terminal, ConsoleTerminalProvider } from '@rushstack/node-core-library';
 
 import { RushBuildXLCommandLineParser } from './cli/RushBuildXLCommandLineParser';
 

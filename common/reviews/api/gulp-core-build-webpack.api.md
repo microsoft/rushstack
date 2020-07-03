@@ -17,7 +17,7 @@ export interface IWebpackResources {
 
 // @public (undocumented)
 export interface IWebpackTaskConfig {
-    config?: Webpack.Configuration;
+    config?: Webpack.Configuration | Webpack.Configuration[];
     configPath: string;
     printStats?: boolean;
     suppressWarnings?: (string | RegExp)[];
@@ -39,7 +39,7 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
     // (undocumented)
     isEnabled(buildConfig: IBuildConfig): boolean;
     // (undocumented)
-    loadSchema(): Object;
+    loadSchema(): any;
     // (undocumented)
     readonly resources: IWebpackResources;
     }

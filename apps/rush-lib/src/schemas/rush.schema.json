@@ -4,6 +4,25 @@
   "description": "The main configuration file for the Rush multi-project build tool. See http://rushjs.io for details.",
   "type": "object",
 
+  "definitions": {
+    "environmentVariables": {
+      "description": "Environment variables for the package manager",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "override": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+
   "properties": {
     "$schema": {
       "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
@@ -53,10 +72,25 @@
       "description": "Allows creation of hotfix changes. This feature is experimental so it is disabled by default. If this is set, \"rush change\" only allows a \"hotfix\" change type to be specified. This change type will be used when publishing subsequent changes from the monorepo.",
       "type": "boolean"
     },
+    "npmOptions": {
+      "description": "Options that are only used when the NPM package manager is selected.",
+      "type": "object",
+      "properties": {
+        "environmentVariables": {
+          "$ref": "#/definitions/environmentVariables"
+        }
+      },
+      "additionalProperties": false
+    },
     "pnpmOptions": {
       "description": "Options that are only used when the PNPM pacakge manager is selected.",
       "type": "object",
       "properties": {
+        "pnpmStore": {
+          "description": "Specifies the location of the PNPM store.  There are two possible values:\n\n\"local\" - use the \"pnpm-store\" folder in the current configured temp folder: \"common/temp/pnpm-store\" by default.\n\"global\" - use PNPM's global store, which has the benefit of being shared across multiple repo folders, but the disadvantage of less isolation for builds (e.g. bugs or incompatibilities when two repos use different releases of PNPM)\n\nIn all cases, the store path will be overridden by the environment variable RUSH_PNPM_STORE_PATH.\n\nThe default value is \"local\".",
+          "type": "string",
+          "enum": ["local", "global"]
+        },
         "strictPeerDependencies": {
           "description": "If true, then Rush will add the \"--strict-peer-dependencies\" option when invoking PNPM. This causes \"rush install\" to fail if there are unsatisfied peer dependencies, which is an invalid state that can cause build failures or incompatible dependency versions. (For historical reasons, JavaScript package managers generally do not treat this invalid state as an error.) The default value is false.",
           "type": "boolean"
@@ -65,6 +99,17 @@
           "description": "Configures the strategy used to select versions during installation.  This feature requires PNPM version 3.1 or newer.  It corresponds to the \"--resolution-strategy\" command-line option for PNPM.  Possible values are \"fast\" and \"fewer-dependencies\".  PNPM's default is \"fast\", but this may be incompatible with certain packages, for example the \"@types\" packages from DefinitelyTyped.  Rush's default is \"fewer-dependencies\", which causes PNPM to avoid installing a newer version if an already installed version can be reused; this is more similar to NPM's algorithm.",
           "type": "string",
           "enum": ["fewer-dependencies", "fast"]
+        },
+        "environmentVariables": {
+          "$ref": "#/definitions/environmentVariables"
+        },
+        "preventManualShrinkwrapChanges": {
+          "description": "If true, then \"rush install\" will report an error if manual modifications were made to the PNPM shrinkwrap file without running `rush update` afterwards. To temporarily disable this validation when invoking \"rush install\", use the \"--bypassPolicy\" command-line parameter. The default value is false.",
+          "type": "boolean"
+        },
+        "useWorkspaces": {
+          "description": "If true, then Rush will use the workspaces feature to install and link packages when invoking PNPM. The default value is false.",
+          "type": "boolean"
         }
       },
       "additionalProperties": false
@@ -76,6 +121,9 @@
         "ignoreEngines": {
           "description": "If true, then Rush will add the \"--ignore-engines\" option when invoking Yarn. * This allows \"rush install\" to succeed if there are dependencies with engines defined in package.json which do not match the current environment. The default value is false.",
           "type": "boolean"
+        },
+        "environmentVariables": {
+          "$ref": "#/definitions/environmentVariables"
         }
       },
       "additionalProperties": false
@@ -83,6 +131,10 @@
     "projectFolderMaxDepth": {
       "description": "The maximum folder depth for the projectFolder field.  The default value is 2, i.e. a single slash in the path name.",
       "type": "number"
+    },
+    "allowMostlyStandardPackageNames": {
+      "description": "Today the npmjs.com registry enforces fairly strict naming rules for packages, but in the early days there was no standard and hardly any enforcement.  A few large legacy projects are still using nonstandard package names, and private registries sometimes allow it.  Set \"allowMostlyStandardPackageNames\" to true to relax Rush's enforcement of package names.  This allows upper case letters and in the future may relax other rules, however we want to minimize these exceptions.  Many popular tools use certain punctuation characters as delimiters, based on the assumption that they will never appear in a package name; thus if we relax the rules too much it is likely to cause very confusing malfunctions. The default value is false.",
+      "type": "boolean"
     },
     "approvedPackagesPolicy": {
       "description": "Controls a package review workflow driven by the two config files \"browser-approved-packages.json\" and \"nonbrowser-approved-packages.json\"",
@@ -143,10 +195,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "variantName",
-          "description"
-        ]
+        "required": ["variantName", "description"]
       }
     },
     "repository": {
@@ -155,6 +204,14 @@
       "properties": {
         "url": {
           "description": "The remote url of the repository. If a value is provided, \"rush change\" will use it to find the right remote to compare against.",
+          "type": "string"
+        },
+        "defaultBranch": {
+          "description": "The default branch name. This tells \"rush change\" which remote branch to compare against. The default value is \"master\"",
+          "type": "string"
+        },
+        "defaultRemote": {
+          "description": "The default remote. This tells \"rush change\" which remote to compare against if the remote URL is not set or if a remote matching the provided remote URL is not found.",
           "type": "string"
         }
       },
@@ -203,10 +260,7 @@
           }
         },
         "additionalProperties": false,
-        "required": [
-          "packageName",
-          "projectFolder"
-        ]
+        "required": ["packageName", "projectFolder"]
       }
     },
     "eventHooks": {
@@ -246,8 +300,5 @@
     }
   },
   "additionalProperties": false,
-  "required": [
-    "rushVersion",
-    "projects"
-  ]
+  "required": ["rushVersion", "projects"]
 }

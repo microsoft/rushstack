@@ -24,6 +24,9 @@ export interface ICSSModules {
 export default class CSSModules implements ICSSModules {
   private _classMap: IClassMap;
   private _rootPath: string;
+  private _customizedGenerateScopedName:
+    | ((name: string, fileName: string, css: string) => string)
+    | undefined;
 
   /**
    * CSSModules includes the source file's path relative to the project root
@@ -33,19 +36,23 @@ export default class CSSModules implements ICSSModules {
    * That is used in {@link ./SassTask#SassTask}
    * But will default the process' current working dir.
    */
-  constructor(rootPath?: string) {
+  public constructor(
+    rootPath?: string,
+    generateScopedName?: (name: string, fileName: string, css: string) => string
+  ) {
     this._classMap = {};
     if (rootPath) {
       this._rootPath = rootPath;
     } else {
       this._rootPath = process.cwd();
     }
+    this._customizedGenerateScopedName = generateScopedName;
   }
 
   public getPlugin(): postcss.AcceptedPlugin {
     return cssModules({
       getJSON: this.saveJson.bind(this),
-      generateScopedName: this.generateScopedName.bind(this)
+      generateScopedName: this._customizedGenerateScopedName || this.generateScopedName.bind(this)
     });
   }
 
@@ -57,14 +64,14 @@ export default class CSSModules implements ICSSModules {
     this._classMap = json;
   }
 
-  protected generateScopedName(name: string, fileName: string, css: string)
-      : string {
+  protected generateScopedName(name: string, fileName: string, css: string): string {
     const fileBaseName: string = path.relative(this._rootPath, fileName);
     const safeFileBaseName: string = fileBaseName.replace(/\\/g, '/');
-    const hash: string = crypto.createHmac('sha1', safeFileBaseName)
-                               .update(css)
-                               .digest('hex')
-                               .substring(0, 8);
+    const hash: string = crypto
+      .createHmac('sha1', safeFileBaseName)
+      .update(css)
+      .digest('hex')
+      .substring(0, 8);
     return `${name}_${hash}`;
   }
 }

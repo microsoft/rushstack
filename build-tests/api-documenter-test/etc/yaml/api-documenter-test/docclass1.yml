@@ -3,7 +3,11 @@ items:
   - uid: 'api-documenter-test!DocClass1:class'
     summary: This is an example class.
     remarks: >-
-      These are some remarks.
+      [Link to overload 1](xref:api-documenter-test!DocClass1%23exampleFunction:member(1))
+
+
+      [Link to overload 2](xref:api-documenter-test!DocClass1%23exampleFunction:member(2))
+
 
 
       The constructor for this class is marked as internal. Third-party code should not call the constructor directly or
@@ -15,6 +19,8 @@ items:
     type: class
     extends:
       - 'api-documenter-test!DocBaseClass:class'
+    inheritance:
+      - type: 'api-documenter-test!DocBaseClass:class'
     implements:
       - 'api-documenter-test!IDocInterface1:interface'
       - 'api-documenter-test!IDocInterface2:interface'
@@ -26,9 +32,11 @@ items:
       - 'api-documenter-test!DocClass1#interestingEdgeCases:member(1)'
       - 'api-documenter-test!DocClass1#malformedEvent:member'
       - 'api-documenter-test!DocClass1#modifiedEvent:member'
+      - 'api-documenter-test!DocClass1#readonlyProperty:member'
       - 'api-documenter-test!DocClass1#regularProperty:member'
       - 'api-documenter-test!DocClass1.sumWithExample:member(1)'
       - 'api-documenter-test!DocClass1#tableExample:member(1)'
+      - 'api-documenter-test!DocClass1#writeableProperty:member'
   - uid: 'api-documenter-test!DocClass1#deprecatedExample:member(1)'
     deprecated:
       content: Use `otherThing()` instead.
@@ -123,6 +131,17 @@ items:
       return:
         type:
           - 'api-documenter-test!SystemEvent:class'
+  - uid: 'api-documenter-test!DocClass1#readonlyProperty:member'
+    name: readonlyProperty
+    fullName: readonlyProperty
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: 'get readonlyProperty(): string;'
+      return:
+        type:
+          - string
   - uid: 'api-documenter-test!DocClass1#regularProperty:member'
     summary: This is a regular property that happens to use the SystemEvent type.
     name: regularProperty
@@ -172,6 +191,20 @@ items:
         type:
           - void
         description: ''
+  - uid: 'api-documenter-test!DocClass1#writeableProperty:member'
+    name: writeableProperty
+    fullName: writeableProperty
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: |-
+        get writeableProperty(): string;
+
+        set writeableProperty(value: string);
+      return:
+        type:
+          - string
 references:
   - uid: 'api-documenter-test!DocBaseClass:class'
     name: DocBaseClass

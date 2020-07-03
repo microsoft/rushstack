@@ -4,7 +4,7 @@
 
 ```ts
 
-import Long from 'long';
+import { default as Long_2 } from 'long';
 import { MAX_UNSIGNED_VALUE } from 'long';
 
 // @public
@@ -29,7 +29,7 @@ export abstract class AbstractClass3 {
 export class AmbientConsumer {
     builtinDefinition1(): Map<string, string>;
     builtinDefinition2(): Promise<void>;
-    definitelyTyped(): jest.Context;
+    definitelyTyped(): jest.MockContext<number, any>;
     localTypings(): IAmbientInterfaceExample;
 }
 
@@ -41,7 +41,7 @@ export class ClassExportedAsDefault {
 export class ClassWithAccessModifiers {
     defaultPublicMethod(): void;
     protected protectedField: number;
-    protected readonly protectedGetter: string;
+    protected get protectedGetter(): string;
     protected protectedSetter(x: string): void;
     static publicStaticField: number;
 }
@@ -51,15 +51,15 @@ export class ClassWithSymbols {
     // (undocumented)
     [ANamespace.fullyExportedCustomSymbol](): void;
     // Warning: (ae-forgotten-export) The symbol "ANamespace" needs to be exported by the entry point index.d.ts
-    // 
+    //
     // (undocumented)
-    readonly [ANamespace.locallyExportedCustomSymbol]: string;
+    get [ANamespace.locallyExportedCustomSymbol](): string;
     // (undocumented)
     [fullyExportedCustomSymbol](): void;
     // (undocumented)
-    readonly [locallyExportedCustomSymbol]: string;
+    get [locallyExportedCustomSymbol](): string;
     // (undocumented)
-    readonly [Symbol.toStringTag]: string;
+    get [Symbol.toStringTag](): string;
     // (undocumented)
     readonly [unexportedCustomSymbol]: number;
 }
@@ -99,7 +99,7 @@ export class DefaultExportEdgeCase {
 // @public (undocumented)
 export class ForgottenExportConsumer1 {
     // Warning: (ae-forgotten-export) The symbol "IForgottenExport" needs to be exported by the entry point index.d.ts
-    // 
+    //
     // (undocumented)
     test1(): IForgottenExport | undefined;
 }
@@ -107,7 +107,7 @@ export class ForgottenExportConsumer1 {
 // @public (undocumented)
 export class ForgottenExportConsumer2 {
     // Warning: (ae-forgotten-export) The symbol "IForgottenExport" needs to be exported by the entry point index.d.ts
-    // 
+    //
     // (undocumented)
     test2(): IForgottenExport_2 | undefined;
 }
@@ -115,7 +115,7 @@ export class ForgottenExportConsumer2 {
 // @beta
 export class ForgottenExportConsumer3 {
     // Warning: (ae-forgotten-export) The symbol "IForgottenDirectDependency" needs to be exported by the entry point index.d.ts
-    // 
+    //
     // (undocumented)
     test2(): IForgottenDirectDependency | undefined;
 }
@@ -190,7 +190,7 @@ export class TypeReferencesInAedoc {
 // @public (undocumented)
 export class UseLong {
     // (undocumented)
-    use_long(): Long;
+    use_long(): Long_2;
 }
 
 // @alpha (undocumented)

@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* tslint:disable:max-line-length */
-
 if (process.argv.indexOf('--no-color') === -1) {
   process.argv.push('--color');
 }
@@ -15,11 +13,16 @@ import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
 import { CleanTask } from './tasks/CleanTask';
 import { CleanFlagTask } from './tasks/CleanFlagTask';
-import { CopyStaticAssetsTask } from  './tasks/copyStaticAssets/CopyStaticAssetsTask';
+import { CopyStaticAssetsTask } from './tasks/copyStaticAssets/CopyStaticAssetsTask';
 import { args, builtPackage } from './State';
 export { IExecutable } from './IExecutable';
 import { log, error as logError } from './logging';
-import { initialize as initializeLogging, markTaskCreationTime, generateGulpError, setWatchMode } from './logging';
+import {
+  initialize as initializeLogging,
+  markTaskCreationTime,
+  generateGulpError,
+  setWatchMode
+} from './logging';
 import { getFlagValue } from './config';
 import * as Gulp from 'gulp';
 import * as notifier from 'node-notifier';
@@ -43,6 +46,7 @@ export {
   log,
   logSummary
 } from './logging';
+export { GCBTerminalProvider } from './utilities/GCBTerminalProvider';
 export * from './tasks/CopyTask';
 export * from './tasks/GenerateShrinkwrapTask';
 export * from './tasks/GulpTask';
@@ -55,17 +59,18 @@ export * from './tasks/JestTask';
 const _taskMap: { [key: string]: IExecutable } = {};
 const _uniqueTasks: IExecutable[] = [];
 
-const packageFolder: string = (builtPackage.directories && builtPackage.directories.packagePath)
-  ? builtPackage.directories.packagePath
-  : '';
+const packageFolder: string =
+  builtPackage.directories && builtPackage.directories.packagePath
+    ? builtPackage.directories.packagePath
+    : '';
 
 let _buildConfig: IBuildConfig = {
   maxBuildTimeMs: 0, // Defaults to no timeout
   // gulp and rootPath are set to undefined here because they'll be defined in the initialize function below,
   //  but we don't want their types to be nullable because a task that uses StrictNullChecks should expect them
   //  to be defined without checking their values.
-  gulp: undefined as any, // tslint:disable-line:no-any
-  rootPath: undefined as any, // tslint:disable-line:no-any
+  gulp: undefined as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+  rootPath: undefined as any, // eslint-disable-line @typescript-eslint/no-explicit-any
   packageFolder,
   srcFolder: 'src',
   distFolder: path.join(packageFolder, 'dist'),
@@ -91,9 +96,8 @@ let _buildConfig: IBuildConfig = {
  * @public
  */
 export function setConfig(config: Partial<IBuildConfig>): void {
-  /* tslint:disable:typedef */
+  // eslint-disable-next-line
   const objectAssign = require('object-assign');
-  /* tslint:enable:typedef */
 
   _buildConfig = objectAssign({}, _buildConfig, config);
 }
@@ -105,9 +109,8 @@ export function setConfig(config: Partial<IBuildConfig>): void {
  * @public
  */
 export function mergeConfig(config: Partial<IBuildConfig>): void {
-  /* tslint:disable:typedef */
+  // eslint-disable-next-line
   const merge = require('lodash.merge');
-  /* tslint:enable:typedef */
 
   _buildConfig = merge({}, _buildConfig, config);
 }
@@ -158,20 +161,25 @@ export function task(taskName: string, taskExecutable: IExecutable): IExecutable
  * @public
  */
 export interface ICustomGulpTask {
-  (gulp: typeof Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: Object) => void):
-    Promise<Object> | NodeJS.ReadWriteStream | void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (gulp: typeof Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: any) => void):
+    | Promise<object>
+    | NodeJS.ReadWriteStream
+    | void;
 }
 
 /** @public */
 class CustomTask extends GulpTask<void> {
   private _fn: ICustomGulpTask;
-  constructor(name: string, fn: ICustomGulpTask) {
+  public constructor(name: string, fn: ICustomGulpTask) {
     super(name);
     this._fn = fn.bind(this);
   }
 
-  public executeTask(gulp: typeof Gulp | GulpProxy, completeCallback?: (error?: string | Error) => void):
-    Promise<Object> | NodeJS.ReadWriteStream | void {
+  public executeTask(
+    gulp: typeof Gulp | GulpProxy,
+    completeCallback?: (error?: string | Error) => void
+  ): Promise<object> | NodeJS.ReadWriteStream | void {
     return this._fn(gulp, getConfig(), completeCallback);
   }
 }
@@ -211,7 +219,6 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
   return {
     execute: (buildConfig: IBuildConfig): Promise<void> => {
       return new Promise<void>(() => {
-
         function _runWatch(): Promise<void> {
           if (isWatchRunning) {
             shouldRerunWatch = true;
@@ -227,7 +234,7 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
                   if (buildConfig.showToast) {
                     notifier.notify({
                       title: successMessage,
-                      message: (builtPackage ? builtPackage.name : ''),
+                      message: builtPackage ? builtPackage.name : '',
                       icon: buildConfig.buildSuccessIconPath
                     });
                   } else {
@@ -279,9 +286,9 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
  * Takes in IExecutables as arguments and returns an IExecutable that will execute them in serial.
  * @public
  */
-export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable {
-  const flatTasks: IExecutable[] = <IExecutable[]>_flatten(tasks).filter(taskExecutable => {
-    // tslint:disable-next-line:no-null-keyword
+export function serial(...tasks: (IExecutable[] | IExecutable)[]): IExecutable {
+  const flatTasks: IExecutable[] = _flatten(tasks).filter((taskExecutable) => {
+    // eslint-disable-next-line @rushstack/no-null
     return taskExecutable !== null && taskExecutable !== undefined;
   });
 
@@ -306,9 +313,9 @@ export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutabl
  * Takes in IExecutables as arguments and returns an IExecutable that will execute them in parallel.
  * @public
  */
-export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable {
-  const flatTasks: IExecutable[] = _flatten<IExecutable>(tasks).filter(taskExecutable => {
-    // tslint:disable-next-line:no-null-keyword
+export function parallel(...tasks: (IExecutable[] | IExecutable)[]): IExecutable {
+  const flatTasks: IExecutable[] = _flatten<IExecutable>(tasks).filter((taskExecutable) => {
+    // eslint-disable-next-line @rushstack/no-null
     return taskExecutable !== null && taskExecutable !== undefined;
   });
 
@@ -317,7 +324,7 @@ export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecuta
   }
 
   return {
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     execute: (buildConfig: IBuildConfig): Promise<any> => {
       return new Promise<void[]>((resolve, reject) => {
         const promises: Promise<void>[] = [];
@@ -352,7 +359,7 @@ export function initialize(gulp: typeof Gulp): void {
 
   initializeLogging(gulp, getConfig(), undefined, undefined);
 
-  Object.keys(_taskMap).forEach(taskName => _registerTask(gulp, taskName, _taskMap[taskName]));
+  Object.keys(_taskMap).forEach((taskName) => _registerTask(gulp, taskName, _taskMap[taskName]));
 
   markTaskCreationTime();
 }
@@ -362,20 +369,19 @@ export function initialize(gulp: typeof Gulp): void {
  */
 function _registerTask(gulp: typeof Gulp, taskName: string, taskExecutable: IExecutable): void {
   gulp.task(taskName, (cb) => {
-    const maxBuildTimeMs: number = taskExecutable.maxBuildTimeMs === undefined
-      ? _buildConfig.maxBuildTimeMs
-      : taskExecutable.maxBuildTimeMs;
-    const timer: NodeJS.Timer | undefined = maxBuildTimeMs === 0
-      ? undefined
-      : setTimeout(
-          () => {
+    const maxBuildTimeMs: number =
+      taskExecutable.maxBuildTimeMs === undefined
+        ? _buildConfig.maxBuildTimeMs
+        : taskExecutable.maxBuildTimeMs;
+    const timer: NodeJS.Timer | undefined =
+      maxBuildTimeMs === 0
+        ? undefined
+        : setTimeout(() => {
             logError(
               `Build ran for ${maxBuildTimeMs} milliseconds without completing. Cancelling build with error.`
             );
             cb(new Error('Timeout'));
-          },
-          maxBuildTimeMs
-        );
+          }, maxBuildTimeMs);
     _executeTask(taskExecutable, _buildConfig).then(
       () => {
         if (timer) {
@@ -401,16 +407,20 @@ function _registerTask(gulp: typeof Gulp, taskName: string, taskExecutable: IExe
 function _executeTask(taskExecutable: IExecutable, buildConfig: IBuildConfig): Promise<void> {
   // Try to fallback to the default task if provided.
   if (taskExecutable && !taskExecutable.execute) {
-    /* tslint:disable:no-any */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((taskExecutable as any).default) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       taskExecutable = (taskExecutable as any).default;
     }
-    /* tslint:enable:no-any */
   }
 
   // If the task is missing, throw a meaningful error.
   if (!taskExecutable || !taskExecutable.execute) {
-    return Promise.reject(new Error(`A task was scheduled, but the task was null. This probably means the task wasn't imported correctly.`));
+    return Promise.reject(
+      new Error(
+        `A task was scheduled, but the task was null. This probably means the task wasn't imported correctly.`
+      )
+    );
   }
 
   if (taskExecutable.isEnabled === undefined || taskExecutable.isEnabled(buildConfig)) {
@@ -420,8 +430,8 @@ function _executeTask(taskExecutable: IExecutable, buildConfig: IBuildConfig): P
       buildConfig.onTaskStart(taskExecutable.name);
     }
 
-    const taskPromise: Promise<void> = taskExecutable.execute(buildConfig)
-      .then(() => {
+    const taskPromise: Promise<void> = taskExecutable.execute(buildConfig).then(
+      () => {
         if (buildConfig.onTaskEnd && taskExecutable.name) {
           buildConfig.onTaskEnd(taskExecutable.name, process.hrtime(startTime));
         }
@@ -432,7 +442,8 @@ function _executeTask(taskExecutable: IExecutable, buildConfig: IBuildConfig): P
         }
 
         return Promise.reject(error);
-      });
+      }
+    );
 
     return taskPromise;
   }
@@ -450,10 +461,10 @@ function _trackTask(taskExecutable: IExecutable): void {
 /**
  * Flattens a set of arrays into a single array.
  */
-function _flatten<T>(oArr: Array<T | T[]>): T[] {
+function _flatten<T>(oArr: (T | T[])[]): T[] {
   const output: T[] = [];
 
-  function traverse(arr: Array<T | T[]>): void {
+  function traverse(arr: (T | T[])[]): void {
     for (let i: number = 0; i < arr.length; ++i) {
       if (Array.isArray(arr[i])) {
         traverse(arr[i] as T[]);
@@ -473,7 +484,7 @@ function _handleCommandLineArguments(): void {
 }
 
 function _handleTasksListArguments(): void {
-  /* tslint:disable:no-string-literal */
+  /* eslint-disable dot-notation */
   if (args['tasks'] || args['tasks-simple'] || args['T']) {
     global['dontWatchExit'] = true;
   }
@@ -481,7 +492,7 @@ function _handleTasksListArguments(): void {
     // we are showing a help command prompt via yargs or ts-command-line
     global['dontWatchExit'] = true;
   }
-  /* tslint:enable:no-string-literal */
+  /* eslint-enable dot-notation */
 }
 
 /** @public */

@@ -14,7 +14,7 @@ import {
   setConfig,
   getConfig
 } from '@microsoft/gulp-core-build';
-import { apiExtractor, tscCmd, tslintCmd } from '@microsoft/gulp-core-build-typescript';
+import { apiExtractor, tscCmd, lintCmd } from '@microsoft/gulp-core-build-typescript';
 import { sass } from '@microsoft/gulp-core-build-sass';
 import { webpack } from '@microsoft/gulp-core-build-webpack';
 import { serve, reload } from '@microsoft/gulp-core-build-serve';
@@ -39,12 +39,9 @@ preCopy.name = 'pre-copy';
 export const postCopy: CopyTask = new CopyTask();
 postCopy.name = 'post-copy';
 
-const sourceMatch: string[] = [
-  'src/**/*.{ts,tsx,scss,js,txt,html}',
-  '!src/**/*.scss.ts'
-];
+const sourceMatch: string[] = ['src/**/*.{ts,tsx,scss,js,txt,html}', '!src/**/*.scss.ts'];
 
-// tslint:disable-next-line:no-string-literal
+// eslint-disable-next-line dot-notation
 const PRODUCTION: boolean = !!getConfig().args['production'] || !!getConfig().args['ship'];
 setConfig({
   production: PRODUCTION,
@@ -57,7 +54,7 @@ setConfig({
  */
 export const buildTasks: IExecutable = task(
   'build',
-  serial(preCopy, sass, parallel(tslintCmd, tscCmd), apiExtractor, postCopy)
+  serial(preCopy, sass, parallel(lintCmd, tscCmd), apiExtractor, postCopy)
 );
 
 /**
@@ -95,13 +92,11 @@ task('generate', generateShrinkwrapTask);
 task('test-watch', watch(sourceMatch, testTasks));
 
 // For watch scenarios like serve, make sure to exclude generated files from src (like *.scss.ts.)
-task('serve',
+task(
+  'serve',
   serial(
     serve,
-    watch(
-      sourceMatch,
-      serial(preCopy, sass, tscCmd, postCopy, webpack, postProcessSourceMapsTask, reload)
-    )
+    watch(sourceMatch, serial(preCopy, sass, tscCmd, postCopy, webpack, postProcessSourceMapsTask, reload))
   )
 );
 

@@ -1,6 +1,180 @@
-# Change Log - @microsoft/node-core-library
+# Change Log - @rushstack/node-core-library
 
-This log was last generated on Sun, 29 Sep 2019 23:56:29 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+
+## 3.25.0
+Fri, 03 Jul 2020 15:09:04 GMT
+
+### Minor changes
+
+- Add a utility method to convert a map into an object
+
+## 3.24.4
+Thu, 25 Jun 2020 06:43:35 GMT
+
+*Version update only*
+
+## 3.24.3
+Wed, 24 Jun 2020 09:50:48 GMT
+
+*Version update only*
+
+## 3.24.2
+Wed, 24 Jun 2020 09:04:28 GMT
+
+*Version update only*
+
+## 3.24.1
+Wed, 10 Jun 2020 20:48:30 GMT
+
+### Patches
+
+- Improve API docs for "LockFile"
+
+## 3.24.0
+Sat, 30 May 2020 02:59:54 GMT
+
+### Minor changes
+
+- Add a FileSystem.copyFiles() API for recursively copying folders, and clarify that FileSystem.copyFile() only copies a single file
+
+## 3.23.1
+Thu, 28 May 2020 05:59:02 GMT
+
+### Patches
+
+- Improve async callstacks for FileSystem API (when using Node 12)
+
+## 3.23.0
+Wed, 27 May 2020 05:15:10 GMT
+
+### Minor changes
+
+- Add an "FileSystemStats" alias to avoid the need to import "fs" when using the FileSystem API
+- Add FileSystem.readLink() and readLinkAsync()
+
+## 3.22.1
+Tue, 26 May 2020 23:00:25 GMT
+
+### Patches
+
+- Make not-exist error messages more readable.
+
+## 3.22.0
+Fri, 22 May 2020 15:08:42 GMT
+
+### Minor changes
+
+- Expose string parsing APIs from JsonFile.
+
+## 3.21.0
+Thu, 21 May 2020 23:09:44 GMT
+
+### Minor changes
+
+- Create async versions of FileSystem and JsonFile APIs.
+
+## 3.20.0
+Thu, 21 May 2020 15:41:59 GMT
+
+### Minor changes
+
+- Add PackageNameParser class, which is a configurable version of the PackageName API
+
+## 3.19.7
+Wed, 08 Apr 2020 04:07:34 GMT
+
+*Version update only*
+
+## 3.19.6
+Sat, 28 Mar 2020 00:37:16 GMT
+
+*Version update only*
+
+## 3.19.5
+Wed, 18 Mar 2020 15:07:47 GMT
+
+### Patches
+
+- Upgrade cyclic dependencies
+
+## 3.19.4
+Tue, 17 Mar 2020 23:55:58 GMT
+
+### Patches
+
+- PACKAGE NAME CHANGE: The NPM scope was changed from `@microsoft/node-core-library` to `@rushstack/node-core-library`
+
+## 3.19.3
+Tue, 28 Jan 2020 02:23:44 GMT
+
+### Patches
+
+- Fix a typing issue that prevented LegacyAdapters from being used with the new glob typings.
+
+## 3.19.2
+Thu, 23 Jan 2020 01:07:56 GMT
+
+### Patches
+
+- Fix an issue with a missing type in LegacyAdapters
+
+## 3.19.1
+Tue, 21 Jan 2020 21:56:14 GMT
+
+*Version update only*
+
+## 3.19.0
+Sun, 19 Jan 2020 02:26:52 GMT
+
+### Minor changes
+
+- Upgrade Node typings to Node 10
+
+## 3.18.3
+Fri, 17 Jan 2020 01:08:23 GMT
+
+*Version update only*
+
+## 3.18.2
+Thu, 09 Jan 2020 06:44:13 GMT
+
+*Version update only*
+
+## 3.18.1
+Wed, 08 Jan 2020 00:11:31 GMT
+
+*Version update only*
+
+## 3.18.0
+Fri, 15 Nov 2019 04:50:50 GMT
+
+### Minor changes
+
+- Add NewlineKind.OsDefault and fix some comments
+
+## 3.17.1
+Mon, 11 Nov 2019 16:07:56 GMT
+
+*Version update only*
+
+## 3.17.0
+Tue, 05 Nov 2019 06:49:28 GMT
+
+### Minor changes
+
+- Add new API LegacyAdapters.stableSort(), and update the Sort API to be stable
+
+## 3.16.0
+Tue, 22 Oct 2019 06:24:44 GMT
+
+### Minor changes
+
+- Add JsonObject type
+
+### Patches
+
+- Refactor some code as part of migration from TSLint to ESLint
 
 ## 3.15.1
 Sun, 29 Sep 2019 23:56:29 GMT

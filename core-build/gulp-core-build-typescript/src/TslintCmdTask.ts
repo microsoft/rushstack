@@ -2,13 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile, JsonObject } from '@rushstack/node-core-library';
 import { TslintRunner as TTslintRunner } from '@microsoft/rush-stack-compiler-3.1';
+import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.1';
 
-import {
-  RSCTask,
-  IRSCTaskConfig
-} from './RSCTask';
+import { RSCTask, IRSCTaskConfig } from './RSCTask';
 
 /**
  * @public
@@ -21,26 +19,24 @@ export interface ITslintCmdTaskConfig extends IRSCTaskConfig {
 }
 
 /**
- * @beta
+ * @public
  */
 export class TslintCmdTask extends RSCTask<ITslintCmdTaskConfig> {
-  constructor() {
-    super(
-      'tslint',
-      {
-        displayAsError: false
-      }
-    );
+  public constructor() {
+    super('tslint', {
+      displayAsError: false
+    });
   }
 
-  public loadSchema(): Object {
+  public loadSchema(): JsonObject {
     return JsonFile.load(path.resolve(__dirname, 'schemas', 'tslint-cmd.schema.json'));
   }
 
   public executeTask(): Promise<void> {
     this.initializeRushStackCompiler();
 
-    const tslintRunner: TTslintRunner = new this._rushStackCompiler.TslintRunner(
+    const rushStackCompiler: typeof TRushStackCompiler = this._rushStackCompiler as typeof TRushStackCompiler;
+    const tslintRunner: TTslintRunner = new rushStackCompiler.TslintRunner(
       {
         displayAsError: this.taskConfig.displayAsError,
 

@@ -12,12 +12,11 @@ import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiRet
  * Constructor options for {@link ApiIndexSignature}.
  * @public
  */
-export interface IApiIndexSignatureOptions extends
-  IApiParameterListMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiReturnTypeMixinOptions,
-  IApiDeclaredItemOptions {
-}
+export interface IApiIndexSignatureOptions
+  extends IApiParameterListMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiReturnTypeMixinOptions,
+    IApiDeclaredItemOptions {}
 
 /**
  * Represents a TypeScript index signature.
@@ -41,14 +40,15 @@ export interface IApiIndexSignatureOptions extends
  *
  * @public
  */
-export class ApiIndexSignature extends ApiParameterListMixin(ApiReleaseTagMixin(ApiReturnTypeMixin(ApiDeclaredItem))) {
+export class ApiIndexSignature extends ApiParameterListMixin(
+  ApiReleaseTagMixin(ApiReturnTypeMixin(ApiDeclaredItem))
+) {
+  public constructor(options: IApiIndexSignatureOptions) {
+    super(options);
+  }
 
   public static getContainerKey(overloadIndex: number): string {
     return `|${ApiItemKind.IndexSignature}|${overloadIndex}`;
-  }
-
-  public constructor(options: IApiIndexSignatureOptions) {
-    super(options);
   }
 
   /** @override */
@@ -65,10 +65,8 @@ export class ApiIndexSignature extends ApiParameterListMixin(ApiReleaseTagMixin(
   public buildCanonicalReference(): DeclarationReference {
     const parent: DeclarationReference = this.parent
       ? this.parent.canonicalReference
-      // .withMeaning() requires some kind of component
-      : DeclarationReference.empty().addNavigationStep(Navigation.Members, '(parent)');
-    return parent
-      .withMeaning(Meaning.IndexSignature)
-      .withOverloadIndex(this.overloadIndex);
+      : // .withMeaning() requires some kind of component
+        DeclarationReference.empty().addNavigationStep(Navigation.Members, '(parent)');
+    return parent.withMeaning(Meaning.IndexSignature).withOverloadIndex(this.overloadIndex);
   }
 }

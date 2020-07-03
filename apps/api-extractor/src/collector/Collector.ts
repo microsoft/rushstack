@@ -3,15 +3,8 @@
 
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
-import {
-  PackageJsonLookup,
-  Sort,
-  InternalError
-} from '@microsoft/node-core-library';
-import {
-  ReleaseTag,
-  AedocDefinitions
-} from '@microsoft/api-extractor-model';
+import { PackageJsonLookup, Sort, InternalError } from '@rushstack/node-core-library';
+import { ReleaseTag, AedocDefinitions } from '@microsoft/api-extractor-model';
 
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
@@ -23,9 +16,10 @@ import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { WorkingPackage } from './WorkingPackage';
 import { PackageDocComment } from '../aedoc/PackageDocComment';
-import { DeclarationMetadata } from './DeclarationMetadata';
+import { DeclarationMetadata, InternalDeclarationMetadata } from './DeclarationMetadata';
+import { ApiItemMetadata, IApiItemMetadataOptions } from './ApiItemMetadata';
 import { SymbolMetadata } from './SymbolMetadata';
-import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
+import { TypeScriptInternals, IGlobalVariableAnalyzer } from '../analyzer/TypeScriptInternals';
 import { MessageRouter } from './MessageRouter';
 import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
 import { ExtractorConfig } from '../api/ExtractorConfig';
@@ -58,6 +52,7 @@ export interface ICollectorOptions {
 export class Collector {
   public readonly program: ts.Program;
   public readonly typeChecker: ts.TypeChecker;
+  public readonly globalVariableAnalyzer: IGlobalVariableAnalyzer;
   public readonly astSymbolTable: AstSymbolTable;
   public readonly astReferenceResolver: AstReferenceResolver;
 
@@ -68,6 +63,11 @@ export class Collector {
 
   public readonly extractorConfig: ExtractorConfig;
 
+  /**
+   * The `ExtractorConfig.bundledPackages` names in a set.
+   */
+  public readonly bundledPackageNames: ReadonlySet<string>;
+
   private readonly _program: ts.Program;
 
   private readonly _tsdocParser: tsdoc.TSDocParser;
@@ -75,21 +75,28 @@ export class Collector {
   private _astEntryPoint: AstModule | undefined;
 
   private readonly _entities: CollectorEntity[] = [];
-  private readonly _entitiesByAstEntity: Map<AstEntity, CollectorEntity> = new Map<AstEntity, CollectorEntity>();
+  private readonly _entitiesByAstEntity: Map<AstEntity, CollectorEntity> = new Map<
+    AstEntity,
+    CollectorEntity
+  >();
 
   private readonly _starExportedExternalModulePaths: string[] = [];
 
   private readonly _dtsTypeReferenceDirectives: Set<string> = new Set<string>();
   private readonly _dtsLibReferenceDirectives: Set<string> = new Set<string>();
 
-  constructor(options: ICollectorOptions) {
+  // Used by getOverloadIndex()
+  private readonly _cachedOverloadIndexesByDeclaration: Map<AstDeclaration, number>;
+
+  public constructor(options: ICollectorOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
 
     this._program = options.program;
     this.extractorConfig = options.extractorConfig;
 
     const entryPointSourceFile: ts.SourceFile | undefined = options.program.getSourceFile(
-      this.extractorConfig.mainEntryPointFilePath);
+      this.extractorConfig.mainEntryPointFilePath
+    );
 
     if (!entryPointSourceFile) {
       throw new Error('Unable to load file: ' + this.extractorConfig.mainEntryPointFilePath);
@@ -111,11 +118,22 @@ export class Collector {
 
     this.program = options.program;
     this.typeChecker = options.program.getTypeChecker();
+    this.globalVariableAnalyzer = TypeScriptInternals.getGlobalVariableAnalyzer(this.program);
 
     this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
-    this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup,
-      this.messageRouter);
-    this.astReferenceResolver = new AstReferenceResolver(this.astSymbolTable, this.workingPackage);
+
+    this.bundledPackageNames = new Set<string>(this.extractorConfig.bundledPackages);
+
+    this.astSymbolTable = new AstSymbolTable(
+      this.program,
+      this.typeChecker,
+      this.packageJsonLookup,
+      this.bundledPackageNames,
+      this.messageRouter
+    );
+    this.astReferenceResolver = new AstReferenceResolver(this);
+
+    this._cachedOverloadIndexesByDeclaration = new Map<AstDeclaration, number>();
   }
 
   /**
@@ -145,8 +163,8 @@ export class Collector {
   }
 
   /**
-   * A list of module specifiers (e.g. `"@microsoft/node-core-library/lib/FileSystem"`) that should be emitted
-   * as star exports (e.g. `export * from "@microsoft/node-core-library/lib/FileSystem"`).
+   * A list of module specifiers (e.g. `"@rushstack/node-core-library/lib/FileSystem"`) that should be emitted
+   * as star exports (e.g. `export * from "@rushstack/node-core-library/lib/FileSystem"`).
    */
   public get starExportedExternalModulePaths(): ReadonlyArray<string> {
     return this._starExportedExternalModulePaths;
@@ -185,20 +203,25 @@ export class Collector {
     const entryPointSourceFile: ts.SourceFile = this.workingPackage.entryPointSourceFile;
 
     const astEntryPoint: AstModule = this.astSymbolTable.fetchAstModuleFromWorkingPackage(
-      entryPointSourceFile);
+      entryPointSourceFile
+    );
     this._astEntryPoint = astEntryPoint;
 
     const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment.tryFindInSourceFile(
-      entryPointSourceFile, this);
+      entryPointSourceFile,
+      this
+    );
 
     if (packageDocCommentTextRange) {
-      const range: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(entryPointSourceFile.text,
-        packageDocCommentTextRange.pos, packageDocCommentTextRange.end);
+      const range: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(
+        entryPointSourceFile.text,
+        packageDocCommentTextRange.pos,
+        packageDocCommentTextRange.end
+      );
 
       this.workingPackage.tsdocParserContext = this._tsdocParser.parseRange(range);
 
-      this.messageRouter.addTsdocMessages(this.workingPackage.tsdocParserContext,
-        entryPointSourceFile);
+      this.messageRouter.addTsdocMessages(this.workingPackage.tsdocParserContext, entryPointSourceFile);
 
       this.workingPackage.tsdocComment = this.workingPackage.tsdocParserContext!.docComment;
     }
@@ -207,7 +230,9 @@ export class Collector {
 
     // Create a CollectorEntity for each top-level export
 
-    const astModuleExportInfo: AstModuleExportInfo = this.astSymbolTable.fetchAstModuleExportInfo(astEntryPoint);
+    const astModuleExportInfo: AstModuleExportInfo = this.astSymbolTable.fetchAstModuleExportInfo(
+      astEntryPoint
+    );
     for (const [exportName, astEntity] of astModuleExportInfo.exportedLocalEntities) {
       this._createCollectorEntity(astEntity, exportName);
 
@@ -222,7 +247,7 @@ export class Collector {
       this._createEntityForIndirectReferences(exportedAstEntity, alreadySeenAstSymbols);
 
       if (exportedAstEntity instanceof AstSymbol) {
-        this.fetchMetadata(exportedAstEntity);
+        this.fetchSymbolMetadata(exportedAstEntity);
       }
     }
 
@@ -234,7 +259,7 @@ export class Collector {
       }
     }
 
-    Sort.sortBy(this._entities, x => x.getSortKey());
+    Sort.sortBy(this._entities, (x) => x.getSortKey());
     Sort.sortSet(this._dtsTypeReferenceDirectives);
     Sort.sortSet(this._dtsLibReferenceDirectives);
     this._starExportedExternalModulePaths.sort();
@@ -261,25 +286,54 @@ export class Collector {
     return this._entitiesByAstEntity.get(astEntity);
   }
 
-  public fetchMetadata(astSymbol: AstSymbol): SymbolMetadata;
-  public fetchMetadata(astDeclaration: AstDeclaration): DeclarationMetadata;
-  public fetchMetadata(symbolOrDeclaration: AstSymbol | AstDeclaration): SymbolMetadata | DeclarationMetadata {
-    if (symbolOrDeclaration.metadata === undefined) {
-      const astSymbol: AstSymbol = symbolOrDeclaration instanceof AstSymbol
-        ? symbolOrDeclaration : symbolOrDeclaration.astSymbol;
+  public fetchSymbolMetadata(astSymbol: AstSymbol): SymbolMetadata {
+    if (astSymbol.symbolMetadata === undefined) {
       this._fetchSymbolMetadata(astSymbol);
     }
-    return symbolOrDeclaration.metadata as SymbolMetadata | DeclarationMetadata;
+    return astSymbol.symbolMetadata as SymbolMetadata;
+  }
+
+  public fetchDeclarationMetadata(astDeclaration: AstDeclaration): DeclarationMetadata {
+    if (astDeclaration.declarationMetadata === undefined) {
+      // Fetching the SymbolMetadata always constructs the DeclarationMetadata
+      this._fetchSymbolMetadata(astDeclaration.astSymbol);
+    }
+    return astDeclaration.declarationMetadata as DeclarationMetadata;
+  }
+
+  public fetchApiItemMetadata(astDeclaration: AstDeclaration): ApiItemMetadata {
+    if (astDeclaration.apiItemMetadata === undefined) {
+      // Fetching the SymbolMetadata always constructs the ApiItemMetadata
+      this._fetchSymbolMetadata(astDeclaration.astSymbol);
+    }
+    return astDeclaration.apiItemMetadata as ApiItemMetadata;
   }
 
   public tryFetchMetadataForAstEntity(astEntity: AstEntity): SymbolMetadata | undefined {
     if (astEntity instanceof AstSymbol) {
-      return this.fetchMetadata(astEntity);
+      return this.fetchSymbolMetadata(astEntity);
     }
-    if (astEntity.astSymbol) { // astImport
-      return this.fetchMetadata(astEntity.astSymbol);
+    if (astEntity.astSymbol) {
+      // astImport
+      return this.fetchSymbolMetadata(astEntity.astSymbol);
     }
     return undefined;
+  }
+
+  public isAncillaryDeclaration(astDeclaration: AstDeclaration): boolean {
+    const declarationMetadata: DeclarationMetadata = this.fetchDeclarationMetadata(astDeclaration);
+    return declarationMetadata.isAncillary;
+  }
+
+  public getNonAncillaryDeclarations(astSymbol: AstSymbol): ReadonlyArray<AstDeclaration> {
+    const result: AstDeclaration[] = [];
+    for (const astDeclaration of astSymbol.astDeclarations) {
+      const declarationMetadata: DeclarationMetadata = this.fetchDeclarationMetadata(astDeclaration);
+      if (!declarationMetadata.isAncillary) {
+        result.push(astDeclaration);
+      }
+    }
+    return result;
   }
 
   /**
@@ -303,6 +357,40 @@ export class Collector {
     return parts.join('');
   }
 
+  /**
+   * For function-like signatures, this returns the TSDoc "overload index" which can be used to identify
+   * a specific overload.
+   */
+  public getOverloadIndex(astDeclaration: AstDeclaration): number {
+    const allDeclarations: ReadonlyArray<AstDeclaration> = astDeclaration.astSymbol.astDeclarations;
+    if (allDeclarations.length === 1) {
+      return 1; // trivial case
+    }
+
+    let overloadIndex: number | undefined = this._cachedOverloadIndexesByDeclaration.get(astDeclaration);
+
+    if (overloadIndex === undefined) {
+      // TSDoc index selectors are positive integers counting from 1
+      let nextIndex: number = 1;
+      for (const other of allDeclarations) {
+        // Filter out other declarations that are not overloads.  For example, an overloaded function can also
+        // be a namespace.
+        if (other.declaration.kind === astDeclaration.declaration.kind) {
+          this._cachedOverloadIndexesByDeclaration.set(other, nextIndex);
+          ++nextIndex;
+        }
+      }
+      overloadIndex = this._cachedOverloadIndexesByDeclaration.get(astDeclaration);
+    }
+
+    if (overloadIndex === undefined) {
+      // This should never happen
+      throw new InternalError('Error calculating overload index for declaration');
+    }
+
+    return overloadIndex;
+  }
+
   private _createCollectorEntity(astEntity: AstEntity, exportedName: string | undefined): void {
     let entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astEntity);
 
@@ -322,7 +410,10 @@ export class Collector {
     }
   }
 
-  private _createEntityForIndirectReferences(astEntity: AstEntity, alreadySeenAstEntities: Set<AstEntity>): void {
+  private _createEntityForIndirectReferences(
+    astEntity: AstEntity,
+    alreadySeenAstEntities: Set<AstEntity>
+  ): void {
     if (alreadySeenAstEntities.has(astEntity)) {
       return;
     }
@@ -384,24 +475,16 @@ export class Collector {
       }
     }
 
-    // Next, add in the global names
-    const globalNames: Set<string> = new Set<string>();
-    this._collectGlobalNames(globalNames);
-
-    for (const globalName of globalNames) {
-      // Note that globalName may conflict with an exported name.
-      // We'll check for this conflict below.
-      usedNames.add(globalName);
-    }
-
     // Ensure that each entity has a unique nameForEmit
     for (const entity of this._entities) {
-
       // What name would we ideally want to emit it as?
       let idealNameForEmit: string;
 
       // If this entity is exported exactly once, then we prefer the exported name
-      if (entity.singleExportName !== undefined && entity.singleExportName !== ts.InternalSymbolName.Default) {
+      if (
+        entity.singleExportName !== undefined &&
+        entity.singleExportName !== ts.InternalSymbolName.Default
+      ) {
         idealNameForEmit = entity.singleExportName;
       } else {
         // otherwise use the local name
@@ -411,7 +494,7 @@ export class Collector {
       // If the idealNameForEmit happens to be the same as one of the exports, then we're safe to use that...
       if (entity.exportNames.has(idealNameForEmit)) {
         // ...except that if it conflicts with a global name, then the global name wins
-        if (!globalNames.has(idealNameForEmit)) {
+        if (!this.globalVariableAnalyzer.hasGlobalName(idealNameForEmit)) {
           entity.nameForEmit = idealNameForEmit;
           continue;
         }
@@ -421,8 +504,8 @@ export class Collector {
       let suffix: number = 1;
       let nameForEmit: string = idealNameForEmit;
 
-      // Choose a name that doesn't conflict with usedNames
-      while (usedNames.has(nameForEmit)) {
+      // Choose a name that doesn't conflict with usedNames or a global name
+      while (usedNames.has(nameForEmit) || this.globalVariableAnalyzer.hasGlobalName(nameForEmit)) {
         nameForEmit = `${idealNameForEmit}_${++suffix}`;
       }
       entity.nameForEmit = nameForEmit;
@@ -430,85 +513,23 @@ export class Collector {
     }
   }
 
-  /**
-   * Adds global names to the usedNames set, to prevent API Extractor from emitting names that conflict with
-   * a global name.
-   */
-  private _collectGlobalNames(usedNames: Set<string>): void {
-    // As a temporary workaround, this a short list of names that appear in typical projects.
-    // The full solution is tracked by this issue:
-    // https://github.com/microsoft/rushstack/issues/1095
-    const globalNames: string[] = [
-      'Array',
-      'ArrayConstructor',
-      'Console',
-      'Date',
-      'DateConstructor',
-      'Error',
-      'ErrorConstructor',
-      'Float32Array',
-      'Float32ArrayConstructor',
-      'Float64Array',
-      'Float64ArrayConstructor',
-      'IArguments',
-      'Int16Array',
-      'Int16ArrayConstructor',
-      'Int32Array',
-      'Int32ArrayConstructor',
-      'Int8Array',
-      'Int8ArrayConstructor',
-      'Iterable',
-      'IterableIterator',
-      'Iterator',
-      'IteratorResult',
-      'Map',
-      'MapConstructor',
-      'Promise',
-      'PromiseConstructor',
-      'ReadonlyArray',
-      'ReadonlyMap',
-      'ReadonlySet',
-      'Set',
-      'SetConstructor',
-      'String',
-      'Symbol',
-      'SymbolConstructor',
-      'Uint16Array',
-      'Uint16ArrayConstructor',
-      'Uint32Array',
-      'Uint32ArrayConstructor',
-      'Uint8Array',
-      'Uint8ArrayConstructor',
-      'Uint8ClampedArray',
-      'Uint8ClampedArrayConstructor',
-      'WeakMap',
-      'WeakMapConstructor',
-      'WeakSet',
-      'WeakSetConstructor',
-      'clearInterval',
-      'clearTimeout',
-      'console',
-      'setInterval',
-      'setTimeout',
-      'undefined'
-    ];
-    for (const globalName of globalNames) {
-      usedNames.add(globalName);
-    }
-  }
-
   private _fetchSymbolMetadata(astSymbol: AstSymbol): void {
-    if (astSymbol.metadata) {
+    if (astSymbol.symbolMetadata) {
       return;
     }
 
-    // When we solve an astSymbol, then we always also solve all of its parents and all of its declarations
-    if (astSymbol.parentAstSymbol && astSymbol.parentAstSymbol.metadata === undefined) {
+    // When we solve an astSymbol, then we always also solve all of its parents and all of its declarations.
+    // The parent is solved first.
+    if (astSymbol.parentAstSymbol && astSymbol.parentAstSymbol.symbolMetadata === undefined) {
       this._fetchSymbolMetadata(astSymbol.parentAstSymbol);
     }
 
+    // Construct the DeclarationMetadata objects, and detect any ancillary declarations
+    this._calculateDeclarationMetadataForDeclarations(astSymbol);
+
+    // Calculate the ApiItemMetadata objects
     for (const astDeclaration of astSymbol.astDeclarations) {
-      this._calculateMetadataForDeclaration(astDeclaration);
+      this._calculateApiItemMetadata(astDeclaration);
     }
 
     // The most public effectiveReleaseTag for all declarations
@@ -516,26 +537,134 @@ export class Collector {
 
     for (const astDeclaration of astSymbol.astDeclarations) {
       // We know we solved this above
-      const declarationMetadata: DeclarationMetadata = astDeclaration.metadata as DeclarationMetadata;
-      const effectiveReleaseTag: ReleaseTag = declarationMetadata.effectiveReleaseTag;
+      const apiItemMetadata: ApiItemMetadata = astDeclaration.apiItemMetadata as ApiItemMetadata;
+
+      const effectiveReleaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
 
       if (effectiveReleaseTag > maxEffectiveReleaseTag) {
         maxEffectiveReleaseTag = effectiveReleaseTag;
       }
     }
 
-    const symbolMetadata: SymbolMetadata = new SymbolMetadata();
-    symbolMetadata.maxEffectiveReleaseTag = maxEffectiveReleaseTag;
-
     // Update this last when we're sure no exceptions were thrown
-    astSymbol.metadata = symbolMetadata;
+    astSymbol.symbolMetadata = new SymbolMetadata({
+      maxEffectiveReleaseTag
+    });
   }
 
-  private _calculateMetadataForDeclaration(astDeclaration: AstDeclaration): void {
-    const declarationMetadata: DeclarationMetadata = new DeclarationMetadata();
-    astDeclaration.metadata = declarationMetadata;
+  private _calculateDeclarationMetadataForDeclarations(astSymbol: AstSymbol): void {
+    // Initialize DeclarationMetadata for each declaration
+    for (const astDeclaration of astSymbol.astDeclarations) {
+      if (astDeclaration.declarationMetadata) {
+        throw new InternalError(
+          'AstDeclaration.declarationMetadata is not expected to have been initialized yet'
+        );
+      }
 
-    const parserContext: tsdoc.ParserContext | undefined = this._parseTsdocForAstDeclaration(astDeclaration);
+      const metadata: InternalDeclarationMetadata = new InternalDeclarationMetadata();
+      metadata.tsdocParserContext = this._parseTsdocForAstDeclaration(astDeclaration);
+
+      astDeclaration.declarationMetadata = metadata;
+    }
+
+    // Detect ancillary declarations
+    for (const astDeclaration of astSymbol.astDeclarations) {
+      // For a getter/setter pair, make the setter ancillary to the getter
+      if (astDeclaration.declaration.kind === ts.SyntaxKind.SetAccessor) {
+        let foundGetter: boolean = false;
+        for (const getterAstDeclaration of astDeclaration.astSymbol.astDeclarations) {
+          if (getterAstDeclaration.declaration.kind === ts.SyntaxKind.GetAccessor) {
+            // Associate it with the getter
+            this._addAncillaryDeclaration(getterAstDeclaration, astDeclaration);
+
+            foundGetter = true;
+          }
+        }
+
+        if (!foundGetter) {
+          this.messageRouter.addAnalyzerIssue(
+            ExtractorMessageId.MissingGetter,
+            `The property "${astDeclaration.astSymbol.localName}" has a setter but no getter.`,
+            astDeclaration
+          );
+        }
+      }
+    }
+  }
+
+  private _addAncillaryDeclaration(
+    mainAstDeclaration: AstDeclaration,
+    ancillaryAstDeclaration: AstDeclaration
+  ): void {
+    const mainMetadata: InternalDeclarationMetadata = mainAstDeclaration.declarationMetadata as InternalDeclarationMetadata;
+    const ancillaryMetadata: InternalDeclarationMetadata = ancillaryAstDeclaration.declarationMetadata as InternalDeclarationMetadata;
+
+    if (mainMetadata.ancillaryDeclarations.indexOf(ancillaryAstDeclaration) >= 0) {
+      return; // already added
+    }
+
+    if (mainAstDeclaration.astSymbol !== ancillaryAstDeclaration.astSymbol) {
+      throw new InternalError(
+        'Invalid call to _addAncillaryDeclaration() because declarations do not' +
+          ' belong to the same symbol'
+      );
+    }
+
+    if (mainMetadata.isAncillary) {
+      throw new InternalError(
+        'Invalid call to _addAncillaryDeclaration() because the target is ancillary itself'
+      );
+    }
+
+    if (ancillaryMetadata.isAncillary) {
+      throw new InternalError(
+        'Invalid call to _addAncillaryDeclaration() because source is already ancillary' +
+          ' to another declaration'
+      );
+    }
+
+    if (mainAstDeclaration.apiItemMetadata || ancillaryAstDeclaration.apiItemMetadata) {
+      throw new InternalError(
+        'Invalid call to _addAncillaryDeclaration() because the API item metadata' +
+          ' has already been constructed'
+      );
+    }
+
+    ancillaryMetadata.isAncillary = true;
+    mainMetadata.ancillaryDeclarations.push(ancillaryAstDeclaration);
+  }
+
+  private _calculateApiItemMetadata(astDeclaration: AstDeclaration): void {
+    const declarationMetadata: InternalDeclarationMetadata = astDeclaration.declarationMetadata as InternalDeclarationMetadata;
+    if (declarationMetadata.isAncillary) {
+      if (astDeclaration.declaration.kind === ts.SyntaxKind.SetAccessor) {
+        if (declarationMetadata.tsdocParserContext) {
+          this.messageRouter.addAnalyzerIssue(
+            ExtractorMessageId.SetterWithDocs,
+            `The doc comment for the property "${astDeclaration.astSymbol.localName}"` +
+              ` must appear on the getter, not the setter.`,
+            astDeclaration
+          );
+        }
+      }
+
+      // We never calculate ApiItemMetadata for an ancillary declaration; instead, it is assigned when
+      // the main declaration is processed.
+      return;
+    }
+
+    const options: IApiItemMetadataOptions = {
+      declaredReleaseTag: ReleaseTag.None,
+      effectiveReleaseTag: ReleaseTag.None,
+      isEventProperty: false,
+      isOverride: false,
+      isSealed: false,
+      isVirtual: false,
+      isPreapproved: false,
+      releaseTagSameAsParent: false
+    };
+
+    const parserContext: tsdoc.ParserContext | undefined = declarationMetadata.tsdocParserContext;
     if (parserContext) {
       const modifierTagSet: tsdoc.StandardModifierTagSet = parserContext.docComment.modifierTagSet;
 
@@ -568,23 +697,22 @@ export class Collector {
       }
 
       if (extraReleaseTags) {
-        if (!astDeclaration.astSymbol.isExternal) { // for now, don't report errors for external code
+        if (!astDeclaration.astSymbol.isExternal) {
+          // for now, don't report errors for external code
           this.messageRouter.addAnalyzerIssue(
             ExtractorMessageId.ExtraReleaseTag,
             'The doc comment should not contain more than one release tag',
-            astDeclaration);
+            astDeclaration
+          );
         }
       }
 
-      declarationMetadata.tsdocParserContext = parserContext;
-      declarationMetadata.tsdocComment = parserContext.docComment;
+      options.declaredReleaseTag = declaredReleaseTag;
 
-      declarationMetadata.declaredReleaseTag = declaredReleaseTag;
-
-      declarationMetadata.isEventProperty = modifierTagSet.isEventProperty();
-      declarationMetadata.isOverride = modifierTagSet.isOverride();
-      declarationMetadata.isSealed = modifierTagSet.isSealed();
-      declarationMetadata.isVirtual = modifierTagSet.isVirtual();
+      options.isEventProperty = modifierTagSet.isEventProperty();
+      options.isOverride = modifierTagSet.isOverride();
+      options.isSealed = modifierTagSet.isSealed();
+      options.isVirtual = modifierTagSet.isVirtual();
 
       if (modifierTagSet.hasTag(AedocDefinitions.preapprovedTag)) {
         // This feature only makes sense for potentially big declarations.
@@ -594,12 +722,12 @@ export class Collector {
           case ts.SyntaxKind.InterfaceDeclaration:
           case ts.SyntaxKind.ModuleDeclaration:
             if (declaredReleaseTag === ReleaseTag.Internal) {
-              declarationMetadata.isPreapproved = true;
+              options.isPreapproved = true;
             } else {
               this.messageRouter.addAnalyzerIssue(
                 ExtractorMessageId.PreapprovedBadReleaseTag,
-                `The @preapproved tag cannot be applied to "${astDeclaration.astSymbol.localName}"`
-                  + ` without an @internal release tag`,
+                `The @preapproved tag cannot be applied to "${astDeclaration.astSymbol.localName}"` +
+                  ` without an @internal release tag`,
                 astDeclaration
               );
             }
@@ -607,8 +735,8 @@ export class Collector {
           default:
             this.messageRouter.addAnalyzerIssue(
               ExtractorMessageId.PreapprovedUnsupportedType,
-              `The @preapproved tag cannot be applied to "${astDeclaration.astSymbol.localName}"`
-                + ` because it is not a supported declaration type`,
+              `The @preapproved tag cannot be applied to "${astDeclaration.astSymbol.localName}"` +
+                ` because it is not a supported declaration type`,
               astDeclaration
             );
             break;
@@ -618,19 +746,21 @@ export class Collector {
 
     // This needs to be set regardless of whether or not a parserContext exists
     if (astDeclaration.parent) {
-      const parentDeclarationMetadata: DeclarationMetadata = this.fetchMetadata(astDeclaration.parent);
-      declarationMetadata.effectiveReleaseTag = declarationMetadata.declaredReleaseTag === ReleaseTag.None
-        ? parentDeclarationMetadata.effectiveReleaseTag
-        : declarationMetadata.declaredReleaseTag;
+      const parentApiItemMetadata: ApiItemMetadata = this.fetchApiItemMetadata(astDeclaration.parent);
+      options.effectiveReleaseTag =
+        options.declaredReleaseTag === ReleaseTag.None
+          ? parentApiItemMetadata.effectiveReleaseTag
+          : options.declaredReleaseTag;
 
-      declarationMetadata.releaseTagSameAsParent =
-        parentDeclarationMetadata.effectiveReleaseTag === declarationMetadata.effectiveReleaseTag;
+      options.releaseTagSameAsParent =
+        parentApiItemMetadata.effectiveReleaseTag === options.effectiveReleaseTag;
     } else {
-      declarationMetadata.effectiveReleaseTag = declarationMetadata.declaredReleaseTag;
+      options.effectiveReleaseTag = options.declaredReleaseTag;
     }
 
-    if (declarationMetadata.effectiveReleaseTag === ReleaseTag.None) {
-      if (!astDeclaration.astSymbol.isExternal) { // for now, don't report errors for external code
+    if (options.effectiveReleaseTag === ReleaseTag.None) {
+      if (!astDeclaration.astSymbol.isExternal) {
+        // for now, don't report errors for external code
         // Don't report missing release tags for forgotten exports
         const astSymbol: AstSymbol = astDeclaration.astSymbol;
         const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
@@ -640,15 +770,27 @@ export class Collector {
           if (astSymbol.rootAstSymbol.localName !== '_default') {
             this.messageRouter.addAnalyzerIssue(
               ExtractorMessageId.MissingReleaseTag,
-              `"${entity.astEntity.localName}" is exported by the package, but it is missing `
-              + `a release tag (@alpha, @beta, @public, or @internal)`,
+              `"${entity.astEntity.localName}" is exported by the package, but it is missing ` +
+                `a release tag (@alpha, @beta, @public, or @internal)`,
               astSymbol
             );
           }
         }
       }
 
-      declarationMetadata.effectiveReleaseTag = ReleaseTag.Public;
+      options.effectiveReleaseTag = ReleaseTag.Public;
+    }
+
+    const apiItemMetadata: ApiItemMetadata = new ApiItemMetadata(options);
+    if (parserContext) {
+      apiItemMetadata.tsdocComment = parserContext.docComment;
+    }
+
+    astDeclaration.apiItemMetadata = apiItemMetadata;
+
+    // Lastly, share the result with any ancillary declarations
+    for (const ancillaryDeclaration of declarationMetadata.ancillaryDeclarations) {
+      ancillaryDeclaration.apiItemMetadata = apiItemMetadata;
     }
   }
 
@@ -668,8 +810,10 @@ export class Collector {
       //
       // But _getReleaseTagForDeclaration() still receives a node corresponding to "x", so we need to walk upwards
       // and find the containing statement in order for getJSDocCommentRanges() to read the comment that we expect.
-      const statement: ts.VariableStatement | undefined = TypeScriptHelpers.findFirstParent(declaration,
-        ts.SyntaxKind.VariableStatement) as ts.VariableStatement | undefined;
+      const statement: ts.VariableStatement | undefined = TypeScriptHelpers.findFirstParent(
+        declaration,
+        ts.SyntaxKind.VariableStatement
+      ) as ts.VariableStatement | undefined;
       if (statement !== undefined) {
         // For a compound declaration, fall back to looking for C instead of A
         if (statement.declarationList.declarations.length === 1) {
@@ -679,7 +823,8 @@ export class Collector {
     }
 
     const sourceFileText: string = declaration.getSourceFile().text;
-    const ranges: ts.CommentRange[] = TypeScriptInternals.getJSDocCommentRanges(nodeForComment, sourceFileText) || [];
+    const ranges: ts.CommentRange[] =
+      TypeScriptInternals.getJSDocCommentRanges(nodeForComment, sourceFileText) || [];
 
     if (ranges.length === 0) {
       return undefined;
@@ -689,8 +834,11 @@ export class Collector {
     // the last one preceding it
     const range: ts.TextRange = ranges[ranges.length - 1];
 
-    const tsdocTextRange: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(sourceFileText,
-      range.pos, range.end);
+    const tsdocTextRange: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(
+      sourceFileText,
+      range.pos,
+      range.end
+    );
 
     const parserContext: tsdoc.ParserContext = this._tsdocParser.parseRange(tsdocTextRange);
 
@@ -713,15 +861,20 @@ export class Collector {
           seenFilenames.add(sourceFile.fileName);
 
           for (const typeReferenceDirective of sourceFile.typeReferenceDirectives) {
-            const name: string = sourceFile.text.substring(typeReferenceDirective.pos, typeReferenceDirective.end);
+            const name: string = sourceFile.text.substring(
+              typeReferenceDirective.pos,
+              typeReferenceDirective.end
+            );
             this._dtsTypeReferenceDirectives.add(name);
           }
 
           for (const libReferenceDirective of sourceFile.libReferenceDirectives) {
-            const name: string = sourceFile.text.substring(libReferenceDirective.pos, libReferenceDirective.end);
+            const name: string = sourceFile.text.substring(
+              libReferenceDirective.pos,
+              libReferenceDirective.end
+            );
             this._dtsLibReferenceDirectives.add(name);
           }
-
         }
       }
     }

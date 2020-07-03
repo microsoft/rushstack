@@ -1,10 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  JsonFile,
-  IPackageJson
-} from '@microsoft/node-core-library';
+import { JsonFile, IPackageJson } from '@rushstack/node-core-library';
 
 /**
  * The type of dependency; used by IPackageDependency.
@@ -108,14 +105,42 @@ export class BasePackage {
   public children: BasePackage[];
   private _childrenByName: Map<string, BasePackage>;
 
+  protected constructor(
+    name: string,
+    version: string | undefined,
+    folderPath: string,
+    packageJson: IRushTempPackageJson | undefined
+  ) {
+    this.name = name;
+    this.packageJson = packageJson;
+    this.version = version;
+    this.folderPath = folderPath;
+
+    // Extract `@alias-scope/alias-name` from  `C:\node_modules\@alias-scope\alias-name`
+    const pathParts: string[] = folderPath.split(/[\\\/]/);
+    this.installedName = pathParts[pathParts.length - 1];
+    if (pathParts.length >= 2) {
+      // Is there an NPM scope?
+      const parentFolder: string = pathParts[pathParts.length - 2];
+      if (parentFolder[0] === '@') {
+        this.installedName = parentFolder + '/' + this.installedName;
+      }
+    }
+
+    this.children = [];
+    this._childrenByName = new Map<string, BasePackage>();
+  }
+
   /**
    * Used by link managers, creates a virtual Package object that represents symbolic links
    * which will be created later
    */
-  public static createLinkedPackage(name: string,
+  public static createLinkedPackage(
+    name: string,
     version: string | undefined,
     folderPath: string,
-    packageJson?: IRushTempPackageJson): BasePackage {
+    packageJson?: IRushTempPackageJson
+  ): BasePackage {
     return new BasePackage(name, version, folderPath, packageJson);
   }
 
@@ -127,9 +152,17 @@ export class BasePackage {
    * @param targetFolderName - Filename where it should have been installed
    *        Example: `C:\MyRepo\common\temp\node_modules\@rush-temp\project1`
    */
-  public static createVirtualTempPackage(packageJsonFilename: string, installFolderName: string): BasePackage {
+  public static createVirtualTempPackage(
+    packageJsonFilename: string,
+    installFolderName: string
+  ): BasePackage {
     const packageJson: IRushTempPackageJson = JsonFile.load(packageJsonFilename);
-    return BasePackage.createLinkedPackage(packageJson.name, packageJson.version, installFolderName, packageJson);
+    return BasePackage.createLinkedPackage(
+      packageJson.name,
+      packageJson.version,
+      installFolderName,
+      packageJson
+    );
   }
 
   public get nameAndVersion(): string {
@@ -173,30 +206,5 @@ export class BasePackage {
     for (const child of this.children) {
       child.printTree(indent + '  ');
     }
-  }
-
-  protected constructor(name: string,
-    version: string | undefined,
-    folderPath: string,
-    packageJson: IRushTempPackageJson | undefined) {
-
-    this.name = name;
-    this.packageJson = packageJson;
-    this.version = version;
-    this.folderPath = folderPath;
-
-    // Extract `@alias-scope/alias-name` from  `C:\node_modules\@alias-scope\alias-name`
-    const pathParts: string[] = folderPath.split(/[\\\/]/);
-    this.installedName = pathParts[pathParts.length - 1];
-    if (pathParts.length >= 2) {
-      // Is there an NPM scope?
-      const parentFolder: string = pathParts[pathParts.length - 2];
-      if (parentFolder[0] === '@') {
-        this.installedName = parentFolder + '/' + this.installedName;
-      }
-    }
-
-    this.children = [];
-    this._childrenByName = new Map<string, BasePackage>();
   }
 }

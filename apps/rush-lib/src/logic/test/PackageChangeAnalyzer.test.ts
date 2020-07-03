@@ -6,9 +6,7 @@ import * as path from 'path';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
 import { RushConfiguration } from '../../api/RushConfiguration';
 
-import {
-  IPackageDeps
-} from '@microsoft/package-deps-hash';
+import { IPackageDeps } from '@rushstack/package-deps-hash';
 
 const packageA: string = 'project-a';
 const packageAPath: string = path.join('tools', packageA);
@@ -32,15 +30,17 @@ describe('PackageChangeAnalyzer', () => {
     PackageChangeAnalyzer.getPackageDeps = (packagePath: string, ignored: string[]) => repoHashDeps;
     const rushConfiguration: RushConfiguration = {
       commonRushConfigFolder: '',
-      projects: [{
-        packageName: packageA,
-        projectRelativeFolder: packageAPath
-      }],
+      projects: [
+        {
+          packageName: packageA,
+          projectRelativeFolder: packageAPath
+        }
+      ],
       rushJsonFolder: '',
       getCommittedShrinkwrapFilename(): string {
         return 'common/config/rush/pnpm-lock.yaml';
       }
-    } as any; // tslint:disable-line:no-any
+    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     const packageChangeAnalyzer: PackageChangeAnalyzer = new PackageChangeAnalyzer(rushConfiguration);
     const packageDeps: IPackageDeps | undefined = packageChangeAnalyzer.getPackageDepsHash(packageA);
@@ -67,7 +67,7 @@ describe('PackageChangeAnalyzer', () => {
         packageName: packageB,
         projectRelativeFolder: packageBPath
       }]
-    } as any; // tslint:disable-line:no-any
+    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     let packageDeps: IPackageDeps = PackageChangeAnalyzer.instance.getPackageDepsHash(packageA);
     expect(packageDeps).toEqual({

@@ -1,4 +1,0 @@
-{
-  "$schema": "http://json.schemastore.org/tslint",
-  "extends": "./node_modules/@microsoft/rush-stack-compiler-3.4/includes/tslint.json"
-}

@@ -1,26 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { assert, expect } from 'chai';
 import Vinyl = require('vinyl');
-import * as Gulp  from 'gulp';
+import * as Gulp from 'gulp';
 import { Readable } from 'stream';
 import * as path from 'path';
 
-import {
-  serial,
-  parallel,
-  GulpTask
-} from '../index';
+import { serial, parallel, GulpTask } from '../index';
 import { mockBuildConfig } from './mockBuildConfig';
 
-interface IConfig {
-}
+interface IConfig {}
 
 let testArray: string[] = [];
 
 class PromiseTask extends GulpTask<IConfig> {
-  constructor() {
+  public constructor() {
     super('promise', {});
   }
 
@@ -33,20 +27,21 @@ class PromiseTask extends GulpTask<IConfig> {
 }
 
 class StreamTask extends GulpTask<IConfig> {
-  constructor() {
+  public constructor() {
     super('stream', {});
   }
 
-  public executeTask(gulp: typeof Gulp): any { // tslint:disable-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public executeTask(gulp: typeof Gulp): any {
     const stream: Readable = new Readable({ objectMode: true });
 
     // Add no opt function to make it compat with through
-    stream['_read'] = () => { // tslint:disable-line:no-string-literal
+    // eslint-disable-next-line dot-notation
+    stream['_read'] = () => {
       // Do Nothing
     };
 
     setTimeout(() => {
-
       const file: Vinyl = new Vinyl({
         path: 'test.js',
         contents: Buffer.from('test')
@@ -64,7 +59,7 @@ class StreamTask extends GulpTask<IConfig> {
 }
 
 class SyncTask extends GulpTask<IConfig> {
-  constructor() {
+  public constructor() {
     super('sync', {});
   }
 
@@ -74,7 +69,7 @@ class SyncTask extends GulpTask<IConfig> {
 }
 
 class SyncWithReturnTask extends GulpTask<IConfig> {
-  constructor() {
+  public constructor() {
     super('sync-with-return', {});
   }
 
@@ -84,7 +79,7 @@ class SyncWithReturnTask extends GulpTask<IConfig> {
 }
 
 class CallbackTask extends GulpTask<IConfig> {
-  constructor() {
+  public constructor() {
     super('schema-task', {});
   }
 
@@ -101,13 +96,10 @@ interface ISimpleConfig {
 class SchemaTask extends GulpTask<ISimpleConfig> {
   public name: string = '';
 
-  constructor() {
-    super(
-      'schema-task',
-      {
-        shouldDoThings: false
-      }
-    );
+  public constructor() {
+    super('schema-task', {
+      shouldDoThings: false
+    });
   }
 
   public executeTask(gulp: typeof Gulp, callback: (error?: string | Error) => void): void {
@@ -119,8 +111,7 @@ class SchemaTask extends GulpTask<ISimpleConfig> {
   }
 }
 
-const tasks: GulpTask<IConfig>[] = [
-];
+const tasks: GulpTask<IConfig>[] = [];
 
 tasks.push(new PromiseTask());
 tasks.push(new StreamTask());
@@ -133,19 +124,25 @@ describe('GulpTask', () => {
     it(`${task.name} serial`, (done) => {
       testArray = [];
       task.setConfig({ addToMe: testArray });
-      serial(task).execute(mockBuildConfig).then(() => {
-        expect(testArray).to.deep.equal([task.name]);
-        done();
-      }).catch(done);
+      serial(task)
+        .execute(mockBuildConfig)
+        .then(() => {
+          expect(testArray).toEqual([task.name]);
+          done();
+        })
+        .catch(done);
     });
 
     it(`${task.name} parallel`, (done) => {
       testArray = [];
       task.setConfig({ addToMe: testArray });
-      parallel(task).execute(mockBuildConfig).then(() => {
-        expect(testArray).to.deep.equal([task.name]);
-        done();
-      }).catch(done);
+      parallel(task)
+        .execute(mockBuildConfig)
+        .then(() => {
+          expect(testArray).toEqual([task.name]);
+          done();
+        })
+        .catch(done);
     });
   }
 
@@ -154,12 +151,15 @@ describe('GulpTask', () => {
     for (const task of tasks) {
       task.setConfig({ addToMe: testArray });
     }
-    serial(tasks).execute(mockBuildConfig).then(() => {
-      for (const task of tasks) {
-        expect(testArray.indexOf(task.name)).to.be.greaterThan(-1);
-      }
-      done();
-    }).catch(done);
+    serial(tasks)
+      .execute(mockBuildConfig)
+      .then(() => {
+        for (const task of tasks) {
+          expect(testArray.indexOf(task.name)).toBeGreaterThan(-1);
+        }
+        done();
+      })
+      .catch(done);
   });
 
   it(`all tasks parallel`, (done) => {
@@ -167,32 +167,35 @@ describe('GulpTask', () => {
     for (const task of tasks) {
       task.setConfig({ addToMe: testArray });
     }
-    parallel(tasks).execute(mockBuildConfig).then(() => {
-      for (const task of tasks) {
-        expect(testArray.indexOf(task.name)).to.be.greaterThan(-1);
-      }
-      done();
-    }).catch(done);
+    parallel(tasks)
+      .execute(mockBuildConfig)
+      .then(() => {
+        for (const task of tasks) {
+          expect(testArray.indexOf(task.name)).toBeGreaterThan(-1);
+        }
+        done();
+      })
+      .catch(done);
   });
 
   it(`reads schema file if loadSchema is implemented`, (done) => {
     const schemaTask: SchemaTask = new SchemaTask();
-    assert.isFalse(schemaTask.taskConfig.shouldDoThings);
+    expect(schemaTask.taskConfig.shouldDoThings).toEqual(false);
     schemaTask.onRegister();
-    assert.isTrue(schemaTask.taskConfig.shouldDoThings);
+    expect(schemaTask.taskConfig.shouldDoThings).toEqual(true);
     done();
   });
 
   it(`throws validation error is config does not conform to schema file`, (done) => {
     const schemaTask: SchemaTask = new SchemaTask();
 
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (schemaTask as any)._getConfigFilePath = (): string => {
       return path.join(__dirname, 'other-schema-task.config.json');
     };
 
-    assert.isFalse(schemaTask.taskConfig.shouldDoThings);
-    assert.throws(schemaTask.onRegister);
+    expect(schemaTask.taskConfig.shouldDoThings).toEqual(false);
+    expect(schemaTask.onRegister).toThrow();
     done();
   });
 });

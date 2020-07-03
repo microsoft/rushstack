@@ -21,7 +21,7 @@ export class MarkdownDocumenterAccessor {
   private _implementation: IMarkdownDocumenterAccessorImplementation;
 
   /** @internal */
-  constructor (implementation: IMarkdownDocumenterAccessorImplementation) {
+  public constructor(implementation: IMarkdownDocumenterAccessorImplementation) {
     this._implementation = implementation;
   }
 

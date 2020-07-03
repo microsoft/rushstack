@@ -29,6 +29,9 @@
        * The name should be comprised of lower case words separated by hyphens or colons. The name should include an
        * English verb (e.g. "deploy"). Use a hyphen to separate words (e.g. "upload-docs"). A group of related commands
        * can be prefixed with a colon (e.g. "docs:generate", "docs:deploy", "docs:serve", etc).
+       *
+       * Note that if the "rebuild" command is overridden here, it becomes separated from the "build" command
+       * and will call the "rebuild" script instead of the "build" script.
        */
       "name": "my-bulk-command",
 
@@ -117,11 +120,31 @@
       "safeForSimultaneousRushProcesses": false,
 
       /**
-       * A script that will be invoked using the OS shell. The working directory will be the folder
-       * that contains rush.json.  If custom parameters are associated with this command, their
+       * (Required) A script that will be invoked using the OS shell. The working directory will be
+       * the folder that contains rush.json.  If custom parameters are associated with this command, their
        * values will be appended to the end of this string.
        */
-      "shellCommand": "node common/scripts/my-global-command.js"
+      "shellCommand": "node common/scripts/my-global-command.js",
+
+      /**
+       * If your "shellCommand" script depends on NPM packages, the recommended best practice is
+       * to make it into a regular Rush project that builds using your normal toolchain.  In cases where
+       * the command needs to work without first having to run "rush build", the recommended practice
+       * is to publish the project to an NPM registry and use common/scripts/install-run.js to launch it.
+       *
+       * Autoinstallers offer another possibility: They are folders under "common/autoinstallers" with
+       * a package.json file and shrinkwrap file. Rush will automatically invoke the package manager to
+       * install these dependencies before an associated command is invoked.  Autoinstallers have the
+       * advantage that they work even in a branch where "rush install" is broken, which makes them a
+       * good solution for Git hook scripts.  But they have the disadvantages of not being buildable
+       * projects, and of increasing the overall installation footprint for your monorepo.
+       *
+       * The "autoinstallerName" setting must not contain a path and must be a valid NPM package name.
+       * For example, the name "my-task" would map to "common/autoinstallers/my-task/package.json", and
+       * the "common/autoinstallers/my-task/node_modules/.bin" folder would be added to the shell PATH when
+       * invoking the "shellCommand".
+       */
+      /*[LINE "HYPOTHETICAL"]*/ "autoinstallerName": "my-task"
     }
     /*[END "DEMO"]*/
   ],
@@ -167,19 +190,51 @@
        * (Required) A list of custom commands and/or built-in Rush commands that this parameter may
        * be used with.  The parameter will be appended to the shell command that Rush invokes.
        */
-       "associatedCommands": [ "build", "rebuild" ]
+      "associatedCommands": ["build", "rebuild"]
     },
 
     {
       /**
        * (Required) Determines the type of custom parameter.
-       * A "flag" is a custom command-line parameter whose presence acts as an on/off switch.
+       * A "string" is a custom command-line parameter whose value is a simple text string.
+       */
+      "parameterKind": "string",
+      "longName": "--my-string",
+      "description": "A custom string parameter for the \"my-global-command\" custom command",
+
+      "associatedCommands": ["my-global-command"],
+
+      /**
+       * The name of the argument, which will be shown in the command-line help.
+       *
+       * For example, if the parameter name is '--count" and the argument name is "NUMBER",
+       * then the command-line help would display "--count NUMBER".  The argument name must
+       * be comprised of upper-case letters, numbers, and underscores.  It should be kept short.
+       */
+      "argumentName": "SOME_TEXT",
+
+      /**
+       * If true, this parameter must be included with the command.  The default is false.
+       */
+      "required": false
+    },
+
+    {
+      /**
+       * (Required) Determines the type of custom parameter.
+       * A "choice" is a custom command-line parameter whose argument must be chosen from a list of
+       * allowable alternatives.
        */
       "parameterKind": "choice",
       "longName": "--my-choice",
       "description": "A custom choice parameter for the \"my-global-command\" custom command",
 
-      "associatedCommands": [ "my-global-command" ],
+      "associatedCommands": ["my-global-command"],
+
+      /**
+       * If true, this parameter must be included with the command.  The default is false.
+       */
+      "required": false,
 
       /**
        * Normally if a parameter is omitted from the command line, it will not be passed

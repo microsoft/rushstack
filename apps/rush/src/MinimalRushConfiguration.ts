@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile } from '@rushstack/node-core-library';
 import { RushConfiguration } from '@microsoft/rush-lib';
 import { RushConstants } from '@microsoft/rush-lib/lib/logic/RushConstants';
 
@@ -20,8 +20,21 @@ export class MinimalRushConfiguration {
   private _rushVersion: string;
   private _commonRushConfigFolder: string;
 
+  private constructor(minimalRushConfigurationJson: IMinimalRushConfigurationJson, rushJsonFilename: string) {
+    this._rushVersion =
+      minimalRushConfigurationJson.rushVersion || minimalRushConfigurationJson.rushMinimumVersion;
+    this._commonRushConfigFolder = path.join(
+      path.dirname(rushJsonFilename),
+      RushConstants.commonFolderName,
+      'config',
+      'rush'
+    );
+  }
+
   public static loadFromDefaultLocation(): MinimalRushConfiguration | undefined {
-    const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation({ showVerbose: true });
+    const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation({
+      showVerbose: true
+    });
     if (rushJsonLocation) {
       return MinimalRushConfiguration._loadFromConfigurationFile(rushJsonLocation);
     } else {
@@ -36,12 +49,6 @@ export class MinimalRushConfiguration {
     } catch (e) {
       return undefined;
     }
-  }
-
-  private constructor(minimalRushConfigurationJson: IMinimalRushConfigurationJson, rushJsonFilename: string) {
-    this._rushVersion = minimalRushConfigurationJson.rushVersion || minimalRushConfigurationJson.rushMinimumVersion;
-    this._commonRushConfigFolder = path.join(path.dirname(rushJsonFilename),
-      RushConstants.commonFolderName, 'config', 'rush');
   }
 
   /**

@@ -6,7 +6,7 @@ import { Constructor, PropertiesOf } from '../mixins/Mixin';
 import { ApiPackage } from '../model/ApiPackage';
 import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 import { DeserializerContext } from '../model/DeserializerContext';
-import { InternalError } from '@microsoft/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 
 /**
@@ -42,8 +42,7 @@ export const enum ApiItemKind {
  * Constructor options for {@link ApiItem}.
  * @public
  */
-export interface IApiItemOptions {
-}
+export interface IApiItemOptions {}
 
 export interface IApiItemJson {
   kind: ApiItemKind;
@@ -52,8 +51,7 @@ export interface IApiItemJson {
 
 // PRIVATE - Allows ApiItemContainerMixin to assign the parent.
 //
-// tslint:disable-next-line:variable-name
-export const ApiItem_onParentChanged: unique symbol = Symbol('ApiItem._onAddToContainer');
+export const apiItem_onParentChanged: unique symbol = Symbol('ApiItem._onAddToContainer');
 
 /**
  * The abstract base class for all members of an `ApiModel` object.
@@ -67,6 +65,10 @@ export class ApiItem {
   private _canonicalReference: DeclarationReference | undefined;
   private _parent: ApiItem | undefined;
 
+  public constructor(options: IApiItemOptions) {
+    // ("options" is not used here, but part of the inheritance pattern)
+  }
+
   public static deserialize(jsonObject: IApiItemJson, context: DeserializerContext): ApiItem {
     // The Deserializer class is coupled with a ton of other classes, so  we delay loading it
     // to avoid ES5 circular imports.
@@ -75,13 +77,12 @@ export class ApiItem {
   }
 
   /** @virtual */
-  public static onDeserializeInto(options: Partial<IApiItemOptions>,  context: DeserializerContext,
-    jsonObject: IApiItemJson): void {
+  public static onDeserializeInto(
+    options: Partial<IApiItemOptions>,
+    context: DeserializerContext,
+    jsonObject: IApiItemJson
+  ): void {
     // (implemented by subclasses)
-  }
-
-  public constructor(options: IApiItemOptions) {
-    // ("options" is not used here, but part of the inheritance pattern)
   }
 
   /** @virtual */
@@ -113,8 +114,7 @@ export class ApiItem {
         this._canonicalReference = this.buildCanonicalReference();
       } catch (e) {
         const name: string = this.getScopedNameWithinPackage() || this.displayName;
-        throw new InternalError(`Error building canonical reference for ${name}:\n`
-          + e.message);
+        throw new InternalError(`Error building canonical reference for ${name}:\n` + e.message);
       }
     }
     return this._canonicalReference;
@@ -145,13 +145,18 @@ export class ApiItem {
    */
   public get displayName(): string {
     switch (this.kind) {
-      case ApiItemKind.CallSignature: return '(call)';
-      case ApiItemKind.Constructor: return '(constructor)';
-      case ApiItemKind.ConstructSignature: return '(new)';
-      case ApiItemKind.IndexSignature: return '(indexer)';
-      case ApiItemKind.Model: return '(model)';
+      case ApiItemKind.CallSignature:
+        return '(call)';
+      case ApiItemKind.Constructor:
+        return '(constructor)';
+      case ApiItemKind.ConstructSignature:
+        return '(new)';
+      case ApiItemKind.IndexSignature:
+        return '(indexer)';
+      case ApiItemKind.Model:
+        return '(model)';
     }
-    return '(???)';  // All other types should inherit ApiNameMixin which will override this property
+    return '(???)'; // All other types should inherit ApiNameMixin which will override this property
   }
 
   /**
@@ -215,9 +220,11 @@ export class ApiItem {
     const reversedParts: string[] = [];
 
     for (let current: ApiItem | undefined = this; current !== undefined; current = current.parent) {
-      if (current.kind === ApiItemKind.Model
-        || current.kind === ApiItemKind.Package
-        || current.kind === ApiItemKind.EntryPoint) {
+      if (
+        current.kind === ApiItemKind.Model ||
+        current.kind === ApiItemKind.Package ||
+        current.kind === ApiItemKind.EntryPoint
+      ) {
         break;
       }
       if (reversedParts.length !== 0) {
@@ -231,7 +238,7 @@ export class ApiItem {
             // These functional forms don't have a proper name, so we don't append the "()" suffix
             break;
           default:
-            if (ApiParameterListMixin.isBaseClassOf(current)) { // tslint:disable-line:no-use-before-declare
+            if (ApiParameterListMixin.isBaseClassOf(current)) {
               reversedParts.push('()');
             }
         }
@@ -268,7 +275,7 @@ export class ApiItem {
    *
    * @internal
    */
-  public [ApiItem_onParentChanged](parent: ApiItem | undefined): void {
+  public [apiItem_onParentChanged](parent: ApiItem | undefined): void {
     this._parent = parent;
     this._canonicalReference = undefined;
   }
@@ -288,4 +295,4 @@ export class ApiItem {
  *
  * @public
  */
-export interface IApiItemConstructor extends Constructor<ApiItem>, PropertiesOf<typeof ApiItem> { }
+export interface IApiItemConstructor extends Constructor<ApiItem>, PropertiesOf<typeof ApiItem> {}

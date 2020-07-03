@@ -1,0 +1,322 @@
+{
+  "name": "@rushstack/eslint-config",
+  "entries": [
+    {
+      "version": "1.0.2",
+      "tag": "@rushstack/eslint-config_v1.0.2",
+      "date": "Thu, 25 Jun 2020 06:43:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Enable variableDeclarationIgnoreFunction for the \"@typescript-eslint/typedef\" rule"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.1",
+      "tag": "@rushstack/eslint-config_v1.0.1",
+      "date": "Wed, 24 Jun 2020 09:50:48 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with the published file set"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" from `1.0.1` to `1.0.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" from `0.4.0` to `0.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.0",
+      "tag": "@rushstack/eslint-config_v1.0.0",
+      "date": "Wed, 24 Jun 2020 09:04:28 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Upgrade to ESLint 7. Breaking change: patch-eslint6.js has been renamed to patch-eslint-resolver.js"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" from `1.0.0` to `1.0.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" from `0.3.2` to `0.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.8",
+      "tag": "@rushstack/eslint-config_v0.5.8",
+      "date": "Wed, 27 May 2020 05:15:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Relax \"max-lines\" lint rule to 2,000 lines instead of 1,000 lines"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.7",
+      "tag": "@rushstack/eslint-config_v0.5.7",
+      "date": "Wed, 08 Apr 2020 04:07:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve the error message text for the \"ban-types\" rule"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.6",
+      "tag": "@rushstack/eslint-config_v0.5.6",
+      "date": "Sat, 28 Mar 2020 00:37:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade to eslint-plugin-tsdoc version 0.2.4"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.5",
+      "tag": "@rushstack/eslint-config_v0.5.5",
+      "date": "Wed, 18 Mar 2020 15:07:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" from `0.3.1` to `0.3.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.4",
+      "tag": "@rushstack/eslint-config_v0.5.4",
+      "date": "Tue, 21 Jan 2020 21:56:13 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade eslint-plugin-tsdoc to enable comments in tsdoc.json and more efficient loading"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.3",
+      "tag": "@rushstack/eslint-config_v0.5.3",
+      "date": "Sun, 19 Jan 2020 02:26:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" from `0.3.0` to `0.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.2",
+      "tag": "@rushstack/eslint-config_v0.5.2",
+      "date": "Fri, 17 Jan 2020 01:08:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" from `0.2.0` to `0.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.1",
+      "tag": "@rushstack/eslint-config_v0.5.1",
+      "date": "Thu, 09 Jan 2020 06:44:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" from `0.1.0` to `0.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.0",
+      "tag": "@rushstack/eslint-config_v0.5.0",
+      "date": "Wed, 08 Jan 2020 00:11:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Replace \"no-restricted-syntax\" rule with an equivalent rule \"@rushstack/no-null\""
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" from `0.0.0` to `0.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.2",
+      "tag": "@rushstack/eslint-config_v0.4.2",
+      "date": "Mon, 11 Nov 2019 16:07:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add eslint-plugin-tsdoc; update plugin versions"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.1",
+      "tag": "@rushstack/eslint-config_v0.4.1",
+      "date": "Tue, 22 Oct 2019 06:24:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update documentation"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.0",
+      "tag": "@rushstack/eslint-config_v0.4.0",
+      "date": "Tue, 15 Oct 2019 01:22:16 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Rename `@microsoft/eslint-config-scalable-ts` to `@rushstack/eslint-config`"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Upgraded ESLint plugin dependencies"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.1",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.3.1",
+      "date": "Sun, 29 Sep 2019 23:56:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update repository URL"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.0",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.3.0",
+      "date": "Wed, 04 Sep 2019 01:43:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix an issue where the @typescript-eslint/array-type rule required a syntax that broke compatibility with TypeScript versions prior to 3.4"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.3",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.2.3",
+      "date": "Tue, 03 Sep 2019 23:13:45 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade to @typescript-eslint/eslint-plugin 2.1.0"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.2",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.2.2",
+      "date": "Tue, 27 Aug 2019 01:48:45 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove unused plugin reference"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.1",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.2.1",
+      "date": "Tue, 27 Aug 2019 01:24:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace \"eslint-plugin-no-null\" with a more lenient implementation that allows equality comparisons with \"null\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.0",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.2.0",
+      "date": "Wed, 21 Aug 2019 21:56:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Enable react/no-deprecated, react/no-unescaped-entities, and react/self-closing-comp"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.2",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.1.2",
+      "date": "Fri, 16 Aug 2019 21:58:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Relax peer dependency to allow usage with ESLint 5"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.1",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.1.1",
+      "date": "Fri, 16 Aug 2019 01:15:03 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where @typescript-eslint/no-unused-vars didn't work properly with React source files"
+          },
+          {
+            "comment": "Relax @typescript-eslint/camelcase to allow \"_checkBox1_onChanged\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@microsoft/eslint-config-scalable-ts_v0.1.0",
+      "date": "Thu, 15 Aug 2019 02:56:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release"
+          }
+        ]
+      }
+    }
+  ]
+}

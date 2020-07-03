@@ -1,13 +1,8 @@
 import * as os from 'os';
 
-import {
-  JsonFile,
-  FileSystem
-} from '@microsoft/node-core-library';
+import { JsonFile, FileSystem, InternalError } from '@rushstack/node-core-library';
 
-import {
-  BaseShrinkwrapFile
-} from '../base/BaseShrinkwrapFile';
+import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
 
 interface INpmShrinkwrapDependencyJson {
@@ -26,6 +21,22 @@ interface INpmShrinkwrapJson {
 export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   private _shrinkwrapJson: INpmShrinkwrapJson;
 
+  private constructor(shrinkwrapJson: INpmShrinkwrapJson) {
+    super();
+    this._shrinkwrapJson = shrinkwrapJson;
+
+    // Normalize the data
+    if (!this._shrinkwrapJson.version) {
+      this._shrinkwrapJson.version = '';
+    }
+    if (!this._shrinkwrapJson.name) {
+      this._shrinkwrapJson.name = '';
+    }
+    if (!this._shrinkwrapJson.dependencies) {
+      this._shrinkwrapJson.dependencies = {};
+    }
+  }
+
   public static loadFromFile(shrinkwrapJsonFilename: string): NpmShrinkwrapFile | undefined {
     let data: string | undefined = undefined;
     try {
@@ -36,7 +47,8 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
       // We don't use JsonFile/jju here because shrinkwrap.json is a special NPM file format
       // and typically very large, so we want to load it the same way that NPM does.
       data = FileSystem.readFile(shrinkwrapJsonFilename);
-      if (data.charCodeAt(0) === 0xFEFF) {  // strip BOM
+      if (data.charCodeAt(0) === 0xfeff) {
+        // strip BOM
         data = data.slice(1);
       }
 
@@ -58,15 +70,17 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
 
   /** @override */
   protected getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined {
-     // First, check under tempProjectName, as this is the first place "rush link" looks.
-    const dependencyJson: INpmShrinkwrapDependencyJson | undefined =
-      NpmShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
+    // First, check under tempProjectName, as this is the first place "rush link" looks.
+    const dependencyJson: INpmShrinkwrapDependencyJson | undefined = NpmShrinkwrapFile.tryGetValue(
+      this._shrinkwrapJson.dependencies,
+      dependencyName
+    );
 
-     if (!dependencyJson) {
-       return undefined;
-     }
+    if (!dependencyJson) {
+      return undefined;
+    }
 
-     return new DependencySpecifier(dependencyName, dependencyJson.version);
+    return new DependencySpecifier(dependencyName, dependencyJson.version);
   }
 
   /**
@@ -75,16 +89,22 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
    * @param versionRange Not used, just exists to satisfy abstract API contract
    * @override
    */
-  protected tryEnsureDependencyVersion(dependencySpecifier: DependencySpecifier,
-    tempProjectName: string): DependencySpecifier | undefined {
-
+  protected tryEnsureDependencyVersion(
+    dependencySpecifier: DependencySpecifier,
+    tempProjectName: string
+  ): DependencySpecifier | undefined {
     // First, check under tempProjectName, as this is the first place "rush link" looks.
     let dependencyJson: INpmShrinkwrapDependencyJson | undefined = undefined;
 
     const tempDependency: INpmShrinkwrapDependencyJson | undefined = NpmShrinkwrapFile.tryGetValue(
-      this._shrinkwrapJson.dependencies, tempProjectName);
+      this._shrinkwrapJson.dependencies,
+      tempProjectName
+    );
     if (tempDependency && tempDependency.dependencies) {
-      dependencyJson = NpmShrinkwrapFile.tryGetValue(tempDependency.dependencies, dependencySpecifier.packageName);
+      dependencyJson = NpmShrinkwrapFile.tryGetValue(
+        tempDependency.dependencies,
+        dependencySpecifier.packageName
+      );
     }
 
     // Otherwise look at the root of the shrinkwrap file
@@ -95,19 +115,21 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     return new DependencySpecifier(dependencySpecifier.packageName, dependencyJson.version);
   }
 
-  private constructor(shrinkwrapJson: INpmShrinkwrapJson) {
-    super();
-    this._shrinkwrapJson = shrinkwrapJson;
+  /** @override */
+  public getWorkspaceKeys(): ReadonlyArray<string> {
+    throw new InternalError('Not implemented');
+  }
 
-    // Normalize the data
-    if (!this._shrinkwrapJson.version) {
-      this._shrinkwrapJson.version = '';
-    }
-    if (!this._shrinkwrapJson.name) {
-      this._shrinkwrapJson.name = '';
-    }
-    if (!this._shrinkwrapJson.dependencies) {
-      this._shrinkwrapJson.dependencies = { };
-    }
+  /** @override */
+  public getWorkspaceKeyByPath(workspaceRoot: string, projectFolder: string): string {
+    throw new InternalError('Not implemented');
+  }
+
+  /** @override */
+  protected getWorkspaceDependencyVersion(
+    dependencySpecifier: DependencySpecifier,
+    workspaceKey: string
+  ): DependencySpecifier | undefined {
+    throw new InternalError('Not implemented');
   }
 }
