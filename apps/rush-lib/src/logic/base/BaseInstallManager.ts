@@ -159,14 +159,13 @@ export abstract class BaseInstallManager {
 
     // Prevent filtered installs when workspaces is disabled
     if (
-      this.rushConfiguration.pnpmOptions &&
-      this.rushConfiguration.pnpmOptions.useWorkspaces &&
-      isFilteredInstall
+      isFilteredInstall &&
+      !(this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces)
     ) {
       console.log();
       console.log(
         colors.red(
-          'The "--to" argument can only be used when running in a workspace environemnt. Run the ' +
+          'The "--to" argument can only be used when running in a workspace environment. Run the ' +
             'command again without specifying this argument.'
         )
       );
