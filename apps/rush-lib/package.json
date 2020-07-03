@@ -64,7 +64,7 @@
     "@types/npm-packlist": "~1.1.1",
     "@types/read-package-tree": "5.1.0",
     "@types/resolve": "1.17.1",
-    "@types/semver": "~7.2.0",
+    "@types/semver": "~7.3.1",
     "@types/strict-uri-encode": "2.0.0",
     "@types/tar": "4.0.3",
     "@types/wordwrap": "1.0.0",

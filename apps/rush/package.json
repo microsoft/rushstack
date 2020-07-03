@@ -42,7 +42,7 @@
     "@rushstack/eslint-config": "1.0.2",
     "@types/jest": "25.2.1",
     "@types/node": "10.17.13",
-    "@types/semver": "~7.2.0",
+    "@types/semver": "~7.3.1",
     "@types/sinon": "1.16.34",
     "chai": "~3.5.0",
     "gulp": "~4.0.2",
