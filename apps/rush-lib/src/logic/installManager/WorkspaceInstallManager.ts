@@ -42,18 +42,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       throw new AlreadyReportedError();
     }
 
-    // Workspaces do not support "--to" flags when running "rush update"
-    if (this.options.allowShrinkwrapUpdates && this.options.toFlags && this.options.toFlags.length !== 0) {
-      console.log();
-      console.log(
-        colors.red(
-          'The "--to" and "--from" options cannot be used when running "rush update". Run the command again ' +
-            'without specifying these arguments.'
-        )
-      );
-      throw new AlreadyReportedError();
-    }
-
     await super.doInstall();
   }
 
