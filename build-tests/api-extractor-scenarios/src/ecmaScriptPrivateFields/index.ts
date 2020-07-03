@@ -5,4 +5,5 @@
 export class Example {
   private _typeScriptPrivate: string;
   #ecmaScriptField: string;
+  #ecmaScriptField2: string;
 }
