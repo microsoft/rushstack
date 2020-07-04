@@ -27,16 +27,6 @@ module.exports = {
  * The return value is the updated object.
  */
 function readPackage(packageJson, context) {
-  // Pin babel-jest until gulp-core-build with jest@25 is published
-  if (packageJson && packageJson.dependencies) {
-    if (packageJson.dependencies['babel-jest']) {
-      packageJson.dependencies['babel-jest'] = '23.6.0';
-    }
-    if (packageJson.name == 'babel-jest') {
-      delete packageJson.peerDependencies['babel-core'];
-    }
-  }
-
   // these packages have peerDependencies on typescript, but now we have multiple copies
   // in the repo so it doesn't know which one to pick
   // See this issue: https://github.com/pnpm/pnpm/issues/1187
