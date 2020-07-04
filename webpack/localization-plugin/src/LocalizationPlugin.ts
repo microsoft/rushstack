@@ -504,11 +504,9 @@ export class LocalizationPlugin implements Webpack.Plugin {
       }
 
       if (resolvedTranslatedData) {
-        for (const resolvedLocaleName in resolvedTranslatedData) {
-          if (resolvedTranslatedData.hasOwnProperty(resolvedLocaleName)) {
-            const translatedLocFileData: ILocaleFileData = resolveLocalizedData(
-              resolvedTranslatedData[resolvedLocaleName]
-            );
+        for (const [resolvedLocaleName, resolvedLocaleData] of Object.entries(resolvedTranslatedData)) {
+          if (resolvedLocaleData) {
+            const translatedLocFileData: ILocaleFileData = normalizeLocalizedData(resolvedLocaleData);
             this._addLocFile(resolvedLocaleName, localizedResourcePath, translatedLocFileData);
           }
         }
