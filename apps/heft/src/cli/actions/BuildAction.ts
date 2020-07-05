@@ -117,7 +117,6 @@ export interface ISharedTypeScriptConfiguration {
  */
 export interface ITypeScriptConfiguration extends ISharedTypeScriptConfiguration {
   tsconfigPaths: string[];
-  tslintConfigPath: string | undefined;
   isLintingEnabled: boolean | undefined;
 }
 
@@ -276,7 +275,6 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
       properties: {
         typeScriptConfiguration: {
           tsconfigPaths: [],
-          tslintConfigPath: undefined,
           isLintingEnabled: !actionContext.properties.liteFlag,
           copyFromCacheMode: 'hardlink',
           additionalModuleKindsToEmit: undefined

@@ -35,7 +35,6 @@ interface IRunBuilderForTsconfigOptions {
 
   tsconfigFilePath: string;
   lintingEnabled: boolean;
-  tslintFilePath: string | undefined;
   copyFromCacheMode?: CopyFromCacheMode;
   watchMode: boolean;
 
@@ -72,7 +71,6 @@ export class TypeScriptPlugin implements IHeftPlugin {
     typeScriptConfiguration: ITypeScriptConfiguration,
     buildFolder: string
   ): Promise<void> {
-    typeScriptConfiguration.tslintConfigPath = 'tslint.json';
     typeScriptConfiguration.tsconfigPaths = await LegacyAdapters.convertCallbackToPromise(
       glob,
       'tsconfig?(-*).json',
@@ -93,7 +91,6 @@ export class TypeScriptPlugin implements IHeftPlugin {
       heftSession: heftSession,
       heftConfiguration,
       lintingEnabled: !!typeScriptConfiguration.isLintingEnabled,
-      tslintFilePath: typeScriptConfiguration.tslintConfigPath,
       copyFromCacheMode: typeScriptConfiguration.copyFromCacheMode,
       watchMode: watchMode
     };
@@ -144,7 +141,6 @@ export class TypeScriptPlugin implements IHeftPlugin {
       heftConfiguration,
       lintingEnabled,
       tsconfigFilePath,
-      tslintFilePath,
       terminalProvider,
       copyFromCacheMode,
       additionalModuleKindsToEmit,
@@ -170,7 +166,6 @@ export class TypeScriptPlugin implements IHeftPlugin {
       eslintToolPath: rscPackage.ToolPaths.eslintPackagePath,
 
       tsconfigPath: fullTsconfigFilePath,
-      tslintPath: tslintFilePath ? path.resolve(heftConfiguration.buildFolder, tslintFilePath) : undefined,
       lintingEnabled,
       buildCacheFolder: options.heftConfiguration.buildCacheFolder,
       additionalModuleKindsToEmit,

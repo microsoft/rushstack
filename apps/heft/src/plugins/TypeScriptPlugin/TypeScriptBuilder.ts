@@ -46,11 +46,6 @@ export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfig
   tsconfigPath: string;
 
   /**
-   * The path to a tslint config file to use to lint the files being compiled, if one exists
-   */
-  tslintPath: string | undefined;
-
-  /**
    * The path of project's build cache folder
    */
   buildCacheFolder: string;
@@ -97,6 +92,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _lintingEnabled: boolean;
   private _moduleKindsToEmit: ICachedEmitModuleKind<Typescript.ModuleKind>[];
   private _rawProjectTslintFile: string | undefined;
+  private _tslintConfigFilePath: string;
 
   private __tsCacheFilePath: string | undefined;
   private __tslintCacheFilePath: string | undefined;
@@ -131,14 +127,12 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
   public initialize(): void {
     this._configuration.buildCacheFolder = this._configuration.buildCacheFolder.replace(/\\/g, '/');
-    this._lintingEnabled =
-      this._configuration.lintingEnabled &&
-      !!this._configuration.tslintPath &&
-      !this._configuration.watchMode; // Don't run lint in watch mode
+    this._tslintConfigFilePath = path.resolve(this._configuration.buildFolder, 'tslint.json');
+    this._lintingEnabled = this._configuration.lintingEnabled && !this._configuration.watchMode; // Don't run lint in watch mode
 
     if (this._lintingEnabled) {
       try {
-        this._rawProjectTslintFile = this._fileSystem.readFile(this._configuration.tslintPath!);
+        this._rawProjectTslintFile = this._fileSystem.readFile(this._tslintConfigFilePath);
       } catch (e) {
         if (this._fileSystem.isNotExistError(e)) {
           this._rawProjectTslintFile = undefined;
@@ -890,7 +884,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private async _runTslintAsync(options: IRunTslintOptions): Promise<Tslint.LintResult> {
     const { tslint, tsProgram, typeScriptFilenames, measurePerformance, changedFiles } = options;
 
-    const tslintConfigHash: crypto.Hash = this._getConfigHash(this._configuration.tslintPath!);
+    const tslintConfigHash: crypto.Hash = this._getConfigHash(this._tslintConfigFilePath);
     const tslintConfigVersion: string = `${tslint.Linter.VERSION}_${tslintConfigHash.digest('hex')}`;
 
     let tslintCacheData: ITsLintCacheData | undefined;
@@ -911,7 +905,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     const newNoFailureFileVersions: Map<string, string> = new Map<string, string>();
 
     const tslintConfiguration: Tslint.Configuration.IConfigurationFile = tslint.Configuration.loadConfigurationFromPath(
-      this._configuration.tslintPath
+      this._tslintConfigFilePath
     );
     const linter: IExtendedLinter = (new tslint.Linter(
       {
@@ -991,7 +985,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     this._terminal.writeVerboseLine(`Examining config file "${configPath}"`);
 
     const rawConfig: string =
-      configPath === this._configuration.tslintPath
+      configPath === this._tslintConfigFilePath
         ? this._rawProjectTslintFile!
         : this._fileSystem.readFile(configPath);
     const parsedConfig: IMinimalConfig = JsonFile.parseString(rawConfig);

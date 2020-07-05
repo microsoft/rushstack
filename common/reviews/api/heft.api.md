@@ -286,8 +286,6 @@ export interface ITypeScriptConfiguration extends ISharedTypeScriptConfiguration
     isLintingEnabled: boolean | undefined;
     // (undocumented)
     tsconfigPaths: string[];
-    // (undocumented)
-    tslintConfigPath: string | undefined;
 }
 
 // @internal
