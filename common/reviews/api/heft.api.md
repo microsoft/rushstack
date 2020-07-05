@@ -147,7 +147,7 @@ export interface ICleanActionContext extends IActionContext<CleanHooks, ICleanAc
 // @public (undocumented)
 export interface ICleanActionProperties {
     // (undocumented)
-    pathsToDelete: string[];
+    pathsToDelete: Set<string>;
 }
 
 // @public (undocumented)

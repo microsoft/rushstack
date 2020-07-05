@@ -75,9 +75,10 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
       | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'clean');
 
     if (cleanActionConfiguration) {
-      cleanConfiguration.pathsToDelete.push(...cleanActionConfiguration.pathsToDelete);
+      for (const pathToDelete of cleanActionConfiguration.pathsToDelete) {
+        cleanConfiguration.pathsToDelete.add(pathToDelete);
+      }
     }
-  }
 
   private async _updateTypescriptConfigurationAsync(
     heftConfiguration: HeftConfiguration,

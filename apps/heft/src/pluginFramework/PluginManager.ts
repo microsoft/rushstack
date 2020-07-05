@@ -13,7 +13,6 @@ import { HeftSession } from './HeftSession';
 import { TypescriptPlugin } from '../plugins/TypescriptPlugin/TypescriptPlugin';
 import { RushActionConfigurationFilesPlugin } from '../plugins/ActionConfigurationLoaders/RushActionConfigurationFilesPlugin';
 import { ProjectActionConfigurationFilesPlugin } from '../plugins/ActionConfigurationLoaders/ProjectActionConfigurationFilesPlugin';
-import { ResolveActionConfigurationPathsPlugin } from '../plugins/ResolveActionConfigurationPathsPlugin';
 import { CleanPlugin } from '../plugins/CleanPlugin';
 import { CopyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
 import { PackageJsonConfigurationPlugin } from '../plugins/PackageJsonConfigurationPlugin';
@@ -46,7 +45,6 @@ export class PluginManager {
     this._applyPlugin(new TypescriptPlugin());
     this._applyPlugin(new RushActionConfigurationFilesPlugin());
     this._applyPlugin(new ProjectActionConfigurationFilesPlugin());
-    this._applyPlugin(new ResolveActionConfigurationPathsPlugin());
     this._applyPlugin(new CopyStaticAssetsPlugin());
     this._applyPlugin(new CleanPlugin());
     this._applyPlugin(new PackageJsonConfigurationPlugin());
