@@ -98,28 +98,35 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
   private _moduleKindsToEmit: ICachedEmitModuleKind<Typescript.ModuleKind>[];
   private _rawProjectTslintFile: string | undefined;
 
-  private _tsCacheFilePath: string | undefined;
-  private _tslintCacheFilePath: string | undefined;
+  private __tsCacheFilePath: string | undefined;
+  private __tslintCacheFilePath: string | undefined;
   private _tsReadJsonCache: Map<string, object> = new Map<string, object>();
 
   public get filename(): string {
     return __filename;
   }
 
-  protected get tsCacheFilePath(): string {
-    if (!this._tsCacheFilePath) {
-      this._tsCacheFilePath = path.posix.join(this._configuration.buildCacheFolder, 'ts.json');
+  private get _tsCacheFilePath(): string {
+    if (!this.__tsCacheFilePath) {
+      const configHash: crypto.Hash = this._getConfigHash(this._configuration.tsconfigPath);
+      configHash.update(JSON.stringify(this._configuration.additionalModuleKindsToEmit));
+      const serializedConfigHash: string = configHash.digest('hex');
+
+      this.__tsCacheFilePath = path.posix.join(
+        this._configuration.buildCacheFolder,
+        `ts_${serializedConfigHash}.json`
+      );
     }
 
-    return this._tsCacheFilePath;
+    return this.__tsCacheFilePath;
   }
 
-  protected get tslintCacheFilePath(): string {
-    if (!this._tslintCacheFilePath) {
-      this._tslintCacheFilePath = path.posix.join(this._configuration.buildCacheFolder, 'tslint.json');
+  private get _tslintCacheFilePath(): string {
+    if (!this.__tslintCacheFilePath) {
+      this.__tslintCacheFilePath = path.posix.join(this._configuration.buildCacheFolder, 'tslint.json');
     }
 
-    return this._tslintCacheFilePath;
+    return this.__tslintCacheFilePath;
   }
 
   public initialize(): void {
@@ -127,7 +134,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
     this._lintingEnabled =
       this._configuration.lintingEnabled &&
       !!this._configuration.tslintPath &&
-      !this._configuration.watchMode; // Don't run TSLint in watch mode
+      !this._configuration.watchMode; // Don't run lint in watch mode
 
     if (this._lintingEnabled) {
       try {
@@ -775,7 +782,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
     );
 
     tsconfig.options.incremental = true;
-    tsconfig.options.tsBuildInfoFile = this.tsCacheFilePath;
+    tsconfig.options.tsBuildInfoFile = this._tsCacheFilePath;
 
     return tsconfig;
   }
@@ -883,12 +890,12 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
   private async _runTslintAsync(options: IRunTslintOptions): Promise<Tslint.LintResult> {
     const { tslint, tsProgram, typescriptFilenames, measurePerformance, changedFiles } = options;
 
-    const tslintConfigHash: crypto.Hash = this._getTslintConfigHash(this._configuration.tslintPath!);
+    const tslintConfigHash: crypto.Hash = this._getConfigHash(this._configuration.tslintPath!);
     const tslintConfigVersion: string = `${tslint.Linter.VERSION}_${tslintConfigHash.digest('hex')}`;
 
     let tslintCacheData: ITsLintCacheData | undefined;
     try {
-      tslintCacheData = await JsonFile.loadAsync(this.tslintCacheFilePath);
+      tslintCacheData = await JsonFile.loadAsync(this._tslintCacheFilePath);
     } catch (e) {
       if (this._fileSystem.isNotExistError(e)) {
         tslintCacheData = undefined;
@@ -971,35 +978,35 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
       cacheVersion: tslintConfigVersion,
       fileVersions: Array.from(newNoFailureFileVersions)
     };
-    await JsonFile.saveAsync(updatedTslintCacheData, this.tslintCacheFilePath, { ensureFolderExists: true });
+    await JsonFile.saveAsync(updatedTslintCacheData, this._tslintCacheFilePath, { ensureFolderExists: true });
 
     return linter.getResult();
   }
 
-  private _getTslintConfigHash(tslintConfigPath: string): crypto.Hash {
-    interface ISimpleTslintConfig {
+  private _getConfigHash(configPath: string): crypto.Hash {
+    interface IMinimalConfig {
       extends?: string;
     }
 
-    this._terminal.writeVerboseLine(`Examining tslint config file "${tslintConfigPath}"`);
+    this._terminal.writeVerboseLine(`Examining config file "${configPath}"`);
 
-    const rawTslintConfig: string =
-      tslintConfigPath === this._configuration.tslintPath
+    const rawConfig: string =
+      configPath === this._configuration.tslintPath
         ? this._rawProjectTslintFile!
-        : this._fileSystem.readFile(tslintConfigPath);
-    const parsedTslintConfig: ISimpleTslintConfig = JsonFile.parseString(rawTslintConfig);
+        : this._fileSystem.readFile(configPath);
+    const parsedConfig: IMinimalConfig = JsonFile.parseString(rawConfig);
     let hash: crypto.Hash;
-    if (parsedTslintConfig.extends) {
-      const tslintExtendsFullPath: string = ResolveUtilities.resolvePackagePath(
-        parsedTslintConfig.extends,
-        path.dirname(tslintConfigPath)
+    if (parsedConfig.extends) {
+      const extendsFullPath: string = ResolveUtilities.resolvePackagePath(
+        parsedConfig.extends,
+        path.dirname(configPath)
       );
-      hash = this._getTslintConfigHash(tslintExtendsFullPath);
+      hash = this._getConfigHash(extendsFullPath);
     } else {
-      hash = crypto.createHash('sha1').update(rawTslintConfig);
+      hash = crypto.createHash('sha1').update(rawConfig);
     }
 
-    return hash.update(rawTslintConfig);
+    return hash.update(rawConfig);
   }
 
   private _parseModuleKind(ts: ExtendedTypescript, moduleKindName: string): Typescript.ModuleKind {

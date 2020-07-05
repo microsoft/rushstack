@@ -63,6 +63,11 @@ export class ResolveUtilities {
     rootPath: string,
     options?: Partial<IResolvePackageOptions>
   ): string {
+    if (packagePath.startsWith('.')) {
+      // This looks like a conventional relative path
+      return path.resolve(rootPath, packagePath);
+    }
+
     let lastSlashIndex: number;
     if (packagePath.startsWith('@')) {
       // This looks like a scoped package name
