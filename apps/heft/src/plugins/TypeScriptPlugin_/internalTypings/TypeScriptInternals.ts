@@ -46,7 +46,7 @@ export interface IResolveModuleNameResolutionHost {
   getCurrentDirectory(): string;
 }
 
-export interface IExtendedTypescript {
+export interface IExtendedTypeScript {
   /**
    * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/performance.ts#L3
    */
@@ -143,4 +143,4 @@ export interface IExtendedEmitResult extends Typescript.EmitResult {
   changedSourceFiles: Set<IExtendedSourceFile>;
 }
 
-export type ExtendedTypescript = typeof Typescript & IExtendedTypescript;
+export type ExtendedTypeScript = typeof Typescript & IExtendedTypeScript;

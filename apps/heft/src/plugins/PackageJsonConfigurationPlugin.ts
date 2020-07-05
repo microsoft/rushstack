@@ -1,7 +1,7 @@
 import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { ITypescriptConfiguration, IBuildActionContext, ICompileStage } from '../cli/actions/BuildAction';
+import { ITypeScriptConfiguration, IBuildActionContext, ICompileStage } from '../cli/actions/BuildAction';
 import { IPackageJson } from '@rushstack/node-core-library';
 
 const PLUGIN_NAME: string = 'PackageJsonConfigurationPlugin';
@@ -12,23 +12,23 @@ export class PackageJsonConfigurationPlugin implements IHeftPlugin {
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildActionContext) => {
       build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileStage) => {
-        compile.hooks.afterConfigureTypescript.tap(PLUGIN_NAME, () => {
-          this._updateTypescriptConfiguration(
+        compile.hooks.afterConfigureTypeScript.tap(PLUGIN_NAME, () => {
+          this._updateTypeScriptConfiguration(
             heftConfiguration.projectPackageJson,
-            compile.properties.typescriptConfiguration
+            compile.properties.typeScriptConfiguration
           );
         });
       });
     });
   }
 
-  private _updateTypescriptConfiguration(
+  private _updateTypeScriptConfiguration(
     projectPackageJson: IPackageJson,
-    typescriptConfiguration: ITypescriptConfiguration
+    typeScriptConfiguration: ITypeScriptConfiguration
   ): void {
     if (projectPackageJson.private !== true) {
       // Copy if the package is intended to be published
-      typescriptConfiguration.copyFromCacheMode = 'copy';
+      typeScriptConfiguration.copyFromCacheMode = 'copy';
     }
   }
 }

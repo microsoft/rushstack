@@ -97,7 +97,7 @@ export type CopyFromCacheMode = 'hardlink' | 'copy';
 /**
  * @public
  */
-export interface ISharedTypescriptConfiguration {
+export interface ISharedTypeScriptConfiguration {
   /**
    * Can be set to 'copy' or 'hardlink'. If set to 'copy', copy files from cache. If set to 'hardlink', files will be
    * hardlinked to the cache location. This option is useful when producing a tarball of build output as TAR files
@@ -115,7 +115,7 @@ export interface ISharedTypescriptConfiguration {
 /**
  * @public
  */
-export interface ITypescriptConfiguration extends ISharedTypescriptConfiguration {
+export interface ITypeScriptConfiguration extends ISharedTypeScriptConfiguration {
   tsconfigPaths: string[];
   tslintConfigPath: string | undefined;
   isLintingEnabled: boolean | undefined;
@@ -125,10 +125,10 @@ export interface ITypescriptConfiguration extends ISharedTypescriptConfiguration
  * @public
  */
 export class CompileStageHooks extends BuildStageHooksBase {
-  public readonly configureTypescript: AsyncSeriesHook = new AsyncSeriesHook();
+  public readonly configureTypeScript: AsyncSeriesHook = new AsyncSeriesHook();
   public readonly configureCopyStaticAssets: AsyncSeriesHook = new AsyncSeriesHook();
 
-  public readonly afterConfigureTypescript: AsyncSeriesHook = new AsyncSeriesHook();
+  public readonly afterConfigureTypeScript: AsyncSeriesHook = new AsyncSeriesHook();
   public readonly afterConfigureCopyStaticAssets: AsyncSeriesHook = new AsyncSeriesHook();
 }
 
@@ -136,7 +136,7 @@ export class CompileStageHooks extends BuildStageHooksBase {
  * @public
  */
 export interface ICompileStageProperties {
-  typescriptConfiguration: ITypescriptConfiguration;
+  typeScriptConfiguration: ITypeScriptConfiguration;
   copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
 }
 
@@ -274,7 +274,7 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
     const compileStage: ICompileStage = {
       hooks: new CompileStageHooks(),
       properties: {
-        typescriptConfiguration: {
+        typeScriptConfiguration: {
           tsconfigPaths: [],
           tslintConfigPath: undefined,
           isLintingEnabled: !actionContext.properties.liteFlag,
@@ -312,11 +312,11 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
       // and that they will handle watching filesystem changes
 
       await Promise.all([
-        compileStage.hooks.configureTypescript.promise(),
+        compileStage.hooks.configureTypeScript.promise(),
         compileStage.hooks.configureCopyStaticAssets.promise()
       ]);
       await Promise.all([
-        compileStage.hooks.afterConfigureTypescript.promise(),
+        compileStage.hooks.afterConfigureTypeScript.promise(),
         compileStage.hooks.afterConfigureCopyStaticAssets.promise()
       ]);
 
@@ -330,11 +330,11 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
       await this._runStageWithLogging('Pre-compile', preCompileStage);
 
       await Promise.all([
-        compileStage.hooks.configureTypescript.promise(),
+        compileStage.hooks.configureTypeScript.promise(),
         compileStage.hooks.configureCopyStaticAssets.promise()
       ]);
       await Promise.all([
-        compileStage.hooks.afterConfigureTypescript.promise(),
+        compileStage.hooks.afterConfigureTypeScript.promise(),
         compileStage.hooks.afterConfigureCopyStaticAssets.promise()
       ]);
       await this._runStageWithLogging('Compile', compileStage);

@@ -12,7 +12,7 @@ import {
 import * as crypto from 'crypto';
 import { Tslint, Typescript } from '@microsoft/rush-stack-compiler-3.7';
 import {
-  ExtendedTypescript,
+  ExtendedTypeScript,
   IEmitResolver,
   IExtendedEmitResult,
   IEmitHost,
@@ -20,19 +20,19 @@ import {
   IExtendedProgram,
   IExtendedSourceFile,
   IResolveModuleNameResolutionHost
-} from './internalTypings/TypescriptInternals';
+} from './internalTypings/TypeScriptInternals';
 
 import { SubprocessRunnerBase } from '../../utilities/subprocess/SubprocessRunnerBase';
 import { Async } from '../../utilities/Async';
 import { ResolveUtilities } from '../../utilities/ResolveUtilities';
 import { IExtendedLinter } from './internalTypings/TslintInternals';
-import { IEmitModuleKindBase, ISharedTypescriptConfiguration } from '../../cli/actions/BuildAction';
+import { IEmitModuleKindBase, ISharedTypeScriptConfiguration } from '../../cli/actions/BuildAction';
 
 const ASYNC_LIMIT: number = 100;
 
-export interface ITypescriptBuilderConfiguration extends ISharedTypescriptConfiguration {
+export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfiguration {
   buildFolder: string;
-  typescriptToolPath: string;
+  typeScriptToolPath: string;
   tslintToolPath: string;
   eslintToolPath: string;
 
@@ -74,7 +74,7 @@ interface ITsLintCacheData {
 interface IRunTslintOptions {
   tslint: typeof Tslint;
   tsProgram: IExtendedProgram;
-  typescriptFilenames: Set<string>;
+  typeScriptFilenames: Set<string>;
   measurePerformance: PerformanceMeasurer;
   changedFiles: Set<IExtendedSourceFile>;
 }
@@ -93,7 +93,7 @@ type TWatchCompilerHost = Typescript.WatchCompilerHostOfFilesAndCompilerOptions<
 
 const EMPTY_JSON: object = {};
 
-export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderConfiguration> {
+export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderConfiguration> {
   private _lintingEnabled: boolean;
   private _moduleKindsToEmit: ICachedEmitModuleKind<Typescript.ModuleKind>[];
   private _rawProjectTslintFile: string | undefined;
@@ -152,7 +152,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
   }
 
   public async invokeAsync(): Promise<void> {
-    const ts: ExtendedTypescript = require(this._configuration.typescriptToolPath);
+    const ts: ExtendedTypeScript = require(this._configuration.typeScriptToolPath);
 
     const tslint: typeof Tslint | undefined = this._lintingEnabled
       ? require(this._configuration.tslintToolPath)
@@ -206,7 +206,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
     }
   }
 
-  public async _runWatch(ts: ExtendedTypescript, measureTsPerformance: PerformanceMeasurer): Promise<void> {
+  public async _runWatch(ts: ExtendedTypeScript, measureTsPerformance: PerformanceMeasurer): Promise<void> {
     //#region CONFIGURE
     const { duration: configureDurationMs, tsconfig, compilerHost } = measureTsPerformance(
       'Configure',
@@ -232,7 +232,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
   }
 
   public async _runBuild(
-    ts: ExtendedTypescript,
+    ts: ExtendedTypeScript,
     tslint: typeof Tslint | undefined,
     measureTsPerformance: PerformanceMeasurer,
     measureTsPerformanceAsync: PerformanceMeasurerAsync
@@ -244,7 +244,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
     const { duration: configureDurationMs, tsconfig, compilerHost } = measureTsPerformance(
       'Configure',
       () => {
-        this._overrideTypescriptReadJson(ts);
+        this._overrideTypeScriptReadJson(ts);
         const _tsconfig: Typescript.ParsedCommandLine = this._loadTsconfig(ts);
         const _compilerHost: Typescript.CompilerHost = this._buildIncrementalCompilerHost(ts, _tsconfig);
         return {
@@ -327,7 +327,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
     );
     //#endregion
 
-    const typescriptFilenames: Set<string> = new Set(tsconfig.fileNames);
+    const typeScriptFilenames: Set<string> = new Set(tsconfig.fileNames);
 
     //#region TSLINT
     let tslintResult: Tslint.LintResult | undefined = undefined;
@@ -335,7 +335,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
       tslintResult = await this._runTslintAsync({
         tslint,
         tsProgram: tsProgram.getProgram() as IExtendedProgram,
-        typescriptFilenames,
+        typeScriptFilenames: typeScriptFilenames,
         measurePerformance: measureTsPerformance,
         changedFiles: emitResult.changedSourceFiles
       });
@@ -406,7 +406,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
 
         for (const sourceFile of tsProgram.getSourceFiles()) {
           const filename: string = sourceFile.fileName;
-          if (typescriptFilenames.has(filename)) {
+          if (typeScriptFilenames.has(filename)) {
             const relativeFilenameWithoutExtension: string = ts.removeFileExtension(
               ts.getExternalModuleNameFromPath(resolverHost, filename)
             );
@@ -501,7 +501,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
   }
 
   private _printDiagnosticMessage(
-    ts: ExtendedTypescript,
+    ts: ExtendedTypeScript,
     diagnostic: Typescript.Diagnostic,
     withIndent: boolean = false
   ): void {
@@ -548,7 +548,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
   }
 
   private _emit(
-    ts: ExtendedTypescript,
+    ts: ExtendedTypeScript,
     tsconfig: Typescript.ParsedCommandLine,
     tsProgram: Typescript.BuilderProgram,
     writeFile: Typescript.WriteFileCallback
@@ -587,7 +587,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
 
     const changedFiles: Set<IExtendedSourceFile> = new Set<IExtendedSourceFile>();
     // Override the underlying file emitter to run itself once for each flavor
-    // This is a rather inelegant way to convince the typescript compiler not to duplicate parse/link/check
+    // This is a rather inelegant way to convince the TypeScript compiler not to duplicate parse/link/check
     ts.emitFiles = (
       resolver: IEmitResolver,
       host: IEmitHost,
@@ -655,7 +655,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
     };
   }
 
-  private _validateTsconfig(ts: ExtendedTypescript, tsconfig: Typescript.ParsedCommandLine): void {
+  private _validateTsconfig(ts: ExtendedTypeScript, tsconfig: Typescript.ParsedCommandLine): void {
     if (
       (tsconfig.options.module && !tsconfig.options.outDir) ||
       (!tsconfig.options.module && tsconfig.options.outDir)
@@ -747,7 +747,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
     return outFolderName;
   }
 
-  private _loadTsconfig(ts: ExtendedTypescript): Typescript.ParsedCommandLine {
+  private _loadTsconfig(ts: ExtendedTypeScript): Typescript.ParsedCommandLine {
     const parsedConfigFile: ReturnType<typeof ts.readConfigFile> = ts.readConfigFile(
       this._configuration.tsconfigPath,
       this._fileSystem.readFile
@@ -788,7 +788,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
   }
 
   private _buildIncrementalCompilerHost(
-    ts: ExtendedTypescript,
+    ts: ExtendedTypeScript,
     tsconfig: Typescript.ParsedCommandLine
   ): Typescript.CompilerHost {
     const compilerHost: Typescript.CompilerHost = ts.createIncrementalCompilerHost(tsconfig.options);
@@ -825,7 +825,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
   }
 
   private _buildWatchCompilerHost(
-    ts: ExtendedTypescript,
+    ts: ExtendedTypeScript,
     tsconfig: Typescript.ParsedCommandLine
   ): TWatchCompilerHost {
     return ts.createWatchCompilerHost(
@@ -856,7 +856,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
     );
   }
 
-  private _overrideTypescriptReadJson(ts: ExtendedTypescript): void {
+  private _overrideTypeScriptReadJson(ts: ExtendedTypeScript): void {
     ts.readJson = (filePath: string) => {
       let jsonData: object | undefined = this._tsReadJsonCache.get(filePath);
       if (jsonData) {
@@ -888,7 +888,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
   }
 
   private async _runTslintAsync(options: IRunTslintOptions): Promise<Tslint.LintResult> {
-    const { tslint, tsProgram, typescriptFilenames, measurePerformance, changedFiles } = options;
+    const { tslint, tsProgram, typeScriptFilenames, measurePerformance, changedFiles } = options;
 
     const tslintConfigHash: crypto.Hash = this._getConfigHash(this._configuration.tslintPath!);
     const tslintConfigVersion: string = `${tslint.Linter.VERSION}_${tslintConfigHash.digest('hex')}`;
@@ -942,7 +942,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
       const filePath: string = sourceFile.fileName;
 
       if (
-        !typescriptFilenames.has(filePath) ||
+        !typeScriptFilenames.has(filePath) ||
         tslint.Configuration.isFileExcluded(filePath, tslintConfiguration)
       ) {
         continue;
@@ -1009,7 +1009,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
     return hash.update(rawConfig);
   }
 
-  private _parseModuleKind(ts: ExtendedTypescript, moduleKindName: string): Typescript.ModuleKind {
+  private _parseModuleKind(ts: ExtendedTypeScript, moduleKindName: string): Typescript.ModuleKind {
     switch (moduleKindName.toLowerCase()) {
       case 'commonjs':
         return ts.ModuleKind.CommonJS;

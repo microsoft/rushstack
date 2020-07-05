@@ -8,13 +8,13 @@ import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.7';
 
 import { RushStackCompilerUtilities } from '../../utilities/RushStackCompilerUtilities';
 import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
-import { TypescriptBuilder, ITypescriptBuilderConfiguration } from './TypescriptBuilder';
+import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
 import { HeftSession } from '../../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import {
   CopyFromCacheMode,
   IEmitModuleKind,
-  ITypescriptConfiguration,
+  ITypeScriptConfiguration,
   IBuildActionContext,
   ICompileStage
 } from '../../cli/actions/BuildAction';
@@ -22,10 +22,10 @@ import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
 
 const PLUGIN_NAME: string = 'typescript';
 
-interface IRunTypescriptOptions {
+interface IRunTypeScriptOptions {
   heftSession: HeftSession;
   heftConfiguration: HeftConfiguration;
-  typescriptConfiguration: ITypescriptConfiguration;
+  typeScriptConfiguration: ITypeScriptConfiguration;
   watchMode: boolean;
 }
 
@@ -43,24 +43,24 @@ interface IRunBuilderForTsconfigOptions {
   additionalModuleKindsToEmit: IEmitModuleKind[] | undefined;
 }
 
-export class TypescriptPlugin implements IHeftPlugin {
+export class TypeScriptPlugin implements IHeftPlugin {
   public readonly displayName: string = PLUGIN_NAME;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildActionContext) => {
       build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileStage) => {
-        compile.hooks.configureTypescript.tapPromise(PLUGIN_NAME, async () => {
-          await this._configureTypescriptAsync(
-            compile.properties.typescriptConfiguration,
+        compile.hooks.configureTypeScript.tapPromise(PLUGIN_NAME, async () => {
+          await this._configureTypeScriptAsync(
+            compile.properties.typeScriptConfiguration,
             heftConfiguration.buildFolder
           );
         });
 
         compile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          await this._runTypescriptAsync({
+          await this._runTypeScriptAsync({
             heftSession,
             heftConfiguration,
-            typescriptConfiguration: compile.properties.typescriptConfiguration,
+            typeScriptConfiguration: compile.properties.typeScriptConfiguration,
             watchMode: build.properties.watchMode
           });
         });
@@ -68,12 +68,12 @@ export class TypescriptPlugin implements IHeftPlugin {
     });
   }
 
-  private async _configureTypescriptAsync(
-    typescriptConfiguration: ITypescriptConfiguration,
+  private async _configureTypeScriptAsync(
+    typeScriptConfiguration: ITypeScriptConfiguration,
     buildFolder: string
   ): Promise<void> {
-    typescriptConfiguration.tslintConfigPath = 'tslint.json';
-    typescriptConfiguration.tsconfigPaths = await LegacyAdapters.convertCallbackToPromise(
+    typeScriptConfiguration.tslintConfigPath = 'tslint.json';
+    typeScriptConfiguration.tsconfigPaths = await LegacyAdapters.convertCallbackToPromise(
       glob,
       'tsconfig?(-*).json',
       {
@@ -83,8 +83,8 @@ export class TypescriptPlugin implements IHeftPlugin {
     );
   }
 
-  private async _runTypescriptAsync(options: IRunTypescriptOptions): Promise<void> {
-    const { heftSession, heftConfiguration, typescriptConfiguration, watchMode } = options;
+  private async _runTypeScriptAsync(options: IRunTypeScriptOptions): Promise<void> {
+    const { heftSession, heftConfiguration, typeScriptConfiguration, watchMode } = options;
 
     const builderOptions: Omit<
       IRunBuilderForTsconfigOptions,
@@ -92,13 +92,13 @@ export class TypescriptPlugin implements IHeftPlugin {
     > = {
       heftSession: heftSession,
       heftConfiguration,
-      lintingEnabled: !!typescriptConfiguration.isLintingEnabled,
-      tslintFilePath: typescriptConfiguration.tslintConfigPath,
-      copyFromCacheMode: typescriptConfiguration.copyFromCacheMode,
+      lintingEnabled: !!typeScriptConfiguration.isLintingEnabled,
+      tslintFilePath: typeScriptConfiguration.tslintConfigPath,
+      copyFromCacheMode: typeScriptConfiguration.copyFromCacheMode,
       watchMode: watchMode
     };
 
-    const tsconfigFilePaths: string[] = typescriptConfiguration.tsconfigPaths;
+    const tsconfigFilePaths: string[] = typeScriptConfiguration.tsconfigPaths;
     if (tsconfigFilePaths.length === 1) {
       const builderTerminalProvider: PrefixProxyTerminalProvider = new PrefixProxyTerminalProvider(
         heftConfiguration.terminalProvider,
@@ -109,7 +109,7 @@ export class TypescriptPlugin implements IHeftPlugin {
         ...builderOptions,
         tsconfigFilePath: tsconfigFilePaths[0],
         terminalProvider: builderTerminalProvider,
-        additionalModuleKindsToEmit: typescriptConfiguration.additionalModuleKindsToEmit
+        additionalModuleKindsToEmit: typeScriptConfiguration.additionalModuleKindsToEmit
       });
     } else {
       const builderProcesses: Promise<void>[] = [];
@@ -122,7 +122,7 @@ export class TypescriptPlugin implements IHeftPlugin {
 
         // Only provide additionalModuleKindsToEmit to the default tsconfig.json
         const additionalModuleKindsToEmit: IEmitModuleKind[] | undefined =
-          tsconfigFilename === 'tsconfig' ? typescriptConfiguration.additionalModuleKindsToEmit : undefined;
+          tsconfigFilename === 'tsconfig' ? typeScriptConfiguration.additionalModuleKindsToEmit : undefined;
 
         builderProcesses.push(
           this._runBuilderForTsconfig({
@@ -163,9 +163,9 @@ export class TypescriptPlugin implements IHeftPlugin {
       throw new Error(`Unable to resolve a compiler package for ${path.basename(tsconfigFilePath)}`);
     }
 
-    const typescriptBuilderConfiguration: ITypescriptBuilderConfiguration = {
+    const typeScriptBuilderConfiguration: ITypeScriptBuilderConfiguration = {
       buildFolder: heftConfiguration.buildFolder,
-      typescriptToolPath: rscPackage.ToolPaths.typescriptPackagePath,
+      typeScriptToolPath: rscPackage.ToolPaths.typescriptPackagePath,
       tslintToolPath: rscPackage.ToolPaths.tslintPackagePath,
       eslintToolPath: rscPackage.ToolPaths.eslintPackagePath,
 
@@ -177,15 +177,15 @@ export class TypescriptPlugin implements IHeftPlugin {
       copyFromCacheMode,
       watchMode
     };
-    const typescriptBuilder: TypescriptBuilder = new TypescriptBuilder(
+    const typeScriptBuilder: TypeScriptBuilder = new TypeScriptBuilder(
       terminalProvider,
-      typescriptBuilderConfiguration
+      typeScriptBuilderConfiguration
     );
 
     if (heftSession.debugMode) {
-      await typescriptBuilder.invokeAsync();
+      await typeScriptBuilder.invokeAsync();
     } else {
-      await typescriptBuilder.invokeAsSubprocessAsync();
+      await typeScriptBuilder.invokeAsSubprocessAsync();
     }
   }
 }

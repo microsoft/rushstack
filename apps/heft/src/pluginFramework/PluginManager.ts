@@ -10,7 +10,7 @@ import { IHeftPlugin } from './IHeftPlugin';
 import { HeftSession } from './HeftSession';
 
 // Default plugins
-import { TypescriptPlugin } from '../plugins/TypescriptPlugin/TypescriptPlugin';
+import { TypeScriptPlugin } from '../plugins/TypeScriptPlugin_/TypeScriptPlugin';
 import { RushActionConfigurationFilesPlugin } from '../plugins/ActionConfigurationLoaders/RushActionConfigurationFilesPlugin';
 import { ProjectActionConfigurationFilesPlugin } from '../plugins/ActionConfigurationLoaders/ProjectActionConfigurationFilesPlugin';
 import { CleanPlugin } from '../plugins/CleanPlugin';
@@ -42,7 +42,7 @@ export class PluginManager {
   }
 
   public initializeDefaultPlugins(): void {
-    this._applyPlugin(new TypescriptPlugin());
+    this._applyPlugin(new TypeScriptPlugin());
     this._applyPlugin(new RushActionConfigurationFilesPlugin());
     this._applyPlugin(new ProjectActionConfigurationFilesPlugin());
     this._applyPlugin(new CopyStaticAssetsPlugin());

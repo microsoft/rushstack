@@ -55,11 +55,11 @@ export class CompileStageHooks extends BuildStageHooksBase {
     // (undocumented)
     readonly afterConfigureCopyStaticAssets: AsyncSeriesHook;
     // (undocumented)
-    readonly afterConfigureTypescript: AsyncSeriesHook;
+    readonly afterConfigureTypeScript: AsyncSeriesHook;
     // (undocumented)
     readonly configureCopyStaticAssets: AsyncSeriesHook;
     // (undocumented)
-    readonly configureTypescript: AsyncSeriesHook;
+    readonly configureTypeScript: AsyncSeriesHook;
 }
 
 // @public (undocumented)
@@ -159,7 +159,7 @@ export interface ICompileStageProperties {
     // (undocumented)
     copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
     // (undocumented)
-    typescriptConfiguration: ITypescriptConfiguration;
+    typeScriptConfiguration: ITypeScriptConfiguration;
 }
 
 // @public (undocumented)
@@ -259,7 +259,7 @@ export interface ISharedCopyStaticAssetsConfiguration {
 }
 
 // @public (undocumented)
-export interface ISharedTypescriptConfiguration {
+export interface ISharedTypeScriptConfiguration {
     additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
     copyFromCacheMode?: CopyFromCacheMode | undefined;
 }
@@ -281,7 +281,7 @@ export interface ITestActionProperties {
 }
 
 // @public (undocumented)
-export interface ITypescriptConfiguration extends ISharedTypescriptConfiguration {
+export interface ITypeScriptConfiguration extends ISharedTypeScriptConfiguration {
     // (undocumented)
     isLintingEnabled: boolean | undefined;
     // (undocumented)

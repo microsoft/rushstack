@@ -5,10 +5,10 @@ import * as path from 'path';
 import { JsonSchema, FileSystem, JsonFile } from '@rushstack/node-core-library';
 
 import {
-  ISharedTypescriptConfiguration,
+  ISharedTypeScriptConfiguration,
   ISharedCopyStaticAssetsConfiguration,
   ICopyStaticAssetsConfiguration,
-  ITypescriptConfiguration,
+  ITypeScriptConfiguration,
   IBuildActionContext
 } from '../../cli/actions/BuildAction';
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
@@ -26,7 +26,7 @@ interface ICopyStaticAssetsConfigurationJson
   extends IConfigurationJsonBase,
     ISharedCopyStaticAssetsConfiguration {}
 
-interface ITypescriptConfigurationJson extends IConfigurationJsonBase, ISharedTypescriptConfiguration {
+interface ITypeScriptConfigurationJson extends IConfigurationJsonBase, ISharedTypeScriptConfiguration {
   disableTslint?: boolean;
 }
 
@@ -59,10 +59,10 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
           );
         });
 
-        compile.hooks.configureTypescript.tapPromise(this.displayName, async () => {
-          await this._updateTypescriptConfigurationAsync(
+        compile.hooks.configureTypeScript.tapPromise(this.displayName, async () => {
+          await this._updateTypeScriptConfigurationAsync(
             heftConfiguration,
-            compile.properties.typescriptConfiguration
+            compile.properties.typeScriptConfiguration
           );
         });
       });
@@ -88,35 +88,35 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
       }
     }
 
-    const typescriptConfigurationJson:
-      | ITypescriptConfigurationJson
+    const typeScriptConfigurationJson:
+      | ITypeScriptConfigurationJson
       | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'typescript');
-    if (typescriptConfigurationJson?.additionalModuleKindsToEmit) {
-      for (const additionalModuleKindToEmit of typescriptConfigurationJson.additionalModuleKindsToEmit) {
+    if (typeScriptConfigurationJson?.additionalModuleKindsToEmit) {
+      for (const additionalModuleKindToEmit of typeScriptConfigurationJson.additionalModuleKindsToEmit) {
         cleanConfiguration.pathsToDelete.add(additionalModuleKindToEmit.outFolderPath);
       }
     }
   }
 
-  private async _updateTypescriptConfigurationAsync(
+  private async _updateTypeScriptConfigurationAsync(
     heftConfiguration: HeftConfiguration,
-    typescriptConfiguration: ITypescriptConfiguration
+    typeScriptConfiguration: ITypeScriptConfiguration
   ): Promise<void> {
-    const typescriptConfigurationJson:
-      | ITypescriptConfigurationJson
+    const typeScriptConfigurationJson:
+      | ITypeScriptConfigurationJson
       | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'typescript');
 
-    if (typescriptConfigurationJson?.copyFromCacheMode) {
-      typescriptConfiguration.copyFromCacheMode = typescriptConfigurationJson.copyFromCacheMode;
+    if (typeScriptConfigurationJson?.copyFromCacheMode) {
+      typeScriptConfiguration.copyFromCacheMode = typeScriptConfigurationJson.copyFromCacheMode;
     }
 
-    if (typescriptConfigurationJson?.additionalModuleKindsToEmit !== undefined) {
-      typescriptConfiguration.additionalModuleKindsToEmit =
-        typescriptConfigurationJson.additionalModuleKindsToEmit || undefined;
+    if (typeScriptConfigurationJson?.additionalModuleKindsToEmit !== undefined) {
+      typeScriptConfiguration.additionalModuleKindsToEmit =
+        typeScriptConfigurationJson.additionalModuleKindsToEmit || undefined;
     }
 
-    if (typescriptConfigurationJson?.disableTslint !== undefined) {
-      typescriptConfiguration.isLintingEnabled = !typescriptConfigurationJson.disableTslint;
+    if (typeScriptConfigurationJson?.disableTslint !== undefined) {
+      typeScriptConfiguration.isLintingEnabled = !typeScriptConfigurationJson.disableTslint;
     }
   }
 
