@@ -22,9 +22,8 @@ export default loaderFactory(function (
     resxNewlineNormalization: options.resxNewlineNormalization
   });
   const resultObject: { [stringName: string]: string } = {};
-  // eslint-disable-next-line guard-for-in
-  for (const stringName in locFileData) {
-    resultObject[stringName] = locFileData[stringName].value;
+  for (const [stringName, stringValue] of Object.entries(locFileData)) {
+    resultObject[stringName] = stringValue.value;
   }
 
   return resultObject;

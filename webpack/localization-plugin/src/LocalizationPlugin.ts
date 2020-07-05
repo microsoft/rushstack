@@ -15,9 +15,7 @@ import {
   ILocalizationPluginOptions,
   ILocalizationStats,
   ILocaleFileData,
-  ILocaleData,
   ILocalizationFile,
-  IPseudolocaleOptions,
   ILocaleElementMap,
   ILocalizedStrings,
   IResolvedMissingTranslations
@@ -460,7 +458,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     const locFileData: ILocaleFileData = this._convertLocalizationFileToLocData(localizedResourceData);
     this._addLocFile(this._defaultLocale, localizedResourcePath, locFileData);
 
-    const resolveLocalizedData: (localizedData: ILocaleFileData | string) => ILocaleFileData = (
+    const normalizeLocalizedData: (localizedData: ILocaleFileData | string) => ILocaleFileData = (
       localizedData
     ) => {
       if (typeof localizedData === 'string') {
@@ -479,16 +477,16 @@ export class LocalizationPlugin implements Webpack.Plugin {
     };
 
     const missingLocales: string[] = [];
-    for (const translatedLocaleName in this._resolvedTranslatedStringsFromOptions) {
-      if (this._resolvedTranslatedStringsFromOptions.hasOwnProperty(translatedLocaleName)) {
-        const translatedLocFileFromOptions: ILocaleFileData | string | undefined = this
-          ._resolvedTranslatedStringsFromOptions[translatedLocaleName][localizedResourcePath];
-        if (!translatedLocFileFromOptions) {
-          missingLocales.push(translatedLocaleName);
-        } else {
-          const translatedLocFileData: ILocaleFileData = resolveLocalizedData(translatedLocFileFromOptions);
-          this._addLocFile(translatedLocaleName, localizedResourcePath, translatedLocFileData);
-        }
+    for (const [translatedLocaleName, translatedStrings] of Object.entries(
+      this._resolvedTranslatedStringsFromOptions
+    )) {
+      const translatedLocFileFromOptions: ILocaleFileData | string | undefined =
+        translatedStrings[localizedResourcePath];
+      if (!translatedLocFileFromOptions) {
+        missingLocales.push(translatedLocaleName);
+      } else {
+        const translatedLocFileData: ILocaleFileData = normalizeLocalizedData(translatedLocFileFromOptions);
+        this._addLocFile(translatedLocaleName, localizedResourcePath, translatedLocFileData);
       }
     }
 
@@ -516,10 +514,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
     this._pseudolocalizers.forEach((pseudolocalizer: (str: string) => string, pseudolocaleName: string) => {
       const pseudolocFileData: ILocaleFileData = {};
 
-      for (const stringName in locFileData) {
-        if (locFileData.hasOwnProperty(stringName)) {
-          pseudolocFileData[stringName] = pseudolocalizer(locFileData[stringName]);
-        }
+      for (const [stringName, stringValue] of Object.entries(locFileData)) {
+        pseudolocFileData[stringName] = pseudolocalizer(stringValue);
       }
 
       this._addLocFile(pseudolocaleName, localizedResourcePath, pseudolocFileData);
@@ -633,54 +629,51 @@ export class LocalizationPlugin implements Webpack.Plugin {
       const { translatedStrings } = this._options.localizedData;
       this._resolvedTranslatedStringsFromOptions = {};
       if (translatedStrings) {
-        for (const localeName in translatedStrings) {
-          if (translatedStrings.hasOwnProperty(localeName)) {
-            if (this._locales.has(localeName)) {
-              errors.push(
-                Error(
-                  `The locale "${localeName}" appears multiple times. ` +
-                    'There may be multiple instances with different casing.'
-                )
-              );
-              return { errors, warnings };
-            }
+        for (const [localeName, locale] of Object.entries(translatedStrings)) {
+          if (this._locales.has(localeName)) {
+            errors.push(
+              Error(
+                `The locale "${localeName}" appears multiple times. ` +
+                  'There may be multiple instances with different casing.'
+              )
+            );
+            return { errors, warnings };
+          }
 
-            if (!ensureValidLocaleName(localeName)) {
-              return { errors, warnings };
-            }
+          if (!ensureValidLocaleName(localeName)) {
+            return { errors, warnings };
+          }
 
-            this._locales.add(localeName);
-            this._resolvedLocalizedStrings.set(localeName, new Map<string, Map<string, string>>());
-            this._resolvedTranslatedStringsFromOptions[localeName] = {};
+          this._locales.add(localeName);
+          this._resolvedLocalizedStrings.set(localeName, new Map<string, Map<string, string>>());
+          this._resolvedTranslatedStringsFromOptions[localeName] = {};
 
-            const locFilePathsInLocale: Set<string> = new Set<string>();
+          const locFilePathsInLocale: Set<string> = new Set<string>();
 
-            const locale: ILocaleData = translatedStrings[localeName];
-            for (const locFilePath in locale) {
-              if (locale.hasOwnProperty(locFilePath)) {
-                const normalizedLocFilePath: string = path.resolve(configuration.context!, locFilePath);
+          for (const [locFilePath, locFileDataFromOptions] of Object.entries(locale)) {
+            if (locale.hasOwnProperty(locFilePath)) {
+              const normalizedLocFilePath: string = path.resolve(configuration.context!, locFilePath);
 
-                if (locFilePathsInLocale.has(normalizedLocFilePath)) {
-                  errors.push(
-                    new Error(
-                      `The localization file path "${locFilePath}" appears multiple times in locale ${localeName}. ` +
-                        'There may be multiple instances with different casing.'
-                    )
-                  );
-                  return { errors, warnings };
-                }
-
-                locFilePathsInLocale.add(normalizedLocFilePath);
-
-                let locFileDataFromOptions: ILocaleFileData | string = locale[locFilePath];
-                if (typeof locFileDataFromOptions === 'string') {
-                  locFileDataFromOptions = path.resolve(configuration.context!, locFileDataFromOptions);
-                }
-
-                this._resolvedTranslatedStringsFromOptions[localeName][
-                  normalizedLocFilePath
-                ] = locFileDataFromOptions;
+              if (locFilePathsInLocale.has(normalizedLocFilePath)) {
+                errors.push(
+                  new Error(
+                    `The localization file path "${locFilePath}" appears multiple times in locale ${localeName}. ` +
+                      'There may be multiple instances with different casing.'
+                  )
+                );
+                return { errors, warnings };
               }
+
+              locFilePathsInLocale.add(normalizedLocFilePath);
+
+              const normalizedLocFileDataFromOptions: string | ILocaleFileData =
+                typeof locFileDataFromOptions === 'string'
+                  ? path.resolve(configuration.context!, locFileDataFromOptions)
+                  : locFileDataFromOptions;
+
+              this._resolvedTranslatedStringsFromOptions[localeName][
+                normalizedLocFilePath
+              ] = normalizedLocFileDataFromOptions;
             }
           }
         }
@@ -714,34 +707,31 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
       // START options.localizedData.pseudoLocales
       if (this._options.localizedData.pseudolocales) {
-        for (const pseudolocaleName in this._options.localizedData.pseudolocales) {
-          if (this._options.localizedData.pseudolocales.hasOwnProperty(pseudolocaleName)) {
-            if (this._defaultLocale === pseudolocaleName) {
-              errors.push(
-                new Error(`A pseudolocale (${pseudolocaleName}) name is also the default locale name.`)
-              );
-              return { errors, warnings };
-            }
-
-            if (this._locales.has(pseudolocaleName)) {
-              errors.push(
-                new Error(
-                  `A pseudolocale (${pseudolocaleName}) name is also specified in the translated strings.`
-                )
-              );
-              return { errors, warnings };
-            }
-
-            const pseudoLocaleOpts: IPseudolocaleOptions = this._options.localizedData.pseudolocales[
-              pseudolocaleName
-            ];
-            this._pseudolocalizers.set(
-              pseudolocaleName,
-              Pseudolocalization.getPseudolocalizer(pseudoLocaleOpts)
+        for (const [pseudolocaleName, pseudoLocaleOpts] of Object.entries(
+          this._options.localizedData.pseudolocales
+        )) {
+          if (this._defaultLocale === pseudolocaleName) {
+            errors.push(
+              new Error(`A pseudolocale (${pseudolocaleName}) name is also the default locale name.`)
             );
-            this._locales.add(pseudolocaleName);
-            this._resolvedLocalizedStrings.set(pseudolocaleName, new Map<string, Map<string, string>>());
+            return { errors, warnings };
           }
+
+          if (this._locales.has(pseudolocaleName)) {
+            errors.push(
+              new Error(
+                `A pseudolocale (${pseudolocaleName}) name is also specified in the translated strings.`
+              )
+            );
+            return { errors, warnings };
+          }
+
+          this._pseudolocalizers.set(
+            pseudolocaleName,
+            Pseudolocalization.getPseudolocalizer(pseudoLocaleOpts)
+          );
+          this._locales.add(pseudolocaleName);
+          this._resolvedLocalizedStrings.set(pseudolocaleName, new Map<string, Map<string, string>>());
         }
       }
       // END options.localizedData.pseudoLocales
