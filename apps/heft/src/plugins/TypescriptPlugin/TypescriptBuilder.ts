@@ -24,7 +24,7 @@ import {
 
 import { SubprocessRunnerBase } from '../../utilities/subprocess/SubprocessRunnerBase';
 import { Async } from '../../utilities/Async';
-import { resolvePackagePath } from '../../utilities/resolvePackage';
+import { ResolveUtilities } from '../../utilities/ResolveUtilities';
 import { IExtendedLinter } from './privateTypings/ExtendedTslint';
 import { IEmitModuleKindBase, ISharedTypescriptConfiguration } from '../../cli/actions/BuildAction';
 
@@ -990,7 +990,7 @@ export class TypescriptBuilder extends SubprocessRunnerBase<ITypescriptBuilderCo
     const parsedTslintConfig: ISimpleTslintConfig = JsonFile.parseString(rawTslintConfig);
     let hash: crypto.Hash;
     if (parsedTslintConfig.extends) {
-      const tslintExtendsFullPath: string = resolvePackagePath(
+      const tslintExtendsFullPath: string = ResolveUtilities.resolvePackagePath(
         parsedTslintConfig.extends,
         path.dirname(tslintConfigPath)
       );
