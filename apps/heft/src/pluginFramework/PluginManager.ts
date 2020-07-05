@@ -10,7 +10,7 @@ import { IHeftPlugin } from './IHeftPlugin';
 import { HeftSession } from './HeftSession';
 
 // Default plugins
-import { TypeScriptPlugin } from '../plugins/TypeScriptPlugin_/TypeScriptPlugin';
+import { TypeScriptPlugin } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
 import { RushActionConfigurationFilesPlugin } from '../plugins/ActionConfigurationLoaders/RushActionConfigurationFilesPlugin';
 import { ProjectActionConfigurationFilesPlugin } from '../plugins/ActionConfigurationLoaders/ProjectActionConfigurationFilesPlugin';
 import { CleanPlugin } from '../plugins/CleanPlugin';
