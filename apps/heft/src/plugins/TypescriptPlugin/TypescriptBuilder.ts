@@ -20,12 +20,12 @@ import {
   IExtendedProgram,
   IExtendedSourceFile,
   IResolveModuleNameResolutionHost
-} from './privateTypings/ExtendedTypescript';
+} from './internalTypings/TypescriptInternals';
 
 import { SubprocessRunnerBase } from '../../utilities/subprocess/SubprocessRunnerBase';
 import { Async } from '../../utilities/Async';
 import { ResolveUtilities } from '../../utilities/ResolveUtilities';
-import { IExtendedLinter } from './privateTypings/ExtendedTslint';
+import { IExtendedLinter } from './internalTypings/TslintInternals';
 import { IEmitModuleKindBase, ISharedTypescriptConfiguration } from '../../cli/actions/BuildAction';
 
 const ASYNC_LIMIT: number = 100;

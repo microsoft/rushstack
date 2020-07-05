@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { Tslint } from '@microsoft/rush-stack-compiler-3.7';
-import { IExtendedSourceFile } from './ExtendedTypescript';
+import { IExtendedSourceFile } from './TypescriptInternals';
 
 type TrimmedLinter = Omit<Tslint.Linter, 'getAllFailures' | 'getEnabledRules' | 'failures'>;
 export interface IExtendedLinter extends TrimmedLinter {
