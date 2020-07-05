@@ -6,10 +6,13 @@ import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from './RushConstants';
 
-export class TempProjectHelper {
-  _rushConfiguration: RushConfiguration;
+// The PosixModeBits are intended to be used with bitwise operations.
+/* eslint-disable no-bitwise */
 
-  constructor(rushConfiguration: RushConfiguration) {
+export class TempProjectHelper {
+  private _rushConfiguration: RushConfiguration;
+
+  public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
   }
 
@@ -17,6 +20,7 @@ export class TempProjectHelper {
    * Deletes the existing tarball and creates a tarball for the given rush project
    */
   public createTempProjectTarball(rushProject: RushConfigurationProject): void {
+    FileSystem.ensureFolder(path.resolve(this._rushConfiguration.commonTempFolder, 'projects'));
     const tarballFile: string = this.getTarballFilePath(rushProject);
     const tempProjectFolder: string = this.getTempProjectFolder(rushProject);
 

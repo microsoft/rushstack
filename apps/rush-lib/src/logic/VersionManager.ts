@@ -87,15 +87,35 @@ export class VersionManager {
       this._getLockStepProjects()
     );
 
-    if (this._rushConfiguration.packageManager == 'pnpm') {
+    changeManager.load(this._rushConfiguration.changesFolder);
+    if (changeManager.hasChanges()) {
+      changeManager.validateChanges(this._versionPolicyConfiguration);
+      changeManager.apply(!!shouldCommit)!.forEach((packageJson) => {
+        this._updatedProjects.set(packageJson.name, packageJson);
+      });
+      changeManager.updateChangelog(!!shouldCommit);
+    }
+
+    this._updateTarballIntegrities();
+  }
+
+  private _updateTarballIntegrities(): void {
+    if (this._rushConfiguration.packageManager === 'pnpm') {
+      console.log('The package manager is pnpm.');
       const tempProjectHelper: TempProjectHelper = new TempProjectHelper(this._rushConfiguration);
 
+      const shrinkwrapFilePath: string = this._rushConfiguration.getCommittedShrinkwrapFilename(
+        this._rushConfiguration.currentInstalledVariant
+      );
+
       const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
-        this._rushConfiguration.tempShrinkwrapFilename,
+        shrinkwrapFilePath,
         this._rushConfiguration.pnpmOptions
       );
 
       if (pnpmShrinkwrapFile) {
+        console.log('Updating shrinkwrap.');
+
         for (const rushProject of this._rushConfiguration.projects) {
           tempProjectHelper.createTempProjectTarball(rushProject);
 
@@ -118,26 +138,15 @@ export class VersionManager {
             );
           }
 
+          console.log(`Updating entry for ${rushProject.packageName}.`);
+
           parentShrinkwrapEntry.resolution.integrity = ssri
             .fromData(fs.readFileSync(tempProjectHelper.getTarballFilePath(rushProject)))
             .toString();
         }
 
-        pnpmShrinkwrapFile.save(
-          this._rushConfiguration.getCommittedShrinkwrapFilename(
-            this._rushConfiguration.currentInstalledVariant
-          )
-        );
+        // pnpmShrinkwrapFile.save(shrinkwrapFilePath);
       }
-    }
-
-    changeManager.load(this._rushConfiguration.changesFolder);
-    if (changeManager.hasChanges()) {
-      changeManager.validateChanges(this._versionPolicyConfiguration);
-      changeManager.apply(!!shouldCommit)!.forEach((packageJson) => {
-        this._updatedProjects.set(packageJson.name, packageJson);
-      });
-      changeManager.updateChangelog(!!shouldCommit);
     }
   }
 
