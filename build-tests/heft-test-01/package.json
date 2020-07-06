@@ -8,7 +8,7 @@
     "build": "heft build --clean"
   },
   "devDependencies": {
-    "@rushstack/heft": "0.1.0",
-    "@microsoft/rush-stack-compiler-3.7": "0.6.1"
+    "@rushstack/heft": "workspace:*",
+    "@microsoft/rush-stack-compiler-3.7": "workspace:*"
   }
 }
