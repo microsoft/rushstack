@@ -6,6 +6,7 @@ import * as path from 'path';
 import { AsyncSeriesBailHook } from 'tapable';
 import { LegacyAdapters } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import * as globEscape from 'glob-escape';
 
 import { HeftActionBase, IHeftActionBaseOptions, ActionHooksBase, IActionContext } from './HeftActionBase';
 import { Async } from '../../utilities/Async';
@@ -29,8 +30,6 @@ export interface ICleanActionProperties {
  * @public
  */
 export interface ICleanActionContext extends IActionContext<CleanHooks, ICleanActionProperties> {}
-
-const GLOB_PATTERN_REGEX: RegExp = /\/\*[^\*]/;
 
 export class CleanAction extends HeftActionBase<CleanHooks, ICleanActionProperties> {
   private _deleteCacheFlag: CommandLineFlagParameter;
@@ -87,7 +86,7 @@ export class CleanAction extends HeftActionBase<CleanHooks, ICleanActionProperti
   }
 
   private async _resolvePath(globPattern: string, buildFolder: string): Promise<string[]> {
-    if (GLOB_PATTERN_REGEX.test(globPattern)) {
+    if (globEscape(globPattern) !== globPattern) {
       const expandedGlob: string[] = await LegacyAdapters.convertCallbackToPromise(glob, globPattern, {
         cwd: buildFolder
       });
