@@ -27,6 +27,7 @@ import { Async } from '../../utilities/Async';
 import { ResolveUtilities } from '../../utilities/ResolveUtilities';
 import { IExtendedLinter } from './internalTypings/TslintInternals';
 import { IEmitModuleKindBase, ISharedTypeScriptConfiguration } from '../../cli/actions/BuildAction';
+import { PerformanceMeasurer, PerformanceMeasurerAsync } from '../../utilities/Performance';
 
 const ASYNC_LIMIT: number = 100;
 
@@ -74,14 +75,6 @@ interface IRunTslintOptions {
   changedFiles: Set<IExtendedSourceFile>;
 }
 
-type PerformanceMeasurer = <TResult extends object | void>(
-  measurementName: string,
-  fn: () => TResult
-) => TResult & { duration: number };
-type PerformanceMeasurerAsync = <TResult extends object | void>(
-  measurementName: string,
-  fn: () => Promise<TResult>
-) => Promise<TResult & { duration: number }>;
 type TWatchCompilerHost = Typescript.WatchCompilerHostOfFilesAndCompilerOptions<
   Typescript.EmitAndSemanticDiagnosticsBuilderProgram
 >;
