@@ -276,7 +276,7 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
         typeScriptConfiguration: {
           tsconfigPaths: [],
           isLintingEnabled: !actionContext.properties.liteFlag,
-          copyFromCacheMode: 'hardlink',
+          copyFromCacheMode: undefined,
           additionalModuleKindsToEmit: undefined
         },
         copyStaticAssetsConfiguration: {
