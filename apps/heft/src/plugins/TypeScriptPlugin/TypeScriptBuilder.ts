@@ -58,11 +58,24 @@ export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfig
    */
   buildCacheFolder: string;
 
+  /**
+   * The maximum number of simultaneous filesystem writes allowed.
+   */
   maxWriteParallelism: number;
 }
 
 interface ICachedEmitModuleKind<TModuleKind> extends IEmitModuleKindBase<TModuleKind> {
+  /**
+   * TypeScript's output is placed in the \<project root\>/.heft/build-cache folder.
+   * This is the the path to the subfolder in the build-cache folder that this emit kind
+   * written to.
+   */
   cacheOutFolderPath: string;
+
+  /**
+   * Set to true if this is the emit kind that is specified in the tsconfig.json.
+   * Sourcemaps and declarations are only emitted for the primary module kind.
+   */
   isPrimary: boolean;
 }
 
@@ -72,6 +85,10 @@ interface IFileToWrite {
 }
 
 interface ITsLintCacheData {
+  /**
+   * The TSLint version and a hash of the TSLint config files. If either changes,
+   * the cache is invalidated.
+   */
   cacheVersion: string;
 
   /**
@@ -84,8 +101,20 @@ interface ITsLintCacheData {
 interface IRunTslintOptions {
   tslint: typeof TTslint;
   tsProgram: IExtendedProgram;
+
+  /**
+   * All of the files that the TypeScript compiler processed.
+   */
   typeScriptFilenames: Set<string>;
+
+  /**
+   * A performance measurer for the TSLint run.
+   */
   measurePerformance: PerformanceMeasurer;
+
+  /**
+   * The set of files that TypeScript has compiled since the last compilation.
+   */
   changedFiles: Set<IExtendedSourceFile>;
 }
 
