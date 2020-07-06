@@ -534,7 +534,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         const severity: string = tslintFailure.getRuleSeverity().toUpperCase();
         this._tslintTerminal.writeWarningLine(
           '  ',
-          Colors.yellow(`${severity}: ${buildFolderRelativeFilename}(${line + 1},${character + 1})`),
+          Colors.yellow(`${severity}: ${buildFolderRelativeFilename}:${line + 1}:${character + 1}`),
           Colors.white(' - '),
           Colors.yellow(`(${tslintFailure.getRuleName()}) ${tslintFailure.getFailure()}`)
         );
@@ -561,7 +561,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         diagnostic.file.fileName
       );
       terminalMessage = [
-        Colors.red(`ERROR: ${buildFolderRelativeFilename}(${line + 1},${character + 1})`),
+        Colors.red(`ERROR: ${buildFolderRelativeFilename}:${line + 1}:${character + 1}`),
         Colors.white(' - '),
         Colors.gray(`(TS${diagnostic.code})`),
         ' ',
