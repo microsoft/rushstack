@@ -19,16 +19,18 @@ import { AddAction } from './actions/AddAction';
 import { ChangeAction } from './actions/ChangeAction';
 import { CheckAction } from './actions/CheckAction';
 import { DeployAction } from './actions/DeployAction';
-import { UpdateAction } from './actions/UpdateAction';
-import { InstallAction } from './actions/InstallAction';
 import { InitAction } from './actions/InitAction';
+import { InitAutoinstallerAction } from './actions/InitAutoinstaller';
 import { InitDeployAction } from './actions/InitDeployAction';
+import { InstallAction } from './actions/InstallAction';
 import { LinkAction } from './actions/LinkAction';
 import { ListAction } from './actions/ListAction';
 import { PublishAction } from './actions/PublishAction';
 import { PurgeAction } from './actions/PurgeAction';
-import { UnlinkAction } from './actions/UnlinkAction';
 import { ScanAction } from './actions/ScanAction';
+import { UnlinkAction } from './actions/UnlinkAction';
+import { UpdateAction } from './actions/UpdateAction';
+import { UpdateAutoinstallerAction } from './actions/UpdateAutoinstaller';
 import { VersionAction } from './actions/VersionAction';
 
 import { BulkScriptAction } from './scriptActions/BulkScriptAction';
@@ -38,7 +40,6 @@ import { Telemetry } from '../logic/Telemetry';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
-import { InitAutoinstallerAction } from './actions/InitAutoinstaller';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -163,17 +164,18 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new ChangeAction(this));
       this.addAction(new CheckAction(this));
       this.addAction(new DeployAction(this));
-      this.addAction(new InstallAction(this));
       this.addAction(new InitAction(this));
       this.addAction(new InitAutoinstallerAction(this));
       this.addAction(new InitDeployAction(this));
+      this.addAction(new InstallAction(this));
       this.addAction(new LinkAction(this));
       this.addAction(new ListAction(this));
       this.addAction(new PublishAction(this));
       this.addAction(new PurgeAction(this));
       this.addAction(new ScanAction(this));
-      this.addAction(new UpdateAction(this));
       this.addAction(new UnlinkAction(this));
+      this.addAction(new UpdateAction(this));
+      this.addAction(new UpdateAutoinstallerAction(this));
       this.addAction(new VersionAction(this));
 
       this._populateScriptActions();

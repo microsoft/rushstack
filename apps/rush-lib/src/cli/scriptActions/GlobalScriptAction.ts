@@ -8,10 +8,11 @@ import * as path from 'path';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { Utilities } from '../../utilities/Utilities';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
-import { FileSystem, LockFile, IPackageJson, JsonFile, PackageName } from '@rushstack/node-core-library';
+import { FileSystem, LockFile, IPackageJson, JsonFile } from '@rushstack/node-core-library';
 import { InstallHelpers } from '../../logic/installManager/InstallHelpers';
 import { RushConstants } from '../../logic/RushConstants';
 import { LastInstallFlag } from '../../api/LastInstallFlag';
+import { Autoinstaller } from '../../logic/Autoinstaller';
 
 /**
  * Constructor parameters for GlobalScriptAction.
@@ -42,14 +43,7 @@ export class GlobalScriptAction extends BaseScriptAction {
     this._autoinstallerName = options.autoinstallerName || '';
 
     if (this._autoinstallerName) {
-      const error: string = PackageName.tryParse(this._autoinstallerName).error;
-      if (error) {
-        throw new Error(
-          `The custom command "${this.actionName}" specifies a "autoinstallerName" containing` +
-            ` invalid characters: ` +
-            error
-        );
-      }
+      Autoinstaller.validateName(this._autoinstallerName);
 
       // Example: .../common/autoinstallers/my-task
       this._autoinstallerFullPath = path.join(
