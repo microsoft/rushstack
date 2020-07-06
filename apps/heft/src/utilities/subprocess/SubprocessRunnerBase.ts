@@ -26,6 +26,13 @@ interface ISubprocessExitMessage extends ISubprocessMessage {
   errorStack?: string;
 }
 
+/**
+ * This base class allows an computationally expensive task to be run in a separate NodeJS
+ * process.
+ *
+ * The subprocess can be provided with a configuration, which must be JSON-serializable,
+ * and the subprocess can log data via a Terminal object.
+ */
 export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
   public static [SUBPROCESS_RUNNER_CLASS_LABEL]: boolean = true;
   private static _subprocessInspectorPort: number = 9229 + 1; // 9229 is the default port
@@ -35,6 +42,9 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
   protected _fileSystem: IExtendedFileSystem = new CachedFileSystem();
   private _terminalProvider: ITerminalProvider;
 
+  /**
+   * The subprocess filename. This should be set to __filename in the child class.
+   */
   public abstract get filename(): string;
 
   public constructor(terminalProvider: ITerminalProvider, configuration: TSubprocessConfiguration) {
