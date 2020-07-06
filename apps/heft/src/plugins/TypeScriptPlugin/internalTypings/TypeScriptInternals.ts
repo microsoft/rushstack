@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Typescript } from '@microsoft/rush-stack-compiler-3.7';
+import { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.7';
 
 // The specifics of these types aren't important
 /**
@@ -19,7 +19,7 @@ export interface IEmitHost {}
  */
 export interface IEmitTransformers {}
 
-export interface IExtendedProgram extends Typescript.Program {
+export interface IExtendedProgram extends TTypescript.Program {
   /**
    * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/types.ts#L3205
    */
@@ -30,7 +30,7 @@ export interface IExtendedProgram extends Typescript.Program {
    */
   getCommonSourceDirectory(): string;
 }
-export interface IExtendedSourceFile extends Typescript.SourceFile {
+export interface IExtendedSourceFile extends TTypescript.SourceFile {
   /**
    * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/types.ts#L3205
    */
@@ -108,19 +108,19 @@ export interface IExtendedTypeScript {
   emitFiles(
     resolver: IEmitResolver,
     host: IEmitHost,
-    targetSourceFile: Typescript.SourceFile | undefined,
+    targetSourceFile: TTypescript.SourceFile | undefined,
     emitTransformers: IEmitTransformers,
     emitOnlyDtsFiles?: boolean,
     onlyBuildInfo?: boolean,
     forceDtsEmit?: boolean
-  ): Typescript.EmitResult;
+  ): TTypescript.EmitResult;
 
   /**
    * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/transformer.ts#L30-L35
    */
   getTransformers(
-    compilerOptions: Typescript.CompilerOptions,
-    customTransformers?: Typescript.CustomTransformers,
+    compilerOptions: TTypescript.CompilerOptions,
+    customTransformers?: TTypescript.CustomTransformers,
     emitOnlyDtsFiles?: boolean
   ): IEmitTransformers;
 
@@ -139,8 +139,8 @@ export interface IExtendedTypeScript {
   ): string;
 }
 
-export interface IExtendedEmitResult extends Typescript.EmitResult {
+export interface IExtendedEmitResult extends TTypescript.EmitResult {
   changedSourceFiles: Set<IExtendedSourceFile>;
 }
 
-export type ExtendedTypeScript = typeof Typescript & IExtendedTypeScript;
+export type ExtendedTypeScript = typeof TTypescript & IExtendedTypeScript;

@@ -14,7 +14,6 @@ import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { SyncHook } from 'tapable';
 import { Terminal } from '@rushstack/node-core-library';
-import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.7';
 
 // @public (undocumented)
 export abstract class ActionHooksBase<TActionProperties extends object> {
@@ -73,12 +72,12 @@ export class DevDeployHooks extends ActionHooksBase<IDevDeployActionProperties> 
 export class HeftConfiguration {
     get buildCacheFolder(): string;
     get buildFolder(): string;
+    get compilerPackage(): ICompilerPackage | undefined;
     get heftPackageJson(): IPackageJson;
     // @internal (undocumented)
     static initialize(options: _IHeftConfigurationInitializationOptions): HeftConfiguration;
     get projectHeftDataFolder(): string;
     get projectPackageJson(): IPackageJson;
-    get rushStackCompilerPackage(): typeof TRushStackCompiler | undefined;
     get terminal(): Terminal;
     get terminalProvider(): ITerminalProvider;
     }
@@ -150,6 +149,16 @@ export interface ICleanActionProperties {
     deleteCache: boolean;
     // (undocumented)
     pathsToDelete: Set<string>;
+}
+
+// @public (undocumented)
+export interface ICompilerPackage {
+    // (undocumented)
+    eslintPath: string;
+    // (undocumented)
+    tslintPath: string;
+    // (undocumented)
+    typeScriptPath: string;
 }
 
 // @public (undocumented)

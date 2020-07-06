@@ -48,6 +48,15 @@ export interface IHeftActionConfigurationOptions {
 /**
  * @public
  */
+export interface ICompilerPackage {
+  typeScriptPath: string;
+  tslintPath: string;
+  eslintPath: string;
+}
+
+/**
+ * @public
+ */
 export class HeftConfiguration {
   private _buildFolder: string;
   private _projectHeftDataFolder: string | undefined;
@@ -55,8 +64,8 @@ export class HeftConfiguration {
   private _terminal: Terminal;
   private _terminalProvider: ITerminalProvider;
 
-  private _rushStackCompilerPackage: typeof TRushStackCompiler | undefined;
-  private _hasRscPackageBeenAccessed: boolean = false;
+  private _compilerPackage: ICompilerPackage | undefined;
+  private _hasCompilerPackageBeenAccessed: boolean = false;
 
   /**
    * Project build folder. This is the folder containing the project's package.json file.
@@ -79,7 +88,7 @@ export class HeftConfiguration {
   /**
    * The project's build cache folder.
    *
-   * This folder exists at <project root>/.heft/build-cache. TypeScript's output
+   * This folder exists at \<project root\>/.heft/build-cache. TypeScript's output
    * goes into this folder and then is either copied or linked to the final output folder
    */
   public get buildCacheFolder(): string {
@@ -119,19 +128,29 @@ export class HeftConfiguration {
   }
 
   /**
-   * If used by the project being built, the rush-stack-compiler-* package.
+   * If used by the project being built, the tool package paths exported from
+   * the rush-stack-compiler-* package.
    */
-  public get rushStackCompilerPackage(): typeof TRushStackCompiler | undefined {
-    if (!this._hasRscPackageBeenAccessed) {
-      this._rushStackCompilerPackage = RushStackCompilerUtilities.tryLoadRushStackCompilerPackageForFolder(
+  public get compilerPackage(): ICompilerPackage | undefined {
+    if (!this._hasCompilerPackageBeenAccessed) {
+      const rushStackCompilerPackage:
+        | typeof TRushStackCompiler
+        | undefined = RushStackCompilerUtilities.tryLoadRushStackCompilerPackageForFolder(
         this.terminal,
         this._buildFolder
       );
 
-      this._hasRscPackageBeenAccessed = true;
+      this._hasCompilerPackageBeenAccessed = true;
+      if (rushStackCompilerPackage) {
+        this._compilerPackage = {
+          typeScriptPath: rushStackCompilerPackage.ToolPaths.typescriptPackagePath,
+          tslintPath: rushStackCompilerPackage.ToolPaths.tslintPackagePath,
+          eslintPath: rushStackCompilerPackage.ToolPaths.eslintPackagePath
+        };
+      }
     }
 
-    return this._rushStackCompilerPackage;
+    return this._compilerPackage;
   }
 
   private constructor() {}

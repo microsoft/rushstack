@@ -10,7 +10,7 @@ import {
   IColorableSequence
 } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
-import { Tslint, Typescript } from '@microsoft/rush-stack-compiler-3.7';
+import { Tslint as TTslint, Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.7';
 import {
   ExtendedTypeScript,
   IEmitResolver,
@@ -73,22 +73,22 @@ interface ITsLintCacheData {
 }
 
 interface IRunTslintOptions {
-  tslint: typeof Tslint;
+  tslint: typeof TTslint;
   tsProgram: IExtendedProgram;
   typeScriptFilenames: Set<string>;
   measurePerformance: PerformanceMeasurer;
   changedFiles: Set<IExtendedSourceFile>;
 }
 
-type TWatchCompilerHost = Typescript.WatchCompilerHostOfFilesAndCompilerOptions<
-  Typescript.EmitAndSemanticDiagnosticsBuilderProgram
+type TWatchCompilerHost = TTypescript.WatchCompilerHostOfFilesAndCompilerOptions<
+  TTypescript.EmitAndSemanticDiagnosticsBuilderProgram
 >;
 
 const EMPTY_JSON: object = {};
 
 export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderConfiguration> {
   private _lintingEnabled: boolean;
-  private _moduleKindsToEmit: ICachedEmitModuleKind<Typescript.ModuleKind>[];
+  private _moduleKindsToEmit: ICachedEmitModuleKind<TTypescript.ModuleKind>[];
   private _rawProjectTslintFile: string | undefined;
   private _tslintConfigFilePath: string;
 
@@ -146,7 +146,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   public async invokeAsync(): Promise<void> {
     const ts: ExtendedTypeScript = require(this._configuration.typeScriptToolPath);
 
-    const tslint: typeof Tslint | undefined = this._lintingEnabled
+    const tslint: typeof TTslint | undefined = this._lintingEnabled
       ? require(this._configuration.tslintToolPath)
       : undefined;
 
@@ -203,7 +203,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     const { duration: configureDurationMs, tsconfig, compilerHost } = measureTsPerformance(
       'Configure',
       () => {
-        const _tsconfig: Typescript.ParsedCommandLine = this._loadTsconfig(ts);
+        const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
         const _compilerHost: TWatchCompilerHost = this._buildWatchCompilerHost(ts, _tsconfig);
         return {
           tsconfig: _tsconfig,
@@ -225,7 +225,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
   public async _runBuild(
     ts: ExtendedTypeScript,
-    tslint: typeof Tslint | undefined,
+    tslint: typeof TTslint | undefined,
     measureTsPerformance: PerformanceMeasurer,
     measureTsPerformanceAsync: PerformanceMeasurerAsync
   ): Promise<void> {
@@ -237,8 +237,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       'Configure',
       () => {
         this._overrideTypeScriptReadJson(ts);
-        const _tsconfig: Typescript.ParsedCommandLine = this._loadTsconfig(ts);
-        const _compilerHost: Typescript.CompilerHost = this._buildIncrementalCompilerHost(ts, _tsconfig);
+        const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
+        const _compilerHost: TTypescript.CompilerHost = this._buildIncrementalCompilerHost(ts, _tsconfig);
         return {
           tsconfig: _tsconfig,
           compilerHost: _compilerHost
@@ -252,7 +252,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
     //#region PROGRAM
     // There will be only one program here; emit will get a bit abused if we produce multiple outputs
-    const tsProgram: Typescript.BuilderProgram = ts.createIncrementalProgram({
+    const tsProgram: TTypescript.BuilderProgram = ts.createIncrementalProgram({
       rootNames: tsconfig.fileNames,
       options: tsconfig.options,
       projectReferences: tsconfig.projectReferences,
@@ -275,14 +275,14 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
     //#region DIAGNOSTICS
     const { duration: diagnosticsDurationMs, diagnostics } = measureTsPerformance('Diagnostics', () => {
-      const rawDiagnostics: Typescript.Diagnostic[] = [
+      const rawDiagnostics: TTypescript.Diagnostic[] = [
         ...tsProgram.getConfigFileParsingDiagnostics(),
         ...tsProgram.getOptionsDiagnostics(),
         ...tsProgram.getSyntacticDiagnostics(),
         ...tsProgram.getGlobalDiagnostics(),
         ...tsProgram.getSemanticDiagnostics()
       ];
-      const _diagnostics: ReadonlyArray<Typescript.Diagnostic> = ts.sortAndDeduplicateDiagnostics(
+      const _diagnostics: ReadonlyArray<TTypescript.Diagnostic> = ts.sortAndDeduplicateDiagnostics(
         rawDiagnostics
       );
       return { diagnostics: _diagnostics };
@@ -292,7 +292,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
     //#region EMIT
     const filesToWrite: IFileToWrite[] = [];
-    const writeFileCallback: Typescript.WriteFileCallback = (filePath: string, data: string) => {
+    const writeFileCallback: TTypescript.WriteFileCallback = (filePath: string, data: string) => {
       filesToWrite.push({ filePath, data });
     };
 
@@ -322,7 +322,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     const typeScriptFilenames: Set<string> = new Set(tsconfig.fileNames);
 
     //#region TSLINT
-    let tslintResult: Tslint.LintResult | undefined = undefined;
+    let tslintResult: TTslint.LintResult | undefined = undefined;
     if (tslint) {
       tslintResult = await this._runTslintAsync({
         tslint,
@@ -494,7 +494,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
   private _printDiagnosticMessage(
     ts: ExtendedTypeScript,
-    diagnostic: Typescript.Diagnostic,
+    diagnostic: TTypescript.Diagnostic,
     withIndent: boolean = false
   ): void {
     let terminalMessage: (string | IColorableSequence)[];
@@ -541,13 +541,13 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
   private _emit(
     ts: ExtendedTypeScript,
-    tsconfig: Typescript.ParsedCommandLine,
-    tsProgram: Typescript.BuilderProgram,
-    writeFile: Typescript.WriteFileCallback
+    tsconfig: TTypescript.ParsedCommandLine,
+    tsProgram: TTypescript.BuilderProgram,
+    writeFile: TTypescript.WriteFileCallback
   ): IExtendedEmitResult {
     let foundPrimary: boolean = false;
-    const moduleKindCompilerOptions: Map<Typescript.ModuleKind, Typescript.CompilerOptions> = new Map();
-    let defaultModuleKind: Typescript.ModuleKind;
+    const moduleKindCompilerOptions: Map<TTypescript.ModuleKind, TTypescript.CompilerOptions> = new Map();
+    let defaultModuleKind: TTypescript.ModuleKind;
     for (const { moduleKind, cacheOutFolderPath, isPrimary } of this._moduleKindsToEmit) {
       if (isPrimary) {
         if (foundPrimary) {
@@ -588,7 +588,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       emitOnlyDtsFiles?: boolean,
       onlyBuildInfo?: boolean,
       forceDtsEmit?: boolean
-    ): Typescript.EmitResult => {
+    ): TTypescript.EmitResult => {
       if (onlyBuildInfo || emitOnlyDtsFiles) {
         // There should only be one tsBuildInfo and one set of declaration files
         return baseEmitFiles(
@@ -605,10 +605,10 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           changedFiles.add(targetSourceFile);
         }
 
-        let defaultModuleKindResult: Typescript.EmitResult;
+        let defaultModuleKindResult: TTypescript.EmitResult;
         let emitSkipped: boolean = false;
         for (const [moduleKind, compilerOptions] of moduleKindCompilerOptions.entries()) {
-          const flavorResult: Typescript.EmitResult = baseEmitFiles(
+          const flavorResult: TTypescript.EmitResult = baseEmitFiles(
             resolver,
             {
               ...host,
@@ -634,7 +634,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       }
     };
 
-    const result: Typescript.EmitResult = tsProgram.emit(
+    const result: TTypescript.EmitResult = tsProgram.emit(
       undefined, // Target source file
       writeFile
     );
@@ -647,7 +647,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     };
   }
 
-  private _validateTsconfig(ts: ExtendedTypeScript, tsconfig: Typescript.ParsedCommandLine): void {
+  private _validateTsconfig(ts: ExtendedTypeScript, tsconfig: TTypescript.ParsedCommandLine): void {
     if (
       (tsconfig.options.module && !tsconfig.options.outDir) ||
       (!tsconfig.options.module && tsconfig.options.outDir)
@@ -674,11 +674,11 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     }
 
     if (this._configuration.additionalModuleKindsToEmit) {
-      const specifiedKinds: Set<Typescript.ModuleKind> = new Set<Typescript.ModuleKind>();
+      const specifiedKinds: Set<TTypescript.ModuleKind> = new Set<TTypescript.ModuleKind>();
       const specifiedOutDirs: Set<string> = new Set<string>();
 
       for (const additionalModuleKindToEmit of this._configuration.additionalModuleKindsToEmit) {
-        const moduleKind: Typescript.ModuleKind = this._parseModuleKind(
+        const moduleKind: TTypescript.ModuleKind = this._parseModuleKind(
           ts,
           additionalModuleKindToEmit.moduleKind
         );
@@ -715,7 +715,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   }
 
   private _addModuleKindToEmit(
-    moduleKind: Typescript.ModuleKind,
+    moduleKind: TTypescript.ModuleKind,
     outFolderPath: string,
     isPrimary: boolean
   ): string {
@@ -739,13 +739,13 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     return outFolderName;
   }
 
-  private _loadTsconfig(ts: ExtendedTypeScript): Typescript.ParsedCommandLine {
+  private _loadTsconfig(ts: ExtendedTypeScript): TTypescript.ParsedCommandLine {
     const parsedConfigFile: ReturnType<typeof ts.readConfigFile> = ts.readConfigFile(
       this._configuration.tsconfigPath,
       this._fileSystem.readFile
     );
     const currentFolder: string = path.dirname(this._configuration.tsconfigPath);
-    const tsconfig: Typescript.ParsedCommandLine = ts.parseJsonConfigFileContent(
+    const tsconfig: TTypescript.ParsedCommandLine = ts.parseJsonConfigFileContent(
       parsedConfigFile.config,
       {
         fileExists: this._fileSystem.exists,
@@ -781,9 +781,9 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
   private _buildIncrementalCompilerHost(
     ts: ExtendedTypeScript,
-    tsconfig: Typescript.ParsedCommandLine
-  ): Typescript.CompilerHost {
-    const compilerHost: Typescript.CompilerHost = ts.createIncrementalCompilerHost(tsconfig.options);
+    tsconfig: TTypescript.ParsedCommandLine
+  ): TTypescript.CompilerHost {
+    const compilerHost: TTypescript.CompilerHost = ts.createIncrementalCompilerHost(tsconfig.options);
 
     compilerHost.realpath = this._fileSystem.getRealPath.bind(this._fileSystem);
     compilerHost.readFile = (filePath: string) => {
@@ -818,7 +818,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
   private _buildWatchCompilerHost(
     ts: ExtendedTypeScript,
-    tsconfig: Typescript.ParsedCommandLine
+    tsconfig: TTypescript.ParsedCommandLine
   ): TWatchCompilerHost {
     return ts.createWatchCompilerHost(
       tsconfig.fileNames,
@@ -826,11 +826,11 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       ts.sys,
       (
         rootNames: ReadonlyArray<string> | undefined,
-        options: Typescript.CompilerOptions | undefined,
-        host?: Typescript.CompilerHost,
-        oldProgram?: Typescript.EmitAndSemanticDiagnosticsBuilderProgram,
-        configFileParsingDiagnostics?: ReadonlyArray<Typescript.Diagnostic>,
-        projectReferences?: ReadonlyArray<Typescript.ProjectReference> | undefined
+        options: TTypescript.CompilerOptions | undefined,
+        host?: TTypescript.CompilerHost,
+        oldProgram?: TTypescript.EmitAndSemanticDiagnosticsBuilderProgram,
+        configFileParsingDiagnostics?: ReadonlyArray<TTypescript.Diagnostic>,
+        projectReferences?: ReadonlyArray<TTypescript.ProjectReference> | undefined
       ) => {
         // TODO: Support additionalModuleKindsToEmit
         return ts.createEmitAndSemanticDiagnosticsBuilderProgram(
@@ -842,8 +842,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           projectReferences
         );
       },
-      (diagnostic: Typescript.Diagnostic) => this._printDiagnosticMessage(ts, diagnostic),
-      (diagnostic: Typescript.Diagnostic) => this._printDiagnosticMessage(ts, diagnostic),
+      (diagnostic: TTypescript.Diagnostic) => this._printDiagnosticMessage(ts, diagnostic),
+      (diagnostic: TTypescript.Diagnostic) => this._printDiagnosticMessage(ts, diagnostic),
       tsconfig.projectReferences
     );
   }
@@ -879,7 +879,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     };
   }
 
-  private async _runTslintAsync(options: IRunTslintOptions): Promise<Tslint.LintResult> {
+  private async _runTslintAsync(options: IRunTslintOptions): Promise<TTslint.LintResult> {
     const { tslint, tsProgram, typeScriptFilenames, measurePerformance, changedFiles } = options;
 
     const tslintConfigHash: crypto.Hash = this._getConfigHash(this._tslintConfigFilePath);
@@ -902,7 +902,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
     const newNoFailureFileVersions: Map<string, string> = new Map<string, string>();
 
-    const tslintConfiguration: Tslint.Configuration.IConfigurationFile = tslint.Configuration.loadConfigurationFromPath(
+    const tslintConfiguration: TTslint.Configuration.IConfigurationFile = tslint.Configuration.loadConfigurationFromPath(
       this._tslintConfigFilePath
     );
     const linter: IExtendedLinter = (new tslint.Linter(
@@ -913,7 +913,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       tsProgram
     ) as unknown) as IExtendedLinter;
 
-    const enabledRules: Tslint.IRule[] = linter.getEnabledRules(tslintConfiguration, false);
+    const enabledRules: TTslint.IRule[] = linter.getEnabledRules(tslintConfiguration, false);
 
     //#region Code from TSLint
     // This code comes from here:
@@ -921,10 +921,10 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     // Modified to only lint files that have changed and that we care about
     //
     // TODO: (if we care) maybe extend the Tslint.Linter class to clean this up
-    const lintFailures: Tslint.RuleFailure[] = [];
+    const lintFailures: TTslint.RuleFailure[] = [];
 
-    const ruleSeverityMap: Map<string, Tslint.RuleSeverity> = new Map<string, Tslint.RuleSeverity>(
-      enabledRules.map((rule): [string, Tslint.RuleSeverity] => [
+    const ruleSeverityMap: Map<string, TTslint.RuleSeverity> = new Map<string, TTslint.RuleSeverity>(
+      enabledRules.map((rule): [string, TTslint.RuleSeverity] => [
         rule.getOptions().ruleName,
         rule.getOptions().ruleSeverity
       ])
@@ -943,12 +943,12 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       const version: string = sourceFile.version;
       if (cachedNoFailureFileVersions.get(filePath) !== version || changedFiles.has(sourceFile)) {
         measurePerformance('Lint', () => {
-          const failures: Tslint.RuleFailure[] = linter.getAllFailures(sourceFile, enabledRules);
+          const failures: TTslint.RuleFailure[] = linter.getAllFailures(sourceFile, enabledRules);
           if (failures.length === 0) {
             newNoFailureFileVersions.set(filePath, version);
           } else {
             for (const failure of failures) {
-              const severity: Tslint.RuleSeverity | undefined = ruleSeverityMap.get(failure.getRuleName());
+              const severity: TTslint.RuleSeverity | undefined = ruleSeverityMap.get(failure.getRuleName());
               if (severity === undefined) {
                 throw new Error(`Severity for rule '${failure.getRuleName()}' not found`);
               }
@@ -1001,7 +1001,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     return hash.update(rawConfig);
   }
 
-  private _parseModuleKind(ts: ExtendedTypeScript, moduleKindName: string): Typescript.ModuleKind {
+  private _parseModuleKind(ts: ExtendedTypeScript, moduleKindName: string): TTypescript.ModuleKind {
     switch (moduleKindName.toLowerCase()) {
       case 'commonjs':
         return ts.ModuleKind.CommonJS;
