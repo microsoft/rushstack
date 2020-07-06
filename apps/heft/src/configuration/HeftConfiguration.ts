@@ -78,6 +78,9 @@ export class HeftConfiguration {
 
   /**
    * The project's build cache folder.
+   *
+   * This folder exists at <project root>/.heft/build-cache. TypeScript's output
+   * goes into this folder and then is either copied or linked to the final output folder
    */
   public get buildCacheFolder(): string {
     if (!this._buildCacheFolder) {
