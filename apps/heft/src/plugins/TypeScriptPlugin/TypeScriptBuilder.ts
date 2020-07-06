@@ -64,6 +64,11 @@ interface IFileToWrite {
 
 interface ITsLintCacheData {
   cacheVersion: string;
+
+  /**
+   * This is the result of `Array.from(Map<string, string>)`. The first element of
+   * each array item is the file's path and the second element is the file's hash.
+   */
   fileVersions: [string, string][];
 }
 
