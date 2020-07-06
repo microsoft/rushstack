@@ -108,7 +108,7 @@
      * range, it will be left as-is. After this, the pnpmfile.js provided in the repository (if one
      * exists) will be called to further modify package dependencies.
      *
-     * The default value is false.
+     * This option is experimental. The default value is false.
      */
     /*[LINE "HYPOTHETICAL"]*/ "useWorkspaces": true
   },
