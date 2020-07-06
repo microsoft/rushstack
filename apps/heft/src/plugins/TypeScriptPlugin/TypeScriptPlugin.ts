@@ -3,11 +3,10 @@
 
 import * as path from 'path';
 import * as glob from 'glob';
-import { LegacyAdapters, Terminal, ITerminalProvider } from '@rushstack/node-core-library';
+import { LegacyAdapters, ITerminalProvider } from '@rushstack/node-core-library';
 import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.7';
 
 import { RushStackCompilerUtilities } from '../../utilities/RushStackCompilerUtilities';
-import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
 import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
 import { HeftSession } from '../../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
@@ -39,6 +38,7 @@ interface IRunBuilderForTsconfigOptions {
   watchMode: boolean;
 
   terminalProvider: ITerminalProvider;
+  terminalPrefixLabel: string | undefined;
   additionalModuleKindsToEmit: IEmitModuleKind[] | undefined;
 }
 
@@ -86,7 +86,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
 
     const builderOptions: Omit<
       IRunBuilderForTsconfigOptions,
-      'terminalProvider' | 'tsconfigFilePath' | 'additionalModuleKindsToEmit'
+      'terminalProvider' | 'tsconfigFilePath' | 'additionalModuleKindsToEmit' | 'terminalPrefixLabel'
     > = {
       heftSession: heftSession,
       heftConfiguration,
@@ -97,25 +97,17 @@ export class TypeScriptPlugin implements IHeftPlugin {
 
     const tsconfigFilePaths: string[] = typeScriptConfiguration.tsconfigPaths;
     if (tsconfigFilePaths.length === 1) {
-      const builderTerminalProvider: PrefixProxyTerminalProvider = new PrefixProxyTerminalProvider(
-        heftConfiguration.terminalProvider,
-        `[${PLUGIN_NAME}] `
-      );
-
       await this._runBuilderForTsconfig({
         ...builderOptions,
         tsconfigFilePath: tsconfigFilePaths[0],
-        terminalProvider: builderTerminalProvider,
-        additionalModuleKindsToEmit: typeScriptConfiguration.additionalModuleKindsToEmit
+        terminalProvider: heftConfiguration.terminalProvider,
+        additionalModuleKindsToEmit: typeScriptConfiguration.additionalModuleKindsToEmit,
+        terminalPrefixLabel: undefined
       });
     } else {
       const builderProcesses: Promise<void>[] = [];
       for (const tsconfigFilePath of tsconfigFilePaths) {
         const tsconfigFilename: string = path.basename(tsconfigFilePath, path.extname(tsconfigFilePath));
-        const builderTerminalProvider: PrefixProxyTerminalProvider = new PrefixProxyTerminalProvider(
-          heftConfiguration.terminalProvider,
-          `[${PLUGIN_NAME} (${tsconfigFilename})] `
-        );
 
         // Only provide additionalModuleKindsToEmit to the default tsconfig.json
         const additionalModuleKindsToEmit: IEmitModuleKind[] | undefined =
@@ -125,8 +117,9 @@ export class TypeScriptPlugin implements IHeftPlugin {
           this._runBuilderForTsconfig({
             ...builderOptions,
             tsconfigFilePath,
-            terminalProvider: builderTerminalProvider,
-            additionalModuleKindsToEmit
+            terminalProvider: heftConfiguration.terminalProvider,
+            additionalModuleKindsToEmit,
+            terminalPrefixLabel: tsconfigFilename
           })
         );
       }
@@ -142,17 +135,17 @@ export class TypeScriptPlugin implements IHeftPlugin {
       lintingEnabled,
       tsconfigFilePath,
       terminalProvider,
+      terminalPrefixLabel,
       copyFromCacheMode,
       additionalModuleKindsToEmit,
       watchMode
     } = options;
 
     const fullTsconfigFilePath: string = path.resolve(heftConfiguration.buildFolder, tsconfigFilePath);
-    const builderTerminal: Terminal = new Terminal(terminalProvider);
     const rscPackage:
       | typeof TRushStackCompiler
       | undefined = RushStackCompilerUtilities.tryLoadRushStackCompilerPackageForTsconfig(
-      builderTerminal,
+      TypeScriptBuilder.getTypeScriptTerminal(terminalProvider, terminalPrefixLabel),
       fullTsconfigFilePath
     );
     if (!rscPackage) {
@@ -170,7 +163,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
       buildCacheFolder: options.heftConfiguration.buildCacheFolder,
       additionalModuleKindsToEmit,
       copyFromCacheMode,
-      watchMode
+      watchMode,
+      terminalPrefixLabel
     };
     const typeScriptBuilder: TypeScriptBuilder = new TypeScriptBuilder(
       terminalProvider,

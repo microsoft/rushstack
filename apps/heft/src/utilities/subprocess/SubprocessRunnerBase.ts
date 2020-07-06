@@ -3,7 +3,7 @@
 
 import * as childProcess from 'child_process';
 import * as path from 'path';
-import { Terminal, ITerminalProvider, TerminalProviderSeverity } from '@rushstack/node-core-library';
+import { ITerminalProvider, TerminalProviderSeverity } from '@rushstack/node-core-library';
 
 import {
   IBaseSubprocessMessage as ISubprocessMessage,
@@ -37,7 +37,6 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
   public static [SUBPROCESS_RUNNER_CLASS_LABEL]: boolean = true;
   private static _subprocessInspectorPort: number = 9229 + 1; // 9229 is the default port
 
-  protected _terminal: Terminal;
   protected _configuration: TSubprocessConfiguration;
   protected _fileSystem: IExtendedFileSystem = new CachedFileSystem();
   private _terminalProvider: ITerminalProvider;
@@ -49,9 +48,9 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
 
   public constructor(terminalProvider: ITerminalProvider, configuration: TSubprocessConfiguration) {
     this._terminalProvider = terminalProvider;
-    this._terminal = new Terminal(terminalProvider);
     this._configuration = configuration;
 
+    this.initializeTerminal(terminalProvider);
     this.initialize();
   }
 
@@ -120,6 +119,13 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
    * @virtual
    */
   public initialize(): void {
+    /* virtual */
+  }
+
+  /**
+   * @virtual
+   */
+  public initializeTerminal(terminalProvider: ITerminalProvider): void {
     /* virtual */
   }
 

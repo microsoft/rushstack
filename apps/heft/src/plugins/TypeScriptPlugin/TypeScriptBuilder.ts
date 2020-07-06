@@ -7,7 +7,9 @@ import {
   JsonFile,
   FileSystemStats,
   IFileSystemCreateLinkOptions,
-  IColorableSequence
+  IColorableSequence,
+  Terminal,
+  ITerminalProvider
 } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
 import { Tslint as TTslint, Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.7';
@@ -28,6 +30,7 @@ import { ResolveUtilities } from '../../utilities/ResolveUtilities';
 import { IExtendedLinter } from './internalTypings/TslintInternals';
 import { IEmitModuleKindBase, ISharedTypeScriptConfiguration } from '../../cli/actions/BuildAction';
 import { PerformanceMeasurer, PerformanceMeasurerAsync } from '../../utilities/Performance';
+import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
 
 const ASYNC_LIMIT: number = 100;
 
@@ -36,6 +39,12 @@ export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfig
   typeScriptToolPath: string;
   tslintToolPath: string;
   eslintToolPath: string;
+
+  /**
+   * If provided, this is included in the logging prefix. For example, if this
+   * is set to "other-tsconfig", logging lines will start with [typescript (other-tsconfig)].
+   */
+  terminalPrefixLabel: string | undefined;
 
   lintingEnabled: boolean;
 
@@ -91,6 +100,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _moduleKindsToEmit: ICachedEmitModuleKind<TTypescript.ModuleKind>[];
   private _rawProjectTslintFile: string | undefined;
   private _tslintConfigFilePath: string;
+  private _typescriptTerminal: Terminal;
+  private _tslintTerminal: Terminal;
 
   private __tsCacheFilePath: string | undefined;
   private __tslintCacheFilePath: string | undefined;
@@ -102,7 +113,10 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
   private get _tsCacheFilePath(): string {
     if (!this.__tsCacheFilePath) {
-      const configHash: crypto.Hash = this._getConfigHash(this._configuration.tsconfigPath);
+      const configHash: crypto.Hash = this._getConfigHash(
+        this._configuration.tsconfigPath,
+        this._typescriptTerminal
+      );
       configHash.update(JSON.stringify(this._configuration.additionalModuleKindsToEmit));
       const serializedConfigHash: string = configHash.digest('hex');
 
@@ -121,6 +135,44 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     }
 
     return this.__tslintCacheFilePath;
+  }
+
+  public static getTypeScriptTerminal(
+    terminalProvider: ITerminalProvider,
+    prefixLabel: string | undefined
+  ): Terminal {
+    return TypeScriptBuilder._getTerminal(terminalProvider, 'typescript', prefixLabel);
+  }
+
+  public static getTslintTerminal(
+    terminalProvider: ITerminalProvider,
+    prefixLabel: string | undefined
+  ): Terminal {
+    return TypeScriptBuilder._getTerminal(terminalProvider, 'tslint', prefixLabel);
+  }
+
+  private static _getTerminal(
+    terminalProvider: ITerminalProvider,
+    prefixName: string,
+    prefixLabel: string | undefined
+  ): Terminal {
+    const prefixTerminalProvider: PrefixProxyTerminalProvider = new PrefixProxyTerminalProvider(
+      terminalProvider,
+      prefixLabel ? `[${prefixName} (${prefixLabel})] ` : `[${prefixName}] `
+    );
+
+    return new Terminal(prefixTerminalProvider);
+  }
+
+  public initializeTerminal(terminalProvider: ITerminalProvider): void {
+    this._typescriptTerminal = TypeScriptBuilder.getTypeScriptTerminal(
+      terminalProvider,
+      this._configuration.terminalPrefixLabel
+    );
+    this._tslintTerminal = TypeScriptBuilder.getTslintTerminal(
+      terminalProvider,
+      this._configuration.terminalPrefixLabel
+    );
   }
 
   public initialize(): void {
@@ -150,9 +202,9 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       ? require(this._configuration.tslintToolPath)
       : undefined;
 
-    this._terminal.writeLine(`Using TypeScript version ${ts.version}`);
+    this._typescriptTerminal.writeLine(`Using TypeScript version ${ts.version}`);
     if (tslint) {
-      this._terminal.writeLine(`Using TSLint version ${tslint.Linter.VERSION}`);
+      this._tslintTerminal.writeLine(`Using TSLint version ${tslint.Linter.VERSION}`);
     }
 
     ts.performance.enable();
@@ -211,7 +263,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         };
       }
     );
-    this._terminal.writeVerboseLine(`Configure: ${configureDurationMs}ms`);
+    this._typescriptTerminal.writeVerboseLine(`Configure: ${configureDurationMs}ms`);
     //#endregion
 
     this._validateTsconfig(ts, tsconfig);
@@ -245,7 +297,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         };
       }
     );
-    this._terminal.writeVerboseLine(`Configure: ${configureDurationMs}ms`);
+    this._typescriptTerminal.writeVerboseLine(`Configure: ${configureDurationMs}ms`);
     //#endregion
 
     this._validateTsconfig(ts, tsconfig);
@@ -260,15 +312,15 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       configFileParsingDiagnostics: ts.getConfigFileParsingDiagnostics(tsconfig)
     });
 
-    this._terminal.writeVerboseLine(
+    this._typescriptTerminal.writeVerboseLine(
       `I/O Read: ${ts.performance.getDuration('I/O Read')}ms (${ts.performance.getCount(
         'beforeIORead'
       )} files)`
     );
-    this._terminal.writeVerboseLine(
+    this._typescriptTerminal.writeVerboseLine(
       `Parse: ${ts.performance.getDuration('Parse')}ms (${ts.performance.getCount('beforeParse')} files)`
     );
-    this._terminal.writeVerboseLine(
+    this._typescriptTerminal.writeVerboseLine(
       `Program (includes Read + Parse): ${ts.performance.getDuration('Program')}ms`
     );
     //#endregion
@@ -287,7 +339,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       );
       return { diagnostics: _diagnostics };
     });
-    this._terminal.writeVerboseLine(`Diagnostics: ${diagnosticsDurationMs}ms`);
+    this._typescriptTerminal.writeVerboseLine(`Diagnostics: ${diagnosticsDurationMs}ms`);
     //#endregion
 
     //#region EMIT
@@ -299,17 +351,19 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     const emitResult: IExtendedEmitResult = this._emit(ts, tsconfig, tsProgram, writeFileCallback);
     //#endregion
 
-    this._terminal.writeVerboseLine(`Bind: ${ts.performance.getDuration('Bind')}ms`);
-    this._terminal.writeVerboseLine(`Check: ${ts.performance.getDuration('Check')}ms`);
-    this._terminal.writeVerboseLine(
+    this._typescriptTerminal.writeVerboseLine(`Bind: ${ts.performance.getDuration('Bind')}ms`);
+    this._typescriptTerminal.writeVerboseLine(`Check: ${ts.performance.getDuration('Check')}ms`);
+    this._typescriptTerminal.writeVerboseLine(
       `Transform: ${ts.performance.getDuration('transformTime')}ms ` +
         `(${ts.performance.getCount('beforeTransform')} files)`
     );
-    this._terminal.writeVerboseLine(
+    this._typescriptTerminal.writeVerboseLine(
       `Print: ${ts.performance.getDuration('printTime')}ms ` +
         `(${ts.performance.getCount('beforePrint')} files) (Includes Transform)`
     );
-    this._terminal.writeVerboseLine(`Emit: ${ts.performance.getDuration('Emit')}ms (Includes Print)`);
+    this._typescriptTerminal.writeVerboseLine(
+      `Emit: ${ts.performance.getDuration('Emit')}ms (Includes Print)`
+    );
 
     //#region WRITE
     const writePromise: Promise<{ duration: number }> = measureTsPerformanceAsync('Write', () =>
@@ -332,14 +386,14 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         changedFiles: emitResult.changedSourceFiles
       });
 
-      this._terminal.writeVerboseLine(
+      this._tslintTerminal.writeVerboseLine(
         `Lint: ${ts.performance.getDuration('Lint')}ms (${ts.performance.getCount('beforeLint')} files)`
       );
     }
     //#endregion
 
     const { duration: writeDuration } = await writePromise;
-    this._terminal.writeVerboseLine(`I/O Write: ${writeDuration}ms (${filesToWrite.length} files)`);
+    this._typescriptTerminal.writeVerboseLine(`I/O Write: ${writeDuration}ms (${filesToWrite.length} files)`);
 
     //#region HARDLINK/COPY
     const shouldHardlink: boolean = this._configuration.copyFromCacheMode !== 'copy';
@@ -448,14 +502,14 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       }
     );
 
-    this._terminal.writeVerboseLine(
+    this._typescriptTerminal.writeVerboseLine(
       `${shouldHardlink ? 'Hardlink' : 'Copy from cache'}: ${hardlinkDuration}ms (${hardlinkCount} files)`
     );
     //#endregion
 
     let compilationFailed: boolean = false;
     if (diagnostics.length > 0) {
-      this._terminal.writeErrorLine(
+      this._typescriptTerminal.writeErrorLine(
         `Encountered ${diagnostics.length} TypeScript error${diagnostics.length > 1 ? 's' : ''}:`
       );
       for (const diagnostic of diagnostics) {
@@ -466,7 +520,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     }
 
     if (tslintResult?.failures?.length) {
-      this._terminal.writeWarningLine(
+      this._tslintTerminal.writeWarningLine(
         `Encountered ${tslintResult!.failures.length} TSLint error${
           tslintResult!.failures.length > 1 ? 's' : ''
         }:`
@@ -478,7 +532,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         );
         const { line, character } = tslintFailure.getStartPosition().getLineAndCharacter();
         const severity: string = tslintFailure.getRuleSeverity().toUpperCase();
-        this._terminal.writeWarningLine(
+        this._tslintTerminal.writeWarningLine(
           '  ',
           Colors.yellow(`${severity}: ${buildFolderRelativeFilename}(${line + 1},${character + 1})`),
           Colors.white(' - '),
@@ -523,17 +577,17 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
     switch (diagnostic.category) {
       case ts.DiagnosticCategory.Error: {
-        this._terminal.writeErrorLine(...terminalMessage);
+        this._typescriptTerminal.writeErrorLine(...terminalMessage);
         break;
       }
 
       case ts.DiagnosticCategory.Warning: {
-        this._terminal.writeWarningLine(...terminalMessage);
+        this._typescriptTerminal.writeWarningLine(...terminalMessage);
         break;
       }
 
       default: {
-        this._terminal.writeLine(...terminalMessage);
+        this._typescriptTerminal.writeLine(...terminalMessage);
         break;
       }
     }
@@ -882,7 +936,10 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private async _runTslintAsync(options: IRunTslintOptions): Promise<TTslint.LintResult> {
     const { tslint, tsProgram, typeScriptFilenames, measurePerformance, changedFiles } = options;
 
-    const tslintConfigHash: crypto.Hash = this._getConfigHash(this._tslintConfigFilePath);
+    const tslintConfigHash: crypto.Hash = this._getConfigHash(
+      this._tslintConfigFilePath,
+      this._tslintTerminal
+    );
     const tslintConfigVersion: string = `${tslint.Linter.VERSION}_${tslintConfigHash.digest('hex')}`;
 
     let tslintCacheData: ITsLintCacheData | undefined;
@@ -975,12 +1032,12 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     return linter.getResult();
   }
 
-  private _getConfigHash(configPath: string): crypto.Hash {
+  private _getConfigHash(configPath: string, terminal: Terminal): crypto.Hash {
     interface IMinimalConfig {
       extends?: string;
     }
 
-    this._terminal.writeVerboseLine(`Examining config file "${configPath}"`);
+    terminal.writeVerboseLine(`Examining config file "${configPath}"`);
 
     const rawConfig: string =
       configPath === this._tslintConfigFilePath
@@ -993,7 +1050,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         parsedConfig.extends,
         path.dirname(configPath)
       );
-      hash = this._getConfigHash(extendsFullPath);
+      hash = this._getConfigHash(extendsFullPath, terminal);
     } else {
       hash = crypto.createHash('sha1').update(rawConfig);
     }
