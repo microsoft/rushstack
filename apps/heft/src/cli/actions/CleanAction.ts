@@ -5,6 +5,7 @@ import * as glob from 'glob';
 import * as path from 'path';
 import { AsyncSeriesBailHook } from 'tapable';
 import { LegacyAdapters } from '@rushstack/node-core-library';
+import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { HeftActionBase, IHeftActionBaseOptions, ActionHooksBase, IActionContext } from './HeftActionBase';
 import { Async } from '../../utilities/Async';
@@ -20,6 +21,7 @@ export class CleanHooks extends ActionHooksBase<ICleanActionProperties> {
  * @public
  */
 export interface ICleanActionProperties {
+  deleteCache: boolean;
   pathsToDelete: Set<string>;
 }
 
@@ -31,6 +33,8 @@ export interface ICleanActionContext extends IActionContext<CleanHooks, ICleanAc
 const GLOB_PATTERN_REGEX: RegExp = /\/\*[^\*]/;
 
 export class CleanAction extends HeftActionBase<CleanHooks, ICleanActionProperties> {
+  private _deleteCacheFlag: CommandLineFlagParameter;
+
   public constructor(options: IHeftActionBaseOptions) {
     super(
       {
@@ -43,6 +47,17 @@ export class CleanAction extends HeftActionBase<CleanHooks, ICleanActionProperti
     );
   }
 
+  public onDefineParameters(): void {
+    super.onDefineParameters();
+
+    this._deleteCacheFlag = this.defineFlagParameter({
+      parameterLongName: '--clear-cache',
+      description:
+        "If this flag is provided, the compiler cache will also be cleared. This isn't dangerous, " +
+        'but may lead to longer compile times'
+    });
+  }
+
   protected async actionExecute(actionContext: ICleanActionContext): Promise<void> {
     const resolvedPathsToDelete: string[] = [];
     for (const pathToDelete of actionContext.properties.pathsToDelete) {
@@ -51,6 +66,10 @@ export class CleanAction extends HeftActionBase<CleanHooks, ICleanActionProperti
         this.heftConfiguration.buildFolder
       );
       resolvedPathsToDelete.push(...resolvedPaths);
+    }
+
+    if (actionContext.properties.deleteCache) {
+      resolvedPathsToDelete.push(this.heftConfiguration.buildCacheFolder);
     }
 
     await Async.forEachLimitAsync(resolvedPathsToDelete, 100, (pathToDelete) =>
@@ -62,6 +81,7 @@ export class CleanAction extends HeftActionBase<CleanHooks, ICleanActionProperti
 
   protected getDefaultActionProperties(): ICleanActionProperties {
     return {
+      deleteCache: this._deleteCacheFlag.value,
       pathsToDelete: new Set<string>()
     };
   }
