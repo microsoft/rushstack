@@ -9,7 +9,7 @@ import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { Utilities } from '../../utilities/Utilities';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { FileSystem, LockFile, IPackageJson, JsonFile, PackageName } from '@rushstack/node-core-library';
-import { InstallHelpers } from '../../logic/InstallHelpers';
+import { InstallHelpers } from '../../logic/installManager/InstallHelpers';
 import { RushConstants } from '../../logic/RushConstants';
 import { LastInstallFlag } from '../../api/LastInstallFlag';
 
@@ -138,14 +138,12 @@ export class GlobalScriptAction extends BaseScriptAction {
 
       console.log(`Installing dependencies under ${this._autoinstallerNameFullPath}...\n`);
 
-      Utilities.executeCommand(
-        this.rushConfiguration.packageManagerToolFilename,
-        ['install', '--frozen-lockfile'],
-        this._autoinstallerNameFullPath,
-        undefined,
-        /* suppressOutput */ false,
-        /* keepEnvironment */ true
-      );
+      Utilities.executeCommand({
+        command: this.rushConfiguration.packageManagerToolFilename,
+        args: ['install', '--frozen-lockfile'],
+        workingDirectory: this._autoinstallerNameFullPath,
+        keepEnvironment: true
+      });
 
       // Create file: ../common/autoinstallers/my-task/.rush/temp/last-install.flag
       lastInstallFlag.create();

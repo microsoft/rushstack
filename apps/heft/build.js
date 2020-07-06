@@ -38,7 +38,7 @@ try {
   callNodeScript(path.join(ToolPaths.eslintPackagePath, 'bin', 'eslint'), [
     '-f',
     'unix',
-    'src/**/*.{ts,tsx}'
+    '"src/**/*.{ts,tsx}"'
   ]);
 
   process.exitCode = 0;

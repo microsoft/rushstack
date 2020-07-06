@@ -3,47 +3,22 @@
 
 import { SyncHook } from 'tapable';
 
-import { BuildAction, IBuildActionData } from '../cli/actions/BuildAction';
-import { CleanAction, ICleanActionData } from '../cli/actions/CleanAction';
-import { DevDeployAction, IDevDeployActionData } from '../cli/actions/DevDeployAction';
-import { StartAction, IStartActionData } from '../cli/actions/StartAction';
-import { TestAction, ITestActionData } from '../cli/actions/TestAction';
+import { BuildAction, IBuildActionContext } from '../cli/actions/BuildAction';
+import { CleanAction, ICleanActionContext } from '../cli/actions/CleanAction';
+import { DevDeployAction, IDevDeployActionContext } from '../cli/actions/DevDeployAction';
+import { StartAction, IStartActionContext } from '../cli/actions/StartAction';
+import { TestAction, ITestActionContext } from '../cli/actions/TestAction';
 import { MetricsCollector, MetricsCollectorHooks } from '../metrics/MetricsCollector';
 
 /**
  * @public
  */
-export type Build = IBuildActionData;
-
-/**
- * @public
- */
-export type Clean = ICleanActionData;
-
-/**
- * @public
- */
-export type DevDeploy = IDevDeployActionData;
-
-/**
- * @public
- */
-export type Start = IStartActionData;
-
-/**
- * @public
- */
-export type Test = ITestActionData;
-
-/**
- * @public
- */
 export interface IHeftSessionHooks {
-  build: SyncHook<IBuildActionData>;
-  clean: SyncHook<ICleanActionData>;
-  devDeploy: SyncHook<IDevDeployActionData>;
-  start: SyncHook<IStartActionData>;
-  test: SyncHook<ITestActionData>;
+  build: SyncHook<IBuildActionContext>;
+  clean: SyncHook<ICleanActionContext>;
+  devDeploy: SyncHook<IDevDeployActionContext>;
+  start: SyncHook<IStartActionContext>;
+  test: SyncHook<ITestActionContext>;
   metricsCollector: MetricsCollectorHooks;
 }
 
@@ -66,6 +41,11 @@ export interface IHeftSessionOptions {
  */
 export class HeftSession {
   public readonly hooks: IHeftSessionHooks;
+
+  /**
+   * @internal
+   */
+  public readonly metricsCollector: MetricsCollector;
 
   /**
    * If set to true, the build is running with the --debug flag
@@ -91,5 +71,7 @@ export class HeftSession {
       test: testAction.testActionHook,
       metricsCollector: metricsCollector.hooks
     };
+
+    this.metricsCollector = metricsCollector;
   }
 }

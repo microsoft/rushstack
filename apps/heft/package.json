@@ -8,7 +8,7 @@
     "start": "node ./watch.js"
   },
   "bin": {
-    "heft": "./bin/dev"
+    "heft": "./bin/heft"
   },
   "main": "lib/index.js",
   "types": "dist/heft.d.ts",
@@ -16,18 +16,19 @@
     "@types/glob": "7.1.1",
     "@types/node": "10.17.13",
     "@types/resolve": "1.17.1",
-    "@rushstack/eslint-config": "1.0.2"
+    "@rushstack/eslint-config": "workspace:*",
+    "@microsoft/rush-stack-compiler-3.7": "workspace:*"
   },
   "dependencies": {
-    "@microsoft/rush-stack-compiler-3.7": "0.5.2",
-    "@rushstack/node-core-library": "3.24.4",
-    "@rushstack/ts-command-line": "4.4.5",
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/ts-command-line": "workspace:*",
     "@types/tapable": "1.0.5",
     "chokidar": "~3.4.0",
     "glob-escape": "~0.0.2",
     "glob": "~7.0.5",
     "resolve": "~1.17.0",
-    "tapable": "1.1.3"
+    "tapable": "1.1.3",
+    "true-case-path": "~2.2.1"
   },
   "jest": {
     "rootDir": "lib"

@@ -64,11 +64,11 @@ Adds a specified package as a dependency of the current project (as
 determined by the current working directory) and then runs \\"rush update\\". If 
 no version is specified, a version will be automatically detected (typically 
 either the latest version or a version that won't break the 
-\\"ensureConsistentVersions\\" policy). If a version range is specified, the 
-latest version in the range will be used. The version will be automatically 
-prepended with a tilde, unless the \\"--exact\\" or \\"--caret\\" flags are used. The 
-\\"--make-consistent\\" flag can be used to update all packages with the 
-dependency.
+\\"ensureConsistentVersions\\" policy). If a version range (or a workspace range) 
+is specified, the latest version in the range will be used. The version will 
+be automatically prepended with a tilde, unless the \\"--exact\\" or \\"--caret\\" 
+flags are used. The \\"--make-consistent\\" flag can be used to update all 
+packages with the dependency.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
@@ -478,8 +478,13 @@ Optional arguments:
                         specified, it will prevent the current commit will 
                         not be tagged.
   -n TOKEN, --npm-auth-token TOKEN
-                        Provide the default scope NPM auth token to be passed 
-                        into npm publish for global package publishing.
+                        (DEPRECATED) Specifies the authentication token to 
+                        use during publishing. This parameter is deprecated 
+                        because command line parameters may be readable by 
+                        unrelated processes on a lab machine. Instead, a 
+                        safer practice is to pass the token via an 
+                        environment variable and reference it from your 
+                        common/config/rush/.npmrc-publish file.
   -t TAG, --tag TAG     The tag option to pass to npm publish. By default NPM 
                         will publish using the 'latest' tag, even if the 
                         package is older than the current latest, so in 

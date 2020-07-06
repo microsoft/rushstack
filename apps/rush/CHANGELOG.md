@@ -1,6 +1,29 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sun, 21 Jun 2020 04:48:53 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Jul 2020 06:16:09 GMT and should not be manually modified.
+
+## 5.27.3
+Fri, 03 Jul 2020 06:16:09 GMT
+
+### Updates
+
+- Added support for new format used by pnpm for tarball URLs that now begin with an @ symbol
+
+## 5.27.2
+Thu, 02 Jul 2020 01:52:18 GMT
+
+### Updates
+
+- Improve "rush deploy" to copy PNPM workaround links (fixes GitHub #1942 and 1943)
+
+## 5.27.1
+Mon, 29 Jun 2020 18:39:59 GMT
+
+### Updates
+
+- Fix an issue where environment variable trimming for .npmrc was unnecessarily performed on comment lines
+- Add a "rush init" template for .npmrc-publish
+- Fix a regression affecting GitHub specifiers for package.json dependencies (issue #1749)
 
 ## 5.27.0
 Sun, 21 Jun 2020 04:48:53 GMT

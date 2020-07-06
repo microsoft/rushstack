@@ -1,11 +1,11 @@
 {
   "changes": [
     {
-      "packageName": "@microsoft/rush",
+      "packageName": "@rushstack/eslint-patch",
       "comment": "",
       "type": "none"
     }
   ],
-  "packageName": "@microsoft/rush",
+  "packageName": "@rushstack/eslint-patch",
   "email": "4673363+octogonz@users.noreply.github.com"
 }

@@ -2,6 +2,63 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "0.2.29",
+      "tag": "@rushstack/debug-certificate-manager_v0.2.29",
+      "date": "Fri, 03 Jul 2020 15:09:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.24.4` to `3.25.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.31` to `6.4.32`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.8.0` to `0.8.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.28",
+      "tag": "@rushstack/debug-certificate-manager_v0.2.28",
+      "date": "Fri, 03 Jul 2020 05:46:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.30` to `6.4.31`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.7.2` to `0.8.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.27",
+      "tag": "@rushstack/debug-certificate-manager_v0.2.27",
+      "date": "Sat, 27 Jun 2020 00:09:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.29` to `6.4.30`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.26",
+      "tag": "@rushstack/debug-certificate-manager_v0.2.26",
+      "date": "Fri, 26 Jun 2020 22:16:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.28` to `6.4.29`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.25",
       "tag": "@rushstack/debug-certificate-manager_v0.2.25",
       "date": "Thu, 25 Jun 2020 06:43:35 GMT",

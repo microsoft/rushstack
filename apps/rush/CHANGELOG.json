@@ -2,6 +2,48 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.27.3",
+      "tag": "@microsoft/rush_v5.27.3",
+      "date": "Fri, 03 Jul 2020 06:16:09 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Added support for new format used by pnpm for tarball URLs that now begin with an @ symbol"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.27.2",
+      "tag": "@microsoft/rush_v5.27.2",
+      "date": "Thu, 02 Jul 2020 01:52:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve \"rush deploy\" to copy PNPM workaround links (fixes GitHub #1942 and 1943)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.27.1",
+      "tag": "@microsoft/rush_v5.27.1",
+      "date": "Mon, 29 Jun 2020 18:39:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where environment variable trimming for .npmrc was unnecessarily performed on comment lines"
+          },
+          {
+            "comment": "Add a \"rush init\" template for .npmrc-publish"
+          },
+          {
+            "comment": "Fix a regression affecting GitHub specifiers for package.json dependencies (issue #1749)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.27.0",
       "tag": "@microsoft/rush_v5.27.0",
       "date": "Sun, 21 Jun 2020 04:48:53 GMT",

@@ -1,6 +1,6 @@
 import * as os from 'os';
 
-import { JsonFile, FileSystem } from '@rushstack/node-core-library';
+import { JsonFile, FileSystem, InternalError } from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
@@ -113,5 +113,23 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     return new DependencySpecifier(dependencySpecifier.packageName, dependencyJson.version);
+  }
+
+  /** @override */
+  public getWorkspaceKeys(): ReadonlyArray<string> {
+    throw new InternalError('Not implemented');
+  }
+
+  /** @override */
+  public getWorkspaceKeyByPath(workspaceRoot: string, projectFolder: string): string {
+    throw new InternalError('Not implemented');
+  }
+
+  /** @override */
+  protected getWorkspaceDependencyVersion(
+    dependencySpecifier: DependencySpecifier,
+    workspaceKey: string
+  ): DependencySpecifier | undefined {
+    throw new InternalError('Not implemented');
   }
 }

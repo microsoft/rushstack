@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.25.0",
+      "tag": "@rushstack/node-core-library_v3.25.0",
+      "date": "Fri, 03 Jul 2020 15:09:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a utility method to convert a map into an object"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.24.4",
       "tag": "@rushstack/node-core-library_v3.24.4",
       "date": "Thu, 25 Jun 2020 06:43:35 GMT",

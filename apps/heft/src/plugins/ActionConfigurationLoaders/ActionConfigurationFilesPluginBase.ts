@@ -5,13 +5,16 @@ import * as path from 'path';
 import { JsonSchema, FileSystem, JsonFile } from '@rushstack/node-core-library';
 
 import {
+  ISharedTypeScriptConfiguration,
   ISharedCopyStaticAssetsConfiguration,
-  ICopyStaticAssetsConfiguration
+  ICopyStaticAssetsConfiguration,
+  ITypeScriptConfiguration,
+  IBuildActionContext
 } from '../../cli/actions/BuildAction';
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
-import { Clean, HeftSession, Build } from '../../pluginFramework/HeftSession';
-import { ICleanActionData } from '../../cli/actions/CleanAction';
+import { HeftSession } from '../../pluginFramework/HeftSession';
+import { ICleanActionProperties, ICleanActionContext } from '../../cli/actions/CleanAction';
 
 interface IConfigurationJsonBase {}
 
@@ -23,24 +26,43 @@ interface ICopyStaticAssetsConfigurationJson
   extends IConfigurationJsonBase,
     ISharedCopyStaticAssetsConfiguration {}
 
+interface ITypeScriptConfigurationJson extends IConfigurationJsonBase, ISharedTypeScriptConfiguration {
+  disableTslint?: boolean;
+}
+
+interface IConfigurationJsonCacheEntry<TConfigJson extends IConfigurationJsonBase = IConfigurationJsonBase> {
+  data: TConfigJson | undefined;
+}
+
 export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin {
   private static _schemaCache: Map<string, JsonSchema> = new Map<string, JsonSchema>();
+  private _configurationJsonCache: Map<string, IConfigurationJsonCacheEntry> = new Map<
+    string,
+    IConfigurationJsonCacheEntry
+  >();
 
   public abstract displayName: string;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftSession.hooks.clean.tap(this.displayName, (clean: Clean) => {
+    heftSession.hooks.clean.tap(this.displayName, (clean: ICleanActionContext) => {
       clean.hooks.loadActionConfiguration.tapPromise(this.displayName, async () => {
-        await this._updateCleanConfigurationAsync(heftConfiguration, clean);
+        await this._updateCleanConfigurationAsync(heftConfiguration, clean.properties);
       });
     });
 
-    heftSession.hooks.build.tap(this.displayName, (build: Build) => {
+    heftSession.hooks.build.tap(this.displayName, (build: IBuildActionContext) => {
       build.hooks.compile.tap(this.displayName, (compile) => {
         compile.hooks.configureCopyStaticAssets.tapPromise(this.displayName, async () => {
           await this._updateCopyStaticAssetsConfigurationAsync(
             heftConfiguration,
-            compile.copyStaticAssetsConfiguration
+            compile.properties.copyStaticAssetsConfiguration
+          );
+        });
+
+        compile.hooks.configureTypeScript.tapPromise(this.displayName, async () => {
+          await this._updateTypeScriptConfigurationAsync(
+            heftConfiguration,
+            compile.properties.typeScriptConfiguration
           );
         });
       });
@@ -54,14 +76,51 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
 
   private async _updateCleanConfigurationAsync(
     heftConfiguration: HeftConfiguration,
-    cleanConfiguration: ICleanActionData
+    cleanConfiguration: ICleanActionProperties
   ): Promise<void> {
     const cleanActionConfiguration:
       | ICleanConfigurationJson
       | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'clean');
 
     if (cleanActionConfiguration) {
-      cleanConfiguration.pathsToDelete.push(...cleanActionConfiguration.pathsToDelete);
+      for (const pathToDelete of cleanActionConfiguration.pathsToDelete) {
+        cleanConfiguration.pathsToDelete.add(pathToDelete);
+      }
+    }
+
+    const typeScriptConfigurationJson:
+      | ITypeScriptConfigurationJson
+      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'typescript');
+    if (typeScriptConfigurationJson?.additionalModuleKindsToEmit) {
+      for (const additionalModuleKindToEmit of typeScriptConfigurationJson.additionalModuleKindsToEmit) {
+        cleanConfiguration.pathsToDelete.add(additionalModuleKindToEmit.outFolderPath);
+      }
+    }
+  }
+
+  private async _updateTypeScriptConfigurationAsync(
+    heftConfiguration: HeftConfiguration,
+    typeScriptConfiguration: ITypeScriptConfiguration
+  ): Promise<void> {
+    const typeScriptConfigurationJson:
+      | ITypeScriptConfigurationJson
+      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'typescript');
+
+    if (typeScriptConfigurationJson?.copyFromCacheMode) {
+      typeScriptConfiguration.copyFromCacheMode = typeScriptConfigurationJson.copyFromCacheMode;
+    }
+
+    if (typeScriptConfigurationJson?.additionalModuleKindsToEmit !== undefined) {
+      typeScriptConfiguration.additionalModuleKindsToEmit =
+        typeScriptConfigurationJson.additionalModuleKindsToEmit || undefined;
+    }
+
+    if (typeScriptConfigurationJson?.disableTslint !== undefined) {
+      typeScriptConfiguration.isLintingEnabled = !typeScriptConfigurationJson.disableTslint;
+    }
+
+    if (typeScriptConfigurationJson?.maxWriteParallelism !== undefined) {
+      typeScriptConfiguration.maxWriteParallelism = typeScriptConfigurationJson.maxWriteParallelism;
     }
   }
 
@@ -102,32 +161,49 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
     }
   }
 
-  private async _getConfigDataByNameAsync<TConfigJson>(
+  private async _getConfigDataByNameAsync<TConfigJson extends IConfigurationJsonBase>(
     heftConfiguration: HeftConfiguration,
     configFilename: string
   ): Promise<TConfigJson | undefined> {
-    const actionConfigurationFilePath: string | undefined = this._getActionConfigurationFilePathByName(
-      configFilename,
-      heftConfiguration
-    );
+    type IOptionalConfigurationJsonCacheEntry = IConfigurationJsonCacheEntry<TConfigJson> | undefined;
+    let configurationJsonCacheEntry: IOptionalConfigurationJsonCacheEntry = this._configurationJsonCache.get(
+      configFilename
+    ) as IOptionalConfigurationJsonCacheEntry;
 
-    if (actionConfigurationFilePath && FileSystem.exists(actionConfigurationFilePath)) {
-      const schema: JsonSchema = await this._getSchemaByNameAsync(configFilename);
-      const baseSchema: JsonSchema = await this._getSchemaByNameAsync('action');
-
-      const loadedConfigJson: TConfigJson = JsonFile.loadAndValidate(actionConfigurationFilePath, schema);
-      baseSchema.validateObject(loadedConfigJson, actionConfigurationFilePath);
-
-      heftConfiguration.terminal.writeVerboseLine(`Loaded config file "${actionConfigurationFilePath}"`);
-
-      return loadedConfigJson;
-    } else {
-      heftConfiguration.terminal.writeVerboseLine(
-        `Config file "${actionConfigurationFilePath}" doesn't exit. Skipping.`
+    if (!configurationJsonCacheEntry) {
+      const actionConfigurationFilePath: string | undefined = this._getActionConfigurationFilePathByName(
+        configFilename,
+        heftConfiguration
       );
 
-      return undefined;
+      if (actionConfigurationFilePath && FileSystem.exists(actionConfigurationFilePath)) {
+        const schema: JsonSchema = await this._getSchemaByNameAsync(configFilename);
+        const baseSchema: JsonSchema = await this._getSchemaByNameAsync('action');
+
+        const loadedConfigJson: TConfigJson = JsonFile.loadAndValidate(actionConfigurationFilePath, schema);
+        baseSchema.validateObject(loadedConfigJson, actionConfigurationFilePath);
+
+        heftConfiguration.terminal.writeVerboseLine(`Loaded config file "${actionConfigurationFilePath}"`);
+
+        configurationJsonCacheEntry = {
+          data: loadedConfigJson
+        };
+      } else {
+        heftConfiguration.terminal.writeVerboseLine(
+          `Config file "${actionConfigurationFilePath}" doesn't exist. Skipping.`
+        );
+
+        configurationJsonCacheEntry = {
+          data: undefined
+        };
+      }
+
+      this._configurationJsonCache.set(configFilename, configurationJsonCacheEntry);
+    } else {
+      heftConfiguration.terminal.writeVerboseLine(`Config file "${configFilename}" was in the cache.`);
     }
+
+    return configurationJsonCacheEntry.data;
   }
 
   private async _getSchemaByNameAsync(configFilename: string): Promise<JsonSchema> {

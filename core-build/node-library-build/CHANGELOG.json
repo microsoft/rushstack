@@ -2,6 +2,66 @@
   "name": "@microsoft/node-library-build",
   "entries": [
     {
+      "version": "6.4.32",
+      "tag": "@microsoft/node-library-build_v6.4.32",
+      "date": "Fri, 03 Jul 2020 15:09:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.16.11` to `3.16.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.8.20` to `3.8.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.4.31` to `8.4.32`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.8.0` to `0.8.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.4.31",
+      "tag": "@microsoft/node-library-build_v6.4.31",
+      "date": "Fri, 03 Jul 2020 05:46:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.4.30` to `8.4.31`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.7.2` to `0.8.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.4.30",
+      "tag": "@microsoft/node-library-build_v6.4.30",
+      "date": "Sat, 27 Jun 2020 00:09:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.4.29` to `8.4.30`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.4.29",
+      "tag": "@microsoft/node-library-build_v6.4.29",
+      "date": "Fri, 26 Jun 2020 22:16:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.4.28` to `8.4.29`"
+          }
+        ]
+      }
+    },
+    {
       "version": "6.4.28",
       "tag": "@microsoft/node-library-build_v6.4.28",
       "date": "Thu, 25 Jun 2020 06:43:35 GMT",

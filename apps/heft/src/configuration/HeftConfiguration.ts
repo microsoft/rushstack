@@ -3,7 +3,10 @@
 
 import * as path from 'path';
 import { Terminal, ITerminalProvider, IPackageJson } from '@rushstack/node-core-library';
+import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.7';
+import { trueCasePathSync } from 'true-case-path';
 
+import { RushStackCompilerUtilities } from '../utilities/RushStackCompilerUtilities';
 import { Utilities } from '../utilities/Utilities';
 import { Constants } from '../utilities/Constants';
 
@@ -45,11 +48,24 @@ export interface IHeftActionConfigurationOptions {
 /**
  * @public
  */
+export interface ICompilerPackage {
+  typeScriptPath: string;
+  tslintPath: string;
+  eslintPath: string;
+}
+
+/**
+ * @public
+ */
 export class HeftConfiguration {
   private _buildFolder: string;
   private _projectHeftDataFolder: string | undefined;
+  private _buildCacheFolder: string | undefined;
   private _terminal: Terminal;
   private _terminalProvider: ITerminalProvider;
+
+  private _compilerPackage: ICompilerPackage | undefined;
+  private _hasCompilerPackageBeenAccessed: boolean = false;
 
   /**
    * Project build folder. This is the folder containing the project's package.json file.
@@ -67,6 +83,20 @@ export class HeftConfiguration {
     }
 
     return this._projectHeftDataFolder;
+  }
+
+  /**
+   * The project's build cache folder.
+   *
+   * This folder exists at \<project root\>/.heft/build-cache. TypeScript's output
+   * goes into this folder and then is either copied or linked to the final output folder
+   */
+  public get buildCacheFolder(): string {
+    if (!this._buildCacheFolder) {
+      this._buildCacheFolder = path.join(this.projectHeftDataFolder, Constants.buildCacheFolderName);
+    }
+
+    return this._buildCacheFolder;
   }
 
   /**
@@ -97,6 +127,32 @@ export class HeftConfiguration {
     return Utilities.packageJsonLookup.tryLoadPackageJsonFor(this.buildFolder)!;
   }
 
+  /**
+   * If used by the project being built, the tool package paths exported from
+   * the rush-stack-compiler-* package.
+   */
+  public get compilerPackage(): ICompilerPackage | undefined {
+    if (!this._hasCompilerPackageBeenAccessed) {
+      const rushStackCompilerPackage:
+        | typeof TRushStackCompiler
+        | undefined = RushStackCompilerUtilities.tryLoadRushStackCompilerPackageForFolder(
+        this.terminal,
+        this._buildFolder
+      );
+
+      this._hasCompilerPackageBeenAccessed = true;
+      if (rushStackCompilerPackage) {
+        this._compilerPackage = {
+          typeScriptPath: rushStackCompilerPackage.ToolPaths.typescriptPackagePath,
+          tslintPath: rushStackCompilerPackage.ToolPaths.tslintPackagePath,
+          eslintPath: rushStackCompilerPackage.ToolPaths.eslintPackagePath
+        };
+      }
+    }
+
+    return this._compilerPackage;
+  }
+
   private constructor() {}
 
   /**
@@ -109,7 +165,13 @@ export class HeftConfiguration {
       options.cwd
     );
     if (packageJsonPath) {
-      configuration._buildFolder = path.dirname(packageJsonPath);
+      let buildFolder: string = path.dirname(packageJsonPath);
+      // The CWD path's casing may be incorrect on a case-insensitive filesystem. Some tools, like Jest
+      // expect the casing of the project path to be correct and produce unexpected behavior when the casing
+      // isn't correct.
+      // This ensures the casing of the project folder is correct.
+      buildFolder = trueCasePathSync(buildFolder);
+      configuration._buildFolder = buildFolder;
     } else {
       throw new Error('No package.json file found. Are you in a project folder?');
     }

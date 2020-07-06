@@ -4,12 +4,13 @@
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
-  ICommandLineActionOptions
+  ICommandLineActionOptions,
+  CommandLineIntegerParameter
 } from '@rushstack/ts-command-line';
 import { SyncHook, AsyncParallelHook, AsyncSeriesHook } from 'tapable';
 import { performance } from 'perf_hooks';
 
-import { HeftActionBase, IHeftActionBaseOptions, ActionHooksBase, IActionDataBase } from './HeftActionBase';
+import { HeftActionBase, IHeftActionBaseOptions, ActionHooksBase, IActionContext } from './HeftActionBase';
 import { CleanAction } from './CleanAction';
 
 export interface IBuildActionOptions extends IHeftActionBaseOptions {
@@ -26,8 +27,12 @@ export class BuildStageHooksBase {
 /**
  * @public
  */
-export interface IBuildStage<TBuildStageHooks extends BuildStageHooksBase = BuildStageHooksBase> {
+export interface IBuildStage<
+  TBuildStageHooks extends BuildStageHooksBase,
+  TBuildStageProperties extends object
+> {
   hooks: TBuildStageHooks;
+  properties: TBuildStageProperties;
 }
 
 /**
@@ -73,39 +78,112 @@ export interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsC
 /**
  * @public
  */
-export class CompileStageHooks extends BuildStageHooksBase {
-  public readonly configureCopyStaticAssets: AsyncSeriesHook = new AsyncSeriesHook();
+export interface IEmitModuleKindBase<TModuleKind> {
+  moduleKind: TModuleKind;
+  outFolderPath: string;
 }
 
 /**
  * @public
  */
-export interface ICompileStage extends IBuildStage<CompileStageHooks> {
+export type IEmitModuleKind = IEmitModuleKindBase<
+  'commonjs' | 'amd' | 'umd' | 'system' | 'es2015' | 'esnext'
+>;
+
+/**
+ * @public
+ */
+export type CopyFromCacheMode = 'hardlink' | 'copy';
+
+/**
+ * @public
+ */
+export interface ISharedTypeScriptConfiguration {
+  /**
+   * Can be set to 'copy' or 'hardlink'. If set to 'copy', copy files from cache. If set to 'hardlink', files will be
+   * hardlinked to the cache location. This option is useful when producing a tarball of build output as TAR files
+   * don't handle these hardlinks correctly. 'hardlink' is the default behavior.
+   */
+  copyFromCacheMode?: CopyFromCacheMode | undefined;
+
+  /**
+   * If provided, emit these module kinds in addition to the modules specified in the tsconfig.
+   * Note that this option only applies to the main tsconfig.json configuration.
+   */
+  additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
+
+  /**
+   * Set this to change the maximum write parallelism. The default is 50.
+   */
+  maxWriteParallelism: number;
+}
+
+/**
+ * @public
+ */
+export interface ITypeScriptConfiguration extends ISharedTypeScriptConfiguration {
+  tsconfigPaths: string[];
+  isLintingEnabled: boolean | undefined;
+}
+
+/**
+ * @public
+ */
+export class CompileStageHooks extends BuildStageHooksBase {
+  public readonly configureTypeScript: AsyncSeriesHook = new AsyncSeriesHook();
+  public readonly configureCopyStaticAssets: AsyncSeriesHook = new AsyncSeriesHook();
+
+  public readonly afterConfigureTypeScript: AsyncSeriesHook = new AsyncSeriesHook();
+  public readonly afterConfigureCopyStaticAssets: AsyncSeriesHook = new AsyncSeriesHook();
+}
+
+/**
+ * @public
+ */
+export interface ICompileStageProperties {
+  typeScriptConfiguration: ITypeScriptConfiguration;
   copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
 }
 
 /**
  * @public
  */
-export interface IBundleStage extends IBuildStage<BuildStageHooksBase> {}
+export interface IPreCompileStage extends IBuildStage<BuildStageHooksBase, {}> {}
 
 /**
  * @public
  */
-export class BuildHooks extends ActionHooksBase {
-  public readonly preCompile: SyncHook<IBuildStage> = new SyncHook<IBuildStage>(['preCompile']);
+export interface ICompileStage extends IBuildStage<CompileStageHooks, ICompileStageProperties> {}
 
-  public readonly compile: SyncHook<ICompileStage> = new SyncHook<ICompileStage>(['compile']);
+/**
+ * @public
+ */
+export interface IBundleStage extends IBuildStage<BuildStageHooksBase, {}> {}
 
-  public readonly bundle: SyncHook<IBundleStage> = new SyncHook<IBundleStage>(['bundle']);
+/**
+ * @public
+ */
+export interface IPostBuildStage extends IBuildStage<BuildStageHooksBase, {}> {}
 
-  public readonly postBuild: SyncHook<IBuildStage> = new SyncHook<IBuildStage>(['postBuild']);
+/**
+ * @public
+ */
+export class BuildHooks extends ActionHooksBase<IBuildActionProperties> {
+  public readonly preCompile: SyncHook<IPreCompileStage> = new SyncHook<IPreCompileStage>([
+    'preCompileStage'
+  ]);
+
+  public readonly compile: SyncHook<ICompileStage> = new SyncHook<ICompileStage>(['compileStage']);
+
+  public readonly bundle: SyncHook<IBundleStage> = new SyncHook<IBundleStage>(['bundleStage']);
+
+  public readonly postBuild: SyncHook<IPostBuildStage> = new SyncHook<IPostBuildStage>(['postBuildStage']);
 }
 
 /**
  * @public
  */
-export interface IBuildActionData extends IActionDataBase<BuildHooks> {
+export interface IBuildActionProperties {
   productionFlag: boolean;
   liteFlag: boolean;
   locale?: string;
@@ -116,7 +194,12 @@ export interface IBuildActionData extends IActionDataBase<BuildHooks> {
   watchMode: boolean;
 }
 
-export class BuildAction extends HeftActionBase<IBuildActionData, BuildHooks> {
+/**
+ * @public
+ */
+export interface IBuildActionContext extends IActionContext<BuildHooks, IBuildActionProperties> {}
+
+export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperties> {
   protected _noTestFlag: CommandLineFlagParameter;
   protected _watchFlag: CommandLineFlagParameter;
   private _productionFlag: CommandLineFlagParameter;
@@ -124,6 +207,7 @@ export class BuildAction extends HeftActionBase<IBuildActionData, BuildHooks> {
   private _liteFlag: CommandLineFlagParameter;
   private _cleanFlag: CommandLineFlagParameter;
   private _maxOldSpaceSizeParameter: CommandLineStringParameter;
+  private _typescriptMaxWriteParallelismParamter: CommandLineIntegerParameter;
 
   private _cleanAction: CleanAction;
 
@@ -180,42 +264,75 @@ export class BuildAction extends HeftActionBase<IBuildActionData, BuildHooks> {
       parameterLongName: '--watch',
       description: 'If provided, run tests in watch mode.'
     });
+
+    this._typescriptMaxWriteParallelismParamter = this.defineIntegerParameter({
+      parameterLongName: '--typescript-max-write-parallelism',
+      argumentName: 'PARALLEILSM',
+      description:
+        'Set this to change the maximum write parallelism. This parameter overrides ' +
+        'what is set in typescript.json. The default is 50.'
+    });
   }
 
-  protected async actionExecute(actionData: IBuildActionData): Promise<void> {
+  protected async actionExecute(actionContext: IBuildActionContext): Promise<void> {
     if (this._cleanFlag.value) {
       await this._runWithLogging('Clean', async () => await this._cleanAction.executeInner());
     }
 
-    const preCompileStage: IBuildStage = { hooks: new BuildStageHooksBase() };
-    actionData.hooks.preCompile.call(preCompileStage);
+    const preCompileStage: IPreCompileStage = {
+      hooks: new BuildStageHooksBase(),
+      properties: {}
+    };
+    actionContext.hooks.preCompile.call(preCompileStage);
 
     const compileStage: ICompileStage = {
       hooks: new CompileStageHooks(),
-      copyStaticAssetsConfiguration: {
-        fileExtensions: [],
-        excludeGlobs: [],
-        includeGlobs: [],
+      properties: {
+        typeScriptConfiguration: {
+          tsconfigPaths: [],
+          isLintingEnabled: !actionContext.properties.liteFlag,
+          copyFromCacheMode: undefined,
+          additionalModuleKindsToEmit: undefined,
+          maxWriteParallelism: 50
+        },
+        copyStaticAssetsConfiguration: {
+          fileExtensions: [],
+          excludeGlobs: [],
+          includeGlobs: [],
 
-        // For now - these may need to be revised later
-        sourceFolderName: 'src',
-        destinationFolderNames: ['lib']
+          // For now - these may need to be revised later
+          sourceFolderName: 'src',
+          destinationFolderNames: ['lib']
+        }
       }
     };
-    actionData.hooks.compile.call(compileStage);
+    actionContext.hooks.compile.call(compileStage);
 
-    const bundleStage: IBundleStage = { hooks: new BuildStageHooksBase() };
-    actionData.hooks.bundle.call(bundleStage);
+    const bundleStage: IBundleStage = {
+      hooks: new BuildStageHooksBase(),
+      properties: {}
+    };
+    actionContext.hooks.bundle.call(bundleStage);
 
-    const postBuildStage: IBuildStage = { hooks: new BuildStageHooksBase() };
-    actionData.hooks.postBuild.call(postBuildStage);
+    const postBuildStage: IPostBuildStage = {
+      hooks: new BuildStageHooksBase(),
+      properties: {}
+    };
+    actionContext.hooks.postBuild.call(postBuildStage);
 
-    if (actionData.watchMode) {
+    if (actionContext.properties.watchMode) {
       // In --watch mode, run all configuration upfront and then kick off all stages
       // concurrently with the expectation that the their promises will never resolve
       // and that they will handle watching filesystem changes
 
-      await compileStage.hooks.configureCopyStaticAssets.promise();
+      await Promise.all([
+        compileStage.hooks.configureTypeScript.promise(),
+        compileStage.hooks.configureCopyStaticAssets.promise()
+      ]);
+      await Promise.all([
+        compileStage.hooks.afterConfigureTypeScript.promise(),
+        compileStage.hooks.afterConfigureCopyStaticAssets.promise()
+      ]);
 
       await Promise.all([
         this._runStageWithLogging('Pre-compile', preCompileStage),
@@ -226,7 +343,17 @@ export class BuildAction extends HeftActionBase<IBuildActionData, BuildHooks> {
     } else {
       await this._runStageWithLogging('Pre-compile', preCompileStage);
 
-      await compileStage.hooks.configureCopyStaticAssets.promise();
+      await Promise.all([
+        compileStage.hooks.configureTypeScript.promise(),
+        compileStage.hooks.configureCopyStaticAssets.promise()
+      ]);
+      await Promise.all([
+        compileStage.hooks.afterConfigureTypeScript.promise(),
+        compileStage.hooks.afterConfigureCopyStaticAssets.promise()
+      ]);
+      if (this._typescriptMaxWriteParallelismParamter.value) {
+        compileStage.properties.typeScriptConfiguration.maxWriteParallelism = this._typescriptMaxWriteParallelismParamter.value;
+      }
       await this._runStageWithLogging('Compile', compileStage);
 
       await this._runStageWithLogging('Bundle', bundleStage);
@@ -235,7 +362,7 @@ export class BuildAction extends HeftActionBase<IBuildActionData, BuildHooks> {
     }
   }
 
-  protected getDefaultActionData(): Omit<IBuildActionData, 'hooks'> {
+  protected getDefaultActionProperties(): IBuildActionProperties {
     return {
       productionFlag: this._productionFlag.value,
       liteFlag: this._liteFlag.value,
@@ -248,7 +375,10 @@ export class BuildAction extends HeftActionBase<IBuildActionData, BuildHooks> {
     };
   }
 
-  protected async _runStageWithLogging(buildStageName: string, buildStage: IBuildStage): Promise<void> {
+  protected async _runStageWithLogging(
+    buildStageName: string,
+    buildStage: IBuildStage<BuildStageHooksBase, object>
+  ): Promise<void> {
     if (buildStage.hooks.run.isUsed()) {
       await this._runWithLogging(buildStageName, async () => await buildStage.hooks.run.promise());
     }

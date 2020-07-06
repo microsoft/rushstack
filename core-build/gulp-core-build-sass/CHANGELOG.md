@@ -1,6 +1,33 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Thu, 25 Jun 2020 06:43:35 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+
+## 4.12.2
+Fri, 03 Jul 2020 15:09:04 GMT
+
+*Version update only*
+
+## 4.12.1
+Fri, 03 Jul 2020 05:46:41 GMT
+
+*Version update only*
+
+## 4.12.0
+Fri, 03 Jul 2020 00:10:16 GMT
+
+### Minor changes
+
+- Allow customization of generated CSS module class names.
+
+## 4.11.12
+Sat, 27 Jun 2020 00:09:38 GMT
+
+*Version update only*
+
+## 4.11.11
+Fri, 26 Jun 2020 22:16:39 GMT
+
+*Version update only*
 
 ## 4.11.10
 Thu, 25 Jun 2020 06:43:35 GMT
