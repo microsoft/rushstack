@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import {
   CommandLineParser,
   CommandLineStringListParameter,
@@ -11,8 +10,7 @@ import {
   Terminal,
   InternalError,
   ConsoleTerminalProvider,
-  ITerminalProvider,
-  FileSystem
+  ITerminalProvider
 } from '@rushstack/node-core-library';
 
 import { MetricsCollector } from '../metrics/MetricsCollector';
@@ -155,14 +153,6 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
   }
 
   private _initializePlugins(pluginSpecifiers: ReadonlyArray<string>): void {
-    // Set up the gulp plugin by default if none are specified.
-    if (
-      pluginSpecifiers.length === 0 &&
-      FileSystem.exists(path.resolve(this._heftConfiguration.buildFolder, 'gulpfile.js'))
-    ) {
-      this._pluginManager.initializePlugin(path.resolve(__dirname, '..', 'plugins', 'gulpPlugin.js'));
-    }
-
     this._pluginManager.initializeDefaultPlugins();
 
     this._pluginManager.initializePluginsFromConfigFile();

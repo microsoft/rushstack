@@ -52,8 +52,17 @@ export class CleanHooks extends ActionHooksBase<ICleanActionProperties> {
 // @public (undocumented)
 export class CompileStageHooks extends BuildStageHooksBase {
     // (undocumented)
+    readonly afterConfigureCopyStaticAssets: AsyncSeriesHook;
+    // (undocumented)
+    readonly afterConfigureTypeScript: AsyncSeriesHook;
+    // (undocumented)
     readonly configureCopyStaticAssets: AsyncSeriesHook;
+    // (undocumented)
+    readonly configureTypeScript: AsyncSeriesHook;
 }
+
+// @public (undocumented)
+export type CopyFromCacheMode = 'hardlink' | 'copy';
 
 // @public (undocumented)
 export class DevDeployHooks extends ActionHooksBase<IDevDeployActionProperties> {
@@ -61,7 +70,9 @@ export class DevDeployHooks extends ActionHooksBase<IDevDeployActionProperties> 
 
 // @public (undocumented)
 export class HeftConfiguration {
+    get buildCacheFolder(): string;
     get buildFolder(): string;
+    get compilerPackage(): ICompilerPackage | undefined;
     get heftPackageJson(): IPackageJson;
     // @internal (undocumented)
     static initialize(options: _IHeftConfigurationInitializationOptions): HeftConfiguration;
@@ -80,6 +91,8 @@ export class HeftSession {
     get debugMode(): boolean;
     // (undocumented)
     readonly hooks: IHeftSessionHooks;
+    // @internal (undocumented)
+    readonly metricsCollector: _MetricsCollector;
     }
 
 // @public (undocumented)
@@ -133,7 +146,19 @@ export interface ICleanActionContext extends IActionContext<CleanHooks, ICleanAc
 // @public (undocumented)
 export interface ICleanActionProperties {
     // (undocumented)
-    pathsToDelete: string[];
+    deleteCache: boolean;
+    // (undocumented)
+    pathsToDelete: Set<string>;
+}
+
+// @public (undocumented)
+export interface ICompilerPackage {
+    // (undocumented)
+    eslintPath: string;
+    // (undocumented)
+    tslintPath: string;
+    // (undocumented)
+    typeScriptPath: string;
 }
 
 // @public (undocumented)
@@ -144,6 +169,8 @@ export interface ICompileStage extends IBuildStage<CompileStageHooks, ICompileSt
 export interface ICompileStageProperties {
     // (undocumented)
     copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
+    // (undocumented)
+    typeScriptConfiguration: ITypeScriptConfiguration;
 }
 
 // @public (undocumented)
@@ -158,6 +185,17 @@ export interface IDevDeployActionContext extends IActionContext<DevDeployHooks, 
 
 // @public (undocumented)
 export interface IDevDeployActionProperties {
+}
+
+// @public (undocumented)
+export type IEmitModuleKind = IEmitModuleKindBase<'commonjs' | 'amd' | 'umd' | 'system' | 'es2015' | 'esnext'>;
+
+// @public (undocumented)
+export interface IEmitModuleKindBase<TModuleKind> {
+    // (undocumented)
+    moduleKind: TModuleKind;
+    // (undocumented)
+    outFolderPath: string;
 }
 
 // @public
@@ -210,6 +248,12 @@ export interface IMetricsData {
     taskTotalExecutionMs: number;
 }
 
+// @internal (undocumented)
+export interface _IPerformanceData {
+    // (undocumented)
+    taskTotalExecutionMs: number;
+}
+
 // @public (undocumented)
 export interface IPostBuildStage extends IBuildStage<BuildStageHooksBase, {}> {
 }
@@ -223,6 +267,13 @@ export interface ISharedCopyStaticAssetsConfiguration {
     excludeGlobs?: string[];
     fileExtensions?: string[];
     includeGlobs?: string[];
+}
+
+// @public (undocumented)
+export interface ISharedTypeScriptConfiguration {
+    additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
+    copyFromCacheMode?: CopyFromCacheMode | undefined;
+    maxWriteParallelism: number;
 }
 
 // @public (undocumented)
@@ -240,6 +291,24 @@ export interface ITestActionContext extends IActionContext<TestHooks, ITestActio
 // @public (undocumented)
 export interface ITestActionProperties {
 }
+
+// @public (undocumented)
+export interface ITypeScriptConfiguration extends ISharedTypeScriptConfiguration {
+    // (undocumented)
+    isLintingEnabled: boolean | undefined;
+    // (undocumented)
+    tsconfigPaths: string[];
+}
+
+// @internal
+export class _MetricsCollector {
+    flushAndTeardownAsync(): Promise<void>;
+    flushAsync(): Promise<void>;
+    // (undocumented)
+    readonly hooks: MetricsCollectorHooks;
+    record(command: string, performanceData?: Partial<_IPerformanceData>): void;
+    setStartTime(): void;
+    }
 
 // @public
 export class MetricsCollectorHooks {

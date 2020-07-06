@@ -89,7 +89,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
   public cleanMatch: string[] = ['src/**/*.sass.ts', 'src/**/*.scss.ts'];
 
   private get _postCSSPlugins(): postcss.AcceptedPlugin[] {
-    return [autoprefixer(this.taskConfig.autoprefixerOptions)];
+    return [autoprefixer(this.taskConfig.autoprefixerOptions) as postcss.Transformer];
   }
 
   public constructor() {

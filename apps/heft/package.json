@@ -8,7 +8,7 @@
     "start": "node ./watch.js"
   },
   "bin": {
-    "heft": "./bin/dev"
+    "heft": "./bin/heft"
   },
   "main": "lib/index.js",
   "types": "dist/heft.d.ts",
@@ -16,10 +16,10 @@
     "@types/glob": "7.1.1",
     "@types/node": "10.17.13",
     "@types/resolve": "1.17.1",
-    "@rushstack/eslint-config": "1.0.2"
+    "@rushstack/eslint-config": "1.0.2",
+    "@microsoft/rush-stack-compiler-3.7": "0.6.1"
   },
   "dependencies": {
-    "@microsoft/rush-stack-compiler-3.7": "0.6.1",
     "@rushstack/node-core-library": "3.25.0",
     "@rushstack/ts-command-line": "4.4.6",
     "@types/tapable": "1.0.5",
