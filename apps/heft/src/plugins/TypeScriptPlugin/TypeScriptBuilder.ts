@@ -32,8 +32,6 @@ import { IEmitModuleKindBase, ISharedTypeScriptConfiguration } from '../../cli/a
 import { PerformanceMeasurer, PerformanceMeasurerAsync } from '../../utilities/Performance';
 import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
 
-const ASYNC_LIMIT: number = 100;
-
 export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfiguration {
   buildFolder: string;
   typeScriptToolPath: string;
@@ -59,6 +57,8 @@ export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfig
    * The path of project's build cache folder
    */
   buildCacheFolder: string;
+
+  maxWriteParallelism: number;
 }
 
 interface ICachedEmitModuleKind<TModuleKind> extends IEmitModuleKindBase<TModuleKind> {
@@ -367,8 +367,10 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
     //#region WRITE
     const writePromise: Promise<{ duration: number }> = measureTsPerformanceAsync('Write', () =>
-      Async.forEachLimitAsync(filesToWrite, ASYNC_LIMIT, async ({ filePath, data }) =>
-        this._fileSystem.writeFile(filePath, data, { ensureFolderExists: true })
+      Async.forEachLimitAsync(
+        filesToWrite,
+        this._configuration.maxWriteParallelism,
+        async ({ filePath, data }) => this._fileSystem.writeFile(filePath, data, { ensureFolderExists: true })
       )
     );
     //#endregion

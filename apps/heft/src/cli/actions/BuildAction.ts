@@ -4,7 +4,8 @@
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
-  ICommandLineActionOptions
+  ICommandLineActionOptions,
+  CommandLineIntegerParameter
 } from '@rushstack/ts-command-line';
 import { SyncHook, AsyncParallelHook, AsyncSeriesHook } from 'tapable';
 import { performance } from 'perf_hooks';
@@ -110,6 +111,11 @@ export interface ISharedTypeScriptConfiguration {
    * Note that this option only applies to the main tsconfig.json configuration.
    */
   additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
+
+  /**
+   * Set this to change the maximum write parallelism. The default is 50.
+   */
+  maxWriteParallelism: number;
 }
 
 /**
@@ -201,6 +207,7 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
   private _liteFlag: CommandLineFlagParameter;
   private _cleanFlag: CommandLineFlagParameter;
   private _maxOldSpaceSizeParameter: CommandLineStringParameter;
+  private _typescriptMaxWriteParallelismParamter: CommandLineIntegerParameter;
 
   private _cleanAction: CleanAction;
 
@@ -257,6 +264,14 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
       parameterLongName: '--watch',
       description: 'If provided, run tests in watch mode.'
     });
+
+    this._typescriptMaxWriteParallelismParamter = this.defineIntegerParameter({
+      parameterLongName: '--typescript-max-write-parallelism',
+      argumentName: 'PARALLEILSM',
+      description:
+        'Set this to change the maximum write parallelism. This parameter overrides ' +
+        'what is set in typescript.json. The default is 50.'
+    });
   }
 
   protected async actionExecute(actionContext: IBuildActionContext): Promise<void> {
@@ -277,7 +292,8 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
           tsconfigPaths: [],
           isLintingEnabled: !actionContext.properties.liteFlag,
           copyFromCacheMode: undefined,
-          additionalModuleKindsToEmit: undefined
+          additionalModuleKindsToEmit: undefined,
+          maxWriteParallelism: 50
         },
         copyStaticAssetsConfiguration: {
           fileExtensions: [],
@@ -335,6 +351,9 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
         compileStage.hooks.afterConfigureTypeScript.promise(),
         compileStage.hooks.afterConfigureCopyStaticAssets.promise()
       ]);
+      if (this._typescriptMaxWriteParallelismParamter.value) {
+        compileStage.properties.typeScriptConfiguration.maxWriteParallelism = this._typescriptMaxWriteParallelismParamter.value;
+      }
       await this._runStageWithLogging('Compile', compileStage);
 
       await this._runStageWithLogging('Bundle', bundleStage);

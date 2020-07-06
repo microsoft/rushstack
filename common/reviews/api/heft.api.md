@@ -273,6 +273,7 @@ export interface ISharedCopyStaticAssetsConfiguration {
 export interface ISharedTypeScriptConfiguration {
     additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
     copyFromCacheMode?: CopyFromCacheMode | undefined;
+    maxWriteParallelism: number;
 }
 
 // @public (undocumented)

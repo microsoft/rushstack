@@ -41,6 +41,11 @@
     "disableTslint": {
       "description": "If set to \"true\", disable TSlint.",
       "type": "boolean"
+    },
+
+    "maxWriteParallelism": {
+      "description": "Set this to change the maximum write parallelism. The default is 50.",
+      "type": "number"
     }
   }
 }

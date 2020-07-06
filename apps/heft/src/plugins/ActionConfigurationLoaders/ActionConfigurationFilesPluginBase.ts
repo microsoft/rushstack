@@ -118,6 +118,10 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
     if (typeScriptConfigurationJson?.disableTslint !== undefined) {
       typeScriptConfiguration.isLintingEnabled = !typeScriptConfigurationJson.disableTslint;
     }
+
+    if (typeScriptConfigurationJson?.maxWriteParallelism !== undefined) {
+      typeScriptConfiguration.maxWriteParallelism = typeScriptConfigurationJson.maxWriteParallelism;
+    }
   }
 
   private async _updateCopyStaticAssetsConfigurationAsync(

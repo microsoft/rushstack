@@ -36,6 +36,7 @@ interface IRunBuilderForTsconfigOptions {
   lintingEnabled: boolean;
   copyFromCacheMode?: CopyFromCacheMode;
   watchMode: boolean;
+  maxWriteParallelism: number;
 
   terminalProvider: ITerminalProvider;
   terminalPrefixLabel: string | undefined;
@@ -92,7 +93,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
       heftConfiguration,
       lintingEnabled: !!typeScriptConfiguration.isLintingEnabled,
       copyFromCacheMode: typeScriptConfiguration.copyFromCacheMode,
-      watchMode: watchMode
+      watchMode: watchMode,
+      maxWriteParallelism: typeScriptConfiguration.maxWriteParallelism
     };
 
     const tsconfigFilePaths: string[] = typeScriptConfiguration.tsconfigPaths;
@@ -138,7 +140,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
       terminalPrefixLabel,
       copyFromCacheMode,
       additionalModuleKindsToEmit,
-      watchMode
+      watchMode,
+      maxWriteParallelism
     } = options;
 
     const fullTsconfigFilePath: string = path.resolve(heftConfiguration.buildFolder, tsconfigFilePath);
@@ -164,7 +167,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
       additionalModuleKindsToEmit,
       copyFromCacheMode,
       watchMode,
-      terminalPrefixLabel
+      terminalPrefixLabel,
+      maxWriteParallelism
     };
     const typeScriptBuilder: TypeScriptBuilder = new TypeScriptBuilder(
       terminalProvider,
