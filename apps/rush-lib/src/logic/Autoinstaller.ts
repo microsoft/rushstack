@@ -9,6 +9,7 @@ import { Utilities } from '../utilities/Utilities';
 
 import { PackageName, IParsedPackageNameOrError } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../api/RushConfiguration';
+import { PackageJsonEditor } from '../api/PackageJsonEditor';
 
 export class Autoinstaller {
   public name: string;
@@ -65,6 +66,16 @@ export class Autoinstaller {
       oldFileContents = FileSystem.readFile(this.shrinkwrapFilePath, { convertLineEndings: NewlineKind.Lf });
       console.log('Deleting ' + this.shrinkwrapFilePath);
       FileSystem.deleteFile(this.shrinkwrapFilePath);
+    }
+
+    // Detect a common mistake where PNPM prints "Already up-to-date" without creating a shrinkwrap file
+    const packageJsonEditor: PackageJsonEditor = PackageJsonEditor.load(this.packageJsonPath);
+    if (packageJsonEditor.dependencyList.length === 0 && packageJsonEditor.dependencyList.length === 0) {
+      throw new Error(
+        'You must add at least one dependency to the autoinstaller package' +
+          ' before invoking this command:\n' +
+          this.packageJsonPath
+      );
     }
 
     console.log();
