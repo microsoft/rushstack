@@ -1096,12 +1096,14 @@ importers:
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@types/jest': 25.2.1
       '@types/webpack-env': 1.13.0
+      gulp: 4.0.2
     specifiers:
       '@microsoft/node-library-build': 'workspace:*'
       '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@types/jest': 25.2.1
       '@types/webpack-env': 1.13.0
+      gulp: ~4.0.2
   ../../libraries/node-core-library:
     dependencies:
       '@types/node': 10.17.13
@@ -14134,3 +14136,4 @@ packages:
       commander: 2.20.3
     resolution:
       integrity: sha512-DUOKC/IhbkdLKKiV89gw9DUauTV8U/8yJl1sjf6MtDmzevLKOF2duNJ495S3MFVjqZarr+qNGCPbkg4mu4PpLw==
+registry: ''

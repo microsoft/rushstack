@@ -18,6 +18,7 @@
     "@rushstack/eslint-config": "workspace:*",
     "@types/jest": "25.2.1",
     "@types/webpack-env": "1.13.0",
-    "@microsoft/node-library-build": "workspace:*"
+    "@microsoft/node-library-build": "workspace:*",
+    "gulp": "~4.0.2"
   }
 }
