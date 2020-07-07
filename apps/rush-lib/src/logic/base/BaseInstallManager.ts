@@ -165,8 +165,8 @@ export abstract class BaseInstallManager {
       console.log();
       console.log(
         colors.red(
-          'The "--to" argument can only be used when running in a workspace environment. Run the ' +
-            'command again without specifying this argument.'
+          'Project filtering arguments can only be used when running in a workspace environment. Run the ' +
+            'command again without specifying these arguments.'
         )
       );
       throw new AlreadyReportedError();
@@ -177,8 +177,8 @@ export abstract class BaseInstallManager {
       console.log();
       console.log(
         colors.red(
-          'The "--to" argument cannot be used when running "rush update". Run the command again ' +
-            'without specifying this argument.'
+          'Project filtering arguments cannot be used when running "rush update". Run the command again ' +
+            'without specifying these arguments.'
         )
       );
       throw new AlreadyReportedError();

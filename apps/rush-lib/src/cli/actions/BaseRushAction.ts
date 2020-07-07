@@ -10,10 +10,10 @@ import {
   ICommandLineActionOptions,
   CommandLineStringListParameter
 } from '@rushstack/ts-command-line';
-
 import { LockFile, PackageJsonLookup, IPackageJson } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { EventHooksManager } from '../../logic/EventHooksManager';
 import { RushCommandLineParser } from './../RushCommandLineParser';
 import { Utilities } from '../../utilities/Utilities';
@@ -158,7 +158,15 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
           throw new AlreadyReportedError();
         }
       } else {
-        projects.push(projectParameter);
+        const project:
+          | RushConfigurationProject
+          | undefined = this.rushConfiguration.findProjectByShorthandName(projectParameter);
+        if (!project) {
+          console.log(colors.red(`The project '${projectParameter}' does not exist in rush.json.`));
+          throw new AlreadyReportedError();
+        }
+
+        projects.push(project.packageName);
       }
     }
 

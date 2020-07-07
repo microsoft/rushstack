@@ -473,24 +473,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       // "<package>..." selects the specified package and all direct and indirect dependencies
       if (this.options.toFlags) {
         for (const flag of this.options.toFlags) {
-          args.push('--filter', `${this._getPackageName(flag)}...`);
+          args.push('--filter', `${flag}...`);
         }
       }
     }
-  }
-
-  /**
-   * Gets the fully-qualified package name of a local project.
-   */
-  private _getPackageName(projectName: string): string {
-    const localProject:
-      | RushConfigurationProject
-      | undefined = this.rushConfiguration.findProjectByShorthandName(projectName);
-    if (!localProject) {
-      throw new Error(`The project '${projectName}' does not exist in rush.json`);
-    }
-
-    return localProject.packageName;
   }
 
   /**
