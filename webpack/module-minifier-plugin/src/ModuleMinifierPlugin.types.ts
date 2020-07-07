@@ -261,7 +261,7 @@ export interface IModuleMinifierPluginOptions {
   minifier: IModuleMinifier;
 
   /**
-   * Whether to enable source map processing. Defaults to `true`.
+   * Whether to enable source map processing. If not provided, will attempt to guess based on `mode` and `devtool` in the webpack config.
    * Set to `false` for faster builds at the expense of debuggability.
    */
   sourceMap?: boolean;

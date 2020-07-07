@@ -24,6 +24,8 @@ optimization: [
   minimizer: [
     new ModuleMinifierPlugin({
       minifier: new WorkerPoolMinifier(),
+      // If not provided, the plugin will attempt to guess from `mode` and `devtool`.
+      // Providing it expressly gives better results
       useSourceMap: true
     })
   ]

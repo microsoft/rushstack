@@ -110,7 +110,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
   public minifier: IModuleMinifier;
 
   private readonly _portableIdsPlugin: PortableMinifierModuleIdsPlugin | undefined;
-  private readonly _sourceMap: boolean;
+  private readonly _sourceMap: boolean | undefined;
 
   public constructor(options: IModuleMinifierPluginOptions) {
     this.hooks = {
@@ -121,7 +121,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
       postProcessCodeFragment: new SyncWaterfallHook(['code', 'context'])
     };
 
-    const { minifier, sourceMap = true, usePortableModules = false } = options;
+    const { minifier, sourceMap, usePortableModules = false } = options;
 
     if (usePortableModules) {
       this._portableIdsPlugin = new PortableMinifierModuleIdsPlugin(this.hooks);
@@ -130,13 +130,22 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
     this.hooks.rehydrateAssets.tap(PLUGIN_NAME, defaultRehydrateAssets);
     this.minifier = minifier;
 
-    this._sourceMap = !!sourceMap;
+    this._sourceMap = sourceMap;
   }
 
   public apply(compiler: webpack.Compiler): void {
     const { _portableIdsPlugin: stableIdsPlugin } = this;
 
-    const useSourceMaps: boolean = this._sourceMap;
+    const {
+      options: { devtool, mode }
+    } = compiler;
+    // The explicit setting is preferred due to accuracy, but try to guess based on devtool
+    const useSourceMaps: boolean =
+      typeof this._sourceMap === 'boolean'
+        ? this._sourceMap
+        : typeof devtool === 'string'
+        ? devtool.endsWith('source-map')
+        : mode === 'production' && devtool !== false;
 
     if (stableIdsPlugin) {
       stableIdsPlugin.apply(compiler);
