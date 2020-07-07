@@ -20,7 +20,7 @@ import { ChangeAction } from './actions/ChangeAction';
 import { CheckAction } from './actions/CheckAction';
 import { DeployAction } from './actions/DeployAction';
 import { InitAction } from './actions/InitAction';
-import { InitAutoinstallerAction } from './actions/InitAutoinstaller';
+import { InitAutoinstallerAction } from './actions/InitAutoinstallerAction';
 import { InitDeployAction } from './actions/InitDeployAction';
 import { InstallAction } from './actions/InstallAction';
 import { LinkAction } from './actions/LinkAction';
@@ -30,7 +30,7 @@ import { PurgeAction } from './actions/PurgeAction';
 import { ScanAction } from './actions/ScanAction';
 import { UnlinkAction } from './actions/UnlinkAction';
 import { UpdateAction } from './actions/UpdateAction';
-import { UpdateAutoinstallerAction } from './actions/UpdateAutoinstaller';
+import { UpdateAutoinstallerAction } from './actions/UpdateAutoinstallerAction';
 import { VersionAction } from './actions/VersionAction';
 
 import { BulkScriptAction } from './scriptActions/BulkScriptAction';
