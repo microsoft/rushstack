@@ -6,11 +6,17 @@ export {
   HeftConfiguration,
   IHeftActionConfiguration,
   IHeftActionConfigurationOptions,
+  ICompilerPackage,
   IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
 } from './configuration/HeftConfiguration';
 export { ActionHooksBase, IActionContext } from './cli/actions/HeftActionBase';
 export { HeftSession, IHeftSessionHooks } from './pluginFramework/HeftSession';
-export { MetricsCollectorHooks, IMetricsData } from './metrics/MetricsCollector';
+export {
+  MetricsCollectorHooks,
+  IMetricsData,
+  IPerformanceData as _IPerformanceData,
+  MetricsCollector as _MetricsCollector
+} from './metrics/MetricsCollector';
 
 // Actions
 export {
@@ -23,7 +29,12 @@ export {
   ICompileStage,
   ISharedCopyStaticAssetsConfiguration,
   ICopyStaticAssetsConfiguration,
+  ITypeScriptConfiguration,
   CompileStageHooks,
+  IEmitModuleKind,
+  IEmitModuleKindBase,
+  ISharedTypeScriptConfiguration,
+  CopyFromCacheMode,
   IBundleStage,
   IPostBuildStage,
   IPreCompileStage

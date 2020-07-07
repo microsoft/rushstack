@@ -24,7 +24,7 @@
     "eslint": "^6.0.0 || ^7.0.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.4.10",
+    "@microsoft/node-library-build": "6.4.31",
     "@microsoft/rush-stack-compiler-3.9": "0.2.1",
     "@types/eslint": "7.2.0",
     "@types/estree": "0.0.44",

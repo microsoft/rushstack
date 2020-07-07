@@ -32,9 +32,9 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@microsoft/api-extractor-model": "7.8.12",
-    "@rushstack/node-core-library": "3.25.0",
-    "@rushstack/ts-command-line": "4.4.6",
+    "@microsoft/api-extractor-model": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/ts-command-line": "workspace:*",
     "@microsoft/tsdoc": "0.12.19",
     "colors": "~1.2.1",
     "lodash": "~4.17.15",
@@ -44,9 +44,9 @@
     "typescript": "~3.9.5"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.4.10",
-    "@microsoft/rush-stack-compiler-3.5": "0.4.4",
-    "@rushstack/eslint-config": "1.0.2",
+    "@microsoft/node-library-build": "6.4.31",
+    "@microsoft/rush-stack-compiler-3.5": "0.8.0",
+    "@rushstack/eslint-config": "workspace:*",
     "@types/jest": "25.2.1",
     "@types/lodash": "4.14.116",
     "@types/semver": "~7.3.1",

@@ -2,6 +2,18 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.3.27",
+      "tag": "@rushstack/localization-plugin_v0.3.27",
+      "date": "Tue, 07 Jul 2020 00:09:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the localization plugin would throw if resolveMissingTranslatedStrings returns undefined for a locale."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.26",
       "tag": "@rushstack/localization-plugin_v0.3.26",
       "date": "Fri, 03 Jul 2020 15:09:04 GMT",

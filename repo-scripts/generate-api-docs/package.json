@@ -8,8 +8,8 @@
     "build": ""
   },
   "devDependencies": {
-    "doc-plugin-rush-stack": "1.0.0",
-    "@microsoft/api-documenter": "7.8.21",
-    "@rushstack/eslint-config": "1.0.2"
+    "doc-plugin-rush-stack": "workspace:*",
+    "@microsoft/api-documenter": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*"
   }
 }

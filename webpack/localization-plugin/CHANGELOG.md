@@ -1,6 +1,13 @@
 # Change Log - @rushstack/localization-plugin
 
-This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Jul 2020 00:09:39 GMT and should not be manually modified.
+
+## 0.3.27
+Tue, 07 Jul 2020 00:09:39 GMT
+
+### Patches
+
+- Fix an issue where the localization plugin would throw if resolveMissingTranslatedStrings returns undefined for a locale.
 
 ## 0.3.26
 Fri, 03 Jul 2020 15:09:04 GMT

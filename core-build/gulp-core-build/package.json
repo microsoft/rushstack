@@ -13,7 +13,7 @@
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
-    "@rushstack/node-core-library": "3.25.0",
+    "@rushstack/node-core-library": "workspace:*",
     "@types/chalk": "0.4.31",
     "@types/gulp": "4.0.6",
     "@types/jest": "25.2.1",
@@ -54,9 +54,9 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.4.10",
-    "@microsoft/rush-stack-compiler-3.5": "0.4.4",
-    "@rushstack/eslint-config": "1.0.2",
+    "@microsoft/node-library-build": "6.4.31",
+    "@microsoft/rush-stack-compiler-3.5": "0.8.0",
+    "@rushstack/eslint-config": "workspace:*",
     "@types/glob": "7.1.1",
     "@types/jest": "25.2.1",
     "@types/z-schema": "3.16.31"
