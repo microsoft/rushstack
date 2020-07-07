@@ -90,6 +90,11 @@ export interface IInstallManagerOptions {
    * Retry the install the specified number of times
    */
   maxInstallAttempts: number;
+
+  /**
+   * The list of projects that should be installed, along with project dependencies.
+   */
+  toFlags: ReadonlyArray<string>;
 }
 
 /**
@@ -150,12 +155,43 @@ export abstract class BaseInstallManager {
   }
 
   public async doInstall(): Promise<void> {
+    const isFilteredInstall: boolean = this.options.toFlags.length > 0;
+
+    // Prevent filtered installs when workspaces is disabled
+    if (
+      isFilteredInstall &&
+      !(this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces)
+    ) {
+      console.log();
+      console.log(
+        colors.red(
+          'Project filtering arguments can only be used when running in a workspace environment. Run the ' +
+            'command again without specifying these arguments.'
+        )
+      );
+      throw new AlreadyReportedError();
+    }
+
+    // Prevent update when using a filter, as modifications to the shrinkwrap shouldn't be saved
+    if (this.options.allowShrinkwrapUpdates && isFilteredInstall) {
+      console.log();
+      console.log(
+        colors.red(
+          'Project filtering arguments cannot be used when running "rush update". Run the command again ' +
+            'without specifying these arguments.'
+        )
+      );
+      throw new AlreadyReportedError();
+    }
+
     const { shrinkwrapIsUpToDate, variantIsUpToDate } = await this.prepareAsync();
 
     // This marker file indicates that the last "rush install" completed successfully.
-    // If "--purge" was specified, or if the last install was interrupted, then we will need to
-    // perform a clean install.  Otherwise, we can do an incremental install.
-    const cleanInstall: boolean = !this._commonTempInstallFlag.checkValidAndReportStoreIssues();
+    // Always perform a clean install if filter flags were provided. Additionally, if
+    // "--purge" was specified, or if the last install was interrupted, then we will
+    // need to perform a clean install.  Otherwise, we can do an incremental install.
+    const cleanInstall: boolean =
+      isFilteredInstall || !this._commonTempInstallFlag.checkValidAndReportStoreIssues();
 
     // Allow us to defer the file read until we need it
     const canSkipInstall: () => boolean = () => {
@@ -215,8 +251,10 @@ export abstract class BaseInstallManager {
         }
       }
 
-      // Create the marker file to indicate a successful install
-      this._commonTempInstallFlag.create();
+      // Create the marker file to indicate a successful install if it's not a filtered install
+      if (!isFilteredInstall) {
+        this._commonTempInstallFlag.create();
+      }
 
       console.log('');
     }
