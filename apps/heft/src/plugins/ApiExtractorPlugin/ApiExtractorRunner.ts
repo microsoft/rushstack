@@ -9,10 +9,37 @@ import { SubprocessRunnerBase } from '../../utilities/subprocess/SubprocessRunne
 import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
 
 export interface IApiExtractorRunnerConfiguration {
+  /**
+   * The path to the API Extractor config file
+   *
+   * For example, /home/username/code/repo/project/.heft/api-extractor.json
+   */
   configFileLocation: string;
+
+  /**
+   * The path to the @microsoft/api-extractor package
+   *
+   * For example, /home/username/code/repo/project/node_modules/@microsoft/api-extractor
+   */
   apiExtractorPackagePath: string;
+
+  /**
+   * The path to the typescript package
+   *
+   * For example, /home/username/code/repo/project/node_modules/typescript
+   */
   typescriptPackagePath: string;
+
+  /**
+   * The folder of the project being built
+   *
+   * For example, /home/username/code/repo/project
+   */
   buildFolder: string;
+
+  /**
+   * If set to true, run API Extractor in production mode
+   */
   production: boolean;
 }
 
