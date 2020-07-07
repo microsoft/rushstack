@@ -566,7 +566,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         this._tslintTerminal.writeWarningLine(
           '  ',
           Colors.yellow(`${severity}: ${buildFolderRelativeFilename}:${line + 1}:${character + 1}`),
-          Colors.white(' - '),
+          ' - ',
           Colors.yellow(`(${tslintFailure.getRuleName()}) ${tslintFailure.getFailure()}`)
         );
       }
@@ -593,9 +593,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       );
       terminalMessage = [
         Colors.red(`ERROR: ${buildFolderRelativeFilename}:${line + 1}:${character + 1}`),
-        Colors.white(' - '),
-        Colors.gray(`(TS${diagnostic.code})`),
-        ' ',
+        ` - (TS${diagnostic.code}) `,
         Colors.red(message)
       ];
     } else {

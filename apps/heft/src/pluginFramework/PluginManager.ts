@@ -16,6 +16,7 @@ import { ProjectActionConfigurationFilesPlugin } from '../plugins/ActionConfigur
 import { CleanPlugin } from '../plugins/CleanPlugin';
 import { CopyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
 import { PackageJsonConfigurationPlugin } from '../plugins/PackageJsonConfigurationPlugin';
+import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
@@ -48,6 +49,7 @@ export class PluginManager {
     this._applyPlugin(new CopyStaticAssetsPlugin());
     this._applyPlugin(new CleanPlugin());
     this._applyPlugin(new PackageJsonConfigurationPlugin());
+    this._applyPlugin(new ApiExtractorPlugin());
   }
 
   public initializePlugin(pluginSpecifier: string, options?: object): void {

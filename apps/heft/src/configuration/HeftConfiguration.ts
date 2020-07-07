@@ -49,9 +49,10 @@ export interface IHeftActionConfigurationOptions {
  * @public
  */
 export interface ICompilerPackage {
-  typeScriptPath: string;
-  tslintPath: string;
-  eslintPath: string;
+  apiExtractorPackagePath: string;
+  typeScriptPackagePath: string;
+  tslintPackagePath: string;
+  eslintPackagePath: string;
 }
 
 /**
@@ -143,9 +144,10 @@ export class HeftConfiguration {
       this._hasCompilerPackageBeenAccessed = true;
       if (rushStackCompilerPackage) {
         this._compilerPackage = {
-          typeScriptPath: rushStackCompilerPackage.ToolPaths.typescriptPackagePath,
-          tslintPath: rushStackCompilerPackage.ToolPaths.tslintPackagePath,
-          eslintPath: rushStackCompilerPackage.ToolPaths.eslintPackagePath
+          apiExtractorPackagePath: rushStackCompilerPackage.ToolPaths.apiExtractorPackagePath,
+          typeScriptPackagePath: rushStackCompilerPackage.ToolPaths.typescriptPackagePath,
+          tslintPackagePath: rushStackCompilerPackage.ToolPaths.tslintPackagePath,
+          eslintPackagePath: rushStackCompilerPackage.ToolPaths.eslintPackagePath
         };
       }
     }
