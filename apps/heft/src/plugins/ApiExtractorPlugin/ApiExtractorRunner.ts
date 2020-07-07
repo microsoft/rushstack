@@ -83,7 +83,7 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
                 ? path.relative(this._configuration.buildFolder, message.sourceFilePath)
                 : message.sourceFilePath;
               logMessage = [
-                Colors.red(`ERROR: ${filePathForLog}(${message.sourceFileLine},${message.sourceFileColumn})`),
+                Colors.red(`ERROR: ${filePathForLog}:${message.sourceFileLine}:${message.sourceFileColumn}`),
                 ` - (${message.category}) `,
                 Colors.red(message.text)
               ];
@@ -106,7 +106,7 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
                 : message.sourceFilePath;
               logMessage = [
                 Colors.yellow(
-                  `WARNING: ${filePathForLog}(${message.sourceFileLine},${message.sourceFileColumn})`
+                  `WARNING: ${filePathForLog}:${message.sourceFileLine}:${message.sourceFileColumn}`
                 ),
                 ` - (${message.category}) `,
                 Colors.yellow(message.text)
