@@ -4,7 +4,6 @@
 import * as path from 'path';
 import {
   Colors,
-  JsonFile,
   FileSystemStats,
   IFileSystemCreateLinkOptions,
   IColorableSequence,
@@ -12,7 +11,7 @@ import {
   ITerminalProvider
 } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
-import { Tslint as TTslint, Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.7';
+import { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.7';
 import {
   ExtendedTypeScript,
   IEmitResolver,
@@ -23,15 +22,14 @@ import {
   IExtendedSourceFile,
   IResolveModuleNameResolutionHost
 } from './internalTypings/TypeScriptInternals';
-import * as TEslint from 'eslint';
 
 import { SubprocessRunnerBase } from '../../utilities/subprocess/SubprocessRunnerBase';
 import { Async } from '../../utilities/Async';
-import { ResolveUtilities } from '../../utilities/ResolveUtilities';
-import { IExtendedLinter } from './internalTypings/TslintInternals';
 import { IEmitModuleKindBase, ISharedTypeScriptConfiguration } from '../../cli/actions/BuildAction';
 import { PerformanceMeasurer, PerformanceMeasurerAsync } from '../../utilities/Performance';
 import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
+import { Tslint } from './Tslint';
+import { Eslint } from './Eslint';
 
 export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfiguration {
   buildFolder: string;
@@ -85,52 +83,6 @@ interface IFileToWrite {
   data: string;
 }
 
-interface ITsLintCacheData {
-  /**
-   * The TSLint version and a hash of the TSLint config files. If either changes,
-   * the cache is invalidated.
-   */
-  cacheVersion: string;
-
-  /**
-   * This is the result of `Array.from(Map<string, string>)`. The first element of
-   * each array item is the file's path and the second element is the file's hash.
-   */
-  fileVersions: [string, string][];
-}
-
-interface IRunLintOptions {
-  tsProgram: IExtendedProgram;
-
-  /**
-   * All of the files that the TypeScript compiler processed.
-   */
-  typeScriptFilenames: Set<string>;
-
-  /**
-   * The set of files that TypeScript has compiled since the last compilation.
-   */
-  changedFiles: Set<IExtendedSourceFile>;
-}
-
-interface IRunTslintOptions extends IRunLintOptions {
-  /**
-   * A performance measurer for the TSLint run.
-   */
-  measurePerformance: PerformanceMeasurer;
-
-  tslint: typeof TTslint;
-}
-
-interface IRunEslintOptions extends IRunLintOptions {
-  /**
-   * A performance measurer for the ESLint run.
-   */
-  measurePerformanceAsync: PerformanceMeasurerAsync;
-
-  eslint: typeof TEslint;
-}
-
 type TWatchCompilerHost = TTypescript.WatchCompilerHostOfFilesAndCompilerOptions<
   TTypescript.EmitAndSemanticDiagnosticsBuilderProgram
 >;
@@ -141,16 +93,11 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _eslintEnabled: boolean;
   private _tslintEnabled: boolean;
   private _moduleKindsToEmit: ICachedEmitModuleKind<TTypescript.ModuleKind>[];
-  private _rawProjectTslintFile: string | undefined;
   private _eslintConfigFilePath: string;
   private _tslintConfigFilePath: string;
   private _typescriptTerminal: Terminal;
-  private _eslintTerminal: Terminal;
-  private _tslintTerminal: Terminal;
 
-  private __tsCacheFilePath: string | undefined;
-  private __eslintCacheFilePath: string | undefined;
-  private __tslintCacheFilePath: string | undefined;
+  private __tsCacheFilePath: string;
   private _tsReadJsonCache: Map<string, object> = new Map<string, object>();
 
   public get filename(): string {
@@ -159,9 +106,10 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
   private get _tsCacheFilePath(): string {
     if (!this.__tsCacheFilePath) {
-      const configHash: crypto.Hash = this._getConfigHash(
+      const configHash: crypto.Hash = Tslint.getConfigHash(
         this._configuration.tsconfigPath,
-        this._typescriptTerminal
+        this._typescriptTerminal,
+        this._fileSystem
       );
       configHash.update(JSON.stringify(this._configuration.additionalModuleKindsToEmit || {}));
       const serializedConfigHash: string = configHash.digest('hex');
@@ -175,72 +123,24 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     return this.__tsCacheFilePath;
   }
 
-  private get _eslintCacheFilePath(): string {
-    if (!this.__eslintCacheFilePath) {
-      this.__eslintCacheFilePath = path.posix.join(this._configuration.buildCacheFolder, 'eslint.json');
-    }
-
-    return this.__eslintCacheFilePath;
-  }
-
-  private get _tslintCacheFilePath(): string {
-    if (!this.__tslintCacheFilePath) {
-      this.__tslintCacheFilePath = path.posix.join(this._configuration.buildCacheFolder, 'tslint.json');
-    }
-
-    return this.__tslintCacheFilePath;
-  }
-
   public static getTypeScriptTerminal(
     terminalProvider: ITerminalProvider,
     prefixLabel: string | undefined
   ): Terminal {
-    return TypeScriptBuilder._getTerminal(terminalProvider, 'typescript', prefixLabel);
-  }
-
-  public static getTslintTerminal(
-    terminalProvider: ITerminalProvider,
-    prefixLabel: string | undefined
-  ): Terminal {
-    return TypeScriptBuilder._getTerminal(terminalProvider, 'tslint', prefixLabel);
-  }
-
-  public static getEslintTerminal(
-    terminalProvider: ITerminalProvider,
-    prefixLabel: string | undefined
-  ): Terminal {
-    return TypeScriptBuilder._getTerminal(terminalProvider, 'eslint', prefixLabel);
-  }
-
-  private static _getTerminal(
-    terminalProvider: ITerminalProvider,
-    prefixName: string,
-    prefixLabel: string | undefined
-  ): Terminal {
     const prefixTerminalProvider: PrefixProxyTerminalProvider = new PrefixProxyTerminalProvider(
       terminalProvider,
-      prefixLabel ? `[${prefixName} (${prefixLabel})] ` : `[${prefixName}] `
+      prefixLabel ? `[typescript (${prefixLabel})] ` : '[typescript] '
     );
 
     return new Terminal(prefixTerminalProvider);
   }
 
-  public initializeTerminal(terminalProvider: ITerminalProvider): void {
-    this._typescriptTerminal = TypeScriptBuilder.getTypeScriptTerminal(
-      terminalProvider,
-      this._configuration.terminalPrefixLabel
-    );
-    this._eslintTerminal = TypeScriptBuilder.getEslintTerminal(
-      terminalProvider,
-      this._configuration.terminalPrefixLabel
-    );
-    this._tslintTerminal = TypeScriptBuilder.getTslintTerminal(
-      terminalProvider,
-      this._configuration.terminalPrefixLabel
-    );
-  }
-
   public initialize(): void {
+    this._typescriptTerminal = TypeScriptBuilder.getTypeScriptTerminal(
+      this._terminalProvider,
+      this._configuration.terminalPrefixLabel
+    );
+
     this._configuration.buildCacheFolder = this._configuration.buildCacheFolder.replace(/\\/g, '/');
     this._tslintConfigFilePath = path.resolve(this._configuration.buildFolder, 'tslint.json');
     this._eslintConfigFilePath = path.resolve(this._configuration.buildFolder, '.eslintrc.js');
@@ -248,53 +148,48 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       this._configuration.lintingEnabled && !this._configuration.watchMode; // Don't run lint in watch mode
 
     if (this._tslintEnabled) {
-      try {
-        this._rawProjectTslintFile = this._fileSystem.readFile(this._tslintConfigFilePath);
-      } catch (e) {
-        if (this._fileSystem.isNotExistError(e)) {
-          this._rawProjectTslintFile = undefined;
-          // The TSLint config file doesn't exist - so just disable linting
-          this._tslintEnabled = false;
-        } else {
-          throw e;
-        }
-      }
+      this._tslintEnabled = this._fileSystem.exists(this._tslintConfigFilePath);
     }
 
     if (this._eslintEnabled) {
-      try {
-        this._fileSystem.readFile(this._eslintConfigFilePath);
-      } catch (e) {
-        if (this._fileSystem.isNotExistError(e)) {
-          this._rawProjectTslintFile = undefined;
-          // The ESLint config file doesn't exist - so just disable linting
-          this._eslintEnabled = false;
-        } else {
-          throw e;
-        }
-      }
+      this._eslintEnabled = this._fileSystem.exists(this._eslintConfigFilePath);
     }
   }
 
   public async invokeAsync(): Promise<void> {
     const ts: ExtendedTypeScript = require(this._configuration.typeScriptToolPath);
 
-    const tslint: typeof TTslint | undefined = this._tslintEnabled
-      ? require(this._configuration.tslintToolPath)
+    const tslint: Tslint | undefined = this._tslintEnabled
+      ? new Tslint({
+          tslintPackagePath: this._configuration.tslintToolPath,
+          terminalPrefixLabel: this._configuration.terminalPrefixLabel,
+          terminalProvider: this._terminalProvider,
+          buildFolderPath: this._configuration.buildFolder,
+          buildCacheFolderPath: this._configuration.buildCacheFolder,
+          linterConfigFilePath: this._tslintConfigFilePath,
+          fileSystem: this._fileSystem
+        })
       : undefined;
 
-    const eslint: typeof TEslint | undefined = this._eslintEnabled
-      ? require(this._configuration.eslintToolPath)
+    const eslint: Eslint | undefined = this._eslintEnabled
+      ? new Eslint({
+          eslintPackagePath: this._configuration.eslintToolPath,
+          terminalPrefixLabel: this._configuration.terminalPrefixLabel,
+          terminalProvider: this._terminalProvider,
+          buildFolderPath: this._configuration.buildFolder,
+          buildCacheFolderPath: this._configuration.buildCacheFolder,
+          linterConfigFilePath: this._eslintConfigFilePath
+        })
       : undefined;
 
     this._typescriptTerminal.writeLine(`Using TypeScript version ${ts.version}`);
 
-    if (tslint) {
-      this._tslintTerminal.writeLine(`Using TSLint version ${tslint.Linter.VERSION}`);
+    if (eslint) {
+      eslint.printVersionHeader();
     }
 
-    if (eslint) {
-      this._tslintTerminal.writeLine(`Using ESLint version ${eslint.Linter.version}`);
+    if (tslint) {
+      tslint.printVersionHeader();
     }
 
     ts.performance.enable();
@@ -367,8 +262,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
   public async _runBuild(
     ts: ExtendedTypeScript,
-    eslint: typeof TEslint | undefined,
-    tslint: typeof TTslint | undefined,
+    eslint: Eslint | undefined,
+    tslint: Tslint | undefined,
     measureTsPerformance: PerformanceMeasurer,
     measureTsPerformanceAsync: PerformanceMeasurerAsync
   ): Promise<void> {
@@ -469,36 +364,26 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     const typeScriptFilenames: Set<string> = new Set(tsconfig.fileNames);
 
     //#region ESLINT
-    let eslintResult: TEslint.ESLint.LintResult[] | undefined = undefined;
     if (eslint) {
-      eslintResult = await this._runEslintAsync({
-        eslint,
+      await eslint.performLintingAsync({
+        ts: ts,
         tsProgram: tsProgram.getProgram() as IExtendedProgram,
         typeScriptFilenames: typeScriptFilenames,
-        measurePerformanceAsync: measureTsPerformanceAsync,
-        changedFiles: emitResult.changedSourceFiles
+        changedFiles: emitResult.changedSourceFiles,
+        measurePerformance: measureTsPerformance
       });
-
-      this._eslintTerminal.writeVerboseLine(
-        `Lint: ${ts.performance.getDuration('Eslint')}ms (${eslintResult.length} files)`
-      );
     }
     //#endregion
 
     //#region TSLINT
-    let tslintResult: TTslint.LintResult | undefined = undefined;
     if (tslint) {
-      tslintResult = await this._runTslintAsync({
-        tslint,
+      await tslint.performLintingAsync({
+        ts: ts,
         tsProgram: tsProgram.getProgram() as IExtendedProgram,
         typeScriptFilenames: typeScriptFilenames,
-        measurePerformance: measureTsPerformance,
-        changedFiles: emitResult.changedSourceFiles
+        changedFiles: emitResult.changedSourceFiles,
+        measurePerformance: measureTsPerformance
       });
-
-      this._tslintTerminal.writeVerboseLine(
-        `Lint: ${ts.performance.getDuration('Tslint')}ms (${ts.performance.getCount('beforeTslint')} files)`
-      );
     }
     //#endregion
 
@@ -629,58 +514,12 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       compilationFailed = true;
     }
 
-    if (eslintResult?.length) {
-      const eslintFailureLogMessages: (string | IColorableSequence)[][] = [];
-
-      for (const eslintFileResult of eslintResult) {
-        const buildFolderRelativeFilename: string = path.relative(
-          this._configuration.buildFolder,
-          eslintFileResult.filePath
-        );
-        for (const message of eslintFileResult.messages) {
-          // https://eslint.org/docs/developer-guide/nodejs-api#◆-lintmessage-type
-          const severity: string = message.severity === 1 ? 'WARNING' : 'ERROR';
-          eslintFailureLogMessages.push([
-            '  ',
-            Colors.yellow(`${severity}: ${buildFolderRelativeFilename}:${message.line}:${message.column}`),
-            ' - ',
-            Colors.yellow(`(${message.ruleId}) ${message.message}`)
-          ]);
-        }
-      }
-
-      if (eslintFailureLogMessages.length > 0) {
-        this._eslintTerminal.writeWarningLine(
-          `Encountered ${eslintFailureLogMessages.length} ESLint error${
-            eslintFailureLogMessages.length > 1 ? 's' : ''
-          }:`
-        );
-        for (const eslintFailureLogMessage of eslintFailureLogMessages) {
-          this._eslintTerminal.writeWarningLine(...eslintFailureLogMessage);
-        }
-      }
+    if (eslint) {
+      eslint.reportFailures();
     }
 
-    if (tslintResult?.failures?.length) {
-      this._tslintTerminal.writeWarningLine(
-        `Encountered ${tslintResult!.failures.length} TSLint error${
-          tslintResult!.failures.length > 1 ? 's' : ''
-        }:`
-      );
-      for (const tslintFailure of tslintResult!.failures) {
-        const buildFolderRelativeFilename: string = path.relative(
-          this._configuration.buildFolder,
-          tslintFailure.getFileName()
-        );
-        const { line, character } = tslintFailure.getStartPosition().getLineAndCharacter();
-        const severity: string = tslintFailure.getRuleSeverity().toUpperCase();
-        this._tslintTerminal.writeWarningLine(
-          '  ',
-          Colors.yellow(`${severity}: ${buildFolderRelativeFilename}:${line + 1}:${character + 1}`),
-          ' - ',
-          Colors.yellow(`(${tslintFailure.getRuleName()}) ${tslintFailure.getFailure()}`)
-        );
-      }
+    if (tslint) {
+      tslint.reportFailures();
     }
 
     if (compilationFailed) {
@@ -1071,149 +910,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         return jsonData;
       }
     };
-  }
-
-  private async _runEslintAsync(options: IRunEslintOptions): Promise<TEslint.ESLint.LintResult[]> {
-    const { eslint: eslintPackage, typeScriptFilenames, measurePerformanceAsync } = options;
-
-    const { lintResult: result } = await measurePerformanceAsync('Eslint', async () => {
-      const eslint: TEslint.ESLint = new eslintPackage.ESLint({
-        cwd: this._configuration.buildFolder,
-        cache: true,
-        cacheLocation: this._eslintCacheFilePath
-      });
-
-      const lintResult: TEslint.ESLint.LintResult[] = await eslint.lintFiles(Array.from(typeScriptFilenames));
-
-      return { lintResult };
-    });
-
-    return result;
-  }
-
-  private async _runTslintAsync(options: IRunTslintOptions): Promise<TTslint.LintResult> {
-    const { tslint, tsProgram, typeScriptFilenames, measurePerformance, changedFiles } = options;
-
-    const tslintConfigHash: crypto.Hash = this._getConfigHash(
-      this._tslintConfigFilePath,
-      this._tslintTerminal
-    );
-    const tslintConfigVersion: string = `${tslint.Linter.VERSION}_${tslintConfigHash.digest('hex')}`;
-
-    let tslintCacheData: ITsLintCacheData | undefined;
-    try {
-      tslintCacheData = await JsonFile.loadAsync(this._tslintCacheFilePath);
-    } catch (e) {
-      if (this._fileSystem.isNotExistError(e)) {
-        tslintCacheData = undefined;
-      } else {
-        throw e;
-      }
-    }
-
-    const cachedNoFailureFileVersions: Map<string, string> = new Map<string, string>(
-      tslintCacheData?.cacheVersion === tslintConfigVersion ? tslintCacheData.fileVersions : []
-    );
-
-    const newNoFailureFileVersions: Map<string, string> = new Map<string, string>();
-
-    const tslintConfiguration: TTslint.Configuration.IConfigurationFile = tslint.Configuration.loadConfigurationFromPath(
-      this._tslintConfigFilePath
-    );
-    const linter: IExtendedLinter = (new tslint.Linter(
-      {
-        fix: false,
-        rulesDirectory: tslintConfiguration.rulesDirectory
-      },
-      tsProgram
-    ) as unknown) as IExtendedLinter;
-
-    const enabledRules: TTslint.IRule[] = linter.getEnabledRules(tslintConfiguration, false);
-
-    //#region Code from TSLint
-    // This code comes from here:
-    // https://github.com/palantir/tslint/blob/24d29e421828348f616bf761adb3892bcdf51662/src/linter.ts#L161-L179
-    // Modified to only lint files that have changed and that we care about
-    //
-    // TODO: (if we care) maybe extend the Tslint.Linter class to clean this up
-    const lintFailures: TTslint.RuleFailure[] = [];
-
-    const ruleSeverityMap: Map<string, TTslint.RuleSeverity> = new Map<string, TTslint.RuleSeverity>(
-      enabledRules.map((rule): [string, TTslint.RuleSeverity] => [
-        rule.getOptions().ruleName,
-        rule.getOptions().ruleSeverity
-      ])
-    );
-
-    for (const sourceFile of tsProgram.getSourceFiles()) {
-      const filePath: string = sourceFile.fileName;
-
-      if (
-        !typeScriptFilenames.has(filePath) ||
-        tslint.Configuration.isFileExcluded(filePath, tslintConfiguration)
-      ) {
-        continue;
-      }
-
-      const version: string = sourceFile.version;
-      if (cachedNoFailureFileVersions.get(filePath) !== version || changedFiles.has(sourceFile)) {
-        measurePerformance('Tslint', () => {
-          const failures: TTslint.RuleFailure[] = linter.getAllFailures(sourceFile, enabledRules);
-          if (failures.length === 0) {
-            newNoFailureFileVersions.set(filePath, version);
-          } else {
-            for (const failure of failures) {
-              const severity: TTslint.RuleSeverity | undefined = ruleSeverityMap.get(failure.getRuleName());
-              if (severity === undefined) {
-                throw new Error(`Severity for rule '${failure.getRuleName()}' not found`);
-              }
-
-              failure.setRuleSeverity(severity);
-              lintFailures.push(failure);
-            }
-          }
-        });
-      } else {
-        newNoFailureFileVersions.set(filePath, version);
-      }
-    }
-
-    linter.failures = lintFailures;
-    //#endregion
-
-    const updatedTslintCacheData: ITsLintCacheData = {
-      cacheVersion: tslintConfigVersion,
-      fileVersions: Array.from(newNoFailureFileVersions)
-    };
-    await JsonFile.saveAsync(updatedTslintCacheData, this._tslintCacheFilePath, { ensureFolderExists: true });
-
-    return linter.getResult();
-  }
-
-  private _getConfigHash(configPath: string, terminal: Terminal): crypto.Hash {
-    interface IMinimalConfig {
-      extends?: string;
-    }
-
-    terminal.writeVerboseLine(`Examining config file "${configPath}"`);
-
-    const rawConfig: string =
-      configPath === this._tslintConfigFilePath
-        ? this._rawProjectTslintFile!
-        : this._fileSystem.readFile(configPath);
-    const parsedConfig: IMinimalConfig = JsonFile.parseString(rawConfig);
-    let hash: crypto.Hash;
-    if (parsedConfig.extends) {
-      const extendsFullPath: string = ResolveUtilities.resolvePackagePath(
-        parsedConfig.extends,
-        path.dirname(configPath)
-      );
-      hash = this._getConfigHash(extendsFullPath, terminal);
-    } else {
-      hash = crypto.createHash('sha1').update(rawConfig);
-    }
-
-    return hash.update(rawConfig);
   }
 
   private _parseModuleKind(ts: ExtendedTypeScript, moduleKindName: string): TTypescript.ModuleKind {
