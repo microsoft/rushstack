@@ -17,15 +17,14 @@ This improves minification time by:
 If running on node 10, you will need to ensure that the `--experimental-workers` flag is enabled.
 
 ```js
-const { ModuleMinifierPlugin } = require('@rushstack/module-minifier-plugin');
-// This is not part of the main export to allow the plugin to be used without 'worker_threads'
-const { WorkerPoolMinifier } = require('@rushstack/module-minifier-plugin/lib/WorkerPoolMinifier');
+const { ModuleMinifierPlugin, WorkerPoolMinifier } = require('@rushstack/module-minifier-plugin');
 
 // In your webpack options:
 optimization: [
   minimizer: [
     new ModuleMinifierPlugin({
-      minifier: new WorkerPoolMinifier()
+      minifier: new WorkerPoolMinifier(),
+      useSourceMap: true
     })
   ]
 ]

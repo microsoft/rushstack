@@ -14,6 +14,10 @@ import { cpus } from 'os';
 
 import './OverrideWebpackIdentifierAllocation';
 
+/**
+ * Options for configuring the WorkerPoolMinifier
+ * @public
+ */
 export interface IWorkerPoolMinifierOptions {
   /**
    * Maximum number of worker threads to use. Will never use more than there are modules to process.

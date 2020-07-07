@@ -121,14 +121,16 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
       postProcessCodeFragment: new SyncWaterfallHook(['code', 'context'])
     };
 
-    if (options.usePortableModules) {
+    const { minifier, sourceMap = true, usePortableModules = false } = options;
+
+    if (usePortableModules) {
       this._portableIdsPlugin = new PortableMinifierModuleIdsPlugin(this.hooks);
     }
 
     this.hooks.rehydrateAssets.tap(PLUGIN_NAME, defaultRehydrateAssets);
-    this.minifier = options.minifier;
+    this.minifier = minifier;
 
-    this._sourceMap = !!options.sourceMap;
+    this._sourceMap = !!sourceMap;
   }
 
   public apply(compiler: webpack.Compiler): void {

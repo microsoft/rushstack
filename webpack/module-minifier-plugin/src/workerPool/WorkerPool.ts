@@ -189,9 +189,12 @@ export class WorkerPool {
       return;
     }
 
+    // Defer the import to allow WorkerPoolMinifier to be exposed via the index
+    const workerConstructor: typeof Worker = require('worker_threads').Worker;
+
     const worker: Worker & {
       [WORKER_ID_SYMBOL]?: string;
-    } = new Worker(this._workerScript, {
+    } = new workerConstructor(this._workerScript, {
       eval: false,
       workerData: this._workerData
     });
