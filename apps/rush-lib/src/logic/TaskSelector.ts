@@ -71,14 +71,7 @@ export class TaskSelector {
     const dependencies: Set<string> = new Set<string>();
 
     for (const toFlag of toFlags) {
-      const toProject:
-        | RushConfigurationProject
-        | undefined = this._options.rushConfiguration.findProjectByShorthandName(toFlag);
-      if (!toProject) {
-        throw new Error(`The project '${toFlag}' does not exist in rush.json`);
-      }
-
-      this._collectAllDependencies(toProject.packageName, dependencies);
+      this._collectAllDependencies(toFlag, dependencies);
     }
 
     // Register any dependencies it may have
@@ -99,14 +92,7 @@ export class TaskSelector {
     const dependents: Set<string> = new Set<string>();
 
     for (const fromFlag of fromFlags) {
-      const fromProject:
-        | RushConfigurationProject
-        | undefined = this._options.rushConfiguration.findProjectByShorthandName(fromFlag);
-      if (!fromProject) {
-        throw new Error(`The project '${fromFlag}' does not exist in rush.json`);
-      }
-
-      this._collectAllDependents(fromProject.packageName, dependents);
+      this._collectAllDependents(fromFlag, dependents);
     }
 
     // Register all downstream dependents
