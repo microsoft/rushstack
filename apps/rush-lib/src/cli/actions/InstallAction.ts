@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
+
 import { BaseInstallAction } from './BaseInstallAction';
 import { IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 
 export class InstallAction extends BaseInstallAction {
   protected _toFlag: CommandLineStringListParameter;
@@ -34,7 +35,6 @@ export class InstallAction extends BaseInstallAction {
    */
   protected onDefineParameters(): void {
     super.onDefineParameters();
-
     this._toFlag = this.defineStringListParameter({
       parameterLongName: '--to',
       parameterShortName: '-t',
