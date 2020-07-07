@@ -1061,6 +1061,14 @@ export class RushConfiguration {
   }
 
   /**
+   * The fully resolved path for the "autoinstallers" folder.
+   * Example: `C:\MyRepo\common\autoinstallers`
+   */
+  public get commonAutoinstallersFolder(): string {
+    return path.join(this._commonFolder, 'autoinstallers');
+  }
+
+  /**
    * The local folder that will store the NPM package cache.  Rush does not rely on the
    * npm's default global cache folder, because npm's caching implementation does not
    * reliably handle multiple processes.  (For example, if a build box is running

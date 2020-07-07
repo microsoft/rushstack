@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { FileSystem } from '@rushstack/node-core-library';
 import * as xml from 'xml';
 import * as TestResults from 'jest-nunit-reporter/src/Testresults';
