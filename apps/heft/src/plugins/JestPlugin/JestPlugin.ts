@@ -13,7 +13,7 @@ import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { ITestActionContext } from '../../cli/actions/TestAction';
 
 const PLUGIN_NAME: string = 'JestPlugin';
-const JEST_CONFIGURATION_LOCATION: string = './.heft/jest.config.json';
+const JEST_CONFIGURATION_LOCATION: string = './config/jest.config.json';
 
 export class JestPlugin implements IHeftPlugin {
   public readonly displayName: string = PLUGIN_NAME;
