@@ -11,7 +11,7 @@ import { IBundleStage, IBuildActionContext } from '../../cli/actions/BuildAction
 import { ApiExtractorRunner } from './ApiExtractorRunner';
 
 const PLUGIN_NAME: string = 'ApiExtractorPlugin';
-const CONFIG_FILE_LOCATION: string = './.heft/api-extractor.json';
+const CONFIG_FILE_LOCATION: string = './config/api-extractor.json';
 
 interface IRunApiExtractorOptions {
   heftConfiguration: HeftConfiguration;
