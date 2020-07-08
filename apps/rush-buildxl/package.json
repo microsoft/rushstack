@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-buildxl",
-  "version": "5.27.3",
+  "version": "5.28.0",
   "description": "An experimental tool that connects Rush and BuildXL",
   "repository": {
     "type": "git",
