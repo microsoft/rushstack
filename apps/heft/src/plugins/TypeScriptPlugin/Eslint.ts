@@ -13,6 +13,11 @@ interface IEslintOptions extends ILinterBaseOptions {
   eslintPackagePath: string;
 }
 
+const enum EslintMessageSeverity {
+  warning = 1,
+  error = 2
+}
+
 export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   private readonly _eslintPackage: typeof TEslint;
 
@@ -41,7 +46,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
       );
       for (const message of eslintFileResult.messages) {
         // https://eslint.org/docs/developer-guide/nodejs-api#◆-lintmessage-type
-        const severity: string = message.severity === 1 ? 'WARNING' : 'ERROR';
+        const severity: string = message.severity === EslintMessageSeverity.warning ? 'WARNING' : 'ERROR';
         eslintFailureLogMessages.push([
           '  ',
           Colors.yellow(`${severity}: ${buildFolderRelativeFilePath}:${message.line}:${message.column}`),
