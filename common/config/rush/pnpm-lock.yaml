@@ -113,6 +113,7 @@ importers:
     devDependencies:
       '@microsoft/rush-stack-compiler-3.7': 'link:../../stack/rush-stack-compiler-3.7'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@types/eslint': 7.2.0
       '@types/glob': 7.1.1
       '@types/node': 10.17.13
       '@types/resolve': 1.17.1
@@ -121,6 +122,7 @@ importers:
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@rushstack/ts-command-line': 'workspace:*'
+      '@types/eslint': 7.2.0
       '@types/glob': 7.1.1
       '@types/node': 10.17.13
       '@types/resolve': 1.17.1
