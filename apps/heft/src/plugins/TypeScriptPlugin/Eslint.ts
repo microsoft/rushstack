@@ -76,13 +76,15 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
 
   protected async initializeAsync(): Promise<void> {
     this._eslint = new this._eslintPackage.ESLint({
-      cwd: this._buildFolderPath
+      cwd: this._buildFolderPath,
+      overrideConfigFile: this._linterConfigFilePath
     });
 
     this._eslintBaseConfiguration = await this._eslint.calculateConfigForFile(this._linterConfigFilePath);
 
     this._eslintCli = new this._eslintPackage.CLIEngine({
-      cwd: this._buildFolderPath
+      cwd: this._buildFolderPath,
+      configFile: this._linterConfigFilePath
     });
   }
 
