@@ -2,6 +2,26 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.28.0",
+      "tag": "@microsoft/rush_v5.28.0",
+      "date": "Wed, 08 Jul 2020 06:56:47 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add new commands \"rush init-autoinstaller\" and \"rush update-autoinstaller\""
+          },
+          {
+            "comment": "Add support for filtered installs when using workspaces"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add preliminary workspaces support for PNPM"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.27.3",
       "tag": "@microsoft/rush_v5.27.3",
       "date": "Fri, 03 Jul 2020 06:16:09 GMT",
