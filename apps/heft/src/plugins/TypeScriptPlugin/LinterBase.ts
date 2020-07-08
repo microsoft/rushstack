@@ -13,15 +13,20 @@ import {
 import { PerformanceMeasurer } from '../../utilities/Performance';
 
 export interface ILinterBaseOptions {
+  ts: IExtendedTypeScript;
   terminalProvider: ITerminalProvider;
   terminalPrefixLabel: string | undefined;
   buildFolderPath: string;
   buildCacheFolderPath: string;
   linterConfigFilePath: string;
+
+  /**
+   * A performance measurer for the lint run.
+   */
+  measurePerformance: PerformanceMeasurer;
 }
 
 export interface IRunLinterOptions {
-  ts: IExtendedTypeScript;
   tsProgram: IExtendedProgram;
 
   /**
@@ -33,11 +38,11 @@ export interface IRunLinterOptions {
    * The set of files that TypeScript has compiled since the last compilation.
    */
   changedFiles: Set<IExtendedSourceFile>;
+}
 
-  /**
-   * A performance measurer for the lint run.
-   */
-  measurePerformance: PerformanceMeasurer;
+export interface ITiming {
+  duration: number;
+  hitCount: number;
 }
 
 interface ITsLintCacheData {
@@ -59,7 +64,9 @@ export abstract class LinterBase<TLintResult> {
   protected readonly _buildFolderPath: string;
   protected readonly _buildCacheFolderPath: string;
   protected readonly _linterConfigFilePath: string;
+  protected readonly _measurePerformance: PerformanceMeasurer;
 
+  private readonly _ts: IExtendedTypeScript;
   private readonly _linterName: string;
 
   public constructor(linterName: string, options: ILinterBaseOptions) {
@@ -67,11 +74,13 @@ export abstract class LinterBase<TLintResult> {
       options.terminalProvider,
       options.terminalPrefixLabel ? `[${linterName} (${options.terminalPrefixLabel})] ` : `[${linterName}] `
     );
+    this._ts = options.ts;
     this._terminal = new Terminal(proxyTerminalProvider);
     this._buildFolderPath = options.buildFolderPath;
     this._buildCacheFolderPath = options.buildCacheFolderPath;
     this._linterConfigFilePath = options.linterConfigFilePath;
     this._linterName = linterName;
+    this._measurePerformance = options.measurePerformance;
   }
 
   protected abstract get cacheVersion(): string;
@@ -116,7 +125,7 @@ export abstract class LinterBase<TLintResult> {
 
       const version: string = sourceFile.version;
       if (cachedNoFailureFileVersions.get(filePath) !== version || options.changedFiles.has(sourceFile)) {
-        options.measurePerformance(this._linterName, () => {
+        this._measurePerformance(this._linterName, () => {
           const failures: TLintResult[] = this.lintFile(sourceFile);
           if (failures.length === 0) {
             newNoFailureFileVersions.set(filePath, version);
@@ -138,13 +147,18 @@ export abstract class LinterBase<TLintResult> {
     };
     await JsonFile.saveAsync(updatedTslintCacheData, cacheFilePath, { ensureFolderExists: true });
 
-    this._terminal.writeVerboseLine(
-      `Lint: ${options.ts.performance.getDuration(this._linterName)}ms ` +
-        `(${options.ts.performance.getCount(`before${this._linterName}`)} files)`
-    );
+    const lintTiming: ITiming = this.getTiming(this._linterName);
+    this._terminal.writeVerboseLine(`Lint: ${lintTiming.duration}ms (${lintTiming.hitCount} files)`);
   }
 
   public abstract reportFailures(): void;
+
+  protected getTiming(timingName: string): ITiming {
+    return {
+      duration: this._ts.performance.getDuration(timingName),
+      hitCount: this._ts.performance.getCount(`before${timingName}`)
+    };
+  }
 
   protected abstract initializeAsync(tsProgram: IExtendedProgram): void;
 

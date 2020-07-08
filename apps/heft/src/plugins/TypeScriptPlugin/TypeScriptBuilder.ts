@@ -159,39 +159,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   public async invokeAsync(): Promise<void> {
     const ts: ExtendedTypeScript = require(this._configuration.typeScriptToolPath);
 
-    const tslint: Tslint | undefined = this._tslintEnabled
-      ? new Tslint({
-          tslintPackagePath: this._configuration.tslintToolPath,
-          terminalPrefixLabel: this._configuration.terminalPrefixLabel,
-          terminalProvider: this._terminalProvider,
-          buildFolderPath: this._configuration.buildFolder,
-          buildCacheFolderPath: this._configuration.buildCacheFolder,
-          linterConfigFilePath: this._tslintConfigFilePath,
-          fileSystem: this._fileSystem
-        })
-      : undefined;
-
-    const eslint: Eslint | undefined = this._eslintEnabled
-      ? new Eslint({
-          eslintPackagePath: this._configuration.eslintToolPath,
-          terminalPrefixLabel: this._configuration.terminalPrefixLabel,
-          terminalProvider: this._terminalProvider,
-          buildFolderPath: this._configuration.buildFolder,
-          buildCacheFolderPath: this._configuration.buildCacheFolder,
-          linterConfigFilePath: this._eslintConfigFilePath
-        })
-      : undefined;
-
-    this._typescriptTerminal.writeLine(`Using TypeScript version ${ts.version}`);
-
-    if (eslint) {
-      eslint.printVersionHeader();
-    }
-
-    if (tslint) {
-      tslint.printVersionHeader();
-    }
-
     ts.performance.enable();
 
     const measureTsPerformance: PerformanceMeasurer = <TResult extends object | void>(
@@ -227,6 +194,43 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         duration: ts.performance.getDuration(measurementName)
       };
     };
+
+    const tslint: Tslint | undefined = this._tslintEnabled
+      ? new Tslint({
+          ts: ts,
+          tslintPackagePath: this._configuration.tslintToolPath,
+          terminalPrefixLabel: this._configuration.terminalPrefixLabel,
+          terminalProvider: this._terminalProvider,
+          buildFolderPath: this._configuration.buildFolder,
+          buildCacheFolderPath: this._configuration.buildCacheFolder,
+          linterConfigFilePath: this._tslintConfigFilePath,
+          fileSystem: this._fileSystem,
+          measurePerformance: measureTsPerformance
+        })
+      : undefined;
+
+    const eslint: Eslint | undefined = this._eslintEnabled
+      ? new Eslint({
+          ts: ts,
+          eslintPackagePath: this._configuration.eslintToolPath,
+          terminalPrefixLabel: this._configuration.terminalPrefixLabel,
+          terminalProvider: this._terminalProvider,
+          buildFolderPath: this._configuration.buildFolder,
+          buildCacheFolderPath: this._configuration.buildCacheFolder,
+          linterConfigFilePath: this._eslintConfigFilePath,
+          measurePerformance: measureTsPerformance
+        })
+      : undefined;
+
+    this._typescriptTerminal.writeLine(`Using TypeScript version ${ts.version}`);
+
+    if (eslint) {
+      eslint.printVersionHeader();
+    }
+
+    if (tslint) {
+      tslint.printVersionHeader();
+    }
 
     if (this._configuration.watchMode) {
       await this._runWatch(ts, measureTsPerformance);
@@ -366,11 +370,9 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     //#region ESLINT
     if (eslint) {
       await eslint.performLintingAsync({
-        ts: ts,
         tsProgram: tsProgram.getProgram() as IExtendedProgram,
         typeScriptFilenames: typeScriptFilenames,
-        changedFiles: emitResult.changedSourceFiles,
-        measurePerformance: measureTsPerformance
+        changedFiles: emitResult.changedSourceFiles
       });
     }
     //#endregion
@@ -378,11 +380,9 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     //#region TSLINT
     if (tslint) {
       await tslint.performLintingAsync({
-        ts: ts,
         tsProgram: tsProgram.getProgram() as IExtendedProgram,
         typeScriptFilenames: typeScriptFilenames,
-        changedFiles: emitResult.changedSourceFiles,
-        measurePerformance: measureTsPerformance
+        changedFiles: emitResult.changedSourceFiles
       });
     }
     //#endregion

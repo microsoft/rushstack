@@ -5,12 +5,17 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import * as TEslint from 'eslint';
 
-import { LinterBase, ILinterBaseOptions } from './LinterBase';
+import { LinterBase, ILinterBaseOptions, ITiming } from './LinterBase';
 import { IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
 import { IColorableSequence, Colors } from '@rushstack/node-core-library';
 
 interface IEslintOptions extends ILinterBaseOptions {
   eslintPackagePath: string;
+}
+
+interface IEslintTiming {
+  enabled: boolean;
+  time: (key: string, fn: (...args: unknown[]) => void) => (...args: unknown[]) => void;
 }
 
 const enum EslintMessageSeverity {
@@ -20,6 +25,7 @@ const enum EslintMessageSeverity {
 
 export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   private readonly _eslintPackage: typeof TEslint;
+  private readonly _eslintTimings: Map<string, string> = new Map<string, string>();
 
   private _eslintCli: TEslint.CLIEngine;
   private _eslint: TEslint.ESLint;
@@ -28,6 +34,8 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
 
   public constructor(options: IEslintOptions) {
     super('eslint', options);
+
+    this._patchTimer(options.eslintPackagePath); // This must happen before the rest of the linter package is loaded
 
     this._eslintPackage = require(options.eslintPackagePath);
   }
@@ -110,9 +118,33 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
 
   protected lintingFinished(lintFailures: TEslint.ESLint.LintResult[]): void {
     this._lintResult = lintFailures;
+
+    let omittedRuleCount: number = 0;
+    for (const [ruleName, measurementName] of this._eslintTimings.entries()) {
+      const timing: ITiming = this.getTiming(measurementName);
+      if (timing.duration > 0) {
+        this._terminal.writeVerboseLine(`Rule "${ruleName}" duration: ${timing.duration}ms`);
+      } else {
+        omittedRuleCount++;
+      }
+    }
+
+    if (omittedRuleCount > 0) {
+      this._terminal.writeVerboseLine(`${omittedRuleCount} rules took 0ms`);
+    }
   }
 
   protected async isFileExcludedAsync(filePath: string): Promise<boolean> {
     return await this._eslint.isPathIgnored(filePath);
+  }
+
+  private _patchTimer(eslintPackagePath: string): void {
+    const timing: IEslintTiming = require(path.join(eslintPackagePath, 'lib', 'linter', 'timing'));
+    timing.enabled = true;
+    timing.time = (key: string, fn: (...args: unknown[]) => void) => {
+      const timingName: string = `Eslint${key}`;
+      this._eslintTimings.set(key, timingName);
+      return (...args: unknown[]) => this._measurePerformance(timingName, () => fn(...args));
+    };
   }
 }
