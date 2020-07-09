@@ -19,6 +19,7 @@
     "exportEquals",
     "exportImportedExternal",
     "exportImportedExternal2",
+    "exportImportedExternalDefault",
     "exportStar",
     "exportStar2",
     "exportStar3",
