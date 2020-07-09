@@ -191,7 +191,7 @@ export abstract class BaseInstallManager {
     // "--purge" was specified, or if the last install was interrupted, then we will
     // need to perform a clean install.  Otherwise, we can do an incremental install.
     const cleanInstall: boolean =
-      isFilteredInstall || !this._commonTempInstallFlag.checkValidAndReportStoreIssues();
+      isFilteredInstall || !this._commonTempInstallFlag.isValid(/*reportStoreIssues:*/ true);
 
     // Allow us to defer the file read until we need it
     const canSkipInstall: () => boolean = () => {

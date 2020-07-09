@@ -42,6 +42,17 @@ export class ApprovedPackagesPolicy {
     readonly reviewCategories: Set<string>;
     }
 
+// @internal
+export abstract class _BaseFlagFile {
+    protected constructor(flagPath: string, state?: JsonObject);
+    clear(): void;
+    create(): void;
+    abstract isValid(): boolean;
+    protected loadFromFile(): JsonObject | undefined;
+    readonly path: string;
+    protected readonly state: JsonObject;
+    }
+
 // @beta
 export enum BumpType {
     // (undocumented)
@@ -192,14 +203,10 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
 }
 
 // @internal
-export class _LastInstallFlag {
+export class _LastInstallFlag extends _BaseFlagFile {
     constructor(folderPath: string, state?: JsonObject);
-    checkValidAndReportStoreIssues(): boolean;
-    clear(): void;
-    create(): void;
-    isValid(): boolean;
-    readonly path: string;
-    }
+    isValid(reportStoreIssues?: boolean): boolean;
+}
 
 // @beta
 export class LockStepVersionPolicy extends VersionPolicy {
