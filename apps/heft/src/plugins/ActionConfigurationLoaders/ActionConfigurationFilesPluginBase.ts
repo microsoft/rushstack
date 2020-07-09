@@ -9,7 +9,8 @@ import {
   ISharedCopyStaticAssetsConfiguration,
   ICopyStaticAssetsConfiguration,
   ITypeScriptConfiguration,
-  IBuildActionContext
+  IBuildActionContext,
+  IBundleStageProperties
 } from '../../cli/actions/BuildAction';
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
@@ -32,6 +33,10 @@ interface ITypeScriptConfigurationJson extends IConfigurationJsonBase, ISharedTy
 
 interface IConfigurationJsonCacheEntry<TConfigJson extends IConfigurationJsonBase = IConfigurationJsonBase> {
   data: TConfigJson | undefined;
+}
+
+interface IWebpackConfigurationJson {
+  webpackConfigFilePath?: string;
 }
 
 export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin {
@@ -64,6 +69,12 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
             heftConfiguration,
             compile.properties.typeScriptConfiguration
           );
+        });
+      });
+
+      build.hooks.bundle.tap(this.displayName, (bundle) => {
+        bundle.hooks.configureWebpack.tapPromise(this.displayName, async () => {
+          await this._updateWebpackConfigurationAsync(heftConfiguration, bundle.properties);
         });
       });
     });
@@ -158,6 +169,19 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
 
         copyStaticAssetsConfiguration.excludeGlobs.push(...copyStaticAssetsConfigurationJson.excludeGlobs);
       }
+    }
+  }
+
+  private async _updateWebpackConfigurationAsync(
+    heftConfiguration: HeftConfiguration,
+    bundleProperties: IBundleStageProperties
+  ): Promise<void> {
+    const webpackConfigurationJson:
+      | IWebpackConfigurationJson
+      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'webpack');
+
+    if (webpackConfigurationJson?.webpackConfigFilePath !== undefined) {
+      bundleProperties.webpackConfigFilePath = webpackConfigurationJson.webpackConfigFilePath;
     }
   }
 

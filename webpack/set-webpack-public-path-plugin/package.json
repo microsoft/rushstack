@@ -16,7 +16,7 @@
     "lodash": "~4.17.15",
     "uglify-js": "~3.0.28"
   },
-  "peerDependencies": {
+  "optionalPeerDependencies": {
     "@types/webpack": "*"
   },
   "devDependencies": {

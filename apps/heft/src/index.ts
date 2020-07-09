@@ -20,24 +20,26 @@ export {
 
 // Actions
 export {
-  IBuildActionProperties,
   BuildHooks,
-  IBuildActionContext,
-  IBuildStage,
   BuildStageHooksBase,
-  ICompileStageProperties,
-  ICompileStage,
-  ISharedCopyStaticAssetsConfiguration,
-  ICopyStaticAssetsConfiguration,
-  ITypeScriptConfiguration,
+  BundleStageHooks,
   CompileStageHooks,
+  CopyFromCacheMode,
+  IBuildActionContext,
+  IBuildActionProperties,
+  IBuildStage,
+  IBundleStage,
+  IBundleStageProperties,
+  ICompileStage,
+  ICompileStageProperties,
+  ICopyStaticAssetsConfiguration,
   IEmitModuleKind,
   IEmitModuleKindBase,
-  ISharedTypeScriptConfiguration,
-  CopyFromCacheMode,
-  IBundleStage,
   IPostBuildStage,
-  IPreCompileStage
+  IPreCompileStage,
+  ISharedCopyStaticAssetsConfiguration,
+  ISharedTypeScriptConfiguration,
+  ITypeScriptConfiguration
 } from './cli/actions/BuildAction';
 export { ICleanActionProperties, CleanHooks, ICleanActionContext } from './cli/actions/CleanAction';
 export {
