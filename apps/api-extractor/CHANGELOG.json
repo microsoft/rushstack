@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.9.2",
+      "tag": "@microsoft/api-extractor_v7.9.2",
+      "date": "Thu, 09 Jul 2020 04:58:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with handling of \"export { default } from 'package';\" (GitHub #2014)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.9.1",
       "tag": "@microsoft/api-extractor_v7.9.1",
       "date": "Fri, 03 Jul 2020 15:09:04 GMT",

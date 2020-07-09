@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Jul 2020 04:58:36 GMT and should not be manually modified.
+
+## 7.9.2
+Thu, 09 Jul 2020 04:58:36 GMT
+
+### Patches
+
+- Fix an issue with handling of "export { default } from 'package';" (GitHub #2014)
 
 ## 7.9.1
 Fri, 03 Jul 2020 15:09:04 GMT
