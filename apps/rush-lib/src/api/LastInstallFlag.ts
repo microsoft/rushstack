@@ -34,7 +34,9 @@ export class LastInstallFlag extends BaseFlagFile {
    */
   public isValid(reportStoreIssues: boolean = false): boolean {
     const oldState: JsonObject | undefined = this.loadFromFile();
-    if (_.isEqual(oldState, this.state)) {
+    if (!oldState) {
+      return false;
+    } else if (_.isEqual(oldState, this.state)) {
       return true;
     }
 
