@@ -441,15 +441,6 @@ export class ExportAnalyzer {
         );
 
         if (externalModulePath !== undefined) {
-          if (exportName === ts.InternalSymbolName.Default) {
-            return this._fetchAstImport(declarationSymbol, {
-              importKind: AstImportKind.DefaultImport,
-              modulePath: externalModulePath,
-              // ideally we should infer a reasonable name from modulePath, but it may be dangerous since file path contains invalid character for variable name
-              exportName: 'DEFAULT',
-              isTypeOnly: false
-            });
-          }
           return this._fetchAstImport(declarationSymbol, {
             importKind: AstImportKind.NamedImport,
             modulePath: externalModulePath,

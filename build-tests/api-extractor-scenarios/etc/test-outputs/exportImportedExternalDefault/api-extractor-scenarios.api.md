@@ -4,7 +4,6 @@
 
 ```ts
 
-import DEFAULT from 'api-extractor-lib2-test';
 import { default as default_2 } from 'api-extractor-lib2-test';
 import { Lib2Class } from 'api-extractor-lib2-test';
 
@@ -12,7 +11,7 @@ import { Lib2Class } from 'api-extractor-lib2-test';
 export class Child extends default_2 {
 }
 
-export default DEFAULT;
+export default default_2;
 
 export { Lib2Class }
 
