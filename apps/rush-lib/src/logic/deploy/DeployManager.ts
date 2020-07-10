@@ -45,14 +45,14 @@ declare module 'npm-packlist' {
 export interface IDeployMetadataJson {
   scenarioName: string;
   mainProjectName: string;
-  projects: IProject[];
+  projects: IProjectInfoJson[];
   links: ILinkInfo[];
 }
 
 /**
- * Represents a Rush project to be deployed.
+ * Part of the deploy-matadata.json file format. Represents a Rush project to be deployed.
  */
-interface IProject {
+interface IProjectInfoJson {
   /**
    * This path is relative to the deploy folder.
    */
