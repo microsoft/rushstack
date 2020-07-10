@@ -104,9 +104,9 @@ export interface IDeployState {
   pnpmfileConfiguration: PnpmfileConfiguration;
 
   /**
-   * The desired name to be used when archiving the target folder. Supported file extensions: .zip.
+   * The desired path to be used when archiving the target folder. Supported file extensions: .zip.
    */
-  createArchiveFileName: string | undefined;
+  createArchiveFilePath: string | undefined;
 }
 
 /**
@@ -547,7 +547,18 @@ export class DeployManager {
         }
       }
     }
-    DeployArchiver.createArchive(deployState).catch((error) => {
+    if (deployState.scenarioConfiguration.json.folderNameToCopy !== undefined) {
+      const sourceFolderPath: string = path.resolve(
+        this._rushConfiguration.rushJsonFolder,
+        deployState.scenarioConfiguration.json.folderNameToCopy
+      );
+      FileSystem.copyFiles({
+        sourcePath: sourceFolderPath,
+        destinationPath: deployState.targetRootFolder,
+        alreadyExistsBehavior: AlreadyExistsBehavior.Error
+      });
+    }
+    DeployArchiver.createArchiveAsync(deployState).catch((error) => {
       throw error;
     });
   }
@@ -560,7 +571,7 @@ export class DeployManager {
     scenarioName: string | undefined,
     overwriteExisting: boolean,
     targetFolderParameter: string | undefined,
-    createArchiveFileName: string | undefined
+    createArchiveFilePath: string | undefined
   ): void {
     const scenarioFilePath: string = DeployScenarioConfiguration.getConfigFilePath(
       scenarioName,
@@ -621,6 +632,11 @@ export class DeployManager {
       }
     }
 
+    // If create archive is set, ensure it has a legal extension
+    if (createArchiveFilePath && path.extname(createArchiveFilePath) !== '.zip') {
+      throw new Error('Create-archive currently only supports creation of zip files.');
+    }
+
     const deployState: IDeployState = {
       scenarioFilePath,
       scenarioConfiguration,
@@ -631,7 +647,7 @@ export class DeployManager {
       folderInfosByPath: new Map(),
       symlinkAnalyzer: new SymlinkAnalyzer(),
       pnpmfileConfiguration: new PnpmfileConfiguration(this._rushConfiguration),
-      createArchiveFileName
+      createArchiveFilePath
     };
 
     console.log();

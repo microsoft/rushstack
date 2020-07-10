@@ -19,7 +19,7 @@ export interface IDeployScenarioJson {
   includeNpmIgnoreFiles?: boolean;
   omitPnpmWorkaroundLinks?: boolean;
   linkCreation?: 'default' | 'script' | 'none';
-  postCopySourceFolder?: string;
+  folderNameToCopy?: string;
   projectSettings?: IDeployScenarioProjectJson[];
 }
 

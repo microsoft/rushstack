@@ -40,8 +40,8 @@
       "enum": ["default", "script", "none"]
     },
 
-    "postCopySourceFolder": {
-      "description": "If this path is specified, then after \"rush deploy\", recursively copies the files from this folder to the deployment target folder (common/deploy). This can be used to provide additional configuration files or scripts needed by the server when deploying.",
+    "folderNameToCopy": {
+      "description": "If this path is specified, then after \"rush deploy\", recursively copy the files from this folder to the deployment target folder (common/deploy). This can be used to provide additional configuration files or scripts needed by the server when deploying.",
       "type": "string"
     },
 

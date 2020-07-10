@@ -1,6 +1,7 @@
 import * as JSZip from 'jszip';
 import * as path from 'path';
-import { FileSystem, FileSystemStats, AlreadyExistsBehavior } from '@rushstack/node-core-library';
+import { FileSystem, FileSystemStats } from '@rushstack/node-core-library';
+
 import { IDeployState } from './DeployManager';
 
 // JSZip is dependant on Blob being declared.
@@ -9,25 +10,9 @@ declare global {
   type Blob = any;
 }
 export class DeployArchiver {
-  public static async createArchive(deployState: IDeployState): Promise<void> {
-    if (deployState.scenarioConfiguration.json.postCopySourceFolder !== undefined) {
-      const sourceFolderPath: string = FileSystem.getRealPath(
-        deployState.scenarioConfiguration.json.postCopySourceFolder
-      );
-      FileSystem.copyFiles({
-        sourcePath: sourceFolderPath,
-        destinationPath: deployState.targetRootFolder,
-        alreadyExistsBehavior: AlreadyExistsBehavior.Error
-      });
-    }
-    if (deployState.createArchiveFileName !== undefined) {
-      if (!deployState.createArchiveFileName.endsWith('.zip')) {
-        console.log(
-          'Create-archive currently only supports creation of zip files. Skipping create-archive step.\n'
-        );
-        return;
-      }
-      console.log('Invoking "JSZip"...\n');
+  public static async createArchiveAsync(deployState: IDeployState): Promise<void> {
+    if (deployState.createArchiveFilePath !== undefined) {
+      console.log('Creating archive...\n');
       const zip: JSZip = this._getZipOfFolder(deployState.targetRootFolder);
       const zipContent: Buffer = await zip.generateAsync({
         type: 'nodebuffer',
@@ -35,11 +20,12 @@ export class DeployArchiver {
       });
 
       FileSystem.writeFile(
-        path.join(deployState.targetRootFolder, deployState.createArchiveFileName),
+        path.resolve(deployState.targetRootFolder, deployState.createArchiveFilePath),
         zipContent
       );
 
-      console.log('\nCompleted "JSZip" successfully.');
+      console.log();
+      console.log('Archive created successfully.');
     }
   }
 
@@ -48,8 +34,7 @@ export class DeployArchiver {
     let results: string[] = [];
     const list: string[] = FileSystem.readFolder(dir);
 
-    let pending: number = list.length;
-    if (!pending) return results;
+    if (!list.length) return results;
 
     for (let file of list) {
       file = path.resolve(dir, file);
@@ -61,14 +46,12 @@ export class DeployArchiver {
       } else {
         results.push(file);
       }
-
-      if (!--pending) return results;
     }
 
     return results;
   }
 
-  private static _getZipOfFolder(dir: string): typeof JSZip {
+  private static _getZipOfFolder(dir: string): JSZip {
     // returns a JSZip instance filled with contents of dir.
     const allPaths: string[] = this._getFilePathsRecursively(dir);
 
