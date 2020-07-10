@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "[rush-lib] Copy over package binaries during deploy (#1982)",
+      "comment": "Fix an issue where package binaries where not created by \"rush deploy\" (#1982)",
       "type": "none"
     }
   ],

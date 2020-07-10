@@ -68,7 +68,7 @@ export class DeployAction extends BaseRushAction {
 
   protected async run(): Promise<void> {
     const deployManager: DeployManager = new DeployManager(this.rushConfiguration);
-    await deployManager.deploy(
+    await deployManager.deployAsync(
       this._project.value,
       this._scenario.value,
       !!this._overwrite.value,

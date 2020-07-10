@@ -502,7 +502,7 @@ export class DeployManager {
     });
   }
 
-  private async _makeBinLinks(deployState: IDeployState): Promise<void> {
+  private async _makeBinLinksAsync(deployState: IDeployState): Promise<void> {
     for (const [, folderInfo] of deployState.folderInfosByPath) {
       if (!folderInfo.isRushProject) {
         return;
@@ -523,7 +523,7 @@ export class DeployManager {
     }
   }
 
-  private async _prepareDeployment(deployState: IDeployState): Promise<void> {
+  private async _prepareDeploymentAsync(deployState: IDeployState): Promise<void> {
     // Calculate the set with additionalProjectsToInclude
     const includedProjectNamesSet: Set<string> = new Set();
     this._collectAdditionalProjectsToInclude(
@@ -585,14 +585,14 @@ export class DeployManager {
         }
       }
 
-      await this._makeBinLinks(deployState);
+      await this._makeBinLinksAsync(deployState);
     }
   }
 
   /**
    * The main entry point for performing a deployment.
    */
-  public async deploy(
+  public async deployAsync(
     mainProjectName: string | undefined,
     scenarioName: string | undefined,
     overwriteExisting: boolean,
@@ -671,7 +671,7 @@ export class DeployManager {
 
     console.log();
 
-    await this._prepareDeployment(deployState);
+    await this._prepareDeploymentAsync(deployState);
 
     console.log('\n' + colors.green('The operation completed successfully.'));
   }
