@@ -1,0 +1,44 @@
+{
+  "name": "@rushstack/module-minifier-plugin",
+  "version": "0.0.1",
+  "description": "This plugin splits minification of webpack compilations into smaller units.",
+  "main": "lib/index.js",
+  "typings": "dist/module-minifier-plugin.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/rushstack/tree/master/webpack/module-minifier-plugin"
+  },
+  "engines": {
+    "node": ">=10.17.1"
+  },
+  "scripts": {
+    "build": "gulp test --clean"
+  },
+  "peerDependencies": {
+    "webpack": "^4.31.0",
+    "webpack-sources": "~1.4.3",
+    "@types/webpack": "*"
+  },
+  "dependencies": {
+    "@types/node": "10.17.13",
+    "@types/tapable": "1.0.5",
+    "source-map": "~0.6.1",
+    "tapable": "1.1.3",
+    "terser": "4.7.0"
+  },
+  "devDependencies": {
+    "@microsoft/rush-stack-compiler-3.5": "workspace:*",
+    "@microsoft/node-library-build": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
+    "@types/jest": "25.2.1",
+    "@types/webpack": "4.39.8",
+    "gulp": "~4.0.2",
+    "webpack": "~4.31.0",
+    "webpack-sources": "~1.4.3"
+  },
+  "sideEffects": [
+    "./lib/terser/Base54",
+    "./lib/OverrideWebpackIdentifierAllocation"
+  ]
+}

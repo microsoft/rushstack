@@ -436,14 +436,17 @@ importers:
   ../../build-tests/heft-test-01:
     devDependencies:
       '@microsoft/rush-stack-compiler-3.7': 'link:../../stack/rush-stack-compiler-3.7'
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
     specifiers:
       '@microsoft/rush-stack-compiler-3.7': 'workspace:*'
+      '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
   ../../build-tests/localization-plugin-test-01:
     dependencies:
       '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/localization-plugin': 'link:../../webpack/localization-plugin'
+      '@rushstack/module-minifier-plugin': 'link:../../webpack/module-minifier-plugin'
       '@rushstack/node-core-library': 'link:../../libraries/node-core-library'
       '@rushstack/set-webpack-public-path-plugin': 'link:../../webpack/set-webpack-public-path-plugin'
       '@types/webpack-env': 1.13.0
@@ -457,6 +460,7 @@ importers:
     specifiers:
       '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/localization-plugin': 'workspace:*'
+      '@rushstack/module-minifier-plugin': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@rushstack/set-webpack-public-path-plugin': 'workspace:*'
       '@types/webpack-env': 1.13.0
@@ -471,6 +475,7 @@ importers:
     dependencies:
       '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/localization-plugin': 'link:../../webpack/localization-plugin'
+      '@rushstack/module-minifier-plugin': 'link:../../webpack/module-minifier-plugin'
       '@rushstack/node-core-library': 'link:../../libraries/node-core-library'
       '@rushstack/set-webpack-public-path-plugin': 'link:../../webpack/set-webpack-public-path-plugin'
       '@types/lodash': 4.14.116
@@ -486,6 +491,7 @@ importers:
     specifiers:
       '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/localization-plugin': 'workspace:*'
+      '@rushstack/module-minifier-plugin': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@rushstack/set-webpack-public-path-plugin': 'workspace:*'
       '@types/lodash': 4.14.116
@@ -1871,6 +1877,36 @@ importers:
       pseudolocale: ~1.1.0
       webpack: ~4.31.0
       xmldoc: ~1.1.2
+  ../../webpack/module-minifier-plugin:
+    dependencies:
+      '@types/node': 10.17.13
+      '@types/tapable': 1.0.5
+      source-map: 0.6.1
+      tapable: 1.1.3
+      terser: 4.7.0
+    devDependencies:
+      '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
+      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@types/jest': 25.2.1
+      '@types/webpack': 4.39.8
+      gulp: 4.0.2
+      webpack: 4.31.0_webpack@4.31.0
+      webpack-sources: 1.4.3
+    specifiers:
+      '@microsoft/node-library-build': 'workspace:*'
+      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
+      '@rushstack/eslint-config': 'workspace:*'
+      '@types/jest': 25.2.1
+      '@types/node': 10.17.13
+      '@types/tapable': 1.0.5
+      '@types/webpack': 4.39.8
+      gulp: ~4.0.2
+      source-map: ~0.6.1
+      tapable: 1.1.3
+      terser: 4.7.0
+      webpack: ~4.31.0
+      webpack-sources: ~1.4.3
   ../../webpack/set-webpack-public-path-plugin:
     dependencies:
       lodash: 4.17.15
@@ -12045,7 +12081,7 @@ packages:
       schema-utils: 1.0.0
       serialize-javascript: 3.1.0
       source-map: 0.6.1
-      terser: 4.8.0
+      terser: 4.7.0
       webpack: 4.31.0_webpack@4.31.0
       webpack-sources: 1.4.3
       worker-farm: 1.7.0
@@ -12055,7 +12091,7 @@ packages:
       webpack: ^4.0.0
     resolution:
       integrity: sha512-U4mACBHIegmfoEe5fdongHESNJWqsGU+W0S/9+BmYGVQDw1+c2Ow05TpMhxjPK1sRb7cuYq1BPl1e5YHJMTCqA==
-  /terser/4.8.0:
+  /terser/4.7.0:
     dependencies:
       commander: 2.20.3
       source-map: 0.6.1
@@ -12064,7 +12100,7 @@ packages:
       node: '>=6.0.0'
     hasBin: true
     resolution:
-      integrity: sha512-EAPipTNeWsb/3wLPeup1tVPaXfIaU68xMnVdPafIL1TV05OhASArYyIfFvnvJCNrR2NIOvDVNNTFRa+Re2MWyw==
+      integrity: sha512-Lfb0RiZcjRDXCC3OSHJpEkxJ9Qeqs6mp2v4jf2MHfy8vGERmVDuvjXdd/EnP5Deme5F2yBRBymKmKHCBg2echw==
   /test-exclude/6.0.0:
     dependencies:
       '@istanbuljs/schema': 0.1.2

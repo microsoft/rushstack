@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/module-minifier-plugin",
+      "comment": "Define ModuleMinifierPlugin",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/module-minifier-plugin",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
