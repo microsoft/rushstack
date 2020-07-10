@@ -479,6 +479,12 @@ export class DeployManager {
 
     deployState.folderInfosByPath.forEach((folderInfo) => {
       if (!folderInfo.isRushProject) {
+        // It's not a Rush project
+        return;
+      }
+
+      if (!deployState.foldersToCopy.has(folderInfo.folderPath)) {
+        // It's not something we crawled
         return;
       }
 
