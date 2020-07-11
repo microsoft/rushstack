@@ -51,7 +51,21 @@
             "type": "string"
           },
           "additionalProjectsToInclude": {
-            "description": " A list of additional local Rush projects to be deployed with this project (beyond the package.json dependencies).  Specify full package names, which must be declared in rush.json.",
+            "description": "A list of additional local Rush projects to be deployed with this project (beyond the package.json dependencies).  Specify full package names, which must be declared in rush.json.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "additionalDependenciesToInclude": {
+            "description": "When deploying a project, the included dependencies are normally determined automatically based on package.json fields such as 'dependencies', 'peerDependencies', and 'optionalDependencies', subject to other deployment settings such as 'includeDevDependencies'. However, in cases where that information is not accurate, you can use 'additionalDependenciesToInclude' to add more packages to the list.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dependenciesToExclude": {
+            "description": "This setting prevents specific dependencies from being deployed.  It only filters dependencies that are explicitly declared in package.json for this project.  It does not affect dependencies added via 'additionalProjectsToInclude' or 'additionalDependenciesToInclude', nor does it affect indirect dependencies.",
             "type": "array",
             "items": {
               "type": "string"
