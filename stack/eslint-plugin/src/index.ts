@@ -4,6 +4,7 @@
 import { TSESLint } from '@typescript-eslint/experimental-utils';
 
 import { noNullRule } from './no-null';
+import { noNewNullRule } from './no-new-null';
 import { noUntypedUnderscoreRule } from './no-untyped-underscore';
 
 interface IPlugin {
@@ -14,6 +15,7 @@ const plugin: IPlugin = {
   rules: {
     // NOTE: The actual ESLint rule name will be "@rushstack/no-null".
     'no-null': noNullRule,
+    'no-new-null': noNewNullRule,
     'no-untyped-underscore': noUntypedUnderscoreRule
   }
 };

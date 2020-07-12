@@ -94,3 +94,81 @@ enum E {
 }
 let e: E._PrivateMember = E._PrivateMember; // okay, because _PrivateMember is declared by E
 ```
+
+## `@rushstack/no-new-null`
+
+Prevent any _new_ type definitions which include `null`.
+
+#### Rule Details
+
+`@rushstack/no-new-null` is primarily for those that don't want to propagate
+`null` type definitions in their codebase, but still have to work with APIs
+that require `null`, e.g. `node` or React hooks.
+
+With the same motivations as the `@rushstack/no-null` rule regarding `null`
+being better served by `undefined`, the `@rushstack/no-new-null` rule flags
+type definitions with `null` that can be exported or used by others.
+
+By adopting this rule, developers will still be able to work with `null` APIs
+by wrapping those APIs with ones that do not expose `null` as a type
+parameter.
+
+#### Examples
+
+The following patterns are considered problems when `@rushstack/no-new-null` is enabled:
+
+```ts
+// interface declaration with null field
+interface IHello { hello: null; } // error
+
+// type declaration with null field
+type Hello = { hello: null; } // error
+
+// type function alias
+type T = (args: string | null) => void; // error
+
+// type alias
+type N = null; // error
+
+// type constructor
+type C = {new (args: string | null)} // error
+
+// function declaration with null args
+function hello(world: string | null): void {}; // error
+function legacy(callback: (err: Error| null) => void): void { }; // error
+
+// function with null return type
+function hello(): (err: Error | null) => void {}; // error
+
+// const with null type
+const nullType: 'hello' | null = 'hello'; // error
+
+// classes with publicly visible properties and methods
+class PublicNulls {
+  property: string | null; // error
+  propertyFunc: (val: string | null) => void; // error
+  legacyImplicitPublic(hello: string | null): void {} // error
+  public legacyExplicitPublic(hello: string | null): void {} // error
+}
+```
+
+The following patterns are NOT considered problems:
+
+```ts
+// wrapping an null-API
+export function ok(hello: string): void {
+  const innerCallback: (err: Error | null) => void = (e) => {}; // passes
+  return innerCallback(null);
+}
+
+// classes where null APIs are used, but are private-only
+class PrivateNulls {
+  private pField: string | null; // passes
+  private pFunc: (val: string | null) => void; // passes
+  private legacyPrivate(hello: string | null): void { // passes
+    this.pField = hello;
+    this.pFunc(this.pField)
+    this.pFunc('hello')
+  }
+}
+```
