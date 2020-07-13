@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Give \\\"rush deploy\\\" the ability to select a subset of dependencies to copy over (#1978)",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "willsoto@users.noreply.github.com"
+}
