@@ -55,6 +55,11 @@ export class DeployArchiver {
     // returns a JSZip instance filled with contents of dir.
     const allPaths: string[] = this._getFilePathsRecursively(dir);
 
+    // This value sets the allowed permissions when preserving symbolic links.
+    // 120000 is the symbolic link identifier, and 0755 designates the allowed permissions.
+    // See: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/stat.h#n10
+    const permissionsValue: string = '120755';
+
     const zip: JSZip = new JSZip();
     for (const filePath of allPaths) {
       const addPath: string = path.relative(dir, filePath);
@@ -63,7 +68,7 @@ export class DeployArchiver {
 
       if (stat.isSymbolicLink()) {
         zip.file(addPath, FileSystem.readLink(filePath), {
-          unixPermissions: parseInt('120755', 8),
+          unixPermissions: parseInt(permissionsValue, 8),
           dir: stat.isDirectory()
         });
       } else {
