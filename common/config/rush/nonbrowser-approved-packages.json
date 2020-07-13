@@ -491,6 +491,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jszip",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "loader-utils",
       "allowedCategories": [ "libraries" ]
     },
