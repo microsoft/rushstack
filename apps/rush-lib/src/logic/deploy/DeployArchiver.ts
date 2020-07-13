@@ -58,7 +58,7 @@ export class DeployArchiver {
     // This value sets the allowed permissions when preserving symbolic links.
     // 120000 is the symbolic link identifier, and 0755 designates the allowed permissions.
     // See: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/stat.h#n10
-    const permissionsValue: string = '120755';
+    const permissionsValue: number = 0o120755;
 
     const zip: JSZip = new JSZip();
     for (const filePath of allPaths) {
@@ -68,7 +68,7 @@ export class DeployArchiver {
 
       if (stat.isSymbolicLink()) {
         zip.file(addPath, FileSystem.readLink(filePath), {
-          unixPermissions: parseInt(permissionsValue, 8),
+          unixPermissions: permissionsValue,
           dir: stat.isDirectory()
         });
       } else {
