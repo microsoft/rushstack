@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/module-minifier-plugin",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/module-minifier-plugin_v0.1.0",
+      "date": "Sat, 11 Jul 2020 00:08:09 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Define ModuleMinifierPlugin"
+          }
+        ]
+      }
+    }
+  ]
+}

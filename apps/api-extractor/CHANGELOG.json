@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.9.2",
+      "tag": "@microsoft/api-extractor_v7.9.2",
+      "date": "Thu, 09 Jul 2020 04:58:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with handling of \"export { default } from 'package';\" (GitHub #2014)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.9.1",
       "tag": "@microsoft/api-extractor_v7.9.1",
       "date": "Fri, 03 Jul 2020 15:09:04 GMT",
@@ -1466,7 +1478,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "(Breaking change) The file extension for API review files has changed from \".api.ts\" to \"api.md\".  For details see https://github.com/Microsoft/web-build-tools/issues/1123"
+            "comment": "(Breaking change) The file extension for API review files has changed from \".api.ts\" to \"api.md\".  For details see https://github.com/microsoft/web-build-tools/issues/1123"
           }
         ]
       }
@@ -1752,7 +1764,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "Fix an issue with rolling up default exports (https://github.com/Microsoft/web-build-tools/issues/1007)"
+            "comment": "Fix an issue with rolling up default exports (https://github.com/microsoft/web-build-tools/issues/1007)"
           }
         ],
         "dependency": [
@@ -2145,7 +2157,7 @@
       "comments": {
         "major": [
           {
-            "comment": "(Breaking change) API Extractor 6 introduces support for TSDoc doc comment syntax!  Please see https://api-extractor.com/ for documentation.  To learn more about the TSDoc standard, check out https://github.com/Microsoft/tsdoc"
+            "comment": "(Breaking change) API Extractor 6 introduces support for TSDoc doc comment syntax!  Please see https://api-extractor.com/ for documentation.  To learn more about the TSDoc standard, check out https://github.com/microsoft/tsdoc"
           }
         ],
         "dependency": [

@@ -37,9 +37,9 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
   public static [SUBPROCESS_RUNNER_CLASS_LABEL]: boolean = true;
   private static _subprocessInspectorPort: number = 9229 + 1; // 9229 is the default port
 
-  protected _configuration: TSubprocessConfiguration;
-  protected _fileSystem: IExtendedFileSystem = new CachedFileSystem();
-  private _terminalProvider: ITerminalProvider;
+  protected readonly _configuration: TSubprocessConfiguration;
+  protected readonly _fileSystem: IExtendedFileSystem = new CachedFileSystem();
+  protected readonly _terminalProvider: ITerminalProvider;
 
   /**
    * The subprocess filename. This should be set to __filename in the child class.
@@ -50,7 +50,6 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
     this._terminalProvider = terminalProvider;
     this._configuration = configuration;
 
-    this.initializeTerminal(terminalProvider);
     this.initialize();
   }
 
@@ -119,13 +118,6 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
    * @virtual
    */
   public initialize(): void {
-    /* virtual */
-  }
-
-  /**
-   * @virtual
-   */
-  public initializeTerminal(terminalProvider: ITerminalProvider): void {
     /* virtual */
   }
 

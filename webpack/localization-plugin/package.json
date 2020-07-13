@@ -1,13 +1,13 @@
 {
   "name": "@rushstack/localization-plugin",
-  "version": "0.3.26",
+  "version": "0.3.27",
   "description": "This plugin facilitates localization with Webpack.",
   "main": "lib/index.js",
   "typings": "dist/localization-plugin.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/rushstack/tree/master/webpack/localization-plugin"
+    "url": "https://github.com/microsoft/rushstack/tree/master/webpack/localization-plugin"
   },
   "scripts": {
     "build": "gulp test --clean"

@@ -1,6 +1,18 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 03 Jul 2020 06:16:09 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Jul 2020 06:56:47 GMT and should not be manually modified.
+
+## 5.28.0
+Wed, 08 Jul 2020 06:56:47 GMT
+
+### Minor changes
+
+- Add preliminary workspaces support for PNPM
+
+### Updates
+
+- Add new commands "rush init-autoinstaller" and "rush update-autoinstaller"
+- Add support for filtered installs when using workspaces
 
 ## 5.27.3
 Fri, 03 Jul 2020 06:16:09 GMT
@@ -856,7 +868,7 @@ Sat, 4 Nov 2017 03:22:28 GMT
 
 ### Breaking changes
 
-- Complete release notes are here: https://github.com/Microsoft/web-build-tools/wiki#november-3-2017---rush-4-released
+- Complete release notes are here: https://github.com/microsoft/web-build-tools/wiki#november-3-2017---rush-4-released
 - Adding custom commands and options.
 - Adding rush version selector.
 - Updating the semantics of rush change.

@@ -13,11 +13,12 @@
   "main": "lib/index.js",
   "types": "dist/heft.d.ts",
   "devDependencies": {
+    "@types/eslint": "7.2.0",
     "@types/glob": "7.1.1",
     "@types/node": "10.17.13",
     "@types/resolve": "1.17.1",
-    "@rushstack/eslint-config": "workspace:*",
-    "@microsoft/rush-stack-compiler-3.7": "workspace:*"
+    "@microsoft/rush-stack-compiler-3.7": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",

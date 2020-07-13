@@ -469,6 +469,13 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (this.rushConfiguration.packageManager === 'pnpm') {
       args.push('--recursive');
       args.push('--link-workspace-packages', 'false');
+
+      // "<package>..." selects the specified package and all direct and indirect dependencies
+      if (this.options.toFlags) {
+        for (const flag of this.options.toFlags) {
+          args.push('--filter', `${flag}...`);
+        }
+      }
     }
   }
 

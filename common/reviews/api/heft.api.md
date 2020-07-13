@@ -154,11 +154,13 @@ export interface ICleanActionProperties {
 // @public (undocumented)
 export interface ICompilerPackage {
     // (undocumented)
-    eslintPath: string;
+    apiExtractorPackagePath: string;
     // (undocumented)
-    tslintPath: string;
+    eslintPackagePath: string;
     // (undocumented)
-    typeScriptPath: string;
+    tslintPackagePath: string;
+    // (undocumented)
+    typeScriptPackagePath: string;
 }
 
 // @public (undocumented)

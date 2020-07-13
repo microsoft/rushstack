@@ -323,6 +323,7 @@ export class RushConfiguration {
     readonly changesFolder: string;
     // @deprecated
     readonly committedShrinkwrapFilename: string;
+    readonly commonAutoinstallersFolder: string;
     readonly commonFolder: string;
     readonly commonRushConfigFolder: string;
     readonly commonScriptsFolder: string;

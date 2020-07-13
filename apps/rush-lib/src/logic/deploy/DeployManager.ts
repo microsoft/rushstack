@@ -5,6 +5,7 @@ import * as colors from 'colors';
 import * as path from 'path';
 import * as resolve from 'resolve';
 import * as npmPacklist from 'npm-packlist';
+import pnpmLinkBins from '@pnpm/link-bins';
 
 // (Used only by the legacy code fragment in the resolve.sync() hook below)
 import * as fsForResolve from 'fs';
@@ -45,7 +46,18 @@ declare module 'npm-packlist' {
 export interface IDeployMetadataJson {
   scenarioName: string;
   mainProjectName: string;
+  projects: IProjectInfoJson[];
   links: ILinkInfo[];
+}
+
+/**
+ * Part of the deploy-matadata.json file format. Represents a Rush project to be deployed.
+ */
+interface IProjectInfoJson {
+  /**
+   * This path is relative to the deploy folder.
+   */
+  path: string;
 }
 
 /**
@@ -467,8 +479,25 @@ export class DeployManager {
     const deployMetadataJson: IDeployMetadataJson = {
       scenarioName: path.basename(deployState.scenarioFilePath),
       mainProjectName: deployState.mainProjectName,
+      projects: [],
       links: []
     };
+
+    deployState.folderInfosByPath.forEach((folderInfo) => {
+      if (!folderInfo.isRushProject) {
+        // It's not a Rush project
+        return;
+      }
+
+      if (!deployState.foldersToCopy.has(folderInfo.folderPath)) {
+        // It's not something we crawled
+        return;
+      }
+
+      deployMetadataJson.projects.push({
+        path: this._remapPathForDeployMetadata(folderInfo.folderPath, deployState)
+      });
+    });
 
     // Remap the links to be relative to target folder
     for (const absoluteLinkInfo of deployState.symlinkAnalyzer.reportSymlinks()) {
@@ -485,7 +514,28 @@ export class DeployManager {
     });
   }
 
-  private _prepareDeployment(deployState: IDeployState): void {
+  private async _makeBinLinksAsync(deployState: IDeployState): Promise<void> {
+    for (const [, folderInfo] of deployState.folderInfosByPath) {
+      if (!folderInfo.isRushProject) {
+        return;
+      }
+
+      const deployedPath: string = this._remapPathForDeployMetadata(folderInfo.folderPath, deployState);
+      const projectFolder: string = path.join(deployState.targetRootFolder, deployedPath, 'node_modules');
+      const projectBinFolder: string = path.join(
+        deployState.targetRootFolder,
+        deployedPath,
+        'node_modules',
+        '.bin'
+      );
+
+      await pnpmLinkBins(projectFolder, projectBinFolder, {
+        warn: (msg: string) => console.warn(colors.yellow(msg))
+      });
+    }
+  }
+
+  private async _prepareDeploymentAsync(deployState: IDeployState): Promise<void> {
     // Calculate the set with additionalProjectsToInclude
     const includedProjectNamesSet: Set<string> = new Set();
     this._collectAdditionalProjectsToInclude(
@@ -546,6 +596,8 @@ export class DeployManager {
           throw new InternalError('Target does not exist: ' + JSON.stringify(linkToCopy, undefined, 2));
         }
       }
+
+      await this._makeBinLinksAsync(deployState);
     }
     if (deployState.scenarioConfiguration.json.folderNameToCopy !== undefined) {
       const sourceFolderPath: string = path.resolve(
@@ -558,21 +610,19 @@ export class DeployManager {
         alreadyExistsBehavior: AlreadyExistsBehavior.Error
       });
     }
-    DeployArchiver.createArchiveAsync(deployState).catch((error) => {
-      throw error;
-    });
+    await DeployArchiver.createArchiveAsync(deployState);
   }
 
   /**
    * The main entry point for performing a deployment.
    */
-  public deploy(
+  public async deployAsync(
     mainProjectName: string | undefined,
     scenarioName: string | undefined,
     overwriteExisting: boolean,
     targetFolderParameter: string | undefined,
     createArchiveFilePath: string | undefined
-  ): void {
+  ): Promise<void> {
     const scenarioFilePath: string = DeployScenarioConfiguration.getConfigFilePath(
       scenarioName,
       this._rushConfiguration
@@ -652,7 +702,7 @@ export class DeployManager {
 
     console.log();
 
-    this._prepareDeployment(deployState);
+    await this._prepareDeploymentAsync(deployState);
 
     console.log('\n' + colors.green('The operation completed successfully.'));
   }

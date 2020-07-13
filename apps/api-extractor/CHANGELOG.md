@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Jul 2020 04:58:36 GMT and should not be manually modified.
+
+## 7.9.2
+Thu, 09 Jul 2020 04:58:36 GMT
+
+### Patches
+
+- Fix an issue with handling of "export { default } from 'package';" (GitHub #2014)
 
 ## 7.9.1
 Fri, 03 Jul 2020 15:09:04 GMT
@@ -594,7 +601,7 @@ Fri, 15 Mar 2019 19:13:25 GMT
 
 ### Patches
 
-- (Breaking change) The file extension for API review files has changed from ".api.ts" to "api.md".  For details see https://github.com/Microsoft/web-build-tools/issues/1123
+- (Breaking change) The file extension for API review files has changed from ".api.ts" to "api.md".  For details see https://github.com/microsoft/web-build-tools/issues/1123
 
 ## 7.0.26
 Wed, 13 Mar 2019 19:13:14 GMT
@@ -731,7 +738,7 @@ Thu, 10 Jan 2019 01:57:52 GMT
 
 ### Patches
 
-- Fix an issue with rolling up default exports (https://github.com/Microsoft/web-build-tools/issues/1007)
+- Fix an issue with rolling up default exports (https://github.com/microsoft/web-build-tools/issues/1007)
 
 ## 7.0.8
 Thu, 20 Dec 2018 17:04:08 GMT
@@ -920,7 +927,7 @@ Sun, 07 Oct 2018 06:15:56 GMT
 
 ### Breaking changes
 
-- (Breaking change) API Extractor 6 introduces support for TSDoc doc comment syntax!  Please see https://api-extractor.com/ for documentation.  To learn more about the TSDoc standard, check out https://github.com/Microsoft/tsdoc
+- (Breaking change) API Extractor 6 introduces support for TSDoc doc comment syntax!  Please see https://api-extractor.com/ for documentation.  To learn more about the TSDoc standard, check out https://github.com/microsoft/tsdoc
 
 ## 5.13.1
 Fri, 28 Sep 2018 16:05:35 GMT

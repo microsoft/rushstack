@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminalProvider, Terminal } from '@rushstack/node-core-library';
+import { ITerminalProvider } from '@rushstack/node-core-library';
 
 import { SubprocessTerminalProvider } from './SubprocessTerminalProvider';
 import {
@@ -33,7 +33,6 @@ if (subprocessRunnerModuleExports.length !== 1) {
 }
 
 declare class SubprocessRunnerSubclass extends SubprocessRunnerBase<object> {
-  public _terminal: Terminal; // Expose the terminal object
   public filename: string;
   public invokeAsync(): Promise<void>;
 }
@@ -53,7 +52,4 @@ const subprocessRunner: SubprocessRunnerSubclass = new SubprocessRunnerClass(
   subprocessConfiguration
 );
 
-subprocessRunner[SUBPROCESS_RUNNER_INNER_INVOKE].call(subprocessRunner).catch((error) => {
-  subprocessRunner._terminal.writeErrorLine(`Unexpected error in subprocess: ${error}`);
-  process.exit(1);
-});
+subprocessRunner[SUBPROCESS_RUNNER_INNER_INVOKE].call(subprocessRunner);

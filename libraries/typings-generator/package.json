@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/rushstack/tree/master/libraries/typings-generator"
+    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/typings-generator"
   },
   "scripts": {
     "build": "gulp test --clean"

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
@@ -76,7 +79,7 @@ export class DeployAction extends BaseRushAction {
 
   protected async run(): Promise<void> {
     const deployManager: DeployManager = new DeployManager(this.rushConfiguration);
-    deployManager.deploy(
+    await deployManager.deployAsync(
       this._project.value,
       this._scenario.value,
       !!this._overwrite.value,
