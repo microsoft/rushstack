@@ -123,6 +123,17 @@ export class ExperimentsConfiguration {
     readonly configuration: Readonly<IExperimentsJson>;
     }
 
+// @internal
+export abstract class _FlagFileBase<TState> {
+    protected constructor(flagPath: string, state: TState);
+    clear(): void;
+    create(): void;
+    abstract isValid(): boolean;
+    protected loadFromFile(): TState | undefined;
+    readonly path: string;
+    protected readonly state: TState;
+    }
+
 // @public
 export interface IConfigurationEnvironment {
     [environmentVariableName: string]: IConfigurationEnvironmentVariable;
@@ -139,6 +150,16 @@ export interface IExperimentsJson {
     legacyIncrementalBuildDependencyDetection?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
+}
+
+// @internal
+export interface _ILastInstallFlagJson {
+    node?: string;
+    packageJson?: IPackageJson;
+    packageManager?: PackageManagerName;
+    packageManagerVersion?: string;
+    storePath?: string;
+    workspaces?: boolean;
 }
 
 // @public
@@ -188,6 +209,13 @@ export interface ITryFindRushJsonLocationOptions {
 // @internal
 export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
     ignoreEngines?: boolean;
+}
+
+// @internal
+export class _LastInstallFlag extends _FlagFileBase<_ILastInstallFlagJson> {
+    constructor(folderPath: string, state?: _ILastInstallFlagJson);
+    static getCurrentState(rushConfiguration: RushConfiguration): _ILastInstallFlagJson;
+    isValid(reportStoreIssues?: boolean): boolean;
 }
 
 // @beta
