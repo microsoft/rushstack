@@ -2,6 +2,21 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.3.28",
+      "tag": "@rushstack/localization-plugin_v0.3.28",
+      "date": "Tue, 14 Jul 2020 19:32:58 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix the way the loc file typings are generated in watch mode for large projects."
+          },
+          {
+            "comment": "Make @types/webpack an optionalPeerDependency instead of a peerDependency."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.27",
       "tag": "@rushstack/localization-plugin_v0.3.27",
       "date": "Tue, 07 Jul 2020 00:09:39 GMT",

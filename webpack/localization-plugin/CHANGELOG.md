@@ -1,6 +1,14 @@
 # Change Log - @rushstack/localization-plugin
 
-This log was last generated on Tue, 07 Jul 2020 00:09:39 GMT and should not be manually modified.
+This log was last generated on Tue, 14 Jul 2020 19:32:58 GMT and should not be manually modified.
+
+## 0.3.28
+Tue, 14 Jul 2020 19:32:58 GMT
+
+### Patches
+
+- Fix the way the loc file typings are generated in watch mode for large projects.
+- Make @types/webpack an optionalPeerDependency instead of a peerDependency.
 
 ## 0.3.27
 Tue, 07 Jul 2020 00:09:39 GMT
