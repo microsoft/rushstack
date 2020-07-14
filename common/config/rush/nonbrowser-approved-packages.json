@@ -491,6 +491,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jszip",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "loader-utils",
       "allowedCategories": [ "libraries" ]
     },
@@ -608,7 +612,7 @@
     },
     {
       "name": "tapable",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "tar",

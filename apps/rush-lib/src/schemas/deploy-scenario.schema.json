@@ -40,6 +40,11 @@
       "enum": ["default", "script", "none"]
     },
 
+    "folderToCopy": {
+      "description": "If this path is specified, then after \"rush deploy\", recursively copy the files from this folder to the deployment target folder (common/deploy). This can be used to provide additional configuration files or scripts needed by the server when deploying.",
+      "type": "string"
+    },
+
     "projectSettings": {
       "description": "Customize how Rush projects are processed during deployment.",
       "type": "array",

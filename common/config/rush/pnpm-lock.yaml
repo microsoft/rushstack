@@ -205,6 +205,7 @@ importers:
       ignore: 5.1.8
       inquirer: 6.2.2
       js-yaml: 3.13.1
+      jszip: 3.5.0
       lodash: 4.17.15
       minimatch: 3.0.4
       node-fetch: 2.1.2
@@ -280,6 +281,7 @@ importers:
       inquirer: ~6.2.0
       jest: 25.4.0
       js-yaml: ~3.13.1
+      jszip: ~3.5.0
       lodash: ~4.17.15
       minimatch: ~3.0.2
       node-fetch: ~2.1.2
@@ -2756,7 +2758,7 @@ packages:
       '@babel/types': 7.10.4
       '@types/babel__generator': 7.6.1
       '@types/babel__template': 7.0.2
-      '@types/babel__traverse': 7.0.12
+      '@types/babel__traverse': 7.0.13
     resolution:
       integrity: sha512-sY2RsIJ5rpER1u3/aQ8OFSI7qGIy8o1NEEbgb2UaJcvOtXOMpd39ko723NBpjQFg9SIX7TXtjejZVGeIMLhoOw==
   /@types/babel__generator/7.6.1:
@@ -2770,11 +2772,11 @@ packages:
       '@babel/types': 7.10.4
     resolution:
       integrity: sha512-/K6zCpeW7Imzgab2bLkLEbz0+1JlFSrUMdw7KoIIu+IUdu51GWaBZpd3y1VXGVXzynvGa4DaIaxNZHiON3GXUg==
-  /@types/babel__traverse/7.0.12:
+  /@types/babel__traverse/7.0.13:
     dependencies:
       '@babel/types': 7.10.4
     resolution:
-      integrity: sha512-t4CoEokHTfcyfb4hUaF9oOHu9RmmNWnm1CP0YmMqOOfClKascOmvlEM736vlqeScuGvBDsHkf8R2INd4DWreQA==
+      integrity: sha512-i+zS7t6/s9cdQvbqKDARrcbrPvtJGlbYsMkazo03nTAK3RX9FNrLllXys22uiTGJapPOTZTQ35nHh4ISph4SLQ==
   /@types/body-parser/1.19.0:
     dependencies:
       '@types/connect': 3.4.33
@@ -4163,7 +4165,7 @@ packages:
     dependencies:
       '@babel/template': 7.10.4
       '@babel/types': 7.10.4
-      '@types/babel__traverse': 7.0.12
+      '@types/babel__traverse': 7.0.13
     engines:
       node: '>= 8.3'
     resolution:
@@ -7380,7 +7382,7 @@ packages:
       depd: 1.1.2
       inherits: 2.0.3
       setprototypeof: 1.1.0
-      statuses: 1.5.0
+      statuses: 1.4.0
     dev: false
     engines:
       node: '>= 0.6'
@@ -7510,6 +7512,10 @@ packages:
       node: '>= 4'
     resolution:
       integrity: sha512-BMpfD7PpiETpBl/A6S498BaIJ6Y/ABT93ETbby2fP00v4EbvPBXWEoaR1UBPKs3iR53pJY7EtZk5KACI57i1Uw==
+  /immediate/3.0.6:
+    dev: false
+    resolution:
+      integrity: sha1-nbHb0Pr43m++D13V5Wu2BigN5ps=
   /import-fresh/3.2.1:
     dependencies:
       parent-module: 1.0.1
@@ -8711,6 +8717,15 @@ packages:
       node: '>=4.0'
     resolution:
       integrity: sha512-z1xSldJ6imESSzOjd3NNkieVJKRlKYSOtMG8SFyCj2FIrvSaSuli/WjpBkEzCBoR9bYYYFgqJw61Xhu7Lcgk+w==
+  /jszip/3.5.0:
+    dependencies:
+      lie: 3.3.0
+      pako: 1.0.11
+      readable-stream: 2.3.7
+      set-immediate-shim: 1.0.1
+    dev: false
+    resolution:
+      integrity: sha512-WRtu7TPCmYePR1nazfrtuF216cIVon/3GWOvHS9QR5bIwSbnxtdpma6un3jyGGNhHsKCSzn5Ypk+EkDRvTGiFA==
   /just-debounce/1.0.0:
     resolution:
       integrity: sha1-h/zPrv/AtozRnVX2cilD+SnqNeo=
@@ -8817,6 +8832,12 @@ packages:
       node: '>= 0.8.0'
     resolution:
       integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==
+  /lie/3.3.0:
+    dependencies:
+      immediate: 3.0.6
+    dev: false
+    resolution:
+      integrity: sha512-UaiMJzeWRlEujzAuw5LokY1L5ecNQYZKfmyZ9L7wDHb/p5etKaxXhohBcrw0EYby+G/NA52vRSN4N39dxHAIwQ==
   /liftoff/3.1.0:
     dependencies:
       extend: 3.0.2
@@ -11396,6 +11417,12 @@ packages:
   /set-blocking/2.0.0:
     resolution:
       integrity: sha1-BF+XgtARrppoA93TgrJDkrPYkPc=
+  /set-immediate-shim/1.0.1:
+    dev: false
+    engines:
+      node: '>=0.10.0'
+    resolution:
+      integrity: sha1-SysbJ+uAip+NzEgaWOXlb1mfP2E=
   /set-value/2.0.1:
     dependencies:
       extend-shallow: 2.0.1
