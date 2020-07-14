@@ -106,8 +106,8 @@ export class LastInstallFlag extends FlagFileBase<ILastInstallFlagJson> {
       if (pkgManager === 'pnpm') {
         if (
           // Only throw an error if the package manager hasn't changed from PNPM
-          oldState.packageManager === pkgManager && // Throw if the store path changed
-          oldState.storePath &&
+          oldState.packageManager === pkgManager &&
+          // Throw if the store path changed
           oldState.storePath !== this.state.storePath
         ) {
           const oldStorePath: string = oldState.storePath || '<global>';
