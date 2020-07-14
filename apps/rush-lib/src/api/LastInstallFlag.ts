@@ -114,8 +114,7 @@ export class LastInstallFlag extends FlagFileBase<ILastInstallFlagJson> {
           const newStorePath: string = this.state.storePath || '<global>';
 
           throw new Error(
-            'Current PNPM store path does not match the last one used.' +
-              '  This may cause inconsistency in your builds.\n\n' +
+            'Current PNPM store path does not match the last one used. This may cause inconsistency in your builds.\n\n' +
               'If you wish to install with the new store path, please run "rush update --purge"\n\n' +
               `Old Path: ${oldStorePath}\n` +
               `New Path: ${newStorePath}`
