@@ -7,6 +7,7 @@ import { JsonObject } from '@rushstack/node-core-library';
 
 import { BaseFlagFile } from './BaseFlagFile';
 import { PackageManagerName } from './packageManager/PackageManager';
+import { RushConfiguration } from './RushConfiguration';
 
 export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
 
@@ -25,6 +26,29 @@ export class LastInstallFlag extends BaseFlagFile {
    */
   public constructor(folderPath: string, state: JsonObject = {}) {
     super(path.join(folderPath, LAST_INSTALL_FLAG_FILE_NAME), state);
+  }
+
+  /**
+   * Gets the current state of the Rush repo. This state is used to compare against
+   * the last-known-good state tracked by the LastInstall flag.
+   * @param rushConfiguration - the configuration of the Rush repo to get the install
+   * state from
+   */
+  public static getCurrentState(rushConfiguration: RushConfiguration): JsonObject {
+    const currentState: JsonObject = {
+      node: process.versions.node,
+      packageManager: rushConfiguration.packageManager,
+      packageManagerVersion: rushConfiguration.packageManagerToolVersion
+    };
+
+    if (currentState.packageManager === 'pnpm' && rushConfiguration.pnpmOptions) {
+      currentState.storePath = rushConfiguration.pnpmOptions.pnpmStorePath;
+      if (rushConfiguration.pnpmOptions.useWorkspaces) {
+        currentState.workspaces = rushConfiguration.pnpmOptions.useWorkspaces;
+      }
+    }
+
+    return currentState;
   }
 
   /**

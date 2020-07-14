@@ -7,15 +7,18 @@ import { FileSystem } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Utilities } from '../utilities/Utilities';
 import { PnpmProjectDependencyManifest } from './pnpm/PnpmProjectDependencyManifest';
+import { LastLinkFlag } from '../api/LastLinkFlag';
 
 /**
  * This class implements the logic for "rush unlink"
  */
 export class UnlinkManager {
   private _rushConfiguration: RushConfiguration;
+  private _lastLinkFlag: LastLinkFlag;
 
   public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
+    this._lastLinkFlag = new LastLinkFlag(rushConfiguration.commonTempFolder);
   }
 
   /**
@@ -25,7 +28,7 @@ export class UnlinkManager {
    * Returns true if anything was deleted.
    */
   public unlink(): boolean {
-    this._deleteFlagFile();
+    this._lastLinkFlag.clear();
     return this._deleteProjectFiles();
   }
 
@@ -58,13 +61,5 @@ export class UnlinkManager {
     }
 
     return didDeleteAnything;
-  }
-
-  /**
-   * Delete the flag file if it exists; this will ensure that
-   * a full "rush link" is required next time
-   */
-  private _deleteFlagFile(): void {
-    Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
   }
 }

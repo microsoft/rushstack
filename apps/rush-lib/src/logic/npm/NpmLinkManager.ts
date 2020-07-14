@@ -7,11 +7,9 @@ import * as path from 'path';
 import * as semver from 'semver';
 import * as tar from 'tar';
 import readPackageTree = require('read-package-tree');
-
-import { JsonFile, FileSystem, FileConstants, LegacyAdapters } from '@rushstack/node-core-library';
+import { FileSystem, FileConstants, LegacyAdapters } from '@rushstack/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
-import { IRushLinkJson } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Utilities } from '../../utilities/Utilities';
 import { NpmPackage, IResolveOrCreateResult, PackageDependencyKind } from './NpmPackage';
@@ -43,17 +41,10 @@ export class NpmLinkManager extends BaseLinkManager {
     const commonPackageLookup: PackageLookup = new PackageLookup();
     commonPackageLookup.loadTree(commonRootPackage);
 
-    const rushLinkJson: IRushLinkJson = {
-      localLinks: {}
-    };
-
     for (const rushProject of this._rushConfiguration.projects) {
       console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-      this._linkProject(rushProject, commonRootPackage, commonPackageLookup, rushLinkJson);
+      this._linkProject(rushProject, commonRootPackage, commonPackageLookup);
     }
-
-    console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
-    JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
   }
 
   /**
@@ -62,14 +53,12 @@ export class NpmLinkManager extends BaseLinkManager {
    * @param commonRootPackage   The common/temp/package.json package
    * @param commonPackageLookup A dictionary for finding packages under common/temp/node_modules
    * @param rushConfiguration   The rush.json file contents
-   * @param rushLinkJson        The common/temp/rush-link.json output file
    * @param options             Command line options for "rush link"
    */
   private _linkProject(
     project: RushConfigurationProject,
     commonRootPackage: NpmPackage,
-    commonPackageLookup: PackageLookup,
-    rushLinkJson: IRushLinkJson
+    commonPackageLookup: PackageLookup
   ): void {
     let commonProjectPackage: NpmPackage | undefined = commonRootPackage.getChildByName(
       project.tempProjectName
@@ -201,18 +190,6 @@ export class NpmLinkManager extends BaseLinkManager {
             );
           } else {
             // Yes, it is compatible, so create a symlink to the Rush project.
-
-            // If the link is coming from our top-level Rush project, then record a
-            // build dependency in rush-link.json:
-            if (localPackage === localProjectPackage) {
-              let localLinks: string[] = rushLinkJson.localLinks[localPackage.name];
-              if (!localLinks) {
-                localLinks = [];
-                rushLinkJson.localLinks[localPackage.name] = localLinks;
-              }
-              localLinks.push(dependency.name);
-            }
-
             // Is the dependency already resolved?
             const resolution: IResolveOrCreateResult = localPackage.resolveOrCreate(dependency.name);
 

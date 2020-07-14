@@ -205,6 +205,7 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
 // @internal
 export class _LastInstallFlag extends _BaseFlagFile {
     constructor(folderPath: string, state?: JsonObject);
+    static getCurrentState(rushConfiguration: RushConfiguration): JsonObject;
     isValid(reportStoreIssues?: boolean): boolean;
 }
 
@@ -383,7 +384,6 @@ export class RushConfiguration {
     readonly repositoryUrl: string | undefined;
     readonly rushJsonFile: string;
     readonly rushJsonFolder: string;
-    readonly rushLinkJsonFilename: string;
     readonly shrinkwrapFilename: string;
     readonly shrinkwrapFilePhrase: string;
     readonly suppressNodeLtsWarning: boolean;
@@ -409,6 +409,7 @@ export class RushConfigurationProject {
     readonly downstreamDependencyProjects: string[];
     // @beta
     readonly isMainProject: boolean;
+    readonly localDependencyProjects: Map<string, RushConfigurationProject>;
     // @deprecated
     readonly packageJson: IPackageJson;
     // @beta

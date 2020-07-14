@@ -9,7 +9,7 @@ import HttpsProxyAgent = require('https-proxy-agent');
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import { FileSystem, JsonFile, JsonObject, PosixModeBits, NewlineKind } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, PosixModeBits, NewlineKind } from '@rushstack/node-core-library';
 
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
@@ -30,6 +30,7 @@ import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import { PolicyValidator } from '../policy/PolicyValidator';
 import { LinkManagerFactory } from '../LinkManagerFactory';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 export interface IInstallManagerOptions {
   /**
@@ -94,7 +95,7 @@ export interface IInstallManagerOptions {
   /**
    * The list of projects that should be installed, along with project dependencies.
    */
-  toFlags: ReadonlyArray<string>;
+  toProjects: ReadonlyArray<RushConfigurationProject>;
 }
 
 /**
@@ -119,22 +120,9 @@ export abstract class BaseInstallManager {
     this._installRecycler = purgeManager.commonTempFolderRecycler;
     this._options = options;
 
-    const lastInstallState: JsonObject = {
-      node: process.versions.node,
-      packageManager: rushConfiguration.packageManager,
-      packageManagerVersion: rushConfiguration.packageManagerToolVersion
-    };
-
-    if (lastInstallState.packageManager === 'pnpm' && rushConfiguration.pnpmOptions) {
-      lastInstallState.storePath = rushConfiguration.pnpmOptions.pnpmStorePath;
-      if (rushConfiguration.pnpmOptions.useWorkspaces) {
-        lastInstallState.workspaces = rushConfiguration.pnpmOptions.useWorkspaces;
-      }
-    }
-
     this._commonTempInstallFlag = new LastInstallFlag(
       this._rushConfiguration.commonTempFolder,
-      lastInstallState
+      LastInstallFlag.getCurrentState(rushConfiguration)
     );
   }
 
@@ -155,13 +143,12 @@ export abstract class BaseInstallManager {
   }
 
   public async doInstall(): Promise<void> {
-    const isFilteredInstall: boolean = this.options.toFlags.length > 0;
+    const isFilteredInstall: boolean = this.options.toProjects.length > 0;
+    const useWorkspaces: boolean =
+      this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
 
     // Prevent filtered installs when workspaces is disabled
-    if (
-      isFilteredInstall &&
-      !(this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces)
-    ) {
+    if (isFilteredInstall && !useWorkspaces) {
       console.log();
       console.log(
         colors.red(
@@ -215,10 +202,6 @@ export abstract class BaseInstallManager {
         );
       }
 
-      // Since we're going to be tampering with common/node_modules, delete the "rush link" flag file if it exists;
-      // this ensures that a full "rush link" is required next time
-      Utilities.deleteFile(this.rushConfiguration.rushLinkJsonFilename);
-
       // Delete the successful install file to indicate the install transaction has started
       this._commonTempInstallFlag.clear();
 
@@ -259,13 +242,17 @@ export abstract class BaseInstallManager {
       console.log('');
     }
 
-    if (!this.options.noLink) {
-      const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this._rushConfiguration);
-      await linkManager.createSymlinksForProjects(false);
-    } else {
-      console.log(
-        os.EOL + colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.')
-      );
+    // Skip linking if using workspaces
+    if (!useWorkspaces) {
+      if (!this.options.noLink) {
+        const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this._rushConfiguration);
+        await linkManager.createSymlinksForProjects(false);
+      } else {
+        console.log(
+          os.EOL +
+            colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.')
+        );
+      }
     }
   }
 

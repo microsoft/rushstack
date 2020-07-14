@@ -10,7 +10,6 @@ import {
   CommandLineStringListParameter,
   CommandLineParameterKind
 } from '@rushstack/ts-command-line';
-import { FileSystem } from '@rushstack/node-core-library';
 
 import { Event } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
@@ -23,6 +22,7 @@ import { TaskCollection } from '../../logic/taskRunner/TaskCollection';
 import { Utilities } from '../../utilities/Utilities';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
+import { LastInstallFlag } from '../../api/LastInstallFlag';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -76,9 +76,13 @@ export class BulkScriptAction extends BaseScriptAction {
   }
 
   public run(): Promise<void> {
-    if (!FileSystem.exists(this.rushConfiguration.rushLinkJsonFilename)) {
+    const lastInstallFlag: LastInstallFlag = new LastInstallFlag(
+      this.rushConfiguration.commonTempFolder,
+      LastInstallFlag.getCurrentState(this.rushConfiguration)
+    );
+    if (!lastInstallFlag.isValid()) {
       throw new Error(
-        `File not found: ${this.rushConfiguration.rushLinkJsonFilename}${os.EOL}Did you run "rush link"?`
+        `File not found: ${lastInstallFlag.path}${os.EOL}Did you run "rush install" or "rush update"?`
       );
     }
     this._doBeforeTask();
@@ -101,8 +105,8 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const taskSelector: TaskSelector = new TaskSelector({
       rushConfiguration: this.rushConfiguration,
-      toFlags: this.mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy),
-      fromFlags: this.mergeProjectsWithVersionPolicy(this._fromFlag, this._fromVersionPolicy),
+      toProjects: this.mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy),
+      fromProjects: this.mergeProjectsWithVersionPolicy(this._fromFlag, this._fromVersionPolicy),
       commandToRun: this._commandToRun,
       customParameterValues,
       isQuietMode: isQuietMode,
