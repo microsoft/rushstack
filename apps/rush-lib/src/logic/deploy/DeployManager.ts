@@ -246,21 +246,36 @@ export class DeployManager {
     additionalDependenciesToInclude: string[] = [],
     dependenciesToExclude: string[] = []
   ): Set<string> {
-    console.log();
-    console.log('Additional dependencies to include:', additionalDependenciesToInclude);
-    console.log('Dependencies to exclude:', dependenciesToExclude);
+    // Track packages that got added/removed for reporting purposes
+    const extraIncludedPackageNames: string[] = [];
+    const extraExcludedPackageNames: string[] = [];
 
-    dependenciesToExclude.forEach((patternWithStar) => {
-      allDependencyNames.forEach((dependency) => {
+    for (const patternWithStar of dependenciesToExclude) {
+      for (const dependency of allDependencyNames) {
         if (matchesWithStar(patternWithStar, dependency)) {
-          allDependencyNames.delete(dependency);
+          if (allDependencyNames.delete(dependency)) {
+            extraExcludedPackageNames.push(dependency);
+          }
         }
-      });
-    });
+      }
+    }
 
-    additionalDependenciesToInclude.forEach((dependencyToInclude) => {
-      allDependencyNames.add(dependencyToInclude);
-    });
+    for (const dependencyToInclude of additionalDependenciesToInclude) {
+      if (!allDependencyNames.has(dependencyToInclude)) {
+        allDependencyNames.add(dependencyToInclude);
+        extraIncludedPackageNames.push(dependencyToInclude);
+      }
+    }
+
+    if (extraIncludedPackageNames.length > 0) {
+      extraIncludedPackageNames.sort();
+      console.log('Extra dependencies included by settings: ' + extraIncludedPackageNames.join(', '));
+    }
+
+    if (extraExcludedPackageNames.length > 0) {
+      extraExcludedPackageNames.sort();
+      console.log('Extra dependencies excluded by settings: ' + extraExcludedPackageNames.join(', '));
+    }
 
     return allDependencyNames;
   }
@@ -603,7 +618,7 @@ export class DeployManager {
     }
 
     for (const projectName of includedProjectNamesSet) {
-      console.log(`Analyzing project "${projectName}"`);
+      console.log(colors.cyan('Analyzing project: ') + projectName);
       const project: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(
         projectName
       );
@@ -613,6 +628,8 @@ export class DeployManager {
       }
 
       this._collectFoldersRecursive(project.projectFolder, deployState);
+
+      console.log();
     }
 
     Sort.sortSet(deployState.foldersToCopy);
@@ -724,6 +741,7 @@ export class DeployManager {
       if (overwriteExisting) {
         console.log('Deleting target folder contents because "--overwrite" was specified...');
         FileSystem.ensureEmptyFolder(targetRootFolder);
+        console.log();
       } else {
         throw new Error(
           'The deploy target folder is not empty. You can specify "--overwrite"' +
@@ -751,8 +769,6 @@ export class DeployManager {
       pnpmfileConfiguration: new PnpmfileConfiguration(this._rushConfiguration),
       createArchiveFilePath
     };
-
-    console.log();
 
     await this._prepareDeploymentAsync(deployState);
 

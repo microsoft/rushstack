@@ -12,7 +12,7 @@ declare global {
 export class DeployArchiver {
   public static async createArchiveAsync(deployState: IDeployState): Promise<void> {
     if (deployState.createArchiveFilePath !== undefined) {
-      console.log('Creating archive...\n');
+      console.log('Creating archive...');
       const zip: JSZip = this._getZipOfFolder(deployState.targetRootFolder);
       const zipContent: Buffer = await zip.generateAsync({
         type: 'nodebuffer',
@@ -24,7 +24,6 @@ export class DeployArchiver {
         zipContent
       );
 
-      console.log();
       console.log('Archive created successfully.');
     }
   }
