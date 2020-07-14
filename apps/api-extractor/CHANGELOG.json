@@ -1478,7 +1478,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "(Breaking change) The file extension for API review files has changed from \".api.ts\" to \"api.md\".  For details see https://github.com/Microsoft/web-build-tools/issues/1123"
+            "comment": "(Breaking change) The file extension for API review files has changed from \".api.ts\" to \"api.md\".  For details see https://github.com/microsoft/web-build-tools/issues/1123"
           }
         ]
       }
@@ -1764,7 +1764,7 @@
       "comments": {
         "patch": [
           {
-            "comment": "Fix an issue with rolling up default exports (https://github.com/Microsoft/web-build-tools/issues/1007)"
+            "comment": "Fix an issue with rolling up default exports (https://github.com/microsoft/web-build-tools/issues/1007)"
           }
         ],
         "dependency": [
@@ -2157,7 +2157,7 @@
       "comments": {
         "major": [
           {
-            "comment": "(Breaking change) API Extractor 6 introduces support for TSDoc doc comment syntax!  Please see https://api-extractor.com/ for documentation.  To learn more about the TSDoc standard, check out https://github.com/Microsoft/tsdoc"
+            "comment": "(Breaking change) API Extractor 6 introduces support for TSDoc doc comment syntax!  Please see https://api-extractor.com/ for documentation.  To learn more about the TSDoc standard, check out https://github.com/microsoft/tsdoc"
           }
         ],
         "dependency": [

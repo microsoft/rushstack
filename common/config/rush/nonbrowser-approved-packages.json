@@ -179,6 +179,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "@rushstack/module-minifier-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/node-core-library",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -604,10 +608,14 @@
     },
     {
       "name": "tapable",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": ["libraries"]
     },
     {
       "name": "tar",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "terser",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -665,6 +673,10 @@
     {
       "name": "webpack-dev-server",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "webpack-sources",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "wordwrap",
