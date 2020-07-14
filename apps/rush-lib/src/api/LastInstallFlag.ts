@@ -3,13 +3,50 @@
 
 import * as path from 'path';
 import * as _ from 'lodash';
-import { JsonObject } from '@rushstack/node-core-library';
 
-import { BaseFlagFile } from './BaseFlagFile';
+import { FlagFileBase } from './FlagFileBase';
 import { PackageManagerName } from './packageManager/PackageManager';
 import { RushConfiguration } from './RushConfiguration';
+import { IPackageJson } from '@rushstack/node-core-library';
 
 export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
+
+/**
+ * The interface for the LastInstallFlag JSON file.
+ *
+ * @internal
+ */
+export interface ILastInstallFlagJson {
+  /**
+   * The Node.js version used.
+   */
+  node?: string;
+
+  /**
+   * The package manager used.
+   */
+  packageManager?: PackageManagerName;
+
+  /**
+   * The package manager version used.
+   */
+  packageManagerVersion?: string;
+
+  /**
+   * A package.json associated with the install flag.
+   */
+  packageJson?: IPackageJson;
+
+  /**
+   * The absolute path to the package store used by the package manager.
+   */
+  storePath?: string;
+
+  /**
+   * Whether or not workspaces was used.
+   */
+  workspaces?: boolean;
+}
 
 /**
  * A helper class for managing last-install flags, which are persistent and
@@ -18,13 +55,13 @@ export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
  * it can invalidate the last install.
  * @internal
  */
-export class LastInstallFlag extends BaseFlagFile {
+export class LastInstallFlag extends FlagFileBase<ILastInstallFlagJson> {
   /**
    * Creates a new LastInstall flag
    * @param folderPath - the folder that this flag is managing
    * @param state - optional, the state that should be managed or compared
    */
-  public constructor(folderPath: string, state: JsonObject = {}) {
+  public constructor(folderPath: string, state: ILastInstallFlagJson = {}) {
     super(path.join(folderPath, LAST_INSTALL_FLAG_FILE_NAME), state);
   }
 
@@ -34,8 +71,8 @@ export class LastInstallFlag extends BaseFlagFile {
    * @param rushConfiguration - the configuration of the Rush repo to get the install
    * state from
    */
-  public static getCurrentState(rushConfiguration: RushConfiguration): JsonObject {
-    const currentState: JsonObject = {
+  public static getCurrentState(rushConfiguration: RushConfiguration): ILastInstallFlagJson {
+    const currentState: ILastInstallFlagJson = {
       node: process.versions.node,
       packageManager: rushConfiguration.packageManager,
       packageManagerVersion: rushConfiguration.packageManagerToolVersion
@@ -57,7 +94,7 @@ export class LastInstallFlag extends BaseFlagFile {
    * is not valid.
    */
   public isValid(reportStoreIssues: boolean = false): boolean {
-    const oldState: JsonObject | undefined = this.loadFromFile();
+    const oldState: ILastInstallFlagJson | undefined = this.loadFromFile();
     if (!oldState) {
       return false;
     } else if (_.isEqual(oldState, this.state)) {
@@ -65,7 +102,7 @@ export class LastInstallFlag extends BaseFlagFile {
     }
 
     if (reportStoreIssues) {
-      const pkgManager: PackageManagerName = this.state.packageManager;
+      const pkgManager: PackageManagerName | undefined = this.state.packageManager;
       if (pkgManager === 'pnpm') {
         if (
           // Only throw an error if the package manager hasn't changed from PNPM

@@ -1,26 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, JsonFile, JsonObject } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 
 /**
- * A helper class for managing last-install flags, which are persistent and
- * indicate that something installed in the folder was successfully completed.
- * It also compares state, so that if something like the Node.js version has changed,
- * it can invalidate the last install.
+ * A helper class for managing persistent flag files. It also compares state, so that if
+ * some tracked state has changed, it can invalidate the flag file.
  * @internal
  */
-export abstract class BaseFlagFile {
+export abstract class FlagFileBase<TState> {
   private _path: string;
-  private _state: JsonObject;
+  private _state: TState;
 
   /**
-   * Creates a new BaseFlagFile
+   * Creates a new FlagFileBase
    *
    * @param flagPath - the file containing the flag information
    * @param state - optional, the state that should be managed or compared
    */
-  protected constructor(flagPath: string, state: JsonObject = {}) {
+  protected constructor(flagPath: string, state: TState) {
     this._path = flagPath;
     this._state = state;
   }
@@ -35,7 +33,7 @@ export abstract class BaseFlagFile {
   /**
    * Returns the current flag state
    */
-  protected get state(): JsonObject {
+  protected get state(): TState {
     return this._state;
   }
 
@@ -63,7 +61,7 @@ export abstract class BaseFlagFile {
   /**
    * Load and return the flag from file, or undefined if the flag could not be loaded.
    */
-  protected loadFromFile(): JsonObject | undefined {
+  protected loadFromFile(): TState | undefined {
     try {
       return JsonFile.load(this.path);
     } catch (err) {
