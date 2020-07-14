@@ -13,11 +13,11 @@
     "build": "gulp test --clean"
   },
   "peerDependencies": {
-    "webpack": "^4.31.0",
-    "@types/webpack": "*"
+    "webpack": "^4.31.0"
   },
   "optionalPeerDependencies": {
-    "@rushstack/set-webpack-public-path-plugin": "^2.3.4"
+    "@rushstack/set-webpack-public-path-plugin": "^2.3.4",
+    "@types/webpack": "*"
   },
   "dependencies": {
     "@types/node": "10.17.13",
