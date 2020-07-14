@@ -565,10 +565,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       args.push('--link-workspace-packages', 'false');
 
       // "<package>..." selects the specified package and all direct and indirect dependencies
-      if (this.options.toProjects) {
-        for (const toProject of this.options.toProjects) {
-          args.push('--filter', `${toProject.packageName}...`);
-        }
+      for (const toProject of this.options.toProjects) {
+        args.push('--filter', `${toProject.packageName}...`);
       }
     }
   }
