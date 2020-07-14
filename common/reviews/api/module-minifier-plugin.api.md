@@ -48,7 +48,7 @@ export const IDENTIFIER_TRAILING_DIGITS: string;
 export interface IExtendedModule extends webpack.compilation.Module, webpack.Module {
     id: string | number | null;
     identifier(): string;
-    readableIdentifier(requestShortener: webpack.compilation.RequestShortener): string;
+    readableIdentifier(requestShortener: unknown): string;
     resource?: string;
     skipMinification?: boolean;
 }
