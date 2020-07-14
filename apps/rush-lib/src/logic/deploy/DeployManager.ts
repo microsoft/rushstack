@@ -24,6 +24,7 @@ import {
   NewlineKind,
   Text
 } from '@rushstack/node-core-library';
+import { DeployArchiver } from './DeployArchiver';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -81,7 +82,7 @@ interface IFolderInfo {
 /**
  * This object tracks DeployManager state during a deployment.
  */
-interface IDeployState {
+export interface IDeployState {
   scenarioFilePath: string;
 
   /**
@@ -116,6 +117,11 @@ interface IDeployState {
   symlinkAnalyzer: SymlinkAnalyzer;
 
   pnpmfileConfiguration: PnpmfileConfiguration;
+
+  /**
+   * The desired path to be used when archiving the target folder. Supported file extensions: .zip.
+   */
+  createArchiveFilePath: string | undefined;
 }
 
 /**
@@ -647,6 +653,18 @@ export class DeployManager {
 
       await this._makeBinLinksAsync(deployState);
     }
+    if (deployState.scenarioConfiguration.json.folderToCopy !== undefined) {
+      const sourceFolderPath: string = path.resolve(
+        this._rushConfiguration.rushJsonFolder,
+        deployState.scenarioConfiguration.json.folderToCopy
+      );
+      FileSystem.copyFiles({
+        sourcePath: sourceFolderPath,
+        destinationPath: deployState.targetRootFolder,
+        alreadyExistsBehavior: AlreadyExistsBehavior.Error
+      });
+    }
+    await DeployArchiver.createArchiveAsync(deployState);
   }
 
   /**
@@ -656,7 +674,8 @@ export class DeployManager {
     mainProjectName: string | undefined,
     scenarioName: string | undefined,
     overwriteExisting: boolean,
-    targetFolderParameter: string | undefined
+    targetFolderParameter: string | undefined,
+    createArchiveFilePath: string | undefined
   ): Promise<void> {
     const scenarioFilePath: string = DeployScenarioConfiguration.getConfigFilePath(
       scenarioName,
@@ -717,6 +736,11 @@ export class DeployManager {
       }
     }
 
+    // If create archive is set, ensure it has a legal extension
+    if (createArchiveFilePath && path.extname(createArchiveFilePath) !== '.zip') {
+      throw new Error('Create-archive currently only supports creation of zip files.');
+    }
+
     const deployState: IDeployState = {
       scenarioFilePath,
       scenarioConfiguration,
@@ -726,7 +750,8 @@ export class DeployManager {
       foldersToCopy: new Set(),
       folderInfosByPath: new Map(),
       symlinkAnalyzer: new SymlinkAnalyzer(),
-      pnpmfileConfiguration: new PnpmfileConfiguration(this._rushConfiguration)
+      pnpmfileConfiguration: new PnpmfileConfiguration(this._rushConfiguration),
+      createArchiveFilePath
     };
 
     console.log();

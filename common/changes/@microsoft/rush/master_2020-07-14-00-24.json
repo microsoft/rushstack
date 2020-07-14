@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a new setting \"folderToCopy\" and new command-line parameter \"--create-archive\" for use with \"rush deploy\"",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "JoePomm@users.noreply.github.com"
+}
