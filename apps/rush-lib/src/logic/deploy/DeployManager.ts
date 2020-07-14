@@ -734,7 +734,9 @@ export class DeployManager {
 
     // If create archive is set, ensure it has a legal extension
     if (createArchiveFilePath && path.extname(createArchiveFilePath) !== '.zip') {
-      throw new Error('Create-archive currently only supports creation of zip files.');
+      throw new Error(
+        'The "--create-archive" parameter currently only supports archives with the .zip file extension.'
+      );
     }
 
     const deployState: IDeployState = {

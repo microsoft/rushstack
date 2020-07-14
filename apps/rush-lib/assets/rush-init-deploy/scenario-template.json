@@ -58,8 +58,8 @@
 
   /**
    * If this path is specified, then after "rush deploy", recursively copy the files from this folder to
-   * the deployment target folder (common/deploy). This can be used to provide
-   * additional configuration files or scripts needed by the server when deploying.
+   * the deployment target folder (common/deploy). This can be used to provide additional configuration files
+   * or scripts needed by the server when deploying. The path is resolved relative to the repository root.
    */
   //  "folderToCopy": "repo-tools/assets/deploy-config",
 
