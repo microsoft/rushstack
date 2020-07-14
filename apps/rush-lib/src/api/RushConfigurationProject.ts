@@ -52,7 +52,7 @@ export class RushConfigurationProject {
   private _shouldPublish: boolean;
   private _skipRushCheck: boolean;
   private _downstreamDependencyProjects: string[];
-  private _localDependencyProjects: Map<string, RushConfigurationProject> | undefined;
+  private _localDependencyProjects: ReadonlyArray<RushConfigurationProject> | undefined;
   private readonly _rushConfiguration: RushConfiguration;
 
   /** @internal */
@@ -217,14 +217,14 @@ export class RushConfigurationProject {
   /**
    * A map of projects within the Rush configuration which are directly depended on by this project
    */
-  public get localDependencyProjects(): Map<string, RushConfigurationProject> {
+  public get localDependencyProjects(): ReadonlyArray<RushConfigurationProject> {
     if (!this._localDependencyProjects) {
-      this._localDependencyProjects = new Map<string, RushConfigurationProject>();
-      this._setLocalDependencyProjects(this.packageJson.dependencies);
-      this._setLocalDependencyProjects(this.packageJson.devDependencies);
-      this._setLocalDependencyProjects(this.packageJson.optionalDependencies);
+      this._localDependencyProjects = [
+        ...this._getLocalDependencyProjects(this.packageJson.dependencies),
+        ...this._getLocalDependencyProjects(this.packageJson.devDependencies),
+        ...this._getLocalDependencyProjects(this.packageJson.optionalDependencies)
+      ];
     }
-
     return this._localDependencyProjects;
   }
 
@@ -327,12 +327,11 @@ export class RushConfigurationProject {
     return isMain;
   }
 
-  private _setLocalDependencyProjects(dependencies: IPackageJsonDependencyTable = {}): void {
-    for (const dependency in dependencies) {
-      if (!dependencies[dependency]) {
-        continue;
-      }
-
+  private _getLocalDependencyProjects(
+    dependencies: IPackageJsonDependencyTable = {}
+  ): RushConfigurationProject[] {
+    const localDependencyProjects: RushConfigurationProject[] = [];
+    for (const dependency of Object.keys(dependencies)) {
       // Skip if we can't find the local project or it's a cyclic dependency
       const localProject: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(
         dependency
@@ -347,14 +346,15 @@ export class RushConfigurationProject {
           case DependencySpecifierType.Version:
           case DependencySpecifierType.Range:
             if (semver.satisfies(localProject.packageJson.version, dependencySpecifier.versionSpecifier)) {
-              this.localDependencyProjects!.set(dependency, localProject);
+              localDependencyProjects.push(localProject);
             }
             break;
           case DependencySpecifierType.Workspace:
-            this.localDependencyProjects!.set(dependency, localProject);
+            localDependencyProjects.push(localProject);
             break;
         }
       }
     }
+    return localDependencyProjects;
   }
 }

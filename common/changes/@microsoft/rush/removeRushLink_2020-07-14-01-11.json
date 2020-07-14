@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Remove support for rush-link.json",
+      "comment": "Replace rush-link.json with a new API which keeps the local dependency tree in memory, and remove support for 'rush link' and 'rush unlink' when using workspaces.",
       "type": "minor"
     }
   ],

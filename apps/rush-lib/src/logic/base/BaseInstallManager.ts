@@ -14,7 +14,6 @@ import { FileSystem, JsonFile, PosixModeBits, NewlineKind } from '@rushstack/nod
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
 import { AsyncRecycler } from '../../utilities/AsyncRecycler';
-import { BaseLinkManager } from './BaseLinkManager';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { Git } from '../Git';
@@ -29,7 +28,6 @@ import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import { PolicyValidator } from '../policy/PolicyValidator';
-import { LinkManagerFactory } from '../LinkManagerFactory';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 export interface IInstallManagerOptions {
@@ -240,19 +238,6 @@ export abstract class BaseInstallManager {
       }
 
       console.log('');
-    }
-
-    // Skip linking if using workspaces
-    if (!useWorkspaces) {
-      if (!this.options.noLink) {
-        const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this._rushConfiguration);
-        await linkManager.createSymlinksForProjects(false);
-      } else {
-        console.log(
-          os.EOL +
-            colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.')
-        );
-      }
     }
   }
 

@@ -511,11 +511,15 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       return;
     }
 
+    const localDependencyProjectNames: Set<string> = new Set<string>(
+      project.localDependencyProjects.map((x) => x.packageName)
+    );
+
     // Loop through non-local dependencies. Skip peer dependencies because they're only a constraint
     const dependencies: PackageJsonDependency[] = [
       ...project.packageJsonEditor.dependencyList,
       ...project.packageJsonEditor.devDependencyList
-    ].filter((x) => x.dependencyType !== DependencyType.Peer && !project.localDependencyProjects.has(x.name));
+    ].filter((x) => x.dependencyType !== DependencyType.Peer && !localDependencyProjectNames.has(x.name));
 
     for (const { name, dependencyType } of dependencies) {
       // read the version number from the shrinkwrap entry

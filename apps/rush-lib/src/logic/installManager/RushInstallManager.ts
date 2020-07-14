@@ -33,6 +33,8 @@ import { LastLinkFlag } from '../../api/LastLinkFlag';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { PurgeManager } from '../PurgeManager';
+import { LinkManagerFactory } from '../LinkManagerFactory';
+import { BaseLinkManager } from '../base/BaseLinkManager';
 
 /**
  * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.
@@ -64,6 +66,22 @@ export class RushInstallManager extends BaseInstallManager {
     super(rushConfiguration, rushGlobalFolder, purgeManager, options);
 
     this._commonTempLinkFlag = new LastLinkFlag(this.rushConfiguration.commonTempFolder);
+  }
+
+  /**
+   * @override
+   */
+  public async doInstall(): Promise<void> {
+    await super.doInstall();
+
+    if (!this.options.noLink) {
+      const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
+      await linkManager.createSymlinksForProjects(false);
+    } else {
+      console.log(
+        os.EOL + colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.')
+      );
+    }
   }
 
   /**

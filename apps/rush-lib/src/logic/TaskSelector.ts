@@ -72,7 +72,7 @@ export class TaskSelector {
       for (const [, dependencyProject] of dependencies) {
         this._taskCollection.addDependencies(
           ProjectTask.getTaskName(dependencyProject),
-          [...dependencyProject.localDependencyProjects.values()].map((x) => ProjectTask.getTaskName(x))
+          dependencyProject.localDependencyProjects.map((x) => ProjectTask.getTaskName(x))
         );
       }
     }
@@ -97,7 +97,7 @@ export class TaskSelector {
       for (const [, dependentProject] of dependents) {
         this._taskCollection.addDependencies(
           ProjectTask.getTaskName(dependentProject),
-          [...dependentProject.localDependencyProjects.values()]
+          dependentProject.localDependencyProjects
             .filter((dep) => dependents.has(dep.packageName))
             .map((x) => ProjectTask.getTaskName(x))
         );
@@ -116,7 +116,7 @@ export class TaskSelector {
       for (const project of this._options.rushConfiguration.projects) {
         this._taskCollection.addDependencies(
           ProjectTask.getTaskName(project),
-          [...project.localDependencyProjects.values()].map((x) => ProjectTask.getTaskName(x))
+          project.localDependencyProjects.map((x) => ProjectTask.getTaskName(x))
         );
       }
     }
@@ -132,7 +132,7 @@ export class TaskSelector {
     if (!result.has(project.packageName)) {
       result.set(project.packageName, project);
 
-      for (const [, dependencyProject] of project.localDependencyProjects) {
+      for (const dependencyProject of project.localDependencyProjects) {
         this._collectAllDependencies(dependencyProject, result);
       }
     }
@@ -161,12 +161,12 @@ export class TaskSelector {
     this._dependentList = new Map<string, Set<RushConfigurationProject>>();
 
     for (const project of this._options.rushConfiguration.projects) {
-      for (const [dependencyName] of project.localDependencyProjects) {
-        if (!this._dependentList.has(dependencyName)) {
-          this._dependentList.set(dependencyName, new Set<RushConfigurationProject>());
+      for (const { packageName } of project.localDependencyProjects) {
+        if (!this._dependentList.has(packageName)) {
+          this._dependentList.set(packageName, new Set<RushConfigurationProject>());
         }
 
-        this._dependentList.get(dependencyName)!.add(project);
+        this._dependentList.get(packageName)!.add(project);
       }
     }
   }
