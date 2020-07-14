@@ -61,7 +61,7 @@
    * the deployment target folder (common/deploy). This can be used to provide
    * additional configuration files or scripts needed by the server when deploying.
    */
-  //  "folderNameToCopy": "repo-tools/assets/deploy-config",
+  //  "folderToCopy": "repo-tools/assets/deploy-config",
 
   /**
    * Customize how Rush projects are processed during deployment.

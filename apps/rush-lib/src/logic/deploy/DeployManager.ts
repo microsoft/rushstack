@@ -599,10 +599,10 @@ export class DeployManager {
 
       await this._makeBinLinksAsync(deployState);
     }
-    if (deployState.scenarioConfiguration.json.folderNameToCopy !== undefined) {
+    if (deployState.scenarioConfiguration.json.folderToCopy !== undefined) {
       const sourceFolderPath: string = path.resolve(
         this._rushConfiguration.rushJsonFolder,
-        deployState.scenarioConfiguration.json.folderNameToCopy
+        deployState.scenarioConfiguration.json.folderToCopy
       );
       FileSystem.copyFiles({
         sourcePath: sourceFolderPath,
