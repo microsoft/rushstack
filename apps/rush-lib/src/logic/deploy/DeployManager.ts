@@ -185,18 +185,14 @@ export class DeployManager {
     }
 
     if (sourceFolderInfo && sourceFolderInfo.isRushProject) {
-      const projectSettings: IDeployScenarioProjectJson | undefined =
-        sourceFolderInfo && sourceFolderInfo.projectSettings;
-      const additionalDependenciesToInclude: string[] | undefined =
-        projectSettings && projectSettings.additionalDependenciesToInclude;
-      const dependenciesToExclude: string[] | undefined =
-        projectSettings && projectSettings.dependenciesToExclude;
-
-      this._applyDependencyFilters(
-        dependencyNamesToProcess,
-        additionalDependenciesToInclude,
-        dependenciesToExclude
-      );
+      const projectSettings: IDeployScenarioProjectJson | undefined = sourceFolderInfo.projectSettings;
+      if (projectSettings) {
+        this._applyDependencyFilters(
+          dependencyNamesToProcess,
+          projectSettings.additionalDependenciesToInclude,
+          projectSettings.dependenciesToExclude
+        );
+      }
     }
 
     for (const dependencyPackageName of dependencyNamesToProcess) {
