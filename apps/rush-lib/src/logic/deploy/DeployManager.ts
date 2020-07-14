@@ -162,25 +162,25 @@ export class DeployManager {
 
     // Union of keys from regular dependencies, peerDependencies, optionalDependencies
     // (and possibly devDependencies if includeDevDependencies=true)
-    const allDependencyNames: Set<string> = new Set<string>();
+    const dependencyNamesToProcess: Set<string> = new Set<string>();
 
     // Just the keys from optionalDependencies and peerDependencies
     const optionalDependencyNames: Set<string> = new Set<string>();
 
     for (const name of Object.keys(packageJson.dependencies || {})) {
-      allDependencyNames.add(name);
+      dependencyNamesToProcess.add(name);
     }
     if (deployState.scenarioConfiguration.json.includeDevDependencies) {
       for (const name of Object.keys(packageJson.devDependencies || {})) {
-        allDependencyNames.add(name);
+        dependencyNamesToProcess.add(name);
       }
     }
     for (const name of Object.keys(packageJson.peerDependencies || {})) {
-      allDependencyNames.add(name);
+      dependencyNamesToProcess.add(name);
       optionalDependencyNames.add(name); // consider peers optional, since they are so frequently broken
     }
     for (const name of Object.keys(packageJson.optionalDependencies || {})) {
-      allDependencyNames.add(name);
+      dependencyNamesToProcess.add(name);
       optionalDependencyNames.add(name);
     }
 
@@ -193,13 +193,13 @@ export class DeployManager {
         projectSettings && projectSettings.dependenciesToExclude;
 
       this._applyDependencyFilters(
-        allDependencyNames,
+        dependencyNamesToProcess,
         additionalDependenciesToInclude,
         dependenciesToExclude
       );
     }
 
-    for (const dependencyPackageName of allDependencyNames) {
+    for (const dependencyPackageName of dependencyNamesToProcess) {
       try {
         this._traceResolveDependency(dependencyPackageName, packageJsonRealFolderPath, deployState);
       } catch (resolveErr) {
