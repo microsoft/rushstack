@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.29.0",
+      "tag": "@microsoft/rush_v5.29.0",
+      "date": "Tue, 14 Jul 2020 05:20:56 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Give \\\"rush deploy\\\" the ability to select a subset of dependencies to copy over (#1978)"
+          },
+          {
+            "comment": "Fix an issue where package binaries where not created by \"rush deploy\" (#1982)"
+          },
+          {
+            "comment": "Add a new setting \"folderToCopy\" and new command-line parameter \"--create-archive\" for use with \"rush deploy\""
+          }
+        ]
+      }
+    },
+    {
       "version": "5.28.0",
       "tag": "@microsoft/rush_v5.28.0",
       "date": "Wed, 08 Jul 2020 06:56:47 GMT",
