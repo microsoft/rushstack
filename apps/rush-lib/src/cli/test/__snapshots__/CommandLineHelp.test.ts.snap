@@ -408,7 +408,8 @@ Optional arguments:
                         You will need to run \\"rush link\\" manually. This flag 
                         is useful for automated builds that want to report 
                         stages individually or perform extra operations in 
-                        between the two stages.
+                        between the two stages. This flag is not supported 
+                        when using workspaces.
   --network-concurrency COUNT
                         If specified, limits the maximum number of concurrent 
                         network requests. This is useful when troubleshooting 
@@ -689,7 +690,8 @@ Optional arguments:
                         You will need to run \\"rush link\\" manually. This flag 
                         is useful for automated builds that want to report 
                         stages individually or perform extra operations in 
-                        between the two stages.
+                        between the two stages. This flag is not supported 
+                        when using workspaces.
   --network-concurrency COUNT
                         If specified, limits the maximum number of concurrent 
                         network requests. This is useful when troubleshooting 

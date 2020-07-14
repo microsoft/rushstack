@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as colors from 'colors';
 import * as path from 'path';
 import { FileSystem } from '@rushstack/node-core-library';
 
@@ -8,6 +9,7 @@ import { RushConfiguration } from '../api/RushConfiguration';
 import { Utilities } from '../utilities/Utilities';
 import { PnpmProjectDependencyManifest } from './pnpm/PnpmProjectDependencyManifest';
 import { LastLinkFlag } from '../api/LastLinkFlag';
+import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 
 /**
  * This class implements the logic for "rush unlink"
@@ -26,8 +28,24 @@ export class UnlinkManager {
    * project/.rush/temp/shrinkwrap-deps.json files
    *
    * Returns true if anything was deleted.
+   *
+   * @param force - (default false) Whether or not the unlink should be forced
    */
-  public unlink(): boolean {
+  public unlink(force: boolean = false): boolean {
+    const useWorkspaces: boolean =
+      this._rushConfiguration.packageManager === 'pnpm' &&
+      this._rushConfiguration.pnpmOptions &&
+      this._rushConfiguration.pnpmOptions.useWorkspaces;
+    if (!force && useWorkspaces) {
+      console.log(
+        colors.red(
+          '"rush unlink" is not supported when workspaces is enabled. Run "rush purge" to remove' +
+            ' links between projects.'
+        )
+      );
+      throw new AlreadyReportedError();
+    }
+
     this._lastLinkFlag.clear();
     return this._deleteProjectFiles();
   }

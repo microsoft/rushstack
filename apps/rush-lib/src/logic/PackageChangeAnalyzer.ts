@@ -145,9 +145,12 @@ export class PackageChangeAnalyzer {
           .replace(/\\/g, '/');
 
         if (!FileSystem.exists(dependencyManifestFilePath)) {
+          const useWorkspaces: boolean =
+            this._rushConfiguration.pnpmOptions && this._rushConfiguration.pnpmOptions.useWorkspaces;
           throw new Error(
             `A project dependency file (${relativeDependencyManifestFilePath}) is missing. You may need to run ` +
-              '"rush unlink" and "rush link".'
+              (useWorkspaces ? '"rush install"' : '"rush unlink" and "rush link"') +
+              '.'
           );
         }
 
