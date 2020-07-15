@@ -2,6 +2,18 @@
   "name": "@rushstack/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "2.4.30",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v2.4.30",
+      "date": "Wed, 15 Jul 2020 15:09:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix specification of optional peerDependencies."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.4.29",
       "tag": "@rushstack/set-webpack-public-path-plugin_v2.4.29",
       "date": "Fri, 03 Jul 2020 15:09:04 GMT",
