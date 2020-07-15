@@ -2,15 +2,18 @@
 // See LICENSE in the project root for license information.
 
 import * as colors from 'colors';
+import * as path from 'path';
 import * as os from 'os';
 
+import { FileSystem } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { PurgeManager } from '../../logic/PurgeManager';
-import { UnlinkManager } from '../../logic/UnlinkManager';
+import { Utilities } from '../../utilities/Utilities';
+import { PnpmProjectDependencyManifest } from '../../logic/pnpm/PnpmProjectDependencyManifest';
 
 export class PurgeAction extends BaseRushAction {
   private _unsafeParameter: CommandLineFlagParameter;
@@ -41,10 +44,9 @@ export class PurgeAction extends BaseRushAction {
     return Promise.resolve().then(() => {
       const stopwatch: Stopwatch = Stopwatch.start();
 
-      const unlinkManager: UnlinkManager = new UnlinkManager(this.rushConfiguration);
       const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration, this.rushGlobalFolder);
 
-      unlinkManager.unlink(/*force:*/ true);
+      this._deleteProjectFiles();
 
       if (this._unsafeParameter.value!) {
         purgeManager.purgeUnsafe();
@@ -61,5 +63,36 @@ export class PurgeAction extends BaseRushAction {
           )
       );
     });
+  }
+
+  /**
+   * Delete:
+   *  - all the node_modules symlinks of configured Rush projects
+   *  - all of the project/.rush/temp/shrinkwrap-deps.json files of configured Rush projects
+   *
+   * Returns true if anything was deleted
+   * */
+  private _deleteProjectFiles(): boolean {
+    let didDeleteAnything: boolean = false;
+
+    for (const rushProject of this.rushConfiguration.projects) {
+      const localModuleFolder: string = path.join(rushProject.projectFolder, 'node_modules');
+      if (FileSystem.exists(localModuleFolder)) {
+        console.log(`Purging ${localModuleFolder}`);
+        Utilities.dangerouslyDeletePath(localModuleFolder);
+        didDeleteAnything = true;
+      }
+
+      const projectDependencyManifestFilePath: string = PnpmProjectDependencyManifest.getFilePathForProject(
+        rushProject
+      );
+      if (FileSystem.exists(projectDependencyManifestFilePath)) {
+        console.log(`Deleting ${projectDependencyManifestFilePath}`);
+        FileSystem.deleteFile(projectDependencyManifestFilePath);
+        didDeleteAnything = true;
+      }
+    }
+
+    return didDeleteAnything;
   }
 }
