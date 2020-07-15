@@ -293,6 +293,8 @@ export interface ITestActionContext extends IActionContext<TestHooks, ITestActio
 // @public (undocumented)
 export interface ITestActionProperties {
     // (undocumented)
+    productionFlag: boolean;
+    // (undocumented)
     watchMode: boolean;
 }
 

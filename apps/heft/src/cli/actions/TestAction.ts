@@ -20,6 +20,7 @@ export class TestHooks extends ActionHooksBase<ITestActionProperties> {
  */
 export interface ITestActionProperties {
   watchMode: boolean;
+  productionFlag: boolean;
 }
 
 /**
@@ -60,7 +61,8 @@ export class TestAction extends BuildAction {
     const testActionContext: ITestActionContext = {
       hooks: new TestHooks(),
       properties: {
-        watchMode: buildActionContext.properties.watchMode
+        watchMode: buildActionContext.properties.watchMode,
+        productionFlag: buildActionContext.properties.productionFlag
       }
     };
     const shouldBuild: boolean = !this._noBuildFlag.value;
