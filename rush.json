@@ -522,14 +522,14 @@
       "shouldPublish": false
     },
     {
-      "packageName": "heft-test-01",
-      "projectFolder": "build-tests/heft-test-01",
+      "packageName": "heft-node-test",
+      "projectFolder": "build-tests/heft-node-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
     {
-      "packageName": "heft-test-webpack",
-      "projectFolder": "build-tests/heft-test-webpack",
+      "packageName": "heft-webpack-test",
+      "projectFolder": "build-tests/heft-webpack-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
