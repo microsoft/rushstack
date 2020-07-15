@@ -45,12 +45,7 @@ export { EventHooks, Event } from './api/EventHooks';
 
 export { ChangeManager } from './api/ChangeManager';
 
-export { FlagFileBase as _FlagFileBase } from './api/FlagFileBase';
-
-export {
-  ILastInstallFlagJson as _ILastInstallFlagJson,
-  LastInstallFlag as _LastInstallFlag
-} from './api/LastInstallFlag';
+export { LastInstallFlag as _LastInstallFlag } from './api/LastInstallFlag';
 
 export {
   VersionPolicyDefinitionName,

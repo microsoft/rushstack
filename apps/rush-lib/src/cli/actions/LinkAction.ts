@@ -1,31 +1,26 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import * as colors from 'colors';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { LinkManagerFactory } from '../../logic/LinkManagerFactory';
-import { BaseLinkManager } from '../../logic/base/BaseLinkManager';
 import { BaseRushAction } from './BaseRushAction';
+import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 export class LinkAction extends BaseRushAction {
-  private _force: CommandLineFlagParameter;
-
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'link',
       summary: 'Create node_modules symlinks for all projects',
       documentation:
-        'Create node_modules symlinks for all projects.  This operation is normally performed' +
-        ' automatically as part of "rush install" or "rush update".  You should only need to use "rush link"' +
-        ' if you performed "rush unlink" for some reason, or if you specified the "--no-link" option' +
-        ' for "rush install" or "rush update".',
+        '(DEPRECATED) Create node_modules symlinks for all projects. This command is deprecated. To restore ' +
+        'project node_modules folders, run "rush install" or "rush update".',
       parser
     });
   }
 
   protected onDefineParameters(): void {
-    this._force = this.defineFlagParameter({
+    this.defineFlagParameter({
       parameterLongName: '--force',
       parameterShortName: '-f',
       description:
@@ -35,7 +30,12 @@ export class LinkAction extends BaseRushAction {
   }
 
   protected async run(): Promise<void> {
-    const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
-    await linkManager.createSymlinksForProjects(this._force.value);
+    console.log(
+      colors.red(
+        'The "rush link" command has been deprecated. No action has been taken. Run "rush install" or ' +
+          '"rush update" to restore project node_modules folders.'
+      )
+    );
+    throw new AlreadyReportedError();
   }
 }

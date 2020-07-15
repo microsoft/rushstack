@@ -29,38 +29,6 @@ import { PnpmShrinkwrapFile, IPnpmShrinkwrapImporterYaml } from '../pnpm/PnpmShr
  */
 export class WorkspaceInstallManager extends BaseInstallManager {
   /**
-   * @override
-   */
-  public async doInstall(): Promise<void> {
-    // Workspaces do not support the no-link option, so throw if this is passed
-    if (this.options.noLink) {
-      console.log();
-      console.log(
-        colors.red(
-          'The "--no-link" option was provided but is not supported when using workspaces. Run the command again ' +
-            'without specifying this argument.'
-        )
-      );
-      throw new AlreadyReportedError();
-    }
-
-    await super.doInstall();
-
-    // Per-project manifests can only be generated for PNPM currently
-    if (this.rushConfiguration.packageManager === 'pnpm' && this.rushConfiguration.pnpmOptions) {
-      // Base it off the temp shrinkwrap, as this was the most recently completed install
-      const tempShrinkwrapFile: PnpmShrinkwrapFile = PnpmShrinkwrapFile.loadFromFile(
-        this.rushConfiguration.tempShrinkwrapFilename,
-        this.rushConfiguration.pnpmOptions
-      )!;
-
-      for (const project of this.rushConfiguration.projects) {
-        this.createPerProjectManifest(tempShrinkwrapFile, project);
-      }
-    }
-  }
-
-  /**
    * Regenerates the common/temp/package.json and related workspace files.
    * If shrinkwrapFile is provided, this function also validates whether it contains
    * everything we need to install and returns true if so; in all other cases,
@@ -428,6 +396,21 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     console.log('');
   }
 
+  protected async postInstallAsync(): Promise<void> {
+    // Per-project manifests can only be generated for PNPM currently
+    if (this.rushConfiguration.packageManager === 'pnpm' && this.rushConfiguration.pnpmOptions) {
+      // Base it off the temp shrinkwrap, as this was the most recently completed install
+      const tempShrinkwrapFile: PnpmShrinkwrapFile = PnpmShrinkwrapFile.loadFromFile(
+        this.rushConfiguration.tempShrinkwrapFilename,
+        this.rushConfiguration.pnpmOptions
+      )!;
+
+      await Promise.all(
+        this.rushConfiguration.projects.map((x) => this._createPerProjectManifestAsync(tempShrinkwrapFile, x))
+      );
+    }
+  }
+
   /**
    * Preferred versions are supported using pnpmfile by substituting any dependency version specifier
    * for the preferred version during package resolution. This is only done if the preferred version range
@@ -473,10 +456,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     });
   }
 
-  protected createPerProjectManifest(
+  protected _createPerProjectManifestAsync(
     pnpmShrinkwrapFile: PnpmShrinkwrapFile,
     project: RushConfigurationProject
-  ): void {
+  ): Promise<void> {
     const pnpmProjectDependencyManifest: PnpmProjectDependencyManifest = new PnpmProjectDependencyManifest({
       pnpmShrinkwrapFile,
       project
@@ -486,8 +469,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (
       this.rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection
     ) {
-      pnpmProjectDependencyManifest.deleteIfExists();
-      return;
+      return pnpmProjectDependencyManifest.deleteIfExistsAsync();
     }
 
     // Obtain the workspace importer from the shrinkwrap, which lists resolved dependencies
@@ -507,8 +489,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           `Cannot find shrinkwrap entry using importer key for workspace project: ${importerKey}`
         );
       }
-      pnpmProjectDependencyManifest.deleteIfExists();
-      return;
+      return pnpmProjectDependencyManifest.deleteIfExistsAsync();
     }
 
     const localDependencyProjectNames: Set<string> = new Set<string>(
@@ -553,7 +534,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       });
     }
 
-    pnpmProjectDependencyManifest.save();
+    return pnpmProjectDependencyManifest.saveAsync();
   }
 
   /**

@@ -5,6 +5,7 @@
 ```ts
 
 import { IPackageJson } from '@rushstack/node-core-library';
+import { JsonObject } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
 
 // @public
@@ -123,17 +124,6 @@ export class ExperimentsConfiguration {
     readonly configuration: Readonly<IExperimentsJson>;
     }
 
-// @internal
-export abstract class _FlagFileBase<TState> {
-    protected constructor(flagPath: string, state: TState);
-    clear(): void;
-    create(): void;
-    abstract isValid(): boolean;
-    protected loadFromFile(): TState | undefined;
-    readonly path: string;
-    protected readonly state: TState;
-    }
-
 // @public
 export interface IConfigurationEnvironment {
     [environmentVariableName: string]: IConfigurationEnvironmentVariable;
@@ -150,16 +140,6 @@ export interface IExperimentsJson {
     legacyIncrementalBuildDependencyDetection?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
-}
-
-// @internal
-export interface _ILastInstallFlagJson {
-    node?: string;
-    packageJson?: IPackageJson;
-    packageManager?: PackageManagerName;
-    packageManagerVersion?: string;
-    storePath?: string;
-    workspaces?: boolean;
 }
 
 // @public
@@ -212,11 +192,15 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
 }
 
 // @internal
-export class _LastInstallFlag extends _FlagFileBase<_ILastInstallFlagJson> {
-    constructor(folderPath: string, state?: _ILastInstallFlagJson);
-    static getCurrentState(rushConfiguration: RushConfiguration): _ILastInstallFlagJson;
-    isValid(reportStoreIssues?: boolean): boolean;
-}
+export class _LastInstallFlag {
+    constructor(folderPath: string, state?: JsonObject);
+    checkValidAndReportStoreIssues(): boolean;
+    clear(): void;
+    create(): void;
+    static getCommonTempFlag(rushConfiguration: RushConfiguration): _LastInstallFlag;
+    isValid(): boolean;
+    readonly path: string;
+    }
 
 // @beta
 export class LockStepVersionPolicy extends VersionPolicy {

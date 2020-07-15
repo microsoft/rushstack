@@ -67,10 +67,7 @@ function getCommandLineParserInstance(repoName: string, taskName: string): IPars
 
   // Bulk tasks are hard-coded to expect install to have been completed. So, ensure the last-install.flag
   // file exists and is valid
-  const lastInstallFlag: LastInstallFlag = new LastInstallFlag(
-    path.resolve(startPath, 'common', 'temp'),
-    LastInstallFlag.getCurrentState(parser.rushConfiguration)
-  );
+  const lastInstallFlag: LastInstallFlag = LastInstallFlag.getCommonTempFlag(parser.rushConfiguration);
   lastInstallFlag.create();
 
   // Mock the command

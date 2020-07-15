@@ -8,7 +8,7 @@ import { JsonFile, IPackageJson } from '@rushstack/node-core-library';
 import { BasePackage, IRushTempPackageJson } from '../base/BasePackage';
 
 /**
- * Used by the "rush link" algorithm when doing NPM package resolution.
+ * Used by the linking algorithm when doing NPM package resolution.
  */
 export interface IResolveOrCreateResult {
   found: BasePackage | undefined;

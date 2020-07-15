@@ -136,7 +136,6 @@ export class PackageJsonUpdater {
       debug: debugInstall,
       allowShrinkwrapUpdates: true,
       bypassPolicy: false,
-      noLink: false,
       fullUpgrade: false,
       recheckShrinkwrap: false,
       networkConcurrency: undefined,

@@ -260,9 +260,9 @@ export class PnpmLinkManager extends BaseLinkManager {
       !this._rushConfiguration.experimentsConfiguration.configuration
         .legacyIncrementalBuildDependencyDetection
     ) {
-      pnpmProjectDependencyManifest.save();
+      await pnpmProjectDependencyManifest.saveAsync();
     } else {
-      pnpmProjectDependencyManifest.deleteIfExists();
+      await pnpmProjectDependencyManifest.deleteIfExistsAsync();
     }
 
     // Also symlink the ".bin" folder

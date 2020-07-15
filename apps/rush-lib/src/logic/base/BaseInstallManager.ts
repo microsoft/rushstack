@@ -48,11 +48,6 @@ export interface IInstallManagerOptions {
   bypassPolicy: boolean;
 
   /**
-   * Whether to skip linking, i.e. require "rush link" to be done manually later.
-   */
-  noLink: boolean;
-
-  /**
    * Whether to delete the shrinkwrap file before installation, i.e. so that all dependencies
    * will be upgraded to the latest SemVer-compatible version.
    */
@@ -118,10 +113,7 @@ export abstract class BaseInstallManager {
     this._installRecycler = purgeManager.commonTempFolderRecycler;
     this._options = options;
 
-    this._commonTempInstallFlag = new LastInstallFlag(
-      this._rushConfiguration.commonTempFolder,
-      LastInstallFlag.getCurrentState(rushConfiguration)
-    );
+    this._commonTempInstallFlag = LastInstallFlag.getCommonTempFlag(rushConfiguration);
   }
 
   protected get rushConfiguration(): RushConfiguration {
@@ -176,7 +168,7 @@ export abstract class BaseInstallManager {
     // "--purge" was specified, or if the last install was interrupted, then we will
     // need to perform a clean install.  Otherwise, we can do an incremental install.
     const cleanInstall: boolean =
-      isFilteredInstall || !this._commonTempInstallFlag.isValid(/*reportStoreIssues:*/ true);
+      isFilteredInstall || !this._commonTempInstallFlag.checkValidAndReportStoreIssues();
 
     // Allow us to defer the file read until we need it
     const canSkipInstall: () => boolean = () => {
@@ -232,6 +224,9 @@ export abstract class BaseInstallManager {
         }
       }
 
+      // Perform any post-install work the install manager requires
+      await this.postInstallAsync();
+
       // Create the marker file to indicate a successful install if it's not a filtered install
       if (!isFilteredInstall) {
         this._commonTempInstallFlag.create();
@@ -248,6 +243,8 @@ export abstract class BaseInstallManager {
   protected abstract canSkipInstall(lastInstallDate: Date): boolean;
 
   protected abstract installAsync(cleanInstall: boolean): Promise<void>;
+
+  protected abstract postInstallAsync(): Promise<void>;
 
   protected async prepareAsync(): Promise<{ variantIsUpToDate: boolean; shrinkwrapIsUpToDate: boolean }> {
     // Check the policies

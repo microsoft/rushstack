@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Replace rush-link.json with a new API which keeps the local dependency tree in memory, and remove support for 'rush link' and 'rush unlink' when using workspaces.",
+      "comment": "Deprecate 'rush link' and 'rush unlink' commands, as well as the '--no-link' install argument. As we move toward using package managers more directly in Rush, the package managers will perform the linking during install (if linking is even necessary). Additionally, these commands directly conflict with (and have different meanings than) their package manager counterparts. Lastly, similar goals can be accomplished by running 'rush install' and 'rush purge'. In addition to these changes, rush-link.json is replaced with a new API which keeps the local dependency tree in memory.",
       "type": "minor"
     }
   ],

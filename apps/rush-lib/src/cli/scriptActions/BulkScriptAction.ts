@@ -76,15 +76,11 @@ export class BulkScriptAction extends BaseScriptAction {
   }
 
   public run(): Promise<void> {
-    const lastInstallFlag: LastInstallFlag = new LastInstallFlag(
-      this.rushConfiguration.commonTempFolder,
-      LastInstallFlag.getCurrentState(this.rushConfiguration)
-    );
+    const lastInstallFlag: LastInstallFlag = LastInstallFlag.getCommonTempFlag(this.rushConfiguration);
     if (!lastInstallFlag.isValid()) {
-      throw new Error(
-        `File not found: ${lastInstallFlag.path}${os.EOL}Did you run "rush install" or "rush update"?`
-      );
+      throw new Error(`Install flag invalid.${os.EOL}Did you run "rush install" or "rush update"?`);
     }
+
     this._doBeforeTask();
 
     const stopwatch: Stopwatch = Stopwatch.start();

@@ -52,8 +52,6 @@ export class NpmLinkManager extends BaseLinkManager {
    * @param project             The local project that we will create symlinks for
    * @param commonRootPackage   The common/temp/package.json package
    * @param commonPackageLookup A dictionary for finding packages under common/temp/node_modules
-   * @param rushConfiguration   The rush.json file contents
-   * @param options             Command line options for "rush link"
    */
   private _linkProject(
     project: RushConfigurationProject,

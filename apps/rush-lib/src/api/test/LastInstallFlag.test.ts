@@ -83,7 +83,7 @@ describe('LastInstallFlag', () => {
 
     flag1.create();
     expect(() => {
-      flag2.isValid(true);
+      flag2.checkValidAndReportStoreIssues();
     }).toThrowError(/PNPM store path/);
   });
 
@@ -98,8 +98,8 @@ describe('LastInstallFlag', () => {
 
     flag1.create();
     expect(() => {
-      flag2.isValid(true);
+      flag2.checkValidAndReportStoreIssues();
     }).not.toThrow();
-    expect(flag2.isValid(true)).toEqual(false);
+    expect(flag2.checkValidAndReportStoreIssues()).toEqual(false);
   });
 });

@@ -13,8 +13,6 @@ import { Utilities } from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { BasePackage } from './BasePackage';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
-import { LastLinkFlag } from '../../api/LastLinkFlag';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 export enum SymlinkKind {
   File,
@@ -27,11 +25,9 @@ export interface IBaseLinkManagerCreateSymlinkOptions extends IFileSystemCreateL
 
 export abstract class BaseLinkManager {
   protected _rushConfiguration: RushConfiguration;
-  private _lastLinkFlag: LastLinkFlag;
 
   public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
-    this._lastLinkFlag = new LastLinkFlag(this._rushConfiguration.commonTempFolder);
   }
 
   protected static _createSymlink(options: IBaseLinkManagerCreateSymlinkOptions): void {
@@ -189,38 +185,10 @@ export abstract class BaseLinkManager {
    *   if true, this option forces the links to be recreated.
    */
   public async createSymlinksForProjects(force: boolean): Promise<void> {
-    const useWorkspaces: boolean =
-      this._rushConfiguration.packageManager === 'pnpm' &&
-      this._rushConfiguration.pnpmOptions &&
-      this._rushConfiguration.pnpmOptions.useWorkspaces;
-    if (useWorkspaces) {
-      console.log(
-        colors.red(
-          '"rush link" is not supported when workspaces is enabled. Linking will be performed when ' +
-            'running "rush install" or "rush update".'
-        )
-      );
-      throw new AlreadyReportedError();
-    }
-
-    if (!force) {
-      if (this._lastLinkFlag.isValid()) {
-        console.log(colors.green(`Skipping linking -- everything is already up to date.`));
-        return;
-      }
-    }
-
     console.log('Linking projects together...');
     const stopwatch: Stopwatch = Stopwatch.start();
 
-    // Delete the flag file if it exists; if we get interrupted, this will ensure that
-    // a full "rush link" is required next time
-    this._lastLinkFlag.clear();
-
     await this._linkProjects();
-
-    console.log(`Writing "${this._lastLinkFlag.path}"`);
-    this._lastLinkFlag.create();
 
     stopwatch.stop();
     console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));

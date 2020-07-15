@@ -111,7 +111,9 @@ export class GlobalScriptAction extends BaseScriptAction {
     const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
 
     const lastInstallFlag: LastInstallFlag = new LastInstallFlag(lastInstallFlagPath, {
-      ...LastInstallFlag.getCurrentState(this.rushConfiguration),
+      node: process.versions.node,
+      packageManager: this.rushConfiguration.packageManager,
+      packageManagerVersion: this.rushConfiguration.packageManagerToolVersion,
       packageJson: packageJson
     });
 

@@ -18,7 +18,7 @@ import {
   InternalError
 } from '@rushstack/node-core-library';
 
-import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
+import { BaseInstallManager } from '../base/BaseInstallManager';
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
 import { IRushTempPackageJson } from '../../logic/base/BasePackage';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -29,10 +29,6 @@ import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../../
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 import { InstallHelpers } from './InstallHelpers';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
-import { LastLinkFlag } from '../../api/LastLinkFlag';
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { RushGlobalFolder } from '../../api/RushGlobalFolder';
-import { PurgeManager } from '../PurgeManager';
 import { LinkManagerFactory } from '../LinkManagerFactory';
 import { BaseLinkManager } from '../base/BaseLinkManager';
 
@@ -55,35 +51,6 @@ declare module 'tar' {
  * This class implements common logic between "rush install" and "rush update".
  */
 export class RushInstallManager extends BaseInstallManager {
-  private _commonTempLinkFlag: LastLinkFlag;
-
-  public constructor(
-    rushConfiguration: RushConfiguration,
-    rushGlobalFolder: RushGlobalFolder,
-    purgeManager: PurgeManager,
-    options: IInstallManagerOptions
-  ) {
-    super(rushConfiguration, rushGlobalFolder, purgeManager, options);
-
-    this._commonTempLinkFlag = new LastLinkFlag(this.rushConfiguration.commonTempFolder);
-  }
-
-  /**
-   * @override
-   */
-  public async doInstall(): Promise<void> {
-    await super.doInstall();
-
-    if (!this.options.noLink) {
-      const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
-      await linkManager.createSymlinksForProjects(false);
-    } else {
-      console.log(
-        os.EOL + colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.')
-      );
-    }
-  }
-
   /**
    * Regenerates the common/package.json and all temp_modules projects.
    * If shrinkwrapFile is provided, this function also validates whether it contains
@@ -233,7 +200,7 @@ export class RushInstallManager extends BaseInstallManager {
         // Is there a locally built Rush project that could satisfy this dependency?
         // If so, then we will symlink to the project folder rather than to common/temp/node_modules.
         // In this case, we don't want "npm install" to process this package, but we do need
-        // to record this decision for "rush link" later, so we add it to a special 'rushDependencies' field.
+        // to record this decision for linking later, so we add it to a special 'rushDependencies' field.
         const localProject: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(
           packageName
         );
@@ -485,10 +452,6 @@ export class RushInstallManager extends BaseInstallManager {
    * @override
    */
   protected async installAsync(cleanInstall: boolean): Promise<void> {
-    // Since we're going to be tampering with common/node_modules, delete the "rush link" flag file if it exists;
-    // this ensures that a full "rush link" is required next time
-    this._commonTempLinkFlag.clear();
-
     // Since we are actually running npm/pnpm/yarn install, recreate all the temp project tarballs.
     // This ensures that any existing tarballs with older header bits will be regenerated.
     // It is safe to assume that temp project pacakge.jsons already exist.
@@ -676,6 +639,11 @@ export class RushInstallManager extends BaseInstallManager {
     }
   }
 
+  protected async postInstallAsync(): Promise<void> {
+    const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
+    await linkManager.createSymlinksForProjects(false);
+  }
+
   /**
    * Gets the path to the tarball
    * Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
@@ -694,7 +662,7 @@ export class RushInstallManager extends BaseInstallManager {
    *
    * The regression is that "npm install" sets the package.json "version" field for the
    * @rush-temp projects to a value like "file:projects/example.tgz", when it should be "0.0.0".
-   * This causes "rush link" to fail later, when read-package-tree tries to parse the bad version.
+   * This causes linking to fail later, when read-package-tree tries to parse the bad version.
    * The error looks like this:
    *
    * ERROR: Failed to parse package.json for foo: Invalid version: "file:projects/example.tgz"
