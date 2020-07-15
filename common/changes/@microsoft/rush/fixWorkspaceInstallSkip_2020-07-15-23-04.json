@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Consider package.json when determining if install can be skipped for workspaces",
+      "comment": "Consider package.json when determining if install can be skipped for PNPM workspaces",
       "type": "patch"
     }
   ],
