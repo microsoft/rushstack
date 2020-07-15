@@ -158,6 +158,10 @@ export interface ICompileStageProperties {
  * @public
  */
 export interface IBundleStageProperties {
+  /**
+   * A path to a Webpack configuration JS file. If this isn't specified, and a Webpack
+   * configuration isn't specified via another plugin, Webpack won't be run.
+   */
   webpackConfigFilePath?: string;
   webpackConfiguration?: webpack.Configuration;
 }

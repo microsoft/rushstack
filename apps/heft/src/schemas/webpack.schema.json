@@ -14,7 +14,7 @@
 
     "webpackConfigFilePath": {
       "type": "string",
-      "description": "A path to a Webpack configuration JS file."
+      "description": "A path to a Webpack configuration JS file. If this isn't specified, and a Webpack configuration isn't specified via another plugin, Webpack won't be run."
     }
   }
 }
