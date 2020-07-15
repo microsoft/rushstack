@@ -152,7 +152,6 @@ export interface IBundleStage extends IBuildStage<BundleStageHooks, IBundleStage
 
 // @public (undocumented)
 export interface IBundleStageProperties {
-    // (undocumented)
     webpackConfigFilePath?: string;
     // (undocumented)
     webpackConfiguration?: webpack.Configuration;
