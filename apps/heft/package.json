@@ -13,6 +13,7 @@
   "main": "lib/index.js",
   "types": "dist/heft.d.ts",
   "devDependencies": {
+    "@jest/types": "~25.4.0",
     "@types/eslint": "7.2.0",
     "@types/glob": "7.1.1",
     "@types/node": "10.17.13",

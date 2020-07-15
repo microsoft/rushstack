@@ -6,7 +6,6 @@ import { runCLI } from '@jest/core';
 import { FileSystem } from '@rushstack/node-core-library';
 
 import { IHeftJestReporterOptions } from './HeftJestReporter';
-import { HeftSnapshotResolver } from './HeftSnapshotResolver';
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
 import { HeftSession } from '../../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
@@ -30,14 +29,13 @@ export class JestPlugin implements IHeftPlugin {
 
   private async _runJestAsync(heftConfiguration: HeftConfiguration, watchMode: boolean): Promise<void> {
     const buildFolder: string = heftConfiguration.buildFolder;
-    HeftSnapshotResolver.buildRoot = heftConfiguration.buildFolder;
     const reporterOptions: IHeftJestReporterOptions = { heftConfiguration };
     const { results: jestResults } = await runCLI(
       {
         watch: watchMode,
         config: JEST_CONFIGURATION_LOCATION,
         reporters: [[path.resolve(__dirname, 'HeftJestReporter.js'), reporterOptions]],
-        snapshotResolver: path.resolve(__dirname, 'heftSnapshotResolverInstance.js'),
+        cacheDirectory: path.join(heftConfiguration.buildCacheFolder, 'jest-cache'),
 
         listTests: false,
         rootDir: buildFolder,
