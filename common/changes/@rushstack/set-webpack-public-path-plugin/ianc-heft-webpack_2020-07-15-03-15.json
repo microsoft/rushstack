@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/set-webpack-public-path-plugin",
+      "comment": "Fix specification of optional peerDependencies.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/set-webpack-public-path-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}
