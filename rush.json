@@ -462,7 +462,8 @@
     {
       "packageName": "@rushstack/heft",
       "projectFolder": "apps/heft",
-      "reviewCategory": "libraries"
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     },
 
     // "build-tests" folder (alphabetical order)
