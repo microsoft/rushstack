@@ -458,6 +458,15 @@ importers:
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
       '@types/jest': 25.2.1
+  ../../build-tests/heft-test-webpack:
+    dependencies:
+      '@microsoft/rush-stack-compiler-3.7': 'link:../../stack/rush-stack-compiler-3.7'
+      '@rushstack/heft': 'link:../../apps/heft'
+      '@types/webpack-env': 1.13.0
+    specifiers:
+      '@microsoft/rush-stack-compiler-3.7': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
+      '@types/webpack-env': 1.13.0
   ../../build-tests/localization-plugin-test-01:
     dependencies:
       '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'

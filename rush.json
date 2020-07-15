@@ -527,6 +527,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-test-webpack",
+      "projectFolder": "build-tests/heft-test-webpack",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "localization-plugin-test-01",
       "projectFolder": "build-tests/localization-plugin-test-01",
       "reviewCategory": "tests",
