@@ -16,8 +16,13 @@
     "lodash": "~4.17.15",
     "uglify-js": "~3.0.28"
   },
-  "optionalPeerDependencies": {
-    "@types/webpack": "*"
+  "peerDependencies": {
+    "@types/webpack": "^4.39.8"
+  },
+  "peerDependenciesMeta": {
+    "@types/webpack": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@microsoft/node-library-build": "workspace:*",
