@@ -9,7 +9,7 @@ import * as semver from 'semver';
 import * as globEscape from 'glob-escape';
 import { JsonFile, Text, FileSystem, FileConstants, Sort, InternalError } from '@rushstack/node-core-library';
 
-import { BaseInstallManager } from '../base/BaseInstallManager';
+import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
 import { IRushTempPackageJson } from '../../logic/base/BasePackage';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -21,6 +21,9 @@ import { DependencySpecifier, DependencySpecifierType } from '../DependencySpeci
 import { InstallHelpers } from './InstallHelpers';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { TempProjectHelper } from '../TempProjectHelper';
+import { RushGlobalFolder } from '../../api/RushGlobalFolder';
+import { RushConfiguration } from '../..';
+import { PurgeManager } from '../PurgeManager';
 
 /**
  * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.
@@ -42,6 +45,17 @@ declare module 'tar' {
  */
 export class RushInstallManager extends BaseInstallManager {
   private _tempProjectHelper: TempProjectHelper;
+
+  public constructor(
+    rushConfiguration: RushConfiguration,
+    rushGlobalFolder: RushGlobalFolder,
+    purgeManager: PurgeManager,
+    options: IInstallManagerOptions
+  ) {
+    super(rushConfiguration, rushGlobalFolder, purgeManager, options);
+    this._tempProjectHelper = new TempProjectHelper(this.rushConfiguration);
+  }
+
   /**
    * Regenerates the common/package.json and all temp_modules projects.
    * If shrinkwrapFile is provided, this function also validates whether it contains
@@ -50,7 +64,7 @@ export class RushInstallManager extends BaseInstallManager {
    *
    * @override
    */
-  protected async prepareCommonTempAsync(
+  public async prepareCommonTempAsync(
     shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
     const stopwatch: Stopwatch = Stopwatch.start();
@@ -430,8 +444,6 @@ export class RushInstallManager extends BaseInstallManager {
       this.rushConfiguration.commonTempFolder,
       RushConstants.nodeModulesFolderName
     );
-
-    this._tempProjectHelper = new TempProjectHelper(this.rushConfiguration);
 
     // Is there an existing "node_modules" folder to consider?
     if (FileSystem.exists(commonNodeModulesFolder)) {

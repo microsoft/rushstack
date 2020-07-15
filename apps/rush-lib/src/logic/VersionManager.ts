@@ -19,6 +19,11 @@ import { ChangeManager } from './ChangeManager';
 import { TempProjectHelper } from './TempProjectHelper';
 import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from './pnpm/PnpmShrinkwrapFile';
 import { DependencySpecifier } from './DependencySpecifier';
+import { PurgeManager } from './PurgeManager';
+import { RushConstants } from './RushConstants';
+import { RushGlobalFolder } from '../api/RushGlobalFolder';
+import { RushInstallManager } from './installManager/RushInstallManager';
+import { IInstallManagerOptions } from './base/BaseInstallManager';
 
 export class VersionManager {
   private _rushConfiguration: RushConfiguration;
@@ -26,11 +31,13 @@ export class VersionManager {
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
   private _updatedProjects: Map<string, IPackageJson>;
   private _changeFiles: Map<string, ChangeFile>;
+  private _globalFolder: RushGlobalFolder;
 
   public constructor(
     rushConfiguration: RushConfiguration,
     userEmail: string,
-    versionPolicyConfiguration?: VersionPolicyConfiguration
+    versionPolicyConfiguration: VersionPolicyConfiguration,
+    globalFolder: RushGlobalFolder
   ) {
     this._rushConfiguration = rushConfiguration;
     this._userEmail = userEmail;
@@ -40,6 +47,7 @@ export class VersionManager {
 
     this._updatedProjects = new Map<string, IPackageJson>();
     this._changeFiles = new Map<string, ChangeFile>();
+    this._globalFolder = globalFolder;
   }
 
   /**
@@ -65,12 +73,12 @@ export class VersionManager {
    * @param identifier - overrides the prerelease identifier and only works for lock step policy
    * @param shouldCommit - whether the changes will be written to disk
    */
-  public bump(
+  public async bump(
     lockStepVersionPolicyName?: string,
     bumpType?: BumpType,
     identifier?: string,
     shouldCommit?: boolean
-  ): void {
+  ): Promise<void> {
     // Bump all the lock step version policies.
     this._versionPolicyConfiguration.bump(lockStepVersionPolicyName, bumpType, identifier, shouldCommit);
 
@@ -96,6 +104,37 @@ export class VersionManager {
       });
       changeManager.updateChangelog(!!shouldCommit);
     }
+    const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._globalFolder);
+    const installManagerOptions: IInstallManagerOptions = {
+      debug: false,
+      allowShrinkwrapUpdates: true,
+      bypassPolicy: false,
+      noLink: false,
+      fullUpgrade: false,
+      recheckShrinkwrap: false,
+      networkConcurrency: undefined,
+      collectLogFile: false,
+      variant: this._rushConfiguration.currentInstalledVariant,
+      maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
+      toFlags: []
+    };
+    const installManager: RushInstallManager = new RushInstallManager(
+      this._rushConfiguration,
+      this._globalFolder,
+      purgeManager,
+      installManagerOptions
+    );
+
+    const shrinkwrapFilePath: string = this._rushConfiguration.getCommittedShrinkwrapFilename(
+      this._rushConfiguration.currentInstalledVariant
+    );
+
+    const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
+      shrinkwrapFilePath,
+      this._rushConfiguration.pnpmOptions
+    );
+
+    await installManager.prepareCommonTempAsync(pnpmShrinkwrapFile);
 
     this._updateTarballIntegrities();
   }
@@ -146,7 +185,7 @@ export class VersionManager {
             .toString();
         }
 
-        // pnpmShrinkwrapFile.save(shrinkwrapFilePath);
+        pnpmShrinkwrapFile.save(shrinkwrapFilePath);
       }
     }
   }

@@ -93,13 +93,18 @@ export class VersionAction extends BaseRushAction {
   }
 
   protected run(): Promise<void> {
-    return Promise.resolve().then(() => {
+    return Promise.resolve().then(async () => {
       PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: this._bypassPolicy.value });
       const userEmail: string = Git.getGitEmail(this.rushConfiguration);
 
       this._validateInput();
 
-      this._versionManager = new VersionManager(this.rushConfiguration, userEmail);
+      this._versionManager = new VersionManager(
+        this.rushConfiguration,
+        userEmail,
+        this.rushConfiguration.versionPolicyConfiguration,
+        this.parser.rushGlobalFolder
+      );
 
       if (this._ensureVersionPolicy.value) {
         this._overwritePolicyVersionIfNeeded();
@@ -117,7 +122,7 @@ export class VersionAction extends BaseRushAction {
         }
       } else if (this._bumpVersion.value) {
         const tempBranch: string = 'version/bump-' + new Date().getTime();
-        this._versionManager.bump(
+        await this._versionManager.bump(
           this._versionPolicy.value,
           this._overwriteBump.value ? BumpType[this._overwriteBump.value] : undefined,
           this._prereleaseIdentifier.value,

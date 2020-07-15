@@ -9,6 +9,7 @@ import { ChangeFile } from '../../api/ChangeFile';
 import { ChangeType, IChangeInfo } from '../../api/ChangeManagement';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { VersionManager } from '../VersionManager';
+import { RushGlobalFolder } from '../../api/RushGlobalFolder';
 
 function _getChanges(changeFiles: Map<string, ChangeFile>, packageName: string): IChangeInfo[] | undefined {
   const changeFile: ChangeFile | undefined = changeFiles.get(packageName);
@@ -27,7 +28,8 @@ describe('VersionManager', () => {
     versionManager = new VersionManager(
       rushConfiguration,
       'test@microsoft.com',
-      rushConfiguration.versionPolicyConfiguration
+      rushConfiguration.versionPolicyConfiguration,
+      new RushGlobalFolder()
     );
   });
 
@@ -81,8 +83,8 @@ describe('VersionManager', () => {
   });
 
   describe('bump', () => {
-    it('bumps to prerelease version', () => {
-      versionManager.bump('testPolicy1', BumpType.prerelease, 'dev', false);
+    it('bumps to prerelease version', async () => {
+      await versionManager.bump('testPolicy1', BumpType.prerelease, 'dev', false);
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       const expectedVersion: string = '10.10.1-dev.0';
 
@@ -108,7 +110,8 @@ describe('WorkspaceVersionManager', () => {
     versionManager = new VersionManager(
       rushConfiguration,
       'test@microsoft.com',
-      rushConfiguration.versionPolicyConfiguration
+      rushConfiguration.versionPolicyConfiguration,
+      new RushGlobalFolder()
     );
   });
 
@@ -162,8 +165,8 @@ describe('WorkspaceVersionManager', () => {
   });
 
   describe('bump', () => {
-    it('bumps to prerelease version', () => {
-      versionManager.bump('testPolicy1', BumpType.prerelease, 'dev', false);
+    it('bumps to prerelease version', async () => {
+      await versionManager.bump('testPolicy1', BumpType.prerelease, 'dev', false);
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       const expectedVersion: string = '10.10.1-dev.0';
 
