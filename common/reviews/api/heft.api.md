@@ -292,6 +292,10 @@ export interface ITestActionContext extends IActionContext<TestHooks, ITestActio
 
 // @public (undocumented)
 export interface ITestActionProperties {
+    // (undocumented)
+    productionFlag: boolean;
+    // (undocumented)
+    watchMode: boolean;
 }
 
 // @public (undocumented)
@@ -325,6 +329,10 @@ export class StartHooks extends ActionHooksBase<IStartActionProperties> {
 
 // @public (undocumented)
 export class TestHooks extends ActionHooksBase<ITestActionProperties> {
+    // (undocumented)
+    readonly configureTest: AsyncSeriesHook;
+    // (undocumented)
+    readonly run: AsyncParallelHook;
 }
 
 

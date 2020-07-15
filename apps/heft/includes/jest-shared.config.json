@@ -1,0 +1,11 @@
+{
+  "silent": false,
+
+  "rootDir": "../../../../",
+  "testURL": "http://localhost/",
+  "testMatch": ["<rootDir>/src/**/*.test.ts?(x)"],
+  "transform": {
+    "src[\\\\/].+\\.ts$": "<rootDir>/node_modules/@rushstack/heft/lib/plugins/JestPlugin/HeftJestSrcTransform.js"
+  },
+  "passWithNoTests": true
+}

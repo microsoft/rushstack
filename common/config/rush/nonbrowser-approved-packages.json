@@ -11,6 +11,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@jest/types",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@microsoft/api-documenter",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -476,6 +480,10 @@
     },
     {
       "name": "jest-resolve",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-snapshot",
       "allowedCategories": [ "libraries" ]
     },
     {

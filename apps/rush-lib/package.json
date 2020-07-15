@@ -71,6 +71,6 @@
     "@types/wordwrap": "1.0.0",
     "@types/z-schema": "3.16.31",
     "gulp": "~4.0.2",
-    "jest": "25.4.0"
+    "jest": "~25.4.0"
   }
 }

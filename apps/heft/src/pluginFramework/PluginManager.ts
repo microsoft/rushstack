@@ -17,6 +17,7 @@ import { CleanPlugin } from '../plugins/CleanPlugin';
 import { CopyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
 import { PackageJsonConfigurationPlugin } from '../plugins/PackageJsonConfigurationPlugin';
 import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
+import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
@@ -50,6 +51,7 @@ export class PluginManager {
     this._applyPlugin(new CleanPlugin());
     this._applyPlugin(new PackageJsonConfigurationPlugin());
     this._applyPlugin(new ApiExtractorPlugin());
+    this._applyPlugin(new JestPlugin());
   }
 
   public initializePlugin(pluginSpecifier: string, options?: object): void {
