@@ -7,6 +7,7 @@ import {
   ICommandLineActionOptions,
   CommandLineIntegerParameter
 } from '@rushstack/ts-command-line';
+import * as webpack from 'webpack';
 import { SyncHook, AsyncParallelHook, AsyncSeriesHook } from 'tapable';
 import { performance } from 'perf_hooks';
 
@@ -140,9 +141,36 @@ export class CompileStageHooks extends BuildStageHooksBase {
 /**
  * @public
  */
+export class BundleStageHooks extends BuildStageHooksBase {
+  public readonly configureWebpack: AsyncSeriesHook = new AsyncSeriesHook();
+  public readonly afterConfigureWebpack: AsyncSeriesHook = new AsyncSeriesHook();
+}
+
+/**
+ * @public
+ */
 export interface ICompileStageProperties {
   typeScriptConfiguration: ITypeScriptConfiguration;
   copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
+}
+
+/**
+ * @public
+ */
+export interface IBundleStageProperties {
+  /**
+   * A path to a Webpack configuration JS file. If this isn't specified, and a Webpack
+   * configuration isn't specified via another plugin, Webpack won't be run.
+   */
+  webpackConfigFilePath?: string;
+
+  /**
+   * The configuration used by the Webpack plugin. This must be populated
+   * for Webpack to run. If webpackConfigFilePath is specified,
+   * this will be populated automatically with the exports of the
+   * config file referenced in that property.
+   */
+  webpackConfiguration?: webpack.Configuration;
 }
 
 /**
@@ -158,7 +186,7 @@ export interface ICompileStage extends IBuildStage<CompileStageHooks, ICompileSt
 /**
  * @public
  */
-export interface IBundleStage extends IBuildStage<BuildStageHooksBase, {}> {}
+export interface IBundleStage extends IBuildStage<BundleStageHooks, IBundleStageProperties> {}
 
 /**
  * @public
@@ -192,6 +220,7 @@ export interface IBuildActionProperties {
   maxOldSpaceSize?: string;
   verboseFlag: boolean;
   watchMode: boolean;
+  webpackStats?: webpack.Stats;
 }
 
 /**
@@ -309,7 +338,7 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
     actionContext.hooks.compile.call(compileStage);
 
     const bundleStage: IBundleStage = {
-      hooks: new BuildStageHooksBase(),
+      hooks: new BundleStageHooks(),
       properties: {}
     };
     actionContext.hooks.bundle.call(bundleStage);
@@ -327,11 +356,13 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
 
       await Promise.all([
         compileStage.hooks.configureTypeScript.promise(),
-        compileStage.hooks.configureCopyStaticAssets.promise()
+        compileStage.hooks.configureCopyStaticAssets.promise(),
+        bundleStage.hooks.configureWebpack.promise()
       ]);
       await Promise.all([
         compileStage.hooks.afterConfigureTypeScript.promise(),
-        compileStage.hooks.afterConfigureCopyStaticAssets.promise()
+        compileStage.hooks.afterConfigureCopyStaticAssets.promise(),
+        bundleStage.hooks.afterConfigureWebpack.promise()
       ]);
 
       await Promise.all([
@@ -356,6 +387,8 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
       }
       await this._runStageWithLogging('Compile', compileStage);
 
+      await bundleStage.hooks.configureWebpack.promise();
+      await bundleStage.hooks.afterConfigureWebpack.promise();
       await this._runStageWithLogging('Bundle', bundleStage);
 
       await this._runStageWithLogging('Post-build', postBuildStage);
