@@ -447,24 +447,35 @@ importers:
       api-extractor-lib1-test: 'workspace:*'
       fs-extra: ~7.0.1
       typescript: ~3.9.5
-  ../../build-tests/heft-test-01:
+  ../../build-tests/heft-node-test:
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.7': 'link:../../stack/rush-stack-compiler-3.7'
+      '@microsoft/rush-stack-compiler-3.9': 'link:../../stack/rush-stack-compiler-3.9'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
       '@types/jest': 25.2.1
     specifiers:
-      '@microsoft/rush-stack-compiler-3.7': 'workspace:*'
+      '@microsoft/rush-stack-compiler-3.9': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
       '@types/jest': 25.2.1
-  ../../build-tests/heft-test-webpack:
+  ../../build-tests/heft-oldest-compiler-test:
+    devDependencies:
+      '@microsoft/rush-stack-compiler-3.0': 'link:../../stack/rush-stack-compiler-3.0'
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
+      '@types/jest': 25.2.1
+    specifiers:
+      '@microsoft/rush-stack-compiler-3.0': 'workspace:*'
+      '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
+      '@types/jest': 25.2.1
+  ../../build-tests/heft-webpack-test:
     dependencies:
-      '@microsoft/rush-stack-compiler-3.7': 'link:../../stack/rush-stack-compiler-3.7'
+      '@microsoft/rush-stack-compiler-3.9': 'link:../../stack/rush-stack-compiler-3.9'
       '@rushstack/heft': 'link:../../apps/heft'
       '@types/webpack-env': 1.13.0
     specifiers:
-      '@microsoft/rush-stack-compiler-3.7': 'workspace:*'
+      '@microsoft/rush-stack-compiler-3.9': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
       '@types/webpack-env': 1.13.0
   ../../build-tests/localization-plugin-test-01:
@@ -14194,3 +14205,4 @@ packages:
       commander: 2.20.3
     resolution:
       integrity: sha512-DUOKC/IhbkdLKKiV89gw9DUauTV8U/8yJl1sjf6MtDmzevLKOF2duNJ495S3MFVjqZarr+qNGCPbkg4mu4PpLw==
+registry: ''
