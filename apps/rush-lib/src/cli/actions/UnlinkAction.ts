@@ -5,7 +5,6 @@ import * as colors from 'colors';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 export class UnlinkAction extends BaseRushAction {
   public constructor(parser: RushCommandLineParser) {
@@ -23,13 +22,12 @@ export class UnlinkAction extends BaseRushAction {
     // No parameters
   }
 
-  protected run(): Promise<void> {
+  protected async run(): Promise<void> {
     console.log(
       colors.red(
         'The "rush unlink" command has been deprecated. No action has been taken. Run "rush purge" to ' +
           'remove project "node_modules" folders.'
       )
     );
-    throw new AlreadyReportedError();
   }
 }

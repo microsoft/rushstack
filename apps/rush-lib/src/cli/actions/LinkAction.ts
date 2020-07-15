@@ -5,7 +5,6 @@ import * as colors from 'colors';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 export class LinkAction extends BaseRushAction {
   public constructor(parser: RushCommandLineParser) {
@@ -36,6 +35,5 @@ export class LinkAction extends BaseRushAction {
           '"rush update" to restore project node_modules folders.'
       )
     );
-    throw new AlreadyReportedError();
   }
 }
