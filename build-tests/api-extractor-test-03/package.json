@@ -9,8 +9,8 @@
   "devDependencies": {
     "@types/jest": "25.2.1",
     "@types/node": "10.17.13",
-    "api-extractor-test-02": "1.0.0",
+    "api-extractor-test-02": "workspace:*",
     "fs-extra": "~7.0.1",
-    "typescript": "~3.7.2"
+    "typescript": "~3.9.5"
   }
 }

@@ -43,6 +43,11 @@ export class HeftSession {
   public readonly hooks: IHeftSessionHooks;
 
   /**
+   * @internal
+   */
+  public readonly metricsCollector: MetricsCollector;
+
+  /**
    * If set to true, the build is running with the --debug flag
    */
   public get debugMode(): boolean {
@@ -66,5 +71,7 @@ export class HeftSession {
       test: testAction.testActionHook,
       metricsCollector: metricsCollector.hooks
     };
+
+    this.metricsCollector = metricsCollector;
   }
 }

@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.26.0",
+  "rushVersion": "5.28.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "4.12.5",
+  "pnpmVersion": "4.14.4",
 
   // "npmVersion": "4.5.0",
   // "yarnVersion": "1.9.4",
@@ -94,7 +94,23 @@
      *
      * The default value is false.
      */
-    "preventManualShrinkwrapChanges": true
+    "preventManualShrinkwrapChanges": true,
+
+    /**
+     * If true, then `rush install` will use the PNPM workspaces feature to perform the
+     * install.
+     *
+     * This feature uses PNPM to peform the entire monorepo install. When using workspaces, Rush will
+     * generate a "pnpm-workspace.yaml" file referencing all local projects to install. Rush will
+     * also generate a "pnpmfile.js" which is used to provide preferred versions support. When install
+     * is run, this pnpmfile will be used to replace dependency version ranges with a smaller subset
+     * of the original range. If the preferred version is not fully a subset of the original version
+     * range, it will be left as-is. After this, the pnpmfile.js provided in the repository (if one
+     * exists) will be called to further modify package dependencies.
+     *
+     * This option is experimental. The default value is false.
+     */
+    "useWorkspaces": true
   },
 
   /**
@@ -105,7 +121,7 @@
    * Specify a SemVer range to ensure developers use a Node.js version that is appropriate
    * for your repo.
    */
-  "nodeSupportedVersionRange": ">=10.13.0 <11.0.0 || >=12.13.0 <13.0.0 || >=14.0.0 <15.0.0",
+  "nodeSupportedVersionRange": ">=10.13.0 <11.0.0 || >=12.13.0 <13.0.0",
 
   /**
    * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
@@ -505,6 +521,18 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-test-01",
+      "projectFolder": "build-tests/heft-test-01",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-test-webpack",
+      "projectFolder": "build-tests/heft-test-webpack",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "localization-plugin-test-01",
       "projectFolder": "build-tests/localization-plugin-test-01",
       "reviewCategory": "tests",
@@ -897,6 +925,12 @@
     {
       "packageName": "@rushstack/loader-raw-script",
       "projectFolder": "webpack/loader-raw-script",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/module-minifier-plugin",
+      "projectFolder": "webpack/module-minifier-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },

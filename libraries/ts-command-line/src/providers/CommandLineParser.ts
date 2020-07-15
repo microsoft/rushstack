@@ -150,8 +150,16 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
             process.exitCode = err.exitCode;
           }
         } else {
-          const message: string = (err.message || 'An unknown error occurred').trim();
-          console.error(colors.red('Error: ' + message));
+          let message: string = (err.message || 'An unknown error occurred').trim();
+
+          // If the message doesn't already start with "Error:" then add a prefix
+          if (!/^(error|internal error|warning)\b/i.test(message)) {
+            message = 'Error: ' + message;
+          }
+
+          console.error();
+          console.error(colors.red(message));
+
           if (!process.exitCode) {
             process.exitCode = 1;
           }

@@ -24,8 +24,8 @@
     "typescript": ">=3.0.0"
   },
   "dependencies": {
-    "@rushstack/eslint-patch": "1.0.2",
-    "@rushstack/eslint-plugin": "0.4.1",
+    "@rushstack/eslint-patch": "workspace:*",
+    "@rushstack/eslint-plugin": "workspace:*",
     "@typescript-eslint/eslint-plugin": "3.4.0",
     "@typescript-eslint/experimental-utils": "3.4.0",
     "@typescript-eslint/parser": "3.4.0",

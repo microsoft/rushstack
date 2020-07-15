@@ -1,0 +1,16 @@
+{
+  "name": "heft-test-01",
+  "description": "Building this project is a very simple regression test for heft",
+  "version": "1.0.0",
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft test --clean"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "@microsoft/rush-stack-compiler-3.7": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
+    "@types/jest": "25.2.1"
+  }
+}

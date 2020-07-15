@@ -6,27 +6,40 @@ export {
   HeftConfiguration,
   IHeftActionConfiguration,
   IHeftActionConfigurationOptions,
+  ICompilerPackage,
   IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
 } from './configuration/HeftConfiguration';
 export { ActionHooksBase, IActionContext } from './cli/actions/HeftActionBase';
 export { HeftSession, IHeftSessionHooks } from './pluginFramework/HeftSession';
-export { MetricsCollectorHooks, IMetricsData } from './metrics/MetricsCollector';
+export {
+  MetricsCollectorHooks,
+  IMetricsData,
+  IPerformanceData as _IPerformanceData,
+  MetricsCollector as _MetricsCollector
+} from './metrics/MetricsCollector';
 
 // Actions
 export {
-  IBuildActionProperties,
   BuildHooks,
-  IBuildActionContext,
-  IBuildStage,
   BuildStageHooksBase,
-  ICompileStageProperties,
-  ICompileStage,
-  ISharedCopyStaticAssetsConfiguration,
-  ICopyStaticAssetsConfiguration,
+  BundleStageHooks,
   CompileStageHooks,
+  CopyFromCacheMode,
+  IBuildActionContext,
+  IBuildActionProperties,
+  IBuildStage,
   IBundleStage,
+  IBundleStageProperties,
+  ICompileStage,
+  ICompileStageProperties,
+  ICopyStaticAssetsConfiguration,
+  IEmitModuleKind,
+  IEmitModuleKindBase,
   IPostBuildStage,
-  IPreCompileStage
+  IPreCompileStage,
+  ISharedCopyStaticAssetsConfiguration,
+  ISharedTypeScriptConfiguration,
+  ITypeScriptConfiguration
 } from './cli/actions/BuildAction';
 export { ICleanActionProperties, CleanHooks, ICleanActionContext } from './cli/actions/CleanAction';
 export {

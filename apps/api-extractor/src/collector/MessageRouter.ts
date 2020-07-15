@@ -182,7 +182,7 @@ export class MessageRouter {
         return; // ignore noise
     }
 
-    const messageText: string = `${diagnostic.messageText}`;
+    const messageText: string = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
     const options: IExtractorMessageOptions = {
       category: ExtractorMessageCategory.Compiler,
       messageId: `TS${diagnostic.code}`,

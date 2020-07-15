@@ -480,6 +480,9 @@ export class LockFile {
 // @public
 export class MapExtensions {
     static mergeFromMap<K, V>(targetMap: Map<K, V>, sourceMap: ReadonlyMap<K, V>): void;
+    static toObject<TValue>(map: Map<string, TValue>): {
+        [key: string]: TValue;
+    };
 }
 
 // @public

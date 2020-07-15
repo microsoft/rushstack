@@ -2,6 +2,60 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.12.2",
+      "tag": "@microsoft/gulp-core-build-sass_v4.12.2",
+      "date": "Fri, 03 Jul 2020 15:09:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.16.11` to `3.16.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.10.64` to `1.10.65`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.24.4` to `3.25.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.8.0` to `0.8.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.31` to `6.4.32`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.12.1",
+      "tag": "@microsoft/gulp-core-build-sass_v4.12.1",
+      "date": "Fri, 03 Jul 2020 05:46:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.10.63` to `1.10.64`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.7.2` to `0.8.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.30` to `6.4.31`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.12.0",
+      "tag": "@microsoft/gulp-core-build-sass_v4.12.0",
+      "date": "Fri, 03 Jul 2020 00:10:16 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow customization of generated CSS module class names."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.11.12",
       "tag": "@microsoft/gulp-core-build-sass_v4.11.12",
       "date": "Sat, 27 Jun 2020 00:09:38 GMT",

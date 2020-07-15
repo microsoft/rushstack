@@ -2,6 +2,56 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.29.0",
+      "tag": "@microsoft/rush_v5.29.0",
+      "date": "Tue, 14 Jul 2020 05:20:56 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Give \\\"rush deploy\\\" the ability to select a subset of dependencies to copy over (#1978)"
+          },
+          {
+            "comment": "Fix an issue where package binaries where not created by \"rush deploy\" (#1982)"
+          },
+          {
+            "comment": "Add a new setting \"folderToCopy\" and new command-line parameter \"--create-archive\" for use with \"rush deploy\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.28.0",
+      "tag": "@microsoft/rush_v5.28.0",
+      "date": "Wed, 08 Jul 2020 06:56:47 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add new commands \"rush init-autoinstaller\" and \"rush update-autoinstaller\""
+          },
+          {
+            "comment": "Add support for filtered installs when using workspaces"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add preliminary workspaces support for PNPM"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.27.3",
+      "tag": "@microsoft/rush_v5.27.3",
+      "date": "Fri, 03 Jul 2020 06:16:09 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Added support for new format used by pnpm for tarball URLs that now begin with an @ symbol"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.27.2",
       "tag": "@microsoft/rush_v5.27.2",
       "date": "Thu, 02 Jul 2020 01:52:18 GMT",
@@ -1771,7 +1821,7 @@
       "comments": {
         "major": [
           {
-            "comment": "Complete release notes are here: https://github.com/Microsoft/web-build-tools/wiki#november-3-2017---rush-4-released"
+            "comment": "Complete release notes are here: https://github.com/microsoft/web-build-tools/wiki#november-3-2017---rush-4-released"
           },
           {
             "comment": "Adding custom commands and options."

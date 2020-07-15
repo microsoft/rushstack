@@ -11,6 +11,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@jest/types",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@microsoft/api-documenter",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -171,7 +175,15 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/heft",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/localization-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@rushstack/module-minifier-plugin",
       "allowedCategories": [ "tests" ]
     },
     {
@@ -471,6 +483,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jest-snapshot",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jju",
       "allowedCategories": [ "libraries" ]
     },
@@ -480,6 +496,10 @@
     },
     {
       "name": "jsdom",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jszip",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -611,6 +631,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "terser",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "through2",
       "allowedCategories": [ "libraries" ]
     },
@@ -665,6 +689,10 @@
     {
       "name": "webpack-dev-server",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "webpack-sources",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "wordwrap",

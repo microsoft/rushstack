@@ -4,8 +4,10 @@
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
-  ICommandLineActionOptions
+  ICommandLineActionOptions,
+  CommandLineIntegerParameter
 } from '@rushstack/ts-command-line';
+import * as webpack from 'webpack';
 import { SyncHook, AsyncParallelHook, AsyncSeriesHook } from 'tapable';
 import { performance } from 'perf_hooks';
 
@@ -77,15 +79,98 @@ export interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsC
 /**
  * @public
  */
+export interface IEmitModuleKindBase<TModuleKind> {
+  moduleKind: TModuleKind;
+  outFolderPath: string;
+}
+
+/**
+ * @public
+ */
+export type IEmitModuleKind = IEmitModuleKindBase<
+  'commonjs' | 'amd' | 'umd' | 'system' | 'es2015' | 'esnext'
+>;
+
+/**
+ * @public
+ */
+export type CopyFromCacheMode = 'hardlink' | 'copy';
+
+/**
+ * @public
+ */
+export interface ISharedTypeScriptConfiguration {
+  /**
+   * Can be set to 'copy' or 'hardlink'. If set to 'copy', copy files from cache. If set to 'hardlink', files will be
+   * hardlinked to the cache location. This option is useful when producing a tarball of build output as TAR files
+   * don't handle these hardlinks correctly. 'hardlink' is the default behavior.
+   */
+  copyFromCacheMode?: CopyFromCacheMode | undefined;
+
+  /**
+   * If provided, emit these module kinds in addition to the modules specified in the tsconfig.
+   * Note that this option only applies to the main tsconfig.json configuration.
+   */
+  additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
+
+  /**
+   * Set this to change the maximum write parallelism. The default is 50.
+   */
+  maxWriteParallelism: number;
+}
+
+/**
+ * @public
+ */
+export interface ITypeScriptConfiguration extends ISharedTypeScriptConfiguration {
+  tsconfigPaths: string[];
+  isLintingEnabled: boolean | undefined;
+}
+
+/**
+ * @public
+ */
 export class CompileStageHooks extends BuildStageHooksBase {
+  public readonly configureTypeScript: AsyncSeriesHook = new AsyncSeriesHook();
   public readonly configureCopyStaticAssets: AsyncSeriesHook = new AsyncSeriesHook();
+
+  public readonly afterConfigureTypeScript: AsyncSeriesHook = new AsyncSeriesHook();
+  public readonly afterConfigureCopyStaticAssets: AsyncSeriesHook = new AsyncSeriesHook();
+}
+
+/**
+ * @public
+ */
+export class BundleStageHooks extends BuildStageHooksBase {
+  public readonly configureWebpack: AsyncSeriesHook = new AsyncSeriesHook();
+  public readonly afterConfigureWebpack: AsyncSeriesHook = new AsyncSeriesHook();
 }
 
 /**
  * @public
  */
 export interface ICompileStageProperties {
+  typeScriptConfiguration: ITypeScriptConfiguration;
   copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
+}
+
+/**
+ * @public
+ */
+export interface IBundleStageProperties {
+  /**
+   * A path to a Webpack configuration JS file. If this isn't specified, and a Webpack
+   * configuration isn't specified via another plugin, Webpack won't be run.
+   */
+  webpackConfigFilePath?: string;
+
+  /**
+   * The configuration used by the Webpack plugin. This must be populated
+   * for Webpack to run. If webpackConfigFilePath is specified,
+   * this will be populated automatically with the exports of the
+   * config file referenced in that property.
+   */
+  webpackConfiguration?: webpack.Configuration;
 }
 
 /**
@@ -101,7 +186,7 @@ export interface ICompileStage extends IBuildStage<CompileStageHooks, ICompileSt
 /**
  * @public
  */
-export interface IBundleStage extends IBuildStage<BuildStageHooksBase, {}> {}
+export interface IBundleStage extends IBuildStage<BundleStageHooks, IBundleStageProperties> {}
 
 /**
  * @public
@@ -135,6 +220,7 @@ export interface IBuildActionProperties {
   maxOldSpaceSize?: string;
   verboseFlag: boolean;
   watchMode: boolean;
+  webpackStats?: webpack.Stats;
 }
 
 /**
@@ -150,6 +236,7 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
   private _liteFlag: CommandLineFlagParameter;
   private _cleanFlag: CommandLineFlagParameter;
   private _maxOldSpaceSizeParameter: CommandLineStringParameter;
+  private _typescriptMaxWriteParallelismParamter: CommandLineIntegerParameter;
 
   private _cleanAction: CleanAction;
 
@@ -206,6 +293,14 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
       parameterLongName: '--watch',
       description: 'If provided, run tests in watch mode.'
     });
+
+    this._typescriptMaxWriteParallelismParamter = this.defineIntegerParameter({
+      parameterLongName: '--typescript-max-write-parallelism',
+      argumentName: 'PARALLEILSM',
+      description:
+        'Set this to change the maximum write parallelism. This parameter overrides ' +
+        'what is set in typescript.json. The default is 50.'
+    });
   }
 
   protected async actionExecute(actionContext: IBuildActionContext): Promise<void> {
@@ -222,6 +317,13 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
     const compileStage: ICompileStage = {
       hooks: new CompileStageHooks(),
       properties: {
+        typeScriptConfiguration: {
+          tsconfigPaths: [],
+          isLintingEnabled: !actionContext.properties.liteFlag,
+          copyFromCacheMode: undefined,
+          additionalModuleKindsToEmit: undefined,
+          maxWriteParallelism: 50
+        },
         copyStaticAssetsConfiguration: {
           fileExtensions: [],
           excludeGlobs: [],
@@ -236,7 +338,7 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
     actionContext.hooks.compile.call(compileStage);
 
     const bundleStage: IBundleStage = {
-      hooks: new BuildStageHooksBase(),
+      hooks: new BundleStageHooks(),
       properties: {}
     };
     actionContext.hooks.bundle.call(bundleStage);
@@ -252,7 +354,16 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
       // concurrently with the expectation that the their promises will never resolve
       // and that they will handle watching filesystem changes
 
-      await compileStage.hooks.configureCopyStaticAssets.promise();
+      await Promise.all([
+        compileStage.hooks.configureTypeScript.promise(),
+        compileStage.hooks.configureCopyStaticAssets.promise(),
+        bundleStage.hooks.configureWebpack.promise()
+      ]);
+      await Promise.all([
+        compileStage.hooks.afterConfigureTypeScript.promise(),
+        compileStage.hooks.afterConfigureCopyStaticAssets.promise(),
+        bundleStage.hooks.afterConfigureWebpack.promise()
+      ]);
 
       await Promise.all([
         this._runStageWithLogging('Pre-compile', preCompileStage),
@@ -263,9 +374,21 @@ export class BuildAction extends HeftActionBase<BuildHooks, IBuildActionProperti
     } else {
       await this._runStageWithLogging('Pre-compile', preCompileStage);
 
-      await compileStage.hooks.configureCopyStaticAssets.promise();
+      await Promise.all([
+        compileStage.hooks.configureTypeScript.promise(),
+        compileStage.hooks.configureCopyStaticAssets.promise()
+      ]);
+      await Promise.all([
+        compileStage.hooks.afterConfigureTypeScript.promise(),
+        compileStage.hooks.afterConfigureCopyStaticAssets.promise()
+      ]);
+      if (this._typescriptMaxWriteParallelismParamter.value) {
+        compileStage.properties.typeScriptConfiguration.maxWriteParallelism = this._typescriptMaxWriteParallelismParamter.value;
+      }
       await this._runStageWithLogging('Compile', compileStage);
 
+      await bundleStage.hooks.configureWebpack.promise();
+      await bundleStage.hooks.afterConfigureWebpack.promise();
       await this._runStageWithLogging('Bundle', bundleStage);
 
       await this._runStageWithLogging('Post-build', postBuildStage);

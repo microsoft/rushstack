@@ -10,11 +10,16 @@ import { IHeftPlugin } from './IHeftPlugin';
 import { HeftSession } from './HeftSession';
 
 // Default plugins
+import { TypeScriptPlugin } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
 import { RushActionConfigurationFilesPlugin } from '../plugins/ActionConfigurationLoaders/RushActionConfigurationFilesPlugin';
 import { ProjectActionConfigurationFilesPlugin } from '../plugins/ActionConfigurationLoaders/ProjectActionConfigurationFilesPlugin';
-import { ResolveActionConfigurationPathsPlugin } from '../plugins/ResolveActionConfigurationPathsPlugin';
 import { CleanPlugin } from '../plugins/CleanPlugin';
 import { CopyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
+import { PackageJsonConfigurationPlugin } from '../plugins/PackageJsonConfigurationPlugin';
+import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
+import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
+import { BasicConfigureWebpackPlugin } from '../plugins/Webpack/BasicConfigureWebpackPlugin';
+import { WebpackPlugin } from '../plugins/Webpack/WebpackPlugin';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
@@ -41,11 +46,16 @@ export class PluginManager {
   }
 
   public initializeDefaultPlugins(): void {
+    this._applyPlugin(new TypeScriptPlugin());
     this._applyPlugin(new RushActionConfigurationFilesPlugin());
     this._applyPlugin(new ProjectActionConfigurationFilesPlugin());
-    this._applyPlugin(new ResolveActionConfigurationPathsPlugin());
     this._applyPlugin(new CopyStaticAssetsPlugin());
     this._applyPlugin(new CleanPlugin());
+    this._applyPlugin(new PackageJsonConfigurationPlugin());
+    this._applyPlugin(new ApiExtractorPlugin());
+    this._applyPlugin(new JestPlugin());
+    this._applyPlugin(new BasicConfigureWebpackPlugin());
+    this._applyPlugin(new WebpackPlugin());
   }
 
   public initializePlugin(pluginSpecifier: string, options?: object): void {

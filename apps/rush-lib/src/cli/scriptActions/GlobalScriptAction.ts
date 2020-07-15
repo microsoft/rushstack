@@ -8,10 +8,11 @@ import * as path from 'path';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { Utilities } from '../../utilities/Utilities';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
-import { FileSystem, LockFile, IPackageJson, JsonFile, PackageName } from '@rushstack/node-core-library';
-import { InstallHelpers } from '../../logic/InstallHelpers';
+import { FileSystem, LockFile, IPackageJson, JsonFile } from '@rushstack/node-core-library';
+import { InstallHelpers } from '../../logic/installManager/InstallHelpers';
 import { RushConstants } from '../../logic/RushConstants';
 import { LastInstallFlag } from '../../api/LastInstallFlag';
+import { Autoinstaller } from '../../logic/Autoinstaller';
 
 /**
  * Constructor parameters for GlobalScriptAction.
@@ -34,7 +35,7 @@ export interface IGlobalScriptActionOptions extends IBaseScriptActionOptions {
 export class GlobalScriptAction extends BaseScriptAction {
   private readonly _shellCommand: string;
   private readonly _autoinstallerName: string;
-  private readonly _autoinstallerNameFullPath: string;
+  private readonly _autoinstallerFullPath: string;
 
   public constructor(options: IGlobalScriptActionOptions) {
     super(options);
@@ -42,32 +43,24 @@ export class GlobalScriptAction extends BaseScriptAction {
     this._autoinstallerName = options.autoinstallerName || '';
 
     if (this._autoinstallerName) {
-      const error: string = PackageName.tryParse(this._autoinstallerName).error;
-      if (error) {
-        throw new Error(
-          `The custom command "${this.actionName}" specifies a "autoinstallerName" containing` +
-            ` invalid characters: ` +
-            error
-        );
-      }
+      Autoinstaller.validateName(this._autoinstallerName);
 
       // Example: .../common/autoinstallers/my-task
-      this._autoinstallerNameFullPath = path.join(
-        this.rushConfiguration.commonFolder,
-        'autoinstallers',
+      this._autoinstallerFullPath = path.join(
+        this.rushConfiguration.commonAutoinstallersFolder,
         this._autoinstallerName
       );
 
-      if (!FileSystem.exists(this._autoinstallerNameFullPath)) {
+      if (!FileSystem.exists(this._autoinstallerFullPath)) {
         throw new Error(
           `The custom command "${this.actionName}" specifies an "autoinstallerName" setting` +
             ' but the path does not exist: ' +
-            this._autoinstallerNameFullPath
+            this._autoinstallerFullPath
         );
       }
 
       // Example: .../common/autoinstallers/my-task/package.json
-      const packageJsonPath: string = path.join(this._autoinstallerNameFullPath, 'package.json');
+      const packageJsonPath: string = path.join(this._autoinstallerFullPath, 'package.json');
       if (!FileSystem.exists(packageJsonPath)) {
         throw new Error(
           `The custom command "${this.actionName}" specifies an "autoinstallerName" setting` +
@@ -86,7 +79,7 @@ export class GlobalScriptAction extends BaseScriptAction {
         );
       }
     } else {
-      this._autoinstallerNameFullPath = '';
+      this._autoinstallerFullPath = '';
     }
   }
 
@@ -100,21 +93,21 @@ export class GlobalScriptAction extends BaseScriptAction {
     // Example: common/autoinstallers/my-task/package.json
     const relativePathForLogs: string = path.relative(
       this.rushConfiguration.rushJsonFolder,
-      this._autoinstallerNameFullPath
+      this._autoinstallerFullPath
     );
 
     console.log(`Acquiring lock for "${relativePathForLogs}" folder...`);
 
-    const lock: LockFile = await LockFile.acquire(this._autoinstallerNameFullPath, 'autoinstaller');
+    const lock: LockFile = await LockFile.acquire(this._autoinstallerFullPath, 'autoinstaller');
 
     // Example: .../common/autoinstallers/my-task/.rush/temp
     const lastInstallFlagPath: string = path.join(
-      this._autoinstallerNameFullPath,
+      this._autoinstallerFullPath,
       RushConstants.projectRushFolderName,
       'temp'
     );
 
-    const packageJsonPath: string = path.join(this._autoinstallerNameFullPath, 'package.json');
+    const packageJsonPath: string = path.join(this._autoinstallerFullPath, 'package.json');
     const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
 
     const lastInstallFlag: LastInstallFlag = new LastInstallFlag(lastInstallFlagPath, {
@@ -126,7 +119,7 @@ export class GlobalScriptAction extends BaseScriptAction {
 
     if (!lastInstallFlag.isValid() || lock.dirtyWhenAcquired) {
       // Example: ../common/autoinstallers/my-task/node_modules
-      const nodeModulesFolder: string = path.join(this._autoinstallerNameFullPath, 'node_modules');
+      const nodeModulesFolder: string = path.join(this._autoinstallerFullPath, 'node_modules');
 
       if (FileSystem.exists(nodeModulesFolder)) {
         console.log('Deleting old files from ' + nodeModulesFolder);
@@ -134,18 +127,16 @@ export class GlobalScriptAction extends BaseScriptAction {
       }
 
       // Copy: .../common/autoinstallers/my-task/.npmrc
-      Utilities.syncNpmrc(this.rushConfiguration.commonRushConfigFolder, this._autoinstallerNameFullPath);
+      Utilities.syncNpmrc(this.rushConfiguration.commonRushConfigFolder, this._autoinstallerFullPath);
 
-      console.log(`Installing dependencies under ${this._autoinstallerNameFullPath}...\n`);
+      console.log(`Installing dependencies under ${this._autoinstallerFullPath}...\n`);
 
-      Utilities.executeCommand(
-        this.rushConfiguration.packageManagerToolFilename,
-        ['install', '--frozen-lockfile'],
-        this._autoinstallerNameFullPath,
-        undefined,
-        /* suppressOutput */ false,
-        /* keepEnvironment */ true
-      );
+      Utilities.executeCommand({
+        command: this.rushConfiguration.packageManagerToolFilename,
+        args: ['install', '--frozen-lockfile'],
+        workingDirectory: this._autoinstallerFullPath,
+        keepEnvironment: true
+      });
 
       // Create file: ../common/autoinstallers/my-task/.rush/temp/last-install.flag
       lastInstallFlag.create();
@@ -164,11 +155,7 @@ export class GlobalScriptAction extends BaseScriptAction {
     if (this._autoinstallerName) {
       await this._prepareAutoinstallerName();
 
-      const autoinstallerNameBinPath: string = path.join(
-        this._autoinstallerNameFullPath,
-        'node_modules',
-        '.bin'
-      );
+      const autoinstallerNameBinPath: string = path.join(this._autoinstallerFullPath, 'node_modules', '.bin');
       additionalPathFolders.push(autoinstallerNameBinPath);
     }
 

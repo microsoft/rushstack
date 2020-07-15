@@ -76,5 +76,6 @@ dist
 # Visual Studio Code
 .vscode
 
-# Remove eventually
-package-deps.json
+# Heft
+*/*/.heft/build-cache/**
+*/*/.heft/temp/**

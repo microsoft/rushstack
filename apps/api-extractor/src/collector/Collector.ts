@@ -495,8 +495,11 @@ export class Collector {
       if (entity.exportNames.has(idealNameForEmit)) {
         // ...except that if it conflicts with a global name, then the global name wins
         if (!this.globalVariableAnalyzer.hasGlobalName(idealNameForEmit)) {
-          entity.nameForEmit = idealNameForEmit;
-          continue;
+          // ...also avoid "default" which can interfere with "export { default } from 'some-module;'"
+          if (idealNameForEmit !== 'default') {
+            entity.nameForEmit = idealNameForEmit;
+            continue;
+          }
         }
       }
 

@@ -24,6 +24,7 @@ import { YarnPackageManager } from './packageManager/YarnPackageManager';
 import { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { ExperimentsConfiguration } from './ExperimentsConfiguration';
 import { PackageNameParsers } from './PackageNameParsers';
+import { RepoStateFile } from '../logic/RepoStateFile';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'master';
@@ -38,6 +39,7 @@ const knownRushConfigFilenames: string[] = [
   '.npmrc-publish',
   RushConstants.pinnedVersionsFilename,
   RushConstants.commonVersionsFilename,
+  RushConstants.repoStateFilename,
   RushConstants.browserApprovedPackagesFilename,
   RushConstants.nonbrowserApprovedPackagesFilename,
   RushConstants.versionPoliciesFilename,
@@ -168,6 +170,10 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    * {@inheritDoc PnpmOptionsConfiguration.preventManualShrinkwrapChanges}
    */
   preventManualShrinkwrapChanges?: boolean;
+  /**
+   * {@inheritDoc PnpmOptionsConfiguration.useWorkspaces}
+   */
+  useWorkspaces?: boolean;
 }
 
 /**
@@ -334,7 +340,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * @remarks
    * This feature protects against accidental inconsistencies that may be introduced
    * if the PNPM shrinkwrap file (`pnpm-lock.yaml`) is manually edited.  When this
-   * feature is enabled, `rush update` will append a hash to the file as a YAML comment,
+   * feature is enabled, `rush update` will write a hash of the shrinkwrap contents to repo-state.json,
    * and then `rush update` and `rush install` will validate the hash.  Note that this does not prohibit
    * manual modifications, but merely requires `rush update` be run
    * afterwards, ensuring that PNPM can report or repair any potential inconsistencies.
@@ -345,6 +351,14 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * The default value is false.
    */
   public readonly preventManualShrinkwrapChanges: boolean;
+
+  /**
+   * If true, then Rush will use the workspaces feature to install and link packages when invoking PNPM.
+   *
+   * @remarks
+   * The default value is false.  (For now.)
+   */
+  public readonly useWorkspaces: boolean;
 
   /** @internal */
   public constructor(json: IPnpmOptionsJson, commonTempFolder: string) {
@@ -360,6 +374,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
     this.preventManualShrinkwrapChanges = !!json.preventManualShrinkwrapChanges;
+    this.useWorkspaces = !!json.useWorkspaces;
   }
 }
 
@@ -1046,6 +1061,14 @@ export class RushConfiguration {
   }
 
   /**
+   * The fully resolved path for the "autoinstallers" folder.
+   * Example: `C:\MyRepo\common\autoinstallers`
+   */
+  public get commonAutoinstallersFolder(): string {
+    return path.join(this._commonFolder, 'autoinstallers');
+  }
+
+  /**
    * The local folder that will store the NPM package cache.  Rush does not rely on the
    * npm's default global cache folder, because npm's caching implementation does not
    * reliably handle multiple processes.  (For example, if a build box is running
@@ -1423,6 +1446,28 @@ export class RushConfiguration {
   public getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration {
     const commonVersionsFilename: string = this.getCommonVersionsFilePath(variant);
     return CommonVersionsConfiguration.loadFromFile(commonVersionsFilename);
+  }
+
+  /**
+   * Gets the path to the repo-state.json file for a specific variant.
+   * @param variant - The name of the current variant in use by the active command.
+   */
+  public getRepoStateFilePath(variant?: string | undefined): string {
+    const repoStateFilename: string = path.join(
+      this.commonRushConfigFolder,
+      ...(variant ? [RushConstants.rushVariantsFolderName, variant] : []),
+      RushConstants.repoStateFilename
+    );
+    return repoStateFilename;
+  }
+
+  /**
+   * Gets the contents from the repo-state.json file for a specific variant.
+   * @param variant - The name of the current variant in use by the active command.
+   */
+  public getRepoState(variant?: string | undefined): RepoStateFile {
+    const repoStateFilename: string = this.getRepoStateFilePath(variant);
+    return RepoStateFile.loadFromFile(repoStateFilename, variant);
   }
 
   /**

@@ -18,6 +18,7 @@ import { PublishUtilities } from './PublishUtilities';
 import { ChangeManager } from './ChangeManager';
 import { TempProjectHelper } from './TempProjectHelper';
 import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from './pnpm/PnpmShrinkwrapFile';
+import { DependencySpecifier } from './DependencySpecifier';
 
 export class VersionManager {
   private _rushConfiguration: RushConfiguration;
@@ -371,7 +372,14 @@ export class VersionManager {
     oldDependencyVersion: string,
     newDependencyVersion: string
   ): void {
-    if (!semver.satisfies(updatedDependentProject.version, oldDependencyVersion) && !projectVersionChanged) {
+    const oldSpecifier: DependencySpecifier = new DependencySpecifier(
+      updatedDependentProject.name,
+      oldDependencyVersion
+    );
+    if (
+      !semver.satisfies(updatedDependentProject.version, oldSpecifier.versionSpecifier) &&
+      !projectVersionChanged
+    ) {
       this._addChange(changes, {
         changeType: ChangeType.patch,
         packageName: clonedProject.name

@@ -1,6 +1,34 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 02 Jul 2020 01:52:18 GMT and should not be manually modified.
+This log was last generated on Tue, 14 Jul 2020 05:20:56 GMT and should not be manually modified.
+
+## 5.29.0
+Tue, 14 Jul 2020 05:20:56 GMT
+
+### Updates
+
+- Give \"rush deploy\" the ability to select a subset of dependencies to copy over (#1978)
+- Fix an issue where package binaries where not created by "rush deploy" (#1982)
+- Add a new setting "folderToCopy" and new command-line parameter "--create-archive" for use with "rush deploy"
+
+## 5.28.0
+Wed, 08 Jul 2020 06:56:47 GMT
+
+### Minor changes
+
+- Add preliminary workspaces support for PNPM
+
+### Updates
+
+- Add new commands "rush init-autoinstaller" and "rush update-autoinstaller"
+- Add support for filtered installs when using workspaces
+
+## 5.27.3
+Fri, 03 Jul 2020 06:16:09 GMT
+
+### Updates
+
+- Added support for new format used by pnpm for tarball URLs that now begin with an @ symbol
 
 ## 5.27.2
 Thu, 02 Jul 2020 01:52:18 GMT
@@ -849,7 +877,7 @@ Sat, 4 Nov 2017 03:22:28 GMT
 
 ### Breaking changes
 
-- Complete release notes are here: https://github.com/Microsoft/web-build-tools/wiki#november-3-2017---rush-4-released
+- Complete release notes are here: https://github.com/microsoft/web-build-tools/wiki#november-3-2017---rush-4-released
 - Adding custom commands and options.
 - Adding rush version selector.
 - Updating the semantics of rush change.
