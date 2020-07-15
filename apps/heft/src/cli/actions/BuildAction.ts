@@ -163,6 +163,13 @@ export interface IBundleStageProperties {
    * configuration isn't specified via another plugin, Webpack won't be run.
    */
   webpackConfigFilePath?: string;
+
+  /**
+   * The configuration used by the Webpack plugin. This must be populated
+   * for Webpack to run. If {@link webpackConfigFilePath} is specified,
+   * this will be populated automatically with the exports of the
+   * config file referenced in that property.
+   */
   webpackConfiguration?: webpack.Configuration;
 }
 
