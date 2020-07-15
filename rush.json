@@ -528,6 +528,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-oldest-compiler-test",
+      "projectFolder": "build-tests/heft-oldest-compiler-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-webpack-test",
       "projectFolder": "build-tests/heft-webpack-test",
       "reviewCategory": "tests",

@@ -1,0 +1,3 @@
+{
+  "pathsToDelete": ["dist", "lib", "temp"]
+}
