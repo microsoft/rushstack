@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/heft",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/heft_v0.1.0",
+      "date": "Wed, 15 Jul 2020 18:29:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release"
+          }
+        ]
+      }
+    }
+  ]
+}
