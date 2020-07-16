@@ -102,6 +102,8 @@ export function getGitHashForFiles(filesToHash: string[], packagePath: string): 
   const changes: Map<string, string> = new Map<string, string>();
 
   if (filesToHash.length) {
+    // Use --stdin-paths arg to pass the list of files to git in order to avoid issues with
+    // command length
     const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
       'git',
       ['hash-object', '--stdin-paths'],
