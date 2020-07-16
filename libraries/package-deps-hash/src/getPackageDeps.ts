@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
+import * as path from 'path';
 import { Executable } from '@rushstack/node-core-library';
 
 import { IPackageDeps } from './IPackageDeps';
@@ -103,8 +104,8 @@ export function getGitHashForFiles(filesToHash: string[], packagePath: string): 
   if (filesToHash.length) {
     const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
       'git',
-      ['hash-object', ...filesToHash],
-      { currentWorkingDirectory: packagePath }
+      ['hash-object', '--stdin-paths'],
+      { input: filesToHash.map((x) => path.resolve(packagePath, x)).join('\n') }
     );
 
     if (result.status !== 0) {
