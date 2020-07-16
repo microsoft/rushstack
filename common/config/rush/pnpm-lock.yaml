@@ -105,7 +105,6 @@ importers:
       '@jest/reporters': 25.4.0
       '@rushstack/node-core-library': 'link:../../libraries/node-core-library'
       '@rushstack/ts-command-line': 'link:../../libraries/ts-command-line'
-      '@types/semver': 7.3.1
       '@types/tapable': 1.0.5
       '@types/webpack': 4.39.8
       chokidar: 3.4.0
@@ -125,6 +124,7 @@ importers:
       '@types/glob': 7.1.1
       '@types/node': 10.17.13
       '@types/resolve': 1.17.1
+      '@types/semver': 7.3.1
     specifiers:
       '@jest/core': ~25.4.0
       '@jest/reporters': ~25.4.0
@@ -464,15 +464,13 @@ importers:
       '@types/jest': 25.2.1
   ../../build-tests/heft-oldest-compiler-test:
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.0': 'link:../../stack/rush-stack-compiler-3.0'
+      '@microsoft/rush-stack-compiler-2.4': 'link:../../stack/rush-stack-compiler-2.4'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
-      '@types/jest': 25.2.1
     specifiers:
-      '@microsoft/rush-stack-compiler-3.0': 'workspace:*'
+      '@microsoft/rush-stack-compiler-2.4': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
-      '@types/jest': 25.2.1
   ../../build-tests/heft-webpack-test:
     dependencies:
       '@microsoft/rush-stack-compiler-3.9': 'link:../../stack/rush-stack-compiler-3.9'
