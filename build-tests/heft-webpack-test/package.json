@@ -1,7 +1,7 @@
 {
-  "name": "heft-test-webpack",
+  "name": "heft-webpack-test",
   "description": "Building this project exercises basic Webpack build in Heft.",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "build": "heft build --clean",
