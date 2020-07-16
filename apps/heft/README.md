@@ -1,6 +1,6 @@
 # @rushstack/heft
 
-> 🚨 *The Heft project is still in early preview. Please report any issues that you encounter.* 🚨
+> 🚨 *This is an early preview release. Please report issues!* 🚨
 
 ![heft](https://github.com/microsoft/rushstack/blob/master/common/wiki-images/heft-300x120.png?raw=true)
 
@@ -30,9 +30,9 @@ other similar systems, Heft has some unique design goals:
   Working from a more standardized foundation makes custom rigs more understandable for newcomers.
 
 - **Optimized**: Heft tracks fine-grained performance metrics at each step.  Although Heft is still in its
-  early stages, it already implements optimizations such as: incremental compilation, symlinking of cache files
-  to avoid copying, reuse of compiler state across multiple emit targets, and a single compiler pass for
-  Jest and Webpack.
+  early stages, the TypeScript plugin already implements optimizations such as: filesystem caching,
+  incremental compilation, symlinking of cache files to avoid copying, hosting the compiler in a separate
+  worker process, and a single compiler pass for Jest and Webpack.
 
 Heft is still in preview and has not officially shipped yet.  The following tasks are already available:
 
@@ -40,7 +40,8 @@ Heft is still in preview and has not officially shipped yet.  The following task
 - **Linter**: [TypeScript-ESLint](https://github.com/typescript-eslint/typescript-eslint), plus legacy support
   for projects that still use [TSLint](https://palantir.github.io/tslint/)
 - **Test runner**: [Jest](https://www.npmjs.com/package/jest)
-- **Bundler**: [Webpack](https://webpack.js.org/), with "watch" mode
+- **Bundler**: [Webpack](https://webpack.js.org/), with "watch" mode for recompiling, but `webpack-dev-server`
+  is not implemented yet for locally running the app
 - **.d.ts bundler**: [API Extractor](https://api-extractor.com/)
 - **Asset management**: Heft also includes a `copy-static-assets` helper supporting arbitrary globs, with "watch" mode
 
