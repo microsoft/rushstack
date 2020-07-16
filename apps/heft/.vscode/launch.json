@@ -18,9 +18,10 @@
       "request": "launch",
       "name": "heft-oldest-compiler-test",
       "program": "${workspaceFolder}/lib/start.js",
-      "cwd": "${workspaceFolder}/../../build-tests/heft-oldest-compiler-test/",
-      "args": ["--debug", "build", "--clean"],
-      "console": "integratedTerminal"
+      "cwd": "C:\\Git\\tsdoc\\tsdoc",
+      "args": ["--debug", "test", "--clean"],
+      "console": "integratedTerminal",
+      "sourceMaps": false
     }
   ]
 }
