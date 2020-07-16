@@ -890,9 +890,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
     if (this._capabilities.incrementalProgram) {
       tsconfig.options.incremental = true;
+      tsconfig.options.tsBuildInfoFile = this._tsCacheFilePath;
     }
-
-    tsconfig.options.tsBuildInfoFile = this._tsCacheFilePath;
 
     return tsconfig;
   }
