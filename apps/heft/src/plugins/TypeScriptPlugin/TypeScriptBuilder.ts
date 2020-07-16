@@ -348,14 +348,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       () => {
         this._overrideTypeScriptReadJson(ts);
         const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
-
-        let _compilerHost: TTypescript.CompilerHost;
-        if (this._capabilities.incrementalProgram) {
-          _compilerHost = this._buildIncrementalCompilerHost(ts, _tsconfig);
-        } else {
-          _compilerHost = ts.createCompilerHost(_tsconfig.options);
-        }
-
+        const _compilerHost: TTypescript.CompilerHost = this._buildIncrementalCompilerHost(ts, _tsconfig);
         return {
           tsconfig: _tsconfig,
           compilerHost: _compilerHost
@@ -912,7 +905,13 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     ts: ExtendedTypeScript,
     tsconfig: TTypescript.ParsedCommandLine
   ): TTypescript.CompilerHost {
-    const compilerHost: TTypescript.CompilerHost = ts.createIncrementalCompilerHost(tsconfig.options);
+    let compilerHost: TTypescript.CompilerHost;
+
+    if (this._capabilities.incrementalProgram) {
+      compilerHost = ts.createIncrementalCompilerHost(tsconfig.options);
+    } else {
+      compilerHost = ts.createCompilerHost(tsconfig.options);
+    }
 
     compilerHost.realpath = this._fileSystem.getRealPath.bind(this._fileSystem);
     compilerHost.readFile = (filePath: string) => {
