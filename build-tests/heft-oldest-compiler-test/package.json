@@ -11,7 +11,6 @@
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@microsoft/rush-stack-compiler-3.0": "workspace:*",
-    "@rushstack/eslint-config": "workspace:*",
-    "@types/jest": "25.2.1"
+    "@rushstack/eslint-config": "workspace:*"
   }
 }
