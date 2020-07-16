@@ -123,8 +123,15 @@ export abstract class LinterBase<TLintResult> {
         continue;
       }
 
-      const version: string = sourceFile.version;
-      if (cachedNoFailureFileVersions.get(filePath) !== version || options.changedFiles.has(sourceFile)) {
+      // Older compilers don't compute the ts.SourceFile.version.  If it is missing, then we can't skip processing
+      const version: string = sourceFile.version || '';
+      const cachedVersion: string = cachedNoFailureFileVersions.get(filePath) || '';
+      if (
+        cachedVersion === '' ||
+        version === '' ||
+        cachedVersion !== version ||
+        options.changedFiles.has(sourceFile)
+      ) {
         this._measurePerformance(this._linterName, () => {
           const failures: TLintResult[] = this.lintFile(sourceFile);
           if (failures.length === 0) {

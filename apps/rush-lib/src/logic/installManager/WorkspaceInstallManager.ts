@@ -5,7 +5,13 @@ import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import { FileSystem, InternalError, MapExtensions, JsonFile } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  InternalError,
+  MapExtensions,
+  JsonFile,
+  FileConstants
+} from '@rushstack/node-core-library';
 
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
@@ -287,11 +293,15 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
     }
 
-    // Also consider timestamps for all the project node_modules folders.
-    // Example: "C:\MyRepo\projects\projectA\node_modules"
+    // Also consider timestamps for all the project node_modules folders, as well as the package.json
+    // files
+    // Example: [ "C:\MyRepo\projects\projectA\node_modules", "C:\MyRepo\projects\projectA\package.json" ]
     potentiallyChangedFiles.push(
       ...this.rushConfiguration.projects.map((x) => {
         return path.join(x.projectFolder, RushConstants.nodeModulesFolderName);
+      }),
+      ...this.rushConfiguration.projects.map((x) => {
+        return path.join(x.projectFolder, FileConstants.PackageJson);
       })
     );
 

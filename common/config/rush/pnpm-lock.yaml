@@ -112,6 +112,7 @@ importers:
       glob-escape: 0.0.2
       jest-snapshot: 25.4.0
       resolve: 1.17.0
+      semver: 7.3.2
       tapable: 1.1.3
       true-case-path: 2.2.1
       webpack: 4.31.0_webpack@4.31.0
@@ -123,6 +124,7 @@ importers:
       '@types/glob': 7.1.1
       '@types/node': 10.17.13
       '@types/resolve': 1.17.1
+      '@types/semver': 7.3.1
     specifiers:
       '@jest/core': ~25.4.0
       '@jest/reporters': ~25.4.0
@@ -135,6 +137,7 @@ importers:
       '@types/glob': 7.1.1
       '@types/node': 10.17.13
       '@types/resolve': 1.17.1
+      '@types/semver': ~7.3.1
       '@types/tapable': 1.0.5
       '@types/webpack': 4.39.8
       chokidar: ~3.4.0
@@ -142,6 +145,7 @@ importers:
       glob-escape: ~0.0.2
       jest-snapshot: ~25.4.0
       resolve: ~1.17.0
+      semver: ~7.3.0
       tapable: 1.1.3
       true-case-path: ~2.2.1
       webpack: ~4.31.0
@@ -447,24 +451,33 @@ importers:
       api-extractor-lib1-test: 'workspace:*'
       fs-extra: ~7.0.1
       typescript: ~3.9.5
-  ../../build-tests/heft-test-01:
+  ../../build-tests/heft-node-test:
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.7': 'link:../../stack/rush-stack-compiler-3.7'
+      '@microsoft/rush-stack-compiler-3.9': 'link:../../stack/rush-stack-compiler-3.9'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
       '@types/jest': 25.2.1
     specifiers:
-      '@microsoft/rush-stack-compiler-3.7': 'workspace:*'
+      '@microsoft/rush-stack-compiler-3.9': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
       '@types/jest': 25.2.1
-  ../../build-tests/heft-test-webpack:
+  ../../build-tests/heft-oldest-compiler-test:
+    devDependencies:
+      '@microsoft/rush-stack-compiler-2.4': 'link:../../stack/rush-stack-compiler-2.4'
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
+    specifiers:
+      '@microsoft/rush-stack-compiler-2.4': 'workspace:*'
+      '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
+  ../../build-tests/heft-webpack-test:
     dependencies:
-      '@microsoft/rush-stack-compiler-3.7': 'link:../../stack/rush-stack-compiler-3.7'
+      '@microsoft/rush-stack-compiler-3.9': 'link:../../stack/rush-stack-compiler-3.9'
       '@rushstack/heft': 'link:../../apps/heft'
       '@types/webpack-env': 1.13.0
     specifiers:
-      '@microsoft/rush-stack-compiler-3.7': 'workspace:*'
+      '@microsoft/rush-stack-compiler-3.9': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
       '@types/webpack-env': 1.13.0
   ../../build-tests/localization-plugin-test-01:
@@ -14194,3 +14207,4 @@ packages:
       commander: 2.20.3
     resolution:
       integrity: sha512-DUOKC/IhbkdLKKiV89gw9DUauTV8U/8yJl1sjf6MtDmzevLKOF2duNJ495S3MFVjqZarr+qNGCPbkg4mu4PpLw==
+registry: ''

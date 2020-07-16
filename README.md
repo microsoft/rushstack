@@ -28,6 +28,7 @@ for large scale TypeScript monorepos.
 | [/apps/api-documenter](./apps/api-documenter/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-documenter.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-documenter) | [changelog](./apps/api-documenter/CHANGELOG.md) | [@microsoft/api-documenter](https://www.npmjs.com/package/@microsoft/api-documenter) |
 | [/apps/api-extractor](./apps/api-extractor/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-extractor.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-extractor) | [changelog](./apps/api-extractor/CHANGELOG.md) | [@microsoft/api-extractor](https://www.npmjs.com/package/@microsoft/api-extractor) |
 | [/apps/api-extractor-model](./apps/api-extractor-model/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-extractor-model.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-extractor-model) | [changelog](./apps/api-extractor-model/CHANGELOG.md) | [@microsoft/api-extractor-model](https://www.npmjs.com/package/@microsoft/api-extractor-model) |
+| [/apps/heft](./apps/heft/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fheft.svg)](https://badge.fury.io/js/%40rushstack%2Fheft) | [changelog](./apps/heft/CHANGELOG.md) | [@rushstack/heft](https://www.npmjs.com/package/@rushstack/heft) |
 | [/apps/rush](./apps/rush/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush.svg)](https://badge.fury.io/js/%40microsoft%2Frush) | [changelog](./apps/rush/CHANGELOG.md) | [@microsoft/rush](https://www.npmjs.com/package/@microsoft/rush) |
 | [/apps/rush-buildxl](./apps/rush-buildxl/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-buildxl.svg)](https://badge.fury.io/js/%40microsoft%2Frush-buildxl) | | [@microsoft/rush-buildxl](https://www.npmjs.com/package/@microsoft/rush-buildxl) |
 | [/apps/rush-lib](./apps/rush-lib/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-lib.svg)](https://badge.fury.io/js/%40microsoft%2Frush-lib) | | [@microsoft/rush-lib](https://www.npmjs.com/package/@microsoft/rush-lib) |
@@ -66,6 +67,7 @@ for large scale TypeScript monorepos.
 | [/webpack/loader-load-themed-styles](./webpack/loader-load-themed-styles/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Floader-load-themed-styles.svg)](https://badge.fury.io/js/%40microsoft%2Floader-load-themed-styles) | [changelog](./webpack/loader-load-themed-styles/CHANGELOG.md) | [@microsoft/loader-load-themed-styles](https://www.npmjs.com/package/@microsoft/loader-load-themed-styles) |
 | [/webpack/loader-raw-script](./webpack/loader-raw-script/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Floader-raw-script.svg)](https://badge.fury.io/js/%40rushstack%2Floader-raw-script) | [changelog](./webpack/loader-raw-script/CHANGELOG.md) | [@rushstack/loader-raw-script](https://www.npmjs.com/package/@rushstack/loader-raw-script) |
 | [/webpack/localization-plugin](./webpack/localization-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Flocalization-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Flocalization-plugin) | [changelog](./webpack/localization-plugin/CHANGELOG.md) | [@rushstack/localization-plugin](https://www.npmjs.com/package/@rushstack/localization-plugin) |
+| [/webpack/module-minifier-plugin](./webpack/module-minifier-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fmodule-minifier-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fmodule-minifier-plugin) | [changelog](./webpack/module-minifier-plugin/CHANGELOG.md) | [@rushstack/module-minifier-plugin](https://www.npmjs.com/package/@rushstack/module-minifier-plugin) |
 | [/webpack/set-webpack-public-path-plugin](./webpack/set-webpack-public-path-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fset-webpack-public-path-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fset-webpack-public-path-plugin) | [changelog](./webpack/set-webpack-public-path-plugin/CHANGELOG.md) | [@rushstack/set-webpack-public-path-plugin](https://www.npmjs.com/package/@rushstack/set-webpack-public-path-plugin) |
 
 
@@ -75,7 +77,6 @@ for large scale TypeScript monorepos.
 
 | Folder | Description |
 | ------ | -----------|
-| [/apps/heft](./apps/heft/) | Heft extensible build framework's base package. |
 | [/build-tests/api-documenter-test](./build-tests/api-documenter-test/) | Building this project is a regression test for api-documenter |
 | [/build-tests/api-extractor-lib1-test](./build-tests/api-extractor-lib1-test/) | Building this project is a regression test for api-extractor |
 | [/build-tests/api-extractor-lib2-test](./build-tests/api-extractor-lib2-test/) | Building this project is a regression test for api-extractor |
@@ -85,6 +86,9 @@ for large scale TypeScript monorepos.
 | [/build-tests/api-extractor-test-02](./build-tests/api-extractor-test-02/) | Building this project is a regression test for api-extractor |
 | [/build-tests/api-extractor-test-03](./build-tests/api-extractor-test-03/) | Building this project is a regression test for api-extractor |
 | [/build-tests/api-extractor-test-04](./build-tests/api-extractor-test-04/) | Building this project is a regression test for api-extractor |
+| [/build-tests/heft-node-test](./build-tests/heft-node-test/) | Building this project is a very simple regression test for heft |
+| [/build-tests/heft-oldest-compiler-test](./build-tests/heft-oldest-compiler-test/) | Building this project is a very simple regression test for heft |
+| [/build-tests/heft-webpack-test](./build-tests/heft-webpack-test/) | Building this project exercises basic Webpack build in Heft. |
 | [/build-tests/localization-plugin-test-01](./build-tests/localization-plugin-test-01/) | Building this project exercises @microsoft/localization-plugin. This tests that the plugin works correctly without any localized resources. |
 | [/build-tests/localization-plugin-test-02](./build-tests/localization-plugin-test-02/) | Building this project exercises @microsoft/localization-plugin. This tests that the loader works correctly with the exportAsDefault option unset. |
 | [/build-tests/localization-plugin-test-03](./build-tests/localization-plugin-test-03/) | Building this project exercises @microsoft/localization-plugin. This tests that the plugin works correctly with the exportAsDefault option set to true. |
