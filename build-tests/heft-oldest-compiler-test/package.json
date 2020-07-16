@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@microsoft/rush-stack-compiler-3.0": "workspace:*",
+    "@microsoft/rush-stack-compiler-2.9": "workspace:*",
     "@rushstack/eslint-config": "workspace:*"
   }
 }

@@ -174,7 +174,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     }
     this._typescriptParsedVersion = parsedVersion;
 
-    // Detect what features this compiler supports
+    // Detect what features this compiler supports.  Note that manually comparing major/minor numbers
+    // loosens the matching to accept prereleases such as "3.6.0-dev.20190530"
     this._capabilities = {
       incrementalProgram: false
     };
@@ -185,7 +186,12 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       this._capabilities.incrementalProgram = true;
     }
 
-    if (this._typescriptParsedVersion.major < 3) {
+    // TypeScript 2.9 introduced "ts.getConfigFileParsingDiagnostics()" which we currently rely on.
+    // More fixups are required to support older versions.  We won't do that work unless someone requests it.
+    if (
+      this._typescriptParsedVersion.major < 2 ||
+      (this._typescriptParsedVersion.major === 2 && this._typescriptParsedVersion.minor < 9)
+    ) {
       // We don't use TerminalProviderSeverity.warning here because, if the person wants to take their chances with
       // a seemingly unsupported compiler, their build should be allowed to succeed.
       this._terminalProvider.write(
