@@ -11,8 +11,7 @@ import {
   Terminal,
   ITerminalProvider,
   JsonFile,
-  IPackageJson,
-  TerminalProviderSeverity
+  IPackageJson
 } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
 import { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.7';
@@ -186,29 +185,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       this._capabilities.incrementalProgram = true;
     }
 
-    // TypeScript 2.9 introduced "ts.getConfigFileParsingDiagnostics()" which we currently rely on.
-    // More fixups are required to support older versions.  We won't do that work unless someone requests it.
-    if (
-      this._typescriptParsedVersion.major < 2 ||
-      (this._typescriptParsedVersion.major === 2 && this._typescriptParsedVersion.minor < 9)
-    ) {
-      // We don't use TerminalProviderSeverity.warning here because, if the person wants to take their chances with
-      // a seemingly unsupported compiler, their build should be allowed to succeed.
-      this._terminalProvider.write(
-        `The TypeScript compiler version ${this._typescriptVersion} is very old` +
-          ` and has not been tested with Heft; it may not work correctly.` +
-          this._terminalProvider.eolCharacter,
-        TerminalProviderSeverity.log
-      );
-    } else if (this._typescriptParsedVersion.major > 3) {
-      this._terminalProvider.write(
-        `The TypeScript compiler version ${this._typescriptVersion} is newer` +
-          ` than the latest version that was tested with Heft; it may not work correctly.` +
-          this._terminalProvider.eolCharacter,
-        TerminalProviderSeverity.log
-      );
-    }
-
     this._configuration.buildCacheFolder = this._configuration.buildCacheFolder.replace(/\\/g, '/');
     this._tslintConfigFilePath = path.resolve(this._configuration.buildFolder, 'tslint.json');
     this._eslintConfigFilePath = path.resolve(this._configuration.buildFolder, '.eslintrc.js');
@@ -225,6 +201,26 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   }
 
   public async invokeAsync(): Promise<void> {
+    // Report a warning if the TypeScript version is too old/new.  The current oldest supported version is
+    // TypeScript 2.9. Prior to that the "ts.getConfigFileParsingDiagnostics()" API is missing; more fixups
+    // would be required to deal with that.  We won't do that work unless someone requests it.
+    if (
+      this._typescriptParsedVersion.major < 2 ||
+      (this._typescriptParsedVersion.major === 2 && this._typescriptParsedVersion.minor < 9)
+    ) {
+      // We don't use TerminalProviderSeverity.warning here because, if the person wants to take their chances with
+      // a seemingly unsupported compiler, their build should be allowed to succeed.
+      this._typescriptTerminal.writeLine(
+        `The TypeScript compiler version ${this._typescriptVersion} is very old` +
+          ` and has not been tested with Heft; it may not work correctly.`
+      );
+    } else if (this._typescriptParsedVersion.major > 3) {
+      this._typescriptTerminal.writeLine(
+        `The TypeScript compiler version ${this._typescriptVersion} is newer` +
+          ` than the latest version that was tested with Heft; it may not work correctly.`
+      );
+    }
+
     const ts: ExtendedTypeScript = require(this._configuration.typeScriptToolPath);
 
     ts.performance.enable();
