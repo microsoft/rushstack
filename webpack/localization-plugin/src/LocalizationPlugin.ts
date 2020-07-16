@@ -198,7 +198,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
     if (isWebpackDevServer) {
       if (typingsPreprocessor) {
-        compiler.hooks.watchRun.tap(PLUGIN_NAME, () => typingsPreprocessor!.runWatcher());
+        compiler.hooks.afterEnvironment.tap(PLUGIN_NAME, () => typingsPreprocessor!.runWatcher());
 
         if (!compiler.options.plugins) {
           compiler.options.plugins = [];

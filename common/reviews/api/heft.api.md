@@ -14,6 +14,7 @@ import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { SyncHook } from 'tapable';
 import { Terminal } from '@rushstack/node-core-library';
+import * as webpack from 'webpack';
 
 // @public (undocumented)
 export abstract class ActionHooksBase<TActionProperties extends object> {
@@ -41,6 +42,14 @@ export class BuildHooks extends ActionHooksBase<IBuildActionProperties> {
 export class BuildStageHooksBase {
     // (undocumented)
     readonly run: AsyncParallelHook;
+}
+
+// @public (undocumented)
+export class BundleStageHooks extends BuildStageHooksBase {
+    // (undocumented)
+    readonly afterConfigureWebpack: AsyncSeriesHook;
+    // (undocumented)
+    readonly configureWebpack: AsyncSeriesHook;
 }
 
 // @public (undocumented)
@@ -125,6 +134,8 @@ export interface IBuildActionProperties {
     verboseFlag: boolean;
     // (undocumented)
     watchMode: boolean;
+    // (undocumented)
+    webpackStats?: webpack.Stats;
 }
 
 // @public (undocumented)
@@ -136,7 +147,13 @@ export interface IBuildStage<TBuildStageHooks extends BuildStageHooksBase, TBuil
 }
 
 // @public (undocumented)
-export interface IBundleStage extends IBuildStage<BuildStageHooksBase, {}> {
+export interface IBundleStage extends IBuildStage<BundleStageHooks, IBundleStageProperties> {
+}
+
+// @public (undocumented)
+export interface IBundleStageProperties {
+    webpackConfigFilePath?: string;
+    webpackConfiguration?: webpack.Configuration;
 }
 
 // @public (undocumented)
@@ -292,6 +309,10 @@ export interface ITestActionContext extends IActionContext<TestHooks, ITestActio
 
 // @public (undocumented)
 export interface ITestActionProperties {
+    // (undocumented)
+    productionFlag: boolean;
+    // (undocumented)
+    watchMode: boolean;
 }
 
 // @public (undocumented)
@@ -325,6 +346,10 @@ export class StartHooks extends ActionHooksBase<IStartActionProperties> {
 
 // @public (undocumented)
 export class TestHooks extends ActionHooksBase<ITestActionProperties> {
+    // (undocumented)
+    readonly configureTest: AsyncSeriesHook;
+    // (undocumented)
+    readonly run: AsyncParallelHook;
 }
 
 

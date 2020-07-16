@@ -11,6 +11,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@jest/types",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@microsoft/api-documenter",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -479,6 +483,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jest-snapshot",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jju",
       "allowedCategories": [ "libraries" ]
     },
@@ -488,6 +496,10 @@
     },
     {
       "name": "jsdom",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jszip",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -608,7 +620,7 @@
     },
     {
       "name": "tapable",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "tar",

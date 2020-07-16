@@ -2,6 +2,18 @@
   "name": "@rushstack/module-minifier-plugin",
   "entries": [
     {
+      "version": "0.1.1",
+      "tag": "@rushstack/module-minifier-plugin_v0.1.1",
+      "date": "Tue, 14 Jul 2020 21:49:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix external typings"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.0",
       "tag": "@rushstack/module-minifier-plugin_v0.1.0",
       "date": "Sat, 11 Jul 2020 00:08:09 GMT",

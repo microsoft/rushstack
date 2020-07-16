@@ -57,6 +57,13 @@
   // "linkCreation": "script",
 
   /**
+   * If this path is specified, then after "rush deploy", recursively copy the files from this folder to
+   * the deployment target folder (common/deploy). This can be used to provide additional configuration files
+   * or scripts needed by the server when deploying. The path is resolved relative to the repository root.
+   */
+  //  "folderToCopy": "repo-tools/assets/deploy-config",
+
+  /**
    * Customize how Rush projects are processed during deployment.
    */
   "projectSettings": [
@@ -72,6 +79,35 @@
     //    */
     //   "additionalProjectsToInclude": [
     //     // "@my-scope/my-project2"
+    //   ],
+    //
+    //   /**
+    //    * When deploying a project, the included dependencies are normally determined automatically based on
+    //    * package.json fields such as "dependencies", "peerDependencies", and "optionalDependencies",
+    //    * subject to other deployment settings such as "includeDevDependencies".  However, in cases where
+    //    * that information is not accurate, you can use "additionalDependenciesToInclude" to add more
+    //    * packages to the list.
+    //    *
+    //    * The list can include any package name that is installed by Rush and resolvable via Node.js module
+    //    * resolution; however, if it resolves to a local Rush project, the "additionalProjectsToInclude"
+    //    * field will not be recursively applied.
+    //    */
+    //   "additionalDependenciesToInclude": [
+    //     // "@rushstack/node-core-library"
+    //   ],
+    //
+    //   /**
+    //    * This setting prevents specific dependencies from being deployed.  It only filters dependencies that
+    //    * are explicitly declared in package.json for this project.  It does not affect dependencies added
+    //    * via "additionalProjectsToInclude" or "additionalDependenciesToInclude", nor does it affect indirect
+    //    * dependencies.
+    //    *
+    //    * The "*" wildcard may be used to match zero or more characters.  For example, if your project already
+    //    * bundles its own dependencies, specify "dependenciesToExclude": [ "*" ] to exclude all package.json
+    //    * dependencies.
+    //    */
+    //   "dependenciesToExclude": [
+    //     // "@types/*"
     //   ]
     // }
   ]

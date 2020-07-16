@@ -1,0 +1,41 @@
+{
+  "name": "@rushstack/heft",
+  "entries": [
+    {
+      "version": "0.1.2",
+      "tag": "@rushstack/heft_v0.1.2",
+      "date": "Thu, 16 Jul 2020 18:34:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Republish to fix incorrect dependency specifier"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.1",
+      "tag": "@rushstack/heft_v0.1.1",
+      "date": "Thu, 16 Jul 2020 17:53:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for TypeScript compilers older than version 3.6 (which do not support incremental compilation)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/heft_v0.1.0",
+      "date": "Wed, 15 Jul 2020 18:29:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release"
+          }
+        ]
+      }
+    }
+  ]
+}

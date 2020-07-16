@@ -161,7 +161,7 @@ export interface IExtendedModule extends webpack.compilation.Module, webpack.Mod
   /**
    * Gets a friendly identifier for the module.
    */
-  readableIdentifier(requestShortener: webpack.compilation.RequestShortener): string;
+  readableIdentifier(requestShortener: unknown): string;
   /**
    * Path to the physical file this module represents
    */

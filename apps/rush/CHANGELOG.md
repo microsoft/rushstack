@@ -1,6 +1,22 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 08 Jul 2020 06:56:47 GMT and should not be manually modified.
+This log was last generated on Thu, 16 Jul 2020 02:18:39 GMT and should not be manually modified.
+
+## 5.29.1
+Thu, 16 Jul 2020 02:18:39 GMT
+
+### Patches
+
+- Consider package.json when determining if install can be skipped for PNPM workspaces
+
+## 5.29.0
+Tue, 14 Jul 2020 05:20:56 GMT
+
+### Updates
+
+- Give \"rush deploy\" the ability to select a subset of dependencies to copy over (#1978)
+- Fix an issue where package binaries where not created by "rush deploy" (#1982)
+- Add a new setting "folderToCopy" and new command-line parameter "--create-archive" for use with "rush deploy"
 
 ## 5.28.0
 Wed, 08 Jul 2020 06:56:47 GMT
