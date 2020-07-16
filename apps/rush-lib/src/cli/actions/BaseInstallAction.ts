@@ -47,8 +47,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
     this._noLinkParameter = this.defineFlagParameter({
       parameterLongName: '--no-link',
       description:
-        '(DEPRECATED) If "--no-link" is specified, then project symlinks will NOT be created' +
-        ' after the installation completes. This parameter is deprecated and will be ignored.'
+        'If "--no-link" is specified, then project symlinks will NOT be created' +
+        ' after the installation completes.  You will need to run "rush link" manually.' +
+        ' This flag is useful for automated builds that want to report stages individually' +
+        ' or perform extra operations in between the two stages. This flag is not supported' +
+        ' when using workspaces.'
     });
     this._networkConcurrencyParameter = this.defineIntegerParameter({
       parameterLongName: '--network-concurrency',
@@ -92,11 +95,6 @@ export abstract class BaseInstallAction extends BaseRushAction {
     this.eventHooksManager.handle(Event.preRushInstall, this.parser.isDebug);
 
     const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration, this.rushGlobalFolder);
-
-    if (this._noLinkParameter.value!) {
-      console.log(colors.yellow('The --no-link flag is deprecated and will be ignored'));
-      console.log('');
-    }
 
     if (this._purgeParameter.value!) {
       console.log('The --purge flag was specified, so performing "rush purge"');

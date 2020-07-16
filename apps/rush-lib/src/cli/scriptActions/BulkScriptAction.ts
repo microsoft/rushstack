@@ -22,7 +22,7 @@ import { TaskCollection } from '../../logic/taskRunner/TaskCollection';
 import { Utilities } from '../../utilities/Utilities';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import { LastInstallFlag } from '../../api/LastInstallFlag';
+import { LastLinkFlag } from '../../api/LastLinkFlag';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -76,9 +76,16 @@ export class BulkScriptAction extends BaseScriptAction {
   }
 
   public run(): Promise<void> {
-    const lastInstallFlag: LastInstallFlag = LastInstallFlag.getCommonTempFlag(this.rushConfiguration);
-    if (!lastInstallFlag.isValid()) {
-      throw new Error(`Install flag invalid.${os.EOL}Did you run "rush install" or "rush update"?`);
+    // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are deprecated
+    const lastLinkFlag: LastLinkFlag = LastLinkFlag.getCommonTempFlag(this.rushConfiguration);
+    if (!lastLinkFlag.isValid()) {
+      const useWorkspaces: boolean =
+        this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
+      if (useWorkspaces) {
+        throw new Error(`Link flag invalid.${os.EOL}Did you run "rush install" or "rush update"?`);
+      } else {
+        throw new Error(`Link flag invalid.${os.EOL}Did you run "rush link"?`);
+      }
     }
 
     this._doBeforeTask();

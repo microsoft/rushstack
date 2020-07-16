@@ -403,10 +403,13 @@ Optional arguments:
   -p, --purge           Perform \\"rush purge\\" before starting the installation
   --bypass-policy       Overrides enforcement of the \\"gitPolicy\\" rules from 
                         rush.json (use honorably!)
-  --no-link             (DEPRECATED) If \\"--no-link\\" is specified, then 
-                        project symlinks will NOT be created after the 
-                        installation completes. This parameter is deprecated 
-                        and will be ignored.
+  --no-link             If \\"--no-link\\" is specified, then project symlinks 
+                        will NOT be created after the installation completes. 
+                        You will need to run \\"rush link\\" manually. This flag 
+                        is useful for automated builds that want to report 
+                        stages individually or perform extra operations in 
+                        between the two stages. This flag is not supported 
+                        when using workspaces.
   --network-concurrency COUNT
                         If specified, limits the maximum number of concurrent 
                         network requests. This is useful when troubleshooting 
@@ -648,8 +651,9 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: unlink 1`] = `
 "usage: rush unlink [-h]
 
-(DEPRECATED) This removes the symlinks created by the \\"rush link\\" command. 
-This command is deprecated.To delete node_modules symlinks, run \\"rush purge\\".
+This removes the symlinks created by the \\"rush link\\" command. This is useful 
+for cleaning a repo using \\"git clean\\" without accidentally deleting source 
+files, or for using standard NPM commands on a project.
 
 Optional arguments:
   -h, --help  Show this help message and exit.
@@ -679,10 +683,13 @@ Optional arguments:
   -p, --purge           Perform \\"rush purge\\" before starting the installation
   --bypass-policy       Overrides enforcement of the \\"gitPolicy\\" rules from 
                         rush.json (use honorably!)
-  --no-link             (DEPRECATED) If \\"--no-link\\" is specified, then 
-                        project symlinks will NOT be created after the 
-                        installation completes. This parameter is deprecated 
-                        and will be ignored.
+  --no-link             If \\"--no-link\\" is specified, then project symlinks 
+                        will NOT be created after the installation completes. 
+                        You will need to run \\"rush link\\" manually. This flag 
+                        is useful for automated builds that want to report 
+                        stages individually or perform extra operations in 
+                        between the two stages. This flag is not supported 
+                        when using workspaces.
   --network-concurrency COUNT
                         If specified, limits the maximum number of concurrent 
                         network requests. This is useful when troubleshooting 

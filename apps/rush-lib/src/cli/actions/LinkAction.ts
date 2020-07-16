@@ -1,12 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
+import { LinkManagerFactory } from '../../logic/LinkManagerFactory';
 import { BaseRushAction } from './BaseRushAction';
+import { BaseLinkManager } from '../../logic/base/BaseLinkManager';
 
 export class LinkAction extends BaseRushAction {
+  private _force: CommandLineFlagParameter;
+
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'link',
@@ -19,7 +23,7 @@ export class LinkAction extends BaseRushAction {
   }
 
   protected onDefineParameters(): void {
-    this.defineFlagParameter({
+    this._force = this.defineFlagParameter({
       parameterLongName: '--force',
       parameterShortName: '-f',
       description:
@@ -29,11 +33,7 @@ export class LinkAction extends BaseRushAction {
   }
 
   protected async run(): Promise<void> {
-    console.log(
-      colors.red(
-        'The "rush link" command has been deprecated. No action has been taken. Run "rush install" or ' +
-          '"rush update" to restore project node_modules folders.'
-      )
-    );
+    const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
+    await linkManager.createSymlinksForProjects(this._force.value);
   }
 }

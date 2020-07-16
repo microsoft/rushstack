@@ -7,7 +7,7 @@ import * as path from 'path';
 import { FileSystem } from '@rushstack/node-core-library';
 import { Interleaver } from '@rushstack/stream-collator';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { LastInstallFlag } from '../../api/LastInstallFlag';
+import { LastLinkFlag } from '../../api/LastLinkFlag';
 
 /**
  * See `__mocks__/child_process.js`.
@@ -65,10 +65,9 @@ function getCommandLineParserInstance(repoName: string, taskName: string): IPars
   // ends.
   const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
 
-  // Bulk tasks are hard-coded to expect install to have been completed. So, ensure the last-install.flag
+  // Bulk tasks are hard-coded to expect install to have been completed. So, ensure the last-link.flag
   // file exists and is valid
-  const lastInstallFlag: LastInstallFlag = LastInstallFlag.getCommonTempFlag(parser.rushConfiguration);
-  lastInstallFlag.create();
+  LastLinkFlag.getCommonTempFlag(parser.rushConfiguration).create();
 
   // Mock the command
   process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', taskName];

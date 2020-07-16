@@ -18,7 +18,7 @@ import {
   InternalError
 } from '@rushstack/node-core-library';
 
-import { BaseInstallManager } from '../base/BaseInstallManager';
+import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
 import { IRushTempPackageJson } from '../../logic/base/BasePackage';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -31,6 +31,10 @@ import { InstallHelpers } from './InstallHelpers';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { LinkManagerFactory } from '../LinkManagerFactory';
 import { BaseLinkManager } from '../base/BaseLinkManager';
+import { RushConfiguration } from '../../api/RushConfiguration';
+import { RushGlobalFolder } from '../../api/RushGlobalFolder';
+import { PurgeManager } from '../PurgeManager';
+import { LastLinkFlag } from '../../api/LastLinkFlag';
 
 /**
  * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.
@@ -51,6 +55,19 @@ declare module 'tar' {
  * This class implements common logic between "rush install" and "rush update".
  */
 export class RushInstallManager extends BaseInstallManager {
+  private _commonTempLinkFlag: LastLinkFlag;
+
+  public constructor(
+    rushConfiguration: RushConfiguration,
+    rushGlobalFolder: RushGlobalFolder,
+    purgeManager: PurgeManager,
+    options: IInstallManagerOptions
+  ) {
+    super(rushConfiguration, rushGlobalFolder, purgeManager, options);
+
+    this._commonTempLinkFlag = new LastLinkFlag(this.rushConfiguration.commonTempFolder);
+  }
+
   /**
    * Regenerates the common/package.json and all temp_modules projects.
    * If shrinkwrapFile is provided, this function also validates whether it contains
@@ -452,6 +469,10 @@ export class RushInstallManager extends BaseInstallManager {
    * @override
    */
   protected async installAsync(cleanInstall: boolean): Promise<void> {
+    // Since we're going to be tampering with common/node_modules, delete the "rush link" flag file if it exists;
+    // this ensures that a full "rush link" is required next time
+    this._commonTempLinkFlag.clear();
+
     // Since we are actually running npm/pnpm/yarn install, recreate all the temp project tarballs.
     // This ensures that any existing tarballs with older header bits will be regenerated.
     // It is safe to assume that temp project pacakge.jsons already exist.
@@ -640,8 +661,14 @@ export class RushInstallManager extends BaseInstallManager {
   }
 
   protected async postInstallAsync(): Promise<void> {
-    const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
-    await linkManager.createSymlinksForProjects(false);
+    if (!this.options.noLink) {
+      const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
+      await linkManager.createSymlinksForProjects(false);
+    } else {
+      console.log(
+        os.EOL + colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.')
+      );
+    }
   }
 
   /**

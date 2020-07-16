@@ -197,6 +197,7 @@ export class _LastInstallFlag {
     checkValidAndReportStoreIssues(): boolean;
     clear(): void;
     create(): void;
+    protected readonly flagName: string;
     static getCommonTempFlag(rushConfiguration: RushConfiguration): _LastInstallFlag;
     isValid(): boolean;
     readonly path: string;

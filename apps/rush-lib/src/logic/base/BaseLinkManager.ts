@@ -13,6 +13,7 @@ import { Utilities } from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { BasePackage } from './BasePackage';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+import { LastLinkFlag } from '../../api/LastLinkFlag';
 
 export enum SymlinkKind {
   File,
@@ -189,6 +190,9 @@ export abstract class BaseLinkManager {
     const stopwatch: Stopwatch = Stopwatch.start();
 
     await this._linkProjects();
+
+    // TODO: Remove when "rush link" and "rush unlink" are deprecated
+    LastLinkFlag.getCommonTempFlag(this._rushConfiguration).create();
 
     stopwatch.stop();
     console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));

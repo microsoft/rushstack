@@ -27,7 +27,7 @@ export class LastInstallFlag {
    * @param state - optional, the state that should be managed or compared
    */
   public constructor(folderPath: string, state: JsonObject = {}) {
-    this._path = path.join(folderPath, LAST_INSTALL_FLAG_FILE_NAME);
+    this._path = path.join(folderPath, this.flagName);
     this._state = state;
   }
 
@@ -132,5 +132,12 @@ export class LastInstallFlag {
    */
   public get path(): string {
     return this._path;
+  }
+
+  /**
+   * Returns the name of the flag file
+   */
+  protected get flagName(): string {
+    return LAST_INSTALL_FLAG_FILE_NAME;
   }
 }

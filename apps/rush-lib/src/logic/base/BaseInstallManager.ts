@@ -48,6 +48,11 @@ export interface IInstallManagerOptions {
   bypassPolicy: boolean;
 
   /**
+   * Whether to skip linking, i.e. require "rush link" to be done manually later.
+   */
+  noLink: boolean;
+
+  /**
    * Whether to delete the shrinkwrap file before installation, i.e. so that all dependencies
    * will be upgraded to the latest SemVer-compatible version.
    */

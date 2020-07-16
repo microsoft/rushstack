@@ -23,11 +23,31 @@ import { RepoStateFile } from '../RepoStateFile';
 import { IPnpmfileShimSettings } from '../pnpm/IPnpmfileShimSettings';
 import { PnpmProjectDependencyManifest } from '../pnpm/PnpmProjectDependencyManifest';
 import { PnpmShrinkwrapFile, IPnpmShrinkwrapImporterYaml } from '../pnpm/PnpmShrinkwrapFile';
+import { LastLinkFlag } from '../../api/LastLinkFlag';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
  */
 export class WorkspaceInstallManager extends BaseInstallManager {
+  /**
+   * @override
+   */
+  public async doInstall(): Promise<void> {
+    // TODO: Remove when "rush link" and "rush unlink" are deprecated
+    if (this.options.noLink) {
+      console.log();
+      console.log(
+        colors.red(
+          'The "--no-link" option was provided but is not supported when using workspaces. Run the command again ' +
+            'without specifying this argument.'
+        )
+      );
+      throw new AlreadyReportedError();
+    }
+
+    await super.doInstall();
+  }
+
   /**
    * Regenerates the common/temp/package.json and related workspace files.
    * If shrinkwrapFile is provided, this function also validates whether it contains
@@ -409,6 +429,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         this.rushConfiguration.projects.map((x) => this._createPerProjectManifestAsync(tempShrinkwrapFile, x))
       );
     }
+
+    // TODO: Remove when "rush link" and "rush unlink" are deprecated
+    LastLinkFlag.getCommonTempFlag(this.rushConfiguration).create();
   }
 
   /**

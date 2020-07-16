@@ -16,6 +16,7 @@ import { RushConstants } from '../../logic/RushConstants';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from './PnpmShrinkwrapFile';
 import { PnpmProjectDependencyManifest } from './PnpmProjectDependencyManifest';
+import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 // special flag for debugging, will print extra diagnostic information,
 // but comes with performance cost
@@ -25,6 +26,25 @@ export class PnpmLinkManager extends BaseLinkManager {
   private readonly _pnpmVersion: semver.SemVer = new semver.SemVer(
     this._rushConfiguration.packageManagerToolVersion
   );
+
+  /**
+   * @override
+   */
+  public async createSymlinksForProjects(force: boolean): Promise<void> {
+    const useWorkspaces: boolean =
+      this._rushConfiguration.pnpmOptions && this._rushConfiguration.pnpmOptions.useWorkspaces;
+    if (useWorkspaces) {
+      console.log(
+        colors.red(
+          'Linking is not supported when using workspaces. Run "rush install" or "rush update" ' +
+            'to restore project node_modules folders.'
+        )
+      );
+      throw new AlreadyReportedError();
+    }
+
+    await super.createSymlinksForProjects(force);
+  }
 
   protected async _linkProjects(): Promise<void> {
     if (this._rushConfiguration.projects.length > 0) {
