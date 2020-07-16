@@ -3,7 +3,7 @@
 
 import * as child_process from 'child_process';
 import * as path from 'path';
-import { Executable } from '@rushstack/node-core-library';
+import { Executable, FileSystem } from '@rushstack/node-core-library';
 
 import { IPackageDeps } from './IPackageDeps';
 
@@ -71,8 +71,8 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
        *   - '??' == untracked
        *   - 'R' == rename
        *   - 'RM' == rename with modifications
-       * filenames == path to the file, or files in the case of files that have been renamed. For files with spaces
-       * in their filename, they will be surrounded by double-quotes. Some systems allow double-quotes in the
+       * filenames == path to the file, or files in the case of files that have been renamed. When filename characters
+       * are escaped, filenames will be surrounded by double-quotes. Some systems allow double-quotes in the
        * filename as well, though these will be escaped and should be included by the regex.
        */
       const match: RegExpMatchArray | null = line.match(/"(\\"|[^"])+"|(\S+)/g);
@@ -82,6 +82,17 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
         const [changeType, ...filenames] = match.map((x) =>
           x.match(/^".+"$/) ? x.slice(1, x.length - 1) : x
         );
+
+        // Filenames with spaces which are not surrounded by quotes will still be split. In order to accomodate all
+        // scenarios which would have the filename stated last, we will walk backwards on the filename array and
+        // check to see if the file exists on disk. This will incur a cost due to disk access
+        while (
+          filenames.length > 1 &&
+          !FileSystem.exists(path.resolve(packagePath, filenames[filenames.length - 1]))
+        ) {
+          const lastFilename: string = filenames.pop()!;
+          filenames.push(`${filenames.pop()!} ${lastFilename}`);
+        }
 
         // We always care about the last filename in the filenames array. In the case of non-rename changes,
         // the filenames array only contains one item. In the case of rename changes, the last item in the
