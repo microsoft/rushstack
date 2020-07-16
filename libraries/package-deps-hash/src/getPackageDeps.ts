@@ -70,14 +70,18 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
        *   - '??' == untracked
        *   - 'R' == rename
        *   - 'RM' == rename with modifications
-       * filenames == path to the file, or files in the case of files that have been renamed
+       * filenames == path to the file, or files in the case of files that have been renamed. For files with spaces
+       * in their filename, they will be surrounded by double-quotes. Some systems allow double-quotes in the
+       * filename as well, though these will be escaped and should be included by the regex.
        */
-      const [changeType, ...filenames]: string[] = line
-        .trim()
-        .split(' ')
-        .filter((linePart) => !!linePart);
+      const match: RegExpMatchArray | null = line.match(/("(\\"|[^"])+"|\S)+/g);
 
-      if (changeType && filenames && filenames.length > 0) {
+      if (match && match.length > 1) {
+        // Trim off leading and trailing double-quotes
+        const [changeType, ...filenames] = match.map((x) =>
+          x.match(/^".+"$/) ? x.slice(1, x.length - 1) : x
+        );
+
         // We always care about the last filename in the filenames array. In the case of non-rename changes,
         // the filenames array only contains one item. In the case of rename changes, the last item in the
         // array is the path to the file in the working tree, which is the only one that we care about.
