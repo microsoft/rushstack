@@ -208,7 +208,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       this._typescriptParsedVersion.major < 2 ||
       (this._typescriptParsedVersion.major === 2 && this._typescriptParsedVersion.minor < 9)
     ) {
-      // We don't use TerminalProviderSeverity.warning here because, if the person wants to take their chances with
+      // We don't use writeWarningLine() here because, if the person wants to take their chances with
       // a seemingly unsupported compiler, their build should be allowed to succeed.
       this._typescriptTerminal.writeLine(
         `The TypeScript compiler version ${this._typescriptVersion} is very old` +
