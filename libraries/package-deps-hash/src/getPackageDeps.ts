@@ -74,7 +74,7 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
        * in their filename, they will be surrounded by double-quotes. Some systems allow double-quotes in the
        * filename as well, though these will be escaped and should be included by the regex.
        */
-      const match: RegExpMatchArray | null = line.match(/("(\\"|[^"])+"|\S)+/g);
+      const match: RegExpMatchArray | null = line.match(/"(\\"|[^"])+"|(\S+)/g);
 
       if (match && match.length > 1) {
         // Trim off leading and trailing double-quotes
