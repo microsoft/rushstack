@@ -11,7 +11,8 @@ import {
   Terminal,
   ITerminalProvider,
   JsonFile,
-  IPackageJson
+  IPackageJson,
+  TerminalProviderSeverity
 } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
 import { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.7';
@@ -182,6 +183,24 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       (this._typescriptParsedVersion.major === 3 && this._typescriptParsedVersion.minor >= 6)
     ) {
       this._capabilities.incrementalProgram = true;
+    }
+
+    if (this._typescriptParsedVersion.major < 3) {
+      // We don't use TerminalProviderSeverity.warning here because, if the person wants to take their chances with
+      // a seemingly unsupported compiler, their build should be allowed to succeed.
+      this._terminalProvider.write(
+        `The TypeScript compiler version ${this._typescriptVersion} is very old` +
+          ` and has not been tested with Heft; it may not work correctly.` +
+          this._terminalProvider.eolCharacter,
+        TerminalProviderSeverity.log
+      );
+    } else if (this._typescriptParsedVersion.major > 3) {
+      this._terminalProvider.write(
+        `The TypeScript compiler version ${this._typescriptVersion} is newer` +
+          ` than the latest version that was tested with Heft; it may not work correctly.` +
+          this._terminalProvider.eolCharacter,
+        TerminalProviderSeverity.log
+      );
     }
 
     this._configuration.buildCacheFolder = this._configuration.buildCacheFolder.replace(/\\/g, '/');
