@@ -104,45 +104,32 @@ export class VersionManager {
       });
       changeManager.updateChangelog(!!shouldCommit);
     }
-    const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._globalFolder);
-    const installManagerOptions: IInstallManagerOptions = {
-      debug: false,
-      allowShrinkwrapUpdates: true,
-      bypassPolicy: false,
-      noLink: false,
-      fullUpgrade: false,
-      recheckShrinkwrap: false,
-      networkConcurrency: undefined,
-      collectLogFile: false,
-      variant: this._rushConfiguration.currentInstalledVariant,
-      maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
-      toFlags: []
-    };
-    const installManager: RushInstallManager = new RushInstallManager(
-      this._rushConfiguration,
-      this._globalFolder,
-      purgeManager,
-      installManagerOptions
-    );
 
-    const shrinkwrapFilePath: string = this._rushConfiguration.getCommittedShrinkwrapFilename(
-      this._rushConfiguration.currentInstalledVariant
-    );
-
-    const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
-      shrinkwrapFilePath,
-      this._rushConfiguration.pnpmOptions
-    );
-
-    await installManager.prepareCommonTempAsync(pnpmShrinkwrapFile);
-
-    this._updateTarballIntegrities();
-  }
-
-  private _updateTarballIntegrities(): void {
-    if (this._rushConfiguration.packageManager === 'pnpm') {
-      console.log('The package manager is pnpm.');
-      const tempProjectHelper: TempProjectHelper = new TempProjectHelper(this._rushConfiguration);
+    if (
+      this._rushConfiguration.packageManager === 'pnpm' &&
+      this._rushConfiguration.pnpmOptions &&
+      !this._rushConfiguration.pnpmOptions.useWorkspaces
+    ) {
+      const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._globalFolder);
+      const installManagerOptions: IInstallManagerOptions = {
+        debug: false,
+        allowShrinkwrapUpdates: true,
+        bypassPolicy: false,
+        noLink: false,
+        fullUpgrade: false,
+        recheckShrinkwrap: false,
+        networkConcurrency: undefined,
+        collectLogFile: false,
+        variant: this._rushConfiguration.currentInstalledVariant,
+        maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
+        toFlags: []
+      };
+      const installManager: RushInstallManager = new RushInstallManager(
+        this._rushConfiguration,
+        this._globalFolder,
+        purgeManager,
+        installManagerOptions
+      );
 
       const shrinkwrapFilePath: string = this._rushConfiguration.getCommittedShrinkwrapFilename(
         this._rushConfiguration.currentInstalledVariant
@@ -153,40 +140,53 @@ export class VersionManager {
         this._rushConfiguration.pnpmOptions
       );
 
+      await installManager.prepareCommonTempAsync(pnpmShrinkwrapFile);
+
       if (pnpmShrinkwrapFile) {
-        console.log('Updating shrinkwrap.');
+        this._updatePnpmShrinkwrapTarballIntegrities(pnpmShrinkwrapFile);
+      }
+    }
+  }
 
-        for (const rushProject of this._rushConfiguration.projects) {
-          tempProjectHelper.createTempProjectTarball(rushProject);
+  private _updatePnpmShrinkwrapTarballIntegrities(pnpmShrinkwrapFile: PnpmShrinkwrapFile): void {
+    const tempProjectHelper: TempProjectHelper = new TempProjectHelper(this._rushConfiguration);
 
-          const tempProjectDependencyKey: string | undefined = pnpmShrinkwrapFile.getTempProjectDependencyKey(
-            rushProject.tempProjectName
-          );
+    if (pnpmShrinkwrapFile) {
+      console.log('Updating shrinkwrap.');
 
-          if (!tempProjectDependencyKey) {
-            throw new Error(`Cannot get dependency key for temp project: ${rushProject.tempProjectName}`);
-          }
+      for (const rushProject of this._rushConfiguration.projects) {
+        tempProjectHelper.createTempProjectTarball(rushProject);
 
-          const parentShrinkwrapEntry:
-            | IPnpmShrinkwrapDependencyYaml
-            | undefined = pnpmShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(
-            tempProjectDependencyKey
-          );
-          if (!parentShrinkwrapEntry) {
-            throw new InternalError(
-              `Cannot find shrinkwrap entry using dependency key for temp project: ${rushProject.tempProjectName}`
-            );
-          }
+        const tempProjectDependencyKey: string | undefined = pnpmShrinkwrapFile.getTempProjectDependencyKey(
+          rushProject.tempProjectName
+        );
 
-          console.log(`Updating entry for ${rushProject.packageName}.`);
-
-          parentShrinkwrapEntry.resolution.integrity = ssri
-            .fromData(fs.readFileSync(tempProjectHelper.getTarballFilePath(rushProject)))
-            .toString();
+        if (!tempProjectDependencyKey) {
+          throw new Error(`Cannot get dependency key for temp project: ${rushProject.tempProjectName}`);
         }
 
-        pnpmShrinkwrapFile.save(shrinkwrapFilePath);
+        const parentShrinkwrapEntry:
+          | IPnpmShrinkwrapDependencyYaml
+          | undefined = pnpmShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(
+          tempProjectDependencyKey
+        );
+        if (!parentShrinkwrapEntry) {
+          throw new InternalError(
+            `Cannot find shrinkwrap entry using dependency key for temp project: ${rushProject.tempProjectName}`
+          );
+        }
+
+        console.log(`Updating entry for ${rushProject.packageName}.`);
+
+        parentShrinkwrapEntry.resolution.integrity = ssri
+          .fromData(fs.readFileSync(tempProjectHelper.getTarballFilePath(rushProject)))
+          .toString();
       }
+
+      pnpmShrinkwrapFile.save(pnpmShrinkwrapFile.shrinkwrapFilename);
+      this._rushConfiguration
+        .getRepoState(this._rushConfiguration.currentInstalledVariant)
+        .refreshState(this._rushConfiguration);
     }
   }
 
