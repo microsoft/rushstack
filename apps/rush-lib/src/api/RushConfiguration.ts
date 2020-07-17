@@ -1153,6 +1153,23 @@ export class RushConfiguration {
   }
 
   /**
+   * The filename of the build dependency data file.  By default this is
+   * called 'rush-link.json' resides in the Rush common folder.
+   * Its data structure is defined by IRushLinkJson.
+   *
+   * Example: `C:\MyRepo\common\temp\rush-link.json`
+   *
+   * @deprecated The "rush-link.json" file was removed in Rush 5.30.0.
+   * Use `RushConfigurationProject.localDependencyProjects` instead.
+   */
+  public get rushLinkJsonFilename(): string {
+    throw new Error(
+      'The "rush-link.json" file was removed in Rush 5.30.0. Use ' +
+        'RushConfigurationProject.localDependencyProjects instead.'
+    );
+  }
+
+  /**
    * The filename of the variant dependency data file.  By default this is
    * called 'current-variant.json' resides in the Rush common folder.
    * Its data structure is defined by ICurrentVariantJson.

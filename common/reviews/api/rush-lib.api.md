@@ -378,6 +378,8 @@ export class RushConfiguration {
     readonly repositoryUrl: string | undefined;
     readonly rushJsonFile: string;
     readonly rushJsonFolder: string;
+    // @deprecated
+    readonly rushLinkJsonFilename: string;
     readonly shrinkwrapFilename: string;
     readonly shrinkwrapFilePhrase: string;
     readonly suppressNodeLtsWarning: boolean;
