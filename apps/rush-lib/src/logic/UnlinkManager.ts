@@ -8,7 +8,7 @@ import { FileSystem } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Utilities } from '../utilities/Utilities';
 import { PnpmProjectDependencyManifest } from './pnpm/PnpmProjectDependencyManifest';
-import { LastLinkFlag } from '../api/LastLinkFlag';
+import { LastLinkFlagFactory } from '../api/LastLinkFlag';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 
 /**
@@ -40,7 +40,7 @@ export class UnlinkManager {
       throw new AlreadyReportedError();
     }
 
-    LastLinkFlag.getCommonTempFlag(this._rushConfiguration).clear();
+    LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration).clear();
     return this._deleteProjectFiles();
   }
 

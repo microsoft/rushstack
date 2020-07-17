@@ -8,25 +8,11 @@ import { RushConfiguration } from './RushConfiguration';
 export const LAST_LINK_FLAG_FILE_NAME: string = 'last-link.flag';
 
 /**
- * The interface for the LastLinkFlag JSON file.
- *
- * @internal
- */
-export interface ILastLinkFlagJson {}
-
-/**
  * A helper class for managing the last-link flag, which is persistent and
  * indicates that linking was completed successfully.
  * @internal
  */
 export class LastLinkFlag extends LastInstallFlag {
-  /**
-   * @override
-   */
-  public static getCommonTempFlag(rushConfiguration: RushConfiguration): LastLinkFlag {
-    return new LastLinkFlag(rushConfiguration.commonTempFolder, {});
-  }
-
   /**
    * @override
    */
@@ -49,5 +35,24 @@ export class LastLinkFlag extends LastInstallFlag {
 
   protected get flagName(): string {
     return LAST_LINK_FLAG_FILE_NAME;
+  }
+}
+
+/**
+ * A helper class for LastLinkFlag
+ *
+ * @internal
+ */
+export class LastLinkFlagFactory {
+  /**
+   * Gets the LastLink flag and sets the current state. This state is used to compare
+   * against the last-known-good state tracked by the LastLink flag.
+   * @param rushConfiguration - the configuration of the Rush repo to get the install
+   * state from
+   *
+   * @internal
+   */
+  public static getCommonTempFlag(rushConfiguration: RushConfiguration): LastLinkFlag {
+    return new LastLinkFlag(rushConfiguration.commonTempFolder, {});
   }
 }

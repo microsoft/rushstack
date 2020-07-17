@@ -32,31 +32,6 @@ export class LastInstallFlag {
   }
 
   /**
-   * Gets the current state of the Rush repo. This state is used to compare against
-   * the last-known-good state tracked by the LastInstall flag.
-   * @param rushConfiguration - the configuration of the Rush repo to get the install
-   * state from
-   *
-   * @internal
-   */
-  public static getCommonTempFlag(rushConfiguration: RushConfiguration): LastInstallFlag {
-    const currentState: JsonObject = {
-      node: process.versions.node,
-      packageManager: rushConfiguration.packageManager,
-      packageManagerVersion: rushConfiguration.packageManagerToolVersion
-    };
-
-    if (currentState.packageManager === 'pnpm' && rushConfiguration.pnpmOptions) {
-      currentState.storePath = rushConfiguration.pnpmOptions.pnpmStorePath;
-      if (rushConfiguration.pnpmOptions.useWorkspaces) {
-        currentState.workspaces = rushConfiguration.pnpmOptions.useWorkspaces;
-      }
-    }
-
-    return new LastInstallFlag(rushConfiguration.commonTempFolder, currentState);
-  }
-
-  /**
    * Returns true if the file exists and the contents match the current state.
    */
   public isValid(): boolean {
@@ -139,5 +114,37 @@ export class LastInstallFlag {
    */
   protected get flagName(): string {
     return LAST_INSTALL_FLAG_FILE_NAME;
+  }
+}
+
+/**
+ * A helper class for LastInstallFlag
+ *
+ * @internal
+ */
+export class LastInstallFlagFactory {
+  /**
+   * Gets the LastInstall flag and sets the current state. This state is used to compare
+   * against the last-known-good state tracked by the LastInstall flag.
+   * @param rushConfiguration - the configuration of the Rush repo to get the install
+   * state from
+   *
+   * @internal
+   */
+  public static getCommonTempFlag(rushConfiguration: RushConfiguration): LastInstallFlag {
+    const currentState: JsonObject = {
+      node: process.versions.node,
+      packageManager: rushConfiguration.packageManager,
+      packageManagerVersion: rushConfiguration.packageManagerToolVersion
+    };
+
+    if (currentState.packageManager === 'pnpm' && rushConfiguration.pnpmOptions) {
+      currentState.storePath = rushConfiguration.pnpmOptions.pnpmStorePath;
+      if (rushConfiguration.pnpmOptions.useWorkspaces) {
+        currentState.workspaces = rushConfiguration.pnpmOptions.useWorkspaces;
+      }
+    }
+
+    return new LastInstallFlag(rushConfiguration.commonTempFolder, currentState);
   }
 }

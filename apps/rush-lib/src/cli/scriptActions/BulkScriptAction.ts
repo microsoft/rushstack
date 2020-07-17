@@ -22,7 +22,7 @@ import { TaskCollection } from '../../logic/taskRunner/TaskCollection';
 import { Utilities } from '../../utilities/Utilities';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import { LastLinkFlag } from '../../api/LastLinkFlag';
+import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -77,7 +77,7 @@ export class BulkScriptAction extends BaseScriptAction {
 
   public run(): Promise<void> {
     // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are deprecated
-    const lastLinkFlag: LastLinkFlag = LastLinkFlag.getCommonTempFlag(this.rushConfiguration);
+    const lastLinkFlag: LastLinkFlag = LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration);
     if (!lastLinkFlag.isValid()) {
       const useWorkspaces: boolean =
         this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;

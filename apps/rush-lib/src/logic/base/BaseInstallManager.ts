@@ -17,8 +17,8 @@ import { AsyncRecycler } from '../../utilities/AsyncRecycler';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { Git } from '../Git';
-import { LastInstallFlag } from '../../api/LastInstallFlag';
-import { LastLinkFlag } from '../../api/LastLinkFlag';
+import { LastInstallFlag, LastInstallFlagFactory } from '../../api/LastInstallFlag';
+import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import { PurgeManager } from '../PurgeManager';
 import { RushConfiguration, ICurrentVariantJson } from '../../api/RushConfiguration';
@@ -120,8 +120,8 @@ export abstract class BaseInstallManager {
     this._installRecycler = purgeManager.commonTempFolderRecycler;
     this._options = options;
 
-    this._commonTempInstallFlag = LastInstallFlag.getCommonTempFlag(rushConfiguration);
-    this._commonTempLinkFlag = LastLinkFlag.getCommonTempFlag(rushConfiguration);
+    this._commonTempInstallFlag = LastInstallFlagFactory.getCommonTempFlag(rushConfiguration);
+    this._commonTempLinkFlag = LastLinkFlagFactory.getCommonTempFlag(rushConfiguration);
   }
 
   protected get rushConfiguration(): RushConfiguration {

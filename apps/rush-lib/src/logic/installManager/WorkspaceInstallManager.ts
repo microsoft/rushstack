@@ -29,7 +29,7 @@ import { RepoStateFile } from '../RepoStateFile';
 import { IPnpmfileShimSettings } from '../pnpm/IPnpmfileShimSettings';
 import { PnpmProjectDependencyManifest } from '../pnpm/PnpmProjectDependencyManifest';
 import { PnpmShrinkwrapFile, IPnpmShrinkwrapImporterYaml } from '../pnpm/PnpmShrinkwrapFile';
-import { LastLinkFlag } from '../../api/LastLinkFlag';
+import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -440,7 +440,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
-    LastLinkFlag.getCommonTempFlag(this.rushConfiguration).create();
+    LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration).create();
   }
 
   /**
