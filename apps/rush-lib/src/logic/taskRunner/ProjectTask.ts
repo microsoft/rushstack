@@ -71,6 +71,10 @@ export class ProjectTask implements ITaskDefinition {
     this._packageDepsFilename = options.packageDepsFilename;
   }
 
+  /**
+   * A helper method to determine the task name of a ProjectTask. Used when the task
+   * name is required before a task is created.
+   */
   public static getTaskName(rushProject: RushConfigurationProject): string {
     return rushProject.packageName;
   }

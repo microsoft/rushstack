@@ -63,13 +63,13 @@ export class TaskSelector {
     }
 
     // Register any dependencies it may have
-    for (const [, dependencyProject] of dependencies) {
+    for (const dependencyProject of dependencies.values()) {
       this._registerTask(dependencyProject);
     }
 
     if (!this._options.ignoreDependencyOrder) {
       // Add ordering relationships for each dependency
-      for (const [, dependencyProject] of dependencies) {
+      for (const dependencyProject of dependencies.values()) {
         this._taskCollection.addDependencies(
           ProjectTask.getTaskName(dependencyProject),
           dependencyProject.localDependencyProjects.map((x) => ProjectTask.getTaskName(x))
@@ -87,14 +87,14 @@ export class TaskSelector {
     }
 
     // Register all downstream dependents
-    for (const [, dependentProject] of dependents) {
+    for (const dependentProject of dependents.values()) {
       this._registerTask(dependentProject);
     }
 
     if (!this._options.ignoreDependencyOrder) {
       // Only add ordering relationships for projects which have been registered
       // e.g. package C may depend on A & B, but if we are only building A's downstream, we will ignore B
-      for (const [, dependentProject] of dependents) {
+      for (const dependentProject of dependents.values()) {
         this._taskCollection.addDependencies(
           ProjectTask.getTaskName(dependentProject),
           dependentProject.localDependencyProjects

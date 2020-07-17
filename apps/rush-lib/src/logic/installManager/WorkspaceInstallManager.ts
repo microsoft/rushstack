@@ -488,6 +488,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     });
   }
 
+  /**
+   * If the feature is enabled, creates shrinkwrap-deps.json files and places them in <projectFolder>/.rush/temp.
+   * These files contain the integrity hash of every dependency as well as dependencies of dependencies. This
+   * file can be used to track whether or not the packages consumed by this project changed between installs.
+   */
   protected _createPerProjectManifestAsync(
     pnpmShrinkwrapFile: PnpmShrinkwrapFile,
     project: RushConfigurationProject
