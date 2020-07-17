@@ -41,7 +41,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   public async doInstall(): Promise<void> {
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
     if (this.options.noLink) {
-      console.log();
       console.log(
         colors.red(
           'The "--no-link" option was provided but is not supported when using workspaces. Run the command again ' +

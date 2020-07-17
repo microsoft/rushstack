@@ -33,7 +33,7 @@ export class UnlinkManager {
     if (!force && useWorkspaces) {
       console.log(
         colors.red(
-          'Unlinking is not supported when using workspaces. Run "rush purge" to remove' +
+          'Unlinking is not supported when using workspaces. Run "rush purge" to remove ' +
             'project node_modules folders.'
         )
       );
