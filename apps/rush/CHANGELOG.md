@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 16 Jul 2020 02:18:39 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Jul 2020 05:32:38 GMT and should not be manually modified.
+
+## 5.30.0
+Fri, 17 Jul 2020 05:32:38 GMT
+
+### Minor changes
+
+- Prepare to deprecate 'rush link' and 'rush unlink' commands, as well as the '--no-link' install argument. As we move toward using package managers more directly in Rush, the package managers will perform the linking during install (if linking is even necessary). Additionally, these commands directly conflict with (and have different meanings than) their package manager counterparts. Lastly, similar goals can be accomplished by running 'rush install' and 'rush purge'. In addition to these changes, rush-link.json deprecated and is replaced with a new API which keeps the local dependency tree in memory.
 
 ## 5.29.1
 Thu, 16 Jul 2020 02:18:39 GMT
