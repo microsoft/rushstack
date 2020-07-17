@@ -6,7 +6,7 @@ import { FileSystem, Terminal } from '@rushstack/node-core-library';
 import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { ICleanActionContext } from '../cli/actions/CleanAction';
+import { ICleanStageContext } from '../stages/CleanStage';
 
 const PLUGIN_NAME: string = 'CleanPlugin';
 
@@ -14,7 +14,7 @@ export class CleanPlugin implements IHeftPlugin {
   public readonly displayName: string = PLUGIN_NAME;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftSession.hooks.clean.tap(PLUGIN_NAME, (clean: ICleanActionContext) => {
+    heftSession.hooks.clean.tap(PLUGIN_NAME, (clean: ICleanStageContext) => {
       clean.hooks.deletePath.tapPromise(PLUGIN_NAME, async (pathToDelete: string) => {
         await this._deletePath(heftConfiguration.terminal, pathToDelete);
       });

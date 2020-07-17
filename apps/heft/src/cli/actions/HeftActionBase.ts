@@ -7,42 +7,12 @@ import {
   ICommandLineActionOptions
 } from '@rushstack/ts-command-line';
 import { Terminal, IPackageJson, Colors, ConsoleTerminalProvider } from '@rushstack/node-core-library';
-import { AsyncSeriesBailHook, SyncHook, AsyncSeriesHook } from 'tapable';
 import { performance } from 'perf_hooks';
 
 import { MetricsCollector } from '../../metrics/MetricsCollector';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { PluginManager } from '../../pluginFramework/PluginManager';
-
-/**
- * @public
- */
-export interface IActionContext<
-  THooks extends ActionHooksBase<TActionProperties>,
-  TActionProperties extends object
-> {
-  hooks: THooks;
-  properties: TActionProperties;
-}
-
-/**
- * @public
- */
-export abstract class ActionHooksBase<TActionProperties extends object> {
-  /**
-   * This hook allows the action's execution to be completely overridden. Only the last-registered plugin
-   * with an override hook provided applies.
-   *
-   * @beta
-   */
-  public readonly overrideAction: AsyncSeriesBailHook<TActionProperties> = new AsyncSeriesBailHook([
-    'actionProperties'
-  ]);
-
-  public readonly loadActionConfiguration: AsyncSeriesHook = new AsyncSeriesHook();
-
-  public readonly afterLoadActionConfiguration: AsyncSeriesHook = new AsyncSeriesHook();
-}
+import { HeftSession } from '../../pluginFramework/HeftSession';
 
 export interface IHeftActionBaseOptions {
   terminal: Terminal;
@@ -51,28 +21,23 @@ export interface IHeftActionBaseOptions {
   pluginManager: PluginManager;
 }
 
-export abstract class HeftActionBase<
-  THooks extends ActionHooksBase<TActionProperties>,
-  TActionProperties extends object
-> extends CommandLineAction {
-  public readonly actionHook: SyncHook<IActionContext<THooks, TActionProperties>>;
+export abstract class HeftActionBase extends CommandLineAction {
   protected readonly terminal: Terminal;
   protected readonly metricsCollector: MetricsCollector;
   protected readonly heftConfiguration: HeftConfiguration;
+  protected readonly heftSession: HeftSession;
   protected verboseFlag: CommandLineFlagParameter;
-  private readonly _innerHooksType: new () => THooks;
 
   public constructor(
     commandLineOptions: ICommandLineActionOptions,
     heftActionOptions: IHeftActionBaseOptions,
-    innerHooksType: new () => THooks
+    heftSession: HeftSession
   ) {
     super(commandLineOptions);
     this.terminal = heftActionOptions.terminal;
     this.metricsCollector = heftActionOptions.metricsCollector;
     this.heftConfiguration = heftActionOptions.heftConfiguration;
-    this.actionHook = new SyncHook<IActionContext<THooks, TActionProperties>>(['action']);
-    this._innerHooksType = innerHooksType;
+    this.heftSession = heftSession;
     this.setStartTime();
   }
 
@@ -104,7 +69,7 @@ export abstract class HeftActionBase<
 
     let encounteredError: boolean = false;
     try {
-      await this.executeInner();
+      await this.actionExecuteAsync();
     } catch (e) {
       encounteredError = true;
       throw e;
@@ -129,41 +94,7 @@ export abstract class HeftActionBase<
   }
 
   /**
-   * @internal
-   */
-  public async executeInner(
-    // Remove this when build and test are separated
-    actionExecute: (
-      actionContext: IActionContext<THooks, TActionProperties>
-    ) => Promise<void> = this.actionExecute.bind(this)
-  ): Promise<void> {
-    const actionProperties: TActionProperties = this.getDefaultActionProperties();
-    const hooks: THooks = new this._innerHooksType();
-    const actionContext: IActionContext<THooks, TActionProperties> = {
-      hooks,
-      properties: actionProperties
-    };
-
-    this.actionHook.call(actionContext);
-
-    await hooks.loadActionConfiguration.promise();
-    await hooks.afterLoadActionConfiguration.promise();
-
-    if (hooks.overrideAction.isUsed()) {
-      await hooks.overrideAction.promise(actionProperties);
-    } else {
-      await actionExecute(actionContext);
-    }
-  }
-
-  /**
    * @virtual
    */
-  protected async actionExecute(actionContext: IActionContext<THooks, TActionProperties>): Promise<void> {
-    throw new Error(
-      `${this.actionName}: override hook is not used and no default action executor is provided.`
-    );
-  }
-
-  protected abstract getDefaultActionProperties(): TActionProperties;
+  protected abstract actionExecuteAsync(): Promise<void>;
 }

@@ -1,55 +1,33 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { SyncHook, AsyncParallelHook, AsyncSeriesHook } from 'tapable';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
-import { BuildAction, IBuildActionOptions, IBuildActionContext } from './BuildAction';
-import { ActionHooksBase, IActionContext } from './HeftActionBase';
-
-/**
- * @public
- */
-export class TestHooks extends ActionHooksBase<ITestActionProperties> {
-  public readonly run: AsyncParallelHook = new AsyncParallelHook();
-  public readonly configureTest: AsyncSeriesHook = new AsyncSeriesHook();
-}
-
-/**
- * @public
- */
-export interface ITestActionProperties {
-  watchMode: boolean;
-  productionFlag: boolean;
-}
-
-/**
- * @public
- */
-export interface ITestActionContext extends IActionContext<TestHooks, ITestActionProperties> {}
-
-export interface ITestActionOptions extends IBuildActionOptions {
-  buildAction: BuildAction;
-}
+import { BuildAction } from './BuildAction';
+import { IHeftActionBaseOptions } from './HeftActionBase';
+import { HeftSession } from '../../pluginFramework/HeftSession';
+import { TestStage, ITestStageOptions } from '../../stages/TestStage';
+import { Logging } from '../../utilities/Logging';
 
 export class TestAction extends BuildAction {
-  public testActionHook: SyncHook<ITestActionContext> = new SyncHook<ITestActionContext>(['action']);
-  private _buildAction: BuildAction;
-
+  private _noTestFlag: CommandLineFlagParameter;
   private _noBuildFlag: CommandLineFlagParameter;
 
-  public constructor(options: ITestActionOptions) {
-    super(options, {
+  public constructor(heftActionOptions: IHeftActionBaseOptions, heftSession: HeftSession) {
+    super(heftActionOptions, heftSession, {
       actionName: 'test',
       summary: 'Build the project and run tests.',
       documentation: ''
     });
-
-    this._buildAction = options.buildAction;
   }
 
   public onDefineParameters(): void {
     super.onDefineParameters();
+
+    this._noTestFlag = this.defineFlagParameter({
+      parameterLongName: '--notest',
+      description: 'If specified, run the build without testing.'
+    });
 
     this._noBuildFlag = this.defineFlagParameter({
       parameterLongName: '--no-build',
@@ -57,59 +35,53 @@ export class TestAction extends BuildAction {
     });
   }
 
-  protected async actionExecute(buildActionContext: IBuildActionContext): Promise<void> {
-    const testActionContext: ITestActionContext = {
-      hooks: new TestHooks(),
-      properties: {
-        watchMode: buildActionContext.properties.watchMode,
-        productionFlag: buildActionContext.properties.productionFlag
-      }
-    };
+  protected async actionExecuteAsync(): Promise<void> {
     const shouldBuild: boolean = !this._noBuildFlag.value;
+    const watchMode: boolean = this._watchFlag.value;
+    const noTest: boolean = this._noTestFlag.value;
+    const lite: boolean = this._liteFlag.value;
 
-    if (testActionContext.properties.watchMode) {
+    if (watchMode) {
       if (!shouldBuild) {
         throw new Error(`${this._watchFlag.longName} is not compatible with ${this._noBuildFlag.longName}`);
-      } else if (buildActionContext.properties.noTest) {
+      } else if (noTest) {
         throw new Error(`${this._watchFlag.longName} is not compatible with ${this._noTestFlag.longName}`);
+      } else if (lite) {
+        throw new Error(`${this._watchFlag.longName} is not compatible with ${this._liteFlag.longName}`);
       }
     }
 
-    this.testActionHook.call(testActionContext);
-
-    if (testActionContext.hooks.overrideAction.isUsed()) {
-      await testActionContext.hooks.overrideAction.promise(buildActionContext.properties);
-      return;
+    if (!shouldBuild) {
+      if (noTest) {
+        throw new Error(`${this._noTestFlag.longName} is not compatible with ${this._noBuildFlag.longName}`);
+      }
     }
 
-    await testActionContext.hooks.loadActionConfiguration.promise();
-    await testActionContext.hooks.afterLoadActionConfiguration.promise();
-
-    if (testActionContext.properties.watchMode) {
-      // In --watch mode, run all configuration upfront and then kick off all stages
-      // concurrently with the expectation that the their promises will never resolve
-      // and that they will handle watching filesystem changes
-
-      this._buildAction.actionHook.call(buildActionContext);
-      await testActionContext.hooks.configureTest.promise();
-
-      await Promise.all([
-        super.actionExecute(buildActionContext),
-        this._runStageWithLogging('Test', testActionContext)
-      ]);
+    if (noTest || lite /* "&& shouldBuild" is implied */) {
+      await super.actionExecuteAsync();
     } else {
-      if (shouldBuild) {
-        // Run Build
-        this._buildAction.actionHook.call(buildActionContext);
-        await super.actionExecute(buildActionContext);
-      }
+      const testStage: TestStage = this.heftSession.testStage;
+      const testStageOptions: ITestStageOptions = {
+        watchMode: this._watchFlag.value,
+        production: this._productionFlag.value
+      };
+      await testStage.initializeAsync(testStageOptions);
 
-      if (!buildActionContext.properties.noTest && !buildActionContext.properties.liteFlag) {
-        await testActionContext.hooks.configureTest.promise();
+      if (watchMode) {
+        // In --watch mode, kick off all stages concurrently with the expectation that the their
+        // promises will never resolve and that they will handle watching filesystem changes
+
+        await Promise.all([super.actionExecuteAsync(), testStage.executeAsync()]);
+      } else {
         if (shouldBuild) {
-          await this._runStageWithLogging('Test', testActionContext);
+          await super.actionExecuteAsync();
+          await Logging.runFunctionWithLoggingBoundsAsync(
+            this.terminal,
+            'Test',
+            async () => await testStage.executeAsync()
+          );
         } else {
-          await testActionContext.hooks.run.promise();
+          await testStage.executeAsync();
         }
       }
     }

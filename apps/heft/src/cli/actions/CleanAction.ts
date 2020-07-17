@@ -1,40 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as glob from 'glob';
-import * as path from 'path';
-import { AsyncSeriesBailHook } from 'tapable';
-import { LegacyAdapters } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
-import * as globEscape from 'glob-escape';
 
-import { HeftActionBase, IHeftActionBaseOptions, ActionHooksBase, IActionContext } from './HeftActionBase';
-import { Async } from '../../utilities/Async';
+import { HeftActionBase, IHeftActionBaseOptions } from './HeftActionBase';
+import { HeftSession } from '../../pluginFramework/HeftSession';
+import { CleanStage, ICleanStageOptions } from '../../stages/CleanStage';
 
-/**
- * @public
- */
-export class CleanHooks extends ActionHooksBase<ICleanActionProperties> {
-  public readonly deletePath: AsyncSeriesBailHook<string> = new AsyncSeriesBailHook<string>(['pathToDelete']);
-}
-
-/**
- * @public
- */
-export interface ICleanActionProperties {
-  deleteCache: boolean;
-  pathsToDelete: Set<string>;
-}
-
-/**
- * @public
- */
-export interface ICleanActionContext extends IActionContext<CleanHooks, ICleanActionProperties> {}
-
-export class CleanAction extends HeftActionBase<CleanHooks, ICleanActionProperties> {
+export class CleanAction extends HeftActionBase {
   private _deleteCacheFlag: CommandLineFlagParameter;
 
-  public constructor(options: IHeftActionBaseOptions) {
+  public constructor(options: IHeftActionBaseOptions, heftSession: HeftSession) {
     super(
       {
         actionName: 'clean',
@@ -42,7 +18,7 @@ export class CleanAction extends HeftActionBase<CleanHooks, ICleanActionProperti
         documentation: ''
       },
       options,
-      CleanHooks
+      heftSession
     );
   }
 
@@ -57,48 +33,14 @@ export class CleanAction extends HeftActionBase<CleanHooks, ICleanActionProperti
     });
   }
 
-  protected async actionExecute(actionContext: ICleanActionContext): Promise<void> {
-    const resolvedPathsToDelete: string[] = [];
-    for (const pathToDelete of actionContext.properties.pathsToDelete) {
-      const resolvedPaths: string[] = await this._resolvePath(
-        pathToDelete,
-        this.heftConfiguration.buildFolder
-      );
-      resolvedPathsToDelete.push(...resolvedPaths);
-    }
+  protected async actionExecuteAsync(): Promise<void> {
+    const cleanStage: CleanStage = this.heftSession.cleanStage;
 
-    if (actionContext.properties.deleteCache) {
-      resolvedPathsToDelete.push(this.heftConfiguration.buildCacheFolder);
-    }
-
-    await Async.forEachLimitAsync(resolvedPathsToDelete, 100, (pathToDelete) =>
-      actionContext.hooks.deletePath.promise(pathToDelete)
-    );
-
-    this.terminal.writeLine(`Deleted ${actionContext.properties.pathsToDelete.size} paths`);
-  }
-
-  protected getDefaultActionProperties(): ICleanActionProperties {
-    return {
-      deleteCache: this._deleteCacheFlag.value,
-      pathsToDelete: new Set<string>()
+    const cleanStageOptions: ICleanStageOptions = {
+      deleteCache: this._deleteCacheFlag.value
     };
-  }
+    await cleanStage.initializeAsync(cleanStageOptions);
 
-  private async _resolvePath(globPattern: string, buildFolder: string): Promise<string[]> {
-    if (globEscape(globPattern) !== globPattern) {
-      const expandedGlob: string[] = await LegacyAdapters.convertCallbackToPromise(glob, globPattern, {
-        cwd: buildFolder
-      });
-
-      const result: string[] = [];
-      for (const pathFromGlob of expandedGlob) {
-        result.push(path.resolve(buildFolder, pathFromGlob));
-      }
-
-      return result;
-    } else {
-      return [path.resolve(buildFolder, globPattern)];
-    }
+    await cleanStage.executeAsync();
   }
 }

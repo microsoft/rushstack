@@ -23,6 +23,10 @@ import { PluginManager } from '../pluginFramework/PluginManager';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IHeftActionBaseOptions } from './actions/HeftActionBase';
 import { HeftSession } from '../pluginFramework/HeftSession';
+import { CleanStage } from '../stages/CleanStage';
+import { BuildStage } from '../stages/BuildStage';
+import { DevDeployStage } from '../stages/DevDeployStage';
+import { TestStage } from '../stages/TestStage';
 
 export class HeftToolsCommandLineParser extends CommandLineParser {
   private _terminalProvider: ConsoleTerminalProvider;
@@ -73,27 +77,27 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       heftConfiguration: this._heftConfiguration
     };
 
-    const cleanAction: CleanAction = new CleanAction(actionOptions);
-    const buildAction: BuildAction = new BuildAction({ ...actionOptions, cleanAction });
-    const devDeployAction: DevDeployAction = new DevDeployAction(actionOptions);
-    const startAction: StartAction = new StartAction(actionOptions);
-    const testAction: TestAction = new TestAction({ ...actionOptions, cleanAction, buildAction });
-
     this._heftSession = new HeftSession({
       getIsDebugMode: () => this.isDebug,
 
-      cleanAction,
-      buildAction,
-      devDeployAction,
-      startAction,
-      testAction,
+      buildStage: new BuildStage(this._heftConfiguration),
+      cleanStage: new CleanStage(this._heftConfiguration),
+      devDeployStage: new DevDeployStage(this._heftConfiguration),
+      testStage: new TestStage(this._heftConfiguration),
       metricsCollector: this.metricsCollector
     });
+
     this._pluginManager = new PluginManager({
       terminal: this.terminal,
       heftConfiguration: this._heftConfiguration,
       heftSession: this._heftSession
     });
+
+    const cleanAction: CleanAction = new CleanAction(actionOptions, this._heftSession);
+    const buildAction: BuildAction = new BuildAction(actionOptions, this._heftSession);
+    const devDeployAction: DevDeployAction = new DevDeployAction(actionOptions, this._heftSession);
+    const startAction: StartAction = new StartAction(actionOptions, this._heftSession);
+    const testAction: TestAction = new TestAction(actionOptions, this._heftSession);
 
     this.addAction(cleanAction);
     this.addAction(buildAction);

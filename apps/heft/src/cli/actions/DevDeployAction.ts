@@ -1,25 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { HeftActionBase, IHeftActionBaseOptions, ActionHooksBase, IActionContext } from './HeftActionBase';
+import { HeftActionBase, IHeftActionBaseOptions } from './HeftActionBase';
+import { HeftSession } from '../../pluginFramework/HeftSession';
+import { DevDeployStage, IDevDeployStageOptions } from '../../stages/DevDeployStage';
 
-/**
- * @public
- */
-export interface IDevDeployActionProperties {}
-
-/**
- * @public
- */
-export class DevDeployHooks extends ActionHooksBase<IDevDeployActionProperties> {}
-
-/**
- * @public
- */
-export interface IDevDeployActionContext extends IActionContext<DevDeployHooks, IDevDeployActionProperties> {}
-
-export class DevDeployAction extends HeftActionBase<DevDeployHooks, IDevDeployActionProperties> {
-  public constructor(options: IHeftActionBaseOptions) {
+export class DevDeployAction extends HeftActionBase {
+  public constructor(options: IHeftActionBaseOptions, heftSession: HeftSession) {
     super(
       {
         actionName: 'dev-deploy',
@@ -27,15 +14,16 @@ export class DevDeployAction extends HeftActionBase<DevDeployHooks, IDevDeployAc
         documentation: ''
       },
       options,
-      DevDeployHooks
+      heftSession
     );
   }
 
-  protected async actionExecute(actionContext: IDevDeployActionContext): Promise<void> {
-    throw new Error('Not implemented yet...');
-  }
+  protected async actionExecuteAsync(): Promise<void> {
+    const devDeployStage: DevDeployStage = this.heftSession.devDeployStage;
 
-  protected getDefaultActionProperties(): IDevDeployActionProperties {
-    return {};
+    const devDeployStageOptions: IDevDeployStageOptions = {};
+    await devDeployStage.initializeAsync(devDeployStageOptions);
+
+    await devDeployStage.executeAsync();
   }
 }

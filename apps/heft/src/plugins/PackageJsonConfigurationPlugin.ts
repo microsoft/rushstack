@@ -1,7 +1,7 @@
 import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { ITypeScriptConfiguration, IBuildActionContext, ICompileStage } from '../cli/actions/BuildAction';
+import { IBuildStageContext, ICompileSubstage, ITypeScriptConfiguration } from '../stages/BuildStage';
 
 const PLUGIN_NAME: string = 'PackageJsonConfigurationPlugin';
 
@@ -9,8 +9,8 @@ export class PackageJsonConfigurationPlugin implements IHeftPlugin {
   public readonly displayName: string = PLUGIN_NAME;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildActionContext) => {
-      build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileStage) => {
+    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
+      build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
         compile.hooks.afterConfigureTypeScript.tap(PLUGIN_NAME, () => {
           this._updateTypeScriptConfiguration(heftConfiguration, compile.properties.typeScriptConfiguration);
         });

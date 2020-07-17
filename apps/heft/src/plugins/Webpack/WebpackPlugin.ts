@@ -5,10 +5,10 @@ import * as webpack from 'webpack';
 import { LegacyAdapters, Terminal, ITerminalProvider } from '@rushstack/node-core-library';
 
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
-import { IBundleStage, IBuildActionContext, IBuildActionProperties } from '../../cli/actions/BuildAction';
 import { HeftSession } from '../../pluginFramework/HeftSession';
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
 import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
+import { IBuildStageContext, IBundleSubstage, IBuildStageProperties } from '../../stages/BuildStage';
 
 const PLUGIN_NAME: string = 'WebpackPlugin';
 
@@ -16,8 +16,8 @@ export class WebpackPlugin implements IHeftPlugin {
   public readonly displayName: string = PLUGIN_NAME;
 
   public apply(heftCompilation: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftCompilation.hooks.build.tap(PLUGIN_NAME, (build: IBuildActionContext) => {
-      build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleStage) => {
+    heftCompilation.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
+      build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
         bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
           await this._runWebpackAsync(
             heftConfiguration.terminalProvider,
@@ -32,7 +32,7 @@ export class WebpackPlugin implements IHeftPlugin {
   private async _runWebpackAsync(
     baseTerminalProvider: ITerminalProvider,
     webpackConfiguration: webpack.Configuration | undefined,
-    buildProperties: IBuildActionProperties
+    buildProperties: IBuildStageProperties
   ): Promise<void> {
     if (!webpackConfiguration) {
       return;
