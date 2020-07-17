@@ -70,7 +70,7 @@ export class UpdateAction extends BaseInstallAction {
       // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
-      toFlags: []
+      toProjects: []
     };
   }
 }

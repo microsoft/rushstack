@@ -29,6 +29,8 @@ import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../../
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 import { InstallHelpers } from './InstallHelpers';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
+import { LinkManagerFactory } from '../LinkManagerFactory';
+import { BaseLinkManager } from '../base/BaseLinkManager';
 
 /**
  * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.
@@ -198,7 +200,7 @@ export class RushInstallManager extends BaseInstallManager {
         // Is there a locally built Rush project that could satisfy this dependency?
         // If so, then we will symlink to the project folder rather than to common/temp/node_modules.
         // In this case, we don't want "npm install" to process this package, but we do need
-        // to record this decision for "rush link" later, so we add it to a special 'rushDependencies' field.
+        // to record this decision for linking later, so we add it to a special 'rushDependencies' field.
         const localProject: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(
           packageName
         );
@@ -637,6 +639,17 @@ export class RushInstallManager extends BaseInstallManager {
     }
   }
 
+  protected async postInstallAsync(): Promise<void> {
+    if (!this.options.noLink) {
+      const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
+      await linkManager.createSymlinksForProjects(false);
+    } else {
+      console.log(
+        os.EOL + colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.')
+      );
+    }
+  }
+
   /**
    * Gets the path to the tarball
    * Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
@@ -655,7 +668,7 @@ export class RushInstallManager extends BaseInstallManager {
    *
    * The regression is that "npm install" sets the package.json "version" field for the
    * @rush-temp projects to a value like "file:projects/example.tgz", when it should be "0.0.0".
-   * This causes "rush link" to fail later, when read-package-tree tries to parse the bad version.
+   * This causes linking to fail later, when read-package-tree tries to parse the bad version.
    * The error looks like this:
    *
    * ERROR: Failed to parse package.json for foo: Invalid version: "file:projects/example.tgz"

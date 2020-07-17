@@ -17,7 +17,7 @@ import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
-import { PackageJsonEditor, DependencyType } from '../../api/PackageJsonEditor';
+import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../../api/PackageJsonEditor';
 import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../../logic/RushConstants';
@@ -27,6 +27,9 @@ import { InstallHelpers } from './InstallHelpers';
 import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 import { RepoStateFile } from '../RepoStateFile';
 import { IPnpmfileShimSettings } from '../pnpm/IPnpmfileShimSettings';
+import { PnpmProjectDependencyManifest } from '../pnpm/PnpmProjectDependencyManifest';
+import { PnpmShrinkwrapFile, IPnpmShrinkwrapImporterYaml } from '../pnpm/PnpmShrinkwrapFile';
+import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -36,9 +39,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
    * @override
    */
   public async doInstall(): Promise<void> {
-    // Workspaces do not support the no-link option, so throw if this is passed
+    // TODO: Remove when "rush link" and "rush unlink" are deprecated
     if (this.options.noLink) {
-      console.log();
       console.log(
         colors.red(
           'The "--no-link" option was provided but is not supported when using workspaces. Run the command again ' +
@@ -423,6 +425,24 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     console.log('');
   }
 
+  protected async postInstallAsync(): Promise<void> {
+    // Per-project manifests can only be generated for PNPM currently
+    if (this.rushConfiguration.packageManager === 'pnpm' && this.rushConfiguration.pnpmOptions) {
+      // Base it off the temp shrinkwrap, as this was the most recently completed install
+      const tempShrinkwrapFile: PnpmShrinkwrapFile = PnpmShrinkwrapFile.loadFromFile(
+        this.rushConfiguration.tempShrinkwrapFilename,
+        this.rushConfiguration.pnpmOptions
+      )!;
+
+      await Promise.all(
+        this.rushConfiguration.projects.map((x) => this._createPerProjectManifestAsync(tempShrinkwrapFile, x))
+      );
+    }
+
+    // TODO: Remove when "rush link" and "rush unlink" are deprecated
+    LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration).create();
+  }
+
   /**
    * Preferred versions are supported using pnpmfile by substituting any dependency version specifier
    * for the preferred version during package resolution. This is only done if the preferred version range
@@ -469,6 +489,92 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   }
 
   /**
+   * If the feature is enabled, creates shrinkwrap-deps.json files and places them in <projectFolder>/.rush/temp.
+   * These files contain the integrity hash of every dependency as well as dependencies of dependencies. This
+   * file can be used to track whether or not the packages consumed by this project changed between installs.
+   */
+  protected _createPerProjectManifestAsync(
+    pnpmShrinkwrapFile: PnpmShrinkwrapFile,
+    project: RushConfigurationProject
+  ): Promise<void> {
+    const pnpmProjectDependencyManifest: PnpmProjectDependencyManifest = new PnpmProjectDependencyManifest({
+      pnpmShrinkwrapFile,
+      project
+    });
+
+    // If the feature is not enabled, clean up the manifest and return
+    if (
+      this.rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection
+    ) {
+      return pnpmProjectDependencyManifest.deleteIfExistsAsync();
+    }
+
+    // Obtain the workspace importer from the shrinkwrap, which lists resolved dependencies
+    const importerKey: string = pnpmShrinkwrapFile.getWorkspaceKeyByPath(
+      this.rushConfiguration.commonTempFolder,
+      project.projectFolder
+    );
+    const workspaceImporter:
+      | IPnpmShrinkwrapImporterYaml
+      | undefined = pnpmShrinkwrapFile.getWorkspaceImporter(importerKey);
+
+    if (!workspaceImporter) {
+      // Filtered installs will not contain all projects in the shrinkwrap, but if one is
+      // missing during a full install, something has gone wrong
+      if (this.options.toProjects.length === 0) {
+        throw new InternalError(
+          `Cannot find shrinkwrap entry using importer key for workspace project: ${importerKey}`
+        );
+      }
+      return pnpmProjectDependencyManifest.deleteIfExistsAsync();
+    }
+
+    const localDependencyProjectNames: Set<string> = new Set<string>(
+      project.localDependencyProjects.map((x) => x.packageName)
+    );
+
+    // Loop through non-local dependencies. Skip peer dependencies because they're only a constraint
+    const dependencies: PackageJsonDependency[] = [
+      ...project.packageJsonEditor.dependencyList,
+      ...project.packageJsonEditor.devDependencyList
+    ].filter((x) => x.dependencyType !== DependencyType.Peer && !localDependencyProjectNames.has(x.name));
+
+    for (const { name, dependencyType } of dependencies) {
+      // read the version number from the shrinkwrap entry
+      let version: string | undefined;
+      if (dependencyType === DependencyType.Regular) {
+        version = (workspaceImporter.dependencies || {})[name];
+      } else if (dependencyType === DependencyType.Dev) {
+        // Dev dependencies are folded into dependencies if there is a duplicate
+        // definition, so we should also check there
+        version =
+          (workspaceImporter.devDependencies || {})[name] || (workspaceImporter.dependencies || {})[name];
+      } else if (dependencyType === DependencyType.Optional) {
+        version = (workspaceImporter.optionalDependencies || {})[name];
+      }
+
+      if (!version) {
+        // Optional dependencies by definition may not exist, so avoid throwing on these
+        if (dependencyType !== DependencyType.Optional) {
+          throw new InternalError(
+            `Cannot find shrinkwrap entry dependency "${name}" for workspace project: ${project.packageName}`
+          );
+        }
+        continue;
+      }
+
+      // Add to the manifest and provide all the parent dependencies
+      pnpmProjectDependencyManifest.addDependency(name, version, {
+        dependencies: { ...workspaceImporter.dependencies, ...workspaceImporter.devDependencies },
+        optionalDependencies: { ...workspaceImporter.optionalDependencies },
+        peerDependencies: {}
+      });
+    }
+
+    return pnpmProjectDependencyManifest.saveAsync();
+  }
+
+  /**
    * Used when invoking the NPM tool.  Appends the common configuration options
    * to the command-line.
    */
@@ -481,10 +587,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       args.push('--link-workspace-packages', 'false');
 
       // "<package>..." selects the specified package and all direct and indirect dependencies
-      if (this.options.toFlags) {
-        for (const flag of this.options.toFlags) {
-          args.push('--filter', `${flag}...`);
-        }
+      for (const toProject of this.options.toProjects) {
+        args.push('--filter', `${toProject.packageName}...`);
       }
     }
   }
