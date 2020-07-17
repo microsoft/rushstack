@@ -18,6 +18,7 @@ import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { Git } from '../Git';
 import { LastInstallFlag } from '../../api/LastInstallFlag';
+import { LastLinkFlag } from '../../api/LastLinkFlag';
 import { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import { PurgeManager } from '../PurgeManager';
 import { RushConfiguration, ICurrentVariantJson } from '../../api/RushConfiguration';
@@ -103,6 +104,7 @@ export abstract class BaseInstallManager {
   private _rushConfiguration: RushConfiguration;
   private _rushGlobalFolder: RushGlobalFolder;
   private _commonTempInstallFlag: LastInstallFlag;
+  private _commonTempLinkFlag: LastLinkFlag;
   private _installRecycler: AsyncRecycler;
 
   private _options: IInstallManagerOptions;
@@ -119,6 +121,7 @@ export abstract class BaseInstallManager {
     this._options = options;
 
     this._commonTempInstallFlag = LastInstallFlag.getCommonTempFlag(rushConfiguration);
+    this._commonTempLinkFlag = LastLinkFlag.getCommonTempFlag(rushConfiguration);
   }
 
   protected get rushConfiguration(): RushConfiguration {
@@ -199,6 +202,10 @@ export abstract class BaseInstallManager {
 
       // Delete the successful install file to indicate the install transaction has started
       this._commonTempInstallFlag.clear();
+
+      // Since we're going to be tampering with common/node_modules, delete the "rush link" flag file if it exists;
+      // this ensures that a full "rush link" is required next time
+      this._commonTempLinkFlag.clear();
 
       // Perform the actual install
       await this.installAsync(cleanInstall);
