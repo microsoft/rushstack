@@ -23,6 +23,10 @@ export interface IModuleMinificationRequest {
    * File name to show for the source code in the source map
    */
   nameForMap: string | undefined;
+  /**
+   * Reserved variable names, e.g. __WEBPACK_EXTERNAL_MODULE_1__
+   */
+  externals: string[] | undefined;
 }
 
 /**
@@ -122,6 +126,11 @@ export interface IAssetInfo {
    * The raw chunk object from Webpack, in case information from it is necessary for reconstruction
    */
   chunk: webpack.compilation.Chunk;
+
+  /**
+   * The set of external names to postprocess
+   */
+  externalNames: Map<string, string>;
 }
 
 /**
@@ -150,6 +159,10 @@ export interface IModuleInfo {
  * @public
  */
 export interface IExtendedModule extends webpack.compilation.Module, webpack.Module {
+  /**
+   * Is this module external?
+   */
+  external?: boolean;
   /**
    * Id for the module
    */
