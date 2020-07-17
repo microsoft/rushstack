@@ -48,27 +48,41 @@ export function minifySingleFile(
   terserOptions: MinifyOptions
 ): IModuleMinificationResult {
   const extractedComments: string[] = [];
-  if (!terserOptions.output) {
-    terserOptions.output = {};
-  }
+  const output: MinifyOptions['output'] = terserOptions.output || {};
+  const { mangle: originalMangle } = terserOptions;
 
-  /**
-   * Comment extraction as performed by terser-webpack-plugin to ensure output parity in default configuration
-   * @see https://github.com/webpack-contrib/terser-webpack-plugin/blob/master/src/minify.js#L129-142
-   */
-  terserOptions.output.comments = (astNode: unknown, comment: IComment) => {
-    if (isSomeComments(comment)) {
-      const commentText: string =
-        comment.type === 'comment2' ? `/*${comment.value}*/\n` : `//${comment.value}\n`;
-      extractedComments.push(commentText);
-    }
+  const mangle: MinifyOptions['mangle'] =
+    originalMangle === false ? false : typeof originalMangle === 'object' ? { ...originalMangle } : {};
 
-    return false;
+  const finalOptions: MinifyOptions = {
+    ...terserOptions,
+    output,
+    mangle
   };
 
-  const { code, nameForMap, hash } = request;
+  if (output.comments !== false) {
+    /**
+     * Comment extraction as performed by terser-webpack-plugin to ensure output parity in default configuration
+     * @see https://github.com/webpack-contrib/terser-webpack-plugin/blob/master/src/minify.js#L129-142
+     */
+    output.comments = (astNode: unknown, comment: IComment) => {
+      if (isSomeComments(comment)) {
+        const commentText: string =
+          comment.type === 'comment2' ? `/*${comment.value}*/\n` : `//${comment.value}\n`;
+        extractedComments.push(commentText);
+      }
 
-  terserOptions.sourceMap = nameForMap
+      return false;
+    };
+  }
+
+  const { code, nameForMap, hash, externals } = request;
+
+  if (mangle && externals) {
+    mangle.reserved = mangle.reserved ? externals.concat(mangle.reserved) : externals;
+  }
+
+  finalOptions.sourceMap = nameForMap
     ? {
         asObject: true
       }
@@ -78,7 +92,7 @@ export function minifySingleFile(
     {
       [nameForMap || 'code']: code
     },
-    terserOptions
+    finalOptions
   );
 
   if (minified.error) {

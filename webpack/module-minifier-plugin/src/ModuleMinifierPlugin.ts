@@ -18,6 +18,7 @@ import {
   STAGE_BEFORE,
   STAGE_AFTER
 } from './Constants';
+import { getIdentifier } from './MinifiedIdentifier';
 import {
   IModuleMinifier,
   IModuleMinifierPluginOptions,
@@ -258,7 +259,8 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
               {
                 hash,
                 code: wrappedCode,
-                nameForMap: useSourceMaps ? nameForMap : undefined
+                nameForMap: useSourceMaps ? nameForMap : undefined,
+                externals: undefined
               },
               (result: IModuleMinificationResult) => {
                 if (isMinificationResultError(result)) {
@@ -327,6 +329,9 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
         async (chunks: webpack.compilation.Chunk[]): Promise<void> => {
           // Still need to minify the rendered assets
           for (const chunk of chunks) {
+            const externals: string[] = [];
+            const externalNames: Map<string, string> = new Map();
+
             const chunkModules: (string | number)[] = [];
             const allChunkModules: Iterable<IExtendedModule> = chunk.modulesIterable;
             let hasNonNumber: boolean = false;
@@ -336,6 +341,17 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
                   hasNonNumber = true;
                 }
                 chunkModules.push(mod.id);
+
+                if (mod.external) {
+                  const key: string = `__WEBPACK_EXTERNAL_MODULE_${webpack.Template.toIdentifier(
+                    `${mod.id}`
+                  )}__`;
+                  // The first two identifiers are used for function (module, exports) at the module site
+                  const ordinal: number = 2 + externals.length;
+                  const miniId: string = getIdentifier(ordinal);
+                  externals.push(key);
+                  externalNames.set(key, miniId);
+                }
               }
             }
 
@@ -358,7 +374,8 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
                   {
                     hash,
                     code: rawCode,
-                    nameForMap: useSourceMaps ? nameForMap : undefined
+                    nameForMap: useSourceMaps ? nameForMap : undefined,
+                    externals
                   },
                   (result: IModuleMinificationResult) => {
                     if (isMinificationResultError(result)) {
@@ -395,7 +412,8 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
                           extractedComments,
                           modules: chunkModules,
                           chunk,
-                          fileName: assetName
+                          fileName: assetName,
+                          externalNames
                         });
                       } catch (err) {
                         compilation.errors.push(err);
@@ -413,7 +431,8 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
                   extractedComments: [],
                   modules: chunkModules,
                   chunk,
-                  fileName: assetName
+                  fileName: assetName,
+                  externalNames
                 });
               }
             }

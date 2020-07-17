@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/module-minifier-plugin",
+      "comment": "Support external modules",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/module-minifier-plugin",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
