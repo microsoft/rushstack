@@ -331,8 +331,6 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
           for (const chunk of chunks) {
             const externals: string[] = [];
             const externalNames: Map<string, string> = new Map();
-            // Skip the first two parameters to not collide with the module function arguments
-            let nextOrdinal: number = 1;
 
             const chunkModules: (string | number)[] = [];
             const allChunkModules: Iterable<IExtendedModule> = chunk.modulesIterable;
@@ -348,7 +346,8 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
                   const key: string = `__WEBPACK_EXTERNAL_MODULE_${webpack.Template.toIdentifier(
                     `${mod.id}`
                   )}__`;
-                  const ordinal: number = ++nextOrdinal;
+                  // The first two identifiers are used for function (module, exports) at the module site
+                  const ordinal: number = 2 + externals.length;
                   const miniId: string = getIdentifier(ordinal);
                   externals.push(key);
                   externalNames.set(key, miniId);

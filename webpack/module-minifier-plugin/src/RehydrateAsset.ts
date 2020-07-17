@@ -1,12 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Template } from 'webpack';
 import { CachedSource, ConcatSource, ReplaceSource, Source } from 'webpack-sources';
 
 import { CHUNK_MODULES_TOKEN } from './Constants';
-import { getIdentifier } from './MinifiedIdentifier';
-import { IAssetInfo, IModuleMap, IModuleInfo, IExtendedModule } from './ModuleMinifierPlugin.types';
+import { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.types';
 
 /**
  * Rehydrates an asset with minified modules.
@@ -139,19 +137,6 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
   }
 
   source.add(suffix);
-
-  const externals: Map<string, string> = new Map();
-  let nextOrdinal: number = 0;
-  for (const id of modules) {
-    const item: IModuleInfo | undefined = moduleMap.get(id);
-    const mod: IExtendedModule | undefined = item && item.module;
-    if (mod && mod.external) {
-      const key: string = `${Template.toIdentifier(`${mod.id}`)}__`;
-      const ordinal: number = ++nextOrdinal;
-      const miniId: string = getIdentifier(ordinal);
-      externals.set(key, miniId);
-    }
-  }
 
   const cached: CachedSource = new CachedSource(source);
 
