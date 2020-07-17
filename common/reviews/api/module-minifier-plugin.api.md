@@ -23,6 +23,7 @@ export function generateLicenseFileForAsset(compilation: webpack.compilation.Com
 // @public
 export interface IAssetInfo {
     chunk: webpack.compilation.Chunk;
+    externalNames: Map<string, string>;
     extractedComments: string[];
     fileName: string;
     modules: (string | number)[];
@@ -46,6 +47,7 @@ export const IDENTIFIER_TRAILING_DIGITS: string;
 
 // @public
 export interface IExtendedModule extends webpack.compilation.Module, webpack.Module {
+    external?: boolean;
     id: string | number | null;
     identifier(): string;
     readableIdentifier(requestShortener: unknown): string;
@@ -81,6 +83,7 @@ export interface IModuleMinificationErrorResult {
 // @public
 export interface IModuleMinificationRequest {
     code: string;
+    externals: string[] | undefined;
     hash: string;
     nameForMap: string | undefined;
 }
