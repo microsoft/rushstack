@@ -60,7 +60,6 @@ export abstract class HeftActionBase<
   protected readonly metricsCollector: MetricsCollector;
   protected readonly heftConfiguration: HeftConfiguration;
   protected verboseFlag: CommandLineFlagParameter;
-  protected _actionPropertiesUpdaters: ((actionOptions: TActionProperties) => void)[] = [];
   private readonly _innerHooksType: new () => THooks;
 
   public constructor(
@@ -138,7 +137,7 @@ export abstract class HeftActionBase<
       actionContext: IActionContext<THooks, TActionProperties>
     ) => Promise<void> = this.actionExecute.bind(this)
   ): Promise<void> {
-    const actionProperties: TActionProperties = this._getActionProperties();
+    const actionProperties: TActionProperties = this.getDefaultActionProperties();
     const hooks: THooks = new this._innerHooksType();
     const actionContext: IActionContext<THooks, TActionProperties> = {
       hooks,
@@ -167,14 +166,4 @@ export abstract class HeftActionBase<
   }
 
   protected abstract getDefaultActionProperties(): TActionProperties;
-
-  private _getActionProperties(): TActionProperties {
-    const actionProperties: TActionProperties = this.getDefaultActionProperties();
-
-    for (const actionPropertiesUpdater of this._actionPropertiesUpdaters) {
-      actionPropertiesUpdater(actionProperties);
-    }
-
-    return actionProperties;
-  }
 }
