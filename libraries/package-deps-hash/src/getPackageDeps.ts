@@ -73,14 +73,15 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
        *   - 'RM' == rename with modifications
        * filenames == path to the file, or files in the case of files that have been renamed. When filename characters
        * are escaped, filenames will be surrounded by double-quotes. Some systems allow double-quotes in the
-       * filename as well, though these will be escaped and should be included by the regex.
+       * filename as well, though these will be escaped and should be included by the regex. We will also keep the
+       * trailing whitespace after every match so that it can be used when reconstructing the filename
        */
-      const match: RegExpMatchArray | null = line.match(/"(\\"|[^"])+"|(\S+)/g);
+      const match: RegExpMatchArray | null = line.match(/(("(\\"|[^"])+")|(\S+))\s*/g);
 
       if (match && match.length > 1) {
         // Trim off leading and trailing double-quotes
         const [changeType, ...filenames] = match.map((x) =>
-          x.match(/^".+"$/) ? x.slice(1, x.length - 1) : x
+          x.match(/^".+"\s*$/) ? x.slice(1, x.lastIndexOf('"')) : x
         );
 
         // Filenames with spaces which are not surrounded by quotes will still be split. In order to accomodate all
@@ -91,13 +92,13 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
           !FileSystem.exists(path.resolve(packagePath, filenames[filenames.length - 1]))
         ) {
           const lastFilename: string = filenames.pop()!;
-          filenames.push(`${filenames.pop()!} ${lastFilename}`);
+          filenames.push(`${filenames.pop()!}${lastFilename}`);
         }
 
         // We always care about the last filename in the filenames array. In the case of non-rename changes,
         // the filenames array only contains one item. In the case of rename changes, the last item in the
         // array is the path to the file in the working tree, which is the only one that we care about.
-        changes.set(filenames[filenames.length - 1], changeType);
+        changes.set(filenames[filenames.length - 1], changeType.trimRight());
       }
     });
 

@@ -276,4 +276,33 @@ describe('getPackageDeps', () => {
 
     _done();
   });
+
+  it('can handle a filename with multiple spaces', (done) => {
+    const tempFilePath: string = path.join(TEST_PROJECT_PATH, 'a  file name.txt');
+
+    FileSystem.writeFile(tempFilePath, 'a');
+
+    function _done(e?: Error): void {
+      FileSystem.deleteFile(tempFilePath);
+      done(e);
+    }
+
+    const results: IPackageDeps = getPackageDeps(TEST_PROJECT_PATH);
+    try {
+      const expectedFiles: { [key: string]: string } = {
+        'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
+        'a  file name.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
+        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
+      };
+      const filePaths: string[] = Object.keys(results.files).sort();
+
+      expect(filePaths).toHaveLength(Object.keys(expectedFiles).length);
+
+      filePaths.forEach((filePath) => expect(results.files[filePath]).toEqual(expectedFiles[filePath]));
+    } catch (e) {
+      return _done(e);
+    }
+
+    _done();
+  });
 });
