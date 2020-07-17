@@ -446,8 +446,10 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: link 1`] = `
 "usage: rush link [-h] [-f]
 
-(DEPRECATED) Create node_modules symlinks for all projects. This command is 
-deprecated. To restore project node_modules folders, run \\"rush install\\" or 
+Create node_modules symlinks for all projects. This operation is normally 
+performed automatically as part of \\"rush install\\" or \\"rush update\\". You 
+should only need to use \\"rush link\\" if you performed \\"rush unlink\\" for some 
+reason, or if you specified the \\"--no-link\\" option for \\"rush install\\" or 
 \\"rush update\\".
 
 Optional arguments:
