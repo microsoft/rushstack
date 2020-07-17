@@ -74,14 +74,14 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
        * filenames == path to the file, or files in the case of files that have been renamed. When filename characters
        * are escaped, filenames will be surrounded by double-quotes. Some systems allow double-quotes in the
        * filename as well, though these will be escaped and should be included by the regex. We will also keep the
-       * trailing whitespace after every match so that it can be used when reconstructing the filename
+       * trailing whitespace after unquoted matches so that it can be used when reconstructing the filename
        */
-      const match: RegExpMatchArray | null = line.match(/(("(\\"|[^"])+")|(\S+))\s*/g);
+      const match: RegExpMatchArray | null = line.match(/("(\\"|[^"])+")|(\S+\s*)/g);
 
       if (match && match.length > 1) {
         // Trim off leading and trailing double-quotes
         const [changeType, ...filenames] = match.map((x) =>
-          x.match(/^".+"\s*$/) ? x.slice(1, x.lastIndexOf('"')) : x
+          x.match(/^".+"$/) ? x.slice(1, x.length - 1) : x
         );
 
         // Filenames with spaces which are not surrounded by quotes will still be split. In order to accomodate all
