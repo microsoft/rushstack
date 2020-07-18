@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/package-deps-hash",
-      "comment": "Fix hashing when a filename contains a space, and fix git hash-object call when long filenames are provided",
+      "comment": "Fix hashing when a filename contains a space, a special character (ex. \", \\), or a unicode character, and fix git hash-object call when long filenames are provided",
       "type": "patch"
     }
   ],
