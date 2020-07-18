@@ -66,6 +66,8 @@ describe('getPackageDeps', () => {
     try {
       const expectedFiles: { [key: string]: string } = {
         'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
+        'file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
+        'file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
         [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
@@ -110,6 +112,8 @@ describe('getPackageDeps', () => {
       const expectedFiles: { [key: string]: string } = {
         'a.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
         'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
+        'file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
+        'file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
         [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
@@ -141,6 +145,8 @@ describe('getPackageDeps', () => {
         'a.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
         'b.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
         'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
+        'file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
+        'file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
         [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
@@ -166,6 +172,8 @@ describe('getPackageDeps', () => {
     const results: IPackageDeps = getPackageDeps(TEST_PROJECT_PATH);
     try {
       const expectedFiles: { [key: string]: string } = {
+        'file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
+        'file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
         [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
@@ -192,6 +200,8 @@ describe('getPackageDeps', () => {
     try {
       const expectedFiles: { [key: string]: string } = {
         'file1.txt': 'f2ba8f84ab5c1bce84a7b441cb1959cfc7093b7f',
+        'file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
+        'file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
         [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
@@ -205,7 +215,11 @@ describe('getPackageDeps', () => {
   });
 
   it('can exclude a committed file', (done) => {
-    const results: IPackageDeps = getPackageDeps(TEST_PROJECT_PATH, ['file1.txt']);
+    const results: IPackageDeps = getPackageDeps(TEST_PROJECT_PATH, [
+      'file1.txt',
+      'file  2.txt',
+      'file蝴蝶.txt'
+    ]);
     try {
       const expectedFiles: { [key: string]: string } = {
         [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
@@ -234,6 +248,8 @@ describe('getPackageDeps', () => {
     try {
       const expectedFiles: { [key: string]: string } = {
         'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
+        'file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
+        'file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
         [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
@@ -262,6 +278,8 @@ describe('getPackageDeps', () => {
     try {
       const expectedFiles: { [key: string]: string } = {
         'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
+        'file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
+        'file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
         'a file.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
         [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
@@ -291,7 +309,71 @@ describe('getPackageDeps', () => {
     try {
       const expectedFiles: { [key: string]: string } = {
         'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
+        'file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
+        'file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
         'a  file name.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
+        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
+      };
+      const filePaths: string[] = Object.keys(results.files).sort();
+
+      expect(filePaths).toHaveLength(Object.keys(expectedFiles).length);
+
+      filePaths.forEach((filePath) => expect(results.files[filePath]).toEqual(expectedFiles[filePath]));
+    } catch (e) {
+      return _done(e);
+    }
+
+    _done();
+  });
+
+  it('can handle a filename with non-standard characters', (done) => {
+    const tempFilePath: string = path.join(TEST_PROJECT_PATH, 'newFile批把.txt');
+
+    FileSystem.writeFile(tempFilePath, 'a');
+
+    function _done(e?: Error): void {
+      FileSystem.deleteFile(tempFilePath);
+      done(e);
+    }
+
+    const results: IPackageDeps = getPackageDeps(TEST_PROJECT_PATH);
+    try {
+      const expectedFiles: { [key: string]: string } = {
+        'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
+        'file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
+        'file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
+        'newFile批把.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
+        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
+      };
+      const filePaths: string[] = Object.keys(results.files).sort();
+
+      expect(filePaths).toHaveLength(Object.keys(expectedFiles).length);
+
+      filePaths.forEach((filePath) => expect(results.files[filePath]).toEqual(expectedFiles[filePath]));
+    } catch (e) {
+      return _done(e);
+    }
+
+    _done();
+  });
+
+  it('can handle a filename with non-standard characters', (done) => {
+    const tempFilePath: string = path.join(TEST_PROJECT_PATH, 'newFile批把.txt');
+
+    FileSystem.writeFile(tempFilePath, 'a');
+
+    function _done(e?: Error): void {
+      FileSystem.deleteFile(tempFilePath);
+      done(e);
+    }
+
+    const results: IPackageDeps = getPackageDeps(TEST_PROJECT_PATH);
+    try {
+      const expectedFiles: { [key: string]: string } = {
+        'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
+        'file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
+        'file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
+        'newFile批把.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
         [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
       };
       const filePaths: string[] = Object.keys(results.files).sort();
