@@ -25,15 +25,23 @@ export function parseGitFilename(filename: string): string {
     return filename;
   }
 
-  // Need to hex encode '%' since we will be decoding from hex
+  // Need to hex encode '%' since we will be decoding the converted octal values from hex
   filename = filename.replace(/%/g, '%25');
-  // Replace all instances of octal encoding with hex (ex. '\347\275\221' -> '%E7%BD%91')
-  filename = filename.replace(
-    /(?:\\(\d{1,3}))/g,
-    (match, ...[octalValue]) => `%${parseInt(octalValue, 8).toString(16)}`
-  );
+  // Replace all instances of octal literals with percent-encoded hex (ex. '\347\275\221' -> '%E7%BD%91').
+  // This is done because the octal literals represent UTF-8 bytes, and by converting them to percent-encoded
+  // hex, we can use decodeURIComponent to get the Unicode chars.
+  filename = filename.replace(/(?:\\(\d{1,3}))/g, (match, ...[octalValue, index, source]) => {
+    // We need to make sure that the backslash is intended to escape the octal value. To do this, walk
+    // backwards from the match to ensure that it's already escaped.
+    const trailingBackslashes: RegExpMatchArray | null = (source as string)
+      .slice(0, index as number)
+      .match(/\\*$/);
+    return trailingBackslashes && trailingBackslashes.length > 0 && trailingBackslashes[0].length % 2 === 0
+      ? `%${parseInt(octalValue, 8).toString(16)}`
+      : match;
+  });
 
-  // Finally, decode the filename and unescape the escaped chars
+  // Finally, decode the filename and unescape the escaped UTF-8 chars
   return JSON.parse(decodeURIComponent(filename));
 }
 

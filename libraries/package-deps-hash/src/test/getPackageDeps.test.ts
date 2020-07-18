@@ -23,6 +23,12 @@ describe('parseGitFilename', () => {
     expect(parseGitFilename('"some/path/to/a/file\\347\\275\\221\\347\\275\\221name"')).toEqual(
       'some/path/to/a/file网网name'
     );
+    expect(parseGitFilename('"some/path/to/a/file\\\\347\\\\\\347\\275\\221name"')).toEqual(
+      'some/path/to/a/file\\347\\网name'
+    );
+    expect(parseGitFilename('"some/path/to/a/file\\\\\\347\\275\\221\\347\\275\\221name"')).toEqual(
+      'some/path/to/a/file\\网网name'
+    );
     done();
   });
 });
