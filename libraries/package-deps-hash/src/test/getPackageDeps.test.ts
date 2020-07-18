@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { getPackageDeps, parseGitLsTree } from '../getPackageDeps';
+import { getPackageDeps, parseGitLsTree, parseGitFilename } from '../getPackageDeps';
 import { IPackageDeps } from '../IPackageDeps';
 import * as path from 'path';
 import { execSync } from 'child_process';
@@ -12,6 +12,20 @@ const SOURCE_PATH: string = path.join(__dirname).replace(path.join('lib', 'test'
 
 const TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'testProject');
 const NESTED_TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'nestedTestProject');
+
+describe('parseGitFilename', () => {
+  it('can parse backslash-escaped filenames', (done) => {
+    expect(parseGitFilename('some/path/to/a/file name')).toEqual('some/path/to/a/file name');
+    expect(parseGitFilename('"some/path/to/a/file?name"')).toEqual('some/path/to/a/file?name');
+    expect(parseGitFilename('"some/path/to/a/file\\\\name"')).toEqual('some/path/to/a/file\\name');
+    expect(parseGitFilename('"some/path/to/a/file\\"name"')).toEqual('some/path/to/a/file"name');
+    expect(parseGitFilename('"some/path/to/a/file\\"name"')).toEqual('some/path/to/a/file"name');
+    expect(parseGitFilename('"some/path/to/a/file\\347\\275\\221\\347\\275\\221name"')).toEqual(
+      'some/path/to/a/file网网name'
+    );
+    done();
+  });
+});
 
 describe('parseGitLsTree', () => {
   it('can handle a blob', (done) => {
