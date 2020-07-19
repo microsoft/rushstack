@@ -5,7 +5,6 @@ import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { BuildAction } from './BuildAction';
 import { IHeftActionBaseOptions } from './HeftActionBase';
-import { HeftSession } from '../../pluginFramework/HeftSession';
 import { TestStage, ITestStageOptions } from '../../stages/TestStage';
 import { Logging } from '../../utilities/Logging';
 
@@ -13,8 +12,8 @@ export class TestAction extends BuildAction {
   private _noTestFlag: CommandLineFlagParameter;
   private _noBuildFlag: CommandLineFlagParameter;
 
-  public constructor(heftActionOptions: IHeftActionBaseOptions, heftSession: HeftSession) {
-    super(heftActionOptions, heftSession, {
+  public constructor(heftActionOptions: IHeftActionBaseOptions) {
+    super(heftActionOptions, {
       actionName: 'test',
       summary: 'Build the project and run tests.',
       documentation: ''
@@ -60,7 +59,7 @@ export class TestAction extends BuildAction {
     if (noTest || lite /* "&& shouldBuild" is implied */) {
       await super.actionExecuteAsync();
     } else {
-      const testStage: TestStage = this.heftSession.testStage;
+      const testStage: TestStage = this.stages.testStage;
       const testStageOptions: ITestStageOptions = {
         watchMode: this._watchFlag.value,
         production: this._productionFlag.value

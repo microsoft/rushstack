@@ -7,7 +7,6 @@ import { HeftActionBase, IHeftActionBaseOptions } from './HeftActionBase';
 import { CleanStage, ICleanStageOptions } from '../../stages/CleanStage';
 import { Logging } from '../../utilities/Logging';
 import { BuildStage, IBuildStageOptions, IBuildStageStandardParameters } from '../../stages/BuildStage';
-import { HeftSession } from '../../pluginFramework/HeftSession';
 
 export class BuildAction extends HeftActionBase {
   protected _watchFlag: CommandLineFlagParameter;
@@ -18,14 +17,13 @@ export class BuildAction extends HeftActionBase {
 
   public constructor(
     heftActionOptions: IHeftActionBaseOptions,
-    heftSession: HeftSession,
     commandLineActionOptions: ICommandLineActionOptions = {
       actionName: 'build',
       summary: 'Build the project.',
       documentation: ''
     }
   ) {
-    super(commandLineActionOptions, heftActionOptions, heftSession);
+    super(commandLineActionOptions, heftActionOptions);
   }
 
   public onDefineParameters(): void {
@@ -48,7 +46,7 @@ export class BuildAction extends HeftActionBase {
 
   protected async actionExecuteAsync(): Promise<void> {
     if (this._cleanFlag.value) {
-      const cleanStage: CleanStage = this.heftSession.cleanStage;
+      const cleanStage: CleanStage = this.stages.cleanStage;
       const cleanStageOptions: ICleanStageOptions = {};
       await cleanStage.initializeAsync(cleanStageOptions);
 
@@ -59,7 +57,7 @@ export class BuildAction extends HeftActionBase {
       );
     }
 
-    const buildStage: BuildStage = this.heftSession.buildStage;
+    const buildStage: BuildStage = this.stages.buildStage;
     const buildStageOptions: IBuildStageOptions = {
       ...BuildStage.getOptionsFromStandardParameters(this._buildStandardParameters),
       watchMode: this._watchFlag.value,

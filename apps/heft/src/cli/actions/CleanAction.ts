@@ -4,21 +4,19 @@
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { HeftActionBase, IHeftActionBaseOptions } from './HeftActionBase';
-import { HeftSession } from '../../pluginFramework/HeftSession';
 import { CleanStage, ICleanStageOptions } from '../../stages/CleanStage';
 
 export class CleanAction extends HeftActionBase {
   private _deleteCacheFlag: CommandLineFlagParameter;
 
-  public constructor(options: IHeftActionBaseOptions, heftSession: HeftSession) {
+  public constructor(options: IHeftActionBaseOptions) {
     super(
       {
         actionName: 'clean',
         summary: 'Clean the project',
         documentation: ''
       },
-      options,
-      heftSession
+      options
     );
   }
 
@@ -34,7 +32,7 @@ export class CleanAction extends HeftActionBase {
   }
 
   protected async actionExecuteAsync(): Promise<void> {
-    const cleanStage: CleanStage = this.heftSession.cleanStage;
+    const cleanStage: CleanStage = this.stages.cleanStage;
 
     const cleanStageOptions: ICleanStageOptions = {
       deleteCache: this._deleteCacheFlag.value

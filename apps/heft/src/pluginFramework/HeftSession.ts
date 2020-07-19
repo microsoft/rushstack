@@ -42,26 +42,6 @@ export class HeftSession {
   /**
    * @internal
    */
-  public buildStage: BuildStage;
-
-  /**
-   * @internal
-   */
-  public cleanStage: CleanStage;
-
-  /**
-   * @internal
-   */
-  public devDeployStage: DevDeployStage;
-
-  /**
-   * @internal
-   */
-  public testStage: TestStage;
-
-  /**
-   * @internal
-   */
   public readonly metricsCollector: MetricsCollector;
 
   /**
@@ -79,18 +59,13 @@ export class HeftSession {
   public constructor(options: IHeftSessionOptions) {
     this._options = options;
 
-    this.buildStage = options.buildStage;
-    this.cleanStage = options.cleanStage;
-    this.devDeployStage = options.devDeployStage;
-    this.testStage = options.testStage;
-
     this.metricsCollector = options.metricsCollector;
 
     this.hooks = {
-      build: this.buildStage.stageInitializationHook,
-      clean: this.cleanStage.stageInitializationHook,
-      devDeploy: this.devDeployStage.stageInitializationHook,
-      test: this.testStage.stageInitializationHook,
+      build: options.buildStage.stageInitializationHook,
+      clean: options.cleanStage.stageInitializationHook,
+      devDeploy: options.devDeployStage.stageInitializationHook,
+      test: options.testStage.stageInitializationHook,
       metricsCollector: this.metricsCollector.hooks
     };
   }

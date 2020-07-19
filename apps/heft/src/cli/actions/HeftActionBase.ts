@@ -12,32 +12,42 @@ import { performance } from 'perf_hooks';
 import { MetricsCollector } from '../../metrics/MetricsCollector';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { PluginManager } from '../../pluginFramework/PluginManager';
-import { HeftSession } from '../../pluginFramework/HeftSession';
+import { BuildStage } from '../../stages/BuildStage';
+import { CleanStage } from '../../stages/CleanStage';
+import { DevDeployStage } from '../../stages/DevDeployStage';
+import { TestStage } from '../../stages/TestStage';
+
+export interface IStages {
+  buildStage: BuildStage;
+  cleanStage: CleanStage;
+  devDeployStage: DevDeployStage;
+  testStage: TestStage;
+}
 
 export interface IHeftActionBaseOptions {
   terminal: Terminal;
   metricsCollector: MetricsCollector;
   heftConfiguration: HeftConfiguration;
   pluginManager: PluginManager;
+  stages: IStages;
 }
 
 export abstract class HeftActionBase extends CommandLineAction {
   protected readonly terminal: Terminal;
   protected readonly metricsCollector: MetricsCollector;
   protected readonly heftConfiguration: HeftConfiguration;
-  protected readonly heftSession: HeftSession;
+  protected readonly stages: IStages;
   protected verboseFlag: CommandLineFlagParameter;
 
   public constructor(
     commandLineOptions: ICommandLineActionOptions,
-    heftActionOptions: IHeftActionBaseOptions,
-    heftSession: HeftSession
+    heftActionOptions: IHeftActionBaseOptions
   ) {
     super(commandLineOptions);
     this.terminal = heftActionOptions.terminal;
     this.metricsCollector = heftActionOptions.metricsCollector;
     this.heftConfiguration = heftActionOptions.heftConfiguration;
-    this.heftSession = heftSession;
+    this.stages = heftActionOptions.stages;
     this.setStartTime();
   }
 

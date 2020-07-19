@@ -88,28 +88,12 @@ export class HeftSession {
     //
     // @internal
     constructor(options: IHeftSessionOptions);
-    // Warning: (ae-forgotten-export) The symbol "BuildStage" needs to be exported by the entry point index.d.ts
-    //
-    // @internal (undocumented)
-    buildStage: BuildStage;
-    // Warning: (ae-forgotten-export) The symbol "CleanStage" needs to be exported by the entry point index.d.ts
-    //
-    // @internal (undocumented)
-    cleanStage: CleanStage;
     get debugMode(): boolean;
-    // Warning: (ae-forgotten-export) The symbol "DevDeployStage" needs to be exported by the entry point index.d.ts
-    //
-    // @internal (undocumented)
-    devDeployStage: DevDeployStage;
     // (undocumented)
     readonly hooks: IHeftSessionHooks;
     // @internal (undocumented)
     readonly metricsCollector: _MetricsCollector;
-    // Warning: (ae-forgotten-export) The symbol "TestStage" needs to be exported by the entry point index.d.ts
-    //
-    // @internal (undocumented)
-    testStage: TestStage;
-}
+    }
 
 // @public (undocumented)
 export interface IBuildStageContext extends IStageContext<BuildStageHooks, IBuildStageProperties> {
