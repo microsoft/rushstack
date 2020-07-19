@@ -31,7 +31,7 @@ export class WebpackPlugin implements IHeftPlugin {
 
   private async _runWebpackAsync(
     baseTerminalProvider: ITerminalProvider,
-    webpackConfiguration: webpack.Configuration | undefined,
+    webpackConfiguration: webpack.Configuration | webpack.Configuration[] | undefined,
     buildProperties: IBuildStageProperties
   ): Promise<void> {
     if (!webpackConfiguration) {
@@ -45,7 +45,16 @@ export class WebpackPlugin implements IHeftPlugin {
     const terminal: Terminal = new Terminal(webpackTerminalProvider);
     terminal.writeLine(`Using Webpack version ${webpack.version}`);
 
-    const compiler: webpack.Compiler = webpack(webpackConfiguration);
+    // This statement needs the `as webpack.Configuration` cast because the TS compiler gets confused
+    // by two of the overrides for the `webpack` function (one accepting a `webpack.Configuration`,
+    // and the other accepting a `webpack.Configuration[]`). The compiler accepts this:
+    // ```
+    // Array.isArray(webpackConfiguration) ? webpack(webpackConfiguration) : webpack(webpackConfiguration)
+    // ```
+    // but that's unnecessary complexity
+    const compiler: webpack.Compiler | webpack.MultiCompiler = webpack(
+      webpackConfiguration as webpack.Configuration
+    );
 
     if (buildProperties.watchMode) {
       try {

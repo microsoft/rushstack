@@ -171,10 +171,7 @@ export interface ICompileSubstageProperties {
   copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
 }
 
-/**
- * @public
- */
-export interface IBundleSubstageProperties {
+export interface ISharedBundleSubstageWebpackProperties {
   apiExtractorConfiguration: IApiExtractorConfiguration;
 
   /**
@@ -184,12 +181,24 @@ export interface IBundleSubstageProperties {
   webpackConfigFilePath?: string;
 
   /**
+   * A path to a Webpack configuration JS file, specifically to be used in --serve mode. If this and
+   * webpackConfigFilePath aren't specified, and a Webpack configuration isn't specified
+   * via another plugin, Webpack won't be run in --serve mode.
+   */
+  webpackServeConfigFilePath?: string;
+}
+
+/**
+ * @public
+ */
+export interface IBundleSubstageProperties extends ISharedBundleSubstageWebpackProperties {
+  /**
    * The configuration used by the Webpack plugin. This must be populated
    * for Webpack to run. If webpackConfigFilePath is specified,
    * this will be populated automatically with the exports of the
    * config file referenced in that property.
    */
-  webpackConfiguration?: webpack.Configuration;
+  webpackConfiguration?: webpack.Configuration | webpack.Configuration[];
 }
 
 /**

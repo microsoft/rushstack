@@ -14,7 +14,8 @@ import {
   ITypeScriptConfiguration,
   ICopyStaticAssetsConfiguration,
   IBundleSubstageProperties,
-  IApiExtractorConfiguration
+  IApiExtractorConfiguration,
+  ISharedBundleSubstageWebpackProperties
 } from '../../stages/BuildStage';
 import { ICleanStageContext, ICleanStageProperties } from '../../stages/CleanStage';
 
@@ -34,10 +35,6 @@ interface ITypeScriptConfigurationJson extends IConfigurationJsonBase, ISharedTy
 
 interface IConfigurationJsonCacheEntry<TConfigJson extends IConfigurationJsonBase = IConfigurationJsonBase> {
   data: TConfigJson | undefined;
-}
-
-interface IWebpackConfigurationJson {
-  webpackConfigFilePath?: string;
 }
 
 export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
@@ -184,11 +181,15 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
     bundleProperties: IBundleSubstageProperties
   ): Promise<void> {
     const webpackConfigurationJson:
-      | IWebpackConfigurationJson
+      | ISharedBundleSubstageWebpackProperties
       | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'webpack');
 
     if (webpackConfigurationJson?.webpackConfigFilePath !== undefined) {
       bundleProperties.webpackConfigFilePath = webpackConfigurationJson.webpackConfigFilePath;
+    }
+
+    if (webpackConfigurationJson?.webpackServeConfigFilePath !== undefined) {
+      bundleProperties.webpackServeConfigFilePath = webpackConfigurationJson.webpackServeConfigFilePath;
     }
   }
 
