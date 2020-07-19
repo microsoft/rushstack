@@ -3,22 +3,20 @@
 
 import { SyncHook } from 'tapable';
 
-import { BuildAction, IBuildActionContext } from '../cli/actions/BuildAction';
-import { CleanAction, ICleanActionContext } from '../cli/actions/CleanAction';
-import { DevDeployAction, IDevDeployActionContext } from '../cli/actions/DevDeployAction';
-import { StartAction, IStartActionContext } from '../cli/actions/StartAction';
-import { TestAction, ITestActionContext } from '../cli/actions/TestAction';
 import { MetricsCollector, MetricsCollectorHooks } from '../metrics/MetricsCollector';
+import { ICleanStageContext, CleanStage } from '../stages/CleanStage';
+import { IDevDeployStageContext, DevDeployStage } from '../stages/DevDeployStage';
+import { BuildStage, IBuildStageContext } from '../stages/BuildStage';
+import { ITestStageContext, TestStage } from '../stages/TestStage';
 
 /**
  * @public
  */
 export interface IHeftSessionHooks {
-  build: SyncHook<IBuildActionContext>;
-  clean: SyncHook<ICleanActionContext>;
-  devDeploy: SyncHook<IDevDeployActionContext>;
-  start: SyncHook<IStartActionContext>;
-  test: SyncHook<ITestActionContext>;
+  build: SyncHook<IBuildStageContext>;
+  clean: SyncHook<ICleanStageContext>;
+  devDeploy: SyncHook<IDevDeployStageContext>;
+  test: SyncHook<ITestStageContext>;
   metricsCollector: MetricsCollectorHooks;
 }
 
@@ -26,11 +24,10 @@ export interface IHeftSessionHooks {
  * @internal
  */
 export interface IHeftSessionOptions {
-  buildAction: BuildAction;
-  cleanAction: CleanAction;
-  devDeployAction: DevDeployAction;
-  startAction: StartAction;
-  testAction: TestAction;
+  buildStage: BuildStage;
+  cleanStage: CleanStage;
+  devDeployStage: DevDeployStage;
+  testStage: TestStage;
 
   metricsCollector: MetricsCollector;
   getIsDebugMode(): boolean;
@@ -61,17 +58,15 @@ export class HeftSession {
    */
   public constructor(options: IHeftSessionOptions) {
     this._options = options;
-    const { buildAction, cleanAction, devDeployAction, startAction, testAction, metricsCollector } = options;
+
+    this.metricsCollector = options.metricsCollector;
 
     this.hooks = {
-      build: buildAction.actionHook,
-      clean: cleanAction.actionHook,
-      devDeploy: devDeployAction.actionHook,
-      start: startAction.actionHook,
-      test: testAction.testActionHook,
-      metricsCollector: metricsCollector.hooks
+      build: options.buildStage.stageInitializationHook,
+      clean: options.cleanStage.stageInitializationHook,
+      devDeploy: options.devDeployStage.stageInitializationHook,
+      test: options.testStage.stageInitializationHook,
+      metricsCollector: this.metricsCollector.hooks
     };
-
-    this.metricsCollector = metricsCollector;
   }
 }

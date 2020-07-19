@@ -5,9 +5,9 @@ import * as path from 'path';
 import { Terminal, FileSystem } from '@rushstack/node-core-library';
 
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
-import { IBundleStage, IBuildActionContext, IBundleStageProperties } from '../../cli/actions/BuildAction';
 import { HeftSession } from '../../pluginFramework/HeftSession';
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
+import { IBuildStageContext, IBundleSubstage, IBundleSubstageProperties } from '../../stages/BuildStage';
 
 const PLUGIN_NAME: string = 'BasicConfigureWebpackPlugin';
 
@@ -15,8 +15,8 @@ export class BasicConfigureWebpackPlugin implements IHeftPlugin {
   public readonly displayName: string = PLUGIN_NAME;
 
   public apply(heftCompilation: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftCompilation.hooks.build.tap(PLUGIN_NAME, (build: IBuildActionContext) => {
-      build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleStage) => {
+    heftCompilation.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
+      build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
         bundle.hooks.configureWebpack.tapPromise(PLUGIN_NAME, async () => {
           await this._loadWebpackConfigAsync(
             heftConfiguration.terminal,
@@ -31,7 +31,7 @@ export class BasicConfigureWebpackPlugin implements IHeftPlugin {
   private async _loadWebpackConfigAsync(
     terminal: Terminal,
     buildFolder: string,
-    bundleProperties: IBundleStageProperties
+    bundleProperties: IBundleSubstageProperties
   ): Promise<void> {
     if (bundleProperties.webpackConfigFilePath) {
       const fullWebpackConfigPath: string = path.resolve(buildFolder, bundleProperties.webpackConfigFilePath);

@@ -9,7 +9,7 @@ import { IHeftJestReporterOptions } from './HeftJestReporter';
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
 import { HeftSession } from '../../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
-import { ITestActionContext } from '../../cli/actions/TestAction';
+import { ITestStageContext } from '../../stages/TestStage';
 
 const PLUGIN_NAME: string = 'JestPlugin';
 const JEST_CONFIGURATION_LOCATION: string = './config/jest.config.json';
@@ -19,13 +19,9 @@ export class JestPlugin implements IHeftPlugin {
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     if (FileSystem.exists(path.join(heftConfiguration.buildFolder, JEST_CONFIGURATION_LOCATION))) {
-      heftSession.hooks.test.tap(PLUGIN_NAME, (test: ITestActionContext) => {
+      heftSession.hooks.test.tap(PLUGIN_NAME, (test: ITestStageContext) => {
         test.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          await this._runJestAsync(
-            heftConfiguration,
-            test.properties.watchMode,
-            test.properties.productionFlag
-          );
+          await this._runJestAsync(heftConfiguration, test.properties.watchMode, test.properties.production);
         });
       });
     }

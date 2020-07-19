@@ -28,11 +28,11 @@ import {
 
 import { SubprocessRunnerBase } from '../../utilities/subprocess/SubprocessRunnerBase';
 import { Async } from '../../utilities/Async';
-import { IEmitModuleKindBase, ISharedTypeScriptConfiguration } from '../../cli/actions/BuildAction';
 import { PerformanceMeasurer, PerformanceMeasurerAsync } from '../../utilities/Performance';
 import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
 import { Tslint } from './Tslint';
 import { Eslint } from './Eslint';
+import { ISharedTypeScriptConfiguration, IEmitModuleKindBase } from '../../stages/BuildStage';
 
 export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfiguration {
   buildFolder: string;

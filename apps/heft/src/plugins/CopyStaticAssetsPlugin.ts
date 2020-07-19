@@ -12,12 +12,8 @@ import { performance } from 'perf_hooks';
 import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import {
-  ICopyStaticAssetsConfiguration,
-  IBuildActionContext,
-  ICompileStage
-} from '../cli/actions/BuildAction';
 import { PrefixProxyTerminalProvider } from '../utilities/PrefixProxyTerminalProvider';
+import { ICopyStaticAssetsConfiguration, IBuildStageContext, ICompileSubstage } from '../stages/BuildStage';
 const PLUGIN_NAME: string = 'CopyStaticAssetsPlugin';
 
 interface ICopyStaticAssetsOptions {
@@ -37,8 +33,8 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
   public readonly displayName: string = PLUGIN_NAME;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildActionContext) => {
-      build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileStage) => {
+    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
+      build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
         compile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
           const terminal: Terminal = new Terminal(
             new PrefixProxyTerminalProvider(heftConfiguration.terminalProvider, '[copy-static-assets] ')

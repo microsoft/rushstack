@@ -9,7 +9,6 @@ export {
   ICompilerPackage,
   IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
 } from './configuration/HeftConfiguration';
-export { ActionHooksBase, IActionContext } from './cli/actions/HeftActionBase';
 export { HeftSession, IHeftSessionHooks } from './pluginFramework/HeftSession';
 export {
   MetricsCollectorHooks,
@@ -18,34 +17,34 @@ export {
   MetricsCollector as _MetricsCollector
 } from './metrics/MetricsCollector';
 
-// Actions
+// Stages
+export { StageHooksBase, IStageContext } from './stages/StageBase';
 export {
-  BuildHooks,
-  BuildStageHooksBase,
-  BundleStageHooks,
-  CompileStageHooks,
+  BuildStageHooks,
+  BuildSubstageHooksBase,
+  BundleSubstageHooks,
+  CompileSubstageHooks,
   CopyFromCacheMode,
-  IBuildActionContext,
-  IBuildActionProperties,
-  IBuildStage,
-  IBundleStage,
-  IBundleStageProperties,
-  ICompileStage,
-  ICompileStageProperties,
+  IBuildStageContext,
+  IBuildStageProperties,
+  IBuildSubstage,
+  IBundleSubstage,
+  IBundleSubstageProperties,
+  ICompileSubstage,
+  ICompileSubstageProperties,
   ICopyStaticAssetsConfiguration,
   IEmitModuleKind,
   IEmitModuleKindBase,
-  IPostBuildStage,
-  IPreCompileStage,
+  IPostBuildSubstage,
+  IPreCompileSubstage,
   ISharedCopyStaticAssetsConfiguration,
   ISharedTypeScriptConfiguration,
   ITypeScriptConfiguration
-} from './cli/actions/BuildAction';
-export { ICleanActionProperties, CleanHooks, ICleanActionContext } from './cli/actions/CleanAction';
+} from './stages/BuildStage';
+export { ICleanStageProperties, CleanStageHooks, ICleanStageContext } from './stages/CleanStage';
 export {
-  IDevDeployActionProperties,
-  DevDeployHooks,
-  IDevDeployActionContext
-} from './cli/actions/DevDeployAction';
-export { IStartActionProperties, StartHooks, IStartActionContext } from './cli/actions/StartAction';
-export { ITestActionProperties, TestHooks, ITestActionContext } from './cli/actions/TestAction';
+  IDevDeployStageProperties,
+  DevDeployStageHooks,
+  IDevDeployStageContext
+} from './stages/DevDeployStage';
+export { ITestStageProperties, TestStageHooks, ITestStageContext } from './stages/TestStage';

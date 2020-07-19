@@ -9,7 +9,8 @@ import { AsyncSeriesBailHook } from 'tapable';
 import { AsyncSeriesHook } from 'tapable';
 import { CommandLineAction } from '@rushstack/ts-command-line';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
-import { ICommandLineActionOptions } from '@rushstack/ts-command-line';
+import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
+import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { SyncHook } from 'tapable';
@@ -17,35 +18,25 @@ import { Terminal } from '@rushstack/node-core-library';
 import * as webpack from 'webpack';
 
 // @public (undocumented)
-export abstract class ActionHooksBase<TActionProperties extends object> {
+export class BuildStageHooks extends StageHooksBase<IBuildStageProperties> {
     // (undocumented)
-    readonly afterLoadActionConfiguration: AsyncSeriesHook;
+    readonly bundle: SyncHook<IBundleSubstage>;
     // (undocumented)
-    readonly loadActionConfiguration: AsyncSeriesHook;
-    // @beta
-    readonly overrideAction: AsyncSeriesBailHook<TActionProperties>;
+    readonly compile: SyncHook<ICompileSubstage>;
+    // (undocumented)
+    readonly postBuild: SyncHook<IPostBuildSubstage>;
+    // (undocumented)
+    readonly preCompile: SyncHook<IPreCompileSubstage>;
 }
 
 // @public (undocumented)
-export class BuildHooks extends ActionHooksBase<IBuildActionProperties> {
-    // (undocumented)
-    readonly bundle: SyncHook<IBundleStage>;
-    // (undocumented)
-    readonly compile: SyncHook<ICompileStage>;
-    // (undocumented)
-    readonly postBuild: SyncHook<IPostBuildStage>;
-    // (undocumented)
-    readonly preCompile: SyncHook<IPreCompileStage>;
-}
-
-// @public (undocumented)
-export class BuildStageHooksBase {
+export class BuildSubstageHooksBase {
     // (undocumented)
     readonly run: AsyncParallelHook;
 }
 
 // @public (undocumented)
-export class BundleStageHooks extends BuildStageHooksBase {
+export class BundleSubstageHooks extends BuildSubstageHooksBase {
     // (undocumented)
     readonly afterConfigureWebpack: AsyncSeriesHook;
     // (undocumented)
@@ -53,13 +44,13 @@ export class BundleStageHooks extends BuildStageHooksBase {
 }
 
 // @public (undocumented)
-export class CleanHooks extends ActionHooksBase<ICleanActionProperties> {
+export class CleanStageHooks extends StageHooksBase<ICleanStageProperties> {
     // (undocumented)
     readonly deletePath: AsyncSeriesBailHook<string>;
 }
 
 // @public (undocumented)
-export class CompileStageHooks extends BuildStageHooksBase {
+export class CompileSubstageHooks extends BuildSubstageHooksBase {
     // (undocumented)
     readonly afterConfigureCopyStaticAssets: AsyncSeriesHook;
     // (undocumented)
@@ -74,7 +65,7 @@ export class CompileStageHooks extends BuildStageHooksBase {
 export type CopyFromCacheMode = 'hardlink' | 'copy';
 
 // @public (undocumented)
-export class DevDeployHooks extends ActionHooksBase<IDevDeployActionProperties> {
+export class DevDeployStageHooks extends StageHooksBase<IDevDeployStageProperties> {
 }
 
 // @public (undocumented)
@@ -105,33 +96,21 @@ export class HeftSession {
     }
 
 // @public (undocumented)
-export interface IActionContext<THooks extends ActionHooksBase<TActionProperties>, TActionProperties extends object> {
-    // (undocumented)
-    hooks: THooks;
-    // (undocumented)
-    properties: TActionProperties;
+export interface IBuildStageContext extends IStageContext<BuildStageHooks, IBuildStageProperties> {
 }
 
 // @public (undocumented)
-export interface IBuildActionContext extends IActionContext<BuildHooks, IBuildActionProperties> {
-}
-
-// @public (undocumented)
-export interface IBuildActionProperties {
+export interface IBuildStageProperties {
     // (undocumented)
-    cleanFlag: boolean;
-    // (undocumented)
-    liteFlag: boolean;
+    lite: boolean;
     // (undocumented)
     locale?: string;
     // (undocumented)
     maxOldSpaceSize?: string;
     // (undocumented)
-    noTest: boolean;
+    production: boolean;
     // (undocumented)
-    productionFlag: boolean;
-    // (undocumented)
-    verboseFlag: boolean;
+    serveMode: boolean;
     // (undocumented)
     watchMode: boolean;
     // (undocumented)
@@ -139,29 +118,29 @@ export interface IBuildActionProperties {
 }
 
 // @public (undocumented)
-export interface IBuildStage<TBuildStageHooks extends BuildStageHooksBase, TBuildStageProperties extends object> {
+export interface IBuildSubstage<TBuildSubstageHooks extends BuildSubstageHooksBase, TBuildSubstageProperties extends object> {
     // (undocumented)
-    hooks: TBuildStageHooks;
+    hooks: TBuildSubstageHooks;
     // (undocumented)
-    properties: TBuildStageProperties;
+    properties: TBuildSubstageProperties;
 }
 
 // @public (undocumented)
-export interface IBundleStage extends IBuildStage<BundleStageHooks, IBundleStageProperties> {
+export interface IBundleSubstage extends IBuildSubstage<BundleSubstageHooks, IBundleSubstageProperties> {
 }
 
 // @public (undocumented)
-export interface IBundleStageProperties {
+export interface IBundleSubstageProperties {
     webpackConfigFilePath?: string;
     webpackConfiguration?: webpack.Configuration;
 }
 
 // @public (undocumented)
-export interface ICleanActionContext extends IActionContext<CleanHooks, ICleanActionProperties> {
+export interface ICleanStageContext extends IStageContext<CleanStageHooks, ICleanStageProperties> {
 }
 
 // @public (undocumented)
-export interface ICleanActionProperties {
+export interface ICleanStageProperties {
     // (undocumented)
     deleteCache: boolean;
     // (undocumented)
@@ -181,11 +160,11 @@ export interface ICompilerPackage {
 }
 
 // @public (undocumented)
-export interface ICompileStage extends IBuildStage<CompileStageHooks, ICompileStageProperties> {
+export interface ICompileSubstage extends IBuildSubstage<CompileSubstageHooks, ICompileSubstageProperties> {
 }
 
 // @public (undocumented)
-export interface ICompileStageProperties {
+export interface ICompileSubstageProperties {
     // (undocumented)
     copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
     // (undocumented)
@@ -199,11 +178,11 @@ export interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsC
 }
 
 // @public (undocumented)
-export interface IDevDeployActionContext extends IActionContext<DevDeployHooks, IDevDeployActionProperties> {
+export interface IDevDeployStageContext extends IStageContext<DevDeployStageHooks, IDevDeployStageProperties> {
 }
 
 // @public (undocumented)
-export interface IDevDeployActionProperties {
+export interface IDevDeployStageProperties {
 }
 
 // @public (undocumented)
@@ -243,17 +222,15 @@ export interface IHeftPlugin<TOptions = void> {
 // @public (undocumented)
 export interface IHeftSessionHooks {
     // (undocumented)
-    build: SyncHook<IBuildActionContext>;
+    build: SyncHook<IBuildStageContext>;
     // (undocumented)
-    clean: SyncHook<ICleanActionContext>;
+    clean: SyncHook<ICleanStageContext>;
     // (undocumented)
-    devDeploy: SyncHook<IDevDeployActionContext>;
+    devDeploy: SyncHook<IDevDeployStageContext>;
     // (undocumented)
     metricsCollector: MetricsCollectorHooks;
     // (undocumented)
-    start: SyncHook<IStartActionContext>;
-    // (undocumented)
-    test: SyncHook<ITestActionContext>;
+    test: SyncHook<ITestStageContext>;
 }
 
 // @public (undocumented)
@@ -274,11 +251,11 @@ export interface _IPerformanceData {
 }
 
 // @public (undocumented)
-export interface IPostBuildStage extends IBuildStage<BuildStageHooksBase, {}> {
+export interface IPostBuildSubstage extends IBuildSubstage<BuildSubstageHooksBase, {}> {
 }
 
 // @public (undocumented)
-export interface IPreCompileStage extends IBuildStage<BuildStageHooksBase, {}> {
+export interface IPreCompileSubstage extends IBuildSubstage<BuildSubstageHooksBase, {}> {
 }
 
 // @public (undocumented)
@@ -296,21 +273,21 @@ export interface ISharedTypeScriptConfiguration {
 }
 
 // @public (undocumented)
-export interface IStartActionContext extends IActionContext<StartHooks, IStartActionProperties> {
-}
-
-// @public (undocumented)
-export interface IStartActionProperties {
-}
-
-// @public (undocumented)
-export interface ITestActionContext extends IActionContext<TestHooks, ITestActionProperties> {
-}
-
-// @public (undocumented)
-export interface ITestActionProperties {
+export interface IStageContext<TStageHooks extends StageHooksBase<TStageProperties>, TStageProperties extends object> {
     // (undocumented)
-    productionFlag: boolean;
+    hooks: TStageHooks;
+    // (undocumented)
+    properties: TStageProperties;
+}
+
+// @public (undocumented)
+export interface ITestStageContext extends IStageContext<TestStageHooks, ITestStageProperties> {
+}
+
+// @public (undocumented)
+export interface ITestStageProperties {
+    // (undocumented)
+    production: boolean;
     // (undocumented)
     watchMode: boolean;
 }
@@ -341,11 +318,17 @@ export class MetricsCollectorHooks {
 }
 
 // @public (undocumented)
-export class StartHooks extends ActionHooksBase<IStartActionProperties> {
+export abstract class StageHooksBase<TActionProperties extends object> {
+    // (undocumented)
+    readonly afterLoadStageConfiguration: AsyncSeriesHook;
+    // (undocumented)
+    readonly loadStageConfiguration: AsyncSeriesHook;
+    // @beta
+    readonly overrideStage: AsyncSeriesBailHook<TActionProperties>;
 }
 
 // @public (undocumented)
-export class TestHooks extends ActionHooksBase<ITestActionProperties> {
+export class TestStageHooks extends StageHooksBase<ITestStageProperties> {
     // (undocumented)
     readonly configureTest: AsyncSeriesHook;
     // (undocumented)
