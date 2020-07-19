@@ -154,8 +154,16 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
 /**
  * @public
  */
+export type IWebpackConfiguration = webpack.Configuration | webpack.Configuration[] | undefined;
+
+/**
+ * @public
+ */
 export class BundleSubstageHooks extends BuildSubstageHooksBase {
-  public readonly configureWebpack: AsyncSeriesHook = new AsyncSeriesHook();
+  public readonly beforeConfigureWebpack: AsyncSeriesHook = new AsyncSeriesHook();
+  public readonly configureWebpack: AsyncSeriesWaterfallHook<
+    IWebpackConfiguration
+  > = new AsyncSeriesWaterfallHook<IWebpackConfiguration>(['webpackConfiguration']);
   public readonly afterConfigureWebpack: AsyncSeriesHook = new AsyncSeriesHook();
 
   public readonly configureApiExtractor: AsyncSeriesWaterfallHook<
@@ -171,6 +179,9 @@ export interface ICompileSubstageProperties {
   copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
 }
 
+/**
+ * @public
+ */
 export interface ISharedBundleSubstageWebpackProperties {
   apiExtractorConfiguration: IApiExtractorConfiguration;
 
@@ -385,15 +396,21 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       // concurrently with the expectation that the their promises will never resolve
       // and that they will handle watching filesystem changes
 
+      await Promise.all([bundleStage.hooks.beforeConfigureWebpack.promise()]);
+
       await Promise.all([
         compileStage.hooks.configureTypeScript.promise(),
         compileStage.hooks.configureCopyStaticAssets.promise(),
-        bundleStage.hooks.configureWebpack.promise(),
         bundleStage.hooks.configureApiExtractor
           .promise(bundleStage.properties.apiExtractorConfiguration)
           .then(
             (apiExtractorConfiguration) =>
               (bundleStage.properties.apiExtractorConfiguration = apiExtractorConfiguration)
+          ),
+        bundleStage.hooks.configureWebpack
+          .promise(undefined)
+          .then(
+            (webpackConfiguration) => (bundleStage.properties.webpackConfiguration = webpackConfiguration)
           )
       ]);
       await Promise.all([
@@ -424,6 +441,11 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       }
       await this._runSubstageWithLoggingAsync('Compile', compileStage);
 
+      await bundleStage.hooks.beforeConfigureWebpack.promise();
+      // eslint-disable-next-line require-atomic-updates
+      bundleStage.properties.webpackConfiguration = await bundleStage.hooks.configureWebpack.promise(
+        undefined
+      );
       await Promise.all([
         bundleStage.hooks.configureWebpack.promise(),
         bundleStage.hooks.configureApiExtractor

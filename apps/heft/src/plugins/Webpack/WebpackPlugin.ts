@@ -8,7 +8,12 @@ import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { HeftSession } from '../../pluginFramework/HeftSession';
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
 import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
-import { IBuildStageContext, IBundleSubstage, IBuildStageProperties } from '../../stages/BuildStage';
+import {
+  IBuildStageContext,
+  IBundleSubstage,
+  IBuildStageProperties,
+  IWebpackConfiguration
+} from '../../stages/BuildStage';
 
 const PLUGIN_NAME: string = 'WebpackPlugin';
 
@@ -31,7 +36,7 @@ export class WebpackPlugin implements IHeftPlugin {
 
   private async _runWebpackAsync(
     baseTerminalProvider: ITerminalProvider,
-    webpackConfiguration: webpack.Configuration | webpack.Configuration[] | undefined,
+    webpackConfiguration: IWebpackConfiguration,
     buildProperties: IBuildStageProperties
   ): Promise<void> {
     if (!webpackConfiguration) {

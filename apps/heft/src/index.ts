@@ -38,9 +38,11 @@ export {
   IEmitModuleKindBase,
   IPostBuildSubstage,
   IPreCompileSubstage,
+  ISharedBundleSubstageWebpackProperties,
   ISharedCopyStaticAssetsConfiguration,
   ISharedTypeScriptConfiguration,
-  ITypeScriptConfiguration
+  ITypeScriptConfiguration,
+  IWebpackConfiguration
 } from './stages/BuildStage';
 export { ICleanStageProperties, CleanStageHooks, ICleanStageContext } from './stages/CleanStage';
 export {

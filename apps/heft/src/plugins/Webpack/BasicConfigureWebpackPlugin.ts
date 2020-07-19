@@ -12,7 +12,8 @@ import {
   IBuildStageContext,
   IBundleSubstage,
   IBundleSubstageProperties,
-  IBuildStageProperties
+  IBuildStageProperties,
+  IWebpackConfiguration
 } from '../../stages/BuildStage';
 
 /**
@@ -39,28 +40,34 @@ export class BasicConfigureWebpackPlugin implements IHeftPlugin {
   public apply(heftCompilation: HeftSession, heftConfiguration: HeftConfiguration): void {
     heftCompilation.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
-        bundle.hooks.configureWebpack.tapPromise(PLUGIN_NAME, async () => {
-          await this._loadWebpackConfigAsync(
-            heftConfiguration.terminal,
-            heftConfiguration.buildFolder,
-            build.properties,
-            bundle.properties
-          );
-        });
+        bundle.hooks.configureWebpack.tapPromise(
+          PLUGIN_NAME,
+          async (existingConfiguration: IWebpackConfiguration) => {
+            return await this._loadWebpackConfigAsync(
+              existingConfiguration,
+              heftConfiguration.terminal,
+              heftConfiguration.buildFolder,
+              build.properties,
+              bundle.properties
+            );
+          }
+        );
       });
     });
   }
 
   private async _loadWebpackConfigAsync(
+    existingConfiguration: IWebpackConfiguration,
     terminal: Terminal,
     buildFolder: string,
     buildProperties: IBuildStageProperties,
     bundleProperties: IBundleSubstageProperties
-  ): Promise<void> {
-    if (bundleProperties.webpackConfiguration) {
+  ): Promise<IWebpackConfiguration> {
+    if (existingConfiguration) {
       terminal.writeVerboseLine(
         'Skipping loading webpack config file because the webpack config has already been set.'
       );
+      return existingConfiguration;
     } else {
       // TODO: Eventually replace this custom logic with a call to this utility in in webpack-cli:
       // https://github.com/webpack/webpack-cli/blob/next/packages/webpack-cli/lib/groups/ConfigGroup.js
@@ -76,20 +83,22 @@ export class BasicConfigureWebpackPlugin implements IHeftPlugin {
         const fullWebpackConfigPath: string = path.resolve(buildFolder, webpackConfigFilePath);
         if (FileSystem.exists(fullWebpackConfigPath)) {
           try {
-            let webpackConfigJs: IWebpackConfigJs = require(fullWebpackConfigPath);
-            const webpackConfig =
+            const webpackConfigJs: IWebpackConfigJs = require(fullWebpackConfigPath);
+            const webpackConfig: IWebpackConfigJsExport =
               (webpackConfigJs as { default: IWebpackConfigJsExport }).default || webpackConfigJs;
 
             if (typeof webpackConfig === 'function') {
-              bundleProperties.webpackConfiguration = await Promise.resolve(
+              return await Promise.resolve(
                 webpackConfig({ prod: buildProperties.production, production: buildProperties.production })
               );
             } else {
-              bundleProperties.webpackConfiguration = await Promise.resolve(webpackConfig);
+              return await Promise.resolve(webpackConfig);
             }
           } catch (e) {
             throw new Error(`Error loading webpack configuration at "${fullWebpackConfigPath}": ${e}`);
           }
+        } else {
+          return undefined;
         }
       }
     }

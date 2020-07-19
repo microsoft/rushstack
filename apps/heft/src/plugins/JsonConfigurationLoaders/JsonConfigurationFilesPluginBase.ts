@@ -71,7 +71,7 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
       });
 
       build.hooks.bundle.tap(this.displayName, (bundle) => {
-        bundle.hooks.configureWebpack.tapPromise(this.displayName, async () => {
+        bundle.hooks.beforeConfigureWebpack.tapPromise(this.displayName, async () => {
           await this._updateWebpackConfigurationAsync(heftConfiguration, bundle.properties);
         });
 
