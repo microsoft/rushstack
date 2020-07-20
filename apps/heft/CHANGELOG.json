@@ -2,6 +2,21 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/heft_v0.2.0",
+      "date": "Mon, 20 Jul 2020 06:52:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Make API Extractor's typescriptCompilerFolder option configurable."
+          },
+          {
+            "comment": "Include basic support for webpack-dev-server."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.2",
       "tag": "@rushstack/heft_v0.1.2",
       "date": "Thu, 16 Jul 2020 18:34:08 GMT",

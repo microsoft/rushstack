@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 16 Jul 2020 18:34:08 GMT and should not be manually modified.
+This log was last generated on Mon, 20 Jul 2020 06:52:33 GMT and should not be manually modified.
+
+## 0.2.0
+Mon, 20 Jul 2020 06:52:33 GMT
+
+### Minor changes
+
+- Make API Extractor's typescriptCompilerFolder option configurable.
+- Include basic support for webpack-dev-server.
 
 ## 0.1.2
 Thu, 16 Jul 2020 18:34:08 GMT
