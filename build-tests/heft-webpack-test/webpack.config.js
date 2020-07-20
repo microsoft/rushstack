@@ -3,6 +3,7 @@
 const path = require('path');
 
 module.exports = {
+  mode: 'development',
   resolve: {
     extensions: ['.js', '.jsx', '.json']
   },
