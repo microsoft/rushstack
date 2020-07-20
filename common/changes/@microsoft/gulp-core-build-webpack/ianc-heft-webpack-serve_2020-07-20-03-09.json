@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-webpack",
+      "comment": "Update webpack",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-webpack",
+  "email": "iclanton@users.noreply.github.com"
+}

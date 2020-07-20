@@ -43,7 +43,7 @@ export class BundleSubstageHooks extends BuildSubstageHooksBase {
     // (undocumented)
     readonly configureApiExtractor: AsyncSeriesWaterfallHook<IApiExtractorConfiguration>;
     // (undocumented)
-    readonly configureWebpack: AsyncSeriesHook;
+    readonly configureWebpack: AsyncSeriesWaterfallHook<IWebpackConfiguration>;
 }
 
 // @public (undocumented)
@@ -138,11 +138,8 @@ export interface IBundleSubstage extends IBuildSubstage<BundleSubstageHooks, IBu
 }
 
 // @public (undocumented)
-export interface IBundleSubstageProperties {
-    // (undocumented)
-    apiExtractorConfiguration: IApiExtractorConfiguration;
-    webpackConfigFilePath?: string;
-    webpackConfiguration?: webpack.Configuration;
+export interface IBundleSubstageProperties extends ISharedBundleSubstageWebpackProperties {
+    webpackConfiguration?: webpack.Configuration | webpack.Configuration[];
 }
 
 // @public (undocumented)
@@ -269,6 +266,12 @@ export interface IPreCompileSubstage extends IBuildSubstage<BuildSubstageHooksBa
 }
 
 // @public (undocumented)
+export interface ISharedBundleSubstageWebpackProperties {
+    // (undocumented)
+    apiExtractorConfiguration: IApiExtractorConfiguration;
+}
+
+// @public (undocumented)
 export interface ISharedCopyStaticAssetsConfiguration {
     excludeGlobs?: string[];
     fileExtensions?: string[];
@@ -309,6 +312,9 @@ export interface ITypeScriptConfiguration extends ISharedTypeScriptConfiguration
     // (undocumented)
     tsconfigPaths: string[];
 }
+
+// @public (undocumented)
+export type IWebpackConfiguration = webpack.Configuration | webpack.Configuration[] | undefined;
 
 // @internal
 export class _MetricsCollector {

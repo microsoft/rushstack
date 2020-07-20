@@ -13,7 +13,6 @@ import {
   IBuildStageContext,
   ITypeScriptConfiguration,
   ICopyStaticAssetsConfiguration,
-  IBundleSubstageProperties,
   IApiExtractorConfiguration
 } from '../../stages/BuildStage';
 import { ICleanStageContext, ICleanStageProperties } from '../../stages/CleanStage';
@@ -34,10 +33,6 @@ interface ITypeScriptConfigurationJson extends IConfigurationJsonBase, ISharedTy
 
 interface IConfigurationJsonCacheEntry<TConfigJson extends IConfigurationJsonBase = IConfigurationJsonBase> {
   data: TConfigJson | undefined;
-}
-
-interface IWebpackConfigurationJson {
-  webpackConfigFilePath?: string;
 }
 
 export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
@@ -74,10 +69,6 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
       });
 
       build.hooks.bundle.tap(this.displayName, (bundle) => {
-        bundle.hooks.configureWebpack.tapPromise(this.displayName, async () => {
-          await this._updateWebpackConfigurationAsync(heftConfiguration, bundle.properties);
-        });
-
         bundle.hooks.configureApiExtractor.tapPromise(this.displayName, async (existingConfiguration) => {
           await this._updateApiExtractorConfigurationAsync(heftConfiguration, existingConfiguration);
           return existingConfiguration;
@@ -176,19 +167,6 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
 
         copyStaticAssetsConfiguration.excludeGlobs.push(...copyStaticAssetsConfigurationJson.excludeGlobs);
       }
-    }
-  }
-
-  private async _updateWebpackConfigurationAsync(
-    heftConfiguration: HeftConfiguration,
-    bundleProperties: IBundleSubstageProperties
-  ): Promise<void> {
-    const webpackConfigurationJson:
-      | IWebpackConfigurationJson
-      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'webpack');
-
-    if (webpackConfigurationJson?.webpackConfigFilePath !== undefined) {
-      bundleProperties.webpackConfigFilePath = webpackConfigurationJson.webpackConfigFilePath;
     }
   }
 

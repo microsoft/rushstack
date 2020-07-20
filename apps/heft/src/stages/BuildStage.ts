@@ -154,8 +154,15 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
 /**
  * @public
  */
+export type IWebpackConfiguration = webpack.Configuration | webpack.Configuration[] | undefined;
+
+/**
+ * @public
+ */
 export class BundleSubstageHooks extends BuildSubstageHooksBase {
-  public readonly configureWebpack: AsyncSeriesHook = new AsyncSeriesHook();
+  public readonly configureWebpack: AsyncSeriesWaterfallHook<
+    IWebpackConfiguration
+  > = new AsyncSeriesWaterfallHook<IWebpackConfiguration>(['webpackConfiguration']);
   public readonly afterConfigureWebpack: AsyncSeriesHook = new AsyncSeriesHook();
 
   public readonly configureApiExtractor: AsyncSeriesWaterfallHook<
@@ -174,22 +181,21 @@ export interface ICompileSubstageProperties {
 /**
  * @public
  */
-export interface IBundleSubstageProperties {
+export interface ISharedBundleSubstageWebpackProperties {
   apiExtractorConfiguration: IApiExtractorConfiguration;
+}
 
-  /**
-   * A path to a Webpack configuration JS file. If this isn't specified, and a Webpack
-   * configuration isn't specified via another plugin, Webpack won't be run.
-   */
-  webpackConfigFilePath?: string;
-
+/**
+ * @public
+ */
+export interface IBundleSubstageProperties extends ISharedBundleSubstageWebpackProperties {
   /**
    * The configuration used by the Webpack plugin. This must be populated
    * for Webpack to run. If webpackConfigFilePath is specified,
    * this will be populated automatically with the exports of the
    * config file referenced in that property.
    */
-  webpackConfiguration?: webpack.Configuration;
+  webpackConfiguration?: webpack.Configuration | webpack.Configuration[];
 }
 
 /**
@@ -379,12 +385,16 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       await Promise.all([
         compileStage.hooks.configureTypeScript.promise(),
         compileStage.hooks.configureCopyStaticAssets.promise(),
-        bundleStage.hooks.configureWebpack.promise(),
         bundleStage.hooks.configureApiExtractor
           .promise(bundleStage.properties.apiExtractorConfiguration)
           .then(
             (apiExtractorConfiguration) =>
               (bundleStage.properties.apiExtractorConfiguration = apiExtractorConfiguration)
+          ),
+        bundleStage.hooks.configureWebpack
+          .promise(undefined)
+          .then(
+            (webpackConfiguration) => (bundleStage.properties.webpackConfiguration = webpackConfiguration)
           )
       ]);
       await Promise.all([
@@ -416,7 +426,11 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       await this._runSubstageWithLoggingAsync('Compile', compileStage);
 
       await Promise.all([
-        bundleStage.hooks.configureWebpack.promise(),
+        bundleStage.hooks.configureWebpack
+          .promise(undefined)
+          .then(
+            (webpackConfiguration) => (bundleStage.properties.webpackConfiguration = webpackConfiguration)
+          ),
         bundleStage.hooks.configureApiExtractor
           .promise(bundleStage.properties.apiExtractorConfiguration)
           .then(
