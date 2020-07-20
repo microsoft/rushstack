@@ -33,6 +33,8 @@ type IWebpackConfigJsExport =
 type IWebpackConfigJs = IWebpackConfigJsExport | { default: IWebpackConfigJsExport };
 
 const PLUGIN_NAME: string = 'BasicConfigureWebpackPlugin';
+const WEBPACK_CONFIG_FILENAME: string = 'webpack.config.js';
+const WEBPACK_DEV_CONFIG_FILENAME: string = 'webpack.dev.config.js';
 
 export class BasicConfigureWebpackPlugin implements IHeftPlugin {
   public readonly displayName: string = PLUGIN_NAME;
@@ -71,36 +73,53 @@ export class BasicConfigureWebpackPlugin implements IHeftPlugin {
     } else {
       // TODO: Eventually replace this custom logic with a call to this utility in in webpack-cli:
       // https://github.com/webpack/webpack-cli/blob/next/packages/webpack-cli/lib/groups/ConfigGroup.js
-      const webpackConfigFilePath: string | undefined = buildProperties.serveMode
-        ? bundleProperties.webpackServeConfigFilePath || bundleProperties.webpackConfigFilePath
-        : bundleProperties.webpackConfigFilePath;
 
-      if (webpackConfigFilePath) {
+      let webpackConfigJs: IWebpackConfigJs | undefined;
+
+      if (buildProperties.serveMode) {
         terminal.writeVerboseLine(
-          `Attempting to load webpack configuration from "${webpackConfigFilePath}".`
+          `Attempting to load webpack configuration from "${WEBPACK_DEV_CONFIG_FILENAME}".`
         );
-
-        const fullWebpackConfigPath: string = path.resolve(buildFolder, webpackConfigFilePath);
-        if (FileSystem.exists(fullWebpackConfigPath)) {
-          try {
-            const webpackConfigJs: IWebpackConfigJs = require(fullWebpackConfigPath);
-            const webpackConfig: IWebpackConfigJsExport =
-              (webpackConfigJs as { default: IWebpackConfigJsExport }).default || webpackConfigJs;
-
-            if (typeof webpackConfig === 'function') {
-              return await Promise.resolve(
-                webpackConfig({ prod: buildProperties.production, production: buildProperties.production })
-              );
-            } else {
-              return await Promise.resolve(webpackConfig);
-            }
-          } catch (e) {
-            throw new Error(`Error loading webpack configuration at "${fullWebpackConfigPath}": ${e}`);
-          }
-        } else {
-          return undefined;
-        }
+        webpackConfigJs = this._tryLoadWebpackConfiguration(buildFolder, WEBPACK_DEV_CONFIG_FILENAME);
       }
+
+      if (!webpackConfigJs) {
+        terminal.writeVerboseLine(
+          `Attempting to load webpack configuration from "${WEBPACK_CONFIG_FILENAME}".`
+        );
+        webpackConfigJs = this._tryLoadWebpackConfiguration(buildFolder, WEBPACK_CONFIG_FILENAME);
+      }
+
+      if (webpackConfigJs) {
+        const webpackConfig: IWebpackConfigJsExport =
+          (webpackConfigJs as { default: IWebpackConfigJsExport }).default || webpackConfigJs;
+
+        if (typeof webpackConfig === 'function') {
+          return await Promise.resolve(
+            webpackConfig({ prod: buildProperties.production, production: buildProperties.production })
+          );
+        } else {
+          return await Promise.resolve(webpackConfig);
+        }
+      } else {
+        return undefined;
+      }
+    }
+  }
+
+  private _tryLoadWebpackConfiguration(
+    buildFolder: string,
+    configurationFilename: string
+  ): IWebpackConfigJs | undefined {
+    const fullWebpackConfigPath: string = path.join(buildFolder, configurationFilename);
+    if (FileSystem.exists(fullWebpackConfigPath)) {
+      try {
+        return require(fullWebpackConfigPath);
+      } catch (e) {
+        throw new Error(`Error loading webpack configuration at "${fullWebpackConfigPath}": ${e}`);
+      }
+    } else {
+      return undefined;
     }
   }
 }

@@ -41,8 +41,6 @@ export class BundleSubstageHooks extends BuildSubstageHooksBase {
     // (undocumented)
     readonly afterConfigureWebpack: AsyncSeriesHook;
     // (undocumented)
-    readonly beforeConfigureWebpack: AsyncSeriesHook;
-    // (undocumented)
     readonly configureApiExtractor: AsyncSeriesWaterfallHook<IApiExtractorConfiguration>;
     // (undocumented)
     readonly configureWebpack: AsyncSeriesWaterfallHook<IWebpackConfiguration>;
@@ -271,8 +269,6 @@ export interface IPreCompileSubstage extends IBuildSubstage<BuildSubstageHooksBa
 export interface ISharedBundleSubstageWebpackProperties {
     // (undocumented)
     apiExtractorConfiguration: IApiExtractorConfiguration;
-    webpackConfigFilePath?: string;
-    webpackServeConfigFilePath?: string;
 }
 
 // @public (undocumented)

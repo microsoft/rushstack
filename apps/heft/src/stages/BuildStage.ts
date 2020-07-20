@@ -160,7 +160,6 @@ export type IWebpackConfiguration = webpack.Configuration | webpack.Configuratio
  * @public
  */
 export class BundleSubstageHooks extends BuildSubstageHooksBase {
-  public readonly beforeConfigureWebpack: AsyncSeriesHook = new AsyncSeriesHook();
   public readonly configureWebpack: AsyncSeriesWaterfallHook<
     IWebpackConfiguration
   > = new AsyncSeriesWaterfallHook<IWebpackConfiguration>(['webpackConfiguration']);
@@ -184,19 +183,6 @@ export interface ICompileSubstageProperties {
  */
 export interface ISharedBundleSubstageWebpackProperties {
   apiExtractorConfiguration: IApiExtractorConfiguration;
-
-  /**
-   * A path to a Webpack configuration JS file. If this isn't specified, and a Webpack
-   * configuration isn't specified via another plugin, Webpack won't be run.
-   */
-  webpackConfigFilePath?: string;
-
-  /**
-   * A path to a Webpack configuration JS file, specifically to be used in --serve mode. If this and
-   * webpackConfigFilePath aren't specified, and a Webpack configuration isn't specified
-   * via another plugin, Webpack won't be run in --serve mode.
-   */
-  webpackServeConfigFilePath?: string;
 }
 
 /**
@@ -396,8 +382,6 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       // concurrently with the expectation that the their promises will never resolve
       // and that they will handle watching filesystem changes
 
-      await Promise.all([bundleStage.hooks.beforeConfigureWebpack.promise()]);
-
       await Promise.all([
         compileStage.hooks.configureTypeScript.promise(),
         compileStage.hooks.configureCopyStaticAssets.promise(),
@@ -441,13 +425,12 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       }
       await this._runSubstageWithLoggingAsync('Compile', compileStage);
 
-      await bundleStage.hooks.beforeConfigureWebpack.promise();
-      // eslint-disable-next-line require-atomic-updates
-      bundleStage.properties.webpackConfiguration = await bundleStage.hooks.configureWebpack.promise(
-        undefined
-      );
       await Promise.all([
-        bundleStage.hooks.configureWebpack.promise(),
+        bundleStage.hooks.configureWebpack
+          .promise(undefined)
+          .then(
+            (webpackConfiguration) => (bundleStage.properties.webpackConfiguration = webpackConfiguration)
+          ),
         bundleStage.hooks.configureApiExtractor
           .promise(bundleStage.properties.apiExtractorConfiguration)
           .then(

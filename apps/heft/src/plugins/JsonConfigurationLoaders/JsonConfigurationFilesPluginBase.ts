@@ -13,9 +13,7 @@ import {
   IBuildStageContext,
   ITypeScriptConfiguration,
   ICopyStaticAssetsConfiguration,
-  IBundleSubstageProperties,
-  IApiExtractorConfiguration,
-  ISharedBundleSubstageWebpackProperties
+  IApiExtractorConfiguration
 } from '../../stages/BuildStage';
 import { ICleanStageContext, ICleanStageProperties } from '../../stages/CleanStage';
 
@@ -71,10 +69,6 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
       });
 
       build.hooks.bundle.tap(this.displayName, (bundle) => {
-        bundle.hooks.beforeConfigureWebpack.tapPromise(this.displayName, async () => {
-          await this._updateWebpackConfigurationAsync(heftConfiguration, bundle.properties);
-        });
-
         bundle.hooks.configureApiExtractor.tapPromise(this.displayName, async (existingConfiguration) => {
           await this._updateApiExtractorConfigurationAsync(heftConfiguration, existingConfiguration);
           return existingConfiguration;
@@ -173,23 +167,6 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
 
         copyStaticAssetsConfiguration.excludeGlobs.push(...copyStaticAssetsConfigurationJson.excludeGlobs);
       }
-    }
-  }
-
-  private async _updateWebpackConfigurationAsync(
-    heftConfiguration: HeftConfiguration,
-    bundleProperties: IBundleSubstageProperties
-  ): Promise<void> {
-    const webpackConfigurationJson:
-      | ISharedBundleSubstageWebpackProperties
-      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'webpack');
-
-    if (webpackConfigurationJson?.webpackConfigFilePath !== undefined) {
-      bundleProperties.webpackConfigFilePath = webpackConfigurationJson.webpackConfigFilePath;
-    }
-
-    if (webpackConfigurationJson?.webpackServeConfigFilePath !== undefined) {
-      bundleProperties.webpackServeConfigFilePath = webpackConfigurationJson.webpackServeConfigFilePath;
     }
   }
 
