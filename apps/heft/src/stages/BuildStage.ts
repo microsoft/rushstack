@@ -110,7 +110,8 @@ export interface ISharedTypeScriptConfiguration {
   additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
 
   /**
-   * Set this to change the maximum write parallelism. The default is 50.
+   * Set this to change the maximum number of file handles that will be opened concurrently for writing.
+   * The default is 50.
    */
   maxWriteParallelism: number;
 }
