@@ -122,7 +122,7 @@ export class VersionManager {
         collectLogFile: false,
         variant: this._rushConfiguration.currentInstalledVariant,
         maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
-        toFlags: []
+        toProjects: []
       };
       const installManager: RushInstallManager = new RushInstallManager(
         this._rushConfiguration,
