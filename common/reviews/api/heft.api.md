@@ -7,6 +7,7 @@
 import { AsyncParallelHook } from 'tapable';
 import { AsyncSeriesBailHook } from 'tapable';
 import { AsyncSeriesHook } from 'tapable';
+import { AsyncSeriesWaterfallHook } from 'tapable';
 import { CommandLineAction } from '@rushstack/ts-command-line';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
@@ -39,6 +40,8 @@ export class BuildSubstageHooksBase {
 export class BundleSubstageHooks extends BuildSubstageHooksBase {
     // (undocumented)
     readonly afterConfigureWebpack: AsyncSeriesHook;
+    // (undocumented)
+    readonly configureApiExtractor: AsyncSeriesWaterfallHook<IApiExtractorConfiguration>;
     // (undocumented)
     readonly configureWebpack: AsyncSeriesHook;
 }
@@ -96,6 +99,11 @@ export class HeftSession {
     }
 
 // @public (undocumented)
+export interface IApiExtractorConfiguration {
+    useProjectTypescriptVersion?: boolean;
+}
+
+// @public (undocumented)
 export interface IBuildStageContext extends IStageContext<BuildStageHooks, IBuildStageProperties> {
 }
 
@@ -131,6 +139,8 @@ export interface IBundleSubstage extends IBuildSubstage<BundleSubstageHooks, IBu
 
 // @public (undocumented)
 export interface IBundleSubstageProperties {
+    // (undocumented)
+    apiExtractorConfiguration: IApiExtractorConfiguration;
     webpackConfigFilePath?: string;
     webpackConfiguration?: webpack.Configuration;
 }

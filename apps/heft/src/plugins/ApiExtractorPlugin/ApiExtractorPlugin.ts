@@ -15,6 +15,7 @@ const CONFIG_FILE_LOCATION: string = './config/api-extractor.json';
 
 interface IRunApiExtractorOptions {
   heftConfiguration: HeftConfiguration;
+  useProjectTypescriptVersion: boolean;
   buildFolder: string;
   debugMode: boolean;
   watchMode: boolean;
@@ -32,6 +33,8 @@ export class ApiExtractorPlugin implements IHeftPlugin {
           bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
             await this._runApiExtractorAsync({
               heftConfiguration,
+              useProjectTypescriptVersion: !!bundle.properties.apiExtractorConfiguration
+                .useProjectTypescriptVersion,
               buildFolder,
               debugMode: heftSession.debugMode,
               watchMode: build.properties.watchMode,
@@ -44,7 +47,14 @@ export class ApiExtractorPlugin implements IHeftPlugin {
   }
 
   private async _runApiExtractorAsync(options: IRunApiExtractorOptions): Promise<void> {
-    const { heftConfiguration, buildFolder, debugMode, watchMode, production } = options;
+    const {
+      heftConfiguration,
+      useProjectTypescriptVersion,
+      buildFolder,
+      debugMode,
+      watchMode,
+      production
+    } = options;
 
     const terminal: Terminal = ApiExtractorRunner.getTerminal(heftConfiguration.terminalProvider);
 
@@ -62,7 +72,9 @@ export class ApiExtractorPlugin implements IHeftPlugin {
       {
         configFileLocation: CONFIG_FILE_LOCATION,
         apiExtractorPackagePath: heftConfiguration.compilerPackage.apiExtractorPackagePath,
-        typescriptPackagePath: heftConfiguration.compilerPackage.typeScriptPackagePath,
+        typescriptPackagePath: useProjectTypescriptVersion
+          ? heftConfiguration.compilerPackage.typeScriptPackagePath
+          : undefined,
         buildFolder: buildFolder,
         production: production
       }
