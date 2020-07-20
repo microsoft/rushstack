@@ -1,37 +1,58 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { HeftActionBase, IHeftActionBaseOptions, ActionHooksBase, IActionContext } from './HeftActionBase';
+import { IHeftActionBaseOptions, HeftActionBase } from './HeftActionBase';
+import { IBuildStageStandardParameters, BuildStage, IBuildStageOptions } from '../../stages/BuildStage';
+import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import { ICleanStageOptions, CleanStage } from '../../stages/CleanStage';
+import { Logging } from '../../utilities/Logging';
 
-/**
- * @public
- */
-export class StartHooks extends ActionHooksBase<IStartActionProperties> {}
+export class StartAction extends HeftActionBase {
+  private _buildStandardParameters: IBuildStageStandardParameters;
+  private _cleanFlag: CommandLineFlagParameter;
 
-/**
- * @public
- */
-export interface IStartActionProperties {}
-
-/**
- * @public
- */
-export interface IStartActionContext extends IActionContext<StartHooks, IStartActionProperties> {}
-
-export class StartAction extends HeftActionBase<StartHooks, IStartActionProperties> {
-  public constructor(options: IHeftActionBaseOptions) {
+  public constructor(heftActionOptions: IHeftActionBaseOptions) {
     super(
       {
         actionName: 'start',
         summary: 'Run the local server for the current project',
         documentation: ''
       },
-      options,
-      StartHooks
+      heftActionOptions
     );
   }
 
-  protected getDefaultActionProperties(): IStartActionProperties {
-    return {};
+  public onDefineParameters(): void {
+    super.onDefineParameters();
+
+    this._buildStandardParameters = BuildStage.defineStageStandardParameters(this);
+
+    this._cleanFlag = this.defineFlagParameter({
+      parameterLongName: '--clean',
+      description: 'If specified, clean the package before starting the development server.'
+    });
+  }
+
+  protected async actionExecuteAsync(): Promise<void> {
+    if (this._cleanFlag.value) {
+      const cleanStage: CleanStage = this.stages.cleanStage;
+      const cleanStageOptions: ICleanStageOptions = {};
+      await cleanStage.initializeAsync(cleanStageOptions);
+
+      await Logging.runFunctionWithLoggingBoundsAsync(
+        this.terminal,
+        'Clean',
+        async () => await cleanStage.executeAsync()
+      );
+    }
+
+    const buildStage: BuildStage = this.stages.buildStage;
+    const buildStageOptions: IBuildStageOptions = {
+      ...BuildStage.getOptionsFromStandardParameters(this._buildStandardParameters),
+      watchMode: true,
+      serveMode: true
+    };
+    await buildStage.initializeAsync(buildStageOptions);
+    await buildStage.executeAsync();
   }
 }

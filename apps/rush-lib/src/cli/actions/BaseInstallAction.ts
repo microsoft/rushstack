@@ -50,7 +50,8 @@ export abstract class BaseInstallAction extends BaseRushAction {
         'If "--no-link" is specified, then project symlinks will NOT be created' +
         ' after the installation completes.  You will need to run "rush link" manually.' +
         ' This flag is useful for automated builds that want to report stages individually' +
-        ' or perform extra operations in between the two stages.'
+        ' or perform extra operations in between the two stages. This flag is not supported' +
+        ' when using workspaces.'
     });
     this._networkConcurrencyParameter = this.defineIntegerParameter({
       parameterLongName: '--network-concurrency',

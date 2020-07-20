@@ -2,6 +2,30 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.30.0",
+      "tag": "@microsoft/rush_v5.30.0",
+      "date": "Fri, 17 Jul 2020 05:32:38 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Prepare to deprecate 'rush link' and 'rush unlink' commands, as well as the '--no-link' install argument. As we move toward using package managers more directly in Rush, the package managers will perform the linking during install (if linking is even necessary). Additionally, these commands directly conflict with (and have different meanings than) their package manager counterparts. Lastly, similar goals can be accomplished by running 'rush install' and 'rush purge'. In addition to these changes, rush-link.json deprecated and is replaced with a new API which keeps the local dependency tree in memory."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.29.1",
+      "tag": "@microsoft/rush_v5.29.1",
+      "date": "Thu, 16 Jul 2020 02:18:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Consider package.json when determining if install can be skipped for PNPM workspaces"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.29.0",
       "tag": "@microsoft/rush_v5.29.0",
       "date": "Tue, 14 Jul 2020 05:20:56 GMT",

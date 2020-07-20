@@ -229,15 +229,6 @@ export interface IRushConfigurationJson {
 }
 
 /**
- * This represents the JSON data structure for the "rush-link.json" data file.
- */
-export interface IRushLinkJson {
-  localLinks: {
-    [name: string]: string[];
-  };
-}
-
-/**
  * This represents the JSON data structure for the "current-variant.json" data file.
  */
 export interface ICurrentVariantJson {
@@ -451,7 +442,6 @@ export class RushConfiguration {
   private _shrinkwrapFilename: string;
   private _tempShrinkwrapFilename: string;
   private _tempShrinkwrapPreinstallFilename: string;
-  private _rushLinkJsonFilename: string;
   private _currentVariantJsonFilename: string;
   private _packageManagerToolVersion: string;
   private _packageManagerToolFilename: string;
@@ -544,7 +534,6 @@ export class RushConfiguration {
 
     this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
 
-    this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
     this._currentVariantJsonFilename = path.join(this._commonTempFolder, 'current-variant.json');
 
     this._suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
@@ -1169,9 +1158,15 @@ export class RushConfiguration {
    * Its data structure is defined by IRushLinkJson.
    *
    * Example: `C:\MyRepo\common\temp\rush-link.json`
+   *
+   * @deprecated The "rush-link.json" file was removed in Rush 5.30.0.
+   * Use `RushConfigurationProject.localDependencyProjects` instead.
    */
   public get rushLinkJsonFilename(): string {
-    return this._rushLinkJsonFilename;
+    throw new Error(
+      'The "rush-link.json" file was removed in Rush 5.30.0. Use ' +
+        'RushConfigurationProject.localDependencyProjects instead.'
+    );
   }
 
   /**

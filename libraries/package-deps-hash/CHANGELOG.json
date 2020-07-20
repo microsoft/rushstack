@@ -2,6 +2,18 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "2.4.33",
+      "tag": "@rushstack/package-deps-hash_v2.4.33",
+      "date": "Mon, 20 Jul 2020 06:52:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix hashing when a filename contains a space, a special character (ex. \", \\), or a unicode character, and fix git hash-object call when long filenames are provided"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.4.32",
       "tag": "@rushstack/package-deps-hash_v2.4.32",
       "date": "Fri, 03 Jul 2020 15:09:04 GMT",

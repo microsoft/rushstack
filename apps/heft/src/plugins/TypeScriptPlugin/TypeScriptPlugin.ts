@@ -10,14 +10,14 @@ import { RushStackCompilerUtilities } from '../../utilities/RushStackCompilerUti
 import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
 import { HeftSession } from '../../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
+import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
 import {
+  ITypeScriptConfiguration,
   CopyFromCacheMode,
   IEmitModuleKind,
-  ITypeScriptConfiguration,
-  IBuildActionContext,
-  ICompileStage
-} from '../../cli/actions/BuildAction';
-import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
+  IBuildStageContext,
+  ICompileSubstage
+} from '../../stages/BuildStage';
 
 const PLUGIN_NAME: string = 'typescript';
 
@@ -47,8 +47,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
   public readonly displayName: string = PLUGIN_NAME;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildActionContext) => {
-      build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileStage) => {
+    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
+      build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
         compile.hooks.configureTypeScript.tapPromise(PLUGIN_NAME, async () => {
           await this._configureTypeScriptAsync(
             compile.properties.typeScriptConfiguration,

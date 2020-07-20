@@ -32,7 +32,7 @@ export interface IExtendedProgram extends TTypescript.Program {
 }
 export interface IExtendedSourceFile extends TTypescript.SourceFile {
   /**
-   * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/types.ts#L3205
+   * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/types.ts#L3011
    */
   version: string;
 }

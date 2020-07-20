@@ -2,9 +2,48 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
+import * as path from 'path';
 import { Executable } from '@rushstack/node-core-library';
 
 import { IPackageDeps } from './IPackageDeps';
+
+/**
+ * Parses a quoted filename sourced from the output of the "git status" command.
+ *
+ * Paths with non-standard characters will be enclosed with double-quotes, and non-standard
+ * characters will be backslash escaped (ex. double-quotes, non-ASCII characters). The
+ * escaped chars can be included in one of two ways:
+ * - backslash-escaped chars (ex. \")
+ * - octal encoded chars (ex. \347)
+ *
+ * See documentation: https://git-scm.com/docs/git-status
+ */
+export function parseGitFilename(filename: string): string {
+  // If there are no double-quotes around the string, then there are no escaped characters
+  // to decode, so just return
+  if (!filename.match(/^".+"$/)) {
+    return filename;
+  }
+
+  // Need to hex encode '%' since we will be decoding the converted octal values from hex
+  filename = filename.replace(/%/g, '%25');
+  // Replace all instances of octal literals with percent-encoded hex (ex. '\347\275\221' -> '%E7%BD%91').
+  // This is done because the octal literals represent UTF-8 bytes, and by converting them to percent-encoded
+  // hex, we can use decodeURIComponent to get the Unicode chars.
+  filename = filename.replace(/(?:\\(\d{1,3}))/g, (match, ...[octalValue, index, source]) => {
+    // We need to make sure that the backslash is intended to escape the octal value. To do this, walk
+    // backwards from the match to ensure that it's already escaped.
+    const trailingBackslashes: RegExpMatchArray | null = (source as string)
+      .slice(0, index as number)
+      .match(/\\*$/);
+    return trailingBackslashes && trailingBackslashes.length > 0 && trailingBackslashes[0].length % 2 === 0
+      ? `%${parseInt(octalValue, 8).toString(16)}`
+      : match;
+  });
+
+  // Finally, decode the filename and unescape the escaped UTF-8 chars
+  return JSON.parse(decodeURIComponent(filename));
+}
 
 /**
  * Parses the output of the "git ls-tree" command
@@ -25,7 +64,7 @@ export function parseGitLsTree(output: string): Map<string, string> {
         const matches: RegExpMatchArray | null = line.match(gitRegex);
         if (matches && matches[3] && matches[4]) {
           const hash: string = matches[3];
-          const filename: string = matches[4];
+          const filename: string = parseGitFilename(matches[4]);
 
           changes.set(filename, hash);
         } else {
@@ -70,18 +109,23 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
        *   - '??' == untracked
        *   - 'R' == rename
        *   - 'RM' == rename with modifications
-       * filenames == path to the file, or files in the case of files that have been renamed
        */
-      const [changeType, ...filenames]: string[] = line
-        .trim()
-        .split(' ')
-        .filter((linePart) => !!linePart);
+      const match: RegExpMatchArray | null = line.match(/("(\\"|[^"])+")|(\S+\s*)/g);
 
-      if (changeType && filenames && filenames.length > 0) {
+      if (match && match.length > 1) {
+        const [changeType, ...filenameMatches] = match;
+
         // We always care about the last filename in the filenames array. In the case of non-rename changes,
-        // the filenames array only contains one item. In the case of rename changes, the last item in the
-        // array is the path to the file in the working tree, which is the only one that we care about.
-        changes.set(filenames[filenames.length - 1], changeType);
+        // the filenames array only contains one file, so we can join all segments that were split on spaces.
+        // In the case of rename changes, the last item in the array is the path to the file in the working tree,
+        // which is the only one that we care about. It is also surrounded by double-quotes if spaces are
+        // included, so no need to worry about joining different segments
+        let lastFilename: string = changeType.startsWith('R')
+          ? filenameMatches[filenameMatches.length - 1]
+          : filenameMatches.join('');
+        lastFilename = parseGitFilename(lastFilename);
+
+        changes.set(lastFilename, changeType.trimRight());
       }
     });
 
@@ -97,10 +141,12 @@ export function getGitHashForFiles(filesToHash: string[], packagePath: string): 
   const changes: Map<string, string> = new Map<string, string>();
 
   if (filesToHash.length) {
+    // Use --stdin-paths arg to pass the list of files to git in order to avoid issues with
+    // command length
     const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
       'git',
-      ['hash-object', ...filesToHash],
-      { currentWorkingDirectory: packagePath }
+      ['hash-object', '--stdin-paths'],
+      { input: filesToHash.map((x) => path.resolve(packagePath, x)).join('\n') }
     );
 
     if (result.status !== 0) {
@@ -151,6 +197,14 @@ export function gitLsTree(path: string): string {
  * Executes "git status" in a folder
  */
 export function gitStatus(path: string): string {
+  /**
+   * -s - Short format. Will be printed as 'XY PATH' or 'XY ORIG_PATH -> PATH'. Paths with non-standard
+   *      characters will be escaped using double-quotes, and non-standard characters will be backslash
+   *      escaped (ex. spaces, tabs, double-quotes)
+   * -u - Untracked files are included
+   *
+   * See documentation here: https://git-scm.com/docs/git-status
+   */
   const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
     'git',
     ['status', '-s', '-u', '.'],

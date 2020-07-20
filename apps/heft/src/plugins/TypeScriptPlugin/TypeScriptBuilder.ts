@@ -2,13 +2,16 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import * as semver from 'semver';
 import {
   Colors,
   FileSystemStats,
   IFileSystemCreateLinkOptions,
   IColorableSequence,
   Terminal,
-  ITerminalProvider
+  ITerminalProvider,
+  JsonFile,
+  IPackageJson
 } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
 import { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.7';
@@ -25,11 +28,11 @@ import {
 
 import { SubprocessRunnerBase } from '../../utilities/subprocess/SubprocessRunnerBase';
 import { Async } from '../../utilities/Async';
-import { IEmitModuleKindBase, ISharedTypeScriptConfiguration } from '../../cli/actions/BuildAction';
 import { PerformanceMeasurer, PerformanceMeasurerAsync } from '../../utilities/Performance';
 import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
 import { Tslint } from './Tslint';
 import { Eslint } from './Eslint';
+import { ISharedTypeScriptConfiguration, IEmitModuleKindBase } from '../../stages/BuildStage';
 
 export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfiguration {
   buildFolder: string;
@@ -89,7 +92,20 @@ type TWatchCompilerHost = TTypescript.WatchCompilerHostOfFilesAndCompilerOptions
 
 const EMPTY_JSON: object = {};
 
+interface ICompilerCapabilities {
+  /**
+   * Support for incremental compilation via `ts.createIncrementalProgram()`.
+   * Introduced with TypeScript 3.6.
+   */
+  incrementalProgram: boolean;
+}
+
 export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderConfiguration> {
+  private _typescriptVersion: string;
+  private _typescriptParsedVersion: semver.SemVer;
+
+  private _capabilities: ICompilerCapabilities;
+
   private _eslintEnabled: boolean;
   private _tslintEnabled: boolean;
   private _moduleKindsToEmit: ICachedEmitModuleKind<TTypescript.ModuleKind>[];
@@ -141,6 +157,34 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       this._configuration.terminalPrefixLabel
     );
 
+    // Determine the compiler version
+    const compilerPackageJsonFilename: string = path.join(
+      this._configuration.typeScriptToolPath,
+      'package.json'
+    );
+    const packageJson: IPackageJson = JsonFile.load(compilerPackageJsonFilename);
+    this._typescriptVersion = packageJson.version;
+    const parsedVersion: semver.SemVer | null = semver.parse(this._typescriptVersion);
+    if (!parsedVersion) {
+      throw new Error(
+        'Unable to parse version "${this._typescriptVersion}" for TypeScript compiler package in: ' +
+          compilerPackageJsonFilename
+      );
+    }
+    this._typescriptParsedVersion = parsedVersion;
+
+    // Detect what features this compiler supports.  Note that manually comparing major/minor numbers
+    // loosens the matching to accept prereleases such as "3.6.0-dev.20190530"
+    this._capabilities = {
+      incrementalProgram: false
+    };
+    if (
+      this._typescriptParsedVersion.major > 3 ||
+      (this._typescriptParsedVersion.major === 3 && this._typescriptParsedVersion.minor >= 6)
+    ) {
+      this._capabilities.incrementalProgram = true;
+    }
+
     this._configuration.buildCacheFolder = this._configuration.buildCacheFolder.replace(/\\/g, '/');
     this._tslintConfigFilePath = path.resolve(this._configuration.buildFolder, 'tslint.json');
     this._eslintConfigFilePath = path.resolve(this._configuration.buildFolder, '.eslintrc.js');
@@ -157,6 +201,26 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   }
 
   public async invokeAsync(): Promise<void> {
+    // Report a warning if the TypeScript version is too old/new.  The current oldest supported version is
+    // TypeScript 2.9. Prior to that the "ts.getConfigFileParsingDiagnostics()" API is missing; more fixups
+    // would be required to deal with that.  We won't do that work unless someone requests it.
+    if (
+      this._typescriptParsedVersion.major < 2 ||
+      (this._typescriptParsedVersion.major === 2 && this._typescriptParsedVersion.minor < 9)
+    ) {
+      // We don't use writeWarningLine() here because, if the person wants to take their chances with
+      // a seemingly unsupported compiler, their build should be allowed to succeed.
+      this._typescriptTerminal.writeLine(
+        `The TypeScript compiler version ${this._typescriptVersion} is very old` +
+          ` and has not been tested with Heft; it may not work correctly.`
+      );
+    } else if (this._typescriptParsedVersion.major > 3) {
+      this._typescriptTerminal.writeLine(
+        `The TypeScript compiler version ${this._typescriptVersion} is newer` +
+          ` than the latest version that was tested with Heft; it may not work correctly.`
+      );
+    }
+
     const ts: ExtendedTypeScript = require(this._configuration.typeScriptToolPath);
 
     ts.performance.enable();
@@ -294,13 +358,29 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
     //#region PROGRAM
     // There will be only one program here; emit will get a bit abused if we produce multiple outputs
-    const tsProgram: TTypescript.BuilderProgram = ts.createIncrementalProgram({
-      rootNames: tsconfig.fileNames,
-      options: tsconfig.options,
-      projectReferences: tsconfig.projectReferences,
-      host: compilerHost,
-      configFileParsingDiagnostics: ts.getConfigFileParsingDiagnostics(tsconfig)
-    });
+    let builderProgram: TTypescript.BuilderProgram | undefined = undefined;
+    let tsProgram: TTypescript.Program;
+
+    if (this._capabilities.incrementalProgram) {
+      builderProgram = ts.createIncrementalProgram({
+        rootNames: tsconfig.fileNames,
+        options: tsconfig.options,
+        projectReferences: tsconfig.projectReferences,
+        host: compilerHost,
+        configFileParsingDiagnostics: ts.getConfigFileParsingDiagnostics(tsconfig)
+      });
+      tsProgram = builderProgram.getProgram();
+    } else {
+      tsProgram = ts.createProgram({
+        rootNames: tsconfig.fileNames,
+        options: tsconfig.options,
+        projectReferences: tsconfig.projectReferences,
+        host: compilerHost,
+        configFileParsingDiagnostics: ts.getConfigFileParsingDiagnostics(tsconfig)
+      });
+    }
+
+    const genericProgram: TTypescript.BuilderProgram | TTypescript.Program = tsProgram;
 
     this._typescriptTerminal.writeVerboseLine(
       `I/O Read: ${ts.performance.getDuration('I/O Read')}ms (${ts.performance.getCount(
@@ -318,11 +398,11 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     //#region DIAGNOSTICS
     const { duration: diagnosticsDurationMs, diagnostics } = measureTsPerformance('Diagnostics', () => {
       const rawDiagnostics: TTypescript.Diagnostic[] = [
-        ...tsProgram.getConfigFileParsingDiagnostics(),
-        ...tsProgram.getOptionsDiagnostics(),
-        ...tsProgram.getSyntacticDiagnostics(),
-        ...tsProgram.getGlobalDiagnostics(),
-        ...tsProgram.getSemanticDiagnostics()
+        ...genericProgram.getConfigFileParsingDiagnostics(),
+        ...genericProgram.getOptionsDiagnostics(),
+        ...genericProgram.getSyntacticDiagnostics(),
+        ...genericProgram.getGlobalDiagnostics(),
+        ...genericProgram.getSemanticDiagnostics()
       ];
       const _diagnostics: ReadonlyArray<TTypescript.Diagnostic> = ts.sortAndDeduplicateDiagnostics(
         rawDiagnostics
@@ -338,7 +418,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       filesToWrite.push({ filePath, data });
     };
 
-    const emitResult: IExtendedEmitResult = this._emit(ts, tsconfig, tsProgram, writeFileCallback);
+    const emitResult: IExtendedEmitResult = this._emit(ts, tsconfig, genericProgram, writeFileCallback);
     //#endregion
 
     this._typescriptTerminal.writeVerboseLine(`Bind: ${ts.performance.getDuration('Bind')}ms`);
@@ -367,10 +447,12 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
     const typeScriptFilenames: Set<string> = new Set(tsconfig.fileNames);
 
+    const extendedProgram: IExtendedProgram = tsProgram as IExtendedProgram;
+
     //#region ESLINT
     if (eslint) {
       await eslint.performLintingAsync({
-        tsProgram: tsProgram.getProgram() as IExtendedProgram,
+        tsProgram: extendedProgram,
         typeScriptFilenames: typeScriptFilenames,
         changedFiles: emitResult.changedSourceFiles
       });
@@ -380,7 +462,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     //#region TSLINT
     if (tslint) {
       await tslint.performLintingAsync({
-        tsProgram: tsProgram.getProgram() as IExtendedProgram,
+        tsProgram: extendedProgram,
         typeScriptFilenames: typeScriptFilenames,
         changedFiles: emitResult.changedSourceFiles
       });
@@ -395,7 +477,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     const { duration: hardlinkDuration, linkCount: hardlinkCount } = await measureTsPerformanceAsync(
       shouldHardlink ? 'Hardlink' : 'CopyFromCache',
       async () => {
-        const commonSourceDirectory: string = (tsProgram.getProgram() as IExtendedProgram).getCommonSourceDirectory();
+        const commonSourceDirectory: string = extendedProgram.getCommonSourceDirectory();
         const linkPromises: Promise<void>[] = [];
         let linkCount: number = 0;
 
@@ -445,7 +527,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           };
         }
 
-        for (const sourceFile of tsProgram.getSourceFiles()) {
+        for (const sourceFile of genericProgram.getSourceFiles()) {
           const filename: string = sourceFile.fileName;
           if (typeScriptFilenames.has(filename)) {
             const relativeFilenameWithoutExtension: string = ts.removeFileExtension(
@@ -575,7 +657,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _emit(
     ts: ExtendedTypeScript,
     tsconfig: TTypescript.ParsedCommandLine,
-    tsProgram: TTypescript.BuilderProgram,
+    genericProgram: TTypescript.BuilderProgram | TTypescript.Program,
     writeFile: TTypescript.WriteFileCallback
   ): IExtendedEmitResult {
     let foundPrimary: boolean = false;
@@ -667,7 +749,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       }
     };
 
-    const result: TTypescript.EmitResult = tsProgram.emit(
+    const result: TTypescript.EmitResult = genericProgram.emit(
       undefined, // Target source file
       writeFile
     );
@@ -806,8 +888,10 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       currentFolder
     );
 
-    tsconfig.options.incremental = true;
-    tsconfig.options.tsBuildInfoFile = this._tsCacheFilePath;
+    if (this._capabilities.incrementalProgram) {
+      tsconfig.options.incremental = true;
+      tsconfig.options.tsBuildInfoFile = this._tsCacheFilePath;
+    }
 
     return tsconfig;
   }
@@ -816,7 +900,13 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     ts: ExtendedTypeScript,
     tsconfig: TTypescript.ParsedCommandLine
   ): TTypescript.CompilerHost {
-    const compilerHost: TTypescript.CompilerHost = ts.createIncrementalCompilerHost(tsconfig.options);
+    let compilerHost: TTypescript.CompilerHost;
+
+    if (this._capabilities.incrementalProgram) {
+      compilerHost = ts.createIncrementalCompilerHost(tsconfig.options);
+    } else {
+      compilerHost = ts.createCompilerHost(tsconfig.options);
+    }
 
     compilerHost.realpath = this._fileSystem.getRealPath.bind(this._fileSystem);
     compilerHost.readFile = (filePath: string) => {
