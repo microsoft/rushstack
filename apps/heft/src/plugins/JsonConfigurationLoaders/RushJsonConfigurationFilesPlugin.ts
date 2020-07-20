@@ -4,10 +4,10 @@
 import * as path from 'path';
 
 import * as RushUtilities from '../../utilities/RushUtilities';
-import { ActionConfigurationFilesPluginBase } from './ActionConfigurationFilesPluginBase';
+import { JsonConfigurationFilesPluginBase } from './JsonConfigurationFilesPluginBase';
 
-export class RushActionConfigurationFilesPlugin extends ActionConfigurationFilesPluginBase {
-  public readonly displayName: string = 'rushActionConfigurationFiles';
+export class RushJsonConfigurationFilesPlugin extends JsonConfigurationFilesPluginBase {
+  public readonly displayName: string = 'rushJsonConfigurationFiles';
 
   private __rushConfigurationFolder: string | undefined | null = undefined;
 
@@ -23,10 +23,10 @@ export class RushActionConfigurationFilesPlugin extends ActionConfigurationFiles
     return this.__rushConfigurationFolder || undefined;
   }
 
-  protected _getActionConfigurationFilePathByName(actionName: string): string | undefined {
+  protected _getConfigurationFilePathByName(name: string): string | undefined {
     const rushConfigurationFolder: string | undefined = this._rushConfigurationFolder;
     if (rushConfigurationFolder) {
-      return path.resolve(rushConfigurationFolder, 'heft', `${actionName}.json`);
+      return path.resolve(rushConfigurationFolder, 'heft', `${name}.json`);
     } else {
       return undefined;
     }
