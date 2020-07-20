@@ -176,7 +176,7 @@
     },
     {
       "name": "@rushstack/heft",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/localization-plugin",
