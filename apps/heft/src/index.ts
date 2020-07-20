@@ -25,6 +25,7 @@ export {
   BundleSubstageHooks,
   CompileSubstageHooks,
   CopyFromCacheMode,
+  IApiExtractorConfiguration,
   IBuildStageContext,
   IBuildStageProperties,
   IBuildSubstage,

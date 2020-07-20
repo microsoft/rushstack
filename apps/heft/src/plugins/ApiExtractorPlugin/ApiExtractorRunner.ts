@@ -28,7 +28,7 @@ export interface IApiExtractorRunnerConfiguration {
    *
    * For example, /home/username/code/repo/project/node_modules/typescript
    */
-  typescriptPackagePath: string;
+  typescriptPackagePath: string | undefined;
 
   /**
    * The folder of the project being built
