@@ -61,7 +61,8 @@ export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfig
   buildCacheFolder: string;
 
   /**
-   * The maximum number of simultaneous filesystem writes allowed.
+   * Set this to change the maximum number of file handles that will be opened concurrently for writing.
+   * The default is 50.
    */
   maxWriteParallelism: number;
 }

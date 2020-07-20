@@ -20,7 +20,7 @@
   "engines": {
     "node": ">=10.13.0"
   },
-  "homepage": "https://rushstack.io",
+  "homepage": "https://rushstack.io/pages/heft/overview/",
   "main": "lib/index.js",
   "types": "dist/heft.d.ts",
   "bin": {
