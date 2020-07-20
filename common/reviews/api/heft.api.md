@@ -318,13 +318,13 @@ export class MetricsCollectorHooks {
 }
 
 // @public (undocumented)
-export abstract class StageHooksBase<TActionProperties extends object> {
+export abstract class StageHooksBase<TStageProperties extends object> {
     // (undocumented)
     readonly afterLoadStageConfiguration: AsyncSeriesHook;
     // (undocumented)
     readonly loadStageConfiguration: AsyncSeriesHook;
     // @beta
-    readonly overrideStage: AsyncSeriesBailHook<TActionProperties>;
+    readonly overrideStage: AsyncSeriesBailHook<TStageProperties>;
 }
 
 // @public (undocumented)

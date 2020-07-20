@@ -19,15 +19,15 @@ export interface IStageContext<
 /**
  * @public
  */
-export abstract class StageHooksBase<TActionProperties extends object> {
+export abstract class StageHooksBase<TStageProperties extends object> {
   /**
-   * This hook allows the action's execution to be completely overridden. Only the last-registered plugin
+   * This hook allows the stage's execution to be completely overridden. Only the last-registered plugin
    * with an override hook provided applies.
    *
    * @beta
    */
-  public readonly overrideStage: AsyncSeriesBailHook<TActionProperties> = new AsyncSeriesBailHook([
-    'actionProperties'
+  public readonly overrideStage: AsyncSeriesBailHook<TStageProperties> = new AsyncSeriesBailHook([
+    'stageProperties'
   ]);
 
   public readonly loadStageConfiguration: AsyncSeriesHook = new AsyncSeriesHook();
