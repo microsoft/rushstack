@@ -463,7 +463,8 @@
       "packageName": "@rushstack/heft",
       "projectFolder": "apps/heft",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft"]
     },
 
     // "build-tests" folder (alphabetical order)

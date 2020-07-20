@@ -28,8 +28,8 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "node ./build.js",
-    "start": "node ./watch.js"
+    "build": "heft build --clean",
+    "start": "heft build --clean --watch"
   },
   "dependencies": {
     "@jest/core": "~25.4.0",
@@ -58,6 +58,7 @@
     "@types/semver": "~7.3.1",
     "@types/webpack-dev-server": "3.11.0",
     "@microsoft/rush-stack-compiler-3.7": "workspace:*",
-    "@rushstack/eslint-config": "workspace:*"
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "0.2.0"
   }
 }
