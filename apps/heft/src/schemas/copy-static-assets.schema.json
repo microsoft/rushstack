@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Clean Action Configuration",
-  "description": "Defines the heft configuration for the clean action.",
+  "title": "Copy Static Assets Configuration",
+  "description": "Defines the heft configuration for the copy-static-assets task.",
   "type": "object",
 
   "additionalProperties": false,

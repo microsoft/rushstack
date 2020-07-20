@@ -39,7 +39,7 @@ interface IWebpackConfigurationJson {
   webpackConfigFilePath?: string;
 }
 
-export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin {
+export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
   private static _schemaCache: Map<string, JsonSchema> = new Map<string, JsonSchema>();
   private _configurationJsonCache: Map<string, IConfigurationJsonCacheEntry> = new Map<
     string,
@@ -80,8 +80,8 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
     });
   }
 
-  protected abstract _getActionConfigurationFilePathByName(
-    actionName: string,
+  protected abstract _getConfigurationFilePathByName(
+    name: string,
     heftConfiguration: HeftConfiguration
   ): string | undefined;
 
@@ -89,12 +89,13 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
     heftConfiguration: HeftConfiguration,
     cleanConfiguration: ICleanStageProperties
   ): Promise<void> {
-    const cleanActionConfiguration:
-      | ICleanConfigurationJson
-      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'clean');
+    const cleanConfigurationJson: ICleanConfigurationJson | undefined = await this._getConfigDataByNameAsync(
+      heftConfiguration,
+      'clean'
+    );
 
-    if (cleanActionConfiguration) {
-      for (const pathToDelete of cleanActionConfiguration.pathsToDelete) {
+    if (cleanConfigurationJson) {
+      for (const pathToDelete of cleanConfigurationJson.pathsToDelete) {
         cleanConfiguration.pathsToDelete.add(pathToDelete);
       }
     }
@@ -195,26 +196,23 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
     ) as IOptionalConfigurationJsonCacheEntry;
 
     if (!configurationJsonCacheEntry) {
-      const actionConfigurationFilePath: string | undefined = this._getActionConfigurationFilePathByName(
+      const configurationFilePath: string | undefined = this._getConfigurationFilePathByName(
         configFilename,
         heftConfiguration
       );
 
-      if (actionConfigurationFilePath && FileSystem.exists(actionConfigurationFilePath)) {
+      if (configurationFilePath && FileSystem.exists(configurationFilePath)) {
         const schema: JsonSchema = await this._getSchemaByNameAsync(configFilename);
-        const baseSchema: JsonSchema = await this._getSchemaByNameAsync('action');
+        const loadedConfigJson: TConfigJson = JsonFile.loadAndValidate(configurationFilePath, schema);
 
-        const loadedConfigJson: TConfigJson = JsonFile.loadAndValidate(actionConfigurationFilePath, schema);
-        baseSchema.validateObject(loadedConfigJson, actionConfigurationFilePath);
-
-        heftConfiguration.terminal.writeVerboseLine(`Loaded config file "${actionConfigurationFilePath}"`);
+        heftConfiguration.terminal.writeVerboseLine(`Loaded config file "${configurationFilePath}"`);
 
         configurationJsonCacheEntry = {
           data: loadedConfigJson
         };
       } else {
         heftConfiguration.terminal.writeVerboseLine(
-          `Config file "${actionConfigurationFilePath}" doesn't exist. Skipping.`
+          `Config file "${configurationFilePath}" doesn't exist. Skipping.`
         );
 
         configurationJsonCacheEntry = {
@@ -231,7 +229,7 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
   }
 
   private async _getSchemaByNameAsync(configFilename: string): Promise<JsonSchema> {
-    let schema: JsonSchema | undefined = ActionConfigurationFilesPluginBase._schemaCache.get(configFilename);
+    let schema: JsonSchema | undefined = JsonConfigurationFilesPluginBase._schemaCache.get(configFilename);
     if (!schema) {
       const schemaPath: string = path.resolve(
         __dirname,
@@ -241,7 +239,7 @@ export abstract class ActionConfigurationFilesPluginBase implements IHeftPlugin 
         `${configFilename}.schema.json`
       );
       schema = JsonSchema.fromFile(schemaPath);
-      ActionConfigurationFilesPluginBase._schemaCache.set(configFilename, schema);
+      JsonConfigurationFilesPluginBase._schemaCache.set(configFilename, schema);
     }
 
     return schema;

@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Clean Action Configuration",
+  "title": "Clean Configuration",
   "description": "Defines the heft configuration for the clean action.",
   "type": "object",
 
