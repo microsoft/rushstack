@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as webpack from 'webpack';
+import * as WebpackDevServer from 'webpack-dev-server';
 import { LegacyAdapters, Terminal, ITerminalProvider } from '@rushstack/node-core-library';
 
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
@@ -27,7 +28,8 @@ export class WebpackPlugin implements IHeftPlugin {
           await this._runWebpackAsync(
             heftConfiguration.terminalProvider,
             bundle.properties.webpackConfiguration,
-            build.properties
+            build.properties,
+            heftConfiguration.terminalProvider.supportsColor
           );
         });
       });
@@ -37,7 +39,8 @@ export class WebpackPlugin implements IHeftPlugin {
   private async _runWebpackAsync(
     baseTerminalProvider: ITerminalProvider,
     webpackConfiguration: IWebpackConfiguration,
-    buildProperties: IBuildStageProperties
+    buildProperties: IBuildStageProperties,
+    supportsColor: boolean
   ): Promise<void> {
     if (!webpackConfiguration) {
       return;
@@ -50,18 +53,36 @@ export class WebpackPlugin implements IHeftPlugin {
     const terminal: Terminal = new Terminal(webpackTerminalProvider);
     terminal.writeLine(`Using Webpack version ${webpack.version}`);
 
-    // This statement needs the `as webpack.Configuration` cast because the TS compiler gets confused
-    // by two of the overrides for the `webpack` function (one accepting a `webpack.Configuration`,
-    // and the other accepting a `webpack.Configuration[]`). The compiler accepts this:
-    // ```
-    // Array.isArray(webpackConfiguration) ? webpack(webpackConfiguration) : webpack(webpackConfiguration)
-    // ```
-    // but that's unnecessary complexity
-    const compiler: webpack.Compiler | webpack.MultiCompiler = webpack(
-      webpackConfiguration as webpack.Configuration
-    );
+    const compiler: webpack.Compiler | webpack.MultiCompiler = Array.isArray(webpackConfiguration)
+      ? webpack(webpackConfiguration) /* (webpack.Compilation[]) => webpack.MultiCompiler */
+      : webpack(webpackConfiguration); /* (webpack.Compilation) => webpack.Compiler */
 
-    if (buildProperties.watchMode) {
+    if (buildProperties.serveMode) {
+      // TODO: make these options configurable
+      const options: WebpackDevServer.Configuration = {
+        host: 'localhost',
+        publicPath: '/',
+        filename: '[name]_[hash].js',
+        clientLogLevel: 'info',
+        stats: {
+          cached: false,
+          cachedAssets: false,
+          colors: supportsColor
+        },
+        port: 8080
+      };
+
+      // TODO: the WebpackDevServer accepts a third parameter for a logger. We should make
+      // use of that to make logging cleaner
+      const devServer: WebpackDevServer = new WebpackDevServer(compiler, options);
+      await new Promise((resolve: () => void, reject: (error: Error) => void) => {
+        devServer.listen(options.port!, options.host!, (error: Error) => {
+          if (error) {
+            reject(error);
+          }
+        });
+      });
+    } else if (buildProperties.watchMode) {
       try {
         const stats: webpack.Stats = await LegacyAdapters.convertCallbackToPromise(
           compiler.watch.bind(compiler),
