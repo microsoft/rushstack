@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.2.1",
+      "tag": "@rushstack/heft_v0.2.1",
+      "date": "Tue, 21 Jul 2020 00:10:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update documentation"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.0",
       "tag": "@rushstack/heft_v0.2.0",
       "date": "Mon, 20 Jul 2020 06:52:33 GMT",
