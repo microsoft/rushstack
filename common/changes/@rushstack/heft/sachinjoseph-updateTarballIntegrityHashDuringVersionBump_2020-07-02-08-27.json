@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/rush",
       "comment": "Update temp project tarball integrities during rush bump",
-      "type": "none"
+      "type": "patch"
     }
   ],
   "packageName": "@microsoft/rush",
