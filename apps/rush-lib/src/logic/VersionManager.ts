@@ -73,7 +73,7 @@ export class VersionManager {
    * @param identifier - overrides the prerelease identifier and only works for lock step policy
    * @param shouldCommit - whether the changes will be written to disk
    */
-  public async bump(
+  public async bumpAsync(
     lockStepVersionPolicyName?: string,
     bumpType?: BumpType,
     identifier?: string,

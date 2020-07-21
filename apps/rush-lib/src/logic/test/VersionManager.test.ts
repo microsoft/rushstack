@@ -84,7 +84,7 @@ describe('VersionManager', () => {
 
   describe('bump', () => {
     it('bumps to prerelease version', async () => {
-      await versionManager.bump('testPolicy1', BumpType.prerelease, 'dev', false);
+      await versionManager.bumpAsync('testPolicy1', BumpType.prerelease, 'dev', false);
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       const expectedVersion: string = '10.10.1-dev.0';
 
@@ -166,7 +166,7 @@ describe('WorkspaceVersionManager', () => {
 
   describe('bump', () => {
     it('bumps to prerelease version', async () => {
-      await versionManager.bump('testPolicy1', BumpType.prerelease, 'dev', false);
+      await versionManager.bumpAsync('testPolicy1', BumpType.prerelease, 'dev', false);
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       const expectedVersion: string = '10.10.1-dev.0';
 

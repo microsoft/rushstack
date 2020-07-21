@@ -122,7 +122,7 @@ export class VersionAction extends BaseRushAction {
         }
       } else if (this._bumpVersion.value) {
         const tempBranch: string = 'version/bump-' + new Date().getTime();
-        await this._versionManager.bump(
+        await this._versionManager.bumpAsync(
           this._versionPolicy.value,
           this._overwriteBump.value ? BumpType[this._overwriteBump.value] : undefined,
           this._prereleaseIdentifier.value,
