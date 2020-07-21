@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.2.2",
+      "tag": "@rushstack/heft_v0.2.2",
+      "date": "Tue, 21 Jul 2020 00:54:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Rename .heft/api-extractor.json to .heft/api-extractor-task.json to avoid confusion with API Extractor's config file"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.1",
       "tag": "@rushstack/heft_v0.2.1",
       "date": "Tue, 21 Jul 2020 00:10:21 GMT",

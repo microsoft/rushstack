@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 21 Jul 2020 00:10:21 GMT and should not be manually modified.
+This log was last generated on Tue, 21 Jul 2020 00:54:55 GMT and should not be manually modified.
+
+## 0.2.2
+Tue, 21 Jul 2020 00:54:55 GMT
+
+### Patches
+
+- Rename .heft/api-extractor.json to .heft/api-extractor-task.json to avoid confusion with API Extractor's config file
 
 ## 0.2.1
 Tue, 21 Jul 2020 00:10:21 GMT
