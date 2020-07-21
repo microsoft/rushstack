@@ -176,7 +176,7 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
   ): Promise<void> {
     const apiExtractorConfigurationJson:
       | IApiExtractorConfiguration
-      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'api-extractor');
+      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'api-extractor-task');
 
     if (apiExtractorConfigurationJson?.useProjectTypescriptVersion !== undefined) {
       apiExtractorConfiguration.useProjectTypescriptVersion =
