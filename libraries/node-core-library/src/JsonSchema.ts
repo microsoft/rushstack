@@ -3,10 +3,14 @@
 
 import * as os from 'os';
 import * as path from 'path';
-import Validator = require('z-schema');
+import * as Ajv from 'ajv';
 
 import { JsonFile, JsonObject } from './JsonFile';
 import { FileSystem } from './FileSystem';
+
+type ISchemaValidator = Ajv.Ajv;
+
+type IErrorDetail = Ajv.ErrorObject;
 
 interface ISchemaWithId {
   id: string | undefined;
@@ -71,7 +75,7 @@ export interface IJsonSchemaFromFileOptions {
 export class JsonSchema {
   private _dependentSchemas: JsonSchema[] = [];
   private _filename: string = '';
-  private _validator: Validator | undefined = undefined;
+  private _validator: ISchemaValidator | undefined = undefined;
   private _schemaObject: JsonObject | undefined = undefined;
 
   private constructor() {}
@@ -153,7 +157,7 @@ export class JsonSchema {
   /**
    * Used to nicely format the ZSchema error tree.
    */
-  private static _formatErrorDetails(errorDetails: Validator.SchemaErrorDetail[]): string {
+  private static _formatErrorDetails(errorDetails: IErrorDetail[]): string {
     return JsonSchema._formatErrorDetailsHelper(errorDetails, '', '');
   }
 
@@ -161,16 +165,16 @@ export class JsonSchema {
    * Used by _formatErrorDetails.
    */
   private static _formatErrorDetailsHelper(
-    errorDetails: Validator.SchemaErrorDetail[],
+    errorDetails: IErrorDetail[],
     indent: string,
     buffer: string
   ): string {
     for (const errorDetail of errorDetails) {
-      buffer += os.EOL + indent + `Error: ${errorDetail.path}`;
+      buffer += os.EOL + indent + `Error: ${errorDetail.dataPath}`;
 
-      if (errorDetail.description) {
+      if (errorDetail.message) {
         const MAX_LENGTH: number = 40;
-        let truncatedDescription: string = errorDetail.description.trim();
+        let truncatedDescription: string = errorDetail.message.trim();
         if (truncatedDescription.length > MAX_LENGTH) {
           truncatedDescription = truncatedDescription.substr(0, MAX_LENGTH - 3) + '...';
         }
@@ -180,9 +184,9 @@ export class JsonSchema {
 
       buffer += os.EOL + indent + `       ${errorDetail.message}`;
 
-      if (errorDetail.inner) {
-        buffer = JsonSchema._formatErrorDetailsHelper(errorDetail.inner, indent + '  ', buffer);
-      }
+      // if (errorDetail.inner) {
+      //   buffer = JsonSchema._formatErrorDetailsHelper(errorDetail.inner, indent + '  ', buffer);
+      // }
     }
 
     return buffer;
@@ -218,18 +222,25 @@ export class JsonSchema {
 
     if (!this._validator) {
       // Don't assign this to _validator until we're sure everything was successful
-      const newValidator: Validator = new Validator({
-        breakOnFirstError: false,
-        noTypeless: true,
-        noExtraKeywords: true
+      const newValidator: ISchemaValidator = new Ajv({
+        verbose: true,
+        allErrors: true,
+        extendRefs: 'fail'
       });
 
+      // TODO: Figure out what's the intent, accept anything as initial
+      // ... or?
+      // node_modules/ajv/lib/refs/json-schema-draft-07.json
+      // ... but when we check newValidator, it already has
+      // console.log('ensureCompiled', newValidator);
       const anythingSchema: JsonObject = {
+        // $schema: 'http://json-schema.org/draft-04/schema',
+        $schema: 'http://json-schema.org/draft-07/schema',
+        $id: 'https://rushjs.io/schemas/rushstack/node-core-library/anything-schema',
         type: ['array', 'boolean', 'integer', 'number', 'object', 'string']
+        // additionalProperties: true,
       };
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (newValidator as any).setRemoteReference('http://json-schema.org/draft-04/schema', anythingSchema);
+      newValidator.addSchema(anythingSchema);
 
       const collectedSchemas: JsonSchema[] = [];
       const seenObjects: Set<JsonSchema> = new Set<JsonSchema>();
@@ -240,11 +251,12 @@ export class JsonSchema {
       // Validate each schema in order.  We specifically do not supply them all together, because we want
       // to make sure that circular references will fail to validate.
       for (const collectedSchema of collectedSchemas) {
-        if (!newValidator.validateSchema(collectedSchema._schemaObject)) {
+        newValidator.validateSchema(collectedSchema._schemaObject);
+        if (newValidator.errors) {
           throw new Error(
             `Failed to validate schema "${collectedSchema.shortName}":` +
               os.EOL +
-              JsonSchema._formatErrorDetails(newValidator.getLastErrors())
+              JsonSchema._formatErrorDetails(newValidator.errors)
           );
         }
       }
@@ -283,10 +295,15 @@ export class JsonSchema {
     errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void
   ): void {
     this.ensureCompiled();
+    if (!this._validator || !this._schemaObject) {
+      const message = `Uninitialized Ajv?`;
+      throw new Error(message);
+    }
+    const schemaWithId: ISchemaWithId = this._schemaObject as ISchemaWithId;
+    this._validator.validate(jsonObject, schemaWithId);
 
-    if (!this._validator!.validate(jsonObject, this._schemaObject)) {
-      const errorDetails: string = JsonSchema._formatErrorDetails(this._validator!.getLastErrors());
-
+    if (this._validator.errors) {
+      const errorDetails: string = JsonSchema._formatErrorDetails(this._validator.errors);
       const args: IJsonSchemaErrorInfo = {
         details: errorDetails
       };
