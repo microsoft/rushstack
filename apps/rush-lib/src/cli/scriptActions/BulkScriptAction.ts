@@ -10,7 +10,6 @@ import {
   CommandLineStringListParameter,
   CommandLineParameterKind
 } from '@rushstack/ts-command-line';
-import { FileSystem, PackageJsonLookup, IPackageJson } from '@rushstack/node-core-library';
 
 import { Event } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
@@ -23,6 +22,7 @@ import { TaskCollection } from '../../logic/taskRunner/TaskCollection';
 import { Utilities } from '../../utilities/Utilities';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
+import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -76,11 +76,18 @@ export class BulkScriptAction extends BaseScriptAction {
   }
 
   public run(): Promise<void> {
-    if (!FileSystem.exists(this.rushConfiguration.rushLinkJsonFilename)) {
-      throw new Error(
-        `File not found: ${this.rushConfiguration.rushLinkJsonFilename}${os.EOL}Did you run "rush link"?`
-      );
+    // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are deprecated
+    const lastLinkFlag: LastLinkFlag = LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration);
+    if (!lastLinkFlag.isValid()) {
+      const useWorkspaces: boolean =
+        this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
+      if (useWorkspaces) {
+        throw new Error(`Link flag invalid.${os.EOL}Did you run "rush install" or "rush update"?`);
+      } else {
+        throw new Error(`Link flag invalid.${os.EOL}Did you run "rush link"?`);
+      }
     }
+
     this._doBeforeTask();
 
     const stopwatch: Stopwatch = Stopwatch.start();
@@ -101,8 +108,8 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const taskSelector: TaskSelector = new TaskSelector({
       rushConfiguration: this.rushConfiguration,
-      toFlags: this._mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy),
-      fromFlags: this._mergeProjectsWithVersionPolicy(this._fromFlag, this._fromVersionPolicy),
+      toProjects: this.mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy),
+      fromProjects: this.mergeProjectsWithVersionPolicy(this._fromFlag, this._fromVersionPolicy),
       commandToRun: this._commandToRun,
       customParameterValues,
       isQuietMode: isQuietMode,
@@ -186,8 +193,8 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterShortName: '-f',
       argumentName: 'PROJECT2',
       description:
-        'Run command in all projects that directly or indirectly depend on the specified project. ' +
-        '"." can be used as shorthand to specify the project in the current working directory.'
+        'Run command in the specified project and all projects that directly or indirectly depend on the ' +
+        'specified project. "." can be used as shorthand to specify the project in the current working directory.'
     });
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
@@ -205,59 +212,6 @@ export class BulkScriptAction extends BaseScriptAction {
     }
 
     this.defineScriptParameters();
-  }
-
-  private _mergeProjectsWithVersionPolicy(
-    projectsParameters: CommandLineStringListParameter,
-    versionPoliciesParameters: CommandLineStringListParameter
-  ): string[] {
-    const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-
-    const projects: string[] = [];
-    for (const projectParameter of projectsParameters.values) {
-      if (projectParameter === '.') {
-        const packageJson: IPackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(process.cwd());
-        if (packageJson) {
-          const projectName: string = packageJson.name;
-          if (this.rushConfiguration.projectsByName.has(projectName)) {
-            projects.push(projectName);
-          } else {
-            console.log(
-              colors.red(
-                'Rush is not currently running in a project directory specified in rush.json. ' +
-                  `The "." value for the ${this._toFlag.longName} parameter or the ${this._fromFlag.longName} parameter ` +
-                  'is not allowed.'
-              )
-            );
-            throw new AlreadyReportedError();
-          }
-        } else {
-          console.log(
-            colors.red(
-              'Rush is not currently running in a project directory. ' +
-                `The "." value for the ${this._toFlag.longName} parameter or the ${this._fromFlag.longName} parameter ` +
-                'is not allowed.'
-            )
-          );
-          throw new AlreadyReportedError();
-        }
-      } else {
-        projects.push(projectParameter);
-      }
-    }
-
-    if (versionPoliciesParameters.values && versionPoliciesParameters.values.length > 0) {
-      this.rushConfiguration.projects.forEach((project) => {
-        const matches: boolean = versionPoliciesParameters.values.some((policyName) => {
-          return project.versionPolicyName === policyName;
-        });
-        if (matches) {
-          projects.push(project.packageName);
-        }
-      });
-    }
-
-    return projects;
   }
 
   private _doBeforeTask(): void {

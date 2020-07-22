@@ -2,6 +2,66 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.25.0",
+      "tag": "@rushstack/node-core-library_v3.25.0",
+      "date": "Fri, 03 Jul 2020 15:09:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a utility method to convert a map into an object"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.24.4",
+      "tag": "@rushstack/node-core-library_v3.24.4",
+      "date": "Thu, 25 Jun 2020 06:43:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `1.0.1` to `1.0.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.24.3",
+      "tag": "@rushstack/node-core-library_v3.24.3",
+      "date": "Wed, 24 Jun 2020 09:50:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `1.0.0` to `1.0.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.24.2",
+      "tag": "@rushstack/node-core-library_v3.24.2",
+      "date": "Wed, 24 Jun 2020 09:04:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.8` to `1.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.24.1",
+      "tag": "@rushstack/node-core-library_v3.24.1",
+      "date": "Wed, 10 Jun 2020 20:48:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve API docs for \"LockFile\""
+          }
+        ]
+      }
+    },
+    {
       "version": "3.24.0",
       "tag": "@rushstack/node-core-library_v3.24.0",
       "date": "Sat, 30 May 2020 02:59:54 GMT",

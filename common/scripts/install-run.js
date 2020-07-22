@@ -57,26 +57,33 @@ function _parsePackageSpecifier(rawPackageSpecifier) {
  * we'd prefer to skip that line and continue looking in other places such as the user's
  * home directory.
  *
- * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities._copyNpmrcFile()
+ * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities.copyAndTrimNpmrcFile()
  */
 function _copyAndTrimNpmrcFile(sourceNpmrcPath, targetNpmrcPath) {
     console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`); // Verbose
     let npmrcFileLines = fs.readFileSync(sourceNpmrcPath).toString().split('\n');
     npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
     const resultLines = [];
+    // This finds environment variable tokens that look like "${VAR_NAME}"
+    const expansionRegExp = /\$\{([^\}]+)\}/g;
+    // Comment lines start with "#" or ";"
+    const commentRegExp = /^\s*[#;]/;
     // Trim out lines that reference environment variables that aren't defined
     for (const line of npmrcFileLines) {
-        // This finds environment variable tokens that look like "${VAR_NAME}"
-        const regex = /\$\{([^\}]+)\}/g;
-        const environmentVariables = line.match(regex);
         let lineShouldBeTrimmed = false;
-        if (environmentVariables) {
-            for (const token of environmentVariables) {
-                // Remove the leading "${" and the trailing "}" from the token
-                const environmentVariableName = token.substring(2, token.length - 1);
-                if (!process.env[environmentVariableName]) {
-                    lineShouldBeTrimmed = true;
-                    break;
+        // Ignore comment lines
+        if (!commentRegExp.test(line)) {
+            const environmentVariables = line.match(expansionRegExp);
+            if (environmentVariables) {
+                for (const token of environmentVariables) {
+                    // Remove the leading "${" and the trailing "}" from the token
+                    const environmentVariableName = token.substring(2, token.length - 1);
+                    // Is the environment variable defined?
+                    if (!process.env[environmentVariableName]) {
+                        // No, so trim this line
+                        lineShouldBeTrimmed = true;
+                        break;
+                    }
                 }
             }
         }
@@ -131,7 +138,7 @@ function getNpmPath() {
             }
             else {
                 // We aren't on Windows - assume we're on *NIX or Darwin
-                _npmPath = childProcess.execSync('which npm', { stdio: [] }).toString();
+                _npmPath = childProcess.execSync('command -v npm', { stdio: [] }).toString();
             }
         }
         catch (e) {
@@ -292,8 +299,8 @@ function _cleanInstallFolder(rushTempFolder, packageInstallFolder) {
         }
         const nodeModulesFolder = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME);
         if (fs.existsSync(nodeModulesFolder)) {
-            const rushRecyclerFolder = _ensureAndJoinPath(rushTempFolder, 'rush-recycler', `install-run-${Date.now().toString()}`);
-            fs.renameSync(nodeModulesFolder, rushRecyclerFolder);
+            const rushRecyclerFolder = _ensureAndJoinPath(rushTempFolder, 'rush-recycler');
+            fs.renameSync(nodeModulesFolder, path.join(rushRecyclerFolder, `install-run-${Date.now().toString()}`));
         }
     }
     catch (e) {
@@ -303,14 +310,14 @@ function _cleanInstallFolder(rushTempFolder, packageInstallFolder) {
 function _createPackageJson(packageInstallFolder, name, version) {
     try {
         const packageJsonContents = {
-            'name': 'ci-rush',
-            'version': '0.0.0',
-            'dependencies': {
+            name: 'ci-rush',
+            version: '0.0.0',
+            dependencies: {
                 [name]: version
             },
-            'description': 'DON\'T WARN',
-            'repository': 'DON\'T WARN',
-            'license': 'MIT'
+            description: "DON'T WARN",
+            repository: "DON'T WARN",
+            license: 'MIT'
         };
         const packageJsonPath = path.join(packageInstallFolder, PACKAGE_JSON_FILENAME);
         fs.writeFileSync(packageJsonPath, JSON.stringify(packageJsonContents, undefined, 2));
@@ -345,7 +352,7 @@ function _installPackage(packageInstallFolder, name, version) {
  */
 function _getBinPath(packageInstallFolder, binName) {
     const binFolderPath = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
-    const resolvedBinName = (os.platform() === 'win32') ? `${binName}.cmd` : binName;
+    const resolvedBinName = os.platform() === 'win32' ? `${binName}.cmd` : binName;
     return path.resolve(binFolderPath, resolvedBinName);
 }
 /**
@@ -378,10 +385,11 @@ function installAndRun(packageName, packageVersion, packageBinName, packageBinAr
     const statusMessageLine = new Array(statusMessage.length + 1).join('-');
     console.log(os.EOL + statusMessage + os.EOL + statusMessageLine + os.EOL);
     const binPath = _getBinPath(packageInstallFolder, packageBinName);
+    const binFolderPath = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
     const result = childProcess.spawnSync(binPath, packageBinArgs, {
         stdio: 'inherit',
         cwd: process.cwd(),
-        env: process.env
+        env: Object.assign({}, process.env, { PATH: [binFolderPath, process.env.PATH].join(path.delimiter) })
     });
     if (result.status !== null) {
         return result.status;
@@ -403,7 +411,7 @@ function runWithErrorAndStatusCode(fn) {
 }
 exports.runWithErrorAndStatusCode = runWithErrorAndStatusCode;
 function _run() {
-    const [nodePath, /* Ex: /bin/node */ scriptPath, /* /repo/common/scripts/install-run-rush.js */ rawPackageSpecifier, /* qrcode@^1.2.0 */ packageBinName, /* qrcode */ ...packageBinArgs /* [-f, myproject/lib] */] = process.argv;
+    const [nodePath /* Ex: /bin/node */, scriptPath /* /repo/common/scripts/install-run-rush.js */, rawPackageSpecifier /* qrcode@^1.2.0 */, packageBinName /* qrcode */, ...packageBinArgs /* [-f, myproject/lib] */] = process.argv;
     if (!nodePath) {
         throw new Error('Unexpected exception: could not detect node path');
     }

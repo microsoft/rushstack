@@ -468,18 +468,21 @@ export type LegacyCallback<TResult, TError> = (error: TError | null | undefined,
 
 // @public
 export class LockFile {
-    static acquire(resourceDir: string, resourceName: string, maxWaitMs?: number): Promise<LockFile>;
+    static acquire(resourceFolder: string, resourceName: string, maxWaitMs?: number): Promise<LockFile>;
     readonly dirtyWhenAcquired: boolean;
     readonly filePath: string;
-    static getLockFilePath(resourceDir: string, resourceName: string, pid?: number): string;
+    static getLockFilePath(resourceFolder: string, resourceName: string, pid?: number): string;
     readonly isReleased: boolean;
     release(): void;
-    static tryAcquire(resourceDir: string, resourceName: string): LockFile | undefined;
+    static tryAcquire(resourceFolder: string, resourceName: string): LockFile | undefined;
     }
 
 // @public
 export class MapExtensions {
     static mergeFromMap<K, V>(targetMap: Map<K, V>, sourceMap: ReadonlyMap<K, V>): void;
+    static toObject<TValue>(map: Map<string, TValue>): {
+        [key: string]: TValue;
+    };
 }
 
 // @public

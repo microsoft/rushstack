@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Heft Plugins Configuration",
+  "description": "Defines plugins that are used by a project.",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "required": ["plugins"],
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "plugins": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["plugin"],
+        "properties": {
+          "plugin": {
+            "description": "Path to the plugin package, relative to the project root.",
+            "type": "string",
+            "pattern": "[^\\\\]"
+          },
+
+          "options": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

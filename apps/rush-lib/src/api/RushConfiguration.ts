@@ -24,6 +24,7 @@ import { YarnPackageManager } from './packageManager/YarnPackageManager';
 import { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { ExperimentsConfiguration } from './ExperimentsConfiguration';
 import { PackageNameParsers } from './PackageNameParsers';
+import { RepoStateFile } from '../logic/RepoStateFile';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'master';
@@ -38,11 +39,13 @@ const knownRushConfigFilenames: string[] = [
   '.npmrc-publish',
   RushConstants.pinnedVersionsFilename,
   RushConstants.commonVersionsFilename,
+  RushConstants.repoStateFilename,
   RushConstants.browserApprovedPackagesFilename,
   RushConstants.nonbrowserApprovedPackagesFilename,
   RushConstants.versionPoliciesFilename,
   RushConstants.commandLineFilename,
-  RushConstants.experimentsFilename
+  RushConstants.experimentsFilename,
+  'deploy.json'
 ];
 
 /**
@@ -167,6 +170,10 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    * {@inheritDoc PnpmOptionsConfiguration.preventManualShrinkwrapChanges}
    */
   preventManualShrinkwrapChanges?: boolean;
+  /**
+   * {@inheritDoc PnpmOptionsConfiguration.useWorkspaces}
+   */
+  useWorkspaces?: boolean;
 }
 
 /**
@@ -219,15 +226,6 @@ export interface IRushConfigurationJson {
   yarnOptions?: IYarnOptionsJson;
   ensureConsistentVersions?: boolean;
   variants?: IRushVariantOptionsJson[];
-}
-
-/**
- * This represents the JSON data structure for the "rush-link.json" data file.
- */
-export interface IRushLinkJson {
-  localLinks: {
-    [name: string]: string[];
-  };
 }
 
 /**
@@ -333,7 +331,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * @remarks
    * This feature protects against accidental inconsistencies that may be introduced
    * if the PNPM shrinkwrap file (`pnpm-lock.yaml`) is manually edited.  When this
-   * feature is enabled, `rush update` will append a hash to the file as a YAML comment,
+   * feature is enabled, `rush update` will write a hash of the shrinkwrap contents to repo-state.json,
    * and then `rush update` and `rush install` will validate the hash.  Note that this does not prohibit
    * manual modifications, but merely requires `rush update` be run
    * afterwards, ensuring that PNPM can report or repair any potential inconsistencies.
@@ -344,6 +342,14 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * The default value is false.
    */
   public readonly preventManualShrinkwrapChanges: boolean;
+
+  /**
+   * If true, then Rush will use the workspaces feature to install and link packages when invoking PNPM.
+   *
+   * @remarks
+   * The default value is false.  (For now.)
+   */
+  public readonly useWorkspaces: boolean;
 
   /** @internal */
   public constructor(json: IPnpmOptionsJson, commonTempFolder: string) {
@@ -359,6 +365,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
     this.preventManualShrinkwrapChanges = !!json.preventManualShrinkwrapChanges;
+    this.useWorkspaces = !!json.useWorkspaces;
   }
 }
 
@@ -426,7 +433,6 @@ export class RushConfiguration {
   private _commonFolder: string;
   private _commonTempFolder: string;
   private _commonScriptsFolder: string;
-  private _commonDeployConfigFolder: string;
   private _commonRushConfigFolder: string;
   private _packageManager: PackageManagerName;
   private _packageManagerWrapper: PackageManager;
@@ -436,7 +442,6 @@ export class RushConfiguration {
   private _shrinkwrapFilename: string;
   private _tempShrinkwrapFilename: string;
   private _tempShrinkwrapPreinstallFilename: string;
-  private _rushLinkJsonFilename: string;
   private _currentVariantJsonFilename: string;
   private _packageManagerToolVersion: string;
   private _packageManagerToolFilename: string;
@@ -522,7 +527,6 @@ export class RushConfiguration {
       path.join(this._commonFolder, RushConstants.rushTempFolderName);
 
     this._commonScriptsFolder = path.join(this._commonFolder, 'scripts');
-    this._commonDeployConfigFolder = path.join(this._commonFolder, 'config', 'deploy-scenarios');
 
     this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
     this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
@@ -530,7 +534,6 @@ export class RushConfiguration {
 
     this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
 
-    this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
     this._currentVariantJsonFilename = path.join(this._commonTempFolder, 'current-variant.json');
 
     this._suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
@@ -928,6 +931,11 @@ export class RushConfiguration {
         continue;
       }
 
+      if (filename.startsWith('deploy-') && fileExtension === '.json') {
+        // Ignore "rush deploy" files, which use the naming pattern "deploy-<scenario-name>.json".
+        continue;
+      }
+
       const knownSet: Set<string> = new Set<string>(knownRushConfigFilenames.map((x) => x.toUpperCase()));
 
       // Add the shrinkwrap filename for the package manager to the known set.
@@ -1042,12 +1050,11 @@ export class RushConfiguration {
   }
 
   /**
-   * The folder where deployment scenario config files are stored.  These files are created by
-   * running "rush init-deploy".
-   * Example: `C:\MyRepo\common\config\deploy-scenarios`
+   * The fully resolved path for the "autoinstallers" folder.
+   * Example: `C:\MyRepo\common\autoinstallers`
    */
-  public get commonDeployConfigFolder(): string {
-    return this._commonDeployConfigFolder;
+  public get commonAutoinstallersFolder(): string {
+    return path.join(this._commonFolder, 'autoinstallers');
   }
 
   /**
@@ -1151,9 +1158,15 @@ export class RushConfiguration {
    * Its data structure is defined by IRushLinkJson.
    *
    * Example: `C:\MyRepo\common\temp\rush-link.json`
+   *
+   * @deprecated The "rush-link.json" file was removed in Rush 5.30.0.
+   * Use `RushConfigurationProject.localDependencyProjects` instead.
    */
   public get rushLinkJsonFilename(): string {
-    return this._rushLinkJsonFilename;
+    throw new Error(
+      'The "rush-link.json" file was removed in Rush 5.30.0. Use ' +
+        'RushConfigurationProject.localDependencyProjects instead.'
+    );
   }
 
   /**
@@ -1428,6 +1441,28 @@ export class RushConfiguration {
   public getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration {
     const commonVersionsFilename: string = this.getCommonVersionsFilePath(variant);
     return CommonVersionsConfiguration.loadFromFile(commonVersionsFilename);
+  }
+
+  /**
+   * Gets the path to the repo-state.json file for a specific variant.
+   * @param variant - The name of the current variant in use by the active command.
+   */
+  public getRepoStateFilePath(variant?: string | undefined): string {
+    const repoStateFilename: string = path.join(
+      this.commonRushConfigFolder,
+      ...(variant ? [RushConstants.rushVariantsFolderName, variant] : []),
+      RushConstants.repoStateFilename
+    );
+    return repoStateFilename;
+  }
+
+  /**
+   * Gets the contents from the repo-state.json file for a specific variant.
+   * @param variant - The name of the current variant in use by the active command.
+   */
+  public getRepoState(variant?: string | undefined): RepoStateFile {
+    const repoStateFilename: string = this.getRepoStateFilePath(variant);
+    return RepoStateFile.loadFromFile(repoStateFilename, variant);
   }
 
   /**

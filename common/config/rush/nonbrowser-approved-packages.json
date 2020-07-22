@@ -4,667 +4,711 @@
   "packages": [
     {
       "name": "@jest/core",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@jest/reporters",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@jest/types",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@microsoft/api-documenter",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/api-extractor",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/api-extractor-model",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@microsoft/decorators",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@microsoft/gulp-core-build",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@microsoft/gulp-core-build-mocha",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@microsoft/gulp-core-build-sass",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@microsoft/gulp-core-build-serve",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@microsoft/gulp-core-build-typescript",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@microsoft/gulp-core-build-webpack",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@microsoft/load-themed-styles",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/node-library-build",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-lib",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@microsoft/rush-stack",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-2.4",
-      "allowedCategories": ["tests"]
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-2.7",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-2.8",
-      "allowedCategories": ["tests"]
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-2.9",
-      "allowedCategories": ["tests"]
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.0",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.1",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.2",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.3",
-      "allowedCategories": ["tests"]
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.4",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.5",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.6",
-      "allowedCategories": ["tests"]
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.7",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-3.8",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-3.9",
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-shared",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@microsoft/sp-tslint-rules",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@microsoft/teams-js",
-      "allowedCategories": ["tests"]
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@microsoft/ts-command-line",
-      "allowedCategories": ["tests"]
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@microsoft/tsdoc",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@microsoft/web-library-build",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@pnpm/link-bins",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@pnpm/logger",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/debug-certificate-manager",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/eslint-config",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@rushstack/eslint-patch",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/eslint-plugin",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/heft",
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/localization-plugin",
-      "allowedCategories": ["tests"]
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@rushstack/module-minifier-plugin",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@rushstack/node-core-library",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/package-deps-hash",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/set-webpack-public-path-plugin",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/stream-collator",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/ts-command-line",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/typings-generator",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@typescript-eslint/eslint-plugin",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@typescript-eslint/experimental-utils",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@typescript-eslint/parser",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@typescript-eslint/typescript-estree",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@yarnpkg/lockfile",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "api-extractor-lib1-test",
-      "allowedCategories": ["tests"]
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "api-extractor-lib2-test",
-      "allowedCategories": ["tests"]
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "api-extractor-lib3-test",
-      "allowedCategories": ["tests"]
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "api-extractor-test-01",
-      "allowedCategories": ["tests"]
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "api-extractor-test-02",
-      "allowedCategories": ["tests"]
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "argparse",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "autoprefixer",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "builtin-modules",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "chai",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "chalk",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "chokidar",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "clean-css",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "cli-table",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "colors",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "deasync",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "decache",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "decomment",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "del",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "doc-plugin-rush-stack",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "end-of-stream",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "eslint",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "eslint-plugin-promise",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "eslint-plugin-react",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "eslint-plugin-security",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "eslint-plugin-tsdoc",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "express",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "fs-extra",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "fsevents",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "git-repo-info",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "glob",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "glob-escape",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "globby",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "gulp",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "gulp-cache",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "gulp-changed",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "gulp-clean-css",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "gulp-clip-empty-files",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "gulp-clone",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "gulp-connect",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "gulp-decomment",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "gulp-flatten",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "gulp-if",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "gulp-istanbul",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "gulp-mocha",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "gulp-open",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "gulp-plumber",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "gulp-postcss",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "gulp-replace",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "gulp-sass",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "gulp-sourcemaps",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "gulp-texttojs",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "gulp-typescript",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "html-webpack-plugin",
-      "allowedCategories": ["tests"]
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "https-proxy-agent",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "ignore",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "import-lazy",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "inquirer",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "istanbul-instrumenter-loader",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "jest",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "jest-cli",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "jest-environment-jsdom",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "jest-nunit-reporter",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "jest-resolve",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-snapshot",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "jju",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "js-yaml",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "jsdom",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jszip",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "loader-utils",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "lodash",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "lodash.merge",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "lolex",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "long",
-      "allowedCategories": ["tests"]
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "md5",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "merge2",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "minimatch",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "mocha",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "node-fetch",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "node-forge",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "node-notifier",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "node-sass",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "npm-package-arg",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "npm-packlist",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "object-assign",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "orchestrator",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "postcss",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "postcss-modules",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "pretty-hrtime",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "pseudolocale",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "read-package-tree",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "resolve",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "semver",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "sinon",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "sinon-chai",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "source-map",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "strict-uri-encode",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "sudo",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "tapable",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "tar",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "terser",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "through2",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "timsort",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "true-case-path",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "ts-jest",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "ts-loader",
-      "allowedCategories": ["tests"]
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "tslint",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "tslint-microsoft-contrib",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "typescript",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "uglify-js",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "vinyl",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "webpack",
-      "allowedCategories": ["libraries", "tests"]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "webpack-bundle-analyzer",
-      "allowedCategories": ["tests"]
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "webpack-cli",
-      "allowedCategories": ["tests"]
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "webpack-dev-server",
-      "allowedCategories": ["tests"]
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "webpack-sources",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "wordwrap",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "xml",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "xmldoc",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "yargs",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "z-schema",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     }
   ]
 }

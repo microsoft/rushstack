@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "4.8.0",
+  "pnpmVersion": "4.14.4",
 
   /*[LINE "HYPOTHETICAL"]*/ "npmVersion": "4.5.0",
   /*[LINE "HYPOTHETICAL"]*/ "yarnVersion": "1.9.4",
@@ -94,7 +94,23 @@
      *
      * The default value is false.
      */
-    /*[LINE "HYPOTHETICAL"]*/ "preventManualShrinkwrapChanges": true
+    /*[LINE "HYPOTHETICAL"]*/ "preventManualShrinkwrapChanges": true,
+
+    /**
+     * If true, then `rush install` will use the PNPM workspaces feature to perform the
+     * install.
+     *
+     * This feature uses PNPM to peform the entire monorepo install. When using workspaces, Rush will
+     * generate a "pnpm-workspace.yaml" file referencing all local projects to install. Rush will
+     * also generate a "pnpmfile.js" which is used to provide preferred versions support. When install
+     * is run, this pnpmfile will be used to replace dependency version ranges with a smaller subset
+     * of the original range. If the preferred version is not fully a subset of the original version
+     * range, it will be left as-is. After this, the pnpmfile.js provided in the repository (if one
+     * exists) will be called to further modify package dependencies.
+     *
+     * This option is experimental. The default value is false.
+     */
+    /*[LINE "HYPOTHETICAL"]*/ "useWorkspaces": true
   },
 
   /**
@@ -105,7 +121,7 @@
    * Specify a SemVer range to ensure developers use a Node.js version that is appropriate
    * for your repo.
    */
-  "nodeSupportedVersionRange": ">=10.13.0 <11.0.0",
+  "nodeSupportedVersionRange": ">=12.13.0 <13.0.0",
 
   /**
    * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
@@ -196,8 +212,8 @@
     "reviewCategories": [
       // Some example categories:
       "production", // projects that ship to production
-      "tools", // non-shipping projects that are part of the developer toolchain
-      "prototypes" // experiments that should mostly be ignored by the review process
+      "tools",      // non-shipping projects that are part of the developer toolchain
+      "prototypes"  // experiments that should mostly be ignored by the review process
     ],
 
     /**
@@ -227,7 +243,10 @@
      * RegExp escapes need two backspashes, and ordinary periods should be "\\.".
      */
     /*[BEGIN "DEMO"]*/
-    "allowedEmailRegExps": ["[^@]+@users\\.noreply\\.github\\.com", "travis@example\\.org"],
+    "allowedEmailRegExps": [
+      "[^@]+@users\\.noreply\\.github\\.com",
+      "travis@example\\.org"
+    ],
     /*[END "DEMO"]*/
 
     /**
@@ -285,7 +304,9 @@
     /**
      * The list of shell commands to run before the Rush installation starts
      */
-    "preRushInstall": [/*[LINE "HYPOTHETICAL"]*/ "common/scripts/pre-rush-install.js"],
+    "preRushInstall": [
+      /*[LINE "HYPOTHETICAL"]*/ "common/scripts/pre-rush-install.js"
+    ],
 
     /**
      * The list of shell commands to run after the Rush installation finishes
@@ -386,7 +407,9 @@
        * locally linked because it would create a cyclic dependency; instead, the last published
        * version will be installed in the Common folder.
        */
-      "cyclicDependencyProjects": [/*[LINE "HYPOTHETICAL"]*/ "my-toolchain"],
+      "cyclicDependencyProjects": [
+        /*[LINE "HYPOTHETICAL"]*/ "my-toolchain"
+      ],
 
       /**
        * If true, then this project will be ignored by the "rush check" command.

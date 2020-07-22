@@ -165,7 +165,8 @@ export class InitAction extends BaseConfiglessRushAction {
       'common/config/rush/common-versions.json',
       'common/config/rush/experiments.json',
       'common/config/rush/pnpmfile.js',
-      'common/config/rush/version-policies.json'
+      'common/config/rush/version-policies.json',
+      'common/git-hooks/commit-msg.sample'
     ];
 
     const assetsSubfolder: string = path.resolve(__dirname, '../../../assets/rush-init');

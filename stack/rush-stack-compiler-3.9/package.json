@@ -1,0 +1,39 @@
+{
+  "name": "@microsoft/rush-stack-compiler-3.9",
+  "version": "0.4.1",
+  "description": "A plug-in for selecting the compiler used with the @microsoft/rush-stack toolchain. This version selects TypeScript 3.9.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack/tree/master/stack/rush-stack-compiler-3.9"
+  },
+  "bin": {
+    "rush-api-extractor": "./bin/rush-api-extractor",
+    "rush-eslint": "./bin/rush-eslint",
+    "rush-tsc": "./bin/rush-tsc",
+    "rush-tslint": "./bin/rush-tslint"
+  },
+  "scripts": {
+    "build": "gulp --clean"
+  },
+  "main": "lib/shared/index.js",
+  "typings": "lib/shared/index.d.ts",
+  "dependencies": {
+    "@microsoft/api-extractor": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
+    "@types/node": "10.17.13",
+    "import-lazy": "~4.0.0",
+    "eslint": "~7.2.0",
+    "tslint": "~5.20.1",
+    "tslint-microsoft-contrib": "~6.2.0",
+    "typescript": "~3.9.5"
+  },
+  "devDependencies": {
+    "@microsoft/node-library-build": "6.4.31",
+    "@microsoft/rush-stack-compiler-3.5": "0.8.0",
+    "@microsoft/rush-stack-compiler-shared": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
+    "gulp": "~4.0.2"
+  }
+}

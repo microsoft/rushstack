@@ -1,0 +1,6 @@
+{
+  "extends": "./node_modules/@microsoft/rush-stack-compiler-3.7/includes/tsconfig-web.json",
+  "compilerOptions": {
+    "types": ["webpack-env"]
+  }
+}

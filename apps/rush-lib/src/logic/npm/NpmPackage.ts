@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import * as path from 'path';
 import readPackageTree = require('read-package-tree');
 import { JsonFile, IPackageJson } from '@rushstack/node-core-library';
@@ -5,7 +8,7 @@ import { JsonFile, IPackageJson } from '@rushstack/node-core-library';
 import { BasePackage, IRushTempPackageJson } from '../base/BasePackage';
 
 /**
- * Used by the "rush link" algorithm when doing NPM package resolution.
+ * Used by the linking algorithm when doing NPM package resolution.
  */
 export interface IResolveOrCreateResult {
   found: BasePackage | undefined;

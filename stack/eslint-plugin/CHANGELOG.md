@@ -1,6 +1,20 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Wed, 18 Mar 2020 15:07:47 GMT and should not be manually modified.
+This log was last generated on Wed, 24 Jun 2020 09:50:48 GMT and should not be manually modified.
+
+## 0.4.1
+Wed, 24 Jun 2020 09:50:48 GMT
+
+### Patches
+
+- Fix an issue with the published file set
+
+## 0.4.0
+Wed, 24 Jun 2020 09:04:28 GMT
+
+### Minor changes
+
+- Upgrade to ESLint 7
 
 ## 0.3.2
 Wed, 18 Mar 2020 15:07:47 GMT

@@ -28,9 +28,7 @@ export class MochaTask extends GulpTask<IMochaTaskConfig> {
     gulp: typeof Gulp,
     completeCallback: (error?: string) => void
   ): NodeJS.ReadWriteStream | Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const istanbul: typeof gulpIstanbul = require('gulp-istanbul');
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const mocha: typeof gulpMocha = require('gulp-mocha');
 
     const globPattern: string = this.taskConfig.testMatch.join('|');

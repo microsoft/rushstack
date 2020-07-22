@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import * as semver from 'semver';
+import * as crypto from 'crypto';
 import { JsonFile, InternalError, FileSystem } from '@rushstack/node-core-library';
 
 import {
@@ -12,7 +13,6 @@ import {
 } from './PnpmShrinkwrapFile';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../RushConstants';
-import { BasePackage } from '../base/BasePackage';
 import { DependencySpecifier } from '../DependencySpecifier';
 
 export interface IPnpmProjectDependencyManifestOptions {
@@ -58,38 +58,43 @@ export class PnpmProjectDependencyManifest {
     return path.join(project.projectRushTempFolder, RushConstants.projectDependencyManifestFilename);
   }
 
-  public addDependency(pkg: BasePackage, parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml): void {
-    if (!pkg.version) {
-      throw new InternalError(`Version missing from dependency ${pkg.name}`);
-    }
-
-    this._addDependencyInternal(pkg.name, pkg.version, parentShrinkwrapEntry);
+  public addDependency(
+    name: string,
+    version: string,
+    parentShrinkwrapEntry: Pick<
+      IPnpmShrinkwrapDependencyYaml,
+      'dependencies' | 'optionalDependencies' | 'peerDependencies'
+    >
+  ): void {
+    this._addDependencyInternal(name, version, parentShrinkwrapEntry);
   }
 
   /**
    * Save the current state of the object to project/.rush/temp/shrinkwrap-deps.json
    */
-  public save(): void {
+  public async saveAsync(): Promise<void> {
     const file: { [specifier: string]: string } = {};
     const keys: string[] = Array.from(this._projectDependencyManifestFile.keys()).sort();
     for (const key of keys) {
       file[key] = this._projectDependencyManifestFile.get(key)!;
     }
-
-    JsonFile.save(file, this._projectDependencyManifestFilename, { ensureFolderExists: true });
+    await JsonFile.saveAsync(file, this._projectDependencyManifestFilename, { ensureFolderExists: true });
   }
 
   /**
    * If the project/.rush/temp/shrinkwrap-deps.json file exists, delete it. Otherwise, do nothing.
    */
-  public deleteIfExists(): void {
-    FileSystem.deleteFile(this._projectDependencyManifestFilename, { throwIfNotExists: false });
+  public deleteIfExistsAsync(): Promise<void> {
+    return FileSystem.deleteFileAsync(this._projectDependencyManifestFilename, { throwIfNotExists: false });
   }
 
   private _addDependencyInternal(
     name: string,
     version: string,
-    parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml,
+    parentShrinkwrapEntry: Pick<
+      IPnpmShrinkwrapDependencyYaml,
+      'dependencies' | 'optionalDependencies' | 'peerDependencies'
+    >,
     throwIfShrinkwrapEntryMissing: boolean = true
   ): void {
     const shrinkwrapEntry:
@@ -104,7 +109,33 @@ export class PnpmProjectDependencyManifest {
     }
 
     const specifier: string = `${name}@${version}`;
-    const integrity: string = shrinkwrapEntry.resolution.integrity;
+    let integrity: string = shrinkwrapEntry.resolution.integrity;
+
+    if (!integrity) {
+      // git dependency specifiers do not have an integrity entry
+
+      // Example ('integrity' doesn't exist in 'resolution'):
+      //
+      // github.com/chfritz/node-xmlrpc/948db2fbd0260e5d56ed5ba58df0f5b6599bbe38:
+      //   dependencies:
+      //     sax: 1.2.4
+      //     xmlbuilder: 8.2.2
+      //   dev: false
+      //   engines:
+      //     node: '>=0.8'
+      //     npm: '>=1.0.0'
+      //   name: xmlrpc
+      //   resolution:
+      //     tarball: 'https://codeload.github.com/chfritz/node-xmlrpc/tar.gz/948db2fbd0260e5d56ed5ba58df0f5b6599bbe38'
+      //   version: 1.3.2
+
+      const sha256Digest: string = crypto
+        .createHash('sha256')
+        .update(JSON.stringify(shrinkwrapEntry))
+        .digest('hex');
+      integrity = `${name}@${version}:${sha256Digest}:`;
+    }
+
     if (this._projectDependencyManifestFile.has(specifier)) {
       if (this._projectDependencyManifestFile.get(specifier) !== integrity) {
         throw new Error(`Collision: ${specifier} already exists in with a different integrity`);
@@ -135,6 +166,16 @@ export class PnpmProjectDependencyManifest {
           (throwIfShrinkwrapEntryMissing = false)
         );
       }
+    }
+
+    if (
+      this._project.rushConfiguration.pnpmOptions &&
+      this._project.rushConfiguration.pnpmOptions.useWorkspaces
+    ) {
+      // When using workspaces, hoisting of dependencies is not possible. Therefore, all packages that are consumed
+      // should be specified as direct dependencies in the shrinkwrap. Given this, there is no need to look for peer
+      // dependencies, since it is simply a constraint to be validated by the package manager.
+      return;
     }
 
     for (const peerDependencyName in shrinkwrapEntry.peerDependencies) {
@@ -236,11 +277,17 @@ export class PnpmProjectDependencyManifest {
     const specifierMatches: RegExpExecArray | null = /^[^_]+_(.+)$/.exec(specifier);
     if (specifierMatches) {
       const combinedPeerDependencies: string = specifierMatches[1];
-      // Parse "eslint@6.6.0+typescript@3.6.4" --> ["eslint@6.6.0", "typescript@3.6.4"]
+      // "eslint@6.6.0+typescript@3.6.4+@types+webpack@4.1.9" --> ["eslint@6.6.0", "typescript@3.6.4", "@types", "webpack@4.1.9"]
       const peerDependencies: string[] = combinedPeerDependencies.split('+');
-      for (const peerDependencySpecifier of peerDependencies) {
+      for (let i: number = 0; i < peerDependencies.length; i++) {
+        // Scopes are also separated by '+', so reduce the proceeding value into it
+        if (peerDependencies[i].indexOf('@') === 0) {
+          peerDependencies[i] = `${peerDependencies[i]}/${peerDependencies[i + 1]}`;
+          peerDependencies.splice(i + 1, 1);
+        }
+
         // Parse "eslint@6.6.0" --> "eslint", "6.6.0"
-        const peerMatches: RegExpExecArray | null = /^([^+@]+)@(.+)$/.exec(peerDependencySpecifier);
+        const peerMatches: RegExpExecArray | null = /^(@?[^+@]+)@(.+)$/.exec(peerDependencies[i]);
         if (peerMatches) {
           const peerDependencyName: string = peerMatches[1];
           const peerDependencyVersion: string = peerMatches[2];

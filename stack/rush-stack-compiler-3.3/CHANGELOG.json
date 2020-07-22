@@ -2,6 +2,145 @@
   "name": "@microsoft/rush-stack-compiler-3.3",
   "entries": [
     {
+      "version": "0.9.1",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.9.1",
+      "date": "Fri, 03 Jul 2020 15:09:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.9.0` to `7.9.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.24.4` to `3.25.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.0",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.9.0",
+      "date": "Fri, 03 Jul 2020 05:46:41 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Disable the \"--typescript-compiler-folder\" setting for API Extractor, since it was causing errors with the latest TypeScript engine"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.8.15` to `7.9.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.2",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.8.2",
+      "date": "Thu, 25 Jun 2020 06:43:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.8.14` to `7.8.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.24.3` to `3.24.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `1.0.1` to `1.0.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `1.0.1` to `1.0.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.1",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.8.1",
+      "date": "Wed, 24 Jun 2020 09:50:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.8.13` to `7.8.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.24.2` to `3.24.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `1.0.0` to `1.0.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `1.0.0` to `1.0.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.0",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.8.0",
+      "date": "Wed, 24 Jun 2020 09:04:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade to ESLint 7"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.8.12` to `7.8.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.24.1` to `3.24.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.8` to `1.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.8` to `1.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.1",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.7.1",
+      "date": "Mon, 15 Jun 2020 22:17:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.8.11` to `7.8.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.0",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.7.0",
+      "date": "Fri, 12 Jun 2020 09:19:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expose the @microsoft/api-extractor package's path"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.3",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.6.3",
+      "date": "Wed, 10 Jun 2020 20:48:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.8.10` to `7.8.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.24.0` to `3.24.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.2",
       "tag": "@microsoft/rush-stack-compiler-3.3_v0.6.2",
       "date": "Mon, 01 Jun 2020 08:34:17 GMT",

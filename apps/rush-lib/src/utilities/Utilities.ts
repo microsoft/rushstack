@@ -20,6 +20,18 @@ export interface IEnvironment {
 }
 
 /**
+ * Options for Utilities.executeCommand().
+ */
+export interface IExecuteCommandOptions {
+  command: string;
+  args: string[];
+  workingDirectory: string;
+  environment?: IEnvironment;
+  suppressOutput?: boolean;
+  keepEnvironment?: boolean;
+}
+
+/**
  * Options for Utilities.installPackageInDirectory().
  */
 export interface IInstallPackageInDirectoryOptions {
@@ -70,6 +82,11 @@ export interface IEnvironmentPathOptions {
    * If true, include <repo root>/common/temp/node_modules/.bin in the PATH.
    */
   includeRepoBin?: boolean;
+
+  /**
+   * Additional folders to be prepended to the search PATH.
+   */
+  additionalPathFolders?: string[] | undefined;
 }
 
 interface ICreateEnvironmentForRushCommandPathOptions extends IEnvironmentPathOptions {
@@ -263,25 +280,20 @@ export class Utilities {
   }
 
   /*
-   * Returns true if outputFilename has a more recent last modified timestamp
-   * than all of the inputFilenames, which would imply that we don't need to rebuild it.
-   * Returns false if any of the files does not exist.
+   * Returns true if dateToCompare is more recent than all of the inputFilenames, which
+   * would imply that we don't need to rebuild it. Returns false if any of the files
+   * does not exist.
    * NOTE: The filenames can also be paths for directories, in which case the directory
    * timestamp is compared.
    */
-  public static isFileTimestampCurrent(outputFilename: string, inputFilenames: string[]): boolean {
-    if (!FileSystem.exists(outputFilename)) {
-      return false;
-    }
-    const outputStats: fs.Stats = FileSystem.getStatistics(outputFilename);
-
+  public static isFileTimestampCurrent(dateToCompare: Date, inputFilenames: string[]): boolean {
     for (const inputFilename of inputFilenames) {
       if (!FileSystem.exists(inputFilename)) {
         return false;
       }
 
       const inputStats: fs.Stats = FileSystem.getStatistics(inputFilename);
-      if (outputStats.mtime < inputStats.mtime) {
+      if (dateToCompare < inputStats.mtime) {
         return false;
       }
     }
@@ -321,21 +333,14 @@ export class Utilities {
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
    */
-  public static executeCommand(
-    command: string,
-    args: string[],
-    workingDirectory: string,
-    environment?: IEnvironment,
-    suppressOutput: boolean = false,
-    keepEnvironment: boolean = false
-  ): void {
+  public static executeCommand(options: IExecuteCommandOptions): void {
     Utilities._executeCommandInternal(
-      command,
-      args,
-      workingDirectory,
-      suppressOutput ? undefined : [0, 1, 2],
-      environment,
-      keepEnvironment
+      options.command,
+      options.args,
+      options.workingDirectory,
+      options.suppressOutput ? undefined : [0, 1, 2],
+      options.environment,
+      options.keepEnvironment
     );
   }
 
@@ -366,12 +371,8 @@ export class Utilities {
    * Attempts to run Utilities.executeCommand() up to maxAttempts times before giving up.
    */
   public static executeCommandWithRetry(
+    options: IExecuteCommandOptions,
     maxAttempts: number,
-    command: string,
-    args: string[],
-    workingDirectory: string,
-    environment?: IEnvironment,
-    suppressOutput: boolean = false,
     retryCallback?: () => void
   ): void {
     if (maxAttempts < 1) {
@@ -382,10 +383,10 @@ export class Utilities {
 
     for (;;) {
       try {
-        Utilities.executeCommand(command, args, workingDirectory, environment, suppressOutput);
+        Utilities.executeCommand(options);
       } catch (error) {
         console.log(os.EOL + 'The command failed:');
-        console.log(` ${command} ` + args.join(' '));
+        console.log(` ${options.command} ` + options.args.join(' '));
         console.log(`ERROR: ${error.toString()}`);
 
         if (attemptNumber < maxAttempts) {
@@ -481,12 +482,14 @@ export class Utilities {
 
     // NOTE: Here we use whatever version of NPM we happen to find in the PATH
     Utilities.executeCommandWithRetry(
-      options.maxInstallAttempts,
-      'npm',
-      ['install'],
-      directory,
-      Utilities._createEnvironmentForRushCommand({}),
-      options.suppressOutput
+      {
+        command: 'npm',
+        args: ['install'],
+        workingDirectory: directory,
+        environment: Utilities._createEnvironmentForRushCommand({}),
+        suppressOutput: options.suppressOutput
+      },
+      options.maxInstallAttempts
     );
   }
 
@@ -521,26 +524,38 @@ export class Utilities {
    * we'd prefer to skip that line and continue looking in other places such as the user's
    * home directory.
    *
-   * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _copyNpmrcFile() FROM scripts/install-run.ts
+   * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _copyAndTrimNpmrcFile() FROM scripts/install-run.ts
    */
   public static copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string): void {
     console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`); // Verbose
     let npmrcFileLines: string[] = FileSystem.readFile(sourceNpmrcPath).split('\n');
     npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
     const resultLines: string[] = [];
+
+    // This finds environment variable tokens that look like "${VAR_NAME}"
+    const expansionRegExp: RegExp = /\$\{([^\}]+)\}/g;
+
+    // Comment lines start with "#" or ";"
+    const commentRegExp: RegExp = /^\s*[#;]/;
+
     // Trim out lines that reference environment variables that aren't defined
     for (const line of npmrcFileLines) {
-      // This finds environment variable tokens that look like "${VAR_NAME}"
-      const regex: RegExp = /\$\{([^\}]+)\}/g;
-      const environmentVariables: string[] | null = line.match(regex);
       let lineShouldBeTrimmed: boolean = false;
-      if (environmentVariables) {
-        for (const token of environmentVariables) {
-          // Remove the leading "${" and the trailing "}" from the token
-          const environmentVariableName: string = token.substring(2, token.length - 1);
-          if (!process.env[environmentVariableName]) {
-            lineShouldBeTrimmed = true;
-            break;
+
+      // Ignore comment lines
+      if (!commentRegExp.test(line)) {
+        const environmentVariables: string[] | null = line.match(expansionRegExp);
+        if (environmentVariables) {
+          for (const token of environmentVariables) {
+            // Remove the leading "${" and the trailing "}" from the token
+            const environmentVariableName: string = token.substring(2, token.length - 1);
+
+            // Is the environment variable defined?
+            if (!process.env[environmentVariableName]) {
+              // No, so trim this line
+              lineShouldBeTrimmed = true;
+              break;
+            }
           }
         }
       }
@@ -555,6 +570,23 @@ export class Utilities {
     }
 
     FileSystem.writeFile(targetNpmrcPath, resultLines.join(os.EOL));
+  }
+
+  /**
+   * Copies the file "sourcePath" to "destinationPath", overwriting the target file location.
+   * If the source file does not exist, then the target file is deleted.
+   */
+  public static syncFile(sourcePath: string, destinationPath: string): void {
+    if (FileSystem.exists(sourcePath)) {
+      console.log(`Updating ${destinationPath}`);
+      FileSystem.copyFile({ sourcePath, destinationPath });
+    } else {
+      if (FileSystem.exists(destinationPath)) {
+        // If the source file doesn't exist and there is one in the target, delete the one in the target
+        console.log(`Deleting ${destinationPath}`);
+        FileSystem.deleteFile(destinationPath);
+      }
+    }
   }
 
   /**
@@ -688,6 +720,12 @@ export class Utilities {
         environment.PATH = Utilities._prependNodeModulesBinToPath(
           environment.PATH,
           options.pathOptions.projectRoot
+        );
+      }
+
+      if (options.pathOptions.additionalPathFolders) {
+        environment.PATH = [...options.pathOptions.additionalPathFolders, environment.PATH].join(
+          path.delimiter
         );
       }
     }

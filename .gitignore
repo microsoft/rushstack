@@ -61,6 +61,7 @@ jspm_packages/
 # Rush temporary files
 common/deploy/
 common/temp/
+common/autoinstallers/*/.npmrc
 **/.rush/temp/
 
 # Common toolchain intermediate files
@@ -75,5 +76,6 @@ dist
 # Visual Studio Code
 .vscode
 
-# Remove eventually
-package-deps.json
+# Heft
+*/*/.heft/build-cache/**
+*/*/.heft/temp/**

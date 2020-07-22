@@ -1,0 +1,16 @@
+{
+  "name": "heft-oldest-compiler-test",
+  "description": "Building this project is a very simple regression test for heft",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft test --clean"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "@microsoft/rush-stack-compiler-2.9": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*"
+  }
+}
