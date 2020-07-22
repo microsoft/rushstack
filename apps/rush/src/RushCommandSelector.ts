@@ -18,7 +18,7 @@ export class RushCommandSelector {
   public static failIfNotInvokedAsRush(version: string): void {
     if (RushCommandSelector.getCommandName() === 'rushx') {
       RushCommandSelector._failWithError(
-        `This repository is using Rush version ${version}` + ` which does not support the "rushx" command`
+        `This repository is using Rush version ${version} which does not support the "rushx" command`
       );
     }
   }
