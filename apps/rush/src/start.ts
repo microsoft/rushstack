@@ -24,7 +24,7 @@ import * as semver from 'semver';
 import {
   Text,
   PackageJsonLookup
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 import { EnvironmentVariableNames } from '@microsoft/rush-lib';
 import * as rushLib from '@microsoft/rush-lib';
 

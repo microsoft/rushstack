@@ -9,7 +9,7 @@ import {
   PackageJsonLookup,
   IPackageJson,
   Text
- } from '@microsoft/node-core-library';
+ } from '@rushstack/node-core-library';
 import { Utilities } from '../utilities/Utilities';
 import { ProjectCommandSet } from '../logic/ProjectCommandSet';
 import { RushConfiguration } from '../api/RushConfiguration';

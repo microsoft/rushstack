@@ -1,6 +1,112 @@
 {
-  "name": "@microsoft/ts-command-line",
+  "name": "@rushstack/ts-command-line",
   "entries": [
+    {
+      "version": "4.4.2",
+      "tag": "@rushstack/ts-command-line_v4.4.2",
+      "date": "Mon, 01 Jun 2020 08:34:17 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a typo in the supplementary notes for parameters with environment variable mappings"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.4.1",
+      "tag": "@rushstack/ts-command-line_v4.4.1",
+      "date": "Wed, 27 May 2020 05:15:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.7` to `0.5.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.4.0",
+      "tag": "@rushstack/ts-command-line_v4.4.0",
+      "date": "Fri, 15 May 2020 08:10:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a new feature defineCommandLineRemainder() which allows additional unvalidated CLI arguments, e.g. to pass along to another tool"
+          },
+          {
+            "comment": "Add the ability for an environment variable to specify multiple values for CommandLineStringListParameter, encoded as a JSON array"
+          },
+          {
+            "comment": "Fix some bugs that prevented a CommandLineParser from being defined without any actions"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix a bug with environmentVariable mapping for CommandLineFlagParameter"
+          },
+          {
+            "comment": "Use API Extractor to trim internal APIs from the .d.ts rollup"
+          },
+          {
+            "comment": "Improve the README.md and API documentation"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.14",
+      "tag": "@rushstack/ts-command-line_v4.3.14",
+      "date": "Wed, 08 Apr 2020 04:07:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.6` to `0.5.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.13",
+      "tag": "@rushstack/ts-command-line_v4.3.13",
+      "date": "Sat, 28 Mar 2020 00:37:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.5` to `0.5.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.12",
+      "tag": "@rushstack/ts-command-line_v4.3.12",
+      "date": "Wed, 18 Mar 2020 15:07:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade cyclic dependencies"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.4` to `0.5.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.11",
+      "tag": "@rushstack/ts-command-line_v4.3.11",
+      "date": "Tue, 17 Mar 2020 23:55:58 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "PACKAGE NAME CHANGE: The NPM scope was changed from `@microsoft/ts-command-line` to `@rushstack/ts-command-line`"
+          }
+        ]
+      }
+    },
     {
       "version": "4.3.10",
       "tag": "@microsoft/ts-command-line_v4.3.10",

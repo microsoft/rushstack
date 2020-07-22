@@ -10,11 +10,10 @@ import readPackageTree = require('read-package-tree');
 
 import {
   JsonFile,
-  PackageName,
   FileSystem,
   FileConstants,
   LegacyAdapters
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
 import { IRushLinkJson } from '../../api/RushConfiguration';
@@ -94,7 +93,8 @@ export class NpmLinkManager extends BaseLinkManager {
       // This avoids the need to run "rush generate" unnecessarily.
 
       // Example: "project1"
-      const unscopedTempProjectName: string = PackageName.getUnscopedName(project.tempProjectName);
+      const unscopedTempProjectName: string = this._rushConfiguration.packageNameParser
+        .getUnscopedName(project.tempProjectName);
 
       // Example: "C:\MyRepo\common\temp\projects\project1
       const extractedFolder: string = path.join(this._rushConfiguration.commonTempFolder,

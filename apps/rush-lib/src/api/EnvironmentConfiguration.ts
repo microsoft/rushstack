@@ -36,10 +36,17 @@ export const enum EnvironmentVariableNames {
 
   /**
    * This variable selects a specific installation variant for Rush to use when installing
-   * and linking package dependencies.  For more information, see this article:
-   * https://rushjs.io/pages/advanced/installation_variants/
+   * and linking package dependencies.
+   * For more information, see the command-line help for the `--variant` parameter
+   * and this article:  https://rushjs.io/pages/advanced/installation_variants/
    */
   RUSH_VARIANT = 'RUSH_VARIANT',
+
+  /**
+   * Specifies the maximum number of concurrent processes to launch during a build.
+   * For more information, see the command-line help for the `--parallelism` parameter for "rush build".
+   */
+  RUSH_PARALLELISM = 'RUSH_PARALLELISM',
 
   /**
    * If this variable is set to "true", Rush will create symlinks with absolute paths instead
@@ -55,7 +62,13 @@ export const enum EnvironmentVariableNames {
    * If a relative path is used, then the store path will be resolved relative to the process's
    * current working directory.  An absolute path is recommended.
    */
-  RUSH_PNPM_STORE_PATH = 'RUSH_PNPM_STORE_PATH'
+  RUSH_PNPM_STORE_PATH = 'RUSH_PNPM_STORE_PATH',
+
+  /**
+   * This environment variable can be used to specify the `--target-folder` parameter
+   * for the "rush deploy" command.
+   */
+  RUSH_DEPLOY_TARGET_FOLDER = 'RUSH_DEPLOY_TARGET_FOLDER'
 }
 
 /**
@@ -151,8 +164,10 @@ export class EnvironmentConfiguration {
             break;
           }
 
+          case EnvironmentVariableNames.RUSH_PARALLELISM:
           case EnvironmentVariableNames.RUSH_PREVIEW_VERSION:
           case EnvironmentVariableNames.RUSH_VARIANT:
+          case EnvironmentVariableNames.RUSH_DEPLOY_TARGET_FOLDER:
             // Handled by @microsoft/rush front end
             break;
           default:

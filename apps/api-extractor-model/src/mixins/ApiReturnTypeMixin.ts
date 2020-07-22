@@ -4,7 +4,7 @@
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
 import { IExcerptTokenRange, Excerpt } from './Excerpt';
 import { ApiDeclaredItem } from '../items/ApiDeclaredItem';
-import { InternalError } from '@microsoft/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 import { DeserializerContext } from '../model/DeserializerContext';
 
 /**

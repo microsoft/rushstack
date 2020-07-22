@@ -1,7 +1,7 @@
 import * as path from 'path';
 
 import { LastInstallFlag } from '../LastInstallFlag';
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 const TEMP_DIR: string = path.join(__dirname, 'temp');
 

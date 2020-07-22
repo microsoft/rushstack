@@ -27,7 +27,7 @@ resources
       directly references two `.loc.json` files
     - [`indexC.ts`](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-02/src/indexC.ts)
       directly references no localized resources, and dynamically imports an async chunk without localized data
-  - The webpack config contains Spanish translations for most of the English strings in the resource files
+  - The webpack config contains and references Spanish translations for most of the English strings in the resource files
   - The output contains English, Spanish, and "passthrough" localized variants of files that contain
     localized data, and a non-localized variant of the files that do not contain localized data
 - [Project 3](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-03)
@@ -41,7 +41,7 @@ resources
       directly references no localized resources, and dynamically imports an async chunk with localized data
     - [`indexD.ts`](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-03/src/indexD.ts)
       directly references no localized resources, and dynamically imports an async chunk without localized data
-  - The webpack config contains Spanish translations for all of the English strings in the resource files
+  - The webpack config contains or references Spanish translations for some of the English strings in the resource files
   - The output contains English, Spanish, "passthrough," and two pseudo-localized variants of files that contain
     localized data, and a non-localized variant of the files that do not contain localized data
 
@@ -122,6 +122,38 @@ translatedStrings: {
 }
 ```
 
+Alternatively, instead of directly specifying the translations, a path to a translated resource file can be
+specified. For example:
+
+```JavaScript
+translatedStrings: {
+  "en-us": {
+    "./src/strings1.loc.json": "./localization/en-us/strings1.loc.json"
+  },
+  "es-es": {
+    "./src/strings1.loc.json": "./localization/es-es/strings1.loc.json"
+  }
+}
+```
+
+#### `localizedData.resolveMissingTranslatedStrings = (locales: string[], filePath: string) => { ... }`
+
+This optional option can be used to resolve translated data that is missing from data that is provided
+in the `localizedData.translatedStrings` option. Set this option with a function expecting two parameters:
+the first, an array of locale names, and second, a fully-qualified path to the localized file in source. The
+function should return an object with locale names as keys and localized data as values. The localized data
+value should either be:
+
+- a string: The absolute path to the translated data in `.resx` or `.loc.json` format
+- an object: An object containing the translated data
+
+Note that these values are the same as the values that can be specified for translations for a localized
+resource in `localizedData.translatedStrings`.
+
+If the function returns data that is missing locales or individual strings, the plugin will fall back to the
+default locale if `localizedData.defaultLocale.fillMissingTranslationStrings` is set to `true`. If
+`localizedData.defaultLocale.fillMissingTranslationStrings` is set to `false`, an error will result.
+
 #### `localizedData.passthroughLocale = { }`
 
 This option is used to specify how and if a passthrough locale should be generated. A passthrough locale
@@ -145,6 +177,14 @@ by setting a value on `passthroughLocale.passthroughLocaleName`.
 This option allows pseudolocales to be generated from the strings in the default locale. This option takes
 an option with pseudolocales as keys and options for the
 [pseudolocale package](https://www.npmjs.com/package/pseudolocale) as values.
+
+#### `localizedData.normalizeResxNewlines = 'crlf' | 'lf'`
+
+This option allows normalization of newlines in RESX files. RESX files are XML, so newlines can be
+specified by including a newline in the `<value>` element. For files stored on source control systems,
+clones on Windows can end up with CRLF newlines and clones on 'nix operating systems can end up with LF
+newlines. This option can be used to help make compilations run on different platforms produce the same
+result.
 
 ### `filesToIgnore = [ ]`
 
@@ -227,7 +267,7 @@ This property is required if `typingsOptions` is set.
 This optional property overrides the compiler context for discovery of localization files for which
 typings should be generated.
 
-### `typingsOptions.exportAsDefault = true | false`
+#### `typingsOptions.exportAsDefault = true | false`
 
 If this option is set to `true`, loc modules typings will be exported wrapped in a `default` property. This
 allows strings to be imported by using the `import strings from './strings.loc.json';` syntax instead of

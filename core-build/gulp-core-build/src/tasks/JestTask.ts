@@ -1,12 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 import * as path from 'path';
-import { GulpTask} from './GulpTask';
+import { GulpTask } from './GulpTask';
 import { IBuildConfig } from '../IBuildConfig';
 import * as Gulp from 'gulp';
-import * as Jest from 'jest-cli';
 import * as glob from 'glob';
-import { FileSystem, JsonObject } from '@microsoft/node-core-library';
+
+// runCLI is not exported from 'jest' anymore.
+// See https://github.com/facebook/jest/issues/9512#issuecomment-581835474
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { runCLI } = require('@jest/core');
+import { Config, AggregatedResult } from '@jest/reporters';
+import { FileSystem, JsonObject } from '@rushstack/node-core-library';
 
 /**
  * Configuration for JestTask
@@ -95,16 +100,16 @@ export class JestTask extends GulpTask<IJestConfig> {
 
   public constructor() {
     super('jest',
-    {
-      cache: true,
-      collectCoverageFrom: ['lib/**/*.js?(x)', '!lib/**/test/**'],
-      coverage: true,
-      coverageReporters: ['json' /*, 'html' */], // Remove HTML reporter temporarily until the Handlebars issue is fixed
-      testPathIgnorePatterns: ['<rootDir>/(src|lib-amd|lib-es6|coverage|build|docs|node_modules)/'],
-      // Some unit tests rely on data folders that look like packages.  This confuses jest-hast-map
-      // when it tries to scan for package.json files.
-      modulePathIgnorePatterns: ['<rootDir>/(src|lib)/.*/package.json']
-    });
+      {
+        cache: true,
+        collectCoverageFrom: ['lib/**/*.js?(x)', '!lib/**/test/**'],
+        coverage: true,
+        coverageReporters: ['json' /*, 'html' */], // Remove HTML reporter temporarily until the Handlebars issue is fixed
+        testPathIgnorePatterns: ['<rootDir>/(src|lib-amd|lib-es6|coverage|build|docs|node_modules)/'],
+        // Some unit tests rely on data folders that look like packages.  This confuses jest-hast-map
+        // when it tries to scan for package.json files.
+        modulePathIgnorePatterns: ['<rootDir>/(src|lib)/.*/package.json']
+      });
   }
 
   public isEnabled(buildConfig: IBuildConfig): boolean {
@@ -168,22 +173,22 @@ export class JestTask extends GulpTask<IJestConfig> {
     const oldTTY: true | undefined = process.stdout.isTTY;
     process.stdout.isTTY = undefined;
 
-    Jest.runCLI(jestConfig,
+    runCLI(jestConfig,
       [this.buildConfig.rootPath]).then(
-      (result: { results: Jest.AggregatedResult, globalConfig: Jest.GlobalConfig }) => {
-        process.stdout.isTTY = oldTTY;
-        if (result.results.numFailedTests || result.results.numFailedTestSuites) {
-          completeCallback(new Error('Jest tests failed'));
-        } else {
-          if (!this.buildConfig.production) {
-            this._copySnapshots(this.buildConfig.libFolder, this.buildConfig.srcFolder);
+        (result: { results: AggregatedResult, globalConfig: Config.GlobalConfig }) => {
+          process.stdout.isTTY = oldTTY;
+          if (result.results.numFailedTests || result.results.numFailedTestSuites) {
+            completeCallback(new Error('Jest tests failed'));
+          } else {
+            if (!this.buildConfig.production) {
+              this._copySnapshots(this.buildConfig.libFolder, this.buildConfig.srcFolder);
+            }
+            completeCallback();
           }
-          completeCallback();
-        }
-      }).catch((err) => {
-        process.stdout.isTTY = oldTTY;
-        completeCallback(err);
-      });
+        }).catch((err) => {
+          process.stdout.isTTY = oldTTY;
+          completeCallback(err);
+        });
   }
 
   private _copySnapshots(srcRoot: string, destRoot: string): void {

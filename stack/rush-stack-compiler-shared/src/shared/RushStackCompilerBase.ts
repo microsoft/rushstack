@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { StandardBuildFolders } from './StandardBuildFolders';
-import { ITerminalProvider, Terminal } from '@microsoft/node-core-library';
+import { ITerminalProvider, Terminal } from '@rushstack/node-core-library';
 
 /**
  * @public

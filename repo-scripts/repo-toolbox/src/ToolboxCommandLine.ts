@@ -3,7 +3,7 @@
 
 import {
   CommandLineParser
-} from '@microsoft/ts-command-line';
+} from '@rushstack/ts-command-line';
 import { ReadmeAction } from './ReadmeAction';
 
 export class ToolboxCommandLine extends CommandLineParser {

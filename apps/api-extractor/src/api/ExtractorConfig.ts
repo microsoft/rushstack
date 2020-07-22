@@ -16,7 +16,7 @@ import {
   InternalError,
   Path,
   NewlineKind
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 import {
   IConfigFile,
   IExtractorMessagesConfig

@@ -15,7 +15,7 @@ import {
   JsonFile,
   FileConstants,
   Text
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import {
   IChangeInfo,
@@ -407,12 +407,12 @@ export class PublishUtilities {
             prereleaseToken.isPartialPrerelease &&
             depChange.changeType! < ChangeType.hotfix
           ) {
-            // FOr partial prereleases, do not version bump dependecies with the `prereleaseToken`
-            // value unless an actual change (hotfix, patch, minor, major) has occured
+            // For partial prereleases, do not version bump dependencies with the `prereleaseToken`
+            // value unless an actual change (hotfix, patch, minor, major) has occurred
             return;
           } else if (depChange && prereleaseToken && prereleaseToken.hasValue) {
             // TODO: treat prerelease version the same as non-prerelease version.
-            // For prelease, the newVersion needs to be appended with prerelease name.
+            // For prerelease, the newVersion needs to be appended with prerelease name.
             // And dependency should specify the specific prerelease version.
             dependencies[depName] = PublishUtilities._getChangeInfoNewVersion(depChange, prereleaseToken);
           } else if (depChange && depChange.changeType! >= ChangeType.hotfix) {

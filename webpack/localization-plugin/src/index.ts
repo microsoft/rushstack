@@ -11,7 +11,7 @@ export {
   ILocaleData,
   ILocaleElementMap,
   ILocaleFileData,
-  ILocalizationFile as _ILocFile,
+  ILocalizationFile as _ILocalizationFile,
   ILocalizationPluginOptions,
   ILocalizationStats,
   ILocalizationStatsChunkGroup,
@@ -23,6 +23,7 @@ export {
   IPassthroughLocaleOptions,
   IPseudolocaleOptions,
   IPseudolocalesOptions,
+  IResolvedMissingTranslations,
   ITypingsGenerationOptions
 } from './interfaces';
 
@@ -32,14 +33,10 @@ export {
 } from './utilities/LocFileParser';
 
 export {
-  ILoggerOptions as _ILoggerOptions
-} from './utilities/Logging';
-
-export {
   ILocalizedWebpackChunk
 } from './webpackInterfaces';
 
 export {
   ITypingsGeneratorOptions,
-  TypingsGenerator
-} from './TypingsGenerator';
+  LocFileTypingsGenerator as TypingsGenerator
+} from './LocFileTypingsGenerator';

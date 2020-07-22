@@ -1,6 +1,100 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 07 Mar 2020 05:36:08 GMT and should not be manually modified.
+This log was last generated on Mon, 08 Jun 2020 18:04:35 GMT and should not be manually modified.
+
+## 5.24.4
+Mon, 08 Jun 2020 18:04:35 GMT
+
+### Updates
+
+- Explicitly assigning the option value for --resolution-strategy. This fixes a crash with pnpm v5, which deprecated the option.
+- Fix an issue where install-run.js is not able to find its own .bin in PATH
+- Fix an issue where "rush install" sometimes skipped regenerating temporary packages, which is incompatible with PNPM's "--frozen-lockfile" feature
+
+## 5.24.3
+Thu, 04 Jun 2020 22:50:56 GMT
+
+### Updates
+
+- Fix an issue where "rush deploy" generated incorrect symlinks on Mac OS if the target folder was symlinked (GitHub #1910)
+
+## 5.24.2
+Wed, 03 Jun 2020 05:35:19 GMT
+
+### Updates
+
+- Expect error when trying to resolve optional dependency during deploy
+
+## 5.24.1
+Tue, 02 Jun 2020 03:11:32 GMT
+
+### Updates
+
+- Fix an issue where the "linkCreation" defaulted to "none" instead of "default"
+
+## 5.24.0
+Mon, 01 Jun 2020 08:48:49 GMT
+
+### Updates
+
+- Set next LTS node version to 14.
+- Add new "rush deploy" command that copies subsets of files/symlinks to a deployment folder
+
+## 5.23.5
+Thu, 28 May 2020 22:49:57 GMT
+
+### Updates
+
+- Fix an issue where Rush cannot reinstall itself on Windows
+
+## 5.23.4
+Thu, 21 May 2020 15:41:59 GMT
+
+### Updates
+
+- Add a new rush.json setting "allowMostlyStandardPackageNames"
+- Add RUSH_PARALLELISM environment variable for specifying the --parallelism default
+
+## 5.23.3
+Fri, 15 May 2020 08:10:59 GMT
+
+### Updates
+
+- Fix a few instances of missing spaces in --help documentation.
+- Provide an option to pass --frozen-lockfile to pnpm for rush install
+
+## 5.23.2
+Wed, 22 Apr 2020 18:44:26 GMT
+
+### Updates
+
+- Add common-versions.json to the set of files that, when changed, will trigger reinstallation of dependencies.
+
+## 5.23.1
+Wed, 15 Apr 2020 03:33:55 GMT
+
+### Updates
+
+- Fix a regression in Rush 5.19.0 where customizing "rush rebuild" would call the "build" script instead of the "rebuild" script.
+- Fix an issue where, on some minimal systems, Rush used a missing shell command to detect an application path.
+- Fix an issue where the common/temp/*.tgz files resulted in different shrinkwrap files on different operating systems
+
+## 5.23.0
+Sat, 04 Apr 2020 00:38:29 GMT
+
+### Updates
+
+- Add a new rush.json setting "preventManualShrinkwrapChanges" which prevents against accidental mistakes in pnpm-lock.yaml.
+- Upgrade node-tar
+- Remove some misleading log output for "rush build" (GitHub #1733)
+
+## 5.22.0
+Wed, 18 Mar 2020 01:23:22 GMT
+
+### Updates
+
+- Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`
+- Support setting environment variables for package manager install processes in rush.json and expose --max-install-attempts as a parameter for rush install/update.
 
 ## 5.21.0
 Sat, 07 Mar 2020 05:36:08 GMT

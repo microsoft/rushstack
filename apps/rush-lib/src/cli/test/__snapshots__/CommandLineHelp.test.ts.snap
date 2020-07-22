@@ -22,9 +22,12 @@ Positional arguments:
     check         Checks each project's package.json files and ensures that 
                   all dependencies are of the same version throughout the 
                   repository.
+    deploy        (EXPERIMENTAL) Copy a subset of Rush projects and their 
+                  dependencies to a deployment folder
     install       Install package dependencies for all projects in the repo 
                   according to the shrinkwrap file
     init          Initializes a new repository to be managed by Rush
+    init-deploy   Create the config file for a new deployment scenario.
     link          Create node_modules symlinks for all projects
     list          List package information for all projects in the repo
     publish       Reads and processes package publishing change requests 
@@ -39,7 +42,7 @@ Positional arguments:
     version       (EXPERIMENTAL) Manage package versions in the repo.
     import-strings
                   Imports translated strings into each project.
-    deploy        Deploys the build
+    upload        Uploads the built files to the server
     build         Build all projects that haven't been built, or have changed 
                   since they were last built.
     rebuild       Clean and rebuild the entire set of projects
@@ -117,11 +120,14 @@ therein; a full rebuild is forced whenever the command has changed (e.g.
 Optional arguments:
   -h, --help            Show this help message and exit.
   -p COUNT, --parallelism COUNT
-                        Specify the number of concurrent build processes The 
-                        value \\"max\\" can be specified to indicate the number 
-                        of CPU cores. If this parameter omitted, the default 
-                        value depends on the operating system and number of 
-                        CPU cores.
+                        Specifies the maximum number of concurrent processes 
+                        to launch during a build. The COUNT should be a 
+                        positive integer or else the word \\"max\\" to specify a 
+                        count that is equal to the number of CPU cores. If 
+                        this parameter is omitted, then the default value 
+                        depends on the operating system and number of CPU 
+                        cores. This parameter may alternatively be specified 
+                        via the RUSH_PARALLELISM environment variable.
   -t PROJECT1, --to PROJECT1
                         Run command in the specified project and all of its 
                         dependencies. \\".\\" can be used as shorthand to specify 
@@ -172,7 +178,7 @@ are backwards and forwards compatible. Examples are: Modifying a private API
 or fixing a bug in the logic of how an existing API works. HOTFIX 
 (EXPERIMENTAL) - these are changes that are hotfixes targeting a specific 
 older version of the package. When a hotfix change is added, other changes 
-will not be able to increment the version number.Enable this feature by 
+will not be able to increment the version number. Enable this feature by 
 setting 'hotfixChangeEnabled' in your rush.json.
 
 Optional arguments:
@@ -183,7 +189,7 @@ Optional arguments:
                         \\"git diff\\" to detect changes.
   -b BRANCH, --target-branch BRANCH
                         If this parameter is specified, compare the checked 
-                        out branch with the specified branch todetermine 
+                        out branch with the specified branch to determine 
                         which projects were changed. If this parameter is not 
                         specified, the checked out branch is compared against 
                         the \\"master\\" branch.
@@ -213,23 +219,38 @@ are of the same version throughout the repository.
 Optional arguments:
   -h, --help         Show this help message and exit.
   --variant VARIANT  Run command using a variant installation configuration. 
-                     This parameter may alternatively specified via the 
+                     This parameter may alternatively be specified via the 
                      RUSH_VARIANT environment variable.
   --json             If this flag is specified, output will be in JSON format.
 "
 `;
 
 exports[`CommandLineHelp prints the help for each action: deploy 1`] = `
-"usage: rush deploy [-h] [--locale {en-us,fr-fr,es-es,zh-cn}]
+"usage: rush deploy [-h] -s SCENARIO [--overwrite] [-t PATH]
 
-Uploads all the built assets to the CDN
+(EXPERIMENTAL) After building the repo, \\"rush deploy\\" can be used to copy a 
+subset of Rush projects and their dependencies to a deployment target folder, 
+which can then be copied to a production machine. The \\"rush deploy\\" behavior 
+is specified by a scenario config file located under the 
+\\"common/config/deploy\\" folder. You can define multiple scenarios. Use the 
+\\"rush init-deploy\\" command to create a new config file.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
-  --locale {en-us,fr-fr,es-es,zh-cn}
-                        Selects a single instead of the default locale 
-                        (en-us) for non-ship builds or all locales for ship 
-                        builds.
+  -s SCENARIO, --scenario SCENARIO
+                        Specifies the name of a config file describing the 
+                        deployment. For example if SCENARIO is \\"web\\", the 
+                        input file is: common/config/deploy/web.json
+  --overwrite           By default, deployment will fail if the target folder 
+                        is not empty. SPECIFYING THIS FLAG WILL RECURSIVELY 
+                        DELETE EXISTING CONTENTS OF THE TARGET FOLDER.
+  -t PATH, --target-folder PATH
+                        By default, files are deployed to the common/deploy 
+                        folder inside the Rush repo. Use this parameter to 
+                        specify a different location. WARNING: USE CAUTION 
+                        WHEN COMBINING WITH \\"--overwrite\\". This parameter may 
+                        alternatively be specified via the 
+                        RUSH_DEPLOY_TARGET_FOLDER environment variable.
 "
 `;
 
@@ -247,11 +268,14 @@ into each project.
 Optional arguments:
   -h, --help            Show this help message and exit.
   -p COUNT, --parallelism COUNT
-                        Specify the number of concurrent build processes The 
-                        value \\"max\\" can be specified to indicate the number 
-                        of CPU cores. If this parameter omitted, the default 
-                        value depends on the operating system and number of 
-                        CPU cores.
+                        Specifies the maximum number of concurrent processes 
+                        to launch during a build. The COUNT should be a 
+                        positive integer or else the word \\"max\\" to specify a 
+                        count that is equal to the number of CPU cores. If 
+                        this parameter is omitted, then the default value 
+                        depends on the operating system and number of CPU 
+                        cores. This parameter may alternatively be specified 
+                        via the RUSH_PARALLELISM environment variable.
   -t PROJECT1, --to PROJECT1
                         Run command in the specified project and all of its 
                         dependencies. \\".\\" can be used as shorthand to specify 
@@ -299,10 +323,28 @@ Optional arguments:
 "
 `;
 
+exports[`CommandLineHelp prints the help for each action: init-deploy 1`] = `
+"usage: rush init-deploy [-h] -s SCENARIO -p PROJECT_NAME
+
+The deployment config files are stored under \\"common/config/deploy\\" and are 
+used to configure behavior of the \\"rush deploy\\" command.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -s SCENARIO, --scenario SCENARIO
+                        Specifies the name of the config file describing the 
+                        deployment. The name must be lower case and separated 
+                        by dashes. Example: \\"production-web\\"
+  -p PROJECT_NAME, --project PROJECT_NAME
+                        Specifies the name of the main Rush project to be 
+                        deployed in this scenario.
+"
+`;
+
 exports[`CommandLineHelp prints the help for each action: install 1`] = `
 "usage: rush install [-h] [-p] [--bypass-policy] [--no-link]
                     [--network-concurrency COUNT] [--debug-package-manager]
-                    [--variant VARIANT]
+                    [--max-install-attempts NUMBER] [--variant VARIANT]
                     
 
 The \\"rush install\\" command installs package dependencies for all your 
@@ -336,8 +378,11 @@ Optional arguments:
                         Activates verbose logging for the package manager. 
                         You will probably want to pipe the output of Rush to 
                         a file when using this command.
+  --max-install-attempts NUMBER
+                        Overrides the default maximum number of install 
+                        attempts. The default value is 3.
   --variant VARIANT     Run command using a variant installation 
-                        configuration. This parameter may alternatively 
+                        configuration. This parameter may alternatively be 
                         specified via the RUSH_VARIANT environment variable.
 "
 `;
@@ -397,7 +442,7 @@ Optional arguments:
                         be applied to package.json files.
   -b BRANCH, --target-branch BRANCH
                         If this flag is specified, applied changes and 
-                        deleted change requests will becommitted and merged 
+                        deleted change requests will be committed and merged 
                         into the target branch.
   -p, --publish         If this flag is specified, applied changes will be 
                         published to npm.
@@ -500,11 +545,14 @@ of \\"rush rebuild\\".)
 Optional arguments:
   -h, --help            Show this help message and exit.
   -p COUNT, --parallelism COUNT
-                        Specify the number of concurrent build processes The 
-                        value \\"max\\" can be specified to indicate the number 
-                        of CPU cores. If this parameter omitted, the default 
-                        value depends on the operating system and number of 
-                        CPU cores.
+                        Specifies the maximum number of concurrent processes 
+                        to launch during a build. The COUNT should be a 
+                        positive integer or else the word \\"max\\" to specify a 
+                        count that is equal to the number of CPU cores. If 
+                        this parameter is omitted, then the default value 
+                        depends on the operating system and number of CPU 
+                        cores. This parameter may alternatively be specified 
+                        via the RUSH_PARALLELISM environment variable.
   -t PROJECT1, --to PROJECT1
                         Run command in the specified project and all of its 
                         dependencies. \\".\\" can be used as shorthand to specify 
@@ -563,7 +611,8 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: update 1`] = `
 "usage: rush update [-h] [-p] [--bypass-policy] [--no-link]
                    [--network-concurrency COUNT] [--debug-package-manager]
-                   [--variant VARIANT] [--full] [--recheck]
+                   [--max-install-attempts NUMBER] [--variant VARIANT]
+                   [--full] [--recheck]
                    
 
 The \\"rush update\\" command installs the dependencies described in your package.
@@ -596,8 +645,11 @@ Optional arguments:
                         Activates verbose logging for the package manager. 
                         You will probably want to pipe the output of Rush to 
                         a file when using this command.
+  --max-install-attempts NUMBER
+                        Overrides the default maximum number of install 
+                        attempts. The default value is 3.
   --variant VARIANT     Run command using a variant installation 
-                        configuration. This parameter may alternatively 
+                        configuration. This parameter may alternatively be 
                         specified via the RUSH_VARIANT environment variable.
   --full                Normally \\"rush update\\" tries to preserve your 
                         existing installed versions and only makes the 
@@ -618,6 +670,20 @@ Optional arguments:
                         your shrinkwrap file with Rush's fixups. (To minimize 
                         shrinkwrap churn, these fixups are normally performed 
                         only in the temporary folder.)
+"
+`;
+
+exports[`CommandLineHelp prints the help for each action: upload 1`] = `
+"usage: rush upload [-h] [--locale {en-us,fr-fr,es-es,zh-cn}]
+
+Uploads all the built assets to the CDN
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  --locale {en-us,fr-fr,es-es,zh-cn}
+                        Selects a single instead of the default locale 
+                        (en-us) for non-ship builds or all locales for ship 
+                        builds.
 "
 `;
 
@@ -650,7 +716,7 @@ Optional arguments:
                         The name of the version policy
   --override-bump BUMPTYPE
                         Overrides the bump type in the version-policy.json 
-                        for the specified version policy.Valid BUMPTYPE 
+                        for the specified version policy. Valid BUMPTYPE 
                         values include: prerelease, patch, preminor, minor, 
                         major. This setting only works for lock-step version 
                         policy in bump action.

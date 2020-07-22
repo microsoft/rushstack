@@ -18,10 +18,10 @@ items:
       - 'api-documenter-test!DocClassInterfaceMerge:interface'
       - 'api-documenter-test!DocEnum:enum'
       - 'api-documenter-test!EcmaSmbols:namespace'
+      - 'api-documenter-test!exampleFunction:function(1)'
       - 'api-documenter-test!ExampleTypeAlias:type'
       - 'api-documenter-test!Generic:class'
       - 'api-documenter-test!GenericTypeAlias:type'
-      - 'api-documenter-test!globalFunction:function(1)'
       - 'api-documenter-test!IDocInterface1:interface'
       - 'api-documenter-test!IDocInterface2:interface'
       - 'api-documenter-test!IDocInterface3:interface'
@@ -45,6 +45,28 @@ items:
       return:
         type:
           - number
+  - uid: 'api-documenter-test!exampleFunction:function(1)'
+    summary: An exported function with hyperlinked parameters and return value.
+    name: 'exampleFunction(x, y)'
+    fullName: 'exampleFunction(x, y)'
+    langs:
+      - typeScript
+    type: function
+    syntax:
+      content: 'export declare function exampleFunction(x: ExampleTypeAlias, y: number): IDocInterface1;'
+      return:
+        type:
+          - 'api-documenter-test!IDocInterface1:interface'
+        description: an interface that should get hyperlinked
+      parameters:
+        - id: x
+          description: an API item that should get hyperlinked
+          type:
+            - 'api-documenter-test!ExampleTypeAlias:type'
+        - id: 'y'
+          description: a system type that should NOT get hyperlinked
+          type:
+            - number
   - uid: 'api-documenter-test!ExampleTypeAlias:type'
     summary: A type alias
     name: ExampleTypeAlias
@@ -70,24 +92,6 @@ items:
       return:
         type:
           - 'T[]'
-  - uid: 'api-documenter-test!globalFunction:function(1)'
-    summary: An exported function
-    name: globalFunction(x)
-    fullName: globalFunction(x)
-    langs:
-      - typeScript
-    type: function
-    syntax:
-      content: 'export declare function globalFunction(x: number): number;'
-      return:
-        type:
-          - number
-        description: ''
-      parameters:
-        - id: x
-          description: ''
-          type:
-            - number
   - uid: 'api-documenter-test!TypeAlias:type'
     name: TypeAlias
     fullName: TypeAlias
@@ -124,6 +128,10 @@ references:
     name: DocEnum
   - uid: 'api-documenter-test!EcmaSmbols:namespace'
     name: EcmaSmbols
+  - uid: 'api-documenter-test!IDocInterface1:interface'
+    name: IDocInterface1
+  - uid: 'api-documenter-test!ExampleTypeAlias:type'
+    name: ExampleTypeAlias
   - uid: 'api-documenter-test!ExampleTypeAlias~0:complex'
     name: Promise<boolean>
     fullName: Promise<boolean>
@@ -135,8 +143,6 @@ references:
         fullName: <boolean>
   - uid: 'api-documenter-test!Generic:class'
     name: Generic
-  - uid: 'api-documenter-test!IDocInterface1:interface'
-    name: IDocInterface1
   - uid: 'api-documenter-test!IDocInterface2:interface'
     name: IDocInterface2
   - uid: 'api-documenter-test!IDocInterface3:interface'

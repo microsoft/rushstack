@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { IPackageJson } from '@microsoft/node-core-library';
+import { IPackageJson } from '@rushstack/node-core-library';
 
 import { BumpType } from '../../api/VersionPolicy';
 import { ChangeFile } from '../../api/ChangeFile';
@@ -49,14 +49,14 @@ describe('VersionManager', () => {
 
       const changeFiles: Map<string, ChangeFile> = versionManager.changeFiles;
       expect(changeFiles.size).toEqual(4);
-      expect(_getChanges(changeFiles, 'a')!.length).toEqual(1);
+      expect(_getChanges(changeFiles, 'a')!).toHaveLength(1);
       expect(_getChanges(changeFiles, 'a')![0].changeType).toEqual(ChangeType.none);
-      expect(_getChanges(changeFiles, 'b')!.length).toEqual(1);
+      expect(_getChanges(changeFiles, 'b')!).toHaveLength(1);
       expect(_getChanges(changeFiles, 'b')![0].changeType).toEqual(ChangeType.none);
-      expect(_getChanges(changeFiles, 'c')!.length).toEqual(2);
+      expect(_getChanges(changeFiles, 'c')!).toHaveLength(2);
       expect(_getChanges(changeFiles, 'c')![0].changeType).toEqual(ChangeType.patch);
       expect(_getChanges(changeFiles, 'c')![1].changeType).toEqual(ChangeType.dependency);
-      expect(_getChanges(changeFiles, 'd')!.length).toEqual(2);
+      expect(_getChanges(changeFiles, 'd')!).toHaveLength(2);
       expect(_getChanges(changeFiles, 'd')![0].changeType).toEqual(ChangeType.patch);
       expect(_getChanges(changeFiles, 'd')![1].changeType).toEqual(ChangeType.dependency);
     });

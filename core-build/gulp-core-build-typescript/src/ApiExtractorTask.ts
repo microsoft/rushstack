@@ -7,7 +7,7 @@ import {
   JsonFile,
   FileSystem,
   JsonObject
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 import { ExtractorConfig, IExtractorInvokeOptions } from '@microsoft/api-extractor';
 import { ApiExtractorRunner as TApiExtractorRunner } from '@microsoft/rush-stack-compiler-3.1';
 
@@ -47,7 +47,7 @@ export class ApiExtractorTask extends RSCTask<IApiExtractorTaskConfig>  {
     };
 
     const ApiExtractorRunner: typeof TApiExtractorRunner = this._rushStackCompiler.ApiExtractorRunner;
-    const extractorConfig: ExtractorConfig = ApiExtractorRunner.apiExtractor.ExtractorConfig.loadFileAndPrepare(
+    const extractorConfig: ExtractorConfig = this._rushStackCompiler.ApiExtractor.ExtractorConfig.loadFileAndPrepare(
       this._getApiExtractorConfigFilePath(this.buildConfig.rootPath)
     );
 

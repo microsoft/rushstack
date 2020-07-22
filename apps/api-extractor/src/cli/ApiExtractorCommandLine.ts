@@ -4,8 +4,8 @@
 import * as colors from 'colors';
 import * as os from 'os';
 
-import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-command-line';
-import { InternalError } from '@microsoft/node-core-library';
+import { CommandLineParser, CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import { InternalError } from '@rushstack/node-core-library';
 
 import { RunAction } from './RunAction';
 import { InitAction } from './InitAction';

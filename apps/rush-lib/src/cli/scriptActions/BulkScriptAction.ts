@@ -5,29 +5,28 @@ import * as os from 'os';
 import * as colors from 'colors';
 
 import {
-  Event
-} from '../../index';
-
-import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
   CommandLineStringListParameter,
   CommandLineParameterKind
-} from '@microsoft/ts-command-line';
+} from '@rushstack/ts-command-line';
+import {
+  FileSystem,
+  PackageJsonLookup,
+  IPackageJson
+} from '@rushstack/node-core-library';
 
+import { Event } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { TaskSelector } from '../../logic/TaskSelector';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
-import {
-  FileSystem,
-  PackageJsonLookup,
-  IPackageJson
-} from '@microsoft/node-core-library';
 import { TaskRunner } from '../../logic/taskRunner/TaskRunner';
 import { TaskCollection } from '../../logic/taskRunner/TaskCollection';
 import { Utilities } from '../../utilities/Utilities';
+import { RushConstants } from '../../logic/RushConstants';
+import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -158,9 +157,11 @@ export class BulkScriptAction extends BaseScriptAction {
         parameterLongName: '--parallelism',
         parameterShortName: '-p',
         argumentName: 'COUNT',
-        description: 'Specify the number of concurrent build processes'
-          + ' The value "max" can be specified to indicate the number of CPU cores.'
-          + ' If this parameter omitted, the default value depends on the operating system and number of CPU cores.'
+        environmentVariable: EnvironmentVariableNames.RUSH_PARALLELISM,
+        description: 'Specifies the maximum number of concurrent processes to launch during a build.'
+          + ' The COUNT should be a positive integer or else the word "max" to specify a count that is equal to'
+          + ' the number of CPU cores. If this parameter is omitted, then the default value depends on the'
+          + ' operating system and number of CPU cores.'
       });
     }
     this._toFlag = this.defineStringListParameter({
@@ -255,7 +256,7 @@ export class BulkScriptAction extends BaseScriptAction {
   }
 
   private _doBeforeTask(): void {
-    if (this.actionName !== 'build' && this.actionName !== 'rebuild') {
+    if (this.actionName !== RushConstants.buildCommandName && this.actionName !== RushConstants.rebuildCommandName) {
       // Only collects information for built-in tasks like build or rebuild.
       return;
     }
@@ -266,7 +267,7 @@ export class BulkScriptAction extends BaseScriptAction {
   }
 
   private _doAfterTask(stopwatch: Stopwatch, success: boolean): void {
-    if (this.actionName !== 'build' && this.actionName !== 'rebuild') {
+    if (this.actionName !== RushConstants.buildCommandName && this.actionName !== RushConstants.rebuildCommandName) {
       // Only collects information for built-in tasks like build or rebuild.
       return;
     }

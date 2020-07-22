@@ -6,7 +6,7 @@ import * as path from 'path';
 import yaml = require('js-yaml');
 
 import { ApiModel } from '@microsoft/api-extractor-model';
-import { Text, FileSystem } from '@microsoft/node-core-library';
+import { Text, FileSystem } from '@rushstack/node-core-library';
 
 import { IYamlTocItem } from '../yaml/IYamlTocFile';
 import { IYamlItem } from '../yaml/IYamlApiFile';

@@ -4,7 +4,7 @@
 import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItem, ApiItemKind, IApiItemJson } from '../items/ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
-import { JsonFile, IJsonFileSaveOptions, PackageJsonLookup, IPackageJson } from '@microsoft/node-core-library';
+import { JsonFile, IJsonFileSaveOptions, PackageJsonLookup, IPackageJson } from '@rushstack/node-core-library';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
 import { ApiEntryPoint } from './ApiEntryPoint';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';

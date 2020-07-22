@@ -1,14 +1,14 @@
 import { EOL } from 'os';
 import { TaskRunner, ITaskRunnerOptions } from '../TaskRunner';
-import { ITaskWriter } from '@microsoft/stream-collator';
+import { ITaskWriter } from '@rushstack/stream-collator';
 import { TaskStatus } from '../TaskStatus';
 import { ITaskDefinition, ITask } from '../ITask';
-import { StringBufferTerminalProvider, Terminal } from '@microsoft/node-core-library';
+import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import { Utilities } from '../../../utilities/Utilities';
 
 // The TaskRunner prints "x.xx seconds" in TestRunner.test.ts.snap; ensure that the Stopwatch timing is deterministic
 jest.mock('../../../utilities/Utilities');
-const mockGetTimeInMs: jest.Mock<unknown> = jest.fn();
+const mockGetTimeInMs: jest.Mock = jest.fn();
 Utilities.getTimeInMs = mockGetTimeInMs;
 
 let mockTimeInMs: number = 0;

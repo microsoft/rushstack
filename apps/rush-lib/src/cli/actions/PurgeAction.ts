@@ -4,7 +4,7 @@
 import * as colors from 'colors';
 import * as os from 'os';
 
-import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';

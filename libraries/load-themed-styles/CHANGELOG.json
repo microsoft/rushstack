@@ -2,6 +2,285 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.10.55",
+      "tag": "@microsoft/load-themed-styles_v1.10.55",
+      "date": "Mon, 01 Jun 2020 08:34:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.5.1` to `0.5.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.21` to `6.4.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.54",
+      "tag": "@microsoft/load-themed-styles_v1.10.54",
+      "date": "Sat, 30 May 2020 02:59:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.5.0` to `0.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.20` to `6.4.21`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.53",
+      "tag": "@microsoft/load-themed-styles_v1.10.53",
+      "date": "Thu, 28 May 2020 05:59:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.17` to `0.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.19` to `6.4.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.52",
+      "tag": "@microsoft/load-themed-styles_v1.10.52",
+      "date": "Wed, 27 May 2020 05:15:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.16` to `0.4.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.7` to `0.5.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.18` to `6.4.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.51",
+      "tag": "@microsoft/load-themed-styles_v1.10.51",
+      "date": "Tue, 26 May 2020 23:00:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.15` to `0.4.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.17` to `6.4.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.50",
+      "tag": "@microsoft/load-themed-styles_v1.10.50",
+      "date": "Fri, 22 May 2020 15:08:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.14` to `0.4.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.16` to `6.4.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.49",
+      "tag": "@microsoft/load-themed-styles_v1.10.49",
+      "date": "Thu, 21 May 2020 23:09:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.13` to `0.4.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.15` to `6.4.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.48",
+      "tag": "@microsoft/load-themed-styles_v1.10.48",
+      "date": "Thu, 21 May 2020 15:41:59 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.12` to `0.4.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.14` to `6.4.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.47",
+      "tag": "@microsoft/load-themed-styles_v1.10.47",
+      "date": "Tue, 19 May 2020 15:08:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.11` to `0.4.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.13` to `6.4.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.46",
+      "tag": "@microsoft/load-themed-styles_v1.10.46",
+      "date": "Fri, 15 May 2020 08:10:59 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.10` to `0.4.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.12` to `6.4.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.45",
+      "tag": "@microsoft/load-themed-styles_v1.10.45",
+      "date": "Wed, 06 May 2020 08:23:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.9` to `0.4.10`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.11` to `6.4.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.44",
+      "tag": "@microsoft/load-themed-styles_v1.10.44",
+      "date": "Sat, 02 May 2020 00:08:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.10` to `6.4.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.43",
+      "tag": "@microsoft/load-themed-styles_v1.10.43",
+      "date": "Wed, 08 Apr 2020 04:07:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.8` to `0.4.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.6` to `0.5.7`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.9` to `6.4.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.42",
+      "tag": "@microsoft/load-themed-styles_v1.10.42",
+      "date": "Fri, 03 Apr 2020 15:10:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.7` to `0.4.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.8` to `6.4.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.41",
+      "tag": "@microsoft/load-themed-styles_v1.10.41",
+      "date": "Sun, 29 Mar 2020 00:04:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.6` to `0.4.7`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.7` to `6.4.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.40",
+      "tag": "@microsoft/load-themed-styles_v1.10.40",
+      "date": "Sat, 28 Mar 2020 00:37:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.5` to `0.4.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.5` to `0.5.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.6` to `6.4.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.39",
+      "tag": "@microsoft/load-themed-styles_v1.10.39",
+      "date": "Wed, 18 Mar 2020 15:07:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.4` to `0.4.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.4` to `0.5.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.5` to `6.4.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.38",
+      "tag": "@microsoft/load-themed-styles_v1.10.38",
+      "date": "Tue, 17 Mar 2020 23:55:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.4.3` to `0.4.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.4` to `6.4.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.10.37",
       "tag": "@microsoft/load-themed-styles_v1.10.37",
       "date": "Tue, 28 Jan 2020 02:23:44 GMT",

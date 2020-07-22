@@ -8,7 +8,7 @@ import {
   IPackageJson,
   JsonFile,
   FileConstants
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import {
   VersionPolicy,

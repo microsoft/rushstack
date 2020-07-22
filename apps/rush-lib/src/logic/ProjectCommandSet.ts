@@ -4,7 +4,7 @@
 import {
   IPackageJson,
   IPackageJsonScriptTable
- } from '@microsoft/node-core-library';
+ } from '@rushstack/node-core-library';
 
 /**
  * Parses the "scripts" section from package.json and provides support for executing scripts.

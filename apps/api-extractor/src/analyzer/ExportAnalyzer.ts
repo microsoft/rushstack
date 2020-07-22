@@ -2,14 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import { InternalError } from '@microsoft/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 
 import { TypeScriptHelpers } from './TypeScriptHelpers';
 import { AstSymbol } from './AstSymbol';
 import { AstImport, IAstImportOptions, AstImportKind } from './AstImport';
 import { AstModule, AstModuleExportInfo } from './AstModule';
 import { TypeScriptInternals } from './TypeScriptInternals';
-import { TypeScriptMessageFormatter } from './TypeScriptMessageFormatter';
+import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
 import { IFetchAstSymbolOptions, AstEntity } from './AstSymbolTable';
 
 /**
@@ -133,8 +133,8 @@ export class ExportAnalyzer {
             });
 
             if (!astSymbol) {
-              throw new Error(`Unsupported export ${JSON.stringify(exportedSymbol.name)} in `
-                + TypeScriptMessageFormatter.formatFileAndLineNumber(followedSymbol.declarations[0]));
+              throw new Error(`Unsupported export ${JSON.stringify(exportedSymbol.name)}:\n`
+                + SourceFileLocationFormatter.formatDeclaration(followedSymbol.declarations[0]));
             }
 
             astModule.cachedExportedEntities.set(exportedSymbol.name, astSymbol);
@@ -560,6 +560,13 @@ export class ExportAnalyzer {
           });
         }
       }
+    }
+
+    const importTypeNode: ts.Node | undefined
+      = TypeScriptHelpers.findFirstChildNode(declaration, ts.SyntaxKind.ImportType);
+    if (importTypeNode) {
+      throw new Error('The expression contains an import() type, which is not yet supported by API Extractor:\n'
+        + SourceFileLocationFormatter.formatDeclaration(importTypeNode));
     }
 
     return undefined;

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Utilities } from '../utilities/Utilities';

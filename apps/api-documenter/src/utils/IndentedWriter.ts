@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { StringBuilder, IStringBuilder } from '@microsoft/node-core-library';
+import { StringBuilder, IStringBuilder } from '@rushstack/node-core-library';
 
 /**
   * A utility for writing indented text.

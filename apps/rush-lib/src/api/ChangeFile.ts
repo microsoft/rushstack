@@ -5,7 +5,7 @@ import * as path from 'path';
 
 import gitInfo = require('git-repo-info');
 
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from './RushConfiguration';
 import {

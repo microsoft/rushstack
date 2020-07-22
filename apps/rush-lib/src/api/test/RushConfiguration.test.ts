@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 
-import { Text } from '@microsoft/node-core-library';
+import { Text } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../RushConfiguration';
 import { ApprovedPackagesPolicy } from '../ApprovedPackagesPolicy';
 import { RushConfigurationProject } from '../RushConfigurationProject';
@@ -79,7 +79,7 @@ describe('RushConfiguration', () => {
     expect(rushConfiguration.projectFolderMinDepth).toEqual(1);
     expect(rushConfiguration.hotfixChangeEnabled).toEqual(true);
 
-    expect(rushConfiguration.projects.length).toEqual(3);
+    expect(rushConfiguration.projects).toHaveLength(3);
 
     // "approvedPackagesPolicy" feature
     const approvedPackagesPolicy: ApprovedPackagesPolicy = rushConfiguration.approvedPackagesPolicy;
@@ -145,7 +145,7 @@ describe('RushConfiguration', () => {
     expect(rushConfiguration.projectFolderMaxDepth).toEqual(99);
     expect(rushConfiguration.projectFolderMinDepth).toEqual(1);
 
-    expect(rushConfiguration.projects.length).toEqual(3);
+    expect(rushConfiguration.projects).toHaveLength(3);
 
     // "approvedPackagesPolicy" feature
     const approvedPackagesPolicy: ApprovedPackagesPolicy = rushConfiguration.approvedPackagesPolicy;

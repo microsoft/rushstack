@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonSchema, JsonFile, NewlineKind } from '@microsoft/node-core-library';
+import { JsonSchema, JsonFile, NewlineKind } from '@rushstack/node-core-library';
 import { IConfigFile } from './IConfigFile';
 
 /**

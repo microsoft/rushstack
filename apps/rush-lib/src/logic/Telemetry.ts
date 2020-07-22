@@ -7,7 +7,7 @@ import { cloneDeep } from 'lodash';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Rush } from '../api/Rush';
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 export interface ITelemetryData {
   name: string;

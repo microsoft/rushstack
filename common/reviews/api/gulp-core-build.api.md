@@ -4,12 +4,12 @@
 
 ```ts
 
-import { ConsoleTerminalProvider } from '@microsoft/node-core-library';
+import { ConsoleTerminalProvider } from '@rushstack/node-core-library';
 import gulp = require('gulp');
 import * as gulp_2 from 'gulp';
-import { JsonObject } from '@microsoft/node-core-library';
+import { JsonObject } from '@rushstack/node-core-library';
 import Orchestrator = require('orchestrator');
-import { TerminalProviderSeverity } from '@microsoft/node-core-library';
+import { TerminalProviderSeverity } from '@rushstack/node-core-library';
 
 // @public
 export function addSuppression(suppression: string | RegExp): void;

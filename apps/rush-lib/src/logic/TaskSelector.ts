@@ -3,7 +3,7 @@ import {
   IRushLinkJson
 } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile } from '@rushstack/node-core-library';
 
 import { ProjectTask, convertSlashesForWindows } from '../logic/taskRunner/ProjectTask';
 import { PackageChangeAnalyzer } from './PackageChangeAnalyzer';

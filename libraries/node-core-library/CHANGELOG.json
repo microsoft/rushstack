@@ -1,6 +1,151 @@
 {
-  "name": "@microsoft/node-core-library",
+  "name": "@rushstack/node-core-library",
   "entries": [
+    {
+      "version": "3.24.0",
+      "tag": "@rushstack/node-core-library_v3.24.0",
+      "date": "Sat, 30 May 2020 02:59:54 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a FileSystem.copyFiles() API for recursively copying folders, and clarify that FileSystem.copyFile() only copies a single file"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.23.1",
+      "tag": "@rushstack/node-core-library_v3.23.1",
+      "date": "Thu, 28 May 2020 05:59:02 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve async callstacks for FileSystem API (when using Node 12)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.23.0",
+      "tag": "@rushstack/node-core-library_v3.23.0",
+      "date": "Wed, 27 May 2020 05:15:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an \"FileSystemStats\" alias to avoid the need to import \"fs\" when using the FileSystem API"
+          },
+          {
+            "comment": "Add FileSystem.readLink() and readLinkAsync()"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.7` to `0.5.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.22.1",
+      "tag": "@rushstack/node-core-library_v3.22.1",
+      "date": "Tue, 26 May 2020 23:00:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Make not-exist error messages more readable."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.22.0",
+      "tag": "@rushstack/node-core-library_v3.22.0",
+      "date": "Fri, 22 May 2020 15:08:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expose string parsing APIs from JsonFile."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.21.0",
+      "tag": "@rushstack/node-core-library_v3.21.0",
+      "date": "Thu, 21 May 2020 23:09:44 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Create async versions of FileSystem and JsonFile APIs."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.20.0",
+      "tag": "@rushstack/node-core-library_v3.20.0",
+      "date": "Thu, 21 May 2020 15:41:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add PackageNameParser class, which is a configurable version of the PackageName API"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.19.7",
+      "tag": "@rushstack/node-core-library_v3.19.7",
+      "date": "Wed, 08 Apr 2020 04:07:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.6` to `0.5.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.19.6",
+      "tag": "@rushstack/node-core-library_v3.19.6",
+      "date": "Sat, 28 Mar 2020 00:37:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.5` to `0.5.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.19.5",
+      "tag": "@rushstack/node-core-library_v3.19.5",
+      "date": "Wed, 18 Mar 2020 15:07:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade cyclic dependencies"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.4` to `0.5.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.19.4",
+      "tag": "@rushstack/node-core-library_v3.19.4",
+      "date": "Tue, 17 Mar 2020 23:55:58 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "PACKAGE NAME CHANGE: The NPM scope was changed from `@microsoft/node-core-library` to `@rushstack/node-core-library`"
+          }
+        ]
+      }
+    },
     {
       "version": "3.19.3",
       "tag": "@microsoft/node-core-library_v3.19.3",

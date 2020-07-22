@@ -3,7 +3,7 @@
 
 import * as ts from 'typescript';
 
-import { InternalError } from '@microsoft/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstImport, AstImportKind } from '../analyzer/AstImport';
 import { StringWriter } from './StringWriter';
@@ -16,7 +16,12 @@ export class DtsEmitHelpers {
   public static emitImport(stringWriter: StringWriter, collectorEntity: CollectorEntity, astImport: AstImport): void {
     switch (astImport.importKind) {
       case AstImportKind.DefaultImport:
-        stringWriter.writeLine(`import ${astImport.exportName} from '${astImport.modulePath}';`);
+        if (collectorEntity.nameForEmit !== astImport.exportName) {
+          stringWriter.write(`import { default as ${collectorEntity.nameForEmit} }`);
+        } else {
+          stringWriter.write(`import ${astImport.exportName}`);
+        }
+        stringWriter.writeLine(` from '${astImport.modulePath}';`);
         break;
       case AstImportKind.NamedImport:
         if (collectorEntity.nameForEmit !== astImport.exportName) {

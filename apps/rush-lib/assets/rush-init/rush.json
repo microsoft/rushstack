@@ -77,7 +77,25 @@
      * After modifying this field, it's recommended to run "rush update --full" so that the package manager
      * will recalculate all version selections.
      */
-    /*[LINE "HYPOTHETICAL"]*/ "resolutionStrategy": "fast"
+    /*[LINE "HYPOTHETICAL"]*/ "resolutionStrategy": "fast",
+
+    /**
+     * If true, then `rush install` will report an error if manual modifications
+     * were made to the PNPM shrinkwrap file without running "rush update" afterwards.
+     *
+     * This feature protects against accidental inconsistencies that may be introduced
+     * if the PNPM shrinkwrap file ("pnpm-lock.yaml") is manually edited.  When this
+     * feature is enabled, "rush update" will append a hash to the file as a YAML comment,
+     * and then "rush update" and "rush install" will validate the hash.  Note that this does not prohibit
+     * manual modifications, but merely requires "rush update" be run
+     * afterwards, ensuring that PNPM can report or repair any potential inconsistencies.
+     *
+     * To temporarily disable this validation when invoking "rush install", use the
+     * "--bypass-policy" command-line parameter.
+     *
+     * The default value is false.
+     */
+     /*[LINE "HYPOTHETICAL"]*/ "preventManualShrinkwrapChanges": true
   },
 
   /**
@@ -141,6 +159,19 @@
    */
   /*[LINE "HYPOTHETICAL"]*/ "projectFolderMinDepth": 2,
   /*[LINE "HYPOTHETICAL"]*/ "projectFolderMaxDepth": 2,
+
+  /**
+   * Today the npmjs.com registry enforces fairly strict naming rules for packages, but in the early
+   * days there was no standard and hardly any enforcement.  A few large legacy projects are still using
+   * nonstandard package names, and private registries sometimes allow it.  Set "allowMostlyStandardPackageNames"
+   * to true to relax Rush's enforcement of package names.  This allows upper case letters and in the future may
+   * relax other rules, however we want to minimize these exceptions.  Many popular tools use certain punctuation
+   * characters as delimiters, based on the assumption that they will never appear in a package name; thus if we relax
+   * the rules too much it is likely to cause very confusing malfunctions.
+   *
+   * The default value is false.
+   */
+  /*[LINE "HYPOTHETICAL"]*/ "allowMostlyStandardPackageNames": true,
 
   /**
    * This feature helps you to review and approve new packages before they are introduced

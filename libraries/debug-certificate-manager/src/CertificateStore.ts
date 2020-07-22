@@ -4,7 +4,7 @@
 import * as path from 'path';
 import { homedir } from 'os';
 
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 /**
  * Store to retrieve and save debug certificate data.

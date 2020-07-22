@@ -10,9 +10,9 @@ import {
   JsonFile,
   JsonSchema,
   Path,
-  PackageName,
-  FileSystem
-} from '@microsoft/node-core-library';
+  FileSystem,
+  PackageNameParser
+} from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
 
 import { Rush } from '../api/Rush';
@@ -29,6 +29,7 @@ import { NpmPackageManager } from './packageManager/NpmPackageManager';
 import { YarnPackageManager } from './packageManager/YarnPackageManager';
 import { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { ExperimentsConfiguration } from './ExperimentsConfiguration';
+import { PackageNameParsers } from './PackageNameParsers';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'master';
@@ -106,10 +107,57 @@ export interface IRushRepositoryJson {
 export type PnpmStoreOptions = 'local' | 'global';
 
 /**
+ * Options for the package manager.
+ * @public
+ */
+export interface IPackageManagerOptionsJsonBase {
+  /**
+   * Environment variables for the package manager
+   */
+  environmentVariables?: IConfigurationEnvironment
+}
+
+/**
+ * A collection of environment variables
+ * @public
+ */
+export interface IConfigurationEnvironment {
+  /**
+   * Environment variables
+   */
+  [environmentVariableName: string]: IConfigurationEnvironmentVariable;
+}
+
+/**
+ * Represents the value of an environment variable, and if the value should be overridden if the variable is set
+ * in the parent environment.
+ * @public
+ */
+export interface IConfigurationEnvironmentVariable {
+  /**
+   * Value of the environment variable
+   */
+  value: string;
+
+  /**
+   * Set to true to override the environment variable even if it is set in the parent environment.
+   * The default value is false.
+   */
+  override?: boolean;
+}
+
+/**
  * Part of IRushConfigurationJson.
  * @internal
  */
-export interface IPnpmOptionsJson {
+export interface INpmOptionsJson extends IPackageManagerOptionsJsonBase {
+}
+
+/**
+ * Part of IRushConfigurationJson.
+ * @internal
+ */
+export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
   /**
    * The store resolution method for PNPM to use
    */
@@ -122,12 +170,24 @@ export interface IPnpmOptionsJson {
    * Defines the dependency resolution strategy PNPM will use
    */
   resolutionStrategy?: ResolutionStrategy;
+  /**
+   * {@inheritDoc PnpmOptionsConfiguration.preventManualShrinkwrapChanges}
+   */
+  preventManualShrinkwrapChanges?: boolean;
 }
 
 /**
  * Part of IRushConfigurationJson.
+ * @internal
  */
-export interface IYarnOptionsJson {
+export interface IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
+  /**
+   * If true, then Rush will add the "--ignore-engines" option when invoking Yarn.
+   * This allows "rush install" to succeed if there are dependencies with engines defined in
+   * package.json which do not match the current environment.
+   *
+   * The default value is false.
+   */
   ignoreEngines?: boolean;
 }
 
@@ -154,12 +214,14 @@ export interface IRushConfigurationJson {
   suppressNodeLtsWarning?: boolean;
   projectFolderMinDepth?: number;
   projectFolderMaxDepth?: number;
+  allowMostlyStandardPackageNames?: boolean;
   approvedPackagesPolicy?: IApprovedPackagesPolicyJson;
   gitPolicy?: IRushGitPolicyJson;
   telemetryEnabled?: boolean;
   projects: IRushConfigurationProjectJson[];
   eventHooks?: IEventHooksJson;
   hotfixChangeEnabled?: boolean;
+  npmOptions?: INpmOptionsJson;
   pnpmOptions?: IPnpmOptionsJson;
   yarnOptions?: IYarnOptionsJson;
   ensureConsistentVersions?: boolean;
@@ -183,6 +245,39 @@ export interface ICurrentVariantJson {
 }
 
 /**
+ * Options that all package managers share.
+ *
+ * @public
+ */
+export abstract class PackageManagerOptionsConfigurationBase implements IPackageManagerOptionsJsonBase {
+  /**
+   * Environment variables for the package manager
+   */
+  public readonly environmentVariables?: IConfigurationEnvironment
+
+  /** @internal */
+  protected constructor(json: IPackageManagerOptionsJsonBase) {
+    this.environmentVariables = json.environmentVariables;
+  }
+}
+
+/**
+ * Options that are only used when the NPM package manager is selected.
+ *
+ * @remarks
+ * It is valid to define these options in rush.json even if the NPM package manager
+ * is not being used.
+ *
+ * @public
+ */
+export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
+  /** @internal */
+  public constructor(json: INpmOptionsJson) {
+    super(json);
+  }
+}
+
+/**
  * Options that are only used when the PNPM package manager is selected.
  *
  * @remarks
@@ -191,7 +286,7 @@ export interface ICurrentVariantJson {
  *
  * @public
  */
-export class PnpmOptionsConfiguration {
+export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
   /**
    * The method used to resolve the store used by PNPM.
    *
@@ -238,8 +333,28 @@ export class PnpmOptionsConfiguration {
    */
   public readonly resolutionStrategy: ResolutionStrategy;
 
+  /**
+   * If true, then `rush install` will report an error if manual modifications
+   * were made to the PNPM shrinkwrap file without running `rush update` afterwards.
+   *
+   * @remarks
+   * This feature protects against accidental inconsistencies that may be introduced
+   * if the PNPM shrinkwrap file (`pnpm-lock.yaml`) is manually edited.  When this
+   * feature is enabled, `rush update` will append a hash to the file as a YAML comment,
+   * and then `rush update` and `rush install` will validate the hash.  Note that this does not prohibit
+   * manual modifications, but merely requires `rush update` be run
+   * afterwards, ensuring that PNPM can report or repair any potential inconsistencies.
+   *
+   * To temporarily disable this validation when invoking `rush install`, use the
+   * `--bypass-policy` command-line parameter.
+   *
+   * The default value is false.
+   */
+  public readonly preventManualShrinkwrapChanges: boolean;
+
   /** @internal */
   public constructor(json: IPnpmOptionsJson, commonTempFolder: string) {
+    super(json);
     this.pnpmStore = json.pnpmStore || 'local';
     if (EnvironmentConfiguration.pnpmStorePathOverride) {
       this.pnpmStorePath = EnvironmentConfiguration.pnpmStorePathOverride;
@@ -250,6 +365,7 @@ export class PnpmOptionsConfiguration {
     }
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
+    this.preventManualShrinkwrapChanges = !!json.preventManualShrinkwrapChanges
   }
 }
 
@@ -262,7 +378,7 @@ export class PnpmOptionsConfiguration {
  *
  * @public
  */
-export class YarnOptionsConfiguration {
+export class YarnOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
   /**
    * If true, then Rush will add the "--ignore-engines" option when invoking Yarn.
    * This allows "rush install" to succeed if there are dependencies with engines defined in
@@ -274,6 +390,7 @@ export class YarnOptionsConfiguration {
 
   /** @internal */
   public constructor(json: IYarnOptionsJson) {
+    super(json);
     this.ignoreEngines = !!json.ignoreEngines;
   }
 }
@@ -314,6 +431,7 @@ export class RushConfiguration {
   private _commonFolder: string;
   private _commonTempFolder: string;
   private _commonScriptsFolder: string;
+  private _commonDeployConfigFolder: string;
   private _commonRushConfigFolder: string;
   private _packageManager: PackageManagerName;
   private _packageManagerWrapper: PackageManager;
@@ -329,6 +447,7 @@ export class RushConfiguration {
   private _packageManagerToolFilename: string;
   private _projectFolderMinDepth: number;
   private _projectFolderMaxDepth: number;
+  private _allowMostlyStandardPackageNames: boolean;
   private _ensureConsistentVersions: boolean;
   private _suppressNodeLtsWarning: boolean;
   private _variants: {
@@ -351,11 +470,15 @@ export class RushConfiguration {
   private _repositoryDefaultBranch: string;
   private _repositoryDefaultRemote: string;
 
+  private _npmOptions: NpmOptionsConfiguration;
   private _pnpmOptions: PnpmOptionsConfiguration;
   private _yarnOptions: YarnOptionsConfiguration;
+  private _packageManagerConfigurationOptions: PackageManagerOptionsConfigurationBase;
 
   // Rush hooks
   private _eventHooks: EventHooks;
+
+  private readonly _packageNameParser: PackageNameParser
 
   private _telemetryEnabled: boolean;
 
@@ -400,6 +523,7 @@ export class RushConfiguration {
       path.join(this._commonFolder, RushConstants.rushTempFolderName);
 
     this._commonScriptsFolder = path.join(this._commonFolder, 'scripts');
+    this._commonDeployConfigFolder = path.join(this._commonFolder, 'config', 'deploy-scenarios');
 
     this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
     this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
@@ -420,6 +544,7 @@ export class RushConfiguration {
     );
     this._experimentsConfiguration = new ExperimentsConfiguration(experimentsConfigFile);
 
+    this._npmOptions = new NpmOptionsConfiguration(rushConfigurationJson.npmOptions || {});
     this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || {},
       this._commonTempFolder);
     this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || {});
@@ -429,14 +554,17 @@ export class RushConfiguration {
 
     if (rushConfigurationJson.npmVersion) {
       this._packageManager = 'npm';
+      this._packageManagerConfigurationOptions = this._npmOptions;
       packageManagerFields.push('npmVersion');
     }
     if (rushConfigurationJson.pnpmVersion) {
       this._packageManager = 'pnpm';
+      this._packageManagerConfigurationOptions = this._pnpmOptions;
       packageManagerFields.push('pnpmVersion');
     }
     if (rushConfigurationJson.yarnVersion) {
       this._packageManager = 'yarn';
+      this._packageManagerConfigurationOptions = this._yarnOptions;
       packageManagerFields.push('yarnVersion');
     }
 
@@ -463,10 +591,10 @@ export class RushConfiguration {
     this._shrinkwrapFilename = this._packageManagerWrapper.shrinkwrapFilename;
 
     this._tempShrinkwrapFilename = path.join(
-        this._commonTempFolder, this._shrinkwrapFilename
+      this._commonTempFolder, this._shrinkwrapFilename
     );
     this._packageManagerToolFilename = path.resolve(path.join(
-        this._commonTempFolder, `${this.packageManager}-local`, 'node_modules', '.bin', `${this.packageManager}`
+      this._commonTempFolder, `${this.packageManager}-local`, 'node_modules', '.bin', `${this.packageManager}`
     ));
 
     /// From "C:\repo\common\temp\pnpm-lock.yaml" --> "C:\repo\common\temp\pnpm-lock-preinstall.yaml"
@@ -475,9 +603,9 @@ export class RushConfiguration {
       parsedPath.name + '-preinstall' + parsedPath.ext);
 
     RushConfiguration._validateCommonRushConfigFolder(
-        this._commonRushConfigFolder,
-        this.packageManager,
-        this._shrinkwrapFilename
+      this._commonRushConfigFolder,
+      this.packageManager,
+      this._shrinkwrapFilename
     );
 
     this._projectFolderMinDepth = rushConfigurationJson.projectFolderMinDepth !== undefined
@@ -491,6 +619,10 @@ export class RushConfiguration {
     if (this._projectFolderMaxDepth < this._projectFolderMinDepth) {
       throw new Error('The projectFolderMaxDepth cannot be smaller than the projectFolderMinDepth');
     }
+
+    this._allowMostlyStandardPackageNames = !!rushConfigurationJson.allowMostlyStandardPackageNames;
+    this._packageNameParser = this._allowMostlyStandardPackageNames
+      ? PackageNameParsers.mostlyStandard : PackageNameParsers.rushDefault;
 
     this._approvedPackagesPolicy = new ApprovedPackagesPolicy(this, rushConfigurationJson);
 
@@ -642,11 +774,11 @@ export class RushConfiguration {
       if (semver.major(Rush.version) !== semver.major(expectedRushVersion)
         || semver.minor(Rush.version) !== semver.minor(expectedRushVersion)) {
 
-          // If the major/minor are different, then make sure it's an older version.
-          if (semver.lt(Rush.version, expectedRushVersion)) {
-            throw new Error(`Unable to load ${rushJsonBaseName} because its RushVersion is`
-              + ` ${rushConfigurationJson.rushVersion}, whereas @microsoft/rush-lib is version ${Rush.version}.`
-              + ` Consider upgrading the library.`);
+        // If the major/minor are different, then make sure it's an older version.
+        if (semver.lt(Rush.version, expectedRushVersion)) {
+          throw new Error(`Unable to load ${rushJsonBaseName} because its RushVersion is`
+            + ` ${rushConfigurationJson.rushVersion}, whereas @microsoft/rush-lib is version ${Rush.version}.`
+            + ` Consider upgrading the library.`);
         }
       }
     }
@@ -716,7 +848,7 @@ export class RushConfiguration {
     // NOTE: projectJsons was already sorted in alphabetical order by the caller.
     for (const projectJson of sortedProjectJsons) {
       // If the name is "@ms/MyProject", extract the "MyProject" part
-      const unscopedName: string = PackageName.getUnscopedName(projectJson.packageName);
+      const unscopedName: string = PackageNameParsers.permissive.getUnscopedName(projectJson.packageName);
 
       // Generate a unique like name "@rush-temp/MyProject", or "@rush-temp/MyProject-2" if
       // there is a naming conflict
@@ -741,9 +873,9 @@ export class RushConfiguration {
    * recognized config files.
    */
   private static _validateCommonRushConfigFolder(
-      commonRushConfigFolder: string,
-      packageManager: PackageManagerName,
-      shrinkwrapFilename: string
+    commonRushConfigFolder: string,
+    packageManager: PackageManagerName,
+    shrinkwrapFilename: string
   ): void {
     if (!FileSystem.exists(commonRushConfigFolder)) {
       console.log(`Creating folder: ${commonRushConfigFolder}`);
@@ -869,6 +1001,15 @@ export class RushConfiguration {
    */
   public get commonScriptsFolder(): string {
     return this._commonScriptsFolder;
+  }
+
+  /**
+   * The folder where deployment scenario config files are stored.  These files are created by
+   * running "rush init-deploy".
+   * Example: `C:\MyRepo\common\config\deploy-scenarios`
+   */
+  public get commonDeployConfigFolder(): string {
+    return this._commonDeployConfigFolder;
   }
 
   /**
@@ -1025,6 +1166,21 @@ export class RushConfiguration {
   }
 
   /**
+   * Today the npmjs.com registry enforces fairly strict naming rules for packages, but in the early
+   * days there was no standard and hardly any enforcement.  A few large legacy projects are still using
+   * nonstandard package names, and private registries sometimes allow it.  Set "allowMostlyStandardPackageNames"
+   * to true to relax Rush's enforcement of package names.  This allows upper case letters and in the future may
+   * relax other rules, however we want to minimize these exceptions.  Many popular tools use certain punctuation
+   * characters as delimiters, based on the assumption that they will never appear in a package name; thus if we relax
+   * the rules too much it is likely to cause very confusing malfunctions.
+   *
+   * The default value is false.
+   */
+  public get allowMostlyStandardPackageNames(): boolean {
+    return this._allowMostlyStandardPackageNames;
+  }
+
+  /**
    * The "approvedPackagesPolicy" settings.
    */
   public get approvedPackagesPolicy(): ApprovedPackagesPolicy {
@@ -1137,6 +1293,13 @@ export class RushConfiguration {
   }
 
   /**
+   * {@inheritDoc NpmOptionsConfiguration}
+   */
+  public get npmOptions(): NpmOptionsConfiguration {
+    return this._npmOptions;
+  }
+
+  /**
    * {@inheritDoc PnpmOptionsConfiguration}
    */
   public get pnpmOptions(): PnpmOptionsConfiguration {
@@ -1148,6 +1311,16 @@ export class RushConfiguration {
    */
   public get yarnOptions(): YarnOptionsConfiguration {
     return this._yarnOptions;
+  }
+
+  /**
+   * The configuration options used by the current package manager.
+   * @remarks
+   * For package manager specific variants, reference {@link RushConfiguration.npmOptions | npmOptions},
+   * {@link RushConfiguration.pnpmOptions | pnpmOptions}, or {@link RushConfiguration.yarnOptions | yarnOptions}.
+   */
+  public get packageManagerOptions(): PackageManagerOptionsConfigurationBase {
+    return this._packageManagerConfigurationOptions;
   }
 
   /**
@@ -1188,6 +1361,13 @@ export class RushConfiguration {
    */
   public get eventHooks(): EventHooks {
     return this._eventHooks;
+  }
+
+  /**
+   * The rush hooks. It allows customized scripts to run at the specified point.
+   */
+  public get packageNameParser(): PackageNameParser {
+    return this._packageNameParser;
   }
 
   /**
@@ -1266,7 +1446,7 @@ export class RushConfiguration {
 
     // Is there an approximate match?
     for (const project of this._projects) {
-      if (PackageName.getUnscopedName(project.packageName) === shorthandProjectName) {
+      if (this.packageNameParser.getUnscopedName(project.packageName) === shorthandProjectName) {
         if (result) {
           // Ambiguous -- there is more than one match
           return undefined;

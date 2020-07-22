@@ -11,11 +11,10 @@ import * as colors from 'colors';
 import {
   JsonFile,
   Text,
-  PackageName,
   FileSystem,
   FileConstants,
   InternalError
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import {
   BaseLinkManager
@@ -43,7 +42,8 @@ export class PnpmLinkManager extends BaseLinkManager {
     // Use shrinkwrap from temp as the committed shrinkwrap may not always be up to date
     // See https://github.com/microsoft/rushstack/issues/1273#issuecomment-492779995
     const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
-      this._rushConfiguration.tempShrinkwrapFilename
+      this._rushConfiguration.tempShrinkwrapFilename,
+      this._rushConfiguration.pnpmOptions
     );
 
     if (!pnpmShrinkwrapFile) {
@@ -73,7 +73,8 @@ export class PnpmLinkManager extends BaseLinkManager {
     // first, read the temp package.json information
 
     // Example: "project1"
-    const unscopedTempProjectName: string = PackageName.getUnscopedName(project.tempProjectName);
+    const unscopedTempProjectName: string = this._rushConfiguration.packageNameParser
+      .getUnscopedName(project.tempProjectName);
 
     // Example: "C:\MyRepo\common\temp\projects\project1
     const extractedFolder: string = path.join(this._rushConfiguration.commonTempFolder,
@@ -149,7 +150,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     // creates for the installed version of each .TGZ package, all we need to do
     // is re-use that symlink in order to get linked to whatever PNPM thought was
     // appropriate. This folder is usually something like:
-    // C:\{uri-encoed-path-to-tgz}\node_modules\{package-name}
+    // C:\{uri-encoded-path-to-tgz}\node_modules\{package-name}
 
     // e.g.:
     //   file:projects/bentleyjs-core.tgz

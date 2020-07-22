@@ -16,7 +16,7 @@ import * as childProcess from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { IPackageJson } from '@microsoft/node-core-library';
+import { IPackageJson } from '@rushstack/node-core-library';
 
 export const RUSH_JSON_FILENAME: string = 'rush.json';
 const RUSH_TEMP_FOLDER_ENV_VARIABLE_NAME: string = 'RUSH_TEMP_FOLDER';
@@ -138,7 +138,7 @@ export function getNpmPath(): string {
         _npmPath = lines[lines.length - 1];
       } else {
         // We aren't on Windows - assume we're on *NIX or Darwin
-        _npmPath = childProcess.execSync('which npm', { stdio: [] }).toString();
+        _npmPath = childProcess.execSync('command -v npm', { stdio: [] }).toString();
       }
     } catch (e) {
       throw new Error(`Unable to determine the path to the NPM tool: ${e}`);
@@ -324,10 +324,13 @@ function _cleanInstallFolder(rushTempFolder: string, packageInstallFolder: strin
     if (fs.existsSync(nodeModulesFolder)) {
       const rushRecyclerFolder: string = _ensureAndJoinPath(
         rushTempFolder,
-        'rush-recycler',
-        `install-run-${Date.now().toString()}`
+        'rush-recycler'
       );
-      fs.renameSync(nodeModulesFolder, rushRecyclerFolder);
+
+      fs.renameSync(
+        nodeModulesFolder,
+        path.join(rushRecyclerFolder, `install-run-${Date.now().toString()}`)
+      );
     }
   } catch (e) {
     throw new Error(`Error cleaning the package install folder (${packageInstallFolder}): ${e}`);
@@ -434,13 +437,17 @@ export function installAndRun(
   console.log(os.EOL + statusMessage + os.EOL + statusMessageLine + os.EOL);
 
   const binPath: string = _getBinPath(packageInstallFolder, packageBinName);
+  const binFolderPath: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
   const result: childProcess.SpawnSyncReturns<Buffer>  = childProcess.spawnSync(
     binPath,
     packageBinArgs,
     {
       stdio: 'inherit',
       cwd: process.cwd(),
-      env: process.env
+      env: {
+        ...process.env,
+        PATH: [binFolderPath, process.env.PATH].join(path.delimiter)
+      }
     }
   );
 

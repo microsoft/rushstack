@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { ITerminalProvider } from '@microsoft/node-core-library';
-import * as TSLint from 'tslint';
+import { ITerminalProvider } from '@rushstack/node-core-library';
 
 import { CmdRunner } from './CmdRunner';
 import { ToolPaths } from './ToolPaths';
+import { Tslint } from './index';
 import { ILintRunnerConfig } from './ILintRunnerConfig';
 import {
   RushStackCompilerBase,
@@ -53,7 +53,7 @@ export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
 
         // TSLint errors are logged to stdout
         try {
-          const errors: TSLint.IRuleFailureJson[] = JSON.parse(dataStr);
+          const errors: Tslint.IRuleFailureJson[] = JSON.parse(dataStr);
           for (const error of errors) {
             const pathFromRoot: string = path.relative(this._standardBuildFolders.projectFolderPath, error.name);
             tslintErrorLogFn(

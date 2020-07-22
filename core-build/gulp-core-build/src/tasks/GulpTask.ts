@@ -3,7 +3,7 @@
 
 import * as colors from 'colors';
 import * as path from 'path';
-import { JsonFile, JsonSchema, FileSystem, JsonObject } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema, FileSystem, JsonObject } from '@rushstack/node-core-library';
 
 import { GulpProxy } from '../GulpProxy';
 import { IExecutable } from '../IExecutable';

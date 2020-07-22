@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import { Text, InternalError } from '@microsoft/node-core-library';
+import { Text, InternalError } from '@rushstack/node-core-library';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';

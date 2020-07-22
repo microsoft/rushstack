@@ -11,11 +11,11 @@ import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
   CommandLineChoiceParameter
-} from '@microsoft/ts-command-line';
+} from '@rushstack/ts-command-line';
 import {
   FileSystem,
   Path
-} from '@microsoft/node-core-library';
+} from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import {
@@ -72,7 +72,7 @@ export class ChangeAction extends BaseRushAction {
       '',
       'HOTFIX (EXPERIMENTAL) - these are changes that are hotfixes targeting a ' +
       'specific older version of the package. When a hotfix change is added, ' +
-      'other changes will not be able to increment the version number.' +
+      'other changes will not be able to increment the version number. ' +
       'Enable this feature by setting \'hotfixChangeEnabled\' in your rush.json.',
       ''
     ];
@@ -106,7 +106,7 @@ export class ChangeAction extends BaseRushAction {
       parameterLongName: '--target-branch',
       parameterShortName: '-b',
       argumentName: 'BRANCH',
-      description: 'If this parameter is specified, compare the checked out branch with the specified branch to' +
+      description: 'If this parameter is specified, compare the checked out branch with the specified branch to ' +
         'determine which projects were changed. If this parameter is not specified, the checked out branch ' +
         'is compared against the "master" branch.'
     });

@@ -4,8 +4,9 @@
 /* eslint-disable no-bitwise */
 
 import * as ts from 'typescript';
-import { TypeScriptMessageFormatter } from './TypeScriptMessageFormatter';
+import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
 import { TypeScriptInternals } from './TypeScriptInternals';
+import { InternalError } from '@rushstack/node-core-library';
 
 export class TypeScriptHelpers {
   // Matches TypeScript's encoded names for well-known ECMAScript symbols like
@@ -107,8 +108,8 @@ export class TypeScriptHelpers {
   public static getSymbolForDeclaration(declaration: ts.Declaration, checker: ts.TypeChecker): ts.Symbol {
     const symbol: ts.Symbol | undefined = TypeScriptInternals.tryGetSymbolForDeclaration(declaration, checker);
     if (!symbol) {
-      throw new Error(TypeScriptMessageFormatter.formatFileAndLineNumber(declaration) + ': '
-        + 'Unable to determine semantic information for this declaration');
+      throw new InternalError('Unable to determine semantic information for declaration:\n'
+        + SourceFileLocationFormatter.formatDeclaration(declaration));
     }
     return symbol;
   }

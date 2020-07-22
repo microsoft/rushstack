@@ -9,7 +9,7 @@ import { DocumenterConfig } from '../documenters/DocumenterConfig';
 import { ExperimentalYamlDocumenter } from '../documenters/ExperimentalYamlDocumenter';
 
 import { ApiModel } from '@microsoft/api-extractor-model';
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 import { MarkdownDocumenter } from '../documenters/MarkdownDocumenter';
 
 export class GenerateAction extends BaseAction {

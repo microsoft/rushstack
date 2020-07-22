@@ -5,7 +5,6 @@ import * as Webpack from 'webpack';
 import * as lodash from 'lodash';
 
 import { Constants } from './utilities/Constants';
-import { EntityMarker } from './utilities/EntityMarker';
 import { ILocaleElementMap } from './interfaces';
 import { LocalizationPlugin, IStringSerialNumberData as IStringData } from './LocalizationPlugin';
 
@@ -23,6 +22,7 @@ interface ILocalizedReconstructionElement extends IReconstructionElement {
   values: ILocaleElementMap;
   size: number;
   stringName: string;
+  escapedBackslash: string;
   locFilePath: string;
 }
 
@@ -30,6 +30,7 @@ interface IDynamicReconstructionElement extends IReconstructionElement {
   kind: 'dynamic';
   valueFn: (locale: string | undefined, token: string | undefined) => string;
   size: number;
+  escapedBackslash: string;
   token?: string;
 }
 
@@ -60,6 +61,7 @@ export interface IProcessAssetOptionsBase {
   asset: IAsset;
   chunk: Webpack.compilation.Chunk;
   noStringsLocaleName: string;
+  chunkHasLocalizedModules: (chunk: Webpack.compilation.Chunk) => boolean;
 }
 
 export interface IProcessNonLocalizedAssetOptions extends IProcessAssetOptionsBase { }
@@ -80,8 +82,8 @@ export interface IProcessAssetResult {
   asset: IAsset;
 }
 
-const PLACEHOLDER_REGEX: RegExp = new RegExp(
-  `${Constants.STRING_PLACEHOLDER_PREFIX}_([A-C])(\\+[^+]+\\+)?_(\\d+)`,
+export const PLACEHOLDER_REGEX: RegExp = new RegExp(
+  `${Constants.STRING_PLACEHOLDER_PREFIX}_(\\\\*)_([A-C])(\\+[^+]+\\+)?_(\\d+)`,
   'g'
 );
 
@@ -92,7 +94,7 @@ export class AssetProcessor {
     const parsedAsset: IParseResult = AssetProcessor._parseStringToReconstructionSequence(
       options.plugin,
       assetSource,
-      this._getJsonpFunction(options.chunk, options.noStringsLocaleName)
+      this._getJsonpFunction(options.chunk, options.chunkHasLocalizedModules, options.noStringsLocaleName)
     );
     const reconstructedAsset: ILocalizedReconstructionResult = AssetProcessor._reconstructLocalized(
       parsedAsset.reconstructionSeries,
@@ -152,7 +154,7 @@ export class AssetProcessor {
     const parsedAsset: IParseResult = AssetProcessor._parseStringToReconstructionSequence(
       options.plugin,
       assetSource,
-      this._getJsonpFunction(options.chunk, options.noStringsLocaleName)
+      this._getJsonpFunction(options.chunk, options.chunkHasLocalizedModules, options.noStringsLocaleName)
     );
     const reconstructedAsset: INonLocalizedReconstructionResult = AssetProcessor._reconstructNonLocalized(
       parsedAsset.reconstructionSeries,
@@ -230,11 +232,20 @@ export class AssetProcessor {
               }
             }
 
-            // Replace the quotemark character with a unicode-escaped character
-            newValue = newValue.replace(/\"/g, '\\u0022');
+            const escapedBackslash: string = localizedElement.escapedBackslash || '\\';
 
-            // Replace the apostrophe character with a unicode-escaped character
-            newValue = newValue.replace(/\'/g, '\\u0027');
+            // Replace backslashes with the properly escaped backslash
+            newValue = newValue.replace(/\\/g, escapedBackslash);
+
+            // @todo: look into using JSON.parse(...) to get the escaping characters
+            const escapingCharacterSequence: string = escapedBackslash.substr(escapedBackslash.length / 2);
+
+            // Ensure the the quotemark, apostrophe, tab, and newline characters are properly escaped
+            newValue = newValue.replace(/\r/g, `${escapingCharacterSequence}r`);
+            newValue = newValue.replace(/\n/g, `${escapingCharacterSequence}n`);
+            newValue = newValue.replace(/\t/g, `${escapingCharacterSequence}t`);
+            newValue = newValue.replace(/\"/g, `${escapingCharacterSequence}u0022`);
+            newValue = newValue.replace(/\'/g, `${escapingCharacterSequence}u0027`);
 
             reconstruction.push(newValue);
             sizeDiff += (newValue.length - localizedElement.size);
@@ -334,7 +345,7 @@ export class AssetProcessor {
       };
       reconstructionSeries.push(staticElement);
 
-      const [placeholder, elementLabel, token, placeholderSerialNumber] = regexResult;
+      const [placeholder, escapedBackslash, elementLabel, token, placeholderSerialNumber] = regexResult;
 
       let localizedReconstructionElement: IReconstructionElement;
       switch (elementLabel) {
@@ -353,6 +364,7 @@ export class AssetProcessor {
               values: stringData.values,
               size: placeholder.length,
               locFilePath: stringData.locFilePath,
+              escapedBackslash: escapedBackslash,
               stringName: stringData.stringName,
             };
             localizedReconstructionElement = localizedElement;
@@ -364,7 +376,8 @@ export class AssetProcessor {
           const dynamicElement: IDynamicReconstructionElement = {
             kind: 'dynamic',
             valueFn: (locale: string) => locale,
-            size: placeholder.length
+            size: placeholder.length,
+            escapedBackslash: escapedBackslash
           };
           localizedReconstructionElement = dynamicElement;
           break;
@@ -375,6 +388,7 @@ export class AssetProcessor {
             kind: 'dynamic',
             valueFn: jsonpFunction,
             size: placeholder.length,
+            escapedBackslash: escapedBackslash,
             token: token.substring(1, token.length - 1)
           };
           localizedReconstructionElement = dynamicElement;
@@ -404,6 +418,7 @@ export class AssetProcessor {
 
   private static _getJsonpFunction(
     chunk: Webpack.compilation.Chunk,
+    chunkHasLocalizedModules: (chunk: Webpack.compilation.Chunk) => boolean,
     noStringsLocaleName: string
   ): (locale: string, chunkIdToken: string | undefined) => string {
     const idsWithStrings: Set<string> = new Set<string>();
@@ -411,7 +426,7 @@ export class AssetProcessor {
 
     const asyncChunks: Set<Webpack.compilation.Chunk> = chunk.getAllAsyncChunks();
     for (const asyncChunk of asyncChunks) {
-      if (EntityMarker.getMark(asyncChunk)) {
+      if (chunkHasLocalizedModules(asyncChunk)) {
         idsWithStrings.add(asyncChunk.id);
       } else {
         idsWithoutStrings.add(asyncChunk.id);

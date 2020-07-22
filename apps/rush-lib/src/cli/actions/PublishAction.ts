@@ -8,8 +8,8 @@ import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
   CommandLineChoiceParameter
-} from '@microsoft/ts-command-line';
-import { FileSystem } from '@microsoft/node-core-library';
+} from '@rushstack/ts-command-line';
+import { FileSystem } from '@rushstack/node-core-library';
 
 import {
   IChangeInfo,
@@ -79,7 +79,7 @@ export class PublishAction extends BaseRushAction {
       parameterShortName: '-b',
       argumentName: 'BRANCH',
       description:
-      'If this flag is specified, applied changes and deleted change requests will be' +
+      'If this flag is specified, applied changes and deleted change requests will be ' +
       'committed and merged into the target branch.'
     });
     this._publish = this.defineFlagParameter({
@@ -203,7 +203,7 @@ export class PublishAction extends BaseRushAction {
    */
   protected run(): Promise<void> {
     return Promise.resolve().then(() => {
-      PolicyValidator.validatePolicy(this.rushConfiguration, false);
+      PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: false });
 
       // Example: "common\temp\publish-home"
       this._targetNpmrcPublishFolder = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
@@ -500,7 +500,7 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private _addNpmPublishHome(): void {    
+  private _addNpmPublishHome(): void {
     // Create "common\temp\publish-home" folder, if it doesn't exist
     Utilities.createFolderWithRetry(this._targetNpmrcPublishFolder);
 

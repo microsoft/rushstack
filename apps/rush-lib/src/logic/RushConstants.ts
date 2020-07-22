@@ -76,6 +76,11 @@ export class RushConstants {
   public static readonly pnpmV1ShrinkwrapFilename: string = 'shrinkwrap.yaml';
 
   /**
+   * Number of installation attempts
+   */
+  public static readonly defaultMaxInstallAttempts: number = 3;
+
+  /**
    * The filename ("pnpm-lock.yaml") used to store an installation plan for the PNPM package manger
    * (PNPM version 3.x and later).
    */

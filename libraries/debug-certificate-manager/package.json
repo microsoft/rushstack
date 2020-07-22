@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/debug-certificate-manager",
-  "version": "0.2.1",
+  "version": "0.2.19",
   "description": "Cross-platform functionality to create debug ssl certificates.",
   "main": "lib/index.js",
   "typings": "dist/debug-certificate-manager.d.ts",
@@ -12,16 +12,16 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@microsoft/node-core-library": "3.19.3",
+    "@rushstack/node-core-library": "3.24.0",
     "deasync": "~0.1.19",
     "node-forge": "~0.7.1",
     "sudo": "~1.0.3"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.4.4",
-    "@microsoft/rush-stack-compiler-3.5": "0.4.3",
-    "@rushstack/eslint-config": "0.5.4",
-    "@types/jest": "23.3.11",
+    "@microsoft/node-library-build": "6.4.22",
+    "@microsoft/rush-stack-compiler-3.5": "0.5.2",
+    "@rushstack/eslint-config": "0.5.8",
+    "@types/jest": "25.2.1",
     "@types/node": "10.17.13",
     "@types/node-forge": "0.9.1",
     "gulp": "~4.0.2"

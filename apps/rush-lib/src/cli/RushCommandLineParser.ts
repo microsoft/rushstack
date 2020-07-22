@@ -5,8 +5,8 @@ import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 
-import { CommandLineParser, CommandLineFlagParameter, CommandLineAction } from '@microsoft/ts-command-line';
-import { InternalError } from '@microsoft/node-core-library';
+import { CommandLineParser, CommandLineFlagParameter, CommandLineAction } from '@rushstack/ts-command-line';
+import { InternalError } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
@@ -18,9 +18,11 @@ import { BaseScriptAction } from '../cli/scriptActions/BaseScriptAction';
 import { AddAction } from './actions/AddAction';
 import { ChangeAction } from './actions/ChangeAction';
 import { CheckAction } from './actions/CheckAction';
+import { DeployAction } from './actions/DeployAction';
 import { UpdateAction } from './actions/UpdateAction';
 import { InstallAction } from './actions/InstallAction';
 import { InitAction } from './actions/InitAction';
+import { InitDeployAction } from './actions/InitDeployAction';
 import { LinkAction } from './actions/LinkAction';
 import { ListAction } from './actions/ListAction';
 import { PublishAction } from './actions/PublishAction';
@@ -156,8 +158,10 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new AddAction(this));
       this.addAction(new ChangeAction(this));
       this.addAction(new CheckAction(this));
+      this.addAction(new DeployAction(this));
       this.addAction(new InstallAction(this));
       this.addAction(new InitAction(this));
+      this.addAction(new InitDeployAction(this));
       this.addAction(new LinkAction(this));
       this.addAction(new ListAction(this));
       this.addAction(new PublishAction(this));
@@ -188,7 +192,7 @@ export class RushCommandLineParser extends CommandLineParser {
       commandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFile);
     }
 
-    // Build actions from the command line configuration supercede default build actions.
+    // Build actions from the command line configuration supersede default build actions.
     this._addCommandLineConfigActions(commandLineConfiguration);
     this._addDefaultBuildActions(commandLineConfiguration);
     this._validateCommandLineConfigParameterAssociations(commandLineConfiguration);
@@ -200,7 +204,11 @@ export class RushCommandLineParser extends CommandLineParser {
     }
 
     if (!this.tryGetAction(RushConstants.rebuildCommandName)) {
-      this._addCommandLineConfigAction(commandLineConfiguration, CommandLineConfiguration.defaultRebuildCommandJson);
+      this._addCommandLineConfigAction(
+        commandLineConfiguration,
+        CommandLineConfiguration.defaultRebuildCommandJson,
+        RushConstants.buildCommandName
+      );
     }
   }
 
@@ -217,7 +225,8 @@ export class RushCommandLineParser extends CommandLineParser {
 
   private _addCommandLineConfigAction(
     commandLineConfiguration: CommandLineConfiguration | undefined,
-    command: CommandJson
+    command: CommandJson,
+    commandToRun?: string
   ): void {
     if (this.tryGetAction(command.name)) {
       throw new Error(`${RushConstants.commandLineFilename} defines a command "${command.name}"`
@@ -231,9 +240,9 @@ export class RushCommandLineParser extends CommandLineParser {
         this.addAction(new BulkScriptAction({
           actionName: command.name,
 
-          // The rush rebuild and rush build command invoke the same NPM script because they share the same
-          // package-deps-hash state.
-          commandToRun: command.name === RushConstants.rebuildCommandName ? 'build' : undefined,
+          // By default, the "rebuild" action runs the "build" script. However, if the command-line.json file
+          // overrides "rebuild," the "rebuild" script should be run.
+          commandToRun: commandToRun,
 
           summary: command.summary,
           documentation: command.description || command.summary,

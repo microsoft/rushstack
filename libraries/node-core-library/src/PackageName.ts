@@ -37,14 +37,50 @@ export interface IParsedPackageNameOrError extends IParsedPackageName {
 }
 
 /**
- * Various functions for working with package names that may include scopes.
+ * Options that configure the validation rules used by a {@link PackageNameParser} instance.
+ *
+ * @remarks
+ * The default validation is based on the npmjs.com registry's policy for published packages, and includes these
+ * restrictions:
+ *
+ * - The package name cannot be longer than 214 characters.
+ *
+ * - The package name must not be empty.
+ *
+ * - Other than the `@` and `/` delimiters used for scopes, the only allowed characters
+ *   are letters, numbers, `-`, `_`, and `.`.
+ *
+ * - The name must not start with a `.` or `_`.
  *
  * @public
  */
-export class PackageName {
+export interface IPackageNameParserOptions {
+  /**
+   * If true, allows upper-case letters in package names.
+   * This improves compatibility with some legacy private registries that still allow that.
+   */
+  allowUpperCase?: boolean;
+}
+
+/**
+ * A configurable parser for validating and manipulating NPM package names such as `my-package` or `@scope/my-package`.
+ *
+ * @remarks
+ * If you do not need to customize the parser configuration, it is recommended to use {@link PackageName}
+ * which exposes these operations as a simple static class.
+ *
+ * @public
+ */
+export class PackageNameParser {
   // encodeURIComponent() escapes all characters except:  A-Z a-z 0-9 - _ . ! ~ * ' ( )
   // However, these are disallowed because they are shell characters:       ! ~ * ' ( )
   private static readonly _invalidNameCharactersRegExp: RegExp = /[^A-Za-z0-9\-_\.]/;
+
+  private readonly _options: IPackageNameParserOptions;
+
+  public constructor(options: IPackageNameParserOptions = { }) {
+    this._options = { ...options };
+  }
 
   /**
    * This attempts to parse a package name that may include a scope component.
@@ -55,7 +91,7 @@ export class PackageName {
    * @returns an {@link IParsedPackageNameOrError} structure whose `error` property will be
    * nonempty if the string could not be parsed.
    */
-  public static tryParse(packageName: string): IParsedPackageNameOrError {
+  public tryParse(packageName: string): IParsedPackageNameOrError {
     const result: IParsedPackageNameOrError = {
       scope: '',
       unscopedName: '',
@@ -114,18 +150,21 @@ export class PackageName {
     const nameWithoutScopeSymbols: string = (result.scope ? result.scope.slice(1, -1) : '')
       + result.unscopedName;
 
-    // "New packages must not have uppercase letters in the name."
-    // This can't be enforced because "old" packages are still actively maintained.
-    // Example: https://www.npmjs.com/package/Base64
-    // However it's pretty reasonable to require the scope to be lower case
-    if (result.scope !== result.scope.toLowerCase()) {
-      result.error = `The package scope "${result.scope}" must not contain upper case characters`;
-      return result;
+    if (!this._options.allowUpperCase) {
+      // "New packages must not have uppercase letters in the name."
+      // This can't be enforced because "old" packages are still actively maintained.
+      // Example: https://www.npmjs.com/package/Base64
+      // However it's pretty reasonable to require the scope to be lower case
+      if (result.scope !== result.scope.toLowerCase()) {
+        result.error = `The package scope "${result.scope}" must not contain upper case characters`;
+        return result;
+      }
     }
 
     // "The name ends up being part of a URL, an argument on the command line, and a folder name.
     // Therefore, the name can't contain any non-URL-safe characters"
-    const match: RegExpMatchArray | null = nameWithoutScopeSymbols.match(PackageName._invalidNameCharactersRegExp);
+    const match: RegExpMatchArray | null = nameWithoutScopeSymbols.match(
+      PackageNameParser._invalidNameCharactersRegExp);
     if (match) {
       result.error = `The package name "${packageName}" contains an invalid character: "${match[0]}"`;
       return result;
@@ -140,8 +179,8 @@ export class PackageName {
    * @remarks
    * The packageName must not be an empty string.
    */
-  public static parse(packageName: string): IParsedPackageName {
-    const result: IParsedPackageNameOrError = PackageName.tryParse(packageName);
+  public parse(packageName: string): IParsedPackageName {
+    const result: IParsedPackageNameOrError = this.tryParse(packageName);
     if (result.error) {
       throw new Error(result.error);
     }
@@ -151,15 +190,15 @@ export class PackageName {
   /**
    * {@inheritDoc IParsedPackageName.scope}
    */
-  public static getScope(packageName: string): string {
-    return PackageName.parse(packageName).scope;
+  public getScope(packageName: string): string {
+    return this.parse(packageName).scope;
   }
 
   /**
    * {@inheritDoc IParsedPackageName.unscopedName}
    */
-  public static getUnscopedName(packageName: string): string {
-    return PackageName.parse(packageName).unscopedName;
+  public getUnscopedName(packageName: string): string {
+    return this.parse(packageName).unscopedName;
   }
 
   /**
@@ -167,8 +206,8 @@ export class PackageName {
    * @remarks
    * This function will not throw an exception.
    */
-  public static isValidName(packageName: string): boolean {
-    const result: IParsedPackageNameOrError = PackageName.tryParse(packageName);
+  public isValidName(packageName: string): boolean {
+    const result: IParsedPackageNameOrError = this.tryParse(packageName);
     return !result.error;
   }
 
@@ -176,8 +215,8 @@ export class PackageName {
    * Throws an exception if the specified name is not a valid package name.
    * The packageName must not be an empty string.
    */
-  public static validate(packageName: string): void {
-    PackageName.parse(packageName);
+  public validate(packageName: string): void {
+    this.parse(packageName);
   }
 
   /**
@@ -186,7 +225,7 @@ export class PackageName {
    * @param unscopedName - Must be a nonempty package name that does not contain a scope
    * @returns A full package name such as "\@example/some-library".
    */
-  public static combineParts(scope: string, unscopedName: string): string {
+  public combineParts(scope: string, unscopedName: string): string {
     if (scope !== '') {
       if (scope[0] !== '@') {
         throw new Error('The scope must start with an "@" character');
@@ -211,8 +250,57 @@ export class PackageName {
     }
 
     // Make sure the result is a valid package name
-    PackageName.validate(result);
+    this.validate(result);
 
     return result;
+  }
+}
+
+/**
+ * Provides basic operations for validating and manipulating NPM package names such as `my-package`
+ * or `@scope/my-package`.
+ *
+ * @remarks
+ * This is the default implementation of {@link PackageNameParser}, exposed as a convenient static class.
+ * If you need to configure the parsing rules, use `PackageNameParser` instead.
+ *
+ * @public
+ */
+export class PackageName {
+  private static readonly _parser: PackageNameParser = new PackageNameParser();
+
+  /** {@inheritDoc PackageNameParser.tryParse} */
+  public static tryParse(packageName: string): IParsedPackageNameOrError {
+    return PackageName._parser.tryParse(packageName);
+  }
+
+  /** {@inheritDoc PackageNameParser.parse} */
+  public static parse(packageName: string): IParsedPackageName {
+   return this._parser.parse(packageName);
+  }
+
+  /** {@inheritDoc PackageNameParser.getScope} */
+  public static getScope(packageName: string): string {
+    return this._parser.getScope(packageName);
+  }
+
+  /** {@inheritDoc PackageNameParser.getUnscopedName} */
+  public static getUnscopedName(packageName: string): string {
+    return this._parser.getUnscopedName(packageName);
+  }
+
+  /** {@inheritDoc PackageNameParser.isValidName} */
+  public static isValidName(packageName: string): boolean {
+    return this._parser.isValidName(packageName);
+  }
+
+  /** {@inheritDoc PackageNameParser.validate} */
+  public static validate(packageName: string): void {
+    return this._parser.validate(packageName);
+  }
+
+  /** {@inheritDoc PackageNameParser.combineParts} */
+  public static combineParts(scope: string, unscopedName: string): string {
+    return this._parser.combineParts(scope, unscopedName);
   }
 }

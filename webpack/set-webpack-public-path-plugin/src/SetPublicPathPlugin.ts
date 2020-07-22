@@ -183,14 +183,21 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
           for (const chunk of chunkGroup.chunks) {
             if (chunk[SHOULD_REPLACE_ASSET_NAME_TOKEN]) {
               for (const assetFilename of chunk.files) {
+                let escapedAssetFilename: string;
+                if (assetFilename.match(/\.map$/)) {
+                  escapedAssetFilename = assetFilename.substr(0, assetFilename.length - (4 /* '.map'.length */)); // Trim the ".map" extension
+                  escapedAssetFilename = lodash.escapeRegExp(escapedAssetFilename);
+                  escapedAssetFilename = JSON.stringify(escapedAssetFilename); // source in sourcemaps is JSON-encoded
+                  escapedAssetFilename = escapedAssetFilename.substring(1, escapedAssetFilename.length - 1); // Trim the quotes from the JSON encoding
+                } else {
+                  escapedAssetFilename = lodash.escapeRegExp(assetFilename);
+                }
+
                 const asset: IAsset = compilation.assets[assetFilename];
                 const originalAssetSource: string = asset.source();
                 const originalAssetSize: number = asset.size();
 
-                const newAssetSource: string = originalAssetSource.replace(
-                  ASSET_NAME_TOKEN_REGEX,
-                  lodash.escapeRegExp(assetFilename)
-                );
+                const newAssetSource: string = originalAssetSource.replace(ASSET_NAME_TOKEN_REGEX, escapedAssetFilename);
                 const sizeDifference: number = assetFilename.length - ASSET_NAME_TOKEN.length;
                 asset.source = () => newAssetSource;
                 asset.size = () => originalAssetSize + sizeDifference;
