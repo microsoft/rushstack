@@ -1,7 +1,9 @@
 {
-  "changes": [{
-    "packageName": "c",
-    "type": "patch",
-    "comment": "Patching c"
-  }]
+  "changes": [
+    {
+      "packageName": "c",
+      "type": "patch",
+      "comment": "Patching c"
+    }
+  ]
 }

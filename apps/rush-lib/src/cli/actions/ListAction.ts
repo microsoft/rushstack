@@ -4,7 +4,6 @@ import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import * as Table from 'cli-table';
 
-
 export interface IJsonEntry {
   name: string;
   version: string;
@@ -76,9 +75,7 @@ export class ListAction extends BaseRushAction {
     }
   }
 
-  private _printJson(
-    allPackages: Map<string, RushConfigurationProject>
-  ): void {
+  private _printJson(allPackages: Map<string, RushConfigurationProject>): void {
     const projects: IJsonEntry[] = [];
     allPackages.forEach((_config: RushConfigurationProject, name: string) => {
       const project: IJsonEntry = {
@@ -96,17 +93,13 @@ export class ListAction extends BaseRushAction {
     console.log(JSON.stringify(output, undefined, 2));
   }
 
-  private _printList(
-    allPackages: Map<string, RushConfigurationProject>
-  ): void {
+  private _printList(allPackages: Map<string, RushConfigurationProject>): void {
     allPackages.forEach((_config: RushConfigurationProject, name: string) => {
       console.log(name);
     });
   }
 
-  private _printListTable(
-    allPackages: Map<string, RushConfigurationProject>
-  ): void {
+  private _printListTable(allPackages: Map<string, RushConfigurationProject>): void {
     const tableHeader: string[] = ['Project'];
     if (this._version.value) {
       tableHeader.push('Version');

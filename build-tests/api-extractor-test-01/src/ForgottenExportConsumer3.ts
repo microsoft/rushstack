@@ -4,10 +4,7 @@
 /**
  * This class is indirectly consumed by ForgottenExportConsumer3.
  */
-export interface IForgottenIndirectDependency {
-
-}
-
+export interface IForgottenIndirectDependency {}
 
 /**
  * This class is directly consumed by ForgottenExportConsumer3.

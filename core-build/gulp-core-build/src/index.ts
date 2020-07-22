@@ -13,11 +13,16 @@ import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
 import { CleanTask } from './tasks/CleanTask';
 import { CleanFlagTask } from './tasks/CleanFlagTask';
-import { CopyStaticAssetsTask } from  './tasks/copyStaticAssets/CopyStaticAssetsTask';
+import { CopyStaticAssetsTask } from './tasks/copyStaticAssets/CopyStaticAssetsTask';
 import { args, builtPackage } from './State';
 export { IExecutable } from './IExecutable';
 import { log, error as logError } from './logging';
-import { initialize as initializeLogging, markTaskCreationTime, generateGulpError, setWatchMode } from './logging';
+import {
+  initialize as initializeLogging,
+  markTaskCreationTime,
+  generateGulpError,
+  setWatchMode
+} from './logging';
 import { getFlagValue } from './config';
 import * as Gulp from 'gulp';
 import * as notifier from 'node-notifier';
@@ -54,9 +59,10 @@ export * from './tasks/JestTask';
 const _taskMap: { [key: string]: IExecutable } = {};
 const _uniqueTasks: IExecutable[] = [];
 
-const packageFolder: string = (builtPackage.directories && builtPackage.directories.packagePath)
-  ? builtPackage.directories.packagePath
-  : '';
+const packageFolder: string =
+  builtPackage.directories && builtPackage.directories.packagePath
+    ? builtPackage.directories.packagePath
+    : '';
 
 let _buildConfig: IBuildConfig = {
   maxBuildTimeMs: 0, // Defaults to no timeout
@@ -157,7 +163,9 @@ export function task(taskName: string, taskExecutable: IExecutable): IExecutable
 export interface ICustomGulpTask {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (gulp: typeof Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: any) => void):
-    Promise<object> | NodeJS.ReadWriteStream | void;
+    | Promise<object>
+    | NodeJS.ReadWriteStream
+    | void;
 }
 
 /** @public */
@@ -168,8 +176,10 @@ class CustomTask extends GulpTask<void> {
     this._fn = fn.bind(this);
   }
 
-  public executeTask(gulp: typeof Gulp | GulpProxy, completeCallback?: (error?: string | Error) => void):
-    Promise<object> | NodeJS.ReadWriteStream | void {
+  public executeTask(
+    gulp: typeof Gulp | GulpProxy,
+    completeCallback?: (error?: string | Error) => void
+  ): Promise<object> | NodeJS.ReadWriteStream | void {
     return this._fn(gulp, getConfig(), completeCallback);
   }
 }
@@ -209,7 +219,6 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
   return {
     execute: (buildConfig: IBuildConfig): Promise<void> => {
       return new Promise<void>(() => {
-
         function _runWatch(): Promise<void> {
           if (isWatchRunning) {
             shouldRerunWatch = true;
@@ -225,7 +234,7 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
                   if (buildConfig.showToast) {
                     notifier.notify({
                       title: successMessage,
-                      message: (builtPackage ? builtPackage.name : ''),
+                      message: builtPackage ? builtPackage.name : '',
                       icon: buildConfig.buildSuccessIconPath
                     });
                   } else {
@@ -278,7 +287,7 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
  * @public
  */
 export function serial(...tasks: (IExecutable[] | IExecutable)[]): IExecutable {
-  const flatTasks: IExecutable[] = _flatten(tasks).filter(taskExecutable => {
+  const flatTasks: IExecutable[] = _flatten(tasks).filter((taskExecutable) => {
     // eslint-disable-next-line @rushstack/no-null
     return taskExecutable !== null && taskExecutable !== undefined;
   });
@@ -305,7 +314,7 @@ export function serial(...tasks: (IExecutable[] | IExecutable)[]): IExecutable {
  * @public
  */
 export function parallel(...tasks: (IExecutable[] | IExecutable)[]): IExecutable {
-  const flatTasks: IExecutable[] = _flatten<IExecutable>(tasks).filter(taskExecutable => {
+  const flatTasks: IExecutable[] = _flatten<IExecutable>(tasks).filter((taskExecutable) => {
     // eslint-disable-next-line @rushstack/no-null
     return taskExecutable !== null && taskExecutable !== undefined;
   });
@@ -350,7 +359,7 @@ export function initialize(gulp: typeof Gulp): void {
 
   initializeLogging(gulp, getConfig(), undefined, undefined);
 
-  Object.keys(_taskMap).forEach(taskName => _registerTask(gulp, taskName, _taskMap[taskName]));
+  Object.keys(_taskMap).forEach((taskName) => _registerTask(gulp, taskName, _taskMap[taskName]));
 
   markTaskCreationTime();
 }
@@ -360,20 +369,19 @@ export function initialize(gulp: typeof Gulp): void {
  */
 function _registerTask(gulp: typeof Gulp, taskName: string, taskExecutable: IExecutable): void {
   gulp.task(taskName, (cb) => {
-    const maxBuildTimeMs: number = taskExecutable.maxBuildTimeMs === undefined
-      ? _buildConfig.maxBuildTimeMs
-      : taskExecutable.maxBuildTimeMs;
-    const timer: NodeJS.Timer | undefined = maxBuildTimeMs === 0
-      ? undefined
-      : setTimeout(
-          () => {
+    const maxBuildTimeMs: number =
+      taskExecutable.maxBuildTimeMs === undefined
+        ? _buildConfig.maxBuildTimeMs
+        : taskExecutable.maxBuildTimeMs;
+    const timer: NodeJS.Timer | undefined =
+      maxBuildTimeMs === 0
+        ? undefined
+        : setTimeout(() => {
             logError(
               `Build ran for ${maxBuildTimeMs} milliseconds without completing. Cancelling build with error.`
             );
             cb(new Error('Timeout'));
-          },
-          maxBuildTimeMs
-        );
+          }, maxBuildTimeMs);
     _executeTask(taskExecutable, _buildConfig).then(
       () => {
         if (timer) {
@@ -408,7 +416,11 @@ function _executeTask(taskExecutable: IExecutable, buildConfig: IBuildConfig): P
 
   // If the task is missing, throw a meaningful error.
   if (!taskExecutable || !taskExecutable.execute) {
-    return Promise.reject(new Error(`A task was scheduled, but the task was null. This probably means the task wasn't imported correctly.`));
+    return Promise.reject(
+      new Error(
+        `A task was scheduled, but the task was null. This probably means the task wasn't imported correctly.`
+      )
+    );
   }
 
   if (taskExecutable.isEnabled === undefined || taskExecutable.isEnabled(buildConfig)) {
@@ -418,8 +430,8 @@ function _executeTask(taskExecutable: IExecutable, buildConfig: IBuildConfig): P
       buildConfig.onTaskStart(taskExecutable.name);
     }
 
-    const taskPromise: Promise<void> = taskExecutable.execute(buildConfig)
-      .then(() => {
+    const taskPromise: Promise<void> = taskExecutable.execute(buildConfig).then(
+      () => {
         if (buildConfig.onTaskEnd && taskExecutable.name) {
           buildConfig.onTaskEnd(taskExecutable.name, process.hrtime(startTime));
         }
@@ -430,7 +442,8 @@ function _executeTask(taskExecutable: IExecutable, buildConfig: IBuildConfig): P
         }
 
         return Promise.reject(error);
-      });
+      }
+    );
 
     return taskPromise;
   }

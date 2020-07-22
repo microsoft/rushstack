@@ -954,7 +954,7 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "api-documenter-test!IDocInterface3#\"[not.a.symbol]\":member",
-              "docComment": "/**\n * An identifier that does needs quotes. It misleadingly looks like an ECMAScript symbol.\n */\n",
+              "docComment": "/**\n * An identifier that does need quotes. It misleadingly looks like an ECMAScript symbol.\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",

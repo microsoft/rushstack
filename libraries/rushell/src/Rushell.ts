@@ -26,7 +26,6 @@ export interface IRushellExecuteResult {
  */
 export class Rushell {
   public execute(script: string): IRushellExecuteResult {
-
     const tokenizer: Tokenizer = new Tokenizer(script);
     const parser: Parser = new Parser(tokenizer);
     const astScript: AstScript = parser.parse();
@@ -37,7 +36,7 @@ export class Rushell {
   private _evaluateNode(astNode: AstNode): IRushellExecuteResult {
     switch (astNode.kind) {
       case AstKind.CompoundWord:
-        return { value: astNode.parts.map(x => this._evaluateNode(x).value).join('') };
+        return { value: astNode.parts.map((x) => this._evaluateNode(x).value).join('') };
       case AstKind.Text:
         return { value: astNode.token!.range.toString() };
       case AstKind.Script:
@@ -65,7 +64,7 @@ export class Rushell {
     }
 
     const commandPath: string = commandPathResult.value;
-    const commandArgs: string[] = commandArgResults.map(x => x.value);
+    const commandArgs: string[] = commandArgResults.map((x) => x.value);
 
     const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(commandPath, commandArgs);
 

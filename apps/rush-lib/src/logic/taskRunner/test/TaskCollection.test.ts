@@ -36,19 +36,17 @@ describe('TaskCollection', () => {
   describe('Dependencies', () => {
     beforeEach(() => {
       taskCollection = new TaskCollection({
-          quietMode: false
+        quietMode: false
       });
     });
 
     it('throwsErrorOnNonExistentTask', () => {
-      expect(() => taskCollection.addDependencies('foo', []))
-        .toThrowErrorMatchingSnapshot();
+      expect(() => taskCollection.addDependencies('foo', [])).toThrowErrorMatchingSnapshot();
     });
 
     it('throwsErrorOnNonExistentDependency', () => {
       taskCollection.addTask(createDummyTask('foo'));
-      expect(() => taskCollection.addDependencies('foo', ['bar']))
-        .toThrowErrorMatchingSnapshot();
+      expect(() => taskCollection.addDependencies('foo', ['bar'])).toThrowErrorMatchingSnapshot();
     });
 
     it('detectsDependencyCycle', () => {

@@ -1,10 +1,6 @@
 {
   "exampleString": "This is a string",
-  "exampleArray": [
-    "apple",
-    "banana",
-    "coconut"
-  ],
+  "exampleArray": ["apple", "banana", "coconut"],
   "exampleOneOf": {
     "field2": "blah"
   }

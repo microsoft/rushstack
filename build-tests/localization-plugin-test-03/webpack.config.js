@@ -18,7 +18,12 @@ function resolveMissingString(localeNames, localizedResourcePath) {
 
   const result = {};
   for (const localeName of localeNames) {
-    const expectedCombinedStringsPath = path.resolve(__dirname, 'localization', localeName, 'combinedStringsData.json');
+    const expectedCombinedStringsPath = path.resolve(
+      __dirname,
+      'localization',
+      localeName,
+      'combinedStringsData.json'
+    );
     try {
       const loadedCombinedStringsPath = JsonFile.load(expectedCombinedStringsPath);
       result[localeName] = loadedCombinedStringsPath[contextRelativePath];
@@ -74,20 +79,20 @@ function generateConfiguration(mode, outputFolderName) {
             localeName: 'en-us'
           },
           translatedStrings: {
-            "es-es": {
-              "./src/strings1.loc.json": {
-                "string1": "la primera cadena de texto"
+            'es-es': {
+              './src/strings1.loc.json': {
+                string1: 'la primera cadena de texto'
               },
-              "./src/chunks/strings2.loc.json": "./localization/es-es/chunks/strings2.loc.json",
-              "./src/strings4.loc.json": {
-                "string1": "\"cadena de texto con comillas\""
+              './src/chunks/strings2.loc.json': './localization/es-es/chunks/strings2.loc.json',
+              './src/strings4.loc.json': {
+                string1: '"cadena de texto con comillas"'
               },
-              "./src/strings5.resx": {
-                "string1": "La primera cadena de texto RESX",
-                "stringWithQuotes": "\"cadena de texto RESX con comillas\""
+              './src/strings5.resx': {
+                string1: 'La primera cadena de texto RESX',
+                stringWithQuotes: '"cadena de texto RESX con comillas"'
               },
-              "./src/chunks/strings6.resx": {
-                "string": "cadena de texto RESX"
+              './src/chunks/strings6.resx': {
+                string: 'cadena de texto RESX'
               }
             }
           },
@@ -136,5 +141,5 @@ function generateConfiguration(mode, outputFolderName) {
 
 module.exports = [
   generateConfiguration('development', 'dist-dev'),
-  generateConfiguration('production', 'dist-prod'),
+  generateConfiguration('production', 'dist-prod')
 ];

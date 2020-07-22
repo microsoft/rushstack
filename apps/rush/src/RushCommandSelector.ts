@@ -17,13 +17,18 @@ type CommandName = 'rush' | 'rushx' | 'myrush' | undefined;
 export class RushCommandSelector {
   public static failIfNotInvokedAsRush(version: string): void {
     if (RushCommandSelector.getCommandName() === 'rushx') {
-      RushCommandSelector._failWithError(`This repository is using Rush version ${version}`
-        + ` which does not support the "rushx" command`);
+      RushCommandSelector._failWithError(
+        `This repository is using Rush version ${version}` + ` which does not support the "rushx" command`
+      );
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static execute(launcherVersion: string, selectedRushLib: any, options: rushLib.ILaunchOptions): void {
+  public static execute(
+    launcherVersion: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    selectedRushLib: any,
+    options: rushLib.ILaunchOptions
+  ): void {
     const Rush: typeof rushLib.Rush = selectedRushLib.Rush;
 
     if (!Rush) {
@@ -33,24 +38,20 @@ export class RushCommandSelector {
 
     if (RushCommandSelector.getCommandName() === 'rushx') {
       if (!Rush.launchRushX) {
-        RushCommandSelector._failWithError(`This repository is using Rush version ${Rush.version}`
-          + ` which does not support the "rushx" command`);
+        RushCommandSelector._failWithError(
+          `This repository is using Rush version ${Rush.version}` +
+            ` which does not support the "rushx" command`
+        );
       }
-      Rush.launchRushX(
-        launcherVersion,
-        {
-          isManaged: options.isManaged,
-          alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
-        }
-      );
+      Rush.launchRushX(launcherVersion, {
+        isManaged: options.isManaged,
+        alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
+      });
     } else {
-      Rush.launch(
-        launcherVersion,
-        {
-          isManaged: options.isManaged,
-          alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
-        }
-      );
+      Rush.launch(launcherVersion, {
+        isManaged: options.isManaged,
+        alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
+      });
     }
   }
 
@@ -66,12 +67,12 @@ export class RushCommandSelector {
       // argv[1]: "C:\\Program Files\\nodejs\\node_modules\\@microsoft\\rush\\bin\\rushx"
       const basename: string = path.basename(process.argv[1]).toUpperCase();
       switch (basename) {
-        case ('RUSHX') :
+        case 'RUSHX':
           return 'rushx';
-        case ('RUSH'):
+        case 'RUSH':
           return 'rush';
-        case ('MYRUSH'):
-          return 'myrush'
+        case 'MYRUSH':
+          return 'myrush';
       }
     }
     return undefined;

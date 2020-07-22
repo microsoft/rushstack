@@ -14,7 +14,6 @@ export interface IGlobalVariableAnalyzer {
 }
 
 export class TypeScriptInternals {
-
   public static getImmediateAliasedSymbol(symbol: ts.Symbol, typeChecker: ts.TypeChecker): ts.Symbol {
     // Compiler internal:
     // https://github.com/microsoft/TypeScript/blob/v3.2.2/src/compiler/checker.ts
@@ -29,12 +28,14 @@ export class TypeScriptInternals {
    * @returns The associated Symbol.  If there is no semantic information (e.g. if the
    * declaration is an extra semicolon somewhere), then "undefined" is returned.
    */
-  public static tryGetSymbolForDeclaration(declaration: ts.Declaration, checker: ts.TypeChecker): ts.Symbol
-    | undefined {
+  public static tryGetSymbolForDeclaration(
+    declaration: ts.Declaration,
+    checker: ts.TypeChecker
+  ): ts.Symbol | undefined {
     let symbol: ts.Symbol | undefined = (declaration as any).symbol;
     if (symbol && symbol.escapedName === ts.InternalSymbolName.Computed) {
       const name: ts.DeclarationName | undefined = ts.getNameOfDeclaration(declaration);
-      symbol = name && checker.getSymbolAtLocation(name) || symbol;
+      symbol = (name && checker.getSymbolAtLocation(name)) || symbol;
     }
     return symbol;
   }
@@ -44,9 +45,11 @@ export class TypeScriptInternals {
    * for a computed property based on its type, rather than by the Binder).
    */
   public static isLateBoundSymbol(symbol: ts.Symbol): boolean {
-    // eslint-disable-next-line no-bitwise
-    if (symbol.flags & ts.SymbolFlags.Transient &&
-        (symbol as any).checkFlags === (ts as any).CheckFlags.Late) {
+    if (
+      // eslint-disable-next-line no-bitwise
+      symbol.flags & ts.SymbolFlags.Transient &&
+      (symbol as any).checkFlags === (ts as any).CheckFlags.Late
+    ) {
       return true;
     }
     return false;
@@ -65,7 +68,9 @@ export class TypeScriptInternals {
   /**
    * Retrieves the (unescaped) value of an string literal, numeric literal, or identifier.
    */
-  public static getTextOfIdentifierOrLiteral(node: ts.Identifier | ts.StringLiteralLike | ts.NumericLiteral): string {
+  public static getTextOfIdentifierOrLiteral(
+    node: ts.Identifier | ts.StringLiteralLike | ts.NumericLiteral
+  ): string {
     // Compiler internal:
     // https://github.com/microsoft/TypeScript/blob/v3.2.2/src/compiler/utilities.ts#L2721
 
@@ -76,9 +81,10 @@ export class TypeScriptInternals {
    * Retrieves the (cached) module resolution information for a module name that was exported from a SourceFile.
    * The compiler populates this cache as part of analyzing the source file.
    */
-  public static getResolvedModule(sourceFile: ts.SourceFile, moduleNameText: string): ts.ResolvedModuleFull
-    | undefined {
-
+  public static getResolvedModule(
+    sourceFile: ts.SourceFile,
+    moduleNameText: string
+  ): ts.ResolvedModuleFull | undefined {
     // Compiler internal:
     // https://github.com/microsoft/TypeScript/blob/v3.2.2/src/compiler/utilities.ts#L218
 

@@ -143,12 +143,14 @@ export class TextRange {
       const current: string = this.buffer[currentIndex];
       ++currentIndex;
 
-      if (current === '\r') { // CR
+      if (current === '\r') {
+        // CR
         // Ignore '\r' and assume it will always have an accompanying '\n'
         continue;
       }
 
-      if (current === '\n') { // LF
+      if (current === '\n') {
+        // LF
         ++line;
         column = 1;
       } else {

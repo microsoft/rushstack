@@ -1,31 +1,37 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DeclarationReference, Meaning, Navigation, Component } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+import {
+  DeclarationReference,
+  Meaning,
+  Navigation,
+  Component
+} from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
-import { ApiTypeParameterListMixin, IApiTypeParameterListMixinOptions, IApiTypeParameterListMixinJson
-  } from '../mixins/ApiTypeParameterListMixin';
+import {
+  ApiTypeParameterListMixin,
+  IApiTypeParameterListMixinOptions,
+  IApiTypeParameterListMixinJson
+} from '../mixins/ApiTypeParameterListMixin';
 import { DeserializerContext } from './DeserializerContext';
 
 /**
  * Constructor options for {@link ApiTypeAlias}.
  * @public
  */
-export interface IApiTypeAliasOptions extends
-  IApiNameMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiDeclaredItemOptions,
-  IApiTypeParameterListMixinOptions {
+export interface IApiTypeAliasOptions
+  extends IApiNameMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiDeclaredItemOptions,
+    IApiTypeParameterListMixinOptions {
   typeTokenRange: IExcerptTokenRange;
 }
 
-export interface IApiTypeAliasJson extends
-  IApiDeclaredItemJson,
-  IApiTypeParameterListMixinJson {
+export interface IApiTypeAliasJson extends IApiDeclaredItemJson, IApiTypeParameterListMixinJson {
   typeTokenRange: IExcerptTokenRange;
 }
 
@@ -55,7 +61,9 @@ export interface IApiTypeAliasJson extends
  *
  * @public
  */
-export class ApiTypeAlias extends ApiTypeParameterListMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
+export class ApiTypeAlias extends ApiTypeParameterListMixin(
+  ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))
+) {
   /**
    * An {@link Excerpt} that describes the type of the alias.
    *
@@ -76,9 +84,11 @@ export class ApiTypeAlias extends ApiTypeParameterListMixin(ApiNameMixin(ApiRele
   }
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiTypeAliasOptions>, context: DeserializerContext,
-    jsonObject: IApiTypeAliasJson): void {
-
+  public static onDeserializeInto(
+    options: Partial<IApiTypeAliasOptions>,
+    context: DeserializerContext,
+    jsonObject: IApiTypeAliasJson
+  ): void {
     super.onDeserializeInto(options, context, jsonObject);
 
     options.typeTokenRange = jsonObject.typeTokenRange;
