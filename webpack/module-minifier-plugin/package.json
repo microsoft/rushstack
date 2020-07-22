@@ -17,10 +17,13 @@
   },
   "peerDependencies": {
     "webpack": "^4.31.0",
-    "webpack-sources": "~1.4.3"
-  },
-  "optionalPeerDependencies": {
+    "webpack-sources": "~1.4.3",
     "@types/webpack": "*"
+  },
+  "peerDependenciesMeta": {
+    "@types/webpack": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@types/node": "10.17.13",
