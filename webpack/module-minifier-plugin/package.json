@@ -17,7 +17,9 @@
   },
   "peerDependencies": {
     "webpack": "^4.31.0",
-    "webpack-sources": "~1.4.3",
+    "webpack-sources": "~1.4.3"
+  },
+  "optionalPeerDependencies": {
     "@types/webpack": "*"
   },
   "dependencies": {
