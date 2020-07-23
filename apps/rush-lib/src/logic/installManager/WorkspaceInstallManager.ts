@@ -141,6 +141,13 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         ...packageJson.dependencyList,
         ...packageJson.devDependencyList
       ]) {
+        // Allow the package manager to handle peer dependency resolution, since this is simply a constraint
+        // enforced by the package manager. Additionally, peer dependencies are simply a version constraint
+        // and do not need to be converted to workspaces protocol.
+        if (dependencyType === DependencyType.Peer) {
+          continue;
+        }
+
         const dependencySpecifier: DependencySpecifier = new DependencySpecifier(name, version);
 
         // Is there a locally built Rush project that could satisfy this dependency?
@@ -201,12 +208,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           }
         } else if (dependencySpecifier.specifierType === DependencySpecifierType.Workspace) {
           // Already specified as a local project. Allow the package manager to validate this
-          continue;
-        }
-
-        // Allow the package manager to handle peer dependency resolution, since this is simply a constraint
-        // enforced by the package manager
-        if (dependencyType === DependencyType.Peer) {
           continue;
         }
 
