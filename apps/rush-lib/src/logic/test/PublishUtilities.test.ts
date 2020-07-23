@@ -314,10 +314,10 @@ describe('sortChangeRequests', () => {
 
     expect(orderedChanges).toHaveLength(5);
     expect(orderedChanges[0].packageName).toEqual('a');
-    expect(orderedChanges[1].packageName).toEqual('e');
-    expect(orderedChanges[2].packageName).toEqual('b');
-    expect(orderedChanges[3].packageName).toEqual('f');
-    expect(orderedChanges[4].packageName).toEqual('c');
+    expect(orderedChanges[1].packageName).toEqual('b');
+    expect(orderedChanges[2].packageName).toEqual('e');
+    expect(orderedChanges[3].packageName).toEqual('c');
+    expect(orderedChanges[4].packageName).toEqual('f');
   });
 });
 
