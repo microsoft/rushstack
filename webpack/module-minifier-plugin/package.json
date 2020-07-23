@@ -20,6 +20,11 @@
     "webpack-sources": "~1.4.3",
     "@types/webpack": "*"
   },
+  "peerDependenciesMeta": {
+    "@types/webpack": {
+      "optional": true
+    }
+  },
   "dependencies": {
     "@types/node": "10.17.13",
     "@types/tapable": "1.0.5",

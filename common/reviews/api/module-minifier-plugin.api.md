@@ -46,7 +46,7 @@ export const IDENTIFIER_LEADING_DIGITS: string;
 export const IDENTIFIER_TRAILING_DIGITS: string;
 
 // @public
-export interface IExtendedModule extends webpack.compilation.Module, webpack.Module {
+export interface IExtendedModule extends webpack.compilation.Module {
     external?: boolean;
     id: string | number | null;
     identifier(): string;
