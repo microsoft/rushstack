@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/rush",
       "comment": "Prevent incorrect conversion to \"workspace:\" notation for peer dependencies when running \"rush update --full\"",
-      "type": "patch"
+      "type": "none"
     }
   ],
   "packageName": "@microsoft/rush",
