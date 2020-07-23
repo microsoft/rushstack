@@ -56,16 +56,19 @@ describe('findChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'rootPatchChange'))
     );
 
-    expect(Object.keys(allChanges)).toHaveLength(2);
+    expect(Object.keys(allChanges)).toHaveLength(3);
 
     expect(allChanges).toHaveProperty('a');
     expect(allChanges).toHaveProperty('b');
+    expect(allChanges).toHaveProperty('e');
 
     expect(allChanges['a'].changeType).toEqual(ChangeType.patch);
     expect(allChanges['b'].changeType).toEqual(ChangeType.dependency);
+    expect(allChanges['e'].changeType).toEqual(ChangeType.dependency);
 
     expect(allChanges['a'].newVersion).toEqual('1.0.1');
     expect(allChanges['b'].newVersion).toEqual('1.0.0');
+    expect(allChanges['e'].newVersion).toEqual('1.0.0');
   });
 
   it('returns 4 changes when hotfixing a root package', () => {
@@ -75,20 +78,28 @@ describe('findChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'rootHotfixChange'))
     );
 
-    expect(Object.keys(allChanges)).toHaveLength(4);
+    expect(Object.keys(allChanges)).toHaveLength(6);
 
     expect(allChanges).toHaveProperty('a');
     expect(allChanges).toHaveProperty('b');
+    expect(allChanges).toHaveProperty('c');
+    expect(allChanges).toHaveProperty('d');
+    expect(allChanges).toHaveProperty('e');
+    expect(allChanges).toHaveProperty('f');
 
     expect(allChanges['a'].changeType).toEqual(ChangeType.hotfix);
     expect(allChanges['b'].changeType).toEqual(ChangeType.hotfix);
     expect(allChanges['c'].changeType).toEqual(ChangeType.hotfix);
     expect(allChanges['d'].changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges['e'].changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges['f'].changeType).toEqual(ChangeType.hotfix);
 
     expect(allChanges['a'].newVersion).toEqual('1.0.0-hotfix.0');
     expect(allChanges['b'].newVersion).toEqual('1.0.0-hotfix.0');
     expect(allChanges['c'].newVersion).toEqual('1.0.0-hotfix.0');
     expect(allChanges['d'].newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges['e'].newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges['f'].newVersion).toEqual('1.0.0-hotfix.0');
   });
 
   it('returns 3 changes when major bumping a root package', () => {
@@ -99,19 +110,25 @@ describe('findChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'rootMajorChange'))
     );
 
-    expect(Object.keys(allChanges)).toHaveLength(3);
+    expect(Object.keys(allChanges)).toHaveLength(5);
 
     expect(allChanges).toHaveProperty('a');
     expect(allChanges).toHaveProperty('b');
     expect(allChanges).toHaveProperty('c');
+    expect(allChanges).toHaveProperty('e');
+    expect(allChanges).toHaveProperty('f');
 
     expect(allChanges['a'].changeType).toEqual(ChangeType.major);
     expect(allChanges['b'].changeType).toEqual(ChangeType.patch);
     expect(allChanges['c'].changeType).toEqual(ChangeType.dependency);
+    expect(allChanges['e'].changeType).toEqual(ChangeType.patch);
+    expect(allChanges['f'].changeType).toEqual(ChangeType.dependency);
 
     expect(allChanges['a'].newVersion).toEqual('2.0.0');
     expect(allChanges['b'].newVersion).toEqual('1.0.1');
     expect(allChanges['c'].newVersion).toEqual('1.0.0');
+    expect(allChanges['e'].newVersion).toEqual('1.0.1');
+    expect(allChanges['f'].newVersion).toEqual('1.0.0');
   });
 
   it('returns 2 changes when bumping cyclic dependencies', () => {
@@ -166,16 +183,22 @@ describe('findChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'multipleChanges'))
     );
 
-    expect(Object.keys(allChanges)).toHaveLength(3);
+    expect(Object.keys(allChanges)).toHaveLength(5);
     expect(allChanges).toHaveProperty('a');
     expect(allChanges).toHaveProperty('b');
     expect(allChanges).toHaveProperty('c');
+    expect(allChanges).toHaveProperty('e');
+    expect(allChanges).toHaveProperty('f');
     expect(allChanges['a'].changeType).toEqual(ChangeType.major);
     expect(allChanges['b'].changeType).toEqual(ChangeType.patch);
     expect(allChanges['c'].changeType).toEqual(ChangeType.dependency);
+    expect(allChanges['e'].changeType).toEqual(ChangeType.patch);
+    expect(allChanges['f'].changeType).toEqual(ChangeType.dependency);
     expect(allChanges['a'].newVersion).toEqual('2.0.0');
     expect(allChanges['b'].newVersion).toEqual('1.0.1');
     expect(allChanges['c'].newVersion).toEqual('1.0.0');
+    expect(allChanges['e'].newVersion).toEqual('1.0.1');
+    expect(allChanges['f'].newVersion).toEqual('1.0.0');
   });
 
   it('can resolve multiple reverse-ordered changes requests on the same package', () => {
@@ -186,16 +209,22 @@ describe('findChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'orderedChanges'))
     );
 
-    expect(Object.keys(allChanges)).toHaveLength(3);
+    expect(Object.keys(allChanges)).toHaveLength(5);
     expect(allChanges).toHaveProperty('a');
     expect(allChanges).toHaveProperty('b');
     expect(allChanges).toHaveProperty('c');
+    expect(allChanges).toHaveProperty('e');
+    expect(allChanges).toHaveProperty('f');
     expect(allChanges['a'].changeType).toEqual(ChangeType.major);
     expect(allChanges['b'].changeType).toEqual(ChangeType.patch);
     expect(allChanges['c'].changeType).toEqual(ChangeType.dependency);
+    expect(allChanges['e'].changeType).toEqual(ChangeType.patch);
+    expect(allChanges['f'].changeType).toEqual(ChangeType.dependency);
     expect(allChanges['a'].newVersion).toEqual('2.0.0');
     expect(allChanges['b'].newVersion).toEqual('1.0.1');
     expect(allChanges['c'].newVersion).toEqual('1.0.0');
+    expect(allChanges['e'].newVersion).toEqual('1.0.1');
+    expect(allChanges['f'].newVersion).toEqual('1.0.0');
   });
 
   it('can resolve multiple hotfix changes', () => {
@@ -206,21 +235,27 @@ describe('findChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'multipleHotfixChanges'))
     );
 
-    expect(Object.keys(allChanges)).toHaveLength(4);
+    expect(Object.keys(allChanges)).toHaveLength(6);
     expect(allChanges).toHaveProperty('a');
     expect(allChanges).toHaveProperty('b');
     expect(allChanges).toHaveProperty('c');
     expect(allChanges).toHaveProperty('d');
+    expect(allChanges).toHaveProperty('e');
+    expect(allChanges).toHaveProperty('f');
 
     expect(allChanges['a'].changeType).toEqual(ChangeType.hotfix);
     expect(allChanges['b'].changeType).toEqual(ChangeType.hotfix);
     expect(allChanges['c'].changeType).toEqual(ChangeType.hotfix);
     expect(allChanges['d'].changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges['e'].changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges['f'].changeType).toEqual(ChangeType.hotfix);
 
     expect(allChanges['a'].newVersion).toEqual('1.0.0-hotfix.0');
     expect(allChanges['b'].newVersion).toEqual('1.0.0-hotfix.0');
     expect(allChanges['c'].newVersion).toEqual('1.0.0-hotfix.0');
     expect(allChanges['d'].newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges['e'].newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges['f'].newVersion).toEqual('1.0.0-hotfix.0');
   });
 
   it('can update an explicit dependency', () => {
@@ -277,10 +312,12 @@ describe('sortChangeRequests', () => {
     );
     const orderedChanges: IChangeInfo[] = PublishUtilities.sortChangeRequests(allChanges);
 
-    expect(orderedChanges).toHaveLength(3);
+    expect(orderedChanges).toHaveLength(5);
     expect(orderedChanges[0].packageName).toEqual('a');
-    expect(orderedChanges[1].packageName).toEqual('b');
-    expect(orderedChanges[2].packageName).toEqual('c');
+    expect(orderedChanges[1].packageName).toEqual('e');
+    expect(orderedChanges[2].packageName).toEqual('b');
+    expect(orderedChanges[3].packageName).toEqual('f');
+    expect(orderedChanges[4].packageName).toEqual('c');
   });
 });
 
