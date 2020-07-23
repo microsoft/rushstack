@@ -148,7 +148,12 @@ export class MarkdownDocumenter {
         break;
       case ApiItemKind.EntryPoint:
         const packageName = apiItem.parent!.displayName;
-        output.appendNode(new DocHeading({ configuration, title: `${packageName}${apiItem.displayName && ('/' + apiItem.displayName)}` }));
+        output.appendNode(
+          new DocHeading({
+            configuration,
+            title: `${packageName}${apiItem.displayName && '/' + apiItem.displayName}`
+          })
+        );
         break;
       case ApiItemKind.Property:
       case ApiItemKind.PropertySignature:
@@ -390,7 +395,7 @@ export class MarkdownDocumenter {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     if (apiContainer.entryPoints.length === 1) {
-      this._writeEntryPointOrNamespaceTables(output, (apiContainer.members[0]) as ApiEntryPoint);
+      this._writeEntryPointOrNamespaceTables(output, apiContainer.members[0] as ApiEntryPoint);
     }
 
     const entryPointsTable: DocTable = new DocTable({
@@ -418,7 +423,10 @@ export class MarkdownDocumenter {
   /**
    * GENERATE PAGE: ENTRYPOINT or NAMESPACE
    */
-  private _writeEntryPointOrNamespaceTables(output: DocSection, apiContainer: ApiEntryPoint | ApiNamespace): void {
+  private _writeEntryPointOrNamespaceTables(
+    output: DocSection,
+    apiContainer: ApiEntryPoint | ApiNamespace
+  ): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     const classesTable: DocTable = new DocTable({
@@ -456,9 +464,10 @@ export class MarkdownDocumenter {
       headerTitles: ['Type Alias', 'Description']
     });
 
-    const apiMembers: ReadonlyArray<ApiItem> = apiContainer.kind === ApiItemKind.EntryPoint ?
-      (apiContainer as ApiEntryPoint).members
-      : (apiContainer as ApiNamespace).members;
+    const apiMembers: ReadonlyArray<ApiItem> =
+      apiContainer.kind === ApiItemKind.EntryPoint
+        ? (apiContainer as ApiEntryPoint).members
+        : (apiContainer as ApiNamespace).members;
 
     for (const apiMember of apiMembers) {
       const row: DocTableRow = new DocTableRow({ configuration }, [
@@ -1033,7 +1042,11 @@ export class MarkdownDocumenter {
           break;
         case ApiItemKind.EntryPoint:
           const packageName = hierarchyItem.parent!.displayName;
-          baseName = Utilities.getSafeFilenameForName(`${PackageName.getUnscopedName(packageName)}/${hierarchyItem.displayName}`);
+          baseName = Utilities.getSafeFilenameForName(
+            `${PackageName.getUnscopedName(packageName)}${
+              hierarchyItem.displayName ? `/${hierarchyItem.displayName}` : ''
+            }`
+          );
           break;
         case ApiItemKind.Package:
           baseName = Utilities.getSafeFilenameForName(PackageName.getUnscopedName(hierarchyItem.displayName));
