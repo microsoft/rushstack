@@ -157,11 +157,11 @@ export interface ICleanStageProperties {
 // @public (undocumented)
 export interface ICompilerPackage {
     // (undocumented)
-    apiExtractorPackagePath: string;
+    apiExtractorPackagePath: string | undefined;
     // (undocumented)
-    eslintPackagePath: string;
+    eslintPackagePath: string | undefined;
     // (undocumented)
-    tslintPackagePath: string;
+    tslintPackagePath: string | undefined;
     // (undocumented)
     typeScriptPackagePath: string;
 }

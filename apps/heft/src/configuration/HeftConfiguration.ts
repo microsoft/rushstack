@@ -48,10 +48,10 @@ export interface IHeftActionConfigurationOptions {
  * @public
  */
 export interface ICompilerPackage {
-  apiExtractorPackagePath: string;
+  apiExtractorPackagePath: string | undefined;
   typeScriptPackagePath: string;
-  tslintPackagePath: string;
-  eslintPackagePath: string;
+  tslintPackagePath: string | undefined;
+  eslintPackagePath: string | undefined;
 }
 
 /**
@@ -134,8 +134,8 @@ export class HeftConfiguration {
   public get compilerPackage(): ICompilerPackage | undefined {
     if (!this._hasCompilerPackageBeenAccessed) {
       const resolution: ITaskPackageResolution | undefined = TaskPackageResolver.resolveTaskPackages(
-        this.terminal,
-        this._buildFolder
+        this._buildFolder,
+        this.terminal
       );
 
       this._hasCompilerPackageBeenAccessed = true;

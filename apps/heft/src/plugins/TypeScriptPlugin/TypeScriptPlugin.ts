@@ -145,8 +145,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
 
     const fullTsconfigFilePath: string = path.resolve(heftConfiguration.buildFolder, tsconfigFilePath);
     const resolution: ITaskPackageResolution | undefined = TaskPackageResolver.resolveTaskPackages(
-      TypeScriptBuilder.getTypeScriptTerminal(terminalProvider, terminalPrefixLabel),
-      fullTsconfigFilePath
+      fullTsconfigFilePath,
+      TypeScriptBuilder.getTypeScriptTerminal(terminalProvider, terminalPrefixLabel)
     );
     if (!resolution) {
       throw new Error(`Unable to resolve a compiler package for ${path.basename(tsconfigFilePath)}`);
