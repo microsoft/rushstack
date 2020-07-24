@@ -9,7 +9,9 @@
    * If this setting is not specified, then the default value is: [ "dist", "lib", "temp" ]
    */
   // "pathsToDelete": [
+  //   "dist",
   //   "lib",
+  //   "temp",
   //   "*.tmp"
   // ]
 }
