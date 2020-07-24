@@ -14,18 +14,49 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "heft-node-test",
+      "name": "heft-node-basic-test build",
       "program": "${workspaceFolder}/lib/start.js",
-      "cwd": "${workspaceFolder}/../../build-tests/heft-node-test/",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-node-basic-test/",
       "args": ["--debug", "build", "--clean"],
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",
+      "sourceMaps": false
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "heft-oldest-compiler-test",
+      "name": "heft-node-basic-test test",
       "program": "${workspaceFolder}/lib/start.js",
-      "cwd": "C:\\Git\\tsdoc\\tsdoc",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-node-basic-test/",
+      "args": ["--debug", "test", "--clean"],
+      "console": "integratedTerminal",
+      "sourceMaps": false
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "heft-node-everything-test build",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-node-everything-test/",
+      "args": ["--debug", "build", "--clean"],
+      "console": "integratedTerminal",
+      "sourceMaps": false
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "heft-node-everything-test test",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-node-everything-test/",
+      "args": ["--debug", "test", "--clean"],
+      "console": "integratedTerminal",
+      "sourceMaps": false
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "heft-oldest-compiler-test build",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-oldest-compiler-test/",
       "args": ["--debug", "test", "--clean"],
       "console": "integratedTerminal",
       "sourceMaps": false

@@ -1,0 +1,17 @@
+{
+  "name": "heft-rsc-test",
+  "description": "Building this project tests Heft using the rush-stack-compiler rig package",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft test --clean --verbose"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "@microsoft/rush-stack-compiler-3.9": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
+    "@types/jest": "25.2.1"
+  }
+}

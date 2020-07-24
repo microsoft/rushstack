@@ -1,0 +1,18 @@
+{
+  "name": "heft-webpack-basic-test",
+  "description": "This project illustrates a minimal tutorial Heft project targeting the web browser runtime",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "heft build --clean",
+    "start": "heft start"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/jest": "25.2.1",
+    "@types/webpack-env": "1.13.0",
+    "eslint": "~7.2.0",
+    "typescript": "~3.9.5"
+  }
+}

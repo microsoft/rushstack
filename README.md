@@ -86,9 +86,14 @@ for large scale TypeScript monorepos.
 | [/build-tests/api-extractor-test-02](./build-tests/api-extractor-test-02/) | Building this project is a regression test for api-extractor |
 | [/build-tests/api-extractor-test-03](./build-tests/api-extractor-test-03/) | Building this project is a regression test for api-extractor |
 | [/build-tests/api-extractor-test-04](./build-tests/api-extractor-test-04/) | Building this project is a regression test for api-extractor |
-| [/build-tests/heft-node-test](./build-tests/heft-node-test/) | Building this project is a very simple regression test for heft |
-| [/build-tests/heft-oldest-compiler-test](./build-tests/heft-oldest-compiler-test/) | Building this project is a very simple regression test for heft |
-| [/build-tests/heft-webpack-test](./build-tests/heft-webpack-test/) | Building this project exercises basic Webpack build in Heft. |
+| [/build-tests/heft-minimal-rig-test](./build-tests/heft-minimal-rig-test/) | This is a minimal rig package that is imported by the 'heft-minimal-rig-usage-test' project |
+| [/build-tests/heft-minimal-rig-usage-test](./build-tests/heft-minimal-rig-usage-test/) | A test project for Heft that resolves its compiler from the 'heft-minimal-rig-test' package |
+| [/build-tests/heft-node-basic-test](./build-tests/heft-node-basic-test/) | This project illustrates a minimal tutorial Heft project targeting the Node.js runtime |
+| [/build-tests/heft-node-everything-test](./build-tests/heft-node-everything-test/) | Building this project tests every task and config file for Heft when targeting the Node.js runtime |
+| [/build-tests/heft-oldest-compiler-test](./build-tests/heft-oldest-compiler-test/) | Building this project tests Heft with the oldest supported TypeScript compiler version |
+| [/build-tests/heft-rsc-test](./build-tests/heft-rsc-test/) | Building this project tests Heft using the rush-stack-compiler rig package |
+| [/build-tests/heft-webpack-basic-test](./build-tests/heft-webpack-basic-test/) | This project illustrates a minimal tutorial Heft project targeting the web browser runtime |
+| [/build-tests/heft-webpack-everything-test](./build-tests/heft-webpack-everything-test/) | Building this project tests every task and config file for Heft when targeting the web browser runtime |
 | [/build-tests/localization-plugin-test-01](./build-tests/localization-plugin-test-01/) | Building this project exercises @microsoft/localization-plugin. This tests that the plugin works correctly without any localized resources. |
 | [/build-tests/localization-plugin-test-02](./build-tests/localization-plugin-test-02/) | Building this project exercises @microsoft/localization-plugin. This tests that the loader works correctly with the exportAsDefault option unset. |
 | [/build-tests/localization-plugin-test-03](./build-tests/localization-plugin-test-03/) | Building this project exercises @microsoft/localization-plugin. This tests that the plugin works correctly with the exportAsDefault option set to true. |
