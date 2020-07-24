@@ -88,7 +88,7 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
   ): Promise<void> {
     const cleanConfigurationJson: ICleanConfigurationJson | undefined = await this._getConfigDataByNameAsync(
       heftConfiguration,
-      'clean'
+      'clean.json'
     );
 
     if (cleanConfigurationJson) {
@@ -99,7 +99,7 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
 
     const typeScriptConfigurationJson:
       | ITypeScriptConfigurationJson
-      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'typescript');
+      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'typescript.json');
     if (typeScriptConfigurationJson?.additionalModuleKindsToEmit) {
       for (const additionalModuleKindToEmit of typeScriptConfigurationJson.additionalModuleKindsToEmit) {
         cleanConfiguration.pathsToDelete.add(additionalModuleKindToEmit.outFolderPath);
@@ -113,7 +113,7 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
   ): Promise<void> {
     const typeScriptConfigurationJson:
       | ITypeScriptConfigurationJson
-      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'typescript');
+      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'typescript.json');
 
     if (typeScriptConfigurationJson?.copyFromCacheMode) {
       typeScriptConfiguration.copyFromCacheMode = typeScriptConfigurationJson.copyFromCacheMode;
@@ -139,7 +139,7 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
   ): Promise<void> {
     const copyStaticAssetsConfigurationJson:
       | ICopyStaticAssetsConfigurationJson
-      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'copy-static-assets');
+      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'copy-static-assets.json');
 
     if (copyStaticAssetsConfigurationJson) {
       if (copyStaticAssetsConfigurationJson.fileExtensions) {
@@ -176,7 +176,7 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
   ): Promise<void> {
     const apiExtractorConfigurationJson:
       | IApiExtractorConfiguration
-      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'api-extractor-task');
+      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'api-extractor-task.json');
 
     if (apiExtractorConfigurationJson?.useProjectTypescriptVersion !== undefined) {
       apiExtractorConfiguration.useProjectTypescriptVersion =
@@ -188,6 +188,10 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
     heftConfiguration: HeftConfiguration,
     configFilename: string
   ): Promise<TConfigJson | undefined> {
+    if (path.extname(configFilename) !== '.json') {
+      throw new Error('The configFilename parameter must specify a file with the .json file extension');
+    }
+
     type IOptionalConfigurationJsonCacheEntry = IConfigurationJsonCacheEntry<TConfigJson> | undefined;
     let configurationJsonCacheEntry: IOptionalConfigurationJsonCacheEntry = this._configurationJsonCache.get(
       configFilename
@@ -200,7 +204,7 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
       );
 
       if (configurationFilePath && FileSystem.exists(configurationFilePath)) {
-        const schema: JsonSchema = await this._getSchemaByNameAsync(configFilename);
+        const schema: JsonSchema = this._getSchemaByName(configFilename);
         const loadedConfigJson: TConfigJson = JsonFile.loadAndValidate(configurationFilePath, schema);
 
         heftConfiguration.terminal.writeVerboseLine(`Loaded config file "${configurationFilePath}"`);
@@ -226,16 +230,12 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
     return configurationJsonCacheEntry.data;
   }
 
-  private async _getSchemaByNameAsync(configFilename: string): Promise<JsonSchema> {
+  private _getSchemaByName(configFilename: string): JsonSchema {
     let schema: JsonSchema | undefined = JsonConfigurationFilesPluginBase._schemaCache.get(configFilename);
     if (!schema) {
-      const schemaPath: string = path.resolve(
-        __dirname,
-        '..',
-        '..',
-        'schemas',
-        `${configFilename}.schema.json`
-      );
+      const schemaFilename: string = path.parse(configFilename).name + '.schema.json';
+
+      const schemaPath: string = path.resolve(__dirname, '..', '..', 'schemas', schemaFilename);
       schema = JsonSchema.fromFile(schemaPath);
       JsonConfigurationFilesPluginBase._schemaCache.set(configFilename, schema);
     }
