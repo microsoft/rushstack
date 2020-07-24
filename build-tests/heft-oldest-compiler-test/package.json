@@ -1,6 +1,6 @@
 {
   "name": "heft-oldest-compiler-test",
-  "description": "Building this project is a very simple regression test for heft",
+  "description": "Building this project tests Heft with the oldest supported TypeScript compiler version",
   "version": "1.0.0",
   "private": true,
   "main": "lib/index.js",

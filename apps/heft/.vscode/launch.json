@@ -18,17 +18,18 @@
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/heft-node-test/",
       "args": ["--debug", "build", "--clean"],
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",
+      "sourceMaps": true
     },
     {
       "type": "node",
       "request": "launch",
       "name": "heft-oldest-compiler-test",
       "program": "${workspaceFolder}/lib/start.js",
-      "cwd": "C:\\Git\\tsdoc\\tsdoc",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-oldest-compiler-test/",
       "args": ["--debug", "test", "--clean"],
       "console": "integratedTerminal",
-      "sourceMaps": false
+      "sourceMaps": true
     }
   ]
 }
