@@ -13,23 +13,24 @@ import {
 import { PackageJsonLookup, INodePackageJson, InternalError } from '@rushstack/node-core-library';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
+import { WorkingPackage } from '../collector/WorkingPackage';
 
 export class DeclarationReferenceGenerator {
   public static readonly unknownReference: string = '?';
 
   private _packageJsonLookup: PackageJsonLookup;
-  private _workingPackageName: string;
+  private _workingPackage: WorkingPackage;
   private _program: ts.Program;
   private _typeChecker: ts.TypeChecker;
 
   public constructor(
     packageJsonLookup: PackageJsonLookup,
-    workingPackageName: string,
+    workingPackage: WorkingPackage,
     program: ts.Program,
     typeChecker: ts.TypeChecker
   ) {
     this._packageJsonLookup = packageJsonLookup;
-    this._workingPackageName = workingPackageName;
+    this._workingPackage = workingPackage;
     this._program = program;
     this._typeChecker = typeChecker;
   }
@@ -41,6 +42,7 @@ export class DeclarationReferenceGenerator {
     const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(node);
     if (symbol !== undefined) {
       const isExpression: boolean = DeclarationReferenceGenerator._isInExpressionContext(node);
+
       return (
         this.getDeclarationReferenceForSymbol(
           symbol,
@@ -304,7 +306,7 @@ export class DeclarationReferenceGenerator {
       .withMeaning(DeclarationReferenceGenerator._getMeaningOfSymbol(followedSymbol, meaning));
   }
 
-  private _getPackageName(sourceFile: ts.SourceFile): string {
+  private _getEntryPointName(sourceFile: ts.SourceFile): string {
     if (this._program.isSourceFileFromExternalLibrary(sourceFile)) {
       const packageJson: INodePackageJson | undefined = this._packageJsonLookup.tryLoadNodePackageJsonFor(
         sourceFile.fileName
@@ -315,12 +317,19 @@ export class DeclarationReferenceGenerator {
       }
       return DeclarationReferenceGenerator.unknownReference;
     }
-    return this._workingPackageName;
+
+    let modulePath = '';
+    for (const entryPoint of this._workingPackage.entryPoints) {
+      if (entryPoint.sourceFile === sourceFile) {
+        modulePath = entryPoint.modulePath;
+      }
+    }
+    return `${this._workingPackage.name}${modulePath ? `/${modulePath}` : ''}`;
   }
 
   private _sourceFileToModuleSource(sourceFile: ts.SourceFile | undefined): GlobalSource | ModuleSource {
     if (sourceFile && ts.isExternalModule(sourceFile)) {
-      return new ModuleSource(this._getPackageName(sourceFile));
+      return new ModuleSource(this._getEntryPointName(sourceFile));
     }
     return GlobalSource.instance;
   }
