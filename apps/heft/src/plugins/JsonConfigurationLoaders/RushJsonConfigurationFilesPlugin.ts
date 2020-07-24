@@ -23,10 +23,10 @@ export class RushJsonConfigurationFilesPlugin extends JsonConfigurationFilesPlug
     return this.__rushConfigurationFolder || undefined;
   }
 
-  protected _getConfigurationFilePathByName(name: string): string | undefined {
+  protected _getConfigurationFileFullPath(jsonFilename: string): string | undefined {
     const rushConfigurationFolder: string | undefined = this._rushConfigurationFolder;
     if (rushConfigurationFolder) {
-      return path.resolve(rushConfigurationFolder, 'heft', `${name}.json`);
+      return path.resolve(rushConfigurationFolder, 'heft', jsonFilename);
     } else {
       return undefined;
     }

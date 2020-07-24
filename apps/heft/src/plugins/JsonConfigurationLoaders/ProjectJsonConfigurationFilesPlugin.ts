@@ -9,10 +9,10 @@ import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 export class ProjectJsonConfigurationFilesPlugin extends JsonConfigurationFilesPluginBase {
   public readonly displayName: string = 'projectJsonConfigurationFiles';
 
-  protected _getConfigurationFilePathByName(
-    name: string,
+  protected _getConfigurationFileFullPath(
+    jsonFilename: string,
     heftConfiguration: HeftConfiguration
   ): string | undefined {
-    return path.resolve(heftConfiguration.projectHeftDataFolder, `${name}.json`);
+    return path.resolve(heftConfiguration.projectHeftDataFolder, jsonFilename);
   }
 }

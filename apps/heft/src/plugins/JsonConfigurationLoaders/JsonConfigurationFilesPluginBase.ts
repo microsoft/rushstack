@@ -79,8 +79,8 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
     });
   }
 
-  protected abstract _getConfigurationFilePathByName(
-    name: string,
+  protected abstract _getConfigurationFileFullPath(
+    jsonFilename: string,
     heftConfiguration: HeftConfiguration
   ): string | undefined;
 
@@ -88,10 +88,9 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
     heftConfiguration: HeftConfiguration,
     cleanConfiguration: ICleanStageProperties
   ): Promise<void> {
-    const cleanConfigurationJson: ICleanConfigurationJson | undefined = await this._getConfigDataByNameAsync(
-      heftConfiguration,
-      'clean.json'
-    );
+    const cleanConfigurationJson:
+      | ICleanConfigurationJson
+      | undefined = await this._getConfigDataByFilenameAsync(heftConfiguration, 'clean.json');
 
     if (cleanConfigurationJson) {
       for (const pathToDelete of cleanConfigurationJson.pathsToDelete) {
@@ -101,7 +100,7 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
 
     const typeScriptConfigurationJson:
       | ITypeScriptConfigurationJson
-      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'typescript.json');
+      | undefined = await this._getConfigDataByFilenameAsync(heftConfiguration, 'typescript.json');
     if (typeScriptConfigurationJson?.additionalModuleKindsToEmit) {
       for (const additionalModuleKindToEmit of typeScriptConfigurationJson.additionalModuleKindsToEmit) {
         cleanConfiguration.pathsToDelete.add(additionalModuleKindToEmit.outFolderPath);
@@ -115,7 +114,7 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
   ): Promise<void> {
     const typeScriptConfigurationJson:
       | ITypeScriptConfigurationJson
-      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'typescript.json');
+      | undefined = await this._getConfigDataByFilenameAsync(heftConfiguration, 'typescript.json');
 
     if (typeScriptConfigurationJson?.copyFromCacheMode) {
       typeScriptConfiguration.copyFromCacheMode = typeScriptConfigurationJson.copyFromCacheMode;
@@ -141,7 +140,7 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
   ): Promise<void> {
     const copyStaticAssetsConfigurationJson:
       | ICopyStaticAssetsConfigurationJson
-      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'copy-static-assets.json');
+      | undefined = await this._getConfigDataByFilenameAsync(heftConfiguration, 'copy-static-assets.json');
 
     if (copyStaticAssetsConfigurationJson) {
       if (copyStaticAssetsConfigurationJson.fileExtensions) {
@@ -178,7 +177,7 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
   ): Promise<void> {
     const apiExtractorConfigurationJson:
       | IApiExtractorConfiguration
-      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'api-extractor-task.json');
+      | undefined = await this._getConfigDataByFilenameAsync(heftConfiguration, 'api-extractor-task.json');
 
     if (apiExtractorConfigurationJson?.useProjectTypescriptVersion !== undefined) {
       apiExtractorConfiguration.useProjectTypescriptVersion =
@@ -186,7 +185,7 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
     }
   }
 
-  private async _getConfigDataByNameAsync<TConfigJson extends IConfigurationJsonBase>(
+  private async _getConfigDataByFilenameAsync<TConfigJson extends IConfigurationJsonBase>(
     heftConfiguration: HeftConfiguration,
     configFilename: string
   ): Promise<TConfigJson | undefined> {
@@ -200,7 +199,7 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
     ) as IOptionalConfigurationJsonCacheEntry;
 
     if (!configurationJsonCacheEntry) {
-      const configurationFilePath: string | undefined = this._getConfigurationFilePathByName(
+      const configurationFilePath: string | undefined = this._getConfigurationFileFullPath(
         configFilename,
         heftConfiguration
       );
