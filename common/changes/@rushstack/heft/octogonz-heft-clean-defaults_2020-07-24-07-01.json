@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Change the default \"pathsToDelete\" so that .heft/clean.json config file is no longer required for typical projects",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
