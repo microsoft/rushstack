@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/localization-plugin",
-      "comment": "",
-      "type": "none"
+      "comment": "Fix broken peer dependency specifier",
+      "type": "patch"
     }
   ],
   "packageName": "@rushstack/localization-plugin",
