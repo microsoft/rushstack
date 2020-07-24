@@ -6,6 +6,7 @@
 
   /**
    * Glob patterns to be deleted by the "heft clean" action.  The paths are resolved relative to the project folder.
+   * If this setting is not specified, then the default value is: [ "dist", "lib", "temp" ]
    */
   // "pathsToDelete": [
   //   "lib",

@@ -14,7 +14,7 @@
 
     "pathsToDelete": {
       "type": "array",
-      "description": "paths that need to be cleaned",
+      "description": "Glob patterns to be deleted by the \"heft clean\" action.  The paths are resolved relative to the project folder. If this setting is not specified, then the default value is: [ \"dist\", \"lib\", \"temp\" ]",
       "items": {
         "type": "string",
         "pattern": "[^\\\\]"
