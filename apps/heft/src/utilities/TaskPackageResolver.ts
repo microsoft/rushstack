@@ -49,6 +49,7 @@ export class TaskPackageResolver {
     const rigPackageFolder: string | undefined = TaskPackageResolver._locateRigPackageFolder(
       localTsconfigPath,
       new Set<string>(),
+      new Set<string>(),
       terminal
     );
 
@@ -149,6 +150,7 @@ export class TaskPackageResolver {
   private static _locateRigPackageFolder(
     tsconfigPath: string,
     visitedTsconfigPaths: Set<string>,
+    visitedRigPackagePaths: Set<string>,
     terminal: Terminal
   ): string | undefined {
     if (visitedTsconfigPaths.has(tsconfigPath)) {
@@ -206,6 +208,7 @@ export class TaskPackageResolver {
       const result: string | undefined = TaskPackageResolver._locateRigPackageFolder(
         baseTsconfigPath,
         visitedTsconfigPaths,
+        visitedRigPackagePaths,
         terminal
       );
       if (result) {
@@ -226,18 +229,24 @@ export class TaskPackageResolver {
       );
     }
 
-    const rigPackageJson: INodePackageJson = TaskPackageResolver._packageJsonLookup.loadNodePackageJson(
-      path.join(rigPackagePath, 'package.json')
-    );
+    // For example, a "include/tsconfig-node.json" may reference the "include/tsconfig-base.json" within
+    // the same rig package.  We only need to analyze the associated package.json once.
+    if (!visitedRigPackagePaths.has(rigPackagePath)) {
+      visitedRigPackagePaths.add(rigPackagePath);
 
-    // eslint-disable-next-line dot-notation
-    if (rigPackageJson.dependencies && rigPackageJson.dependencies['typescript']) {
-      terminal.writeVerboseLine(
-        `Found a "typescript" dependency specified for "${rigPackageJson.name}";` +
-          ` assuming it is acting as a Heft rig package: ` +
-          rigPackagePath
+      const rigPackageJson: INodePackageJson = TaskPackageResolver._packageJsonLookup.loadNodePackageJson(
+        path.join(rigPackagePath, 'package.json')
       );
-      return rigPackagePath;
+
+      // eslint-disable-next-line dot-notation
+      if (rigPackageJson.dependencies && rigPackageJson.dependencies['typescript']) {
+        terminal.writeVerboseLine(
+          `Found a "typescript" dependency specified for "${rigPackageJson.name}";` +
+            ` assuming it is acting as a Heft rig package: ` +
+            rigPackagePath
+        );
+        return rigPackagePath;
+      }
     }
 
     return undefined;
