@@ -113,13 +113,15 @@ export class TaskPackageResolver {
     terminal: Terminal,
     isRigFolder: boolean
   ): string | undefined {
+    if (isRigFolder) {
+      terminal.writeVerboseLine(`Attempting to resolve "${taskPackageName}" from rig folder ${baseFolder}`);
+    } else {
+      terminal.writeVerboseLine(`Attempting to resolve "${taskPackageName}" from ${baseFolder}`);
+    }
+
+    let resolvedPackageJsonFile: string | undefined;
     try {
-      if (isRigFolder) {
-        terminal.writeVerboseLine(`Attempting to resolve "${taskPackageName}" from rig folder ${baseFolder}`);
-      } else {
-        terminal.writeVerboseLine(`Attempting to resolve "${taskPackageName}" from ${baseFolder}`);
-      }
-      const resolvedPackageJsonFile: string = resolve.sync(taskPackageName, {
+      resolvedPackageJsonFile = resolve.sync(taskPackageName, {
         basedir: baseFolder,
         preserveSymlinks: false,
         packageFilter: (packageJson: INodePackageJson) => {
@@ -130,21 +132,24 @@ export class TaskPackageResolver {
           };
         }
       });
-      const resolvedPackageFolder: string = path.dirname(resolvedPackageJsonFile);
-
-      if (isRigFolder) {
-        terminal.writeVerboseLine(
-          `Resolved "${taskPackageName}" via rig package to ${resolvedPackageFolder}`
-        );
-      } else {
-        terminal.writeVerboseLine(`Resolved "${taskPackageName}" to ${resolvedPackageFolder}`);
-      }
-
-      return resolvedPackageFolder;
     } catch (e) {
       // Ignore errors
+      resolvedPackageJsonFile = undefined;
     }
-    return undefined;
+
+    if (resolvedPackageJsonFile === undefined) {
+      return undefined;
+    }
+
+    const resolvedPackageFolder: string = path.dirname(resolvedPackageJsonFile);
+
+    if (isRigFolder) {
+      terminal.writeVerboseLine(`Resolved "${taskPackageName}" via rig package to ${resolvedPackageFolder}`);
+    } else {
+      terminal.writeVerboseLine(`Resolved "${taskPackageName}" to ${resolvedPackageFolder}`);
+    }
+
+    return resolvedPackageFolder;
   }
 
   private static _locateRigPackageFolder(
@@ -160,14 +165,13 @@ export class TaskPackageResolver {
 
     terminal.writeVerboseLine(`Examining ${tsconfigPath}`);
 
-    if (!FileSystem.exists(tsconfigPath)) {
-      throw new Error(`The referenced tsconfig.json file does not exist: ` + tsconfigPath);
-    }
-
     let tsconfig: ITsconfig;
     try {
       tsconfig = JsonFile.load(tsconfigPath);
     } catch (e) {
+      if (FileSystem.isNotExistError(e)) {
+        throw new Error(`The referenced tsconfig.json file does not exist:\n` + tsconfigPath);
+      }
       throw new Error(`Error parsing tsconfig.json: ${e}\n` + tsconfigPath);
     }
 
@@ -242,8 +246,7 @@ export class TaskPackageResolver {
       if (rigPackageJson.dependencies && rigPackageJson.dependencies['typescript']) {
         terminal.writeVerboseLine(
           `Found a "typescript" dependency specified for "${rigPackageJson.name}";` +
-            ` assuming it is acting as a Heft rig package: ` +
-            rigPackagePath
+            ` assuming it is acting as a Heft rig package: ${rigPackagePath}`
         );
         return rigPackagePath;
       }
