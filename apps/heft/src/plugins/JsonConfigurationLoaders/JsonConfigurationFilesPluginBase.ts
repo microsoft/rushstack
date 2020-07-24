@@ -2,7 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonSchema, FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { JsonSchema, FileSystem, JsonFile, JsonObject } from '@rushstack/node-core-library';
+import lodash = require('lodash');
 
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
@@ -37,6 +38,7 @@ interface IConfigurationJsonCacheEntry<TConfigJson extends IConfigurationJsonBas
 
 export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
   private static _schemaCache: Map<string, JsonSchema> = new Map<string, JsonSchema>();
+  private static _defaultConfigCache: Map<string, JsonObject> = new Map<string, JsonObject>();
   private _configurationJsonCache: Map<string, IConfigurationJsonCacheEntry> = new Map<
     string,
     IConfigurationJsonCacheEntry
@@ -204,8 +206,19 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
       );
 
       if (configurationFilePath && FileSystem.exists(configurationFilePath)) {
+        // Load the <name>.schema.json
         const schema: JsonSchema = this._getSchemaByName(configFilename);
-        const loadedConfigJson: TConfigJson = JsonFile.loadAndValidate(configurationFilePath, schema);
+        // Load the <name>.defaults.json
+        const defaultConfig: JsonObject = this._getDefaultConfigByName(configFilename);
+        // Load the <name>.json
+        const loadedConfigurationWithoutDefaults: JsonObject = JsonFile.load(configurationFilePath);
+        // Merge <name>.defaults.json and <name>.json
+        const loadedConfigJson: TConfigJson = lodash.merge(
+          lodash.cloneDeep(defaultConfig),
+          loadedConfigurationWithoutDefaults
+        );
+        // Validate the resulting object to make sure it conforms to the schema
+        schema.validateObject(loadedConfigJson, configurationFilePath);
 
         heftConfiguration.terminal.writeVerboseLine(`Loaded config file "${configurationFilePath}"`);
 
@@ -239,7 +252,20 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
       schema = JsonSchema.fromFile(schemaPath);
       JsonConfigurationFilesPluginBase._schemaCache.set(configFilename, schema);
     }
-
     return schema;
+  }
+
+  private _getDefaultConfigByName(configFilename: string): JsonObject {
+    let defaultConfig: JsonObject | undefined = JsonConfigurationFilesPluginBase._defaultConfigCache.get(
+      configFilename
+    );
+    if (defaultConfig === undefined) {
+      const defaultConfigFilename: string = path.parse(configFilename).name + '.defaults.json';
+
+      const defaultConfigPath: string = path.resolve(__dirname, '..', '..', 'schemas', defaultConfigFilename);
+      defaultConfig = JsonFile.load(defaultConfigPath);
+      JsonConfigurationFilesPluginBase._defaultConfigCache.set(configFilename, defaultConfig);
+    }
+    return defaultConfig;
   }
 }
