@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@rushstack/heft_v0.3.0",
+      "date": "Fri, 24 Jul 2020 20:40:38 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Enable Heft to be used without the \"@microsoft/rush-stack-compiler-n.n\" system"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.2",
       "tag": "@rushstack/heft_v0.2.2",
       "date": "Tue, 21 Jul 2020 00:54:55 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 21 Jul 2020 00:54:55 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Jul 2020 20:40:38 GMT and should not be manually modified.
+
+## 0.3.0
+Fri, 24 Jul 2020 20:40:38 GMT
+
+### Minor changes
+
+- Enable Heft to be used without the "@microsoft/rush-stack-compiler-n.n" system
 
 ## 0.2.2
 Tue, 21 Jul 2020 00:54:55 GMT
