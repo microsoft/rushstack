@@ -160,14 +160,13 @@ export class TaskPackageResolver {
 
     terminal.writeVerboseLine(`Examining ${tsconfigPath}`);
 
-    if (!FileSystem.exists(tsconfigPath)) {
-      throw new Error(`The referenced tsconfig.json file does not exist: ` + tsconfigPath);
-    }
-
     let tsconfig: ITsconfig;
     try {
       tsconfig = JsonFile.load(tsconfigPath);
     } catch (e) {
+      if (FileSystem.isNotExistError(e)) {
+        throw new Error(`The referenced tsconfig.json file does not exist:\n` + tsconfigPath);
+      }
       throw new Error(`Error parsing tsconfig.json: ${e}\n` + tsconfigPath);
     }
 
@@ -242,8 +241,7 @@ export class TaskPackageResolver {
       if (rigPackageJson.dependencies && rigPackageJson.dependencies['typescript']) {
         terminal.writeVerboseLine(
           `Found a "typescript" dependency specified for "${rigPackageJson.name}";` +
-            ` assuming it is acting as a Heft rig package: ` +
-            rigPackagePath
+            ` assuming it is acting as a Heft rig package: ${rigPackagePath}`
         );
         return rigPackagePath;
       }
