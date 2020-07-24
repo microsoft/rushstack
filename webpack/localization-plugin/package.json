@@ -14,7 +14,7 @@
   },
   "peerDependencies": {
     "webpack": "^4.31.0",
-    "@rushstack/set-webpack-public-path-plugin": "workspace:^2.4.30",
+    "@rushstack/set-webpack-public-path-plugin": "^2.4.30",
     "@types/webpack": "^4.39.0"
   },
   "peerDependenciesMeta": {
