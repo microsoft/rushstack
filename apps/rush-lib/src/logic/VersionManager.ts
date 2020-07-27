@@ -14,6 +14,7 @@ import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { VersionPolicyConfiguration } from '../api/VersionPolicyConfiguration';
 import { PublishUtilities } from './PublishUtilities';
 import { ChangeManager } from './ChangeManager';
+import { DependencySpecifier } from './DependencySpecifier';
 
 export class VersionManager {
   private _rushConfiguration: RushConfiguration;
@@ -23,14 +24,14 @@ export class VersionManager {
   private _changeFiles: Map<string, ChangeFile>;
 
   public constructor(
-    _rushConfiguration: RushConfiguration,
-    _userEmail: string,
-    _versionPolicyConfiguration?: VersionPolicyConfiguration
+    rushConfiguration: RushConfiguration,
+    userEmail: string,
+    versionPolicyConfiguration?: VersionPolicyConfiguration
   ) {
-    this._rushConfiguration = _rushConfiguration;
-    this._userEmail = _userEmail;
-    this._versionPolicyConfiguration = _versionPolicyConfiguration
-      ? _versionPolicyConfiguration
+    this._rushConfiguration = rushConfiguration;
+    this._userEmail = userEmail;
+    this._versionPolicyConfiguration = versionPolicyConfiguration
+      ? versionPolicyConfiguration
       : this._rushConfiguration.versionPolicyConfiguration;
 
     this._updatedProjects = new Map<string, IPackageJson>();
@@ -313,7 +314,14 @@ export class VersionManager {
     oldDependencyVersion: string,
     newDependencyVersion: string
   ): void {
-    if (!semver.satisfies(updatedDependentProject.version, oldDependencyVersion) && !projectVersionChanged) {
+    const oldSpecifier: DependencySpecifier = new DependencySpecifier(
+      updatedDependentProject.name,
+      oldDependencyVersion
+    );
+    if (
+      !semver.satisfies(updatedDependentProject.version, oldSpecifier.versionSpecifier) &&
+      !projectVersionChanged
+    ) {
       this._addChange(changes, {
         changeType: ChangeType.patch,
         packageName: clonedProject.name

@@ -1,6 +1,34 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Wed, 27 May 2020 05:15:10 GMT and should not be manually modified.
+This log was last generated on Sat, 25 Jul 2020 01:38:03 GMT and should not be manually modified.
+
+## 1.0.3
+Sat, 25 Jul 2020 01:38:03 GMT
+
+### Patches
+
+- Update README.md to add the missing file extension for .eslintrc.js
+
+## 1.0.2
+Thu, 25 Jun 2020 06:43:34 GMT
+
+### Patches
+
+- Enable variableDeclarationIgnoreFunction for the "@typescript-eslint/typedef" rule
+
+## 1.0.1
+Wed, 24 Jun 2020 09:50:48 GMT
+
+### Patches
+
+- Fix an issue with the published file set
+
+## 1.0.0
+Wed, 24 Jun 2020 09:04:28 GMT
+
+### Breaking changes
+
+- Upgrade to ESLint 7. Breaking change: patch-eslint6.js has been renamed to patch-eslint-resolver.js
 
 ## 0.5.8
 Wed, 27 May 2020 05:15:10 GMT

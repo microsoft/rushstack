@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/load-themed-styles",
-  "version": "1.10.57",
+  "version": "1.10.65",
   "description": "Loads themed styles.",
   "license": "MIT",
   "repository": {
@@ -14,10 +14,11 @@
   "typings": "lib/index.d.ts",
   "keywords": [],
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.6.0",
-    "@rushstack/eslint-config": "0.5.8",
+    "@microsoft/rush-stack-compiler-3.5": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
     "@types/jest": "25.2.1",
     "@types/webpack-env": "1.13.0",
-    "@microsoft/node-library-build": "6.4.24"
+    "@microsoft/node-library-build": "workspace:*",
+    "gulp": "~4.0.2"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-typescript",
-  "version": "8.4.24",
+  "version": "8.4.32",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,20 +13,20 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.16.8",
-    "@rushstack/node-core-library": "3.24.1",
+    "@microsoft/gulp-core-build": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
     "@types/node": "10.17.13",
     "decomment": "~0.9.1",
     "glob": "~7.0.5",
-    "glob-escape": "~0.0.1",
+    "glob-escape": "~0.0.2",
     "resolve": "~1.17.0"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "7.8.11",
-    "@microsoft/node-library-build": "6.4.10",
-    "@microsoft/rush-stack-compiler-3.1": "0.11.0",
-    "@microsoft/rush-stack-compiler-3.5": "0.4.4",
-    "@rushstack/eslint-config": "0.5.8",
+    "@microsoft/api-extractor": "workspace:*",
+    "@microsoft/node-library-build": "6.4.31",
+    "@microsoft/rush-stack-compiler-3.1": "workspace:*",
+    "@microsoft/rush-stack-compiler-3.5": "0.8.0",
+    "@rushstack/eslint-config": "workspace:*",
     "@types/glob": "7.1.1",
     "@types/resolve": "1.17.1",
     "gulp": "~4.0.2",

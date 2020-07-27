@@ -8,15 +8,15 @@ import pnpmLinkBins from '@pnpm/link-bins';
 import * as semver from 'semver';
 import * as colors from 'colors';
 
-import { JsonFile, Text, FileSystem, FileConstants, InternalError } from '@rushstack/node-core-library';
+import { Text, FileSystem, FileConstants, InternalError } from '@rushstack/node-core-library';
 
 import { BaseLinkManager } from '../base/BaseLinkManager';
 import { BasePackage } from '../base/BasePackage';
 import { RushConstants } from '../../logic/RushConstants';
-import { IRushLinkJson } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from './PnpmShrinkwrapFile';
 import { PnpmProjectDependencyManifest } from './PnpmProjectDependencyManifest';
+import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 // special flag for debugging, will print extra diagnostic information,
 // but comes with performance cost
@@ -27,11 +27,26 @@ export class PnpmLinkManager extends BaseLinkManager {
     this._rushConfiguration.packageManagerToolVersion
   );
 
-  protected async _linkProjects(): Promise<void> {
-    const rushLinkJson: IRushLinkJson = {
-      localLinks: {}
-    };
+  /**
+   * @override
+   */
+  public async createSymlinksForProjects(force: boolean): Promise<void> {
+    const useWorkspaces: boolean =
+      this._rushConfiguration.pnpmOptions && this._rushConfiguration.pnpmOptions.useWorkspaces;
+    if (useWorkspaces) {
+      console.log(
+        colors.red(
+          'Linking is not supported when using workspaces. Run "rush install" or "rush update" ' +
+            'to restore project node_modules folders.'
+        )
+      );
+      throw new AlreadyReportedError();
+    }
 
+    await super.createSymlinksForProjects(force);
+  }
+
+  protected async _linkProjects(): Promise<void> {
     if (this._rushConfiguration.projects.length > 0) {
       // Use shrinkwrap from temp as the committed shrinkwrap may not always be up to date
       // See https://github.com/microsoft/rushstack/issues/1273#issuecomment-492779995
@@ -47,8 +62,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       }
 
       for (const rushProject of this._rushConfiguration.projects) {
-        console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-        await this._linkProject(rushProject, rushLinkJson, pnpmShrinkwrapFile);
+        await this._linkProject(rushProject, pnpmShrinkwrapFile);
       }
     } else {
       console.log(
@@ -58,9 +72,6 @@ export class PnpmLinkManager extends BaseLinkManager {
         )
       );
     }
-
-    console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
-    JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
   }
 
   /**
@@ -70,11 +81,11 @@ export class PnpmLinkManager extends BaseLinkManager {
    */
   private async _linkProject(
     project: RushConfigurationProject,
-    rushLinkJson: IRushLinkJson,
     pnpmShrinkwrapFile: PnpmShrinkwrapFile
   ): Promise<void> {
-    // first, read the temp package.json information
+    console.log(os.EOL + 'LINKING: ' + project.packageName);
 
+    // first, read the temp package.json information
     // Example: "project1"
     const unscopedTempProjectName: string = this._rushConfiguration.packageNameParser.getUnscopedName(
       project.tempProjectName
@@ -104,7 +115,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     );
 
     const localPackage: BasePackage = BasePackage.createLinkedPackage(
-      project.packageJsonEditor.name,
+      project.packageName,
       commonPackage.version,
       project.projectFolder
     );
@@ -121,13 +132,6 @@ export class PnpmLinkManager extends BaseLinkManager {
         // We found a suitable match, so place a new local package that
         // symlinks to the Rush project
         const matchedVersion: string = matchedRushPackage.packageJsonEditor.version;
-
-        let localLinks: string[] = rushLinkJson.localLinks[localPackage.name];
-        if (!localLinks) {
-          localLinks = [];
-          rushLinkJson.localLinks[localPackage.name] = localLinks;
-        }
-        localLinks.push(dependencyName);
 
         // e.g. "C:\my-repo\project-a\node_modules\project-b" if project-b is a rush dependency of project-a
         const newLocalFolderPath: string = path.join(localPackage.folderPath, 'node_modules', dependencyName);
@@ -276,9 +280,9 @@ export class PnpmLinkManager extends BaseLinkManager {
       !this._rushConfiguration.experimentsConfiguration.configuration
         .legacyIncrementalBuildDependencyDetection
     ) {
-      pnpmProjectDependencyManifest.save();
+      await pnpmProjectDependencyManifest.saveAsync();
     } else {
-      pnpmProjectDependencyManifest.deleteIfExists();
+      await pnpmProjectDependencyManifest.deleteIfExistsAsync();
     }
 
     // Also symlink the ".bin" folder
@@ -341,7 +345,8 @@ export class PnpmLinkManager extends BaseLinkManager {
       );
     }
 
-    // read the version number from the shrinkwrap entry
+    // read the version number from the shrinkwrap entry and return if no version is specified
+    // and the dependency is optional
     const version: string | undefined = isOptional
       ? (parentShrinkwrapEntry.optionalDependencies || {})[dependencyName]
       : (parentShrinkwrapEntry.dependencies || {})[dependencyName];
@@ -370,7 +375,11 @@ export class PnpmLinkManager extends BaseLinkManager {
       !this._rushConfiguration.experimentsConfiguration.configuration
         .legacyIncrementalBuildDependencyDetection
     ) {
-      pnpmProjectDependencyManifest.addDependency(newLocalPackage, parentShrinkwrapEntry);
+      pnpmProjectDependencyManifest.addDependency(
+        newLocalPackage.name,
+        newLocalPackage.version!,
+        parentShrinkwrapEntry
+      );
     }
 
     return newLocalPackage;

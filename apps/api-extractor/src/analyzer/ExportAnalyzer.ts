@@ -63,7 +63,7 @@ export class ExportAnalyzer {
 
   private readonly _program: ts.Program;
   private readonly _typeChecker: ts.TypeChecker;
-  private readonly _bundledPackageNames: Set<string>;
+  private readonly _bundledPackageNames: ReadonlySet<string>;
   private readonly _astSymbolTable: IAstSymbolTable;
 
   private readonly _astModulesByModuleSymbol: Map<ts.Symbol, AstModule> = new Map<ts.Symbol, AstModule>();
@@ -76,7 +76,7 @@ export class ExportAnalyzer {
   public constructor(
     program: ts.Program,
     typeChecker: ts.TypeChecker,
-    bundledPackageNames: Set<string>,
+    bundledPackageNames: ReadonlySet<string>,
     astSymbolTable: IAstSymbolTable
   ) {
     this._program = program;
@@ -427,7 +427,10 @@ export class ExportAnalyzer {
         const exportSpecifier: ts.ExportSpecifier = declaration as ts.ExportSpecifier;
         exportName = (exportSpecifier.propertyName || exportSpecifier.name).getText().trim();
       } else {
-        throw new InternalError('Unimplemented export declaration kind: ' + declaration.getText());
+        throw new InternalError(
+          `Unimplemented export declaration kind: ${declaration.getText()}\n` +
+            SourceFileLocationFormatter.formatDeclaration(declaration)
+        );
       }
 
       // Ignore "export { A }" without a module specifier
@@ -441,7 +444,8 @@ export class ExportAnalyzer {
           return this._fetchAstImport(declarationSymbol, {
             importKind: AstImportKind.NamedImport,
             modulePath: externalModulePath,
-            exportName: exportName
+            exportName: exportName,
+            isTypeOnly: false
           });
         }
 
@@ -485,9 +489,8 @@ export class ExportAnalyzer {
           // The implementation here only works when importing from an external module.
           // The full solution is tracked by: https://github.com/microsoft/rushstack/issues/1029
           throw new Error(
-            '"import * as ___ from ___;" is not supported yet for local files.' +
-              '\nFailure in: ' +
-              importDeclaration.getSourceFile().fileName
+            '"import * as ___ from ___;" is not supported yet for local files.\n' +
+              SourceFileLocationFormatter.formatDeclaration(importDeclaration)
           );
         }
 
@@ -496,7 +499,8 @@ export class ExportAnalyzer {
         return this._fetchAstImport(undefined, {
           importKind: AstImportKind.StarImport,
           exportName: declarationSymbol.name,
-          modulePath: externalModulePath
+          modulePath: externalModulePath,
+          isTypeOnly: ExportAnalyzer._getIsTypeOnly(importDeclaration)
         });
       }
 
@@ -528,7 +532,8 @@ export class ExportAnalyzer {
           return this._fetchAstImport(declarationSymbol, {
             importKind: AstImportKind.NamedImport,
             modulePath: externalModulePath,
-            exportName: exportName
+            exportName: exportName,
+            isTypeOnly: ExportAnalyzer._getIsTypeOnly(importDeclaration)
           });
         }
 
@@ -561,7 +566,8 @@ export class ExportAnalyzer {
           return this._fetchAstImport(declarationSymbol, {
             importKind: AstImportKind.DefaultImport,
             modulePath: externalModulePath,
-            exportName
+            exportName,
+            isTypeOnly: ExportAnalyzer._getIsTypeOnly(importDeclaration)
           });
         }
 
@@ -571,7 +577,10 @@ export class ExportAnalyzer {
           declarationSymbol
         );
       } else {
-        throw new InternalError('Unimplemented import declaration kind: ' + declaration.getText());
+        throw new InternalError(
+          `Unimplemented import declaration kind: ${declaration.getText()}\n` +
+            SourceFileLocationFormatter.formatDeclaration(declaration)
+        );
       }
     }
 
@@ -599,7 +608,8 @@ export class ExportAnalyzer {
           return this._fetchAstImport(declarationSymbol, {
             importKind: AstImportKind.EqualsImport,
             modulePath: externalModuleName,
-            exportName: variableName
+            exportName: variableName,
+            isTypeOnly: false
           });
         }
       }
@@ -617,6 +627,13 @@ export class ExportAnalyzer {
     }
 
     return undefined;
+  }
+
+  private static _getIsTypeOnly(importDeclaration: ts.ImportDeclaration): boolean {
+    if (importDeclaration.importClause) {
+      return !!importDeclaration.importClause.isTypeOnly;
+    }
+    return false;
   }
 
   private _getExportOfSpecifierAstModule(
@@ -695,7 +712,8 @@ export class ExportAnalyzer {
           return this._fetchAstImport(astSymbol.followedSymbol, {
             importKind: AstImportKind.NamedImport,
             modulePath: starExportedModule.externalModulePath,
-            exportName: exportName
+            exportName: exportName,
+            isTypeOnly: false
           });
         }
 
@@ -715,7 +733,10 @@ export class ExportAnalyzer {
       importOrExportDeclaration
     );
     if (!moduleSpecifier) {
-      throw new InternalError('Unable to parse module specifier');
+      throw new InternalError(
+        'Unable to parse module specifier\n' +
+          SourceFileLocationFormatter.formatDeclaration(importOrExportDeclaration)
+      );
     }
 
     // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
@@ -740,7 +761,10 @@ export class ExportAnalyzer {
       importOrExportDeclaration
     );
     if (!moduleSpecifier) {
-      throw new InternalError('Unable to parse module specifier');
+      throw new InternalError(
+        'Unable to parse module specifier\n' +
+          SourceFileLocationFormatter.formatDeclaration(importOrExportDeclaration)
+      );
     }
 
     const resolvedModule: ts.ResolvedModuleFull | undefined = TypeScriptInternals.getResolvedModule(
@@ -751,8 +775,11 @@ export class ExportAnalyzer {
     if (resolvedModule === undefined) {
       // This should not happen, since getResolvedModule() specifically looks up names that the compiler
       // found in export declarations for this source file
+      //
+      // Encountered in https://github.com/microsoft/rushstack/issues/1914
       throw new InternalError(
-        'getResolvedModule() could not resolve module name ' + JSON.stringify(moduleSpecifier)
+        `getResolvedModule() could not resolve module name ${JSON.stringify(moduleSpecifier)}\n` +
+          SourceFileLocationFormatter.formatDeclaration(importOrExportDeclaration)
       );
     }
 
@@ -765,7 +792,8 @@ export class ExportAnalyzer {
       // This should not happen, since getResolvedModule() specifically looks up names that the compiler
       // found in export declarations for this source file
       throw new InternalError(
-        'getSourceFile() failed to locate ' + JSON.stringify(resolvedModule.resolvedFileName)
+        `getSourceFile() failed to locate ${JSON.stringify(resolvedModule.resolvedFileName)}\n` +
+          SourceFileLocationFormatter.formatDeclaration(importOrExportDeclaration)
       );
     }
 
@@ -799,6 +827,12 @@ export class ExportAnalyzer {
           includeNominalAnalysis: false,
           addIfMissing: true
         });
+      }
+    } else {
+      // If we encounter at least one import that does not use the type-only form,
+      // then the .d.ts rollup will NOT use "import type".
+      if (!options.isTypeOnly) {
+        astImport.isTypeOnlyEverywhere = false;
       }
     }
 

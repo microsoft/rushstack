@@ -1,0 +1,92 @@
+{
+  "name": "@rushstack/heft",
+  "entries": [
+    {
+      "version": "0.3.0",
+      "tag": "@rushstack/heft_v0.3.0",
+      "date": "Fri, 24 Jul 2020 20:40:38 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Enable Heft to be used without the \"@microsoft/rush-stack-compiler-n.n\" system"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.2",
+      "tag": "@rushstack/heft_v0.2.2",
+      "date": "Tue, 21 Jul 2020 00:54:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Rename .heft/api-extractor.json to .heft/api-extractor-task.json to avoid confusion with API Extractor's config file"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.1",
+      "tag": "@rushstack/heft_v0.2.1",
+      "date": "Tue, 21 Jul 2020 00:10:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update documentation"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.0",
+      "tag": "@rushstack/heft_v0.2.0",
+      "date": "Mon, 20 Jul 2020 06:52:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Make API Extractor's typescriptCompilerFolder option configurable."
+          },
+          {
+            "comment": "Include basic support for webpack-dev-server."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.2",
+      "tag": "@rushstack/heft_v0.1.2",
+      "date": "Thu, 16 Jul 2020 18:34:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Republish to fix incorrect dependency specifier"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.1",
+      "tag": "@rushstack/heft_v0.1.1",
+      "date": "Thu, 16 Jul 2020 17:53:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for TypeScript compilers older than version 3.6 (which do not support incremental compilation)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/heft_v0.1.0",
+      "date": "Wed, 15 Jul 2020 18:29:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release"
+          }
+        ]
+      }
+    }
+  ]
+}

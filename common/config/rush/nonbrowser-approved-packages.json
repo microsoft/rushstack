@@ -11,6 +11,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@jest/types",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@microsoft/api-documenter",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -22,10 +26,7 @@
       "name": "@microsoft/api-extractor-model",
       "allowedCategories": [ "libraries" ]
     },
-    {
-      "name": "@microsoft/decorators",
-      "allowedCategories": [ "libraries" ]
-    },
+ 
     {
       "name": "@microsoft/gulp-core-build",
       "allowedCategories": [ "libraries" ]
@@ -120,7 +121,7 @@
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.9",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-shared",
@@ -163,11 +164,23 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/eslint-patch",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/eslint-plugin",
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/heft",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "@rushstack/localization-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@rushstack/module-minifier-plugin",
       "allowedCategories": [ "tests" ]
     },
     {
@@ -296,7 +309,7 @@
     },
     {
       "name": "eslint",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "eslint-plugin-promise",
@@ -423,6 +436,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "heft-minimal-rig-test",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "html-webpack-plugin",
       "allowedCategories": [ "tests" ]
     },
@@ -467,6 +484,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jest-snapshot",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jju",
       "allowedCategories": [ "libraries" ]
     },
@@ -476,6 +497,10 @@
     },
     {
       "name": "jsdom",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jszip",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -595,7 +620,15 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "tapable",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "tar",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "terser",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -620,11 +653,11 @@
     },
     {
       "name": "tslint",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "tslint-microsoft-contrib",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "typescript",
@@ -652,7 +685,11 @@
     },
     {
       "name": "webpack-dev-server",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "webpack-sources",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "wordwrap",

@@ -2,13 +2,21 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonFile, IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
+import * as semver from 'semver';
+import {
+  JsonFile,
+  IPackageJson,
+  FileSystem,
+  FileConstants,
+  IPackageJsonDependencyTable
+} from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
 import { PackageJsonEditor } from './PackageJsonEditor';
 import { RushConstants } from '../logic/RushConstants';
 import { PackageNameParsers } from './PackageNameParsers';
+import { DependencySpecifier, DependencySpecifierType } from '../logic/DependencySpecifier';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
@@ -44,6 +52,7 @@ export class RushConfigurationProject {
   private _shouldPublish: boolean;
   private _skipRushCheck: boolean;
   private _downstreamDependencyProjects: string[];
+  private _localDependencyProjects: ReadonlyArray<RushConfigurationProject> | undefined;
   private readonly _rushConfiguration: RushConfiguration;
 
   /** @internal */
@@ -206,6 +215,20 @@ export class RushConfigurationProject {
   }
 
   /**
+   * A map of projects within the Rush configuration which are directly depended on by this project
+   */
+  public get localDependencyProjects(): ReadonlyArray<RushConfigurationProject> {
+    if (!this._localDependencyProjects) {
+      this._localDependencyProjects = [
+        ...this._getLocalDependencyProjects(this.packageJson.dependencies),
+        ...this._getLocalDependencyProjects(this.packageJson.devDependencies),
+        ...this._getLocalDependencyProjects(this.packageJson.optionalDependencies)
+      ];
+    }
+    return this._localDependencyProjects;
+  }
+
+  /**
    * The parsed NPM "package.json" file from projectFolder.
    * @deprecated Use packageJsonEditor instead
    */
@@ -302,5 +325,36 @@ export class RushConfigurationProject {
       }
     }
     return isMain;
+  }
+
+  private _getLocalDependencyProjects(
+    dependencies: IPackageJsonDependencyTable = {}
+  ): RushConfigurationProject[] {
+    const localDependencyProjects: RushConfigurationProject[] = [];
+    for (const dependency of Object.keys(dependencies)) {
+      // Skip if we can't find the local project or it's a cyclic dependency
+      const localProject: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(
+        dependency
+      );
+      if (localProject && !this._cyclicDependencyProjects.has(dependency)) {
+        // Set the value if it's a workspace project, or if we have a local project and the semver is satisfied
+        const dependencySpecifier: DependencySpecifier = new DependencySpecifier(
+          dependency,
+          dependencies[dependency]
+        );
+        switch (dependencySpecifier.specifierType) {
+          case DependencySpecifierType.Version:
+          case DependencySpecifierType.Range:
+            if (semver.satisfies(localProject.packageJson.version, dependencySpecifier.versionSpecifier)) {
+              localDependencyProjects.push(localProject);
+            }
+            break;
+          case DependencySpecifierType.Workspace:
+            localDependencyProjects.push(localProject);
+            break;
+        }
+      }
+    }
+    return localDependencyProjects;
   }
 }

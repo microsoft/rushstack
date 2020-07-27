@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Rush repo-state.json file",
+  "description": "For use with the Rush tool, this file tracks the state of various features in the Rush repo. See http://rushjs.io for details.",
+
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+    "pnpmShrinkwrapHash": {
+      "description": "A hash of the contents of the PNPM shrinkwrap file for the repository. This hash is used to determine whether or not the shrinkwrap has been modified prior to install.",
+      "type": "string"
+    },
+    "preferredVersionsHash": {
+      "description": "A hash of \"preferred versions\" for the repository. This hash is used to determine whether or not preferred versions have been modified prior to install.",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

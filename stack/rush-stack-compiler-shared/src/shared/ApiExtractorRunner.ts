@@ -5,7 +5,6 @@ import { ITerminalProvider } from '@rushstack/node-core-library';
 
 import { RushStackCompilerBase, IRushStackCompilerBaseOptions } from './RushStackCompilerBase';
 import { ApiExtractor } from './index';
-import { ToolPaths } from './ToolPaths';
 import { LoggingUtilities } from './LoggingUtilities';
 
 /**
@@ -116,8 +115,11 @@ export class ApiExtractorRunner extends RushStackCompilerBase {
             }
           }
           message.handled = true;
-        },
-        typescriptCompilerFolder: ToolPaths.typescriptPackagePath
+        }
+        // In the past we configured API Extractor to use the TypeScript runtime declarations from
+        // the local compiler, however lately it seems to work better without this option.
+        //
+        // typescriptCompilerFolder: ToolPaths.typescriptPackagePath
       };
 
       // NOTE: ExtractorResult.succeeded indicates whether errors or warnings occurred, however we

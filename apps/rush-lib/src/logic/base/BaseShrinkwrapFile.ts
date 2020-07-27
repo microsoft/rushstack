@@ -6,8 +6,8 @@ import * as semver from 'semver';
 import { FileSystem } from '@rushstack/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
-import { DependencySpecifier } from '../DependencySpecifier';
-import { IPolicyValidatorOptions } from '../policy/PolicyValidator';
+import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
+import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
 import { PackageManagerOptionsConfigurationBase } from '../../api/RushConfiguration';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
 
@@ -25,15 +25,6 @@ export abstract class BaseShrinkwrapFile {
   }
 
   /**
-   * Return whether or not the committed shrinkwrap file should be forcibly rechecked for changes.
-   *
-   * @virtual
-   */
-  public shouldForceRecheck(): boolean {
-    return false;
-  }
-
-  /**
    * Serializes and saves the shrinkwrap file to specified location
    */
   public save(filePath: string): void {
@@ -47,7 +38,7 @@ export abstract class BaseShrinkwrapFile {
    */
   public validate(
     packageManagerOptionsConfig: PackageManagerOptionsConfigurationBase,
-    policyOptions: IPolicyValidatorOptions
+    policyOptions: IShrinkwrapFilePolicyValidatorOptions
   ): void {}
 
   /**
@@ -121,6 +112,57 @@ export abstract class BaseShrinkwrapFile {
   /** @virtual */
   protected abstract getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined;
 
+  /**
+   * Returns true if the specified workspace in the shrinkwrap file includes a package that would
+   * satisfy the specified SemVer version range.
+   *
+   * Consider this example:
+   *
+   * - project-a\
+   *   - lib-a@1.2.3
+   *   - lib-b@1.0.0
+   * - lib-b@2.0.0
+   *
+   * In this example, hasCompatibleWorkspaceDependency("lib-b", ">= 1.1.0", "workspace-key-for-project-a")
+   * would fail because it finds lib-b@1.0.0 which does not satisfy the pattern ">= 1.1.0".
+   *
+   * @virtual
+   */
+  public hasCompatibleWorkspaceDependency(
+    dependencySpecifier: DependencySpecifier,
+    workspaceKey: string
+  ): boolean {
+    const shrinkwrapDependency: DependencySpecifier | undefined = this.getWorkspaceDependencyVersion(
+      dependencySpecifier,
+      workspaceKey
+    );
+    return shrinkwrapDependency
+      ? this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency)
+      : false;
+  }
+
+  /**
+   * Returns the list of keys to workspace projects specified in the shrinkwrap.
+   * Example: [ '../../apps/project1', '../../apps/project2' ]
+   *
+   * @virtual
+   */
+  public abstract getWorkspaceKeys(): ReadonlyArray<string>;
+
+  /**
+   * Returns the key to the project in the workspace specified by the shrinkwrap.
+   * Example: '../../apps/project1'
+   *
+   * @virtual
+   */
+  public abstract getWorkspaceKeyByPath(workspaceRoot: string, projectFolder: string): string;
+
+  /** @virtual */
+  protected abstract getWorkspaceDependencyVersion(
+    dependencySpecifier: DependencySpecifier,
+    workspaceKey: string
+  ): DependencySpecifier | undefined;
+
   /** @virtual */
   protected abstract serialize(): string;
 
@@ -151,9 +193,9 @@ export abstract class BaseShrinkwrapFile {
     //
     // In this case, the shrinkwrap file will have a key equivalent to "npm:target-name@1.2.5",
     // and so we need to unwrap the target and compare "1.2.5" with "^1.2.3".
-    if (projectDependency.specifierType === 'alias') {
+    if (projectDependency.specifierType === DependencySpecifierType.Alias) {
       // Does the shrinkwrap install it as an alias?
-      if (shrinkwrapDependency.specifierType === 'alias') {
+      if (shrinkwrapDependency.specifierType === DependencySpecifierType.Alias) {
         // Does the shrinkwrap have the right package name?
         if (projectDependency.packageName === shrinkwrapDependency.packageName) {
           // Yes, the aliases match, so let's compare their targets in the logic below
@@ -170,8 +212,8 @@ export abstract class BaseShrinkwrapFile {
     }
 
     switch (normalizedProjectDependency.specifierType) {
-      case 'version':
-      case 'range':
+      case DependencySpecifierType.Version:
+      case DependencySpecifierType.Range:
         return semver.satisfies(
           normalizedShrinkwrapDependency.versionSpecifier,
           normalizedProjectDependency.versionSpecifier

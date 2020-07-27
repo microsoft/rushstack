@@ -5,6 +5,11 @@ import * as colors from 'colors';
 import * as path from 'path';
 import * as resolve from 'resolve';
 import * as npmPacklist from 'npm-packlist';
+import pnpmLinkBins from '@pnpm/link-bins';
+
+// (Used only by the legacy code fragment in the resolve.sync() hook below)
+import * as fsForResolve from 'fs';
+
 import ignore, { Ignore } from 'ignore';
 import {
   Path,
@@ -19,10 +24,13 @@ import {
   NewlineKind,
   Text
 } from '@rushstack/node-core-library';
+import { DeployArchiver } from './DeployArchiver';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { DeployScenarioConfiguration, IDeployScenarioProjectJson } from './DeployScenarioConfiguration';
+import { PnpmfileConfiguration } from './PnpmfileConfiguration';
+import { matchesWithStar } from './Utils';
 
 // (@types/npm-packlist is missing this API)
 declare module 'npm-packlist' {
@@ -39,7 +47,18 @@ declare module 'npm-packlist' {
 export interface IDeployMetadataJson {
   scenarioName: string;
   mainProjectName: string;
+  projects: IProjectInfoJson[];
   links: ILinkInfo[];
+}
+
+/**
+ * Part of the deploy-matadata.json file format. Represents a Rush project to be deployed.
+ */
+interface IProjectInfoJson {
+  /**
+   * This path is relative to the deploy folder.
+   */
+  path: string;
 }
 
 /**
@@ -56,12 +75,14 @@ interface IFolderInfo {
    * True if this is the package folder for a local Rush project.
    */
   isRushProject: boolean;
+
+  projectSettings?: IDeployScenarioProjectJson;
 }
 
 /**
  * This object tracks DeployManager state during a deployment.
  */
-interface IDeployState {
+export interface IDeployState {
   scenarioFilePath: string;
 
   /**
@@ -94,6 +115,13 @@ interface IDeployState {
   folderInfosByPath: Map<string, IFolderInfo>;
 
   symlinkAnalyzer: SymlinkAnalyzer;
+
+  pnpmfileConfiguration: PnpmfileConfiguration;
+
+  /**
+   * The desired path to be used when archiving the target folder. Supported file extensions: .zip.
+   */
+  createArchiveFilePath: string | undefined;
 }
 
 /**
@@ -114,97 +142,193 @@ export class DeployManager {
   private _collectFoldersRecursive(packageJsonFolderPath: string, deployState: IDeployState): void {
     const packageJsonRealFolderPath: string = FileSystem.getRealPath(packageJsonFolderPath);
 
-    if (!deployState.foldersToCopy.has(packageJsonRealFolderPath)) {
-      deployState.foldersToCopy.add(packageJsonRealFolderPath);
+    if (deployState.foldersToCopy.has(packageJsonRealFolderPath)) {
+      // we've already seen this folder
+      return;
+    }
 
-      const packageJson: IPackageJson = JsonFile.load(path.join(packageJsonRealFolderPath, 'package.json'));
+    deployState.foldersToCopy.add(packageJsonRealFolderPath);
 
-      // Union of keys from regular dependencies, peerDependencies, optionalDependencies
-      // (and possibly devDependencies if includeDevDependencies=true)
-      const allDependencyNames: Set<string> = new Set<string>();
+    const originalPackageJson: IPackageJson = JsonFile.load(
+      path.join(packageJsonRealFolderPath, 'package.json')
+    );
 
-      // Just the keys from optionalDependencies and peerDependencies
-      const optionalDependencyNames: Set<string> = new Set<string>();
+    const sourceFolderInfo: IFolderInfo | undefined = deployState.folderInfosByPath.get(
+      FileSystem.getRealPath(packageJsonFolderPath)
+    );
 
-      for (const name of Object.keys(packageJson.dependencies || {})) {
-        allDependencyNames.add(name);
+    // Transform packageJson using pnpmfile.js
+    const packageJson: IPackageJson = deployState.pnpmfileConfiguration.transform(originalPackageJson);
+
+    // Union of keys from regular dependencies, peerDependencies, optionalDependencies
+    // (and possibly devDependencies if includeDevDependencies=true)
+    const dependencyNamesToProcess: Set<string> = new Set<string>();
+
+    // Just the keys from optionalDependencies and peerDependencies
+    const optionalDependencyNames: Set<string> = new Set<string>();
+
+    for (const name of Object.keys(packageJson.dependencies || {})) {
+      dependencyNamesToProcess.add(name);
+    }
+    if (deployState.scenarioConfiguration.json.includeDevDependencies) {
+      for (const name of Object.keys(packageJson.devDependencies || {})) {
+        dependencyNamesToProcess.add(name);
       }
-      if (deployState.scenarioConfiguration.json.includeDevDependencies) {
-        for (const name of Object.keys(packageJson.devDependencies || {})) {
-          allDependencyNames.add(name);
+    }
+    for (const name of Object.keys(packageJson.peerDependencies || {})) {
+      dependencyNamesToProcess.add(name);
+      optionalDependencyNames.add(name); // consider peers optional, since they are so frequently broken
+    }
+    for (const name of Object.keys(packageJson.optionalDependencies || {})) {
+      dependencyNamesToProcess.add(name);
+      optionalDependencyNames.add(name);
+    }
+
+    if (sourceFolderInfo && sourceFolderInfo.isRushProject) {
+      const projectSettings: IDeployScenarioProjectJson | undefined = sourceFolderInfo.projectSettings;
+      if (projectSettings) {
+        this._applyDependencyFilters(
+          dependencyNamesToProcess,
+          projectSettings.additionalDependenciesToInclude,
+          projectSettings.dependenciesToExclude
+        );
+      }
+    }
+
+    for (const dependencyPackageName of dependencyNamesToProcess) {
+      try {
+        this._traceResolveDependency(dependencyPackageName, packageJsonRealFolderPath, deployState);
+      } catch (resolveErr) {
+        if (resolveErr.code === 'MODULE_NOT_FOUND' && optionalDependencyNames.has(dependencyPackageName)) {
+          // Ignore missing optional dependency
+          continue;
         }
+        throw resolveErr;
       }
-      for (const name of Object.keys(packageJson.peerDependencies || {})) {
-        allDependencyNames.add(name);
-        optionalDependencyNames.add(name); // consider peers optional, since they are so frequently broken
-      }
-      for (const name of Object.keys(packageJson.optionalDependencies || {})) {
-        allDependencyNames.add(name);
-        optionalDependencyNames.add(name);
-      }
+    }
 
-      // (Used only by the legacy code fragment in the resolve.sync() hook below)
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const fs: typeof import('fs') = require('fs');
+    if (
+      this._rushConfiguration.packageManager === 'pnpm' &&
+      !deployState.scenarioConfiguration.json.omitPnpmWorkaroundLinks
+    ) {
+      // Replicate the PNPM workaround links.
 
-      for (const dependencyPackageName of allDependencyNames) {
-        // The "resolve" library models the Node.js require() API, which gives precedence to "core" system modules
-        // over an NPM package with the same name.  But we are traversing package.json dependencies, which never
-        // refer to system modules.  Appending a "/" forces require() to look for the NPM package.
-        const resolveSuffix: string =
-          dependencyPackageName + resolve.isCore(dependencyPackageName) ? '/' : '';
-
+      // Only apply this logic for packages that were actually installed under the common/temp folder.
+      if (Path.isUnder(packageJsonFolderPath, this._rushConfiguration.commonTempFolder)) {
         try {
-          const resolvedDependency: string = resolve.sync(dependencyPackageName + resolveSuffix, {
-            basedir: packageJsonRealFolderPath,
-            preserveSymlinks: false,
-            packageFilter: (pkg, dir) => {
-              // point "main" at a file that is guaranteed to exist
-              // This helps resolve packages such as @types/node that have no entry point
-              pkg.main = './package.json';
-              return pkg;
-            },
-            realpathSync: (filePath) => {
-              // This code fragment is a modification of the documented default implementation from the "fs-extra" docs
-              try {
-                const resolvedPath: string = fs.realpathSync(filePath);
+          // The PNPM workaround links are created in this folder.  We will resolve the current package
+          // from that location and collect any additional links encountered along the way.
+          const pnpmDotFolderPath: string = path.join(
+            this._rushConfiguration.commonTempFolder,
+            'node_modules',
+            '.pnpm'
+          );
 
-                deployState.symlinkAnalyzer.analyzePath(filePath);
-                return resolvedPath;
-              } catch (realpathErr) {
-                if (realpathErr.code !== 'ENOENT') {
-                  throw realpathErr;
-                }
-              }
-              return filePath;
-            }
-          });
-
-          if (!resolvedDependency) {
-            if (optionalDependencyNames.has(dependencyPackageName)) {
-              // Ignore missing optional dependency
-              continue;
-            }
-            throw new Error(`Error resolving ${dependencyPackageName} from ${packageJsonRealFolderPath}`);
-          }
-
-          const dependencyPackageFolderPath:
-            | string
-            | undefined = this._packageJsonLookup.tryGetPackageFolderFor(resolvedDependency);
-          if (!dependencyPackageFolderPath) {
-            throw new Error(`Error finding package.json folder for ${resolvedDependency}`);
-          }
-
-          this._collectFoldersRecursive(dependencyPackageFolderPath, deployState);
+          // TODO: Investigate how package aliases are handled by PNPM in this case.  For example:
+          //
+          // "dependencies": {
+          //   "alias-name": "npm:real-name@^1.2.3"
+          // }
+          this._traceResolveDependency(packageJson.name, pnpmDotFolderPath, deployState);
         } catch (resolveErr) {
-          if (resolveErr.code === 'MODULE_NOT_FOUND' && optionalDependencyNames.has(dependencyPackageName)) {
-            // Ignore missing optional dependency
-            continue;
+          if (resolveErr.code === 'MODULE_NOT_FOUND') {
+            // The workaround link isn't guaranteed to exist, so ignore if it's missing
+            // NOTE: If you encounter this warning a lot, please report it to the Rush maintainers.
+            console.log('Ignoring missing PNPM workaround link for ' + packageJsonFolderPath);
           }
-          throw resolveErr;
         }
       }
     }
+  }
+
+  private _applyDependencyFilters(
+    allDependencyNames: Set<string>,
+    additionalDependenciesToInclude: string[] = [],
+    dependenciesToExclude: string[] = []
+  ): Set<string> {
+    // Track packages that got added/removed for reporting purposes
+    const extraIncludedPackageNames: string[] = [];
+    const extraExcludedPackageNames: string[] = [];
+
+    for (const patternWithStar of dependenciesToExclude) {
+      for (const dependency of allDependencyNames) {
+        if (matchesWithStar(patternWithStar, dependency)) {
+          if (allDependencyNames.delete(dependency)) {
+            extraExcludedPackageNames.push(dependency);
+          }
+        }
+      }
+    }
+
+    for (const dependencyToInclude of additionalDependenciesToInclude) {
+      if (!allDependencyNames.has(dependencyToInclude)) {
+        allDependencyNames.add(dependencyToInclude);
+        extraIncludedPackageNames.push(dependencyToInclude);
+      }
+    }
+
+    if (extraIncludedPackageNames.length > 0) {
+      extraIncludedPackageNames.sort();
+      console.log('Extra dependencies included by settings: ' + extraIncludedPackageNames.join(', '));
+    }
+
+    if (extraExcludedPackageNames.length > 0) {
+      extraExcludedPackageNames.sort();
+      console.log('Extra dependencies excluded by settings: ' + extraExcludedPackageNames.join(', '));
+    }
+
+    return allDependencyNames;
+  }
+
+  private _traceResolveDependency(
+    packageName: string,
+    startingFolder: string,
+    deployState: IDeployState
+  ): void {
+    // The "resolve" library models the Node.js require() API, which gives precedence to "core" system modules
+    // over an NPM package with the same name.  But we are traversing package.json dependencies, which never
+    // refer to system modules.  Appending a "/" forces require() to look for the NPM package.
+    const resolveSuffix: string = packageName + resolve.isCore(packageName) ? '/' : '';
+
+    const resolvedDependency: string = resolve.sync(packageName + resolveSuffix, {
+      basedir: startingFolder,
+      preserveSymlinks: false,
+      packageFilter: (pkg, dir) => {
+        // point "main" at a file that is guaranteed to exist
+        // This helps resolve packages such as @types/node that have no entry point
+        pkg.main = './package.json';
+        return pkg;
+      },
+      realpathSync: (filePath) => {
+        // This code fragment is a modification of the documented default implementation from the "fs-extra" docs
+        try {
+          const resolvedPath: string = fsForResolve.realpathSync(filePath);
+
+          deployState.symlinkAnalyzer.analyzePath(filePath);
+          return resolvedPath;
+        } catch (realpathErr) {
+          if (realpathErr.code !== 'ENOENT') {
+            throw realpathErr;
+          }
+        }
+        return filePath;
+      }
+    });
+
+    if (!resolvedDependency) {
+      // This should not happen, since the resolve.sync() docs say it will throw an exception instead
+      throw new InternalError(`Error resolving ${packageName} from ${startingFolder}`);
+    }
+
+    const dependencyPackageFolderPath: string | undefined = this._packageJsonLookup.tryGetPackageFolderFor(
+      resolvedDependency
+    );
+
+    if (!dependencyPackageFolderPath) {
+      throw new Error(`Error finding package.json folder for ${resolvedDependency}`);
+    }
+
+    this._collectFoldersRecursive(dependencyPackageFolderPath, deployState);
   }
 
   /**
@@ -415,8 +539,25 @@ export class DeployManager {
     const deployMetadataJson: IDeployMetadataJson = {
       scenarioName: path.basename(deployState.scenarioFilePath),
       mainProjectName: deployState.mainProjectName,
+      projects: [],
       links: []
     };
+
+    deployState.folderInfosByPath.forEach((folderInfo) => {
+      if (!folderInfo.isRushProject) {
+        // It's not a Rush project
+        return;
+      }
+
+      if (!deployState.foldersToCopy.has(folderInfo.folderPath)) {
+        // It's not something we crawled
+        return;
+      }
+
+      deployMetadataJson.projects.push({
+        path: this._remapPathForDeployMetadata(folderInfo.folderPath, deployState)
+      });
+    });
 
     // Remap the links to be relative to target folder
     for (const absoluteLinkInfo of deployState.symlinkAnalyzer.reportSymlinks()) {
@@ -433,7 +574,28 @@ export class DeployManager {
     });
   }
 
-  private _prepareDeployment(deployState: IDeployState): void {
+  private async _makeBinLinksAsync(deployState: IDeployState): Promise<void> {
+    for (const [, folderInfo] of deployState.folderInfosByPath) {
+      if (!folderInfo.isRushProject) {
+        return;
+      }
+
+      const deployedPath: string = this._remapPathForDeployMetadata(folderInfo.folderPath, deployState);
+      const projectFolder: string = path.join(deployState.targetRootFolder, deployedPath, 'node_modules');
+      const projectBinFolder: string = path.join(
+        deployState.targetRootFolder,
+        deployedPath,
+        'node_modules',
+        '.bin'
+      );
+
+      await pnpmLinkBins(projectFolder, projectBinFolder, {
+        warn: (msg: string) => console.warn(colors.yellow(msg))
+      });
+    }
+  }
+
+  private async _prepareDeploymentAsync(deployState: IDeployState): Promise<void> {
     // Calculate the set with additionalProjectsToInclude
     const includedProjectNamesSet: Set<string> = new Set();
     this._collectAdditionalProjectsToInclude(
@@ -444,14 +606,19 @@ export class DeployManager {
 
     for (const rushProject of this._rushConfiguration.projects) {
       const projectFolder: string = FileSystem.getRealPath(rushProject.projectFolder);
+      const projectSettings:
+        | IDeployScenarioProjectJson
+        | undefined = deployState.scenarioConfiguration.projectJsonsByName.get(rushProject.packageName);
+
       deployState.folderInfosByPath.set(projectFolder, {
         folderPath: projectFolder,
-        isRushProject: true
+        isRushProject: true,
+        projectSettings
       });
     }
 
     for (const projectName of includedProjectNamesSet) {
-      console.log(`Analyzing project "${projectName}"`);
+      console.log(colors.cyan('Analyzing project: ') + projectName);
       const project: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(
         projectName
       );
@@ -461,6 +628,8 @@ export class DeployManager {
       }
 
       this._collectFoldersRecursive(project.projectFolder, deployState);
+
+      console.log();
     }
 
     Sort.sortSet(deployState.foldersToCopy);
@@ -494,18 +663,33 @@ export class DeployManager {
           throw new InternalError('Target does not exist: ' + JSON.stringify(linkToCopy, undefined, 2));
         }
       }
+
+      await this._makeBinLinksAsync(deployState);
     }
+    if (deployState.scenarioConfiguration.json.folderToCopy !== undefined) {
+      const sourceFolderPath: string = path.resolve(
+        this._rushConfiguration.rushJsonFolder,
+        deployState.scenarioConfiguration.json.folderToCopy
+      );
+      FileSystem.copyFiles({
+        sourcePath: sourceFolderPath,
+        destinationPath: deployState.targetRootFolder,
+        alreadyExistsBehavior: AlreadyExistsBehavior.Error
+      });
+    }
+    await DeployArchiver.createArchiveAsync(deployState);
   }
 
   /**
    * The main entry point for performing a deployment.
    */
-  public deploy(
+  public async deployAsync(
     mainProjectName: string | undefined,
     scenarioName: string | undefined,
     overwriteExisting: boolean,
-    targetFolderParameter: string | undefined
-  ): void {
+    targetFolderParameter: string | undefined,
+    createArchiveFilePath: string | undefined
+  ): Promise<void> {
     const scenarioFilePath: string = DeployScenarioConfiguration.getConfigFilePath(
       scenarioName,
       this._rushConfiguration
@@ -557,12 +741,20 @@ export class DeployManager {
       if (overwriteExisting) {
         console.log('Deleting target folder contents because "--overwrite" was specified...');
         FileSystem.ensureEmptyFolder(targetRootFolder);
+        console.log();
       } else {
         throw new Error(
           'The deploy target folder is not empty. You can specify "--overwrite"' +
             ' to recursively delete all folder contents.'
         );
       }
+    }
+
+    // If create archive is set, ensure it has a legal extension
+    if (createArchiveFilePath && path.extname(createArchiveFilePath) !== '.zip') {
+      throw new Error(
+        'The "--create-archive" parameter currently only supports archives with the .zip file extension.'
+      );
     }
 
     const deployState: IDeployState = {
@@ -573,10 +765,12 @@ export class DeployManager {
       targetRootFolder,
       foldersToCopy: new Set(),
       folderInfosByPath: new Map(),
-      symlinkAnalyzer: new SymlinkAnalyzer()
+      symlinkAnalyzer: new SymlinkAnalyzer(),
+      pnpmfileConfiguration: new PnpmfileConfiguration(this._rushConfiguration),
+      createArchiveFilePath
     };
 
-    this._prepareDeployment(deployState);
+    await this._prepareDeploymentAsync(deployState);
 
     console.log('\n' + colors.green('The operation completed successfully.'));
   }

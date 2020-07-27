@@ -12,7 +12,8 @@ import {
 
 import { BaseRushAction } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';
-import { InstallManager, IInstallManagerOptions } from '../../logic/InstallManager';
+import { BaseInstallManager, IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
+import { InstallManagerFactory } from '../../logic/InstallManagerFactory';
 import { PurgeManager } from '../../logic/PurgeManager';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { StandardScriptUpdater } from '../../logic/StandardScriptUpdater';
@@ -49,7 +50,8 @@ export abstract class BaseInstallAction extends BaseRushAction {
         'If "--no-link" is specified, then project symlinks will NOT be created' +
         ' after the installation completes.  You will need to run "rush link" manually.' +
         ' This flag is useful for automated builds that want to report stages individually' +
-        ' or perform extra operations in between the two stages.'
+        ' or perform extra operations in between the two stages. This flag is not supported' +
+        ' when using workspaces.'
     });
     this._networkConcurrencyParameter = this.defineIntegerParameter({
       parameterLongName: '--network-concurrency',
@@ -117,7 +119,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     const installManagerOptions: IInstallManagerOptions = this.buildInstallOptions();
 
-    const installManager: InstallManager = new InstallManager(
+    const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
       this.rushConfiguration,
       this.rushGlobalFolder,
       purgeManager,

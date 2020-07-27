@@ -286,7 +286,7 @@ function wireUpProcessErrorHandling(shouldWarningsFailBuild: boolean): void {
     let wroteToStdErr: boolean = false;
 
     if (shouldWarningsFailBuild) {
-      const oldStdErr: Function = process.stderr.write;
+      const oldStdErr: typeof process.stderr.write = process.stderr.write;
       process.stderr.write = function (text: string | Buffer): boolean {
         if (text.toString()) {
           wroteToStdErr = true;

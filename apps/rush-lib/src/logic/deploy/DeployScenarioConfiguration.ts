@@ -10,6 +10,8 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 export interface IDeployScenarioProjectJson {
   projectName: string;
   additionalProjectsToInclude?: string[];
+  additionalDependenciesToInclude?: string[];
+  dependenciesToExclude?: string[];
 }
 
 // The parsed JSON file structure, as defined by the "deploy-scenario.schema.json" JSON schema
@@ -17,7 +19,9 @@ export interface IDeployScenarioJson {
   deploymentProjectNames: string[];
   includeDevDependencies?: boolean;
   includeNpmIgnoreFiles?: boolean;
+  omitPnpmWorkaroundLinks?: boolean;
   linkCreation?: 'default' | 'script' | 'none';
+  folderToCopy?: string;
   projectSettings?: IDeployScenarioProjectJson[];
 }
 

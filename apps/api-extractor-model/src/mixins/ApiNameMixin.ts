@@ -34,7 +34,7 @@ const _name: unique symbol = Symbol('ApiNameMixin._name');
  *
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface ApiNameMixin extends ApiItem {
   /**
    * The exported name of this API item.

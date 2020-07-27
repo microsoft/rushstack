@@ -2,8 +2,16 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import * as semver from 'semver';
 import * as ts from 'typescript';
-import { FileSystem, NewlineKind, PackageJsonLookup, IPackageJson } from '@rushstack/node-core-library';
+import * as resolve from 'resolve';
+import {
+  FileSystem,
+  NewlineKind,
+  PackageJsonLookup,
+  IPackageJson,
+  INodePackageJson
+} from '@rushstack/node-core-library';
 
 import { ExtractorConfig } from './ExtractorConfig';
 import { Collector } from '../collector/Collector';
@@ -200,7 +208,10 @@ export class Extractor {
       showDiagnostics: !!options.showDiagnostics
     });
 
+    this._checkCompilerCompatibility(extractorConfig, messageRouter);
+
     if (messageRouter.showDiagnostics) {
+      messageRouter.logDiagnostic('');
       messageRouter.logDiagnosticHeader('Final prepared ExtractorConfig');
       messageRouter.logDiagnostic(extractorConfig.getDiagnosticDump());
       messageRouter.logDiagnosticFooter();
@@ -249,17 +260,29 @@ export class Extractor {
     let apiReportChanged: boolean = false;
 
     if (extractorConfig.apiReportEnabled) {
-      const acutalApiReportPathWithoutExtension = extractorConfig.reportTempFilePath.replace(/\.api\.md$/, '');
+      const acutalApiReportPathWithoutExtension = extractorConfig.reportTempFilePath.replace(
+        /\.api\.md$/,
+        ''
+      );
       const expectedApiReportPathWithoutExtension = extractorConfig.reportFilePath.replace(/\.api\.md$/, '');
 
-      const actualApiReportContentMap: Map<string, string> = ApiReportGenerator.generateReviewFileContent(collector);
+      const actualApiReportContentMap: Map<string, string> = ApiReportGenerator.generateReviewFileContent(
+        collector
+      );
 
       for (const [modulePath, actualApiReportContent] of actualApiReportContentMap) {
-
-        const actualEntryPointApiReportPath: string = `${acutalApiReportPathWithoutExtension}${modulePath ? '.' : ''}${modulePath}.api.md`;
-        const actualEntryPointApiReportShortPath: string = extractorConfig._getShortFilePath(actualEntryPointApiReportPath);
-        const expectedEntryPointApiReportPath: string = `${expectedApiReportPathWithoutExtension}${modulePath ? '.' : ''}${modulePath}.api.md`;
-        const expectedEntryPointApiReportShortPath: string = extractorConfig._getShortFilePath(expectedEntryPointApiReportPath);
+        const actualEntryPointApiReportPath: string = `${acutalApiReportPathWithoutExtension}${
+          modulePath ? '.' : ''
+        }${modulePath}.api.md`;
+        const actualEntryPointApiReportShortPath: string = extractorConfig._getShortFilePath(
+          actualEntryPointApiReportPath
+        );
+        const expectedEntryPointApiReportPath: string = `${expectedApiReportPathWithoutExtension}${
+          modulePath ? '.' : ''
+        }${modulePath}.api.md`;
+        const expectedEntryPointApiReportShortPath: string = extractorConfig._getShortFilePath(
+          expectedEntryPointApiReportPath
+        );
 
         // Write the actual file
         FileSystem.writeFile(actualEntryPointApiReportPath, actualApiReportContent, {
@@ -271,21 +294,27 @@ export class Extractor {
         if (FileSystem.exists(expectedEntryPointApiReportPath)) {
           const expectedApiReportContent: string = FileSystem.readFile(expectedEntryPointApiReportPath);
 
-          if (!ApiReportGenerator.areEquivalentApiFileContents(actualApiReportContent, expectedApiReportContent)) {
+          if (
+            !ApiReportGenerator.areEquivalentApiFileContents(actualApiReportContent, expectedApiReportContent)
+          ) {
             apiReportChanged = true;
 
             if (!localBuild) {
               // For a production build, issue a warning that will break the CI build.
-              messageRouter.logWarning(ConsoleMessageId.ApiReportNotCopied,
-                'You have changed the public API signature for this project.'
-                + ` Please copy the file "${actualEntryPointApiReportShortPath}" to "${expectedEntryPointApiReportShortPath}",`
-                + ` or perform a local build (which does this automatically).`
-                + ` See the Git repo documentation for more info.`);
+              messageRouter.logWarning(
+                ConsoleMessageId.ApiReportNotCopied,
+                'You have changed the public API signature for this project.' +
+                  ` Please copy the file "${actualEntryPointApiReportShortPath}" to "${expectedEntryPointApiReportShortPath}",` +
+                  ` or perform a local build (which does this automatically).` +
+                  ` See the Git repo documentation for more info.`
+              );
             } else {
               // For a local build, just copy the file automatically.
-              messageRouter.logWarning(ConsoleMessageId.ApiReportCopied,
-                'You have changed the public API signature for this project.'
-                + ` Updating ${expectedEntryPointApiReportShortPath}`);
+              messageRouter.logWarning(
+                ConsoleMessageId.ApiReportCopied,
+                'You have changed the public API signature for this project.' +
+                  ` Updating ${expectedEntryPointApiReportShortPath}`
+              );
 
               FileSystem.writeFile(expectedEntryPointApiReportPath, actualApiReportContent, {
                 ensureFolderExists: true,
@@ -293,8 +322,10 @@ export class Extractor {
               });
             }
           } else {
-            messageRouter.logVerbose(ConsoleMessageId.ApiReportUnchanged,
-              `The API report is up to date: ${actualEntryPointApiReportShortPath}`);
+            messageRouter.logVerbose(
+              ConsoleMessageId.ApiReportUnchanged,
+              `The API report is up to date: ${actualEntryPointApiReportShortPath}`
+            );
           }
         } else {
           // The target file does not exist, so we are setting up the API review file for the first time.
@@ -306,25 +337,29 @@ export class Extractor {
 
           if (!localBuild) {
             // For a production build, issue a warning that will break the CI build.
-            messageRouter.logWarning(ConsoleMessageId.ApiReportNotCopied,
-              'The API report file is missing.'
-              + ` Please copy the file "${actualEntryPointApiReportShortPath}" to "${expectedEntryPointApiReportShortPath}",`
-              + ` or perform a local build (which does this automatically).`
-              + ` See the Git repo documentation for more info.`);
+            messageRouter.logWarning(
+              ConsoleMessageId.ApiReportNotCopied,
+              'The API report file is missing.' +
+                ` Please copy the file "${actualEntryPointApiReportShortPath}" to "${expectedEntryPointApiReportShortPath}",` +
+                ` or perform a local build (which does this automatically).` +
+                ` See the Git repo documentation for more info.`
+            );
           } else {
             const expectedApiReportFolder: string = path.dirname(expectedEntryPointApiReportPath);
             if (!FileSystem.exists(expectedApiReportFolder)) {
-              messageRouter.logError(ConsoleMessageId.ApiReportFolderMissing,
-                'Unable to create the API report file. Please make sure the target folder exists:\n'
-                + expectedApiReportFolder
+              messageRouter.logError(
+                ConsoleMessageId.ApiReportFolderMissing,
+                'Unable to create the API report file. Please make sure the target folder exists:\n' +
+                  expectedApiReportFolder
               );
             } else {
               FileSystem.writeFile(expectedEntryPointApiReportPath, actualApiReportContent, {
                 convertLineEndings: extractorConfig.newlineKind
               });
-              messageRouter.logWarning(ConsoleMessageId.ApiReportCreated,
-                'The API report file was missing, so a new file was created. Please add this file to Git:\n'
-                + expectedEntryPointApiReportPath
+              messageRouter.logWarning(
+                ConsoleMessageId.ApiReportCreated,
+                'The API report file was missing, so a new file was created. Please add this file to Git:\n' +
+                  expectedEntryPointApiReportPath
               );
             }
           }
@@ -382,6 +417,45 @@ export class Extractor {
       errorCount: messageRouter.errorCount,
       warningCount: messageRouter.warningCount
     });
+  }
+
+  private static _checkCompilerCompatibility(
+    extractorConfig: ExtractorConfig,
+    messageRouter: MessageRouter
+  ): void {
+    messageRouter.logInfo(
+      ConsoleMessageId.Preamble,
+      `Analysis will use the bundled TypeScript version ${ts.version}`
+    );
+
+    try {
+      const typescriptPath: string = resolve.sync('typescript', {
+        basedir: extractorConfig.projectFolder,
+        preserveSymlinks: false
+      });
+      const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
+      const packageJson: INodePackageJson | undefined = packageJsonLookup.tryLoadNodePackageJsonFor(
+        typescriptPath
+      );
+      if (packageJson && packageJson.version && semver.valid(packageJson.version)) {
+        // Consider a newer MINOR release to be incompatible
+        const ourMajor: number = semver.major(ts.version);
+        const ourMinor: number = semver.minor(ts.version);
+
+        const theirMajor: number = semver.major(packageJson.version);
+        const theirMinor: number = semver.minor(packageJson.version);
+
+        if (theirMajor > ourMajor || (theirMajor === ourMajor && theirMinor > ourMinor)) {
+          messageRouter.logInfo(
+            ConsoleMessageId.CompilerVersionNotice,
+            `*** The target project appears to use TypeScript ${packageJson.version} which is newer than the` +
+              ` bundled compiler engine; consider upgrading API Extractor.`
+          );
+        }
+      }
+    } catch (e) {
+      // The compiler detection heuristic is not expected to work in many configurations
+    }
   }
 
   private static _generateRollupDtsFile(

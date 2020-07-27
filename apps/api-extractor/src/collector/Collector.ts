@@ -63,14 +63,25 @@ export class Collector {
 
   public readonly extractorConfig: ExtractorConfig;
 
+  /**
+   * The `ExtractorConfig.bundledPackages` names in a set.
+   */
+  public readonly bundledPackageNames: ReadonlySet<string>;
+
   private readonly _program: ts.Program;
 
   private readonly _tsdocParser: tsdoc.TSDocParser;
 
   private _astEntryPoints: AstModule[] | undefined;
 
-  private readonly _entitiesByAstEntity: Map<AstEntity, CollectorEntity> = new Map<AstEntity, CollectorEntity>();
-  private readonly _entitiesByAstEntryPoint: Map<IWorkingPackageEntryPoint, CollectorEntity[]> = new Map<IWorkingPackageEntryPoint, CollectorEntity[]>();
+  private readonly _entitiesByAstEntity: Map<AstEntity, CollectorEntity> = new Map<
+    AstEntity,
+    CollectorEntity
+  >();
+  private readonly _entitiesByAstEntryPoint: Map<IWorkingPackageEntryPoint, CollectorEntity[]> = new Map<
+    IWorkingPackageEntryPoint,
+    CollectorEntity[]
+  >();
 
   private readonly _starExportedExternalModulePaths: string[] = [];
 
@@ -91,20 +102,18 @@ export class Collector {
       ...this.extractorConfig.additionalEntryPoints
     ];
 
-    const workingPackageEntryPoints: IWorkingPackageEntryPoint[] = entryPoints.map(entryPoint => {
-      const sourceFile: ts.SourceFile | undefined = options.program.getSourceFile(
-        entryPoint.filePath);
+    const workingPackageEntryPoints: IWorkingPackageEntryPoint[] = entryPoints.map((entryPoint) => {
+      const sourceFile: ts.SourceFile | undefined = options.program.getSourceFile(entryPoint.filePath);
 
       if (!sourceFile) {
         throw new Error('Unable to load file: ' + entryPoint.filePath);
       }
 
       return {
-       modulePath: entryPoint.modulePath,
-       sourceFile
+        modulePath: entryPoint.modulePath,
+        sourceFile
       };
     });
-
 
     if (!this.extractorConfig.packageFolder || !this.extractorConfig.packageJson) {
       // TODO: We should be able to analyze projects that don't have any package.json.
@@ -126,13 +135,13 @@ export class Collector {
 
     this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
 
-    const bundledPackageNames: Set<string> = new Set<string>(this.extractorConfig.bundledPackages);
+    this.bundledPackageNames = new Set<string>(this.extractorConfig.bundledPackages);
 
     this.astSymbolTable = new AstSymbolTable(
       this.program,
       this.typeChecker,
       this.packageJsonLookup,
-      bundledPackageNames,
+      this.bundledPackageNames,
       this.messageRouter
     );
     this.astReferenceResolver = new AstReferenceResolver(this);
@@ -205,11 +214,11 @@ export class Collector {
 
     // Build entry points
     for (const entryPoint of this.workingPackage.entryPoints) {
-
       const { modulePath, sourceFile: entryPointSourceFile } = entryPoint;
 
       const astEntryPoint: AstModule = this.astSymbolTable.fetchAstModuleFromWorkingPackage(
-        entryPointSourceFile);
+        entryPointSourceFile
+      );
 
       if (!this._astEntryPoints) {
         this._astEntryPoints = [astEntryPoint];
@@ -224,16 +233,20 @@ export class Collector {
       // Process pacakgeDocComment only for the default entry point
       if (this.workingPackage.isDefaultEntryPoint(entryPoint)) {
         const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment.tryFindInSourceFile(
-          entryPointSourceFile, this);
+          entryPointSourceFile,
+          this
+        );
 
         if (packageDocCommentTextRange) {
-          const range: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(entryPointSourceFile.text,
-            packageDocCommentTextRange.pos, packageDocCommentTextRange.end);
+          const range: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(
+            entryPointSourceFile.text,
+            packageDocCommentTextRange.pos,
+            packageDocCommentTextRange.end
+          );
 
           this.workingPackage.tsdocParserContext = this._tsdocParser.parseRange(range);
 
-          this.messageRouter.addTsdocMessages(this.workingPackage.tsdocParserContext,
-            entryPointSourceFile);
+          this.messageRouter.addTsdocMessages(this.workingPackage.tsdocParserContext, entryPointSourceFile);
 
           this.workingPackage.tsdocComment = this.workingPackage.tsdocParserContext!.docComment;
         }
@@ -242,7 +255,9 @@ export class Collector {
       // Create a CollectorEntity for each top-level export
       const exportedAstEntities: AstEntity[] = [];
 
-      const astModuleExportInfo: AstModuleExportInfo = this.astSymbolTable.fetchAstModuleExportInfo(astEntryPoint);
+      const astModuleExportInfo: AstModuleExportInfo = this.astSymbolTable.fetchAstModuleExportInfo(
+        astEntryPoint
+      );
       for (const [exportName, astEntity] of astModuleExportInfo.exportedLocalEntities) {
         this._createCollectorEntity(astEntity, entryPoint, exportName);
 
@@ -254,11 +269,7 @@ export class Collector {
       // are encountered first as exports.
       const alreadySeenAstSymbols: Set<AstSymbol> = new Set<AstSymbol>();
       for (const exportedAstEntity of exportedAstEntities) {
-        this._createEntityForIndirectReferences(
-          exportedAstEntity,
-          entryPoint,
-          alreadySeenAstSymbols
-        );
+        this._createEntityForIndirectReferences(exportedAstEntity, entryPoint, alreadySeenAstSymbols);
 
         if (exportedAstEntity instanceof AstSymbol) {
           this.fetchSymbolMetadata(exportedAstEntity);
@@ -272,11 +283,10 @@ export class Collector {
           this._starExportedExternalModulePaths.push(starExportedExternalModule.externalModulePath);
         }
       }
-
     }
 
     for (const entities of this._entitiesByAstEntryPoint.values()) {
-      Sort.sortBy(entities, x => x.getSortKey());
+      Sort.sortBy(entities, (x) => x.getSortKey());
     }
     Sort.sortSet(this._dtsTypeReferenceDirectives);
     Sort.sortSet(this._dtsLibReferenceDirectives);
@@ -409,7 +419,11 @@ export class Collector {
     return overloadIndex;
   }
 
-  private _createCollectorEntity(astEntity: AstEntity, entryPoint: IWorkingPackageEntryPoint, exportedName: string | undefined): void {
+  private _createCollectorEntity(
+    astEntity: AstEntity,
+    entryPoint: IWorkingPackageEntryPoint,
+    exportedName: string | undefined
+  ): void {
     let entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astEntity);
 
     if (!entity) {
@@ -424,7 +438,7 @@ export class Collector {
 
     // add collectorEntity to the corresponding entry point
     const entitiesOfAstModule = this._entitiesByAstEntryPoint.get(entryPoint) || [];
-    if (!entitiesOfAstModule.find(e => e === entity)) {
+    if (!entitiesOfAstModule.find((e) => e === entity)) {
       entitiesOfAstModule.push(entity);
       this._entitiesByAstEntryPoint.set(entryPoint, entitiesOfAstModule);
     }
@@ -504,7 +518,6 @@ export class Collector {
 
     // Ensure that each entity has a unique nameForEmit
     for (const entity of entities) {
-
       // What name would we ideally want to emit it as?
       let idealNameForEmit: string;
 
@@ -523,8 +536,11 @@ export class Collector {
       if (entity.exportNames.has(idealNameForEmit)) {
         // ...except that if it conflicts with a global name, then the global name wins
         if (!this.globalVariableAnalyzer.hasGlobalName(idealNameForEmit)) {
-          entity.nameForEmit = idealNameForEmit;
-          continue;
+          // ...also avoid "default" which can interfere with "export { default } from 'some-module;'"
+          if (idealNameForEmit !== 'default') {
+            entity.nameForEmit = idealNameForEmit;
+            continue;
+          }
         }
       }
 

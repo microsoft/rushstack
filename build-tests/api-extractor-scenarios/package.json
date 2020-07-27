@@ -9,16 +9,16 @@
     "build": "node build.js"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "7.8.11",
-    "@rushstack/node-core-library": "3.24.1",
+    "@microsoft/api-extractor": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
     "@microsoft/teams-js": "1.3.0-beta.4",
     "@types/jest": "25.2.1",
     "@types/node": "10.17.13",
-    "api-extractor-lib1-test": "1.0.0",
-    "api-extractor-lib2-test": "1.0.0",
-    "api-extractor-lib3-test": "1.0.0",
+    "api-extractor-lib1-test": "workspace:*",
+    "api-extractor-lib2-test": "workspace:*",
+    "api-extractor-lib3-test": "workspace:*",
     "colors": "~1.2.1",
     "fs-extra": "~7.0.1",
-    "typescript": "~3.7.2"
+    "typescript": "~3.9.5"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/ts-command-line",
-  "version": "4.4.2",
+  "version": "4.4.6",
   "description": "An object-oriented command-line parser for TypeScript",
   "repository": {
     "type": "git",
@@ -21,8 +21,8 @@
     "@types/jest": "25.2.1",
     "@types/node": "10.17.13",
     "gulp": "~4.0.2",
-    "@microsoft/node-library-build": "6.4.10",
-    "@microsoft/rush-stack-compiler-3.5": "0.4.4",
-    "@rushstack/eslint-config": "0.5.8"
+    "@microsoft/node-library-build": "6.4.31",
+    "@microsoft/rush-stack-compiler-3.5": "0.8.0",
+    "@rushstack/eslint-config": "workspace:*"
   }
 }

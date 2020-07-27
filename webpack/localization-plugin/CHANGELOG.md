@@ -1,6 +1,75 @@
 # Change Log - @rushstack/localization-plugin
 
-This log was last generated on Fri, 12 Jun 2020 09:19:21 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Jul 2020 20:40:38 GMT and should not be manually modified.
+
+## 0.3.30
+Fri, 24 Jul 2020 20:40:38 GMT
+
+### Patches
+
+- Fix broken peer dependency specifier
+
+## 0.3.29
+Wed, 15 Jul 2020 15:09:42 GMT
+
+### Patches
+
+- Fix specification of optional peerDependencies.
+
+## 0.3.28
+Tue, 14 Jul 2020 19:32:58 GMT
+
+### Patches
+
+- Fix the way the loc file typings are generated in watch mode for large projects.
+- Make @types/webpack an optionalPeerDependency instead of a peerDependency.
+
+## 0.3.27
+Tue, 07 Jul 2020 00:09:39 GMT
+
+### Patches
+
+- Fix an issue where the localization plugin would throw if resolveMissingTranslatedStrings returns undefined for a locale.
+
+## 0.3.26
+Fri, 03 Jul 2020 15:09:04 GMT
+
+*Version update only*
+
+## 0.3.25
+Fri, 03 Jul 2020 05:46:42 GMT
+
+*Version update only*
+
+## 0.3.24
+Sat, 27 Jun 2020 00:09:38 GMT
+
+*Version update only*
+
+## 0.3.23
+Fri, 26 Jun 2020 22:16:39 GMT
+
+*Version update only*
+
+## 0.3.22
+Thu, 25 Jun 2020 06:43:35 GMT
+
+*Version update only*
+
+## 0.3.21
+Wed, 24 Jun 2020 09:50:48 GMT
+
+*Version update only*
+
+## 0.3.20
+Wed, 24 Jun 2020 09:04:28 GMT
+
+*Version update only*
+
+## 0.3.19
+Mon, 15 Jun 2020 22:17:18 GMT
+
+*Version update only*
 
 ## 0.3.18
 Fri, 12 Jun 2020 09:19:21 GMT

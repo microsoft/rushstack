@@ -22,17 +22,20 @@ export class DeclarationReferenceGenerator {
   private _workingPackage: WorkingPackage;
   private _program: ts.Program;
   private _typeChecker: ts.TypeChecker;
+  private _bundledPackageNames: ReadonlySet<string>;
 
   public constructor(
     packageJsonLookup: PackageJsonLookup,
     workingPackage: WorkingPackage,
     program: ts.Program,
-    typeChecker: ts.TypeChecker
+    typeChecker: ts.TypeChecker,
+    bundledPackageNames: ReadonlySet<string>
   ) {
     this._packageJsonLookup = packageJsonLookup;
     this._workingPackage = workingPackage;
     this._program = program;
     this._typeChecker = typeChecker;
+    this._bundledPackageNames = bundledPackageNames;
   }
 
   /**
@@ -329,7 +332,16 @@ export class DeclarationReferenceGenerator {
 
   private _sourceFileToModuleSource(sourceFile: ts.SourceFile | undefined): GlobalSource | ModuleSource {
     if (sourceFile && ts.isExternalModule(sourceFile)) {
-      return new ModuleSource(this._getEntryPointName(sourceFile));
+      const packageName: string = this._getEntryPointName(sourceFile);
+
+      if (this._bundledPackageNames.has(packageName)) {
+        // The api-extractor.json config file has a "bundledPackages" setting, which causes imports from
+        // certain NPM packages to be treated as part of the working project.  In this case, we need to
+        // substitute the working package name.
+        return new ModuleSource(this._workingPackage.name); // TODO: make it work with multiple entrypoints
+      } else {
+        return new ModuleSource(packageName);
+      }
     }
     return GlobalSource.instance;
   }

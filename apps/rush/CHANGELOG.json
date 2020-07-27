@@ -2,6 +2,137 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.30.1",
+      "tag": "@microsoft/rush_v5.30.1",
+      "date": "Thu, 23 Jul 2020 23:47:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixed an isssue where the \"rush build\" incremental analysis sometimes reported a warning with large diffs (GitHub #501) or filenames that contain spaces, quotes, or other unusual characters (GitHub #2007)"
+          },
+          {
+            "comment": "Prevent incorrect conversion to \"workspace:\" notation for peer dependencies when running \"rush update --full\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.30.0",
+      "tag": "@microsoft/rush_v5.30.0",
+      "date": "Fri, 17 Jul 2020 05:32:38 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Prepare to deprecate 'rush link' and 'rush unlink' commands, as well as the '--no-link' install argument. As we move toward using package managers more directly in Rush, the package managers will perform the linking during install (if linking is even necessary). Additionally, these commands directly conflict with (and have different meanings than) their package manager counterparts. Lastly, similar goals can be accomplished by running 'rush install' and 'rush purge'. In addition to these changes, rush-link.json deprecated and is replaced with a new API which keeps the local dependency tree in memory."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.29.1",
+      "tag": "@microsoft/rush_v5.29.1",
+      "date": "Thu, 16 Jul 2020 02:18:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Consider package.json when determining if install can be skipped for PNPM workspaces"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.29.0",
+      "tag": "@microsoft/rush_v5.29.0",
+      "date": "Tue, 14 Jul 2020 05:20:56 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Give \\\"rush deploy\\\" the ability to select a subset of dependencies to copy over (#1978)"
+          },
+          {
+            "comment": "Fix an issue where package binaries where not created by \"rush deploy\" (#1982)"
+          },
+          {
+            "comment": "Add a new setting \"folderToCopy\" and new command-line parameter \"--create-archive\" for use with \"rush deploy\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.28.0",
+      "tag": "@microsoft/rush_v5.28.0",
+      "date": "Wed, 08 Jul 2020 06:56:47 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add new commands \"rush init-autoinstaller\" and \"rush update-autoinstaller\""
+          },
+          {
+            "comment": "Add support for filtered installs when using workspaces"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add preliminary workspaces support for PNPM"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.27.3",
+      "tag": "@microsoft/rush_v5.27.3",
+      "date": "Fri, 03 Jul 2020 06:16:09 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Added support for new format used by pnpm for tarball URLs that now begin with an @ symbol"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.27.2",
+      "tag": "@microsoft/rush_v5.27.2",
+      "date": "Thu, 02 Jul 2020 01:52:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve \"rush deploy\" to copy PNPM workaround links (fixes GitHub #1942 and 1943)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.27.1",
+      "tag": "@microsoft/rush_v5.27.1",
+      "date": "Mon, 29 Jun 2020 18:39:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where environment variable trimming for .npmrc was unnecessarily performed on comment lines"
+          },
+          {
+            "comment": "Add a \"rush init\" template for .npmrc-publish"
+          },
+          {
+            "comment": "Fix a regression affecting GitHub specifiers for package.json dependencies (issue #1749)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.27.0",
+      "tag": "@microsoft/rush_v5.27.0",
+      "date": "Sun, 21 Jun 2020 04:48:53 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve \"rush deploy\" to apply pnpmfile.js when calculating dependencies"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.26.0",
       "tag": "@microsoft/rush_v5.26.0",
       "date": "Mon, 15 Jun 2020 01:26:24 GMT",
@@ -1729,7 +1860,7 @@
       "comments": {
         "major": [
           {
-            "comment": "Complete release notes are here: https://github.com/Microsoft/web-build-tools/wiki#november-3-2017---rush-4-released"
+            "comment": "Complete release notes are here: https://github.com/microsoft/web-build-tools/wiki#november-3-2017---rush-4-released"
           },
           {
             "comment": "Adding custom commands and options."

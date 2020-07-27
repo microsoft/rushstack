@@ -68,6 +68,7 @@ export class CommonVersionsConfiguration {
     readonly allowedAlternativeVersions: Map<string, ReadonlyArray<string>>;
     readonly filePath: string;
     getAllPreferredVersions(): Map<string, string>;
+    getPreferredVersionsHash(): string;
     readonly implicitlyPreferredVersions: boolean | undefined;
     static loadFromFile(jsonFilename: string): CommonVersionsConfiguration;
     readonly preferredVersions: Map<string, string>;
@@ -176,6 +177,7 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     preventManualShrinkwrapChanges?: boolean;
     resolutionStrategy?: ResolutionStrategy;
     strictPeerDependencies?: boolean;
+    useWorkspaces?: boolean;
 }
 
 // @public
@@ -195,6 +197,7 @@ export class _LastInstallFlag {
     checkValidAndReportStoreIssues(): boolean;
     clear(): void;
     create(): void;
+    protected readonly flagName: string;
     isValid(): boolean;
     readonly path: string;
     }
@@ -289,10 +292,20 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly preventManualShrinkwrapChanges: boolean;
     readonly resolutionStrategy: ResolutionStrategy;
     readonly strictPeerDependencies: boolean;
+    readonly useWorkspaces: boolean;
 }
 
 // @public
 export type PnpmStoreOptions = 'local' | 'global';
+
+// @public
+export class RepoStateFile {
+    readonly filePath: string;
+    static loadFromFile(jsonFilename: string, variant: string | undefined): RepoStateFile;
+    readonly pnpmShrinkwrapHash: string | undefined;
+    readonly preferredVersionsHash: string | undefined;
+    refreshState(rushConfiguration: RushConfiguration): boolean;
+    }
 
 // @public
 export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
@@ -311,6 +324,7 @@ export class RushConfiguration {
     readonly changesFolder: string;
     // @deprecated
     readonly committedShrinkwrapFilename: string;
+    readonly commonAutoinstallersFolder: string;
     readonly commonFolder: string;
     readonly commonRushConfigFolder: string;
     readonly commonScriptsFolder: string;
@@ -331,6 +345,8 @@ export class RushConfiguration {
     getCommonVersionsFilePath(variant?: string | undefined): string;
     getPnpmfilePath(variant?: string | undefined): string;
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
+    getRepoState(variant?: string | undefined): RepoStateFile;
+    getRepoStateFilePath(variant?: string | undefined): string;
     readonly gitAllowedEmailRegExps: string[];
     readonly gitSampleEmail: string;
     readonly gitVersionBumpCommitMessage: string | undefined;
@@ -361,6 +377,7 @@ export class RushConfiguration {
     readonly repositoryUrl: string | undefined;
     readonly rushJsonFile: string;
     readonly rushJsonFolder: string;
+    // @deprecated
     readonly rushLinkJsonFilename: string;
     readonly shrinkwrapFilename: string;
     readonly shrinkwrapFilePhrase: string;
@@ -387,6 +404,7 @@ export class RushConfigurationProject {
     readonly downstreamDependencyProjects: string[];
     // @beta
     readonly isMainProject: boolean;
+    readonly localDependencyProjects: ReadonlyArray<RushConfigurationProject>;
     // @deprecated
     readonly packageJson: IPackageJson;
     // @beta

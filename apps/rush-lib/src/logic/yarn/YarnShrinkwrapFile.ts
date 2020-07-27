@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import * as os from 'os';
 import * as lockfile from '@yarnpkg/lockfile';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
@@ -244,6 +247,24 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   protected tryEnsureDependencyVersion(
     dependencySpecifier: DependencySpecifier,
     tempProjectName: string
+  ): DependencySpecifier | undefined {
+    throw new InternalError('Not implemented');
+  }
+
+  /** @override */
+  public getWorkspaceKeys(): ReadonlyArray<string> {
+    throw new InternalError('Not implemented');
+  }
+
+  /** @override */
+  public getWorkspaceKeyByPath(workspaceRoot: string, projectFolder: string): string {
+    throw new InternalError('Not implemented');
+  }
+
+  /** @override */
+  protected getWorkspaceDependencyVersion(
+    dependencySpecifier: DependencySpecifier,
+    workspaceKey: string
   ): DependencySpecifier | undefined {
     throw new InternalError('Not implemented');
   }

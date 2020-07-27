@@ -5,7 +5,8 @@ import * as colors from 'colors';
 import * as semver from 'semver';
 
 import { RushConfiguration } from '../api/RushConfiguration';
-import { InstallManager, IInstallManagerOptions } from './InstallManager';
+import { BaseInstallManager, IInstallManagerOptions } from './base/BaseInstallManager';
+import { InstallManagerFactory } from './InstallManagerFactory';
 import { VersionMismatchFinder } from './versionMismatch/VersionMismatchFinder';
 import { PurgeManager } from './PurgeManager';
 import { Utilities } from '../utilities/Utilities';
@@ -15,7 +16,7 @@ import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { VersionMismatchFinderEntity } from './versionMismatch/VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './versionMismatch/VersionMismatchFinderProject';
 import { RushConstants } from './RushConstants';
-import { InstallHelpers } from './InstallHelpers';
+import { InstallHelpers } from './installManager/InstallHelpers';
 
 /**
  * The type of SemVer range specifier that is prepended to the version
@@ -123,7 +124,7 @@ export class PackageJsonUpdater {
       variant
     } = options;
 
-    const implicitlyPinned: Map<string, string> = InstallManager.collectImplicitlyPreferredVersions(
+    const implicitlyPinned: Map<string, string> = InstallHelpers.collectImplicitlyPreferredVersions(
       this._rushConfiguration,
       {
         variant
@@ -141,9 +142,10 @@ export class PackageJsonUpdater {
       networkConcurrency: undefined,
       collectLogFile: false,
       variant: variant,
-      maxInstallAttempts: RushConstants.defaultMaxInstallAttempts
+      maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
+      toProjects: []
     };
-    const installManager: InstallManager = new InstallManager(
+    const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
       this._rushConfiguration,
       this._rushGlobalFolder,
       purgeManager,
@@ -281,7 +283,7 @@ export class PackageJsonUpdater {
    */
   private async _getNormalizedVersionSpec(
     projects: RushConfigurationProject[],
-    installManager: InstallManager,
+    installManager: BaseInstallManager,
     packageName: string,
     initialSpec: string | undefined,
     implicitlyPinnedVersion: string | undefined,
@@ -328,7 +330,18 @@ export class PackageJsonUpdater {
       RushConstants.defaultMaxInstallAttempts
     );
 
+    const useWorkspaces: boolean = !!(
+      this._rushConfiguration.pnpmOptions && this._rushConfiguration.pnpmOptions.useWorkspaces
+    );
+    const workspacePrefix: string = 'workspace:';
+
+    // Trim 'workspace:' notation from the spec, since we're going to be tweaking the range
+    if (useWorkspaces && initialSpec && initialSpec.startsWith(workspacePrefix)) {
+      initialSpec = initialSpec.substring(workspacePrefix.length).trim();
+    }
+
     let selectedVersion: string | undefined;
+    let selectedVersionPrefix: string = '';
 
     if (initialSpec && initialSpec !== 'latest') {
       console.log(colors.gray('Finding versions that satisfy the selector: ') + initialSpec);
@@ -337,7 +350,14 @@ export class PackageJsonUpdater {
       if (localProject !== undefined) {
         const version: string = localProject.packageJson.version;
         if (semver.satisfies(version, initialSpec)) {
-          selectedVersion = version;
+          // For workspaces, assume that specifying the exact version means you always want to consume
+          // the local project. Otherwise, use the exact local package version
+          if (useWorkspaces) {
+            selectedVersion = initialSpec === version ? '*' : initialSpec;
+            selectedVersionPrefix = workspacePrefix;
+          } else {
+            selectedVersion = version;
+          }
         } else {
           throw new Error(
             `The dependency being added ("${packageName}") is a project in the local Rush repository, ` +
@@ -398,7 +418,14 @@ export class PackageJsonUpdater {
       }
 
       if (localProject !== undefined) {
-        selectedVersion = localProject.packageJson.version;
+        // For workspaces, assume that no specified version range means you always want to consume
+        // the local project. Otherwise, use the exact local package version
+        if (useWorkspaces) {
+          selectedVersion = '*';
+          selectedVersionPrefix = workspacePrefix;
+        } else {
+          selectedVersion = localProject.packageJson.version;
+        }
       } else {
         console.log(`Querying NPM registry for latest version of "${packageName}"...`);
 
@@ -423,41 +450,40 @@ export class PackageJsonUpdater {
 
     console.log();
 
-    switch (rangeStyle) {
-      case SemVerStyle.Caret: {
-        console.log(
-          colors.grey(
-            `Assigning version "^${selectedVersion}" for "${packageName}" because the "--caret"` +
-              ` flag was specified.`
-          )
-        );
-        return `^${selectedVersion}`;
-      }
+    let reasonForModification: string = '';
+    if (selectedVersion !== '*') {
+      switch (rangeStyle) {
+        case SemVerStyle.Caret: {
+          selectedVersionPrefix += '^';
+          reasonForModification = ' because the "--caret" flag was specified';
+          break;
+        }
 
-      case SemVerStyle.Exact: {
-        console.log(
-          colors.grey(
-            `Assigning version "${selectedVersion}" for "${packageName}" because the "--exact"` +
-              ` flag was specified.`
-          )
-        );
-        return selectedVersion;
-      }
+        case SemVerStyle.Exact: {
+          reasonForModification = ' because the "--exact" flag was specified';
+          break;
+        }
 
-      case SemVerStyle.Tilde: {
-        console.log(colors.gray(`Assigning version "~${selectedVersion}" for "${packageName}".`));
-        return `~${selectedVersion}`;
-      }
+        case SemVerStyle.Tilde: {
+          selectedVersionPrefix += '~';
+          break;
+        }
 
-      case SemVerStyle.Passthrough: {
-        console.log(colors.gray(`Assigning version "${selectedVersion}" for "${packageName}".`));
-        return selectedVersion;
-      }
+        case SemVerStyle.Passthrough: {
+          break;
+        }
 
-      default: {
-        throw new Error(`Unexpected SemVerStyle ${rangeStyle}.`);
+        default: {
+          throw new Error(`Unexpected SemVerStyle ${rangeStyle}.`);
+        }
       }
     }
+
+    const normalizedVersion: string = selectedVersionPrefix + selectedVersion;
+    console.log(
+      colors.gray(`Assigning version "${normalizedVersion}" for "${packageName}"${reasonForModification}.`)
+    );
+    return normalizedVersion;
   }
 
   private _collectAllDownstreamDependencies(

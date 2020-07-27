@@ -29,10 +29,20 @@
       "type": "boolean"
     },
 
+    "omitPnpmWorkaroundLinks": {
+      "description": "To improve backwards compatibility with legacy packages, the PNPM package manager installs extra links in the node_modules folder that enable packages to import undeclared dependencies.  In some cases this workaround may significantly increase the installation footprint or cause other problems.  If your deployment does not require this workaround, you can set \"omitPnpmWorkaroundLinks\" to true to avoid creating the extra links.  The default value is false.",
+      "type": "boolean"
+    },
+
     "linkCreation": {
       "description": "Specify how links (symbolic links, hard links, and/or NTFS junctions) will be created in the deployed folder:\n\"default\": Create the links while copying the files; this is the default behavior.\n\"script\": A Node.js script called \"create-links.js\" will be written.  When executed, this script will create the links described in the \"deploy-metadata.json\" output file.\n\"none\": Do nothing; some other tool may create the links later.",
       "type": "string",
       "enum": ["default", "script", "none"]
+    },
+
+    "folderToCopy": {
+      "description": "If this path is specified, then after \"rush deploy\", recursively copy the files from this folder to the deployment target folder (common/deploy). This can be used to provide additional configuration files or scripts needed by the server when deploying. The path is resolved relative to the repository root.",
+      "type": "string"
     },
 
     "projectSettings": {
@@ -46,7 +56,21 @@
             "type": "string"
           },
           "additionalProjectsToInclude": {
-            "description": " A list of additional local Rush projects to be deployed with this project (beyond the package.json dependencies).  Specify full package names, which must be declared in rush.json.",
+            "description": "A list of additional local Rush projects to be deployed with this project (beyond the package.json dependencies).  Specify full package names, which must be declared in rush.json.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "additionalDependenciesToInclude": {
+            "description": "When deploying a project, the included dependencies are normally determined automatically based on package.json fields such as 'dependencies', 'peerDependencies', and 'optionalDependencies', subject to other deployment settings such as 'includeDevDependencies'. However, in cases where that information is not accurate, you can use 'additionalDependenciesToInclude' to add more packages to the list.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dependenciesToExclude": {
+            "description": "This setting prevents specific dependencies from being deployed.  It only filters dependencies that are explicitly declared in package.json for this project.  It does not affect dependencies added via 'additionalProjectsToInclude' or 'additionalDependenciesToInclude', nor does it affect indirect dependencies.",
             "type": "array",
             "items": {
               "type": "string"

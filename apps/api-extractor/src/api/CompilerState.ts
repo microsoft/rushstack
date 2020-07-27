@@ -67,9 +67,11 @@ export class CompilerState {
       );
     }
 
-    const inputFilePaths: string[] = commandLine.fileNames.concat(extractorConfig.mainEntryPointFilePath.filePath);
+    const inputFilePaths: string[] = commandLine.fileNames.concat(
+      extractorConfig.mainEntryPointFilePath.filePath
+    );
     if (options && options.additionalEntryPoints) {
-      inputFilePaths.push(...options.additionalEntryPoints.map(entryPoint => entryPoint));
+      inputFilePaths.push(...options.additionalEntryPoints.map((entryPoint) => entryPoint));
     }
 
     // Append the entry points and remove any non-declaration files from the list
@@ -80,7 +82,7 @@ export class CompilerState {
     const program: ts.Program = ts.createProgram(analysisFilePaths, commandLine.options, compilerHost);
 
     if (commandLine.errors.length > 0) {
-      const errorText: string = `${commandLine.errors[0].messageText}`;
+      const errorText: string = ts.flattenDiagnosticMessageText(commandLine.errors[0].messageText, '\n');
       throw new Error(`Error parsing tsconfig.json content: ${errorText}`);
     }
 

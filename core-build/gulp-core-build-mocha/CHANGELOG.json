@@ -2,6 +2,63 @@
   "name": "@microsoft/gulp-core-build-mocha",
   "entries": [
     {
+      "version": "3.8.21",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.8.21",
+      "date": "Fri, 03 Jul 2020 15:09:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.16.11` to `3.16.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.20",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.8.20",
+      "date": "Thu, 25 Jun 2020 06:43:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.16.10` to `3.16.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `1.0.1` to `1.0.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.19",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.8.19",
+      "date": "Wed, 24 Jun 2020 09:50:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.16.9` to `3.16.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `1.0.0` to `1.0.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.18",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.8.18",
+      "date": "Wed, 24 Jun 2020 09:04:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.16.8` to `3.16.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.8` to `1.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.8.17",
       "tag": "@microsoft/gulp-core-build-mocha_v3.8.17",
       "date": "Wed, 10 Jun 2020 20:48:30 GMT",

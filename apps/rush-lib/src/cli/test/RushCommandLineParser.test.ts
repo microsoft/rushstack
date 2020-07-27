@@ -7,6 +7,7 @@ import * as path from 'path';
 import { FileSystem } from '@rushstack/node-core-library';
 import { Interleaver } from '@rushstack/stream-collator';
 import { RushCommandLineParser } from '../RushCommandLineParser';
+import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 
 /**
  * See `__mocks__/child_process.js`.
@@ -38,7 +39,6 @@ interface IParserTestInstance {
  * in `__mocks__/child_process.js`.
  */
 function setSpawnMock(options?: ISpawnMockConfig): jest.Mock {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const cpMocked: IChildProcessModuleMock = require('child_process');
   cpMocked.__setSpawnMockConfig(options);
 
@@ -64,6 +64,10 @@ function getCommandLineParserInstance(repoName: string, taskName: string): IPars
   // repo will fail due to contention over the same lock which is kept until the test runner process
   // ends.
   const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
+
+  // Bulk tasks are hard-coded to expect install to have been completed. So, ensure the last-link.flag
+  // file exists and is valid
+  LastLinkFlagFactory.getCommonTempFlag(parser.rushConfiguration).create();
 
   // Mock the command
   process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', taskName];

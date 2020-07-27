@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Copy Static Assets Configuration",
+  "description": "Defines the heft configuration for the copy-static-assets task.",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "fileExtensions": {
+      "type": "array",
+      "description": "File extensions that should be copied from the src folder to the destination folder(s)",
+      "items": {
+        "type": "string",
+        "pattern": "\\..+"
+      }
+    },
+
+    "excludeGlobs": {
+      "type": "array",
+      "description": "Globs that should be explicitly excluded. This takes precedence over globs listed in \"includeGlobs\" and files that match the file extensions provided in \"fileExtensions\".",
+      "items": {
+        "type": "string",
+        "pattern": "[^\\\\]"
+      }
+    },
+
+    "includeGlobs": {
+      "type": "array",
+      "description": "Globs that should be explicitly included.",
+      "items": {
+        "type": "string",
+        "pattern": "[^\\\\]"
+      }
+    }
+  }
+}

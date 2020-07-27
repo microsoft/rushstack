@@ -96,7 +96,7 @@ export class AstSymbolTable {
     program: ts.Program,
     typeChecker: ts.TypeChecker,
     packageJsonLookup: PackageJsonLookup,
-    bundledPackageNames: Set<string>,
+    bundledPackageNames: ReadonlySet<string>,
     messageRouter: MessageRouter
   ) {
     this._program = program;

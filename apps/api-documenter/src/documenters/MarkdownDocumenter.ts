@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* eslint max-lines: "off" */
-
 import * as path from 'path';
 import { PackageName, FileSystem, NewlineKind } from '@rushstack/node-core-library';
 import {
@@ -17,7 +15,8 @@ import {
   DocFencedCode,
   StandardTags,
   DocBlock,
-  DocComment
+  DocComment,
+  DocNodeContainer
 } from '@microsoft/tsdoc';
 import {
   ApiModel,
@@ -148,7 +147,12 @@ export class MarkdownDocumenter {
         break;
       case ApiItemKind.EntryPoint:
         const packageName = apiItem.parent!.displayName;
-        output.appendNode(new DocHeading({ configuration, title: `${packageName}${apiItem.displayName && ('/' + apiItem.displayName)}` }));
+        output.appendNode(
+          new DocHeading({
+            configuration,
+            title: `${packageName}${apiItem.displayName && '/' + apiItem.displayName}`
+          })
+        );
         break;
       case ApiItemKind.Property:
       case ApiItemKind.PropertySignature:
@@ -209,6 +213,8 @@ export class MarkdownDocumenter {
           })
         );
       }
+
+      this._writeHeritageTypes(output, apiItem);
     }
 
     let appendRemarks: boolean = true;
@@ -297,6 +303,57 @@ export class MarkdownDocumenter {
     FileSystem.writeFile(filename, pageContent, {
       convertLineEndings: this._documenterConfig ? this._documenterConfig.newlineKind : NewlineKind.CrLf
     });
+  }
+
+  private _writeHeritageTypes(output: DocSection, apiItem: ApiDeclaredItem): void {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+
+    if (apiItem instanceof ApiClass) {
+      if (apiItem.extendsType) {
+        const extendsParagraph: DocParagraph = new DocParagraph({ configuration }, [
+          new DocEmphasisSpan({ configuration, bold: true }, [
+            new DocPlainText({ configuration, text: 'Extends: ' })
+          ])
+        ]);
+        this._appendExcerptWithHyperlinks(extendsParagraph, apiItem.extendsType.excerpt);
+        output.appendNode(extendsParagraph);
+      }
+      if (apiItem.implementsTypes.length > 0) {
+        const extendsParagraph: DocParagraph = new DocParagraph({ configuration }, [
+          new DocEmphasisSpan({ configuration, bold: true }, [
+            new DocPlainText({ configuration, text: 'Implements: ' })
+          ])
+        ]);
+        let needsComma: boolean = false;
+        for (const implementsType of apiItem.implementsTypes) {
+          if (needsComma) {
+            extendsParagraph.appendNode(new DocPlainText({ configuration, text: ', ' }));
+          }
+          this._appendExcerptWithHyperlinks(extendsParagraph, implementsType.excerpt);
+          needsComma = true;
+        }
+        output.appendNode(extendsParagraph);
+      }
+    }
+
+    if (apiItem instanceof ApiInterface) {
+      if (apiItem.extendsTypes.length > 0) {
+        const extendsParagraph: DocParagraph = new DocParagraph({ configuration }, [
+          new DocEmphasisSpan({ configuration, bold: true }, [
+            new DocPlainText({ configuration, text: 'Extends: ' })
+          ])
+        ]);
+        let needsComma: boolean = false;
+        for (const extendsType of apiItem.extendsTypes) {
+          if (needsComma) {
+            extendsParagraph.appendNode(new DocPlainText({ configuration, text: ', ' }));
+          }
+          this._appendExcerptWithHyperlinks(extendsParagraph, extendsType.excerpt);
+          needsComma = true;
+        }
+        output.appendNode(extendsParagraph);
+      }
+    }
   }
 
   private _writeRemarksSection(output: DocSection, apiItem: ApiItem): void {
@@ -390,7 +447,7 @@ export class MarkdownDocumenter {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     if (apiContainer.entryPoints.length === 1) {
-      this._writeEntryPointOrNamespaceTables(output, (apiContainer.members[0]) as ApiEntryPoint);
+      this._writeEntryPointOrNamespaceTables(output, apiContainer.members[0] as ApiEntryPoint);
     }
 
     const entryPointsTable: DocTable = new DocTable({
@@ -418,7 +475,10 @@ export class MarkdownDocumenter {
   /**
    * GENERATE PAGE: ENTRYPOINT or NAMESPACE
    */
-  private _writeEntryPointOrNamespaceTables(output: DocSection, apiContainer: ApiEntryPoint | ApiNamespace): void {
+  private _writeEntryPointOrNamespaceTables(
+    output: DocSection,
+    apiContainer: ApiEntryPoint | ApiNamespace
+  ): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     const classesTable: DocTable = new DocTable({
@@ -456,9 +516,10 @@ export class MarkdownDocumenter {
       headerTitles: ['Type Alias', 'Description']
     });
 
-    const apiMembers: ReadonlyArray<ApiItem> = apiContainer.kind === ApiItemKind.EntryPoint ?
-      (apiContainer as ApiEntryPoint).members
-      : (apiContainer as ApiNamespace).members;
+    const apiMembers: ReadonlyArray<ApiItem> =
+      apiContainer.kind === ApiItemKind.EntryPoint
+        ? (apiContainer as ApiEntryPoint).members
+        : (apiContainer as ApiNamespace).members;
 
     for (const apiMember of apiMembers) {
       const row: DocTableRow = new DocTableRow({ configuration }, [
@@ -818,38 +879,44 @@ export class MarkdownDocumenter {
     if (!excerpt.text.trim()) {
       paragraph.appendNode(new DocPlainText({ configuration, text: '(not declared)' }));
     } else {
-      for (const token of excerpt.spannedTokens) {
-        // Markdown doesn't provide a standardized syntax for hyperlinks inside code spans, so we will render
-        // the type expression as DocPlainText.  Instead of creating multiple DocParagraphs, we can simply
-        // discard any newlines and let the renderer do normal word-wrapping.
-        const unwrappedTokenText: string = token.text.replace(/[\r\n]+/g, ' ');
-
-        // If it's hyperlinkable, then append a DocLinkTag
-        if (token.kind === ExcerptTokenKind.Reference && token.canonicalReference) {
-          const apiItemResult: IResolveDeclarationReferenceResult = this._apiModel.resolveDeclarationReference(
-            token.canonicalReference,
-            undefined
-          );
-
-          if (apiItemResult.resolvedApiItem) {
-            paragraph.appendNode(
-              new DocLinkTag({
-                configuration,
-                tagName: '@link',
-                linkText: unwrappedTokenText,
-                urlDestination: this._getLinkFilenameForApiItem(apiItemResult.resolvedApiItem)
-              })
-            );
-            continue;
-          }
-        }
-
-        // Otherwise append non-hyperlinked text
-        paragraph.appendNode(new DocPlainText({ configuration, text: unwrappedTokenText }));
-      }
+      this._appendExcerptWithHyperlinks(paragraph, excerpt);
     }
 
     return paragraph;
+  }
+
+  private _appendExcerptWithHyperlinks(docNodeContainer: DocNodeContainer, excerpt: Excerpt): void {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+
+    for (const token of excerpt.spannedTokens) {
+      // Markdown doesn't provide a standardized syntax for hyperlinks inside code spans, so we will render
+      // the type expression as DocPlainText.  Instead of creating multiple DocParagraphs, we can simply
+      // discard any newlines and let the renderer do normal word-wrapping.
+      const unwrappedTokenText: string = token.text.replace(/[\r\n]+/g, ' ');
+
+      // If it's hyperlinkable, then append a DocLinkTag
+      if (token.kind === ExcerptTokenKind.Reference && token.canonicalReference) {
+        const apiItemResult: IResolveDeclarationReferenceResult = this._apiModel.resolveDeclarationReference(
+          token.canonicalReference,
+          undefined
+        );
+
+        if (apiItemResult.resolvedApiItem) {
+          docNodeContainer.appendNode(
+            new DocLinkTag({
+              configuration,
+              tagName: '@link',
+              linkText: unwrappedTokenText,
+              urlDestination: this._getLinkFilenameForApiItem(apiItemResult.resolvedApiItem)
+            })
+          );
+          continue;
+        }
+      }
+
+      // Otherwise append non-hyperlinked text
+      docNodeContainer.appendNode(new DocPlainText({ configuration, text: unwrappedTokenText }));
+    }
   }
 
   private _createEntryPointTitleCell(apiItem: ApiEntryPoint): DocTableCell {
@@ -1033,7 +1100,9 @@ export class MarkdownDocumenter {
           break;
         case ApiItemKind.EntryPoint:
           const packageName = hierarchyItem.parent!.displayName;
-          baseName = Utilities.getSafeFilenameForName(`${PackageName.getUnscopedName(packageName)}/${hierarchyItem.displayName}`);
+          baseName = Utilities.getSafeFilenameForName(
+            `${PackageName.getUnscopedName(packageName)}/${hierarchyItem.displayName}`
+          );
           break;
         case ApiItemKind.Package:
           baseName = Utilities.getSafeFilenameForName(PackageName.getUnscopedName(hierarchyItem.displayName));

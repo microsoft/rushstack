@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
@@ -8,6 +11,7 @@ export class DeployAction extends BaseRushAction {
   private _project: CommandLineStringParameter;
   private _overwrite: CommandLineFlagParameter;
   private _targetFolder: CommandLineStringParameter;
+  private _createArchivePath: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -61,15 +65,26 @@ export class DeployAction extends BaseRushAction {
         ' Use this parameter to specify a different location. ' +
         ' WARNING: USE CAUTION WHEN COMBINING WITH "--overwrite"'
     });
+
+    this._createArchivePath = this.defineStringParameter({
+      parameterLongName: '--create-archive',
+      argumentName: 'ARCHIVE_PATH',
+      description:
+        'If specified, after the deployment has been prepared, "rush deploy"' +
+        ' will create an archive containing the contents of the target folder.' +
+        ' The newly created archive file will be placed according to the designated path, relative' +
+        ' to the target folder. Supported file extensions: .zip'
+    });
   }
 
   protected async run(): Promise<void> {
     const deployManager: DeployManager = new DeployManager(this.rushConfiguration);
-    deployManager.deploy(
+    await deployManager.deployAsync(
       this._project.value,
       this._scenario.value,
       !!this._overwrite.value,
-      this._targetFolder.value
+      this._targetFolder.value,
+      this._createArchivePath.value
     );
   }
 }

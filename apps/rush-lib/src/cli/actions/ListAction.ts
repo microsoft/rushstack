@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
@@ -77,12 +80,12 @@ export class ListAction extends BaseRushAction {
 
   private _printJson(allPackages: Map<string, RushConfigurationProject>): void {
     const projects: IJsonEntry[] = [];
-    allPackages.forEach((_config: RushConfigurationProject, name: string) => {
+    allPackages.forEach((config: RushConfigurationProject, name: string) => {
       const project: IJsonEntry = {
         name: name,
-        version: _config.packageJson.version,
-        path: _config.projectRelativeFolder,
-        fullPath: _config.projectFolder
+        version: config.packageJson.version,
+        path: config.projectRelativeFolder,
+        fullPath: config.projectFolder
       };
       projects.push(project);
     });
@@ -94,7 +97,7 @@ export class ListAction extends BaseRushAction {
   }
 
   private _printList(allPackages: Map<string, RushConfigurationProject>): void {
-    allPackages.forEach((_config: RushConfigurationProject, name: string) => {
+    allPackages.forEach((config: RushConfigurationProject, name: string) => {
       console.log(name);
     });
   }
