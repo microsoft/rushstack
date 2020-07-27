@@ -446,8 +446,10 @@ export class MarkdownDocumenter {
   private _writePackage(output: DocSection, apiContainer: ApiPackage): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
+    // If a package has a single entry point, generate entry point page in the package page directly
     if (apiContainer.entryPoints.length === 1) {
       this._writeEntryPointOrNamespaceTables(output, apiContainer.members[0] as ApiEntryPoint);
+      return;
     }
 
     const entryPointsTable: DocTable = new DocTable({
@@ -1017,30 +1019,40 @@ export class MarkdownDocumenter {
       })
     );
 
+    let multipleEntryPoints: boolean = false;
     for (const hierarchyItem of apiItem.getHierarchy()) {
       let customDisplayName = '';
-      switch (hierarchyItem.kind) {
-        case ApiItemKind.Model:
-          // We don't show the model as part of the breadcrumb because it is the root-level container.
-          break;
-        case ApiItemKind.EntryPoint:
+
+      if (hierarchyItem.kind === ApiItemKind.Model) {
+        // We don't show the model as part of the breadcrumb because it is the root-level container.
+        continue;
+      } else if (hierarchyItem.kind === ApiItemKind.EntryPoint) {
+        // In case the package has a single entry point, we don't generate entry point pages.
+        if (!multipleEntryPoints) {
+          continue;
+        } else {
           // In case of the root entry point, display is empty string, so we just show '/'
           // TODO: change api-extractor to generate '/' as the name for the root entry point
           customDisplayName = hierarchyItem.displayName || '/';
-        default:
-          output.appendNodesInParagraph([
-            new DocPlainText({
-              configuration: this._tsdocConfiguration,
-              text: ' > '
-            }),
-            new DocLinkTag({
-              configuration: this._tsdocConfiguration,
-              tagName: '@link',
-              linkText: customDisplayName || hierarchyItem.displayName,
-              urlDestination: this._getLinkFilenameForApiItem(hierarchyItem)
-            })
-          ]);
+        }
+      } else if (hierarchyItem.kind === ApiItemKind.Package) {
+        if ((hierarchyItem as ApiPackage).entryPoints.length > 1) {
+          multipleEntryPoints = true;
+        }
       }
+
+      output.appendNodesInParagraph([
+        new DocPlainText({
+          configuration: this._tsdocConfiguration,
+          text: ' > '
+        }),
+        new DocLinkTag({
+          configuration: this._tsdocConfiguration,
+          tagName: '@link',
+          linkText: customDisplayName || hierarchyItem.displayName,
+          urlDestination: this._getLinkFilenameForApiItem(hierarchyItem)
+        })
+      ]);
     }
   }
 
@@ -1084,6 +1096,7 @@ export class MarkdownDocumenter {
     }
 
     let baseName: string = '';
+    let multipleEntryPoints: boolean = false;
     for (const hierarchyItem of apiItem.getHierarchy()) {
       // For overloaded methods, add a suffix such as "MyClass.myMethod_2".
       let qualifiedName: string = Utilities.getSafeFilenameForName(hierarchyItem.displayName);
@@ -1100,12 +1113,17 @@ export class MarkdownDocumenter {
           break;
         case ApiItemKind.EntryPoint:
           const packageName = hierarchyItem.parent!.displayName;
-          baseName = Utilities.getSafeFilenameForName(
-            `${PackageName.getUnscopedName(packageName)}/${hierarchyItem.displayName}`
-          );
+          let entryPointName = PackageName.getUnscopedName(packageName);
+          if (multipleEntryPoints) {
+            entryPointName = `${PackageName.getUnscopedName(packageName)}/${hierarchyItem.displayName}`;
+          }
+          baseName = Utilities.getSafeFilenameForName(entryPointName);
           break;
         case ApiItemKind.Package:
           baseName = Utilities.getSafeFilenameForName(PackageName.getUnscopedName(hierarchyItem.displayName));
+          if ((hierarchyItem as ApiPackage).entryPoints.length > 1) {
+            multipleEntryPoints = true;
+          }
           break;
         default:
           baseName += '.' + qualifiedName;
