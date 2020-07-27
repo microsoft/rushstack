@@ -75,7 +75,9 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction {
       }
     }
 
-    console.log(`Starting "rush ${this.actionName}"${os.EOL}`);
+    if (!(process.argv.length > 2 && process.argv[2] === 'tab-complete')) {
+      console.log(`Starting "rush ${this.actionName}"${os.EOL}`);
+    }
     return this.run();
   }
 

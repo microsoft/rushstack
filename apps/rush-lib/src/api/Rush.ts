@@ -53,7 +53,9 @@ export class Rush {
   public static launch(launcherVersion: string, arg: ILaunchOptions): void {
     const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
 
-    Rush._printStartupBanner(options.isManaged);
+    if (!(process.argv.length > 2 && process.argv[2] === 'tab-complete')) {
+      Rush._printStartupBanner(options.isManaged);
+    }
 
     if (!CommandLineMigrationAdvisor.checkArgv(process.argv)) {
       // The migration advisor recognized an obsolete command-line

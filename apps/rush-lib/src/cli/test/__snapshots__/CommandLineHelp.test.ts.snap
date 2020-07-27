@@ -42,6 +42,7 @@ Positional arguments:
                         of imported packages.
     unlink              Delete node_modules symlinks for all projects in the 
                         repo
+    tab-complete        Provides tab completion.
     update              Install package dependencies for all projects in the 
                         repo, and create or update the shrinkwrap file as 
                         needed
@@ -654,6 +655,18 @@ approximate, but generally pretty accurate.
 
 Optional arguments:
   -h, --help  Show this help message and exit.
+"
+`;
+
+exports[`CommandLineHelp prints the help for each action: tab-complete 1`] = `
+"usage: rush tab-complete [-h] [--word WORD] [--position INDEX]
+
+Provides tab completion
+
+Optional arguments:
+  -h, --help        Show this help message and exit.
+  --word WORD       The word to complete.
+  --position INDEX  The position in the word to be completed.
 "
 `;
 

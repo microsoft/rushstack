@@ -33,7 +33,7 @@ export class MinimalRushConfiguration {
 
   public static loadFromDefaultLocation(): MinimalRushConfiguration | undefined {
     const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation({
-      showVerbose: true
+      showVerbose: process.argv.length > 2 && process.argv[2] !== 'tab-complete'
     });
     if (rushJsonLocation) {
       return MinimalRushConfiguration._loadFromConfigurationFile(rushJsonLocation);
