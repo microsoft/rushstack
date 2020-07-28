@@ -61,8 +61,8 @@ export class TabCompleteAction extends BaseRushAction {
     if (commands.length < 2) {
       this._printAllActions();
     } else {
-      if (commands.length === 2) {
-        if (caretPosition === commandLine.length) {
+      if (caretPosition === commandLine.length) {
+        if (commands.length === 2) {
           for (const actionName of Object.keys(TabCompleteAction._actions)) {
             // console.log('TabCompleteAction._actions[' + i + ']: ' + TabCompleteAction._actions[i] + ', commands[1]: ' + commands[1]);
             if (actionName.indexOf(commands[1]) === 0) {
@@ -74,17 +74,10 @@ export class TabCompleteAction extends BaseRushAction {
             // console.log('TabCompleteAction._actions[' + i + ']: ' + TabCompleteAction._actions[i] + ', commands[1]: ' + commands[1]);
             if (actionName === commands[1]) {
               for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
-                console.log(TabCompleteAction._actions[actionName][i]);
+                if (TabCompleteAction._actions[actionName][i].indexOf(commands[commands.length - 1]) === 0) {
+                  console.log(TabCompleteAction._actions[actionName][i]);
+                }
               }
-            }
-          }
-        }
-      } else if (caretPosition === commandLine.length + 1) {
-        for (const actionName of Object.keys(TabCompleteAction._actions)) {
-          // console.log('TabCompleteAction._actions[' + i + ']: ' + TabCompleteAction._actions[i] + ', commands[1]: ' + commands[1]);
-          if (actionName === commands[1]) {
-            for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
-              console.log(TabCompleteAction._actions[actionName][i]);
             }
           }
         }
@@ -93,9 +86,7 @@ export class TabCompleteAction extends BaseRushAction {
           // console.log('TabCompleteAction._actions[' + i + ']: ' + TabCompleteAction._actions[i] + ', commands[1]: ' + commands[1]);
           if (actionName === commands[1]) {
             for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
-              if (TabCompleteAction._actions[actionName][i].indexOf(commands[commands.length - 1]) === 0) {
-                console.log(TabCompleteAction._actions[actionName][i]);
-              }
+              console.log(TabCompleteAction._actions[actionName][i]);
             }
           }
         }
