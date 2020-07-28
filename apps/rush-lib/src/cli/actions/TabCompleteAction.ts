@@ -30,31 +30,54 @@ export class TabCompleteAction extends BaseRushAction {
   }
 
   protected async run(): Promise<void> {
-    console.log('arg count: ' + process.argv.length);
+    // console.log('arg count: ' + process.argv.length);
 
-    for (let i: number = 0; i < process.argv.length; i++) {
-      console.log(i + ': ' + process.argv[i]);
+    // for (let i: number = 0; i < process.argv.length; i++) {
+    //   console.log(i + ': ' + process.argv[i] + ' [' + process.argv[i].length + ']');
+    // }
+
+    if (!this._wordToCompleteParameter.value || !this._positionParameter.value) {
+      this._printAllActions();
+      return;
     }
 
-    if (process.argv.length < 4) {
-      TabCompleteAction._actions.forEach((element) => {
-        console.log(element);
-      });
-    } else {
+    const commandLine: string = this._wordToCompleteParameter.value;
+    const caretPosition: number = this._positionParameter.value;
+    const commands: string[] = commandLine.split(' ');
+
+    if (commands.length < 2) {
+      this._printAllActions();
+      return;
+    }
+
+    // console.log('commands.length: ' + commands.length);
+    // console.log('caretPosition: ' + caretPosition);
+    // console.log('commandLine.length: ' + commandLine.length);
+
+    if (commands.length === 2 && caretPosition === commandLine.length) {
       for (let i: number = 0; i < TabCompleteAction._actions.length; i++) {
-        if (TabCompleteAction._actions[i].indexOf(process.argv[4]) === 0) {
+        // console.log('TabCompleteAction._actions[' + i + ']: ' + TabCompleteAction._actions[i] + ', commands[1]: ' + commands[1]);
+        if (TabCompleteAction._actions[i].indexOf(commands[1]) === 0) {
           console.log(TabCompleteAction._actions[i]);
         }
       }
+
+      return;
     }
 
     if (this._wordToCompleteParameter.value) {
-      console.log(this._wordToCompleteParameter.value);
+      console.log('wordToComplete: ' + this._wordToCompleteParameter.value);
     }
 
     if (this._positionParameter.value) {
-      console.log(this._positionParameter.value);
+      console.log('position: ' + this._positionParameter.value);
     }
+  }
+
+  private _printAllActions(): void {
+    TabCompleteAction._actions.forEach((element) => {
+      console.log(element);
+    });
   }
 
   protected onDefineParameters(): void {
