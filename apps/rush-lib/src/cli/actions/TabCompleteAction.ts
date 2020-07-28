@@ -3,13 +3,22 @@
 
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { CommandLineStringParameter, CommandLineIntegerParameter } from '@rushstack/ts-command-line';
+import {
+  CommandLineStringParameter,
+  CommandLineIntegerParameter,
+  CommandLineParameterKind
+} from '@rushstack/ts-command-line';
+
+interface IParameter {
+  name: string;
+  kind: CommandLineParameterKind;
+}
 
 export class TabCompleteAction extends BaseRushAction {
   private _wordToCompleteParameter: CommandLineStringParameter;
   private _positionParameter: CommandLineIntegerParameter;
 
-  private static _actions: { [actionName: string]: string[] } = {};
+  private static _actions: { [actionName: string]: IParameter[] } = {};
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -21,11 +30,11 @@ export class TabCompleteAction extends BaseRushAction {
     });
 
     this.parser.actions.forEach((element) => {
-      const actionParameters: string[] = [];
+      const actionParameters: IParameter[] = [];
       element.parameters.forEach((elem) => {
-        actionParameters.push(elem.longName);
+        actionParameters.push({ name: elem.longName, kind: elem.kind });
         if (elem.shortName) {
-          actionParameters.push(elem.shortName);
+          actionParameters.push({ name: elem.shortName, kind: elem.kind });
         }
       });
       TabCompleteAction._actions[element.actionName] = actionParameters;
@@ -74,7 +83,9 @@ export class TabCompleteAction extends BaseRushAction {
             // console.log('TabCompleteAction._actions[' + i + ']: ' + TabCompleteAction._actions[i] + ', commands[1]: ' + commands[1]);
             if (actionName === commands[1]) {
               for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
-                if (TabCompleteAction._actions[actionName][i].indexOf(commands[commands.length - 1]) === 0) {
+                if (
+                  TabCompleteAction._actions[actionName][i].name.indexOf(commands[commands.length - 1]) === 0
+                ) {
                   console.log(TabCompleteAction._actions[actionName][i]);
                 }
               }
@@ -86,7 +97,16 @@ export class TabCompleteAction extends BaseRushAction {
           // console.log('TabCompleteAction._actions[' + i + ']: ' + TabCompleteAction._actions[i] + ', commands[1]: ' + commands[1]);
           if (actionName === commands[1]) {
             for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
-              console.log(TabCompleteAction._actions[actionName][i]);
+              if (
+                commands[commands.length - 1] === TabCompleteAction._actions[actionName][i].name &&
+                TabCompleteAction._actions[actionName][i].kind !== CommandLineParameterKind.Flag
+              ) {
+                return;
+              }
+            }
+
+            for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
+              console.log(TabCompleteAction._actions[actionName][i].name);
             }
           }
         }
