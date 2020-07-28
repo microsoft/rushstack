@@ -14,30 +14,30 @@ export class TabCompleteAction extends BaseRushAction {
       actionName: 'tab-complete',
       summary: 'Provides tab completion.',
       documentation: 'Provides tab completion',
-      parser
+      parser,
+      safeForSimultaneousRushProcesses: true
     });
   }
 
   protected async run(): Promise<void> {
     this.parser.actions.forEach((element) => {
       console.log(element.actionName);
-      element.parameters.forEach((elem) => {
-        console.log(elem.longName);
-        if (elem.shortName) {
-          console.log(elem.shortName);
-        }
-      });
+      // element.parameters.forEach((elem) => {
+      //   console.log(elem.longName);
+      //   if (elem.shortName) {
+      //     console.log(elem.shortName);
+      //   }
+      // });
     });
 
-    // console.log(this.parameters.join());
-    // console.log(this.parser.actions.join());
+    console.log();
 
-    if (!this._wordToCompleteParameter.value) {
-      return;
+    if (this._wordToCompleteParameter.value) {
+      console.log(this._wordToCompleteParameter.value);
     }
 
-    if (!this._positionParameter.value) {
-      return;
+    if (this._positionParameter.value) {
+      console.log(this._positionParameter.value);
     }
   }
 
