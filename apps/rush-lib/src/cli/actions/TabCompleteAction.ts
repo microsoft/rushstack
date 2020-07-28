@@ -9,7 +9,7 @@ export class TabCompleteAction extends BaseRushAction {
   private _wordToCompleteParameter: CommandLineStringParameter;
   private _positionParameter: CommandLineIntegerParameter;
 
-  private static _actions: string[] = [];
+  private static _actions: { [actionName: string]: string[] } = {};
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -21,12 +21,20 @@ export class TabCompleteAction extends BaseRushAction {
     });
 
     this.parser.actions.forEach((element) => {
-      TabCompleteAction._actions.push(element.actionName);
+      const actionParameters: string[] = [];
+      element.parameters.forEach((elem) => {
+        actionParameters.push(elem.longName);
+        if (elem.shortName) {
+          actionParameters.push(elem.shortName);
+        }
+      });
+      TabCompleteAction._actions[element.actionName] = actionParameters;
     });
-    TabCompleteAction._actions.push('-d');
-    TabCompleteAction._actions.push('-debug');
-    TabCompleteAction._actions.push('-h');
-    TabCompleteAction._actions.push('-help');
+
+    TabCompleteAction._actions['-d'] = [];
+    TabCompleteAction._actions['-debug'] = [];
+    TabCompleteAction._actions['-h'] = [];
+    TabCompleteAction._actions['-help'] = [];
   }
 
   protected async run(): Promise<void> {
@@ -45,39 +53,60 @@ export class TabCompleteAction extends BaseRushAction {
     const caretPosition: number = this._positionParameter.value;
     const commands: string[] = commandLine.split(' ');
 
+    console.log('commandLine: ' + commandLine);
+    console.log('commandLine.length: ' + commandLine.length);
+    console.log('caretPosition: ' + caretPosition);
+    console.log('commands.length: ' + commands.length);
+
     if (commands.length < 2) {
       this._printAllActions();
-      return;
-    }
-
-    // console.log('commands.length: ' + commands.length);
-    // console.log('caretPosition: ' + caretPosition);
-    // console.log('commandLine.length: ' + commandLine.length);
-
-    if (commands.length === 2 && caretPosition === commandLine.length) {
-      for (let i: number = 0; i < TabCompleteAction._actions.length; i++) {
-        // console.log('TabCompleteAction._actions[' + i + ']: ' + TabCompleteAction._actions[i] + ', commands[1]: ' + commands[1]);
-        if (TabCompleteAction._actions[i].indexOf(commands[1]) === 0) {
-          console.log(TabCompleteAction._actions[i]);
+    } else {
+      if (commands.length === 2) {
+        if (caretPosition === commandLine.length) {
+          for (const actionName of Object.keys(TabCompleteAction._actions)) {
+            // console.log('TabCompleteAction._actions[' + i + ']: ' + TabCompleteAction._actions[i] + ', commands[1]: ' + commands[1]);
+            if (actionName.indexOf(commands[1]) === 0) {
+              console.log(actionName);
+            }
+          }
+        } else {
+          for (const actionName of Object.keys(TabCompleteAction._actions)) {
+            // console.log('TabCompleteAction._actions[' + i + ']: ' + TabCompleteAction._actions[i] + ', commands[1]: ' + commands[1]);
+            if (actionName === commands[1]) {
+              for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
+                console.log(TabCompleteAction._actions[actionName][i]);
+              }
+            }
+          }
+        }
+      } else if (caretPosition === commandLine.length + 1) {
+        for (const actionName of Object.keys(TabCompleteAction._actions)) {
+          // console.log('TabCompleteAction._actions[' + i + ']: ' + TabCompleteAction._actions[i] + ', commands[1]: ' + commands[1]);
+          if (actionName === commands[1]) {
+            for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
+              console.log(TabCompleteAction._actions[actionName][i]);
+            }
+          }
+        }
+      } else {
+        for (const actionName of Object.keys(TabCompleteAction._actions)) {
+          // console.log('TabCompleteAction._actions[' + i + ']: ' + TabCompleteAction._actions[i] + ', commands[1]: ' + commands[1]);
+          if (actionName === commands[1]) {
+            for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
+              if (TabCompleteAction._actions[actionName][i].indexOf(commands[commands.length - 1]) === 0) {
+                console.log(TabCompleteAction._actions[actionName][i]);
+              }
+            }
+          }
         }
       }
-
-      return;
-    }
-
-    if (this._wordToCompleteParameter.value) {
-      console.log('wordToComplete: ' + this._wordToCompleteParameter.value);
-    }
-
-    if (this._positionParameter.value) {
-      console.log('position: ' + this._positionParameter.value);
     }
   }
 
   private _printAllActions(): void {
-    TabCompleteAction._actions.forEach((element) => {
-      console.log(element);
-    });
+    for (const actionName of Object.keys(TabCompleteAction._actions)) {
+      console.log(actionName);
+    }
   }
 
   protected onDefineParameters(): void {
