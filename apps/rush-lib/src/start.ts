@@ -3,8 +3,4 @@
 
 import { Rush } from './api/Rush';
 
-console.log('1');
-
 Rush.launch(Rush.version, { isManaged: false });
-
-console.log('100');
