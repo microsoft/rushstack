@@ -14,6 +14,12 @@ export class Lib1Class extends Lib1ForgottenExport {
     writeableProperty: string;
 }
 
+// @public (undocumented)
+export type Lib1GenericType<T1, T2> = {
+    one: T1;
+    two: T2;
+};
+
 // @alpha (undocumented)
 export interface Lib1Interface {
 }
