@@ -32,6 +32,10 @@ export class TabCompleteAction extends BaseRushAction {
   }
 
   protected async run(): Promise<void> {
+    this.getCompletions();
+  }
+
+  private getCompletions(): void {
     this.parser.actions.forEach((element) => {
       const actionParameters: IParameter[] = [];
       element.parameters.forEach((elem) => {
