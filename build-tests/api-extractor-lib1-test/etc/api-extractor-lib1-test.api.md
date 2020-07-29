@@ -18,5 +18,18 @@ export class Lib1Class extends Lib1ForgottenExport {
 export interface Lib1Interface {
 }
 
+// @public (undocumented)
+export namespace Lib1Namespace {
+    // (undocumented)
+    export namespace Inner {
+        // (undocumented)
+        export class X {
+        }
+    }
+    // (undocumented)
+    export class Y {
+    }
+}
+
 
 ```

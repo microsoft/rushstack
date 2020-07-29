@@ -26,3 +26,5 @@ export class Lib1Class extends Lib1ForgottenExport {
 
 /** @alpha */
 export interface Lib1Interface {}
+
+export { Lib1Namespace } from './Lib1Namespace';
