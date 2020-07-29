@@ -32,10 +32,10 @@ export class TabCompleteAction extends BaseRushAction {
   }
 
   protected async run(): Promise<void> {
-    this.getCompletions();
+    this._getCompletions();
   }
 
-  private getCompletions(): void {
+  private _getCompletions(): void {
     this.parser.actions.forEach((element) => {
       const actionParameters: IParameter[] = [];
       element.parameters.forEach((elem) => {
@@ -164,7 +164,7 @@ export class TabCompleteAction extends BaseRushAction {
             if (completePartialWord) {
               for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
                 if (TabCompleteAction._actions[actionName][i].name.indexOf(lastCommand) === 0) {
-                  console.log(TabCompleteAction._actions[actionName][i]);
+                  console.log(TabCompleteAction._actions[actionName][i].name);
                 }
               }
             } else {
