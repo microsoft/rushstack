@@ -15,6 +15,8 @@ interface IParameter {
   kind: CommandLineParameterKind;
 }
 
+const DEFAULT_WORD_TO_AUTOCOMPLETE = '';
+const DEFAULT_POSITION = 0;
 export class TabCompleteAction extends BaseRushAction {
   private _wordToCompleteParameter: CommandLineStringParameter;
   private _positionParameter: CommandLineIntegerParameter;
@@ -35,13 +37,15 @@ export class TabCompleteAction extends BaseRushAction {
     this._wordToCompleteParameter = this.defineStringParameter({
       parameterLongName: '--word',
       argumentName: 'WORD',
-      description: `The word to complete.`
+      description: `The word to complete.`,
+      defaultValue: DEFAULT_WORD_TO_AUTOCOMPLETE
     });
 
     this._positionParameter = this.defineIntegerParameter({
       parameterLongName: '--position',
       argumentName: 'INDEX',
-      description: `The position in the word to be completed.`
+      description: `The position in the word to be completed.`,
+      defaultValue: DEFAULT_POSITION
     });
   }
 
