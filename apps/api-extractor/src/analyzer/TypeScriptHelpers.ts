@@ -126,6 +126,14 @@ export class TypeScriptHelpers {
     nodeWithModuleSpecifier: ts.ImportDeclaration | ts.ExportDeclaration | ts.ImportTypeNode
   ): string | undefined {
     if (nodeWithModuleSpecifier.kind === ts.SyntaxKind.ImportType) {
+      // As specified internally in typescript:/src/compiler/types.ts#ValidImportTypeNode
+      if (
+        nodeWithModuleSpecifier.argument.kind !== ts.SyntaxKind.LiteralType ||
+        (nodeWithModuleSpecifier.argument as ts.LiteralTypeNode).literal.kind !== ts.SyntaxKind.StringLiteral
+      ) {
+        throw new InternalError('Invalid ImportTypeNode:\n' + nodeWithModuleSpecifier.getText());
+      }
+
       return ((nodeWithModuleSpecifier.argument as ts.LiteralTypeNode)
         .literal as ts.StringLiteral).text.trim();
     }
