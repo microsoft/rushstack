@@ -63,10 +63,10 @@ export class TabCompleteAction extends BaseRushAction {
     const caretPosition: number = this._positionParameter.value;
     const commands: string[] = commandLine.split(' ');
 
-    console.log('commandLine: ' + commandLine);
-    console.log('commandLine.length: ' + commandLine.length);
-    console.log('caretPosition: ' + caretPosition);
-    console.log('commands.length: ' + commands.length);
+    // console.log('commandLine: ' + commandLine);
+    // console.log('commandLine.length: ' + commandLine.length);
+    // console.log('caretPosition: ' + caretPosition);
+    // console.log('commands.length: ' + commands.length);
 
     const debugParameterUsed: boolean =
       commands.length > 1 && (commands[1] === '-d' || commands[1] === '--debug');
@@ -77,8 +77,8 @@ export class TabCompleteAction extends BaseRushAction {
     } else {
       const lastCommand: string = commands[commands.length - 1];
       const secondLastCommand: string = commands[commands.length - 2];
-      console.log('lastCommand: ' + lastCommand);
-      console.log('secondLastCommand: ' + secondLastCommand);
+      // console.log('lastCommand: ' + lastCommand);
+      // console.log('secondLastCommand: ' + secondLastCommand);
 
       const completePartialWord: boolean = caretPosition === commandLine.length;
 
