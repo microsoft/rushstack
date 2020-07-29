@@ -70,6 +70,8 @@ export class TabCompleteAction extends BaseRushAction {
     if (commands.length < 2) {
       this._printAllActions();
     } else {
+      const lastCommand: string = commands[commands.length - 1];
+      // const secondLastCommand: string = commands[commands.length - 2];
       if (caretPosition === commandLine.length) {
         if (commands.length === 2) {
           for (const actionName of Object.keys(TabCompleteAction._actions)) {
@@ -83,9 +85,7 @@ export class TabCompleteAction extends BaseRushAction {
             // console.log('TabCompleteAction._actions[' + i + ']: ' + TabCompleteAction._actions[i] + ', commands[1]: ' + commands[1]);
             if (actionName === commands[1]) {
               for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
-                if (
-                  TabCompleteAction._actions[actionName][i].name.indexOf(commands[commands.length - 1]) === 0
-                ) {
+                if (TabCompleteAction._actions[actionName][i].name.indexOf(lastCommand) === 0) {
                   console.log(TabCompleteAction._actions[actionName][i]);
                 }
               }
@@ -96,9 +96,41 @@ export class TabCompleteAction extends BaseRushAction {
         for (const actionName of Object.keys(TabCompleteAction._actions)) {
           // console.log('TabCompleteAction._actions[' + i + ']: ' + TabCompleteAction._actions[i] + ', commands[1]: ' + commands[1]);
           if (actionName === commands[1]) {
+            // TODO: Add support for -d/--debug switches
+            if (actionName === 'build' || actionName === 'rebuild') {
+              const projectCommands: string[] = ['-f', '--from', '-t', '--to'];
+              if (projectCommands.indexOf(lastCommand) !== -1) {
+                for (let i: number = 0; i < this.rushConfiguration.projects.length; i++) {
+                  console.log(this.rushConfiguration.projects[i].packageName);
+                }
+
+                return;
+              }
+
+              // TODO: Add support for version policy, variant
+            } else if (actionName === 'change') {
+              if (lastCommand === '--bump-type') {
+                const bumpTypes: string[] = ['major', 'minor', 'patch', 'none'];
+                for (let i: number = 0; i < bumpTypes.length; i++) {
+                  console.log(bumpTypes[i]);
+                }
+
+                return;
+              }
+            } else if (actionName === 'publish') {
+              if (lastCommand === '--set-access-level') {
+                const accessLevels: string[] = ['public', 'restricted'];
+                for (let i: number = 0; i < accessLevels.length; i++) {
+                  console.log(accessLevels[i]);
+                }
+
+                return;
+              }
+            }
+
             for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
               if (
-                commands[commands.length - 1] === TabCompleteAction._actions[actionName][i].name &&
+                lastCommand === TabCompleteAction._actions[actionName][i].name &&
                 TabCompleteAction._actions[actionName][i].kind !== CommandLineParameterKind.Flag
               ) {
                 return;
