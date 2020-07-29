@@ -1,0 +1,28 @@
+/**
+ * Configures the "copy-static-assets" task for Heft.
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/copy-static-assets.schema.json"
+
+  /**
+   * File extensions that should be copied from the src folder to the destination folder(s).
+   */
+  // "fileExtensions": [
+  //   ".css"
+  // ],
+
+  /**
+   * Glob patterns that should be explicitly included.
+   */
+  // "includeGlobs": [
+  //   "some/path/*.js"
+  // ],
+
+  /**
+   * Glob patterns that should be explicitly excluded. This takes precedence over globs listed
+   * in "includeGlobs" and files that match the file extensions provided in "fileExtensions".
+   */
+  // "excludeGlobs": [
+  //   "some/path/*.css"
+  // ]
+}

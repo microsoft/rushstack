@@ -2,6 +2,30 @@
   "name": "@rushstack/module-minifier-plugin",
   "entries": [
     {
+      "version": "0.1.3",
+      "tag": "@rushstack/module-minifier-plugin_v0.1.3",
+      "date": "Thu, 23 Jul 2020 23:47:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Make @types/webpack optional, fix Module"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.2",
+      "tag": "@rushstack/module-minifier-plugin_v0.1.2",
+      "date": "Fri, 17 Jul 2020 22:44:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Support external modules"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.1",
       "tag": "@rushstack/module-minifier-plugin_v0.1.1",
       "date": "Tue, 14 Jul 2020 21:49:38 GMT",

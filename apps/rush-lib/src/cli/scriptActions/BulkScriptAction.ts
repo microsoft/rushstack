@@ -10,7 +10,6 @@ import {
   CommandLineStringListParameter,
   CommandLineParameterKind
 } from '@rushstack/ts-command-line';
-import { FileSystem } from '@rushstack/node-core-library';
 
 import { Event } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
@@ -23,6 +22,7 @@ import { TaskCollection } from '../../logic/taskRunner/TaskCollection';
 import { Utilities } from '../../utilities/Utilities';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
+import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -76,11 +76,18 @@ export class BulkScriptAction extends BaseScriptAction {
   }
 
   public run(): Promise<void> {
-    if (!FileSystem.exists(this.rushConfiguration.rushLinkJsonFilename)) {
-      throw new Error(
-        `File not found: ${this.rushConfiguration.rushLinkJsonFilename}${os.EOL}Did you run "rush link"?`
-      );
+    // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are deprecated
+    const lastLinkFlag: LastLinkFlag = LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration);
+    if (!lastLinkFlag.isValid()) {
+      const useWorkspaces: boolean =
+        this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
+      if (useWorkspaces) {
+        throw new Error(`Link flag invalid.${os.EOL}Did you run "rush install" or "rush update"?`);
+      } else {
+        throw new Error(`Link flag invalid.${os.EOL}Did you run "rush link"?`);
+      }
     }
+
     this._doBeforeTask();
 
     const stopwatch: Stopwatch = Stopwatch.start();
@@ -101,8 +108,8 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const taskSelector: TaskSelector = new TaskSelector({
       rushConfiguration: this.rushConfiguration,
-      toFlags: this.mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy),
-      fromFlags: this.mergeProjectsWithVersionPolicy(this._fromFlag, this._fromVersionPolicy),
+      toProjects: this.mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy),
+      fromProjects: this.mergeProjectsWithVersionPolicy(this._fromFlag, this._fromVersionPolicy),
       commandToRun: this._commandToRun,
       customParameterValues,
       isQuietMode: isQuietMode,

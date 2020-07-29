@@ -73,7 +73,7 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
 
   /** @override */
   protected getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined {
-    // First, check under tempProjectName, as this is the first place "rush link" looks.
+    // First, check under tempProjectName, as this is the first place we look during linking.
     const dependencyJson: INpmShrinkwrapDependencyJson | undefined = NpmShrinkwrapFile.tryGetValue(
       this._shrinkwrapJson.dependencies,
       dependencyName
@@ -96,7 +96,7 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     dependencySpecifier: DependencySpecifier,
     tempProjectName: string
   ): DependencySpecifier | undefined {
-    // First, check under tempProjectName, as this is the first place "rush link" looks.
+    // First, check under tempProjectName, as this is the first place we look during linking.
     let dependencyJson: INpmShrinkwrapDependencyJson | undefined = undefined;
 
     const tempDependency: INpmShrinkwrapDependencyJson | undefined = NpmShrinkwrapFile.tryGetValue(

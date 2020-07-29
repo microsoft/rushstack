@@ -127,7 +127,9 @@ export class PublishUtilities {
   public static sortChangeRequests(allChanges: IChangeInfoHash): IChangeInfo[] {
     return Object.keys(allChanges)
       .map((key) => allChanges[key])
-      .sort((a, b) => (a.order! < b.order! ? -1 : 1));
+      .sort((a, b) =>
+        a.order! === b.order! ? a.packageName.localeCompare(b.packageName) : a.order! < b.order! ? -1 : 1
+      );
   }
 
   /**

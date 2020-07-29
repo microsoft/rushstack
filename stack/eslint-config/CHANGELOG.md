@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Thu, 25 Jun 2020 06:43:34 GMT and should not be manually modified.
+This log was last generated on Sat, 25 Jul 2020 01:38:03 GMT and should not be manually modified.
+
+## 1.0.3
+Sat, 25 Jul 2020 01:38:03 GMT
+
+### Patches
+
+- Update README.md to add the missing file extension for .eslintrc.js
 
 ## 1.0.2
 Thu, 25 Jun 2020 06:43:34 GMT

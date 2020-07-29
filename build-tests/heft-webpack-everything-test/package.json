@@ -1,0 +1,20 @@
+{
+  "name": "heft-webpack-everything-test",
+  "description": "Building this project tests every task and config file for Heft when targeting the web browser runtime",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "heft build --clean",
+    "start": "heft start"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/jest": "25.2.1",
+    "@types/webpack-env": "1.13.0",
+    "eslint": "~7.2.0",
+    "tslint-microsoft-contrib": "~6.2.0",
+    "tslint": "~5.20.1",
+    "typescript": "~3.9.5"
+  }
+}

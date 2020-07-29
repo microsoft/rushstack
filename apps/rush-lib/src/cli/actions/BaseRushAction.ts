@@ -128,17 +128,19 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
   protected mergeProjectsWithVersionPolicy(
     projectsParameters: CommandLineStringListParameter,
     versionPoliciesParameters: CommandLineStringListParameter
-  ): string[] {
+  ): RushConfigurationProject[] {
     const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
-    const projects: string[] = [];
+    const projects: RushConfigurationProject[] = [];
     for (const projectParameter of projectsParameters.values) {
       if (projectParameter === '.') {
         const packageJson: IPackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(process.cwd());
         if (packageJson) {
-          const projectName: string = packageJson.name;
-          if (this.rushConfiguration.projectsByName.has(projectName)) {
-            projects.push(projectName);
+          const project: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(
+            packageJson.name
+          );
+          if (project) {
+            projects.push(project);
           } else {
             console.log(
               colors.red(
@@ -166,7 +168,7 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
           throw new AlreadyReportedError();
         }
 
-        projects.push(project.packageName);
+        projects.push(project);
       }
     }
 
@@ -176,7 +178,7 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
           return project.versionPolicyName === policyName;
         });
         if (matches) {
-          projects.push(project.packageName);
+          projects.push(project);
         }
       });
     }

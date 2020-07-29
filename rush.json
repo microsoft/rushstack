@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.28.0",
+  "rushVersion": "5.30.1",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -141,7 +141,7 @@
    * uncomment this line. This is effectively similar to running "rush check" before any
    * of the following commands:
    *
-   *   rush install, rush update, rush link, rush version, rush publish
+   *   rush install, rush update, rush version, rush publish
    *
    * In some cases you may want this turned on, but need to allow certain packages to use a different
    * version. In those cases, you will need to add an entry to the "allowedAlternativeVersions"
@@ -462,7 +462,9 @@
     {
       "packageName": "@rushstack/heft",
       "projectFolder": "apps/heft",
-      "reviewCategory": "libraries"
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft"]
     },
 
     // "build-tests" folder (alphabetical order)
@@ -520,18 +522,57 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
+
+    // heft-* projects
     {
-      "packageName": "heft-test-01",
-      "projectFolder": "build-tests/heft-test-01",
+      "packageName": "heft-minimal-rig-test",
+      "projectFolder": "build-tests/heft-minimal-rig-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
     {
-      "packageName": "heft-test-webpack",
-      "projectFolder": "build-tests/heft-test-webpack",
+      "packageName": "heft-minimal-rig-usage-test",
+      "projectFolder": "build-tests/heft-minimal-rig-usage-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
+    {
+      "packageName": "heft-node-basic-test",
+      "projectFolder": "build-tests/heft-node-basic-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-node-everything-test",
+      "projectFolder": "build-tests/heft-node-everything-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-oldest-compiler-test",
+      "projectFolder": "build-tests/heft-oldest-compiler-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-rsc-test",
+      "projectFolder": "build-tests/heft-rsc-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-webpack-basic-test",
+      "projectFolder": "build-tests/heft-webpack-basic-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-webpack-everything-test",
+      "projectFolder": "build-tests/heft-webpack-everything-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+
     {
       "packageName": "localization-plugin-test-01",
       "projectFolder": "build-tests/localization-plugin-test-01",
@@ -562,6 +603,8 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
+
+    // rush-stack-compiler-* projects
     {
       "packageName": "rush-stack-compiler-2.4-library-test",
       "projectFolder": "build-tests/rush-stack-compiler-2.4-library-test",
@@ -646,6 +689,7 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
+
     {
       "packageName": "ts-command-line-test",
       "projectFolder": "build-tests/ts-command-line-test",

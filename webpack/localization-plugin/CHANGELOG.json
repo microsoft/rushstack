@@ -2,6 +2,18 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.3.30",
+      "tag": "@rushstack/localization-plugin_v0.3.30",
+      "date": "Fri, 24 Jul 2020 20:40:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix broken peer dependency specifier"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.29",
       "tag": "@rushstack/localization-plugin_v0.3.29",
       "date": "Wed, 15 Jul 2020 15:09:42 GMT",

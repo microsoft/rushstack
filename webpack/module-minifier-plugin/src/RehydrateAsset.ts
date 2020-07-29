@@ -14,7 +14,7 @@ import { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.type
  * @public
  */
 export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner: string): Source {
-  const { source: assetSource, modules } = asset;
+  const { source: assetSource, modules, externalNames } = asset;
 
   const assetCode: string = assetSource.source();
 
@@ -32,6 +32,8 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
   }
 
   const emptyFunction = 'function(){}'; // eslint-disable-line @typescript-eslint/typedef
+  // This must not have the global flag set
+  const validIdRegex: RegExp = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 
   const source: ConcatSource = new ConcatSource(banner, prefix);
 
@@ -83,7 +85,10 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
     // Write an object literal
     let separator: '{' | ',' = '{';
     for (const id of modules) {
-      source.add(`${separator}${JSON.stringify(id)}:`);
+      // If the id is legal to use as a key in a JavaScript object literal, use as-is
+      const javascriptId: string | number =
+        typeof id !== 'string' || validIdRegex.test(id) ? id : JSON.stringify(id);
+      source.add(`${separator}${javascriptId}:`);
       separator = ',';
 
       const item: IModuleInfo | undefined = moduleMap.get(id);
@@ -133,5 +138,29 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
 
   source.add(suffix);
 
-  return new CachedSource(source);
+  const cached: CachedSource = new CachedSource(source);
+
+  if (externalNames.size) {
+    const replaceSource: ReplaceSource = new ReplaceSource(cached);
+    const code: string = cached.source();
+
+    const externalIdRegex: RegExp = /__WEBPACK_EXTERNAL_MODULE_[A-Za-z0-9_$]+/g;
+
+    // RegExp.exec uses null or an array as the return type, explicitly
+    let match: RegExpExecArray | null = null; // eslint-disable-line @rushstack/no-null
+    while ((match = externalIdRegex.exec(code))) {
+      const id: string = match[0];
+      const mapped: string | undefined = externalNames.get(id);
+
+      if (mapped === undefined) {
+        console.error(`Missing minified external for ${id} in ${asset.fileName}!`);
+      }
+
+      replaceSource.replace(match.index, externalIdRegex.lastIndex - 1, mapped);
+    }
+
+    return new CachedSource(replaceSource);
+  }
+
+  return cached;
 }

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+This log was last generated on Mon, 20 Jul 2020 06:52:33 GMT and should not be manually modified.
+
+## 2.4.33
+Mon, 20 Jul 2020 06:52:33 GMT
+
+### Patches
+
+- Fix hashing when a filename contains a space, a special character (ex. ", \), or a unicode character, and fix git hash-object call when long filenames are provided
 
 ## 2.4.32
 Fri, 03 Jul 2020 15:09:04 GMT

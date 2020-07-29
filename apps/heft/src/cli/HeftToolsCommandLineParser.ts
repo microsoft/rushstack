@@ -21,8 +21,12 @@ import { StartAction } from './actions/StartAction';
 import { TestAction } from './actions/TestAction';
 import { PluginManager } from '../pluginFramework/PluginManager';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { IHeftActionBaseOptions } from './actions/HeftActionBase';
+import { IHeftActionBaseOptions, IStages } from './actions/HeftActionBase';
 import { HeftSession } from '../pluginFramework/HeftSession';
+import { CleanStage } from '../stages/CleanStage';
+import { BuildStage } from '../stages/BuildStage';
+import { DevDeployStage } from '../stages/DevDeployStage';
+import { TestStage } from '../stages/TestStage';
 
 export class HeftToolsCommandLineParser extends CommandLineParser {
   private _terminalProvider: ConsoleTerminalProvider;
@@ -66,34 +70,37 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       terminalProvider: this.terminalProvider
     });
 
+    const stages: IStages = {
+      buildStage: new BuildStage(this._heftConfiguration),
+      cleanStage: new CleanStage(this._heftConfiguration),
+      devDeployStage: new DevDeployStage(this._heftConfiguration),
+      testStage: new TestStage(this._heftConfiguration)
+    };
     const actionOptions: IHeftActionBaseOptions = {
       terminal: this.terminal,
       metricsCollector: this.metricsCollector,
       pluginManager: this._pluginManager,
-      heftConfiguration: this._heftConfiguration
+      heftConfiguration: this._heftConfiguration,
+      stages
     };
-
-    const cleanAction: CleanAction = new CleanAction(actionOptions);
-    const buildAction: BuildAction = new BuildAction({ ...actionOptions, cleanAction });
-    const devDeployAction: DevDeployAction = new DevDeployAction(actionOptions);
-    const startAction: StartAction = new StartAction(actionOptions);
-    const testAction: TestAction = new TestAction({ ...actionOptions, cleanAction, buildAction });
 
     this._heftSession = new HeftSession({
       getIsDebugMode: () => this.isDebug,
-
-      cleanAction,
-      buildAction,
-      devDeployAction,
-      startAction,
-      testAction,
+      ...stages,
       metricsCollector: this.metricsCollector
     });
+
     this._pluginManager = new PluginManager({
       terminal: this.terminal,
       heftConfiguration: this._heftConfiguration,
       heftSession: this._heftSession
     });
+
+    const cleanAction: CleanAction = new CleanAction(actionOptions);
+    const buildAction: BuildAction = new BuildAction(actionOptions);
+    const devDeployAction: DevDeployAction = new DevDeployAction(actionOptions);
+    const startAction: StartAction = new StartAction(actionOptions);
+    const testAction: TestAction = new TestAction(actionOptions);
 
     this.addAction(cleanAction);
     this.addAction(buildAction);

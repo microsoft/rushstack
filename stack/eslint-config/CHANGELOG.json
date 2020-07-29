@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "1.0.3",
+      "tag": "@rushstack/eslint-config_v1.0.3",
+      "date": "Sat, 25 Jul 2020 01:38:03 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update README.md to add the missing file extension for .eslintrc.js"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.2",
       "tag": "@rushstack/eslint-config_v1.0.2",
       "date": "Thu, 25 Jun 2020 06:43:34 GMT",
