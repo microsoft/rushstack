@@ -297,6 +297,39 @@ export class DtsRollupGenerator {
               throw new InternalError('referencedEntry.nameForEmit is undefined');
             }
 
+            let typeArgumentsText: string = '';
+
+            if (node.typeArguments && node.typeArguments.length > 0) {
+              // Type arguments have to be processed and written to the document
+              const lessThanTokenPos: number = span.children.findIndex(
+                (childSpan) => childSpan.node.kind === ts.SyntaxKind.LessThanToken
+              );
+              const greaterThanTokenPos: number = span.children.findIndex(
+                (childSpan) => childSpan.node.kind === ts.SyntaxKind.GreaterThanToken
+              );
+
+              const typeArgumentsSpans: Span[] = span.children.slice(
+                lessThanTokenPos + 1,
+                greaterThanTokenPos
+              );
+
+              // Apply modifications to Span elements of typeArguments
+              typeArgumentsSpans.forEach((childSpan) => {
+                const childAstDeclaration: AstDeclaration = AstDeclaration.isSupportedSyntaxKind(
+                  childSpan.kind
+                )
+                  ? collector.astSymbolTable.getChildAstDeclarationByNode(childSpan.node, astDeclaration)
+                  : astDeclaration;
+
+                DtsRollupGenerator._modifySpan(collector, childSpan, entity, childAstDeclaration, dtsKind);
+              });
+
+              const typeArgumentsStrings: string[] = typeArgumentsSpans.map((childSpan) =>
+                childSpan.getModifiedText()
+              );
+              typeArgumentsText = `<${typeArgumentsStrings.join(', ')}>`;
+            }
+
             if (
               referencedEntity.astEntity instanceof AstImport &&
               referencedEntity.astEntity.importKind === AstImportKind.ImportType &&
@@ -307,12 +340,12 @@ export class DtsRollupGenerator {
                 : referencedEntity.nameForEmit;
 
               span.modification.skipAll();
-              span.modification.prefix = replacement;
+              span.modification.prefix = `${replacement}${typeArgumentsText}`;
             } else {
               // Replace with internal symbol or AstImport
 
               span.modification.skipAll();
-              span.modification.prefix = referencedEntity.nameForEmit;
+              span.modification.prefix = `${referencedEntity.nameForEmit}${typeArgumentsText}`;
             }
           }
         }

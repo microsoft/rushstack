@@ -133,7 +133,7 @@ export class AstImport {
    * `AstImport.exportName`.
    */
   public get localName(): string | undefined {
-    return this.exportName;
+    return this.exportName ? this.exportName.split('.').slice(-1)[0] : undefined;
   }
 
   /**

@@ -12,6 +12,7 @@ import { CollectorEntity } from './CollectorEntity';
 import { AstSymbolTable, AstEntity } from '../analyzer/AstSymbolTable';
 import { AstModule, AstModuleExportInfo } from '../analyzer/AstModule';
 import { AstSymbol } from '../analyzer/AstSymbol';
+import { AstImport } from '../analyzer/AstImport';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { WorkingPackage } from './WorkingPackage';
@@ -23,6 +24,9 @@ import { TypeScriptInternals, IGlobalVariableAnalyzer } from '../analyzer/TypeSc
 import { MessageRouter } from './MessageRouter';
 import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
 import { ExtractorConfig } from '../api/ExtractorConfig';
+
+const toAlphaNumericCamelCase = (str: string): string =>
+  str.replace(/(\W+[a-z])/g, (g) => g[g.length - 1].toUpperCase()).replace(/\W/g, '');
 
 /**
  * Options for Collector constructor.
@@ -487,14 +491,13 @@ export class Collector {
         entity.singleExportName !== undefined &&
         entity.singleExportName !== ts.InternalSymbolName.Default
       ) {
-        // TODO: remove replace after "exportPath" support
-        idealNameForEmit = entity.singleExportName.replace(/\./g, '_');
-      } else if (entity.astEntity.localName) {
-        // otherwise use the local name
-        // TODO: remove replace after "exportPath" support
-        idealNameForEmit = entity.astEntity.localName.replace(/\./g, '_');
+        idealNameForEmit = entity.singleExportName;
+      } else if (entity.astEntity instanceof AstImport) {
+        // otherwise use the local name or modulePath
+        idealNameForEmit = entity.astEntity.localName || toAlphaNumericCamelCase(entity.astEntity.modulePath);
       } else {
-        idealNameForEmit = '_NameForEmit';
+        // otherwise use the local name
+        idealNameForEmit = entity.astEntity.localName;
       }
 
       // If the idealNameForEmit happens to be the same as one of the exports, then we're safe to use that...
