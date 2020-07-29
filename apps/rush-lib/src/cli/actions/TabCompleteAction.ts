@@ -3,6 +3,8 @@
 
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
+import { FileSystem } from '@rushstack/node-core-library';
+
 import {
   CommandLineStringParameter,
   CommandLineIntegerParameter,
@@ -28,7 +30,9 @@ export class TabCompleteAction extends BaseRushAction {
       parser,
       safeForSimultaneousRushProcesses: true
     });
+  }
 
+  protected async run(): Promise<void> {
     this.parser.actions.forEach((element) => {
       const actionParameters: IParameter[] = [];
       element.parameters.forEach((elem) => {
@@ -44,9 +48,9 @@ export class TabCompleteAction extends BaseRushAction {
     TabCompleteAction._actions['-debug'] = [];
     TabCompleteAction._actions['-h'] = [];
     TabCompleteAction._actions['-help'] = [];
-  }
 
-  protected async run(): Promise<void> {
+    // FileSystem.writeFile('D:/a.txt', JSON.stringify(TabCompleteAction._actions));
+
     // console.log('arg count: ' + process.argv.length);
 
     // for (let i: number = 0; i < process.argv.length; i++) {
@@ -99,6 +103,7 @@ export class TabCompleteAction extends BaseRushAction {
             // TODO: Add support for -d/--debug switches
             if (actionName === 'build' || actionName === 'rebuild') {
               const projectCommands: string[] = ['-f', '--from', '-t', '--to'];
+              console.log('lastCommandIndex: ' + projectCommands.indexOf(lastCommand));
               if (projectCommands.indexOf(lastCommand) !== -1) {
                 for (let i: number = 0; i < this.rushConfiguration.projects.length; i++) {
                   console.log(this.rushConfiguration.projects[i].packageName);
