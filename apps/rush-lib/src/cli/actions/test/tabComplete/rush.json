@@ -6,12 +6,12 @@
 
   "projects": [
     {
-      "packageName": "a",
-      "projectFolder": "a"
+      "packageName": "abc",
+      "projectFolder": "abc"
     },
     {
-      "packageName": "b",
-      "projectFolder": "b"
+      "packageName": "def",
+      "projectFolder": "def"
     }
   ]
 }

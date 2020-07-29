@@ -44,7 +44,8 @@ describe('TabCompleteAction', () => {
       const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
       const tc: TabCompleteAction = new TabCompleteAction(parser);
 
-      const actual: string[] = Array.from(tc._getCompletions('rush', 5));
+      const commandLine: string = 'rush';
+      const actual: string[] = Array.from(tc._getCompletions(commandLine.trim(), commandLine.length));
 
       expect(actual.indexOf('add') !== -1).toBe(true);
       expect(actual.indexOf('check') !== -1).toBe(true);
@@ -65,7 +66,8 @@ describe('TabCompleteAction', () => {
       const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
       const tc: TabCompleteAction = new TabCompleteAction(parser);
 
-      const actual: string[] = Array.from(tc._getCompletions('rush a', 6));
+      const commandLine: string = 'rush a';
+      const actual: string[] = Array.from(tc._getCompletions(commandLine.trim(), commandLine.length));
 
       const expected: string[] = ['add'];
 
@@ -82,7 +84,8 @@ describe('TabCompleteAction', () => {
       const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
       const tc: TabCompleteAction = new TabCompleteAction(parser);
 
-      const actual: string[] = Array.from(tc._getCompletions('rush build', 11));
+      const commandLine: string = 'rush build ';
+      const actual: string[] = Array.from(tc._getCompletions(commandLine.trim(), commandLine.length));
 
       expect(actual.indexOf('-t') !== -1).toBe(true);
       expect(actual.indexOf('--to') !== -1).toBe(true);
@@ -90,7 +93,7 @@ describe('TabCompleteAction', () => {
       expect(actual.indexOf('--from') !== -1).toBe(true);
     });
 
-    it(`gets completion(s) for rush build --<tab>`, () => {
+    it(`gets completion(s) for rush build -<tab>`, () => {
       const startPath: string = path.resolve(__dirname, 'tabComplete');
       // Create a Rush CLI instance. This instance is heavy-weight and relies on setting process.exit
       // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test
@@ -100,7 +103,8 @@ describe('TabCompleteAction', () => {
       const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
       const tc: TabCompleteAction = new TabCompleteAction(parser);
 
-      const actual: string[] = Array.from(tc._getCompletions('rush build -', 13));
+      const commandLine: string = 'rush build -';
+      const actual: string[] = Array.from(tc._getCompletions(commandLine.trim(), commandLine.length));
 
       expect(actual.indexOf('-t') !== -1).toBe(true);
       expect(actual.indexOf('--to') !== -1).toBe(true);
@@ -118,9 +122,30 @@ describe('TabCompleteAction', () => {
       const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
       const tc: TabCompleteAction = new TabCompleteAction(parser);
 
-      const actual: string[] = Array.from(tc._getCompletions('rush build -t', 14));
+      const commandLine: string = 'rush build -t ';
+      const actual: string[] = Array.from(tc._getCompletions(commandLine.trim(), commandLine.length));
 
-      const expected: string[] = ['a', 'b'];
+      const expected: string[] = ['abc', 'def'];
+
+      expect(arrayEqual(actual, expected)).toBe(true);
+    });
+
+    it(`gets completion(s) for rush build -t a`, () => {
+      const startPath: string = path.resolve(__dirname, 'tabComplete');
+      // Create a Rush CLI instance. This instance is heavy-weight and relies on setting process.exit
+      // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test
+      // repo will fail due to contention over the same lock which is kept until the test runner process
+      // ends.
+      jest.spyOn(process, 'cwd').mockReturnValue(startPath);
+      const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
+      const tc: TabCompleteAction = new TabCompleteAction(parser);
+
+      const commandLine: string = 'rush build -t a';
+      const actual: string[] = Array.from(tc._getCompletions(commandLine.trim(), commandLine.length));
+
+      console.log('Actual: ' + actual);
+
+      const expected: string[] = ['abc'];
 
       expect(arrayEqual(actual, expected)).toBe(true);
     });
@@ -135,8 +160,28 @@ describe('TabCompleteAction', () => {
       const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
       const tc: TabCompleteAction = new TabCompleteAction(parser);
 
-      const actual: string[] = Array.from(tc._getCompletions('rush change --bump-type', 24));
+      const commandLine: string = 'rush change --bump-type ';
+      const actual: string[] = Array.from(tc._getCompletions(commandLine.trim(), commandLine.length));
       const expected: string[] = ['major', 'minor', 'patch', 'none'];
+
+      expect(arrayEqual(actual, expected)).toBe(true);
+    });
+
+    it(`gets completion(s) for rush change --bump-type m<tab>`, () => {
+      const startPath: string = path.resolve(__dirname, 'tabComplete');
+      // Create a Rush CLI instance. This instance is heavy-weight and relies on setting process.exit
+      // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test
+      // repo will fail due to contention over the same lock which is kept until the test runner process
+      // ends.
+      jest.spyOn(process, 'cwd').mockReturnValue(startPath);
+      const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
+      const tc: TabCompleteAction = new TabCompleteAction(parser);
+
+      const commandLine: string = 'rush change --bump-type m';
+      const actual: string[] = Array.from(tc._getCompletions(commandLine.trim(), commandLine.length));
+      console.log('Actual: ' + actual);
+
+      const expected: string[] = ['major', 'minor'];
 
       expect(arrayEqual(actual, expected)).toBe(true);
     });
