@@ -1,0 +1,80 @@
+{
+  "metadata": {
+    "toolPackage": "@microsoft/api-extractor",
+    "toolVersion": "[test mode]",
+    "schemaVersion": 1003,
+    "oldestForwardsCompatibleVersion": 1001
+  },
+  "kind": "Package",
+  "canonicalReference": "api-extractor-scenarios!",
+  "docComment": "",
+  "name": "api-extractor-scenarios",
+  "members": [
+    {
+      "kind": "EntryPoint",
+      "canonicalReference": "api-extractor-scenarios!",
+      "name": "",
+      "members": [
+        {
+          "kind": "Interface",
+          "canonicalReference": "api-extractor-scenarios!IExample:interface",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface IExample "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "IExample",
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-extractor-scenarios!IExample#generic:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "generic: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "import('api-extractor-lib1-test')."
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Lib1GenericType",
+                  "canonicalReference": "api-extractor-lib1-test!Lib1GenericType:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<number, import('api-extractor-lib1-test')."
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Lib1Interface",
+                  "canonicalReference": "api-extractor-lib1-test!Lib1Interface:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "generic",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 6
+              }
+            }
+          ],
+          "extendsTokenRanges": []
+        }
+      ]
+    }
+  ]
+}
