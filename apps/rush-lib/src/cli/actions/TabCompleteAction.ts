@@ -3,7 +3,6 @@
 
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { FileSystem } from '@rushstack/node-core-library';
 
 import {
   CommandLineStringParameter,
@@ -49,8 +48,6 @@ export class TabCompleteAction extends BaseRushAction {
     TabCompleteAction._actions['-h'] = [];
     TabCompleteAction._actions['-help'] = [];
 
-    // FileSystem.writeFile('D:/a.txt', JSON.stringify(TabCompleteAction._actions));
-
     // console.log('arg count: ' + process.argv.length);
 
     // for (let i: number = 0; i < process.argv.length; i++) {
@@ -71,23 +68,24 @@ export class TabCompleteAction extends BaseRushAction {
     console.log('caretPosition: ' + caretPosition);
     console.log('commands.length: ' + commands.length);
 
-    if (commands.length < 2) {
+    const debugParameterUsed: boolean =
+      commands.length > 1 && (commands[1] === '-d' || commands[1] === '--debug');
+    const debugParameterOffset: number = debugParameterUsed ? 1 : 0; // if debug switch is used, then offset everything by 1.
+
+    if (commands.length < 2 + debugParameterOffset) {
       this._printAllActions();
     } else {
       const lastCommand: string = commands[commands.length - 1];
-      // const secondLastCommand: string = commands[commands.length - 2];
       if (caretPosition === commandLine.length) {
-        if (commands.length === 2) {
+        if (commands.length === 2 + debugParameterOffset) {
           for (const actionName of Object.keys(TabCompleteAction._actions)) {
-            // console.log('TabCompleteAction._actions[' + i + ']: ' + TabCompleteAction._actions[i] + ', commands[1]: ' + commands[1]);
-            if (actionName.indexOf(commands[1]) === 0) {
+            if (actionName.indexOf(commands[1 + debugParameterOffset]) === 0) {
               console.log(actionName);
             }
           }
         } else {
           for (const actionName of Object.keys(TabCompleteAction._actions)) {
-            // console.log('TabCompleteAction._actions[' + i + ']: ' + TabCompleteAction._actions[i] + ', commands[1]: ' + commands[1]);
-            if (actionName === commands[1]) {
+            if (actionName === commands[1 + debugParameterOffset]) {
               for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
                 if (TabCompleteAction._actions[actionName][i].name.indexOf(lastCommand) === 0) {
                   console.log(TabCompleteAction._actions[actionName][i]);
@@ -98,8 +96,7 @@ export class TabCompleteAction extends BaseRushAction {
         }
       } else {
         for (const actionName of Object.keys(TabCompleteAction._actions)) {
-          // console.log('TabCompleteAction._actions[' + i + ']: ' + TabCompleteAction._actions[i] + ', commands[1]: ' + commands[1]);
-          if (actionName === commands[1]) {
+          if (actionName === commands[1 + debugParameterOffset]) {
             // TODO: Add support for -d/--debug switches
             if (actionName === 'build' || actionName === 'rebuild') {
               const projectCommands: string[] = ['-f', '--from', '-t', '--to'];
