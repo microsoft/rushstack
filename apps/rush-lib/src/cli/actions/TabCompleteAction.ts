@@ -97,7 +97,6 @@ export class TabCompleteAction extends BaseRushAction {
       } else {
         for (const actionName of Object.keys(TabCompleteAction._actions)) {
           if (actionName === commands[1 + debugParameterOffset]) {
-            // TODO: Add support for -d/--debug switches
             if (actionName === 'build' || actionName === 'rebuild') {
               const projectCommands: string[] = ['-f', '--from', '-t', '--to'];
               console.log('lastCommandIndex: ' + projectCommands.indexOf(lastCommand));
