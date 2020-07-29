@@ -18,7 +18,7 @@
         {
           "kind": "Class",
           "canonicalReference": "api-extractor-scenarios!Item:class",
-          "docComment": "",
+          "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",

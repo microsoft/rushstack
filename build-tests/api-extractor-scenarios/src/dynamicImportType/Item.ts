@@ -1,3 +1,4 @@
+/** @public */
 export class Item {
   options: import('./Options').Options;
   lib1: import('api-extractor-lib1-test').Lib1Interface;
