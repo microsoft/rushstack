@@ -76,6 +76,9 @@ export class TabCompleteAction extends BaseRushAction {
       this._printAllActions();
     } else {
       const lastCommand: string = commands[commands.length - 1];
+      const secondLastCommand: string = commands[commands.length - 2];
+      console.log('lastCommand: ' + lastCommand);
+      console.log('secondLastCommand: ' + secondLastCommand);
       if (caretPosition === commandLine.length) {
         if (commands.length === 2 + debugParameterOffset) {
           for (const actionName of Object.keys(TabCompleteAction._actions)) {
@@ -86,6 +89,18 @@ export class TabCompleteAction extends BaseRushAction {
         } else {
           for (const actionName of Object.keys(TabCompleteAction._actions)) {
             if (actionName === commands[1 + debugParameterOffset]) {
+              if (actionName === 'build' || actionName === 'rebuild') {
+                const projectCommands: string[] = ['-f', '--from', '-t', '--to'];
+                if (projectCommands.indexOf(secondLastCommand) !== -1) {
+                  for (let i: number = 0; i < this.rushConfiguration.projects.length; i++) {
+                    if (this.rushConfiguration.projects[i].packageName.indexOf(lastCommand) === 0) {
+                      console.log(this.rushConfiguration.projects[i].packageName);
+                    }
+                  }
+
+                  return;
+                }
+              }
               for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
                 if (TabCompleteAction._actions[actionName][i].name.indexOf(lastCommand) === 0) {
                   console.log(TabCompleteAction._actions[actionName][i]);
@@ -99,7 +114,6 @@ export class TabCompleteAction extends BaseRushAction {
           if (actionName === commands[1 + debugParameterOffset]) {
             if (actionName === 'build' || actionName === 'rebuild') {
               const projectCommands: string[] = ['-f', '--from', '-t', '--to'];
-              console.log('lastCommandIndex: ' + projectCommands.indexOf(lastCommand));
               if (projectCommands.indexOf(lastCommand) !== -1) {
                 for (let i: number = 0; i < this.rushConfiguration.projects.length; i++) {
                   console.log(this.rushConfiguration.projects[i].packageName);
