@@ -79,18 +79,21 @@ export class TabCompleteAction extends BaseRushAction {
       const secondLastCommand: string = commands[commands.length - 2];
       console.log('lastCommand: ' + lastCommand);
       console.log('secondLastCommand: ' + secondLastCommand);
-      if (caretPosition === commandLine.length) {
-        if (commands.length === 2 + debugParameterOffset) {
-          for (const actionName of Object.keys(TabCompleteAction._actions)) {
-            if (actionName.indexOf(commands[1 + debugParameterOffset]) === 0) {
-              console.log(actionName);
-            }
+
+      const completePartialWord: boolean = caretPosition === commandLine.length;
+
+      if (completePartialWord && commands.length === 2 + debugParameterOffset) {
+        for (const actionName of Object.keys(TabCompleteAction._actions)) {
+          if (actionName.indexOf(commands[1 + debugParameterOffset]) === 0) {
+            console.log(actionName);
           }
-        } else {
-          for (const actionName of Object.keys(TabCompleteAction._actions)) {
-            if (actionName === commands[1 + debugParameterOffset]) {
-              if (actionName === 'build' || actionName === 'rebuild') {
-                const projectCommands: string[] = ['-f', '--from', '-t', '--to'];
+        }
+      } else {
+        for (const actionName of Object.keys(TabCompleteAction._actions)) {
+          if (actionName === commands[1 + debugParameterOffset]) {
+            if (actionName === 'build' || actionName === 'rebuild') {
+              const projectCommands: string[] = ['-f', '--from', '-t', '--to'];
+              if (completePartialWord) {
                 if (projectCommands.indexOf(secondLastCommand) !== -1) {
                   for (let i: number = 0; i < this.rushConfiguration.projects.length; i++) {
                     if (this.rushConfiguration.projects[i].packageName.indexOf(lastCommand) === 0) {
@@ -100,60 +103,80 @@ export class TabCompleteAction extends BaseRushAction {
 
                   return;
                 }
+              } else {
+                if (projectCommands.indexOf(lastCommand) !== -1) {
+                  for (let i: number = 0; i < this.rushConfiguration.projects.length; i++) {
+                    console.log(this.rushConfiguration.projects[i].packageName);
+                  }
+
+                  return;
+                }
               }
+              // TODO: Add support for version policy, variant
+            } else if (actionName === 'change') {
+              const bumpTypes: string[] = ['major', 'minor', 'patch', 'none'];
+              if (completePartialWord) {
+                if (secondLastCommand === '--bump-type') {
+                  for (let i: number = 0; i < bumpTypes.length; i++) {
+                    if (bumpTypes[i].indexOf(lastCommand) === 0) {
+                      console.log(bumpTypes[i]);
+                    }
+                  }
+
+                  return;
+                }
+              } else {
+                if (lastCommand === '--bump-type') {
+                  for (let i: number = 0; i < bumpTypes.length; i++) {
+                    console.log(bumpTypes[i]);
+                  }
+
+                  return;
+                }
+              }
+            } else if (actionName === 'publish') {
+              const accessLevels: string[] = ['public', 'restricted'];
+              if (completePartialWord) {
+                if (secondLastCommand === '--set-access-level') {
+                  for (let i: number = 0; i < accessLevels.length; i++) {
+                    if (accessLevels[i].indexOf(lastCommand) === 0) {
+                      console.log(accessLevels[i]);
+                    }
+                  }
+
+                  return;
+                }
+              } else {
+                if (lastCommand === '--set-access-level') {
+                  for (let i: number = 0; i < accessLevels.length; i++) {
+                    console.log(accessLevels[i]);
+                  }
+
+                  return;
+                }
+              }
+            }
+
+            if (completePartialWord) {
               for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
                 if (TabCompleteAction._actions[actionName][i].name.indexOf(lastCommand) === 0) {
                   console.log(TabCompleteAction._actions[actionName][i]);
                 }
               }
-            }
-          }
-        }
-      } else {
-        for (const actionName of Object.keys(TabCompleteAction._actions)) {
-          if (actionName === commands[1 + debugParameterOffset]) {
-            if (actionName === 'build' || actionName === 'rebuild') {
-              const projectCommands: string[] = ['-f', '--from', '-t', '--to'];
-              if (projectCommands.indexOf(lastCommand) !== -1) {
-                for (let i: number = 0; i < this.rushConfiguration.projects.length; i++) {
-                  console.log(this.rushConfiguration.projects[i].packageName);
+            } else {
+              for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
+                if (
+                  lastCommand === TabCompleteAction._actions[actionName][i].name &&
+                  TabCompleteAction._actions[actionName][i].kind !== CommandLineParameterKind.Flag
+                ) {
+                  // The parameter is expecting a value, so don't suggest parameter names again
+                  return;
                 }
-
-                return;
               }
 
-              // TODO: Add support for version policy, variant
-            } else if (actionName === 'change') {
-              if (lastCommand === '--bump-type') {
-                const bumpTypes: string[] = ['major', 'minor', 'patch', 'none'];
-                for (let i: number = 0; i < bumpTypes.length; i++) {
-                  console.log(bumpTypes[i]);
-                }
-
-                return;
+              for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
+                console.log(TabCompleteAction._actions[actionName][i].name);
               }
-            } else if (actionName === 'publish') {
-              if (lastCommand === '--set-access-level') {
-                const accessLevels: string[] = ['public', 'restricted'];
-                for (let i: number = 0; i < accessLevels.length; i++) {
-                  console.log(accessLevels[i]);
-                }
-
-                return;
-              }
-            }
-
-            for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
-              if (
-                lastCommand === TabCompleteAction._actions[actionName][i].name &&
-                TabCompleteAction._actions[actionName][i].kind !== CommandLineParameterKind.Flag
-              ) {
-                return;
-              }
-            }
-
-            for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
-              console.log(TabCompleteAction._actions[actionName][i].name);
             }
           }
         }
