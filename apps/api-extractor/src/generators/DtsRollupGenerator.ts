@@ -308,6 +308,10 @@ export class DtsRollupGenerator {
                 (childSpan) => childSpan.node.kind === ts.SyntaxKind.GreaterThanToken
               );
 
+              if (lessThanTokenPos < 0 || greaterThanTokenPos <= lessThanTokenPos) {
+                throw new InternalError('Invalid type arguments:\n' + node.getText());
+              }
+
               const typeArgumentsSpans: Span[] = span.children.slice(
                 lessThanTokenPos + 1,
                 greaterThanTokenPos
