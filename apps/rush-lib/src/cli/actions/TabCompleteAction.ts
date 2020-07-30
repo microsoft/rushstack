@@ -15,8 +15,8 @@ interface IParameter {
   kind: CommandLineParameterKind;
 }
 
-const DEFAULT_WORD_TO_AUTOCOMPLETE = '';
-const DEFAULT_POSITION = 0;
+const DEFAULT_WORD_TO_AUTOCOMPLETE: string = '';
+const DEFAULT_POSITION: number = 0;
 export class TabCompleteAction extends BaseRushAction {
   private _wordToCompleteParameter: CommandLineStringParameter;
   private _positionParameter: CommandLineIntegerParameter;

@@ -665,8 +665,9 @@ Provides tab completion
 
 Optional arguments:
   -h, --help        Show this help message and exit.
-  --word WORD       The word to complete.
-  --position INDEX  The position in the word to be completed.
+  --word WORD       The word to complete. The default value is \\"\\".
+  --position INDEX  The position in the word to be completed. The default 
+                    value is 0.
 "
 `;
 
