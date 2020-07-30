@@ -396,6 +396,45 @@ export class ExportAnalyzer {
     return astSymbol;
   }
 
+  /**
+   * Examples:
+   *
+   * Input: "@scope/my-package"
+   * Output: "myPackage"
+   *
+   * Input: "@scope/my-package/path/to/A-thing"
+   * Output: "AThing"
+   *
+   * Input: "@scope/my-package/path/to//"
+   * Output: "to"
+   */
+  public static generateIdentifierForModulePath(modulePath: string): string {
+    let baseName: string;
+    const parts: string[] = modulePath.split('/');
+    for (;;) {
+      if (parts.length === 0) {
+        baseName = '';
+        break;
+      }
+      baseName = parts[parts.length - 1];
+      if (baseName !== '') {
+        break;
+      }
+      parts.pop();
+    }
+
+    const generatedName: string = baseName
+      // capitalize words except for the first word
+      .replace(/(\W[a-z_])/g, (g) => g[g.length - 1].toUpperCase())
+      // remove non-alphanumeric characters
+      .replace(/\W/g, '')
+      // remove leading numeric characters
+      .replace(/^[^a-z_]+/i, '');
+
+    // If no usable characters remain, then return a nonempty string
+    return generatedName === '' ? '_' : generatedName;
+  }
+
   public fetchReferencedAstEntityFromImportTypeNode(
     node: ts.ImportTypeNode,
     referringModuleIsExternal: boolean
@@ -403,13 +442,31 @@ export class ExportAnalyzer {
     const externalModulePath: string | undefined = this._tryGetExternalModulePath(node);
 
     if (externalModulePath) {
+      // It's an import from an external path, something like this:
+      //
+      //    export interface IExample {
+      //      dottedImportType: import('api-extractor-lib1-test').Lib1Namespace.Inner.X;
+      //    }
+      //
+      // We will generate an AstImport that will get emitted like this:
+      //
+      //   import * as apiExtractorLib1Test from 'api-extractor-lib1-test';
+      //
       return this._fetchAstImport(undefined, {
         importKind: AstImportKind.ImportType,
-        exportName: node.qualifier ? node.qualifier.getText().trim() : undefined,
+        exportName: ExportAnalyzer.generateIdentifierForModulePath(externalModulePath),
         modulePath: externalModulePath,
         isTypeOnly: false
       });
     }
+
+    // Otherwise it's an import from a potentially local path, something like this:
+    //
+    //     export class Item {
+    //       options: import('./Options').Options;
+    //     }
+    //
+    // In this case, we follow the reference and eventually return an AstEntity corresponding to "Options"
 
     // Internal reference: AstSymbol
     const rightMostToken: ts.Identifier | ts.ImportTypeNode = node.qualifier

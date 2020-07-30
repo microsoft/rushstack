@@ -12,7 +12,6 @@ import { CollectorEntity } from './CollectorEntity';
 import { AstSymbolTable, AstEntity } from '../analyzer/AstSymbolTable';
 import { AstModule, AstModuleExportInfo } from '../analyzer/AstModule';
 import { AstSymbol } from '../analyzer/AstSymbol';
-import { AstImport } from '../analyzer/AstImport';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { WorkingPackage } from './WorkingPackage';
@@ -24,9 +23,6 @@ import { TypeScriptInternals, IGlobalVariableAnalyzer } from '../analyzer/TypeSc
 import { MessageRouter } from './MessageRouter';
 import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
 import { ExtractorConfig } from '../api/ExtractorConfig';
-
-const toAlphaNumericCamelCase = (str: string): string =>
-  str.replace(/(\W+[a-z])/g, (g) => g[g.length - 1].toUpperCase()).replace(/\W/g, '');
 
 /**
  * Options for Collector constructor.
@@ -492,9 +488,6 @@ export class Collector {
         entity.singleExportName !== ts.InternalSymbolName.Default
       ) {
         idealNameForEmit = entity.singleExportName;
-      } else if (entity.astEntity instanceof AstImport) {
-        // otherwise use the local name or modulePath
-        idealNameForEmit = entity.astEntity.localName || toAlphaNumericCamelCase(entity.astEntity.modulePath);
       } else {
         // otherwise use the local name
         idealNameForEmit = entity.astEntity.localName;

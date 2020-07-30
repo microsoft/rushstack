@@ -4,13 +4,12 @@
 
 ```ts
 
-import { Lib1GenericType } from 'api-extractor-lib1-test';
-import { Lib1Interface } from 'api-extractor-lib1-test';
+import { apiExtractorLib1Test } from 'api-extractor-lib1-test';
 
 // @public (undocumented)
 export interface IExample {
     // (undocumented)
-    generic: Lib1GenericType.Lib1GenericType;
+    generic: apiExtractorLib1Test.Lib1GenericType;
 }
 
 

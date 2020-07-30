@@ -4,20 +4,21 @@
 
 ```ts
 
+import { apiExtractorLib1Test } from 'api-extractor-lib1-test';
+import { apiExtractorLib2Test } from 'api-extractor-lib2-test';
+import { apiExtractorLib3Test } from 'api-extractor-lib3-test';
 import * as Lib1 from 'api-extractor-lib1-test';
-import { Lib1Class } from 'api-extractor-lib3-test';
-import { Lib1Interface } from 'api-extractor-lib1-test';
 import { Lib2Class } from 'api-extractor-lib2-test';
 import { Lib2Interface } from 'api-extractor-lib2-test';
 
 // @public (undocumented)
 export class Item {
     // (undocumented)
-    lib1: Lib1Interface.Lib1Interface;
+    lib1: apiExtractorLib1Test.Lib1Interface;
     // (undocumented)
-    lib2: Lib2Interface.Lib2Interface;
+    lib2: apiExtractorLib2Test.Lib2Interface;
     // (undocumented)
-    lib3: Lib1Class.Lib1Class;
+    lib3: apiExtractorLib3Test.Lib1Class;
     // Warning: (ae-forgotten-export) The symbol "Options" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)

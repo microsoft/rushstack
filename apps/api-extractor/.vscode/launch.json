@@ -80,7 +80,7 @@
         "run",
         "--local",
         "--config",
-        "./temp/configs/api-extractor-typeof.json"
+        "./temp/configs/api-extractor-dynamicImportType.json"
       ],
       "sourceMaps": true
     },
