@@ -442,6 +442,10 @@ export class Utilities {
     return Utilities._executeLifecycleCommandInternal(command, child_process.spawn, options);
   }
 
+  public static isNonDebugTabCompletionRequest(): boolean {
+    return process.argv.length > 2 && process.argv[2] === 'tab-complete';
+  }
+
   /**
    * For strings passed to a shell command, this adds appropriate escaping
    * to avoid misinterpretation of spaces or special characters.

@@ -77,7 +77,7 @@ export class RushCommandLineParser extends CommandLineParser {
     try {
       const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation({
         startingFolder: this._rushOptions.cwd,
-        showVerbose: process.argv.length > 2 && process.argv[2] !== 'tab-complete'
+        showVerbose: !Utilities.isNonDebugTabCompletionRequest()
       });
       if (rushJsonFilename) {
         this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);

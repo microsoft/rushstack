@@ -27,7 +27,7 @@ export class TabCompleteAction extends BaseRushAction {
     super({
       actionName: 'tab-complete',
       summary: 'Provides tab completion.',
-      documentation: 'Provides tab completion',
+      documentation: 'Provides tab completion.',
       parser,
       safeForSimultaneousRushProcesses: true
     });
@@ -119,69 +119,40 @@ export class TabCompleteAction extends BaseRushAction {
       for (const actionName of Object.keys(TabCompleteAction._actions)) {
         if (actionName === commands[1 + debugParameterOffset]) {
           if (actionName === 'build' || actionName === 'rebuild') {
-            const projectCommands: string[] = ['-f', '--from', '-t', '--to'];
-            if (completePartialWord) {
-              if (projectCommands.indexOf(secondLastCommand) !== -1) {
-                for (let i: number = 0; i < this.rushConfiguration.projects.length; i++) {
-                  if (this.rushConfiguration.projects[i].packageName.indexOf(lastCommand) === 0) {
-                    yield this.rushConfiguration.projects[i].packageName;
-                  }
-                }
-
-                return;
-              }
-            } else {
-              if (projectCommands.indexOf(lastCommand) !== -1) {
-                for (let i: number = 0; i < this.rushConfiguration.projects.length; i++) {
-                  yield this.rushConfiguration.projects[i].packageName;
-                }
-
-                return;
-              }
+            const choiceParameter: string[] = ['-f', '--from', '-t', '--to'];
+            const choiceParameterValues: string[] = [];
+            for (let i: number = 0; i < this.rushConfiguration.projects.length; i++) {
+              choiceParameterValues.push(this.rushConfiguration.projects[i].packageName);
             }
+            yield* this._getChoiceParameterValues(
+              choiceParameter,
+              choiceParameterValues,
+              lastCommand,
+              secondLastCommand,
+              completePartialWord
+            );
+
             // TODO: Add support for version policy, variant
           } else if (actionName === 'change') {
-            const bumpTypes: string[] = ['major', 'minor', 'patch', 'none'];
-            if (completePartialWord) {
-              if (secondLastCommand === '--bump-type') {
-                for (let i: number = 0; i < bumpTypes.length; i++) {
-                  if (bumpTypes[i].indexOf(lastCommand) === 0) {
-                    yield bumpTypes[i];
-                  }
-                }
-
-                return;
-              }
-            } else {
-              if (lastCommand === '--bump-type') {
-                for (let i: number = 0; i < bumpTypes.length; i++) {
-                  yield bumpTypes[i];
-                }
-
-                return;
-              }
-            }
+            const choiceParameter: string[] = ['--bump-type'];
+            const choiceParameterValues: string[] = ['major', 'minor', 'patch', 'none'];
+            yield* this._getChoiceParameterValues(
+              choiceParameter,
+              choiceParameterValues,
+              lastCommand,
+              secondLastCommand,
+              completePartialWord
+            );
           } else if (actionName === 'publish') {
-            const accessLevels: string[] = ['public', 'restricted'];
-            if (completePartialWord) {
-              if (secondLastCommand === '--set-access-level') {
-                for (let i: number = 0; i < accessLevels.length; i++) {
-                  if (accessLevels[i].indexOf(lastCommand) === 0) {
-                    yield accessLevels[i];
-                  }
-                }
-
-                return;
-              }
-            } else {
-              if (lastCommand === '--set-access-level') {
-                for (let i: number = 0; i < accessLevels.length; i++) {
-                  yield accessLevels[i];
-                }
-
-                return;
-              }
-            }
+            const choiceParameter: string[] = ['--set-access-level'];
+            const choiceParameterValues: string[] = ['public', 'restricted'];
+            yield* this._getChoiceParameterValues(
+              choiceParameter,
+              choiceParameterValues,
+              lastCommand,
+              secondLastCommand,
+              completePartialWord
+            );
           }
 
           if (completePartialWord) {
@@ -205,6 +176,30 @@ export class TabCompleteAction extends BaseRushAction {
               yield TabCompleteAction._actions[actionName][i].name;
             }
           }
+        }
+      }
+    }
+  }
+
+  private *_getChoiceParameterValues(
+    choiceParameter: string[],
+    choiceParamaterValues: string[],
+    lastCommand: string,
+    secondLastCommand: string,
+    completePartialWord: boolean
+  ): IterableIterator<string> {
+    if (completePartialWord) {
+      if (choiceParameter.indexOf(secondLastCommand) !== -1) {
+        for (let i: number = 0; i < choiceParamaterValues.length; i++) {
+          if (choiceParamaterValues[i].indexOf(lastCommand) === 0) {
+            yield choiceParamaterValues[i];
+          }
+        }
+      }
+    } else {
+      if (choiceParameter.indexOf(lastCommand) !== -1) {
+        for (let i: number = 0; i < choiceParamaterValues.length; i++) {
+          yield choiceParamaterValues[i];
         }
       }
     }

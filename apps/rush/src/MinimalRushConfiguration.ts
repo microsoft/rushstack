@@ -6,6 +6,7 @@ import * as path from 'path';
 import { JsonFile } from '@rushstack/node-core-library';
 import { RushConfiguration } from '@microsoft/rush-lib';
 import { RushConstants } from '@microsoft/rush-lib/lib/logic/RushConstants';
+import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
 
 interface IMinimalRushConfigurationJson {
   rushMinimumVersion: string;
@@ -33,7 +34,7 @@ export class MinimalRushConfiguration {
 
   public static loadFromDefaultLocation(): MinimalRushConfiguration | undefined {
     const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation({
-      showVerbose: process.argv.length > 2 && process.argv[2] !== 'tab-complete'
+      showVerbose: !Utilities.isNonDebugTabCompletionRequest()
     });
     if (rushJsonLocation) {
       return MinimalRushConfiguration._loadFromConfigurationFile(rushJsonLocation);

@@ -10,6 +10,7 @@ import { RushConstants } from '../logic/RushConstants';
 import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
+import { Utilities } from '../utilities/Utilities';
 
 /**
  * Options to pass to the rush "launch" functions.
@@ -53,7 +54,7 @@ export class Rush {
   public static launch(launcherVersion: string, arg: ILaunchOptions): void {
     const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
 
-    if (!(process.argv.length > 2 && process.argv[2] === 'tab-complete')) {
+    if (!Utilities.isNonDebugTabCompletionRequest()) {
       Rush._printStartupBanner(options.isManaged);
     }
 

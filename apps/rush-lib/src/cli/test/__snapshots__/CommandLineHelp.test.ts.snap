@@ -661,7 +661,7 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: tab-complete 1`] = `
 "usage: rush tab-complete [-h] [--word WORD] [--position INDEX]
 
-Provides tab completion
+Provides tab completion.
 
 Optional arguments:
   -h, --help        Show this help message and exit.
