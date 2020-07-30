@@ -5,11 +5,14 @@
 ```ts
 
 import * as X from 'api-extractor-lib1-test';
+import * as Y from 'api-extractor-lib1-test';
 
 // @public (undocumented)
 export interface IExample {
     // (undocumented)
     dottedImportType: X.Lib1Namespace.Inner.X;
+    // (undocumented)
+    dottedImportType2: Y.Lib1Namespace.Y;
 }
 
 
