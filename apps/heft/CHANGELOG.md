@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 24 Jul 2020 20:40:38 GMT and should not be manually modified.
+This log was last generated on Thu, 30 Jul 2020 15:09:35 GMT and should not be manually modified.
+
+## 0.3.1
+Thu, 30 Jul 2020 15:09:35 GMT
+
+### Patches
+
+- Emit errors and warnings from webpack.
 
 ## 0.3.0
 Fri, 24 Jul 2020 20:40:38 GMT

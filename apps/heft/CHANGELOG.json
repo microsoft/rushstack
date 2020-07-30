@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.3.1",
+      "tag": "@rushstack/heft_v0.3.1",
+      "date": "Thu, 30 Jul 2020 15:09:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Emit errors and warnings from webpack."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.0",
       "tag": "@rushstack/heft_v0.3.0",
       "date": "Fri, 24 Jul 2020 20:40:38 GMT",
