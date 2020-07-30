@@ -57,6 +57,36 @@
                 "startIndex": 1,
                 "endIndex": 3
               }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-extractor-scenarios!IExample#dottedImportType2:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "dottedImportType2: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "import('api-extractor-lib1-test')."
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Lib1Namespace.Y",
+                  "canonicalReference": "api-extractor-lib1-test!Lib1Namespace.Y:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "dottedImportType2",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 3
+              }
             }
           ],
           "extendsTokenRanges": []
