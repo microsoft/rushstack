@@ -86,49 +86,50 @@ export class TabCompleteAction extends BaseRushAction {
       return;
     }
 
-    const commands: string[] = commandLine.split(' ');
+    const tokens: string[] = this._tokenizeCommandLine(commandLine);
 
     // yield ('commandLine: ' + commandLine);
     // yield ('commandLine.length: ' + commandLine.length);
     // yield ('caretPosition: ' + caretPosition);
-    // yield ('commands.length: ' + commands.length);
+    // yield ('tokens.length: ' + tokens.length);
 
-    const debugParameterUsed: boolean =
-      commands.length > 1 && (commands[1] === '-d' || commands[1] === '--debug');
+    const debugParameterUsed: boolean = tokens.length > 1 && (tokens[1] === '-d' || tokens[1] === '--debug');
     const debugParameterOffset: number = debugParameterUsed ? 1 : 0; // if debug switch is used, then offset everything by 1.
 
-    if (commands.length < 2 + debugParameterOffset) {
+    if (tokens.length < 2 + debugParameterOffset) {
       yield* Object.keys(actions); // return all actions
       return;
     }
 
-    const lastCommand: string = commands[commands.length - 1];
-    const secondLastCommand: string = commands[commands.length - 2];
-    // yield ('lastCommand: ' + lastCommand);
-    // yield ('secondLastCommand: ' + secondLastCommand);
+    const lastToken: string = tokens[tokens.length - 1];
+    const secondLastToken: string = tokens[tokens.length - 2];
+    // yield ('lastToken: ' + lastToken);
+    // yield ('secondLastToken: ' + secondLastToken);
 
     const completePartialWord: boolean = caretPosition === commandLine.length;
 
-    if (completePartialWord && commands.length === 2 + debugParameterOffset) {
+    if (completePartialWord && tokens.length === 2 + debugParameterOffset) {
       for (const actionName of Object.keys(actions)) {
-        if (actionName.indexOf(commands[1 + debugParameterOffset]) === 0) {
+        if (actionName.indexOf(tokens[1 + debugParameterOffset]) === 0) {
           yield actionName;
         }
       }
     } else {
       for (const actionName of Object.keys(actions)) {
-        if (actionName === commands[1 + debugParameterOffset]) {
+        if (actionName === tokens[1 + debugParameterOffset]) {
           if (actionName === 'build' || actionName === 'rebuild') {
             const choiceParameter: string[] = ['-f', '--from', '-t', '--to'];
             const choiceParameterValues: string[] = [];
-            for (let i: number = 0; i < this.rushConfiguration.projects.length; i++) {
-              choiceParameterValues.push(this.rushConfiguration.projects[i].packageName);
+
+            for (const project of this.rushConfiguration.projects) {
+              choiceParameterValues.push(project.packageName);
             }
+
             yield* this._getChoiceParameterValues(
               choiceParameter,
               choiceParameterValues,
-              lastCommand,
-              secondLastCommand,
+              lastToken,
+              secondLastToken,
               completePartialWord
             );
 
@@ -139,8 +140,8 @@ export class TabCompleteAction extends BaseRushAction {
             yield* this._getChoiceParameterValues(
               choiceParameter,
               choiceParameterValues,
-              lastCommand,
-              secondLastCommand,
+              lastToken,
+              secondLastToken,
               completePartialWord
             );
           } else if (actionName === 'publish') {
@@ -149,8 +150,8 @@ export class TabCompleteAction extends BaseRushAction {
             yield* this._getChoiceParameterValues(
               choiceParameter,
               choiceParameterValues,
-              lastCommand,
-              secondLastCommand,
+              lastToken,
+              secondLastToken,
               completePartialWord
             );
           }
@@ -158,13 +159,10 @@ export class TabCompleteAction extends BaseRushAction {
           const parameterNames: string[] = Array.from(actions[actionName], (x: IParameter) => x.name);
 
           if (completePartialWord) {
-            yield* this._completeChoiceParameterValues(parameterNames, lastCommand);
+            yield* this._completeChoiceParameterValues(parameterNames, lastToken);
           } else {
-            for (let i: number = 0; i < actions[actionName].length; i++) {
-              if (
-                lastCommand === actions[actionName][i].name &&
-                actions[actionName][i].kind !== CommandLineParameterKind.Flag
-              ) {
+            for (const parameter of actions[actionName]) {
+              if (parameter.name === lastToken && parameter.kind !== CommandLineParameterKind.Flag) {
                 // The parameter is expecting a value, so don't suggest parameter names again
                 return;
               }
@@ -177,31 +175,35 @@ export class TabCompleteAction extends BaseRushAction {
     }
   }
 
+  private _tokenizeCommandLine(commandLine: string): string[] {
+    return commandLine.split(' ');
+  }
+
   private *_getChoiceParameterValues(
     choiceParameter: string[],
-    choiceParamaterValues: string[],
-    lastCommand: string,
-    secondLastCommand: string,
+    choiceParameterValues: string[],
+    lastToken: string,
+    secondLastToken: string,
     completePartialWord: boolean
   ): IterableIterator<string> {
     if (completePartialWord) {
-      if (choiceParameter.indexOf(secondLastCommand) !== -1) {
-        yield* this._completeChoiceParameterValues(choiceParamaterValues, lastCommand);
+      if (choiceParameter.indexOf(secondLastToken) !== -1) {
+        yield* this._completeChoiceParameterValues(choiceParameterValues, lastToken);
       }
     } else {
-      if (choiceParameter.indexOf(lastCommand) !== -1) {
-        yield* choiceParamaterValues;
+      if (choiceParameter.indexOf(lastToken) !== -1) {
+        yield* choiceParameterValues;
       }
     }
   }
 
   private *_completeChoiceParameterValues(
-    choiceParamaterValues: string[],
-    lastCommand: string
+    choiceParameterValues: string[],
+    lastToken: string
   ): IterableIterator<string> {
-    for (let i: number = 0; i < choiceParamaterValues.length; i++) {
-      if (choiceParamaterValues[i].indexOf(lastCommand) === 0) {
-        yield choiceParamaterValues[i];
+    for (const choiceParameterValue of choiceParameterValues) {
+      if (choiceParameterValue.indexOf(lastToken) === 0) {
+        yield choiceParameterValue;
       }
     }
   }
