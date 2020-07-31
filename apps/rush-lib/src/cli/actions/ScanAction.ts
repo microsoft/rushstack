@@ -33,7 +33,7 @@ export class ScanAction extends BaseConfiglessRushAction {
     // abstract
   }
 
-  protected run(): Promise<void> {
+  protected runAsync(): Promise<void> {
     const packageJsonFilename: string = path.resolve('./package.json');
 
     if (!FileSystem.exists(packageJsonFilename)) {

@@ -142,7 +142,7 @@ export class ChangeAction extends BaseRushAction {
     });
   }
 
-  public async run(): Promise<void> {
+  public async runAsync(): Promise<void> {
     console.log(`The target branch is ${this._targetBranch}`);
     this._projectHostMap = this._generateHostMap();
 

@@ -67,7 +67,7 @@ export class ListAction extends BaseRushAction {
     });
   }
 
-  protected async run(): Promise<void> {
+  protected async runAsync(): Promise<void> {
     const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
     if (this._jsonFlag.value) {
       this._printJson(allPackages);

@@ -87,7 +87,7 @@ export class AddAction extends BaseRushAction {
     });
   }
 
-  public async run(): Promise<void> {
+  public async runAsync(): Promise<void> {
     let projects: RushConfigurationProject[];
     if (this._allFlag.value) {
       projects = this.rushConfiguration.projects;

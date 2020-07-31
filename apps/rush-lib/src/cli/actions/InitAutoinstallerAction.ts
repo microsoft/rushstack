@@ -35,7 +35,7 @@ export class InitAutoinstallerAction extends BaseRushAction {
     });
   }
 
-  protected async run(): Promise<void> {
+  protected async runAsync(): Promise<void> {
     const autoinstallerName: string = this._name.value!;
 
     const autoinstaller: Autoinstaller = new Autoinstaller(autoinstallerName, this.rushConfiguration);

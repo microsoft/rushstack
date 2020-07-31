@@ -149,7 +149,7 @@ export class GlobalScriptAction extends BaseScriptAction {
     lock.release();
   }
 
-  public async run(): Promise<void> {
+  public async runAsync(): Promise<void> {
     const additionalPathFolders: string[] = [];
 
     if (this._autoinstallerName) {

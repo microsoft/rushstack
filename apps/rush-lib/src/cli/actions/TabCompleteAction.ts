@@ -49,7 +49,7 @@ export class TabCompleteAction extends BaseRushAction {
     });
   }
 
-  protected async run(): Promise<void> {
+  protected async runAsync(): Promise<void> {
     const commandLine: string = this._wordToCompleteParameter.value || '';
     const caretPosition: number = this._positionParameter.value || 0;
 

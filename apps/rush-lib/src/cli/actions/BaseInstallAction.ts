@@ -77,7 +77,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
   protected abstract buildInstallOptions(): IInstallManagerOptions;
 
-  protected run(): Promise<void> {
+  protected runAsync(): Promise<void> {
     VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, {
       variant: this._variant.value
     });

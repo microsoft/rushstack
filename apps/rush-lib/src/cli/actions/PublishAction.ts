@@ -207,7 +207,7 @@ export class PublishAction extends BaseRushAction {
   /**
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
-  protected run(): Promise<void> {
+  protected runAsync(): Promise<void> {
     return Promise.resolve().then(() => {
       PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: false });
 

@@ -80,7 +80,7 @@ export class InitAction extends BaseConfiglessRushAction {
     });
   }
 
-  protected run(): Promise<void> {
+  protected runAsync(): Promise<void> {
     const initFolder: string = process.cwd();
 
     if (!this._overwriteParameter.value) {

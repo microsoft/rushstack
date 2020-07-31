@@ -52,7 +52,7 @@ export class InitDeployAction extends BaseRushAction {
     });
   }
 
-  protected async run(): Promise<void> {
+  protected async runAsync(): Promise<void> {
     const scenarioFilePath: string = DeployScenarioConfiguration.getConfigFilePath(
       this._scenario.value,
       this.rushConfiguration
