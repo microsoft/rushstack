@@ -17,11 +17,14 @@ interface IParameter {
 
 const DEFAULT_WORD_TO_AUTOCOMPLETE: string = '';
 const DEFAULT_POSITION: number = 0;
+
+interface IActionMap {
+  [actionName: string]: IParameter[];
+}
+
 export class TabCompleteAction extends BaseRushAction {
   private _wordToCompleteParameter: CommandLineStringParameter;
   private _positionParameter: CommandLineIntegerParameter;
-
-  private static _actions: { [actionName: string]: IParameter[] } = {};
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -59,6 +62,7 @@ export class TabCompleteAction extends BaseRushAction {
   }
 
   public *_getCompletions(commandLine: string, caretPosition: number): IterableIterator<string> {
+    const actions: IActionMap = {};
     this.parser.actions.forEach((element) => {
       const actionParameters: IParameter[] = [];
       element.parameters.forEach((elem) => {
@@ -67,13 +71,13 @@ export class TabCompleteAction extends BaseRushAction {
           actionParameters.push({ name: elem.shortName, kind: elem.kind });
         }
       });
-      TabCompleteAction._actions[element.actionName] = actionParameters;
+      actions[element.actionName] = actionParameters;
     });
 
-    TabCompleteAction._actions['-d'] = [];
-    TabCompleteAction._actions['--debug'] = [];
-    TabCompleteAction._actions['-h'] = [];
-    TabCompleteAction._actions['--help'] = [];
+    actions['-d'] = [];
+    actions['--debug'] = [];
+    actions['-h'] = [];
+    actions['--help'] = [];
 
     // yield ('arg count: ' + process.argv.length);
 
@@ -82,7 +86,7 @@ export class TabCompleteAction extends BaseRushAction {
     // }
 
     if (!commandLine || !caretPosition) {
-      yield* this._getAllActions();
+      yield* Object.keys(actions); // return all actions
       return;
     }
 
@@ -98,7 +102,7 @@ export class TabCompleteAction extends BaseRushAction {
     const debugParameterOffset: number = debugParameterUsed ? 1 : 0; // if debug switch is used, then offset everything by 1.
 
     if (commands.length < 2 + debugParameterOffset) {
-      yield* this._getAllActions();
+      yield* Object.keys(actions); // return all actions
       return;
     }
 
@@ -110,13 +114,13 @@ export class TabCompleteAction extends BaseRushAction {
     const completePartialWord: boolean = caretPosition === commandLine.length;
 
     if (completePartialWord && commands.length === 2 + debugParameterOffset) {
-      for (const actionName of Object.keys(TabCompleteAction._actions)) {
+      for (const actionName of Object.keys(actions)) {
         if (actionName.indexOf(commands[1 + debugParameterOffset]) === 0) {
           yield actionName;
         }
       }
     } else {
-      for (const actionName of Object.keys(TabCompleteAction._actions)) {
+      for (const actionName of Object.keys(actions)) {
         if (actionName === commands[1 + debugParameterOffset]) {
           if (actionName === 'build' || actionName === 'rebuild') {
             const choiceParameter: string[] = ['-f', '--from', '-t', '--to'];
@@ -156,24 +160,24 @@ export class TabCompleteAction extends BaseRushAction {
           }
 
           if (completePartialWord) {
-            for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
-              if (TabCompleteAction._actions[actionName][i].name.indexOf(lastCommand) === 0) {
-                yield TabCompleteAction._actions[actionName][i].name;
+            for (let i: number = 0; i < actions[actionName].length; i++) {
+              if (actions[actionName][i].name.indexOf(lastCommand) === 0) {
+                yield actions[actionName][i].name;
               }
             }
           } else {
-            for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
+            for (let i: number = 0; i < actions[actionName].length; i++) {
               if (
-                lastCommand === TabCompleteAction._actions[actionName][i].name &&
-                TabCompleteAction._actions[actionName][i].kind !== CommandLineParameterKind.Flag
+                lastCommand === actions[actionName][i].name &&
+                actions[actionName][i].kind !== CommandLineParameterKind.Flag
               ) {
                 // The parameter is expecting a value, so don't suggest parameter names again
                 return;
               }
             }
 
-            for (let i: number = 0; i < TabCompleteAction._actions[actionName].length; i++) {
-              yield TabCompleteAction._actions[actionName][i].name;
+            for (let i: number = 0; i < actions[actionName].length; i++) {
+              yield actions[actionName][i].name;
             }
           }
         }
@@ -198,16 +202,8 @@ export class TabCompleteAction extends BaseRushAction {
       }
     } else {
       if (choiceParameter.indexOf(lastCommand) !== -1) {
-        for (let i: number = 0; i < choiceParamaterValues.length; i++) {
-          yield choiceParamaterValues[i];
-        }
+        yield* choiceParamaterValues;
       }
-    }
-  }
-
-  private *_getAllActions(): IterableIterator<string> {
-    for (const actionName of Object.keys(TabCompleteAction._actions)) {
-      yield actionName;
     }
   }
 }
