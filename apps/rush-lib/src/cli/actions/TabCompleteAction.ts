@@ -18,10 +18,6 @@ interface IParameter {
 const DEFAULT_WORD_TO_AUTOCOMPLETE: string = '';
 const DEFAULT_POSITION: number = 0;
 
-interface IActionMap {
-  [actionName: string]: IParameter[];
-}
-
 export class TabCompleteAction extends BaseRushAction {
   private _wordToCompleteParameter: CommandLineStringParameter;
   private _positionParameter: CommandLineIntegerParameter;
@@ -62,7 +58,7 @@ export class TabCompleteAction extends BaseRushAction {
   }
 
   public *_getCompletions(commandLine: string, caretPosition: number): IterableIterator<string> {
-    const actions: IActionMap = {};
+    const actions: Map<string, IParameter[]> = new Map<string, IParameter[]>();
     this.parser.actions.forEach((element) => {
       const actionParameters: IParameter[] = [];
       element.parameters.forEach((elem) => {
@@ -159,12 +155,10 @@ export class TabCompleteAction extends BaseRushAction {
             );
           }
 
+          const parameterNames: string[] = Array.from(actions[actionName], (x: IParameter) => x.name);
+
           if (completePartialWord) {
-            for (let i: number = 0; i < actions[actionName].length; i++) {
-              if (actions[actionName][i].name.indexOf(lastCommand) === 0) {
-                yield actions[actionName][i].name;
-              }
-            }
+            yield* this._completeChoiceParameterValues(parameterNames, lastCommand);
           } else {
             for (let i: number = 0; i < actions[actionName].length; i++) {
               if (
@@ -176,9 +170,7 @@ export class TabCompleteAction extends BaseRushAction {
               }
             }
 
-            for (let i: number = 0; i < actions[actionName].length; i++) {
-              yield actions[actionName][i].name;
-            }
+            yield* parameterNames;
           }
         }
       }
@@ -194,15 +186,22 @@ export class TabCompleteAction extends BaseRushAction {
   ): IterableIterator<string> {
     if (completePartialWord) {
       if (choiceParameter.indexOf(secondLastCommand) !== -1) {
-        for (let i: number = 0; i < choiceParamaterValues.length; i++) {
-          if (choiceParamaterValues[i].indexOf(lastCommand) === 0) {
-            yield choiceParamaterValues[i];
-          }
-        }
+        yield* this._completeChoiceParameterValues(choiceParamaterValues, lastCommand);
       }
     } else {
       if (choiceParameter.indexOf(lastCommand) !== -1) {
         yield* choiceParamaterValues;
+      }
+    }
+  }
+
+  private *_completeChoiceParameterValues(
+    choiceParamaterValues: string[],
+    lastCommand: string
+  ): IterableIterator<string> {
+    for (let i: number = 0; i < choiceParamaterValues.length; i++) {
+      if (choiceParamaterValues[i].indexOf(lastCommand) === 0) {
+        yield choiceParamaterValues[i];
       }
     }
   }
