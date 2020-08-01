@@ -1,11 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// eslint-disable-next-line
+const importLazy = require('import-lazy')(require);
+
+console.log('VersionPolicyConfiguration.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
-import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
+console.log('VersionPolicyConfiguration.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
+// import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
+// eslint-disable-next-line
+const nodeCoreLibrary = importLazy('@rushstack/node-core-library');
+console.log('VersionPolicyConfiguration.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { VersionPolicy, BumpType, LockStepVersionPolicy } from './VersionPolicy';
+console.log('VersionPolicyConfiguration.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConfigurationProject } from './RushConfigurationProject';
+console.log('VersionPolicyConfiguration.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * @beta
@@ -64,9 +74,11 @@ export interface IVersionPolicyDependencyJson {
  * @beta
  */
 export class VersionPolicyConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/version-policies.schema.json')
-  );
+  private static get _jsonSchema() /* NodeCoreLibrary.JsonSchema */ {
+    return nodeCoreLibrary.JsonSchema.fromFile(
+      path.join(__dirname, '../schemas/version-policies.schema.json')
+    );
+  }
 
   private _versionPolicies: Map<string, VersionPolicy>;
   private _jsonFileName: string;
@@ -164,10 +176,10 @@ export class VersionPolicyConfiguration {
   }
 
   private _loadFile(): void {
-    if (!FileSystem.exists(this._jsonFileName)) {
+    if (!nodeCoreLibrary.FileSystem.exists(this._jsonFileName)) {
       return;
     }
-    const versionPolicyJson: IVersionPolicyJson[] = JsonFile.loadAndValidate(
+    const versionPolicyJson: IVersionPolicyJson[] = nodeCoreLibrary.JsonFile.loadAndValidate(
       this._jsonFileName,
       VersionPolicyConfiguration._jsonSchema
     );
@@ -186,7 +198,7 @@ export class VersionPolicyConfiguration {
       versionPolicyJson.push(versionPolicy._json);
     });
     if (shouldCommit) {
-      JsonFile.save(versionPolicyJson, this._jsonFileName, { updateExistingFile: true });
+      nodeCoreLibrary.JsonFile.save(versionPolicyJson, this._jsonFileName, { updateExistingFile: true });
     }
   }
 }

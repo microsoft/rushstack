@@ -23,6 +23,7 @@ export class TabCompleteAction extends BaseRushAction {
   private _positionParameter: CommandLineIntegerParameter;
 
   public constructor(parser: RushCommandLineParser) {
+    console.log('TabCompleteAction.constructor  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
     super({
       actionName: 'tab-complete',
       summary: 'Provides tab completion.',
@@ -30,6 +31,7 @@ export class TabCompleteAction extends BaseRushAction {
       parser,
       safeForSimultaneousRushProcesses: true
     });
+    console.log('TabCompleteAction.constructor  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
   }
 
   protected onDefineParameters(): void {
@@ -49,12 +51,14 @@ export class TabCompleteAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
+    console.log('TabCompleteAction.runAsync  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
     const commandLine: string = this._wordToCompleteParameter.value || '';
     const caretPosition: number = this._positionParameter.value || 0;
 
     for (const value of this._getCompletions(commandLine, caretPosition)) {
       console.log(value);
     }
+    console.log('TabCompleteAction.runAsync  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
   }
 
   public *_getCompletions(commandLine: string, caretPosition: number): IterableIterator<string> {

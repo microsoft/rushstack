@@ -1,22 +1,38 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+console.log('PackageJsonUpdater.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as colors from 'colors';
+console.log('PackageJsonUpdater.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as semver from 'semver';
+console.log('PackageJsonUpdater.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { RushConfiguration } from '../api/RushConfiguration';
+console.log('PackageJsonUpdater.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import { BaseInstallManager, IInstallManagerOptions } from './base/BaseInstallManager';
+console.log('PackageJsonUpdater.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import { InstallManagerFactory } from './InstallManagerFactory';
+console.log('PackageJsonUpdater.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 import { VersionMismatchFinder } from './versionMismatch/VersionMismatchFinder';
+console.log('PackageJsonUpdater.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PurgeManager } from './PurgeManager';
+console.log('PackageJsonUpdater.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 import { Utilities } from '../utilities/Utilities';
+console.log('PackageJsonUpdater.ts  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
 import { DependencyType, PackageJsonDependency } from '../api/PackageJsonEditor';
+console.log('PackageJsonUpdater.ts  : 10: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
+console.log('PackageJsonUpdater.ts  : 11: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
+console.log('PackageJsonUpdater.ts  : 12: ' + (new Date().getTime() % 20000) / 1000.0);
 import { VersionMismatchFinderEntity } from './versionMismatch/VersionMismatchFinderEntity';
+console.log('PackageJsonUpdater.ts  : 13: ' + (new Date().getTime() % 20000) / 1000.0);
 import { VersionMismatchFinderProject } from './versionMismatch/VersionMismatchFinderProject';
+console.log('PackageJsonUpdater.ts  : 14: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConstants } from './RushConstants';
+console.log('PackageJsonUpdater.ts  : 15: ' + (new Date().getTime() % 20000) / 1000.0);
 import { InstallHelpers } from './installManager/InstallHelpers';
+console.log('PackageJsonUpdater.ts  : 16: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * The type of SemVer range specifier that is prepended to the version
@@ -445,7 +461,7 @@ export class PackageJsonUpdater {
 
       console.log();
 
-      console.log(`Found latest version: ${colors.cyan(selectedVersion)}`);
+      console.log(`Found latest version: ${colors.cyan(selectedVersion!)}`);
     }
 
     console.log();

@@ -1,13 +1,25 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// eslint-disable-next-line
+const importLazy = require('import-lazy')(require);
+
+console.log('RushInstallManager.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as glob from 'glob';
+console.log('RushInstallManager.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as colors from 'colors';
+console.log('RushInstallManager.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as os from 'os';
+console.log('RushInstallManager.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
+console.log('RushInstallManager.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as semver from 'semver';
-import * as tar from 'tar';
+console.log('RushInstallManager.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
+// eslint-disable-next-line
+const tar = importLazy('tar');
+console.log('RushInstallManager.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as globEscape from 'glob-escape';
+console.log('RushInstallManager.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 import {
   JsonFile,
   Text,
@@ -17,35 +29,49 @@ import {
   PosixModeBits,
   InternalError
 } from '@rushstack/node-core-library';
+console.log('RushInstallManager.ts  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { BaseInstallManager } from '../base/BaseInstallManager';
+console.log('RushInstallManager.ts  : 10: ' + (new Date().getTime() % 20000) / 1000.0);
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
+console.log('RushInstallManager.ts  : 11: ' + (new Date().getTime() % 20000) / 1000.0);
 import { IRushTempPackageJson } from '../../logic/base/BasePackage';
+console.log('RushInstallManager.ts  : 12: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+console.log('RushInstallManager.ts  : 13: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConstants } from '../../logic/RushConstants';
+console.log('RushInstallManager.ts  : 14: ' + (new Date().getTime() % 20000) / 1000.0);
 import { Stopwatch } from '../../utilities/Stopwatch';
+console.log('RushInstallManager.ts  : 15: ' + (new Date().getTime() % 20000) / 1000.0);
 import { Utilities } from '../../utilities/Utilities';
+console.log('RushInstallManager.ts  : 16: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../../api/PackageJsonEditor';
+console.log('RushInstallManager.ts  : 17: ' + (new Date().getTime() % 20000) / 1000.0);
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
+console.log('RushInstallManager.ts  : 18: ' + (new Date().getTime() % 20000) / 1000.0);
 import { InstallHelpers } from './InstallHelpers';
+console.log('RushInstallManager.ts  : 19: ' + (new Date().getTime() % 20000) / 1000.0);
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
+console.log('RushInstallManager.ts  : 20: ' + (new Date().getTime() % 20000) / 1000.0);
 import { LinkManagerFactory } from '../LinkManagerFactory';
+console.log('RushInstallManager.ts  : 21: ' + (new Date().getTime() % 20000) / 1000.0);
 import { BaseLinkManager } from '../base/BaseLinkManager';
+console.log('RushInstallManager.ts  : 22: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.
  * As a temporary workaround, augment the type.
  */
-declare module 'tar' {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  export interface CreateOptions {
-    /**
-     * "Set to true to omit writing mtime values for entries. Note that this prevents using other
-     * mtime-based features like tar.update or the keepNewer option with the resulting tar archive."
-     */
-    noMtime?: boolean;
-  }
-}
+// declare module 'tar' {
+//   // eslint-disable-next-line @typescript-eslint/naming-convention
+//   export interface CreateOptions {
+//     /**
+//      * "Set to true to omit writing mtime values for entries. Note that this prevents using other
+//      * mtime-based features like tar.update or the keepNewer option with the resulting tar archive."
+//      */
+//     noMtime?: boolean;
+//   }
+// }
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -350,7 +376,8 @@ export class RushInstallManager extends BaseInstallManager {
     // NPM expects the root of the tarball to have a directory called 'package'
     const npmPackageFolder: string = 'package';
 
-    const tarOptions: tar.CreateOptions = {
+    // eslint-disable-next-line
+    const tarOptions = {
       gzip: true,
       file: tarballFile,
       cwd: tempProjectFolder,
@@ -359,7 +386,8 @@ export class RushInstallManager extends BaseInstallManager {
       noPax: true,
       sync: true,
       prefix: npmPackageFolder,
-      filter: (path: string, stat: tar.FileStat): boolean => {
+      // eslint-disable-next-line
+      filter: (path: string, stat): boolean => {
         if (
           !this.rushConfiguration.experimentsConfiguration.configuration.noChmodFieldInTarHeaderNormalization
         ) {
@@ -369,7 +397,7 @@ export class RushInstallManager extends BaseInstallManager {
         }
         return true;
       }
-    } as tar.CreateOptions;
+    };
     // create the new tarball
     tar.create(tarOptions, [FileConstants.PackageJson]);
   }

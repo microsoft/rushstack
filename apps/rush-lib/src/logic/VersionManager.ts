@@ -188,7 +188,7 @@ export class VersionManager {
         clonedProject = cloneDeep(rushProject.packageJson);
         projectVersionChanged = false;
       }
-      this._updateProjectAllDependencies(rushProject, clonedProject, projectVersionChanged);
+      this._updateProjectAllDependencies(rushProject, clonedProject!, projectVersionChanged);
     });
   }
 

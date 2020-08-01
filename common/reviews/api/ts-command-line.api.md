@@ -145,7 +145,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     readonly toolDescription: string;
     readonly toolFilename: string;
     tryGetAction(actionName: string): CommandLineAction | undefined;
-}
+    }
 
 // @public
 export class CommandLineRemainder {
@@ -264,5 +264,7 @@ export interface ICommandLineStringDefinition extends IBaseCommandLineDefinition
 export interface ICommandLineStringListDefinition extends IBaseCommandLineDefinitionWithArgument {
 }
 
+
+// (No @packageDocumentation comment for this package)
 
 ```

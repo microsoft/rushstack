@@ -1,11 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+console.log('ApprovedPackagesPolicy.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
+console.log('ApprovedPackagesPolicy.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { ApprovedPackagesConfiguration } from './ApprovedPackagesConfiguration';
+console.log('ApprovedPackagesPolicy.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConstants } from '../logic/RushConstants';
+console.log('ApprovedPackagesPolicy.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConfiguration, IRushConfigurationJson, IApprovedPackagesPolicyJson } from './RushConfiguration';
+console.log('ApprovedPackagesPolicy.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * This is a helper object for RushConfiguration.

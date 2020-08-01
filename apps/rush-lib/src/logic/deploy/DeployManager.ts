@@ -1,36 +1,60 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// eslint-disable-next-line
+const importLazy = require('import-lazy')(require);
+
+console.log('DeployManager.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as colors from 'colors';
+console.log('DeployManager.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
+console.log('DeployManager.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as resolve from 'resolve';
+console.log('DeployManager.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as npmPacklist from 'npm-packlist';
-import pnpmLinkBins from '@pnpm/link-bins';
+console.log('DeployManager.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
+// eslint-disable-next-line
+const pnpmLinkBins = importLazy('@pnpm/link-bins');
+console.log('DeployManager.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 
 // (Used only by the legacy code fragment in the resolve.sync() hook below)
 import * as fsForResolve from 'fs';
+console.log('DeployManager.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import ignore, { Ignore } from 'ignore';
-import {
-  Path,
-  FileSystem,
-  PackageJsonLookup,
-  FileSystemStats,
-  Sort,
-  JsonFile,
-  IPackageJson,
-  AlreadyExistsBehavior,
-  InternalError,
-  NewlineKind,
-  Text
-} from '@rushstack/node-core-library';
+console.log('DeployManager.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
+// import {
+//   Path,
+//   FileSystem,
+//   PackageJsonLookup,
+//   FileSystemStats,
+//   Sort,
+//   JsonFile,
+//   IPackageJson,
+//   AlreadyExistsBehavior,
+//   InternalError,
+//   NewlineKind,
+//   Text
+// } from '@rushstack/node-core-library';
+
+// eslint-disable-next-line
+const nodeCoreLibrary = importLazy('@rushstack/node-core-library');
+console.log('DeployManager.ts  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
+
 import { DeployArchiver } from './DeployArchiver';
+console.log('DeployManager.ts  : 10: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConfiguration } from '../../api/RushConfiguration';
+console.log('DeployManager.ts  : 11: ' + (new Date().getTime() % 20000) / 1000.0);
 import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
+console.log('DeployManager.ts  : 12: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+console.log('DeployManager.ts  : 13: ' + (new Date().getTime() % 20000) / 1000.0);
 import { DeployScenarioConfiguration, IDeployScenarioProjectJson } from './DeployScenarioConfiguration';
+console.log('DeployManager.ts  : 14: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PnpmfileConfiguration } from './PnpmfileConfiguration';
+console.log('DeployManager.ts  : 15: ' + (new Date().getTime() % 20000) / 1000.0);
 import { matchesWithStar } from './Utils';
+console.log('DeployManager.ts  : 16: ' + (new Date().getTime() % 20000) / 1000.0);
 
 // (@types/npm-packlist is missing this API)
 declare module 'npm-packlist' {
@@ -129,18 +153,19 @@ export interface IDeployState {
  */
 export class DeployManager {
   private readonly _rushConfiguration: RushConfiguration;
-  private readonly _packageJsonLookup: PackageJsonLookup;
+  private readonly _packageJsonLookup;
 
   public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
-    this._packageJsonLookup = new PackageJsonLookup();
+    // eslint-disable-next-line
+    this._packageJsonLookup = new nodeCoreLibrary.PackageJsonLookup();
   }
 
   /**
    * Recursively crawl the node_modules dependencies and collect the result in IDeployState.foldersToCopy.
    */
   private _collectFoldersRecursive(packageJsonFolderPath: string, deployState: IDeployState): void {
-    const packageJsonRealFolderPath: string = FileSystem.getRealPath(packageJsonFolderPath);
+    const packageJsonRealFolderPath: string = nodeCoreLibrary.FileSystem.getRealPath(packageJsonFolderPath);
 
     if (deployState.foldersToCopy.has(packageJsonRealFolderPath)) {
       // we've already seen this folder
@@ -149,16 +174,17 @@ export class DeployManager {
 
     deployState.foldersToCopy.add(packageJsonRealFolderPath);
 
-    const originalPackageJson: IPackageJson = JsonFile.load(
+    const originalPackageJson = nodeCoreLibrary.JsonFile.load(
       path.join(packageJsonRealFolderPath, 'package.json')
     );
 
     const sourceFolderInfo: IFolderInfo | undefined = deployState.folderInfosByPath.get(
-      FileSystem.getRealPath(packageJsonFolderPath)
+      // eslint-disable-next-line
+      nodeCoreLibrary.FileSystem.getRealPath(packageJsonFolderPath)
     );
 
     // Transform packageJson using pnpmfile.js
-    const packageJson: IPackageJson = deployState.pnpmfileConfiguration.transform(originalPackageJson);
+    const packageJson = deployState.pnpmfileConfiguration.transform(originalPackageJson);
 
     // Union of keys from regular dependencies, peerDependencies, optionalDependencies
     // (and possibly devDependencies if includeDevDependencies=true)
@@ -214,7 +240,7 @@ export class DeployManager {
       // Replicate the PNPM workaround links.
 
       // Only apply this logic for packages that were actually installed under the common/temp folder.
-      if (Path.isUnder(packageJsonFolderPath, this._rushConfiguration.commonTempFolder)) {
+      if (nodeCoreLibrary.Path.isUnder(packageJsonFolderPath, this._rushConfiguration.commonTempFolder)) {
         try {
           // The PNPM workaround links are created in this folder.  We will resolve the current package
           // from that location and collect any additional links encountered along the way.
@@ -317,7 +343,7 @@ export class DeployManager {
 
     if (!resolvedDependency) {
       // This should not happen, since the resolve.sync() docs say it will throw an exception instead
-      throw new InternalError(`Error resolving ${packageName} from ${startingFolder}`);
+      throw new nodeCoreLibrary.InternalError(`Error resolving ${packageName} from ${startingFolder}`);
     }
 
     const dependencyPackageFolderPath: string | undefined = this._packageJsonLookup.tryGetPackageFolderFor(
@@ -338,7 +364,7 @@ export class DeployManager {
    * Example output: "C:\MyRepo\common\deploy\libraries\my-lib"
    */
   private _remapPathForDeployFolder(absolutePathInSourceFolder: string, deployState: IDeployState): string {
-    if (!Path.isUnderOrEqual(absolutePathInSourceFolder, deployState.sourceRootFolder)) {
+    if (!nodeCoreLibrary.Path.isUnderOrEqual(absolutePathInSourceFolder, deployState.sourceRootFolder)) {
       throw new Error(
         `Source path is not under ${deployState.sourceRootFolder}\n${absolutePathInSourceFolder}`
       );
@@ -355,13 +381,13 @@ export class DeployManager {
    * Example output: "libraries/my-lib"
    */
   private _remapPathForDeployMetadata(absolutePathInSourceFolder: string, deployState: IDeployState): string {
-    if (!Path.isUnderOrEqual(absolutePathInSourceFolder, deployState.sourceRootFolder)) {
+    if (!nodeCoreLibrary.Path.isUnderOrEqual(absolutePathInSourceFolder, deployState.sourceRootFolder)) {
       throw new Error(
         `Source path is not under ${deployState.sourceRootFolder}\n${absolutePathInSourceFolder}`
       );
     }
     const relativePath: string = path.relative(deployState.sourceRootFolder, absolutePathInSourceFolder);
-    return Text.replaceAll(relativePath, '\\', '/');
+    return nodeCoreLibrary.Text.replaceAll(relativePath, '\\', '/');
   }
 
   /**
@@ -372,7 +398,7 @@ export class DeployManager {
 
     if (!deployState.scenarioConfiguration.json.includeNpmIgnoreFiles) {
       const sourceFolderInfo: IFolderInfo | undefined = deployState.folderInfosByPath.get(
-        FileSystem.getRealPath(sourceFolderPath)
+        nodeCoreLibrary.FileSystem.getRealPath(sourceFolderPath)
       );
       if (sourceFolderInfo) {
         if (sourceFolderInfo.isRushProject) {
@@ -397,12 +423,12 @@ export class DeployManager {
         const copyDestinationPath: string = path.join(targetFolderPath, npmPackFile);
 
         if (deployState.symlinkAnalyzer.analyzePath(copySourcePath).kind !== 'link') {
-          FileSystem.ensureFolder(path.dirname(copyDestinationPath));
+          nodeCoreLibrary.FileSystem.ensureFolder(path.dirname(copyDestinationPath));
 
-          FileSystem.copyFile({
+          nodeCoreLibrary.FileSystem.copyFile({
             sourcePath: copySourcePath,
             destinationPath: copyDestinationPath,
-            alreadyExistsBehavior: AlreadyExistsBehavior.Error
+            alreadyExistsBehavior: nodeCoreLibrary.AlreadyExistsBehavior.Error
           });
         }
       }
@@ -419,10 +445,10 @@ export class DeployManager {
         '**/.DS_Store'
       ]);
 
-      FileSystem.copyFiles({
+      nodeCoreLibrary.FileSystem.copyFiles({
         sourcePath: sourceFolderPath,
         destinationPath: targetFolderPath,
-        alreadyExistsBehavior: AlreadyExistsBehavior.Error,
+        alreadyExistsBehavior: nodeCoreLibrary.AlreadyExistsBehavior.Error,
         filter: (src: string, dest: string) => {
           const relativeSrc: string = path.relative(sourceFolderPath, src);
           if (!relativeSrc) {
@@ -433,7 +459,8 @@ export class DeployManager {
             return false;
           }
 
-          const stats: FileSystemStats = FileSystem.getLinkStatistics(src);
+          // eslint-disable-next-line
+          const stats = nodeCoreLibrary.FileSystem.getLinkStatistics(src);
           if (stats.isSymbolicLink()) {
             deployState.symlinkAnalyzer.analyzePath(src);
             return false;
@@ -456,12 +483,12 @@ export class DeployManager {
     };
 
     // Has the link target been created yet?  If not, we should try again later
-    if (!FileSystem.exists(linkInfo.targetPath)) {
+    if (!nodeCoreLibrary.FileSystem.exists(linkInfo.targetPath)) {
       return false;
     }
 
     const newLinkFolder: string = path.dirname(linkInfo.linkPath);
-    FileSystem.ensureFolder(newLinkFolder);
+    nodeCoreLibrary.FileSystem.ensureFolder(newLinkFolder);
 
     // Link to the relative path for symlinks
     const relativeTargetPath: string = path.relative(newLinkFolder, linkInfo.targetPath);
@@ -470,7 +497,7 @@ export class DeployManager {
     if (process.platform === 'win32') {
       if (linkInfo.kind === 'folderLink') {
         // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
-        FileSystem.createSymbolicLinkJunction({
+        nodeCoreLibrary.FileSystem.createSymbolicLinkJunction({
           linkTargetPath: relativeTargetPath,
           newLinkPath: linkInfo.linkPath
         });
@@ -479,7 +506,7 @@ export class DeployManager {
         // administrator permission.
 
         // NOTE: We cannot use the relative path for hard links
-        FileSystem.createHardLink({
+        nodeCoreLibrary.FileSystem.createHardLink({
           linkTargetPath: relativeTargetPath,
           newLinkPath: linkInfo.linkPath
         });
@@ -488,12 +515,12 @@ export class DeployManager {
       // However hard links seem to cause build failures on Mac, so for all other operating systems
       // we use symbolic links for this case.
       if (linkInfo.kind === 'folderLink') {
-        FileSystem.createSymbolicLinkFolder({
+        nodeCoreLibrary.FileSystem.createSymbolicLinkFolder({
           linkTargetPath: relativeTargetPath,
           newLinkPath: linkInfo.linkPath
         });
       } else {
-        FileSystem.createSymbolicLinkFile({
+        nodeCoreLibrary.FileSystem.createSymbolicLinkFile({
           linkTargetPath: relativeTargetPath,
           newLinkPath: linkInfo.linkPath
         });
@@ -569,8 +596,8 @@ export class DeployManager {
       deployMetadataJson.links.push(relativeInfo);
     }
 
-    JsonFile.save(deployMetadataJson, deployMetadataFilePath, {
-      newlineConversion: NewlineKind.OsDefault
+    nodeCoreLibrary.JsonFile.save(deployMetadataJson, deployMetadataFilePath, {
+      newlineConversion: nodeCoreLibrary.NewlineKind.OsDefault
     });
   }
 
@@ -605,7 +632,7 @@ export class DeployManager {
     );
 
     for (const rushProject of this._rushConfiguration.projects) {
-      const projectFolder: string = FileSystem.getRealPath(rushProject.projectFolder);
+      const projectFolder: string = nodeCoreLibrary.FileSystem.getRealPath(rushProject.projectFolder);
       const projectSettings:
         | IDeployScenarioProjectJson
         | undefined = deployState.scenarioConfiguration.projectJsonsByName.get(rushProject.packageName);
@@ -632,7 +659,7 @@ export class DeployManager {
       console.log();
     }
 
-    Sort.sortSet(deployState.foldersToCopy);
+    nodeCoreLibrary.Sort.sortSet(deployState.foldersToCopy);
 
     console.log('Copying folders...');
     for (const folderToCopy of deployState.foldersToCopy) {
@@ -644,10 +671,10 @@ export class DeployManager {
 
     if (deployState.scenarioConfiguration.json.linkCreation === 'script') {
       console.log('Copying create-links.js');
-      FileSystem.copyFile({
+      nodeCoreLibrary.FileSystem.copyFile({
         sourcePath: path.join(__dirname, '../../scripts/create-links.js'),
         destinationPath: path.join(deployState.targetRootFolder, 'create-links.js'),
-        alreadyExistsBehavior: AlreadyExistsBehavior.Error
+        alreadyExistsBehavior: nodeCoreLibrary.AlreadyExistsBehavior.Error
       });
     }
 
@@ -660,7 +687,9 @@ export class DeployManager {
           // TODO: If a symbolic link points to another symbolic link, then we should order the operations
           // so that the intermediary target is created first.  This case was procrastinated because it does
           // not seem to occur in practice.  If you encounter this, please report it.
-          throw new InternalError('Target does not exist: ' + JSON.stringify(linkToCopy, undefined, 2));
+          throw new nodeCoreLibrary.InternalError(
+            'Target does not exist: ' + JSON.stringify(linkToCopy, undefined, 2)
+          );
         }
       }
 
@@ -671,10 +700,10 @@ export class DeployManager {
         this._rushConfiguration.rushJsonFolder,
         deployState.scenarioConfiguration.json.folderToCopy
       );
-      FileSystem.copyFiles({
+      nodeCoreLibrary.FileSystem.copyFiles({
         sourcePath: sourceFolderPath,
         destinationPath: deployState.targetRootFolder,
-        alreadyExistsBehavior: AlreadyExistsBehavior.Error
+        alreadyExistsBehavior: nodeCoreLibrary.AlreadyExistsBehavior.Error
       });
     }
     await DeployArchiver.createArchiveAsync(deployState);
@@ -721,7 +750,7 @@ export class DeployManager {
     let targetRootFolder: string;
     if (targetFolderParameter) {
       targetRootFolder = path.resolve(targetFolderParameter);
-      if (!FileSystem.exists(targetRootFolder)) {
+      if (!nodeCoreLibrary.FileSystem.exists(targetRootFolder)) {
         throw new Error(
           'The specified target folder does not exist: ' + JSON.stringify(targetFolderParameter)
         );
@@ -734,13 +763,13 @@ export class DeployManager {
     console.log(colors.cyan('Deploying to target folder:  ') + targetRootFolder);
     console.log(colors.cyan('Main project for deployment: ') + mainProjectName + '\n');
 
-    FileSystem.ensureFolder(targetRootFolder);
+    nodeCoreLibrary.FileSystem.ensureFolder(targetRootFolder);
 
     // Is the target folder empty?
-    if (FileSystem.readFolder(targetRootFolder).length > 0) {
+    if (nodeCoreLibrary.FileSystem.readFolder(targetRootFolder).length > 0) {
       if (overwriteExisting) {
         console.log('Deleting target folder contents because "--overwrite" was specified...');
-        FileSystem.ensureEmptyFolder(targetRootFolder);
+        nodeCoreLibrary.FileSystem.ensureEmptyFolder(targetRootFolder);
         console.log();
       } else {
         throw new Error(

@@ -1,33 +1,56 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// eslint-disable-next-line
+const importLazy = require('import-lazy')(require);
+
+console.log('ChangeAction.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as os from 'os';
+console.log('ChangeAction.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
+console.log('ChangeAction.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as child_process from 'child_process';
+console.log('ChangeAction.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as colors from 'colors';
-import * as inquirer from 'inquirer';
+console.log('ChangeAction.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
+// import * as inquirer from 'inquirer';
+// eslint-disable-next-line
+const inquirer = importLazy('inquirer');
+
+console.log('ChangeAction.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
+console.log('ChangeAction.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { FileSystem, Path } from '@rushstack/node-core-library';
+console.log('ChangeAction.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+console.log('ChangeAction.ts  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
 import { IChangeFile, IChangeInfo, ChangeType } from '../../api/ChangeManagement';
+console.log('ChangeAction.ts  : 10: ' + (new Date().getTime() % 20000) / 1000.0);
 import { VersionControl } from '../../utilities/VersionControl';
+console.log('ChangeAction.ts  : 11: ' + (new Date().getTime() % 20000) / 1000.0);
 import { ChangeFile } from '../../api/ChangeFile';
+console.log('ChangeAction.ts  : 12: ' + (new Date().getTime() % 20000) / 1000.0);
 import { BaseRushAction } from './BaseRushAction';
+console.log('ChangeAction.ts  : 13: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushCommandLineParser } from '../RushCommandLineParser';
+console.log('ChangeAction.ts  : 14: ' + (new Date().getTime() % 20000) / 1000.0);
 import { ChangeFiles } from '../../logic/ChangeFiles';
+console.log('ChangeAction.ts  : 15: ' + (new Date().getTime() % 20000) / 1000.0);
 import {
   VersionPolicy,
   IndividualVersionPolicy,
   LockStepVersionPolicy,
   VersionPolicyDefinitionName
 } from '../../api/VersionPolicy';
+console.log('ChangeAction.ts  : 16: ' + (new Date().getTime() % 20000) / 1000.0);
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
+console.log('ChangeAction.ts  : 17: ' + (new Date().getTime() % 20000) / 1000.0);
 
 export class ChangeAction extends BaseRushAction {
   private _verifyParameter: CommandLineFlagParameter;
@@ -178,7 +201,8 @@ export class ChangeAction extends BaseRushAction {
 
     this._warnUncommittedChanges();
 
-    const promptModule: inquirer.PromptModule = inquirer.createPromptModule();
+    // eslint-disable-next-line
+    const promptModule = inquirer.createPromptModule();
     let changeFileData: Map<string, IChangeFile> = new Map<string, IChangeFile>();
     let interactiveMode: boolean = false;
     if (this._bulkChangeParameter.value) {
@@ -366,7 +390,8 @@ export class ChangeAction extends BaseRushAction {
    * The main loop which prompts the user for information on changed projects.
    */
   private async _promptForChangeFileData(
-    promptModule: inquirer.PromptModule,
+    // eslint-disable-next-line
+    promptModule,
     sortedProjectList: string[],
     existingChangeComments: Map<string, string[]>
   ): Promise<Map<string, IChangeFile>> {
@@ -401,7 +426,8 @@ export class ChangeAction extends BaseRushAction {
    * Asks all questions which are needed to generate changelist for a project.
    */
   private async _askQuestions(
-    promptModule: inquirer.PromptModule,
+    // eslint-disable-next-line
+    promptModule,
     packageName: string,
     existingChangeComments: Map<string, string[]>
   ): Promise<IChangeInfo | undefined> {
@@ -440,7 +466,8 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private async _promptForComments(
-    promptModule: inquirer.PromptModule,
+    // eslint-disable-next-line
+    promptModule,
     packageName: string
   ): Promise<IChangeInfo | undefined> {
     const bumpOptions: { [type: string]: string } = this._getBumpOptions(packageName);
@@ -519,7 +546,8 @@ export class ChangeAction extends BaseRushAction {
    * Will determine a user's email by first detecting it from their Git config,
    * or will ask for it if it is not found or the Git config is wrong.
    */
-  private async _detectOrAskForEmail(promptModule: inquirer.PromptModule): Promise<string> {
+  // eslint-disable-next-line
+  private async _detectOrAskForEmail(promptModule): Promise<string> {
     return (await this._detectAndConfirmEmail(promptModule)) || (await this._promptForEmail(promptModule));
   }
 
@@ -539,7 +567,8 @@ export class ChangeAction extends BaseRushAction {
    * Detects the user's email address from their Git configuration, prompts the user to approve the
    * detected email. It returns undefined if it cannot be detected.
    */
-  private async _detectAndConfirmEmail(promptModule: inquirer.PromptModule): Promise<string | undefined> {
+  // eslint-disable-next-line
+  private async _detectAndConfirmEmail(promptModule): Promise<string | undefined> {
     const email: string | undefined = this._detectEmail();
 
     if (email) {
@@ -560,7 +589,8 @@ export class ChangeAction extends BaseRushAction {
   /**
    * Asks the user for their email address
    */
-  private async _promptForEmail(promptModule: inquirer.PromptModule): Promise<string> {
+  // eslint-disable-next-line
+  private async _promptForEmail(promptModule): Promise<string> {
     const { email }: { email: string } = await promptModule([
       {
         type: 'input',
@@ -594,7 +624,8 @@ export class ChangeAction extends BaseRushAction {
    * Writes change files to the common/changes folder. Will prompt for overwrite if file already exists.
    */
   private async _writeChangeFiles(
-    promptModule: inquirer.PromptModule,
+    // eslint-disable-next-line
+    promptModule,
     changeFileData: Map<string, IChangeFile>,
     overwrite: boolean,
     interactiveMode: boolean
@@ -605,7 +636,8 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private async _writeChangeFile(
-    promptModule: inquirer.PromptModule,
+    // eslint-disable-next-line
+    promptModule,
     changeFileData: IChangeFile,
     overwrite: boolean,
     interactiveMode: boolean
@@ -629,7 +661,8 @@ export class ChangeAction extends BaseRushAction {
     }
   }
 
-  private async _promptForOverwrite(promptModule: inquirer.PromptModule, filePath: string): Promise<boolean> {
+  // eslint-disable-next-line
+  private async _promptForOverwrite(promptModule, filePath: string): Promise<boolean> {
     const overwrite: boolean = await promptModule([
       {
         name: 'overwrite',

@@ -1,20 +1,41 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// eslint-disable-next-line
+const importLazy = require('import-lazy')(require);
+
+console.log('NpmLinkManager.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as colors from 'colors';
+console.log('NpmLinkManager.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as os from 'os';
+console.log('NpmLinkManager.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
+console.log('NpmLinkManager.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as semver from 'semver';
-import * as tar from 'tar';
-import readPackageTree = require('read-package-tree');
+console.log('NpmLinkManager.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
+// import * as tar from 'tar';
+// eslint-disable-next-line
+const tar = importLazy('tar');
+console.log('NpmLinkManager.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
+// import readPackageTree = require('read-package-tree');
+// eslint-disable-next-line
+const readPackageTree = importLazy('read-package-tree');
+console.log('NpmLinkManager.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { FileSystem, FileConstants, LegacyAdapters } from '@rushstack/node-core-library';
+console.log('NpmLinkManager.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { RushConstants } from '../../logic/RushConstants';
+console.log('NpmLinkManager.ts  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+console.log('NpmLinkManager.ts  : 10: ' + (new Date().getTime() % 20000) / 1000.0);
 import { Utilities } from '../../utilities/Utilities';
+console.log('NpmLinkManager.ts  : 11: ' + (new Date().getTime() % 20000) / 1000.0);
 import { NpmPackage, IResolveOrCreateResult, PackageDependencyKind } from './NpmPackage';
+console.log('NpmLinkManager.ts  : 12: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PackageLookup } from '../PackageLookup';
+console.log('NpmLinkManager.ts  : 13: ' + (new Date().getTime() % 20000) / 1000.0);
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
+console.log('NpmLinkManager.ts  : 14: ' + (new Date().getTime() % 20000) / 1000.0);
 
 interface IQueueItem {
   // A project from somewhere under "common/temp/node_modules"
@@ -28,10 +49,21 @@ interface IQueueItem {
   cyclicSubtreeRoot: NpmPackage | undefined;
 }
 
+interface readPackageTreeNode {
+  id: number;
+  package: any;
+  children: readPackageTreeNode[];
+  parent: readPackageTreeNode | null;
+  path: string;
+  realpath: string;
+  error: Error | null;
+  isLink: boolean;
+}
+
 export class NpmLinkManager extends BaseLinkManager {
   protected async _linkProjects(): Promise<void> {
-    const npmPackage: readPackageTree.Node = await LegacyAdapters.convertCallbackToPromise<
-      readPackageTree.Node,
+    const npmPackage: readPackageTreeNode = await LegacyAdapters.convertCallbackToPromise<
+      readPackageTreeNode,
       Error,
       string
     >(readPackageTree, this._rushConfiguration.commonTempFolder);

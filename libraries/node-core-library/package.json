@@ -16,6 +16,7 @@
     "colors": "~1.2.1",
     "fs-extra": "~7.0.1",
     "jju": "~1.4.0",
+    "import-lazy": "~4.0.0",
     "semver": "~7.3.0",
     "timsort": "~0.3.0",
     "z-schema": "~3.18.3"

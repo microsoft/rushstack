@@ -1,9 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as semver from 'semver';
+// eslint-disable-next-line
+const importLazy = require('import-lazy')(require);
 
-import { IPackageJson, JsonFile, Sort } from '@rushstack/node-core-library';
+console.log('PackageJsonEditor.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
+import * as semver from 'semver';
+console.log('PackageJsonEditor.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
+
+// import { IPackageJson, JsonFile, Sort } from '@rushstack/node-core-library';
+// eslint-disable-next-line
+const nodeCoreLibrary = importLazy('@rushstack/node-core-library');
+console.log('PackageJsonEditor.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * @beta
@@ -57,7 +65,7 @@ export class PackageJsonDependency {
  */
 export class PackageJsonEditor {
   private readonly _filePath: string;
-  private readonly _data: IPackageJson;
+  private readonly _data;
   private readonly _dependencies: Map<string, PackageJsonDependency>;
 
   // NOTE: The "devDependencies" section is tracked separately because sometimes people
@@ -67,7 +75,8 @@ export class PackageJsonEditor {
   private readonly _devDependencies: Map<string, PackageJsonDependency>;
   private _modified: boolean;
 
-  private constructor(filepath: string, data: IPackageJson) {
+  // eslint-disable-next-line
+  private constructor(filepath: string, data /* IPackageJson */) {
     this._filePath = filepath;
     this._data = data;
     this._modified = false;
@@ -140,18 +149,19 @@ export class PackageJsonEditor {
         );
       });
 
-      Sort.sortMapKeys(this._dependencies);
-      Sort.sortMapKeys(this._devDependencies);
+      nodeCoreLibrary.Sort.sortMapKeys(this._dependencies);
+      nodeCoreLibrary.Sort.sortMapKeys(this._devDependencies);
     } catch (e) {
       throw new Error(`Error loading "${filepath}": ${e.message}`);
     }
   }
 
   public static load(filePath: string): PackageJsonEditor {
-    return new PackageJsonEditor(filePath, JsonFile.load(filePath));
+    return new PackageJsonEditor(filePath, nodeCoreLibrary.JsonFile.load(filePath));
   }
 
-  public static fromObject(object: IPackageJson, filename: string): PackageJsonEditor {
+  // eslint-disable-next-line
+  public static fromObject(object /* IPackageJson */, filename: string): PackageJsonEditor {
     return new PackageJsonEditor(filename, object);
   }
 
@@ -217,7 +227,7 @@ export class PackageJsonEditor {
 
   public saveIfModified(): boolean {
     if (this._modified) {
-      JsonFile.save(this._normalize(), this._filePath, { updateExistingFile: true });
+      nodeCoreLibrary.JsonFile.save(this._normalize(), this._filePath, { updateExistingFile: true });
       this._modified = false;
       return true;
     }
@@ -228,7 +238,8 @@ export class PackageJsonEditor {
     this._modified = true;
   }
 
-  private _normalize(): IPackageJson {
+  // eslint-disable-next-line
+  private _normalize() /* IPackageJson */ {
     delete this._data.dependencies;
     delete this._data.optionalDependencies;
     delete this._data.peerDependencies;

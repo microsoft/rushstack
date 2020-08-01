@@ -1,8 +1,21 @@
-import * as JSZip from 'jszip';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+// eslint-disable-next-line
+const importLazy = require('import-lazy')(require);
+
+console.log('DeployArchiver.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
+// import * as JSZip from 'jszip';
+// eslint-disable-next-line
+const JSZip = importLazy('jszip');
+console.log('DeployArchiver.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
+console.log('DeployArchiver.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import { FileSystem, FileSystemStats } from '@rushstack/node-core-library';
+console.log('DeployArchiver.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { IDeployState } from './DeployManager';
+console.log('DeployArchiver.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 
 // JSZip is dependant on Blob being declared.
 declare global {
@@ -13,7 +26,8 @@ export class DeployArchiver {
   public static async createArchiveAsync(deployState: IDeployState): Promise<void> {
     if (deployState.createArchiveFilePath !== undefined) {
       console.log('Creating archive...');
-      const zip: JSZip = this._getZipOfFolder(deployState.targetRootFolder);
+      // eslint-disable-next-line
+      const zip = this._getZipOfFolder(deployState.targetRootFolder);
       const zipContent: Buffer = await zip.generateAsync({
         type: 'nodebuffer',
         platform: 'UNIX'
@@ -50,7 +64,8 @@ export class DeployArchiver {
     return results;
   }
 
-  private static _getZipOfFolder(dir: string): JSZip {
+  // eslint-disable-next-line
+  private static _getZipOfFolder(dir: string) {
     // returns a JSZip instance filled with contents of dir.
     const allPaths: string[] = this._getFilePathsRecursively(dir);
 
@@ -59,7 +74,8 @@ export class DeployArchiver {
     // See: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/stat.h#n10
     const permissionsValue: number = 0o120755;
 
-    const zip: JSZip = new JSZip();
+    // eslint-disable-next-line
+    const zip = new JSZip();
     for (const filePath of allPaths) {
       const addPath: string = path.relative(dir, filePath);
       const stat: FileSystemStats = FileSystem.getLinkStatistics(filePath);

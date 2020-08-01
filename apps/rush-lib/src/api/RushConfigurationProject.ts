@@ -1,22 +1,40 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// eslint-disable-next-line
+const importLazy = require('import-lazy')(require);
+
+console.log('RushConfigurationProject.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
+console.log('RushConfigurationProject.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as semver from 'semver';
-import {
-  JsonFile,
-  IPackageJson,
-  FileSystem,
-  FileConstants,
-  IPackageJsonDependencyTable
-} from '@rushstack/node-core-library';
+console.log('RushConfigurationProject.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
+
+// import {
+//   JsonFile,
+//   IPackageJson,
+//   FileSystem,
+//   FileConstants,
+//   IPackageJsonDependencyTable
+// } from '@rushstack/node-core-library';
+// eslint-disable-next-line
+const nodeCoreLibrary = importLazy('@rushstack/node-core-library');
+console.log('RushConfigurationProject.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { RushConfiguration } from '../api/RushConfiguration';
+console.log('RushConfigurationProject.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
+console.log('RushConfigurationProject.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PackageJsonEditor } from './PackageJsonEditor';
+console.log('RushConfigurationProject.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConstants } from '../logic/RushConstants';
+console.log('RushConfigurationProject.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PackageNameParsers } from './PackageNameParsers';
+console.log('RushConfigurationProject.ts  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
 import { DependencySpecifier, DependencySpecifierType } from '../logic/DependencySpecifier';
+// eslint-disable-next-line
+// const depSpecifier = importLazy('../logic/DependencySpecifier');
+console.log('RushConfigurationProject.ts  : 10: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
@@ -42,7 +60,7 @@ export class RushConfigurationProject {
   private _projectRelativeFolder: string;
   private _projectRushTempFolder: string;
   private _reviewCategory: string;
-  private _packageJson: IPackageJson;
+  private _packageJson: any;
   private _packageJsonEditor: PackageJsonEditor;
   private _tempProjectName: string;
   private _unscopedTempProjectName: string;
@@ -84,7 +102,7 @@ export class RushConfigurationProject {
 
     this._projectFolder = path.join(rushConfiguration.rushJsonFolder, projectJson.projectFolder);
 
-    if (!FileSystem.exists(this._projectFolder)) {
+    if (!nodeCoreLibrary.FileSystem.exists(this._projectFolder)) {
       throw new Error(`Project folder not found: ${projectJson.projectFolder}`);
     }
 
@@ -113,8 +131,8 @@ export class RushConfigurationProject {
       this._reviewCategory = projectJson.reviewCategory;
     }
 
-    const packageJsonFilename: string = path.join(this._projectFolder, FileConstants.PackageJson);
-    this._packageJson = JsonFile.load(packageJsonFilename);
+    const packageJsonFilename: string = path.join(this._projectFolder, 'package.json');
+    this._packageJson = nodeCoreLibrary.JsonFile.load(packageJsonFilename);
 
     if (this._packageJson.name !== this._packageName) {
       throw new Error(
@@ -232,7 +250,7 @@ export class RushConfigurationProject {
    * The parsed NPM "package.json" file from projectFolder.
    * @deprecated Use packageJsonEditor instead
    */
-  public get packageJson(): IPackageJson {
+  public get packageJson(): any {
     return this._packageJson;
   }
 
@@ -327,9 +345,7 @@ export class RushConfigurationProject {
     return isMain;
   }
 
-  private _getLocalDependencyProjects(
-    dependencies: IPackageJsonDependencyTable = {}
-  ): RushConfigurationProject[] {
+  private _getLocalDependencyProjects(dependencies: any = {}): RushConfigurationProject[] {
     const localDependencyProjects: RushConfigurationProject[] = [];
     for (const dependency of Object.keys(dependencies)) {
       // Skip if we can't find the local project or it's a cyclic dependency
@@ -338,10 +354,8 @@ export class RushConfigurationProject {
       );
       if (localProject && !this._cyclicDependencyProjects.has(dependency)) {
         // Set the value if it's a workspace project, or if we have a local project and the semver is satisfied
-        const dependencySpecifier: DependencySpecifier = new DependencySpecifier(
-          dependency,
-          dependencies[dependency]
-        );
+        // eslint-disable-next-line
+        const dependencySpecifier = new DependencySpecifier(dependency, dependencies[dependency]);
         switch (dependencySpecifier.specifierType) {
           case DependencySpecifierType.Version:
           case DependencySpecifierType.Range:

@@ -1,46 +1,88 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// eslint-disable-next-line
+const importLazy = require('import-lazy')(require);
+
+console.log('RushCommandLineParser.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as colors from 'colors';
+console.log('RushCommandLineParser.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as os from 'os';
+console.log('RushCommandLineParser.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
+console.log('RushCommandLineParser.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { CommandLineParser, CommandLineFlagParameter, CommandLineAction } from '@rushstack/ts-command-line';
-import { InternalError } from '@rushstack/node-core-library';
+console.log('RushCommandLineParser.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
+// import { InternalError } from '@rushstack/node-core-library';
+// eslint-disable-next-line
+const nodeCoreLibrary = importLazy('@rushstack/node-core-library');
+
+console.log('RushCommandLineParser.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { RushConfiguration } from '../api/RushConfiguration';
+console.log('RushCommandLineParser.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConstants } from '../logic/RushConstants';
+console.log('RushCommandLineParser.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
+console.log('RushCommandLineParser.ts  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
 import { CommandJson } from '../api/CommandLineJson';
+console.log('RushCommandLineParser.ts  : 10: ' + (new Date().getTime() % 20000) / 1000.0);
 import { Utilities } from '../utilities/Utilities';
+console.log('RushCommandLineParser.ts  : 11: ' + (new Date().getTime() % 20000) / 1000.0);
 import { BaseScriptAction } from '../cli/scriptActions/BaseScriptAction';
+console.log('RushCommandLineParser.ts  : 12: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { AddAction } from './actions/AddAction';
+console.log('RushCommandLineParser.ts  : 13: ' + (new Date().getTime() % 20000) / 1000.0);
 import { ChangeAction } from './actions/ChangeAction';
+console.log('RushCommandLineParser.ts  : 14: ' + (new Date().getTime() % 20000) / 1000.0);
 import { CheckAction } from './actions/CheckAction';
+console.log('RushCommandLineParser.ts  : 15: ' + (new Date().getTime() % 20000) / 1000.0);
 import { DeployAction } from './actions/DeployAction';
+console.log('RushCommandLineParser.ts  : 16: ' + (new Date().getTime() % 20000) / 1000.0);
 import { InitAction } from './actions/InitAction';
+console.log('RushCommandLineParser.ts  : 17: ' + (new Date().getTime() % 20000) / 1000.0);
 import { InitAutoinstallerAction } from './actions/InitAutoinstallerAction';
+console.log('RushCommandLineParser.ts  : 18: ' + (new Date().getTime() % 20000) / 1000.0);
 import { InitDeployAction } from './actions/InitDeployAction';
+console.log('RushCommandLineParser.ts  : 19: ' + (new Date().getTime() % 20000) / 1000.0);
 import { InstallAction } from './actions/InstallAction';
+console.log('RushCommandLineParser.ts  : 20: ' + (new Date().getTime() % 20000) / 1000.0);
 import { LinkAction } from './actions/LinkAction';
+console.log('RushCommandLineParser.ts  : 21: ' + (new Date().getTime() % 20000) / 1000.0);
 import { ListAction } from './actions/ListAction';
+console.log('RushCommandLineParser.ts  : 22: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PublishAction } from './actions/PublishAction';
+console.log('RushCommandLineParser.ts  : 23: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PurgeAction } from './actions/PurgeAction';
+console.log('RushCommandLineParser.ts  : 24: ' + (new Date().getTime() % 20000) / 1000.0);
 import { ScanAction } from './actions/ScanAction';
+console.log('RushCommandLineParser.ts  : 25: ' + (new Date().getTime() % 20000) / 1000.0);
 import { TabCompleteAction } from './actions/TabCompleteAction';
+console.log('RushCommandLineParser.ts  : 26: ' + (new Date().getTime() % 20000) / 1000.0);
 import { UnlinkAction } from './actions/UnlinkAction';
+console.log('RushCommandLineParser.ts  : 27: ' + (new Date().getTime() % 20000) / 1000.0);
 import { UpdateAction } from './actions/UpdateAction';
+console.log('RushCommandLineParser.ts  : 28: ' + (new Date().getTime() % 20000) / 1000.0);
 import { UpdateAutoinstallerAction } from './actions/UpdateAutoinstallerAction';
+console.log('RushCommandLineParser.ts  : 29: ' + (new Date().getTime() % 20000) / 1000.0);
 import { VersionAction } from './actions/VersionAction';
+console.log('RushCommandLineParser.ts  : 30: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { BulkScriptAction } from './scriptActions/BulkScriptAction';
+console.log('RushCommandLineParser.ts  : 31: ' + (new Date().getTime() % 20000) / 1000.0);
 import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
+console.log('RushCommandLineParser.ts  : 32: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { Telemetry } from '../logic/Telemetry';
+console.log('RushCommandLineParser.ts  : 33: ' + (new Date().getTime() % 20000) / 1000.0);
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
+console.log('RushCommandLineParser.ts  : 34: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
+console.log('RushCommandLineParser.ts  : 35: ' + (new Date().getTime() % 20000) / 1000.0);
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
+console.log('RushCommandLineParser.ts  : 36: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * Options for `RushCommandLineParser`.
@@ -59,6 +101,7 @@ export class RushCommandLineParser extends CommandLineParser {
   private _rushOptions: IRushCommandLineParserOptions;
 
   public constructor(options?: Partial<IRushCommandLineParserOptions>) {
+    console.log('RushCommandLineParser.constructor  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
     super({
       toolFilename: 'rush',
       toolDescription:
@@ -71,28 +114,35 @@ export class RushCommandLineParser extends CommandLineParser {
         ' automation tools.  If you are looking for a proven turnkey solution for monorepo management,' +
         ' Rush is for you.'
     });
+    console.log('RushCommandLineParser.constructor  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 
     this._rushOptions = this._normalizeOptions(options || {});
+    console.log('RushCommandLineParser.constructor  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 
     try {
       const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation({
         startingFolder: this._rushOptions.cwd,
         showVerbose: !Utilities.isNonDebugTabCompletionRequest()
       });
+      console.log('RushCommandLineParser.constructor  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
       if (rushJsonFilename) {
         this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
       }
+      console.log('RushCommandLineParser.constructor  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
     } catch (error) {
       this._reportErrorAndSetExitCode(error);
     }
 
+    console.log('RushCommandLineParser.constructor  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
     NodeJsCompatibility.warnAboutCompatibilityIssues({
       isRushLib: true,
       alreadyReportedNodeTooNewError: this._rushOptions.alreadyReportedNodeTooNewError,
       rushConfiguration: this.rushConfiguration
     });
 
+    console.log('RushCommandLineParser.constructor  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
     this._populateActions();
+    console.log('RushCommandLineParser.constructor  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
   }
 
   public get isDebug(): boolean {
@@ -122,7 +172,7 @@ export class RushCommandLineParser extends CommandLineParser {
     process.exitCode = 1;
 
     if (this._debugParameter.value) {
-      InternalError.breakInDebugger = true;
+      nodeCoreLibrary.InternalError.breakInDebugger = true;
     }
 
     return this._wrapOnExecute()

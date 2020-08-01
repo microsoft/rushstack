@@ -1,9 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// eslint-disable-next-line
+const importLazy = require('import-lazy')(require);
+
 import * as os from 'os';
 import * as path from 'path';
-import Validator = require('z-schema');
+// eslint-disable-next-line
+const Validator = importLazy('z-schema');
 
 import { JsonFile, JsonObject } from './JsonFile';
 import { FileSystem } from './FileSystem';
@@ -71,7 +75,8 @@ export interface IJsonSchemaFromFileOptions {
 export class JsonSchema {
   private _dependentSchemas: JsonSchema[] = [];
   private _filename: string = '';
-  private _validator: Validator | undefined = undefined;
+  // eslint-disable-next-line
+  private _validator;
   private _schemaObject: JsonObject | undefined = undefined;
 
   private constructor() {}
@@ -153,15 +158,18 @@ export class JsonSchema {
   /**
    * Used to nicely format the ZSchema error tree.
    */
-  private static _formatErrorDetails(errorDetails: Validator.SchemaErrorDetail[]): string {
+  // eslint-disable-next-line
+  private static _formatErrorDetails(errorDetails /*: Validator.SchemaErrorDetail[]*/): string {
     return JsonSchema._formatErrorDetailsHelper(errorDetails, '', '');
   }
 
   /**
    * Used by _formatErrorDetails.
    */
+  // eslint-disable-next-line
   private static _formatErrorDetailsHelper(
-    errorDetails: Validator.SchemaErrorDetail[],
+    // eslint-disable-next-line
+    errorDetails /*: Validator.SchemaErrorDetail[]*/,
     indent: string,
     buffer: string
   ): string {
@@ -218,7 +226,8 @@ export class JsonSchema {
 
     if (!this._validator) {
       // Don't assign this to _validator until we're sure everything was successful
-      const newValidator: Validator = new Validator({
+      // eslint-disable-next-line
+      const newValidator = new Validator({
         breakOnFirstError: false,
         noTypeless: true,
         noExtraKeywords: true
@@ -285,6 +294,7 @@ export class JsonSchema {
     this.ensureCompiled();
 
     if (!this._validator!.validate(jsonObject, this._schemaObject)) {
+      // eslint-disable-next-line
       const errorDetails: string = JsonSchema._formatErrorDetails(this._validator!.getLastErrors());
 
       const args: IJsonSchemaErrorInfo = {

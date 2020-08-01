@@ -1,8 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// eslint-disable-next-line
+const importLazy = require('import-lazy')(require);
+
 import * as path from 'path';
-import { FileSystem, JsonFile, JsonSchema, NewlineKind } from '@rushstack/node-core-library';
+// import { FileSystem, JsonFile, JsonSchema, NewlineKind } from '@rushstack/node-core-library';
+// eslint-disable-next-line
+const nodeCoreLibrary = importLazy('@rushstack/node-core-library');
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
@@ -34,9 +39,11 @@ interface IRepoStateJson {
  * @public
  */
 export class RepoStateFile {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/repo-state.schema.json')
-  );
+  // eslint-disable-next-line
+  private static get _jsonSchema() /* NodeCoreLibrary.JsonSchema */ {
+    return nodeCoreLibrary.JsonSchema.fromFile(path.join(__dirname, '../schemas/repo-state.schema.json'));
+  }
+
   private _repoStateFilePath: string;
   private _variant: string | undefined;
   private _pnpmShrinkwrapHash: string | undefined;
@@ -88,9 +95,9 @@ export class RepoStateFile {
   public static loadFromFile(jsonFilename: string, variant: string | undefined): RepoStateFile {
     let repoStateJson: IRepoStateJson | undefined = undefined;
     try {
-      repoStateJson = JsonFile.loadAndValidate(jsonFilename, RepoStateFile._jsonSchema);
+      repoStateJson = nodeCoreLibrary.JsonFile.loadAndValidate(jsonFilename, RepoStateFile._jsonSchema);
     } catch (error) {
-      if (!FileSystem.isNotExistError(error)) {
+      if (!nodeCoreLibrary.FileSystem.isNotExistError(error)) {
         throw error;
       }
     }
@@ -154,8 +161,8 @@ export class RepoStateFile {
     if (this._modified) {
       const content: string =
         '// DO NOT MODIFY THIS FILE. It is generated and used by Rush.' +
-        `${NewlineKind.Lf}${this._serialize()}`;
-      FileSystem.writeFile(this._repoStateFilePath, content);
+        `${nodeCoreLibrary.NewlineKind.Lf}${this._serialize()}`;
+      nodeCoreLibrary.FileSystem.writeFile(this._repoStateFilePath, content);
       this._modified = false;
       return true;
     }
@@ -173,6 +180,8 @@ export class RepoStateFile {
       repoStateJson.preferredVersionsHash = this._preferredVersionsHash;
     }
 
-    return JsonFile.stringify(repoStateJson, { newlineConversion: NewlineKind.Lf });
+    return nodeCoreLibrary.JsonFile.stringify(repoStateJson, {
+      newlineConversion: nodeCoreLibrary.NewlineKind.Lf
+    });
   }
 }
