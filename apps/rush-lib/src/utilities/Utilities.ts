@@ -446,6 +446,10 @@ export class Utilities {
     return process.argv.length > 2 && process.argv[2] === 'tab-complete';
   }
 
+  public static shouldPrintBanner(): boolean {
+    return !Utilities.isNonDebugTabCompletionRequest() && process.argv.indexOf('--json') === -1;
+  }
+
   /**
    * For strings passed to a shell command, this adds appropriate escaping
    * to avoid misinterpretation of spaces or special characters.
