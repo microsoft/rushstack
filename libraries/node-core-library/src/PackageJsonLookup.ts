@@ -76,12 +76,10 @@ export class PackageJsonLookup {
    * loading, an exception will be thrown instead.
    */
   public static loadOwnPackageJson(dirnameOfCaller: string): IPackageJson {
-    console.log('PackageJsonLookup.loadOwnPackageJson()  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
     const packageJson:
       | IPackageJson
       | undefined = PackageJsonLookup._loadOwnPackageJsonLookup.tryLoadPackageJsonFor(dirnameOfCaller);
 
-    console.log('PackageJsonLookup.loadOwnPackageJson()  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
     if (packageJson === undefined) {
       throw new Error(
         `PackageJsonLookup.loadOwnPackageJson() failed to find the caller's package.json.` +
@@ -89,12 +87,10 @@ export class PackageJsonLookup {
       );
     }
 
-    console.log('PackageJsonLookup.loadOwnPackageJson()  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
     if (packageJson.version !== undefined) {
       return packageJson as IPackageJson;
     }
 
-    console.log('PackageJsonLookup.loadOwnPackageJson()  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
     const errorPath: string =
       PackageJsonLookup._loadOwnPackageJsonLookup.tryGetPackageJsonFilePathFor(dirnameOfCaller) ||
       'package.json';

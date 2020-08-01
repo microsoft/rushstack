@@ -52,28 +52,22 @@ export class Rush {
    * Even though this API isn't documented, it is still supported for legacy compatibility.
    */
   public static launch(launcherVersion: string, arg: ILaunchOptions): void {
-    console.log('Rush.launch()  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
     const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
-    console.log('Rush.launch()  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 
     if (!Utilities.isNonDebugTabCompletionRequest()) {
       Rush._printStartupBanner(options.isManaged);
     }
-    console.log('Rush.launch()  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 
     if (!CommandLineMigrationAdvisor.checkArgv(process.argv)) {
       // The migration advisor recognized an obsolete command-line
       process.exitCode = 1;
       return;
     }
-    console.log('Rush.launch()  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 
     const parser: RushCommandLineParser = new RushCommandLineParser({
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
     });
-    console.log('Rush.launch()  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
     parser.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise
-    console.log('Rush.launch()  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
   }
 
   /**

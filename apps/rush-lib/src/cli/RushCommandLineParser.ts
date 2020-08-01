@@ -59,7 +59,6 @@ export class RushCommandLineParser extends CommandLineParser {
   private _rushOptions: IRushCommandLineParserOptions;
 
   public constructor(options?: Partial<IRushCommandLineParserOptions>) {
-    console.log('RushCommandLineParser.constructor()  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
     super({
       toolFilename: 'rush',
       toolDescription:
@@ -73,35 +72,27 @@ export class RushCommandLineParser extends CommandLineParser {
         ' Rush is for you.'
     });
 
-    console.log('RushCommandLineParser.constructor()  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
     this._rushOptions = this._normalizeOptions(options || {});
 
-    console.log('RushCommandLineParser.constructor()  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
     try {
-      console.log('RushCommandLineParser.constructor()  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
       const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation({
         startingFolder: this._rushOptions.cwd,
         showVerbose: !Utilities.isNonDebugTabCompletionRequest()
       });
-      console.log('RushCommandLineParser.constructor()  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
       if (rushJsonFilename) {
         this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
       }
-      console.log('RushCommandLineParser.constructor()  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
     } catch (error) {
       this._reportErrorAndSetExitCode(error);
     }
 
-    console.log('RushCommandLineParser.constructor()  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
     NodeJsCompatibility.warnAboutCompatibilityIssues({
       isRushLib: true,
       alreadyReportedNodeTooNewError: this._rushOptions.alreadyReportedNodeTooNewError,
       rushConfiguration: this.rushConfiguration
     });
 
-    console.log('RushCommandLineParser.constructor()  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
     this._populateActions();
-    console.log('RushCommandLineParser.constructor()  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
   }
 
   public get isDebug(): boolean {
