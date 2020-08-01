@@ -265,6 +265,4 @@ export interface ICommandLineStringListDefinition extends IBaseCommandLineDefini
 }
 
 
-// (No @packageDocumentation comment for this package)
-
 ```

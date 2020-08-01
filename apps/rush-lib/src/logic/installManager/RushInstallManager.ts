@@ -4,7 +4,7 @@
 // eslint-disable-next-line
 const importLazy = require('import-lazy')(require);
 
-// import * as glob from 'glob';
+// eslint-disable-next-line
 const glob = importLazy('glob');
 import * as colors from 'colors';
 import * as os from 'os';

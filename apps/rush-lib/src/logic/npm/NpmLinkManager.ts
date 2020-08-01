@@ -8,12 +8,10 @@ import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-// import * as tar from 'tar';
 // eslint-disable-next-line
 const tar = importLazy('tar');
-// import readPackageTree = require('read-package-tree');
 // eslint-disable-next-line
-const readPackageTree = importLazy('read-package-tree');
+import readPackageTree = require('read-package-tree');
 import { FileSystem, FileConstants, LegacyAdapters } from '@rushstack/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
@@ -35,21 +33,10 @@ interface IQueueItem {
   cyclicSubtreeRoot: NpmPackage | undefined;
 }
 
-interface readPackageTreeNode {
-  id: number;
-  package: any;
-  children: readPackageTreeNode[];
-  parent: readPackageTreeNode | null;
-  path: string;
-  realpath: string;
-  error: Error | null;
-  isLink: boolean;
-}
-
 export class NpmLinkManager extends BaseLinkManager {
   protected async _linkProjects(): Promise<void> {
-    const npmPackage: readPackageTreeNode = await LegacyAdapters.convertCallbackToPromise<
-      readPackageTreeNode,
+    const npmPackage: readPackageTree.Node = await LegacyAdapters.convertCallbackToPromise<
+      readPackageTree.Node,
       Error,
       string
     >(readPackageTree, this._rushConfiguration.commonTempFolder);

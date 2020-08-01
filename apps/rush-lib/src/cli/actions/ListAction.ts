@@ -8,6 +8,7 @@ import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+// eslint-disable-next-line
 const Table = importLazy('cli-table');
 
 export interface IJsonEntry {

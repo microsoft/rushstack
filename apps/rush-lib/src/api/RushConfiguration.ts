@@ -816,13 +816,7 @@ export class RushConfiguration {
       }
     }
 
-    console.log(
-      'RushConfiguration.loadFromConfigurationFile()  : 5: ' + (new Date().getTime() % 20000) / 1000.0
-    );
     RushConfiguration._jsonSchema.validateObject(rushConfigurationJson, resolvedRushJsonFilename);
-    console.log(
-      'RushConfiguration.loadFromConfigurationFile()  : 6: ' + (new Date().getTime() % 20000) / 1000.0
-    );
 
     return new RushConfiguration(rushConfigurationJson, resolvedRushJsonFilename);
   }

@@ -5,13 +5,13 @@
 const importLazy = require('import-lazy')(require);
 
 import { EOL } from 'os';
-// import * as glob from 'glob';
+// eslint-disable-next-line
 const glob = importLazy('glob');
+import { JsonFile } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
 import { IChangeInfo } from '../api/ChangeManagement';
 import { IChangelog } from '../api/Changelog';
-import { JsonFile } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../api/RushConfiguration';
 
 /**

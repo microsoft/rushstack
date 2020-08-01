@@ -6,6 +6,7 @@ const importLazy = require('import-lazy')(require);
 
 import * as colors from 'colors';
 import * as path from 'path';
+// eslint-disable-next-line
 const resolve = importLazy('resolve');
 // eslint-disable-next-line
 const npmPacklist = importLazy('npm-packlist');
@@ -39,7 +40,6 @@ import { matchesWithStar } from './Utils';
 
 interface INpmPackListWalkerSync {
   readonly result: string[];
-  constructor(opts: { path: string });
   start(): void;
 }
 

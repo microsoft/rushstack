@@ -5,7 +5,7 @@
 const importLazy = require('import-lazy')(require);
 
 import * as colors from 'colors';
-// import * as glob from 'glob';
+// eslint-disable-next-line
 const glob = importLazy('glob');
 import * as path from 'path';
 import * as builtinPackageNames from 'builtin-modules';
