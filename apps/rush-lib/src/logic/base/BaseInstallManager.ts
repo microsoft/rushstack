@@ -8,7 +8,6 @@ import * as colors from 'colors';
 import * as fetch from 'node-fetch';
 import * as fs from 'fs';
 import * as http from 'http';
-// import HttpsProxyAgent = require('https-proxy-agent');
 // eslint-disable-next-line
 const HttpsProxyAgent = importLazy('https-proxy-agent');
 import * as os from 'os';

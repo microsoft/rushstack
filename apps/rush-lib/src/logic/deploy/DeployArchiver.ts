@@ -4,7 +4,6 @@
 // eslint-disable-next-line
 const importLazy = require('import-lazy')(require);
 
-// import * as JSZip from 'jszip';
 // eslint-disable-next-line
 const JSZip = importLazy('jszip');
 import * as path from 'path';

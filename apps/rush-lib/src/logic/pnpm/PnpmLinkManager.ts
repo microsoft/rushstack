@@ -8,7 +8,6 @@ import * as os from 'os';
 import * as path from 'path';
 import uriEncode = require('strict-uri-encode');
 
-// import pnpmLinkBins from '@pnpm/link-bins';
 // eslint-disable-next-line
 const pnpmLinkBins = importLazy('@pnpm/link-bins');
 

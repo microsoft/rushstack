@@ -75,7 +75,7 @@ export class BulkScriptAction extends BaseScriptAction {
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
   }
 
-  public runAsync(): Promise<void> {
+  public async runAsync(): Promise<void> {
     // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are deprecated
     const lastLinkFlag: LastLinkFlag = LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration);
     if (!lastLinkFlag.isValid()) {

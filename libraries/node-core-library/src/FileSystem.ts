@@ -6,7 +6,7 @@ const importLazy = require('import-lazy')(require);
 
 import * as nodeJsPath from 'path';
 import * as fs from 'fs';
-// import * as fsx from 'fs-extra';
+
 // eslint-disable-next-line
 const fsx = importLazy('fs-extra');
 

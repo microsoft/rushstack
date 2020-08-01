@@ -8,7 +8,6 @@ import * as os from 'os';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import * as colors from 'colors';
-// import * as inquirer from 'inquirer';
 // eslint-disable-next-line
 const inquirer = importLazy('inquirer');
 
