@@ -3,6 +3,7 @@
 
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
+import stringArgv from 'string-argv';
 
 import {
   CommandLineStringParameter,
@@ -52,12 +53,12 @@ export class TabCompleteAction extends BaseRushAction {
     const commandLine: string = this._wordToCompleteParameter.value || '';
     const caretPosition: number = this._positionParameter.value || 0;
 
-    for (const value of this._getCompletions(commandLine, caretPosition)) {
+    for (const value of this.getCompletions(commandLine, caretPosition)) {
       console.log(value);
     }
   }
 
-  public *_getCompletions(commandLine: string, caretPosition: number): IterableIterator<string> {
+  public *getCompletions(commandLine: string, caretPosition: number): IterableIterator<string> {
     const actions: Map<string, IParameter[]> = new Map<string, IParameter[]>();
     this.parser.actions.forEach((element) => {
       const actionParameters: IParameter[] = [];
@@ -75,23 +76,12 @@ export class TabCompleteAction extends BaseRushAction {
     actions['-h'] = [];
     actions['--help'] = [];
 
-    // yield ('arg count: ' + process.argv.length);
-
-    // for (let i: number = 0; i < process.argv.length; i++) {
-    //   yield (i + ': ' + process.argv[i] + ' [' + process.argv[i].length + ']');
-    // }
-
     if (!commandLine || !caretPosition) {
       yield* Object.keys(actions); // return all actions
       return;
     }
 
-    const tokens: string[] = this._tokenizeCommandLine(commandLine);
-
-    // yield ('commandLine: ' + commandLine);
-    // yield ('commandLine.length: ' + commandLine.length);
-    // yield ('caretPosition: ' + caretPosition);
-    // yield ('tokens.length: ' + tokens.length);
+    const tokens: string[] = Array.from(this.tokenizeCommandLine(commandLine));
 
     const debugParameterUsed: boolean = tokens.length > 1 && (tokens[1] === '-d' || tokens[1] === '--debug');
     const debugParameterOffset: number = debugParameterUsed ? 1 : 0; // if debug switch is used, then offset everything by 1.
@@ -103,8 +93,6 @@ export class TabCompleteAction extends BaseRushAction {
 
     const lastToken: string = tokens[tokens.length - 1];
     const secondLastToken: string = tokens[tokens.length - 2];
-    // yield ('lastToken: ' + lastToken);
-    // yield ('secondLastToken: ' + secondLastToken);
 
     const completePartialWord: boolean = caretPosition === commandLine.length;
 
@@ -175,8 +163,8 @@ export class TabCompleteAction extends BaseRushAction {
     }
   }
 
-  private _tokenizeCommandLine(commandLine: string): string[] {
-    return commandLine.split(' ');
+  public tokenizeCommandLine(commandLine: string): string[] {
+    return stringArgv(commandLine);
   }
 
   private *_getChoiceParameterValues(
@@ -208,3 +196,6 @@ export class TabCompleteAction extends BaseRushAction {
     }
   }
 }
+// function isWhiteSpaceStrict(ch: string | undefined) {
+//   return ch && ch.length > 0 && ch.trim() === '';
+// }
