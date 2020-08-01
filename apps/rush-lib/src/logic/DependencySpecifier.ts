@@ -1,15 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line
-const importLazy = require('import-lazy')(require);
-
-console.log('DependencySpecifier.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import npmPackageArg = require('npm-package-arg');
-console.log('DependencySpecifier.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
-// import { InternalError } from '@rushstack/node-core-library';
-const nodeCoreLibrary = importLazy('@rushstack/node-core-library/lib/InternalError');
-console.log('DependencySpecifier.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
+import { InternalError } from '@rushstack/node-core-library';
 
 /**
  * The parsed format of a provided version specifier.
@@ -109,7 +102,7 @@ export class DependencySpecifier {
     if (this.specifierType === DependencySpecifierType.Alias) {
       const aliasResult: npmPackageArg.AliasResult = result as npmPackageArg.AliasResult;
       if (!aliasResult.subSpec || !aliasResult.subSpec.name) {
-        throw new nodeCoreLibrary.InternalError('Unexpected result from npm-package-arg');
+        throw new InternalError('Unexpected result from npm-package-arg');
       }
       this.aliasTarget = new DependencySpecifier(aliasResult.subSpec.name, aliasResult.subSpec.rawSpec);
     } else {
@@ -136,7 +129,7 @@ export class DependencySpecifier {
       case 'alias':
         return DependencySpecifierType.Alias;
       default:
-        throw new nodeCoreLibrary.InternalError(`Unexpected npm-package-arg result type "${specifierType}"`);
+        throw new InternalError(`Unexpected npm-package-arg result type "${specifierType}"`);
     }
   }
 }
