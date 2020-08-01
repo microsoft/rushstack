@@ -13,9 +13,9 @@ import { CommandJson, ICommandLineJson, ParameterJson } from './CommandLineJson'
  * Custom Commands and Options for the Rush Command Line
  */
 export class CommandLineConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/command-line.schema.json')
-  );
+  private static get _jsonSchema(): JsonSchema {
+    return JsonSchema.fromFile(path.join(__dirname, '../schemas/command-line.schema.json'));
+  }
 
   public readonly commands: CommandJson[] = [];
   public readonly parameters: ParameterJson[] = [];

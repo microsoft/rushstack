@@ -6,6 +6,7 @@
 
 import { IPackageJson } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
+import { PackageNameParser } from '@rushstack/node-core-library';
 
 // @public
 export class ApprovedPackagesConfiguration {
@@ -246,7 +247,7 @@ export class PackageJsonEditor {
     // (undocumented)
     readonly filePath: string;
     // (undocumented)
-    static fromObject(object: any, filename: string): PackageJsonEditor;
+    static fromObject(object: IPackageJson, filename: string): PackageJsonEditor;
     // (undocumented)
     static load(filePath: string): PackageJsonEditor;
     // (undocumented)
@@ -362,7 +363,7 @@ export class RushConfiguration {
     readonly packageManagerToolVersion: string;
     // @beta
     readonly packageManagerWrapper: PackageManager;
-    readonly packageNameParser: any;
+    readonly packageNameParser: PackageNameParser;
     readonly pnpmOptions: PnpmOptionsConfiguration;
     readonly projectFolderMaxDepth: number;
     readonly projectFolderMinDepth: number;
@@ -405,7 +406,7 @@ export class RushConfigurationProject {
     readonly isMainProject: boolean;
     readonly localDependencyProjects: ReadonlyArray<RushConfigurationProject>;
     // @deprecated
-    readonly packageJson: any;
+    readonly packageJson: IPackageJson;
     // @beta
     readonly packageJsonEditor: PackageJsonEditor;
     readonly packageName: string;

@@ -1,18 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line
-const importLazy = require('import-lazy')(require);
-
 import * as child_process from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as tty from 'tty';
 import * as path from 'path';
 import * as wordwrap from 'wordwrap';
-// import { JsonFile, IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
-// eslint-disable-next-line
-const nodeCoreLibrary = importLazy('@rushstack/node-core-library');
+import { JsonFile, IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Stream } from 'stream';
 
@@ -129,7 +124,7 @@ export class Utilities {
       throw new Error(dirError);
     }
     const homeFolder: string = path.resolve(unresolvedUserFolder);
-    if (!nodeCoreLibrary.FileSystem.exists(homeFolder)) {
+    if (!FileSystem.exists(homeFolder)) {
       throw new Error(dirError);
     }
 
@@ -195,7 +190,7 @@ export class Utilities {
   }
 
   /**
-   * Creates the specified folder by calling nodeCoreLibrary.FileSystem.ensureFolder(), but using a
+   * Creates the specified folder by calling FileSystem.ensureFolder(), but using a
    * retry loop to recover from temporary locks that may be held by other processes.
    * If the folder already exists, no error occurs.
    */
@@ -214,7 +209,7 @@ export class Utilities {
     const maxWaitTimeMs: number = 7 * 1000;
 
     return Utilities.retryUntilTimeout(
-      () => nodeCoreLibrary.FileSystem.ensureFolder(folderName),
+      () => FileSystem.ensureFolder(folderName),
       maxWaitTimeMs,
       (e) =>
         new Error(
@@ -233,7 +228,7 @@ export class Utilities {
     let exists: boolean = false;
 
     try {
-      const lstat: fs.Stats = nodeCoreLibrary.FileSystem.getLinkStatistics(filePath);
+      const lstat: fs.Stats = FileSystem.getLinkStatistics(filePath);
       exists = lstat.isFile();
     } catch (e) {
       /* no-op */
@@ -249,7 +244,7 @@ export class Utilities {
     let exists: boolean = false;
 
     try {
-      const lstat: fs.Stats = nodeCoreLibrary.FileSystem.getLinkStatistics(directoryPath);
+      const lstat: fs.Stats = FileSystem.getLinkStatistics(directoryPath);
       exists = lstat.isDirectory();
     } catch (e) {
       /* no-op */
@@ -265,7 +260,7 @@ export class Utilities {
    */
   public static dangerouslyDeletePath(folderPath: string): void {
     try {
-      nodeCoreLibrary.FileSystem.deleteFolder(folderPath);
+      FileSystem.deleteFolder(folderPath);
     } catch (e) {
       throw new Error(
         `${e.message}${os.EOL}Often this is caused by a file lock from a process ` +
@@ -280,7 +275,7 @@ export class Utilities {
   public static deleteFile(filePath: string): void {
     if (Utilities.fileExists(filePath)) {
       console.log(`Deleting: ${filePath}`);
-      nodeCoreLibrary.FileSystem.deleteFile(filePath);
+      FileSystem.deleteFile(filePath);
     }
   }
 
@@ -293,11 +288,11 @@ export class Utilities {
    */
   public static isFileTimestampCurrent(dateToCompare: Date, inputFilenames: string[]): boolean {
     for (const inputFilename of inputFilenames) {
-      if (!nodeCoreLibrary.FileSystem.exists(inputFilename)) {
+      if (!FileSystem.exists(inputFilename)) {
         return false;
       }
 
-      const inputStats: fs.Stats = nodeCoreLibrary.FileSystem.getStatistics(inputFilename);
+      const inputStats: fs.Stats = FileSystem.getStatistics(inputFilename);
       if (dateToCompare < inputStats.mtime) {
         return false;
       }
@@ -466,13 +461,13 @@ export class Utilities {
    */
   public static installPackageInDirectory(options: IInstallPackageInDirectoryOptions): void {
     const directory: string = path.resolve(options.directory);
-    if (nodeCoreLibrary.FileSystem.exists(directory)) {
+    if (FileSystem.exists(directory)) {
       console.log('Deleting old files from ' + directory);
     }
 
-    nodeCoreLibrary.FileSystem.ensureEmptyFolder(directory);
+    FileSystem.ensureEmptyFolder(directory);
 
-    const npmPackageJson /*: IPackageJson*/ = {
+    const npmPackageJson: IPackageJson = {
       dependencies: {
         [options.packageName]: options.version
       },
@@ -481,10 +476,7 @@ export class Utilities {
       private: true,
       version: '0.0.0'
     };
-    nodeCoreLibrary.JsonFile.save(
-      npmPackageJson,
-      path.join(directory, nodeCoreLibrary.FileConstants.PackageJson)
-    );
+    JsonFile.save(npmPackageJson, path.join(directory, FileConstants.PackageJson));
 
     if (options.commonRushConfigFolder) {
       Utilities.syncNpmrc(options.commonRushConfigFolder, directory);
@@ -540,7 +532,7 @@ export class Utilities {
    */
   public static copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string): void {
     console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`); // Verbose
-    let npmrcFileLines: string[] = nodeCoreLibrary.FileSystem.readFile(sourceNpmrcPath).split('\n');
+    let npmrcFileLines: string[] = FileSystem.readFile(sourceNpmrcPath).split('\n');
     npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
     const resultLines: string[] = [];
 
@@ -581,7 +573,7 @@ export class Utilities {
       }
     }
 
-    nodeCoreLibrary.FileSystem.writeFile(targetNpmrcPath, resultLines.join(os.EOL));
+    FileSystem.writeFile(targetNpmrcPath, resultLines.join(os.EOL));
   }
 
   /**
@@ -589,14 +581,14 @@ export class Utilities {
    * If the source file does not exist, then the target file is deleted.
    */
   public static syncFile(sourcePath: string, destinationPath: string): void {
-    if (nodeCoreLibrary.FileSystem.exists(sourcePath)) {
+    if (FileSystem.exists(sourcePath)) {
       console.log(`Updating ${destinationPath}`);
-      nodeCoreLibrary.FileSystem.copyFile({ sourcePath, destinationPath });
+      FileSystem.copyFile({ sourcePath, destinationPath });
     } else {
-      if (nodeCoreLibrary.FileSystem.exists(destinationPath)) {
+      if (FileSystem.exists(destinationPath)) {
         // If the source file doesn't exist and there is one in the target, delete the one in the target
         console.log(`Deleting ${destinationPath}`);
-        nodeCoreLibrary.FileSystem.deleteFile(destinationPath);
+        FileSystem.deleteFile(destinationPath);
       }
     }
   }
@@ -618,12 +610,12 @@ export class Utilities {
     );
     const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
     try {
-      if (nodeCoreLibrary.FileSystem.exists(sourceNpmrcPath)) {
+      if (FileSystem.exists(sourceNpmrcPath)) {
         Utilities.copyAndTrimNpmrcFile(sourceNpmrcPath, targetNpmrcPath);
-      } else if (nodeCoreLibrary.FileSystem.exists(targetNpmrcPath)) {
+      } else if (FileSystem.exists(targetNpmrcPath)) {
         // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
         console.log(`Deleting ${targetNpmrcPath}`); // Verbose
-        nodeCoreLibrary.FileSystem.deleteFile(targetNpmrcPath);
+        FileSystem.deleteFile(targetNpmrcPath);
       }
     } catch (e) {
       throw new Error(`Error syncing .npmrc file: ${e}`);

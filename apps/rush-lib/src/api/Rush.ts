@@ -1,19 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line
-const importLazy = require('import-lazy')(require);
-
 console.log('Rush.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import { EOL } from 'os';
 console.log('Rush.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as colors from 'colors';
 console.log('Rush.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
-// import { PackageJsonLookup } from '@rushstack/node-core-library';
-// eslint-disable-next-line
-const nodeCoreLibrary = importLazy('@rushstack/node-core-library');
-
+import { PackageJsonLookup } from '@rushstack/node-core-library';
 console.log('Rush.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
+
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 console.log('Rush.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConstants } from '../logic/RushConstants';
@@ -23,9 +18,9 @@ console.log('Rush.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
 console.log('Rush.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
-console.log('Rush.ts  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
+console.log('Rush.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { Utilities } from '../utilities/Utilities';
-console.log('Rush.ts  : 10: ' + (new Date().getTime() % 20000) / 1000.0);
+console.log('Rush.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * Options to pass to the rush "launch" functions.
@@ -67,25 +62,28 @@ export class Rush {
    * Even though this API isn't documented, it is still supported for legacy compatibility.
    */
   public static launch(launcherVersion: string, arg: ILaunchOptions): void {
-    console.log('Rush.launch  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
+    console.log('Rush.launch()  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
     const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
+    console.log('Rush.launch()  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 
     if (!Utilities.isNonDebugTabCompletionRequest()) {
       Rush._printStartupBanner(options.isManaged);
     }
+    console.log('Rush.launch()  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 
     if (!CommandLineMigrationAdvisor.checkArgv(process.argv)) {
       // The migration advisor recognized an obsolete command-line
       process.exitCode = 1;
       return;
     }
+    console.log('Rush.launch()  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 
     const parser: RushCommandLineParser = new RushCommandLineParser({
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
     });
-    console.log('Rush.launch  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
+    console.log('Rush.launch()  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
     parser.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise
-    console.log('Rush.launch  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
+    console.log('Rush.launch()  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
   }
 
   /**
@@ -108,7 +106,7 @@ export class Rush {
    * This is the same as the Rush tool version for that release.
    */
   public static get version(): string {
-    return nodeCoreLibrary.PackageJsonLookup.loadOwnPackageJson(__dirname).version;
+    return PackageJsonLookup.loadOwnPackageJson(__dirname).version;
   }
 
   /**

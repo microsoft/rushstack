@@ -1,23 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line
-const importLazy = require('import-lazy')(require);
-
-console.log('ApprovedPackagesConfiguration.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
-console.log('ApprovedPackagesConfiguration.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as os from 'os';
-console.log('ApprovedPackagesConfiguration.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
-// import { JsonFile, JsonSchema, FileSystem, NewlineKind, InternalError } from '@rushstack/node-core-library';
-// eslint-disable-next-line
-const nodeCoreLibrary = importLazy('@rushstack/node-core-library');
-console.log('ApprovedPackagesConfiguration.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
+import { JsonFile, JsonSchema, FileSystem, NewlineKind, InternalError } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
-console.log('ApprovedPackagesConfiguration.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
-console.log('ApprovedPackagesConfiguration.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * Part of IApprovedPackagesJson.
@@ -58,11 +47,8 @@ export class ApprovedPackagesItem {
  * @public
  */
 export class ApprovedPackagesConfiguration {
-  // eslint-disable-next-line
-  private static get _jsonSchema() {
-    return nodeCoreLibrary.JsonSchema.fromFile(
-      path.join(__dirname, '../schemas/approved-packages.schema.json')
-    );
+  private static get _jsonSchema(): JsonSchema {
+    return JsonSchema.fromFile(path.join(__dirname, '../schemas/approved-packages.schema.json'));
   }
 
   public items: ApprovedPackagesItem[] = [];
@@ -116,8 +102,7 @@ export class ApprovedPackagesConfiguration {
    * If the file exists, calls loadFromFile().
    */
   public tryLoadFromFile(approvedPackagesPolicyEnabled: boolean): boolean {
-    // eslint-disable-next-line
-    if (!nodeCoreLibrary.FileSystem.exists(this._jsonFilename)) {
+    if (!FileSystem.exists(this._jsonFilename)) {
       return false;
     }
 
@@ -137,7 +122,7 @@ export class ApprovedPackagesConfiguration {
    * Loads the configuration data from the filename that was passed to the constructor.
    */
   public loadFromFile(): void {
-    const approvedPackagesJson: IApprovedPackagesJson = nodeCoreLibrary.JsonFile.loadAndValidate(
+    const approvedPackagesJson: IApprovedPackagesJson = JsonFile.loadAndValidate(
       this._jsonFilename,
       ApprovedPackagesConfiguration._jsonSchema
     );
@@ -179,7 +164,7 @@ export class ApprovedPackagesConfiguration {
     }
 
     // Save the file
-    let body: string = nodeCoreLibrary.JsonFile.stringify(this._loadedJson);
+    let body: string = JsonFile.stringify(this._loadedJson);
 
     // Unindent the allowedCategories array to improve readability
     body = body.replace(/("allowedCategories": +\[)([^\]]+)/g, (substring: string, ...args: string[]) => {
@@ -189,8 +174,8 @@ export class ApprovedPackagesConfiguration {
     // Add a header
     body = '// DO NOT ADD COMMENTS IN THIS FILE.  They will be lost when the Rush tool resaves it.\n' + body;
 
-    nodeCoreLibrary.FileSystem.writeFile(this._jsonFilename, body, {
-      convertLineEndings: nodeCoreLibrary.NewlineKind.CrLf
+    FileSystem.writeFile(this._jsonFilename, body, {
+      convertLineEndings: NewlineKind.CrLf
     });
   }
 
@@ -222,7 +207,7 @@ export class ApprovedPackagesConfiguration {
    */
   private _addItem(item: ApprovedPackagesItem): void {
     if (this._itemsByName.has(item.packageName)) {
-      throw new nodeCoreLibrary.InternalError('Duplicate key');
+      throw new InternalError('Duplicate key');
     }
     this.items.push(item);
     this._itemsByName.set(item.packageName, item);

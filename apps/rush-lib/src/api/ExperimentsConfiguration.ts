@@ -35,9 +35,9 @@ export interface IExperimentsJson {
  * @beta
  */
 export class ExperimentsConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.resolve(__dirname, '..', 'schemas', 'experiments.schema.json')
-  );
+  private static get _jsonSchema(): JsonSchema {
+    return JsonSchema.fromFile(path.resolve(__dirname, '..', 'schemas', 'experiments.schema.json'));
+  }
 
   private _experimentConfiguration: IExperimentsJson;
   private _jsonFileName: string;

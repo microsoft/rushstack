@@ -3,57 +3,28 @@
 
 /* eslint max-lines: off */
 
-// eslint-disable-next-line
-const importLazy = require('import-lazy')(require);
-
-console.log('RushConfiguration.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
-console.log('RushConfiguration.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as fs from 'fs';
-console.log('RushConfiguration.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
-// eslint-disable-next-line
-const semver = importLazy('semver');
-console.log('RushConfiguration.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
-// import { JsonFile, JsonSchema, Path, FileSystem, PackageNameParser } from '@rushstack/node-core-library';
-// eslint-disable-next-line
-const nodeCoreLibrary = importLazy('@rushstack/node-core-library');
-
-console.log('RushConfiguration.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
+import * as semver from 'semver';
+import { JsonFile, JsonSchema, Path, FileSystem, PackageNameParser } from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
-console.log('RushConfiguration.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { Rush } from '../api/Rush';
-console.log('RushConfiguration.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConfigurationProject, IRushConfigurationProjectJson } from './RushConfigurationProject';
-console.log('RushConfiguration.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConstants } from '../logic/RushConstants';
-console.log('RushConfiguration.ts  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
-console.log('RushConfiguration.ts  : 10: ' + (new Date().getTime() % 20000) / 1000.0);
 import { EventHooks } from './EventHooks';
-console.log('RushConfiguration.ts  : 11: ' + (new Date().getTime() % 20000) / 1000.0);
 import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
-console.log('RushConfiguration.ts  : 12: ' + (new Date().getTime() % 20000) / 1000.0);
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
-console.log('RushConfiguration.ts  : 13: ' + (new Date().getTime() % 20000) / 1000.0);
 import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
-console.log('RushConfiguration.ts  : 14: ' + (new Date().getTime() % 20000) / 1000.0);
 import { Utilities } from '../utilities/Utilities';
-console.log('RushConfiguration.ts  : 15: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PackageManagerName, PackageManager } from './packageManager/PackageManager';
-console.log('RushConfiguration.ts  : 16: ' + (new Date().getTime() % 20000) / 1000.0);
 import { NpmPackageManager } from './packageManager/NpmPackageManager';
-console.log('RushConfiguration.ts  : 17: ' + (new Date().getTime() % 20000) / 1000.0);
 import { YarnPackageManager } from './packageManager/YarnPackageManager';
-console.log('RushConfiguration.ts  : 18: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PnpmPackageManager } from './packageManager/PnpmPackageManager';
-console.log('RushConfiguration.ts  : 19: ' + (new Date().getTime() % 20000) / 1000.0);
 import { ExperimentsConfiguration } from './ExperimentsConfiguration';
-console.log('RushConfiguration.ts  : 20: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PackageNameParsers } from './PackageNameParsers';
-console.log('RushConfiguration.ts  : 21: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RepoStateFile } from '../logic/RepoStateFile';
-console.log('RushConfiguration.ts  : 22: ' + (new Date().getTime() % 20000) / 1000.0);
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'master';
@@ -452,10 +423,9 @@ export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
  * @public
  */
 export class RushConfiguration {
-  // eslint-disable-next-line
-  private static _jsonSchema = nodeCoreLibrary.JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/rush.schema.json')
-  );
+  private static get _jsonSchema(): JsonSchema {
+    return JsonSchema.fromFile(path.join(__dirname, '../schemas/rush.schema.json'));
+  }
 
   private _rushJsonFile: string;
   private _rushJsonFolder: string;
@@ -508,7 +478,7 @@ export class RushConfiguration {
   // Rush hooks
   private _eventHooks: EventHooks;
 
-  private readonly _packageNameParser: any;
+  private readonly _packageNameParser: PackageNameParser;
 
   private _telemetryEnabled: boolean;
 
@@ -523,29 +493,21 @@ export class RushConfiguration {
    * instead.
    */
   private constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string) {
-    console.log('RushConfiguration.constructor()  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
     EnvironmentConfiguration.initialize();
-    console.log('RushConfiguration.constructor()  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 
     if (rushConfigurationJson.nodeSupportedVersionRange) {
-      console.log('RushConfiguration.constructor()  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
       if (!semver.validRange(rushConfigurationJson.nodeSupportedVersionRange)) {
-        console.log('RushConfiguration.constructor()  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
         throw new Error(
           'Error parsing the node-semver expression in the "nodeSupportedVersionRange"' +
             ` field from rush.json: "${rushConfigurationJson.nodeSupportedVersionRange}"`
         );
       }
-      console.log('RushConfiguration.constructor()  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
       if (!semver.satisfies(process.version, rushConfigurationJson.nodeSupportedVersionRange)) {
-        console.log('RushConfiguration.constructor()  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
         const message: string =
           `Your dev environment is running Node.js version ${process.version} which does` +
           ` not meet the requirements for building this repository.  (The rush.json configuration` +
           ` requires nodeSupportedVersionRange="${rushConfigurationJson.nodeSupportedVersionRange}")`;
-        console.log('RushConfiguration.constructor()  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
         if (EnvironmentConfiguration.allowUnsupportedNodeVersion) {
-          console.log('RushConfiguration.constructor()  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
           console.warn(message);
         } else {
           throw new Error(message);
@@ -553,62 +515,43 @@ export class RushConfiguration {
       }
     }
 
-    console.log('RushConfiguration.constructor()  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
     this._rushJsonFile = rushJsonFilename;
-    console.log('RushConfiguration.constructor()  : 10: ' + (new Date().getTime() % 20000) / 1000.0);
     this._rushJsonFolder = path.dirname(rushJsonFilename);
-    console.log('RushConfiguration.constructor()  : 11: ' + (new Date().getTime() % 20000) / 1000.0);
 
     this._commonFolder = path.resolve(path.join(this._rushJsonFolder, RushConstants.commonFolderName));
-    console.log('RushConfiguration.constructor()  : 12: ' + (new Date().getTime() % 20000) / 1000.0);
 
     this._commonRushConfigFolder = path.join(this._commonFolder, 'config', 'rush');
-    console.log('RushConfiguration.constructor()  : 13: ' + (new Date().getTime() % 20000) / 1000.0);
 
     this._commonTempFolder =
       EnvironmentConfiguration.rushTempFolderOverride ||
       path.join(this._commonFolder, RushConstants.rushTempFolderName);
 
-    console.log('RushConfiguration.constructor()  : 14: ' + (new Date().getTime() % 20000) / 1000.0);
     this._commonScriptsFolder = path.join(this._commonFolder, 'scripts');
-    console.log('RushConfiguration.constructor()  : 15: ' + (new Date().getTime() % 20000) / 1000.0);
 
     this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
-    console.log('RushConfiguration.constructor()  : 16: ' + (new Date().getTime() % 20000) / 1000.0);
     this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
-    console.log('RushConfiguration.constructor()  : 17: ' + (new Date().getTime() % 20000) / 1000.0);
     this._yarnCacheFolder = path.resolve(path.join(this._commonTempFolder, 'yarn-cache'));
-    console.log('RushConfiguration.constructor()  : 18: ' + (new Date().getTime() % 20000) / 1000.0);
 
     this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
-    console.log('RushConfiguration.constructor()  : 19: ' + (new Date().getTime() % 20000) / 1000.0);
 
     this._currentVariantJsonFilename = path.join(this._commonTempFolder, 'current-variant.json');
-    console.log('RushConfiguration.constructor()  : 20: ' + (new Date().getTime() % 20000) / 1000.0);
 
     this._suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
-    console.log('RushConfiguration.constructor()  : 21: ' + (new Date().getTime() % 20000) / 1000.0);
 
     this._ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
-    console.log('RushConfiguration.constructor()  : 22: ' + (new Date().getTime() % 20000) / 1000.0);
 
     const experimentsConfigFile: string = path.join(
       this._commonRushConfigFolder,
       RushConstants.experimentsFilename
     );
-    console.log('RushConfiguration.constructor()  : 23: ' + (new Date().getTime() % 20000) / 1000.0);
     this._experimentsConfiguration = new ExperimentsConfiguration(experimentsConfigFile);
-    console.log('RushConfiguration.constructor()  : 24: ' + (new Date().getTime() % 20000) / 1000.0);
 
     this._npmOptions = new NpmOptionsConfiguration(rushConfigurationJson.npmOptions || {});
-    console.log('RushConfiguration.constructor()  : 25: ' + (new Date().getTime() % 20000) / 1000.0);
     this._pnpmOptions = new PnpmOptionsConfiguration(
       rushConfigurationJson.pnpmOptions || {},
       this._commonTempFolder
     );
-    console.log('RushConfiguration.constructor()  : 26: ' + (new Date().getTime() % 20000) / 1000.0);
     this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || {});
-    console.log('RushConfiguration.constructor()  : 27: ' + (new Date().getTime() % 20000) / 1000.0);
 
     // TODO: Add an actual "packageManager" field in rush.json
     const packageManagerFields: string[] = [];
@@ -647,9 +590,7 @@ export class RushConfiguration {
       this._packageManagerWrapper = new NpmPackageManager(this._packageManagerToolVersion);
     } else if (this._packageManager === 'pnpm') {
       this._packageManagerToolVersion = rushConfigurationJson.pnpmVersion!;
-      console.log('RushConfiguration.constructor()  : 28: ' + (new Date().getTime() % 20000) / 1000.0);
       this._packageManagerWrapper = new PnpmPackageManager(this._packageManagerToolVersion);
-      console.log('RushConfiguration.constructor()  : 29: ' + (new Date().getTime() % 20000) / 1000.0);
     } else {
       this._packageManagerToolVersion = rushConfigurationJson.yarnVersion!;
       this._packageManagerWrapper = new YarnPackageManager(this._packageManagerToolVersion);
@@ -675,13 +616,11 @@ export class RushConfiguration {
       parsedPath.name + '-preinstall' + parsedPath.ext
     );
 
-    console.log('RushConfiguration.constructor()  : 30: ' + (new Date().getTime() % 20000) / 1000.0);
     RushConfiguration._validateCommonRushConfigFolder(
       this._commonRushConfigFolder,
       this.packageManager,
       this._shrinkwrapFilename
     );
-    console.log('RushConfiguration.constructor()  : 31: ' + (new Date().getTime() % 20000) / 1000.0);
 
     this._projectFolderMinDepth =
       rushConfigurationJson.projectFolderMinDepth !== undefined
@@ -704,9 +643,7 @@ export class RushConfiguration {
       ? PackageNameParsers.mostlyStandard
       : PackageNameParsers.rushDefault;
 
-    console.log('RushConfiguration.constructor()  : 32: ' + (new Date().getTime() % 20000) / 1000.0);
     this._approvedPackagesPolicy = new ApprovedPackagesPolicy(this, rushConfigurationJson);
-    console.log('RushConfiguration.constructor()  : 33: ' + (new Date().getTime() % 20000) / 1000.0);
 
     this._gitAllowedEmailRegExps = [];
     this._gitSampleEmail = '';
@@ -829,31 +766,13 @@ export class RushConfiguration {
    * an RushConfiguration object.
    */
   public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration {
-    console.log(
-      'RushConfiguration.loadFromConfigurationFile()  : 1: ' + (new Date().getTime() % 20000) / 1000.0
-    );
     let resolvedRushJsonFilename: string = path.resolve(rushJsonFilename);
-
     // Load the rush.json before we fix the casing. If the case is wrong on a case-sensitive filesystem,
     // the next line show throw.
-    console.log(
-      'RushConfiguration.loadFromConfigurationFile()  : 2: ' + (new Date().getTime() % 20000) / 1000.0
-    );
-    const rushConfigurationJson: IRushConfigurationJson = nodeCoreLibrary.JsonFile.load(
-      resolvedRushJsonFilename
-    );
-    console.log(
-      'RushConfiguration.loadFromConfigurationFile()  : 3: ' + (new Date().getTime() % 20000) / 1000.0
-    );
+    const rushConfigurationJson: IRushConfigurationJson = JsonFile.load(resolvedRushJsonFilename);
 
     try {
-      console.log(
-        'RushConfiguration.loadFromConfigurationFile()  : 4: ' + (new Date().getTime() % 20000) / 1000.0
-      );
       resolvedRushJsonFilename = trueCasePathSync(resolvedRushJsonFilename);
-      console.log(
-        'RushConfiguration.loadFromConfigurationFile()  : 5: ' + (new Date().getTime() % 20000) / 1000.0
-      );
     } catch (error) {
       /* ignore errors from true-case-path */
     }
@@ -863,17 +782,11 @@ export class RushConfiguration {
     // but we'll validate anyway.
     const expectedRushVersion: string = rushConfigurationJson.rushVersion;
 
-    console.log(
-      'RushConfiguration.loadFromConfigurationFile()  : 6: ' + (new Date().getTime() % 20000) / 1000.0
-    );
     const rushJsonBaseName: string = path.basename(resolvedRushJsonFilename);
 
     // If the version is missing or malformed, fall through and let the schema handle it.
     if (expectedRushVersion && semver.valid(expectedRushVersion)) {
       // Make sure the requested version isn't too old
-      console.log(
-        'RushConfiguration.loadFromConfigurationFile()  : 7: ' + (new Date().getTime() % 20000) / 1000.0
-      );
       if (semver.lt(expectedRushVersion, MINIMUM_SUPPORTED_RUSH_JSON_VERSION)) {
         throw new Error(
           `${rushJsonBaseName} is version ${expectedRushVersion}, which is too old for this tool. ` +
@@ -888,17 +801,11 @@ export class RushConfiguration {
       //
       // IMPORTANT: Whenever a breaking change is introduced for one of the config files, we must
       // increment the minor version number for Rush.
-      console.log(
-        'RushConfiguration.loadFromConfigurationFile()  : 8: ' + (new Date().getTime() % 20000) / 1000.0
-      );
       if (
         semver.major(Rush.version) !== semver.major(expectedRushVersion) ||
         semver.minor(Rush.version) !== semver.minor(expectedRushVersion)
       ) {
         // If the major/minor are different, then make sure it's an older version.
-        console.log(
-          'RushConfiguration.loadFromConfigurationFile()  : 9: ' + (new Date().getTime() % 20000) / 1000.0
-        );
         if (semver.lt(Rush.version, expectedRushVersion)) {
           throw new Error(
             `Unable to load ${rushJsonBaseName} because its RushVersion is` +
@@ -909,14 +816,8 @@ export class RushConfiguration {
       }
     }
 
-    console.log(
-      'RushConfiguration.loadFromConfigurationFile()  : 10: ' + (new Date().getTime() % 20000) / 1000.0
-    );
     RushConfiguration._jsonSchema.validateObject(rushConfigurationJson, resolvedRushJsonFilename);
 
-    console.log(
-      'RushConfiguration.loadFromConfigurationFile()  : 11: ' + (new Date().getTime() % 20000) / 1000.0
-    );
     return new RushConfiguration(rushConfigurationJson, resolvedRushJsonFilename);
   }
 
@@ -942,7 +843,7 @@ export class RushConfiguration {
     for (let i: number = 0; i < 10; ++i) {
       const rushJsonFilename: string = path.join(currentFolder, 'rush.json');
 
-      if (nodeCoreLibrary.FileSystem.exists(rushJsonFilename)) {
+      if (FileSystem.exists(rushJsonFilename)) {
         if (i > 0 && verbose) {
           console.log('Found configuration in ' + rushJsonFilename);
         }
@@ -1011,17 +912,15 @@ export class RushConfiguration {
     packageManager: PackageManagerName,
     shrinkwrapFilename: string
   ): void {
-    if (!nodeCoreLibrary.FileSystem.exists(commonRushConfigFolder)) {
+    if (!FileSystem.exists(commonRushConfigFolder)) {
       console.log(`Creating folder: ${commonRushConfigFolder}`);
-      nodeCoreLibrary.FileSystem.ensureFolder(commonRushConfigFolder);
+      FileSystem.ensureFolder(commonRushConfigFolder);
       return;
     }
 
-    for (const filename of nodeCoreLibrary.FileSystem.readFolder(commonRushConfigFolder)) {
+    for (const filename of FileSystem.readFolder(commonRushConfigFolder)) {
       // Ignore things that aren't actual files
-      const stat: fs.Stats = nodeCoreLibrary.FileSystem.getLinkStatistics(
-        path.join(commonRushConfigFolder, filename)
-      );
+      const stat: fs.Stats = FileSystem.getLinkStatistics(path.join(commonRushConfigFolder, filename));
       if (!stat.isFile() && !stat.isSymbolicLink()) {
         continue;
       }
@@ -1060,7 +959,7 @@ export class RushConfiguration {
       commonRushConfigFolder,
       RushConstants.pinnedVersionsFilename
     );
-    if (nodeCoreLibrary.FileSystem.exists(pinnedVersionsFilename)) {
+    if (FileSystem.exists(pinnedVersionsFilename)) {
       throw new Error(
         'The "pinned-versions.json" config file is no longer supported;' +
           ' please move your settings to the "preferredVersions" field of a "common-versions.json" config file.' +
@@ -1498,10 +1397,8 @@ export class RushConfiguration {
   public get currentInstalledVariant(): string | undefined {
     let variant: string | undefined;
 
-    if (nodeCoreLibrary.FileSystem.exists(this._currentVariantJsonFilename)) {
-      const currentVariantJson: ICurrentVariantJson = nodeCoreLibrary.JsonFile.load(
-        this._currentVariantJsonFilename
-      );
+    if (FileSystem.exists(this._currentVariantJsonFilename)) {
+      const currentVariantJson: ICurrentVariantJson = JsonFile.load(this._currentVariantJsonFilename);
 
       variant = currentVariantJson.variant || undefined;
     }
@@ -1520,7 +1417,7 @@ export class RushConfiguration {
   /**
    * The rush hooks. It allows customized scripts to run at the specified point.
    */
-  public get packageNameParser(): any {
+  public get packageNameParser(): PackageNameParser {
     return this._packageNameParser;
   }
 
@@ -1675,7 +1572,7 @@ export class RushConfiguration {
   public tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined {
     const resolvedPath: string = path.resolve(currentFolderPath);
     for (const project of this.projects) {
-      if (nodeCoreLibrary.Path.isUnderOrEqual(resolvedPath, project.projectFolder)) {
+      if (Path.isUnderOrEqual(resolvedPath, project.projectFolder)) {
         return project;
       }
     }
