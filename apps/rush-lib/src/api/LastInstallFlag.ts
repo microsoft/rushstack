@@ -5,6 +5,7 @@
 const importLazy = require('import-lazy')(require);
 
 import * as path from 'path';
+// eslint-disable-next-line
 const _ = importLazy('lodash');
 import { FileSystem, JsonFile, JsonObject } from '@rushstack/node-core-library';
 

@@ -3,14 +3,10 @@
 
 import * as os from 'os';
 
-console.log('NpmShrinkwrapFile.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import { JsonFile, FileSystem, InternalError } from '@rushstack/node-core-library';
-console.log('NpmShrinkwrapFile.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
-console.log('NpmShrinkwrapFile.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import { DependencySpecifier } from '../DependencySpecifier';
-console.log('NpmShrinkwrapFile.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 
 interface INpmShrinkwrapDependencyJson {
   version: string;

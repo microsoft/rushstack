@@ -4,20 +4,14 @@
 // eslint-disable-next-line
 const importLazy = require('import-lazy')(require);
 
-console.log('NCL.FileSystem.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as nodeJsPath from 'path';
-console.log('NCL.FileSystem.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as fs from 'fs';
-console.log('NCL.FileSystem.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 // import * as fsx from 'fs-extra';
 // eslint-disable-next-line
 const fsx = importLazy('fs-extra');
-console.log('NCL.FileSystem.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { Text, NewlineKind, Encoding } from './Text';
-console.log('NCL.FileSystem.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PosixModeBits } from './PosixModeBits';
-console.log('NCL.FileSystem.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * An alias for the Node.js `fs.Stats` object.

@@ -4,13 +4,10 @@
 // eslint-disable-next-line
 const importLazy = require('import-lazy')(require);
 
-console.log('VersionPolicy.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
+// eslint-disable-next-line
 const _ = importLazy('lodash');
-console.log('VersionPolicy.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as semver from 'semver';
-console.log('VersionPolicy.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import { IPackageJson } from '@rushstack/node-core-library';
-console.log('VersionPolicy.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import {
   IVersionPolicyJson,
@@ -20,13 +17,9 @@ import {
   VersionFormatForPublish,
   IVersionPolicyDependencyJson
 } from './VersionPolicyConfiguration';
-console.log('VersionPolicy.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PackageJsonEditor } from './PackageJsonEditor';
-console.log('VersionPolicy.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConfiguration } from './RushConfiguration';
-console.log('VersionPolicy.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConfigurationProject } from './RushConfigurationProject';
-console.log('VersionPolicy.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * Type of version bumps

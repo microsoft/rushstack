@@ -1,11 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-console.log('BulkScriptAction.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as os from 'os';
-console.log('BulkScriptAction.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as colors from 'colors';
-console.log('BulkScriptAction.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import {
   CommandLineFlagParameter,
@@ -14,31 +11,18 @@ import {
   CommandLineParameterKind
 } from '@rushstack/ts-command-line';
 
-console.log('BulkScriptAction.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import { Event } from '../../index';
-console.log('BulkScriptAction.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import { SetupChecks } from '../../logic/SetupChecks';
-console.log('BulkScriptAction.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 import { TaskSelector } from '../../logic/TaskSelector';
-console.log('BulkScriptAction.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { Stopwatch } from '../../utilities/Stopwatch';
-console.log('BulkScriptAction.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
-console.log('BulkScriptAction.ts  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
-console.log('BulkScriptAction.ts  : 10: ' + (new Date().getTime() % 20000) / 1000.0);
 import { TaskRunner } from '../../logic/taskRunner/TaskRunner';
-console.log('BulkScriptAction.ts  : 11: ' + (new Date().getTime() % 20000) / 1000.0);
 import { TaskCollection } from '../../logic/taskRunner/TaskCollection';
-console.log('BulkScriptAction.ts  : 12: ' + (new Date().getTime() % 20000) / 1000.0);
 import { Utilities } from '../../utilities/Utilities';
-console.log('BulkScriptAction.ts  : 13: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConstants } from '../../logic/RushConstants';
-console.log('BulkScriptAction.ts  : 14: ' + (new Date().getTime() % 20000) / 1000.0);
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-console.log('BulkScriptAction.ts  : 15: ' + (new Date().getTime() % 20000) / 1000.0);
 import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
-console.log('BulkScriptAction.ts  : 16: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * Constructor parameters for BulkScriptAction.

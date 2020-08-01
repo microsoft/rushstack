@@ -4,37 +4,24 @@
 // eslint-disable-next-line
 const importLazy = require('import-lazy')(require);
 
-console.log('PnpmShrinkwrapFile.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 // eslint-disable-next-line
 const yaml = importLazy('js-yaml');
-console.log('PnpmShrinkwrapFile.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as os from 'os';
-console.log('PnpmShrinkwrapFile.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
-console.log('PnpmShrinkwrapFile.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as semver from 'semver';
-console.log('PnpmShrinkwrapFile.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as crypto from 'crypto';
-console.log('PnpmShrinkwrapFile.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as colors from 'colors';
-console.log('PnpmShrinkwrapFile.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { FileSystem } from '@rushstack/node-core-library';
-console.log('PnpmShrinkwrapFile.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
-console.log('PnpmShrinkwrapFile.ts  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
 import { DependencySpecifier } from '../DependencySpecifier';
-console.log('PnpmShrinkwrapFile.ts  : 10: ' + (new Date().getTime() % 20000) / 1000.0);
 import {
   PackageManagerOptionsConfigurationBase,
   PnpmOptionsConfiguration
 } from '../../api/RushConfiguration';
-console.log('PnpmShrinkwrapFile.ts  : 11: ' + (new Date().getTime() % 20000) / 1000.0);
 import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
-console.log('PnpmShrinkwrapFile.ts  : 12: ' + (new Date().getTime() % 20000) / 1000.0);
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
-console.log('PnpmShrinkwrapFile.ts  : 13: ' + (new Date().getTime() % 20000) / 1000.0);
 
 export interface IPeerDependenciesMetaYaml {
   optional?: boolean;

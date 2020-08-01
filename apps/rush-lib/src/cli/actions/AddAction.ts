@@ -1,25 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-console.log('AddAction.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as os from 'os';
-console.log('AddAction.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as semver from 'semver';
-console.log('AddAction.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
-console.log('AddAction.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-console.log('AddAction.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import { BaseRushAction } from './BaseRushAction';
-console.log('AddAction.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushCommandLineParser } from '../RushCommandLineParser';
-console.log('AddAction.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PackageJsonUpdater, SemVerStyle } from '../../logic/PackageJsonUpdater';
-console.log('AddAction.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 import { DependencySpecifier } from '../../logic/DependencySpecifier';
-console.log('AddAction.ts  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
 
 export class AddAction extends BaseRushAction {
   private _allFlag: CommandLineFlagParameter;

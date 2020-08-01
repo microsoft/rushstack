@@ -1,18 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-console.log('JsonFile.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as os from 'os';
-console.log('JsonFile.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as jju from 'jju';
-console.log('JsonFile.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { JsonSchema, IJsonSchemaErrorInfo, IJsonSchemaValidateOptions } from './JsonSchema';
-console.log('JsonFile.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import { Text, NewlineKind } from './Text';
-console.log('JsonFile.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import { FileSystem } from './FileSystem';
-console.log('JsonFile.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * Represents a JSON-serializable object whose type has not been determined yet.

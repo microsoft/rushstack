@@ -1,26 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-console.log('Rush.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import { EOL } from 'os';
-console.log('Rush.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as colors from 'colors';
-console.log('Rush.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PackageJsonLookup } from '@rushstack/node-core-library';
-console.log('Rush.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
-console.log('Rush.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConstants } from '../logic/RushConstants';
-console.log('Rush.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushXCommandLine } from '../cli/RushXCommandLine';
-console.log('Rush.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
-console.log('Rush.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
-console.log('Rush.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { Utilities } from '../utilities/Utilities';
-console.log('Rush.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * Options to pass to the rush "launch" functions.

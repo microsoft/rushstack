@@ -1,11 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-console.log('CommonVersionsConfiguration.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as crypto from 'crypto';
-console.log('CommonVersionsConfiguration.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
-console.log('CommonVersionsConfiguration.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import {
   JsonFile,
   JsonSchema,
@@ -14,11 +11,8 @@ import {
   FileSystem,
   Sort
 } from '@rushstack/node-core-library';
-console.log('CommonVersionsConfiguration.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PackageNameParsers } from './PackageNameParsers';
-console.log('CommonVersionsConfiguration.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
-console.log('CommonVersionsConfiguration.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * Part of the ICommonVersionsJson structure.

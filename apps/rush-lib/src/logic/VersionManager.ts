@@ -6,6 +6,7 @@ const importLazy = require('import-lazy')(require);
 
 import * as path from 'path';
 import * as semver from 'semver';
+// eslint-disable-next-line
 const _ = importLazy('lodash');
 import { IPackageJson, JsonFile, FileConstants } from '@rushstack/node-core-library';
 

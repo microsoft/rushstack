@@ -1,15 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-console.log('WorkspaceInstallManager.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as colors from 'colors';
-console.log('WorkspaceInstallManager.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as os from 'os';
-console.log('WorkspaceInstallManager.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
-console.log('WorkspaceInstallManager.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as semver from 'semver';
-console.log('WorkspaceInstallManager.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import {
   FileSystem,
   InternalError,
@@ -17,42 +12,24 @@ import {
   JsonFile,
   FileConstants
 } from '@rushstack/node-core-library';
-console.log('WorkspaceInstallManager.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
-console.log('WorkspaceInstallManager.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
-console.log('WorkspaceInstallManager.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
-console.log('WorkspaceInstallManager.ts  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
-console.log('WorkspaceInstallManager.ts  : 10: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../../api/PackageJsonEditor';
-console.log('WorkspaceInstallManager.ts  : 11: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
-console.log('WorkspaceInstallManager.ts  : 12: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-console.log('WorkspaceInstallManager.ts  : 13: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConstants } from '../../logic/RushConstants';
-console.log('WorkspaceInstallManager.ts  : 14: ' + (new Date().getTime() % 20000) / 1000.0);
 import { Stopwatch } from '../../utilities/Stopwatch';
-console.log('WorkspaceInstallManager.ts  : 15: ' + (new Date().getTime() % 20000) / 1000.0);
 import { Utilities } from '../../utilities/Utilities';
-console.log('WorkspaceInstallManager.ts  : 16: ' + (new Date().getTime() % 20000) / 1000.0);
 import { InstallHelpers } from './InstallHelpers';
-console.log('WorkspaceInstallManager.ts  : 17: ' + (new Date().getTime() % 20000) / 1000.0);
 import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
-console.log('WorkspaceInstallManager.ts  : 18: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RepoStateFile } from '../RepoStateFile';
-console.log('WorkspaceInstallManager.ts  : 19: ' + (new Date().getTime() % 20000) / 1000.0);
 import { IPnpmfileShimSettings } from '../pnpm/IPnpmfileShimSettings';
-console.log('WorkspaceInstallManager.ts  : 20: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PnpmProjectDependencyManifest } from '../pnpm/PnpmProjectDependencyManifest';
-console.log('WorkspaceInstallManager.ts  : 21: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PnpmShrinkwrapFile, IPnpmShrinkwrapImporterYaml } from '../pnpm/PnpmShrinkwrapFile';
-console.log('WorkspaceInstallManager.ts  : 22: ' + (new Date().getTime() % 20000) / 1000.0);
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
-console.log('WorkspaceInstallManager.ts  : 22: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * This class implements common logic between "rush install" and "rush update".

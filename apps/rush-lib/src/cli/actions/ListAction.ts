@@ -4,17 +4,11 @@
 // eslint-disable-next-line
 const importLazy = require('import-lazy')(require);
 
-console.log('ListAction.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import { BaseRushAction } from './BaseRushAction';
-console.log('ListAction.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushCommandLineParser } from '../RushCommandLineParser';
-console.log('ListAction.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
-console.log('ListAction.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-console.log('ListAction.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 const Table = importLazy('cli-table');
-console.log('ListAction.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 
 export interface IJsonEntry {
   name: string;

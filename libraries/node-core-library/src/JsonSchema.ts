@@ -1,18 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-console.log('JsonSchema.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as os from 'os';
-console.log('JsonSchema.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
-console.log('JsonSchema.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import Validator = require('z-schema/dist/ZSchema-browser-min');
-console.log('JsonSchema.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { JsonFile, JsonObject } from './JsonFile';
-console.log('JsonSchema.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import { FileSystem } from './FileSystem';
-console.log('JsonSchema.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 
 interface ISchemaWithId {
   id: string | undefined;

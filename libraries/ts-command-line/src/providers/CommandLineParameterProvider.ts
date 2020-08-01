@@ -1,9 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-console.log('CommandLineParameterProvider.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as argparse from 'argparse';
-console.log('CommandLineParameterProvider.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import {
   ICommandLineFlagDefinition,
   ICommandLineStringDefinition,
@@ -12,25 +10,17 @@ import {
   ICommandLineChoiceDefinition,
   ICommandLineRemainderDefinition
 } from '../parameters/CommandLineDefinition';
-console.log('CommandLineParameterProvider.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import {
   CommandLineParameter,
   CommandLineParameterWithArgument,
   CommandLineParameterKind
 } from '../parameters/BaseClasses';
-console.log('CommandLineParameterProvider.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
-console.log('CommandLineParameterProvider.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
-console.log('CommandLineParameterProvider.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 import { CommandLineStringListParameter } from '../parameters/CommandLineStringListParameter';
-console.log('CommandLineParameterProvider.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { CommandLineIntegerParameter } from '../parameters/CommandLineIntegerParameter';
-console.log('CommandLineParameterProvider.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 import { CommandLineChoiceParameter } from '../parameters/CommandLineChoiceParameter';
-console.log('CommandLineParameterProvider.ts  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
 import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
-console.log('CommandLineParameterProvider.ts  : 10: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * This is the argparse result data object

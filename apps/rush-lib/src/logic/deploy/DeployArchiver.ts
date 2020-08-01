@@ -4,18 +4,13 @@
 // eslint-disable-next-line
 const importLazy = require('import-lazy')(require);
 
-console.log('DeployArchiver.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 // import * as JSZip from 'jszip';
 // eslint-disable-next-line
 const JSZip = importLazy('jszip');
-console.log('DeployArchiver.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
-console.log('DeployArchiver.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import { FileSystem, FileSystemStats } from '@rushstack/node-core-library';
-console.log('DeployArchiver.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { IDeployState } from './DeployManager';
-console.log('DeployArchiver.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 
 // JSZip is dependant on Blob being declared.
 declare global {

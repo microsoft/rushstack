@@ -4,53 +4,35 @@
 // eslint-disable-next-line
 const importLazy = require('import-lazy')(require);
 
-console.log('ChangeAction.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as os from 'os';
-console.log('ChangeAction.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
-console.log('ChangeAction.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as child_process from 'child_process';
-console.log('ChangeAction.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as colors from 'colors';
-console.log('ChangeAction.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 // import * as inquirer from 'inquirer';
 // eslint-disable-next-line
 const inquirer = importLazy('inquirer');
-
-console.log('ChangeAction.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
-console.log('ChangeAction.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { FileSystem, Path } from '@rushstack/node-core-library';
-console.log('ChangeAction.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-console.log('ChangeAction.ts  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
 import { IChangeFile, IChangeInfo, ChangeType } from '../../api/ChangeManagement';
-console.log('ChangeAction.ts  : 10: ' + (new Date().getTime() % 20000) / 1000.0);
 import { VersionControl } from '../../utilities/VersionControl';
-console.log('ChangeAction.ts  : 11: ' + (new Date().getTime() % 20000) / 1000.0);
 import { ChangeFile } from '../../api/ChangeFile';
-console.log('ChangeAction.ts  : 12: ' + (new Date().getTime() % 20000) / 1000.0);
 import { BaseRushAction } from './BaseRushAction';
-console.log('ChangeAction.ts  : 13: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushCommandLineParser } from '../RushCommandLineParser';
-console.log('ChangeAction.ts  : 14: ' + (new Date().getTime() % 20000) / 1000.0);
 import { ChangeFiles } from '../../logic/ChangeFiles';
-console.log('ChangeAction.ts  : 15: ' + (new Date().getTime() % 20000) / 1000.0);
 import {
   VersionPolicy,
   IndividualVersionPolicy,
   LockStepVersionPolicy,
   VersionPolicyDefinitionName
 } from '../../api/VersionPolicy';
-console.log('ChangeAction.ts  : 16: ' + (new Date().getTime() % 20000) / 1000.0);
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
-console.log('ChangeAction.ts  : 17: ' + (new Date().getTime() % 20000) / 1000.0);
 
 export class ChangeAction extends BaseRushAction {
   private _verifyParameter: CommandLineFlagParameter;

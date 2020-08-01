@@ -6,11 +6,12 @@ const importLazy = require('import-lazy')(require);
 
 import * as fs from 'fs';
 import * as path from 'path';
+// eslint-disable-next-line
 const _ = importLazy('lodash');
+import { FileSystem } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Rush } from '../api/Rush';
-import { FileSystem } from '@rushstack/node-core-library';
 
 export interface ITelemetryData {
   name: string;

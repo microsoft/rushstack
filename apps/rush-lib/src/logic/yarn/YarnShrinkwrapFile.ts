@@ -4,22 +4,14 @@
 // eslint-disable-next-line
 const importLazy = require('import-lazy')(require);
 
-console.log('YarnShrinkwrapFile.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as os from 'os';
-console.log('YarnShrinkwrapFile.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 // eslint-disable-next-line
 const lockfile = importLazy('@yarnpkg/lockfile');
-console.log('YarnShrinkwrapFile.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
-console.log('YarnShrinkwrapFile.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import { FileSystem, IParsedPackageNameOrError, InternalError } from '@rushstack/node-core-library';
-console.log('YarnShrinkwrapFile.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConstants } from '../RushConstants';
-console.log('YarnShrinkwrapFile.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 import { DependencySpecifier } from '../DependencySpecifier';
-console.log('YarnShrinkwrapFile.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PackageNameParsers } from '../../api/PackageNameParsers';
-console.log('YarnShrinkwrapFile.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 
 interface IYarnLockfileParseResult {
   // eslint-disable-next-line
