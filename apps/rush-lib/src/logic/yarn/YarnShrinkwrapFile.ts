@@ -1,13 +1,30 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// eslint-disable-next-line
+const importLazy = require('import-lazy')(require);
+
+console.log('YarnShrinkwrapFile.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as os from 'os';
-import * as lockfile from '@yarnpkg/lockfile';
+console.log('YarnShrinkwrapFile.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
+// eslint-disable-next-line
+const lockfile = importLazy('@yarnpkg/lockfile');
+console.log('YarnShrinkwrapFile.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
+console.log('YarnShrinkwrapFile.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import { FileSystem, IParsedPackageNameOrError, InternalError } from '@rushstack/node-core-library';
+console.log('YarnShrinkwrapFile.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConstants } from '../RushConstants';
+console.log('YarnShrinkwrapFile.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 import { DependencySpecifier } from '../DependencySpecifier';
+console.log('YarnShrinkwrapFile.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PackageNameParsers } from '../../api/PackageNameParsers';
+console.log('YarnShrinkwrapFile.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
+
+interface IYarnLockfileParseResult {
+  // eslint-disable-next-line
+  object: any;
+}
 
 /**
  * Used with YarnShrinkwrapFile._encodePackageNameAndSemVer() and _decodePackageNameAndSemVer().
@@ -146,7 +163,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
 
   public static loadFromFile(shrinkwrapFilename: string): YarnShrinkwrapFile | undefined {
     let shrinkwrapString: string;
-    let shrinkwrapJson: lockfile.ParseResult;
+    let shrinkwrapJson: IYarnLockfileParseResult;
     try {
       if (!FileSystem.exists(shrinkwrapFilename)) {
         return undefined; // file does not exist

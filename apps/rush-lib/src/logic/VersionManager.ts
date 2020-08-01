@@ -1,9 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// eslint-disable-next-line
+const importLazy = require('import-lazy')(require);
+
 import * as path from 'path';
 import * as semver from 'semver';
-import { cloneDeep } from 'lodash';
+const _ = importLazy('lodash');
 import { IPackageJson, JsonFile, FileConstants } from '@rushstack/node-core-library';
 
 import { VersionPolicy, BumpType, LockStepVersionPolicy } from '../api/VersionPolicy';
@@ -185,7 +188,7 @@ export class VersionManager {
       let clonedProject: IPackageJson | undefined = this._updatedProjects.get(rushProject.packageName);
       let projectVersionChanged: boolean = true;
       if (!clonedProject) {
-        clonedProject = cloneDeep(rushProject.packageJson);
+        clonedProject = _.cloneDeep(rushProject.packageJson);
         projectVersionChanged = false;
       }
       this._updateProjectAllDependencies(rushProject, clonedProject!, projectVersionChanged);

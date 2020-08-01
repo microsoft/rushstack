@@ -1,8 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// eslint-disable-next-line
+const importLazy = require('import-lazy')(require);
+
 console.log('VersionPolicy.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
-import { cloneDeep } from 'lodash';
+const _ = importLazy('lodash');
 console.log('VersionPolicy.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as semver from 'semver';
 console.log('VersionPolicy.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
@@ -328,7 +331,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
   }
 
   private _updatePackageVersion(project: IPackageJson, newVersion: semver.SemVer): IPackageJson {
-    const updatedProject: IPackageJson = cloneDeep(project);
+    const updatedProject: IPackageJson = _.cloneDeep(project);
     updatedProject.version = newVersion.format();
     return updatedProject;
   }
@@ -387,7 +390,7 @@ export class IndividualVersionPolicy extends VersionPolicy {
     if (this.lockedMajor) {
       const version: semver.SemVer = new semver.SemVer(project.version);
       if (version.major < this.lockedMajor) {
-        const updatedProject: IPackageJson = cloneDeep(project);
+        const updatedProject: IPackageJson = _.cloneDeep(project);
         updatedProject.version = `${this._lockedMajor}.0.0`;
         return updatedProject;
       } else if (version.major > this.lockedMajor) {

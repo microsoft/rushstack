@@ -106,7 +106,7 @@ export class Rush {
    * This is the same as the Rush tool version for that release.
    */
   public static get version(): string {
-    return PackageJsonLookup.loadOwnPackageJson(__dirname).version;
+    return PackageJsonLookup.getOwnPackageJsonVersion(__dirname);
   }
 
   /**
