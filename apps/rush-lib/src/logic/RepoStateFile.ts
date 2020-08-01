@@ -1,12 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+console.log('RepoStateFile.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
+console.log('RepoStateFile.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import { FileSystem, JsonFile, JsonSchema, NewlineKind } from '@rushstack/node-core-library';
+console.log('RepoStateFile.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { RushConfiguration } from '../api/RushConfiguration';
+console.log('RepoStateFile.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
+console.log('RepoStateFile.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
+console.log('RepoStateFile.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * This interface represents the raw repo-state.json file

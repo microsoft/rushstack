@@ -1,11 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+console.log('PackageJsonLookup.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
+console.log('PackageJsonLookup.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import { JsonFile } from './JsonFile';
+console.log('PackageJsonLookup.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import { IPackageJson, INodePackageJson } from './IPackageJson';
+console.log('PackageJsonLookup.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import { FileConstants } from './Constants';
+console.log('PackageJsonLookup.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import { FileSystem } from './FileSystem';
+console.log('PackageJsonLookup.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * Constructor parameters for {@link PackageJsonLookup}

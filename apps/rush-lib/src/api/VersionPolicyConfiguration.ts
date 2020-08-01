@@ -1,11 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+console.log('VersionPolicyConfiguration.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
+console.log('VersionPolicyConfiguration.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
+console.log('VersionPolicyConfiguration.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import { VersionPolicy, BumpType, LockStepVersionPolicy } from './VersionPolicy';
+console.log('VersionPolicyConfiguration.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConfigurationProject } from './RushConfigurationProject';
+console.log('VersionPolicyConfiguration.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * @beta

@@ -1,22 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// eslint-disable-next-line
+const importLazy = require('import-lazy')(require);
+
 import * as globEscape from 'glob-escape';
 import * as os from 'os';
 import * as path from 'path';
-import * as yaml from 'js-yaml';
+// eslint-disable-next-line
+const yaml = importLazy('js-yaml');
 import { FileSystem, Sort, Text } from '@rushstack/node-core-library';
 
 import { BaseWorkspaceFile } from '../base/BaseWorkspaceFile';
-
-// This is based on PNPM's own configuration:
-// https://github.com/pnpm/pnpm-shrinkwrap/blob/master/src/write.ts
-const WORKSPACE_YAML_FORMAT: yaml.DumpOptions = {
-  lineWidth: 1000,
-  noCompatMode: true,
-  noRefs: true,
-  sortKeys: true
-};
+import { PNPM_SHRINKWRAP_YAML_FORMAT as PNPM_YAML_DUMP_OPTIONS } from './PnpmYamlCommon';
 
 /**
  * This interface represents the raw pnpm-workspace.YAML file
@@ -81,6 +77,6 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     const workspaceYaml: IPnpmWorkspaceYaml = {
       packages: Array.from(this._workspacePackages)
     };
-    return yaml.safeDump(workspaceYaml, WORKSPACE_YAML_FORMAT);
+    return yaml.safeDump(workspaceYaml, PNPM_YAML_DUMP_OPTIONS);
   }
 }

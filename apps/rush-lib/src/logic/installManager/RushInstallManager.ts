@@ -5,7 +5,8 @@
 const importLazy = require('import-lazy')(require);
 
 console.log('RushInstallManager.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
-import * as glob from 'glob';
+// import * as glob from 'glob';
+const glob = importLazy('glob');
 console.log('RushInstallManager.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as colors from 'colors';
 console.log('RushInstallManager.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);

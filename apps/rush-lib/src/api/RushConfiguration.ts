@@ -3,28 +3,50 @@
 
 /* eslint max-lines: off */
 
+console.log('RushConfiguration.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
+console.log('RushConfiguration.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as fs from 'fs';
+console.log('RushConfiguration.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as semver from 'semver';
+console.log('RushConfiguration.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import { JsonFile, JsonSchema, Path, FileSystem, PackageNameParser } from '@rushstack/node-core-library';
+console.log('RushConfiguration.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import { trueCasePathSync } from 'true-case-path';
+console.log('RushConfiguration.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { Rush } from '../api/Rush';
+console.log('RushConfiguration.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConfigurationProject, IRushConfigurationProjectJson } from './RushConfigurationProject';
+console.log('RushConfiguration.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConstants } from '../logic/RushConstants';
+console.log('RushConfiguration.ts  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
+console.log('RushConfiguration.ts  : 10: ' + (new Date().getTime() % 20000) / 1000.0);
 import { EventHooks } from './EventHooks';
+console.log('RushConfiguration.ts  : 11: ' + (new Date().getTime() % 20000) / 1000.0);
 import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
+console.log('RushConfiguration.ts  : 12: ' + (new Date().getTime() % 20000) / 1000.0);
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
+console.log('RushConfiguration.ts  : 13: ' + (new Date().getTime() % 20000) / 1000.0);
 import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
+console.log('RushConfiguration.ts  : 14: ' + (new Date().getTime() % 20000) / 1000.0);
 import { Utilities } from '../utilities/Utilities';
+console.log('RushConfiguration.ts  : 15: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PackageManagerName, PackageManager } from './packageManager/PackageManager';
+console.log('RushConfiguration.ts  : 16: ' + (new Date().getTime() % 20000) / 1000.0);
 import { NpmPackageManager } from './packageManager/NpmPackageManager';
+console.log('RushConfiguration.ts  : 17: ' + (new Date().getTime() % 20000) / 1000.0);
 import { YarnPackageManager } from './packageManager/YarnPackageManager';
+console.log('RushConfiguration.ts  : 18: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PnpmPackageManager } from './packageManager/PnpmPackageManager';
+console.log('RushConfiguration.ts  : 19: ' + (new Date().getTime() % 20000) / 1000.0);
 import { ExperimentsConfiguration } from './ExperimentsConfiguration';
+console.log('RushConfiguration.ts  : 20: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PackageNameParsers } from './PackageNameParsers';
+console.log('RushConfiguration.ts  : 21: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RepoStateFile } from '../logic/RepoStateFile';
+console.log('RushConfiguration.ts  : 22: ' + (new Date().getTime() % 20000) / 1000.0);
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'master';
@@ -816,7 +838,13 @@ export class RushConfiguration {
       }
     }
 
+    console.log(
+      'RushConfiguration.loadFromConfigurationFile()  : 5: ' + (new Date().getTime() % 20000) / 1000.0
+    );
     RushConfiguration._jsonSchema.validateObject(rushConfigurationJson, resolvedRushJsonFilename);
+    console.log(
+      'RushConfiguration.loadFromConfigurationFile()  : 6: ' + (new Date().getTime() % 20000) / 1000.0
+    );
 
     return new RushConfiguration(rushConfigurationJson, resolvedRushJsonFilename);
   }

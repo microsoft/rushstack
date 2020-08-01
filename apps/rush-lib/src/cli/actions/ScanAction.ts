@@ -1,8 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// eslint-disable-next-line
+const importLazy = require('import-lazy')(require);
+
 import * as colors from 'colors';
-import * as glob from 'glob';
+// import * as glob from 'glob';
+const glob = importLazy('glob');
 import * as path from 'path';
 import * as builtinPackageNames from 'builtin-modules';
 import { FileSystem } from '@rushstack/node-core-library';

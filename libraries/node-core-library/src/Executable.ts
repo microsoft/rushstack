@@ -1,12 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+console.log('NCL.Executable.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as child_process from 'child_process';
+console.log('NCL.Executable.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as os from 'os';
+console.log('NCL.Executable.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
+console.log('NCL.Executable.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { FileSystem } from './FileSystem';
+console.log('NCL.Executable.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PosixModeBits } from './PosixModeBits';
+console.log('NCL.Executable.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * Typings for one of the streams inside IExecutableSpawnSyncOptions.stdio.

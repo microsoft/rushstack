@@ -1,15 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+console.log('RushXCommandLine.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as colors from 'colors';
+console.log('RushXCommandLine.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as os from 'os';
+console.log('RushXCommandLine.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
+console.log('RushXCommandLine.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { PackageJsonLookup, IPackageJson, Text } from '@rushstack/node-core-library';
+console.log('RushXCommandLine.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 import { Utilities } from '../utilities/Utilities';
+console.log('RushXCommandLine.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 import { ProjectCommandSet } from '../logic/ProjectCommandSet';
+console.log('RushXCommandLine.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConfiguration } from '../api/RushConfiguration';
+console.log('RushXCommandLine.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
+console.log('RushXCommandLine.ts  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
 
 /**
  * @internal

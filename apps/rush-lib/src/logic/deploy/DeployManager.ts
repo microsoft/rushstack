@@ -4,17 +4,26 @@
 // eslint-disable-next-line
 const importLazy = require('import-lazy')(require);
 
+console.log('DeployManager.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as colors from 'colors';
+console.log('DeployManager.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
-import * as resolve from 'resolve';
-import * as npmPacklist from 'npm-packlist';
+console.log('DeployManager.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
+const resolve = importLazy('resolve');
+console.log('DeployManager.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
+// eslint-disable-next-line
+const npmPacklist = importLazy('npm-packlist');
+console.log('DeployManager.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
 // eslint-disable-next-line
 const pnpmLinkBins = importLazy('@pnpm/link-bins');
 
+console.log('DeployManager.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 // (Used only by the legacy code fragment in the resolve.sync() hook below)
 import * as fsForResolve from 'fs';
+console.log('DeployManager.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import ignore, { Ignore } from 'ignore';
+console.log('DeployManager.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 import {
   Path,
   FileSystem,
@@ -28,21 +37,26 @@ import {
   NewlineKind,
   Text
 } from '@rushstack/node-core-library';
+console.log('DeployManager.ts  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
 import { DeployArchiver } from './DeployArchiver';
+console.log('DeployManager.ts  : 10: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConfiguration } from '../../api/RushConfiguration';
+console.log('DeployManager.ts  : 11: ' + (new Date().getTime() % 20000) / 1000.0);
 import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
+console.log('DeployManager.ts  : 12: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+console.log('DeployManager.ts  : 13: ' + (new Date().getTime() % 20000) / 1000.0);
 import { DeployScenarioConfiguration, IDeployScenarioProjectJson } from './DeployScenarioConfiguration';
+console.log('DeployManager.ts  : 14: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PnpmfileConfiguration } from './PnpmfileConfiguration';
+console.log('DeployManager.ts  : 15: ' + (new Date().getTime() % 20000) / 1000.0);
 import { matchesWithStar } from './Utils';
+console.log('DeployManager.ts  : 16: ' + (new Date().getTime() % 20000) / 1000.0);
 
-// (@types/npm-packlist is missing this API)
-declare module 'npm-packlist' {
-  export class WalkerSync {
-    public readonly result: string[];
-    public constructor(opts: { path: string });
-    public start(): void;
-  }
+interface INpmPackListWalkerSync {
+  readonly result: string[];
+  constructor(opts: { path: string });
+  start(): void;
 }
 
 /**
@@ -390,7 +404,7 @@ export class DeployManager {
     if (useNpmIgnoreFilter) {
       // Use npm-packlist to filter the files.  Using the WalkerSync class (instead of the sync() API) ensures
       // that "bundledDependencies" are not included.
-      const walker: npmPacklist.WalkerSync = new npmPacklist.WalkerSync({
+      const walker: INpmPackListWalkerSync = new npmPacklist.WalkerSync({
         path: sourceFolderPath
       });
       walker.start();

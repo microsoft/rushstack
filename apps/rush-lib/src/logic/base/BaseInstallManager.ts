@@ -1,35 +1,68 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// eslint-disable-next-line
+const importLazy = require('import-lazy')(require);
+
+console.log('BaseInstallManager.ts  : 1: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as colors from 'colors';
+console.log('BaseInstallManager.ts  : 2: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as fetch from 'node-fetch';
+console.log('BaseInstallManager.ts  : 3: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as fs from 'fs';
+console.log('BaseInstallManager.ts  : 4: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as http from 'http';
-import HttpsProxyAgent = require('https-proxy-agent');
+console.log('BaseInstallManager.ts  : 5: ' + (new Date().getTime() % 20000) / 1000.0);
+// import HttpsProxyAgent = require('https-proxy-agent');
+// eslint-disable-next-line
+const HttpsProxyAgent = importLazy('https-proxy-agent');
+console.log('BaseInstallManager.ts  : 6: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as os from 'os';
+console.log('BaseInstallManager.ts  : 7: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as path from 'path';
+console.log('BaseInstallManager.ts  : 8: ' + (new Date().getTime() % 20000) / 1000.0);
 import * as semver from 'semver';
+console.log('BaseInstallManager.ts  : 9: ' + (new Date().getTime() % 20000) / 1000.0);
 import { FileSystem, JsonFile, PosixModeBits, NewlineKind } from '@rushstack/node-core-library';
+console.log('BaseInstallManager.ts  : 10: ' + (new Date().getTime() % 20000) / 1000.0);
 
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
+console.log('BaseInstallManager.ts  : 11: ' + (new Date().getTime() % 20000) / 1000.0);
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
+console.log('BaseInstallManager.ts  : 12: ' + (new Date().getTime() % 20000) / 1000.0);
 import { AsyncRecycler } from '../../utilities/AsyncRecycler';
+console.log('BaseInstallManager.ts  : 13: ' + (new Date().getTime() % 20000) / 1000.0);
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
+console.log('BaseInstallManager.ts  : 14: ' + (new Date().getTime() % 20000) / 1000.0);
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+console.log('BaseInstallManager.ts  : 15: ' + (new Date().getTime() % 20000) / 1000.0);
 import { Git } from '../Git';
+console.log('BaseInstallManager.ts  : 16: ' + (new Date().getTime() % 20000) / 1000.0);
 import { LastInstallFlag, LastInstallFlagFactory } from '../../api/LastInstallFlag';
+console.log('BaseInstallManager.ts  : 17: ' + (new Date().getTime() % 20000) / 1000.0);
 import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
+console.log('BaseInstallManager.ts  : 18: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PurgeManager } from '../PurgeManager';
+console.log('BaseInstallManager.ts  : 19: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConfiguration, ICurrentVariantJson } from '../../api/RushConfiguration';
+console.log('BaseInstallManager.ts  : 20: ' + (new Date().getTime() % 20000) / 1000.0);
 import { Rush } from '../../api/Rush';
+console.log('BaseInstallManager.ts  : 21: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
+console.log('BaseInstallManager.ts  : 22: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConstants } from '../RushConstants';
+console.log('BaseInstallManager.ts  : 23: ' + (new Date().getTime() % 20000) / 1000.0);
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
+console.log('BaseInstallManager.ts  : 24: ' + (new Date().getTime() % 20000) / 1000.0);
 import { Utilities } from '../../utilities/Utilities';
+console.log('BaseInstallManager.ts  : 25: ' + (new Date().getTime() % 20000) / 1000.0);
 import { InstallHelpers } from '../installManager/InstallHelpers';
+console.log('BaseInstallManager.ts  : 26: ' + (new Date().getTime() % 20000) / 1000.0);
 import { PolicyValidator } from '../policy/PolicyValidator';
+console.log('BaseInstallManager.ts  : 27: ' + (new Date().getTime() % 20000) / 1000.0);
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+console.log('BaseInstallManager.ts  : 28: ' + (new Date().getTime() % 20000) / 1000.0);
 
 export interface IInstallManagerOptions {
   /**
