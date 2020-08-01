@@ -12,7 +12,7 @@ const yaml = importLazy('js-yaml');
 import { FileSystem, Sort, Text } from '@rushstack/node-core-library';
 
 import { BaseWorkspaceFile } from '../base/BaseWorkspaceFile';
-import { PNPM_SHRINKWRAP_YAML_FORMAT as PNPM_YAML_DUMP_OPTIONS } from './PnpmYamlCommon';
+import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
 
 /**
  * This interface represents the raw pnpm-workspace.YAML file
@@ -77,6 +77,6 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     const workspaceYaml: IPnpmWorkspaceYaml = {
       packages: Array.from(this._workspacePackages)
     };
-    return yaml.safeDump(workspaceYaml, PNPM_YAML_DUMP_OPTIONS);
+    return yaml.safeDump(workspaceYaml, PNPM_SHRINKWRAP_YAML_FORMAT);
   }
 }
