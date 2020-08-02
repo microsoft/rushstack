@@ -45,6 +45,7 @@ export class JestPlugin implements IHeftPlugin {
 
         // In debug mode, avoid forking separate processes that are difficult to debug
         runInBand: heftSession.debugMode,
+        debug: heftSession.debugMode,
 
         config: JEST_CONFIGURATION_LOCATION,
         reporters: [[path.resolve(__dirname, 'HeftJestReporter.js'), reporterOptions]],

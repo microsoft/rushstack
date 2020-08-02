@@ -22,6 +22,7 @@
         "build",
         "--clean"
       ],
+      "console": "integratedTerminal",
       "sourceMaps": true
     },
     {
