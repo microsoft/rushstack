@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "",
-      "type": "none"
+      "comment": "Add support for shell tab completion.",
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/rush",

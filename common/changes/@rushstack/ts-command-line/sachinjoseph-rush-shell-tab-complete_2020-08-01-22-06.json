@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/ts-command-line",
-      "comment": "Create a lighter weight function to get own package version.",
+      "comment": "Add support for shell tab completion.",
       "type": "minor"
     }
   ],
