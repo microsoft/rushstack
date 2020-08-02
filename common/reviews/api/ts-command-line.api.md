@@ -142,8 +142,6 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     protected _getArgumentParser(): argparse.ArgumentParser;
     protected onExecute(): Promise<void>;
     selectedAction: CommandLineAction | undefined;
-    readonly toolDescription: string;
-    readonly toolFilename: string;
     tryGetAction(actionName: string): CommandLineAction | undefined;
     }
 
@@ -246,6 +244,7 @@ export interface _ICommandLineParserData {
 
 // @public
 export interface ICommandLineParserOptions {
+    enableTabCompletionAction?: boolean;
     toolDescription: string;
     toolFilename: string;
 }

@@ -69,7 +69,8 @@ export class RushCommandLineParser extends CommandLineParser {
         ' and automates package publishing.  It can manage decoupled subsets of projects with different' +
         ' release and versioning strategies.  A full API is included to facilitate integration with other' +
         ' automation tools.  If you are looking for a proven turnkey solution for monorepo management,' +
-        ' Rush is for you.'
+        ' Rush is for you.',
+      enableTabCompletionAction: true
     });
 
     this._rushOptions = this._normalizeOptions(options || {});

@@ -1338,6 +1338,7 @@ importers:
       '@types/argparse': 1.0.38
       argparse: 1.0.10
       colors: 1.2.5
+      string-argv: 0.3.1
     devDependencies:
       '@microsoft/node-library-build': 6.4.31
       '@microsoft/rush-stack-compiler-3.5': 0.8.0
@@ -1355,6 +1356,7 @@ importers:
       argparse: ~1.0.9
       colors: ~1.2.1
       gulp: ~4.0.2
+      string-argv: ~0.3.1
   ../../libraries/typings-generator:
     dependencies:
       '@rushstack/node-core-library': 'link:../node-core-library'
