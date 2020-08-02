@@ -196,6 +196,3 @@ export class TabCompleteAction extends BaseRushAction {
     }
   }
 }
-// function isWhiteSpaceStrict(ch: string | undefined) {
-//   return ch && ch.length > 0 && ch.trim() === '';
-// }
