@@ -8,13 +8,10 @@ import stringArgv from 'string-argv';
 import {
   CommandLineStringParameter,
   CommandLineIntegerParameter,
-  CommandLineParameterKind
+  CommandLineChoiceParameter,
+  CommandLineParameterKind,
+  CommandLineParameter
 } from '@rushstack/ts-command-line';
-
-interface IParameter {
-  name: string;
-  kind: CommandLineParameterKind;
-}
 
 const DEFAULT_WORD_TO_AUTOCOMPLETE: string = '';
 const DEFAULT_POSITION: number = 0;
@@ -59,16 +56,23 @@ export class TabCompleteAction extends BaseRushAction {
   }
 
   public *getCompletions(commandLine: string, caretPosition: number): IterableIterator<string> {
-    const actions: Map<string, IParameter[]> = new Map<string, IParameter[]>();
+    const actions: Map<string, Map<string, CommandLineParameter>> = new Map<
+      string,
+      Map<string, CommandLineParameter>
+    >();
+
     this.parser.actions.forEach((element) => {
-      const actionParameters: IParameter[] = [];
+      const parameterNameToParameterInfoMap: Map<string, CommandLineParameter> = new Map<
+        string,
+        CommandLineParameter
+      >();
       element.parameters.forEach((elem) => {
-        actionParameters.push({ name: elem.longName, kind: elem.kind });
+        parameterNameToParameterInfoMap[elem.longName] = elem;
         if (elem.shortName) {
-          actionParameters.push({ name: elem.shortName, kind: elem.kind });
+          parameterNameToParameterInfoMap[elem.shortName] = elem;
         }
       });
-      actions[element.actionName] = actionParameters;
+      actions[element.actionName] = parameterNameToParameterInfoMap;
     });
 
     actions['-d'] = [];
@@ -113,44 +117,54 @@ export class TabCompleteAction extends BaseRushAction {
               choiceParameterValues.push(project.packageName);
             }
 
-            yield* this._getChoiceParameterValues(
-              choiceParameter,
-              choiceParameterValues,
-              lastToken,
-              secondLastToken,
-              completePartialWord
+            const projectNamesToReturn: string[] = Array.from(
+              this._getChoiceParameterValues(
+                choiceParameter,
+                choiceParameterValues,
+                lastToken,
+                secondLastToken,
+                completePartialWord
+              )
             );
+
+            if (projectNamesToReturn.length > 0) {
+              yield* projectNamesToReturn;
+              return;
+            }
 
             // TODO: Add support for version policy, variant
-          } else if (actionName === 'change') {
-            const choiceParameter: string[] = ['--bump-type'];
-            const choiceParameterValues: string[] = ['major', 'minor', 'patch', 'none'];
-            yield* this._getChoiceParameterValues(
-              choiceParameter,
-              choiceParameterValues,
-              lastToken,
-              secondLastToken,
-              completePartialWord
-            );
-          } else if (actionName === 'publish') {
-            const choiceParameter: string[] = ['--set-access-level'];
-            const choiceParameterValues: string[] = ['public', 'restricted'];
-            yield* this._getChoiceParameterValues(
-              choiceParameter,
-              choiceParameterValues,
-              lastToken,
-              secondLastToken,
-              completePartialWord
-            );
           }
+          const parameterNameMap: Map<string, CommandLineParameter> = actions[actionName];
 
-          const parameterNames: string[] = Array.from(actions[actionName], (x: IParameter) => x.name);
+          const parameterNames: string[] = Array.from(Object.keys(actions[actionName]), (x: string) => x);
+
+          for (const parameter of parameterNames) {
+            if (parameterNameMap[parameter].kind === CommandLineParameterKind.Choice) {
+              const choiceParameterValues: string[] = (parameterNameMap[
+                parameter
+              ] as CommandLineChoiceParameter).alternatives as string[];
+              if (completePartialWord) {
+                if (parameter === secondLastToken) {
+                  yield* this._completeChoiceParameterValues(choiceParameterValues, lastToken);
+                  return;
+                }
+              } else {
+                if (parameter === lastToken) {
+                  yield* choiceParameterValues;
+                  return;
+                }
+              }
+            }
+          }
 
           if (completePartialWord) {
             yield* this._completeChoiceParameterValues(parameterNames, lastToken);
           } else {
-            for (const parameter of actions[actionName]) {
-              if (parameter.name === lastToken && parameter.kind !== CommandLineParameterKind.Flag) {
+            for (const parameter of parameterNames) {
+              if (
+                parameter === lastToken &&
+                parameterNameMap[parameter].kind !== CommandLineParameterKind.Flag
+              ) {
                 // The parameter is expecting a value, so don't suggest parameter names again
                 return;
               }
