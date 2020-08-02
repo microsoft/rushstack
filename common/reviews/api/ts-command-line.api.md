@@ -72,6 +72,8 @@ export abstract class CommandLineParameter {
     // @internal
     constructor(definition: IBaseCommandLineDefinition);
     abstract appendToArgList(argList: string[]): void;
+    // (undocumented)
+    readonly completions: (() => Promise<string[]>) | undefined;
     readonly description: string;
     readonly environmentVariable: string | undefined;
     // @internal
@@ -200,6 +202,8 @@ export class DynamicCommandLineParser extends CommandLineParser {
 
 // @public
 export interface IBaseCommandLineDefinition {
+    // (undocumented)
+    completions?: () => Promise<string[]>;
     description: string;
     environmentVariable?: string;
     parameterLongName: string;

@@ -62,6 +62,11 @@ export interface IBaseCommandLineDefinition {
    *   ordinary String Parameter:  Any value is accepted, including an empty string.
    */
   environmentVariable?: string;
+
+  /**
+   *
+   */
+  completions?: () => Promise<string[]>;
 }
 
 /**

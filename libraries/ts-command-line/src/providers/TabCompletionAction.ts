@@ -1,14 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// import { BaseRushAction } from './BaseRushAction';
-// import { CommandLineParser } from './CommandLineParser';
 import stringArgv from 'string-argv';
 
 import { CommandLineIntegerParameter } from '../parameters/CommandLineIntegerParameter';
 import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
 import { CommandLineParameterKind, CommandLineParameter } from '../parameters/BaseClasses';
 import { CommandLineAction } from './CommandLineAction';
+import { CommandLineChoiceParameter } from '..';
 
 interface IParameter {
   name: string;
@@ -21,16 +20,21 @@ const DEFAULT_POSITION: number = 0;
 export class TabCompleteAction extends CommandLineAction {
   private _wordToCompleteParameter: CommandLineStringParameter;
   private _positionParameter: CommandLineIntegerParameter;
-  private _actionsByName: Map<string, CommandLineAction>;
+  private _actions: ReadonlyArray<CommandLineAction>;
+  private _globalParameters: ReadonlyArray<CommandLineParameter>;
 
-  public constructor(actionsByName: Map<string, CommandLineAction>) {
+  public constructor(
+    actions: ReadonlyArray<CommandLineAction>,
+    globalParameters: ReadonlyArray<CommandLineParameter>
+  ) {
     super({
-      actionName: 'tab-complete2',
+      actionName: 'tab-complete',
       summary: 'Provides tab completion.',
       documentation: 'Provides tab completion.'
     });
 
-    this._actionsByName = actionsByName;
+    this._actions = actions;
+    this._globalParameters = globalParameters;
   }
 
   protected onDefineParameters(): void {
@@ -57,31 +61,33 @@ export class TabCompleteAction extends CommandLineAction {
     const commandLine: string = this._wordToCompleteParameter.value || '';
     const caretPosition: number = this._positionParameter.value || 0;
 
-    for (const value of this.getCompletions(commandLine, caretPosition)) {
+    for await (const value of this.getCompletions(commandLine, caretPosition)) {
       console.log(value);
     }
   }
 
-  public *getCompletions(commandLine: string, caretPosition: number): IterableIterator<string> {
+  public async *getCompletions(commandLine: string, caretPosition: number): AsyncIterable<string> {
     const actions: Map<string, Map<string, CommandLineParameter>> = new Map<
       string,
       Map<string, CommandLineParameter>
     >();
-    for (const [key, value] of this._actionsByName.entries()) {
+    for (const action of this._actions) {
       const parameterNameToParameterInfoMap: IParameter[] = [];
-      value.parameters.forEach((elem) => {
-        parameterNameToParameterInfoMap[elem.longName] = elem;
-        if (elem.shortName) {
-          parameterNameToParameterInfoMap[elem.shortName] = elem;
+      action.parameters.forEach((parameter) => {
+        parameterNameToParameterInfoMap[parameter.longName] = parameter;
+        if (parameter.shortName) {
+          parameterNameToParameterInfoMap[parameter.shortName] = parameter;
         }
       });
-      actions[key] = parameterNameToParameterInfoMap;
+      actions[action.actionName] = parameterNameToParameterInfoMap;
     }
 
-    actions['-d'] = [];
-    actions['--debug'] = [];
-    actions['-h'] = [];
-    actions['--help'] = [];
+    for (const parameter of this._globalParameters) {
+      actions[parameter.longName] = parameter;
+      if (parameter.shortName) {
+        actions[parameter.shortName] = parameter;
+      }
+    }
 
     if (!commandLine || !caretPosition) {
       yield* Object.keys(actions); // return all actions
@@ -90,10 +96,10 @@ export class TabCompleteAction extends CommandLineAction {
 
     const tokens: string[] = Array.from(this.tokenizeCommandLine(commandLine));
 
-    const debugParameterUsed: boolean = tokens.length > 1 && (tokens[1] === '-d' || tokens[1] === '--debug');
-    const debugParameterOffset: number = debugParameterUsed ? 1 : 0; // if debug switch is used, then offset everything by 1.
+    // offset arguments by the number of global params in the input
+    const globalParameterOffset: number = this._getGlobalParameterOffset(tokens);
 
-    if (tokens.length < 2 + debugParameterOffset) {
+    if (tokens.length < 2 + globalParameterOffset) {
       yield* Object.keys(actions); // return all actions
       return;
     }
@@ -103,66 +109,50 @@ export class TabCompleteAction extends CommandLineAction {
 
     const completePartialWord: boolean = caretPosition === commandLine.length;
 
-    if (completePartialWord && tokens.length === 2 + debugParameterOffset) {
+    if (completePartialWord && tokens.length === 2 + globalParameterOffset) {
       for (const actionName of Object.keys(actions)) {
-        if (actionName.indexOf(tokens[1 + debugParameterOffset]) === 0) {
+        if (actionName.indexOf(tokens[1 + globalParameterOffset]) === 0) {
           yield actionName;
         }
       }
     } else {
       for (const actionName of Object.keys(actions)) {
-        if (actionName === tokens[1 + debugParameterOffset]) {
-          if (actionName === 'build' || actionName === 'rebuild') {
-            const choiceParameter: string[] = ['-f', '--from', '-t', '--to'];
-            const choiceParameterValues: string[] = [];
+        if (actionName === tokens[1 + globalParameterOffset]) {
+          const parameterNameMap: Map<string, CommandLineParameter> = actions[actionName];
 
-            // TODO: Provide a way to supply custom parameter values
-            // for (const project of this.rushConfiguration.projects) {
-            //   choiceParameterValues.push(project.packageName);
-            // }
+          const parameterNames: string[] = Array.from(Object.keys(actions[actionName]), (x: string) => x);
 
-            choiceParameterValues.push('abc');
-            choiceParameterValues.push('def');
-            choiceParameterValues.push('hij');
-
-            yield* this._getChoiceParameterValues(
-              choiceParameter,
-              choiceParameterValues,
-              lastToken,
-              secondLastToken,
-              completePartialWord
-            );
-
-            // TODO: Add support for version policy, variant
-          } else if (actionName === 'change') {
-            const choiceParameter: string[] = ['--bump-type'];
-            const choiceParameterValues: string[] = ['major', 'minor', 'patch', 'none'];
-            yield* this._getChoiceParameterValues(
-              choiceParameter,
-              choiceParameterValues,
-              lastToken,
-              secondLastToken,
-              completePartialWord
-            );
-          } else if (actionName === 'publish') {
-            const choiceParameter: string[] = ['--set-access-level'];
-            const choiceParameterValues: string[] = ['public', 'restricted'];
-            yield* this._getChoiceParameterValues(
-              choiceParameter,
-              choiceParameterValues,
-              lastToken,
-              secondLastToken,
-              completePartialWord
-            );
+          for (const parameter of parameterNames) {
+            let choiceParameterValues: string[] = [];
+            if (parameterNameMap[parameter].kind === CommandLineParameterKind.Choice) {
+              choiceParameterValues = (parameterNameMap[parameter] as CommandLineChoiceParameter)
+                .alternatives as string[];
+            } else if (parameterNameMap[parameter].completions) {
+              choiceParameterValues = await parameterNameMap[parameter].completions();
+            }
+            if (choiceParameterValues.length > 0) {
+              if (completePartialWord) {
+                if (parameter === secondLastToken) {
+                  yield* this._completeChoiceParameterValues(choiceParameterValues, lastToken);
+                  return;
+                }
+              } else {
+                if (parameter === lastToken) {
+                  yield* choiceParameterValues;
+                  return;
+                }
+              }
+            }
           }
-
-          const parameterNames: string[] = Array.from(actions[actionName], (x: IParameter) => x.name);
 
           if (completePartialWord) {
             yield* this._completeChoiceParameterValues(parameterNames, lastToken);
           } else {
-            for (const parameter of actions[actionName]) {
-              if (parameter.name === lastToken && parameter.kind !== CommandLineParameterKind.Flag) {
+            for (const parameter of parameterNames) {
+              if (
+                parameter === lastToken &&
+                parameterNameMap[parameter].kind !== CommandLineParameterKind.Flag
+              ) {
                 // The parameter is expecting a value, so don't suggest parameter names again
                 return;
               }
@@ -170,6 +160,8 @@ export class TabCompleteAction extends CommandLineAction {
 
             yield* parameterNames;
           }
+
+          break;
         }
       }
     }
@@ -179,22 +171,18 @@ export class TabCompleteAction extends CommandLineAction {
     return stringArgv(commandLine);
   }
 
-  private *_getChoiceParameterValues(
-    choiceParameter: string[],
-    choiceParameterValues: string[],
-    lastToken: string,
-    secondLastToken: string,
-    completePartialWord: boolean
-  ): IterableIterator<string> {
-    if (completePartialWord) {
-      if (choiceParameter.indexOf(secondLastToken) !== -1) {
-        yield* this._completeChoiceParameterValues(choiceParameterValues, lastToken);
-      }
-    } else {
-      if (choiceParameter.indexOf(lastToken) !== -1) {
-        yield* choiceParameterValues;
+  private _getGlobalParameterOffset(tokens: string[]): number {
+    let count: number = 0;
+    for (let i: number = 1; i < tokens.length; i++) {
+      for (const globalParameter of this._globalParameters) {
+        if (tokens[i] !== globalParameter.longName && tokens[i] !== globalParameter.shortName) {
+          break;
+        }
+        count++;
       }
     }
+
+    return count;
   }
 
   private *_completeChoiceParameterValues(

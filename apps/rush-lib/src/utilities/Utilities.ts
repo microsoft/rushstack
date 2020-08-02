@@ -443,7 +443,10 @@ export class Utilities {
   }
 
   public static isNonDebugTabCompletionRequest(): boolean {
-    return process.argv.length > 2 && process.argv[2] === 'tab-complete';
+    return (
+      (process.argv.length > 2 && process.argv[2] === 'tab-complete') ||
+      (process.argv.length > 2 && process.argv[2] === 'tab-complete2')
+    );
   }
 
   public static shouldPrintBanner(): boolean {

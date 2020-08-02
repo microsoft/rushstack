@@ -58,6 +58,9 @@ export abstract class CommandLineParameter {
   /** {@inheritDoc IBaseCommandLineDefinition.environmentVariable} */
   public readonly environmentVariable: string | undefined;
 
+  /** {@inheritDoc IBaseCommandLineDefinition.completions} */
+  public readonly completions: (() => Promise<string[]>) | undefined;
+
   /** @internal */
   public constructor(definition: IBaseCommandLineDefinition) {
     this.longName = definition.parameterLongName;
@@ -65,6 +68,7 @@ export abstract class CommandLineParameter {
     this.description = definition.description;
     this.required = !!definition.required;
     this.environmentVariable = definition.environmentVariable;
+    this.completions = definition.completions;
 
     if (!CommandLineParameter._longNameRegExp.test(this.longName)) {
       throw new Error(

@@ -173,7 +173,8 @@ export class BulkScriptAction extends BaseScriptAction {
       argumentName: 'PROJECT1',
       description:
         'Run command in the specified project and all of its dependencies. "." can be used as shorthand ' +
-        'to specify the project in the current working directory.'
+        'to specify the project in the current working directory.',
+      completions: this._getProjectNames.bind(this)
     });
     this._fromVersionPolicy = this.defineStringListParameter({
       parameterLongName: '--from-version-policy',
@@ -212,6 +213,14 @@ export class BulkScriptAction extends BaseScriptAction {
     }
 
     this.defineScriptParameters();
+  }
+
+  private async _getProjectNames(): Promise<string[]> {
+    const ret: string[] = [];
+    for (const project of this.rushConfiguration.projects) {
+      ret.push(project.packageName);
+    }
+    return ret;
   }
 
   private _doBeforeTask(): void {

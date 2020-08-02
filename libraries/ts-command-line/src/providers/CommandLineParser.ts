@@ -136,7 +136,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    */
   public execute(args?: string[]): Promise<boolean> {
     if (this._options.enableTabCompletionAction) {
-      this.addAction(new TabCompleteAction(this._actionsByName));
+      this.addAction(new TabCompleteAction(this.actions, this.parameters));
     }
     return this.executeWithoutErrorHandling(args)
       .then(() => {
