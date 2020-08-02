@@ -7,5 +7,5 @@
   /**
    * Glob patterns to be deleted by the "heft clean" action.  The paths are resolved relative to the project folder.
    */
-  "pathsToDelete": ["dist", "lib", "temp"]
+  "pathsToDelete": ["dist", "lib", "lib-esnext", "temp"]
 }
