@@ -10,6 +10,7 @@ import * as wordwrap from 'wordwrap';
 import { JsonFile, IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Stream } from 'stream';
+import { CommandLineConstants } from '@rushstack/ts-command-line';
 
 export interface IEnvironment {
   // NOTE: the process.env doesn't actually support "undefined" as a value.
@@ -443,10 +444,7 @@ export class Utilities {
   }
 
   public static isNonDebugTabCompletionRequest(): boolean {
-    return (
-      (process.argv.length > 2 && process.argv[2] === 'tab-complete') ||
-      (process.argv.length > 2 && process.argv[2] === 'tab-complete2')
-    );
+    return process.argv.length > 2 && process.argv[2] === CommandLineConstants.TabCompletionParameterName;
   }
 
   public static shouldPrintBanner(): boolean {

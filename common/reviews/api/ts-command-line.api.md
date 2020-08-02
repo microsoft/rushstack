@@ -41,6 +41,11 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
     }
 
 // @public
+export const enum CommandLineConstants {
+    TabCompletionParameterName = "tab-complete"
+}
+
+// @public
 export class CommandLineFlagParameter extends CommandLineParameter {
     // @internal
     constructor(definition: ICommandLineFlagDefinition);
