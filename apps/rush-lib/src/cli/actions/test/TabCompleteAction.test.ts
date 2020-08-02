@@ -46,8 +46,6 @@ describe('TabCompleteAction', () => {
 
       const commandLine: string = 'rush';
       const actual: string[] = Array.from(tc.getCompletions(commandLine.trim(), commandLine.length));
-      console.log('tab-complete --word "' + commandLine.trim() + '" --position ' + commandLine.length);
-      console.log(actual);
 
       expect(actual.indexOf('add') !== -1).toBe(true);
       expect(actual.indexOf('check') !== -1).toBe(true);
@@ -70,8 +68,6 @@ describe('TabCompleteAction', () => {
 
       const commandLine: string = 'rush a';
       const actual: string[] = Array.from(tc.getCompletions(commandLine.trim(), commandLine.length));
-      console.log('tab-complete --word "' + commandLine.trim() + '" --position ' + commandLine.length);
-      console.log(actual);
 
       const expected: string[] = ['add'];
 
@@ -90,8 +86,6 @@ describe('TabCompleteAction', () => {
 
       const commandLine: string = 'rush build ';
       const actual: string[] = Array.from(tc.getCompletions(commandLine.trim(), commandLine.length));
-      console.log('tab-complete --word "' + commandLine.trim() + '" --position ' + commandLine.length);
-      console.log(actual);
 
       expect(actual.indexOf('-t') !== -1).toBe(true);
       expect(actual.indexOf('--to') !== -1).toBe(true);
@@ -111,8 +105,6 @@ describe('TabCompleteAction', () => {
 
       const commandLine: string = 'rush build -';
       const actual: string[] = Array.from(tc.getCompletions(commandLine.trim(), commandLine.length));
-      console.log('tab-complete --word "' + commandLine.trim() + '" --position ' + commandLine.length);
-      console.log(actual);
 
       expect(actual.indexOf('-t') !== -1).toBe(true);
       expect(actual.indexOf('--to') !== -1).toBe(true);
@@ -132,8 +124,6 @@ describe('TabCompleteAction', () => {
 
       const commandLine: string = 'rush build -t ';
       const actual: string[] = Array.from(tc.getCompletions(commandLine.trim(), commandLine.length));
-      console.log('tab-complete --word "' + commandLine.trim() + '" --position ' + commandLine.length);
-      console.log(actual);
 
       const expected: string[] = ['abc', 'def'];
 
@@ -152,8 +142,6 @@ describe('TabCompleteAction', () => {
 
       const commandLine: string = 'rush build -t a';
       const actual: string[] = Array.from(tc.getCompletions(commandLine.trim(), commandLine.length));
-      console.log('tab-complete --word "' + commandLine.trim() + '" --position ' + commandLine.length);
-      console.log(actual);
 
       const expected: string[] = ['abc'];
 
@@ -172,8 +160,6 @@ describe('TabCompleteAction', () => {
 
       const commandLine: string = 'rush change --bump-type ';
       const actual: string[] = Array.from(tc.getCompletions(commandLine.trim(), commandLine.length));
-      console.log('tab-complete --word "' + commandLine.trim() + '" --position ' + commandLine.length);
-      console.log(actual);
 
       const expected: string[] = ['major', 'minor', 'patch', 'none'];
 
@@ -192,8 +178,6 @@ describe('TabCompleteAction', () => {
 
       const commandLine: string = 'rush change --bulk ';
       const actual: string[] = Array.from(tc.getCompletions(commandLine.trim(), commandLine.length));
-      console.log('tab-complete --word "' + commandLine.trim() + '" --position ' + commandLine.length);
-      console.log(actual);
 
       expect(actual.indexOf('--bulk') !== -1).toBe(true);
       expect(actual.indexOf('--message') !== -1).toBe(true);
@@ -213,8 +197,6 @@ describe('TabCompleteAction', () => {
 
       const commandLine: string = 'rush change --bump-type m';
       const actual: string[] = Array.from(tc.getCompletions(commandLine.trim(), commandLine.length));
-      console.log('tab-complete --word "' + commandLine.trim() + '" --position ' + commandLine.length);
-      console.log(actual);
 
       const expected: string[] = ['major', 'minor'];
 
@@ -233,8 +215,6 @@ describe('TabCompleteAction', () => {
 
       const commandLine: string = 'rush change --message ';
       const actual: string[] = Array.from(tc.getCompletions(commandLine.trim(), commandLine.length));
-      console.log('tab-complete --word "' + commandLine.trim() + '" --position ' + commandLine.length);
-      console.log(actual);
 
       const expected: string[] = [];
 
@@ -253,8 +233,6 @@ describe('TabCompleteAction', () => {
 
       const commandLine: string = 'rush change --message "my change log message" --bump-type ';
       const actual: string[] = Array.from(tc.getCompletions(commandLine.trim(), commandLine.length));
-      console.log('tab-complete --word "' + commandLine.trim() + '" --position ' + commandLine.length);
-      console.log(actual);
 
       const expected: string[] = ['major', 'minor', 'patch', 'none'];
 
@@ -273,8 +251,6 @@ describe('TabCompleteAction', () => {
 
       const commandLine: string = 'rush change --message "my change log message" --bump-type m';
       const actual: string[] = Array.from(tc.getCompletions(commandLine.trim(), commandLine.length));
-      console.log('tab-complete --word "' + commandLine.trim() + '" --position ' + commandLine.length);
-      console.log(actual);
 
       const expected: string[] = ['major', 'minor'];
 
@@ -295,8 +271,6 @@ describe('TabCompleteAction', () => {
 
       const commandLine: string = 'rush change -';
       const actual: string[] = Array.from(tc.tokenizeCommandLine(commandLine.trim()));
-      console.log('tab-complete --word "' + commandLine.trim() + '" --position ' + commandLine.length);
-      console.log(actual);
 
       const expected: string[] = ['rush', 'change', '-'];
 
@@ -314,8 +288,6 @@ describe('TabCompleteAction', () => {
 
       const commandLine: string = 'rush change -m "my change log"';
       const actual: string[] = Array.from(tc.tokenizeCommandLine(commandLine.trim()));
-      console.log('tab-complete --word "' + commandLine.trim() + '" --position ' + commandLine.length);
-      console.log(actual);
 
       const expected: string[] = ['rush', 'change', '-m', 'my change log'];
 
