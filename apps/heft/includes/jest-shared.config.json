@@ -4,6 +4,7 @@
   "rootDir": "../../../../",
   "testURL": "http://localhost/",
   "testMatch": ["<rootDir>/src/**/*.test.{ts,tsx}"],
+  "transformIgnorePatterns": [],
   "transform": {
     "\\.(ts|tsx)$": "<rootDir>/node_modules/@rushstack/heft/lib/plugins/JestPlugin/HeftJestSrcTransform.js",
     "\\.(css|jpg|png|gif|mp3)$": "<rootDir>/node_modules/@rushstack/heft/lib/exports/jest-identity-mock-transform"
