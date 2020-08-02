@@ -21,13 +21,19 @@ export class JestPlugin implements IHeftPlugin {
     if (FileSystem.exists(path.join(heftConfiguration.buildFolder, JEST_CONFIGURATION_LOCATION))) {
       heftSession.hooks.test.tap(PLUGIN_NAME, (test: ITestStageContext) => {
         test.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          await this._runJestAsync(heftConfiguration, test.properties.watchMode, test.properties.production);
+          await this._runJestAsync(
+            heftSession,
+            heftConfiguration,
+            test.properties.watchMode,
+            test.properties.production
+          );
         });
       });
     }
   }
 
   private async _runJestAsync(
+    heftSession: HeftSession,
     heftConfiguration: HeftConfiguration,
     watchMode: boolean,
     production: boolean
@@ -37,6 +43,10 @@ export class JestPlugin implements IHeftPlugin {
     const { results: jestResults } = await runCLI(
       {
         watch: watchMode,
+
+        // In debug mode, avoid forking separate processes that are difficult to debug
+        runInBand: heftSession.debugMode,
+
         config: JEST_CONFIGURATION_LOCATION,
         reporters: [[path.resolve(__dirname, 'HeftJestReporter.js'), reporterOptions]],
         cacheDirectory: path.join(heftConfiguration.buildCacheFolder, 'jest-cache'),
