@@ -615,6 +615,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "string-argv",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "sudo",
       "allowedCategories": [ "libraries" ]
     },
