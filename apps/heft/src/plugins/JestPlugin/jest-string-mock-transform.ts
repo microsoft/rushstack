@@ -10,5 +10,10 @@ import { InitialOptionsWithRootDir } from '@jest/types/build/Config';
  * environment.
  */
 export function process(src: string, filename: string, jestOptions: InitialOptionsWithRootDir): string {
-  return `module.exports = '${filename.replace(/\'/g, "'").replace(/\\/g, '\\\\')}';`;
+  // Double-escape "'" and "\" characters in the filename because this is going to be serialized
+  // in a string in generated JS code, bounded by single quotes
+  const escapedFilename: string = filename.replace(/\'/g, "\\'").replace(/\\/g, '\\\\');
+
+  // For a file called "myImage.png", this will generate a JS module that exports the literal string "myImage.png"
+  return `module.exports = '${escapedFilename}';`;
 }
