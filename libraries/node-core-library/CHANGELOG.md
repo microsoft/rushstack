@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+This log was last generated on Mon, 03 Aug 2020 06:55:14 GMT and should not be manually modified.
+
+## 3.26.0
+Mon, 03 Aug 2020 06:55:14 GMT
+
+### Minor changes
+
+- Added IJsonFileStringifyOptions.headerComment
 
 ## 3.25.0
 Fri, 03 Jul 2020 15:09:04 GMT
