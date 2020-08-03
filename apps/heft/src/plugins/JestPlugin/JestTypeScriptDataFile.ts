@@ -33,7 +33,11 @@ export class JestTypeScriptDataFile {
     const json: IJestTypeScriptDataFileJson = {
       emitFolderPathForJest: typeScriptConfiguration.emitFolderPathForJest || 'lib'
     };
-    JsonFile.save(json, jsonFilePath);
+    JsonFile.save(json, jsonFilePath, {
+      ensureFolderExists: true,
+      onlyIfChanged: true,
+      headerComment: '// THIS DATA FILE IS INTERNAL TO HEFT; DO NOT MODIFY IT OR RELY ON ITS CONTENTS'
+    });
   }
 
   /**

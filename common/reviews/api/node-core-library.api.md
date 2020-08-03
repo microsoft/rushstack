@@ -313,6 +313,7 @@ export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
 
 // @public
 export interface IJsonFileStringifyOptions {
+    headerComment?: string;
     newlineConversion?: NewlineKind;
     prettyFormatting?: boolean;
 }

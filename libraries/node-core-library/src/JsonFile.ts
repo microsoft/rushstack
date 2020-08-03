@@ -36,6 +36,15 @@ export interface IJsonFileStringifyOptions {
    * Note that this is slightly slower than the native JSON.stringify() implementation.
    */
   prettyFormatting?: boolean;
+
+  /**
+   * If specified, this header will be prepended to the start of the file.  The header must consist
+   * of lines prefixed by "//" characters.
+   * @remarks
+   * When used with {@link IJsonFileSaveOptions.updateExistingFile}
+   * or {@link JsonFile.updateString}, the header will ONLY be added for a newly created file.
+   */
+  headerComment?: string;
 }
 
 /**
@@ -209,8 +218,16 @@ export class JsonFile {
         mode: 'json',
         indent: 2
       });
+
+      if (options.headerComment !== undefined) {
+        stringified = JsonFile._formatJsonHeaderComment(options.headerComment) + stringified;
+      }
     } else {
       stringified = JSON.stringify(newJsonObject, undefined, 2);
+
+      if (options.headerComment !== undefined) {
+        stringified = JsonFile._formatJsonHeaderComment(options.headerComment) + stringified;
+      }
     }
 
     // Add the trailing newline
@@ -396,5 +413,24 @@ export class JsonFile {
       }
     }
     return result;
+  }
+
+  private static _formatJsonHeaderComment(headerComment: string): string {
+    if (headerComment === '') {
+      return '';
+    }
+    const lines: string[] = headerComment.split('\n');
+    const result: string[] = [];
+    for (const line of lines) {
+      if (!/^\s*$/.test(line) && !/^\s*\/\//.test(line)) {
+        throw new Error(
+          'The headerComment lines must be blank or start with the "//" prefix.\n' +
+            'Invalid line' +
+            JSON.stringify(line)
+        );
+      }
+      result.push(Text.replaceAll(line, '\r', ''));
+    }
+    return lines.join('\n') + '\n';
   }
 }
