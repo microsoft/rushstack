@@ -122,32 +122,31 @@ export class TabCompleteAction extends CommandLineAction {
 
           const parameterNames: string[] = Array.from(Object.keys(actions[actionName]), (x: string) => x);
 
-          for (const parameter of parameterNames) {
-            let choiceParameterValues: string[] = [];
-            if (parameterNameMap[parameter].kind === CommandLineParameterKind.Choice) {
-              choiceParameterValues = (parameterNameMap[parameter] as CommandLineChoiceParameter)
-                .alternatives as string[];
-            } else if (parameterNameMap[parameter].completions) {
-              choiceParameterValues = await parameterNameMap[parameter].completions();
-            }
-            if (choiceParameterValues.length > 0) {
-              if (completePartialWord) {
-                if (parameter === secondLastToken) {
-                  yield* this._completeChoiceParameterValues(choiceParameterValues, lastToken);
-                  return;
-                }
-              } else {
-                if (parameter === lastToken) {
-                  yield* choiceParameterValues;
+          if (completePartialWord) {
+            for (const parameterName of parameterNames) {
+              if (parameterName === secondLastToken) {
+                const values: string[] = await this._getParameterValueCompletions(
+                  parameterNameMap[parameterName]
+                );
+                if (values.length > 0) {
+                  yield* this._completeParameterValues(values, lastToken);
                   return;
                 }
               }
             }
-          }
-
-          if (completePartialWord) {
-            yield* this._completeChoiceParameterValues(parameterNames, lastToken);
+            yield* this._completeParameterValues(parameterNames, lastToken);
           } else {
+            for (const parameterName of parameterNames) {
+              if (parameterName === lastToken) {
+                const values: string[] = await this._getParameterValueCompletions(
+                  parameterNameMap[parameterName]
+                );
+                if (values.length > 0) {
+                  yield* values;
+                  return;
+                }
+              }
+            }
             for (const parameter of parameterNames) {
               if (
                 parameter === lastToken &&
@@ -171,6 +170,17 @@ export class TabCompleteAction extends CommandLineAction {
     return stringArgv(commandLine);
   }
 
+  private async _getParameterValueCompletions(parameter: CommandLineParameter): Promise<string[]> {
+    let choiceParameterValues: string[] = [];
+    if (parameter.kind === CommandLineParameterKind.Choice) {
+      choiceParameterValues = (parameter as CommandLineChoiceParameter).alternatives as string[];
+    } else if (parameter.completions) {
+      choiceParameterValues = await parameter.completions();
+    }
+
+    return choiceParameterValues;
+  }
+
   private _getGlobalParameterOffset(tokens: string[]): number {
     let count: number = 0;
     for (let i: number = 1; i < tokens.length; i++) {
@@ -185,7 +195,7 @@ export class TabCompleteAction extends CommandLineAction {
     return count;
   }
 
-  private *_completeChoiceParameterValues(
+  private *_completeParameterValues(
     choiceParameterValues: string[],
     lastToken: string
   ): IterableIterator<string> {

@@ -195,7 +195,8 @@ export class BulkScriptAction extends BaseScriptAction {
       argumentName: 'PROJECT2',
       description:
         'Run command in the specified project and all projects that directly or indirectly depend on the ' +
-        'specified project. "." can be used as shorthand to specify the project in the current working directory.'
+        'specified project. "." can be used as shorthand to specify the project in the current working directory.',
+      completions: this._getProjectNames.bind(this)
     });
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
