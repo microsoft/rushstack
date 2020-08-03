@@ -9,10 +9,10 @@ import { FileSystem } from '@rushstack/node-core-library';
 const proxyCode: string = FileSystem.readFile(path.join(__dirname, 'identityMock.js')).toString();
 
 /**
- * This Jest transform handles imports of data files (e.g. .css, .png) that would normally be
+ * This Jest transform handles imports of files like CSS that would normally be
  * processed by a Webpack loader.  Instead of actually loading the resource, we return a mock object.
  * The mock simply returns the imported name as a text string.  For example, `mock.xyz` would evaluate to `"xyz"`.
- * This technique is based on the "identity-obj-proxy" loader for Webpack:
+ * This technique is based on "identity-obj-proxy":
  *
  *   https://www.npmjs.com/package/identity-obj-proxy
  *

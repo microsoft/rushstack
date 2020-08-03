@@ -7,7 +7,7 @@
   /**
    * File extensions that should be copied from the src folder to the destination folder(s).
    */
-  "fileExtensions": [".css"]
+  "fileExtensions": [".css", ".png"]
 
   /**
    * Glob patterns that should be explicitly included.

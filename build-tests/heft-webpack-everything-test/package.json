@@ -13,8 +13,10 @@
     "@types/jest": "25.2.1",
     "@types/webpack-env": "1.13.0",
     "eslint": "~7.2.0",
+    "file-loader": "~6.0.0",
     "tslint-microsoft-contrib": "~6.2.0",
     "tslint": "~5.20.1",
-    "typescript": "~3.9.5"
+    "typescript": "~3.9.5",
+    "webpack": "~4.31.0"
   }
 }
