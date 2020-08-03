@@ -82,30 +82,48 @@ export class WebpackPlugin implements IHeftPlugin {
           }
         });
       });
-    } else if (buildProperties.watchMode) {
-      try {
-        const stats: webpack.Stats = await LegacyAdapters.convertCallbackToPromise(
-          compiler.watch.bind(compiler),
-          {}
-        );
-        // eslint-disable-next-line require-atomic-updates
-        buildProperties.webpackStats = stats;
-      } catch (e) {
-        // TODO: handle error better
-        terminal.writeErrorLine(e);
-        throw e;
-      }
     } else {
-      try {
-        const stats: webpack.Stats = await LegacyAdapters.convertCallbackToPromise(
-          compiler.run.bind(compiler)
-        );
-        // eslint-disable-next-line require-atomic-updates
-        buildProperties.webpackStats = stats;
-      } catch (e) {
-        // TODO: handle error better
-        terminal.writeErrorLine(e);
-        throw e;
+      let stats: webpack.Stats;
+      if (buildProperties.watchMode) {
+        try {
+          stats = await LegacyAdapters.convertCallbackToPromise(compiler.watch.bind(compiler), {});
+        } catch (e) {
+          // TODO: handle error better
+          terminal.writeErrorLine(e);
+          throw e;
+        }
+      } else {
+        try {
+          stats = await LegacyAdapters.convertCallbackToPromise(compiler.run.bind(compiler));
+        } catch (e) {
+          // TODO: handle error better
+          terminal.writeErrorLine(e);
+          throw e;
+        }
+      }
+      // eslint-disable-next-line require-atomic-updates
+      buildProperties.webpackStats = stats;
+
+      this._emitErrors(terminal, stats);
+    }
+  }
+
+  private _emitErrors(terminal: Terminal, stats: webpack.Stats): void {
+    if (stats.hasErrors() || stats.hasWarnings()) {
+      const serializedStats: webpack.Stats.ToJsonOutput = stats.toJson('errors-warnings');
+
+      for (const warning of serializedStats.warnings) {
+        terminal.writeWarningLine(warning);
+      }
+
+      for (const error of serializedStats.errors) {
+        terminal.writeErrorLine(error);
+      }
+
+      if (serializedStats.errors.length === 1) {
+        throw new Error('Webpack compilation encountered an error.');
+      } else if (serializedStats.errors.length > 1) {
+        throw new Error('Webpack compilation encountered errors.');
       }
     }
   }

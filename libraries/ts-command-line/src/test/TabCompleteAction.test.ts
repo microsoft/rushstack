@@ -379,6 +379,7 @@ describe(`Tokenize command line`, () => {
 
     expect(actual.sort()).toEqual(expected.sort());
   });
+
   it(`tokenizes 'rush change -m "my change log"'`, () => {
     const commandLine: string = 'rush change -m "my change log"';
     const actual: string[] = tc.tokenizeCommandLine(commandLine.trim());
