@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/typedef
 const importLazy = require('import-lazy')(require);
 
 import * as globEscape from 'glob-escape';
 import * as os from 'os';
 import * as path from 'path';
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/typedef
 const yaml = importLazy('js-yaml');
 import { FileSystem, Sort, Text } from '@rushstack/node-core-library';
 

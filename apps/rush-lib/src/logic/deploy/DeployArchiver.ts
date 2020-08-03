@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/typedef
 const importLazy = require('import-lazy')(require);
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/typedef
 const JSZip = importLazy('jszip');
 import * as path from 'path';
 import { FileSystem, FileSystemStats } from '@rushstack/node-core-library';
@@ -13,14 +13,14 @@ import { IDeployState } from './DeployManager';
 
 // JSZip is dependant on Blob being declared.
 declare global {
-  // eslint-disable-next-line
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   type Blob = any;
 }
 export class DeployArchiver {
   public static async createArchiveAsync(deployState: IDeployState): Promise<void> {
     if (deployState.createArchiveFilePath !== undefined) {
       console.log('Creating archive...');
-      // eslint-disable-next-line
+      // eslint-disable-next-line @typescript-eslint/typedef
       const zip = this._getZipOfFolder(deployState.targetRootFolder);
       const zipContent: Buffer = await zip.generateAsync({
         type: 'nodebuffer',
@@ -58,8 +58,8 @@ export class DeployArchiver {
     return results;
   }
 
-  // eslint-disable-next-line
-  private static _getZipOfFolder(dir: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private static _getZipOfFolder(dir: string): any {
     // returns a JSZip instance filled with contents of dir.
     const allPaths: string[] = this._getFilePathsRecursively(dir);
 
@@ -68,7 +68,7 @@ export class DeployArchiver {
     // See: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/stat.h#n10
     const permissionsValue: number = 0o120755;
 
-    // eslint-disable-next-line
+    // eslint-disable-next-line @typescript-eslint/typedef
     const zip = new JSZip();
     for (const filePath of allPaths) {
       const addPath: string = path.relative(dir, filePath);

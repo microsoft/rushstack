@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/typedef
 const importLazy = require('import-lazy')(require);
 
 import * as colors from 'colors';
 import * as fetch from 'node-fetch';
 import * as fs from 'fs';
 import * as http from 'http';
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/typedef
 const HttpsProxyAgent = importLazy('https-proxy-agent');
 import * as os from 'os';
 import * as path from 'path';

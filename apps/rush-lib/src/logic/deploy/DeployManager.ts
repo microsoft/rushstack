@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/typedef
 const importLazy = require('import-lazy')(require);
 
 import * as colors from 'colors';
 import * as path from 'path';
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/typedef
 const resolve = importLazy('resolve');
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/typedef
 const npmPacklist = importLazy('npm-packlist');
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/typedef
 const pnpmLinkBins = importLazy('@pnpm/link-bins');
 
 // (Used only by the legacy code fragment in the resolve.sync() hook below)

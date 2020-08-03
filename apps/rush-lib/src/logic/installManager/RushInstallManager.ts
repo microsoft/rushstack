@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/typedef
 const importLazy = require('import-lazy')(require);
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/typedef
 const glob = importLazy('glob');
 import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/typedef
 const tar = importLazy('tar');
 import * as globEscape from 'glob-escape';
 import {
@@ -340,7 +340,7 @@ export class RushInstallManager extends BaseInstallManager {
     // NPM expects the root of the tarball to have a directory called 'package'
     const npmPackageFolder: string = 'package';
 
-    // eslint-disable-next-line
+    // eslint-disable-next-line @typescript-eslint/typedef
     const tarOptions = {
       gzip: true,
       file: tarballFile,
@@ -354,7 +354,7 @@ export class RushInstallManager extends BaseInstallManager {
       noPax: true,
       sync: true,
       prefix: npmPackageFolder,
-      // eslint-disable-next-line
+      // eslint-disable-next-line @typescript-eslint/typedef
       filter: (path: string, stat): boolean => {
         if (
           !this.rushConfiguration.experimentsConfiguration.configuration.noChmodFieldInTarHeaderNormalization

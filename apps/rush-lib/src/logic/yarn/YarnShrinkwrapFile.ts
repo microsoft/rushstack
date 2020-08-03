@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/typedef
 const importLazy = require('import-lazy')(require);
 
 import * as os from 'os';
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/typedef
 const lockfile = importLazy('@yarnpkg/lockfile');
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { FileSystem, IParsedPackageNameOrError, InternalError } from '@rushstack/node-core-library';
@@ -14,7 +14,7 @@ import { DependencySpecifier } from '../DependencySpecifier';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
 
 interface IYarnLockfileParseResult {
-  // eslint-disable-next-line
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   object: any;
 }
 

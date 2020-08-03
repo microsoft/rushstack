@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/typedef
 const importLazy = require('import-lazy')(require);
 
 import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/typedef
 const tar = importLazy('tar');
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/typedef
 import readPackageTree = require('read-package-tree');
 import { FileSystem, FileConstants, LegacyAdapters } from '@rushstack/node-core-library';
 

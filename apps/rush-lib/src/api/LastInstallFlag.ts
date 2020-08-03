@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/typedef
 const importLazy = require('import-lazy')(require);
 
 import * as path from 'path';
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/typedef
 const _ = importLazy('lodash');
 import { FileSystem, JsonFile, JsonObject } from '@rushstack/node-core-library';
 
