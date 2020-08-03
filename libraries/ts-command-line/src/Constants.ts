@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /**
- * String constants for parts of filenames.
+ * String constants for command line processing.
  *
  * @public
  */
