@@ -80,7 +80,7 @@ export class TabCompleteAction extends CommandLineAction {
           parameterNameToParameterInfoMap[parameter.shortName] = parameter;
         }
       });
-      actions[action.actionName] = parameterNameToParameterInfoMap;
+      actions.set(action.actionName, parameterNameToParameterInfoMap);
     }
 
     for (const parameter of this._globalParameters) {
