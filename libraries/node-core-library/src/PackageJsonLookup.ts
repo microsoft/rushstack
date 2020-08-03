@@ -100,6 +100,12 @@ export class PackageJsonLookup {
     );
   }
 
+  /**
+   * Gets the version of the package.json of the currently executing script.
+   *
+   * @param dirnameOfCaller - The search for package.json will start at the this directory,
+   * and then move upwards.
+   */
   public static getOwnPackageJsonVersion(dirnameOfCaller: string): string {
     let parent: string = path.dirname(dirnameOfCaller);
     do {
