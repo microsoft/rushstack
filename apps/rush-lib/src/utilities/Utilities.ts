@@ -444,7 +444,7 @@ export class Utilities {
   }
 
   public static isNonDebugTabCompletionRequest(): boolean {
-    return process.argv.length > 2 && process.argv[2] === CommandLineConstants.TabCompletionParameterName;
+    return process.argv.length > 2 && process.argv[2] === CommandLineConstants.TabCompletionActionName;
   }
 
   public static shouldPrintBanner(): boolean {

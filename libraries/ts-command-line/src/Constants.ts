@@ -8,7 +8,7 @@
  */
 export const enum CommandLineConstants {
   /**
-   * "package.json" - the configuration file that defines an NPM package
+   * The name of the built-in action that serves suggestions for tab-completion
    */
-  TabCompletionParameterName = 'tab-complete'
+  TabCompletionActionName = 'tab-complete'
 }

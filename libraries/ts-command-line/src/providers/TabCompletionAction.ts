@@ -8,6 +8,7 @@ import { CommandLineStringParameter } from '../parameters/CommandLineStringParam
 import { CommandLineParameterKind, CommandLineParameter } from '../parameters/BaseClasses';
 import { CommandLineAction } from './CommandLineAction';
 import { CommandLineChoiceParameter } from '..';
+import { CommandLineConstants } from '../Constants';
 
 interface IParameter {
   name: string;
@@ -28,7 +29,7 @@ export class TabCompleteAction extends CommandLineAction {
     globalParameters: ReadonlyArray<CommandLineParameter>
   ) {
     super({
-      actionName: 'tab-complete',
+      actionName: CommandLineConstants.TabCompletionActionName,
       summary: 'Provides tab completion.',
       documentation: 'Provides tab completion.'
     });

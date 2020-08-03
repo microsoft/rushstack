@@ -42,7 +42,7 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
 
 // @public
 export const enum CommandLineConstants {
-    TabCompletionParameterName = "tab-complete"
+    TabCompletionActionName = "tab-complete"
 }
 
 // @public
