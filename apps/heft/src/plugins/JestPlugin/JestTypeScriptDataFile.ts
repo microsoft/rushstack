@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import { JsonFile } from '@rushstack/node-core-library';
+
 import { ITypeScriptConfiguration } from '../../stages/BuildStage';
 
 /**
