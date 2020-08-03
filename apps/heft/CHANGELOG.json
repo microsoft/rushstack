@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.4.1",
+      "tag": "@rushstack/heft_v0.4.1",
+      "date": "Mon, 03 Aug 2020 15:09:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add specific support for handling binary assets in Jest tests."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.0",
       "tag": "@rushstack/heft_v0.4.0",
       "date": "Mon, 03 Aug 2020 06:55:14 GMT",

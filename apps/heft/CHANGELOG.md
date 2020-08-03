@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Mon, 03 Aug 2020 06:55:14 GMT and should not be manually modified.
+This log was last generated on Mon, 03 Aug 2020 15:09:51 GMT and should not be manually modified.
+
+## 0.4.1
+Mon, 03 Aug 2020 15:09:51 GMT
+
+### Patches
+
+- Add specific support for handling binary assets in Jest tests.
 
 ## 0.4.0
 Mon, 03 Aug 2020 06:55:14 GMT
