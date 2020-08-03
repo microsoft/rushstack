@@ -55,10 +55,6 @@ export class TabCompleteAction extends CommandLineAction {
   }
 
   protected async onExecute(): Promise<void> {
-    await this.runAsync();
-  }
-
-  protected async runAsync(): Promise<void> {
     const commandLine: string = this._wordToCompleteParameter.value || '';
     const caretPosition: number = this._positionParameter.value || 0;
 
