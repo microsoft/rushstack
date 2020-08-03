@@ -6,15 +6,23 @@ import { Path, FileSystem } from '@rushstack/node-core-library';
 import { InitialOptionsWithRootDir } from '@jest/types/build/Config';
 import { JestTypeScriptDataFile, IJestTypeScriptDataFileJson } from './JestTypeScriptDataFile';
 
+// This caches jest-typescript-data.json file contents.
+// Map from jestOptions.rootDir --> IJestTypeScriptDataFileJson
+const dataFileJsonCache: Map<string, IJestTypeScriptDataFileJson> = new Map();
+
 /**
  * This Jest transformer maps TS files under a 'src' folder to their compiled equivalent under 'lib'
  */
 export function process(src: string, filename: string, jestOptions: InitialOptionsWithRootDir): string {
-  // Read typescript-jest-config.json, which is created by Heft's TypeScript plugin.  It tells us
-  // which emitted output folder to use for Jest.
-  const jestTypeScriptConfig: IJestTypeScriptDataFileJson = JestTypeScriptDataFile.loadForProject(
+  let jestTypeScriptDataFile: IJestTypeScriptDataFileJson | undefined = dataFileJsonCache.get(
     jestOptions.rootDir
   );
+  if (jestTypeScriptDataFile === undefined) {
+    // Read jest-typescript-data.json, which is created by Heft's TypeScript plugin.  It tells us
+    // which emitted output folder to use for Jest.
+    jestTypeScriptDataFile = JestTypeScriptDataFile.loadForProject(jestOptions.rootDir);
+    dataFileJsonCache.set(jestOptions.rootDir, jestTypeScriptDataFile);
+  }
 
   // Is the input file under the "src" folder?
   const srcFolder: string = path.join(jestOptions.rootDir, 'src');
@@ -29,7 +37,7 @@ export function process(src: string, filename: string, jestOptions: InitialOptio
     // Example: /path/to/project/lib/folder1/folder2/Example.js
     const libFilename: string = path.join(
       jestOptions.rootDir,
-      jestTypeScriptConfig.emitFolderPathForJest,
+      jestTypeScriptDataFile.emitFolderPathForJest,
       srcRelativeFolderPath,
       `${parsedFilename.name}.js`
     );
