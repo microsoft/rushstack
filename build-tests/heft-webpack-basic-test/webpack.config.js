@@ -8,7 +8,7 @@ module.exports = {
     extensions: ['.js', '.jsx', '.json']
   },
   entry: {
-    'heft-test': path.join(__dirname, 'lib-esnext', 'index.js')
+    'heft-test': path.join(__dirname, 'lib', 'index.js')
   },
   output: {
     path: path.join(__dirname, 'dist'),

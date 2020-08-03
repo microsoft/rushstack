@@ -17,6 +17,7 @@ import {
   ICompileSubstage
 } from '../../stages/BuildStage';
 import { TaskPackageResolver, ITaskPackageResolution } from '../../utilities/TaskPackageResolver';
+import { JestTypeScriptDataFile } from '../JestPlugin/JestTypeScriptDataFile';
 
 const PLUGIN_NAME: string = 'typescript';
 
@@ -95,6 +96,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
       watchMode: watchMode,
       maxWriteParallelism: typeScriptConfiguration.maxWriteParallelism
     };
+
+    JestTypeScriptDataFile.saveForProject(heftConfiguration.buildFolder, typeScriptConfiguration);
 
     const tsconfigFilePaths: string[] = typeScriptConfiguration.tsconfigPaths;
     if (tsconfigFilePaths.length === 1) {
