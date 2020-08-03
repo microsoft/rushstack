@@ -124,6 +124,10 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
         typeScriptConfigurationJson.additionalModuleKindsToEmit || undefined;
     }
 
+    if (typeScriptConfigurationJson?.emitFolderPathForJest !== undefined) {
+      typeScriptConfiguration.emitFolderPathForJest = typeScriptConfigurationJson?.emitFolderPathForJest;
+    }
+
     if (typeScriptConfigurationJson?.disableTslint !== undefined) {
       typeScriptConfiguration.isLintingEnabled = !typeScriptConfigurationJson.disableTslint;
     }
