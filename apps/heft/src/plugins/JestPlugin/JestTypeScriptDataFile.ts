@@ -28,7 +28,7 @@ export class JestTypeScriptDataFile {
     projectFolder: string,
     typeScriptConfiguration: ITypeScriptConfiguration
   ): void {
-    const jsonFilePath: string = JestTypeScriptDataFile._getConfigFilePath(projectFolder);
+    const jsonFilePath: string = JestTypeScriptDataFile.getConfigFilePath(projectFolder);
 
     const json: IJestTypeScriptDataFileJson = {
       emitFolderPathForJest: typeScriptConfiguration.emitFolderPathForJest || 'lib'
@@ -40,11 +40,11 @@ export class JestTypeScriptDataFile {
    * Called by jest-build-transform.js to read the file.
    */
   public static loadForProject(projectFolder: string): IJestTypeScriptDataFileJson {
-    const jsonFilePath: string = JestTypeScriptDataFile._getConfigFilePath(projectFolder);
+    const jsonFilePath: string = JestTypeScriptDataFile.getConfigFilePath(projectFolder);
     return JsonFile.load(jsonFilePath);
   }
 
-  private static _getConfigFilePath(projectFolder: string): string {
+  public static getConfigFilePath(projectFolder: string): string {
     return path.join(projectFolder, '.heft', 'build-cache', 'jest-typescript-data.json');
   }
 }

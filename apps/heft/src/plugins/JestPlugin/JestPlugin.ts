@@ -11,6 +11,7 @@ import { HeftSession } from '../../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { ITestStageContext } from '../../stages/TestStage';
 import { ICleanStageContext } from '../../stages/CleanStage';
+import { JestTypeScriptDataFile, IJestTypeScriptDataFileJson } from './JestTypeScriptDataFile';
 
 const PLUGIN_NAME: string = 'JestPlugin';
 const JEST_CONFIGURATION_LOCATION: string = './config/jest.config.json';
@@ -38,6 +39,9 @@ export class JestPlugin implements IHeftPlugin {
     test: ITestStageContext
   ): Promise<void> {
     const buildFolder: string = heftConfiguration.buildFolder;
+
+    this._validateJestTypeScriptDataFile(buildFolder);
+
     const reporterOptions: IHeftJestReporterOptions = { heftConfiguration };
     const { results: jestResults } = await runCLI(
       {
@@ -63,6 +67,25 @@ export class JestPlugin implements IHeftPlugin {
     if (jestResults.numFailedTests > 0) {
       throw new Error(
         `${jestResults.numFailedTests} Jest test${jestResults.numFailedTests > 1 ? 's' : ''} failed`
+      );
+    }
+  }
+
+  private _validateJestTypeScriptDataFile(buildFolder: string): void {
+    // Full path to jest-typescript-data.json
+    const jestTypeScriptDataFile: IJestTypeScriptDataFileJson = JestTypeScriptDataFile.loadForProject(
+      buildFolder
+    );
+    const emitFolderPathForJest: string = path.join(
+      buildFolder,
+      jestTypeScriptDataFile.emitFolderPathForJest
+    );
+    if (!FileSystem.exists(emitFolderPathForJest)) {
+      throw new Error(
+        'The transpiler output folder does not exist:\n  ' +
+          emitFolderPathForJest +
+          '\nWas the compiler invoked? Is the "emitFolderPathForJest" setting correctly' +
+          ' specified in .heft/typescript.json?\n'
       );
     }
   }
