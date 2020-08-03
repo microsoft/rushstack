@@ -26,7 +26,6 @@
       "name": "@microsoft/api-extractor-model",
       "allowedCategories": [ "libraries" ]
     },
- 
     {
       "name": "@microsoft/gulp-core-build",
       "allowedCategories": [ "libraries" ]
@@ -338,6 +337,10 @@
     {
       "name": "fsevents",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "file-loader",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "git-repo-info",
