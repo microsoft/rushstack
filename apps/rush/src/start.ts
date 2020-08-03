@@ -34,7 +34,7 @@ const configuration:
   | MinimalRushConfiguration
   | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
 
-const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
+const currentPackageVersion: string = PackageJsonLookup.getOwnPackageJsonVersion(__dirname);
 
 let rushVersionToLoad: string | undefined = undefined;
 
