@@ -38,21 +38,6 @@ import { LinkManagerFactory } from '../LinkManagerFactory';
 import { BaseLinkManager } from '../base/BaseLinkManager';
 
 /**
- * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.
- * As a temporary workaround, augment the type.
- */
-// declare module 'tar' {
-//   // eslint-disable-next-line @typescript-eslint/naming-convention
-//   export interface CreateOptions {
-//     /**
-//      * "Set to true to omit writing mtime values for entries. Note that this prevents using other
-//      * mtime-based features like tar.update or the keepNewer option with the resulting tar archive."
-//      */
-//     noMtime?: boolean;
-//   }
-// }
-
-/**
  * This class implements common logic between "rush install" and "rush update".
  */
 export class RushInstallManager extends BaseInstallManager {
@@ -361,6 +346,10 @@ export class RushInstallManager extends BaseInstallManager {
       file: tarballFile,
       cwd: tempProjectFolder,
       portable: true,
+      /**
+       * Set to true to omit writing mtime values for entries. Note that this prevents using other
+       * mtime-based features like tar.update or the keepNewer option with the resulting tar archive.
+       */
       noMtime: true,
       noPax: true,
       sync: true,

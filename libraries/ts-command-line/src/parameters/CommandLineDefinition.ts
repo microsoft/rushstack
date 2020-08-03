@@ -64,7 +64,7 @@ export interface IBaseCommandLineDefinition {
   environmentVariable?: string;
 
   /**
-   * Custom tab completions for the parameter values.
+   * Custom tab completions for the parameter values
    */
   completions?: () => Promise<string[]>;
 }
