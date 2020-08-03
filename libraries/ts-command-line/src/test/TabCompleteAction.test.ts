@@ -208,14 +208,11 @@ function getCommandLineParser(): DynamicCommandLineParser {
   return commandLineParser;
 }
 
+const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
+const tc: TabCompleteAction = new TabCompleteAction(commandLineParser.actions, commandLineParser.parameters);
+
 describe('Gets TabCompletion(s)', () => {
   it(`gets completion(s) for rush <tab>`, async () => {
-    const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
-    const tc: TabCompleteAction = new TabCompleteAction(
-      commandLineParser.actions,
-      commandLineParser.parameters
-    );
-
     const commandLine: string = 'rush ';
     const actual: string[] = await arrayFromAsyncIteractorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
@@ -227,12 +224,6 @@ describe('Gets TabCompletion(s)', () => {
   });
 
   it(`gets completion(s) for rush a<tab>`, async () => {
-    const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
-    const tc: TabCompleteAction = new TabCompleteAction(
-      commandLineParser.actions,
-      commandLineParser.parameters
-    );
-
     const commandLine: string = 'rush a';
     const actual: string[] = await arrayFromAsyncIteractorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
@@ -244,12 +235,6 @@ describe('Gets TabCompletion(s)', () => {
   });
 
   it(`gets completion(s) for rush -d a<tab>`, async () => {
-    const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
-    const tc: TabCompleteAction = new TabCompleteAction(
-      commandLineParser.actions,
-      commandLineParser.parameters
-    );
-
     const commandLine: string = 'rush -d a';
     const actual: string[] = await arrayFromAsyncIteractorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
@@ -261,12 +246,6 @@ describe('Gets TabCompletion(s)', () => {
   });
 
   it(`gets completion(s) for rush build <tab>`, async () => {
-    const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
-    const tc: TabCompleteAction = new TabCompleteAction(
-      commandLineParser.actions,
-      commandLineParser.parameters
-    );
-
     const commandLine: string = 'rush build ';
     const actual: string[] = await arrayFromAsyncIteractorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
@@ -279,12 +258,6 @@ describe('Gets TabCompletion(s)', () => {
   });
 
   it(`gets completion(s) for rush build -<tab>`, async () => {
-    const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
-    const tc: TabCompleteAction = new TabCompleteAction(
-      commandLineParser.actions,
-      commandLineParser.parameters
-    );
-
     const commandLine: string = 'rush build -';
     const actual: string[] = await arrayFromAsyncIteractorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
@@ -297,12 +270,6 @@ describe('Gets TabCompletion(s)', () => {
   });
 
   it(`gets completion(s) for rush build -t <tab>`, async () => {
-    const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
-    const tc: TabCompleteAction = new TabCompleteAction(
-      commandLineParser.actions,
-      commandLineParser.parameters
-    );
-
     const commandLine: string = 'rush build -t ';
     const actual: string[] = await arrayFromAsyncIteractorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
@@ -314,12 +281,6 @@ describe('Gets TabCompletion(s)', () => {
   });
 
   it(`gets completion(s) for rush build -t a<tab>`, async () => {
-    const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
-    const tc: TabCompleteAction = new TabCompleteAction(
-      commandLineParser.actions,
-      commandLineParser.parameters
-    );
-
     const commandLine: string = 'rush build -t a';
     const actual: string[] = await arrayFromAsyncIteractorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
@@ -331,12 +292,6 @@ describe('Gets TabCompletion(s)', () => {
   });
 
   it(`gets completion(s) for rush --debug build -t a<tab>`, async () => {
-    const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
-    const tc: TabCompleteAction = new TabCompleteAction(
-      commandLineParser.actions,
-      commandLineParser.parameters
-    );
-
     const commandLine: string = 'rush --debug build -t a';
     const actual: string[] = await arrayFromAsyncIteractorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
@@ -348,12 +303,6 @@ describe('Gets TabCompletion(s)', () => {
   });
 
   it(`gets completion(s) for rush change --bump-type <tab>`, async () => {
-    const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
-    const tc: TabCompleteAction = new TabCompleteAction(
-      commandLineParser.actions,
-      commandLineParser.parameters
-    );
-
     const commandLine: string = 'rush change --bump-type ';
     const actual: string[] = await arrayFromAsyncIteractorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
@@ -365,12 +314,6 @@ describe('Gets TabCompletion(s)', () => {
   });
 
   it(`gets completion(s) for rush change --bulk <tab>`, async () => {
-    const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
-    const tc: TabCompleteAction = new TabCompleteAction(
-      commandLineParser.actions,
-      commandLineParser.parameters
-    );
-
     const commandLine: string = 'rush change --bulk ';
     const actual: string[] = await arrayFromAsyncIteractorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
@@ -383,12 +326,6 @@ describe('Gets TabCompletion(s)', () => {
   });
 
   it(`gets completion(s) for rush change --bump-type m<tab>`, async () => {
-    const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
-    const tc: TabCompleteAction = new TabCompleteAction(
-      commandLineParser.actions,
-      commandLineParser.parameters
-    );
-
     const commandLine: string = 'rush change --bump-type m';
     const actual: string[] = await arrayFromAsyncIteractorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
@@ -400,12 +337,6 @@ describe('Gets TabCompletion(s)', () => {
   });
 
   it(`gets completion(s) for rush change --message <tab>`, async () => {
-    const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
-    const tc: TabCompleteAction = new TabCompleteAction(
-      commandLineParser.actions,
-      commandLineParser.parameters
-    );
-
     const commandLine: string = 'rush change --message ';
     const actual: string[] = await arrayFromAsyncIteractorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
@@ -417,12 +348,6 @@ describe('Gets TabCompletion(s)', () => {
   });
 
   it(`gets completion(s) for rush change --message "my change log message" --bump-type <tab>`, async () => {
-    const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
-    const tc: TabCompleteAction = new TabCompleteAction(
-      commandLineParser.actions,
-      commandLineParser.parameters
-    );
-
     const commandLine: string = 'rush change --message "my change log message" --bump-type ';
     const actual: string[] = await arrayFromAsyncIteractorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
@@ -434,12 +359,6 @@ describe('Gets TabCompletion(s)', () => {
   });
 
   it(`gets completion(s) for rush change --message "my change log message" --bump-type m<tab>`, async () => {
-    const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
-    const tc: TabCompleteAction = new TabCompleteAction(
-      commandLineParser.actions,
-      commandLineParser.parameters
-    );
-
     const commandLine: string = 'rush change --message "my change log message" --bump-type m';
     const actual: string[] = await arrayFromAsyncIteractorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
@@ -453,12 +372,6 @@ describe('Gets TabCompletion(s)', () => {
 
 describe(`Tokenize command line`, () => {
   it(`tokenizes "rush change -"`, () => {
-    const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
-    const tc: TabCompleteAction = new TabCompleteAction(
-      commandLineParser.actions,
-      commandLineParser.parameters
-    );
-
     const commandLine: string = 'rush change -';
     const actual: string[] = tc.tokenizeCommandLine(commandLine.trim());
 
@@ -467,12 +380,6 @@ describe(`Tokenize command line`, () => {
     expect(actual.sort()).toEqual(expected.sort());
   });
   it(`tokenizes 'rush change -m "my change log"'`, () => {
-    const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
-    const tc: TabCompleteAction = new TabCompleteAction(
-      commandLineParser.actions,
-      commandLineParser.parameters
-    );
-
     const commandLine: string = 'rush change -m "my change log"';
     const actual: string[] = tc.tokenizeCommandLine(commandLine.trim());
 
