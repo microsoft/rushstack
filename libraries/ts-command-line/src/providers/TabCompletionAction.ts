@@ -10,19 +10,14 @@ import { CommandLineAction } from './CommandLineAction';
 import { CommandLineChoiceParameter } from '..';
 import { CommandLineConstants } from '../Constants';
 
-interface IParameter {
-  name: string;
-  parameterInfo: CommandLineParameter;
-}
-
 const DEFAULT_WORD_TO_AUTOCOMPLETE: string = '';
 const DEFAULT_POSITION: number = 0;
 
 export class TabCompleteAction extends CommandLineAction {
   private _wordToCompleteParameter: CommandLineStringParameter;
   private _positionParameter: CommandLineIntegerParameter;
-  private _actions: ReadonlyArray<CommandLineAction>;
-  private _globalParameters: ReadonlyArray<CommandLineParameter>;
+  private readonly _actions: Map<string, Map<string, CommandLineParameter>>;
+  private readonly _globalParameters: Map<string, CommandLineParameter>;
 
   public constructor(
     actions: ReadonlyArray<CommandLineAction>,
@@ -34,8 +29,28 @@ export class TabCompleteAction extends CommandLineAction {
       documentation: 'Provides tab completion.'
     });
 
-    this._actions = actions;
-    this._globalParameters = globalParameters;
+    this._actions = new Map<string, Map<string, CommandLineParameter>>();
+    for (const action of actions) {
+      const parameterNameToParameterInfoMap: Map<string, CommandLineParameter> = new Map<
+        string,
+        CommandLineParameter
+      >();
+      for (const parameter of action.parameters) {
+        parameterNameToParameterInfoMap.set(parameter.longName, parameter);
+        if (parameter.shortName) {
+          parameterNameToParameterInfoMap.set(parameter.shortName, parameter);
+        }
+      }
+      this._actions.set(action.actionName, parameterNameToParameterInfoMap);
+    }
+
+    this._globalParameters = new Map<string, CommandLineParameter>();
+    for (const parameter of globalParameters) {
+      this._globalParameters.set(parameter.longName, parameter);
+      if (parameter.shortName) {
+        this._globalParameters.set(parameter.shortName, parameter);
+      }
+    }
   }
 
   protected onDefineParameters(): void {
@@ -64,30 +79,10 @@ export class TabCompleteAction extends CommandLineAction {
   }
 
   public async *getCompletions(commandLine: string, caretPosition: number): AsyncIterable<string> {
-    const actions: Map<string, Map<string, CommandLineParameter>> = new Map<
-      string,
-      Map<string, CommandLineParameter>
-    >();
-    for (const action of this._actions) {
-      const parameterNameToParameterInfoMap: IParameter[] = [];
-      action.parameters.forEach((parameter) => {
-        parameterNameToParameterInfoMap[parameter.longName] = parameter;
-        if (parameter.shortName) {
-          parameterNameToParameterInfoMap[parameter.shortName] = parameter;
-        }
-      });
-      actions.set(action.actionName, parameterNameToParameterInfoMap);
-    }
-
-    for (const parameter of this._globalParameters) {
-      actions[parameter.longName] = parameter;
-      if (parameter.shortName) {
-        actions[parameter.shortName] = parameter;
-      }
-    }
+    const actions: Map<string, Map<string, CommandLineParameter>> = this._actions;
 
     if (!commandLine || !caretPosition) {
-      yield* Object.keys(actions); // return all actions
+      yield* this._getAllActions();
       return;
     }
 
@@ -96,8 +91,14 @@ export class TabCompleteAction extends CommandLineAction {
     // offset arguments by the number of global params in the input
     const globalParameterOffset: number = this._getGlobalParameterOffset(tokens);
 
+    // for (let i: number = 0; i < tokens.length; i++) {
+    //   yield 'token'+ i + tokens[i];
+    // }
+
+    // yield 'globalParameterOffset'+globalParameterOffset;
+
     if (tokens.length < 2 + globalParameterOffset) {
-      yield* Object.keys(actions); // return all actions
+      yield* this._getAllActions();
       return;
     }
 
@@ -107,23 +108,29 @@ export class TabCompleteAction extends CommandLineAction {
     const completePartialWord: boolean = caretPosition === commandLine.length;
 
     if (completePartialWord && tokens.length === 2 + globalParameterOffset) {
-      for (const actionName of Object.keys(actions)) {
+      // yield 'a1';
+      // yield 'tokens1gl0'+tokens[1 + globalParameterOffset]
+      for (const actionName of actions.keys()) {
+        // yield 'a1' + actionName;
         if (actionName.indexOf(tokens[1 + globalParameterOffset]) === 0) {
           yield actionName;
         }
       }
     } else {
-      for (const actionName of Object.keys(actions)) {
+      // yield 'b1';
+      for (const actionName of actions.keys()) {
         if (actionName === tokens[1 + globalParameterOffset]) {
-          const parameterNameMap: Map<string, CommandLineParameter> = actions[actionName];
+          // yield 'c1' + actionName;
+          const parameterNameMap: Map<string, CommandLineParameter> = actions.get(actionName)!;
 
-          const parameterNames: string[] = Array.from(Object.keys(actions[actionName]), (x: string) => x);
+          const parameterNames: string[] = Array.from(parameterNameMap.keys());
 
           if (completePartialWord) {
+            // yield 'd1';
             for (const parameterName of parameterNames) {
               if (parameterName === secondLastToken) {
                 const values: string[] = await this._getParameterValueCompletions(
-                  parameterNameMap[parameterName]
+                  parameterNameMap.get(parameterName)!
                 );
                 if (values.length > 0) {
                   yield* this._completeParameterValues(values, lastToken);
@@ -133,10 +140,11 @@ export class TabCompleteAction extends CommandLineAction {
             }
             yield* this._completeParameterValues(parameterNames, lastToken);
           } else {
+            // yield 'e1';
             for (const parameterName of parameterNames) {
               if (parameterName === lastToken) {
                 const values: string[] = await this._getParameterValueCompletions(
-                  parameterNameMap[parameterName]
+                  parameterNameMap.get(parameterName)!
                 );
                 if (values.length > 0) {
                   yield* values;
@@ -144,10 +152,10 @@ export class TabCompleteAction extends CommandLineAction {
                 }
               }
             }
-            for (const parameter of parameterNames) {
+            for (const parameterName of parameterNames) {
               if (
-                parameter === lastToken &&
-                parameterNameMap[parameter].kind !== CommandLineParameterKind.Flag
+                parameterName === lastToken &&
+                parameterNameMap.get(parameterName)!.kind !== CommandLineParameterKind.Flag
               ) {
                 // The parameter is expecting a value, so don't suggest parameter names again
                 return;
@@ -161,6 +169,11 @@ export class TabCompleteAction extends CommandLineAction {
         }
       }
     }
+  }
+
+  private *_getAllActions(): IterableIterator<string> {
+    yield* this._actions.keys();
+    yield* this._globalParameters.keys();
   }
 
   public tokenizeCommandLine(commandLine: string): string[] {
@@ -179,14 +192,16 @@ export class TabCompleteAction extends CommandLineAction {
   }
 
   private _getGlobalParameterOffset(tokens: string[]): number {
+    const globalParameters: Map<string, CommandLineParameter> = this._globalParameters;
     let count: number = 0;
-    for (let i: number = 1; i < tokens.length; i++) {
-      for (const globalParameter of this._globalParameters) {
+
+    outer: for (let i: number = 1; i < tokens.length; i++) {
+      for (const globalParameter of globalParameters.values()) {
         if (tokens[i] !== globalParameter.longName && tokens[i] !== globalParameter.shortName) {
-          break;
+          break outer;
         }
-        count++;
       }
+      count++;
     }
 
     return count;
