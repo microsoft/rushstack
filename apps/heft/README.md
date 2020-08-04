@@ -3,10 +3,11 @@
 > 🚨 *This is an early preview release. Please report issues!* 🚨
 
 <div>
-  <br>
+  <br />
   <a href="https://rushstack.io/pages/heft/overview/">
     <img width="380" src="https://rushstack.io/images/heft-logo-horse.svg">
   </a>
+  <p />
 </div>
 
 <!-- ----------------------------------------------------------------------------- -->
