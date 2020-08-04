@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "Create a lighter weight function to get own package version.",
-      "type": "minor"
+      "comment": "Lazy-import some packages to improve spin up times.",
+      "type": "patch"
     }
   ],
   "packageName": "@rushstack/node-core-library",
