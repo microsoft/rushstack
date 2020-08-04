@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.4.2",
+      "tag": "@rushstack/heft_v0.4.2",
+      "date": "Tue, 04 Aug 2020 07:27:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update README.md logo"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.1",
       "tag": "@rushstack/heft_v0.4.1",
       "date": "Mon, 03 Aug 2020 15:09:51 GMT",
