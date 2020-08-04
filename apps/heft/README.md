@@ -2,7 +2,12 @@
 
 > 🚨 *This is an early preview release. Please report issues!* 🚨
 
-![heft](https://github.com/microsoft/rushstack/blob/master/common/wiki-images/heft-300x120.png?raw=true)
+<div>
+  <br>
+  <a href="https://rushstack.io/pages/heft/overview/">
+    <img width="380" src="https://rushstack.io/images/heft-logo-horse.svg">
+  </a>
+</div>
 
 <!-- ----------------------------------------------------------------------------- -->
 <!-- Text below this line should stay in sync with the Rush Stack web site content -->
