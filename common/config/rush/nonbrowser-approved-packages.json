@@ -339,6 +339,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "file-loader",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "git-repo-info",
       "allowedCategories": [ "libraries" ]
     },

@@ -1,6 +1,28 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 30 Jul 2020 15:09:35 GMT and should not be manually modified.
+This log was last generated on Mon, 03 Aug 2020 15:09:51 GMT and should not be manually modified.
+
+## 0.4.1
+Mon, 03 Aug 2020 15:09:51 GMT
+
+### Patches
+
+- Add specific support for handling binary assets in Jest tests.
+
+## 0.4.0
+Mon, 03 Aug 2020 06:55:14 GMT
+
+### Minor changes
+
+- Add jest-identity-mock-transform for mocking .css imports in Webpack projects
+- Add new "emitFolderPathForJest" setting in typescript.json, which simplifies how Webpack projects emit CommonJS for Jest
+
+### Patches
+
+- Fix an issue where jest-shared.config.json did not match .tsx file extensions
+- Standardize how jest-shared.config.json references path-based imports
+- Enable Jest "runInBand" when invoking Heft with "--debug"
+- Fix an issue where "heft clean" did not clean Jest's unreliable cache
 
 ## 0.3.1
 Thu, 30 Jul 2020 15:09:35 GMT

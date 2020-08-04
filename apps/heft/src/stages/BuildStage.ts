@@ -110,6 +110,14 @@ export interface ISharedTypeScriptConfiguration {
   additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
 
   /**
+   * Specifies the intermediary folder that Jest will use for its input.  Because Jest uses the
+   * Node.js runtime to execute tests, the module format must be CommonJS.
+   *
+   * The default value is "lib".
+   */
+  emitFolderPathForJest?: string;
+
+  /**
    * Set this to change the maximum number of file handles that will be opened concurrently for writing.
    * The default is 50.
    */
