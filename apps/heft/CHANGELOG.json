@@ -2,6 +2,52 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.4.1",
+      "tag": "@rushstack/heft_v0.4.1",
+      "date": "Mon, 03 Aug 2020 15:09:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add specific support for handling binary assets in Jest tests."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.0",
+      "tag": "@rushstack/heft_v0.4.0",
+      "date": "Mon, 03 Aug 2020 06:55:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where jest-shared.config.json did not match .tsx file extensions"
+          },
+          {
+            "comment": "Standardize how jest-shared.config.json references path-based imports"
+          },
+          {
+            "comment": "Enable Jest \"runInBand\" when invoking Heft with \"--debug\""
+          },
+          {
+            "comment": "Fix an issue where \"heft clean\" did not clean Jest's unreliable cache"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add jest-identity-mock-transform for mocking .css imports in Webpack projects"
+          },
+          {
+            "comment": "Add new \"emitFolderPathForJest\" setting in typescript.json, which simplifies how Webpack projects emit CommonJS for Jest"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.26.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.1",
       "tag": "@rushstack/heft_v0.3.1",
       "date": "Thu, 30 Jul 2020 15:09:35 GMT",
