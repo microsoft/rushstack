@@ -54,7 +54,7 @@ export class Rush {
   public static launch(launcherVersion: string, arg: ILaunchOptions): void {
     const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
 
-    if (Utilities.shouldPrintBanner()) {
+    if (!Utilities.shouldRestrictConsoleOutput()) {
       Rush._printStartupBanner(options.isManaged);
     }
 

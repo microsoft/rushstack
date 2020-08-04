@@ -58,6 +58,11 @@ export class CommandLineFlagParameter extends CommandLineParameter {
     }
 
 // @public
+export class CommandLineHelper {
+    static isTabCompletionActionRequest(): boolean;
+}
+
+// @public
 export class CommandLineIntegerParameter extends CommandLineParameterWithArgument {
     // @internal
     constructor(definition: ICommandLineIntegerDefinition);

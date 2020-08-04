@@ -10,7 +10,7 @@ import * as wordwrap from 'wordwrap';
 import { JsonFile, IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Stream } from 'stream';
-import { CommandLineConstants } from '@rushstack/ts-command-line';
+import { CommandLineHelper } from '@rushstack/ts-command-line';
 
 export interface IEnvironment {
   // NOTE: the process.env doesn't actually support "undefined" as a value.
@@ -443,12 +443,11 @@ export class Utilities {
     return Utilities._executeLifecycleCommandInternal(command, child_process.spawn, options);
   }
 
-  public static isNonDebugTabCompletionRequest(): boolean {
-    return process.argv.length > 2 && process.argv[2] === CommandLineConstants.TabCompletionActionName;
-  }
-
-  public static shouldPrintBanner(): boolean {
-    return !Utilities.isNonDebugTabCompletionRequest() && process.argv.indexOf('--json') === -1;
+  /**
+   * Utility to determine if the app should restrict writing to the console.
+   */
+  public static shouldRestrictConsoleOutput(): boolean {
+    return !CommandLineHelper.isTabCompletionActionRequest() && process.argv.indexOf('--json') === -1;
   }
 
   /**

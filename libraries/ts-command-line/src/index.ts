@@ -45,3 +45,5 @@ export { DynamicCommandLineAction } from './providers/DynamicCommandLineAction';
 export { DynamicCommandLineParser } from './providers/DynamicCommandLineParser';
 
 export { CommandLineConstants } from './Constants';
+
+export { CommandLineHelper } from './CommandLineHelper';
