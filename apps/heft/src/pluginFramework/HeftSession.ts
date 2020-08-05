@@ -26,7 +26,16 @@ export interface IHeftSessionHooks {
 
 export interface IHeftSessionOptions {
   plugin: IHeftPlugin;
+  applyForPluginFn: ApplyForPluginFn;
 }
+
+/**
+ * @beta
+ */
+export type ApplyForPluginFn = <TPlugin extends IHeftPlugin>(
+  pluginToTap: TPlugin,
+  pluginApplyFn: (plugin: TPlugin) => void
+) => void;
 
 /**
  * @public
@@ -48,6 +57,14 @@ export class HeftSession {
   public readonly debugMode: boolean;
 
   /**
+   * Call this function to receive a callback with the plugin if and after the specified plugin
+   * has been applied. This is used to tap hooks on another plugin.
+   *
+   * @beta
+   */
+  public readonly applyForPlugin: ApplyForPluginFn;
+
+  /**
    * @internal
    */
   public constructor(options: IHeftSessionOptions, internalSessionOptions: IInternalHeftSessionOptions) {
@@ -65,6 +82,8 @@ export class HeftSession {
     };
 
     this.debugMode = internalSessionOptions.getIsDebugMode();
+
+    this.applyForPlugin = options.applyForPluginFn;
   }
 
   /**

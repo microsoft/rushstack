@@ -39,6 +39,7 @@ export class PluginManager {
   private _terminal: Terminal;
   private _heftConfiguration: HeftConfiguration;
   private _internalHeftSession: InternalHeftSession;
+  private _appliedPlugins: IHeftPlugin[] = [];
 
   public constructor(options: IPluginManagerOptions) {
     this._terminal = options.terminal;
@@ -95,6 +96,12 @@ export class PluginManager {
     }
   }
 
+  public afterInitializeAllPlugins(): void {
+    for (const appliedPlugin of this._appliedPlugins) {
+      this._internalHeftSession.applyPluginHooks(appliedPlugin);
+    }
+  }
+
   private _initializeResolvedPlugin(resolvedPluginPath: string, options?: object): void {
     const plugin: IHeftPlugin<object | void> = this._loadAndValidatePluginPackage(resolvedPluginPath);
     this._applyPlugin(plugin, options);
@@ -105,6 +112,7 @@ export class PluginManager {
       // Todo: Use the plugin displayName in its logging.
       const heftSession: HeftSession = this._internalHeftSession.getSessionForPlugin(plugin);
       plugin.apply(heftSession, this._heftConfiguration, options);
+      this._appliedPlugins.push(plugin);
     } catch (e) {
       throw new InternalError(`Error applying "${plugin.displayName}": ${e}`);
     }
