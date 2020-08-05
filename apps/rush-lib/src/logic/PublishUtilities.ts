@@ -646,12 +646,12 @@ export class PublishUtilities {
         change.packageName,
         dependencies[change.packageName]
       );
-      const isAnyWorkspaceVersion: boolean =
+      const isWorkspaceWildcardVersion: boolean =
         requiredVersion.specifierType === DependencySpecifierType.Workspace &&
         requiredVersion.versionSpecifier === '*';
       const alwaysUpdate: boolean =
         (!!prereleaseToken && prereleaseToken.hasValue && !allChanges.hasOwnProperty(parentPackageName)) ||
-        isAnyWorkspaceVersion;
+        isWorkspaceWildcardVersion;
 
       // If the version range exists and has not yet been updated to this version, update it.
       if (requiredVersion.versionSpecifier !== change.newRangeDependency || alwaysUpdate) {
@@ -665,7 +665,8 @@ export class PublishUtilities {
           // The downstream dep will also need to be republished if using `workspace:*` as this will publish
           // as the exact version.
           changeType =
-            semver.satisfies(change.newVersion!, requiredVersion.versionSpecifier) && !isAnyWorkspaceVersion
+            semver.satisfies(change.newVersion!, requiredVersion.versionSpecifier) &&
+            !isWorkspaceWildcardVersion
               ? ChangeType.dependency
               : ChangeType.patch;
         }
