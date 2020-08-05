@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Ensure downstream workspace package version bumps also bump parent packages",
+      "comment": "Fix an issue where a package version bump would not bump downstream packages with a `workspace:*` dependency specifier.",
       "type": "none"
     }
   ],
