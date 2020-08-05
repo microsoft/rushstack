@@ -88,15 +88,16 @@ export class HeftConfiguration {
 // @public (undocumented)
 export class HeftSession {
     // Warning: (ae-forgotten-export) The symbol "IHeftSessionOptions" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "IInternalHeftSessionOptions" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    constructor(options: IHeftSessionOptions);
-    get debugMode(): boolean;
+    constructor(options: IHeftSessionOptions, internalSessionOptions: IInternalHeftSessionOptions);
+    readonly debugMode: boolean;
     // (undocumented)
     readonly hooks: IHeftSessionHooks;
     // @internal (undocumented)
     readonly metricsCollector: _MetricsCollector;
-    }
+}
 
 // @public (undocumented)
 export interface IApiExtractorConfiguration {

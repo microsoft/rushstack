@@ -4,10 +4,12 @@
 import { SyncHook } from 'tapable';
 
 import { MetricsCollector, MetricsCollectorHooks } from '../metrics/MetricsCollector';
-import { ICleanStageContext, CleanStage } from '../stages/CleanStage';
-import { IDevDeployStageContext, DevDeployStage } from '../stages/DevDeployStage';
-import { BuildStage, IBuildStageContext } from '../stages/BuildStage';
-import { ITestStageContext, TestStage } from '../stages/TestStage';
+import { ICleanStageContext } from '../stages/CleanStage';
+import { IDevDeployStageContext } from '../stages/DevDeployStage';
+import { IBuildStageContext } from '../stages/BuildStage';
+import { ITestStageContext } from '../stages/TestStage';
+import { IHeftPlugin } from './IHeftPlugin';
+import { IInternalHeftSessionOptions } from './InternalHeftSession';
 
 /**
  * @public
@@ -20,17 +22,8 @@ export interface IHeftSessionHooks {
   metricsCollector: MetricsCollectorHooks;
 }
 
-/**
- * @internal
- */
 export interface IHeftSessionOptions {
-  buildStage: BuildStage;
-  cleanStage: CleanStage;
-  devDeployStage: DevDeployStage;
-  testStage: TestStage;
-
-  metricsCollector: MetricsCollector;
-  getIsDebugMode(): boolean;
+  plugin: IHeftPlugin;
 }
 
 /**
@@ -47,26 +40,22 @@ export class HeftSession {
   /**
    * If set to true, the build is running with the --debug flag
    */
-  public get debugMode(): boolean {
-    return this._options.getIsDebugMode();
-  }
-
-  private _options: IHeftSessionOptions;
+  public readonly debugMode: boolean;
 
   /**
    * @internal
    */
-  public constructor(options: IHeftSessionOptions) {
-    this._options = options;
-
-    this.metricsCollector = options.metricsCollector;
+  public constructor(options: IHeftSessionOptions, internalSessionOptions: IInternalHeftSessionOptions) {
+    this.metricsCollector = internalSessionOptions.metricsCollector;
 
     this.hooks = {
-      build: options.buildStage.stageInitializationHook,
-      clean: options.cleanStage.stageInitializationHook,
-      devDeploy: options.devDeployStage.stageInitializationHook,
-      test: options.testStage.stageInitializationHook,
+      build: internalSessionOptions.buildStage.stageInitializationHook,
+      clean: internalSessionOptions.cleanStage.stageInitializationHook,
+      devDeploy: internalSessionOptions.devDeployStage.stageInitializationHook,
+      test: internalSessionOptions.testStage.stageInitializationHook,
       metricsCollector: this.metricsCollector.hooks
     };
+
+    this.debugMode = internalSessionOptions.getIsDebugMode();
   }
 }
