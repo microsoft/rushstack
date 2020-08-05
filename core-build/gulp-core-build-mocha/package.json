@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-mocha",
-  "version": "3.8.21",
+  "version": "3.8.22",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
