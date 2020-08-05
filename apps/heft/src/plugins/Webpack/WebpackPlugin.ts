@@ -14,7 +14,7 @@ import {
   IBuildStageProperties,
   IWebpackConfiguration
 } from '../../stages/BuildStage';
-import { NamedLogger } from '../../pluginFramework/logging/NamedLogger';
+import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 
 const PLUGIN_NAME: string = 'WebpackPlugin';
 
@@ -46,7 +46,7 @@ export class WebpackPlugin implements IHeftPlugin {
       return;
     }
 
-    const logger: NamedLogger = heftSession.requestNamedLogger('webpack');
+    const logger: ScopedLogger = heftSession.requestScopedLogger('webpack');
     logger.terminal.writeLine(`Using Webpack version ${webpack.version}`);
 
     const compiler: webpack.Compiler | webpack.MultiCompiler = Array.isArray(webpackConfiguration)
@@ -103,7 +103,7 @@ export class WebpackPlugin implements IHeftPlugin {
     }
   }
 
-  private _emitErrors(logger: NamedLogger, stats: webpack.Stats): void {
+  private _emitErrors(logger: ScopedLogger, stats: webpack.Stats): void {
     if (stats.hasErrors() || stats.hasWarnings()) {
       const serializedStats: webpack.Stats.ToJsonOutput = stats.toJson('errors-warnings');
 

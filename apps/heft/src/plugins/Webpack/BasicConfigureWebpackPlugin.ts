@@ -15,7 +15,7 @@ import {
   IBuildStageProperties,
   IWebpackConfiguration
 } from '../../stages/BuildStage';
-import { NamedLogger } from '../../pluginFramework/logging/NamedLogger';
+import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 
 /**
  * See https://webpack.js.org/api/cli/#environment-options
@@ -66,7 +66,7 @@ export class BasicConfigureWebpackPlugin implements IHeftPlugin {
     buildProperties: IBuildStageProperties,
     bundleProperties: IBundleSubstageProperties
   ): Promise<IWebpackConfiguration> {
-    const logger: NamedLogger = heftSession.requestNamedLogger('configure-webpack');
+    const logger: ScopedLogger = heftSession.requestScopedLogger('configure-webpack');
 
     if (existingConfiguration) {
       logger.terminal.writeVerboseLine(

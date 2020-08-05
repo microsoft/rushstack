@@ -6,7 +6,7 @@ import { Terminal, ITerminalProvider } from '@rushstack/node-core-library';
 import { IHeftPlugin } from '../IHeftPlugin';
 import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
 
-export interface INamedLoggerOptions {
+export interface IScopedLoggerOptions {
   requestingPlugin: IHeftPlugin;
   loggerName: string;
   terminalProvider: ITerminalProvider;
@@ -16,8 +16,8 @@ export interface INamedLoggerOptions {
 /**
  * @public
  */
-export class NamedLogger {
-  private readonly _options: INamedLoggerOptions;
+export class ScopedLogger {
+  private readonly _options: IScopedLoggerOptions;
   private readonly _errors: Error[] = [];
   private readonly _warnings: Error[] = [];
 
@@ -47,7 +47,7 @@ export class NamedLogger {
   /**
    * @internal
    */
-  public constructor(options: INamedLoggerOptions) {
+  public constructor(options: IScopedLoggerOptions) {
     this._options = options;
     this._requestingPlugin = options.requestingPlugin;
     this.loggerName = options.loggerName;

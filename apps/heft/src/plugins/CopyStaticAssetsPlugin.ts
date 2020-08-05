@@ -13,12 +13,12 @@ import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { ICopyStaticAssetsConfiguration, IBuildStageContext, ICompileSubstage } from '../stages/BuildStage';
-import { NamedLogger } from '../pluginFramework/logging/NamedLogger';
+import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 
 const PLUGIN_NAME: string = 'CopyStaticAssetsPlugin';
 
 interface ICopyStaticAssetsOptions {
-  logger: NamedLogger;
+  logger: ScopedLogger;
   buildFolder: string;
   copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
   watchMode: boolean;
@@ -37,7 +37,7 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
         compile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          const logger: NamedLogger = heftSession.requestNamedLogger('copy-static-assets');
+          const logger: ScopedLogger = heftSession.requestScopedLogger('copy-static-assets');
 
           await this._runCopyAsync({
             logger,

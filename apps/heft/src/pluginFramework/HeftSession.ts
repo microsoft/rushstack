@@ -10,7 +10,7 @@ import { IBuildStageContext } from '../stages/BuildStage';
 import { ITestStageContext } from '../stages/TestStage';
 import { IHeftPlugin } from './IHeftPlugin';
 import { IInternalHeftSessionOptions } from './InternalHeftSession';
-import { NamedLogger } from './logging/NamedLogger';
+import { ScopedLogger } from './logging/ScopedLogger';
 import { LoggingManager } from './logging/LoggingManager';
 
 /**
@@ -70,7 +70,7 @@ export class HeftSession {
   /**
    * Call this function to request a logger with the specified name.
    */
-  public requestNamedLogger(loggerName: string): NamedLogger {
-    return this._loggingManager.requestNamedLogger(this._options.plugin, loggerName);
+  public requestScopedLogger(loggerName: string): ScopedLogger {
+    return this._loggingManager.requestScopedLogger(this._options.plugin, loggerName);
   }
 }

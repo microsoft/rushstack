@@ -97,7 +97,7 @@ export class HeftSession {
     readonly hooks: IHeftSessionHooks;
     // @internal (undocumented)
     readonly metricsCollector: _MetricsCollector;
-    requestNamedLogger(loggerName: string): NamedLogger;
+    requestScopedLogger(loggerName: string): ScopedLogger;
 }
 
 // @public (undocumented)
@@ -337,11 +337,11 @@ export class MetricsCollectorHooks {
 }
 
 // @public (undocumented)
-export class NamedLogger {
-    // Warning: (ae-forgotten-export) The symbol "INamedLoggerOptions" needs to be exported by the entry point index.d.ts
+export class ScopedLogger {
+    // Warning: (ae-forgotten-export) The symbol "IScopedLoggerOptions" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    constructor(options: INamedLoggerOptions);
+    constructor(options: IScopedLoggerOptions);
     emitError(error: Error): void;
     emitWarning(warning: Error): void;
     // (undocumented)

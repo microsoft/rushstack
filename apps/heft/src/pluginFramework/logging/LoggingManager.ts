@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { IHeftPlugin } from '../IHeftPlugin';
-import { NamedLogger } from './NamedLogger';
+import { ScopedLogger } from './ScopedLogger';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 
 export interface ILoggingManagerOptions {
@@ -11,7 +11,7 @@ export interface ILoggingManagerOptions {
 
 export class LoggingManager {
   private _options: ILoggingManagerOptions;
-  private _namedLoggers: Map<string, NamedLogger> = new Map<string, NamedLogger>();
+  private _scopedLoggers: Map<string, ScopedLogger> = new Map<string, ScopedLogger>();
   private _verboseEnabled: boolean;
 
   public constructor(options: ILoggingManagerOptions) {
@@ -22,30 +22,30 @@ export class LoggingManager {
     this._verboseEnabled = true;
   }
 
-  public requestNamedLogger(plugin: IHeftPlugin, loggerName: string): NamedLogger {
-    const existingNamedLogger: NamedLogger | undefined = this._namedLoggers.get(loggerName);
-    if (existingNamedLogger) {
+  public requestScopedLogger(plugin: IHeftPlugin, loggerName: string): ScopedLogger {
+    const existingScopedLogger: ScopedLogger | undefined = this._scopedLoggers.get(loggerName);
+    if (existingScopedLogger) {
       throw new Error(
         `A named logger with name "${loggerName}" has already been requested ` +
-          `by plugin "${existingNamedLogger._requestingPlugin.displayName}".`
+          `by plugin "${existingScopedLogger._requestingPlugin.displayName}".`
       );
     } else {
-      const namedLogger: NamedLogger = new NamedLogger({
+      const scopedLogger: ScopedLogger = new ScopedLogger({
         requestingPlugin: plugin,
         loggerName,
         terminalProvider: this._options.terminalProvider,
         getVerboseEnabled: () => this._verboseEnabled
       });
-      this._namedLoggers.set(loggerName, namedLogger);
-      return namedLogger;
+      this._scopedLoggers.set(loggerName, scopedLogger);
+      return scopedLogger;
     }
   }
 
   public getErrorStrings(): string[] {
     const result: string[] = [];
 
-    for (const [, namedLogger] of this._namedLoggers) {
-      result.push(...namedLogger.errors.map((error) => `[${namedLogger.loggerName}] ${error.message}`));
+    for (const [, scopedLogger] of this._scopedLoggers) {
+      result.push(...scopedLogger.errors.map((error) => `[${scopedLogger.loggerName}] ${error.message}`));
     }
 
     return result;
@@ -54,8 +54,10 @@ export class LoggingManager {
   public getWarningStrings(): string[] {
     const result: string[] = [];
 
-    for (const [, namedLogger] of this._namedLoggers) {
-      result.push(...namedLogger.warnings.map((warning) => `[${namedLogger.loggerName}] ${warning.message}`));
+    for (const [, scopedLogger] of this._scopedLoggers) {
+      result.push(
+        ...scopedLogger.warnings.map((warning) => `[${scopedLogger.loggerName}] ${warning.message}`)
+      );
     }
 
     return result;
