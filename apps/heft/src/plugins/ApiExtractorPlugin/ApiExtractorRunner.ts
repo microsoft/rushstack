@@ -60,7 +60,7 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
   }
 
   public initialize(): void {
-    this._terminal = ApiExtractorRunner.getTerminal(this._terminalProvider);
+    this._terminal = ApiExtractorRunner.getTerminal(this._globalTerminalProvider);
   }
 
   public async invokeAsync(): Promise<void> {

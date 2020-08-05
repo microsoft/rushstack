@@ -144,7 +144,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
   public initialize(): void {
     this._typescriptTerminal = TypeScriptBuilder.getTypeScriptTerminal(
-      this._terminalProvider,
+      this._globalTerminalProvider,
       this._configuration.terminalPrefixLabel
     );
 
@@ -265,7 +265,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         ts: ts,
         tslintPackagePath: this._configuration.tslintToolPath,
         terminalPrefixLabel: this._configuration.terminalPrefixLabel,
-        terminalProvider: this._terminalProvider,
+        terminalProvider: this._globalTerminalProvider,
         buildFolderPath: this._configuration.buildFolder,
         buildCacheFolderPath: this._configuration.buildCacheFolder,
         linterConfigFilePath: this._tslintConfigFilePath,
@@ -283,7 +283,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         ts: ts,
         eslintPackagePath: this._configuration.eslintToolPath,
         terminalPrefixLabel: this._configuration.terminalPrefixLabel,
-        terminalProvider: this._terminalProvider,
+        terminalProvider: this._globalTerminalProvider,
         buildFolderPath: this._configuration.buildFolder,
         buildCacheFolderPath: this._configuration.buildCacheFolder,
         linterConfigFilePath: this._eslintConfigFilePath,
