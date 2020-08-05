@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where a package version bump would not bump downstream packages with a `workspace:*` dependency specifier.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "3473356+D4N14L@users.noreply.github.com"
+}
