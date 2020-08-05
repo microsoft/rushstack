@@ -12,6 +12,7 @@ import {
   ReporterOnStartOptions,
   Config
 } from '@jest/reporters';
+
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 
 export interface IHeftJestReporterOptions {
@@ -23,7 +24,7 @@ export default class HeftJestReporter implements Reporter {
   private _buildFolder: string;
 
   public constructor(jestConfig: Config.GlobalConfig, options: IHeftJestReporterOptions) {
-    this._terminal = options.heftConfiguration.terminal;
+    this._terminal = options.heftConfiguration.globalTerminal;
     this._buildFolder = options.heftConfiguration.buildFolder;
   }
 

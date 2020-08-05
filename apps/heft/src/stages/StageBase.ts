@@ -49,7 +49,7 @@ export abstract class StageBase<
   private readonly _innerHooksType: new () => TStageHooks;
 
   public constructor(heftConfiguration: HeftConfiguration, innerHooksType: new () => TStageHooks) {
-    this.terminal = heftConfiguration.terminal;
+    this.terminal = heftConfiguration.globalTerminal;
     this.heftConfiguration = heftConfiguration;
     this.stageInitializationHook = new SyncHook<IStageContext<TStageHooks, TStageProperties>>([
       'stageContext'

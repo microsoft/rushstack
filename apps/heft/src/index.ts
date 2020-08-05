@@ -16,6 +16,7 @@ export {
   IPerformanceData as _IPerformanceData,
   MetricsCollector as _MetricsCollector
 } from './metrics/MetricsCollector';
+export { NamedLogger } from './pluginFramework/NamedLogger';
 
 // Stages
 export { StageHooksBase, IStageContext } from './stages/StageBase';

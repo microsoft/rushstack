@@ -10,6 +10,8 @@ import { IBuildStageContext } from '../stages/BuildStage';
 import { ITestStageContext } from '../stages/TestStage';
 import { IHeftPlugin } from './IHeftPlugin';
 import { IInternalHeftSessionOptions } from './InternalHeftSession';
+import { NamedLogger } from './NamedLogger';
+import { LoggingManager } from './LoggingManager';
 
 /**
  * @public
@@ -30,6 +32,9 @@ export interface IHeftSessionOptions {
  * @public
  */
 export class HeftSession {
+  private readonly _loggingManager: LoggingManager;
+  private readonly _options: IHeftSessionOptions;
+
   public readonly hooks: IHeftSessionHooks;
 
   /**
@@ -46,6 +51,9 @@ export class HeftSession {
    * @internal
    */
   public constructor(options: IHeftSessionOptions, internalSessionOptions: IInternalHeftSessionOptions) {
+    this._options = options;
+
+    this._loggingManager = internalSessionOptions.loggingManager;
     this.metricsCollector = internalSessionOptions.metricsCollector;
 
     this.hooks = {
@@ -57,5 +65,12 @@ export class HeftSession {
     };
 
     this.debugMode = internalSessionOptions.getIsDebugMode();
+  }
+
+  /**
+   * Call this function to request a logger with the specified name.
+   */
+  public requestNamedLogger(loggerName: string): NamedLogger {
+    return this._loggingManager.requestNamedLogger(this._options.plugin, loggerName);
   }
 }

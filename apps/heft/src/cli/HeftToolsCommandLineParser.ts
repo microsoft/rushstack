@@ -6,12 +6,7 @@ import {
   CommandLineStringListParameter,
   CommandLineFlagParameter
 } from '@rushstack/ts-command-line';
-import {
-  Terminal,
-  InternalError,
-  ConsoleTerminalProvider,
-  ITerminalProvider
-} from '@rushstack/node-core-library';
+import { Terminal, InternalError, ConsoleTerminalProvider } from '@rushstack/node-core-library';
 
 import { MetricsCollector } from '../metrics/MetricsCollector';
 import { CleanAction } from './actions/CleanAction';
@@ -27,10 +22,12 @@ import { CleanStage } from '../stages/CleanStage';
 import { BuildStage } from '../stages/BuildStage';
 import { DevDeployStage } from '../stages/DevDeployStage';
 import { TestStage } from '../stages/TestStage';
+import { LoggingManager } from '../pluginFramework/LoggingManager';
 
 export class HeftToolsCommandLineParser extends CommandLineParser {
   private _terminalProvider: ConsoleTerminalProvider;
   private _terminal: Terminal;
+  private _loggingManager: LoggingManager;
   private _metricsCollector: MetricsCollector;
   private _pluginManager: PluginManager;
   private _heftConfiguration: HeftConfiguration;
@@ -43,16 +40,8 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     return this._debugFlag.value;
   }
 
-  public get terminalProvider(): ITerminalProvider {
-    return this._terminalProvider;
-  }
-
   public get terminal(): Terminal {
     return this._terminal;
-  }
-
-  public get metricsCollector(): MetricsCollector {
-    return this._metricsCollector;
   }
 
   public constructor() {
@@ -64,10 +53,13 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     this._terminalProvider = new ConsoleTerminalProvider();
     this._terminal = new Terminal(this._terminalProvider);
     this._metricsCollector = new MetricsCollector();
+    this._loggingManager = new LoggingManager({
+      terminalProvider: this._terminalProvider
+    });
 
     this._heftConfiguration = HeftConfiguration.initialize({
       cwd: process.cwd(),
-      terminalProvider: this.terminalProvider
+      terminalProvider: this._terminalProvider
     });
 
     const stages: IStages = {
@@ -77,8 +69,9 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       testStage: new TestStage(this._heftConfiguration)
     };
     const actionOptions: IHeftActionBaseOptions = {
-      terminal: this.terminal,
-      metricsCollector: this.metricsCollector,
+      terminal: this._terminal,
+      loggingManager: this._loggingManager,
+      metricsCollector: this._metricsCollector,
       pluginManager: this._pluginManager,
       heftConfiguration: this._heftConfiguration,
       stages
@@ -87,11 +80,12 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     this._internalHeftSession = new InternalHeftSession({
       getIsDebugMode: () => this.isDebug,
       ...stages,
-      metricsCollector: this.metricsCollector
+      loggingManager: this._loggingManager,
+      metricsCollector: this._metricsCollector
     });
 
     this._pluginManager = new PluginManager({
-      terminal: this.terminal,
+      terminal: this._terminal,
       heftConfiguration: this._heftConfiguration,
       internalHeftSession: this._internalHeftSession
     });
@@ -130,6 +124,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     this._terminalProvider.verboseEnabled = this.isDebug;
 
     if (this.isDebug) {
+      this._loggingManager.enableVerboseLogging();
       InternalError.breakInDebugger = true;
     }
 
@@ -150,11 +145,11 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
 
   private _normalizeCwd(): void {
     const buildFolder: string = this._heftConfiguration.buildFolder;
-    this.terminal.writeLine(`Project build folder is "${buildFolder}"`);
+    this._terminal.writeLine(`Project build folder is "${buildFolder}"`);
     const currentCwd: string = process.cwd();
     if (currentCwd !== buildFolder) {
       // Update the CWD to the project's build root. Some tools, like Jest, use process.cwd()
-      this.terminal.writeVerboseLine(`CWD is "${currentCwd}". Normalizing to project build folder.`);
+      this._terminal.writeVerboseLine(`CWD is "${currentCwd}". Normalizing to project build folder.`);
       process.chdir(buildFolder);
     }
   }
@@ -170,7 +165,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
   }
 
   private async _reportErrorAndSetExitCode(error: Error): Promise<void> {
-    this.terminal.writeErrorLine(error.toString());
+    this._terminal.writeErrorLine(error.toString());
 
     if (this.isDebug) {
       this._terminal.writeLine();
