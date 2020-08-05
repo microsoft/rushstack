@@ -475,6 +475,39 @@ importers:
       api-extractor-lib1-test: 'workspace:*'
       fs-extra: ~7.0.1
       typescript: ~3.9.5
+  ../../build-tests/heft-example-plugin-01:
+    dependencies:
+      tapable: 1.1.3
+    devDependencies:
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
+      '@types/node': 10.17.13
+      '@types/tapable': 1.0.5
+      eslint: 7.2.0
+      typescript: 3.9.7
+    specifiers:
+      '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
+      '@types/node': 10.17.13
+      '@types/tapable': 1.0.5
+      eslint: ~7.2.0
+      tapable: 1.1.3
+      typescript: ~3.9.5
+  ../../build-tests/heft-example-plugin-02:
+    devDependencies:
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
+      '@types/node': 10.17.13
+      eslint: 7.2.0
+      heft-example-plugin-01: 'link:../heft-example-plugin-01'
+      typescript: 3.9.7
+    specifiers:
+      '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
+      '@types/node': 10.17.13
+      eslint: ~7.2.0
+      heft-example-plugin-01: 'workspace:*'
+      typescript: ~3.9.5
   ../../build-tests/heft-minimal-rig-test:
     dependencies:
       typescript: 3.9.7
