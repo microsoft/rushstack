@@ -16,7 +16,7 @@ import { BuildStage } from '../../stages/BuildStage';
 import { CleanStage } from '../../stages/CleanStage';
 import { DevDeployStage } from '../../stages/DevDeployStage';
 import { TestStage } from '../../stages/TestStage';
-import { LoggingManager } from '../../pluginFramework/LoggingManager';
+import { LoggingManager } from '../../pluginFramework/logging/LoggingManager';
 
 export interface IStages {
   buildStage: BuildStage;

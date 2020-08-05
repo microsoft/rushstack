@@ -8,7 +8,7 @@ import { CleanStage } from '../stages/CleanStage';
 import { DevDeployStage } from '../stages/DevDeployStage';
 import { TestStage } from '../stages/TestStage';
 import { MetricsCollector } from '../metrics/MetricsCollector';
-import { LoggingManager } from './LoggingManager';
+import { LoggingManager } from './logging/LoggingManager';
 
 /**
  * @internal

@@ -13,7 +13,7 @@ import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { ICopyStaticAssetsConfiguration, IBuildStageContext, ICompileSubstage } from '../stages/BuildStage';
-import { NamedLogger } from '../pluginFramework/NamedLogger';
+import { NamedLogger } from '../pluginFramework/logging/NamedLogger';
 
 const PLUGIN_NAME: string = 'CopyStaticAssetsPlugin';
 

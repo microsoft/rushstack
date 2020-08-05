@@ -3,8 +3,8 @@
 
 import { Terminal, ITerminalProvider } from '@rushstack/node-core-library';
 
-import { IHeftPlugin } from './IHeftPlugin';
-import { PrefixProxyTerminalProvider } from '../utilities/PrefixProxyTerminalProvider';
+import { IHeftPlugin } from '../IHeftPlugin';
+import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
 
 export interface INamedLoggerOptions {
   requestingPlugin: IHeftPlugin;

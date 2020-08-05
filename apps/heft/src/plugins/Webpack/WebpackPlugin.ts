@@ -14,7 +14,7 @@ import {
   IBuildStageProperties,
   IWebpackConfiguration
 } from '../../stages/BuildStage';
-import { NamedLogger } from '../../pluginFramework/NamedLogger';
+import { NamedLogger } from '../../pluginFramework/logging/NamedLogger';
 
 const PLUGIN_NAME: string = 'WebpackPlugin';
 

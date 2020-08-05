@@ -12,7 +12,7 @@ import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { ITestStageContext } from '../../stages/TestStage';
 import { ICleanStageContext } from '../../stages/CleanStage';
 import { JestTypeScriptDataFile, IJestTypeScriptDataFileJson } from './JestTypeScriptDataFile';
-import { NamedLogger } from '../../pluginFramework/NamedLogger';
+import { NamedLogger } from '../../pluginFramework/logging/NamedLogger';
 
 const PLUGIN_NAME: string = 'JestPlugin';
 const JEST_CONFIGURATION_LOCATION: string = './config/jest.config.json';

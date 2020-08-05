@@ -22,7 +22,7 @@ import { CleanStage } from '../stages/CleanStage';
 import { BuildStage } from '../stages/BuildStage';
 import { DevDeployStage } from '../stages/DevDeployStage';
 import { TestStage } from '../stages/TestStage';
-import { LoggingManager } from '../pluginFramework/LoggingManager';
+import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 
 export class HeftToolsCommandLineParser extends CommandLineParser {
   private _terminalProvider: ConsoleTerminalProvider;

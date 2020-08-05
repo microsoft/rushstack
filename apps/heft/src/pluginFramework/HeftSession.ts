@@ -10,8 +10,8 @@ import { IBuildStageContext } from '../stages/BuildStage';
 import { ITestStageContext } from '../stages/TestStage';
 import { IHeftPlugin } from './IHeftPlugin';
 import { IInternalHeftSessionOptions } from './InternalHeftSession';
-import { NamedLogger } from './NamedLogger';
-import { LoggingManager } from './LoggingManager';
+import { NamedLogger } from './logging/NamedLogger';
+import { LoggingManager } from './logging/LoggingManager';
 
 /**
  * @public
