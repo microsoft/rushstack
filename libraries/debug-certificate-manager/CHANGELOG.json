@@ -2,6 +2,24 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "0.2.30",
+      "tag": "@rushstack/debug-certificate-manager_v0.2.30",
+      "date": "Wed, 05 Aug 2020 18:27:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.26.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" to `6.4.33`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.29",
       "tag": "@rushstack/debug-certificate-manager_v0.2.29",
       "date": "Fri, 03 Jul 2020 15:09:04 GMT",

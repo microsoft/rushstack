@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.16.13",
+      "tag": "@microsoft/gulp-core-build_v3.16.13",
+      "date": "Wed, 05 Aug 2020 18:27:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.26.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.16.12",
       "tag": "@microsoft/gulp-core-build_v3.16.12",
       "date": "Fri, 03 Jul 2020 15:09:04 GMT",
