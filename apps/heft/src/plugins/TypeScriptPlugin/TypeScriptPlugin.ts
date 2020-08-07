@@ -4,9 +4,7 @@
 import * as path from 'path';
 import * as glob from 'glob';
 import { LegacyAdapters, ITerminalProvider } from '@rushstack/node-core-library';
-import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.7';
 
-import { RushStackCompilerUtilities } from '../../utilities/RushStackCompilerUtilities';
 import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
 import { HeftSession } from '../../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
@@ -18,6 +16,8 @@ import {
   IBuildStageContext,
   ICompileSubstage
 } from '../../stages/BuildStage';
+import { TaskPackageResolver, ITaskPackageResolution } from '../../utilities/TaskPackageResolver';
+import { JestTypeScriptDataFile } from '../JestPlugin/JestTypeScriptDataFile';
 
 const PLUGIN_NAME: string = 'typescript';
 
@@ -97,6 +97,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
       maxWriteParallelism: typeScriptConfiguration.maxWriteParallelism
     };
 
+    JestTypeScriptDataFile.saveForProject(heftConfiguration.buildFolder, typeScriptConfiguration);
+
     const tsconfigFilePaths: string[] = typeScriptConfiguration.tsconfigPaths;
     if (tsconfigFilePaths.length === 1) {
       await this._runBuilderForTsconfig({
@@ -145,21 +147,19 @@ export class TypeScriptPlugin implements IHeftPlugin {
     } = options;
 
     const fullTsconfigFilePath: string = path.resolve(heftConfiguration.buildFolder, tsconfigFilePath);
-    const rscPackage:
-      | typeof TRushStackCompiler
-      | undefined = RushStackCompilerUtilities.tryLoadRushStackCompilerPackageForTsconfig(
-      TypeScriptBuilder.getTypeScriptTerminal(terminalProvider, terminalPrefixLabel),
-      fullTsconfigFilePath
+    const resolution: ITaskPackageResolution | undefined = TaskPackageResolver.resolveTaskPackages(
+      fullTsconfigFilePath,
+      TypeScriptBuilder.getTypeScriptTerminal(terminalProvider, terminalPrefixLabel)
     );
-    if (!rscPackage) {
+    if (!resolution) {
       throw new Error(`Unable to resolve a compiler package for ${path.basename(tsconfigFilePath)}`);
     }
 
     const typeScriptBuilderConfiguration: ITypeScriptBuilderConfiguration = {
       buildFolder: heftConfiguration.buildFolder,
-      typeScriptToolPath: rscPackage.ToolPaths.typescriptPackagePath,
-      tslintToolPath: rscPackage.ToolPaths.tslintPackagePath,
-      eslintToolPath: rscPackage.ToolPaths.eslintPackagePath,
+      typeScriptToolPath: resolution.typeScriptPackagePath,
+      tslintToolPath: resolution.tslintPackagePath,
+      eslintToolPath: resolution.eslintPackagePath,
 
       tsconfigPath: fullTsconfigFilePath,
       lintingEnabled,

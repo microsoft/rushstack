@@ -127,7 +127,9 @@ export class PublishUtilities {
   public static sortChangeRequests(allChanges: IChangeInfoHash): IChangeInfo[] {
     return Object.keys(allChanges)
       .map((key) => allChanges[key])
-      .sort((a, b) => (a.order! < b.order! ? -1 : 1));
+      .sort((a, b) =>
+        a.order! === b.order! ? a.packageName.localeCompare(b.packageName) : a.order! < b.order! ? -1 : 1
+      );
   }
 
   /**
@@ -640,15 +642,19 @@ export class PublishUtilities {
       dependencies[change.packageName] &&
       !PublishUtilities._isCyclicDependency(allPackages, parentPackageName, change.packageName)
     ) {
-      const requiredVersion: string = new DependencySpecifier(
+      const requiredVersion: DependencySpecifier = new DependencySpecifier(
         change.packageName,
         dependencies[change.packageName]
-      ).versionSpecifier;
+      );
+      const isWorkspaceWildcardVersion: boolean =
+        requiredVersion.specifierType === DependencySpecifierType.Workspace &&
+        requiredVersion.versionSpecifier === '*';
       const alwaysUpdate: boolean =
-        !!prereleaseToken && prereleaseToken.hasValue && !allChanges.hasOwnProperty(parentPackageName);
+        (!!prereleaseToken && prereleaseToken.hasValue && !allChanges.hasOwnProperty(parentPackageName)) ||
+        isWorkspaceWildcardVersion;
 
       // If the version range exists and has not yet been updated to this version, update it.
-      if (requiredVersion !== change.newRangeDependency || alwaysUpdate) {
+      if (requiredVersion.versionSpecifier !== change.newRangeDependency || alwaysUpdate) {
         let changeType: ChangeType;
         // Propagate hotfix changes to dependencies
         if (change.changeType === ChangeType.hotfix) {
@@ -656,9 +662,13 @@ export class PublishUtilities {
         } else {
           // Either it already satisfies the new version, or doesn't.
           // If not, the downstream dep needs to be republished.
-          changeType = semver.satisfies(change.newVersion!, requiredVersion)
-            ? ChangeType.dependency
-            : ChangeType.patch;
+          // The downstream dep will also need to be republished if using `workspace:*` as this will publish
+          // as the exact version.
+          changeType =
+            semver.satisfies(change.newVersion!, requiredVersion.versionSpecifier) &&
+            !isWorkspaceWildcardVersion
+              ? ChangeType.dependency
+              : ChangeType.patch;
         }
 
         const hasChanged: boolean = PublishUtilities._addChange(

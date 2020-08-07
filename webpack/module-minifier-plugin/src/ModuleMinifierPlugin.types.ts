@@ -158,7 +158,7 @@ export interface IModuleInfo {
  * Extension of the webpack Module typings with members that are used by this Plugin
  * @public
  */
-export interface IExtendedModule extends webpack.compilation.Module, webpack.Module {
+export interface IExtendedModule extends webpack.compilation.Module {
   /**
    * Is this module external?
    */

@@ -37,8 +37,8 @@ import { ISharedTypeScriptConfiguration, IEmitModuleKindBase } from '../../stage
 export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfiguration {
   buildFolder: string;
   typeScriptToolPath: string;
-  tslintToolPath: string;
-  eslintToolPath: string;
+  tslintToolPath: string | undefined;
+  eslintToolPath: string | undefined;
 
   /**
    * If provided, this is included in the logging prefix. For example, if this
@@ -61,7 +61,8 @@ export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfig
   buildCacheFolder: string;
 
   /**
-   * The maximum number of simultaneous filesystem writes allowed.
+   * Set this to change the maximum number of file handles that will be opened concurrently for writing.
+   * The default is 50.
    */
   maxWriteParallelism: number;
 }
@@ -259,32 +260,41 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       };
     };
 
-    const tslint: Tslint | undefined = this._tslintEnabled
-      ? new Tslint({
-          ts: ts,
-          tslintPackagePath: this._configuration.tslintToolPath,
-          terminalPrefixLabel: this._configuration.terminalPrefixLabel,
-          terminalProvider: this._terminalProvider,
-          buildFolderPath: this._configuration.buildFolder,
-          buildCacheFolderPath: this._configuration.buildCacheFolder,
-          linterConfigFilePath: this._tslintConfigFilePath,
-          fileSystem: this._fileSystem,
-          measurePerformance: measureTsPerformance
-        })
-      : undefined;
+    let tslint: Tslint | undefined = undefined;
+    if (this._tslintEnabled) {
+      if (!this._configuration.tslintToolPath) {
+        throw new Error('Unable to resolve "tslint" package');
+      }
 
-    const eslint: Eslint | undefined = this._eslintEnabled
-      ? new Eslint({
-          ts: ts,
-          eslintPackagePath: this._configuration.eslintToolPath,
-          terminalPrefixLabel: this._configuration.terminalPrefixLabel,
-          terminalProvider: this._terminalProvider,
-          buildFolderPath: this._configuration.buildFolder,
-          buildCacheFolderPath: this._configuration.buildCacheFolder,
-          linterConfigFilePath: this._eslintConfigFilePath,
-          measurePerformance: measureTsPerformance
-        })
-      : undefined;
+      tslint = new Tslint({
+        ts: ts,
+        tslintPackagePath: this._configuration.tslintToolPath,
+        terminalPrefixLabel: this._configuration.terminalPrefixLabel,
+        terminalProvider: this._terminalProvider,
+        buildFolderPath: this._configuration.buildFolder,
+        buildCacheFolderPath: this._configuration.buildCacheFolder,
+        linterConfigFilePath: this._tslintConfigFilePath,
+        fileSystem: this._fileSystem,
+        measurePerformance: measureTsPerformance
+      });
+    }
+    let eslint: Eslint | undefined = undefined;
+    if (this._eslintEnabled) {
+      if (!this._configuration.eslintToolPath) {
+        throw new Error('Unable to resolve "eslint" package');
+      }
+
+      eslint = new Eslint({
+        ts: ts,
+        eslintPackagePath: this._configuration.eslintToolPath,
+        terminalPrefixLabel: this._configuration.terminalPrefixLabel,
+        terminalProvider: this._terminalProvider,
+        buildFolderPath: this._configuration.buildFolder,
+        buildCacheFolderPath: this._configuration.buildCacheFolder,
+        linterConfigFilePath: this._eslintConfigFilePath,
+        measurePerformance: measureTsPerformance
+      });
+    }
 
     this._typescriptTerminal.writeLine(`Using TypeScript version ${ts.version}`);
 

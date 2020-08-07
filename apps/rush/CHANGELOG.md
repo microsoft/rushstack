@@ -1,6 +1,21 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 17 Jul 2020 05:32:38 GMT and should not be manually modified.
+This log was last generated on Wed, 05 Aug 2020 17:57:07 GMT and should not be manually modified.
+
+## 5.30.2
+Wed, 05 Aug 2020 17:57:07 GMT
+
+### Updates
+
+- Fix an issue where a package version bump would not bump downstream packages with a `workspace:*` dependency specifier.
+
+## 5.30.1
+Thu, 23 Jul 2020 23:47:59 GMT
+
+### Updates
+
+- Fixed an isssue where the "rush build" incremental analysis sometimes reported a warning with large diffs (GitHub #501) or filenames that contain spaces, quotes, or other unusual characters (GitHub #2007)
+- Prevent incorrect conversion to "workspace:" notation for peer dependencies when running "rush update --full"
 
 ## 5.30.0
 Fri, 17 Jul 2020 05:32:38 GMT

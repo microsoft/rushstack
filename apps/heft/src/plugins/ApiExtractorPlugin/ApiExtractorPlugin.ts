@@ -67,6 +67,10 @@ export class ApiExtractorPlugin implements IHeftPlugin {
       throw new Error('Unable to resolve a compiler package for tsconfig.json');
     }
 
+    if (!heftConfiguration.compilerPackage.apiExtractorPackagePath) {
+      throw new Error('Unable to resolve the "@microsoft/api-extractor" package for this project');
+    }
+
     const apiExtractorRunner: ApiExtractorRunner = new ApiExtractorRunner(
       heftConfiguration.terminalProvider,
       {

@@ -2,6 +2,127 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.4.3",
+      "tag": "@rushstack/heft_v0.4.3",
+      "date": "Wed, 05 Aug 2020 18:27:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.26.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.7\" to `0.6.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.2",
+      "tag": "@rushstack/heft_v0.4.2",
+      "date": "Tue, 04 Aug 2020 07:27:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update README.md logo"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.1",
+      "tag": "@rushstack/heft_v0.4.1",
+      "date": "Mon, 03 Aug 2020 15:09:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add specific support for handling binary assets in Jest tests."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.0",
+      "tag": "@rushstack/heft_v0.4.0",
+      "date": "Mon, 03 Aug 2020 06:55:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where jest-shared.config.json did not match .tsx file extensions"
+          },
+          {
+            "comment": "Standardize how jest-shared.config.json references path-based imports"
+          },
+          {
+            "comment": "Enable Jest \"runInBand\" when invoking Heft with \"--debug\""
+          },
+          {
+            "comment": "Fix an issue where \"heft clean\" did not clean Jest's unreliable cache"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add jest-identity-mock-transform for mocking .css imports in Webpack projects"
+          },
+          {
+            "comment": "Add new \"emitFolderPathForJest\" setting in typescript.json, which simplifies how Webpack projects emit CommonJS for Jest"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.26.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.1",
+      "tag": "@rushstack/heft_v0.3.1",
+      "date": "Thu, 30 Jul 2020 15:09:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Emit errors and warnings from webpack."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.0",
+      "tag": "@rushstack/heft_v0.3.0",
+      "date": "Fri, 24 Jul 2020 20:40:38 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Enable Heft to be used without the \"@microsoft/rush-stack-compiler-n.n\" system"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.2",
+      "tag": "@rushstack/heft_v0.2.2",
+      "date": "Tue, 21 Jul 2020 00:54:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Rename .heft/api-extractor.json to .heft/api-extractor-task.json to avoid confusion with API Extractor's config file"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.1",
+      "tag": "@rushstack/heft_v0.2.1",
+      "date": "Tue, 21 Jul 2020 00:10:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update documentation"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.0",
       "tag": "@rushstack/heft_v0.2.0",
       "date": "Mon, 20 Jul 2020 06:52:33 GMT",

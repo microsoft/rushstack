@@ -1,6 +1,11 @@
 # Change Log - @microsoft/rush-stack-compiler-3.6
 
-This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+This log was last generated on Wed, 05 Aug 2020 18:27:33 GMT and should not be manually modified.
+
+## 0.6.2
+Wed, 05 Aug 2020 18:27:33 GMT
+
+*Version update only*
 
 ## 0.6.1
 Fri, 03 Jul 2020 15:09:04 GMT

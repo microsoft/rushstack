@@ -88,15 +88,16 @@ export class HeftConfiguration {
 // @public (undocumented)
 export class HeftSession {
     // Warning: (ae-forgotten-export) The symbol "IHeftSessionOptions" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "IInternalHeftSessionOptions" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    constructor(options: IHeftSessionOptions);
-    get debugMode(): boolean;
+    constructor(options: IHeftSessionOptions, internalSessionOptions: IInternalHeftSessionOptions);
+    readonly debugMode: boolean;
     // (undocumented)
     readonly hooks: IHeftSessionHooks;
     // @internal (undocumented)
     readonly metricsCollector: _MetricsCollector;
-    }
+}
 
 // @public (undocumented)
 export interface IApiExtractorConfiguration {
@@ -157,11 +158,11 @@ export interface ICleanStageProperties {
 // @public (undocumented)
 export interface ICompilerPackage {
     // (undocumented)
-    apiExtractorPackagePath: string;
+    apiExtractorPackagePath: string | undefined;
     // (undocumented)
-    eslintPackagePath: string;
+    eslintPackagePath: string | undefined;
     // (undocumented)
-    tslintPackagePath: string;
+    tslintPackagePath: string | undefined;
     // (undocumented)
     typeScriptPackagePath: string;
 }
@@ -282,6 +283,7 @@ export interface ISharedCopyStaticAssetsConfiguration {
 export interface ISharedTypeScriptConfiguration {
     additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
     copyFromCacheMode?: CopyFromCacheMode | undefined;
+    emitFolderPathForJest?: string;
     maxWriteParallelism: number;
 }
 

@@ -10,9 +10,9 @@ import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminal
 
 export interface IApiExtractorRunnerConfiguration {
   /**
-   * The path to the API Extractor config file
+   * The path to the Extractor's config file ("api-extractor.json")
    *
-   * For example, /home/username/code/repo/project/.heft/api-extractor.json
+   * For example, /home/username/code/repo/project/config/api-extractor.json
    */
   configFileLocation: string;
 

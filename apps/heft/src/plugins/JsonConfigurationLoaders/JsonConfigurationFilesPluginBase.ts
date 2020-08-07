@@ -124,6 +124,10 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
         typeScriptConfigurationJson.additionalModuleKindsToEmit || undefined;
     }
 
+    if (typeScriptConfigurationJson?.emitFolderPathForJest !== undefined) {
+      typeScriptConfiguration.emitFolderPathForJest = typeScriptConfigurationJson?.emitFolderPathForJest;
+    }
+
     if (typeScriptConfigurationJson?.disableTslint !== undefined) {
       typeScriptConfiguration.isLintingEnabled = !typeScriptConfigurationJson.disableTslint;
     }
@@ -176,7 +180,7 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
   ): Promise<void> {
     const apiExtractorConfigurationJson:
       | IApiExtractorConfiguration
-      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'api-extractor');
+      | undefined = await this._getConfigDataByNameAsync(heftConfiguration, 'api-extractor-task');
 
     if (apiExtractorConfigurationJson?.useProjectTypescriptVersion !== undefined) {
       apiExtractorConfiguration.useProjectTypescriptVersion =

@@ -1,6 +1,18 @@
 # Change Log - @rushstack/localization-plugin
 
-This log was last generated on Wed, 15 Jul 2020 15:09:42 GMT and should not be manually modified.
+This log was last generated on Wed, 05 Aug 2020 18:27:32 GMT and should not be manually modified.
+
+## 0.3.31
+Wed, 05 Aug 2020 18:27:32 GMT
+
+*Version update only*
+
+## 0.3.30
+Fri, 24 Jul 2020 20:40:38 GMT
+
+### Patches
+
+- Fix broken peer dependency specifier
 
 ## 0.3.29
 Wed, 15 Jul 2020 15:09:42 GMT

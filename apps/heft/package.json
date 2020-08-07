@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft",
-  "version": "0.2.0",
+  "version": "0.4.3",
   "description": "The Rush Stack extensible build system",
   "keywords": [
     "toolchain",
@@ -20,7 +20,7 @@
   "engines": {
     "node": ">=10.13.0"
   },
-  "homepage": "https://rushstack.io",
+  "homepage": "https://rushstack.io/pages/heft/overview/",
   "main": "lib/index.js",
   "types": "dist/heft.d.ts",
   "bin": {

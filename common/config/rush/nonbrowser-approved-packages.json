@@ -27,10 +27,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@microsoft/decorators",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "@microsoft/gulp-core-build",
       "allowedCategories": [ "libraries" ]
     },
@@ -312,7 +308,7 @@
     },
     {
       "name": "eslint",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "eslint-plugin-promise",
@@ -341,6 +337,10 @@
     {
       "name": "fsevents",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "file-loader",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "git-repo-info",
@@ -437,6 +437,10 @@
     {
       "name": "gulp-typescript",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "heft-minimal-rig-test",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "html-webpack-plugin",
@@ -656,11 +660,11 @@
     },
     {
       "name": "tslint",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "tslint-microsoft-contrib",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "typescript",

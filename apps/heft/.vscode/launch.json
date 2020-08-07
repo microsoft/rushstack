@@ -14,18 +14,53 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "heft-node-test",
+      "name": "Run in specified folder",
       "program": "${workspaceFolder}/lib/start.js",
-      "cwd": "${workspaceFolder}/../../build-tests/heft-node-test/",
-      "args": ["--debug", "build", "--clean"],
-      "console": "integratedTerminal"
+      "cwd": "(your project path)",
+      "args": [
+        "--debug",
+        "build",
+        "--clean"
+      ],
+      "console": "integratedTerminal",
+      "sourceMaps": true
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "heft-oldest-compiler-test",
+      "name": "heft-node-basic-test build",
       "program": "${workspaceFolder}/lib/start.js",
-      "cwd": "C:\\Git\\tsdoc\\tsdoc",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-node-basic-test/",
+      "args": ["--debug", "build", "--clean"],
+      "console": "integratedTerminal",
+      "sourceMaps": false
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "heft-node-basic-test test",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-node-basic-test/",
+      "args": ["--debug", "test", "--clean"],
+      "console": "integratedTerminal",
+      "sourceMaps": false
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "heft-webpack-basic-test build",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-webpack-basic-test/",
+      "args": ["--debug", "build", "--clean"],
+      "console": "integratedTerminal",
+      "sourceMaps": false
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "heft-webpack-basic-test test",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-webpack-basic-test/",
       "args": ["--debug", "test", "--clean"],
       "console": "integratedTerminal",
       "sourceMaps": false
