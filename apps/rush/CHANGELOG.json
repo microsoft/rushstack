@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.30.3",
+      "tag": "@microsoft/rush_v5.30.3",
+      "date": "Fri, 07 Aug 2020 21:09:05 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where Mac OS sometimes reported \"An unrecognized file .DS_Store was found in the Rush config folder\""
+          }
+        ]
+      }
+    },
+    {
       "version": "5.30.2",
       "tag": "@microsoft/rush_v5.30.2",
       "date": "Wed, 05 Aug 2020 17:57:07 GMT",
