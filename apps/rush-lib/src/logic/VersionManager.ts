@@ -107,8 +107,8 @@ export class VersionManager {
 
     if (
       this._rushConfiguration.packageManager === 'pnpm' &&
-      this._rushConfiguration.pnpmOptions &&
-      !this._rushConfiguration.pnpmOptions.useWorkspaces
+      (!this._rushConfiguration.pnpmOptions ||
+        (this._rushConfiguration.pnpmOptions && !this._rushConfiguration.pnpmOptions.useWorkspaces))
     ) {
       const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._globalFolder);
       const installManagerOptions: IInstallManagerOptions = {
