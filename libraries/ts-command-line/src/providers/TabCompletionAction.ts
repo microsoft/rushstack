@@ -98,12 +98,6 @@ export class TabCompleteAction extends CommandLineAction {
     // offset arguments by the number of global params in the input
     const globalParameterOffset: number = this._getGlobalParameterOffset(tokens);
 
-    // for (let i: number = 0; i < tokens.length; i++) {
-    //   yield 'token'+ i + tokens[i];
-    // }
-
-    // yield 'globalParameterOffset'+globalParameterOffset;
-
     if (tokens.length < 2 + globalParameterOffset) {
       yield* this._getAllActions();
       return;
@@ -115,25 +109,19 @@ export class TabCompleteAction extends CommandLineAction {
     const completePartialWord: boolean = caretPosition === commandLine.length;
 
     if (completePartialWord && tokens.length === 2 + globalParameterOffset) {
-      // yield 'a1';
-      // yield 'tokens1gl0'+tokens[1 + globalParameterOffset]
       for (const actionName of actions.keys()) {
-        // yield 'a1' + actionName;
         if (actionName.indexOf(tokens[1 + globalParameterOffset]) === 0) {
           yield actionName;
         }
       }
     } else {
-      // yield 'b1';
       for (const actionName of actions.keys()) {
         if (actionName === tokens[1 + globalParameterOffset]) {
-          // yield 'c1' + actionName;
           const parameterNameMap: Map<string, CommandLineParameter> = actions.get(actionName)!;
 
           const parameterNames: string[] = Array.from(parameterNameMap.keys());
 
           if (completePartialWord) {
-            // yield 'd1';
             for (const parameterName of parameterNames) {
               if (parameterName === secondLastToken) {
                 const values: string[] = await this._getParameterValueCompletions(
@@ -147,7 +135,6 @@ export class TabCompleteAction extends CommandLineAction {
             }
             yield* this._completeParameterValues(parameterNames, lastToken);
           } else {
-            // yield 'e1';
             for (const parameterName of parameterNames) {
               if (parameterName === lastToken) {
                 const values: string[] = await this._getParameterValueCompletions(
