@@ -12,6 +12,8 @@ import * as path from 'path';
 import * as semver from 'semver';
 // eslint-disable-next-line @typescript-eslint/typedef
 const tar = importLazy('tar');
+// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
+import { CreateOptions, FileStat } from 'tar';
 import * as globEscape from 'glob-escape';
 import {
   JsonFile,
@@ -36,6 +38,21 @@ import { InstallHelpers } from './InstallHelpers';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { LinkManagerFactory } from '../LinkManagerFactory';
 import { BaseLinkManager } from '../base/BaseLinkManager';
+
+/**
+ * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.
+ * As a temporary workaround, augment the type.
+ */
+declare module 'tar' {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  export interface CreateOptions {
+    /**
+     * "Set to true to omit writing mtime values for entries. Note that this prevents using other
+     * mtime-based features like tar.update or the keepNewer option with the resulting tar archive."
+     */
+    noMtime?: boolean;
+  }
+}
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -340,8 +357,7 @@ export class RushInstallManager extends BaseInstallManager {
     // NPM expects the root of the tarball to have a directory called 'package'
     const npmPackageFolder: string = 'package';
 
-    // eslint-disable-next-line @typescript-eslint/typedef
-    const tarOptions = {
+    const tarOptions: CreateOptions = {
       gzip: true,
       file: tarballFile,
       cwd: tempProjectFolder,
@@ -354,8 +370,7 @@ export class RushInstallManager extends BaseInstallManager {
       noPax: true,
       sync: true,
       prefix: npmPackageFolder,
-      // eslint-disable-next-line @typescript-eslint/typedef
-      filter: (path: string, stat): boolean => {
+      filter: (path: string, stat: FileStat): boolean => {
         if (
           !this.rushConfiguration.experimentsConfiguration.configuration.noChmodFieldInTarHeaderNormalization
         ) {
@@ -365,7 +380,7 @@ export class RushInstallManager extends BaseInstallManager {
         }
         return true;
       }
-    };
+    } as CreateOptions;
     // create the new tarball
     tar.create(tarOptions, [FileConstants.PackageJson]);
   }

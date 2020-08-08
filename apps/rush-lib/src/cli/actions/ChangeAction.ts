@@ -10,6 +10,8 @@ import * as child_process from 'child_process';
 import * as colors from 'colors';
 // eslint-disable-next-line @typescript-eslint/typedef
 const inquirer = importLazy('inquirer');
+// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
+import { PromptModule } from 'inquirer';
 
 import {
   CommandLineFlagParameter,
@@ -182,8 +184,7 @@ export class ChangeAction extends BaseRushAction {
 
     this._warnUncommittedChanges();
 
-    // eslint-disable-next-line @typescript-eslint/typedef
-    const promptModule = inquirer.createPromptModule();
+    const promptModule: PromptModule = inquirer.createPromptModule();
     let changeFileData: Map<string, IChangeFile> = new Map<string, IChangeFile>();
     let interactiveMode: boolean = false;
     if (this._bulkChangeParameter.value) {
@@ -371,8 +372,7 @@ export class ChangeAction extends BaseRushAction {
    * The main loop which prompts the user for information on changed projects.
    */
   private async _promptForChangeFileData(
-    // eslint-disable-next-line @typescript-eslint/typedef
-    promptModule,
+    promptModule: PromptModule,
     sortedProjectList: string[],
     existingChangeComments: Map<string, string[]>
   ): Promise<Map<string, IChangeFile>> {
@@ -407,8 +407,7 @@ export class ChangeAction extends BaseRushAction {
    * Asks all questions which are needed to generate changelist for a project.
    */
   private async _askQuestions(
-    // eslint-disable-next-line @typescript-eslint/typedef
-    promptModule,
+    promptModule: PromptModule,
     packageName: string,
     existingChangeComments: Map<string, string[]>
   ): Promise<IChangeInfo | undefined> {
@@ -447,8 +446,7 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private async _promptForComments(
-    // eslint-disable-next-line @typescript-eslint/typedef
-    promptModule,
+    promptModule: PromptModule,
     packageName: string
   ): Promise<IChangeInfo | undefined> {
     const bumpOptions: { [type: string]: string } = this._getBumpOptions(packageName);
@@ -527,8 +525,7 @@ export class ChangeAction extends BaseRushAction {
    * Will determine a user's email by first detecting it from their Git config,
    * or will ask for it if it is not found or the Git config is wrong.
    */
-  // eslint-disable-next-line @typescript-eslint/typedef
-  private async _detectOrAskForEmail(promptModule): Promise<string> {
+  private async _detectOrAskForEmail(promptModule: PromptModule): Promise<string> {
     return (await this._detectAndConfirmEmail(promptModule)) || (await this._promptForEmail(promptModule));
   }
 
@@ -548,8 +545,7 @@ export class ChangeAction extends BaseRushAction {
    * Detects the user's email address from their Git configuration, prompts the user to approve the
    * detected email. It returns undefined if it cannot be detected.
    */
-  // eslint-disable-next-line @typescript-eslint/typedef
-  private async _detectAndConfirmEmail(promptModule): Promise<string | undefined> {
+  private async _detectAndConfirmEmail(promptModule: PromptModule): Promise<string | undefined> {
     const email: string | undefined = this._detectEmail();
 
     if (email) {
@@ -570,8 +566,7 @@ export class ChangeAction extends BaseRushAction {
   /**
    * Asks the user for their email address
    */
-  // eslint-disable-next-line @typescript-eslint/typedef
-  private async _promptForEmail(promptModule): Promise<string> {
+  private async _promptForEmail(promptModule: PromptModule): Promise<string> {
     const { email }: { email: string } = await promptModule([
       {
         type: 'input',
@@ -605,8 +600,7 @@ export class ChangeAction extends BaseRushAction {
    * Writes change files to the common/changes folder. Will prompt for overwrite if file already exists.
    */
   private async _writeChangeFiles(
-    // eslint-disable-next-line @typescript-eslint/typedef
-    promptModule,
+    promptModule: PromptModule,
     changeFileData: Map<string, IChangeFile>,
     overwrite: boolean,
     interactiveMode: boolean
@@ -617,8 +611,7 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private async _writeChangeFile(
-    // eslint-disable-next-line @typescript-eslint/typedef
-    promptModule,
+    promptModule: PromptModule,
     changeFileData: IChangeFile,
     overwrite: boolean,
     interactiveMode: boolean
@@ -642,8 +635,7 @@ export class ChangeAction extends BaseRushAction {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/typedef
-  private async _promptForOverwrite(promptModule, filePath: string): Promise<boolean> {
+  private async _promptForOverwrite(promptModule: PromptModule, filePath: string): Promise<boolean> {
     const overwrite: boolean = await promptModule([
       {
         name: 'overwrite',

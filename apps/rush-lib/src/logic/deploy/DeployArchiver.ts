@@ -6,6 +6,7 @@ const importLazy = require('import-lazy')(require);
 
 // eslint-disable-next-line @typescript-eslint/typedef
 const JSZip = importLazy('jszip');
+
 import * as path from 'path';
 import { FileSystem, FileSystemStats } from '@rushstack/node-core-library';
 
