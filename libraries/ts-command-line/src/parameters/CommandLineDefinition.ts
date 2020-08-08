@@ -64,7 +64,10 @@ export interface IBaseCommandLineDefinition {
   environmentVariable?: string;
 
   /**
-   * Custom tab completions for the parameter values
+   * An optional callback that provides a list of custom choices for tab completion.
+   * @remarks
+   * This option is only used when `ICommandLineParserOptions.enableTabCompletionAction`
+   * is enabled.
    */
   completions?: () => Promise<string[]>;
 }
