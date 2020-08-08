@@ -60,7 +60,7 @@ export class CommandLineFlagParameter extends CommandLineParameter {
 
 // @public
 export class CommandLineHelper {
-    static isTabCompletionActionRequest(): boolean;
+    static isTabCompletionActionRequest(argv: string[]): boolean;
 }
 
 // @public

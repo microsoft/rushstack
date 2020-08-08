@@ -14,7 +14,7 @@ export class CommandLineHelper {
    *
    * @public
    */
-  public static isTabCompletionActionRequest(): boolean {
-    return process.argv.length > 2 && process.argv[2] === CommandLineConstants.TabCompletionActionName;
+  public static isTabCompletionActionRequest(argv: string[]): boolean {
+    return argv && argv.length > 2 && argv[2] === CommandLineConstants.TabCompletionActionName;
   }
 }
