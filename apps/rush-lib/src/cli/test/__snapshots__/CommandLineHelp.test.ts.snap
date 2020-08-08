@@ -53,6 +53,7 @@ Positional arguments:
     build               Build all projects that haven't been built, or have 
                         changed since they were last built.
     rebuild             Clean and rebuild the entire set of projects
+    tab-complete        Provides tab completion.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
@@ -654,6 +655,19 @@ approximate, but generally pretty accurate.
 
 Optional arguments:
   -h, --help  Show this help message and exit.
+"
+`;
+
+exports[`CommandLineHelp prints the help for each action: tab-complete 1`] = `
+"usage: rush tab-complete [-h] [--word WORD] [--position INDEX]
+
+Provides tab completion.
+
+Optional arguments:
+  -h, --help        Show this help message and exit.
+  --word WORD       The word to complete. The default value is \\"\\".
+  --position INDEX  The position in the word to be completed. The default 
+                    value is 0.
 "
 `;
 

@@ -25,6 +25,7 @@ describe('CommandLineHelp', () => {
     // if it encounters errors.
     // TODO Remove the calls to process.exit() or override them for testing.
     parser = new RushCommandLineParser();
+    parser.execute().catch(console.error);
   });
 
   it('prints the global help', () => {
