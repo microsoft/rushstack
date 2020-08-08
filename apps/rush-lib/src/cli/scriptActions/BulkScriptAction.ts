@@ -10,6 +10,7 @@ import {
   CommandLineStringListParameter,
   CommandLineParameterKind
 } from '@rushstack/ts-command-line';
+import { PackageName } from '@rushstack/node-core-library';
 
 import { Event } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
@@ -217,11 +218,31 @@ export class BulkScriptAction extends BaseScriptAction {
   }
 
   private async _getProjectNames(): Promise<string[]> {
-    const ret: string[] = [];
+    const unscopedNamesMap: Map<string, number> = new Map<string, number>();
+
+    const scoppedPackageNames: string[] = [];
     for (const project of this.rushConfiguration.projects) {
-      ret.push(project.packageName);
+      scoppedPackageNames.push(project.packageName);
+
+      const unscopedName: string = PackageName.getUnscopedName(project.packageName);
+      let count: number = 0;
+      if (unscopedNamesMap.has(unscopedName)) {
+        count = unscopedNamesMap.get(unscopedName)!;
+      }
+      unscopedNamesMap.set(unscopedName, count + 1);
     }
-    return ret;
+
+    const unscopedNames: string[] = [];
+
+    for (const unscopedName of unscopedNamesMap.keys()) {
+      const unscopedNameCount: number = unscopedNamesMap.get(unscopedName)!;
+      // don't suggest ambiguous unscoped names
+      if (unscopedNameCount === 1 && !scoppedPackageNames.includes(unscopedName)) {
+        unscopedNames.push(unscopedName);
+      }
+    }
+
+    return unscopedNames.sort().concat(scoppedPackageNames.sort());
   }
 
   private _doBeforeTask(): void {

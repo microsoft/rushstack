@@ -447,7 +447,7 @@ export class Utilities {
    * Utility to determine if the app should restrict writing to the console.
    */
   public static shouldRestrictConsoleOutput(): boolean {
-    return !CommandLineHelper.isTabCompletionActionRequest() && process.argv.indexOf('--json') === -1;
+    return CommandLineHelper.isTabCompletionActionRequest() || process.argv.indexOf('--json') === -1;
   }
 
   /**
