@@ -172,7 +172,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
     };
     const typeScriptBuilder: TypeScriptBuilder = new TypeScriptBuilder(
       terminalProvider,
-      typeScriptBuilderConfiguration
+      typeScriptBuilderConfiguration,
+      heftSession
     );
 
     if (heftSession.debugMode) {

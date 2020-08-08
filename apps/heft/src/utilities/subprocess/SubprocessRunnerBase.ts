@@ -6,18 +6,20 @@ import * as path from 'path';
 import { ITerminalProvider, TerminalProviderSeverity } from '@rushstack/node-core-library';
 
 import {
-  IBaseSubprocessMessage as ISubprocessMessage,
-  IApiCallMessage,
+  ISubprocessMessageBase,
   ISubprocessApiCallArg,
   SupportedSerializableArgType,
-  ISerializedErrorValue,
-  ISubprocessApiCallArgWithValue
+  ISubprocessApiCallArgWithValue,
+  ISerializedErrorValue
 } from './SubprocessCommunication';
 import { IExtendedFileSystem } from '../fileSystem/IExtendedFileSystem';
 import { CachedFileSystem } from '../fileSystem/CachedFileSystem';
-import { SubprocessTerminalProvider } from './SubprocessTerminalProvider';
+import { HeftSession } from '../../pluginFramework/HeftSession';
+import { TerminalProviderManager } from './TerminalProviderManager';
+import { SubprocessCommunicationManagerBase } from './SubprocessCommunicationManagerBase';
 
 export interface ISubprocessInnerConfiguration {
+  globalTerminalProviderId: number;
   terminalSupportsColor: boolean;
   terminalEolCharacter: string;
 }
@@ -25,12 +27,10 @@ export interface ISubprocessInnerConfiguration {
 export const SUBPROCESS_RUNNER_CLASS_LABEL: unique symbol = Symbol('IsSubprocessModule');
 export const SUBPROCESS_RUNNER_INNER_INVOKE: unique symbol = Symbol('SubprocessInnerInvoke');
 
-interface ISubprocessExitMessage extends ISubprocessMessage {
+interface ISubprocessExitMessage extends ISubprocessMessageBase {
   type: 'exit';
   error: ISubprocessApiCallArg;
 }
-
-let apiCallIdCounter: number = 0;
 
 /**
  * This base class allows an computationally expensive task to be run in a separate NodeJS
@@ -43,70 +43,94 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
   public static [SUBPROCESS_RUNNER_CLASS_LABEL]: boolean = true;
   private static _subprocessInspectorPort: number = 9229 + 1; // 9229 is the default port
 
+  private _terminalProviderManager: TerminalProviderManager;
+
+  private _innerConfiguration: ISubprocessInnerConfiguration;
   private _runningAsSubprocess: boolean = false;
-  private readonly _parentGlobalTerminalProvider: ITerminalProvider;
   protected readonly _configuration: TSubprocessConfiguration;
   protected readonly _fileSystem: IExtendedFileSystem = new CachedFileSystem();
 
-  protected readonly _globalTerminalProvider: ITerminalProvider;
+  protected _globalTerminalProvider: ITerminalProvider;
+  private readonly _subprocessCommunicationManagers: SubprocessCommunicationManagerBase[] = [];
 
   /**
    * The subprocess filename. This should be set to __filename in the child class.
    */
   public abstract get filename(): string;
 
-  public constructor(
-    innerConfiguration: ISubprocessInnerConfiguration,
-    configuration: TSubprocessConfiguration
-  );
+  /**
+   * Constructs an instances of a subprocess runner
+   */
   public constructor(
     parentGlobalTerminalProvider: ITerminalProvider,
-    configuration: TSubprocessConfiguration
-  );
-  public constructor(
-    innerConfigurationOrTerminalProvider: ITerminalProvider | ISubprocessInnerConfiguration,
-    configuration: TSubprocessConfiguration
+    configuration: TSubprocessConfiguration,
+    heftSession: HeftSession
   ) {
-    let innerConfiguration:
-      | ISubprocessInnerConfiguration
-      | undefined = innerConfigurationOrTerminalProvider as ISubprocessInnerConfiguration;
-    let parentGlobalTerminalProvider: ITerminalProvider | undefined = undefined;
-    if (
-      innerConfiguration.terminalEolCharacter === undefined ||
-      innerConfiguration.terminalSupportsColor === undefined
-    ) {
-      // This is the non-subprocess-invocation case
-      parentGlobalTerminalProvider = innerConfigurationOrTerminalProvider as ITerminalProvider;
-      innerConfiguration = undefined;
-    }
-
-    if (innerConfiguration) {
-      this._globalTerminalProvider = new SubprocessTerminalProvider(
-        innerConfiguration,
-        this._sendGlobalTerminalProviderMessage.bind(this)
-      );
-    } else {
-      this._parentGlobalTerminalProvider = parentGlobalTerminalProvider!;
-      this._globalTerminalProvider = parentGlobalTerminalProvider!;
-    }
-
     this._configuration = configuration;
 
-    this.initialize();
+    if (parentGlobalTerminalProvider) {
+      // This is the parent process
+      this._terminalProviderManager = new TerminalProviderManager({
+        sendMessageToParentProcessFn: this._receiveMessageFromSubprocess.bind(this),
+        sendMessageToSubprocessFn: this._receiveMessageFromParentProcess.bind(this)
+      });
+      const globalTerminalProviderId: number = this._terminalProviderManager.registerTerminalProvider(
+        parentGlobalTerminalProvider
+      );
+      this._innerConfiguration = {
+        globalTerminalProviderId: globalTerminalProviderId,
+        terminalEolCharacter: parentGlobalTerminalProvider.eolCharacter,
+        terminalSupportsColor: parentGlobalTerminalProvider.supportsColor
+      };
+      this._globalTerminalProvider = this._terminalProviderManager.registerSubprocessTerminalProvider(
+        globalTerminalProviderId,
+        this._innerConfiguration
+      );
+
+      this._subprocessCommunicationManagers.push(this._terminalProviderManager);
+
+      this.initialize();
+    }
+  }
+
+  public static initializeSubprocess<TSubprocessConfiguration>(
+    thisType: new (
+      parentGlobalTerminalProvider: ITerminalProvider,
+      configuration: TSubprocessConfiguration,
+      heftSession: HeftSession
+    ) => SubprocessRunnerBase<TSubprocessConfiguration>,
+    innerConfiguration: ISubprocessInnerConfiguration,
+    configuration: TSubprocessConfiguration
+  ): SubprocessRunnerBase<TSubprocessConfiguration> {
+    const subprocessRunner: SubprocessRunnerBase<TSubprocessConfiguration> = new thisType(
+      undefined!,
+      configuration,
+      undefined!
+    );
+    subprocessRunner._runningAsSubprocess = true;
+    subprocessRunner._innerConfiguration = innerConfiguration;
+    subprocessRunner._terminalProviderManager = new TerminalProviderManager({
+      sendMessageToParentProcessFn: process.send!.bind(process),
+      sendMessageToSubprocessFn: () => {
+        throw new Error('A subprocess cannot send a message to itself.');
+      }
+    });
+    subprocessRunner._globalTerminalProvider = subprocessRunner._terminalProviderManager.registerSubprocessTerminalProvider(
+      innerConfiguration.globalTerminalProviderId,
+      innerConfiguration
+    );
+
+    subprocessRunner._subprocessCommunicationManagers.push(subprocessRunner._terminalProviderManager);
+    subprocessRunner.initialize();
+
+    return subprocessRunner;
   }
 
   public invokeAsSubprocessAsync(): Promise<void> {
-    this._runningAsSubprocess = true;
-
     return new Promise((resolve: () => void, reject: (error: Error) => void) => {
-      const innerConfiguration: ISubprocessInnerConfiguration = {
-        terminalSupportsColor: this._globalTerminalProvider.supportsColor,
-        terminalEolCharacter: this._globalTerminalProvider.eolCharacter
-      };
-
       const builderProcess: childProcess.ChildProcess = childProcess.fork(
         path.resolve(__dirname, 'startSubprocess'),
-        [this.filename, JSON.stringify(innerConfiguration), JSON.stringify(this._configuration)],
+        [this.filename, JSON.stringify(this._innerConfiguration), JSON.stringify(this._configuration)],
         {
           execArgv: this._processNodeArgsForSubprocess(this._globalTerminalProvider, process.execArgv)
         }
@@ -115,14 +139,8 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
       let hasExited: boolean = false;
       let exitError: Error | undefined;
 
-      builderProcess.on('message', (message: ISubprocessMessage) => {
+      builderProcess.on('message', (message: ISubprocessMessageBase) => {
         switch (message.type) {
-          case 'subprocessApiCall': {
-            const apiCallMessage: IApiCallMessage = message as IApiCallMessage;
-            this._receiveApiMessage(apiCallMessage);
-            break;
-          }
-
           case 'exit': {
             if (hasExited) {
               throw new Error(
@@ -138,7 +156,14 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
           }
 
           default: {
-            throw new Error(`Subprocess communication error. Unexpected message type: "${message.type}"`);
+            if (hasExited) {
+              throw new Error(
+                'Subprocess communication error. Received a message after the subprocess ' +
+                  'has indicated that it has exited'
+              );
+            }
+
+            this._receiveMessageFromSubprocess(message);
           }
         }
       });
@@ -162,16 +187,21 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
     /* virtual */
   }
 
-  public abstract async invokeAsync(): Promise<void>;
+  public abstract invokeAsync(): Promise<void>;
 
   public async [SUBPROCESS_RUNNER_INNER_INVOKE](): Promise<void> {
-    this._runningAsSubprocess = true;
+    process.on('message', (message: ISubprocessMessageBase) => {
+      this._receiveMessageFromParentProcess(message);
+    });
+
     let error: Error | undefined = undefined;
     try {
       await this.invokeAsync();
     } catch (e) {
       error = e;
     } finally {
+      process.removeAllListeners();
+
       const exitMessage: ISubprocessExitMessage = {
         type: 'exit',
         error: this._serializeArg(error)
@@ -206,38 +236,32 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
     return nodeArgs;
   }
 
-  private _sendGlobalTerminalProviderMessage(message: string, severity: TerminalProviderSeverity): void {
-    this._sendSubprocessApiMessage(this._receiveGlobalTerminalProviderMessage.name, arguments);
-  }
-
-  private _receiveGlobalTerminalProviderMessage(message: string, severity: TerminalProviderSeverity): void {
-    this._parentGlobalTerminalProvider.write(message, severity);
-  }
-
-  private _sendSubprocessApiMessage(apiName: string, args: IArguments): void {
-    const message: IApiCallMessage = {
-      type: 'subprocessApiCall',
-      id: apiCallIdCounter++,
-      apiName,
-      args: Array.from(args).map((arg) => this._serializeArg(arg)),
-      expectsResponse: false
-    };
-
-    if (this._runningAsSubprocess) {
-      process.send!(message);
-    } else {
-      this._receiveApiMessage(message);
+  private _receiveMessageFromParentProcess(message: ISubprocessMessageBase): void {
+    for (const subprocessCommunicationManager of this._subprocessCommunicationManagers) {
+      if (subprocessCommunicationManager.canHandleMessageFromParentProcess(message)) {
+        subprocessCommunicationManager.receiveMessageFromParentProcess(message);
+        break;
+      }
     }
+
+    throw new Error(
+      'Subprocess communication manager. No communication manager can handle message type ' +
+        `"${message.type}" from parent process.`
+    );
   }
 
-  private _receiveApiMessage(message: IApiCallMessage): void {
-    const args: unknown[] = message.args.map((arg) => this._deserializeArg(arg));
-
-    if (typeof this[message.apiName] === 'function') {
-      this[message.apiName].call(this, ...args);
-    } else {
-      throw new Error(`Unknown API ${message.apiName}`);
+  private _receiveMessageFromSubprocess(message: ISubprocessMessageBase): void {
+    for (const subprocessCommunicationManager of this._subprocessCommunicationManagers) {
+      if (subprocessCommunicationManager.canHandleMessageFromSubprocess(message)) {
+        subprocessCommunicationManager.receiveMessageFromSubprocess(message);
+        return;
+      }
     }
+
+    throw new Error(
+      'Subprocess communication manager. No communication manager can handle message type ' +
+        `"${message.type}" from subprocess.`
+    );
   }
 
   private _serializeArg(arg: unknown): ISubprocessApiCallArg {
@@ -259,9 +283,9 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
           };
 
           return result;
-        } else {
-          throw new Error(`Object argument (${arg}) is not supported in subprocess communication.`);
         }
+
+        break;
       }
 
       case 'string':

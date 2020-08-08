@@ -42,7 +42,9 @@ if (!SubprocessRunnerClass[SUBPROCESS_RUNNER_CLASS_LABEL]) {
 
 const innerConfiguration: ISubprocessInnerConfiguration = JSON.parse(serializedInnerConfiguration);
 const subprocessConfiguration: object = JSON.parse(serializedSubprocessConfiguration);
-const subprocessRunner: SubprocessRunnerSubclass = new SubprocessRunnerClass(
+
+const subprocessRunner: SubprocessRunnerSubclass = SubprocessRunnerClass.initializeSubprocess(
+  SubprocessRunnerClass,
   innerConfiguration,
   subprocessConfiguration
 );

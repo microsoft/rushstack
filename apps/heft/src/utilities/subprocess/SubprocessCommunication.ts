@@ -23,14 +23,6 @@ export interface ISubprocessApiCallArgWithValue<TValue = string | number | boole
   value: TValue;
 }
 
-export interface IBaseSubprocessMessage {
-  type: 'exit' | 'subprocessApiCall';
-}
-
-export interface IApiCallMessage extends IBaseSubprocessMessage {
-  type: 'subprocessApiCall';
-  id: number;
-  apiName: string;
-  args: ISubprocessApiCallArg[];
-  expectsResponse: boolean;
+export interface ISubprocessMessageBase {
+  type: string;
 }
