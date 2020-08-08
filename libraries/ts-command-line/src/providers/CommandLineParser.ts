@@ -54,6 +54,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   private _actions: CommandLineAction[];
   private _actionsByName: Map<string, CommandLineAction>;
   private _executed: boolean = false;
+  private _tabCompleteActionWasAdded: boolean = false;
 
   public constructor(options: ICommandLineParserOptions) {
     super();
@@ -135,8 +136,9 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    *               the process.argv will be used
    */
   public execute(args?: string[]): Promise<boolean> {
-    if (this._options.enableTabCompletionAction) {
+    if (this._options.enableTabCompletionAction && !this._tabCompleteActionWasAdded) {
       this.addAction(new TabCompleteAction(this.actions, this.parameters));
+      this._tabCompleteActionWasAdded = true;
     }
     return this.executeWithoutErrorHandling(args)
       .then(() => {
