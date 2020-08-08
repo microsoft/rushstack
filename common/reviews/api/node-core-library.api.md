@@ -333,6 +333,12 @@ export interface IJsonSchemaValidateOptions {
     customErrorHeader?: string;
 }
 
+// @public (undocumented)
+export class Import {
+    // (undocumented)
+    static lazy(moduleName: string, require: (id: string) => unknown): any;
+}
+
 // @public
 export interface INodePackageJson {
     bin?: string;

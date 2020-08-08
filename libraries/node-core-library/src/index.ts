@@ -21,6 +21,7 @@ export {
   IPackageJsonDependencyTable,
   IPackageJsonScriptTable
 } from './IPackageJson';
+export { Import } from './Import';
 export { InternalError } from './InternalError';
 export { JsonObject, JsonFile, IJsonFileSaveOptions, IJsonFileStringifyOptions } from './JsonFile';
 export {

@@ -1,15 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line @typescript-eslint/typedef
-const importLazy = require('import-lazy')(require);
-
+import { Import, FileSystem } from '@rushstack/node-core-library';
 import * as colors from 'colors';
-// eslint-disable-next-line @typescript-eslint/typedef
-const glob = importLazy('glob');
+const glob: typeof import('glob') = Import.lazy('glob', require);
 import * as path from 'path';
 import * as builtinPackageNames from 'builtin-modules';
-import { FileSystem } from '@rushstack/node-core-library';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseConfiglessRushAction } from './BaseRushAction';
