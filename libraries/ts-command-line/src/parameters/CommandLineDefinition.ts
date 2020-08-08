@@ -62,14 +62,6 @@ export interface IBaseCommandLineDefinition {
    *   ordinary String Parameter:  Any value is accepted, including an empty string.
    */
   environmentVariable?: string;
-
-  /**
-   * An optional callback that provides a list of custom choices for tab completion.
-   * @remarks
-   * This option is only used when `ICommandLineParserOptions.enableTabCompletionAction`
-   * is enabled.
-   */
-  completions?: () => Promise<string[]>;
 }
 
 /**
@@ -90,6 +82,14 @@ export interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLine
    * be comprised of upper-case letters, numbers, and underscores.  It should be kept short.
    */
   argumentName: string;
+
+  /**
+   * An optional callback that provides a list of custom choices for tab completion.
+   * @remarks
+   * This option is only used when `ICommandLineParserOptions.enableTabCompletionAction`
+   * is enabled.
+   */
+  completions?: () => Promise<string[]>;
 }
 
 /**
@@ -108,6 +108,14 @@ export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition
    * {@inheritDoc ICommandLineStringDefinition.defaultValue}
    */
   defaultValue?: string;
+
+  /**
+   * An optional callback that provides a list of custom choices for tab completion.
+   * @remarks
+   * This option is only used when `ICommandLineParserOptions.enableTabCompletionAction`
+   * is enabled.
+   */
+  completions?: () => Promise<string[]>;
 }
 
 /**

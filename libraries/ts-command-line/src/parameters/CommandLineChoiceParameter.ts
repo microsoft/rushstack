@@ -17,6 +17,9 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
 
   private _value: string | undefined = undefined;
 
+  /** {@inheritDoc ICommandLineChoiceDefinition.completions} */
+  public readonly completions: (() => Promise<string[]>) | undefined;
+
   /** @internal */
   public constructor(definition: ICommandLineChoiceDefinition) {
     super(definition);
@@ -36,6 +39,7 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
     this.alternatives = definition.alternatives;
     this.defaultValue = definition.defaultValue;
     this.validateDefaultValue(!!this.defaultValue);
+    this.completions = definition.completions;
   }
 
   /** {@inheritDoc CommandLineParameter.kind} */

@@ -31,6 +31,7 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
     readonly alternatives: ReadonlyArray<string>;
     // @override
     appendToArgList(argList: string[]): void;
+    readonly completions: (() => Promise<string[]>) | undefined;
     readonly defaultValue: string | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
@@ -82,7 +83,6 @@ export abstract class CommandLineParameter {
     // @internal
     constructor(definition: IBaseCommandLineDefinition);
     abstract appendToArgList(argList: string[]): void;
-    readonly completions: (() => Promise<string[]>) | undefined;
     readonly description: string;
     readonly environmentVariable: string | undefined;
     // @internal
@@ -139,6 +139,7 @@ export abstract class CommandLineParameterWithArgument extends CommandLineParame
     // @internal
     constructor(definition: IBaseCommandLineDefinitionWithArgument);
     readonly argumentName: string;
+    readonly completions: (() => Promise<string[]>) | undefined;
     }
 
 // @public
@@ -186,6 +187,7 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
     constructor(definition: ICommandLineStringDefinition);
     // @override
     appendToArgList(argList: string[]): void;
+    readonly completions: (() => Promise<string[]>) | undefined;
     readonly defaultValue: string | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
@@ -211,7 +213,6 @@ export class DynamicCommandLineParser extends CommandLineParser {
 
 // @public
 export interface IBaseCommandLineDefinition {
-    completions?: () => Promise<string[]>;
     description: string;
     environmentVariable?: string;
     parameterLongName: string;
@@ -222,6 +223,7 @@ export interface IBaseCommandLineDefinition {
 // @public
 export interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLineDefinition {
     argumentName: string;
+    completions?: () => Promise<string[]>;
 }
 
 // @public
@@ -234,6 +236,7 @@ export interface ICommandLineActionOptions {
 // @public
 export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition {
     alternatives: string[];
+    completions?: () => Promise<string[]>;
     defaultValue?: string;
 }
 

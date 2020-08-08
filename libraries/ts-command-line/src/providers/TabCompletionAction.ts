@@ -5,7 +5,11 @@ import stringArgv from 'string-argv';
 
 import { CommandLineIntegerParameter } from '../parameters/CommandLineIntegerParameter';
 import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
-import { CommandLineParameterKind, CommandLineParameter } from '../parameters/BaseClasses';
+import {
+  CommandLineParameterKind,
+  CommandLineParameter,
+  CommandLineParameterWithArgument
+} from '../parameters/BaseClasses';
 import { CommandLineAction } from './CommandLineAction';
 import { CommandLineChoiceParameter } from '..';
 import { CommandLineConstants } from '../Constants';
@@ -187,8 +191,19 @@ export class TabCompleteAction extends CommandLineAction {
     let choiceParameterValues: string[] = [];
     if (parameter.kind === CommandLineParameterKind.Choice) {
       choiceParameterValues = (parameter as CommandLineChoiceParameter).alternatives as string[];
-    } else if (parameter.completions) {
-      choiceParameterValues = await parameter.completions();
+    } else if (parameter.kind !== CommandLineParameterKind.Flag) {
+      let parameterWithArgumentOrChoices:
+        | CommandLineParameterWithArgument
+        | CommandLineChoiceParameter
+        | undefined = undefined;
+      if (parameter instanceof CommandLineParameterWithArgument) {
+        parameterWithArgumentOrChoices = parameter as CommandLineParameterWithArgument;
+      } else if (parameter instanceof CommandLineChoiceParameter) {
+        parameterWithArgumentOrChoices = parameter as CommandLineChoiceParameter;
+      }
+      if (parameterWithArgumentOrChoices && parameterWithArgumentOrChoices.completions) {
+        choiceParameterValues = await parameterWithArgumentOrChoices.completions();
+      }
     }
 
     return choiceParameterValues;
