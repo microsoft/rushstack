@@ -14,9 +14,6 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
 
   private _value: string | undefined = undefined;
 
-  /** {@inheritDoc ICommandLineChoiceDefinition.completions} */
-  public readonly completions: (() => Promise<string[]>) | undefined;
-
   /** @internal */
   public constructor(definition: ICommandLineStringDefinition) {
     super(definition);

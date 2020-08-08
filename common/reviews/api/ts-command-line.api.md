@@ -187,7 +187,6 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
     constructor(definition: ICommandLineStringDefinition);
     // @override
     appendToArgList(argList: string[]): void;
-    readonly completions: (() => Promise<string[]>) | undefined;
     readonly defaultValue: string | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
