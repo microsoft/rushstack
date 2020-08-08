@@ -220,9 +220,9 @@ export class BulkScriptAction extends BaseScriptAction {
   private async _getProjectNames(): Promise<string[]> {
     const unscopedNamesMap: Map<string, number> = new Map<string, number>();
 
-    const scoppedPackageNames: string[] = [];
+    const scopedNames: string[] = [];
     for (const project of this.rushConfiguration.projects) {
-      scoppedPackageNames.push(project.packageName);
+      scopedNames.push(project.packageName);
 
       const unscopedName: string = PackageName.getUnscopedName(project.packageName);
       let count: number = 0;
@@ -237,12 +237,12 @@ export class BulkScriptAction extends BaseScriptAction {
     for (const unscopedName of unscopedNamesMap.keys()) {
       const unscopedNameCount: number = unscopedNamesMap.get(unscopedName)!;
       // don't suggest ambiguous unscoped names
-      if (unscopedNameCount === 1 && !scoppedPackageNames.includes(unscopedName)) {
+      if (unscopedNameCount === 1 && !scopedNames.includes(unscopedName)) {
         unscopedNames.push(unscopedName);
       }
     }
 
-    return unscopedNames.sort().concat(scoppedPackageNames.sort());
+    return unscopedNames.sort().concat(scopedNames.sort());
   }
 
   private _doBeforeTask(): void {

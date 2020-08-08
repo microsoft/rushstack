@@ -71,14 +71,17 @@ export class TabCompleteAction extends CommandLineAction {
 
   protected async onExecute(): Promise<void> {
     const commandLine: string = this._wordToCompleteParameter.value || '';
-    const caretPosition: number = this._positionParameter.value || 0;
+    const caretPosition: number = this._positionParameter.value || (commandLine && commandLine.length) || 0;
 
     for await (const value of this.getCompletions(commandLine, caretPosition)) {
       console.log(value);
     }
   }
 
-  public async *getCompletions(commandLine: string, caretPosition: number): AsyncIterable<string> {
+  public async *getCompletions(
+    commandLine: string,
+    caretPosition: number = commandLine.length
+  ): AsyncIterable<string> {
     const actions: Map<string, Map<string, CommandLineParameter>> = this._actions;
 
     if (!commandLine || !caretPosition) {

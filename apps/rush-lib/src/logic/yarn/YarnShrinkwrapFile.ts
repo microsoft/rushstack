@@ -7,16 +7,13 @@ const importLazy = require('import-lazy')(require);
 import * as os from 'os';
 // eslint-disable-next-line @typescript-eslint/typedef
 const lockfile = importLazy('@yarnpkg/lockfile');
+// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
+import { ParseResult } from '@yarnpkg/lockfile';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { FileSystem, IParsedPackageNameOrError, InternalError } from '@rushstack/node-core-library';
 import { RushConstants } from '../RushConstants';
 import { DependencySpecifier } from '../DependencySpecifier';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
-
-interface IYarnLockfileParseResult {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  object: any;
-}
 
 /**
  * Used with YarnShrinkwrapFile._encodePackageNameAndSemVer() and _decodePackageNameAndSemVer().
@@ -155,7 +152,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
 
   public static loadFromFile(shrinkwrapFilename: string): YarnShrinkwrapFile | undefined {
     let shrinkwrapString: string;
-    let shrinkwrapJson: IYarnLockfileParseResult;
+    let shrinkwrapJson: ParseResult;
     try {
       if (!FileSystem.exists(shrinkwrapFilename)) {
         return undefined; // file does not exist
