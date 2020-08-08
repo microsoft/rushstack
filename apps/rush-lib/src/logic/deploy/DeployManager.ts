@@ -30,7 +30,9 @@ import {
   NewlineKind,
   Text
 } from '@rushstack/node-core-library';
-import { DeployArchiver } from './DeployArchiver';
+// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
+import * as DeployArchiver from './DeployArchiver';
+const da: typeof DeployArchiver = importLazy('./DeployArchiver');
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -679,7 +681,7 @@ export class DeployManager {
         alreadyExistsBehavior: AlreadyExistsBehavior.Error
       });
     }
-    await DeployArchiver.createArchiveAsync(deployState);
+    await da.DeployArchiver.createArchiveAsync(deployState);
   }
 
   /**
