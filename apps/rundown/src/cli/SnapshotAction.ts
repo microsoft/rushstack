@@ -22,7 +22,12 @@ export class SnapshotAction extends BaseReportAction {
 
   protected async onExecute(): Promise<void> {
     const rundown: Rundown = new Rundown();
-    await rundown.invokeAsync(this.scriptParameter.value!, this.argsParameter.values);
+    await rundown.invokeAsync(
+      this.scriptParameter.value!,
+      this.argsParameter.values,
+      this.quietParameter.value!!,
+      this.ignoreExitCodeParameter.value!!
+    );
     rundown.writeSnapshotReport();
   }
 }

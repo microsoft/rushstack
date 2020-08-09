@@ -10,9 +10,13 @@ export class Rundown {
   // Map from required path --> caller path
   private _importedModuleMap: Map<string, string> = new Map();
 
-  private async _spawnLauncherAsync(nodeArgs: string[]): Promise<void> {
+  private async _spawnLauncherAsync(
+    nodeArgs: string[],
+    quiet: boolean,
+    ignoreExitCode: boolean
+  ): Promise<void> {
     const childProcess: child_process.ChildProcess = child_process.spawn(process.execPath, nodeArgs, {
-      stdio: ['inherit', 'inherit', 'inherit', 'ipc']
+      stdio: quiet ? ['inherit', 'ignore', 'ignore', 'ipc'] : ['inherit', 'inherit', 'inherit', 'ipc']
     });
 
     let completedNormally: boolean = false;
@@ -34,7 +38,7 @@ export class Rundown {
 
     return new Promise((resolve, reject) => {
       childProcess.on('exit', (code: number | null, signal: string | null): void => {
-        if (code !== 0) {
+        if (code !== 0 && !ignoreExitCode) {
           reject(new Error('Child process terminated with exit code ' + code));
         } else if (!completedNormally) {
           reject(new Error('Child process terminated without completing IPC handshake'));
@@ -45,7 +49,12 @@ export class Rundown {
     });
   }
 
-  public async invokeAsync(scriptPath: string, args: ReadonlyArray<string>): Promise<void> {
+  public async invokeAsync(
+    scriptPath: string,
+    args: ReadonlyArray<string>,
+    quiet: boolean,
+    ignoreExitCode: boolean
+  ): Promise<void> {
     if (!FileSystem.exists(scriptPath)) {
       throw new Error('The specified script path does not exist: ' + scriptPath);
     }
@@ -55,7 +64,7 @@ export class Rundown {
     // ["path/to/launcher.js", "path/to/target-script.js", "first-target-arg"]
     const nodeArgs: string[] = [path.join(__dirname, 'launcher.js'), absoluteScriptPath, ...args];
 
-    await this._spawnLauncherAsync(nodeArgs);
+    await this._spawnLauncherAsync(nodeArgs, quiet, ignoreExitCode);
   }
 
   public writeSnapshotReport(): void {
