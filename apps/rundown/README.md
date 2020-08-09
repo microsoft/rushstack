@@ -52,43 +52,43 @@ The report may look like this:
 
 **rundown-inspect.log**
 ```
-/my-tool/lib/start.js
-/my-tool/node_modules/at-least-node/index.js
-/my-tool/node_modules/fs-extra/lib/copy-sync/copy-sync.js
-/my-tool/node_modules/fs-extra/lib/copy-sync/index.js
-/my-tool/node_modules/fs-extra/lib/copy/copy.js
-/my-tool/node_modules/fs-extra/lib/copy/index.js
-/my-tool/node_modules/fs-extra/lib/empty/index.js
-/my-tool/node_modules/fs-extra/lib/ensure/file.js
-/my-tool/node_modules/fs-extra/lib/ensure/index.js
-/my-tool/node_modules/fs-extra/lib/ensure/link.js
-/my-tool/node_modules/fs-extra/lib/ensure/symlink-paths.js
-/my-tool/node_modules/fs-extra/lib/ensure/symlink-type.js
-/my-tool/node_modules/fs-extra/lib/ensure/symlink.js
-/my-tool/node_modules/fs-extra/lib/fs/index.js
-/my-tool/node_modules/fs-extra/lib/index.js
-/my-tool/node_modules/fs-extra/lib/json/jsonfile.js
-/my-tool/node_modules/fs-extra/lib/json/output-json-sync.js
-/my-tool/node_modules/fs-extra/lib/json/output-json.js
-/my-tool/node_modules/fs-extra/lib/mkdirs/index.js
-/my-tool/node_modules/fs-extra/lib/mkdirs/make-dir.js
-/my-tool/node_modules/fs-extra/lib/move-sync/index.js
-/my-tool/node_modules/fs-extra/lib/move-sync/move-sync.js
-/my-tool/node_modules/fs-extra/lib/move/index.js
-/my-tool/node_modules/fs-extra/lib/move/move.js
-/my-tool/node_modules/fs-extra/lib/output/index.js
-/my-tool/node_modules/fs-extra/lib/path-exists/index.js
-/my-tool/node_modules/fs-extra/lib/remove/index.js
-/my-tool/node_modules/fs-extra/lib/remove/rimraf.js
-/my-tool/node_modules/fs-extra/lib/util/stat.js
-/my-tool/node_modules/fs-extra/lib/util/utimes.js
-/my-tool/node_modules/graceful-fs/clone.js
-/my-tool/node_modules/graceful-fs/graceful-fs.js
-/my-tool/node_modules/graceful-fs/legacy-streams.js
-/my-tool/node_modules/graceful-fs/polyfills.js
-/my-tool/node_modules/jsonfile/index.js
-/my-tool/node_modules/jsonfile/utils.js
-/my-tool/node_modules/universalify/index.js
+/path/to/my-tool/lib/start.js
+/path/to/my-tool/node_modules/at-least-node/index.js
+/path/to/my-tool/node_modules/fs-extra/lib/copy-sync/copy-sync.js
+/path/to/my-tool/node_modules/fs-extra/lib/copy-sync/index.js
+/path/to/my-tool/node_modules/fs-extra/lib/copy/copy.js
+/path/to/my-tool/node_modules/fs-extra/lib/copy/index.js
+/path/to/my-tool/node_modules/fs-extra/lib/empty/index.js
+/path/to/my-tool/node_modules/fs-extra/lib/ensure/file.js
+/path/to/my-tool/node_modules/fs-extra/lib/ensure/index.js
+/path/to/my-tool/node_modules/fs-extra/lib/ensure/link.js
+/path/to/my-tool/node_modules/fs-extra/lib/ensure/symlink-paths.js
+/path/to/my-tool/node_modules/fs-extra/lib/ensure/symlink-type.js
+/path/to/my-tool/node_modules/fs-extra/lib/ensure/symlink.js
+/path/to/my-tool/node_modules/fs-extra/lib/fs/index.js
+/path/to/my-tool/node_modules/fs-extra/lib/index.js
+/path/to/my-tool/node_modules/fs-extra/lib/json/jsonfile.js
+/path/to/my-tool/node_modules/fs-extra/lib/json/output-json-sync.js
+/path/to/my-tool/node_modules/fs-extra/lib/json/output-json.js
+/path/to/my-tool/node_modules/fs-extra/lib/mkdirs/index.js
+/path/to/my-tool/node_modules/fs-extra/lib/mkdirs/make-dir.js
+/path/to/my-tool/node_modules/fs-extra/lib/move-sync/index.js
+/path/to/my-tool/node_modules/fs-extra/lib/move-sync/move-sync.js
+/path/to/my-tool/node_modules/fs-extra/lib/move/index.js
+/path/to/my-tool/node_modules/fs-extra/lib/move/move.js
+/path/to/my-tool/node_modules/fs-extra/lib/output/index.js
+/path/to/my-tool/node_modules/fs-extra/lib/path-exists/index.js
+/path/to/my-tool/node_modules/fs-extra/lib/remove/index.js
+/path/to/my-tool/node_modules/fs-extra/lib/remove/rimraf.js
+/path/to/my-tool/node_modules/fs-extra/lib/util/stat.js
+/path/to/my-tool/node_modules/fs-extra/lib/util/utimes.js
+/path/to/my-tool/node_modules/graceful-fs/clone.js
+/path/to/my-tool/node_modules/graceful-fs/graceful-fs.js
+/path/to/my-tool/node_modules/graceful-fs/legacy-streams.js
+/path/to/my-tool/node_modules/graceful-fs/polyfills.js
+/path/to/my-tool/node_modules/jsonfile/index.js
+/path/to/my-tool/node_modules/jsonfile/utils.js
+/path/to/my-tool/node_modules/universalify/index.js
 ```
 
 ## Finding callers
@@ -104,19 +104,19 @@ The report now shows more detail:
 **rundown-inspect.log**
 ```
 . . .
-C:\Git\rushstack\apps\test\node_modules\graceful-fs\legacy-streams.js
-  imported by C:\Git\rushstack\apps\test\node_modules\graceful-fs\graceful-fs.js
-  imported by C:\Git\rushstack\apps\test\node_modules\fs-extra\lib\fs\index.js
-  imported by C:\Git\rushstack\apps\test\node_modules\fs-extra\lib\index.js
-  imported by C:\Git\rushstack\apps\test\lib\start.js
-  imported by C:\Git\rushstack\apps\rundown\lib\launcher.js
+/path/to/my-tool/node_modules/graceful-fs/legacy-streams.js
+  imported by /path/to/my-tool/node_modules/graceful-fs/graceful-fs.js
+  imported by /path/to/my-tool/node_modules/fs-extra/lib/fs/index.js
+  imported by /path/to/my-tool/node_modules/fs-extra/lib/index.js
+  imported by /path/to/my-tool/lib/start.js
+  imported by /rundown/lib/launcher.js
 
-C:\Git\rushstack\apps\test\node_modules\graceful-fs\polyfills.js
-  imported by C:\Git\rushstack\apps\test\node_modules\graceful-fs\graceful-fs.js
-  imported by C:\Git\rushstack\apps\test\node_modules\fs-extra\lib\fs\index.js
-  imported by C:\Git\rushstack\apps\test\node_modules\fs-extra\lib\index.js
-  imported by C:\Git\rushstack\apps\test\lib\start.js
-  imported by C:\Git\rushstack\apps\rundown\lib\launcher.js
+/path/to/my-tool/node_modules/graceful-fs/polyfills.js
+  imported by /path/to/my-tool/node_modules/graceful-fs/graceful-fs.js
+  imported by /path/to/my-tool/node_modules/fs-extra/lib/fs/index.js
+  imported by /path/to/my-tool/node_modules/fs-extra/lib/index.js
+  imported by /path/to/my-tool/lib/start.js
+  imported by rundown/lib/launcher.js
 . . .
 ```
 
