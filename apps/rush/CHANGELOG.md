@@ -1,6 +1,20 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 23 Jul 2020 23:47:59 GMT and should not be manually modified.
+This log was last generated on Fri, 07 Aug 2020 21:09:05 GMT and should not be manually modified.
+
+## 5.30.3
+Fri, 07 Aug 2020 21:09:05 GMT
+
+### Updates
+
+- Fix an issue where Mac OS sometimes reported "An unrecognized file .DS_Store was found in the Rush config folder"
+
+## 5.30.2
+Wed, 05 Aug 2020 17:57:07 GMT
+
+### Updates
+
+- Fix an issue where a package version bump would not bump downstream packages with a `workspace:*` dependency specifier.
 
 ## 5.30.1
 Thu, 23 Jul 2020 23:47:59 GMT

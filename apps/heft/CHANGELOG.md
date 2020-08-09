@@ -1,6 +1,18 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Mon, 03 Aug 2020 15:09:51 GMT and should not be manually modified.
+This log was last generated on Wed, 05 Aug 2020 18:27:33 GMT and should not be manually modified.
+
+## 0.4.3
+Wed, 05 Aug 2020 18:27:33 GMT
+
+*Version update only*
+
+## 0.4.2
+Tue, 04 Aug 2020 07:27:25 GMT
+
+### Patches
+
+- Update README.md logo
 
 ## 0.4.1
 Mon, 03 Aug 2020 15:09:51 GMT
