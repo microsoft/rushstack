@@ -1,24 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line @typescript-eslint/typedef
-const importLazy = require('import-lazy')(require);
-
 import * as os from 'os';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import * as colors from 'colors';
-// eslint-disable-next-line @typescript-eslint/typedef
-const inquirer = importLazy('inquirer');
-// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
-import { PromptModule } from 'inquirer';
 
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
-import { FileSystem, Path } from '@rushstack/node-core-library';
+import { FileSystem, Path, Import } from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { IChangeFile, IChangeInfo, ChangeType } from '../../api/ChangeManagement';
@@ -34,6 +27,10 @@ import {
   VersionPolicyDefinitionName
 } from '../../api/VersionPolicy';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
+
+const inquirer: typeof import('inquirer') = Import.lazy('inquirer', require);
+// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
+import * as inquirerTypes from 'inquirer';
 
 export class ChangeAction extends BaseRushAction {
   private _verifyParameter: CommandLineFlagParameter;
@@ -184,7 +181,7 @@ export class ChangeAction extends BaseRushAction {
 
     this._warnUncommittedChanges();
 
-    const promptModule: PromptModule = inquirer.createPromptModule();
+    const promptModule: inquirerTypes.PromptModule = inquirer.createPromptModule();
     let changeFileData: Map<string, IChangeFile> = new Map<string, IChangeFile>();
     let interactiveMode: boolean = false;
     if (this._bulkChangeParameter.value) {
@@ -372,7 +369,7 @@ export class ChangeAction extends BaseRushAction {
    * The main loop which prompts the user for information on changed projects.
    */
   private async _promptForChangeFileData(
-    promptModule: PromptModule,
+    promptModule: inquirerTypes.PromptModule,
     sortedProjectList: string[],
     existingChangeComments: Map<string, string[]>
   ): Promise<Map<string, IChangeFile>> {
@@ -407,7 +404,7 @@ export class ChangeAction extends BaseRushAction {
    * Asks all questions which are needed to generate changelist for a project.
    */
   private async _askQuestions(
-    promptModule: PromptModule,
+    promptModule: inquirerTypes.PromptModule,
     packageName: string,
     existingChangeComments: Map<string, string[]>
   ): Promise<IChangeInfo | undefined> {
@@ -446,7 +443,7 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private async _promptForComments(
-    promptModule: PromptModule,
+    promptModule: inquirerTypes.PromptModule,
     packageName: string
   ): Promise<IChangeInfo | undefined> {
     const bumpOptions: { [type: string]: string } = this._getBumpOptions(packageName);
@@ -525,7 +522,7 @@ export class ChangeAction extends BaseRushAction {
    * Will determine a user's email by first detecting it from their Git config,
    * or will ask for it if it is not found or the Git config is wrong.
    */
-  private async _detectOrAskForEmail(promptModule: PromptModule): Promise<string> {
+  private async _detectOrAskForEmail(promptModule: inquirerTypes.PromptModule): Promise<string> {
     return (await this._detectAndConfirmEmail(promptModule)) || (await this._promptForEmail(promptModule));
   }
 
@@ -545,7 +542,9 @@ export class ChangeAction extends BaseRushAction {
    * Detects the user's email address from their Git configuration, prompts the user to approve the
    * detected email. It returns undefined if it cannot be detected.
    */
-  private async _detectAndConfirmEmail(promptModule: PromptModule): Promise<string | undefined> {
+  private async _detectAndConfirmEmail(
+    promptModule: inquirerTypes.PromptModule
+  ): Promise<string | undefined> {
     const email: string | undefined = this._detectEmail();
 
     if (email) {
@@ -566,7 +565,7 @@ export class ChangeAction extends BaseRushAction {
   /**
    * Asks the user for their email address
    */
-  private async _promptForEmail(promptModule: PromptModule): Promise<string> {
+  private async _promptForEmail(promptModule: inquirerTypes.PromptModule): Promise<string> {
     const { email }: { email: string } = await promptModule([
       {
         type: 'input',
@@ -600,7 +599,7 @@ export class ChangeAction extends BaseRushAction {
    * Writes change files to the common/changes folder. Will prompt for overwrite if file already exists.
    */
   private async _writeChangeFiles(
-    promptModule: PromptModule,
+    promptModule: inquirerTypes.PromptModule,
     changeFileData: Map<string, IChangeFile>,
     overwrite: boolean,
     interactiveMode: boolean
@@ -611,7 +610,7 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private async _writeChangeFile(
-    promptModule: PromptModule,
+    promptModule: inquirerTypes.PromptModule,
     changeFileData: IChangeFile,
     overwrite: boolean,
     interactiveMode: boolean
@@ -635,7 +634,10 @@ export class ChangeAction extends BaseRushAction {
     }
   }
 
-  private async _promptForOverwrite(promptModule: PromptModule, filePath: string): Promise<boolean> {
+  private async _promptForOverwrite(
+    promptModule: inquirerTypes.PromptModule,
+    filePath: string
+  ): Promise<boolean> {
     const overwrite: boolean = await promptModule([
       {
         name: 'overwrite',

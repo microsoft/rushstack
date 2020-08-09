@@ -1,17 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line @typescript-eslint/typedef
-const importLazy = require('import-lazy')(require);
-
 import * as colors from 'colors';
 import * as path from 'path';
-// eslint-disable-next-line @typescript-eslint/typedef
-const resolve = importLazy('resolve');
-// eslint-disable-next-line @typescript-eslint/typedef
-const npmPacklist = importLazy('npm-packlist');
-// eslint-disable-next-line @typescript-eslint/typedef
-const pnpmLinkBins = importLazy('@pnpm/link-bins');
+import * as resolve from 'resolve';
+import * as npmPacklist from 'npm-packlist';
+import pnpmLinkBins from '@pnpm/link-bins';
 
 // (Used only by the legacy code fragment in the resolve.sync() hook below)
 import * as fsForResolve from 'fs';
@@ -30,9 +24,7 @@ import {
   NewlineKind,
   Text
 } from '@rushstack/node-core-library';
-// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
-import * as DeployArchiver from './DeployArchiver';
-const da: typeof DeployArchiver = importLazy('./DeployArchiver');
+import { DeployArchiver } from './DeployArchiver';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -40,9 +32,13 @@ import { DeployScenarioConfiguration, IDeployScenarioProjectJson } from './Deplo
 import { PnpmfileConfiguration } from './PnpmfileConfiguration';
 import { matchesWithStar } from './Utils';
 
-interface INpmPackListWalkerSync {
-  readonly result: string[];
-  start(): void;
+// (@types/npm-packlist is missing this API)
+declare module 'npm-packlist' {
+  export class WalkerSync {
+    public readonly result: string[];
+    public constructor(opts: { path: string });
+    public start(): void;
+  }
 }
 
 /**
@@ -390,7 +386,7 @@ export class DeployManager {
     if (useNpmIgnoreFilter) {
       // Use npm-packlist to filter the files.  Using the WalkerSync class (instead of the sync() API) ensures
       // that "bundledDependencies" are not included.
-      const walker: INpmPackListWalkerSync = new npmPacklist.WalkerSync({
+      const walker: npmPacklist.WalkerSync = new npmPacklist.WalkerSync({
         path: sourceFolderPath
       });
       walker.start();
@@ -681,7 +677,7 @@ export class DeployManager {
         alreadyExistsBehavior: AlreadyExistsBehavior.Error
       });
     }
-    await da.DeployArchiver.createArchiveAsync(deployState);
+    await DeployArchiver.createArchiveAsync(deployState);
   }
 
   /**

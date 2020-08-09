@@ -1,13 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line @typescript-eslint/typedef
-const importLazy = require('import-lazy')(require);
-
-// eslint-disable-next-line @typescript-eslint/typedef
-const _ = importLazy('lodash');
 import * as semver from 'semver';
-import { IPackageJson } from '@rushstack/node-core-library';
+import { IPackageJson, Import } from '@rushstack/node-core-library';
 
 import {
   IVersionPolicyJson,
@@ -20,6 +15,8 @@ import {
 import { PackageJsonEditor } from './PackageJsonEditor';
 import { RushConfiguration } from './RushConfiguration';
 import { RushConfigurationProject } from './RushConfigurationProject';
+
+const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 /**
  * Type of version bumps
@@ -324,7 +321,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
   }
 
   private _updatePackageVersion(project: IPackageJson, newVersion: semver.SemVer): IPackageJson {
-    const updatedProject: IPackageJson = _.cloneDeep(project);
+    const updatedProject: IPackageJson = lodash.cloneDeep(project);
     updatedProject.version = newVersion.format();
     return updatedProject;
   }
@@ -383,7 +380,7 @@ export class IndividualVersionPolicy extends VersionPolicy {
     if (this.lockedMajor) {
       const version: semver.SemVer = new semver.SemVer(project.version);
       if (version.major < this.lockedMajor) {
-        const updatedProject: IPackageJson = _.cloneDeep(project);
+        const updatedProject: IPackageJson = lodash.cloneDeep(project);
         updatedProject.version = `${this._lockedMajor}.0.0`;
         return updatedProject;
       } else if (version.major > this.lockedMajor) {

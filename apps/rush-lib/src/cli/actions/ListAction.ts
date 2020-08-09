@@ -1,15 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line @typescript-eslint/typedef
-const importLazy = require('import-lazy')(require);
-
+import { Import } from '@rushstack/node-core-library';
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-// eslint-disable-next-line @typescript-eslint/typedef
-const Table = importLazy('cli-table');
+
+const cliTable: typeof import('cli-table') = Import.lazy('cli-table', require);
 
 export interface IJsonEntry {
   name: string;
@@ -119,7 +117,7 @@ export class ListAction extends BaseRushAction {
     }
 
     // eslint-disable-next-line @typescript-eslint/typedef
-    const table = new Table({
+    const table = new cliTable({
       head: tableHeader
     });
 
