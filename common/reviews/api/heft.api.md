@@ -268,6 +268,14 @@ export interface IPreCompileSubstage extends IBuildSubstage<BuildSubstageHooksBa
 }
 
 // @public (undocumented)
+export interface IScopedLogger {
+    emitError(error: Error): void;
+    emitWarning(warning: Error): void;
+    // (undocumented)
+    readonly terminal: Terminal;
+}
+
+// @public (undocumented)
 export interface ISharedBundleSubstageWebpackProperties {
     // (undocumented)
     apiExtractorConfiguration: IApiExtractorConfiguration;
@@ -337,7 +345,7 @@ export class MetricsCollectorHooks {
 }
 
 // @public (undocumented)
-export class ScopedLogger {
+export class ScopedLogger implements IScopedLogger {
     // Warning: (ae-forgotten-export) The symbol "IScopedLoggerOptions" needs to be exported by the entry point index.d.ts
     //
     // @internal

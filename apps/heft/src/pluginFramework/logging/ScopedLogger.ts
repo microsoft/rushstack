@@ -10,19 +10,36 @@ export interface IScopedLoggerOptions {
   requestingPlugin: IHeftPlugin;
   loggerName: string;
   terminalProvider: ITerminalProvider;
-  getVerboseEnabled: () => boolean;
+  getShouldPrintStacks: () => boolean;
 }
 
 /**
  * @public
  */
-export class ScopedLogger {
+export interface IScopedLogger {
+  readonly terminal: Terminal;
+
+  /**
+   * Call this function to emit an error to the heft runtime.
+   */
+  emitError(error: Error): void;
+
+  /**
+   * Call this function to emit an warning to the heft runtime.
+   */
+  emitWarning(warning: Error): void;
+}
+
+/**
+ * @public
+ */
+export class ScopedLogger implements IScopedLogger {
   private readonly _options: IScopedLoggerOptions;
   private readonly _errors: Error[] = [];
   private readonly _warnings: Error[] = [];
 
-  private get _logVerbose(): boolean {
-    return this._options.getVerboseEnabled();
+  private get _shouldPrintStacks(): boolean {
+    return this._options.getShouldPrintStacks();
   }
 
   public get errors(): ReadonlyArray<Error> {
@@ -60,23 +77,23 @@ export class ScopedLogger {
   }
 
   /**
-   * Call this function to emit an error to the heft runtime.
+   * {@inheritdoc IScopedLogger.emitError}
    */
   public emitError(error: Error): void {
     this._errors.push(error);
-    this.terminal.writeErrorLine(error.message);
-    if (this._logVerbose && error.stack) {
+    this.terminal.writeErrorLine(`ERROR: ${error.message}`);
+    if (this._shouldPrintStacks && error.stack) {
       this.terminal.writeErrorLine(error.stack);
     }
   }
 
   /**
-   * Call this function to emit an warning to the heft runtime.
+   * {@inheritdoc IScopedLogger.emitWarning}
    */
   public emitWarning(warning: Error): void {
     this._warnings.push(warning);
-    this.terminal.writeWarningLine(warning.message);
-    if (this._logVerbose && warning.stack) {
+    this.terminal.writeWarningLine(`WARNING: ${warning.message}`);
+    if (this._shouldPrintStacks && warning.stack) {
       this.terminal.writeWarningLine(warning.stack);
     }
   }

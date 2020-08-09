@@ -16,7 +16,7 @@ export {
   IPerformanceData as _IPerformanceData,
   MetricsCollector as _MetricsCollector
 } from './metrics/MetricsCollector';
-export { ScopedLogger } from './pluginFramework/logging/ScopedLogger';
+export { ScopedLogger, IScopedLogger } from './pluginFramework/logging/ScopedLogger';
 
 // Stages
 export { StageHooksBase, IStageContext } from './stages/StageBase';

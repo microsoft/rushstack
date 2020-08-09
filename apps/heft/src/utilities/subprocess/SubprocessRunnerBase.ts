@@ -3,7 +3,7 @@
 
 import * as childProcess from 'child_process';
 import * as path from 'path';
-import { ITerminalProvider, TerminalProviderSeverity } from '@rushstack/node-core-library';
+import { ITerminalProvider, Terminal } from '@rushstack/node-core-library';
 
 import {
   ISubprocessMessageBase,
@@ -16,7 +16,12 @@ import { IExtendedFileSystem } from '../fileSystem/IExtendedFileSystem';
 import { CachedFileSystem } from '../fileSystem/CachedFileSystem';
 import { HeftSession } from '../../pluginFramework/HeftSession';
 import { TerminalProviderManager } from './TerminalProviderManager';
-import { SubprocessCommunicationManagerBase } from './SubprocessCommunicationManagerBase';
+import {
+  SubprocessCommunicationManagerBase,
+  ISubprocessCommunicationManagerBaseOptions
+} from './SubprocessCommunicationManagerBase';
+import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
+import { ScopedLoggerManager } from './ScopedLoggerManager';
 
 export interface ISubprocessInnerConfiguration {
   globalTerminalProviderId: number;
@@ -44,19 +49,24 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
   private static _subprocessInspectorPort: number = 9229 + 1; // 9229 is the default port
 
   private _terminalProviderManager: TerminalProviderManager;
+  private _scopedLoggerManager: ScopedLoggerManager;
 
   private _innerConfiguration: ISubprocessInnerConfiguration;
-  private _runningAsSubprocess: boolean = false;
+  public _runningAsSubprocess: boolean = false;
   protected readonly _configuration: TSubprocessConfiguration;
   protected readonly _fileSystem: IExtendedFileSystem = new CachedFileSystem();
 
-  protected _globalTerminalProvider: ITerminalProvider;
+  protected _globalTerminal: Terminal;
   private readonly _subprocessCommunicationManagers: SubprocessCommunicationManagerBase[] = [];
 
   /**
    * The subprocess filename. This should be set to __filename in the child class.
    */
   public abstract get filename(): string;
+
+  public get runningAsSubprocess(): boolean {
+    return this._runningAsSubprocess;
+  }
 
   /**
    * Constructs an instances of a subprocess runner
@@ -70,24 +80,35 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
 
     if (parentGlobalTerminalProvider) {
       // This is the parent process
-      this._terminalProviderManager = new TerminalProviderManager({
-        sendMessageToParentProcessFn: this._receiveMessageFromSubprocess.bind(this),
-        sendMessageToSubprocessFn: this._receiveMessageFromParentProcess.bind(this)
-      });
-      const globalTerminalProviderId: number = this._terminalProviderManager.registerTerminalProvider(
-        parentGlobalTerminalProvider
-      );
       this._innerConfiguration = {
-        globalTerminalProviderId: globalTerminalProviderId,
+        globalTerminalProviderId: undefined!,
         terminalEolCharacter: parentGlobalTerminalProvider.eolCharacter,
         terminalSupportsColor: parentGlobalTerminalProvider.supportsColor
       };
-      this._globalTerminalProvider = this._terminalProviderManager.registerSubprocessTerminalProvider(
-        globalTerminalProviderId,
-        this._innerConfiguration
+
+      const communicationManagerBaseOptions: ISubprocessCommunicationManagerBaseOptions = {
+        sendMessageToParentProcessFn: this._receiveMessageFromSubprocess.bind(this),
+        sendMessageToSubprocessFn: this._receiveMessageFromParentProcess.bind(this)
+      };
+      this._terminalProviderManager = new TerminalProviderManager({
+        ...communicationManagerBaseOptions,
+        configuration: this._innerConfiguration
+      });
+      this._scopedLoggerManager = new ScopedLoggerManager({
+        ...communicationManagerBaseOptions,
+        terminalProviderManager: this._terminalProviderManager,
+        heftSession: heftSession
+      });
+
+      const globalTerminalProviderId: number = this._terminalProviderManager.registerTerminalProvider(
+        parentGlobalTerminalProvider
+      );
+      this._innerConfiguration.globalTerminalProviderId = globalTerminalProviderId;
+      this._globalTerminal = new Terminal(
+        this._terminalProviderManager.registerSubprocessTerminalProvider(globalTerminalProviderId)
       );
 
-      this._subprocessCommunicationManagers.push(this._terminalProviderManager);
+      this._subprocessCommunicationManagers.push(this._terminalProviderManager, this._scopedLoggerManager);
 
       this.initialize();
     }
@@ -109,18 +130,32 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
     );
     subprocessRunner._runningAsSubprocess = true;
     subprocessRunner._innerConfiguration = innerConfiguration;
-    subprocessRunner._terminalProviderManager = new TerminalProviderManager({
+
+    const communicationManagerBaseOptions: ISubprocessCommunicationManagerBaseOptions = {
       sendMessageToParentProcessFn: process.send!.bind(process),
       sendMessageToSubprocessFn: () => {
         throw new Error('A subprocess cannot send a message to itself.');
       }
+    };
+    subprocessRunner._terminalProviderManager = new TerminalProviderManager({
+      ...communicationManagerBaseOptions,
+      configuration: innerConfiguration
     });
-    subprocessRunner._globalTerminalProvider = subprocessRunner._terminalProviderManager.registerSubprocessTerminalProvider(
-      innerConfiguration.globalTerminalProviderId,
-      innerConfiguration
+    subprocessRunner._scopedLoggerManager = new ScopedLoggerManager({
+      ...communicationManagerBaseOptions,
+      terminalProviderManager: subprocessRunner._terminalProviderManager
+    });
+
+    subprocessRunner._globalTerminal = new Terminal(
+      subprocessRunner._terminalProviderManager.registerSubprocessTerminalProvider(
+        innerConfiguration.globalTerminalProviderId
+      )
     );
 
-    subprocessRunner._subprocessCommunicationManagers.push(subprocessRunner._terminalProviderManager);
+    subprocessRunner._subprocessCommunicationManagers.push(
+      subprocessRunner._terminalProviderManager,
+      subprocessRunner._scopedLoggerManager
+    );
     subprocessRunner.initialize();
 
     return subprocessRunner;
@@ -128,18 +163,21 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
 
   public invokeAsSubprocessAsync(): Promise<void> {
     return new Promise((resolve: () => void, reject: (error: Error) => void) => {
-      const builderProcess: childProcess.ChildProcess = childProcess.fork(
+      const subprocess: childProcess.ChildProcess = childProcess.fork(
         path.resolve(__dirname, 'startSubprocess'),
         [this.filename, JSON.stringify(this._innerConfiguration), JSON.stringify(this._configuration)],
         {
-          execArgv: this._processNodeArgsForSubprocess(this._globalTerminalProvider, process.execArgv)
+          execArgv: this._processNodeArgsForSubprocess(this._globalTerminal, process.execArgv)
         }
       );
+
+      this._terminalProviderManager.registerSubprocess(subprocess);
+      this._scopedLoggerManager.registerSubprocess(subprocess);
 
       let hasExited: boolean = false;
       let exitError: Error | undefined;
 
-      builderProcess.on('message', (message: ISubprocessMessageBase) => {
+      subprocess.on('message', (message: ISubprocessMessageBase) => {
         switch (message.type) {
           case 'exit': {
             if (hasExited) {
@@ -150,7 +188,7 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
 
             const exitMessage: ISubprocessExitMessage = message as ISubprocessExitMessage;
             hasExited = true;
-            exitError = this._deserializeArg(exitMessage.error) as Error | undefined;
+            exitError = SubprocessRunnerBase.deserializeArg(exitMessage.error) as Error | undefined;
 
             break;
           }
@@ -168,7 +206,7 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
         }
       });
 
-      builderProcess.on('close', () => {
+      subprocess.on('close', () => {
         if (exitError) {
           reject(exitError);
         } else if (!hasExited) {
@@ -204,13 +242,17 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
 
       const exitMessage: ISubprocessExitMessage = {
         type: 'exit',
-        error: this._serializeArg(error)
+        error: SubprocessRunnerBase.serializeArg(error)
       };
       process.send!(exitMessage);
     }
   }
 
-  private _processNodeArgsForSubprocess(terminalProvider: ITerminalProvider, nodeArgs: string[]): string[] {
+  protected async requestScopedLoggerAsync(loggerName: string): Promise<IScopedLogger> {
+    return await this._scopedLoggerManager.requestScopedLoggerAsync(loggerName);
+  }
+
+  private _processNodeArgsForSubprocess(terminal: Terminal, nodeArgs: string[]): string[] {
     nodeArgs = [...nodeArgs]; // Clone the args array
     const inspectPort: number = SubprocessRunnerBase._subprocessInspectorPort++;
     let willUseInspector: boolean = false;
@@ -226,11 +268,7 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
     }
 
     if (willUseInspector) {
-      // Don't bother instantiating a Terminal object just for this one logging statement.
-      terminalProvider.write(
-        `Subprocess with inspector bound to port ${inspectPort}${terminalProvider.eolCharacter}`,
-        TerminalProviderSeverity.log
-      );
+      terminal.writeLine(`Subprocess with inspector bound to port ${inspectPort}`);
     }
 
     return nodeArgs;
@@ -240,7 +278,7 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
     for (const subprocessCommunicationManager of this._subprocessCommunicationManagers) {
       if (subprocessCommunicationManager.canHandleMessageFromParentProcess(message)) {
         subprocessCommunicationManager.receiveMessageFromParentProcess(message);
-        break;
+        return;
       }
     }
 
@@ -264,7 +302,7 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
     );
   }
 
-  private _serializeArg(arg: unknown): ISubprocessApiCallArg {
+  public static serializeArg(arg: unknown): ISubprocessApiCallArg {
     if (arg === undefined) {
       return { type: SupportedSerializableArgType.Undefined };
     } else if (arg === null) {
@@ -303,7 +341,7 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
     throw new Error(`Argument (${arg}) is not supported in subprocess communication.`);
   }
 
-  private _deserializeArg(arg: ISubprocessApiCallArg): unknown | undefined {
+  public static deserializeArg(arg: ISubprocessApiCallArg): unknown | undefined {
     switch (arg.type) {
       case SupportedSerializableArgType.Undefined: {
         return undefined;

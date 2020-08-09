@@ -4,12 +4,9 @@
 import * as path from 'path';
 import * as semver from 'semver';
 import {
-  Colors,
   FileSystemStats,
   IFileSystemCreateLinkOptions,
-  IColorableSequence,
   Terminal,
-  ITerminalProvider,
   JsonFile,
   IPackageJson,
   InternalError
@@ -26,10 +23,10 @@ import {
 import { SubprocessRunnerBase } from '../../utilities/subprocess/SubprocessRunnerBase';
 import { Async } from '../../utilities/Async';
 import { PerformanceMeasurer, PerformanceMeasurerAsync } from '../../utilities/Performance';
-import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
 import { Tslint } from './Tslint';
 import { Eslint } from './Eslint';
 import { ISharedTypeScriptConfiguration } from '../../stages/BuildStage';
+import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 
 import { EmitFilesPatch, ICachedEmitModuleKind } from './EmitFilesPatch';
 
@@ -43,7 +40,7 @@ export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfig
    * If provided, this is included in the logging prefix. For example, if this
    * is set to "other-tsconfig", logging lines will start with [typescript (other-tsconfig)].
    */
-  terminalPrefixLabel: string | undefined;
+  loggerPrefixLabel: string | undefined;
 
   lintingEnabled: boolean;
 
@@ -102,6 +99,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _moduleKindsToEmit: ICachedEmitModuleKind<TTypescript.ModuleKind>[];
   private _eslintConfigFilePath: string;
   private _tslintConfigFilePath: string;
+  private _typescriptLogger: IScopedLogger;
   private _typescriptTerminal: Terminal;
 
   private __tsCacheFilePath: string;
@@ -130,23 +128,12 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     return this.__tsCacheFilePath;
   }
 
-  public static getTypeScriptTerminal(
-    terminalProvider: ITerminalProvider,
-    prefixLabel: string | undefined
-  ): Terminal {
-    const prefixTerminalProvider: PrefixProxyTerminalProvider = new PrefixProxyTerminalProvider(
-      terminalProvider,
-      prefixLabel ? `[typescript (${prefixLabel})] ` : '[typescript] '
+  public async invokeAsync(): Promise<void> {
+    const loggerPrefixLabel: string | undefined = this._configuration.loggerPrefixLabel;
+    this._typescriptLogger = await this.requestScopedLoggerAsync(
+      loggerPrefixLabel ? `typescript (${loggerPrefixLabel})` : 'typescript'
     );
-
-    return new Terminal(prefixTerminalProvider);
-  }
-
-  public initialize(): void {
-    this._typescriptTerminal = TypeScriptBuilder.getTypeScriptTerminal(
-      this._globalTerminalProvider,
-      this._configuration.terminalPrefixLabel
-    );
+    this._typescriptTerminal = this._typescriptLogger.terminal;
 
     // Determine the compiler version
     const compilerPackageJsonFilename: string = path.join(
@@ -194,9 +181,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     if (this._eslintEnabled) {
       this._eslintEnabled = this._fileSystem.exists(this._eslintConfigFilePath);
     }
-  }
 
-  public async invokeAsync(): Promise<void> {
     // Report a warning if the TypeScript version is too old/new.  The current oldest supported version is
     // TypeScript 2.9. Prior to that the "ts.getConfigFileParsingDiagnostics()" API is missing; more fixups
     // would be required to deal with that.  We won't do that work unless someone requests it.
@@ -261,11 +246,14 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         throw new Error('Unable to resolve "tslint" package');
       }
 
+      const tslintScopedLogger: IScopedLogger = await this.requestScopedLoggerAsync(
+        loggerPrefixLabel ? `tslint (${loggerPrefixLabel})` : 'tslint'
+      );
       tslint = new Tslint({
         ts: ts,
         tslintPackagePath: this._configuration.tslintToolPath,
-        terminalPrefixLabel: this._configuration.terminalPrefixLabel,
-        terminalProvider: this._globalTerminalProvider,
+        terminalPrefixLabel: this._configuration.loggerPrefixLabel,
+        scopedLogger: tslintScopedLogger,
         buildFolderPath: this._configuration.buildFolder,
         buildCacheFolderPath: this._configuration.buildCacheFolder,
         linterConfigFilePath: this._tslintConfigFilePath,
@@ -273,17 +261,21 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         measurePerformance: measureTsPerformance
       });
     }
+
     let eslint: Eslint | undefined = undefined;
     if (this._eslintEnabled) {
       if (!this._configuration.eslintToolPath) {
         throw new Error('Unable to resolve "eslint" package');
       }
 
+      const eslintScopedLogger: IScopedLogger = await this.requestScopedLoggerAsync(
+        loggerPrefixLabel ? `eslint (${loggerPrefixLabel})` : 'eslint'
+      );
       eslint = new Eslint({
         ts: ts,
         eslintPackagePath: this._configuration.eslintToolPath,
-        terminalPrefixLabel: this._configuration.terminalPrefixLabel,
-        terminalProvider: this._globalTerminalProvider,
+        terminalPrefixLabel: this._configuration.loggerPrefixLabel,
+        scopedLogger: eslintScopedLogger,
         buildFolderPath: this._configuration.buildFolder,
         buildCacheFolderPath: this._configuration.buildCacheFolder,
         linterConfigFilePath: this._eslintConfigFilePath,
@@ -589,16 +581,13 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     );
     //#endregion
 
-    let compilationFailed: boolean = false;
     if (diagnostics.length > 0) {
       this._typescriptTerminal.writeErrorLine(
         `Encountered ${diagnostics.length} TypeScript error${diagnostics.length > 1 ? 's' : ''}:`
       );
       for (const diagnostic of diagnostics) {
-        this._printDiagnosticMessage(ts, diagnostic, true);
+        this._printDiagnosticMessage(ts, diagnostic);
       }
-
-      compilationFailed = true;
     }
 
     if (eslint) {
@@ -608,18 +597,10 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     if (tslint) {
       tslint.reportFailures();
     }
-
-    if (compilationFailed) {
-      throw new Error('TypeScript compilation failed.');
-    }
   }
 
-  private _printDiagnosticMessage(
-    ts: ExtendedTypeScript,
-    diagnostic: TTypescript.Diagnostic,
-    withIndent: boolean = false
-  ): void {
-    let terminalMessage: (string | IColorableSequence)[];
+  private _printDiagnosticMessage(ts: ExtendedTypeScript, diagnostic: TTypescript.Diagnostic): void {
+    let diagnosticMessage: string;
     // Code taken from reference example
     if (diagnostic.file) {
       const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!);
@@ -628,32 +609,28 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         this._configuration.buildFolder,
         diagnostic.file.fileName
       );
-      terminalMessage = [
-        Colors.red(`ERROR: ${buildFolderRelativeFilename}:${line + 1}:${character + 1}`),
-        ` - (TS${diagnostic.code}) `,
-        Colors.red(message)
-      ];
+      diagnosticMessage =
+        `${buildFolderRelativeFilename}:${line + 1}:${character + 1} - ` +
+        `(TS${diagnostic.code}) ${message}`;
     } else {
-      terminalMessage = [ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')];
+      diagnosticMessage = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
     }
 
-    if (withIndent) {
-      terminalMessage = ['  ', ...terminalMessage];
-    }
+    const errorObject: Error = new Error(diagnosticMessage);
 
     switch (diagnostic.category) {
       case ts.DiagnosticCategory.Error: {
-        this._typescriptTerminal.writeErrorLine(...terminalMessage);
+        this._typescriptLogger.emitError(errorObject);
         break;
       }
 
       case ts.DiagnosticCategory.Warning: {
-        this._typescriptTerminal.writeWarningLine(...terminalMessage);
+        this._typescriptLogger.emitWarning(errorObject);
         break;
       }
 
       default: {
-        this._typescriptTerminal.writeLine(...terminalMessage);
+        this._typescriptTerminal.writeLine(...diagnosticMessage);
         break;
       }
     }

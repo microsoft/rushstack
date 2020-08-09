@@ -12,14 +12,14 @@ export interface ILoggingManagerOptions {
 export class LoggingManager {
   private _options: ILoggingManagerOptions;
   private _scopedLoggers: Map<string, ScopedLogger> = new Map<string, ScopedLogger>();
-  private _verboseEnabled: boolean;
+  private _shouldPrintStacks: boolean;
 
   public constructor(options: ILoggingManagerOptions) {
     this._options = options;
   }
 
-  public enableVerboseLogging(): void {
-    this._verboseEnabled = true;
+  public enablePrintStacks(): void {
+    this._shouldPrintStacks = true;
   }
 
   public requestScopedLogger(plugin: IHeftPlugin, loggerName: string): ScopedLogger {
@@ -34,7 +34,7 @@ export class LoggingManager {
         requestingPlugin: plugin,
         loggerName,
         terminalProvider: this._options.terminalProvider,
-        getVerboseEnabled: () => this._verboseEnabled
+        getShouldPrintStacks: () => this._shouldPrintStacks
       });
       this._scopedLoggers.set(loggerName, scopedLogger);
       return scopedLogger;

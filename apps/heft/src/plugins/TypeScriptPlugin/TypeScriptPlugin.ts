@@ -18,6 +18,7 @@ import {
 } from '../../stages/BuildStage';
 import { TaskPackageResolver, ITaskPackageResolution } from '../../utilities/TaskPackageResolver';
 import { JestTypeScriptDataFile } from '../JestPlugin/JestTypeScriptDataFile';
+import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 
 const PLUGIN_NAME: string = 'typescript';
 
@@ -147,9 +148,10 @@ export class TypeScriptPlugin implements IHeftPlugin {
     } = options;
 
     const fullTsconfigFilePath: string = path.resolve(heftConfiguration.buildFolder, tsconfigFilePath);
+    const pluginLogger: ScopedLogger = heftSession.requestScopedLogger('TypeScript Plugin');
     const resolution: ITaskPackageResolution | undefined = TaskPackageResolver.resolveTaskPackages(
       fullTsconfigFilePath,
-      TypeScriptBuilder.getTypeScriptTerminal(terminalProvider, terminalPrefixLabel)
+      pluginLogger.terminal
     );
     if (!resolution) {
       throw new Error(`Unable to resolve a compiler package for ${path.basename(tsconfigFilePath)}`);
@@ -167,7 +169,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
       additionalModuleKindsToEmit,
       copyFromCacheMode,
       watchMode,
-      terminalPrefixLabel,
+      loggerPrefixLabel: terminalPrefixLabel,
       maxWriteParallelism
     };
     const typeScriptBuilder: TypeScriptBuilder = new TypeScriptBuilder(

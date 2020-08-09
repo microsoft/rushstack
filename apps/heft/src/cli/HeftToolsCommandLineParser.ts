@@ -124,7 +124,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     this._terminalProvider.verboseEnabled = this.isDebug;
 
     if (this.isDebug) {
-      this._loggingManager.enableVerboseLogging();
+      this._loggingManager.enablePrintStacks();
       InternalError.breakInDebugger = true;
     }
 

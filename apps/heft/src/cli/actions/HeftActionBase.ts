@@ -75,8 +75,6 @@ export abstract class HeftActionBase extends CommandLineAction {
     this.terminal.writeLine(`Starting ${this.actionName}`);
 
     if (this.verboseFlag.value) {
-      this.loggingManager.enableVerboseLogging();
-
       if (this.heftConfiguration.terminalProvider instanceof ConsoleTerminalProvider) {
         this.heftConfiguration.terminalProvider.verboseEnabled = true;
       }
@@ -92,7 +90,7 @@ export abstract class HeftActionBase extends CommandLineAction {
       this.recordMetrics();
 
       const warningStrings: string[] = this.loggingManager.getWarningStrings();
-      const errorStrings: string[] = this.loggingManager.getWarningStrings();
+      const errorStrings: string[] = this.loggingManager.getErrorStrings();
 
       const encounteredWarnings: boolean = warningStrings.length > 0;
       encounteredError = encounteredError || errorStrings.length > 0;

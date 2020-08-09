@@ -5,7 +5,10 @@ import { ITerminalProvider, TerminalProviderSeverity } from '@rushstack/node-cor
 
 import { ISubprocessInnerConfiguration } from './SubprocessRunnerBase';
 import { ISubprocessMessageBase } from './SubprocessCommunication';
-import { SubprocessCommunicationManagerBase } from './SubprocessCommunicationManagerBase';
+import {
+  SubprocessCommunicationManagerBase,
+  ISubprocessCommunicationManagerBaseOptions
+} from './SubprocessCommunicationManagerBase';
 
 const TERMINAL_PROVIDER_MESSAGE_TYPE: string = 'terminalProviderMessage';
 
@@ -15,9 +18,19 @@ interface ITerminalProviderSubprocessMessage extends ISubprocessMessageBase {
   severity: TerminalProviderSeverity;
 }
 
+export interface ITerminalProviderManagerOptions extends ISubprocessCommunicationManagerBaseOptions {
+  configuration: ISubprocessInnerConfiguration;
+}
+
 export class TerminalProviderManager extends SubprocessCommunicationManagerBase {
   private _terminalProviderIdCounter: number = 0;
   private readonly _terminalProviders: Map<number, ITerminalProvider> = new Map<number, ITerminalProvider>();
+  private readonly _configuration: ISubprocessInnerConfiguration;
+
+  public constructor(options: ITerminalProviderManagerOptions) {
+    super(options);
+    this._configuration = options.configuration;
+  }
 
   public registerTerminalProvider(terminalProvider: ITerminalProvider): number {
     const id: number = this._terminalProviderIdCounter++;
@@ -26,13 +39,10 @@ export class TerminalProviderManager extends SubprocessCommunicationManagerBase 
     return id;
   }
 
-  public registerSubprocessTerminalProvider(
-    terminalProviderId: number,
-    configuration: ISubprocessInnerConfiguration
-  ): ITerminalProvider {
+  public registerSubprocessTerminalProvider(terminalProviderId: number): ITerminalProvider {
     const terminalProvider: ITerminalProvider = {
-      eolCharacter: configuration.terminalEolCharacter,
-      supportsColor: configuration.terminalSupportsColor,
+      eolCharacter: this._configuration.terminalEolCharacter,
+      supportsColor: this._configuration.terminalSupportsColor,
       write: (data: string, severity: TerminalProviderSeverity) => {
         const message: ITerminalProviderSubprocessMessage = {
           type: TERMINAL_PROVIDER_MESSAGE_TYPE,
