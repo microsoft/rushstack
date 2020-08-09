@@ -202,7 +202,7 @@ export class ScopedLoggerManager extends SubprocessCommunicationManagerBase {
             sendErrorOrWarning(error, true);
           },
           emitWarning: (warning: Error) => {
-            sendErrorOrWarning(warning, true);
+            sendErrorOrWarning(warning, false);
           }
         };
         response.resolve(scopedLogger);
