@@ -1,10 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// eslint-disable-next-line @typescript-eslint/typedef
+const importLazy = require('import-lazy')(require);
+
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { LinkManagerFactory } from '../../logic/LinkManagerFactory';
+// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
+import * as LinkManagerFactoryExports from '../../logic/LinkManagerFactory';
+const linkManagerFactoryExports: typeof LinkManagerFactoryExports = importLazy(
+  '../../logic/LinkManagerFactory'
+);
 import { BaseLinkManager } from '../../logic/base/BaseLinkManager';
 import { BaseRushAction } from './BaseRushAction';
 
@@ -35,7 +42,9 @@ export class LinkAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
-    const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
+    const linkManager: BaseLinkManager = linkManagerFactoryExports.LinkManagerFactory.getLinkManager(
+      this.rushConfiguration
+    );
     await linkManager.createSymlinksForProjects(this._force.value);
   }
 }

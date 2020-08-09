@@ -312,10 +312,10 @@ export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
 
 // @public
 export class Rush {
-    static launch(launcherVersion: string, arg: ILaunchOptions): void;
+    static launch(launcherVersion: string, arg: ILaunchOptions, cb?: () => void): void;
     static launchRushX(launcherVersion: string, options: ILaunchOptions): void;
     static readonly version: string;
-}
+    }
 
 // @public
 export class RushConfiguration {

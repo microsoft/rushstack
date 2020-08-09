@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// eslint-disable-next-line @typescript-eslint/typedef
+const importLazy = require('import-lazy')(require);
+
 import * as colors from 'colors';
 import * as os from 'os';
 
@@ -13,7 +16,11 @@ import {
 import { BaseRushAction } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';
 import { BaseInstallManager, IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
-import { InstallManagerFactory } from '../../logic/InstallManagerFactory';
+// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
+import * as InstallManagerFactoryExports from '../../logic/InstallManagerFactory';
+const installManagerFactoryExports: typeof InstallManagerFactoryExports = importLazy(
+  '../../logic/InstallManagerFactory'
+);
 import { PurgeManager } from '../../logic/PurgeManager';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { StandardScriptUpdater } from '../../logic/StandardScriptUpdater';
@@ -119,7 +126,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     const installManagerOptions: IInstallManagerOptions = this.buildInstallOptions();
 
-    const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
+    const installManager: BaseInstallManager = installManagerFactoryExports.InstallManagerFactory.getInstallManager(
       this.rushConfiguration,
       this.rushGlobalFolder,
       purgeManager,

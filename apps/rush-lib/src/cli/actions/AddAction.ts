@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// eslint-disable-next-line @typescript-eslint/typedef
+const importLazy = require('import-lazy')(require);
+
 import * as os from 'os';
 import * as semver from 'semver';
 
@@ -9,7 +12,10 @@ import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
+// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
 import { PackageJsonUpdater, SemVerStyle } from '../../logic/PackageJsonUpdater';
+import * as PackageJsonUpdaterW from '../../logic/PackageJsonUpdater';
+const packageJsonUpdaterExports: typeof PackageJsonUpdaterW = importLazy('../../logic/PackageJsonUpdater');
 import { DependencySpecifier } from '../../logic/DependencySpecifier';
 
 export class AddAction extends BaseRushAction {
@@ -136,7 +142,10 @@ export class AddAction extends BaseRushAction {
       }
     }
 
-    const updater: PackageJsonUpdater = new PackageJsonUpdater(this.rushConfiguration, this.rushGlobalFolder);
+    const updater: PackageJsonUpdater = new packageJsonUpdaterExports.PackageJsonUpdater(
+      this.rushConfiguration,
+      this.rushGlobalFolder
+    );
 
     let rangeStyle: SemVerStyle;
     if (version && version !== 'latest') {

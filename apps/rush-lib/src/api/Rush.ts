@@ -38,6 +38,8 @@ export interface ILaunchOptions {
  * @public
  */
 export class Rush {
+  private static _version: string | undefined = undefined;
+
   /**
    * This API is used by the `@microsoft/rush` front end to launch the "rush" command-line.
    * Third-party tools should not use this API.  Instead, they should execute the "rush" binary
@@ -51,7 +53,7 @@ export class Rush {
    *
    * Even though this API isn't documented, it is still supported for legacy compatibility.
    */
-  public static launch(launcherVersion: string, arg: ILaunchOptions): void {
+  public static launch(launcherVersion: string, arg: ILaunchOptions, cb: () => void = () => {}): void {
     const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
 
     if (!Utilities.shouldRestrictConsoleOutput()) {
@@ -67,7 +69,14 @@ export class Rush {
     const parser: RushCommandLineParser = new RushCommandLineParser({
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
     });
-    parser.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise
+    parser
+      .execute()
+      .then(() => {
+        if (cb) {
+          cb();
+        }
+      })
+      .catch(console.error); // CommandLineParser.execute() should never reject the promise
   }
 
   /**
@@ -90,7 +99,11 @@ export class Rush {
    * This is the same as the Rush tool version for that release.
    */
   public static get version(): string {
-    return PackageJsonLookup.getOwnPackageJsonVersion(__dirname);
+    if (!this._version) {
+      this._version = PackageJsonLookup.getOwnPackageJsonVersion(__dirname);
+    }
+
+    return this._version!;
   }
 
   /**
