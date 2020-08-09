@@ -1,19 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line @typescript-eslint/typedef
-const importLazy = require('import-lazy')(require);
-
-// eslint-disable-next-line @typescript-eslint/typedef
-const glob = importLazy('glob');
+import * as glob from 'glob';
 import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-// eslint-disable-next-line @typescript-eslint/typedef
-const tar = importLazy('tar');
-// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
-import { CreateOptions, FileStat } from 'tar';
+import * as tar from 'tar';
 import * as globEscape from 'glob-escape';
 import {
   JsonFile,
@@ -357,20 +350,16 @@ export class RushInstallManager extends BaseInstallManager {
     // NPM expects the root of the tarball to have a directory called 'package'
     const npmPackageFolder: string = 'package';
 
-    const tarOptions: CreateOptions = {
+    const tarOptions: tar.CreateOptions = {
       gzip: true,
       file: tarballFile,
       cwd: tempProjectFolder,
       portable: true,
-      /**
-       * Set to true to omit writing mtime values for entries. Note that this prevents using other
-       * mtime-based features like tar.update or the keepNewer option with the resulting tar archive.
-       */
       noMtime: true,
       noPax: true,
       sync: true,
       prefix: npmPackageFolder,
-      filter: (path: string, stat: FileStat): boolean => {
+      filter: (path: string, stat: tar.FileStat): boolean => {
         if (
           !this.rushConfiguration.experimentsConfiguration.configuration.noChmodFieldInTarHeaderNormalization
         ) {
@@ -380,7 +369,7 @@ export class RushInstallManager extends BaseInstallManager {
         }
         return true;
       }
-    } as CreateOptions;
+    } as tar.CreateOptions;
     // create the new tarball
     tar.create(tarOptions, [FileConstants.PackageJson]);
   }
