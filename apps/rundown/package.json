@@ -16,6 +16,9 @@
   "scripts": {
     "build": "heft test --clean"
   },
+  "bin": {
+    "rundown": "./bin/rundown"
+  },
   "license": "MIT",
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
