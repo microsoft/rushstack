@@ -63,6 +63,8 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
 
   public reportFailures(): void {
     let eslintFailureCount: number = 0;
+    const errors: Error[] = [];
+    const warnings: Error[] = [];
 
     for (const eslintFileResult of this._lintResult) {
       const buildFolderRelativeFilePath: string = path.relative(
@@ -78,12 +80,12 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
         const errorObject: Error = new Error(formattedMessage);
         switch (message.severity) {
           case EslintMessageSeverity.error: {
-            this._scopedLogger.emitError(errorObject);
+            errors.push(errorObject);
             break;
           }
 
           case EslintMessageSeverity.warning: {
-            this._scopedLogger.emitWarning(errorObject);
+            warnings.push(errorObject);
             break;
           }
         }
@@ -94,6 +96,14 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
       this._terminal.writeWarningLine(
         `Encountered ${eslintFailureCount} ESLint error${eslintFailureCount > 1 ? 's' : ''}:`
       );
+    }
+
+    for (const error of errors) {
+      this._scopedLogger.emitError(error);
+    }
+
+    for (const warning of warnings) {
+      this._scopedLogger.emitWarning(warning);
     }
   }
 
