@@ -1,19 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line @typescript-eslint/typedef
-const importLazy = require('import-lazy')(require);
-
 import * as colors from 'colors';
 import * as fetch from 'node-fetch';
 import * as fs from 'fs';
 import * as http from 'http';
-// eslint-disable-next-line @typescript-eslint/typedef
-const HttpsProxyAgent = importLazy('https-proxy-agent');
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import { FileSystem, JsonFile, PosixModeBits, NewlineKind } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, PosixModeBits, NewlineKind, Import } from '@rushstack/node-core-library';
 
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
@@ -34,6 +29,8 @@ import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import { PolicyValidator } from '../policy/PolicyValidator';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+
+const HttpsProxyAgent: typeof import('https-proxy-agent') = Import.lazy('https-proxy-agent', require);
 
 export interface IInstallManagerOptions {
   /**

@@ -1,17 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line @typescript-eslint/typedef
-const importLazy = require('import-lazy')(require);
-
 import * as fs from 'fs';
 import * as path from 'path';
-// eslint-disable-next-line @typescript-eslint/typedef
-const _ = importLazy('lodash');
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, Import } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Rush } from '../api/Rush';
+
+const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 export interface ITelemetryData {
   name: string;
@@ -44,7 +41,7 @@ export class Telemetry {
     if (!this._enabled) {
       return;
     }
-    const data: ITelemetryData = _.cloneDeep(telemetryData);
+    const data: ITelemetryData = lodash.cloneDeep(telemetryData);
     data.timestamp = data.timestamp || new Date().getTime();
     data.platform = data.platform || process.platform;
     data.rushVersion = data.rushVersion || Rush.version;

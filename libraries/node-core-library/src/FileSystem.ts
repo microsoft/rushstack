@@ -1,17 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line @typescript-eslint/typedef
-const importLazy = require('import-lazy')(require);
-
 import * as nodeJsPath from 'path';
 import * as fs from 'fs';
 
-// eslint-disable-next-line @typescript-eslint/typedef
-const fsx = importLazy('fs-extra');
-
 import { Text, NewlineKind, Encoding } from './Text';
 import { PosixModeBits } from './PosixModeBits';
+import { Import } from './Import';
+
+const fsx: typeof import('fs-extra') = Import.lazy('fs-extra', require);
 
 /**
  * An alias for the Node.js `fs.Stats` object.

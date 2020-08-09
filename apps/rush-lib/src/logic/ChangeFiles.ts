@@ -1,18 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line @typescript-eslint/typedef
-const importLazy = require('import-lazy')(require);
-
 import { EOL } from 'os';
-// eslint-disable-next-line @typescript-eslint/typedef
-const glob = importLazy('glob');
-import { JsonFile } from '@rushstack/node-core-library';
+import { JsonFile, Import } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
 import { IChangeInfo } from '../api/ChangeManagement';
 import { IChangelog } from '../api/Changelog';
 import { RushConfiguration } from '../api/RushConfiguration';
+
+const glob: typeof import('glob') = Import.lazy('glob', require);
 
 /**
  * This class represents the collection of change files existing in the repo and provides operations

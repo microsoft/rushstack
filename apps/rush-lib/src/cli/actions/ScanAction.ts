@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Import, FileSystem } from '@rushstack/node-core-library';
 import * as colors from 'colors';
-const glob: typeof import('glob') = Import.lazy('glob', require);
 import * as path from 'path';
 import * as builtinPackageNames from 'builtin-modules';
 
+import { Import, FileSystem } from '@rushstack/node-core-library';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseConfiglessRushAction } from './BaseRushAction';
+
+const glob: typeof import('glob') = Import.lazy('glob', require);
 
 export class ScanAction extends BaseConfiglessRushAction {
   public constructor(parser: RushCommandLineParser) {
