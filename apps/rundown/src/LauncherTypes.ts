@@ -6,11 +6,14 @@ export const enum LauncherAction {
   Inspect = 'inspect'
 }
 
-export interface IIpcTrace {
-  id: 'trace';
-
+export interface IIpcTraceRecord {
   importedModule: string;
   callingModule: string;
+}
+
+export interface IIpcTrace {
+  id: 'trace';
+  records: IIpcTraceRecord[];
 }
 
 export interface IIpcDone {

@@ -4,7 +4,10 @@
 import moduleApi = require('module');
 import * as process from 'process';
 
-import { /* type */ LauncherAction, IIpcTrace, IIpcDone } from './LauncherTypes';
+import { /* type */ LauncherAction, IIpcTrace, IIpcDone, IIpcTraceRecord } from './LauncherTypes';
+
+// The _ipcTraceRecordsBatch will get transmitted when this many items are accumulated
+const IPC_BATCH_SIZE: number = 1000;
 
 class Launcher {
   public action: LauncherAction = LauncherAction.Inspect;
@@ -12,6 +15,7 @@ class Launcher {
   public reportPath: string = '';
   private _importedModules: Set<unknown> = new Set();
   private _importedModulePaths: Set<string> = new Set();
+  private _ipcTraceRecordsBatch: IIpcTraceRecord[] = [];
 
   public transformArgs(argv: ReadonlyArray<string>): string[] {
     let nodeArg: string;
@@ -32,18 +36,32 @@ class Launcher {
     }
   }
 
+  private _sendIpcTraceBatch(): void {
+    if (this._ipcTraceRecordsBatch.length > 0) {
+      const batch = [...this._ipcTraceRecordsBatch];
+      this._ipcTraceRecordsBatch.length = 0;
+
+      process.send!({
+        id: 'trace',
+        records: batch
+      } as IIpcTrace);
+    }
+  }
+
   public installHook(): void {
     const realRequire = moduleApi.Module.prototype.require;
 
     const importedModules: Set<unknown> = this._importedModules; // for closure
     const importedModulePaths: Set<string> = this._importedModulePaths; // for closure
+    const ipcTraceRecordsBatch: IIpcTraceRecord[] = this._ipcTraceRecordsBatch; // for closure
+    const sendIpcTraceBatch: () => void = this._sendIpcTraceBatch.bind(this); // for closure
 
     function hookedRequire(moduleName: string): unknown {
       // NOTE: The "this" pointer is the calling NodeModule, so we rely on closure
       // variable here.
       const callingModuleInfo: NodeModule = this;
 
-      const importedModule: unknown = realRequire.apply(this, arguments);
+      const importedModule: unknown = realRequire.apply(callingModuleInfo, arguments);
 
       if (!importedModules.has(importedModule)) {
         importedModules.add(importedModule);
@@ -67,11 +85,13 @@ class Launcher {
 
           if (!importedModulePaths.has(importedModuleInfo.filename)) {
             importedModulePaths.add(importedModuleInfo.filename);
-            process.send!({
-              id: 'trace',
+            ipcTraceRecordsBatch.push({
               importedModule: importedModuleInfo.filename,
               callingModule: callingModuleInfo.filename
-            } as IIpcTrace);
+            });
+            if (ipcTraceRecordsBatch.length >= IPC_BATCH_SIZE) {
+              sendIpcTraceBatch();
+            }
           }
         }
       }
@@ -83,11 +103,16 @@ class Launcher {
     Launcher._copyProperties(hookedRequire, realRequire);
 
     process.on('exit', () => {
+      this._sendIpcTraceBatch();
       process.send!({
         id: 'done'
       } as IIpcDone);
     });
   }
+}
+
+if (!process.send) {
+  throw new Error('launcher.js must be invoked via IPC');
 }
 
 const launcher: Launcher = new Launcher();

@@ -15,13 +15,17 @@ export class Rundown {
       stdio: ['inherit', 'inherit', 'inherit', 'ipc']
     });
 
+    let completedNormally: boolean = false;
+
     childProcess.on('message', (message: IpcMessage): void => {
       switch (message.id) {
         case 'trace':
-          this._importedModuleMap.set(message.importedModule, message.callingModule);
+          for (const record of message.records) {
+            this._importedModuleMap.set(record.importedModule, record.callingModule);
+          }
           break;
         case 'done':
-          console.log('DONE');
+          completedNormally = true;
           break;
         default:
           throw new Error('Unknown IPC message: ' + JSON.stringify(message));
@@ -32,6 +36,8 @@ export class Rundown {
       childProcess.on('exit', (code: number | null, signal: string | null): void => {
         if (code !== 0) {
           reject(new Error('Child process terminated with exit code ' + code));
+        } else if (!completedNormally) {
+          reject(new Error('Child process terminated without completing IPC handshake'));
         } else {
           resolve();
         }
