@@ -152,3 +152,65 @@ graceful-fs
 jsonfile
 universalify
 ```
+
+## Command-line reference
+
+```
+usage: rundown [-h] <command> ...
+
+Detect load time regressions by running an app, tracing require() calls, and
+generating a deterministic report
+
+Positional arguments:
+  <command>
+    snapshot  Invoke a Node.js script and generate a test snapshot
+    inspect   Invoke a Node.js script and generate detailed diagnostic output
+
+Optional arguments:
+  -h, --help  Show this help message and exit.
+
+For detailed help about a specific command, use: rundown <command> -h
+```
+
+```
+usage: rundown snapshot [-h] -s PATH [-a STRING] [-q] [-i]
+
+Invoke a Node.js script and generate a test snapshot. This command creates a
+concise report that can be added to Git, so that its diff can be used to
+detect performance regressions
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -s PATH, --script PATH
+                        The path to a .js file that will be the entry point
+                        for the target Node.js process
+  -a STRING, --arg STRING
+                        Specifies command-line arguments to be passed to the
+                        target Node.js process
+  -q, --quiet           Suppress STDOUT/STDERR for the target Node.js process
+  -i, --ignore-exit-code
+                        Do not report an error if the target Node.js process
+                        returns a nonzero exit code
+```
+
+```
+usage: rundown inspect [-h] -s PATH [-a STRING] [-q] [-i] [-t]
+
+Invoke a Node.js script and generate detailed diagnostic output. This command
+is used to inspect performance regressions.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -s PATH, --script PATH
+                        The path to a .js file that will be the entry point
+                        for the target Node.js process
+  -a STRING, --arg STRING
+                        Specifies command-line arguments to be passed to the
+                        target Node.js process
+  -q, --quiet           Suppress STDOUT/STDERR for the target Node.js process
+  -i, --ignore-exit-code
+                        Do not report an error if the target Node.js process
+                        returns a nonzero exit code
+  -t, --trace-imports   Reports the call chain for each module path, showing
+                        how it was imported
+```
