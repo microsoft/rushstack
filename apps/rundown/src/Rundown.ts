@@ -97,8 +97,6 @@ export class Rundown {
     let data: string = '';
 
     if (traceImports) {
-      data = importedPaths.join('\n') + '\n';
-    } else {
       for (const importedPath of importedPaths) {
         data += importedPath + '\n';
 
@@ -118,6 +116,8 @@ export class Rundown {
         }
         data += '\n';
       }
+    } else {
+      data = importedPaths.join('\n') + '\n';
     }
 
     FileSystem.writeFile(reportPath, data);
