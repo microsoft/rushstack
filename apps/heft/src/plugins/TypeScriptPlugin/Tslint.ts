@@ -68,6 +68,12 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
 
   public reportFailures(): void {
     if (this._lintResult.failures?.length) {
+      this._terminal.writeWarningLine(
+        `Encountered ${this._lintResult.failures.length} TSLint error${
+          this._lintResult.failures.length > 1 ? 's' : ''
+        }:`
+      );
+
       for (const tslintFailure of this._lintResult.failures) {
         const buildFolderRelativeFilename: string = path.relative(
           this._buildFolderPath,
@@ -90,12 +96,6 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
           }
         }
       }
-
-      this._terminal.writeWarningLine(
-        `Encountered ${this._lintResult.failures.length} TSLint error${
-          this._lintResult.failures.length > 1 ? 's' : ''
-        }:`
-      );
     }
   }
 
