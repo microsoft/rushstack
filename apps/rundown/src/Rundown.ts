@@ -4,19 +4,27 @@
 import { FileSystem } from '@rushstack/node-core-library';
 import * as child_process from 'child_process';
 import * as path from 'path';
+import { LauncherAction } from './LauncherAction';
 
 export class Rundown {
-  public static invoke(scriptPath: string, trace: boolean, args: ReadonlyArray<string>): void {
+  public static invoke(
+    action: LauncherAction,
+    scriptPath: string,
+    args: ReadonlyArray<string>,
+    traceImports: boolean
+  ): void {
     if (!FileSystem.exists(scriptPath)) {
       throw new Error('The specified script path does not exist: ' + scriptPath);
     }
     const absoluteScriptPath: string = path.resolve(scriptPath);
 
+    // Example process.argv:
+    // ["path/to/launcher.js", "snapshot", "rundown.log", "path/to/target-script.js", "first-target-arg"]
     const nodeArgs: string[] = [
       path.join(__dirname, 'launcher.js'),
-      absoluteScriptPath,
+      action,
       'rundown.log',
-      trace ? '1' : '0',
+      absoluteScriptPath,
       ...args
     ];
 

@@ -5,23 +5,32 @@ import moduleApi = require('module');
 import * as process from 'process';
 import * as fs from 'fs';
 
+import { /* type */ LauncherAction } from './LauncherAction';
+
 class Launcher {
-  public showCaller: boolean = false;
+  public action: LauncherAction = LauncherAction.Inspect;
   public targetScriptPathArg: string = '';
   public reportPath: string = '';
   private _importedModules: Set<unknown> = new Set();
 
   public transformArgs(argv: ReadonlyArray<string>): string[] {
     let nodeArg: string;
-    let showCallerArg: string;
+    let actionArg: string;
     let remainderArgs: string[];
 
     // Example process.argv:
-    // ["path/to/node.exe", "path/to/launcher.js", "path/to/target-script.js", "rundown.log", "0", "first-target-arg"]
-    [nodeArg, , this.targetScriptPathArg, this.reportPath, showCallerArg, ...remainderArgs] = argv;
+    // ["path/to/node.exe", "path/to/launcher.js", "snapshot", "rundown.log", "path/to/target-script.js", "first-target-arg"]
+    [
+      nodeArg /* launcher.js */,
+      ,
+      actionArg,
+      this.reportPath,
+      this.targetScriptPathArg,
+      ...remainderArgs
+    ] = argv;
 
     // Extract the caller ("0" or "1")
-    this.showCaller = showCallerArg === '1';
+    this.action = actionArg as LauncherAction;
 
     // Example process.argv:
     // ["path/to/node.exe", "path/to/target-script.js", "first-target-arg"]
@@ -88,7 +97,7 @@ class Launcher {
 
       let data: string = '';
 
-      if (this.showCaller) {
+      if (this.action === LauncherAction.Inspect) {
         for (const importedPath of importedPaths) {
           data += importedPath + '\n';
 

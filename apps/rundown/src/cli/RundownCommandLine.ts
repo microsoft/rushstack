@@ -1,20 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  CommandLineParser,
-  CommandLineFlagParameter,
-  CommandLineStringParameter,
-  CommandLineStringListParameter
-} from '@rushstack/ts-command-line';
+import { CommandLineParser } from '@rushstack/ts-command-line';
 
-import { Rundown } from './Rundown';
+import { SnapshotAction } from './SnapshotAction';
+import { InspectAction } from './InspectAction';
 
 export class RundownCommandLine extends CommandLineParser {
-  private _scriptParameter: CommandLineStringParameter;
-  private _traceParameter: CommandLineFlagParameter;
-  private _argsParameter: CommandLineStringListParameter;
-
   public constructor() {
     super({
       toolFilename: 'rundown',
@@ -22,32 +14,10 @@ export class RundownCommandLine extends CommandLineParser {
         'Detect load time regressions by running an app, tracing require() calls,' +
         ' and generating a deterministic report'
     });
+
+    this.addAction(new SnapshotAction());
+    this.addAction(new InspectAction());
   }
 
-  protected onDefineParameters(): void {
-    // abstract
-    this._scriptParameter = this.defineStringParameter({
-      parameterLongName: '--script',
-      parameterShortName: '-s',
-      argumentName: 'PATH',
-      description: 'The path to a .js file that will be invoked as the process entry point',
-      required: true
-    });
-    this._traceParameter = this.defineFlagParameter({
-      parameterLongName: '--trace',
-      parameterShortName: '-t',
-      description: 'Report lots of extra information that is useful for investigating problems'
-    });
-    this._argsParameter = this.defineStringListParameter({
-      parameterLongName: '--arg',
-      parameterShortName: '-a',
-      argumentName: 'STRING',
-      description: 'Specifies command-line arguments to be passed to the Node.js process'
-    });
-  }
-
-  protected onExecute(): Promise<void> {
-    Rundown.invoke(this._scriptParameter.value!, this._traceParameter.value!!, this._argsParameter.values);
-    return super.onExecute();
-  }
+  protected onDefineParameters(): void {}
 }
