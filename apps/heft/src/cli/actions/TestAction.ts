@@ -75,6 +75,11 @@ export class TestAction extends BuildAction {
       } else {
         if (shouldBuild) {
           await super.actionExecuteAsync();
+
+          if (this.loggingManager.getErrorStrings().length > 0) {
+            return;
+          }
+
           await Logging.runFunctionWithLoggingBoundsAsync(
             this.terminal,
             'Test',

@@ -63,10 +63,10 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     });
 
     const stages: IStages = {
-      buildStage: new BuildStage(this._heftConfiguration),
-      cleanStage: new CleanStage(this._heftConfiguration),
-      devDeployStage: new DevDeployStage(this._heftConfiguration),
-      testStage: new TestStage(this._heftConfiguration)
+      buildStage: new BuildStage(this._heftConfiguration, this._loggingManager),
+      cleanStage: new CleanStage(this._heftConfiguration, this._loggingManager),
+      devDeployStage: new DevDeployStage(this._heftConfiguration, this._loggingManager),
+      testStage: new TestStage(this._heftConfiguration, this._loggingManager)
     };
     const actionOptions: IHeftActionBaseOptions = {
       terminal: this._terminal,

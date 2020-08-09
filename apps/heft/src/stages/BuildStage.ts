@@ -13,6 +13,7 @@ import {
   CommandLineStringParameter,
   CommandLineIntegerParameter
 } from '@rushstack/ts-command-line';
+import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 
 /**
  * @public
@@ -281,8 +282,8 @@ export interface IBuildStageStandardParameters {
 }
 
 export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties, IBuildStageOptions> {
-  public constructor(heftConfiguration: HeftConfiguration) {
-    super(heftConfiguration, BuildStageHooks);
+  public constructor(heftConfiguration: HeftConfiguration, loggingManager: LoggingManager) {
+    super(heftConfiguration, loggingManager, BuildStageHooks);
   }
 
   public static defineStageStandardParameters(action: CommandLineAction): IBuildStageStandardParameters {
@@ -421,6 +422,10 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
     } else {
       await this._runSubstageWithLoggingAsync('Pre-compile', preCompileSubstage);
 
+      if (this.loggingManager.getErrorStrings().length > 0) {
+        return;
+      }
+
       await Promise.all([
         compileStage.hooks.configureTypeScript.promise(),
         compileStage.hooks.configureCopyStaticAssets.promise()
@@ -433,6 +438,10 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
         compileStage.properties.typeScriptConfiguration.maxWriteParallelism = this.stageOptions.typescriptMaxWriteParallelism;
       }
       await this._runSubstageWithLoggingAsync('Compile', compileStage);
+
+      if (this.loggingManager.getErrorStrings().length > 0) {
+        return;
+      }
 
       await Promise.all([
         bundleStage.hooks.configureWebpack
@@ -450,6 +459,10 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       await bundleStage.hooks.afterConfigureWebpack.promise();
       await this._runSubstageWithLoggingAsync('Bundle', bundleStage);
 
+      if (this.loggingManager.getErrorStrings().length > 0) {
+        return;
+      }
+
       await this._runSubstageWithLoggingAsync('Post-build', postBuildStage);
     }
   }
@@ -460,7 +473,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
   ): Promise<void> {
     if (buildStage.hooks.run.isUsed()) {
       await Logging.runFunctionWithLoggingBoundsAsync(
-        this.terminal,
+        this.globalTerminal,
         buildStageName,
         async () => await buildStage.hooks.run.promise()
       );
