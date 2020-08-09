@@ -4,7 +4,6 @@
 import { BaseReportAction } from './BaseReportAction';
 
 import { Rundown } from '../Rundown';
-import { LauncherAction } from '../LauncherAction';
 
 export class SnapshotAction extends BaseReportAction {
   public constructor() {
@@ -22,6 +21,8 @@ export class SnapshotAction extends BaseReportAction {
   }
 
   protected async onExecute(): Promise<void> {
-    Rundown.invoke(LauncherAction.Snapshot, this.scriptParameter.value!, this.argsParameter.values, false);
+    const rundown: Rundown = new Rundown();
+    await rundown.invokeAsync(this.scriptParameter.value!, this.argsParameter.values);
+    rundown.writeSnapshotReport();
   }
 }

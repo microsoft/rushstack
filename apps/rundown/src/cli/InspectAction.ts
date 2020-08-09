@@ -5,7 +5,6 @@ import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { BaseReportAction } from './BaseReportAction';
 import { Rundown } from '../Rundown';
-import { LauncherAction } from '../LauncherAction';
 
 export class InspectAction extends BaseReportAction {
   private _traceParameter: CommandLineFlagParameter;
@@ -31,11 +30,8 @@ export class InspectAction extends BaseReportAction {
   }
 
   protected async onExecute(): Promise<void> {
-    Rundown.invoke(
-      LauncherAction.Inspect,
-      this.scriptParameter.value!,
-      this.argsParameter.values,
-      this._traceParameter.value!!
-    );
+    const rundown: Rundown = new Rundown();
+    await rundown.invokeAsync(this.scriptParameter.value!, this.argsParameter.values);
+    rundown.writeInspectReport(this._traceParameter.value!!);
   }
 }

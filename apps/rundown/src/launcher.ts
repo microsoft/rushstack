@@ -3,34 +3,23 @@
 
 import moduleApi = require('module');
 import * as process from 'process';
-import * as fs from 'fs';
 
-import { /* type */ LauncherAction } from './LauncherAction';
+import { /* type */ LauncherAction, IIpcTrace, IIpcDone } from './LauncherTypes';
 
 class Launcher {
   public action: LauncherAction = LauncherAction.Inspect;
   public targetScriptPathArg: string = '';
   public reportPath: string = '';
   private _importedModules: Set<unknown> = new Set();
+  private _importedModulePaths: Set<string> = new Set();
 
   public transformArgs(argv: ReadonlyArray<string>): string[] {
     let nodeArg: string;
-    let actionArg: string;
     let remainderArgs: string[];
 
     // Example process.argv:
-    // ["path/to/node.exe", "path/to/launcher.js", "snapshot", "rundown.log", "path/to/target-script.js", "first-target-arg"]
-    [
-      nodeArg /* launcher.js */,
-      ,
-      actionArg,
-      this.reportPath,
-      this.targetScriptPathArg,
-      ...remainderArgs
-    ] = argv;
-
-    // Extract the caller ("0" or "1")
-    this.action = actionArg as LauncherAction;
+    // ["path/to/node.exe", "path/to/launcher.js", "path/to/target-script.js", "first-target-arg"]
+    [nodeArg, , this.targetScriptPathArg, ...remainderArgs] = argv;
 
     // Example process.argv:
     // ["path/to/node.exe", "path/to/target-script.js", "first-target-arg"]
@@ -44,12 +33,10 @@ class Launcher {
   }
 
   public installHook(): void {
-    // Map from required path --> caller path
-    const importedModuleMap: Map<string, string> = new Map();
-
     const realRequire = moduleApi.Module.prototype.require;
 
     const importedModules: Set<unknown> = this._importedModules; // for closure
+    const importedModulePaths: Set<string> = this._importedModulePaths; // for closure
 
     function hookedRequire(moduleName: string): unknown {
       // NOTE: The "this" pointer is the calling NodeModule, so we rely on closure
@@ -78,8 +65,13 @@ class Launcher {
             throw new Error('Missing filename for ' + moduleName);
           }
 
-          if (!importedModuleMap.has(importedModuleInfo.filename)) {
-            importedModuleMap.set(importedModuleInfo.filename, callingModuleInfo.filename);
+          if (!importedModulePaths.has(importedModuleInfo.filename)) {
+            importedModulePaths.add(importedModuleInfo.filename);
+            process.send!({
+              id: 'trace',
+              importedModule: importedModuleInfo.filename,
+              callingModule: callingModuleInfo.filename
+            } as IIpcTrace);
           }
         }
       }
@@ -91,37 +83,9 @@ class Launcher {
     Launcher._copyProperties(hookedRequire, realRequire);
 
     process.on('exit', () => {
-      console.log('Writing ' + this.reportPath);
-      const importedPaths = [...importedModuleMap.keys()];
-      importedPaths.sort();
-
-      let data: string = '';
-
-      if (this.action === LauncherAction.Inspect) {
-        for (const importedPath of importedPaths) {
-          data += importedPath + '\n';
-
-          let current: string = importedPath;
-          let visited: Set<string> = new Set();
-          for (;;) {
-            const callerPath = importedModuleMap.get(current);
-            if (!callerPath) {
-              break;
-            }
-            if (visited.has(callerPath)) {
-              break;
-            }
-            visited.add(callerPath);
-            data += '  imported by ' + callerPath + '\n';
-            current = callerPath;
-          }
-          data += '\n';
-        }
-      } else {
-        data = importedPaths.join('\n') + '\n';
-      }
-
-      fs.writeFileSync(this.reportPath, data);
+      process.send!({
+        id: 'done'
+      } as IIpcDone);
     });
   }
 }

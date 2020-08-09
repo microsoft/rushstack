@@ -5,3 +5,16 @@ export const enum LauncherAction {
   Snapshot = 'snapshot',
   Inspect = 'inspect'
 }
+
+export interface IIpcTrace {
+  id: 'trace';
+
+  importedModule: string;
+  callingModule: string;
+}
+
+export interface IIpcDone {
+  id: 'done';
+}
+
+export type IpcMessage = IIpcTrace | IIpcDone;
