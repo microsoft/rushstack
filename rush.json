@@ -422,6 +422,12 @@
     //
     // "apps" folder (alphabetical order)
     {
+      "packageName": "@microsoft/api-documenter",
+      "projectFolder": "apps/api-documenter",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@microsoft/api-extractor",
       "projectFolder": "apps/api-extractor",
       "reviewCategory": "libraries",
@@ -436,10 +442,18 @@
       "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
     },
     {
-      "packageName": "@microsoft/api-documenter",
-      "projectFolder": "apps/api-documenter",
+      "packageName": "@rushstack/heft",
+      "projectFolder": "apps/heft",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft"]
+    },
+    {
+      "packageName": "@rushstack/rundown",
+      "projectFolder": "apps/rundown",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/rundown"]
     },
     {
       "packageName": "@microsoft/rush",
@@ -458,13 +472,6 @@
       "projectFolder": "apps/rush-lib",
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
-    },
-    {
-      "packageName": "@rushstack/heft",
-      "projectFolder": "apps/heft",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft"]
     },
 
     // "build-tests" folder (alphabetical order)

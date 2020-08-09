@@ -155,6 +155,24 @@ importers:
       true-case-path: ~2.2.1
       webpack: ~4.31.0
       webpack-dev-server: ~3.11.0
+  ../../apps/rundown:
+    dependencies:
+      '@rushstack/node-core-library': 'link:../../libraries/node-core-library'
+      '@rushstack/ts-command-line': 'link:../../libraries/ts-command-line'
+    devDependencies:
+      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../heft'
+      '@types/jest': 25.2.1
+      '@types/node': 10.17.13
+    specifiers:
+      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
+      '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
+      '@rushstack/node-core-library': 'workspace:*'
+      '@rushstack/ts-command-line': 'workspace:*'
+      '@types/jest': 25.2.1
+      '@types/node': 10.17.13
   ../../apps/rush:
     dependencies:
       '@microsoft/rush-lib': 'link:../rush-lib'
