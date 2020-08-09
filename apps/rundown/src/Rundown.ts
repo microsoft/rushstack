@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, PackageJsonLookup, Sort, Text } from '@rushstack/node-core-library';
 import * as child_process from 'child_process';
 import * as path from 'path';
 import { IpcMessage } from './LauncherTypes';
@@ -53,18 +53,37 @@ export class Rundown {
   }
 
   public writeSnapshotReport(): void {
-    const reportPath: string = 'rundown.log';
+    const reportPath: string = 'rundown-snapshot.log';
+
+    const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
     console.log('Writing ' + reportPath);
     const importedPaths: string[] = [...this._importedModuleMap.keys()];
-    importedPaths.sort();
 
-    let data: string = importedPaths.join('\n') + '\n';
+    const importedPackageFolders: Set<string> = new Set();
+
+    for (const importedPath of importedPaths) {
+      const importedPackageFolder: string | undefined = packageJsonLookup.tryGetPackageFolderFor(
+        importedPath
+      );
+      if (importedPackageFolder) {
+        if (/[\\/]node_modules[\\/]/i.test(importedPackageFolder)) {
+          importedPackageFolders.add(path.basename(importedPackageFolder));
+        } else {
+          const relativePath: string = path.relative(process.cwd(), importedPackageFolder);
+          importedPackageFolders.add(Text.replaceAll(relativePath, '\\', '/'));
+        }
+      }
+    }
+
+    Sort.sortSet(importedPackageFolders);
+    let data: string = [...importedPackageFolders].join('\n') + '\n';
+
     FileSystem.writeFile(reportPath, data);
   }
 
   public writeInspectReport(traceImports: boolean): void {
-    const reportPath: string = 'rundown.log';
+    const reportPath: string = 'rundown-inspect.log';
     console.log('Writing ' + reportPath);
     const importedPaths: string[] = [...this._importedModuleMap.keys()];
     importedPaths.sort();
