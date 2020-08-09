@@ -1,10 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { Import } from '@rushstack/node-core-library';
+
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
-import { DeployManager } from '../../logic/deploy/DeployManager';
+
+const deployManagerModule: typeof import('../../logic/deploy/DeployManager') = Import.lazy(
+  '../../logic/deploy/DeployManager',
+  require
+);
+// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
+import * as deployManagerTypes from '../../logic/deploy/DeployManager';
 
 export class DeployAction extends BaseRushAction {
   private _scenario: CommandLineStringParameter;
@@ -78,7 +86,9 @@ export class DeployAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
-    const deployManager: DeployManager = new DeployManager(this.rushConfiguration);
+    const deployManager: deployManagerTypes.DeployManager = new deployManagerModule.DeployManager(
+      this.rushConfiguration
+    );
     await deployManager.deployAsync(
       this._project.value,
       this._scenario.value,
