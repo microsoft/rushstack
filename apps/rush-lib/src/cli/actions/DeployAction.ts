@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import { Import } from '@rushstack/node-core-library';
+import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 const deployManagerModule: typeof import('../../logic/deploy/DeployManager') = Import.lazy(
   '../../logic/deploy/DeployManager',
