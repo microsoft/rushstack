@@ -4,7 +4,8 @@
 import {
   CommandLineParser,
   CommandLineFlagParameter,
-  CommandLineStringParameter
+  CommandLineStringParameter,
+  CommandLineStringListParameter
 } from '@rushstack/ts-command-line';
 
 import { Rundown } from './Rundown';
@@ -12,7 +13,7 @@ import { Rundown } from './Rundown';
 export class RundownCommandLine extends CommandLineParser {
   private _scriptParameter: CommandLineStringParameter;
   private _traceParameter: CommandLineFlagParameter;
-  private _argsParameter: CommandLineStringParameter;
+  private _argsParameter: CommandLineStringListParameter;
 
   public constructor() {
     super({
@@ -37,19 +38,16 @@ export class RundownCommandLine extends CommandLineParser {
       parameterShortName: '-t',
       description: 'Report lots of extra information that is useful for investigating problems'
     });
-    this._argsParameter = this.defineStringParameter({
-      parameterLongName: '--args',
+    this._argsParameter = this.defineStringListParameter({
+      parameterLongName: '--arg',
+      parameterShortName: '-a',
       argumentName: 'STRING',
-      description: 'A text string containing the command-line arguments to be passed to the Node.js process'
+      description: 'Specifies command-line arguments to be passed to the Node.js process'
     });
   }
 
   protected onExecute(): Promise<void> {
-    Rundown.invoke(
-      this._scriptParameter.value!,
-      this._traceParameter.value!!,
-      this._argsParameter.value || ''
-    );
+    Rundown.invoke(this._scriptParameter.value!, this._traceParameter.value!!, this._argsParameter.values);
     return super.onExecute();
   }
 }

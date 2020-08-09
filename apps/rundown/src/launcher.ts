@@ -5,87 +5,125 @@ import moduleApi = require('module');
 import * as process from 'process';
 import * as fs from 'fs';
 
-const SHOW_CALLER: boolean = false;
+class Launcher {
+  public showCaller: boolean = false;
+  public targetScriptPathArg: string = '';
+  public reportPath: string = '';
+  private _importedModules: Set<unknown> = new Set();
 
-const importedModules: Set<unknown> = new Set();
+  public transformArgs(argv: ReadonlyArray<string>): string[] {
+    let nodeArg: string;
+    let showCallerArg: string;
+    let remainderArgs: string[];
 
-// Map from required path --> caller path
-const importedModuleMap: Map<string, string> = new Map();
+    // Example process.argv:
+    // ["path/to/node.exe", "path/to/launcher.js", "path/to/target-script.js", "rundown.log", "0", "first-target-arg"]
+    [nodeArg, , this.targetScriptPathArg, this.reportPath, showCallerArg, ...remainderArgs] = argv;
 
-function copyProperties(dst: object, src: object): void {
-  for (var prop of Object.keys(src)) {
-    dst[prop] = src[prop];
+    // Extract the caller ("0" or "1")
+    this.showCaller = showCallerArg === '1';
+
+    // Example process.argv:
+    // ["path/to/node.exe", "path/to/target-script.js", "first-target-arg"]
+    return [nodeArg, this.targetScriptPathArg, ...remainderArgs];
+  }
+
+  private static _copyProperties(dst: object, src: object): void {
+    for (var prop of Object.keys(src)) {
+      dst[prop] = src[prop];
+    }
+  }
+
+  public installHook(): void {
+    // Map from required path --> caller path
+    const importedModuleMap: Map<string, string> = new Map();
+
+    const realRequire = moduleApi.Module.prototype.require;
+
+    const importedModules: Set<unknown> = this._importedModules; // for closure
+
+    function hookedRequire(moduleName: string): unknown {
+      // NOTE: The "this" pointer is the calling NodeModule, so we rely on closure
+      // variable here.
+      const callingModuleInfo: NodeModule = this;
+
+      const importedModule: unknown = realRequire.apply(this, arguments);
+
+      if (!importedModules.has(importedModule)) {
+        importedModules.add(importedModule);
+
+        // Find the info for the imported module
+        let importedModuleInfo: NodeModule | undefined = undefined;
+        const children = callingModuleInfo.children || [];
+        for (const child of children) {
+          if (child.exports === importedModule) {
+            importedModuleInfo = child;
+            break;
+          }
+        }
+
+        if (importedModuleInfo === undefined) {
+          // It's a built-in module like "os"
+        } else {
+          if (!importedModuleInfo.filename) {
+            throw new Error('Missing filename for ' + moduleName);
+          }
+
+          if (!importedModuleMap.has(importedModuleInfo.filename)) {
+            importedModuleMap.set(importedModuleInfo.filename, callingModuleInfo.filename);
+          }
+        }
+      }
+
+      return importedModule;
+    }
+
+    moduleApi.Module.prototype.require = hookedRequire;
+    Launcher._copyProperties(hookedRequire, realRequire);
+
+    process.on('exit', () => {
+      console.log('Writing ' + this.reportPath);
+      const importedPaths = [...importedModuleMap.keys()];
+      importedPaths.sort();
+
+      let data: string = '';
+
+      if (this.showCaller) {
+        for (const importedPath of importedPaths) {
+          data += importedPath + '\n';
+
+          let current: string = importedPath;
+          let visited: Set<string> = new Set();
+          for (;;) {
+            const callerPath = importedModuleMap.get(current);
+            if (!callerPath) {
+              break;
+            }
+            if (visited.has(callerPath)) {
+              break;
+            }
+            visited.add(callerPath);
+            data += '  imported by ' + callerPath + '\n';
+            current = callerPath;
+          }
+          data += '\n';
+        }
+      } else {
+        data = importedPaths.join('\n') + '\n';
+      }
+
+      fs.writeFileSync(this.reportPath, data);
+    });
   }
 }
 
-function hookedRequire(moduleName: string): unknown {
-  const importedModule: unknown = realRequire.apply(this, arguments);
+const launcher: Launcher = new Launcher();
 
-  if (!importedModules.has(importedModule)) {
-    importedModules.add(importedModule);
+const originalArgv: ReadonlyArray<string> = [...process.argv];
+process.argv.length = 0;
+process.argv.push(...launcher.transformArgs(originalArgv));
 
-    const callingModuleInfo: NodeModule = this;
+launcher.installHook();
 
-    // Find the info for the imported module
-    let importedModuleInfo: NodeModule | undefined = undefined;
-    const children = callingModuleInfo.children || [];
-    for (const child of children) {
-      if (child.exports === importedModule) {
-        importedModuleInfo = child;
-        break;
-      }
-    }
-
-    if (importedModuleInfo === undefined) {
-      // It's a built-in module like "os"
-    } else {
-      if (!importedModuleInfo.filename) {
-        throw new Error('Missing filename for ' + moduleName);
-      }
-
-      if (!importedModuleMap.has(importedModuleInfo.filename)) {
-        importedModuleMap.set(importedModuleInfo.filename, callingModuleInfo.filename);
-      }
-    }
-  }
-
-  return importedModule;
-}
-
-const realRequire = moduleApi.Module.prototype.require;
-
-moduleApi.Module.prototype.require = hookedRequire;
-copyProperties(hookedRequire, realRequire);
-
-process.on('exit', () => {
-  console.log('Writing trace-require.log');
-  const importedPaths = [...importedModuleMap.keys()];
-  importedPaths.sort();
-
-  let data: string = '';
-
-  if (SHOW_CALLER) {
-    for (const importedPath of importedPaths) {
-      data += importedPath + '\n';
-
-      let current: string = importedPath;
-      let visited: Set<string> = new Set();
-      for (;;) {
-        const callerPath = importedModuleMap.get(current);
-        if (!callerPath) {
-          break;
-        }
-        if (visited.has(callerPath)) {
-          break;
-        }
-        visited.add(callerPath);
-        data += '  ' + callerPath + '\n';
-        current = callerPath;
-      }
-    }
-  } else {
-    data = importedPaths.join('\n') + '\n';
-  }
-
-  fs.writeFileSync('trace-require.log', data);
-});
+// Start the app
+require(launcher.targetScriptPathArg);
