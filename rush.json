@@ -451,9 +451,7 @@
     {
       "packageName": "@rushstack/rundown",
       "projectFolder": "apps/rundown",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/rundown"]
+      "reviewCategory": "libraries"
     },
     {
       "packageName": "@microsoft/rush",
