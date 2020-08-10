@@ -20,7 +20,6 @@ import { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.7';
 import {
   ExtendedTypeScript,
   IEmitResolver,
-  IExtendedEmitResult,
   IEmitHost,
   IEmitTransformers,
   IExtendedProgram,
@@ -84,11 +83,6 @@ interface ICachedEmitModuleKind<TModuleKind> extends IEmitModuleKindBase<TModule
   isPrimary: boolean;
 }
 
-interface IFileToWrite {
-  filePath: string;
-  data: string;
-}
-
 type TWatchCompilerHost = TTypescript.WatchCompilerHostOfFilesAndCompilerOptions<
   TTypescript.EmitAndSemanticDiagnosticsBuilderProgram
 >;
@@ -101,6 +95,16 @@ interface ICompilerCapabilities {
    * Introduced with TypeScript 3.6.
    */
   incrementalProgram: boolean;
+}
+
+interface IFileToWrite {
+  filePath: string;
+  data: string;
+}
+
+interface IExtendedEmitResult extends TTypescript.EmitResult {
+  changedSourceFiles: Set<IExtendedSourceFile>;
+  filesToWrite: IFileToWrite[];
 }
 
 export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderConfiguration> {
@@ -425,8 +429,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     //#endregion
 
     //#region EMIT
-    const filesToWrite: IFileToWrite[] = [];
-    const emitResult: IExtendedEmitResult = this._emit(ts, tsconfig, genericProgram, filesToWrite);
+    const emitResult: IExtendedEmitResult = this._emit(ts, tsconfig, genericProgram);
     //#endregion
 
     this._typescriptTerminal.writeVerboseLine(`Bind: ${ts.performance.getDuration('Bind')}ms`);
@@ -446,7 +449,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     //#region WRITE
     const writePromise: Promise<{ duration: number }> = measureTsPerformanceAsync('Write', () =>
       Async.forEachLimitAsync(
-        filesToWrite,
+        emitResult.filesToWrite,
         this._configuration.maxWriteParallelism,
         async ({ filePath, data }) => this._fileSystem.writeFile(filePath, data, { ensureFolderExists: true })
       )
@@ -478,7 +481,9 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     //#endregion
 
     const { duration: writeDuration } = await writePromise;
-    this._typescriptTerminal.writeVerboseLine(`I/O Write: ${writeDuration}ms (${filesToWrite.length} files)`);
+    this._typescriptTerminal.writeVerboseLine(
+      `I/O Write: ${writeDuration}ms (${emitResult.filesToWrite.length} files)`
+    );
 
     //#region HARDLINK/COPY
     const shouldHardlink: boolean = this._configuration.copyFromCacheMode !== 'copy';
@@ -665,9 +670,10 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _emit(
     ts: ExtendedTypeScript,
     tsconfig: TTypescript.ParsedCommandLine,
-    genericProgram: TTypescript.BuilderProgram | TTypescript.Program,
-    filesToWrite: IFileToWrite[]
+    genericProgram: TTypescript.BuilderProgram | TTypescript.Program
   ): IExtendedEmitResult {
+    const filesToWrite: IFileToWrite[] = [];
+
     let foundPrimary: boolean = false;
     let defaultModuleKind: TTypescript.ModuleKind;
 
@@ -793,7 +799,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
     return {
       ...result,
-      changedSourceFiles: changedFiles
+      changedSourceFiles: changedFiles,
+      filesToWrite
     };
   }
 
