@@ -331,16 +331,16 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "file-loader",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "fs-extra",
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "fsevents",
       "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "file-loader",
-      "allowedCategories": [ "tests" ]
     },
     {
       "name": "git-repo-info",
