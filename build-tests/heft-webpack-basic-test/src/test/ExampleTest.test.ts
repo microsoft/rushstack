@@ -6,6 +6,6 @@ import { MyClass } from '../MyClass';
 describe('Example Test', () => {
   it('Correctly tests stuff', () => {
     const myClass: MyClass = new MyClass();
-    expect(myClass.doSomething()).toBeTruthy();
+    expect(myClass.doSomething().length > 0).toBeTruthy();
   });
 });

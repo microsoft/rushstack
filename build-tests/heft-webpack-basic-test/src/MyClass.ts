@@ -1,6 +1,6 @@
 export class MyClass {
-  public doSomething(): boolean {
+  public doSomething(): string {
     console.log('hello from MyClass.ts');
-    return true;
+    return 'This string is returned from MyClass.doSomething()';
   }
 }
