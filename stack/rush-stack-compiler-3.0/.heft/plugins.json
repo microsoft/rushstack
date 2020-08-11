@@ -1,0 +1,61 @@
+/**
+ * Specifies the plugins that will be loaded by Heft.
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/plugins.schema.json",
+
+  /**
+   * The list of Heft plugins to be loaded.
+   */
+  "plugins": [
+    /**
+     * The list of Heft plugins to be loaded.
+     */
+    {
+      /**
+       * The path to the plugin package.
+       */
+      "plugin": "@rushstack/pre-compile-hardlink-or-copy-plugin",
+
+      /**
+       * An optional object that provides additional settings that may be defined by the plugin.
+       */
+      "options": {
+        "newLinkPath": "src",
+        "linkTarget": "node_modules/@microsoft/rush-stack-compiler-shared/src"
+      }
+    },
+
+    {
+      /**
+       * The path to the plugin package.
+       */
+      "plugin": "@rushstack/pre-compile-hardlink-or-copy-plugin",
+
+      /**
+       * An optional object that provides additional settings that may be defined by the plugin.
+       */
+      "options": {
+        "newLinkPath": "lib/ToolPackages.d.ts",
+        "linkTarget": "node_modules/@microsoft/rush-stack-compiler-shared/src/ToolPackages.d.ts",
+        "copyInsteadOfHardlink": true
+      }
+    },
+
+    {
+      /**
+       * The path to the plugin package.
+       */
+      "plugin": "@rushstack/pre-compile-hardlink-or-copy-plugin",
+
+      /**
+       * An optional object that provides additional settings that may be defined by the plugin.
+       */
+      "options": {
+        "newLinkPath": "lib/ToolPackages.js",
+        "linkTarget": "node_modules/@microsoft/rush-stack-compiler-shared/src/ToolPackages.js",
+        "copyInsteadOfHardlink": true
+      }
+    }
+  ]
+}

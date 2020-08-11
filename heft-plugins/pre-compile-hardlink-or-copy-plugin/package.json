@@ -1,0 +1,26 @@
+{
+  "name": "@rushstack/pre-compile-hardlink-or-copy-plugin",
+  "version": "0.0.0",
+  "description": "Heft plugin that can be used to create a hardlink before the compilation runs.",
+  "main": "lib/index.js",
+  "typings": "dist/pre-compile-hardlink-or-copy-plugin.d.ts",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/microsoft/rushstack/tree/master/heft-plugins/pre-compile-hardlink-or-copy-plugin"
+  },
+  "scripts": {
+    "build": "heft test --clean"
+  },
+  "peerDependencies": {
+    "@rushstack/heft": "^0.4.4"
+  },
+  "dependencies": {
+    "@types/node": "10.17.13",
+    "@rushstack/node-core-library": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@microsoft/rush-stack-compiler-3.7": "0.6.2",
+    "@rushstack/heft": "0.4.3"
+  }
+}

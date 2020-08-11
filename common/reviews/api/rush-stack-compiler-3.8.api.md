@@ -69,35 +69,35 @@ export abstract class RushStackCompilerBase<TOptions extends IRushStackCompilerB
 export class StandardBuildFolders {
     constructor(projectFolderPath: string);
     // (undocumented)
-    readonly distFolderPath: string;
+    get distFolderPath(): string;
     // (undocumented)
-    readonly libFolderPath: string;
+    get libFolderPath(): string;
     // (undocumented)
-    readonly projectFolderPath: string;
+    get projectFolderPath(): string;
     // (undocumented)
-    readonly srcFolderPath: string;
+    get srcFolderPath(): string;
     // (undocumented)
-    readonly tempFolderPath: string;
+    get tempFolderPath(): string;
     }
 
 // @beta (undocumented)
 export class ToolPaths {
     // (undocumented)
-    static readonly apiExtractorPackageJson: IPackageJson;
+    static get apiExtractorPackageJson(): IPackageJson;
     // (undocumented)
-    static readonly apiExtractorPackagePath: string;
+    static get apiExtractorPackagePath(): string;
     // (undocumented)
-    static readonly eslintPackageJson: IPackageJson;
+    static get eslintPackageJson(): IPackageJson;
     // (undocumented)
-    static readonly eslintPackagePath: string;
+    static get eslintPackagePath(): string;
     // (undocumented)
-    static readonly tslintPackageJson: IPackageJson;
+    static get tslintPackageJson(): IPackageJson;
     // (undocumented)
-    static readonly tslintPackagePath: string;
+    static get tslintPackagePath(): string;
     // (undocumented)
-    static readonly typescriptPackageJson: IPackageJson;
+    static get typescriptPackageJson(): IPackageJson;
     // (undocumented)
-    static readonly typescriptPackagePath: string;
+    static get typescriptPackagePath(): string;
     }
 
 export { Tslint }

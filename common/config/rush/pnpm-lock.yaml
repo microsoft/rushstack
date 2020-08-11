@@ -121,7 +121,7 @@ importers:
       '@jest/types': 25.4.0
       '@microsoft/rush-stack-compiler-3.7': 'link:../../stack/rush-stack-compiler-3.7'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
-      '@rushstack/heft': 0.2.0
+      '@rushstack/heft': 0.4.3
       '@types/eslint': 7.2.0
       '@types/glob': 7.1.1
       '@types/node': 10.17.13
@@ -134,7 +134,7 @@ importers:
       '@jest/types': ~25.4.0
       '@microsoft/rush-stack-compiler-3.7': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
-      '@rushstack/heft': 0.2.0
+      '@rushstack/heft': 0.4.3
       '@rushstack/node-core-library': 'workspace:*'
       '@rushstack/ts-command-line': 'workspace:*'
       '@types/eslint': 7.2.0
@@ -683,155 +683,127 @@ importers:
       '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
       '@microsoft/rush-stack-compiler-2.4': 'link:../../stack/rush-stack-compiler-2.4'
       '@types/node': 10.17.13
-      gulp: 4.0.2
     specifiers:
       '@microsoft/node-library-build': 'workspace:*'
       '@microsoft/rush-stack-compiler-2.4': 'workspace:*'
       '@types/node': 10.17.13
-      gulp: ~4.0.2
   ../../build-tests/rush-stack-compiler-2.7-library-test:
     devDependencies:
       '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
       '@microsoft/rush-stack-compiler-2.7': 'link:../../stack/rush-stack-compiler-2.7'
       '@types/node': 10.17.13
-      gulp: 4.0.2
     specifiers:
       '@microsoft/node-library-build': 'workspace:*'
       '@microsoft/rush-stack-compiler-2.7': 'workspace:*'
       '@types/node': 10.17.13
-      gulp: ~4.0.2
   ../../build-tests/rush-stack-compiler-2.8-library-test:
     devDependencies:
       '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
       '@microsoft/rush-stack-compiler-2.8': 'link:../../stack/rush-stack-compiler-2.8'
       '@types/node': 10.17.13
-      gulp: 4.0.2
     specifiers:
       '@microsoft/node-library-build': 'workspace:*'
       '@microsoft/rush-stack-compiler-2.8': 'workspace:*'
       '@types/node': 10.17.13
-      gulp: ~4.0.2
   ../../build-tests/rush-stack-compiler-2.9-library-test:
     devDependencies:
       '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
       '@microsoft/rush-stack-compiler-2.9': 'link:../../stack/rush-stack-compiler-2.9'
       '@types/node': 10.17.13
-      gulp: 4.0.2
     specifiers:
       '@microsoft/node-library-build': 'workspace:*'
       '@microsoft/rush-stack-compiler-2.9': 'workspace:*'
       '@types/node': 10.17.13
-      gulp: ~4.0.2
   ../../build-tests/rush-stack-compiler-3.0-library-test:
     devDependencies:
       '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
       '@microsoft/rush-stack-compiler-3.0': 'link:../../stack/rush-stack-compiler-3.0'
       '@types/node': 10.17.13
-      gulp: 4.0.2
     specifiers:
       '@microsoft/node-library-build': 'workspace:*'
       '@microsoft/rush-stack-compiler-3.0': 'workspace:*'
       '@types/node': 10.17.13
-      gulp: ~4.0.2
   ../../build-tests/rush-stack-compiler-3.1-library-test:
     devDependencies:
       '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
       '@microsoft/rush-stack-compiler-3.1': 'link:../../stack/rush-stack-compiler-3.1'
       '@types/node': 10.17.13
-      gulp: 4.0.2
     specifiers:
       '@microsoft/node-library-build': 'workspace:*'
       '@microsoft/rush-stack-compiler-3.1': 'workspace:*'
       '@types/node': 10.17.13
-      gulp: ~4.0.2
   ../../build-tests/rush-stack-compiler-3.2-library-test:
     devDependencies:
       '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
       '@microsoft/rush-stack-compiler-3.2': 'link:../../stack/rush-stack-compiler-3.2'
       '@types/node': 10.17.13
-      gulp: 4.0.2
     specifiers:
       '@microsoft/node-library-build': 'workspace:*'
       '@microsoft/rush-stack-compiler-3.2': 'workspace:*'
       '@types/node': 10.17.13
-      gulp: ~4.0.2
   ../../build-tests/rush-stack-compiler-3.3-library-test:
     devDependencies:
       '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
       '@microsoft/rush-stack-compiler-3.3': 'link:../../stack/rush-stack-compiler-3.3'
       '@types/node': 10.17.13
-      gulp: 4.0.2
     specifiers:
       '@microsoft/node-library-build': 'workspace:*'
       '@microsoft/rush-stack-compiler-3.3': 'workspace:*'
       '@types/node': 10.17.13
-      gulp: ~4.0.2
   ../../build-tests/rush-stack-compiler-3.4-library-test:
     devDependencies:
       '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
       '@microsoft/rush-stack-compiler-3.4': 'link:../../stack/rush-stack-compiler-3.4'
       '@types/node': 10.17.13
-      gulp: 4.0.2
     specifiers:
       '@microsoft/node-library-build': 'workspace:*'
       '@microsoft/rush-stack-compiler-3.4': 'workspace:*'
       '@types/node': 10.17.13
-      gulp: ~4.0.2
   ../../build-tests/rush-stack-compiler-3.5-library-test:
     devDependencies:
       '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
       '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@types/node': 10.17.13
-      gulp: 4.0.2
     specifiers:
       '@microsoft/node-library-build': 'workspace:*'
       '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@types/node': 10.17.13
-      gulp: ~4.0.2
   ../../build-tests/rush-stack-compiler-3.6-library-test:
     devDependencies:
       '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
       '@microsoft/rush-stack-compiler-3.6': 'link:../../stack/rush-stack-compiler-3.6'
       '@types/node': 10.17.13
-      gulp: 4.0.2
     specifiers:
       '@microsoft/node-library-build': 'workspace:*'
       '@microsoft/rush-stack-compiler-3.6': 'workspace:*'
       '@types/node': 10.17.13
-      gulp: ~4.0.2
   ../../build-tests/rush-stack-compiler-3.7-library-test:
     devDependencies:
       '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
       '@microsoft/rush-stack-compiler-3.7': 'link:../../stack/rush-stack-compiler-3.7'
       '@types/node': 10.17.13
-      gulp: 4.0.2
     specifiers:
       '@microsoft/node-library-build': 'workspace:*'
       '@microsoft/rush-stack-compiler-3.7': 'workspace:*'
       '@types/node': 10.17.13
-      gulp: ~4.0.2
   ../../build-tests/rush-stack-compiler-3.8-library-test:
     devDependencies:
       '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
       '@microsoft/rush-stack-compiler-3.8': 'link:../../stack/rush-stack-compiler-3.8'
       '@types/node': 10.17.13
-      gulp: 4.0.2
     specifiers:
       '@microsoft/node-library-build': 'workspace:*'
       '@microsoft/rush-stack-compiler-3.8': 'workspace:*'
       '@types/node': 10.17.13
-      gulp: ~4.0.2
   ../../build-tests/rush-stack-compiler-3.9-library-test:
     devDependencies:
       '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
       '@microsoft/rush-stack-compiler-3.9': 'link:../../stack/rush-stack-compiler-3.9'
       '@types/node': 10.17.13
-      gulp: 4.0.2
     specifiers:
       '@microsoft/node-library-build': 'workspace:*'
       '@microsoft/rush-stack-compiler-3.9': 'workspace:*'
       '@types/node': 10.17.13
-      gulp: ~4.0.2
   ../../build-tests/ts-command-line-test:
     devDependencies:
       '@rushstack/ts-command-line': 'link:../../libraries/ts-command-line'
@@ -1194,6 +1166,20 @@ importers:
       '@types/node': 10.17.13
       gulp: ~4.0.2
       gulp-replace: ^0.5.4
+  ../../heft-plugins/pre-compile-hardlink-or-copy-plugin:
+    dependencies:
+      '@rushstack/node-core-library': 'link:../../libraries/node-core-library'
+      '@types/node': 10.17.13
+    devDependencies:
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 0.4.3
+    specifiers:
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
+      '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 0.4.3
+      '@rushstack/node-core-library': 'workspace:*'
+      '@types/node': 10.17.13
   ../../libraries/debug-certificate-manager:
     dependencies:
       '@rushstack/node-core-library': 'link:../node-core-library'
@@ -1460,19 +1446,17 @@ importers:
       typescript: ~3.7.2
   ../../stack/eslint-patch:
     devDependencies:
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
+      '@rushstack/heft': 0.4.3
       '@types/node': 10.17.13
-      gulp: 4.0.2
     specifiers:
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
+      '@rushstack/heft': 0.4.3
       '@types/node': 10.17.13
-      gulp: ~4.0.2
   ../../stack/eslint-plugin:
     devDependencies:
-      '@microsoft/node-library-build': 6.4.31
       '@microsoft/rush-stack-compiler-3.9': 0.2.1
+      '@rushstack/heft': 0.4.3
       '@types/eslint': 7.2.0
       '@types/estree': 0.0.44
       '@types/node': 10.17.13
@@ -1480,11 +1464,10 @@ importers:
       '@typescript-eslint/parser': 3.4.0_eslint@7.2.0+typescript@3.9.7
       '@typescript-eslint/typescript-estree': 3.4.0_typescript@3.9.7
       eslint: 7.2.0
-      gulp: 4.0.2
       typescript: 3.9.7
     specifiers:
-      '@microsoft/node-library-build': 6.4.31
       '@microsoft/rush-stack-compiler-3.9': 0.2.1
+      '@rushstack/heft': 0.4.3
       '@types/eslint': 7.2.0
       '@types/estree': 0.0.44
       '@types/node': 10.17.13
@@ -1492,7 +1475,6 @@ importers:
       '@typescript-eslint/parser': 3.4.0
       '@typescript-eslint/typescript-estree': 3.4.0
       eslint: ~7.2.0
-      gulp: ~4.0.2
       typescript: ~3.9.5
   ../../stack/rush-stack-compiler-2.4:
     dependencies:
@@ -1506,20 +1488,20 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@2.4.2
       typescript: 2.4.2
     devDependencies:
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
-      gulp: 4.0.2
+      '@rushstack/heft': 0.4.3
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 0.4.3
       '@rushstack/node-core-library': 'workspace:*'
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'workspace:*'
       '@types/node': 10.17.13
       eslint: ~7.2.0
-      gulp: ~4.0.2
       import-lazy: ~4.0.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
@@ -1536,20 +1518,20 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@2.7.2
       typescript: 2.7.2
     devDependencies:
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
-      gulp: 4.0.2
+      '@rushstack/heft': 0.4.3
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 0.4.3
       '@rushstack/node-core-library': 'workspace:*'
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'workspace:*'
       '@types/node': 10.17.13
       eslint: ~7.2.0
-      gulp: ~4.0.2
       import-lazy: ~4.0.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
@@ -1566,20 +1548,20 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@2.8.4
       typescript: 2.8.4
     devDependencies:
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
-      gulp: 4.0.2
+      '@rushstack/heft': 0.4.3
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 0.4.3
       '@rushstack/node-core-library': 'workspace:*'
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'workspace:*'
       '@types/node': 10.17.13
       eslint: ~7.2.0
-      gulp: ~4.0.2
       import-lazy: ~4.0.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
@@ -1596,20 +1578,20 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@2.9.2
       typescript: 2.9.2
     devDependencies:
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
-      gulp: 4.0.2
+      '@rushstack/heft': 0.4.3
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 0.4.3
       '@rushstack/node-core-library': 'workspace:*'
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'workspace:*'
       '@types/node': 10.17.13
       eslint: ~7.2.0
-      gulp: ~4.0.2
       import-lazy: ~4.0.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
@@ -1626,20 +1608,20 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.0.3
       typescript: 3.0.3
     devDependencies:
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
-      gulp: 4.0.2
+      '@rushstack/heft': 0.4.3
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 0.4.3
       '@rushstack/node-core-library': 'workspace:*'
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'workspace:*'
       '@types/node': 10.17.13
       eslint: ~7.2.0
-      gulp: ~4.0.2
       import-lazy: ~4.0.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
@@ -1656,20 +1638,20 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.1.6
       typescript: 3.1.6
     devDependencies:
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
-      gulp: 4.0.2
+      '@rushstack/heft': 0.4.3
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 0.4.3
       '@rushstack/node-core-library': 'workspace:*'
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'workspace:*'
       '@types/node': 10.17.13
       eslint: ~7.2.0
-      gulp: ~4.0.2
       import-lazy: ~4.0.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
@@ -1686,20 +1668,20 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.2.4
       typescript: 3.2.4
     devDependencies:
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
-      gulp: 4.0.2
+      '@rushstack/heft': 0.4.3
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 0.4.3
       '@rushstack/node-core-library': 'workspace:*'
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'workspace:*'
       '@types/node': 10.17.13
       eslint: ~7.2.0
-      gulp: ~4.0.2
       import-lazy: ~4.0.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
@@ -1716,20 +1698,20 @@ importers:
       tslint-microsoft-contrib: 6.2.0_5de1f8fa14d12d0f8943ae8c5c9e10ce
       typescript: 3.3.4000
     devDependencies:
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
-      gulp: 4.0.2
+      '@rushstack/heft': 0.4.3
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 0.4.3
       '@rushstack/node-core-library': 'workspace:*'
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'workspace:*'
       '@types/node': 10.17.13
       eslint: ~7.2.0
-      gulp: ~4.0.2
       import-lazy: ~4.0.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
@@ -1746,20 +1728,20 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.4.5
       typescript: 3.4.5
     devDependencies:
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
-      gulp: 4.0.2
+      '@rushstack/heft': 0.4.3
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 0.4.3
       '@rushstack/node-core-library': 'workspace:*'
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'workspace:*'
       '@types/node': 10.17.13
       eslint: ~7.2.0
-      gulp: ~4.0.2
       import-lazy: ~4.0.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
@@ -1776,20 +1758,20 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.5.3
       typescript: 3.5.3
     devDependencies:
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
-      gulp: 4.0.2
+      '@rushstack/heft': 0.4.3
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 0.4.3
       '@rushstack/node-core-library': 'workspace:*'
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'workspace:*'
       '@types/node': 10.17.13
       eslint: ~7.2.0
-      gulp: ~4.0.2
       import-lazy: ~4.0.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
@@ -1806,20 +1788,20 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.6.5
       typescript: 3.6.5
     devDependencies:
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
-      gulp: 4.0.2
+      '@rushstack/heft': 0.4.3
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 0.4.3
       '@rushstack/node-core-library': 'workspace:*'
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'workspace:*'
       '@types/node': 10.17.13
       eslint: ~7.2.0
-      gulp: ~4.0.2
       import-lazy: ~4.0.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
@@ -1836,20 +1818,20 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.7.5
       typescript: 3.7.5
     devDependencies:
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
-      gulp: 4.0.2
+      '@rushstack/heft': 0.4.3
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 0.4.3
       '@rushstack/node-core-library': 'workspace:*'
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'workspace:*'
       '@types/node': 10.17.13
       eslint: ~7.2.0
-      gulp: ~4.0.2
       import-lazy: ~4.0.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
@@ -1866,20 +1848,20 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.8.3
       typescript: 3.8.3
     devDependencies:
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
-      gulp: 4.0.2
+      '@rushstack/heft': 0.4.3
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 0.4.3
       '@rushstack/node-core-library': 'workspace:*'
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'workspace:*'
       '@types/node': 10.17.13
       eslint: ~7.2.0
-      gulp: ~4.0.2
       import-lazy: ~4.0.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
@@ -1896,20 +1878,20 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.9.7
       typescript: 3.9.7
     devDependencies:
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
-      gulp: 4.0.2
+      '@rushstack/heft': 0.4.3
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
-      '@microsoft/node-library-build': 6.4.31
-      '@microsoft/rush-stack-compiler-3.5': 0.8.0
+      '@microsoft/rush-stack-compiler-3.7': 0.6.2
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 0.4.3
       '@rushstack/node-core-library': 'workspace:*'
+      '@rushstack/pre-compile-hardlink-or-copy-plugin': 'workspace:*'
       '@types/node': 10.17.13
       eslint: ~7.2.0
-      gulp: ~4.0.2
       import-lazy: ~4.0.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
@@ -1921,42 +1903,38 @@ importers:
       '@microsoft/load-themed-styles': 'link:../../libraries/load-themed-styles'
       loader-utils: 1.1.0
     devDependencies:
-      '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
       '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
       '@types/jest': 25.2.1
       '@types/loader-utils': 1.1.3
       '@types/node': 10.17.13
       '@types/webpack': 4.39.8
-      gulp: 4.0.2
     specifiers:
       '@microsoft/load-themed-styles': 'workspace:*'
-      '@microsoft/node-library-build': 'workspace:*'
       '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
       '@types/jest': 25.2.1
       '@types/loader-utils': 1.1.3
       '@types/node': 10.17.13
       '@types/webpack': 4.39.8
-      gulp: ~4.0.2
       loader-utils: ~1.1.0
   ../../webpack/loader-raw-script:
     dependencies:
       loader-utils: 1.1.0
     devDependencies:
-      '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
       '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
       '@types/jest': 25.2.1
       '@types/node': 10.17.13
-      gulp: 4.0.2
     specifiers:
-      '@microsoft/node-library-build': 'workspace:*'
       '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
       '@types/jest': 25.2.1
       '@types/node': 10.17.13
-      gulp: ~4.0.2
       loader-utils: ~1.1.0
   ../../webpack/localization-plugin:
     dependencies:
@@ -1970,20 +1948,19 @@ importers:
       pseudolocale: 1.1.0
       xmldoc: 1.1.2
     devDependencies:
-      '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
       '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
       '@rushstack/set-webpack-public-path-plugin': 'link:../set-webpack-public-path-plugin'
       '@types/loader-utils': 1.1.3
       '@types/lodash': 4.14.116
       '@types/webpack': 4.39.8
       '@types/xmldoc': 1.1.4
-      gulp: 4.0.2
       webpack: 4.31.0_webpack@4.31.0
     specifiers:
-      '@microsoft/node-library-build': 'workspace:*'
       '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@rushstack/set-webpack-public-path-plugin': 'workspace:*'
       '@rushstack/typings-generator': 'workspace:*'
@@ -1994,7 +1971,6 @@ importers:
       '@types/webpack': 4.39.8
       '@types/xmldoc': 1.1.4
       decache: ~4.5.1
-      gulp: ~4.0.2
       loader-utils: ~1.1.0
       lodash: ~4.17.15
       pseudolocale: ~1.1.0
@@ -2008,23 +1984,21 @@ importers:
       tapable: 1.1.3
       terser: 4.7.0
     devDependencies:
-      '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
       '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
       '@types/jest': 25.2.1
       '@types/webpack': 4.39.8
-      gulp: 4.0.2
       webpack: 4.31.0_webpack@4.31.0
       webpack-sources: 1.4.3
     specifiers:
-      '@microsoft/node-library-build': 'workspace:*'
       '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
       '@types/jest': 25.2.1
       '@types/node': 10.17.13
       '@types/tapable': 1.0.5
       '@types/webpack': 4.39.8
-      gulp: ~4.0.2
       source-map: ~0.6.1
       tapable: 1.1.3
       terser: 4.7.0
@@ -2035,27 +2009,25 @@ importers:
       lodash: 4.17.19
       uglify-js: 3.0.28
     devDependencies:
-      '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
       '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
       '@types/jest': 25.2.1
       '@types/lodash': 4.14.116
       '@types/node': 10.17.13
       '@types/tapable': 1.0.5
       '@types/uglify-js': 2.6.29
       '@types/webpack': 4.39.8
-      gulp: 4.0.2
     specifiers:
-      '@microsoft/node-library-build': 'workspace:*'
       '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
       '@types/jest': 25.2.1
       '@types/lodash': 4.14.116
       '@types/node': 10.17.13
       '@types/tapable': 1.0.5
       '@types/uglify-js': 2.6.29
       '@types/webpack': 4.39.8
-      gulp: ~4.0.2
       lodash: ~4.17.15
       uglify-js: ~3.0.28
 lockfileVersion: 5.1
@@ -2504,6 +2476,13 @@ packages:
     dev: true
     resolution:
       integrity: sha512-1bqqmmOz18z6fWmFUEEteFl4obK21/2gj0rqLxN7AFijrvKfZ6p6zKB6FkBBp2hJbIfSdf3Kr6RGFG5vifvW+w==
+  /@microsoft/api-extractor-model/7.8.13:
+    dependencies:
+      '@microsoft/tsdoc': 0.12.19
+      '@rushstack/node-core-library': 3.26.1
+    dev: true
+    resolution:
+      integrity: sha512-SspJ84pZEZfF5jcVkwtdmgpnxjwMwJxQkK+v868jF6Ue/rJZ7WV/+qFB76gxLXNPsnVhF/xdS8s4AWXL0ePN8g==
   /@microsoft/api-extractor-model/7.8.8:
     dependencies:
       '@microsoft/tsdoc': 0.12.19
@@ -2542,6 +2521,22 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-pB29upamyni4VR7uWxaS7jRxxIOw7UPoih6ZRj7r/jlUPgqVDewMb6FbdZH3UVmXtOFU7PReRFEddsvk3jUQMw==
+  /@microsoft/api-extractor/7.9.3:
+    dependencies:
+      '@microsoft/api-extractor-model': 7.8.13
+      '@microsoft/tsdoc': 0.12.19
+      '@rushstack/node-core-library': 3.26.1
+      '@rushstack/ts-command-line': 4.4.6
+      colors: 1.2.5
+      lodash: 4.17.19
+      resolve: 1.17.0
+      semver: 7.3.2
+      source-map: 0.6.1
+      typescript: 3.9.7
+    dev: true
+    hasBin: true
+    resolution:
+      integrity: sha512-8NXXmL+RhkHbL84lyFcjtqm6/IJxcGCckm2bIQFTyRjH4atshvpkuYy/IsTuRSuQ6XHEPa6QNze8IwEhhV5zPA==
   /@microsoft/gulp-core-build-mocha/3.8.20:
     dependencies:
       '@microsoft/gulp-core-build': 3.16.11
@@ -2635,6 +2630,21 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-uBb9uq/HRGDpvF8bu5v80YOkWOMAfwg69SOWU3ODoEqob0qtVpz4nBHHAavUcc2N63FIsZxtYqwfW8JSCTwE6g==
+  /@microsoft/rush-stack-compiler-3.7/0.6.2:
+    dependencies:
+      '@microsoft/api-extractor': 7.9.3
+      '@rushstack/eslint-config': 1.0.3_eslint@7.2.0+typescript@3.7.5
+      '@rushstack/node-core-library': 3.26.1
+      '@types/node': 10.17.13
+      eslint: 7.2.0
+      import-lazy: 4.0.0
+      tslint: 5.20.1_typescript@3.7.5
+      tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.7.5
+      typescript: 3.7.5
+    dev: true
+    hasBin: true
+    resolution:
+      integrity: sha512-Mg/gcTVLBZbPrcqSajzivpFJNiXlz/UInEeVTnlVgiKtYXhjYHuBGeWXllHaKb2qBxb8l+cNgu8eKwRWVfFX6A==
   /@microsoft/rush-stack-compiler-3.9/0.2.1:
     dependencies:
       '@microsoft/api-extractor': 7.8.12
@@ -2797,6 +2807,26 @@ packages:
       typescript: '>=3.0.0'
     resolution:
       integrity: sha512-Z5TablhgasFx1GhZ/pSuMy1iM4Odak/iUNKlIPNEogdlrTr4aAKx/IsGDkfHfPpuTNOHBdyIwcb2a1sIg+bBtg==
+  /@rushstack/eslint-config/1.0.3_eslint@7.2.0+typescript@3.7.5:
+    dependencies:
+      '@rushstack/eslint-patch': 1.0.2
+      '@rushstack/eslint-plugin': 0.4.1_eslint@7.2.0
+      '@typescript-eslint/eslint-plugin': 3.4.0_43170e314695d1b0876b4d3c3574f4a4
+      '@typescript-eslint/experimental-utils': 3.4.0_eslint@7.2.0+typescript@3.7.5
+      '@typescript-eslint/parser': 3.4.0_eslint@7.2.0+typescript@3.7.5
+      '@typescript-eslint/typescript-estree': 3.4.0_typescript@3.7.5
+      eslint: 7.2.0
+      eslint-plugin-promise: 4.2.1
+      eslint-plugin-react: 7.20.3_eslint@7.2.0
+      eslint-plugin-security: 1.4.0
+      eslint-plugin-tsdoc: 0.2.6
+      typescript: 3.7.5
+    dev: true
+    peerDependencies:
+      eslint: ^6.0.0 || ^7.0.0
+      typescript: '>=3.0.0'
+    resolution:
+      integrity: sha512-pJcrs9DZ7O8foVM73L2w9DmfV3cH6nzQ2vqXH9rnOUfXdFQrV2U1BBNms1eU5bl6Vns52IRqQjIjxQGokZ8nNA==
   /@rushstack/eslint-patch/1.0.2:
     dev: true
     resolution:
@@ -2817,11 +2847,11 @@ packages:
       eslint: ^6.0.0 || ^7.0.0
     resolution:
       integrity: sha512-X+YS0Uq8VfaniKRC0IDtWhep1mhLQ/mpeZ9oxqal20mf30zaSS/0fsTwQ0VQRsuJ/+EitnWL+xGZ0LTVioWmOA==
-  /@rushstack/heft/0.2.0:
+  /@rushstack/heft/0.4.3:
     dependencies:
       '@jest/core': 25.4.0
       '@jest/reporters': 25.4.0
-      '@rushstack/node-core-library': 3.25.0
+      '@rushstack/node-core-library': 3.26.1
       '@rushstack/ts-command-line': 4.4.6
       '@types/tapable': 1.0.5
       '@types/webpack': 4.39.8
@@ -2840,7 +2870,7 @@ packages:
       node: '>=10.13.0'
     hasBin: true
     resolution:
-      integrity: sha512-asHlndr+/OKQI2eugrwKKZpS6Fb+E+kUNjd34EKm+A/pFrKHwJmBPq9WH8mMAHe5TOUO1gk5Ncvw58QFve05NQ==
+      integrity: sha512-LPUe7+nHrKp9PUr4UELLg71HakpT3bu9L1LqurO0wefTpNJEnjAQDDTME7UyknWRs53VfwWk3Qqg1qGYYIzifg==
   /@rushstack/node-core-library/3.24.1:
     dependencies:
       '@types/node': 10.17.13
@@ -2865,7 +2895,7 @@ packages:
     dev: true
     resolution:
       integrity: sha512-h8XQjpI78o5Mq7mJKX/rSfV9R02CJXBzxgqQ4EnptUP1StZ/BvyzwAp5VHvvNoJKXlFgqJwwOt8TE4d7bHGLgg==
-  /@rushstack/node-core-library/3.25.0:
+  /@rushstack/node-core-library/3.26.1:
     dependencies:
       '@types/node': 10.17.13
       colors: 1.2.5
@@ -2876,7 +2906,7 @@ packages:
       z-schema: 3.18.4
     dev: true
     resolution:
-      integrity: sha512-e2NCFtAu/eu14b8nlzRX6ZrE9Sb3J2wVt+pninQmTn/IgfnRLAtM0D4PzUO4+ktZwF9fCnpqrOGokLzw6RSVNw==
+      integrity: sha512-N2wewcrJS2Jut73qxi711D1OXVKd9+8YmCllcjxEN++88qqqxCQVnn6Iu9ydu79Frm5rV8p/zvHOLCeUm/mLOQ==
   /@rushstack/ts-command-line/4.4.2:
     dependencies:
       '@types/argparse': 1.0.38
@@ -3442,7 +3472,6 @@ packages:
       semver: 7.3.2
       tsutils: 3.17.1_typescript@3.7.5
       typescript: 3.7.5
-    dev: false
     engines:
       node: ^10.12.0 || >=12.0.0
     peerDependencies:
@@ -3514,7 +3543,6 @@ packages:
       eslint-scope: 5.1.0
       eslint-utils: 2.1.0
       typescript: 3.7.5
-    dev: false
     engines:
       node: ^10.12.0 || >=12.0.0
     peerDependencies:
@@ -3529,7 +3557,6 @@ packages:
       eslint: 7.2.0
       eslint-scope: 5.1.0
       eslint-utils: 2.1.0
-      typescript: 3.9.7
     dev: true
     engines:
       node: ^10.12.0 || >=12.0.0
@@ -3579,7 +3606,6 @@ packages:
       eslint: 7.2.0
       eslint-visitor-keys: 1.3.0
       typescript: 3.7.5
-    dev: false
     engines:
       node: ^10.12.0 || >=12.0.0
     peerDependencies:
@@ -3650,7 +3676,6 @@ packages:
       semver: 7.3.2
       tsutils: 3.17.1_typescript@3.7.5
       typescript: 3.7.5
-    dev: false
     engines:
       node: ^10.12.0 || >=12.0.0
     peerDependencies:
@@ -6458,7 +6483,7 @@ packages:
       integrity: sha512-483XLLxTVIwWK3QTrMGRqUfUpoOs/0hbQrl2oz4J0pAcm3A3bu84wxTFqGqkJzewCLdME38xJLJAxBABfQT8sQ==
   /faye-websocket/0.10.0:
     dependencies:
-      websocket-driver: 0.6.5
+      websocket-driver: 0.7.4
     engines:
       node: '>=0.4.0'
     resolution:
@@ -12430,7 +12455,6 @@ packages:
       tslint: 5.20.1_typescript@3.7.5
       tsutils: 2.28.0_typescript@3.7.5
       typescript: 3.7.5
-    dev: false
     peerDependencies:
       tslint: ^5.1.0
       typescript: ^2.1.0 || ^3.0.0
@@ -12736,7 +12760,6 @@ packages:
       tslib: 1.13.0
       tsutils: 2.29.0_typescript@3.7.5
       typescript: 3.7.5
-    dev: false
     engines:
       node: '>=4.8.0'
     hasBin: true
@@ -12893,7 +12916,6 @@ packages:
     dependencies:
       tslib: 1.13.0
       typescript: 3.7.5
-    dev: false
     peerDependencies:
       typescript: '>=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev || >=2.9.0-dev || >= 3.0.0-dev || >= 3.1.0-dev'
     resolution:
@@ -13017,7 +13039,6 @@ packages:
     dependencies:
       tslib: 1.13.0
       typescript: 3.7.5
-    dev: false
     peerDependencies:
       typescript: '>=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev || >=2.9.0-dev || >= 3.0.0-dev || >= 3.1.0-dev'
     resolution:
@@ -13054,7 +13075,6 @@ packages:
     dependencies:
       tslib: 1.13.0
       typescript: 3.7.5
-    dev: false
     engines:
       node: '>= 6'
     peerDependencies:
