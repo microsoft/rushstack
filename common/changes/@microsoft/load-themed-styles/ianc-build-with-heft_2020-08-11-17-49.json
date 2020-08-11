@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Updated project to build with Heft",
+      "type": "patch",
+      "packageName": "@microsoft/load-themed-styles"
+    }
+  ],
+  "packageName": "@microsoft/load-themed-styles",
+  "email": "iclanton@users.noreply.github.com"
+}

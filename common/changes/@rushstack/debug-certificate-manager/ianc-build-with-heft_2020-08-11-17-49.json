@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Updated project to build with Heft",
+      "type": "patch",
+      "packageName": "@rushstack/debug-certificate-manager"
+    }
+  ],
+  "packageName": "@rushstack/debug-certificate-manager",
+  "email": "iclanton@users.noreply.github.com"
+}

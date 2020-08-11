@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Updated project to build with Heft",
+      "type": "patch",
+      "packageName": "@rushstack/eslint-patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-patch",
+  "email": "iclanton@users.noreply.github.com"
+}
