@@ -139,8 +139,4 @@ export interface IExtendedTypeScript {
   ): string;
 }
 
-export interface IExtendedEmitResult extends TTypescript.EmitResult {
-  changedSourceFiles: Set<IExtendedSourceFile>;
-}
-
 export type ExtendedTypeScript = typeof TTypescript & IExtendedTypeScript;
