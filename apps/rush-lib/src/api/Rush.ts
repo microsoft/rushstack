@@ -53,7 +53,7 @@ export class Rush {
    *
    * Even though this API isn't documented, it is still supported for legacy compatibility.
    */
-  public static launch(launcherVersion: string, arg: ILaunchOptions, cb: () => void = () => {}): void {
+  public static launch(launcherVersion: string, arg: ILaunchOptions): void {
     const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
 
     if (!Utilities.shouldRestrictConsoleOutput()) {
@@ -69,14 +69,7 @@ export class Rush {
     const parser: RushCommandLineParser = new RushCommandLineParser({
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
     });
-    parser
-      .execute()
-      .then(() => {
-        if (cb) {
-          cb();
-        }
-      })
-      .catch(console.error); // CommandLineParser.execute() should never reject the promise
+    parser.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise
   }
 
   /**

@@ -44,7 +44,6 @@
     "resolve": "~1.17.0",
     "semver": "~7.3.0",
     "strict-uri-encode": "~2.0.0",
-    "string-argv": "~0.3.1",
     "tar": "~5.0.5",
     "true-case-path": "~2.2.1",
     "wordwrap": "~1.0.0",
