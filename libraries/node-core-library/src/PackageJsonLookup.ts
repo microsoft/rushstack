@@ -109,8 +109,8 @@ export class PackageJsonLookup {
    */
   public static getOwnPackageJsonVersion(dirnameOfCaller: string): string {
     let parent: string = path.dirname(dirnameOfCaller);
-    let depth: number = 10,
-      minDepth = 1;
+    let depth: number = 10;
+    const minDepth: number = 1;
     do {
       try {
         return require(path.resolve(dirnameOfCaller, 'package.json')).version;
