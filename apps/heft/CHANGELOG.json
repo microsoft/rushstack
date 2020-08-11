@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.4.4",
+      "tag": "@rushstack/heft_v0.4.4",
+      "date": "Tue, 11 Aug 2020 00:36:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where emitted .js.map sourcemaps had an incorrect relative path (GitHub #2086)"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.3",
       "tag": "@rushstack/heft_v0.4.3",
       "date": "Wed, 05 Aug 2020 18:27:33 GMT",
