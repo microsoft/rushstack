@@ -13,8 +13,15 @@ import { CommandJson, ICommandLineJson, ParameterJson } from './CommandLineJson'
  * Custom Commands and Options for the Rush Command Line
  */
 export class CommandLineConfiguration {
+  private static _jsonSchemaCached: JsonSchema | undefined = undefined;
   private static get _jsonSchema(): JsonSchema {
-    return JsonSchema.fromFile(path.join(__dirname, '../schemas/command-line.schema.json'));
+    if (!this._jsonSchemaCached) {
+      this._jsonSchemaCached = JsonSchema.fromFile(
+        path.join(__dirname, '../schemas/command-line.schema.json')
+      );
+    }
+
+    return this._jsonSchemaCached;
   }
 
   public readonly commands: CommandJson[] = [];

@@ -31,8 +31,15 @@ export class DeployScenarioConfiguration {
   // Example: "deploy-the-thing123"
   private static _scenarioNameRegExp: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
+  private static _jsonSchemaCached: JsonSchema | undefined = undefined;
   private static get _jsonSchema(): JsonSchema {
-    return JsonSchema.fromFile(path.join(__dirname, '../../schemas/deploy-scenario.schema.json'));
+    if (!this._jsonSchemaCached) {
+      this._jsonSchemaCached = JsonSchema.fromFile(
+        path.join(__dirname, '../../schemas/deploy-scenario.schema.json')
+      );
+    }
+
+    return this._jsonSchemaCached;
   }
 
   public readonly json: IDeployScenarioJson;

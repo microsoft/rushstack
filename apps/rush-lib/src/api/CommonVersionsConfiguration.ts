@@ -57,8 +57,15 @@ interface ICommonVersionsJson {
  * @public
  */
 export class CommonVersionsConfiguration {
+  private static _jsonSchemaCached: JsonSchema | undefined = undefined;
   private static get _jsonSchema(): JsonSchema {
-    return JsonSchema.fromFile(path.join(__dirname, '../schemas/common-versions.schema.json'));
+    if (!this._jsonSchemaCached) {
+      this._jsonSchemaCached = JsonSchema.fromFile(
+        path.join(__dirname, '../schemas/common-versions.schema.json')
+      );
+    }
+
+    return this._jsonSchemaCached;
   }
 
   private _filePath: string;

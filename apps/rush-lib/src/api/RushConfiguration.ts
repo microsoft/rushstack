@@ -423,8 +423,13 @@ export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
  * @public
  */
 export class RushConfiguration {
+  private static _jsonSchemaCached: JsonSchema | undefined = undefined;
   private static get _jsonSchema(): JsonSchema {
-    return JsonSchema.fromFile(path.join(__dirname, '../schemas/rush.schema.json'));
+    if (!this._jsonSchemaCached) {
+      this._jsonSchemaCached = JsonSchema.fromFile(path.join(__dirname, '../schemas/rush.schema.json'));
+    }
+
+    return this._jsonSchemaCached;
   }
 
   private _rushJsonFile: string;
