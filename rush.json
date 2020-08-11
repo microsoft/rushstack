@@ -426,14 +426,14 @@
       "projectFolder": "apps/api-extractor",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
+      "cyclicDependencyProjects": ["@microsoft/rush-stack-compiler-3.5", "@rushstack/heft"]
     },
     {
       "packageName": "@microsoft/api-extractor-model",
       "projectFolder": "apps/api-extractor-model",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
+      "cyclicDependencyProjects": ["@microsoft/rush-stack-compiler-3.5", "@rushstack/heft"]
     },
     {
       "packageName": "@microsoft/api-documenter",
@@ -782,7 +782,7 @@
       "projectFolder": "libraries/node-core-library",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
+      "cyclicDependencyProjects": ["@microsoft/rush-stack-compiler-3.5", "@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/package-deps-hash",
@@ -807,7 +807,7 @@
       "projectFolder": "libraries/ts-command-line",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.5"]
+      "cyclicDependencyProjects": ["@microsoft/rush-stack-compiler-3.5", "@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/typings-generator",

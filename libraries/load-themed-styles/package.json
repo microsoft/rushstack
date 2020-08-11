@@ -7,7 +7,7 @@
     "url": "https://github.com/microsoft/rushstack/tree/master/libraries/load-themed-styles"
   },
   "scripts": {
-    "build": "gulp --clean"
+    "build": "heft build --clean"
   },
   "main": "lib/index.js",
   "module": "lib-es6/index.js",
@@ -16,9 +16,8 @@
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.5": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
     "@types/jest": "25.2.1",
-    "@types/webpack-env": "1.13.0",
-    "@microsoft/node-library-build": "workspace:*",
-    "gulp": "~4.0.2"
+    "@types/webpack-env": "1.13.0"
   }
 }

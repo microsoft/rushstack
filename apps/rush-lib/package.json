@@ -14,7 +14,7 @@
   "main": "lib/index.js",
   "typings": "dist/rush-lib.d.ts",
   "scripts": {
-    "build": "gulp test --clean"
+    "build": "heft test --clean"
   },
   "license": "MIT",
   "dependencies": {
@@ -50,9 +50,9 @@
     "jszip": "~3.5.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "workspace:*",
     "@microsoft/rush-stack-compiler-3.5": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
     "@types/glob": "7.1.1",
     "@types/inquirer": "0.0.43",
     "@types/jest": "25.2.1",
@@ -70,7 +70,6 @@
     "@types/tar": "4.0.3",
     "@types/wordwrap": "1.0.0",
     "@types/z-schema": "3.16.31",
-    "gulp": "~4.0.2",
     "jest": "~25.4.0"
   }
 }

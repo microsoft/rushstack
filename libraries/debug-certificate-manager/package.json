@@ -9,7 +9,7 @@
     "url": "https://github.com/microsoft/rushstack/tree/master/libraries/debug-certificate-manager"
   },
   "scripts": {
-    "build": "gulp test --clean"
+    "build": "heft test --clean"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
@@ -18,12 +18,11 @@
     "sudo": "~1.0.3"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "workspace:*",
     "@microsoft/rush-stack-compiler-3.5": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
     "@types/jest": "25.2.1",
     "@types/node": "10.17.13",
-    "@types/node-forge": "0.9.1",
-    "gulp": "~4.0.2"
+    "@types/node-forge": "0.9.1"
   }
 }
