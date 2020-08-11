@@ -89,9 +89,6 @@ export class PluginLoader {
             } catch (e) {
               throw new Error(`Failed to construct feature subclass:\n` + e.toString());
             }
-            if (!(markdownDocumenterFeature instanceof MarkdownDocumenterFeature)) {
-              throw new Error('The constructed subclass was not an instance of MarkdownDocumenterFeature');
-            }
 
             try {
               markdownDocumenterFeature.onInitialized();
