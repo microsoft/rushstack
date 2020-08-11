@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.26.1",
+      "tag": "@rushstack/node-core-library_v3.26.1",
+      "date": "Wed, 05 Aug 2020 18:27:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Triggering publish of dependents"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.26.0",
       "tag": "@rushstack/node-core-library_v3.26.0",
       "date": "Mon, 03 Aug 2020 06:55:14 GMT",

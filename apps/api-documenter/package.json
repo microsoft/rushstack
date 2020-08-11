@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-documenter",
-  "version": "7.8.21",
+  "version": "7.8.22",
   "description": "Read JSON files from api-extractor, generate documentation pages",
   "repository": {
     "type": "git",
@@ -9,7 +9,7 @@
   "homepage": "https://api-extractor.com/",
   "license": "MIT",
   "scripts": {
-    "build": "gulp test --clean"
+    "build": "heft test --clean"
   },
   "bin": {
     "api-documenter": "./bin/api-documenter"
@@ -27,13 +27,12 @@
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.5": "workspace:*",
-    "@microsoft/node-library-build": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
     "@types/jest": "25.2.1",
     "@types/js-yaml": "3.12.1",
     "@types/node": "10.17.13",
     "@types/resolve": "1.17.1",
-    "gulp": "~4.0.2",
     "jest": "~25.4.0"
   }
 }

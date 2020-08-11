@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Mon, 03 Aug 2020 06:55:14 GMT and should not be manually modified.
+This log was last generated on Wed, 05 Aug 2020 18:27:32 GMT and should not be manually modified.
+
+## 3.26.1
+Wed, 05 Aug 2020 18:27:32 GMT
+
+### Patches
+
+- Triggering publish of dependents
 
 ## 3.26.0
 Mon, 03 Aug 2020 06:55:14 GMT

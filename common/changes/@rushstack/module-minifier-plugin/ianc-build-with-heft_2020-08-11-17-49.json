@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Updated project to build with Heft",
+      "type": "patch",
+      "packageName": "@rushstack/module-minifier-plugin"
+    }
+  ],
+  "packageName": "@rushstack/module-minifier-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/loader-raw-script",
-  "version": "1.3.32",
+  "version": "1.3.33",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -10,7 +10,7 @@
     "url": "https://github.com/microsoft/rushstack/tree/master/webpack/loader-raw-script"
   },
   "scripts": {
-    "build": "gulp test --clean"
+    "build": "heft test --clean"
   },
   "dependencies": {
     "loader-utils": "~1.1.0"
@@ -18,9 +18,8 @@
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.5": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
     "@types/jest": "25.2.1",
-    "@types/node": "10.17.13",
-    "gulp": "~4.0.2",
-    "@microsoft/node-library-build": "workspace:*"
+    "@types/node": "10.17.13"
   }
 }

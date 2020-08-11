@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Updated project to build with Heft",
+      "type": "patch",
+      "packageName": "@microsoft/rush-stack-compiler-3.0"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-3.0",
+  "email": "iclanton@users.noreply.github.com"
+}

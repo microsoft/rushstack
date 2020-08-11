@@ -22,7 +22,7 @@ import { TestAction } from './actions/TestAction';
 import { PluginManager } from '../pluginFramework/PluginManager';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IHeftActionBaseOptions, IStages } from './actions/HeftActionBase';
-import { HeftSession } from '../pluginFramework/HeftSession';
+import { InternalHeftSession } from '../pluginFramework/InternalHeftSession';
 import { CleanStage } from '../stages/CleanStage';
 import { BuildStage } from '../stages/BuildStage';
 import { DevDeployStage } from '../stages/DevDeployStage';
@@ -34,7 +34,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
   private _metricsCollector: MetricsCollector;
   private _pluginManager: PluginManager;
   private _heftConfiguration: HeftConfiguration;
-  private _heftSession: HeftSession;
+  private _internalHeftSession: InternalHeftSession;
 
   private _debugFlag: CommandLineFlagParameter;
   private _pluginsParameter: CommandLineStringListParameter;
@@ -84,7 +84,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       stages
     };
 
-    this._heftSession = new HeftSession({
+    this._internalHeftSession = new InternalHeftSession({
       getIsDebugMode: () => this.isDebug,
       ...stages,
       metricsCollector: this.metricsCollector
@@ -93,7 +93,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     this._pluginManager = new PluginManager({
       terminal: this.terminal,
       heftConfiguration: this._heftConfiguration,
-      heftSession: this._heftSession
+      internalHeftSession: this._internalHeftSession
     });
 
     const cleanAction: CleanAction = new CleanAction(actionOptions);

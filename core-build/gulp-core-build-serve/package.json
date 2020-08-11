@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-serve",
-  "version": "3.7.29",
+  "version": "3.7.30",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",

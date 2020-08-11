@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-typescript",
-  "version": "8.4.32",
+  "version": "8.4.33",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",

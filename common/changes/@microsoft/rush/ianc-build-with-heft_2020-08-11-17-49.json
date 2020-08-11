@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Updated project to build with Heft",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}

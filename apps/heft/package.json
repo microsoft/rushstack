@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft",
-  "version": "0.4.2",
+  "version": "0.4.4",
   "description": "The Rush Stack extensible build system",
   "keywords": [
     "toolchain",
@@ -59,6 +59,6 @@
     "@types/webpack-dev-server": "3.11.0",
     "@microsoft/rush-stack-compiler-3.7": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "0.2.0"
+    "@rushstack/heft": "0.4.3"
   }
 }

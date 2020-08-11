@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/module-minifier-plugin",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "This plugin splits minification of webpack compilations into smaller units.",
   "main": "lib/index.js",
   "typings": "dist/module-minifier-plugin.d.ts",
@@ -13,7 +13,7 @@
     "node": ">=10.17.1"
   },
   "scripts": {
-    "build": "gulp test --clean"
+    "build": "heft test --clean"
   },
   "peerDependencies": {
     "webpack": "^4.31.0",
@@ -34,11 +34,10 @@
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.5": "workspace:*",
-    "@microsoft/node-library-build": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
     "@types/jest": "25.2.1",
     "@types/webpack": "4.39.8",
-    "gulp": "~4.0.2",
     "webpack": "~4.31.0",
     "webpack-sources": "~1.4.3"
   },
