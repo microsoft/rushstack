@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Updated project to build with Heft",
+      "type": "patch",
+      "packageName": "@rushstack/stream-collator"
+    }
+  ],
+  "packageName": "@rushstack/stream-collator",
+  "email": "iclanton@users.noreply.github.com"
+}

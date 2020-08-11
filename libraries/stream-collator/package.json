@@ -9,7 +9,7 @@
   "main": "lib/index.js",
   "typings": "dist/stream-collator.d.ts",
   "scripts": {
-    "build": "gulp test --clean"
+    "build": "heft test --clean"
   },
   "license": "MIT",
   "dependencies": {
@@ -19,8 +19,7 @@
     "@microsoft/rush-stack-compiler-3.5": "workspace:*",
     "@types/jest": "25.2.1",
     "@types/node": "10.17.13",
-    "gulp": "~4.0.2",
-    "@microsoft/node-library-build": "workspace:*",
-    "@rushstack/eslint-config": "workspace:*"
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*"
   }
 }

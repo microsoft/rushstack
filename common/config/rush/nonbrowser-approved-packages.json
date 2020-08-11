@@ -191,6 +191,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/pre-compile-hardlink-or-copy-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/set-webpack-public-path-plugin",
       "allowedCategories": [ "libraries", "tests" ]
     },

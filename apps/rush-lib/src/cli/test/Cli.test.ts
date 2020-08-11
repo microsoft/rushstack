@@ -8,7 +8,7 @@ import { Utilities } from '../../utilities/Utilities';
 describe('CLI', () => {
   it('should not fail when there is no rush.json', () => {
     const workingDir: string = '/';
-    const startPath: string = path.resolve(path.join(__dirname, '../../start.js'));
+    const startPath: string = path.resolve(path.join(__dirname, '../../../lib/start.js'));
 
     expect(() => {
       Utilities.executeCommand({
