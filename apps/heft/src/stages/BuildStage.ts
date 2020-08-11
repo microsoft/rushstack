@@ -122,6 +122,12 @@ export interface ISharedTypeScriptConfiguration {
    * The default is 50.
    */
   maxWriteParallelism: number;
+
+  /**
+   * Adds extra commandline arguments to pass to the Node subprocess running Typescript. e.g. --max-old-space-size
+   * Supported command line interface for node.js can be found at https://nodejs.org/api/cli.html
+   */
+  extraNodeArgv?: string[];
 }
 
 /**

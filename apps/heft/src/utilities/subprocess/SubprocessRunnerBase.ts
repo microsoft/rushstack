@@ -46,6 +46,11 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
    */
   public abstract get filename(): string;
 
+  /**
+   * extraNodeArgv is undefined unless overridden by the child class.
+   */
+  public extraNodeArgv: string[] | undefined;
+
   public constructor(terminalProvider: ITerminalProvider, configuration: TSubprocessConfiguration) {
     this._terminalProvider = terminalProvider;
     this._configuration = configuration;
@@ -64,7 +69,11 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
         path.resolve(__dirname, 'startSubprocess'),
         [this.filename, JSON.stringify(innerConfiguration), JSON.stringify(this._configuration)],
         {
-          execArgv: this._processNodeArgsForSubprocess(this._terminalProvider, process.execArgv)
+          // argv sent to Node inherits from the parent as well as from the extraNodeArgv
+          execArgv: this._processNodeArgsForSubprocess(
+            this._terminalProvider,
+            this.extraNodeArgv ? this.extraNodeArgv.concat(process.execArgv) : process.execArgv
+          )
         }
       );
 

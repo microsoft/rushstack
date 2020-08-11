@@ -65,6 +65,12 @@ export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfig
    * The default is 50.
    */
   maxWriteParallelism: number;
+
+  /**
+   * Adds extra commandline arguments to pass to the Node subprocess running Typescript. e.g. --max-old-space-size
+   * Supported command line interface for node.js can be found at https://nodejs.org/api/cli.html
+   */
+  extraNodeArgv?: string[];
 }
 
 interface ICachedEmitModuleKind<TModuleKind> extends IEmitModuleKindBase<TModuleKind> {
@@ -199,6 +205,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     if (this._eslintEnabled) {
       this._eslintEnabled = this._fileSystem.exists(this._eslintConfigFilePath);
     }
+    this.extraNodeArgv = this._configuration.extraNodeArgv;
   }
 
   public async invokeAsync(): Promise<void> {
