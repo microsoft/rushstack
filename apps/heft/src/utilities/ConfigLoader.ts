@@ -63,23 +63,15 @@ interface IConfigFileCacheEntry {
 }
 
 export class ConfigLoader {
-  public static _configFileCache: Map<string, IConfigFileCacheEntry> = new Map<
-    string,
-    IConfigFileCacheEntry
-  >();
-  public static _schemaCache: Map<string, JsonSchema> = new Map<string, JsonSchema>();
+  public _configFileCache: Map<string, IConfigFileCacheEntry> = new Map<string, IConfigFileCacheEntry>();
+  public _schemaCache: Map<string, JsonSchema> = new Map<string, JsonSchema>();
 
-  public static clearCache(): void {
-    ConfigLoader._configFileCache.clear();
-    ConfigLoader._schemaCache.clear();
-  }
-
-  public static async loadConfigFileAsync<TConfigFile>(
+  public async loadConfigFileAsync<TConfigFile>(
     configFilePath: string,
     configMeta: IConfigMeta<TConfigFile>
   ): Promise<TConfigFile> {
-    const normalizedConfigMeta: IConfigMeta<TConfigFile> = ConfigLoader._sortObjectProperties(configMeta);
-    return await ConfigLoader._loadConfigFileAsyncInner(
+    const normalizedConfigMeta: IConfigMeta<TConfigFile> = this._sortObjectProperties(configMeta);
+    return await this._loadConfigFileAsyncInner(
       path.resolve(configFilePath),
       normalizedConfigMeta,
       JSON.stringify(normalizedConfigMeta),
@@ -87,7 +79,7 @@ export class ConfigLoader {
     );
   }
 
-  private static async _loadConfigFileAsyncInner<TConfigFile>(
+  private async _loadConfigFileAsyncInner<TConfigFile>(
     resolvedConfigFilePath: string,
     normalizedConfigMeta: IConfigMeta<TConfigFile>,
     serializedConfigMeta: string,
@@ -95,7 +87,7 @@ export class ConfigLoader {
   ): Promise<TConfigFile> {
     const cacheKey: string = `${resolvedConfigFilePath}?${serializedConfigMeta}`;
 
-    let cacheEntry: IConfigFileCacheEntry | undefined = ConfigLoader._configFileCache.get(cacheKey);
+    let cacheEntry: IConfigFileCacheEntry | undefined = this._configFileCache.get(cacheKey);
     if (!cacheEntry) {
       try {
         if (visitedConfigFiles.has(resolvedConfigFilePath)) {
@@ -107,10 +99,10 @@ export class ConfigLoader {
 
         visitedConfigFiles.add(resolvedConfigFilePath);
 
-        let schema: JsonSchema | undefined = ConfigLoader._schemaCache.get(normalizedConfigMeta.schemaPath);
+        let schema: JsonSchema | undefined = this._schemaCache.get(normalizedConfigMeta.schemaPath);
         if (!schema) {
           schema = JsonSchema.fromFile(normalizedConfigMeta.schemaPath);
-          ConfigLoader._schemaCache.set(normalizedConfigMeta.schemaPath, schema);
+          this._schemaCache.set(normalizedConfigMeta.schemaPath, schema);
         }
 
         const configJson: IConfigJson & TConfigFile = await JsonFile.loadAndValidateAsync(
@@ -124,7 +116,7 @@ export class ConfigLoader {
             path.dirname(resolvedConfigFilePath),
             configJson.extends
           );
-          parentConfig = await ConfigLoader._loadConfigFileAsyncInner(
+          parentConfig = await this._loadConfigFileAsyncInner(
             resolvedParentConfigPath,
             normalizedConfigMeta,
             serializedConfigMeta,
@@ -143,7 +135,7 @@ export class ConfigLoader {
             continue;
           }
 
-          result[propertyName] = ConfigLoader._processProperty(
+          result[propertyName] = this._processProperty(
             resolvedConfigFilePath,
             propertyName,
             configJson[propertyName],
@@ -170,7 +162,7 @@ export class ConfigLoader {
     }
   }
 
-  private static _sortObjectProperties<TObj>(obj: TObj): TObj {
+  private _sortObjectProperties<TObj>(obj: TObj): TObj {
     if (obj[HAS_BEEN_NORMALIZED]) {
       return obj;
     } else {
@@ -180,7 +172,7 @@ export class ConfigLoader {
       for (const key of sortedKeys) {
         const value: unknown = obj[key];
         const normalizedValue: unknown =
-          typeof value === 'object' ? ConfigLoader._sortObjectProperties(value) : value;
+          typeof value === 'object' ? this._sortObjectProperties(value) : value;
         result[key] = normalizedValue;
       }
 
@@ -188,7 +180,7 @@ export class ConfigLoader {
     }
   }
 
-  private static _processProperty<TProperty>(
+  private _processProperty<TProperty>(
     configFilePath: string,
     propertyName: string,
     propertyValue: TProperty | undefined,
@@ -196,7 +188,7 @@ export class ConfigLoader {
     inheritanceType: InheritanceType | undefined,
     pathHandling: PathHandling<TProperty> | undefined
   ): TProperty | undefined {
-    propertyValue = ConfigLoader._handlePropertyInheritance(
+    propertyValue = this._handlePropertyInheritance(
       propertyName,
       propertyValue,
       parentPropertyValue,
@@ -204,18 +196,13 @@ export class ConfigLoader {
     );
 
     if (propertyValue) {
-      return ConfigLoader._handlePropertyPathResolution(
-        configFilePath,
-        propertyName,
-        propertyValue,
-        pathHandling
-      );
+      return this._handlePropertyPathResolution(configFilePath, propertyName, propertyValue, pathHandling);
     } else {
       return propertyValue;
     }
   }
 
-  private static _handlePropertyInheritance<TProperty>(
+  private _handlePropertyInheritance<TProperty>(
     propertyName: string,
     propertyValue: TProperty | undefined,
     parentPropertyValue: TProperty | undefined,
@@ -251,7 +238,7 @@ export class ConfigLoader {
     }
   }
 
-  private static _handlePropertyPathResolution<TProperty>(
+  private _handlePropertyPathResolution<TProperty>(
     configFilePath: string,
     propertyName: string,
     propertyValue: TProperty,
@@ -285,7 +272,7 @@ export class ConfigLoader {
           );
         }
 
-        return (ConfigLoader._resolvePathProperty(
+        return (this._resolvePathProperty(
           configFilePath,
           propertyValue,
           stringPropertyHandling?.resolutionMethod
@@ -309,7 +296,7 @@ export class ConfigLoader {
 
         if (unstructuredPropertyHandling?.objectEntriesHandling) {
           for (const [key, value] of Object.entries(propertyValue)) {
-            propertyValue[key] = ConfigLoader._handlePropertyPathResolution(
+            propertyValue[key] = this._handlePropertyPathResolution(
               configFilePath,
               key,
               value,
@@ -321,7 +308,7 @@ export class ConfigLoader {
             structuredPropertyHandling.childPropertyHandling
           )) {
             if (propertyValue[childPropertyName]) {
-              propertyValue[childPropertyName] = ConfigLoader._handlePropertyPathResolution(
+              propertyValue[childPropertyName] = this._handlePropertyPathResolution(
                 configFilePath,
                 childPropertyName,
                 propertyValue[childPropertyName],
@@ -346,7 +333,7 @@ export class ConfigLoader {
     }
   }
 
-  private static _resolvePathProperty(
+  private _resolvePathProperty(
     configFilePath: string,
     propertyValue: string,
     resolutionMethod: ResolutionMethod | undefined

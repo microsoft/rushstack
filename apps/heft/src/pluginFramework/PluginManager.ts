@@ -71,7 +71,8 @@ export class PluginManager {
         this._heftConfiguration.projectHeftDataFolder,
         'plugins.json'
       );
-      const pluginConfigurationJson: IPluginConfigurationJson = await ConfigLoader.loadConfigFileAsync<
+      const configLoader: ConfigLoader = new ConfigLoader();
+      const pluginConfigurationJson: IPluginConfigurationJson = await configLoader.loadConfigFileAsync<
         IPluginConfigurationJson
       >(pluginConfigFilePath, {
         schemaPath: path.join(__dirname, '..', 'schemas', 'plugins.schema.json'),
