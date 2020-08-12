@@ -1,6 +1,13 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Wed, 05 Aug 2020 18:27:32 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Aug 2020 00:10:05 GMT and should not be manually modified.
+
+## 0.2.31
+Wed, 12 Aug 2020 00:10:05 GMT
+
+### Patches
+
+- Updated project to build with Heft
 
 ## 0.2.30
 Wed, 05 Aug 2020 18:27:32 GMT

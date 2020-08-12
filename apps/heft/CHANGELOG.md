@@ -1,6 +1,18 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 05 Aug 2020 18:27:33 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Aug 2020 00:10:05 GMT and should not be manually modified.
+
+## 0.4.5
+Wed, 12 Aug 2020 00:10:05 GMT
+
+*Version update only*
+
+## 0.4.4
+Tue, 11 Aug 2020 00:36:22 GMT
+
+### Patches
+
+- Fix an issue where emitted .js.map sourcemaps had an incorrect relative path (GitHub #2086)
 
 ## 0.4.3
 Wed, 05 Aug 2020 18:27:33 GMT
