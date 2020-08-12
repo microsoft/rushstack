@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Terminal, InternalError, JsonFile, FileSystem, JsonSchema } from '@rushstack/node-core-library';
+import { Terminal, InternalError, FileSystem } from '@rushstack/node-core-library';
 import * as resolve from 'resolve';
 
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
@@ -21,6 +21,7 @@ import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPl
 import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
 import { BasicConfigureWebpackPlugin } from '../plugins/Webpack/BasicConfigureWebpackPlugin';
 import { WebpackPlugin } from '../plugins/Webpack/WebpackPlugin';
+import { ConfigLoader, InheritanceType, ResolutionMethod } from '../utilities/ConfigLoader';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
@@ -61,29 +62,46 @@ export class PluginManager {
 
   public initializePlugin(pluginSpecifier: string, options?: object): void {
     const resolvedPluginPath: string = this._resolvePlugin(pluginSpecifier);
-    const plugin: IHeftPlugin<object | void> = this._loadAndValidatePluginPackage(resolvedPluginPath);
-    this._applyPlugin(plugin, options);
+    this._initializeResolvedPlugin(resolvedPluginPath, options);
   }
 
-  public initializePluginsFromConfigFile(): void {
+  public async initializePluginsFromConfigFileAsync(): Promise<void> {
     try {
       const pluginConfigFilePath: string = path.join(
         this._heftConfiguration.projectHeftDataFolder,
         'plugins.json'
       );
-      const pluginConfigurationJson: IPluginConfigurationJson = JsonFile.loadAndValidate(
-        pluginConfigFilePath,
-        JsonSchema.fromFile(path.join(__dirname, '..', 'schemas', 'plugins.schema.json'))
-      );
+      const pluginConfigurationJson: IPluginConfigurationJson = await ConfigLoader.loadConfigFileAsync<
+        IPluginConfigurationJson
+      >(pluginConfigFilePath, {
+        schemaPath: path.join(__dirname, '..', 'schemas', 'plugins.schema.json'),
+        propertyInheritance: {
+          plugins: InheritanceType.append
+        },
+        propertyPathResolution: {
+          plugins: {
+            objectEntriesHandling: {
+              childPropertyHandling: {
+                plugin: ResolutionMethod.NodeResolve
+              }
+            }
+          }
+        }
+      });
 
       for (const pluginSpecifier of pluginConfigurationJson.plugins) {
-        this.initializePlugin(pluginSpecifier.plugin, pluginSpecifier.options);
+        this._initializeResolvedPlugin(pluginSpecifier.plugin, pluginSpecifier.options);
       }
     } catch (e) {
       if (!FileSystem.isNotExistError(e)) {
         throw e;
       }
     }
+  }
+
+  private _initializeResolvedPlugin(resolvedPluginPath: string, options?: object): void {
+    const plugin: IHeftPlugin<object | void> = this._loadAndValidatePluginPackage(resolvedPluginPath);
+    this._applyPlugin(plugin, options);
   }
 
   private _applyPlugin(plugin: IHeftPlugin<object | void>, options?: object): void {
