@@ -536,22 +536,22 @@ importers:
       '@types/react-dom': 16.9.8
       '@types/webpack-env': 1.13.0
       eslint: 7.2.0
-      handlebars: 4.7.6
-      handlebars-loader: 1.7.1_handlebars@4.7.6
       html-webpack-plugin: 3.2.0_webpack@4.31.0
+      react: 16.13.1
+      react-dom: 16.13.1_react@16.13.1
       typescript: 3.9.7
       webpack: 4.31.0_webpack@4.31.0
     specifiers:
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
       '@types/jest': 25.2.1
-      '@types/react': ~16.9.45
-      '@types/react-dom': ~16.9.8
+      '@types/react': 16.9.45
+      '@types/react-dom': 16.9.8
       '@types/webpack-env': 1.13.0
       eslint: ~7.2.0
-      handlebars: ~4.7.6
-      handlebars-loader: ~1.7.1
       html-webpack-plugin: ~3.2.0
+      react: ~16.13.1
+      react-dom: ~16.13.1
       typescript: ~3.9.5
       webpack: ~4.31.0
   ../../build-tests/heft-webpack-everything-test:
@@ -4258,10 +4258,6 @@ packages:
       node: '>= 0.10'
     resolution:
       integrity: sha1-HQqRS7Aldb7IqPOnTlCA9yssDGs=
-  /async/0.2.10:
-    dev: true
-    resolution:
-      integrity: sha1-trvgsGdLnXGXCMo43owjfLUmw9E=
   /async/1.5.2:
     resolution:
       integrity: sha1-7GphrlZIDAw8skHJVhjiCJL5Zyo=
@@ -6474,6 +6470,7 @@ packages:
     resolution:
       integrity: sha1-PYpcZog6FqMMqGQ+hR8Zuqd5eRc=
   /fastparse/1.1.2:
+    dev: false
     resolution:
       integrity: sha512-483XLLxTVIwWK3QTrMGRqUfUpoOs/0hbQrl2oz4J0pAcm3A3bu84wxTFqGqkJzewCLdME38xJLJAxBABfQT8sQ==
   /faye-websocket/0.10.0:
@@ -7260,18 +7257,6 @@ packages:
   /handle-thing/2.0.1:
     resolution:
       integrity: sha512-9Qn4yBxelxoh2Ow62nP+Ka/kMnOXRi8BXnRaUwezLNhqelnN49xKz4F/dPP8OYLxLxq6JDtZb2i9XznUQbNPTg==
-  /handlebars-loader/1.7.1_handlebars@4.7.6:
-    dependencies:
-      async: 0.2.10
-      fastparse: 1.1.2
-      handlebars: 4.7.6
-      loader-utils: 1.0.4
-      object-assign: 4.1.1
-    dev: true
-    peerDependencies:
-      handlebars: '>= 1.3.0 < 5'
-    resolution:
-      integrity: sha512-Q+Z/hDPQzU8ZTlVnAe/0T1LHABlyhL7opNcSKcQDhmUXK2ByGTqib1Z2Tfv4Ic50WqDcLFWQcOb3mhjcBRbscQ==
   /handlebars/4.7.6:
     dependencies:
       minimist: 1.2.5
@@ -8992,16 +8977,6 @@ packages:
       object-assign: 4.1.1
     resolution:
       integrity: sha1-+G5jdNQyBabmxg6RlvF8Apm/s0g=
-  /loader-utils/1.0.4:
-    dependencies:
-      big.js: 3.2.0
-      emojis-list: 2.1.0
-      json5: 0.5.1
-    dev: true
-    engines:
-      node: '>=4.0.0'
-    resolution:
-      integrity: sha1-E/Vhl/FSOjBYkSSLTHJEVAhIQmw=
   /loader-utils/1.1.0:
     dependencies:
       big.js: 3.2.0
@@ -10739,9 +10714,31 @@ packages:
       node: '>= 0.8'
     resolution:
       integrity: sha512-4Oz8DUIwdvoa5qMJelxipzi/iJIi40O5cGV1wNYp5hvZP8ZN0T+jiNkL0QepXs+EsQ9XJ8ipEDoiH70ySUJP3Q==
+  /react-dom/16.13.1_react@16.13.1:
+    dependencies:
+      loose-envify: 1.4.0
+      object-assign: 4.1.1
+      prop-types: 15.7.2
+      react: 16.13.1
+      scheduler: 0.19.1
+    dev: true
+    peerDependencies:
+      react: ^16.13.1
+    resolution:
+      integrity: sha512-81PIMmVLnCNLO/fFOQxdQkvEq/+Hfpv24XNJfpyZhTRfO0QcmQIF/PgCa1zCOj2w1hrn12MFLyaJ/G0+Mxtfag==
   /react-is/16.13.1:
     resolution:
       integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
+  /react/16.13.1:
+    dependencies:
+      loose-envify: 1.4.0
+      object-assign: 4.1.1
+      prop-types: 15.7.2
+    dev: true
+    engines:
+      node: '>=0.10.0'
+    resolution:
+      integrity: sha512-YMZQQq32xHLX0bz5Mnibv1/LHb3Sqzngu7xstSM+vrkE5Kzr9xE0yMByK5kMoTK30YVJE61WfbxIFFvfeDKT1w==
   /read-package-json/2.1.1:
     dependencies:
       glob: 7.1.6
@@ -11259,6 +11256,13 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-Ydydq3zC+WYDJK1+gRxRapLIED9PWeSuuS41wqyoRmzvhhh9nc+QQrVMKJYzJFULazeGhzSV0QleN2wD3boh2g==
+  /scheduler/0.19.1:
+    dependencies:
+      loose-envify: 1.4.0
+      object-assign: 4.1.1
+    dev: true
+    resolution:
+      integrity: sha512-n/zwRWRYSUj0/3g/otKDRPMh6qv2SYMWNq85IEa8iZyAv8od9zDYpGSnpBEjNgcMNq6Scbu5KfIPxNF72R/2EA==
   /schema-utils/1.0.0:
     dependencies:
       ajv: 6.12.3
