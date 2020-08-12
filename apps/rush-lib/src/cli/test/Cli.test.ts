@@ -35,6 +35,6 @@ describe('CLI', () => {
         .split(/\s*\n\s*/)
         .filter((x) => x)
         .pop() || '';
-    expect(lastLine).toEqual('build.js: ARGS=[]');
+    expect(lastLine).toEqual('build.js: ARGS=["1","2","-x"]');
   });
 });
