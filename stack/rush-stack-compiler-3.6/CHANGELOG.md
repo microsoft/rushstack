@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush-stack-compiler-3.6
 
-This log was last generated on Wed, 05 Aug 2020 18:27:33 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Aug 2020 00:10:05 GMT and should not be manually modified.
+
+## 0.6.3
+Wed, 12 Aug 2020 00:10:05 GMT
+
+### Patches
+
+- Updated project to build with Heft
 
 ## 0.6.2
 Wed, 05 Aug 2020 18:27:33 GMT
