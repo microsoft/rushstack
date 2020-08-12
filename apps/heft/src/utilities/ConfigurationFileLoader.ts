@@ -11,49 +11,107 @@ interface IConfigurationJson {
   extends?: string;
 }
 
+/**
+ * @beta
+ */
 export enum InheritanceType {
+  /**
+   * Append additional elements after elements from the parent file's property
+   */
   append = 'append',
+
+  /**
+   * Discard elements from the parent file's property
+   */
   replace = 'replace'
 }
 
+/**
+ * @beta
+ */
 export enum ResolutionMethod {
+  /**
+   * Resolve a path relative to the configuration file
+   */
   resolvePathRelativeToConfigurationFile,
+
+  /**
+   * Resolve a path relative to the root of the project containing the configuration file
+   */
   resolvePathRelativeToProjectRoot,
+
+  /**
+   * Treat the property as a NodeJS-style require/import reference and resolve using standard
+   * NodeJS filesystem resolution
+   */
   NodeResolve
 }
 
+/**
+ * @beta
+ */
 export interface IConfigurationMeta<TConfigurationFile> {
+  /**
+   * Path to the configuration file's schema file
+   */
   schemaPath: string;
+
+  /**
+   * Options for resolving paths inside properties of the configuration file
+   */
   propertyPathResolution?: {
     [TConfigurationFileProperty in keyof TConfigurationFile]?: PathHandling<
       TConfigurationFile[TConfigurationFileProperty]
     >;
   };
+
+  /**
+   * Options for inheritance of top-level configuration file properties
+   */
   propertyInheritance?: {
     [TConfigFileProperty in keyof TConfigurationFile]?: InheritanceType;
   };
 }
 
+/**
+ * @beta
+ */
 export type PathHandling<TObject> = TObject extends object
   ? IUnstructuredObjectPropertyPathHandling<TObject> | IStructuredObjectPropertyPathHandling<TObject>
   : TObject extends string
   ? IStringPropertyPathHandling
   : never;
 
+/**
+ * @beta
+ */
 export interface IStructuredObjectPropertyPathHandling<TObject extends object> {
+  /**
+   * Options for path resolution in specific properties inside a configuration file
+   */
   childPropertyHandling: {
     [TObjectProperty in keyof TObject]?: PathHandling<TObject[TObjectProperty]>;
   };
 }
 
+/**
+ * @beta
+ */
 export interface IUnstructuredObjectPropertyPathHandling<TObject> {
   /**
-   * Specify a value here to handle the way object or array elements are processed
+   * Specify a value here to describe the way paths are resolved in elements of an array, or all values of an
+   * object
    */
   objectEntriesHandling: PathHandling<TObject[keyof TObject]>;
 }
 
+/**
+ * @beta
+ */
 export interface IStringPropertyPathHandling {
+  /**
+   * Specify a value here to describe the way a path in a string property is resolved
+   */
   resolutionMethod: ResolutionMethod;
 }
 
@@ -64,12 +122,15 @@ interface IConfigurationFileCacheEntry {
   error?: Error;
 }
 
+/**
+ * @beta
+ */
 export class ConfigurationFileLoader {
-  public _configurationFileCache: Map<string, IConfigurationFileCacheEntry> = new Map<
+  private _configurationFileCache: Map<string, IConfigurationFileCacheEntry> = new Map<
     string,
     IConfigurationFileCacheEntry
   >();
-  public _schemaCache: Map<string, JsonSchema> = new Map<string, JsonSchema>();
+  private _schemaCache: Map<string, JsonSchema> = new Map<string, JsonSchema>();
 
   public async loadConfigurationFileAsync<TConfigurationFile>(
     configurationFilePath: string,

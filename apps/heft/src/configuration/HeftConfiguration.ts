@@ -8,6 +8,7 @@ import { trueCasePathSync } from 'true-case-path';
 import { TaskPackageResolver, ITaskPackageResolution } from '../utilities/TaskPackageResolver';
 import { Utilities } from '../utilities/Utilities';
 import { Constants } from '../utilities/Constants';
+import { ConfigurationFileLoader } from '../utilities/ConfigurationFileLoader';
 
 /**
  * @internal
@@ -63,6 +64,7 @@ export class HeftConfiguration {
   private _buildCacheFolder: string | undefined;
   private _globalTerminal: Terminal;
   private _terminalProvider: ITerminalProvider;
+  private _configurationFileLoader: ConfigurationFileLoader = new ConfigurationFileLoader();
 
   private _compilerPackage: ICompilerPackage | undefined;
   private _hasCompilerPackageBeenAccessed: boolean = false;
@@ -145,6 +147,16 @@ export class HeftConfiguration {
     }
 
     return this._compilerPackage;
+  }
+
+  /**
+   * The configuration file loader can be used to load well-structured JSON configuration files that support extending
+   * from other JSON configuration files.
+   *
+   * @beta
+   */
+  public get configurationFileLoader(): ConfigurationFileLoader {
+    return this._configurationFileLoader;
   }
 
   private constructor() {}
