@@ -3,7 +3,7 @@
 
   "plugins": [
     {
-      "plugin": "@jest/core"
+      "plugin": "@rushstack/node-core-library"
     }
   ]
 }

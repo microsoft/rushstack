@@ -2,10 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonSchema, JsonFile } from '@rushstack/node-core-library';
-
-import { Utilities } from './Utilities';
-import { ResolveUtilities } from './ResolveUtilities';
+import { JsonSchema, JsonFile, PackageJsonLookup, Resolve } from '@rushstack/node-core-library';
 
 interface IConfigurationJson {
   extends?: string;
@@ -131,6 +128,7 @@ export class ConfigurationFileLoader {
     IConfigurationFileCacheEntry
   >();
   private _schemaCache: Map<string, JsonSchema> = new Map<string, JsonSchema>();
+  private _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
   public async loadConfigurationFileAsync<TConfigurationFile>(
     configurationFilePath: string,
@@ -415,7 +413,7 @@ export class ConfigurationFileLoader {
       }
 
       case ResolutionMethod.resolvePathRelativeToProjectRoot: {
-        const packageRoot: string | undefined = Utilities.packageJsonLookup.tryGetPackageFolderFor(
+        const packageRoot: string | undefined = this._packageJsonLookup.tryGetPackageFolderFor(
           configurationFilePath
         );
         if (!packageRoot) {
@@ -426,7 +424,7 @@ export class ConfigurationFileLoader {
       }
 
       case ResolutionMethod.NodeResolve: {
-        return ResolveUtilities.resolvePackagePath(propertyValue, configurationFilePath);
+        return Resolve.resolvePackagePath(propertyValue, configurationFilePath);
       }
 
       default: {

@@ -3,13 +3,13 @@
 
 import * as path from 'path';
 import { Tslint as TTslint } from '@microsoft/rush-stack-compiler-3.7';
+import { Resolve } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
 import { Terminal, JsonFile } from '@rushstack/node-core-library';
 
 import { LinterBase, ILinterBaseOptions } from './LinterBase';
 import { IExtendedSourceFile, IExtendedProgram } from './internalTypings/TypeScriptInternals';
 import { IExtendedFileSystem } from '../../utilities/fileSystem/IExtendedFileSystem';
-import { ResolveUtilities } from '../../utilities/ResolveUtilities';
 import { IExtendedLinter } from './internalTypings/TslintInternals';
 import { FileError } from '../../pluginFramework/logging/FileError';
 
@@ -51,7 +51,7 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     const parsedConfig: IMinimalConfig = JsonFile.parseString(rawConfig);
     let hash: crypto.Hash;
     if (parsedConfig.extends) {
-      const extendsFullPath: string = ResolveUtilities.resolvePackagePath(
+      const extendsFullPath: string = Resolve.resolvePackagePath(
         parsedConfig.extends,
         path.dirname(configFilePath)
       );

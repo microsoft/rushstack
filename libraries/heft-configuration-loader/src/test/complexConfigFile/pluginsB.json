@@ -8,7 +8,7 @@
       "plugin": "@rushstack/heft"
     },
     {
-      "plugin": "glob"
+      "plugin": "@rushstack/eslint-config"
     }
   ]
 }

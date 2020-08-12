@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Terminal, InternalError, FileSystem } from '@rushstack/node-core-library';
-import * as resolve from 'resolve';
+import { Terminal, InternalError, FileSystem, Resolve } from '@rushstack/node-core-library';
+import { InheritanceType, ResolutionMethod } from '@rushstack/heft-configuration-loader';
 
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IHeftPlugin } from './IHeftPlugin';
@@ -21,7 +21,6 @@ import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPl
 import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
 import { BasicConfigureWebpackPlugin } from '../plugins/Webpack/BasicConfigureWebpackPlugin';
 import { WebpackPlugin } from '../plugins/Webpack/WebpackPlugin';
-import { InheritanceType, ResolutionMethod } from '../utilities/ConfigurationFileLoader';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
@@ -153,9 +152,7 @@ export class PluginManager {
     this._terminal.writeVerboseLine(`Resolving plugin ${pluginSpecifier}`);
 
     try {
-      resolvedPluginPath = resolve.sync(pluginSpecifier, {
-        basedir: this._heftConfiguration.buildFolder
-      });
+      resolvedPluginPath = Resolve.resolvePackagePath(pluginSpecifier, this._heftConfiguration.buildFolder);
     } catch (e) {
       throw new InternalError(`Error resolving specified plugin "${pluginSpecifier}". Resolve error: ${e}`);
     }

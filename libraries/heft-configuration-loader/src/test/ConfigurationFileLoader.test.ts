@@ -11,7 +11,7 @@ import {
 } from '../ConfigurationFileLoader';
 
 describe('ConfigLoader', () => {
-  const projectRoot: string = path.resolve(__dirname, '..', '..', '..');
+  const projectRoot: string = path.resolve(__dirname, '..', '..');
   let configFileLoader: ConfigurationFileLoader;
 
   beforeEach(() => {
@@ -140,7 +140,6 @@ describe('ConfigLoader', () => {
         configFilePath,
         configMeta
       );
-      const projectRoot: string = path.resolve(__dirname, '..', '..', '..');
       expect(loadedConfigFile).toEqual({
         things: [
           path.resolve(projectRoot, 'A'),
@@ -235,7 +234,7 @@ describe('ConfigLoader', () => {
 
     it('Correctly loads a complex config file', async () => {
       const configFilePath: string = path.resolve(__dirname, 'complexConfigFile', 'pluginsB.json');
-      const schemaPath: string = path.resolve(__dirname, '..', '..', 'schemas', 'plugins.schema.json');
+      const schemaPath: string = path.resolve(__dirname, 'complexConfigFile', 'plugins.schema.json');
       const configMeta: IConfigurationMeta<IComplexConfigFile> = {
         schemaPath,
         propertyInheritance: {
@@ -261,13 +260,13 @@ describe('ConfigLoader', () => {
       expect(loadedConfigFile).toEqual({
         plugins: [
           {
-            plugin: path.resolve(projectRoot, 'node_modules', '@jest', 'core')
+            plugin: path.resolve(projectRoot, 'node_modules', '@rushstack', 'node-core-library')
           },
           {
             plugin: path.resolve(projectRoot, 'node_modules', '@rushstack', 'heft')
           },
           {
-            plugin: path.resolve(projectRoot, 'node_modules', 'glob')
+            plugin: path.resolve(projectRoot, 'node_modules', '@rushstack', 'eslint-config')
           }
         ]
       });

@@ -12,6 +12,7 @@ import { CommandLineAction } from '@rushstack/ts-command-line';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
+import { ConfigurationFileLoader } from '@rushstack/heft-configuration-loader';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { SyncHook } from 'tapable';
@@ -64,28 +65,6 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
     readonly configureCopyStaticAssets: AsyncSeriesHook;
     // (undocumented)
     readonly configureTypeScript: AsyncSeriesHook;
-}
-
-// @beta (undocumented)
-export enum ConfigurationFileInheritanceType {
-    append = "append",
-    replace = "replace"
-}
-
-// @beta (undocumented)
-export class ConfigurationFileLoader {
-    // (undocumented)
-    loadConfigurationFileAsync<TConfigurationFile>(configurationFilePath: string, configurationMeta: IConfigurationMeta<TConfigurationFile>): Promise<TConfigurationFile>;
-    }
-
-// @beta (undocumented)
-export type ConfigurationFilePathHandling<TObject> = TObject extends object ? IUnstructuredObjectPropertyPathHandling<TObject> | IStructuredObjectPropertyPathHandling<TObject> : TObject extends string ? IStringPropertyPathHandling : never;
-
-// @beta (undocumented)
-export enum ConfigurationFilePathResolutionMethod {
-    NodeResolve = 2,
-    resolvePathRelativeToConfigurationFile = 0,
-    resolvePathRelativeToProjectRoot = 1
 }
 
 // @public (undocumented)
@@ -204,17 +183,6 @@ export interface ICompileSubstageProperties {
     copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
     // (undocumented)
     typeScriptConfiguration: ITypeScriptConfiguration;
-}
-
-// @beta (undocumented)
-export interface IConfigurationMeta<TConfigurationFile> {
-    propertyInheritance?: {
-        [TConfigFileProperty in keyof TConfigurationFile]?: ConfigurationFileInheritanceType;
-    };
-    propertyPathResolution?: {
-        [TConfigurationFileProperty in keyof TConfigurationFile]?: ConfigurationFilePathHandling<TConfigurationFile[TConfigurationFileProperty]>;
-    };
-    schemaPath: string;
 }
 
 // @public (undocumented)
@@ -341,18 +309,6 @@ export interface IStageContext<TStageHooks extends StageHooksBase<TStageProperti
     properties: TStageProperties;
 }
 
-// @beta (undocumented)
-export interface IStringPropertyPathHandling {
-    resolutionMethod: ConfigurationFilePathResolutionMethod;
-}
-
-// @beta (undocumented)
-export interface IStructuredObjectPropertyPathHandling<TObject extends object> {
-    childPropertyHandling: {
-        [TObjectProperty in keyof TObject]?: ConfigurationFilePathHandling<TObject[TObjectProperty]>;
-    };
-}
-
 // @public (undocumented)
 export interface ITestStageContext extends IStageContext<TestStageHooks, ITestStageProperties> {
 }
@@ -383,11 +339,6 @@ export interface ITypeScriptConfiguration extends ISharedTypeScriptConfiguration
     isLintingEnabled: boolean | undefined;
     // (undocumented)
     tsconfigPaths: string[];
-}
-
-// @beta (undocumented)
-export interface IUnstructuredObjectPropertyPathHandling<TObject> {
-    objectEntriesHandling: ConfigurationFilePathHandling<TObject[keyof TObject]>;
 }
 
 // @public (undocumented)

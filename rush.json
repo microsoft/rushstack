@@ -778,6 +778,13 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/heft-configuration-loader",
+      "projectFolder": "libraries/heft-configuration-loader",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft"]
+    },
+    {
       "packageName": "@microsoft/load-themed-styles",
       "projectFolder": "libraries/load-themed-styles",
       "reviewCategory": "libraries",

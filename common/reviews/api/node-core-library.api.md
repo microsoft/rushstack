@@ -420,6 +420,12 @@ export interface IProtectableMapParameters<K, V> {
     onSet?: (source: ProtectableMap<K, V>, key: K, value: V) => V;
 }
 
+// @alpha (undocumented)
+export interface IResolvePackageOptions {
+    // (undocumented)
+    doNotResolveSymlinks: boolean;
+}
+
 // @beta (undocumented)
 export interface IStringBufferOutputOptions {
     normalizeSpecialCharacters: boolean;
@@ -584,6 +590,12 @@ export class ProtectableMap<K, V> {
     readonly protectedView: Map<K, V>;
     set(key: K, value: V): this;
     readonly size: number;
+}
+
+// @alpha (undocumented)
+export class Resolve {
+    static resolvePackage(packageName: string, rootPath: string, options?: Partial<IResolvePackageOptions>): string;
+    static resolvePackagePath(packagePath: string, rootPath: string, options?: Partial<IResolvePackageOptions>): string;
 }
 
 // @public

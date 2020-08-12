@@ -179,6 +179,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/heft-configuration-loader",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/localization-plugin",
       "allowedCategories": [ "tests" ]
     },

@@ -75,3 +75,5 @@ export {
   IStringBufferOutputOptions
 } from './Terminal/StringBufferTerminalProvider';
 export { TypeUuid } from './TypeUuid';
+export { Resolve, IResolvePackageOptions } from './Resolve';
+

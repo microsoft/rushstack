@@ -4,11 +4,11 @@
 import * as path from 'path';
 import { Terminal, ITerminalProvider, IPackageJson } from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
+import { ConfigurationFileLoader } from '@rushstack/heft-configuration-loader';
 
 import { TaskPackageResolver, ITaskPackageResolution } from '../utilities/TaskPackageResolver';
 import { Utilities } from '../utilities/Utilities';
 import { Constants } from '../utilities/Constants';
-import { ConfigurationFileLoader } from '../utilities/ConfigurationFileLoader';
 
 /**
  * @internal

@@ -52,15 +52,3 @@ export {
   IDevDeployStageContext
 } from './stages/DevDeployStage';
 export { ITestStageProperties, TestStageHooks, ITestStageContext } from './stages/TestStage';
-
-// Utilities
-export {
-  ConfigurationFileLoader,
-  IConfigurationMeta,
-  IStringPropertyPathHandling,
-  IStructuredObjectPropertyPathHandling,
-  IUnstructuredObjectPropertyPathHandling,
-  InheritanceType as ConfigurationFileInheritanceType,
-  ResolutionMethod as ConfigurationFilePathResolutionMethod,
-  PathHandling as ConfigurationFilePathHandling
-} from './utilities/ConfigurationFileLoader';

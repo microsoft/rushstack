@@ -3,15 +3,23 @@
 
 import { sync } from 'resolve';
 import * as path from 'path';
-import { FileSystem, PackageJsonLookup } from '@rushstack/node-core-library';
+
+import { PackageJsonLookup } from './PackageJsonLookup';
+import { FileSystem } from './FileSystem';
 
 const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
+/**
+ * @alpha
+ */
 export interface IResolvePackageOptions {
   doNotResolveSymlinks: boolean;
 }
 
-export class ResolveUtilities {
+/**
+ * @alpha
+ */
+export class Resolve {
   /**
    * Gets the path of a given package name from the perspective of a given path
    */
@@ -87,7 +95,7 @@ export class ResolveUtilities {
       pathInsidePackage = packagePath.substr(lastSlashIndex + 1);
     }
 
-    const resolvedPackagePath: string = ResolveUtilities.resolvePackage(packageName, rootPath, options);
+    const resolvedPackagePath: string = Resolve.resolvePackage(packageName, rootPath, options);
     return path.resolve(resolvedPackagePath, pathInsidePackage);
   }
 }
