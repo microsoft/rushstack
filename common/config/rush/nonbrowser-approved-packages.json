@@ -283,6 +283,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "css-loader",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "deasync",
       "allowedCategories": [ "libraries" ]
     },
@@ -617,6 +621,10 @@
     {
       "name": "strict-uri-encode",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "style-loader",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "sudo",
