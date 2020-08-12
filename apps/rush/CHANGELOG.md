@@ -1,6 +1,21 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 05 Aug 2020 17:57:07 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Aug 2020 19:33:44 GMT and should not be manually modified.
+
+## 5.31.0
+Wed, 12 Aug 2020 19:33:44 GMT
+
+### Updates
+
+- Updated project to build with Heft
+- Fix an issue where "rushx" did not pass additional command-line arguments to the package.json script (GitHub #1232)
+
+## 5.30.3
+Fri, 07 Aug 2020 21:09:05 GMT
+
+### Updates
+
+- Fix an issue where Mac OS sometimes reported "An unrecognized file .DS_Store was found in the Rush config folder"
 
 ## 5.30.2
 Wed, 05 Aug 2020 17:57:07 GMT

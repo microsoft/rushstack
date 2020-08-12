@@ -2,6 +2,23 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.26.2",
+      "tag": "@rushstack/node-core-library_v3.26.2",
+      "date": "Wed, 12 Aug 2020 00:10:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated project to build with Heft"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.0.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.26.1",
       "tag": "@rushstack/node-core-library_v3.26.1",
       "date": "Wed, 05 Aug 2020 18:27:32 GMT",

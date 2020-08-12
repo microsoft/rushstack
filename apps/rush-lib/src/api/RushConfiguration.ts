@@ -931,6 +931,11 @@ export class RushConfiguration {
         continue;
       }
 
+      // Ignore hidden files such as ".DS_Store"
+      if (filename.startsWith('.')) {
+        continue;
+      }
+
       if (filename.startsWith('deploy-') && fileExtension === '.json') {
         // Ignore "rush deploy" files, which use the naming pattern "deploy-<scenario-name>.json".
         continue;

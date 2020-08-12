@@ -2,6 +2,39 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.4.5",
+      "tag": "@rushstack/heft_v0.4.5",
+      "date": "Wed, 12 Aug 2020 00:10:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.26.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.4.7`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.7\" to `0.6.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.0.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.4",
+      "tag": "@rushstack/heft_v0.4.4",
+      "date": "Tue, 11 Aug 2020 00:36:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where emitted .js.map sourcemaps had an incorrect relative path (GitHub #2086)"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.3",
       "tag": "@rushstack/heft_v0.4.3",
       "date": "Wed, 05 Aug 2020 18:27:33 GMT",

@@ -5,20 +5,21 @@ import * as path from 'path';
 import * as semver from 'semver';
 import {
   Colors,
+  Path,
   FileSystemStats,
   IFileSystemCreateLinkOptions,
   IColorableSequence,
   Terminal,
   ITerminalProvider,
   JsonFile,
-  IPackageJson
+  IPackageJson,
+  InternalError
 } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
 import { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.7';
 import {
   ExtendedTypeScript,
   IEmitResolver,
-  IExtendedEmitResult,
   IEmitHost,
   IEmitTransformers,
   IExtendedProgram,
@@ -82,11 +83,6 @@ interface ICachedEmitModuleKind<TModuleKind> extends IEmitModuleKindBase<TModule
   isPrimary: boolean;
 }
 
-interface IFileToWrite {
-  filePath: string;
-  data: string;
-}
-
 type TWatchCompilerHost = TTypescript.WatchCompilerHostOfFilesAndCompilerOptions<
   TTypescript.EmitAndSemanticDiagnosticsBuilderProgram
 >;
@@ -99,6 +95,16 @@ interface ICompilerCapabilities {
    * Introduced with TypeScript 3.6.
    */
   incrementalProgram: boolean;
+}
+
+interface IFileToWrite {
+  filePath: string;
+  data: string;
+}
+
+interface IExtendedEmitResult extends TTypescript.EmitResult {
+  changedSourceFiles: Set<IExtendedSourceFile>;
+  filesToWrite: IFileToWrite[];
 }
 
 export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderConfiguration> {
@@ -423,12 +429,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     //#endregion
 
     //#region EMIT
-    const filesToWrite: IFileToWrite[] = [];
-    const writeFileCallback: TTypescript.WriteFileCallback = (filePath: string, data: string) => {
-      filesToWrite.push({ filePath, data });
-    };
-
-    const emitResult: IExtendedEmitResult = this._emit(ts, tsconfig, genericProgram, writeFileCallback);
+    const emitResult: IExtendedEmitResult = this._emit(ts, tsconfig, genericProgram);
     //#endregion
 
     this._typescriptTerminal.writeVerboseLine(`Bind: ${ts.performance.getDuration('Bind')}ms`);
@@ -448,7 +449,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     //#region WRITE
     const writePromise: Promise<{ duration: number }> = measureTsPerformanceAsync('Write', () =>
       Async.forEachLimitAsync(
-        filesToWrite,
+        emitResult.filesToWrite,
         this._configuration.maxWriteParallelism,
         async ({ filePath, data }) => this._fileSystem.writeFile(filePath, data, { ensureFolderExists: true })
       )
@@ -480,7 +481,9 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     //#endregion
 
     const { duration: writeDuration } = await writePromise;
-    this._typescriptTerminal.writeVerboseLine(`I/O Write: ${writeDuration}ms (${filesToWrite.length} files)`);
+    this._typescriptTerminal.writeVerboseLine(
+      `I/O Write: ${writeDuration}ms (${emitResult.filesToWrite.length} files)`
+    );
 
     //#region HARDLINK/COPY
     const shouldHardlink: boolean = this._configuration.copyFromCacheMode !== 'copy';
@@ -667,42 +670,45 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _emit(
     ts: ExtendedTypeScript,
     tsconfig: TTypescript.ParsedCommandLine,
-    genericProgram: TTypescript.BuilderProgram | TTypescript.Program,
-    writeFile: TTypescript.WriteFileCallback
+    genericProgram: TTypescript.BuilderProgram | TTypescript.Program
   ): IExtendedEmitResult {
+    const filesToWrite: IFileToWrite[] = [];
+
     let foundPrimary: boolean = false;
-    const moduleKindCompilerOptions: Map<TTypescript.ModuleKind, TTypescript.CompilerOptions> = new Map();
     let defaultModuleKind: TTypescript.ModuleKind;
-    for (const { moduleKind, cacheOutFolderPath, isPrimary } of this._moduleKindsToEmit) {
-      if (isPrimary) {
+
+    for (const moduleKindToEmit of this._moduleKindsToEmit) {
+      if (moduleKindToEmit.isPrimary) {
         if (foundPrimary) {
           throw new Error('Multiple primary module emit kinds encountered.');
         } else {
           foundPrimary = true;
         }
-
-        moduleKindCompilerOptions.set(moduleKind, {
-          ...tsconfig.options,
-          outDir: cacheOutFolderPath
-        });
-        defaultModuleKind = moduleKind;
-      } else {
-        moduleKindCompilerOptions.set(moduleKind, {
-          ...tsconfig.options,
-          outDir: cacheOutFolderPath,
-          module: moduleKind,
-
-          // Don't emit declarations or sourcemaps for secondary module kinds
-          declaration: false,
-          sourceMap: false,
-          declarationMap: false
-        });
+        defaultModuleKind = moduleKindToEmit.moduleKind;
       }
     }
 
     const baseEmitFiles: typeof ts.emitFiles = ts.emitFiles;
 
     const changedFiles: Set<IExtendedSourceFile> = new Set<IExtendedSourceFile>();
+
+    let originalOutDir: string | undefined = undefined;
+    let redirectedOutDir: string | undefined = undefined;
+    const writeFileCallback: TTypescript.WriteFileCallback = (filePath: string, data: string) => {
+      // Redirect from "path/to/lib" --> "path/to/.heft/build-cache/lib"
+      let redirectedFilePath: string = filePath;
+      if (redirectedOutDir !== undefined) {
+        if (Path.isUnderOrEqual(filePath, originalOutDir!)) {
+          redirectedFilePath = path.resolve(redirectedOutDir, path.relative(originalOutDir!, filePath));
+        } else {
+          // The compiler is writing some other output, for example:
+          // ./.heft/build-cache/ts_a7cd263b9f06b2440c0f2b2264746621c192f2e2.json
+        }
+      }
+
+      filesToWrite.push({ filePath: redirectedFilePath, data });
+    };
+
     // Override the underlying file emitter to run itself once for each flavor
     // This is a rather inelegant way to convince the TypeScript compiler not to duplicate parse/link/check
     ts.emitFiles = (
@@ -732,7 +738,29 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
         let defaultModuleKindResult: TTypescript.EmitResult;
         let emitSkipped: boolean = false;
-        for (const [moduleKind, compilerOptions] of moduleKindCompilerOptions.entries()) {
+        for (const moduleKindToEmit of this._moduleKindsToEmit) {
+          const compilerOptions: TTypescript.CompilerOptions = moduleKindToEmit.isPrimary
+            ? {
+                ...tsconfig.options
+              }
+            : {
+                ...tsconfig.options,
+                module: moduleKindToEmit.moduleKind,
+
+                // Don't emit declarations or sourcemaps for secondary module kinds
+                declaration: false,
+                sourceMap: false,
+                declarationMap: false
+              };
+
+          if (!compilerOptions.outDir) {
+            throw new InternalError('Expected compilerOptions.outDir to be assigned');
+          }
+
+          // Redirect from "path/to/lib" --> "path/to/.heft/build-cache/lib"
+          originalOutDir = compilerOptions.outDir;
+          redirectedOutDir = moduleKindToEmit.cacheOutFolderPath;
+
           const flavorResult: TTypescript.EmitResult = baseEmitFiles(
             resolver,
             {
@@ -747,9 +775,12 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           );
 
           emitSkipped = emitSkipped || flavorResult.emitSkipped;
-          if (moduleKind === defaultModuleKind) {
+          if (moduleKindToEmit.moduleKind === defaultModuleKind) {
             defaultModuleKindResult = flavorResult;
           }
+
+          originalOutDir = undefined;
+          redirectedOutDir = undefined;
           // Should results be aggregated, in case for whatever reason the diagnostics are not the same?
         }
         return {
@@ -761,14 +792,15 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
     const result: TTypescript.EmitResult = genericProgram.emit(
       undefined, // Target source file
-      writeFile
+      writeFileCallback
     );
 
     ts.emitFiles = baseEmitFiles;
 
     return {
       ...result,
-      changedSourceFiles: changedFiles
+      changedSourceFiles: changedFiles,
+      filesToWrite
     };
   }
 

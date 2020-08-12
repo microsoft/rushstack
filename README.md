@@ -115,6 +115,7 @@ for large scale TypeScript monorepos.
 | [/build-tests/rush-stack-compiler-3.9-library-test](./build-tests/rush-stack-compiler-3.9-library-test/) |  |
 | [/build-tests/ts-command-line-test](./build-tests/ts-command-line-test/) | Building this project is a regression test for ts-command-line |
 | [/build-tests/web-library-build-test](./build-tests/web-library-build-test/) |  |
+| [/heft-plugins/pre-compile-hardlink-or-copy-plugin](./heft-plugins/pre-compile-hardlink-or-copy-plugin/) | Heft plugin that can be used to create a hardlink before the compilation runs. |
 | [/libraries/rushell](./libraries/rushell/) | Execute shell commands using a consistent syntax on every platform |
 | [/repo-scripts/doc-plugin-rush-stack](./repo-scripts/doc-plugin-rush-stack/) | API Documenter plugin used with the rushstack.io website |
 | [/repo-scripts/generate-api-docs](./repo-scripts/generate-api-docs/) | Used to generate API docs for the rushstack.io website |

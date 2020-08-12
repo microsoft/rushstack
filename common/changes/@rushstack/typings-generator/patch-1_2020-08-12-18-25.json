@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add keywords to package.json for discoverability",
+      "type": "none",
+      "packageName": "@rushstack/typings-generator"
+    }
+  ],
+  "packageName": "@rushstack/typings-generator",
+  "email": "forivall@users.noreply.github.com"
+}
