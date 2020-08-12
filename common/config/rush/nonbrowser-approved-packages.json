@@ -623,6 +623,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "ssri",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "strict-uri-encode",
       "allowedCategories": [ "libraries" ]
     },
