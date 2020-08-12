@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.31.0",
+      "tag": "@microsoft/rush_v5.31.0",
+      "date": "Wed, 12 Aug 2020 19:33:44 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Updated project to build with Heft"
+          },
+          {
+            "comment": "Fix an issue where \"rushx\" did not pass additional command-line arguments to the package.json script (GitHub #1232)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.30.3",
       "tag": "@microsoft/rush_v5.30.3",
       "date": "Fri, 07 Aug 2020 21:09:05 GMT",
