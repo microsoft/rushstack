@@ -1,10 +1,9 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { MyClass } from './MyClass';
+import { ExampleApp } from './ExampleApp';
+
+import './index.css';
 
 const rootDiv: HTMLElement = document.getElementById('root') as HTMLElement;
-
-const myClass: MyClass = new MyClass();
-
-ReactDOM.render(<div>{myClass.doSomething()}</div>, rootDiv);
+ReactDOM.render(<ExampleApp />, rootDiv);

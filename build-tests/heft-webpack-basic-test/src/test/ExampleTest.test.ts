@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { MyClass } from '../MyClass';
+import { ToggleSwitch } from '../ToggleSwitch';
 
 describe('Example Test', () => {
   it('Correctly tests stuff', () => {
-    const myClass: MyClass = new MyClass();
-    expect(myClass.doSomething().length > 0).toBeTruthy();
+    expect(ToggleSwitch).toBeDefined();
   });
 });
