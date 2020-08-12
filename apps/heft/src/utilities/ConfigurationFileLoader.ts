@@ -7,7 +7,7 @@ import { JsonSchema, JsonFile } from '@rushstack/node-core-library';
 import { Utilities } from './Utilities';
 import { ResolveUtilities } from './ResolveUtilities';
 
-interface IConfigJson {
+interface IConfigurationJson {
   extends?: string;
 }
 
@@ -17,18 +17,20 @@ export enum InheritanceType {
 }
 
 export enum ResolutionMethod {
-  resolvePathRelativeToConfigFile,
+  resolvePathRelativeToConfigurationFile,
   resolvePathRelativeToProjectRoot,
   NodeResolve
 }
 
-export interface IConfigMeta<TConfigFile> {
+export interface IConfigurationMeta<TConfigurationFile> {
   schemaPath: string;
   propertyPathResolution?: {
-    [TConfigFileProperty in keyof TConfigFile]?: PathHandling<TConfigFile[TConfigFileProperty]>;
+    [TConfigurationFileProperty in keyof TConfigurationFile]?: PathHandling<
+      TConfigurationFile[TConfigurationFileProperty]
+    >;
   };
   propertyInheritance?: {
-    [TConfigFileProperty in keyof TConfigFile]?: InheritanceType;
+    [TConfigFileProperty in keyof TConfigurationFile]?: InheritanceType;
   };
 }
 
@@ -57,99 +59,102 @@ export interface IStringPropertyPathHandling {
 
 const HAS_BEEN_NORMALIZED: unique symbol = Symbol('has been sorted');
 
-interface IConfigFileCacheEntry {
-  configFile?: unknown;
+interface IConfigurationFileCacheEntry {
+  configurationFile?: unknown;
   error?: Error;
 }
 
-export class ConfigLoader {
-  public _configFileCache: Map<string, IConfigFileCacheEntry> = new Map<string, IConfigFileCacheEntry>();
+export class ConfigurationFileLoader {
+  public _configurationFileCache: Map<string, IConfigurationFileCacheEntry> = new Map<
+    string,
+    IConfigurationFileCacheEntry
+  >();
   public _schemaCache: Map<string, JsonSchema> = new Map<string, JsonSchema>();
 
-  public async loadConfigFileAsync<TConfigFile>(
-    configFilePath: string,
-    configMeta: IConfigMeta<TConfigFile>
-  ): Promise<TConfigFile> {
-    const normalizedConfigMeta: IConfigMeta<TConfigFile> = this._sortObjectProperties(configMeta);
-    return await this._loadConfigFileAsyncInner(
-      path.resolve(configFilePath),
-      normalizedConfigMeta,
-      JSON.stringify(normalizedConfigMeta),
+  public async loadConfigurationFileAsync<TConfigurationFile>(
+    configurationFilePath: string,
+    configurationMeta: IConfigurationMeta<TConfigurationFile>
+  ): Promise<TConfigurationFile> {
+    const normalizedConfigurationMeta: IConfigurationMeta<TConfigurationFile> = this._sortObjectProperties(
+      configurationMeta
+    );
+    return await this._loadConfigurationFileAsyncInner(
+      path.resolve(configurationFilePath),
+      normalizedConfigurationMeta,
+      JSON.stringify(normalizedConfigurationMeta),
       new Set<string>()
     );
   }
 
-  private async _loadConfigFileAsyncInner<TConfigFile>(
-    resolvedConfigFilePath: string,
-    normalizedConfigMeta: IConfigMeta<TConfigFile>,
-    serializedConfigMeta: string,
-    visitedConfigFiles: Set<string>
-  ): Promise<TConfigFile> {
-    const cacheKey: string = `${resolvedConfigFilePath}?${serializedConfigMeta}`;
+  private async _loadConfigurationFileAsyncInner<TConfigurationFile>(
+    resolvedConfigurationFilePath: string,
+    normalizedConfigurationMeta: IConfigurationMeta<TConfigurationFile>,
+    serializedConfigurationMeta: string,
+    visitedConfigurationFilePaths: Set<string>
+  ): Promise<TConfigurationFile> {
+    const cacheKey: string = `${resolvedConfigurationFilePath}?${serializedConfigurationMeta}`;
 
-    let cacheEntry: IConfigFileCacheEntry | undefined = this._configFileCache.get(cacheKey);
+    let cacheEntry: IConfigurationFileCacheEntry | undefined = this._configurationFileCache.get(cacheKey);
     if (!cacheEntry) {
       try {
-        if (visitedConfigFiles.has(resolvedConfigFilePath)) {
+        if (visitedConfigurationFilePaths.has(resolvedConfigurationFilePath)) {
           throw new Error(
-            'A loop has been detected in the "extends" properties of config file at ' +
-              `"${resolvedConfigFilePath}".`
+            'A loop has been detected in the "extends" properties of configuration file at ' +
+              `"${resolvedConfigurationFilePath}".`
           );
         }
 
-        visitedConfigFiles.add(resolvedConfigFilePath);
+        visitedConfigurationFilePaths.add(resolvedConfigurationFilePath);
 
-        let schema: JsonSchema | undefined = this._schemaCache.get(normalizedConfigMeta.schemaPath);
+        let schema: JsonSchema | undefined = this._schemaCache.get(normalizedConfigurationMeta.schemaPath);
         if (!schema) {
-          schema = JsonSchema.fromFile(normalizedConfigMeta.schemaPath);
-          this._schemaCache.set(normalizedConfigMeta.schemaPath, schema);
+          schema = JsonSchema.fromFile(normalizedConfigurationMeta.schemaPath);
+          this._schemaCache.set(normalizedConfigurationMeta.schemaPath, schema);
         }
 
-        const configJson: IConfigJson & TConfigFile = await JsonFile.loadAndValidateAsync(
-          resolvedConfigFilePath,
-          schema
-        );
+        const configurationJson: IConfigurationJson &
+          TConfigurationFile = await JsonFile.loadAndValidateAsync(resolvedConfigurationFilePath, schema);
 
-        let parentConfig: TConfigFile | undefined = undefined;
-        if (configJson.extends) {
+        let parentConfiguration: TConfigurationFile | undefined = undefined;
+        if (configurationJson.extends) {
           const resolvedParentConfigPath: string = path.resolve(
-            path.dirname(resolvedConfigFilePath),
-            configJson.extends
+            path.dirname(resolvedConfigurationFilePath),
+            configurationJson.extends
           );
-          parentConfig = await this._loadConfigFileAsyncInner(
+          parentConfiguration = await this._loadConfigurationFileAsyncInner(
             resolvedParentConfigPath,
-            normalizedConfigMeta,
-            serializedConfigMeta,
-            visitedConfigFiles
+            normalizedConfigurationMeta,
+            serializedConfigurationMeta,
+            visitedConfigurationFilePaths
           );
         }
 
         const propertyNames: Set<string> = new Set<string>([
-          ...Object.keys(parentConfig || {}),
-          ...Object.keys(configJson)
+          ...Object.keys(parentConfiguration || {}),
+          ...Object.keys(configurationJson)
         ]);
 
-        const result: TConfigFile = {} as TConfigFile;
+        const result: TConfigurationFile = {} as TConfigurationFile;
         for (const propertyName of propertyNames) {
           if (propertyName === '$schema' || propertyName === 'extends') {
             continue;
           }
 
           result[propertyName] = this._processProperty(
-            resolvedConfigFilePath,
+            resolvedConfigurationFilePath,
             propertyName,
-            configJson[propertyName],
-            parentConfig ? parentConfig[propertyName] : undefined,
-            normalizedConfigMeta.propertyInheritance
-              ? normalizedConfigMeta.propertyInheritance[propertyName]
+            configurationJson[propertyName],
+            parentConfiguration ? parentConfiguration[propertyName] : undefined,
+            normalizedConfigurationMeta.propertyInheritance
+              ? normalizedConfigurationMeta.propertyInheritance[propertyName]
               : undefined,
-            normalizedConfigMeta.propertyPathResolution
-              ? normalizedConfigMeta.propertyPathResolution[propertyName]
+            normalizedConfigurationMeta.propertyPathResolution
+              ? normalizedConfigurationMeta.propertyPathResolution[propertyName]
               : undefined
           );
         }
 
-        cacheEntry = { configFile: result };
+        cacheEntry = { configurationFile: result };
       } catch (e) {
         cacheEntry = { error: e };
       }
@@ -158,15 +163,15 @@ export class ConfigLoader {
     if (cacheEntry.error) {
       throw cacheEntry.error;
     } else {
-      return cacheEntry.configFile! as TConfigFile;
+      return cacheEntry.configurationFile! as TConfigurationFile;
     }
   }
 
-  private _sortObjectProperties<TObj>(obj: TObj): TObj {
+  private _sortObjectProperties<TObject>(obj: TObject): TObject {
     if (obj[HAS_BEEN_NORMALIZED]) {
       return obj;
     } else {
-      const result: TObj = ({ [HAS_BEEN_NORMALIZED]: true } as unknown) as TObj;
+      const result: TObject = ({ [HAS_BEEN_NORMALIZED]: true } as unknown) as TObject;
 
       const sortedKeys: string[] = Object.keys(obj).sort();
       for (const key of sortedKeys) {
@@ -181,7 +186,7 @@ export class ConfigLoader {
   }
 
   private _processProperty<TProperty>(
-    configFilePath: string,
+    configurationFilePath: string,
     propertyName: string,
     propertyValue: TProperty | undefined,
     parentPropertyValue: TProperty | undefined,
@@ -196,7 +201,12 @@ export class ConfigLoader {
     );
 
     if (propertyValue) {
-      return this._handlePropertyPathResolution(configFilePath, propertyName, propertyValue, pathHandling);
+      return this._handlePropertyPathResolution(
+        configurationFilePath,
+        propertyName,
+        propertyValue,
+        pathHandling
+      );
     } else {
       return propertyValue;
     }
@@ -218,7 +228,7 @@ export class ConfigLoader {
         case InheritanceType.append: {
           if (!Array.isArray(propertyValue) || !Array.isArray(parentPropertyValue)) {
             throw new Error(
-              `Issue in processing config file property "${propertyName}". ` +
+              `Issue in processing configuration file property "${propertyName}". ` +
                 `Property is not an array, but the inheritance type is set as "${InheritanceType.append}"`
             );
           }
@@ -239,7 +249,7 @@ export class ConfigLoader {
   }
 
   private _handlePropertyPathResolution<TProperty>(
-    configFilePath: string,
+    configurationFilePath: string,
     propertyName: string,
     propertyValue: TProperty,
     pathHandling: PathHandling<TProperty> | undefined
@@ -273,7 +283,7 @@ export class ConfigLoader {
         }
 
         return (this._resolvePathProperty(
-          configFilePath,
+          configurationFilePath,
           propertyValue,
           stringPropertyHandling?.resolutionMethod
         ) as unknown) as TProperty;
@@ -297,7 +307,7 @@ export class ConfigLoader {
         if (unstructuredPropertyHandling?.objectEntriesHandling) {
           for (const [key, value] of Object.entries(propertyValue)) {
             propertyValue[key] = this._handlePropertyPathResolution(
-              configFilePath,
+              configurationFilePath,
               key,
               value,
               unstructuredPropertyHandling.objectEntriesHandling
@@ -309,7 +319,7 @@ export class ConfigLoader {
           )) {
             if (propertyValue[childPropertyName]) {
               propertyValue[childPropertyName] = this._handlePropertyPathResolution(
-                configFilePath,
+                configurationFilePath,
                 childPropertyName,
                 propertyValue[childPropertyName],
                 handling as PathHandling<unknown>
@@ -334,28 +344,28 @@ export class ConfigLoader {
   }
 
   private _resolvePathProperty(
-    configFilePath: string,
+    configurationFilePath: string,
     propertyValue: string,
     resolutionMethod: ResolutionMethod | undefined
   ): string {
     switch (resolutionMethod) {
-      case ResolutionMethod.resolvePathRelativeToConfigFile: {
-        return path.resolve(path.dirname(configFilePath), propertyValue);
+      case ResolutionMethod.resolvePathRelativeToConfigurationFile: {
+        return path.resolve(path.dirname(configurationFilePath), propertyValue);
       }
 
       case ResolutionMethod.resolvePathRelativeToProjectRoot: {
         const packageRoot: string | undefined = Utilities.packageJsonLookup.tryGetPackageFolderFor(
-          configFilePath
+          configurationFilePath
         );
         if (!packageRoot) {
-          throw new Error(`Could not find a package root for path "${configFilePath}"`);
+          throw new Error(`Could not find a package root for path "${configurationFilePath}"`);
         }
 
         return path.resolve(packageRoot, propertyValue);
       }
 
       case ResolutionMethod.NodeResolve: {
-        return ResolveUtilities.resolvePackagePath(propertyValue, configFilePath);
+        return ResolveUtilities.resolvePackagePath(propertyValue, configurationFilePath);
       }
 
       default: {

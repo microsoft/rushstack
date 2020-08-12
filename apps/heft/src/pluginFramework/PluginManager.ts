@@ -21,7 +21,11 @@ import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPl
 import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
 import { BasicConfigureWebpackPlugin } from '../plugins/Webpack/BasicConfigureWebpackPlugin';
 import { WebpackPlugin } from '../plugins/Webpack/WebpackPlugin';
-import { ConfigFileLoader, InheritanceType, ResolutionMethod } from '../utilities/ConfigFileLoader';
+import {
+  ConfigurationFileLoader,
+  InheritanceType,
+  ResolutionMethod
+} from '../utilities/ConfigurationFileLoader';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
@@ -71,8 +75,8 @@ export class PluginManager {
         this._heftConfiguration.projectHeftDataFolder,
         'plugins.json'
       );
-      const configFileLoader: ConfigFileLoader = new ConfigFileLoader();
-      const pluginConfigurationJson: IPluginConfigurationJson = await configFileLoader.loadConfigFileAsync<
+      const configFileLoader: ConfigurationFileLoader = new ConfigurationFileLoader();
+      const pluginConfigurationJson: IPluginConfigurationJson = await configFileLoader.loadConfigurationFileAsync<
         IPluginConfigurationJson
       >(pluginConfigFilePath, {
         schemaPath: path.join(__dirname, '..', 'schemas', 'plugins.schema.json'),

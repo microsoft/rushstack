@@ -3,14 +3,19 @@
 
 import * as path from 'path';
 
-import { ConfigFileLoader, IConfigMeta, InheritanceType, ResolutionMethod } from '../ConfigFileLoader';
+import {
+  ConfigurationFileLoader,
+  IConfigurationMeta,
+  InheritanceType,
+  ResolutionMethod
+} from '../ConfigurationFileLoader';
 
 describe('ConfigLoader', () => {
   const projectRoot: string = path.resolve(__dirname, '..', '..', '..');
-  let configFileLoader: ConfigFileLoader;
+  let configFileLoader: ConfigurationFileLoader;
 
   beforeEach(() => {
-    configFileLoader = new ConfigFileLoader();
+    configFileLoader = new ConfigurationFileLoader();
   });
 
   describe('A simple config file', () => {
@@ -23,11 +28,11 @@ describe('ConfigLoader', () => {
     }
 
     it('Correctly loads the config file', async () => {
-      const configMeta: IConfigMeta<ISimplestConfigFile> = {
+      const configMeta: IConfigurationMeta<ISimplestConfigFile> = {
         schemaPath
       };
 
-      const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigFileAsync(
+      const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath,
         configMeta
       );
@@ -35,16 +40,16 @@ describe('ConfigLoader', () => {
     });
 
     it('Correctly resolves paths relative to the config file', async () => {
-      const configMeta: IConfigMeta<ISimplestConfigFile> = {
+      const configMeta: IConfigurationMeta<ISimplestConfigFile> = {
         schemaPath,
         propertyPathResolution: {
           thing: {
-            resolutionMethod: ResolutionMethod.resolvePathRelativeToConfigFile
+            resolutionMethod: ResolutionMethod.resolvePathRelativeToConfigurationFile
           }
         }
       };
 
-      const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigFileAsync(
+      const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath,
         configMeta
       );
@@ -54,7 +59,7 @@ describe('ConfigLoader', () => {
     });
 
     it('Correctly resolves paths relative to the project root', async () => {
-      const configMeta: IConfigMeta<ISimplestConfigFile> = {
+      const configMeta: IConfigurationMeta<ISimplestConfigFile> = {
         schemaPath,
         propertyPathResolution: {
           thing: {
@@ -63,7 +68,7 @@ describe('ConfigLoader', () => {
         }
       };
 
-      const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigFileAsync(
+      const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath,
         configMeta
       );
@@ -83,11 +88,11 @@ describe('ConfigLoader', () => {
     }
 
     it('Correctly loads the config file', async () => {
-      const configMeta: IConfigMeta<ISimpleConfigFile> = {
+      const configMeta: IConfigurationMeta<ISimpleConfigFile> = {
         schemaPath
       };
 
-      const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigFileAsync(
+      const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath,
         configMeta
       );
@@ -95,18 +100,18 @@ describe('ConfigLoader', () => {
     });
 
     it('Correctly resolves paths relative to the config file', async () => {
-      const configMeta: IConfigMeta<ISimpleConfigFile> = {
+      const configMeta: IConfigurationMeta<ISimpleConfigFile> = {
         schemaPath,
         propertyPathResolution: {
           things: {
             objectEntriesHandling: {
-              resolutionMethod: ResolutionMethod.resolvePathRelativeToConfigFile
+              resolutionMethod: ResolutionMethod.resolvePathRelativeToConfigurationFile
             }
           }
         }
       };
 
-      const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigFileAsync(
+      const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath,
         configMeta
       );
@@ -120,7 +125,7 @@ describe('ConfigLoader', () => {
     });
 
     it('Correctly resolves paths relative to the project root', async () => {
-      const configMeta: IConfigMeta<ISimpleConfigFile> = {
+      const configMeta: IConfigurationMeta<ISimpleConfigFile> = {
         schemaPath,
         propertyPathResolution: {
           things: {
@@ -131,7 +136,7 @@ describe('ConfigLoader', () => {
         }
       };
 
-      const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigFileAsync(
+      const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath,
         configMeta
       );
@@ -156,10 +161,10 @@ describe('ConfigLoader', () => {
     }
 
     it('Correctly loads the config file with default config meta', async () => {
-      const configMeta: IConfigMeta<ISimpleConfigFile> = {
+      const configMeta: IConfigurationMeta<ISimpleConfigFile> = {
         schemaPath
       };
-      const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigFileAsync(
+      const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath,
         configMeta
       );
@@ -167,13 +172,13 @@ describe('ConfigLoader', () => {
     });
 
     it('Correctly loads the config file with "append" in config meta', async () => {
-      const configMeta: IConfigMeta<ISimpleConfigFile> = {
+      const configMeta: IConfigurationMeta<ISimpleConfigFile> = {
         schemaPath,
         propertyInheritance: {
           things: InheritanceType.append
         }
       };
-      const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigFileAsync(
+      const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath,
         configMeta
       );
@@ -181,14 +186,14 @@ describe('ConfigLoader', () => {
     });
 
     it('Correctly loads the config file with "replace" in config meta', async () => {
-      const configMeta: IConfigMeta<ISimpleConfigFile> = {
+      const configMeta: IConfigurationMeta<ISimpleConfigFile> = {
         schemaPath,
         propertyInheritance: {
           things: InheritanceType.replace
         }
       };
 
-      const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigFileAsync(
+      const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath,
         configMeta
       );
@@ -196,17 +201,17 @@ describe('ConfigLoader', () => {
     });
 
     it('Correctly resolves paths relative to the config file', async () => {
-      const configMeta: IConfigMeta<ISimpleConfigFile> = {
+      const configMeta: IConfigurationMeta<ISimpleConfigFile> = {
         schemaPath,
         propertyPathResolution: {
           things: {
             objectEntriesHandling: {
-              resolutionMethod: ResolutionMethod.resolvePathRelativeToConfigFile
+              resolutionMethod: ResolutionMethod.resolvePathRelativeToConfigurationFile
             }
           }
         }
       };
-      const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigFileAsync(
+      const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath,
         configMeta
       );
@@ -231,7 +236,7 @@ describe('ConfigLoader', () => {
     it('Correctly loads a complex config file', async () => {
       const configFilePath: string = path.resolve(__dirname, 'complexConfigFile', 'pluginsB.json');
       const schemaPath: string = path.resolve(__dirname, '..', '..', 'schemas', 'plugins.schema.json');
-      const configMeta: IConfigMeta<IComplexConfigFile> = {
+      const configMeta: IConfigurationMeta<IComplexConfigFile> = {
         schemaPath,
         propertyInheritance: {
           plugins: InheritanceType.append
@@ -249,7 +254,7 @@ describe('ConfigLoader', () => {
         }
       };
 
-      const loadedConfigFile: IComplexConfigFile = await configFileLoader.loadConfigFileAsync(
+      const loadedConfigFile: IComplexConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath,
         configMeta
       );
