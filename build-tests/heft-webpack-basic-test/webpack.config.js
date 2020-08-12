@@ -3,48 +3,32 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-/** example config, each parameter has options for different build runtime environments */
-const CONFIG = {
-  reactUrl: {
-    dev: 'https://cdnjs.cloudflare.com/ajax/libs/react/16.4.2/umd/react.development.js',
-    production: 'https://cdnjs.cloudflare.com/ajax/libs/react/16.4.2/umd/react.production.min.js'
-  },
-
-  reactDomUrl: {
-    dev: 'https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.4.2/umd/react-dom.development.js',
-    production: 'https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.4.2/umd/react-dom.production.min.js'
-  }
-};
-
-function _generateBaseWebpackConfiguration({ runtimeEnv = 'dev', isProduction = false }) {
+/**
+ * If the "--production" command-line parameter is specified when invoking Heft, then the
+ * "production" function parameter will be true.  You can use this to enable bundling optimizations.
+ */
+function createWebpackConfig({ production }) {
   const webpackConfig = {
-    mode: 'development',
+    // Documentation: https://webpack.js.org/configuration/mode/
+    mode: production ? 'production' : 'development',
     resolve: {
       extensions: ['.js', '.jsx', '.json']
     },
     entry: {
-      'heft-test': path.join(__dirname, 'lib', 'index.js')
+      app: path.join(__dirname, 'lib', 'index.js'),
+
+      // Put these libraries in a separate vendor bundle
+      vendor: ['react', 'react-dom']
     },
     output: {
       path: path.join(__dirname, 'dist'),
       filename: '[name]_[contenthash].js'
     },
-    externals: {
-      react: 'React',
-      'react-dom': 'ReactDOM'
-    },
-    devtool: isProduction ? undefined : 'source-map',
+    devtool: production ? undefined : 'source-map',
     plugins: [
-      //webpack plugin to generate a startup index.html file
+      // See here for documentation: https://github.com/jantimon/html-webpack-plugin
       new HtmlWebpackPlugin({
-        //inject the output at the bottom of the template <body>
-        inject: true,
-        //uses handlebars to pass in parameters to the template
-        template: `handlebars-loader!${path.join(__dirname, 'web', 'index.hbs')}`,
-        chunks: {},
-        templateParameters: {
-          scriptsToInclude: [{ url: CONFIG.reactUrl[runtimeEnv] }, { url: CONFIG.reactDomUrl[runtimeEnv] }]
-        }
+        template: 'assets/index.html'
       })
     ]
   };
@@ -52,4 +36,4 @@ function _generateBaseWebpackConfiguration({ runtimeEnv = 'dev', isProduction = 
   return webpackConfig;
 }
 
-module.exports = _generateBaseWebpackConfiguration({ runtimeEnv: 'dev', isProduction: false });
+module.exports = createWebpackConfig;
