@@ -11,8 +11,10 @@
     "generate",
     "documentation",
     "declaration",
+    "dts",
     ".d.ts",
     "rollup",
+    "bundle",
     "compiler",
     "alpha",
     "beta"
