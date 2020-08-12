@@ -3,11 +3,19 @@
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
   "packages": [
     {
+      "name": "css-loader",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "react",
       "allowedCategories": [ "tests" ]
     },
     {
       "name": "react-dom",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "style-loader",
       "allowedCategories": [ "tests" ]
     }
   ]

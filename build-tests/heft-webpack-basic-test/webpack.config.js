@@ -14,6 +14,14 @@ function createWebpackConfig({ production }) {
     resolve: {
       extensions: ['.js', '.jsx', '.json']
     },
+    module: {
+      rules: [
+        {
+          test: /\.css$/,
+          use: [require.resolve('style-loader'), require.resolve('css-loader')]
+        }
+      ]
+    },
     entry: {
       app: path.join(__dirname, 'lib', 'index.js'),
 
