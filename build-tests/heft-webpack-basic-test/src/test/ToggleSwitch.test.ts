@@ -3,8 +3,8 @@
 
 import { ToggleSwitch } from '../ToggleSwitch';
 
-describe('Example Test', () => {
-  it('Correctly tests stuff', () => {
+describe('ToggleSwitch', () => {
+  it('can be tested', () => {
     expect(ToggleSwitch).toBeDefined();
   });
 });
