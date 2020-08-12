@@ -1,33 +1,64 @@
 import * as React from 'react';
 
-export interface IToggleEventArgs {
-  sliderPosition: ToggleSwitchPosition;
-}
-
-export interface IToggleSwitchProps {
-  leftColor: string;
-  rightColor: string;
-  onToggle: (sender: ToggleSwitch, args: IToggleEventArgs) => void;
-}
-
+/**
+ * Slider positions for `ToggleSwitch`.
+ */
 export const enum ToggleSwitchPosition {
   Left = 'left',
   Right = 'right'
 }
 
-export class ToggleSwitch extends React.Component<IToggleSwitchProps> {
-  private _sliderPosition: ToggleSwitchPosition.Left | ToggleSwitchPosition.Right;
+/**
+ * Event arguments for `IToggleSwitchProps.onToggle`.
+ */
+export interface IToggleEventArgs {
+  sliderPosition: ToggleSwitchPosition;
+}
 
+export interface IToggleSwitchProps {
+  /**
+   * The CSS color when the `ToggleSwitch` slider is in the left position.
+   * Example value: `"#800000"`
+   */
+  leftColor: string;
+
+  /**
+   * The CSS color when the `ToggleSwitch` slider is in the right position.
+   * Example value: `"#008000"`
+   */
+  rightColor: string;
+
+  /**
+   * An event that fires when the `ToggleSwitch` control is clicked.
+   */
+  onToggle?: (sender: ToggleSwitch, args: IToggleEventArgs) => void;
+}
+
+/**
+ * Private state for ToggleSwitch.
+ */
+interface IToggleSwitchState {
+  sliderPosition: ToggleSwitchPosition;
+}
+
+/**
+ * An example component that renders a switch whose slider position can be "left" or "right".
+ */
+export class ToggleSwitch extends React.Component<IToggleSwitchProps, IToggleSwitchState> {
   public constructor(props: IToggleSwitchProps) {
     super(props);
-    this._sliderPosition = ToggleSwitchPosition.Left;
+    this.state = {
+      sliderPosition: ToggleSwitchPosition.Left
+    };
   }
 
   public render(): React.ReactNode {
     const frameStyle: React.CSSProperties = {
       borderRadius: '10px',
       backgroundColor:
-        this._sliderPosition === ToggleSwitchPosition.Left ? this.props.leftColor : this.props.rightColor,
+        this.state.sliderPosition === ToggleSwitchPosition.Left
+          ? this.props.leftColor
+          : this.props.rightColor,
       width: '35px',
       height: '20px',
       cursor: 'pointer'
@@ -39,7 +70,7 @@ export class ToggleSwitch extends React.Component<IToggleSwitchProps> {
       height: '20px'
     };
 
-    if (this._sliderPosition === ToggleSwitchPosition.Left) {
+    if (this.state.sliderPosition === ToggleSwitchPosition.Left) {
       sliderStyle.marginLeft = '0px';
       sliderStyle.marginRight = 'auto';
     } else {
@@ -54,16 +85,18 @@ export class ToggleSwitch extends React.Component<IToggleSwitchProps> {
     );
   }
 
+  // React event handlers should be represented as fields instead of methods to ensure the "this" pointer
+  // is bound correctly.  This form does not work with virtual/override inheritance, so use regular methods
+  // everywhere else.
   private _onClickSlider = (event: React.MouseEvent): void => {
-    if (this._sliderPosition === ToggleSwitchPosition.Left) {
-      this._sliderPosition = ToggleSwitchPosition.Right;
+    if (this.state.sliderPosition === ToggleSwitchPosition.Left) {
+      this.setState({ sliderPosition: ToggleSwitchPosition.Right });
     } else {
-      this._sliderPosition = ToggleSwitchPosition.Left;
+      this.setState({ sliderPosition: ToggleSwitchPosition.Left });
     }
-    // We could also use setState() to track "sliderPosition", but the TypeScript typings don't work as well.
-    this.forceUpdate();
+
     if (this.props.onToggle) {
-      this.props.onToggle(this, { sliderPosition: this._sliderPosition });
+      this.props.onToggle(this, { sliderPosition: this.state.sliderPosition });
     }
   };
 }

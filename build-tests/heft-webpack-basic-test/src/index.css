@@ -1,3 +1,7 @@
+/**
+ * This file gets copied to the "lib" folder because its extension is registered in copy-static-assets.json
+ * Then Webpack uses css-loader to embed it in the application bundle, and then style-loader applies to the DOM.
+ */
 html,
 body {
   margin: 0;

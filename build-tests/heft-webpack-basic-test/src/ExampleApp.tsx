@@ -1,6 +1,9 @@
 import * as React from 'react';
 import { ToggleSwitch, IToggleEventArgs } from './ToggleSwitch';
 
+/**
+ * This React component renders the application page.
+ */
 export class ExampleApp extends React.Component {
   public render(): React.ReactNode {
     const appStyle: React.CSSProperties = {
@@ -21,6 +24,9 @@ export class ExampleApp extends React.Component {
     );
   }
 
+  // React event handlers should be represented as fields instead of methods to ensure the "this" pointer
+  // is bound correctly.  This form does not work with virtual/override inheritance, so use regular methods
+  // everywhere else.
   private _onToggle = (sender: ToggleSwitch, args: IToggleEventArgs): void => {
     console.log('Toggle switch changed: ' + args.sliderPosition);
   };
