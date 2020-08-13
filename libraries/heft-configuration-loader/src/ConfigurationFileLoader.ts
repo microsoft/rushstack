@@ -233,18 +233,91 @@ export class ConfigurationFileLoader<TConfigurationFile> {
           ...Object.keys(configurationJson)
         ]);
 
-        const result: TConfigurationFile = {} as TConfigurationFile;
+        const resultAnnotation: IConfigurationFileFieldAnnotation<TConfigurationFile> = {
+          configurationFilePath: resolvedConfigurationFilePath,
+          originalValues: {} as TConfigurationFile
+        };
+        const result: TConfigurationFile = ({
+          [CONFIGURATION_FILE_FIELD_ANNOTATION]: resultAnnotation
+        } as unknown) as TConfigurationFile;
         for (const propertyName of propertyNames) {
           if (propertyName === '$schema' || propertyName === 'extends') {
             continue;
           }
 
-          result[propertyName] = this._handlePropertyInheritance(
-            propertyName,
-            configurationJson[propertyName],
-            parentConfiguration[propertyName],
-            this._propertyInheritanceTypes[propertyName]
-          );
+          const propertyValue: unknown | undefined = configurationJson[propertyName];
+          const parentPropertyValue: unknown | undefined = parentConfiguration[propertyName];
+
+          const bothAreArrays: boolean = Array.isArray(propertyValue) && Array.isArray(parentPropertyValue);
+          const defaultInheritanceType: InheritanceType = bothAreArrays
+            ? InheritanceType.append
+            : InheritanceType.replace;
+          const inheritanceType: InheritanceType =
+            this._propertyInheritanceTypes[propertyName] !== undefined
+              ? this._propertyInheritanceTypes[propertyName]
+              : defaultInheritanceType;
+
+          let newValue: unknown;
+          const usePropertyValue: () => void = () => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            resultAnnotation.originalValues[propertyName] = this.getPropertyOriginalValue<any, any>({
+              parentObject: configurationJson,
+              propertyName: propertyName
+            });
+            newValue = propertyValue;
+          };
+          const useParentPropertyValue: () => void = () => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            resultAnnotation.originalValues[propertyName] = this.getPropertyOriginalValue<any, any>({
+              parentObject: parentConfiguration,
+              propertyName: propertyName
+            });
+            newValue = parentPropertyValue;
+          };
+
+          switch (inheritanceType) {
+            case InheritanceType.replace: {
+              if (propertyValue !== undefined) {
+                usePropertyValue();
+              } else {
+                useParentPropertyValue();
+              }
+
+              break;
+            }
+
+            case InheritanceType.append: {
+              if (propertyValue !== undefined && parentPropertyValue === undefined) {
+                usePropertyValue();
+              } else if (propertyValue === undefined && parentPropertyValue !== undefined) {
+                useParentPropertyValue();
+              } else {
+                if (!Array.isArray(propertyValue) || !Array.isArray(parentPropertyValue)) {
+                  throw new Error(
+                    `Issue in processing configuration file property "${propertyName}". ` +
+                      `Property is not an array, but the inheritance type is set as "${InheritanceType.append}"`
+                  );
+                }
+
+                newValue = [...parentPropertyValue, ...propertyValue];
+                ((newValue as unknown) as IAnnotatedField<unknown[]>)[CONFIGURATION_FILE_FIELD_ANNOTATION] = {
+                  configurationFilePath: undefined,
+                  originalValues: {
+                    ...parentPropertyValue[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues,
+                    ...propertyValue[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues
+                  }
+                };
+              }
+
+              break;
+            }
+
+            default: {
+              throw new Error(`Unknown inheritance type "${inheritanceType}"`);
+            }
+          }
+
+          result[propertyName] = newValue;
         }
 
         cacheEntry = { configurationFile: result };
@@ -266,10 +339,7 @@ export class ConfigurationFileLoader<TConfigurationFile> {
     }
 
     if (typeof obj === 'object') {
-      ((obj as unknown) as IAnnotatedField<TObject>)[CONFIGURATION_FILE_FIELD_ANNOTATION] = {
-        configurationFilePath: resolvedConfigurationFilePath,
-        originalValues: { ...obj }
-      };
+      this._annotateProperty(resolvedConfigurationFilePath, obj);
 
       for (const objValue of Object.values(obj)) {
         this._annotateProperties(resolvedConfigurationFilePath, objValue);
@@ -277,45 +347,16 @@ export class ConfigurationFileLoader<TConfigurationFile> {
     }
   }
 
-  private _handlePropertyInheritance<TProperty>(
-    propertyName: string,
-    propertyValue: TProperty | undefined,
-    parentPropertyValue: TProperty | undefined,
-    inheritanceType: InheritanceType | undefined
-  ): TProperty | undefined {
-    inheritanceType = inheritanceType || InheritanceType.append;
-    if (parentPropertyValue) {
-      switch (inheritanceType) {
-        case InheritanceType.replace: {
-          return propertyValue;
-        }
+  private _annotateProperty<TObject>(resolvedConfigurationFilePath: string, obj: TObject): void {
+    if (!obj) {
+      return;
+    }
 
-        case InheritanceType.append: {
-          if (!Array.isArray(propertyValue) || !Array.isArray(parentPropertyValue)) {
-            throw new Error(
-              `Issue in processing configuration file property "${propertyName}". ` +
-                `Property is not an array, but the inheritance type is set as "${InheritanceType.append}"`
-            );
-          }
-
-          const result: TProperty = ([...parentPropertyValue, ...propertyValue] as unknown) as TProperty;
-          ((result as unknown) as IAnnotatedField<TProperty>)[CONFIGURATION_FILE_FIELD_ANNOTATION] = {
-            configurationFilePath: undefined,
-            originalValues: {
-              ...parentPropertyValue[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues,
-              ...propertyValue[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues
-            }
-          };
-
-          return result;
-        }
-
-        default: {
-          throw new Error(`Unknown inheritance type "${inheritanceType}"`);
-        }
-      }
-    } else {
-      return propertyValue;
+    if (typeof obj === 'object') {
+      ((obj as unknown) as IAnnotatedField<TObject>)[CONFIGURATION_FILE_FIELD_ANNOTATION] = {
+        configurationFilePath: resolvedConfigurationFilePath,
+        originalValues: { ...obj }
+      };
     }
   }
 
