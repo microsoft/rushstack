@@ -11,7 +11,8 @@ import {
   Terminal,
   ITerminalProvider,
   JsonFile,
-  IPackageJson
+  IPackageJson,
+  InternalError
 } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
 import { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.7';
@@ -324,6 +325,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     //#endregion
 
     this._validateTsconfig(ts, tsconfig);
+
+    EmitFilesPatch.install(ts, tsconfig, this._moduleKindsToEmit, /* useBuildCache */ false);
 
     ts.createWatchProgram(compilerHost);
 
@@ -664,7 +667,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     const filesToWrite: IFileToWrite[] = [];
 
     const changedFiles: Set<IExtendedSourceFile> = new Set<IExtendedSourceFile>();
-    EmitFilesPatch.install(ts, tsconfig, this._moduleKindsToEmit, changedFiles);
+    EmitFilesPatch.install(ts, tsconfig, this._moduleKindsToEmit, /* useBuildCache */ true, changedFiles);
 
     const writeFileCallback: TTypescript.WriteFileCallback = (filePath: string, data: string) => {
       const redirectedFilePath: string = EmitFilesPatch.getRedirectedFilePath(filePath);
@@ -873,16 +876,25 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       (
         rootNames: ReadonlyArray<string> | undefined,
         options: TTypescript.CompilerOptions | undefined,
-        host?: TTypescript.CompilerHost,
+        compilerHost?: TTypescript.CompilerHost,
         oldProgram?: TTypescript.EmitAndSemanticDiagnosticsBuilderProgram,
         configFileParsingDiagnostics?: ReadonlyArray<TTypescript.Diagnostic>,
         projectReferences?: ReadonlyArray<TTypescript.ProjectReference> | undefined
       ) => {
-        // TODO: Support additionalModuleKindsToEmit
+        if (compilerHost === undefined) {
+          throw new InternalError('_buildWatchCompilerHost() expects a compilerHost to be configured');
+        }
+
+        const originalWriteFile: TTypescript.WriteFileCallback = compilerHost.writeFile;
+        compilerHost.writeFile = (filePath: string, ...rest: unknown[]) => {
+          const redirectedFilePath: string = EmitFilesPatch.getRedirectedFilePath(filePath);
+          originalWriteFile.call(this, redirectedFilePath, ...rest);
+        };
+
         return ts.createEmitAndSemanticDiagnosticsBuilderProgram(
           rootNames,
           options,
-          host,
+          compilerHost,
           oldProgram,
           configFileParsingDiagnostics,
           projectReferences

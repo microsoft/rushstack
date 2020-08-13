@@ -41,10 +41,11 @@ export class EmitFilesPatch {
     ts: ExtendedTypeScript,
     tsconfig: TTypescript.ParsedCommandLine,
     moduleKindsToEmit: ICachedEmitModuleKind<TTypescript.ModuleKind>[],
-    changedFiles: Set<IExtendedSourceFile>
+    useBuildCache: boolean,
+    changedFiles?: Set<IExtendedSourceFile>
   ): void {
     if (EmitFilesPatch._patchedTs !== undefined) {
-      throw new Error(
+      throw new InternalError(
         'EmitFilesPatch.install() cannot be called without first uninstalling the existing patch'
       );
     }
@@ -88,7 +89,7 @@ export class EmitFilesPatch {
           forceDtsEmit
         );
       } else {
-        if (targetSourceFile) {
+        if (targetSourceFile && changedFiles) {
           changedFiles.add(targetSourceFile);
         }
 
@@ -114,7 +115,9 @@ export class EmitFilesPatch {
 
           // Redirect from "path/to/lib" --> "path/to/.heft/build-cache/lib"
           EmitFilesPatch._originalOutDir = compilerOptions.outDir;
-          EmitFilesPatch._redirectedOutDir = moduleKindToEmit.cacheOutFolderPath;
+          EmitFilesPatch._redirectedOutDir = useBuildCache
+            ? moduleKindToEmit.cacheOutFolderPath
+            : moduleKindToEmit.outFolderPath;
 
           const flavorResult: TTypescript.EmitResult = EmitFilesPatch._baseEmitFiles(
             resolver,
@@ -146,7 +149,17 @@ export class EmitFilesPatch {
     };
   }
 
+  public static get isInstalled(): boolean {
+    return this._patchedTs !== undefined;
+  }
+
   public static getRedirectedFilePath(filePath: string): string {
+    if (!EmitFilesPatch.isInstalled) {
+      throw new InternalError(
+        'EmitFilesPatch.getRedirectedFilePath() cannot be used unless the patch is installed'
+      );
+    }
+
     // Redirect from "path/to/lib" --> "path/to/.heft/build-cache/lib"
     let redirectedFilePath: string = filePath;
     if (EmitFilesPatch._redirectedOutDir !== undefined) {
@@ -165,10 +178,10 @@ export class EmitFilesPatch {
 
   public static uninstall(ts: ExtendedTypeScript): void {
     if (EmitFilesPatch._patchedTs === undefined) {
-      throw new Error('EmitFilesPatch.uninstall() cannot be called if no patch was installed');
+      throw new InternalError('EmitFilesPatch.uninstall() cannot be called if no patch was installed');
     }
     if (ts !== EmitFilesPatch._patchedTs) {
-      throw new Error('EmitFilesPatch.uninstall() called for the wrong object');
+      throw new InternalError('EmitFilesPatch.uninstall() called for the wrong object');
     }
 
     ts.emitFiles = EmitFilesPatch._baseEmitFiles;
