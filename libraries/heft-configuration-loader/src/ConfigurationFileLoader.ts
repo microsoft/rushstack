@@ -231,10 +231,7 @@ export class ConfigurationFileLoader<TConfigurationFile> {
             );
           }
 
-          const parentPropertyValueAsArray: unknown[] = parentPropertyValue;
-          parentPropertyValueAsArray.push(...propertyValue);
-
-          return (parentPropertyValueAsArray as unknown) as TProperty;
+          return ([...parentPropertyValue, ...propertyValue] as unknown) as TProperty;
         }
 
         default: {
