@@ -1,6 +1,15 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 12 Aug 2020 00:10:05 GMT and should not be manually modified.
+This log was last generated on Thu, 13 Aug 2020 04:57:38 GMT and should not be manually modified.
+
+## 0.4.6
+Thu, 13 Aug 2020 04:57:38 GMT
+
+### Patches
+
+- Fix an issue with incorrect source maps for the Jest transform
+- Fix a watch mode race condition where "--clean" ran in parallel with "heft test" (GitHub #2078)
+- Fix an issue where "The transpiler output folder does not exist" was sometimes printed erroneously
 
 ## 0.4.5
 Wed, 12 Aug 2020 00:10:05 GMT

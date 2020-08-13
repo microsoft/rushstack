@@ -2,6 +2,24 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.4.6",
+      "tag": "@rushstack/heft_v0.4.6",
+      "date": "Thu, 13 Aug 2020 04:57:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with incorrect source maps for the Jest transform"
+          },
+          {
+            "comment": "Fix a watch mode race condition where \"--clean\" ran in parallel with \"heft test\" (GitHub #2078)"
+          },
+          {
+            "comment": "Fix an issue where \"The transpiler output folder does not exist\" was sometimes printed erroneously"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.5",
       "tag": "@rushstack/heft_v0.4.5",
       "date": "Wed, 12 Aug 2020 00:10:05 GMT",
