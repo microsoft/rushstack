@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Set PATH explicitly and let NodeJS take care of OS-specific case handling",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "crhaglun@users.noreply.github.com"
+}
