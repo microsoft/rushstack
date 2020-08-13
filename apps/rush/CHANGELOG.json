@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.32.0",
+      "tag": "@microsoft/rush_v5.32.0",
+      "date": "Thu, 13 Aug 2020 00:53:43 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update temp project tarball integrities during rush bump"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.31.0",
       "tag": "@microsoft/rush_v5.31.0",
       "date": "Wed, 12 Aug 2020 19:33:44 GMT",
