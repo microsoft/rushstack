@@ -40,7 +40,11 @@ export class JestPlugin implements IHeftPlugin {
   ): Promise<void> {
     const buildFolder: string = heftConfiguration.buildFolder;
 
-    this._validateJestTypeScriptDataFile(buildFolder);
+    // In watch mode, Jest starts up in parallel with the compiler, so there's no
+    // guarantee that the output files would have been written yet.
+    if (!test.properties.watchMode) {
+      this._validateJestTypeScriptDataFile(buildFolder);
+    }
 
     const reporterOptions: IHeftJestReporterOptions = { heftConfiguration };
     const { results: jestResults } = await runCLI(

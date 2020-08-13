@@ -45,6 +45,11 @@ export class BuildAction extends HeftActionBase {
   }
 
   protected async actionExecuteAsync(): Promise<void> {
+    await this.runCleanIfRequestedAsync();
+    await this.runBuildAsync();
+  }
+
+  protected async runCleanIfRequestedAsync(): Promise<void> {
     if (this._cleanFlag.value) {
       const cleanStage: CleanStage = this.stages.cleanStage;
       const cleanStageOptions: ICleanStageOptions = {};
@@ -56,7 +61,9 @@ export class BuildAction extends HeftActionBase {
         async () => await cleanStage.executeAsync()
       );
     }
+  }
 
+  protected async runBuildAsync(): Promise<void> {
     const buildStage: BuildStage = this.stages.buildStage;
     const buildStageOptions: IBuildStageOptions = {
       ...BuildStage.getOptionsFromStandardParameters(this._buildStandardParameters),

@@ -67,10 +67,11 @@ export class TestAction extends BuildAction {
       await testStage.initializeAsync(testStageOptions);
 
       if (watchMode) {
+        await this.runCleanIfRequestedAsync();
+
         // In --watch mode, kick off all stages concurrently with the expectation that the their
         // promises will never resolve and that they will handle watching filesystem changes
-
-        await Promise.all([super.actionExecuteAsync(), testStage.executeAsync()]);
+        await Promise.all([this.runBuildAsync(), testStage.executeAsync()]);
       } else {
         if (shouldBuild) {
           await super.actionExecuteAsync();
