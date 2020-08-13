@@ -5,7 +5,6 @@ import * as path from 'path';
 import * as semver from 'semver';
 import {
   Colors,
-  Path,
   FileSystemStats,
   IFileSystemCreateLinkOptions,
   IColorableSequence,
@@ -19,9 +18,6 @@ import * as crypto from 'crypto';
 import { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.7';
 import {
   ExtendedTypeScript,
-  IEmitResolver,
-  IEmitHost,
-  IEmitTransformers,
   IExtendedProgram,
   IExtendedSourceFile,
   IResolveModuleNameResolutionHost
@@ -33,7 +29,9 @@ import { PerformanceMeasurer, PerformanceMeasurerAsync } from '../../utilities/P
 import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
 import { Tslint } from './Tslint';
 import { Eslint } from './Eslint';
-import { ISharedTypeScriptConfiguration, IEmitModuleKindBase } from '../../stages/BuildStage';
+import { ISharedTypeScriptConfiguration } from '../../stages/BuildStage';
+
+import { EmitFilesPatch, ICachedEmitModuleKind } from './EmitFilesPatch';
 
 export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfiguration {
   buildFolder: string;
@@ -68,21 +66,6 @@ export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfig
   maxWriteParallelism: number;
 }
 
-interface ICachedEmitModuleKind<TModuleKind> extends IEmitModuleKindBase<TModuleKind> {
-  /**
-   * TypeScript's output is placed in the \<project root\>/.heft/build-cache folder.
-   * This is the the path to the subfolder in the build-cache folder that this emit kind
-   * written to.
-   */
-  cacheOutFolderPath: string;
-
-  /**
-   * Set to true if this is the emit kind that is specified in the tsconfig.json.
-   * Sourcemaps and declarations are only emitted for the primary module kind.
-   */
-  isPrimary: boolean;
-}
-
 type TWatchCompilerHost = TTypescript.WatchCompilerHostOfFilesAndCompilerOptions<
   TTypescript.EmitAndSemanticDiagnosticsBuilderProgram
 >;
@@ -112,6 +95,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _typescriptParsedVersion: semver.SemVer;
 
   private _capabilities: ICompilerCapabilities;
+  private _useIncrementalProgram: boolean;
 
   private _eslintEnabled: boolean;
   private _tslintEnabled: boolean;
@@ -191,6 +175,11 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     ) {
       this._capabilities.incrementalProgram = true;
     }
+
+    // Disable incremental "useIncrementalProgram" in watch mode because its compiler configuration is
+    // different, which will invalidate the incremental build cache.  In order to support this, we'd need
+    // to delete the cache when switching modes, or else maintain two separate cache folders.
+    this._useIncrementalProgram = this._capabilities.incrementalProgram && !this._configuration.watchMode;
 
     this._configuration.buildCacheFolder = this._configuration.buildCacheFolder.replace(/\\/g, '/');
     this._tslintConfigFilePath = path.resolve(this._configuration.buildFolder, 'tslint.json');
@@ -337,6 +326,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
     this._validateTsconfig(ts, tsconfig);
 
+    EmitFilesPatch.install(ts, tsconfig, this._moduleKindsToEmit, /* useBuildCache */ false);
+
     ts.createWatchProgram(compilerHost);
 
     return new Promise(() => {
@@ -377,7 +368,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     let builderProgram: TTypescript.BuilderProgram | undefined = undefined;
     let tsProgram: TTypescript.Program;
 
-    if (this._capabilities.incrementalProgram) {
+    if (this._useIncrementalProgram) {
       builderProgram = ts.createIncrementalProgram({
         rootNames: tsconfig.fileNames,
         options: tsconfig.options,
@@ -675,119 +666,12 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   ): IExtendedEmitResult {
     const filesToWrite: IFileToWrite[] = [];
 
-    let foundPrimary: boolean = false;
-    let defaultModuleKind: TTypescript.ModuleKind;
-
-    for (const moduleKindToEmit of this._moduleKindsToEmit) {
-      if (moduleKindToEmit.isPrimary) {
-        if (foundPrimary) {
-          throw new Error('Multiple primary module emit kinds encountered.');
-        } else {
-          foundPrimary = true;
-        }
-        defaultModuleKind = moduleKindToEmit.moduleKind;
-      }
-    }
-
-    const baseEmitFiles: typeof ts.emitFiles = ts.emitFiles;
-
     const changedFiles: Set<IExtendedSourceFile> = new Set<IExtendedSourceFile>();
+    EmitFilesPatch.install(ts, tsconfig, this._moduleKindsToEmit, /* useBuildCache */ true, changedFiles);
 
-    let originalOutDir: string | undefined = undefined;
-    let redirectedOutDir: string | undefined = undefined;
     const writeFileCallback: TTypescript.WriteFileCallback = (filePath: string, data: string) => {
-      // Redirect from "path/to/lib" --> "path/to/.heft/build-cache/lib"
-      let redirectedFilePath: string = filePath;
-      if (redirectedOutDir !== undefined) {
-        if (Path.isUnderOrEqual(filePath, originalOutDir!)) {
-          redirectedFilePath = path.resolve(redirectedOutDir, path.relative(originalOutDir!, filePath));
-        } else {
-          // The compiler is writing some other output, for example:
-          // ./.heft/build-cache/ts_a7cd263b9f06b2440c0f2b2264746621c192f2e2.json
-        }
-      }
-
+      const redirectedFilePath: string = EmitFilesPatch.getRedirectedFilePath(filePath);
       filesToWrite.push({ filePath: redirectedFilePath, data });
-    };
-
-    // Override the underlying file emitter to run itself once for each flavor
-    // This is a rather inelegant way to convince the TypeScript compiler not to duplicate parse/link/check
-    ts.emitFiles = (
-      resolver: IEmitResolver,
-      host: IEmitHost,
-      targetSourceFile: IExtendedSourceFile | undefined,
-      emitTransformers: IEmitTransformers,
-      emitOnlyDtsFiles?: boolean,
-      onlyBuildInfo?: boolean,
-      forceDtsEmit?: boolean
-    ): TTypescript.EmitResult => {
-      if (onlyBuildInfo || emitOnlyDtsFiles) {
-        // There should only be one tsBuildInfo and one set of declaration files
-        return baseEmitFiles(
-          resolver,
-          host,
-          targetSourceFile,
-          emitTransformers,
-          emitOnlyDtsFiles,
-          onlyBuildInfo,
-          forceDtsEmit
-        );
-      } else {
-        if (targetSourceFile) {
-          changedFiles.add(targetSourceFile);
-        }
-
-        let defaultModuleKindResult: TTypescript.EmitResult;
-        let emitSkipped: boolean = false;
-        for (const moduleKindToEmit of this._moduleKindsToEmit) {
-          const compilerOptions: TTypescript.CompilerOptions = moduleKindToEmit.isPrimary
-            ? {
-                ...tsconfig.options
-              }
-            : {
-                ...tsconfig.options,
-                module: moduleKindToEmit.moduleKind,
-
-                // Don't emit declarations for secondary module kinds
-                declaration: false,
-                declarationMap: false
-              };
-
-          if (!compilerOptions.outDir) {
-            throw new InternalError('Expected compilerOptions.outDir to be assigned');
-          }
-
-          // Redirect from "path/to/lib" --> "path/to/.heft/build-cache/lib"
-          originalOutDir = compilerOptions.outDir;
-          redirectedOutDir = moduleKindToEmit.cacheOutFolderPath;
-
-          const flavorResult: TTypescript.EmitResult = baseEmitFiles(
-            resolver,
-            {
-              ...host,
-              getCompilerOptions: () => compilerOptions
-            },
-            targetSourceFile,
-            ts.getTransformers(compilerOptions, undefined, emitOnlyDtsFiles),
-            emitOnlyDtsFiles,
-            onlyBuildInfo,
-            forceDtsEmit
-          );
-
-          emitSkipped = emitSkipped || flavorResult.emitSkipped;
-          if (moduleKindToEmit.moduleKind === defaultModuleKind) {
-            defaultModuleKindResult = flavorResult;
-          }
-
-          originalOutDir = undefined;
-          redirectedOutDir = undefined;
-          // Should results be aggregated, in case for whatever reason the diagnostics are not the same?
-        }
-        return {
-          ...defaultModuleKindResult!,
-          emitSkipped
-        };
-      }
     };
 
     const result: TTypescript.EmitResult = genericProgram.emit(
@@ -795,7 +679,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       writeFileCallback
     );
 
-    ts.emitFiles = baseEmitFiles;
+    EmitFilesPatch.uninstall(ts);
 
     return {
       ...result,
@@ -930,7 +814,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       currentFolder
     );
 
-    if (this._capabilities.incrementalProgram) {
+    if (this._useIncrementalProgram) {
       tsconfig.options.incremental = true;
       tsconfig.options.tsBuildInfoFile = this._tsCacheFilePath;
     }
@@ -944,7 +828,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   ): TTypescript.CompilerHost {
     let compilerHost: TTypescript.CompilerHost;
 
-    if (this._capabilities.incrementalProgram) {
+    if (this._useIncrementalProgram) {
       compilerHost = ts.createIncrementalCompilerHost(tsconfig.options);
     } else {
       compilerHost = ts.createCompilerHost(tsconfig.options);
@@ -992,16 +876,25 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       (
         rootNames: ReadonlyArray<string> | undefined,
         options: TTypescript.CompilerOptions | undefined,
-        host?: TTypescript.CompilerHost,
+        compilerHost?: TTypescript.CompilerHost,
         oldProgram?: TTypescript.EmitAndSemanticDiagnosticsBuilderProgram,
         configFileParsingDiagnostics?: ReadonlyArray<TTypescript.Diagnostic>,
         projectReferences?: ReadonlyArray<TTypescript.ProjectReference> | undefined
       ) => {
-        // TODO: Support additionalModuleKindsToEmit
+        if (compilerHost === undefined) {
+          throw new InternalError('_buildWatchCompilerHost() expects a compilerHost to be configured');
+        }
+
+        const originalWriteFile: TTypescript.WriteFileCallback = compilerHost.writeFile;
+        compilerHost.writeFile = (filePath: string, ...rest: unknown[]) => {
+          const redirectedFilePath: string = EmitFilesPatch.getRedirectedFilePath(filePath);
+          originalWriteFile.call(this, redirectedFilePath, ...rest);
+        };
+
         return ts.createEmitAndSemanticDiagnosticsBuilderProgram(
           rootNames,
           options,
-          host,
+          compilerHost,
           oldProgram,
           configFileParsingDiagnostics,
           projectReferences
