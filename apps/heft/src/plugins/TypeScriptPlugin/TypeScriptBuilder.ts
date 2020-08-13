@@ -112,6 +112,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _typescriptParsedVersion: semver.SemVer;
 
   private _capabilities: ICompilerCapabilities;
+  private _useIncrementalProgram: boolean;
 
   private _eslintEnabled: boolean;
   private _tslintEnabled: boolean;
@@ -191,6 +192,11 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     ) {
       this._capabilities.incrementalProgram = true;
     }
+
+    // Disable incremental "useIncrementalProgram" in watch mode because its compiler configuration is
+    // different, which will invalidate the incremental build cache.  In order to support this, we'd need
+    // to delete the cache when switching modes, or else maintain two separate cache folders.
+    this._useIncrementalProgram = this._capabilities.incrementalProgram && !this._configuration.watchMode;
 
     this._configuration.buildCacheFolder = this._configuration.buildCacheFolder.replace(/\\/g, '/');
     this._tslintConfigFilePath = path.resolve(this._configuration.buildFolder, 'tslint.json');
@@ -377,7 +383,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     let builderProgram: TTypescript.BuilderProgram | undefined = undefined;
     let tsProgram: TTypescript.Program;
 
-    if (this._capabilities.incrementalProgram) {
+    if (this._useIncrementalProgram) {
       builderProgram = ts.createIncrementalProgram({
         rootNames: tsconfig.fileNames,
         options: tsconfig.options,
@@ -930,7 +936,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       currentFolder
     );
 
-    if (this._capabilities.incrementalProgram) {
+    if (this._useIncrementalProgram) {
       tsconfig.options.incremental = true;
       tsconfig.options.tsBuildInfoFile = this._tsCacheFilePath;
     }
@@ -944,7 +950,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   ): TTypescript.CompilerHost {
     let compilerHost: TTypescript.CompilerHost;
 
-    if (this._capabilities.incrementalProgram) {
+    if (this._useIncrementalProgram) {
       compilerHost = ts.createIncrementalCompilerHost(tsconfig.options);
     } else {
       compilerHost = ts.createCompilerHost(tsconfig.options);
