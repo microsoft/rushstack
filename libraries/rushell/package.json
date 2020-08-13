@@ -9,8 +9,8 @@
   "main": "lib/index.js",
   "typings": "dist/rushell.d.ts",
   "scripts": {
-    "build": "gulp test --clean",
-    "start": "jest --watch"
+    "build": "heft test --clean",
+    "start": "heft test --watch"
   },
   "license": "MIT",
   "dependencies": {
@@ -18,11 +18,10 @@
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.5": "workspace:*",
-    "@microsoft/node-library-build": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
     "@types/jest": "25.2.1",
     "@types/node": "10.17.13",
-    "gulp": "~4.0.2",
     "jest": "~25.4.0",
     "ts-jest": "~25.1.0"
   },

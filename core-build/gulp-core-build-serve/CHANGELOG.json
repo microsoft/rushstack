@@ -2,6 +2,45 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "3.7.32",
+      "tag": "@microsoft/gulp-core-build-serve_v3.7.32",
+      "date": "Thu, 13 Aug 2020 04:57:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `0.2.32`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.7.31",
+      "tag": "@microsoft/gulp-core-build-serve_v3.7.31",
+      "date": "Wed, 12 Aug 2020 00:10:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" to `3.16.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.26.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `0.2.31`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" to `6.4.34`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.0.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.7.30",
       "tag": "@microsoft/gulp-core-build-serve_v3.7.30",
       "date": "Wed, 05 Aug 2020 18:27:32 GMT",

@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft",
-  "version": "0.4.3",
+  "version": "0.4.6",
   "description": "The Rush Stack extensible build system",
   "keywords": [
     "toolchain",
@@ -34,6 +34,7 @@
   "dependencies": {
     "@jest/core": "~25.4.0",
     "@jest/reporters": "~25.4.0",
+    "@jest/transform": "~25.4.0",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "@types/tapable": "1.0.5",
@@ -59,6 +60,6 @@
     "@types/webpack-dev-server": "3.11.0",
     "@microsoft/rush-stack-compiler-3.7": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "0.2.0"
+    "@rushstack/heft": "0.4.3"
   }
 }

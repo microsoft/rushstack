@@ -1,0 +1,7 @@
+{
+  "name": "rushx-project",
+  "version": "0.0.0",
+  "scripts": {
+    "show-args": "node ./build.js"
+  }
+}

@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-lib",
-  "version": "5.30.3",
+  "version": "5.32.0",
   "description": "A library for writing scripts that interact with the Rush tool",
   "repository": {
     "type": "git",
@@ -14,7 +14,7 @@
   "main": "lib/index.js",
   "typings": "dist/rush-lib.d.ts",
   "scripts": {
-    "build": "gulp test --clean"
+    "build": "heft test --clean"
   },
   "license": "MIT",
   "dependencies": {
@@ -42,6 +42,7 @@
     "read-package-tree": "~5.1.5",
     "resolve": "~1.17.0",
     "semver": "~7.3.0",
+    "ssri": "~8.0.0",
     "strict-uri-encode": "~2.0.0",
     "tar": "~5.0.5",
     "true-case-path": "~2.2.1",
@@ -50,9 +51,9 @@
     "jszip": "~3.5.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "workspace:*",
     "@microsoft/rush-stack-compiler-3.5": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
     "@types/glob": "7.1.1",
     "@types/inquirer": "0.0.43",
     "@types/jest": "25.2.1",
@@ -66,11 +67,11 @@
     "@types/read-package-tree": "5.1.0",
     "@types/resolve": "1.17.1",
     "@types/semver": "~7.3.1",
+    "@types/ssri": "~7.1.0",
     "@types/strict-uri-encode": "2.0.0",
     "@types/tar": "4.0.3",
     "@types/wordwrap": "1.0.0",
     "@types/z-schema": "3.16.31",
-    "gulp": "~4.0.2",
     "jest": "~25.4.0"
   }
 }

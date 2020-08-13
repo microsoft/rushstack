@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add keywords to package.json for discoverability",
+      "type": "none",
+      "packageName": "@microsoft/api-extractor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "forivall@users.noreply.github.com"
+}
