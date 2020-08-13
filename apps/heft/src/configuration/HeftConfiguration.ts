@@ -4,7 +4,6 @@
 import * as path from 'path';
 import { Terminal, ITerminalProvider, IPackageJson } from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
-import { ConfigurationFileLoader } from '@rushstack/heft-configuration-loader';
 
 import { TaskPackageResolver, ITaskPackageResolution } from '../utilities/TaskPackageResolver';
 import { Utilities } from '../utilities/Utilities';
@@ -64,7 +63,6 @@ export class HeftConfiguration {
   private _buildCacheFolder: string | undefined;
   private _globalTerminal: Terminal;
   private _terminalProvider: ITerminalProvider;
-  private _configurationFileLoader: ConfigurationFileLoader = new ConfigurationFileLoader();
 
   private _compilerPackage: ICompilerPackage | undefined;
   private _hasCompilerPackageBeenAccessed: boolean = false;
@@ -147,16 +145,6 @@ export class HeftConfiguration {
     }
 
     return this._compilerPackage;
-  }
-
-  /**
-   * The configuration file loader can be used to load well-structured JSON configuration files that support extending
-   * from other JSON configuration files.
-   *
-   * @beta
-   */
-  public get configurationFileLoader(): ConfigurationFileLoader {
-    return this._configurationFileLoader;
   }
 
   private constructor() {}

@@ -3,7 +3,11 @@
 
 import * as path from 'path';
 import { Terminal, InternalError, FileSystem, Resolve } from '@rushstack/node-core-library';
-import { InheritanceType, ResolutionMethod } from '@rushstack/heft-configuration-loader';
+import {
+  InheritanceType,
+  PathResolutionMethod,
+  ConfigurationFileLoader
+} from '@rushstack/heft-configuration-loader';
 
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IHeftPlugin } from './IHeftPlugin';
@@ -70,23 +74,20 @@ export class PluginManager {
         this._heftConfiguration.projectHeftDataFolder,
         'plugins.json'
       );
-      const pluginConfigurationJson: IPluginConfigurationJson = await this._heftConfiguration.configurationFileLoader.loadConfigurationFileAsync<
+      const schemaPath: string = path.join(__dirname, '..', 'schemas', 'plugins.schema.json');
+      const pluginConfigFileLoader: ConfigurationFileLoader<IPluginConfigurationJson> = new ConfigurationFileLoader<
         IPluginConfigurationJson
-      >(pluginConfigFilePath, {
-        schemaPath: path.join(__dirname, '..', 'schemas', 'plugins.schema.json'),
-        propertyInheritance: {
-          plugins: InheritanceType.append
-        },
-        propertyPathResolution: {
-          plugins: {
-            objectEntriesHandling: {
-              childPropertyHandling: {
-                plugin: ResolutionMethod.NodeResolve
-              }
-            }
+      >(schemaPath, {
+        propertyInheritanceTypes: { plugins: InheritanceType.append },
+        jsonPathMetadata: {
+          '$.plugins.*.plugin': {
+            pathResolutionMethod: PathResolutionMethod.NodeResolve
           }
         }
       });
+      const pluginConfigurationJson: IPluginConfigurationJson = await pluginConfigFileLoader.loadConfigurationFileAsync(
+        pluginConfigFilePath
+      );
 
       for (const pluginSpecifier of pluginConfigurationJson.plugins) {
         this._initializeResolvedPlugin(pluginSpecifier.plugin, pluginSpecifier.options);

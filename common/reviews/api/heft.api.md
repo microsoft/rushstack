@@ -12,7 +12,6 @@ import { CommandLineAction } from '@rushstack/ts-command-line';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
-import { ConfigurationFileLoader } from '@rushstack/heft-configuration-loader';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { SyncHook } from 'tapable';
@@ -79,8 +78,6 @@ export class HeftConfiguration {
     get buildCacheFolder(): string;
     get buildFolder(): string;
     get compilerPackage(): ICompilerPackage | undefined;
-    // @beta
-    get configurationFileLoader(): ConfigurationFileLoader;
     get globalTerminal(): Terminal;
     get heftPackageJson(): IPackageJson;
     // @internal (undocumented)
