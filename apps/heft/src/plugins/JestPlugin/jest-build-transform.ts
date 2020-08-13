@@ -19,6 +19,19 @@ function delayMs(milliseconds: number): void {
 
 const DEBUG_TRANSFORM: boolean = false;
 
+// Tolerate this much inaccuracy in the filesystem time stamps
+const TIMESTAMP_TOLERANCE_MS: number = 15;
+
+// Wait this long after a .js file's timestamp changes before starting to read it; this gives time
+// for the contents to get flushed to disk.
+const FLUSH_TIME_MS: number = 500;
+
+// Wait this long for the .js file to be written before giving up.
+const MAX_WAIT_MS: number = 4000;
+
+// Shamefully sleep this long to avoid consuming CPU cycles
+const POLLING_INTERVAL_MS: number = 50;
+
 /**
  * This Jest transformer maps TS files under a 'src' folder to their compiled equivalent under 'lib'
  */
@@ -79,18 +92,17 @@ export function process(
       if (libFileStatistics) {
         // The lib/*.js timestamp must not be older than the src/*.ts timestamp, otherwise the transpiler
         // is not done writing its outputs.
-        if (libFileStatistics.ctimeMs + 15 > srcFileStatistics.ctimeMs) {
-          // allow 100ms of slop for clock issues
+        if (libFileStatistics.ctimeMs + TIMESTAMP_TOLERANCE_MS > srcFileStatistics.ctimeMs) {
           // Also, the lib/*.js timestamp must not be too recent, otherwise the transpiler may not have
           // finished flushing its output to disk.
-          if (nowMs > libFileStatistics.ctimeMs + 500) {
+          if (nowMs > libFileStatistics.ctimeMs + FLUSH_TIME_MS) {
             // The .js file is newer than the .ts file, and is old enough to have been flushed
             break;
           }
         }
       }
 
-      if (nowMs - startOfLoopMs > 4000) {
+      if (nowMs - startOfLoopMs > MAX_WAIT_MS) {
         // Something is wrong -- why hasn't the compiler updated the .js file?
         if (libFileStatistics) {
           throw new Error(
@@ -108,7 +120,7 @@ export function process(
       // Jest's transforms are synchronous, so our only option here is to sleep synchronously. Bad Jest. :-(
       // TODO: The better solution is to change how Jest's watch loop is notified.
       stalled = true;
-      delayMs(100);
+      delayMs(POLLING_INTERVAL_MS);
     }
 
     if (stalled && DEBUG_TRANSFORM) {
