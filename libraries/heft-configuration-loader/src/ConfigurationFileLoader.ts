@@ -45,6 +45,17 @@ export enum PathResolutionMethod {
   NodeResolve
 }
 
+const CONFIGURATION_FILE_FIELD_ANNOTATION: unique symbol = Symbol('configuration-file-field-annotation');
+
+interface IAnnotatedField<TField> {
+  [CONFIGURATION_FILE_FIELD_ANNOTATION]: IConfigurationFileFieldAnnotation<TField>;
+}
+
+interface IConfigurationFileFieldAnnotation<TField> {
+  configurationFilePath: string | undefined;
+  originalValues: { [propertyName in keyof TField]: unknown };
+}
+
 interface IConfigurationFileCacheEntry<TConfigurationFile> {
   configurationFile?: TConfigurationFile;
   error?: Error;
@@ -89,6 +100,14 @@ interface IJsonPathCallbackObject {
 /**
  * @beta
  */
+export interface IOriginalValueOptions<TParentProperty> {
+  parentObject: TParentProperty;
+  propertyName: keyof TParentProperty;
+}
+
+/**
+ * @beta
+ */
 export class ConfigurationFileLoader<TConfigurationFile> {
   private readonly _schema: JsonSchema;
   private readonly _jsonPathMetadata: IJsonPathsMetadata;
@@ -122,6 +141,36 @@ export class ConfigurationFileLoader<TConfigurationFile> {
     );
   }
 
+  /**
+   * Get the path to the source file that the referenced property was originally
+   * loaded from.
+   */
+  public getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined {
+    const annotation: IConfigurationFileFieldAnnotation<TObject> | undefined =
+      obj[CONFIGURATION_FILE_FIELD_ANNOTATION];
+    if (annotation) {
+      return annotation.configurationFilePath;
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Get the value of the specified property on the specified object that was originally
+   * loaded from a configuration file.
+   */
+  public getPropertyOriginalValue<TParentProperty extends object, TValue>(
+    options: IOriginalValueOptions<TParentProperty>
+  ): TValue {
+    const annotation: IConfigurationFileFieldAnnotation<TParentProperty> | undefined =
+      options.parentObject[CONFIGURATION_FILE_FIELD_ANNOTATION];
+    if (annotation && annotation.originalValues.hasOwnProperty(options.propertyName)) {
+      return annotation.originalValues[options.propertyName] as TValue;
+    }
+
+    throw new Error(`No original value could be determined for property "${options.propertyName}"`);
+  }
+
   private async _loadConfigurationFileAsyncInner(
     resolvedConfigurationFilePath: string,
     visitedConfigurationFilePaths: Set<string>
@@ -146,6 +195,7 @@ export class ConfigurationFileLoader<TConfigurationFile> {
           this._schema
         );
 
+        this._annotateProperties(resolvedConfigurationFilePath, configurationJson);
 
         for (const [jsonPath, metadata] of Object.entries(this._jsonPathMetadata)) {
           JSONPath({
@@ -210,6 +260,23 @@ export class ConfigurationFileLoader<TConfigurationFile> {
     }
   }
 
+  private _annotateProperties<TObject>(resolvedConfigurationFilePath: string, obj: TObject): void {
+    if (!obj) {
+      return;
+    }
+
+    if (typeof obj === 'object') {
+      ((obj as unknown) as IAnnotatedField<TObject>)[CONFIGURATION_FILE_FIELD_ANNOTATION] = {
+        configurationFilePath: resolvedConfigurationFilePath,
+        originalValues: { ...obj }
+      };
+
+      for (const objValue of Object.values(obj)) {
+        this._annotateProperties(resolvedConfigurationFilePath, objValue);
+      }
+    }
+  }
+
   private _handlePropertyInheritance<TProperty>(
     propertyName: string,
     propertyValue: TProperty | undefined,
@@ -231,7 +298,16 @@ export class ConfigurationFileLoader<TConfigurationFile> {
             );
           }
 
-          return ([...parentPropertyValue, ...propertyValue] as unknown) as TProperty;
+          const result: TProperty = ([...parentPropertyValue, ...propertyValue] as unknown) as TProperty;
+          ((result as unknown) as IAnnotatedField<TProperty>)[CONFIGURATION_FILE_FIELD_ANNOTATION] = {
+            configurationFilePath: undefined,
+            originalValues: {
+              ...parentPropertyValue[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues,
+              ...propertyValue[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues
+            }
+          };
+
+          return result;
         }
 
         default: {
@@ -239,7 +315,7 @@ export class ConfigurationFileLoader<TConfigurationFile> {
         }
       }
     } else {
-      return propertyValue || parentPropertyValue;
+      return propertyValue;
     }
   }
 

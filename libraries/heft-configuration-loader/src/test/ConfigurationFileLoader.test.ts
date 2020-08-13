@@ -24,7 +24,8 @@ describe('ConfigLoader', () => {
       const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath
       );
-      expect(loadedConfigFile).toEqual({ thing: 'A' });
+      const expectedConfigFile: ISimplestConfigFile = { thing: 'A' };
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
 
     it('Correctly resolves paths relative to the config file', async () => {
@@ -40,9 +41,10 @@ describe('ConfigLoader', () => {
       const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath
       );
-      expect(loadedConfigFile).toEqual({
+      const expectedConfigFile: ISimplestConfigFile = {
         thing: path.resolve(configFileFolder, 'A')
-      });
+      };
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
 
     it('Correctly resolves paths relative to the project root', async () => {
@@ -58,9 +60,10 @@ describe('ConfigLoader', () => {
       const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath
       );
-      expect(loadedConfigFile).toEqual({
+      const expectedConfigFile: ISimplestConfigFile = {
         thing: path.resolve(projectRoot, 'A')
-      });
+      };
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
   });
 
@@ -80,7 +83,8 @@ describe('ConfigLoader', () => {
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath
       );
-      expect(loadedConfigFile).toEqual({ things: ['A', 'B', 'C'] });
+      const expectedConfigFile: ISimpleConfigFile = { things: ['A', 'B', 'C'] };
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
 
     it('Correctly resolves paths relative to the config file', async () => {
@@ -96,13 +100,14 @@ describe('ConfigLoader', () => {
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath
       );
-      expect(loadedConfigFile).toEqual({
+      const expectedConfigFile: ISimpleConfigFile = {
         things: [
           path.resolve(configFileFolder, 'A'),
           path.resolve(configFileFolder, 'B'),
           path.resolve(configFileFolder, 'C')
         ]
-      });
+      };
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
 
     it('Correctly resolves paths relative to the project root', async () => {
@@ -118,13 +123,14 @@ describe('ConfigLoader', () => {
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath
       );
-      expect(loadedConfigFile).toEqual({
+      const expectedConfigFile: ISimpleConfigFile = {
         things: [
           path.resolve(projectRoot, 'A'),
           path.resolve(projectRoot, 'B'),
           path.resolve(projectRoot, 'C')
         ]
-      });
+      };
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
   });
 
@@ -144,7 +150,8 @@ describe('ConfigLoader', () => {
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath
       );
-      expect(loadedConfigFile).toEqual({ things: ['A', 'B', 'C', 'D', 'E'] });
+      const expectedConfigFile: ISimpleConfigFile = { things: ['A', 'B', 'C', 'D', 'E'] };
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
 
     it('Correctly loads the config file with "append" in config meta', async () => {
@@ -158,7 +165,8 @@ describe('ConfigLoader', () => {
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath
       );
-      expect(loadedConfigFile).toEqual({ things: ['A', 'B', 'C', 'D', 'E'] });
+      const expectedConfigFile: ISimpleConfigFile = { things: ['A', 'B', 'C', 'D', 'E'] };
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
 
     it('Correctly loads the config file with "replace" in config meta', async () => {
@@ -172,7 +180,8 @@ describe('ConfigLoader', () => {
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath
       );
-      expect(loadedConfigFile).toEqual({ things: ['D', 'E'] });
+      const expectedConfigFile: ISimpleConfigFile = { things: ['D', 'E'] };
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
 
     it('Correctly resolves paths relative to the config file', async () => {
@@ -189,7 +198,8 @@ describe('ConfigLoader', () => {
         configFilePath
       );
       const parentConfigFileFolder: string = path.resolve(configFileFolder, '..', 'simpleConfigFile');
-      expect(loadedConfigFile).toEqual({
+
+      const expectedConfigFile: ISimpleConfigFile = {
         things: [
           path.resolve(parentConfigFileFolder, 'A'),
           path.resolve(parentConfigFileFolder, 'B'),
@@ -197,7 +207,8 @@ describe('ConfigLoader', () => {
           path.resolve(configFileFolder, 'D'),
           path.resolve(configFileFolder, 'E')
         ]
-      });
+      };
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
   });
 
@@ -222,7 +233,7 @@ describe('ConfigLoader', () => {
       const loadedConfigFile: IComplexConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath
       );
-      expect(loadedConfigFile).toEqual({
+      const expectedConfigFile: IComplexConfigFile = {
         plugins: [
           {
             plugin: path.resolve(projectRoot, 'node_modules', '@rushstack', 'node-core-library')
@@ -234,7 +245,8 @@ describe('ConfigLoader', () => {
             plugin: path.resolve(projectRoot, 'node_modules', '@rushstack', 'eslint-config')
           }
         ]
-      });
+      };
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
   });
 });

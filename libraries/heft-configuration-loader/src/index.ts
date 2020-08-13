@@ -7,6 +7,7 @@ export {
   IJsonPathMetadata,
   IJsonPathsMetadata,
   InheritanceType,
+  IOriginalValueOptions,
   IPropertyInheritanceTypes,
   PathResolutionMethod
 } from './ConfigurationFileLoader';

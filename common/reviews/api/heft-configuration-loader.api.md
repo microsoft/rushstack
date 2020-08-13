@@ -10,6 +10,8 @@ import { JsonSchema } from '@rushstack/node-core-library';
 export class ConfigurationFileLoader<TConfigurationFile> {
     constructor(jsonSchemaPath: string, options?: IConfigurationFileLoaderOptions<TConfigurationFile>);
     constructor(jsonSchema: JsonSchema, options?: IConfigurationFileLoaderOptions<TConfigurationFile>);
+    getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
+    getPropertyOriginalValue<TParentProperty extends object, TValue>(options: IOriginalValueOptions<TParentProperty>): TValue;
     // (undocumented)
     loadConfigurationFileAsync(configurationFilePath: string): Promise<TConfigurationFile>;
     }
@@ -38,6 +40,14 @@ export interface IJsonPathsMetadata {
 export enum InheritanceType {
     append = "append",
     replace = "replace"
+}
+
+// @beta (undocumented)
+export interface IOriginalValueOptions<TParentProperty> {
+    // (undocumented)
+    parentObject: TParentProperty;
+    // (undocumented)
+    propertyName: keyof TParentProperty;
 }
 
 // @beta (undocumented)
