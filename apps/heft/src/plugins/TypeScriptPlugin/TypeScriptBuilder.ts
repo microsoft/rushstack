@@ -548,24 +548,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
             );
 
             for (const { cacheOutFolderPath, outFolderPath, isPrimary } of this._moduleKindsToEmit) {
+              // Only primary module kinds emit declarations
               if (isPrimary) {
-                // Only primary module kinds emit declarations and sourcemaps
-                if (tsconfig.options.declaration) {
-                  const dtsFilename: string = `${relativeFilenameWithoutExtension}.d.ts`;
-                  queueLinkOrCopy({
-                    linkTargetPath: path.join(cacheOutFolderPath, dtsFilename),
-                    newLinkPath: path.join(outFolderPath, dtsFilename)
-                  });
-                }
-
-                if (tsconfig.options.sourceMap && !sourceFile.isDeclarationFile) {
-                  const jsMapFilename: string = `${relativeFilenameWithoutExtension}.js.map`;
-                  queueLinkOrCopy({
-                    linkTargetPath: path.join(cacheOutFolderPath, jsMapFilename),
-                    newLinkPath: path.join(outFolderPath, jsMapFilename)
-                  });
-                }
-
                 if (tsconfig.options.declarationMap) {
                   const dtsMapFilename: string = `${relativeFilenameWithoutExtension}.d.ts.map`;
                   queueLinkOrCopy({
@@ -573,8 +557,25 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
                     newLinkPath: path.join(outFolderPath, dtsMapFilename)
                   });
                 }
+
+                if (tsconfig.options.declaration) {
+                  const dtsFilename: string = `${relativeFilenameWithoutExtension}.d.ts`;
+                  queueLinkOrCopy({
+                    linkTargetPath: path.join(cacheOutFolderPath, dtsFilename),
+                    newLinkPath: path.join(outFolderPath, dtsFilename)
+                  });
+                }
               }
 
+              if (tsconfig.options.sourceMap && !sourceFile.isDeclarationFile) {
+                const jsMapFilename: string = `${relativeFilenameWithoutExtension}.js.map`;
+                queueLinkOrCopy({
+                  linkTargetPath: path.join(cacheOutFolderPath, jsMapFilename),
+                  newLinkPath: path.join(outFolderPath, jsMapFilename)
+                });
+              }
+
+              // Write the .js file last in case something is watching its timestamp
               if (!sourceFile.isDeclarationFile) {
                 const jsFilename: string = `${relativeFilenameWithoutExtension}.js`;
                 queueLinkOrCopy({
@@ -747,9 +748,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
                 ...tsconfig.options,
                 module: moduleKindToEmit.moduleKind,
 
-                // Don't emit declarations or sourcemaps for secondary module kinds
+                // Don't emit declarations for secondary module kinds
                 declaration: false,
-                sourceMap: false,
                 declarationMap: false
               };
 
