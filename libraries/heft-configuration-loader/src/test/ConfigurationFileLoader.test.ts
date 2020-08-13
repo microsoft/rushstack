@@ -25,7 +25,12 @@ describe('ConfigLoader', () => {
         configFilePath
       );
       const expectedConfigFile: ISimplestConfigFile = { thing: 'A' };
+
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(configFilePath);
+      expect(
+        configFileLoader.getPropertyOriginalValue({ parentObject: loadedConfigFile, propertyName: 'thing' })
+      ).toEqual('A');
     });
 
     it('Correctly resolves paths relative to the config file', async () => {
@@ -45,6 +50,10 @@ describe('ConfigLoader', () => {
         thing: path.resolve(configFileFolder, 'A')
       };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(configFilePath);
+      expect(
+        configFileLoader.getPropertyOriginalValue({ parentObject: loadedConfigFile, propertyName: 'thing' })
+      ).toEqual('A');
     });
 
     it('Correctly resolves paths relative to the project root', async () => {
@@ -64,6 +73,10 @@ describe('ConfigLoader', () => {
         thing: path.resolve(projectRoot, 'A')
       };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(configFilePath);
+      expect(
+        configFileLoader.getPropertyOriginalValue({ parentObject: loadedConfigFile, propertyName: 'thing' })
+      ).toEqual('A');
     });
   });
 
@@ -219,6 +232,7 @@ describe('ConfigLoader', () => {
 
     it('Correctly loads a complex config file', async () => {
       const configFilePath: string = path.resolve(__dirname, 'complexConfigFile', 'pluginsB.json');
+      const parentConfigFilePath: string = path.resolve(__dirname, 'complexConfigFile', 'pluginsA.json');
       const schemaPath: string = path.resolve(__dirname, 'complexConfigFile', 'plugins.schema.json');
 
       const configFileLoader: ConfigurationFileLoader<IComplexConfigFile> = new ConfigurationFileLoader<
@@ -246,7 +260,33 @@ describe('ConfigLoader', () => {
           }
         ]
       };
+
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+
+      expect(
+        configFileLoader.getPropertyOriginalValue({
+          parentObject: loadedConfigFile.plugins[0],
+          propertyName: 'plugin'
+        })
+      ).toEqual('@rushstack/node-core-library');
+      expect(
+        configFileLoader.getPropertyOriginalValue({
+          parentObject: loadedConfigFile.plugins[1],
+          propertyName: 'plugin'
+        })
+      ).toEqual('@rushstack/heft');
+      expect(
+        configFileLoader.getPropertyOriginalValue({
+          parentObject: loadedConfigFile.plugins[2],
+          propertyName: 'plugin'
+        })
+      ).toEqual('@rushstack/eslint-config');
+
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.plugins[0])).toEqual(
+        parentConfigFilePath
+      );
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.plugins[1])).toEqual(configFilePath);
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.plugins[2])).toEqual(configFilePath);
     });
   });
 });
