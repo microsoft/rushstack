@@ -11,6 +11,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@jest/transform",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@jest/types",
       "allowedCategories": [ "libraries" ]
     },
