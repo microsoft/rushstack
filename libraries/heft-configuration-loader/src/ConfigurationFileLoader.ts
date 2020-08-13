@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import { JSONPath } from 'jsonpath-plus';
 import { JsonSchema, JsonFile, PackageJsonLookup, Resolve } from '@rushstack/node-core-library';
 
 interface IConfigurationJson {
@@ -26,7 +27,7 @@ export enum InheritanceType {
 /**
  * @beta
  */
-export enum ResolutionMethod {
+export enum PathResolutionMethod {
   /**
    * Resolve a path relative to the configuration file
    */
@@ -44,116 +45,90 @@ export enum ResolutionMethod {
   NodeResolve
 }
 
-/**
- * @beta
- */
-export interface IConfigurationMeta<TConfigurationFile> {
-  /**
-   * Path to the configuration file's schema file
-   */
-  schemaPath: string;
-
-  /**
-   * Options for resolving paths inside properties of the configuration file
-   */
-  propertyPathResolution?: {
-    [TConfigurationFileProperty in keyof TConfigurationFile]?: PathHandling<
-      TConfigurationFile[TConfigurationFileProperty]
-    >;
-  };
-
-  /**
-   * Options for inheritance of top-level configuration file properties
-   */
-  propertyInheritance?: {
-    [TConfigFileProperty in keyof TConfigurationFile]?: InheritanceType;
-  };
-}
-
-/**
- * @beta
- */
-export type PathHandling<TObject> = TObject extends object
-  ? IUnstructuredObjectPropertyPathHandling<TObject> | IStructuredObjectPropertyPathHandling<TObject>
-  : TObject extends string
-  ? IStringPropertyPathHandling
-  : never;
-
-/**
- * @beta
- */
-export interface IStructuredObjectPropertyPathHandling<TObject extends object> {
-  /**
-   * Options for path resolution in specific properties inside a configuration file
-   */
-  childPropertyHandling: {
-    [TObjectProperty in keyof TObject]?: PathHandling<TObject[TObjectProperty]>;
-  };
-}
-
-/**
- * @beta
- */
-export interface IUnstructuredObjectPropertyPathHandling<TObject> {
-  /**
-   * Specify a value here to describe the way paths are resolved in elements of an array, or all values of an
-   * object
-   */
-  objectEntriesHandling: PathHandling<TObject[keyof TObject]>;
-}
-
-/**
- * @beta
- */
-export interface IStringPropertyPathHandling {
-  /**
-   * Specify a value here to describe the way a path in a string property is resolved
-   */
-  resolutionMethod: ResolutionMethod;
-}
-
-const HAS_BEEN_NORMALIZED: unique symbol = Symbol('has been sorted');
-
-interface IConfigurationFileCacheEntry {
-  configurationFile?: unknown;
+interface IConfigurationFileCacheEntry<TConfigurationFile> {
+  configurationFile?: TConfigurationFile;
   error?: Error;
 }
 
 /**
  * @beta
  */
-export class ConfigurationFileLoader {
-  private _configurationFileCache: Map<string, IConfigurationFileCacheEntry> = new Map<
-    string,
-    IConfigurationFileCacheEntry
-  >();
-  private _schemaCache: Map<string, JsonSchema> = new Map<string, JsonSchema>();
-  private _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
+export interface IJsonPathMetadata {
+  pathResolutionMethod?: PathResolutionMethod;
+}
 
-  public async loadConfigurationFileAsync<TConfigurationFile>(
-    configurationFilePath: string,
-    configurationMeta: IConfigurationMeta<TConfigurationFile>
-  ): Promise<TConfigurationFile> {
-    const normalizedConfigurationMeta: IConfigurationMeta<TConfigurationFile> = this._sortObjectProperties(
-      configurationMeta
-    );
+/**
+ * @beta
+ */
+export type IPropertyInheritanceTypes<TConfigurationFile> = {
+  [propertyName in keyof TConfigurationFile]?: InheritanceType;
+};
+
+/**
+ * @beta
+ */
+export interface IJsonPathsMetadata {
+  [jsonPath: string]: IJsonPathMetadata;
+}
+
+/**
+ * @beta
+ */
+export interface IConfigurationFileLoaderOptions<TConfigurationFile> {
+  jsonPathMetadata?: IJsonPathsMetadata;
+  propertyInheritanceTypes?: IPropertyInheritanceTypes<TConfigurationFile>;
+}
+
+interface IJsonPathCallbackObject {
+  path: string;
+  parent: object;
+  parentProperty: string;
+  value: string;
+}
+
+/**
+ * @beta
+ */
+export class ConfigurationFileLoader<TConfigurationFile> {
+  private readonly _schema: JsonSchema;
+  private readonly _jsonPathMetadata: IJsonPathsMetadata;
+  private readonly _propertyInheritanceTypes: IPropertyInheritanceTypes<TConfigurationFile>;
+
+  private readonly _configurationFileCache: Map<
+    string,
+    IConfigurationFileCacheEntry<TConfigurationFile>
+  > = new Map<string, IConfigurationFileCacheEntry<TConfigurationFile>>();
+  private readonly _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
+
+  public constructor(jsonSchemaPath: string, options?: IConfigurationFileLoaderOptions<TConfigurationFile>);
+  public constructor(jsonSchema: JsonSchema, options?: IConfigurationFileLoaderOptions<TConfigurationFile>);
+  public constructor(
+    jsonSchema: string | JsonSchema,
+    options?: IConfigurationFileLoaderOptions<TConfigurationFile>
+  ) {
+    if (typeof jsonSchema === 'string') {
+      jsonSchema = JsonSchema.fromFile(jsonSchema);
+    }
+
+    this._schema = jsonSchema;
+    this._jsonPathMetadata = options?.jsonPathMetadata || {};
+    this._propertyInheritanceTypes = options?.propertyInheritanceTypes || {};
+  }
+
+  public async loadConfigurationFileAsync(configurationFilePath: string): Promise<TConfigurationFile> {
     return await this._loadConfigurationFileAsyncInner(
       path.resolve(configurationFilePath),
-      normalizedConfigurationMeta,
-      JSON.stringify(normalizedConfigurationMeta),
       new Set<string>()
     );
   }
 
-  private async _loadConfigurationFileAsyncInner<TConfigurationFile>(
+  private async _loadConfigurationFileAsyncInner(
     resolvedConfigurationFilePath: string,
-    normalizedConfigurationMeta: IConfigurationMeta<TConfigurationFile>,
-    serializedConfigurationMeta: string,
     visitedConfigurationFilePaths: Set<string>
   ): Promise<TConfigurationFile> {
-    const cacheKey: string = `${resolvedConfigurationFilePath}?${serializedConfigurationMeta}`;
-
-    let cacheEntry: IConfigurationFileCacheEntry | undefined = this._configurationFileCache.get(cacheKey);
+    let cacheEntry:
+      | IConfigurationFileCacheEntry<TConfigurationFile>
+      | undefined = this._configurationFileCache.get(resolvedConfigurationFilePath);
     if (!cacheEntry) {
       try {
         if (visitedConfigurationFilePaths.has(resolvedConfigurationFilePath)) {
@@ -165,16 +140,33 @@ export class ConfigurationFileLoader {
 
         visitedConfigurationFilePaths.add(resolvedConfigurationFilePath);
 
-        let schema: JsonSchema | undefined = this._schemaCache.get(normalizedConfigurationMeta.schemaPath);
-        if (!schema) {
-          schema = JsonSchema.fromFile(normalizedConfigurationMeta.schemaPath);
-          this._schemaCache.set(normalizedConfigurationMeta.schemaPath, schema);
+        const configurationJson: IConfigurationJson &
+          TConfigurationFile = await JsonFile.loadAndValidateAsync(
+          resolvedConfigurationFilePath,
+          this._schema
+        );
+
+
+        for (const [jsonPath, metadata] of Object.entries(this._jsonPathMetadata)) {
+          JSONPath({
+            path: jsonPath,
+            json: configurationJson,
+            callback: (payload: unknown, payloadType: string, fullPayload: IJsonPathCallbackObject) => {
+              if (metadata.pathResolutionMethod !== undefined) {
+                fullPayload.parent[fullPayload.parentProperty] = this._resolvePathProperty(
+                  resolvedConfigurationFilePath,
+                  fullPayload.value,
+                  metadata.pathResolutionMethod
+                );
+              }
+            },
+            otherTypeCallback: () => {
+              throw new Error('@other() tags are not supported');
+            }
+          });
         }
 
-        const configurationJson: IConfigurationJson &
-          TConfigurationFile = await JsonFile.loadAndValidateAsync(resolvedConfigurationFilePath, schema);
-
-        let parentConfiguration: TConfigurationFile | undefined = undefined;
+        let parentConfiguration: Partial<TConfigurationFile> = {};
         if (configurationJson.extends) {
           const resolvedParentConfigPath: string = path.resolve(
             path.dirname(resolvedConfigurationFilePath),
@@ -182,14 +174,12 @@ export class ConfigurationFileLoader {
           );
           parentConfiguration = await this._loadConfigurationFileAsyncInner(
             resolvedParentConfigPath,
-            normalizedConfigurationMeta,
-            serializedConfigurationMeta,
             visitedConfigurationFilePaths
           );
         }
 
         const propertyNames: Set<string> = new Set<string>([
-          ...Object.keys(parentConfiguration || {}),
+          ...Object.keys(parentConfiguration),
           ...Object.keys(configurationJson)
         ]);
 
@@ -199,17 +189,11 @@ export class ConfigurationFileLoader {
             continue;
           }
 
-          result[propertyName] = this._processProperty(
-            resolvedConfigurationFilePath,
+          result[propertyName] = this._handlePropertyInheritance(
             propertyName,
             configurationJson[propertyName],
-            parentConfiguration ? parentConfiguration[propertyName] : undefined,
-            normalizedConfigurationMeta.propertyInheritance
-              ? normalizedConfigurationMeta.propertyInheritance[propertyName]
-              : undefined,
-            normalizedConfigurationMeta.propertyPathResolution
-              ? normalizedConfigurationMeta.propertyPathResolution[propertyName]
-              : undefined
+            parentConfiguration[propertyName],
+            this._propertyInheritanceTypes[propertyName]
           );
         }
 
@@ -223,51 +207,6 @@ export class ConfigurationFileLoader {
       throw cacheEntry.error;
     } else {
       return cacheEntry.configurationFile! as TConfigurationFile;
-    }
-  }
-
-  private _sortObjectProperties<TObject>(obj: TObject): TObject {
-    if (obj[HAS_BEEN_NORMALIZED]) {
-      return obj;
-    } else {
-      const result: TObject = ({ [HAS_BEEN_NORMALIZED]: true } as unknown) as TObject;
-
-      const sortedKeys: string[] = Object.keys(obj).sort();
-      for (const key of sortedKeys) {
-        const value: unknown = obj[key];
-        const normalizedValue: unknown =
-          typeof value === 'object' ? this._sortObjectProperties(value) : value;
-        result[key] = normalizedValue;
-      }
-
-      return result;
-    }
-  }
-
-  private _processProperty<TProperty>(
-    configurationFilePath: string,
-    propertyName: string,
-    propertyValue: TProperty | undefined,
-    parentPropertyValue: TProperty | undefined,
-    inheritanceType: InheritanceType | undefined,
-    pathHandling: PathHandling<TProperty> | undefined
-  ): TProperty | undefined {
-    propertyValue = this._handlePropertyInheritance(
-      propertyName,
-      propertyValue,
-      parentPropertyValue,
-      inheritanceType
-    );
-
-    if (propertyValue) {
-      return this._handlePropertyPathResolution(
-        configurationFilePath,
-        propertyName,
-        propertyValue,
-        pathHandling
-      );
-    } else {
-      return propertyValue;
     }
   }
 
@@ -307,112 +246,17 @@ export class ConfigurationFileLoader {
     }
   }
 
-  private _handlePropertyPathResolution<TProperty>(
-    configurationFilePath: string,
-    propertyName: string,
-    propertyValue: TProperty,
-    pathHandling: PathHandling<TProperty> | undefined
-  ): TProperty {
-    const stringPropertyHandling:
-      | IStringPropertyPathHandling
-      | undefined = pathHandling as IStringPropertyPathHandling;
-    const structuredPropertyHandling:
-      | (TProperty extends object ? IStructuredObjectPropertyPathHandling<TProperty> : never)
-      | undefined = pathHandling as TProperty extends object
-      ? IStructuredObjectPropertyPathHandling<TProperty>
-      : never;
-    const unstructuredPropertyHandling:
-      | (TProperty extends object ? IUnstructuredObjectPropertyPathHandling<TProperty> : never)
-      | undefined = pathHandling as TProperty extends object
-      ? IUnstructuredObjectPropertyPathHandling<TProperty>
-      : never;
-
-    switch (typeof propertyValue) {
-      case 'string': {
-        if (structuredPropertyHandling?.childPropertyHandling) {
-          throw new Error(
-            `Property "${propertyName}" is a string, but "childPropertyHandling" is specified.`
-          );
-        }
-
-        if (unstructuredPropertyHandling?.objectEntriesHandling) {
-          throw new Error(
-            `Property "${propertyName}" is a string, but "objectEntriesHandling" is specified.`
-          );
-        }
-
-        return (this._resolvePathProperty(
-          configurationFilePath,
-          propertyValue,
-          stringPropertyHandling?.resolutionMethod
-        ) as unknown) as TProperty;
-      }
-
-      case 'object': {
-        if (stringPropertyHandling?.resolutionMethod) {
-          throw new Error(`Property "${propertyName}" is an object, but a resolutionMethod is specified.`);
-        }
-
-        if (
-          structuredPropertyHandling?.childPropertyHandling &&
-          unstructuredPropertyHandling?.objectEntriesHandling
-        ) {
-          throw new Error(
-            'Both a "childPropertyHandling" and a "objectEntriesHandling" are specified. ' +
-              'Only one is allowed.'
-          );
-        }
-
-        if (unstructuredPropertyHandling?.objectEntriesHandling) {
-          for (const [key, value] of Object.entries(propertyValue)) {
-            propertyValue[key] = this._handlePropertyPathResolution(
-              configurationFilePath,
-              key,
-              value,
-              unstructuredPropertyHandling.objectEntriesHandling
-            );
-          }
-        } else if (structuredPropertyHandling?.childPropertyHandling) {
-          for (const [childPropertyName, handling] of Object.entries(
-            structuredPropertyHandling.childPropertyHandling
-          )) {
-            if (propertyValue[childPropertyName]) {
-              propertyValue[childPropertyName] = this._handlePropertyPathResolution(
-                configurationFilePath,
-                childPropertyName,
-                propertyValue[childPropertyName],
-                handling as PathHandling<unknown>
-              );
-            }
-          }
-        }
-
-        return propertyValue;
-      }
-
-      default: {
-        if (pathHandling) {
-          throw new Error(
-            `Property "${propertyName}" is a ${typeof propertyValue}, but a pathHandling is specified.`
-          );
-        }
-
-        return propertyValue;
-      }
-    }
-  }
-
   private _resolvePathProperty(
     configurationFilePath: string,
     propertyValue: string,
-    resolutionMethod: ResolutionMethod | undefined
+    resolutionMethod: PathResolutionMethod | undefined
   ): string {
     switch (resolutionMethod) {
-      case ResolutionMethod.resolvePathRelativeToConfigurationFile: {
+      case PathResolutionMethod.resolvePathRelativeToConfigurationFile: {
         return path.resolve(path.dirname(configurationFilePath), propertyValue);
       }
 
-      case ResolutionMethod.resolvePathRelativeToProjectRoot: {
+      case PathResolutionMethod.resolvePathRelativeToProjectRoot: {
         const packageRoot: string | undefined = this._packageJsonLookup.tryGetPackageFolderFor(
           configurationFilePath
         );
@@ -423,7 +267,7 @@ export class ConfigurationFileLoader {
         return path.resolve(packageRoot, propertyValue);
       }
 
-      case ResolutionMethod.NodeResolve: {
+      case PathResolutionMethod.NodeResolve: {
         return Resolve.resolvePackagePath(propertyValue, configurationFilePath);
       }
 

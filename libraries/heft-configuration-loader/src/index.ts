@@ -3,11 +3,10 @@
 
 export {
   ConfigurationFileLoader,
-  IConfigurationMeta,
-  IStringPropertyPathHandling,
-  IStructuredObjectPropertyPathHandling,
-  IUnstructuredObjectPropertyPathHandling,
+  IConfigurationFileLoaderOptions,
+  IJsonPathMetadata,
+  IJsonPathsMetadata,
   InheritanceType,
-  ResolutionMethod,
-  PathHandling
+  IPropertyInheritanceTypes,
+  PathResolutionMethod
 } from './ConfigurationFileLoader';

@@ -519,6 +519,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jsonpath-plus",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jszip",
       "allowedCategories": [ "libraries" ]
     },

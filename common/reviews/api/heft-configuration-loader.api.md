@@ -4,21 +4,34 @@
 
 ```ts
 
+import { JsonSchema } from '@rushstack/node-core-library';
+
 // @beta (undocumented)
-export class ConfigurationFileLoader {
+export class ConfigurationFileLoader<TConfigurationFile> {
+    constructor(jsonSchemaPath: string, options?: IConfigurationFileLoaderOptions<TConfigurationFile>);
+    constructor(jsonSchema: JsonSchema, options?: IConfigurationFileLoaderOptions<TConfigurationFile>);
     // (undocumented)
-    loadConfigurationFileAsync<TConfigurationFile>(configurationFilePath: string, configurationMeta: IConfigurationMeta<TConfigurationFile>): Promise<TConfigurationFile>;
+    loadConfigurationFileAsync(configurationFilePath: string): Promise<TConfigurationFile>;
     }
 
 // @beta (undocumented)
-export interface IConfigurationMeta<TConfigurationFile> {
-    propertyInheritance?: {
-        [TConfigFileProperty in keyof TConfigurationFile]?: InheritanceType;
-    };
-    propertyPathResolution?: {
-        [TConfigurationFileProperty in keyof TConfigurationFile]?: PathHandling<TConfigurationFile[TConfigurationFileProperty]>;
-    };
-    schemaPath: string;
+export interface IConfigurationFileLoaderOptions<TConfigurationFile> {
+    // (undocumented)
+    jsonPathMetadata?: IJsonPathsMetadata;
+    // (undocumented)
+    propertyInheritanceTypes?: IPropertyInheritanceTypes<TConfigurationFile>;
+}
+
+// @beta (undocumented)
+export interface IJsonPathMetadata {
+    // (undocumented)
+    pathResolutionMethod?: PathResolutionMethod;
+}
+
+// @beta (undocumented)
+export interface IJsonPathsMetadata {
+    // (undocumented)
+    [jsonPath: string]: IJsonPathMetadata;
 }
 
 // @beta (undocumented)
@@ -28,27 +41,12 @@ export enum InheritanceType {
 }
 
 // @beta (undocumented)
-export interface IStringPropertyPathHandling {
-    resolutionMethod: ResolutionMethod;
-}
+export type IPropertyInheritanceTypes<TConfigurationFile> = {
+    [propertyName in keyof TConfigurationFile]?: InheritanceType;
+};
 
 // @beta (undocumented)
-export interface IStructuredObjectPropertyPathHandling<TObject extends object> {
-    childPropertyHandling: {
-        [TObjectProperty in keyof TObject]?: PathHandling<TObject[TObjectProperty]>;
-    };
-}
-
-// @beta (undocumented)
-export interface IUnstructuredObjectPropertyPathHandling<TObject> {
-    objectEntriesHandling: PathHandling<TObject[keyof TObject]>;
-}
-
-// @beta (undocumented)
-export type PathHandling<TObject> = TObject extends object ? IUnstructuredObjectPropertyPathHandling<TObject> | IStructuredObjectPropertyPathHandling<TObject> : TObject extends string ? IStringPropertyPathHandling : never;
-
-// @beta (undocumented)
-export enum ResolutionMethod {
+export enum PathResolutionMethod {
     NodeResolve = 2,
     resolvePathRelativeToConfigurationFile = 0,
     resolvePathRelativeToProjectRoot = 1

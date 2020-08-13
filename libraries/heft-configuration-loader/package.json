@@ -18,6 +18,7 @@
     "start": "heft test --clean --watch"
   },
   "dependencies": {
+    "jsonpath-plus": "~4.0.0",
     "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
