@@ -4,6 +4,8 @@
 import * as path from 'path';
 import { Path, FileSystem } from '@rushstack/node-core-library';
 import { InitialOptionsWithRootDir } from '@jest/types/build/Config';
+import { TransformedSource } from '@jest/transform';
+
 import { JestTypeScriptDataFile, IJestTypeScriptDataFileJson } from './JestTypeScriptDataFile';
 
 // This caches jest-typescript-data.json file contents.
@@ -13,7 +15,11 @@ const dataFileJsonCache: Map<string, IJestTypeScriptDataFileJson> = new Map();
 /**
  * This Jest transformer maps TS files under a 'src' folder to their compiled equivalent under 'lib'
  */
-export function process(src: string, filename: string, jestOptions: InitialOptionsWithRootDir): string {
+export function process(
+  src: string,
+  filename: string,
+  jestOptions: InitialOptionsWithRootDir
+): TransformedSource {
   let jestTypeScriptDataFile: IJestTypeScriptDataFileJson | undefined = dataFileJsonCache.get(
     jestOptions.rootDir
   );
@@ -42,8 +48,9 @@ export function process(src: string, filename: string, jestOptions: InitialOptio
       `${parsedFilename.name}.js`
     );
 
+    let code: string;
     try {
-      return FileSystem.readFile(libFilename);
+      code = FileSystem.readFile(libFilename);
     } catch (error) {
       if (FileSystem.isNotExistError(error)) {
         throw new Error(
@@ -53,6 +60,27 @@ export function process(src: string, filename: string, jestOptions: InitialOptio
         throw error;
       }
     }
+
+    const sourceMapFilename: string = libFilename + '.map';
+
+    let sourceMap: string;
+    try {
+      sourceMap = FileSystem.readFile(sourceMapFilename);
+    } catch (error) {
+      if (FileSystem.isNotExistError(error)) {
+        throw new Error(
+          'jest-build-transform: The source map file is missing -- check your tsconfig.json settings:\n' +
+            sourceMapFilename
+        );
+      } else {
+        throw error;
+      }
+    }
+
+    return {
+      code: code,
+      map: sourceMap
+    };
   } else {
     throw new Error('jest-build-transform: The input path is not under the "src" folder:\n' + filename);
   }
