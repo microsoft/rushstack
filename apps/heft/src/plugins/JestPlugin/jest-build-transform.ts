@@ -17,6 +17,8 @@ function delayMs(milliseconds: number): void {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
 }
 
+const DEBUG_TRANSFORM: boolean = false;
+
 /**
  * This Jest transformer maps TS files under a 'src' folder to their compiled equivalent under 'lib'
  */
@@ -108,9 +110,11 @@ export function process(
       stalled = true;
       delayMs(100);
     }
-    if (stalled) {
+
+    if (stalled && DEBUG_TRANSFORM) {
       const nowMs: number = new Date().getTime();
       console.log(`Waited ${nowMs - startOfLoopMs} ms for .js file`);
+      delayMs(2000);
     }
 
     let code: string;
