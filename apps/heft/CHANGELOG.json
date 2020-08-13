@@ -2,6 +2,24 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.4.7",
+      "tag": "@rushstack/heft_v0.4.7",
+      "date": "Thu, 13 Aug 2020 09:26:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a race condition where .js files were sometimes read by Jest before they were written by TypeScript"
+          },
+          {
+            "comment": "Fix an issue where the TypeScript incremental build cache sometimes did not work correctly in \"--watch\" mode"
+          },
+          {
+            "comment": "Add support for \"additionalModuleKindsToEmit\" in watch mode"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.6",
       "tag": "@rushstack/heft_v0.4.6",
       "date": "Thu, 13 Aug 2020 04:57:38 GMT",

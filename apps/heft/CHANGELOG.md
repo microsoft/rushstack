@@ -1,6 +1,15 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 13 Aug 2020 04:57:38 GMT and should not be manually modified.
+This log was last generated on Thu, 13 Aug 2020 09:26:39 GMT and should not be manually modified.
+
+## 0.4.7
+Thu, 13 Aug 2020 09:26:39 GMT
+
+### Patches
+
+- Fix a race condition where .js files were sometimes read by Jest before they were written by TypeScript
+- Fix an issue where the TypeScript incremental build cache sometimes did not work correctly in "--watch" mode
+- Add support for "additionalModuleKindsToEmit" in watch mode
 
 ## 0.4.6
 Thu, 13 Aug 2020 04:57:38 GMT
