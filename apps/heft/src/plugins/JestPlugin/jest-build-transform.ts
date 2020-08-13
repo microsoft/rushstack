@@ -79,7 +79,7 @@ export function process(
       if (libFileStatistics) {
         // The lib/*.js timestamp must not be older than the src/*.ts timestamp, otherwise the transpiler
         // is not done writing its outputs.
-        if (libFileStatistics.ctimeMs + 15 - srcFileStatistics.ctimeMs > 0) {
+        if (libFileStatistics.ctimeMs + 15 > srcFileStatistics.ctimeMs) {
           // allow 100ms of slop for clock issues
           // Also, the lib/*.js timestamp must not be too recent, otherwise the transpiler may not have
           // finished flushing its output to disk.
