@@ -1,19 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line @typescript-eslint/typedef
-const importLazy = require('import-lazy')(require);
-
 import * as os from 'os';
-// eslint-disable-next-line @typescript-eslint/typedef
-const lockfile = importLazy('@yarnpkg/lockfile');
-// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
-import { ParseResult } from '@yarnpkg/lockfile';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
-import { FileSystem, IParsedPackageNameOrError, InternalError } from '@rushstack/node-core-library';
+import { FileSystem, IParsedPackageNameOrError, InternalError, Import } from '@rushstack/node-core-library';
 import { RushConstants } from '../RushConstants';
 import { DependencySpecifier } from '../DependencySpecifier';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
+
+const lockfileModule: typeof import('@yarnpkg/lockfile') = Import.lazy('@yarnpkg/lockfile', require);
+// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
+import { ParseResult } from '@yarnpkg/lockfile';
 
 /**
  * Used with YarnShrinkwrapFile._encodePackageNameAndSemVer() and _decodePackageNameAndSemVer().
@@ -159,7 +156,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
       }
 
       shrinkwrapString = FileSystem.readFile(shrinkwrapFilename);
-      shrinkwrapJson = lockfile.parse(shrinkwrapString);
+      shrinkwrapJson = lockfileModule.parse(shrinkwrapString);
     } catch (error) {
       throw new Error(`Error reading "${shrinkwrapFilename}":` + os.EOL + `  ${error.message}`);
     }
@@ -241,7 +238,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
 
   /** @override */
   protected serialize(): string {
-    return lockfile.stringify(this._shrinkwrapJson);
+    return lockfileModule.stringify(this._shrinkwrapJson);
   }
 
   /** @override */

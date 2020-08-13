@@ -1,17 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line @typescript-eslint/typedef
-const importLazy = require('import-lazy')(require);
-
-// eslint-disable-next-line @typescript-eslint/typedef
-const yaml = importLazy('js-yaml');
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import * as crypto from 'crypto';
 import * as colors from 'colors';
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, Import } from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
@@ -22,6 +17,8 @@ import {
 import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
+
+const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
 export interface IPeerDependenciesMetaYaml {
   optional?: boolean;
@@ -234,7 +231,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       }
 
       const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilename);
-      const parsedData: IPnpmShrinkwrapYaml = yaml.safeLoad(shrinkwrapContent);
+      const parsedData: IPnpmShrinkwrapYaml = yamlModule.safeLoad(shrinkwrapContent);
       return new PnpmShrinkwrapFile(parsedData, shrinkwrapYamlFilename);
     } catch (error) {
       throw new Error(`Error reading "${shrinkwrapYamlFilename}":${os.EOL}  ${error.message}`);
@@ -433,7 +430,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       }
     }
 
-    return yaml.safeDump(shrinkwrapToSerialize, PNPM_SHRINKWRAP_YAML_FORMAT);
+    return yamlModule.safeDump(shrinkwrapToSerialize, PNPM_SHRINKWRAP_YAML_FORMAT);
   }
 
   /**

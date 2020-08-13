@@ -225,7 +225,6 @@ importers:
       glob-escape: 0.0.2
       https-proxy-agent: 2.2.4
       ignore: 5.1.8
-      import-lazy: 4.0.0
       inquirer: 6.2.2
       js-yaml: 3.13.1
       jszip: 3.5.0
@@ -301,7 +300,6 @@ importers:
       gulp: ~4.0.2
       https-proxy-agent: ~2.2.1
       ignore: ~5.1.6
-      import-lazy: ~4.0.0
       inquirer: ~6.2.0
       jest: ~25.4.0
       js-yaml: ~3.13.1

@@ -1,22 +1,22 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line @typescript-eslint/typedef
-const importLazy = require('import-lazy')(require);
-
 import * as os from 'os';
 import * as semver from 'semver';
-
+import { Import } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
+import { DependencySpecifier } from '../../logic/DependencySpecifier';
+
+const packageJsonUpdaterModule: typeof import('../../logic/PackageJsonUpdater') = Import.lazy(
+  '../../logic/PackageJsonUpdater',
+  require
+);
 // TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
 import { PackageJsonUpdater, SemVerStyle } from '../../logic/PackageJsonUpdater';
-import * as PackageJsonUpdaterW from '../../logic/PackageJsonUpdater';
-const packageJsonUpdaterExports: typeof PackageJsonUpdaterW = importLazy('../../logic/PackageJsonUpdater');
-import { DependencySpecifier } from '../../logic/DependencySpecifier';
 
 export class AddAction extends BaseRushAction {
   private _allFlag: CommandLineFlagParameter;
@@ -142,7 +142,7 @@ export class AddAction extends BaseRushAction {
       }
     }
 
-    const updater: PackageJsonUpdater = new packageJsonUpdaterExports.PackageJsonUpdater(
+    const updater: PackageJsonUpdater = new packageJsonUpdaterModule.PackageJsonUpdater(
       this.rushConfiguration,
       this.rushGlobalFolder
     );
