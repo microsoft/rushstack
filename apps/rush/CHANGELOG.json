@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.32.1",
+      "tag": "@microsoft/rush_v5.32.1",
+      "date": "Fri, 14 Aug 2020 04:06:30 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Change method used to calculate integrity of tarballs"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.32.0",
       "tag": "@microsoft/rush_v5.32.0",
       "date": "Thu, 13 Aug 2020 00:53:43 GMT",
