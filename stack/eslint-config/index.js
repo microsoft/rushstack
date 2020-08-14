@@ -3,6 +3,25 @@
 
 const macros = require('./macros');
 
+// Rule severity guidelines
+// ------------------------
+//
+// Errors are generally printed in red, and may prevent other build tasks from running (e.g. unit tests).
+// Developers should never ignore errors.  Warnings are generally printed in yellow, and do not block local
+// development, although they must be fixed/suppressed before merging.  Developers will commonly ignore warnings
+// until their feature is working.
+//
+// Rules that should be a WARNING:
+// - An issue that is very common in partially implemented work (e.g. missing type declaration)
+// - An issue that "keeps things nice" but otherwise doesn't affect the meaning of the code (e.g. naming convention)
+// - Security rules -- developers may need to temporarily introduce "insecure" expressions while debugging;
+//   if our policy forces them to suppress the lint rule, they may forget to reenable it later.
+//
+// Rules that should be an ERROR:
+// - An issue that is very likely to be a typo (e.g. "x = x;")
+// - An issue that catches code that is likely to malfunction (e.g. unterminated promise chain)
+// - An obsolete language feature that nobody should be using for any good reason
+
 module.exports = {
   // Disable the parser by default
   parser: '',
@@ -36,10 +55,10 @@ module.exports = {
       rules: {
         // The @rushstack rules are documented in the package README:
         // https://www.npmjs.com/package/@rushstack/eslint-plugin
-        '@rushstack/no-null': 'error',
+        '@rushstack/no-null': 'warn',
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/adjacent-overload-signatures': 'error',
+        '@typescript-eslint/adjacent-overload-signatures': 'warn',
 
         // RATIONALE:         We require "string[]" (instead of "Array<string>") because it is idiomatic TypeScript.
         //                    We require "ReadonlyArray<string>" (instead of "readonly string[]") because, although
@@ -48,7 +67,7 @@ module.exports = {
         //                    lint rules should not require usage of bleeding edge language features.  In the future
         //                    when TypeScript 3 is obsolete, we'll change this rule to require "readonly string[]".
         '@typescript-eslint/array-type': [
-          'error',
+          'warn',
           {
             default: 'array',
             readonly: 'generic'
@@ -59,7 +78,7 @@ module.exports = {
         //
         // CONFIGURATION:     By default, these are banned: String, Boolean, Number, Object, Symbol
         '@typescript-eslint/ban-types': [
-          'error',
+          'warn',
           {
             extendDefaults: false, // (the complete list is in this file)
             types: {
@@ -106,12 +125,12 @@ module.exports = {
         ],
 
         // RATIONALE:         We require "x as number" instead of "<number>x" to avoid conflicts with JSX.
-        '@typescript-eslint/consistent-type-assertions': 'error',
+        '@typescript-eslint/consistent-type-assertions': 'warn',
 
         // RATIONALE:         We prefer "interface IBlah { x: number }" over "type Blah = { x: number }"
         //                    because code is more readable when it is built from stereotypical forms
         //                    (interfaces, enums, functions, etc.) instead of freeform type algebra.
-        '@typescript-eslint/consistent-type-definitions': 'error',
+        '@typescript-eslint/consistent-type-definitions': 'warn',
 
         // RATIONALE:         Code is more readable when the type of every variable is immediately obvious.
         //                    Even if the compiler may be able to infer a type, this inference will be unavailable
@@ -120,7 +139,7 @@ module.exports = {
         //
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         '@typescript-eslint/explicit-function-return-type': [
-          'error',
+          'warn',
           {
             allowExpressions: true,
             allowTypedFunctionExpressions: true,
@@ -129,7 +148,7 @@ module.exports = {
         ],
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/explicit-member-accessibility': 'error',
+        '@typescript-eslint/explicit-member-accessibility': 'warn',
 
         // RATIONALE:         Object-oriented programming organizes code into "classes" that associate
         //                    data structures (the class's fields) and the operations performed on those
@@ -141,7 +160,7 @@ module.exports = {
         //                    reordering methods produces spurious diffs that make PRs hard to read.  For classes
         //                    with lots of methods, alphabetization is probably a more useful secondary ordering.
         '@typescript-eslint/member-ordering': [
-          'error',
+          'warn',
           {
             default: 'never',
             classes: ['field', 'constructor', 'method']
@@ -157,7 +176,7 @@ module.exports = {
         //
         // Docs: https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/naming-convention.md
         '@typescript-eslint/naming-convention': [
-          'error',
+          'warn',
           ...macros.expandNamingConventionSelectors([
             {
               // We should be stricter about 'enumMember', but it often functions legitimately as an ad hoc namespace.
@@ -315,7 +334,7 @@ module.exports = {
         ],
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/no-array-constructor': 'error',
+        '@typescript-eslint/no-array-constructor': 'warn',
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         //
@@ -323,7 +342,7 @@ module.exports = {
         //                    This rule should be suppressed only in very special cases such as JSON.stringify()
         //                    where the type really can be anything.  Even if the type is flexible, another type
         //                    may be more appropriate such as "unknown", "{}", or "Record<k,V>".
-        '@typescript-eslint/no-explicit-any': 'error',
+        '@typescript-eslint/no-explicit-any': 'warn',
 
         // RATIONALE:         The #1 rule of promises is that every promise chain must be terminated by a catch()
         //                    handler.  Thus wherever a Promise arises, the code must either append a catch handler,
@@ -351,7 +370,7 @@ module.exports = {
         //
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         '@typescript-eslint/no-namespace': [
-          'error',
+          'warn',
           {
             // Discourage "namespace" in .ts and .tsx files
             allowDeclarations: false,
@@ -369,7 +388,7 @@ module.exports = {
         //                    just to save some typing.
         //
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/no-parameter-properties': 'error',
+        '@typescript-eslint/no-parameter-properties': 'warn',
 
         // RATIONALE:         When left in shipping code, unused variables often indicate a mistake.  Dead code
         //                    may impact performance.
@@ -395,7 +414,7 @@ module.exports = {
         // RATIONALE:         The "module" keyword is deprecated except when describing legacy libraries.
         //
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/prefer-namespace-keyword': 'error',
+        '@typescript-eslint/prefer-namespace-keyword': 'warn',
 
         // RATIONALE:         We require explicit type annotations, even when the compiler could infer the type.
         //                    This can be a controversial policy because it makes code more verbose.  There are
@@ -457,29 +476,29 @@ module.exports = {
           }
         ],
 
-        // RATIONALE:         Catches a common coding mistake.
+        // RATIONALE:         This rule warns if setters are defined without getters, which is probably a mistake.
         'accessor-pairs': 'error',
 
         // RATIONALE:         In TypeScript, if you write x["y"] instead of x.y, it disables type checking.
         'dot-notation': [
-          'error',
+          'warn',
           {
             allowPattern: '^_'
           }
         ],
 
-        // RATIONALE:         Catches a common coding mistake.
+        // RATIONALE:         Catches code that is likely to be incorrect
         eqeqeq: 'error',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'for-direction': 'error',
+        'for-direction': 'warn',
 
         // RATIONALE:         Catches a common coding mistake.
         'guard-for-in': 'error',
 
         // RATIONALE:         If you have more than 2,000 lines in a single source file, it's probably time
         //                    to split up your code.
-        'max-lines': ['error', { max: 2000 }],
+        'max-lines': ['warn', { max: 2000 }],
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-async-promise-executor': 'error',
@@ -487,7 +506,7 @@ module.exports = {
         // RATIONALE:         "|" and "&" are relatively rare, and are more likely to appear as a mistake when
         //                    someone meant "||" or "&&".  (But nobody types the other operators by mistake.)
         'no-bitwise': [
-          'error',
+          'warn',
           {
             allow: [
               '^',
@@ -517,32 +536,34 @@ module.exports = {
         'no-cond-assign': 'error',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'no-constant-condition': 'error',
+        'no-constant-condition': 'warn',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-control-regex': 'error',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'no-debugger': 'error',
+        'no-debugger': 'warn',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-delete-var': 'error',
 
+        // RATIONALE:         Catches code that is likely to be incorrect
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-duplicate-case': 'error',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'no-empty': 'error',
+        'no-empty': 'warn',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-empty-character-class': 'error',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'no-empty-pattern': 'error',
+        'no-empty-pattern': 'warn',
 
         // RATIONALE:         Eval is a security concern and a performance concern.
-        'no-eval': 'error',
+        'no-eval': 'warn',
 
+        // RATIONALE:         Catches code that is likely to be incorrect
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-ex-assign': 'error',
 
@@ -554,16 +575,15 @@ module.exports = {
         'no-extend-native': 'error',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'no-extra-boolean-cast': 'error',
+        'no-extra-boolean-cast': 'warn',
 
-        // RATIONALE:         Catches a common coding mistake.
-        'no-extra-label': 'error',
+        'no-extra-label': 'warn',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-fallthrough': 'error',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'no-func-assign': 'error',
+        'no-func-assign': 'warn',
 
         // RATIONALE:         Catches a common coding mistake.
         'no-implied-eval': 'error',
@@ -575,7 +595,7 @@ module.exports = {
         'no-label-var': 'error',
 
         // RATIONALE:         Eliminates redundant code.
-        'no-lone-blocks': 'error',
+        'no-lone-blocks': 'warn',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-misleading-character-class': 'error',
@@ -587,23 +607,25 @@ module.exports = {
         //                    a variable.  Either it's part of an awkward expression like "(new Thing()).doSomething()",
         //                    or else implies that the constructor is doing nontrivial computations, which is often
         //                    a poor class design.
-        'no-new': 'error',
+        'no-new': 'warn',
 
-        // RATIONALE:         Obsolete notation that is error-prone.
+        // RATIONALE:         Obsolete language feature that is deprecated.
         'no-new-func': 'error',
 
-        // RATIONALE:         Obsolete notation.
+        // RATIONALE:         Obsolete language feature that is deprecated.
         'no-new-object': 'error',
 
         // RATIONALE:         Obsolete notation.
-        'no-new-wrappers': 'error',
+        'no-new-wrappers': 'warn',
 
+        // RATIONALE:         Catches code that is likely to be incorrect
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-octal': 'error',
 
-        // RATIONALE:         Catches a common coding mistake.
+        // RATIONALE:         Catches code that is likely to be incorrect
         'no-octal-escape': 'error',
 
+        // RATIONALE:         Catches code that is likely to be incorrect
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-regex-spaces': 'error',
 
@@ -611,7 +633,7 @@ module.exports = {
         'no-return-assign': 'error',
 
         // RATIONALE:         Security risk.
-        'no-script-url': 'error',
+        'no-script-url': 'warn',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-self-assign': 'error',
@@ -625,9 +647,11 @@ module.exports = {
         //                    in the debugger.
         'no-sequences': 'error',
 
+        // RATIONALE:         Catches code that is likely to be incorrect
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-shadow-restricted-names': 'error',
 
+        // RATIONALE:         Obsolete language feature that is deprecated.
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-sparse-arrays': 'error',
 
@@ -639,22 +663,22 @@ module.exports = {
         'no-throw-literal': 'error',
 
         // RATIONALE:         Catches a common coding mistake.
-        'no-unmodified-loop-condition': 'error',
+        'no-unmodified-loop-condition': 'warn',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-unsafe-finally': 'error',
 
         // RATIONALE:         Catches a common coding mistake.
-        'no-unused-expressions': 'error',
+        'no-unused-expressions': 'warn',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'no-unused-labels': 'error',
+        'no-unused-labels': 'warn',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'no-useless-catch': 'error',
+        'no-useless-catch': 'warn',
 
         // RATIONALE:         Avoids a potential performance problem.
-        'no-useless-concat': 'error',
+        'no-useless-concat': 'warn',
 
         // RATIONALE:         The "var" keyword is deprecated because of its confusing "hoisting" behavior.
         //                    Always use "let" or "const" instead.
@@ -665,20 +689,23 @@ module.exports = {
         // RATIONALE:         Generally not needed in modern code.
         'no-void': 'error',
 
+        // RATIONALE:         Obsolete language feature that is deprecated.
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-with': 'error',
 
+        // RATIONALE:         Makes logic easier to understand, since constants always have a known value
         // @typescript-eslint\eslint-plugin\dist\configs\eslint-recommended.js
-        'prefer-const': 'error',
+        'prefer-const': 'warn',
 
         // RATIONALE:         Catches a common coding mistake where "resolve" and "reject" are confused.
         'promise/param-names': 'error',
 
+        // RATIONALE:         Catches code that is likely to be incorrect
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'require-atomic-updates': 'error',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'require-yield': 'error',
+        'require-yield': 'warn',
 
         // "Use strict" is redundant when using the TypeScript compiler.
         strict: ['error', 'never'],
@@ -686,6 +713,7 @@ module.exports = {
         // We're still experimenting with this plugin, so for now it is off by default.
         'tsdoc/syntax': 'off',
 
+        // RATIONALE:         Catches code that is likely to be incorrect
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'use-isnan': 'error'
 
