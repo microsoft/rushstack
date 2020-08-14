@@ -184,8 +184,8 @@ export class VersionManager {
 
         if (parentShrinkwrapEntry.resolution.integrity !== newIntegrity) {
           console.log(
-            `Updating entry for ${rushProject.packageName} ` +
-              `(${parentShrinkwrapEntry.resolution.integrity} -> ${newIntegrity}).`
+            `Updating entry for ${rushProject.packageName}: ` +
+              `${parentShrinkwrapEntry.resolution.integrity} -> ${newIntegrity}`
           );
           parentShrinkwrapEntry.resolution.integrity = newIntegrity;
         }
