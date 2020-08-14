@@ -394,8 +394,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     );
     //#endregion
 
-    //#region DIAGNOSTICS
-    const { duration: diagnosticsDurationMs, diagnostics } = measureTsPerformance('Diagnostics', () => {
+    //#region ANALYSIS
+    const { duration: diagnosticsDurationMs, diagnostics } = measureTsPerformance('Analyze', () => {
       const rawDiagnostics: TTypescript.Diagnostic[] = [
         ...genericProgram.getConfigFileParsingDiagnostics(),
         ...genericProgram.getOptionsDiagnostics(),
@@ -408,7 +408,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       );
       return { diagnostics: _diagnostics };
     });
-    this._typescriptTerminal.writeVerboseLine(`Diagnostics: ${diagnosticsDurationMs}ms`);
+    this._typescriptTerminal.writeVerboseLine(`Analyze: ${diagnosticsDurationMs}ms`);
     //#endregion
 
     //#region EMIT
