@@ -188,7 +188,9 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
 
             const exitMessage: ISubprocessExitMessage = message as ISubprocessExitMessage;
             hasExited = true;
-            exitError = SubprocessRunnerBase.deserializeArg(exitMessage.error) as Error | undefined;
+            exitError = SubprocessRunnerBase.deserializeFromIpcMessage(exitMessage.error) as
+              | Error
+              | undefined;
 
             break;
           }
@@ -242,7 +244,7 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
 
       const exitMessage: ISubprocessExitMessage = {
         type: 'exit',
-        error: SubprocessRunnerBase.serializeArg(error)
+        error: SubprocessRunnerBase.serializeForIpcMessage(error)
       };
       process.send!(exitMessage);
     }
@@ -302,7 +304,7 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
     );
   }
 
-  public static serializeArg(arg: unknown): ISubprocessApiCallArg {
+  public static serializeForIpcMessage(arg: unknown): ISubprocessApiCallArg {
     if (arg === undefined) {
       return { type: SupportedSerializableArgType.Undefined };
     } else if (arg === null) {
@@ -341,7 +343,7 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
     throw new Error(`Argument (${arg}) is not supported in subprocess communication.`);
   }
 
-  public static deserializeArg(arg: ISubprocessApiCallArg): unknown | undefined {
+  public static deserializeFromIpcMessage(arg: ISubprocessApiCallArg): unknown | undefined {
     switch (arg.type) {
       case SupportedSerializableArgType.Undefined: {
         return undefined;

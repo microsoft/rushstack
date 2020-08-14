@@ -4,25 +4,27 @@
 import { SubprocessRunnerBase } from '../SubprocessRunnerBase';
 
 describe('SubprocessRunnerBase', () => {
-  it(`${SubprocessRunnerBase.serializeArg.name} correctly serializes objects`, () => {
-    expect(SubprocessRunnerBase.serializeArg(1)).toMatchSnapshot();
-    expect(SubprocessRunnerBase.serializeArg(false)).toMatchSnapshot();
-    expect(SubprocessRunnerBase.serializeArg('abc')).toMatchSnapshot();
+  it(`${SubprocessRunnerBase.serializeForIpcMessage.name} correctly serializes objects`, () => {
+    expect(SubprocessRunnerBase.serializeForIpcMessage(1)).toMatchSnapshot();
+    expect(SubprocessRunnerBase.serializeForIpcMessage(false)).toMatchSnapshot();
+    expect(SubprocessRunnerBase.serializeForIpcMessage('abc')).toMatchSnapshot();
     // eslint-disable-next-line @rushstack/no-null
-    expect(SubprocessRunnerBase.serializeArg(null)).toMatchSnapshot();
-    expect(SubprocessRunnerBase.serializeArg(undefined)).toMatchSnapshot();
+    expect(SubprocessRunnerBase.serializeForIpcMessage(null)).toMatchSnapshot();
+    expect(SubprocessRunnerBase.serializeForIpcMessage(undefined)).toMatchSnapshot();
     const error: Error = new Error();
     error.stack = 'ERROR STACK';
-    expect(SubprocessRunnerBase.serializeArg(error)).toMatchSnapshot();
+    expect(SubprocessRunnerBase.serializeForIpcMessage(error)).toMatchSnapshot();
   });
 
-  it(`${SubprocessRunnerBase.serializeArg.name} doesn't handle non-error objects`, () => {
-    expect(() => SubprocessRunnerBase.serializeArg({})).toThrow();
+  it(`${SubprocessRunnerBase.serializeForIpcMessage.name} doesn't handle non-error objects`, () => {
+    expect(() => SubprocessRunnerBase.serializeForIpcMessage({})).toThrow();
   });
 
   it('de-serializes serialized objects', () => {
     function testDeserialization(x: unknown): void {
-      expect(SubprocessRunnerBase.deserializeArg(SubprocessRunnerBase.serializeArg(x))).toEqual(x);
+      expect(
+        SubprocessRunnerBase.deserializeFromIpcMessage(SubprocessRunnerBase.serializeForIpcMessage(x))
+      ).toEqual(x);
     }
 
     testDeserialization(1);

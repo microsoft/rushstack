@@ -1,39 +1,39 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SubprocessRunnerBase serializeArg correctly serializes objects 1`] = `
+exports[`SubprocessRunnerBase serializeForIpcMessage correctly serializes objects 1`] = `
 Object {
   "type": 2,
   "value": 1,
 }
 `;
 
-exports[`SubprocessRunnerBase serializeArg correctly serializes objects 2`] = `
+exports[`SubprocessRunnerBase serializeForIpcMessage correctly serializes objects 2`] = `
 Object {
   "type": 2,
   "value": false,
 }
 `;
 
-exports[`SubprocessRunnerBase serializeArg correctly serializes objects 3`] = `
+exports[`SubprocessRunnerBase serializeForIpcMessage correctly serializes objects 3`] = `
 Object {
   "type": 2,
   "value": "abc",
 }
 `;
 
-exports[`SubprocessRunnerBase serializeArg correctly serializes objects 4`] = `
+exports[`SubprocessRunnerBase serializeForIpcMessage correctly serializes objects 4`] = `
 Object {
   "type": 1,
 }
 `;
 
-exports[`SubprocessRunnerBase serializeArg correctly serializes objects 5`] = `
+exports[`SubprocessRunnerBase serializeForIpcMessage correctly serializes objects 5`] = `
 Object {
   "type": 0,
 }
 `;
 
-exports[`SubprocessRunnerBase serializeArg correctly serializes objects 6`] = `
+exports[`SubprocessRunnerBase serializeForIpcMessage correctly serializes objects 6`] = `
 Object {
   "type": 3,
   "value": Object {

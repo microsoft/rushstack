@@ -127,7 +127,7 @@ export class ScopedLoggerManager extends SubprocessCommunicationManagerBase {
           responseMessage = {
             type: SCOPED_LOGGER_MANAGER_REQUEST_LOGGER_MESSAGE_TYPE,
             loggerName: typedMessage.loggerName,
-            error: SubprocessRunnerBase.serializeArg(error) as ISubprocessApiCallArgWithValue<
+            error: SubprocessRunnerBase.serializeForIpcMessage(error) as ISubprocessApiCallArgWithValue<
               ISerializedErrorValue
             >
           };
@@ -145,7 +145,7 @@ export class ScopedLoggerManager extends SubprocessCommunicationManagerBase {
           throw new Error(`No logger was was registered with ID ${typedMessage.loggerId}`);
         }
 
-        const errorOrWarning: Error = SubprocessRunnerBase.deserializeArg(
+        const errorOrWarning: Error = SubprocessRunnerBase.deserializeFromIpcMessage(
           typedMessage.errorOrWarning
         ) as Error;
         if (typedMessage.isError) {
@@ -174,7 +174,7 @@ export class ScopedLoggerManager extends SubprocessCommunicationManagerBase {
       }
 
       if (typedMessage.error) {
-        const error: Error = SubprocessRunnerBase.deserializeArg(typedMessage.error) as Error;
+        const error: Error = SubprocessRunnerBase.deserializeFromIpcMessage(typedMessage.error) as Error;
         response.reject(error);
       } else if (typedMessage.terminalProviderId !== undefined) {
         const terminalProvider: ITerminalProvider = this._terminalProviderManager.registerSubprocessTerminalProvider(
@@ -188,7 +188,7 @@ export class ScopedLoggerManager extends SubprocessCommunicationManagerBase {
           const message: IEmitErrorOrWarning = {
             type: SCOPED_LOGGER_EMIT_ERROR_WARNING_MESSAGE_TYPE,
             loggerId: typedMessage.terminalProviderId!,
-            errorOrWarning: SubprocessRunnerBase.serializeArg(
+            errorOrWarning: SubprocessRunnerBase.serializeForIpcMessage(
               errorOrWarning
             ) as ISubprocessApiCallArgWithValue<ISerializedErrorValue>,
             isError
