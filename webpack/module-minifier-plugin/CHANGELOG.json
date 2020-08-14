@@ -2,6 +2,18 @@
   "name": "@rushstack/module-minifier-plugin",
   "entries": [
     {
+      "version": "0.1.8",
+      "tag": "@rushstack/module-minifier-plugin_v0.1.8",
+      "date": "Fri, 14 Aug 2020 23:38:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix handling of missing leading ids"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.7",
       "tag": "@rushstack/module-minifier-plugin_v0.1.7",
       "date": "Thu, 13 Aug 2020 09:26:40 GMT",
