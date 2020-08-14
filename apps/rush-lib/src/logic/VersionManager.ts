@@ -85,7 +85,8 @@ export class VersionManager {
     // Update packages and generate change files due to lock step bump.
     this._ensure(lockStepVersionPolicyName, shouldCommit);
 
-    // Refresh rush configuration
+    // Refresh rush configuration since we may have modified the package.json versions
+    // when calling this._ensure(...)
     this._rushConfiguration = RushConfiguration.loadFromConfigurationFile(
       this._rushConfiguration.rushJsonFile
     );
@@ -104,6 +105,12 @@ export class VersionManager {
       });
       changeManager.updateChangelog(!!shouldCommit);
     }
+
+    // Refresh rush configuration again, since we've further modified the package.json files
+    // by calling changeManager.apply(...)
+    this._rushConfiguration = RushConfiguration.loadFromConfigurationFile(
+      this._rushConfiguration.rushJsonFile
+    );
 
     if (
       this._rushConfiguration.packageManager === 'pnpm' &&
