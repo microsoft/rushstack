@@ -105,6 +105,11 @@ export class VersionManager {
       changeManager.updateChangelog(!!shouldCommit);
     }
 
+    // Refresh rush configuration
+    this._rushConfiguration = RushConfiguration.loadFromConfigurationFile(
+      this._rushConfiguration.rushJsonFile
+    );
+
     if (
       this._rushConfiguration.packageManager === 'pnpm' &&
       (!this._rushConfiguration.pnpmOptions ||
