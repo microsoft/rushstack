@@ -119,6 +119,7 @@ importers:
       '@rushstack/heft': 0.4.3
       '@types/eslint': 7.2.0
       '@types/glob': 7.1.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       '@types/resolve': 1.17.1
       '@types/semver': 7.3.1
@@ -135,6 +136,7 @@ importers:
       '@rushstack/ts-command-line': 'workspace:*'
       '@types/eslint': 7.2.0
       '@types/glob': 7.1.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       '@types/resolve': 1.17.1
       '@types/semver': ~7.3.1
