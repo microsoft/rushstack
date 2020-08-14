@@ -618,7 +618,9 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
     const errorObject: Error = new Error(diagnosticMessage);
 
-    switch (diagnostic.category) {
+    const adjustedCategory: TTypescript.DiagnosticCategory = this._getAdjustedDiagnosticCategory(diagnostic);
+
+    switch (adjustedCategory) {
       case ts.DiagnosticCategory.Error: {
         this._typescriptLogger.emitError(errorObject);
         break;
@@ -634,6 +636,21 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         break;
       }
     }
+  }
+
+  private _getAdjustedDiagnosticCategory(diagnostic: TTypescript.Diagnostic): TTypescript.DiagnosticCategory {
+    // Workaround for https://github.com/microsoft/TypeScript/issues/40058
+    // The compiler reports a hard error for issues such as this:
+    //
+    //    error TS6133: 'x' is declared but its value is never read.
+    //
+    // These should properly be treated as warnings, because they are purely cosmetic issues.
+    // TODO: Maybe heft should provide a config file for managing DiagnosticCategory mappings.
+    if (diagnostic.reportsUnnecessary && diagnostic.category === TTypescript.DiagnosticCategory.Error) {
+      return TTypescript.DiagnosticCategory.Warning;
+    }
+
+    return diagnostic.category;
   }
 
   private _emit(
