@@ -82,7 +82,7 @@ export class ScopedLogger implements IScopedLogger {
    */
   public emitError(error: Error): void {
     this._errors.push(error);
-    this.terminal.writeErrorLine(`ERROR: ${error.message}`);
+    this.terminal.writeErrorLine(`Error: ${error.message}`);
     if (this._shouldPrintStacks && error.stack) {
       this.terminal.writeErrorLine(error.stack);
     }
@@ -93,7 +93,7 @@ export class ScopedLogger implements IScopedLogger {
    */
   public emitWarning(warning: Error): void {
     this._warnings.push(warning);
-    this.terminal.writeWarningLine(`WARNING: ${warning.message}`);
+    this.terminal.writeWarningLine(`Warning: ${warning.message}`);
     if (this._shouldPrintStacks && warning.stack) {
       this.terminal.writeWarningLine(warning.stack);
     }
