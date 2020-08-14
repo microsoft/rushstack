@@ -143,12 +143,14 @@ export class VersionManager {
       await installManager.prepareCommonTempAsync(pnpmShrinkwrapFile);
 
       if (pnpmShrinkwrapFile) {
-        this._updatePnpmShrinkwrapTarballIntegrities(pnpmShrinkwrapFile);
+        await this._updatePnpmShrinkwrapTarballIntegritiesAsync(pnpmShrinkwrapFile);
       }
     }
   }
 
-  private _updatePnpmShrinkwrapTarballIntegrities(pnpmShrinkwrapFile: PnpmShrinkwrapFile): void {
+  private async _updatePnpmShrinkwrapTarballIntegritiesAsync(
+    pnpmShrinkwrapFile: PnpmShrinkwrapFile
+  ): Promise<void> {
     const tempProjectHelper: TempProjectHelper = new TempProjectHelper(this._rushConfiguration);
 
     if (pnpmShrinkwrapFile) {
@@ -176,17 +178,28 @@ export class VersionManager {
           );
         }
 
-        console.log(`Updating entry for ${rushProject.packageName}.`);
+        const newIntegrity: string = (
+          await ssri.fromStream(fs.createReadStream(tempProjectHelper.getTarballFilePath(rushProject)))
+        ).toString();
 
-        parentShrinkwrapEntry.resolution.integrity = ssri
-          .fromData(fs.readFileSync(tempProjectHelper.getTarballFilePath(rushProject)))
-          .toString();
+        if (parentShrinkwrapEntry.resolution.integrity !== newIntegrity) {
+          console.log(
+            `Updating entry for ${rushProject.packageName} ` +
+              `(${parentShrinkwrapEntry.resolution.integrity} -> ${newIntegrity}).`
+          );
+          parentShrinkwrapEntry.resolution.integrity = newIntegrity;
+        }
       }
 
       pnpmShrinkwrapFile.save(pnpmShrinkwrapFile.shrinkwrapFilename);
-      this._rushConfiguration
-        .getRepoState(this._rushConfiguration.currentInstalledVariant)
-        .refreshState(this._rushConfiguration);
+
+      if (
+        this._rushConfiguration
+          .getRepoState(this._rushConfiguration.currentInstalledVariant)
+          .refreshState(this._rushConfiguration)
+      ) {
+        console.log(`Updated repo-state.json`);
+      }
     }
   }
 
