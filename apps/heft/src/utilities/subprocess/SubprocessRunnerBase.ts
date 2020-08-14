@@ -21,7 +21,7 @@ import {
   ISubprocessCommunicationManagerBaseOptions
 } from './SubprocessCommunicationManagerBase';
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
-import { ScopedLoggerManager } from './ScopedLoggerManager';
+import { SubprocessLoggerManager } from './SubprocessLoggerManager';
 
 export interface ISubprocessInnerConfiguration {
   globalTerminalProviderId: number;
@@ -49,7 +49,7 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
   private static _subprocessInspectorPort: number = 9229 + 1; // 9229 is the default port
 
   private _terminalProviderManager: TerminalProviderManager;
-  private _scopedLoggerManager: ScopedLoggerManager;
+  private _scopedLoggerManager: SubprocessLoggerManager;
 
   private _innerConfiguration: ISubprocessInnerConfiguration;
   public _runningAsSubprocess: boolean = false;
@@ -94,7 +94,7 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
         ...communicationManagerBaseOptions,
         configuration: this._innerConfiguration
       });
-      this._scopedLoggerManager = new ScopedLoggerManager({
+      this._scopedLoggerManager = new SubprocessLoggerManager({
         ...communicationManagerBaseOptions,
         terminalProviderManager: this._terminalProviderManager,
         heftSession: heftSession
@@ -141,7 +141,7 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
       ...communicationManagerBaseOptions,
       configuration: innerConfiguration
     });
-    subprocessRunner._scopedLoggerManager = new ScopedLoggerManager({
+    subprocessRunner._scopedLoggerManager = new SubprocessLoggerManager({
       ...communicationManagerBaseOptions,
       terminalProviderManager: subprocessRunner._terminalProviderManager
     });
