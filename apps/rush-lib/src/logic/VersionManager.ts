@@ -157,8 +157,6 @@ export class VersionManager {
       console.log('Updating shrinkwrap.');
 
       for (const rushProject of this._rushConfiguration.projects) {
-        tempProjectHelper.createTempProjectTarball(rushProject);
-
         const tempProjectDependencyKey: string | undefined = pnpmShrinkwrapFile.getTempProjectDependencyKey(
           rushProject.tempProjectName
         );
