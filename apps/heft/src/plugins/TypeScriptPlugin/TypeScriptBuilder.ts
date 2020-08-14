@@ -583,7 +583,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
     if (diagnostics.length > 0) {
       this._typescriptTerminal.writeErrorLine(
-        `Encountered ${diagnostics.length} TypeScript error${diagnostics.length > 1 ? 's' : ''}:`
+        `Encountered ${diagnostics.length} TypeScript issue${diagnostics.length > 1 ? 's' : ''}:`
       );
       for (const diagnostic of diagnostics) {
         this._printDiagnosticMessage(ts, diagnostic);

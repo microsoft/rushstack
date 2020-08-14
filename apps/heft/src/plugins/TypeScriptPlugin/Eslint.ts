@@ -94,7 +94,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
 
     if (eslintFailureCount > 0) {
       this._terminal.writeWarningLine(
-        `Encountered ${eslintFailureCount} ESLint error${eslintFailureCount > 1 ? 's' : ''}:`
+        `Encountered ${eslintFailureCount} ESLint issue${eslintFailureCount > 1 ? 's' : ''}:`
       );
     }
 
