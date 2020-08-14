@@ -5,24 +5,24 @@ import * as childProcess from 'child_process';
 
 import { ISubprocessMessageBase } from './SubprocessCommunication';
 
-export type SendMessageFnType = (message: ISubprocessMessageBase) => void;
+export type SendMessageFunctionType = (message: ISubprocessMessageBase) => void;
 
 export interface ISubprocessCommunicationManagerBaseOptions {
-  sendMessageToParentProcessFn: SendMessageFnType;
-  sendMessageToSubprocessFn: SendMessageFnType;
+  sendMessageToParentProcess: SendMessageFunctionType;
+  sendMessageToSubprocess: SendMessageFunctionType;
 }
 
 export abstract class SubprocessCommunicationManagerBase {
-  protected readonly _sendMessageToParentProcessFn: SendMessageFnType;
-  protected _sendMessageToSubprocessFn: SendMessageFnType;
+  protected readonly _sendMessageToParentProcess: SendMessageFunctionType;
+  protected _sendMessageToSubprocess: SendMessageFunctionType;
 
   public constructor(options: ISubprocessCommunicationManagerBaseOptions) {
-    this._sendMessageToParentProcessFn = options.sendMessageToParentProcessFn;
-    this._sendMessageToSubprocessFn = options.sendMessageToSubprocessFn;
+    this._sendMessageToParentProcess = options.sendMessageToParentProcess;
+    this._sendMessageToSubprocess = options.sendMessageToSubprocess;
   }
 
   public registerSubprocess(subprocess: childProcess.ChildProcess): void {
-    this._sendMessageToSubprocessFn = subprocess.send.bind(subprocess);
+    this._sendMessageToSubprocess = subprocess.send.bind(subprocess);
   }
 
   public abstract canHandleMessageFromSubprocess(message: ISubprocessMessageBase): boolean;

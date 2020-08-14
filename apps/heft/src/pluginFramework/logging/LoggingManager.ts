@@ -44,7 +44,7 @@ export class LoggingManager {
   public getErrorStrings(): string[] {
     const result: string[] = [];
 
-    for (const [, scopedLogger] of this._scopedLoggers) {
+    for (const scopedLogger of this._scopedLoggers.values()) {
       result.push(...scopedLogger.errors.map((error) => `[${scopedLogger.loggerName}] ${error.message}`));
     }
 
@@ -54,7 +54,7 @@ export class LoggingManager {
   public getWarningStrings(): string[] {
     const result: string[] = [];
 
-    for (const [, scopedLogger] of this._scopedLoggers) {
+    for (const scopedLogger of this._scopedLoggers.values()) {
       result.push(
         ...scopedLogger.warnings.map((warning) => `[${scopedLogger.loggerName}] ${warning.message}`)
       );

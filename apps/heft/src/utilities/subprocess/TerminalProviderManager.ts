@@ -50,7 +50,7 @@ export class TerminalProviderManager extends SubprocessCommunicationManagerBase 
           data,
           severity
         };
-        this._sendMessageToParentProcessFn(message);
+        this._sendMessageToParentProcess(message);
       }
     };
 

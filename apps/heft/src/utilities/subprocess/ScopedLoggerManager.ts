@@ -76,7 +76,7 @@ export class ScopedLoggerManager extends SubprocessCommunicationManagerBase {
           type: SCOPED_LOGGER_MANAGER_REQUEST_LOGGER_MESSAGE_TYPE,
           loggerName: loggerName
         };
-        this._sendMessageToParentProcessFn(message);
+        this._sendMessageToParentProcess(message);
       });
     } finally {
       this._loggerNamesAwaitingResponse.delete(loggerName);
@@ -133,7 +133,7 @@ export class ScopedLoggerManager extends SubprocessCommunicationManagerBase {
           };
         }
 
-        this._sendMessageToSubprocessFn(responseMessage);
+        this._sendMessageToSubprocess(responseMessage);
 
         break;
       }
@@ -193,7 +193,7 @@ export class ScopedLoggerManager extends SubprocessCommunicationManagerBase {
             ) as ISubprocessApiCallArgWithValue<ISerializedErrorValue>,
             isError
           };
-          this._sendMessageToParentProcessFn(message);
+          this._sendMessageToParentProcess(message);
         };
 
         const scopedLogger: IScopedLogger = {

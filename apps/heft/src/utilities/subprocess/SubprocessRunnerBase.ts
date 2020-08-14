@@ -87,8 +87,8 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
       };
 
       const communicationManagerBaseOptions: ISubprocessCommunicationManagerBaseOptions = {
-        sendMessageToParentProcessFn: this._receiveMessageFromSubprocess.bind(this),
-        sendMessageToSubprocessFn: this._receiveMessageFromParentProcess.bind(this)
+        sendMessageToParentProcess: this._receiveMessageFromSubprocess.bind(this),
+        sendMessageToSubprocess: this._receiveMessageFromParentProcess.bind(this)
       };
       this._terminalProviderManager = new TerminalProviderManager({
         ...communicationManagerBaseOptions,
@@ -132,8 +132,8 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
     subprocessRunner._innerConfiguration = innerConfiguration;
 
     const communicationManagerBaseOptions: ISubprocessCommunicationManagerBaseOptions = {
-      sendMessageToParentProcessFn: process.send!.bind(process),
-      sendMessageToSubprocessFn: () => {
+      sendMessageToParentProcess: process.send!.bind(process),
+      sendMessageToSubprocess: () => {
         throw new Error('A subprocess cannot send a message to itself.');
       }
     };
