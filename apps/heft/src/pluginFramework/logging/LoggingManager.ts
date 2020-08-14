@@ -13,6 +13,11 @@ export class LoggingManager {
   private _options: ILoggingManagerOptions;
   private _scopedLoggers: Map<string, ScopedLogger> = new Map<string, ScopedLogger>();
   private _shouldPrintStacks: boolean;
+  private _hasAnyErrors: boolean;
+
+  public get errorsHaveBeenEmitted(): boolean {
+    return this._hasAnyErrors;
+  }
 
   public constructor(options: ILoggingManagerOptions) {
     this._options = options;
@@ -34,7 +39,8 @@ export class LoggingManager {
         requestingPlugin: plugin,
         loggerName,
         terminalProvider: this._options.terminalProvider,
-        getShouldPrintStacks: () => this._shouldPrintStacks
+        getShouldPrintStacks: () => this._shouldPrintStacks,
+        errorHasBeenEmittedCallback: () => (this._hasAnyErrors = true)
       });
       this._scopedLoggers.set(loggerName, scopedLogger);
       return scopedLogger;

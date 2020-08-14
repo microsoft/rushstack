@@ -76,7 +76,7 @@ export class TestAction extends BuildAction {
         if (shouldBuild) {
           await super.actionExecuteAsync();
 
-          if (this.loggingManager.getErrorStrings().length > 0) {
+          if (this.loggingManager.errorsHaveBeenEmitted) {
             return;
           }
 

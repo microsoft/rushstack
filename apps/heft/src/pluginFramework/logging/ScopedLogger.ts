@@ -11,6 +11,7 @@ export interface IScopedLoggerOptions {
   loggerName: string;
   terminalProvider: ITerminalProvider;
   getShouldPrintStacks: () => boolean;
+  errorHasBeenEmittedCallback: () => void;
 }
 
 /**

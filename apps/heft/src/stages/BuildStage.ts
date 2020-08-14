@@ -422,7 +422,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
     } else {
       await this._runSubstageWithLoggingAsync('Pre-compile', preCompileSubstage);
 
-      if (this.loggingManager.getErrorStrings().length > 0) {
+      if (this.loggingManager.errorsHaveBeenEmitted) {
         return;
       }
 
@@ -439,7 +439,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       }
       await this._runSubstageWithLoggingAsync('Compile', compileStage);
 
-      if (this.loggingManager.getErrorStrings().length > 0) {
+      if (this.loggingManager.errorsHaveBeenEmitted) {
         return;
       }
 
@@ -459,7 +459,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       await bundleStage.hooks.afterConfigureWebpack.promise();
       await this._runSubstageWithLoggingAsync('Bundle', bundleStage);
 
-      if (this.loggingManager.getErrorStrings().length > 0) {
+      if (this.loggingManager.errorsHaveBeenEmitted) {
         return;
       }
 
