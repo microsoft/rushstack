@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Change method used to calculate integrity of tarballs",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "3473356+D4N14L@users.noreply.github.com"
+}
