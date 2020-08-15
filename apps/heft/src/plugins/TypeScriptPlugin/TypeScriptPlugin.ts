@@ -89,6 +89,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
   private async _runTypeScriptAsync(options: IRunTypeScriptOptions): Promise<void> {
     const { heftSession, heftConfiguration, typeScriptConfiguration, watchMode, firstEmitCallback } = options;
 
+    const logger: ScopedLogger = heftSession.requestScopedLogger('TypeScript Plugin');
     const builderOptions: Omit<
       IRunBuilderForTsconfigOptions,
       | 'terminalProvider'
@@ -107,39 +108,47 @@ export class TypeScriptPlugin implements IHeftPlugin {
 
     JestTypeScriptDataFile.saveForProject(heftConfiguration.buildFolder, typeScriptConfiguration);
 
+    const callbacksForTsconfigs: Set<() => void> = new Set<() => void>();
+    function getFirstEmitCallbackForTsconfig(): () => void {
+      const callback: () => void = () => {
+        callbacksForTsconfigs.delete(callback);
+        if (callbacksForTsconfigs.size === 0) {
+          firstEmitCallback();
+        }
+      };
+
+      callbacksForTsconfigs.add(callback);
+
+      return callback;
+    }
+
     const tsconfigFilePaths: string[] = typeScriptConfiguration.tsconfigPaths;
     if (tsconfigFilePaths.length === 1) {
-      await this._runBuilderForTsconfig({
+      await this._runBuilderForTsconfig(logger, {
         ...builderOptions,
         tsconfigFilePath: tsconfigFilePaths[0],
         terminalProvider: heftConfiguration.terminalProvider,
         additionalModuleKindsToEmit: typeScriptConfiguration.additionalModuleKindsToEmit,
         terminalPrefixLabel: undefined,
-        firstEmitCallback
+        firstEmitCallback: getFirstEmitCallbackForTsconfig()
       });
     } else {
       const builderProcesses: Promise<void>[] = [];
       for (const tsconfigFilePath of tsconfigFilePaths) {
         const tsconfigFilename: string = path.basename(tsconfigFilePath, path.extname(tsconfigFilePath));
 
-        const isDefaultTsconfig: boolean = tsconfigFilename === 'tsconfig';
         // Only provide additionalModuleKindsToEmit to the default tsconfig.json
-        const additionalModuleKindsToEmit: IEmitModuleKind[] | undefined = isDefaultTsconfig
-          ? typeScriptConfiguration.additionalModuleKindsToEmit
-          : undefined;
+        const additionalModuleKindsToEmit: IEmitModuleKind[] | undefined =
+          tsconfigFilename === 'tsconfig' ? typeScriptConfiguration.additionalModuleKindsToEmit : undefined;
 
         builderProcesses.push(
-          this._runBuilderForTsconfig({
+          this._runBuilderForTsconfig(logger, {
             ...builderOptions,
             tsconfigFilePath,
             terminalProvider: heftConfiguration.terminalProvider,
             additionalModuleKindsToEmit,
             terminalPrefixLabel: tsconfigFilename,
-            firstEmitCallback: isDefaultTsconfig
-              ? firstEmitCallback
-              : () => {
-                  /* no-op */
-                }
+            firstEmitCallback: getFirstEmitCallbackForTsconfig()
           })
         );
       }
@@ -148,7 +157,10 @@ export class TypeScriptPlugin implements IHeftPlugin {
     }
   }
 
-  private async _runBuilderForTsconfig(options: IRunBuilderForTsconfigOptions): Promise<void> {
+  private async _runBuilderForTsconfig(
+    logger: ScopedLogger,
+    options: IRunBuilderForTsconfigOptions
+  ): Promise<void> {
     const {
       heftSession,
       heftConfiguration,
@@ -164,10 +176,9 @@ export class TypeScriptPlugin implements IHeftPlugin {
     } = options;
 
     const fullTsconfigFilePath: string = path.resolve(heftConfiguration.buildFolder, tsconfigFilePath);
-    const pluginLogger: ScopedLogger = heftSession.requestScopedLogger('TypeScript Plugin');
     const resolution: ITaskPackageResolution | undefined = TaskPackageResolver.resolveTaskPackages(
       fullTsconfigFilePath,
-      pluginLogger.terminal
+      logger.terminal
     );
     if (!resolution) {
       throw new Error(`Unable to resolve a compiler package for ${path.basename(tsconfigFilePath)}`);
