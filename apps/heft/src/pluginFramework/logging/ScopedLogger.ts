@@ -5,6 +5,7 @@ import { Terminal, ITerminalProvider } from '@rushstack/node-core-library';
 
 import { IHeftPlugin } from '../IHeftPlugin';
 import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
+import { LoggingManager } from './LoggingManager';
 
 export interface IScopedLoggerOptions {
   requestingPlugin: IHeftPlugin;
@@ -82,7 +83,7 @@ export class ScopedLogger implements IScopedLogger {
    */
   public emitError(error: Error): void {
     this._errors.push(error);
-    this.terminal.writeErrorLine(`Error: ${error.message}`);
+    this.terminal.writeErrorLine(`Error: ${LoggingManager.getErrorMessage(error)}`);
     if (this._shouldPrintStacks && error.stack) {
       this.terminal.writeErrorLine(error.stack);
     }
@@ -93,7 +94,7 @@ export class ScopedLogger implements IScopedLogger {
    */
   public emitWarning(warning: Error): void {
     this._warnings.push(warning);
-    this.terminal.writeWarningLine(`Warning: ${warning.message}`);
+    this.terminal.writeWarningLine(`Warning: ${LoggingManager.getErrorMessage(warning)}`);
     if (this._shouldPrintStacks && warning.stack) {
       this.terminal.writeWarningLine(warning.stack);
     }

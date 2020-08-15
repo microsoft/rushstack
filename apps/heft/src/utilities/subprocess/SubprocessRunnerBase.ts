@@ -10,7 +10,8 @@ import {
   ISubprocessApiCallArg,
   SupportedSerializableArgType,
   ISubprocessApiCallArgWithValue,
-  ISerializedErrorValue
+  ISerializedErrorValue,
+  ISerializedFileErrorValue
 } from './SubprocessCommunication';
 import { IExtendedFileSystem } from '../fileSystem/IExtendedFileSystem';
 import { CachedFileSystem } from '../fileSystem/CachedFileSystem';
@@ -22,6 +23,7 @@ import {
 } from './SubprocessCommunicationManagerBase';
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { SubprocessLoggerManager } from './SubprocessLoggerManager';
+import { FileError } from '../../pluginFramework/logging/FileError';
 
 export interface ISubprocessInnerConfiguration {
   globalTerminalProviderId: number;
@@ -313,7 +315,20 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
 
     switch (typeof arg) {
       case 'object': {
-        if (arg instanceof Error) {
+        if (arg instanceof FileError) {
+          const result: ISubprocessApiCallArgWithValue<ISerializedFileErrorValue> = {
+            type: SupportedSerializableArgType.FileError,
+            value: {
+              errorMessage: arg.message,
+              errorStack: arg.stack,
+              filePath: arg.filePath,
+              line: arg.line,
+              column: arg.column
+            }
+          };
+
+          return result;
+        } else if (arg instanceof Error) {
           const result: ISubprocessApiCallArgWithValue<ISerializedErrorValue> = {
             type: SupportedSerializableArgType.Error,
             value: {
@@ -359,6 +374,20 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
           ISerializedErrorValue
         >;
         const result: Error = new Error(typedArg.value.errorMessage);
+        result.stack = typedArg.value.errorStack;
+        return result;
+      }
+
+      case SupportedSerializableArgType.FileError: {
+        const typedArg: ISubprocessApiCallArgWithValue<ISerializedFileErrorValue> = arg as ISubprocessApiCallArgWithValue<
+          ISerializedFileErrorValue
+        >;
+        const result: FileError = new FileError(
+          typedArg.value.errorMessage,
+          typedArg.value.filePath,
+          typedArg.value.line,
+          typedArg.value.column
+        );
         result.stack = typedArg.value.errorStack;
         return result;
       }
