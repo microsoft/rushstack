@@ -12,7 +12,6 @@ export class BuildAction extends HeftActionBase {
   protected _watchFlag: CommandLineFlagParameter;
   protected _productionFlag: CommandLineFlagParameter;
   protected _liteFlag: CommandLineFlagParameter;
-  protected _firstCompilationEmitCallback: (() => void) | undefined;
   private _buildStandardParameters: IBuildStageStandardParameters;
   private _cleanFlag: CommandLineFlagParameter;
 
@@ -69,8 +68,7 @@ export class BuildAction extends HeftActionBase {
     const buildStageOptions: IBuildStageOptions = {
       ...BuildStage.getOptionsFromStandardParameters(this._buildStandardParameters),
       watchMode: this._watchFlag.value,
-      serveMode: false,
-      firstCompilationEmitCallback: this._firstCompilationEmitCallback?.bind(this)
+      serveMode: false
     };
     await buildStage.initializeAsync(buildStageOptions);
     await buildStage.executeAsync();

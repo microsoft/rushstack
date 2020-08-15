@@ -7,6 +7,7 @@ import { BuildAction } from './BuildAction';
 import { IHeftActionBaseOptions } from './HeftActionBase';
 import { TestStage, ITestStageOptions } from '../../stages/TestStage';
 import { Logging } from '../../utilities/Logging';
+import { IBuildStageContext, ICompileSubstage } from '../../stages/BuildStage';
 
 export class TestAction extends BuildAction {
   private _noTestFlag: CommandLineFlagParameter;
@@ -69,9 +70,18 @@ export class TestAction extends BuildAction {
       if (watchMode) {
         await this.runCleanIfRequestedAsync();
 
+        const TAP_NAME: string = 'test-action';
+        this.stages.buildStage.stageInitializationHook.tap(TAP_NAME, (build: IBuildStageContext) => {
+          build.hooks.compile.tap(TAP_NAME, (compile: ICompileSubstage) => {
+            compile.hooks.afterTypescriptFirstEmit.tapPromise(
+              TAP_NAME,
+              async () => await testStage.executeAsync()
+            );
+          });
+        });
+
         // In --watch mode, kick off all stages concurrently with the expectation that the their
         // promises will never resolve and that they will handle watching filesystem changes
-        this._firstCompilationEmitCallback = async () => await testStage.executeAsync();
         await this.runBuildAsync();
       } else {
         if (shouldBuild) {

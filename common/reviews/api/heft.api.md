@@ -58,6 +58,8 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
     readonly afterConfigureCopyStaticAssets: AsyncSeriesHook;
     // (undocumented)
     readonly afterConfigureTypeScript: AsyncSeriesHook;
+    // @internal (undocumented)
+    readonly afterTypescriptFirstEmit: AsyncParallelHook;
     // (undocumented)
     readonly configureCopyStaticAssets: AsyncSeriesHook;
     // (undocumented)
@@ -170,8 +172,6 @@ export interface ICompilerPackage {
 
 // @public (undocumented)
 export interface ICompileSubstage extends IBuildSubstage<CompileSubstageHooks, ICompileSubstageProperties> {
-    // (undocumented)
-    firstCompilationEmitCallback: () => void;
 }
 
 // @public (undocumented)

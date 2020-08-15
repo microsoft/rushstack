@@ -159,6 +159,11 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
 
   public readonly afterConfigureTypeScript: AsyncSeriesHook = new AsyncSeriesHook();
   public readonly afterConfigureCopyStaticAssets: AsyncSeriesHook = new AsyncSeriesHook();
+
+  /**
+   * @internal
+   */
+  public readonly afterTypescriptFirstEmit: AsyncParallelHook = new AsyncParallelHook();
 }
 
 /**
@@ -216,9 +221,7 @@ export interface IPreCompileSubstage extends IBuildSubstage<BuildSubstageHooksBa
 /**
  * @public
  */
-export interface ICompileSubstage extends IBuildSubstage<CompileSubstageHooks, ICompileSubstageProperties> {
-  firstCompilationEmitCallback: () => void;
-}
+export interface ICompileSubstage extends IBuildSubstage<CompileSubstageHooks, ICompileSubstageProperties> {}
 
 /**
  * @public
@@ -273,7 +276,6 @@ export interface IBuildStageOptions {
   watchMode: boolean;
   serveMode: boolean;
   typescriptMaxWriteParallelism?: number;
-  firstCompilationEmitCallback: (() => void) | undefined;
 }
 
 export interface IBuildStageStandardParameters {
@@ -331,8 +333,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       production: standardParameters.productionFlag.value,
       lite: standardParameters.liteFlag.value,
       locale: standardParameters.localeParameter.value,
-      typescriptMaxWriteParallelism: standardParameters.typescriptMaxWriteParallelismParamter.value,
-      firstCompilationEmitCallback: undefined
+      typescriptMaxWriteParallelism: standardParameters.typescriptMaxWriteParallelismParamter.value
     };
   }
 
@@ -353,7 +354,6 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       properties: {}
     };
     this.stageHooks.preCompile.call(preCompileSubstage);
-    let firstCompilationEmitCallback: (() => void) | undefined = undefined;
 
     const compileStage: ICompileSubstage = {
       hooks: new CompileSubstageHooks(),
@@ -373,15 +373,6 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
           // For now - these may need to be revised later
           sourceFolderName: 'src',
           destinationFolderNames: ['lib']
-        }
-      },
-      firstCompilationEmitCallback: () => {
-        if (firstCompilationEmitCallback) {
-          firstCompilationEmitCallback();
-        }
-
-        if (this.stageOptions.firstCompilationEmitCallback) {
-          this.stageOptions.firstCompilationEmitCallback();
         }
       }
     };
@@ -427,12 +418,14 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
         bundleStage.hooks.afterConfigureWebpack.promise()
       ]);
 
-      firstCompilationEmitCallback = async () => {
-        await Promise.all([
-          this._runSubstageWithLoggingAsync('Bundle', bundleStage),
-          this._runSubstageWithLoggingAsync('Post-build', postBuildStage)
-        ]);
-      };
+      compileStage.hooks.afterTypescriptFirstEmit.tapPromise(
+        'build-stage',
+        async () =>
+          await Promise.all([
+            this._runSubstageWithLoggingAsync('Bundle', bundleStage),
+            this._runSubstageWithLoggingAsync('Post-build', postBuildStage)
+          ])
+      );
 
       await Promise.all([
         this._runSubstageWithLoggingAsync('Pre-compile', preCompileSubstage),

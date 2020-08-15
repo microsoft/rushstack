@@ -65,7 +65,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
             heftConfiguration,
             typeScriptConfiguration: compile.properties.typeScriptConfiguration,
             watchMode: build.properties.watchMode,
-            firstEmitCallback: compile.firstCompilationEmitCallback
+            firstEmitCallback: async () => compile.hooks.afterTypescriptFirstEmit.promise()
           });
         });
       });
