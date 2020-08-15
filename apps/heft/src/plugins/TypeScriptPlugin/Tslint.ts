@@ -69,7 +69,7 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
   public reportFailures(): void {
     if (this._lintResult.failures?.length) {
       this._terminal.writeWarningLine(
-        `Encountered ${this._lintResult.failures.length} TSLint error${
+        `Encountered ${this._lintResult.failures.length} TSLint issues${
           this._lintResult.failures.length > 1 ? 's' : ''
         }:`
       );
