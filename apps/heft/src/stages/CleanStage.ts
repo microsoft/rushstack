@@ -10,6 +10,7 @@ import { LegacyAdapters } from '@rushstack/node-core-library';
 import { StageBase, StageHooksBase, IStageContext } from './StageBase';
 import { Async } from '../utilities/Async';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
+import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 
 /**
  * @public
@@ -36,8 +37,8 @@ export interface ICleanStageOptions {
 export interface ICleanStageContext extends IStageContext<CleanStageHooks, ICleanStageProperties> {}
 
 export class CleanStage extends StageBase<CleanStageHooks, ICleanStageProperties, ICleanStageOptions> {
-  public constructor(heftConfiguration: HeftConfiguration) {
-    super(heftConfiguration, CleanStageHooks);
+  public constructor(heftConfiguration: HeftConfiguration, loggingManager: LoggingManager) {
+    super(heftConfiguration, loggingManager, CleanStageHooks);
   }
 
   protected getDefaultStageProperties(options: ICleanStageOptions): ICleanStageProperties {
@@ -66,7 +67,7 @@ export class CleanStage extends StageBase<CleanStageHooks, ICleanStageProperties
       this.stageHooks.deletePath.promise(pathToDelete)
     );
 
-    this.terminal.writeLine(`Deleted ${this.stageProperties.pathsToDelete.size} paths`);
+    this.globalTerminal.writeLine(`Deleted ${this.stageProperties.pathsToDelete.size} paths`);
   }
 
   private async _resolvePathAsync(globPattern: string, buildFolder: string): Promise<string[]> {

@@ -21,10 +21,15 @@ import { DependencySpecifier } from './DependencySpecifier';
 import { PurgeManager } from './PurgeManager';
 import { RushConstants } from './RushConstants';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
-import { RushInstallManager } from './installManager/RushInstallManager';
 import { IInstallManagerOptions } from './base/BaseInstallManager';
 
 const lodash: typeof import('lodash') = Import.lazy('lodash', require);
+// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
+import { RushInstallManager } from './installManager/RushInstallManager';
+const rushInstallManagerModule: typeof import('./installManager/RushInstallManager') = Import.lazy(
+  './installManager/RushInstallManager',
+  require
+);
 
 export class VersionManager {
   private _rushConfiguration: RushConfiguration;
@@ -86,7 +91,8 @@ export class VersionManager {
     // Update packages and generate change files due to lock step bump.
     this._ensure(lockStepVersionPolicyName, shouldCommit);
 
-    // Refresh rush configuration
+    // Refresh rush configuration since we may have modified the package.json versions
+    // when calling this._ensure(...)
     this._rushConfiguration = RushConfiguration.loadFromConfigurationFile(
       this._rushConfiguration.rushJsonFile
     );
@@ -105,6 +111,12 @@ export class VersionManager {
       });
       changeManager.updateChangelog(!!shouldCommit);
     }
+
+    // Refresh rush configuration again, since we've further modified the package.json files
+    // by calling changeManager.apply(...)
+    this._rushConfiguration = RushConfiguration.loadFromConfigurationFile(
+      this._rushConfiguration.rushJsonFile
+    );
 
     if (
       this._rushConfiguration.packageManager === 'pnpm' &&
@@ -125,7 +137,7 @@ export class VersionManager {
         maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
         toProjects: []
       };
-      const installManager: RushInstallManager = new RushInstallManager(
+      const installManager: RushInstallManager = new rushInstallManagerModule.RushInstallManager(
         this._rushConfiguration,
         this._globalFolder,
         purgeManager,
@@ -144,20 +156,20 @@ export class VersionManager {
       await installManager.prepareCommonTempAsync(pnpmShrinkwrapFile);
 
       if (pnpmShrinkwrapFile) {
-        this._updatePnpmShrinkwrapTarballIntegrities(pnpmShrinkwrapFile);
+        await this._updatePnpmShrinkwrapTarballIntegritiesAsync(pnpmShrinkwrapFile);
       }
     }
   }
 
-  private _updatePnpmShrinkwrapTarballIntegrities(pnpmShrinkwrapFile: PnpmShrinkwrapFile): void {
+  private async _updatePnpmShrinkwrapTarballIntegritiesAsync(
+    pnpmShrinkwrapFile: PnpmShrinkwrapFile
+  ): Promise<void> {
     const tempProjectHelper: TempProjectHelper = new TempProjectHelper(this._rushConfiguration);
 
     if (pnpmShrinkwrapFile) {
       console.log('Updating shrinkwrap.');
 
       for (const rushProject of this._rushConfiguration.projects) {
-        tempProjectHelper.createTempProjectTarball(rushProject);
-
         const tempProjectDependencyKey: string | undefined = pnpmShrinkwrapFile.getTempProjectDependencyKey(
           rushProject.tempProjectName
         );
@@ -177,17 +189,28 @@ export class VersionManager {
           );
         }
 
-        console.log(`Updating entry for ${rushProject.packageName}.`);
+        const newIntegrity: string = (
+          await ssri.fromStream(fs.createReadStream(tempProjectHelper.getTarballFilePath(rushProject)))
+        ).toString();
 
-        parentShrinkwrapEntry.resolution.integrity = ssri
-          .fromData(fs.readFileSync(tempProjectHelper.getTarballFilePath(rushProject)))
-          .toString();
+        if (parentShrinkwrapEntry.resolution.integrity !== newIntegrity) {
+          console.log(
+            `Updating entry for ${rushProject.packageName}: ` +
+              `${parentShrinkwrapEntry.resolution.integrity} -> ${newIntegrity}`
+          );
+          parentShrinkwrapEntry.resolution.integrity = newIntegrity;
+        }
       }
 
       pnpmShrinkwrapFile.save(pnpmShrinkwrapFile.shrinkwrapFilename);
-      this._rushConfiguration
-        .getRepoState(this._rushConfiguration.currentInstalledVariant)
-        .refreshState(this._rushConfiguration);
+
+      if (
+        this._rushConfiguration
+          .getRepoState(this._rushConfiguration.currentInstalledVariant)
+          .refreshState(this._rushConfiguration)
+      ) {
+        console.log(`Updated repo-state.json`);
+      }
     }
   }
 

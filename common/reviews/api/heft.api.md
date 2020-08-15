@@ -76,12 +76,12 @@ export class HeftConfiguration {
     get buildCacheFolder(): string;
     get buildFolder(): string;
     get compilerPackage(): ICompilerPackage | undefined;
+    get globalTerminal(): Terminal;
     get heftPackageJson(): IPackageJson;
     // @internal (undocumented)
     static initialize(options: _IHeftConfigurationInitializationOptions): HeftConfiguration;
     get projectHeftDataFolder(): string;
     get projectPackageJson(): IPackageJson;
-    get terminal(): Terminal;
     get terminalProvider(): ITerminalProvider;
     }
 
@@ -97,6 +97,7 @@ export class HeftSession {
     readonly hooks: IHeftSessionHooks;
     // @internal (undocumented)
     readonly metricsCollector: _MetricsCollector;
+    requestScopedLogger(loggerName: string): ScopedLogger;
 }
 
 // @public (undocumented)
@@ -267,6 +268,14 @@ export interface IPreCompileSubstage extends IBuildSubstage<BuildSubstageHooksBa
 }
 
 // @public (undocumented)
+export interface IScopedLogger {
+    emitError(error: Error): void;
+    emitWarning(warning: Error): void;
+    // (undocumented)
+    readonly terminal: Terminal;
+}
+
+// @public (undocumented)
 export interface ISharedBundleSubstageWebpackProperties {
     // (undocumented)
     apiExtractorConfiguration: IApiExtractorConfiguration;
@@ -334,6 +343,28 @@ export class MetricsCollectorHooks {
     flushAndTeardown: AsyncParallelHook;
     recordMetric: SyncHook<string, IMetricsData>;
 }
+
+// @public (undocumented)
+export class ScopedLogger implements IScopedLogger {
+    // Warning: (ae-forgotten-export) The symbol "IScopedLoggerOptions" needs to be exported by the entry point index.d.ts
+    //
+    // @internal
+    constructor(options: IScopedLoggerOptions);
+    emitError(error: Error): void;
+    emitWarning(warning: Error): void;
+    // (undocumented)
+    get errors(): ReadonlyArray<Error>;
+    // (undocumented)
+    readonly loggerName: string;
+    // @internal (undocumented)
+    readonly _requestingPlugin: IHeftPlugin;
+    // (undocumented)
+    readonly terminal: Terminal;
+    // (undocumented)
+    readonly terminalProvider: ITerminalProvider;
+    // (undocumented)
+    get warnings(): ReadonlyArray<Error>;
+    }
 
 // @public (undocumented)
 export abstract class StageHooksBase<TStageProperties extends object> {

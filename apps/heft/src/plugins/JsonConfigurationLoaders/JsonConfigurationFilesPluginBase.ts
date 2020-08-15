@@ -207,13 +207,13 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
         const schema: JsonSchema = await this._getSchemaByNameAsync(configFilename);
         const loadedConfigJson: TConfigJson = JsonFile.loadAndValidate(configurationFilePath, schema);
 
-        heftConfiguration.terminal.writeVerboseLine(`Loaded config file "${configurationFilePath}"`);
+        heftConfiguration.globalTerminal.writeVerboseLine(`Loaded config file "${configurationFilePath}"`);
 
         configurationJsonCacheEntry = {
           data: loadedConfigJson
         };
       } else {
-        heftConfiguration.terminal.writeVerboseLine(
+        heftConfiguration.globalTerminal.writeVerboseLine(
           `Config file "${configurationFilePath}" doesn't exist. Skipping.`
         );
 
@@ -224,7 +224,7 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
 
       this._configurationJsonCache.set(configFilename, configurationJsonCacheEntry);
     } else {
-      heftConfiguration.terminal.writeVerboseLine(`Config file "${configFilename}" was in the cache.`);
+      heftConfiguration.globalTerminal.writeVerboseLine(`Config file "${configFilename}" was in the cache.`);
     }
 
     return configurationJsonCacheEntry.data;

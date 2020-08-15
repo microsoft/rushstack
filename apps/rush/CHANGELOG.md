@@ -1,6 +1,20 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 13 Aug 2020 00:53:43 GMT and should not be manually modified.
+This log was last generated on Fri, 14 Aug 2020 21:03:48 GMT and should not be manually modified.
+
+## 5.32.2
+Fri, 14 Aug 2020 21:03:48 GMT
+
+### Updates
+
+- Resolve issue with version --bump where the wrong hash would get written to the pnpm-lock file
+
+## 5.32.1
+Fri, 14 Aug 2020 04:06:30 GMT
+
+### Updates
+
+- Change method used to calculate integrity of tarballs
 
 ## 5.32.0
 Thu, 13 Aug 2020 00:53:43 GMT

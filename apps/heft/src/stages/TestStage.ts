@@ -4,6 +4,7 @@
 import { StageBase, StageHooksBase, IStageContext } from './StageBase';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { AsyncSeriesHook, AsyncParallelHook } from 'tapable';
+import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 
 /**
  * @public
@@ -32,8 +33,8 @@ export interface ITestStageOptions {
 }
 
 export class TestStage extends StageBase<TestStageHooks, ITestStageProperties, ITestStageOptions> {
-  public constructor(heftConfiguration: HeftConfiguration) {
-    super(heftConfiguration, TestStageHooks);
+  public constructor(heftConfiguration: HeftConfiguration, loggingManager: LoggingManager) {
+    super(heftConfiguration, loggingManager, TestStageHooks);
   }
 
   protected getDefaultStageProperties(options: ITestStageOptions): ITestStageProperties {
