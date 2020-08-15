@@ -7,12 +7,12 @@ import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 
-const deployManagerModule: typeof import('../../logic/deploy/DeployManager') = Import.lazy(
+// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
+import * as deployManagerTypes from '../../logic/deploy/DeployManager';
+const deployManagerModule: typeof deployManagerTypes = Import.lazy(
   '../../logic/deploy/DeployManager',
   require
 );
-// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
-import * as deployManagerTypes from '../../logic/deploy/DeployManager';
 
 export class DeployAction extends BaseRushAction {
   private _scenario: CommandLineStringParameter;

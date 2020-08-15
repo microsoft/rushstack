@@ -25,8 +25,8 @@ import { IInstallManagerOptions } from './base/BaseInstallManager';
 
 const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 // TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
-import { RushInstallManager } from './installManager/RushInstallManager';
-const rushInstallManagerModule: typeof import('./installManager/RushInstallManager') = Import.lazy(
+import * as RushInstallManagerTypes from './installManager/RushInstallManager';
+const rushInstallManagerModule: typeof RushInstallManagerTypes = Import.lazy(
   './installManager/RushInstallManager',
   require
 );
@@ -137,7 +137,7 @@ export class VersionManager {
         maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
         toProjects: []
       };
-      const installManager: RushInstallManager = new rushInstallManagerModule.RushInstallManager(
+      const installManager: RushInstallManagerTypes.RushInstallManager = new rushInstallManagerModule.RushInstallManager(
         this._rushConfiguration,
         this._globalFolder,
         purgeManager,

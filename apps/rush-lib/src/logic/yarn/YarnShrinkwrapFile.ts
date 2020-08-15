@@ -8,9 +8,9 @@ import { RushConstants } from '../RushConstants';
 import { DependencySpecifier } from '../DependencySpecifier';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
 
-const lockfileModule: typeof import('@yarnpkg/lockfile') = Import.lazy('@yarnpkg/lockfile', require);
 // TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
-import { ParseResult } from '@yarnpkg/lockfile';
+import * as YarnPkgLockfileTypes from '@yarnpkg/lockfile';
+const lockfileModule: typeof YarnPkgLockfileTypes = Import.lazy('@yarnpkg/lockfile', require);
 
 /**
  * Used with YarnShrinkwrapFile._encodePackageNameAndSemVer() and _decodePackageNameAndSemVer().
@@ -149,7 +149,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
 
   public static loadFromFile(shrinkwrapFilename: string): YarnShrinkwrapFile | undefined {
     let shrinkwrapString: string;
-    let shrinkwrapJson: ParseResult;
+    let shrinkwrapJson: YarnPkgLockfileTypes.ParseResult;
     try {
       if (!FileSystem.exists(shrinkwrapFilename)) {
         return undefined; // file does not exist

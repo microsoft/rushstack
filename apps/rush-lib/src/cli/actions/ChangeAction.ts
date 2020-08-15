@@ -28,9 +28,9 @@ import {
 } from '../../api/VersionPolicy';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
-const inquirer: typeof import('inquirer') = Import.lazy('inquirer', require);
 // TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
 import * as inquirerTypes from 'inquirer';
+const inquirer: typeof inquirerTypes = Import.lazy('inquirer', require);
 
 export class ChangeAction extends BaseRushAction {
   private _verifyParameter: CommandLineFlagParameter;

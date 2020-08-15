@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { IPackageJson, FileConstants } from '@rushstack/node-core-library';
+import { IPackageJson, FileConstants, Import } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 import { BumpType, LockStepVersionPolicy } from '../../api/VersionPolicy';
@@ -13,9 +13,12 @@ import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismat
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { PolicyValidator } from '../../logic/policy/PolicyValidator';
 import { BaseRushAction } from './BaseRushAction';
-import { VersionManager } from '../../logic/VersionManager';
 import { PublishGit } from '../../logic/PublishGit';
 import { Git } from '../../logic/Git';
+
+// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
+import * as VersionManagerTypes from '../../logic/VersionManager';
+const versionManagerModule: typeof VersionManagerTypes = Import.lazy('../../logic/VersionManager', require);
 
 export const DEFAULT_PACKAGE_UPDATE_MESSAGE: string = 'Applying package updates.';
 
@@ -29,7 +32,7 @@ export class VersionAction extends BaseRushAction {
   private _overwriteBump: CommandLineStringParameter;
   private _prereleaseIdentifier: CommandLineStringParameter;
 
-  private _versionManager: VersionManager;
+  private _versionManager: VersionManagerTypes.VersionManager;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -98,7 +101,7 @@ export class VersionAction extends BaseRushAction {
 
     this._validateInput();
 
-    this._versionManager = new VersionManager(
+    this._versionManager = new versionManagerModule.VersionManager(
       this.rushConfiguration,
       userEmail,
       this.rushConfiguration.versionPolicyConfiguration,
