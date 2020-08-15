@@ -27,6 +27,7 @@ import { Tslint } from './Tslint';
 import { Eslint } from './Eslint';
 import { ISharedTypeScriptConfiguration } from '../../stages/BuildStage';
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
+import { FileError } from '../../pluginFramework/logging/FileError';
 
 import { EmitFilesPatch, ICachedEmitModuleKind } from './EmitFilesPatch';
 
@@ -600,8 +601,9 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   }
 
   private _printDiagnosticMessage(ts: ExtendedTypeScript, diagnostic: TTypescript.Diagnostic): void {
-    let diagnosticMessage: string;
     // Code taken from reference example
+    let diagnosticMessage: string;
+    let errorObject: Error;
     if (diagnostic.file) {
       const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!);
       const message: string = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
@@ -609,14 +611,13 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         this._configuration.buildFolder,
         diagnostic.file.fileName
       );
-      diagnosticMessage =
-        `${buildFolderRelativeFilename}:${line + 1}:${character + 1} - ` +
-        `(TS${diagnostic.code}) ${message}`;
+      const formattedMessage: string = `(TS${diagnostic.code}) ${message}`;
+      errorObject = new FileError(formattedMessage, buildFolderRelativeFilename, line + 1, character + 1);
+      diagnosticMessage = errorObject.toString();
     } else {
       diagnosticMessage = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+      errorObject = new Error(diagnosticMessage);
     }
-
-    const errorObject: Error = new Error(diagnosticMessage);
 
     const adjustedCategory: TTypescript.DiagnosticCategory = this._getAdjustedDiagnosticCategory(diagnostic);
 
