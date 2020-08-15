@@ -3,30 +3,30 @@
 
 import * as webpack from 'webpack';
 import * as WebpackDevServer from 'webpack-dev-server';
-import { LegacyAdapters, Terminal, ITerminalProvider } from '@rushstack/node-core-library';
+import { LegacyAdapters } from '@rushstack/node-core-library';
 
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { HeftSession } from '../../pluginFramework/HeftSession';
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
-import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
 import {
   IBuildStageContext,
   IBundleSubstage,
   IBuildStageProperties,
   IWebpackConfiguration
 } from '../../stages/BuildStage';
+import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 
 const PLUGIN_NAME: string = 'WebpackPlugin';
 
 export class WebpackPlugin implements IHeftPlugin {
   public readonly displayName: string = PLUGIN_NAME;
 
-  public apply(heftCompilation: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftCompilation.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
+  public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
+    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
         bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
           await this._runWebpackAsync(
-            heftConfiguration.terminalProvider,
+            heftSession,
             bundle.properties.webpackConfiguration,
             build.properties,
             heftConfiguration.terminalProvider.supportsColor
@@ -37,7 +37,7 @@ export class WebpackPlugin implements IHeftPlugin {
   }
 
   private async _runWebpackAsync(
-    baseTerminalProvider: ITerminalProvider,
+    heftSession: HeftSession,
     webpackConfiguration: IWebpackConfiguration,
     buildProperties: IBuildStageProperties,
     supportsColor: boolean
@@ -46,12 +46,8 @@ export class WebpackPlugin implements IHeftPlugin {
       return;
     }
 
-    const webpackTerminalProvider: PrefixProxyTerminalProvider = new PrefixProxyTerminalProvider(
-      baseTerminalProvider,
-      '[webpack] '
-    );
-    const terminal: Terminal = new Terminal(webpackTerminalProvider);
-    terminal.writeLine(`Using Webpack version ${webpack.version}`);
+    const logger: ScopedLogger = heftSession.requestScopedLogger('webpack');
+    logger.terminal.writeLine(`Using Webpack version ${webpack.version}`);
 
     const compiler: webpack.Compiler | webpack.MultiCompiler = Array.isArray(webpackConfiguration)
       ? webpack(webpackConfiguration) /* (webpack.Compilation[]) => webpack.MultiCompiler */
@@ -83,47 +79,40 @@ export class WebpackPlugin implements IHeftPlugin {
         });
       });
     } else {
-      let stats: webpack.Stats;
+      let stats: webpack.Stats | undefined;
       if (buildProperties.watchMode) {
         try {
           stats = await LegacyAdapters.convertCallbackToPromise(compiler.watch.bind(compiler), {});
         } catch (e) {
-          // TODO: handle error better
-          terminal.writeErrorLine(e);
-          throw e;
+          logger.emitError(e);
         }
       } else {
         try {
           stats = await LegacyAdapters.convertCallbackToPromise(compiler.run.bind(compiler));
         } catch (e) {
-          // TODO: handle error better
-          terminal.writeErrorLine(e);
-          throw e;
+          logger.emitError(e);
         }
       }
-      // eslint-disable-next-line require-atomic-updates
-      buildProperties.webpackStats = stats;
 
-      this._emitErrors(terminal, stats);
+      if (stats) {
+        // eslint-disable-next-line require-atomic-updates
+        buildProperties.webpackStats = stats;
+
+        this._emitErrors(logger, stats);
+      }
     }
   }
 
-  private _emitErrors(terminal: Terminal, stats: webpack.Stats): void {
+  private _emitErrors(logger: ScopedLogger, stats: webpack.Stats): void {
     if (stats.hasErrors() || stats.hasWarnings()) {
       const serializedStats: webpack.Stats.ToJsonOutput = stats.toJson('errors-warnings');
 
-      for (const warning of serializedStats.warnings) {
-        terminal.writeWarningLine(warning);
+      for (const warning of serializedStats.warnings as (string | Error)[]) {
+        logger.emitWarning(warning instanceof Error ? warning : new Error(warning));
       }
 
-      for (const error of serializedStats.errors) {
-        terminal.writeErrorLine(error);
-      }
-
-      if (serializedStats.errors.length === 1) {
-        throw new Error('Webpack compilation encountered an error.');
-      } else if (serializedStats.errors.length > 1) {
-        throw new Error('Webpack compilation encountered errors.');
+      for (const error of serializedStats.errors as (string | Error)[]) {
+        logger.emitError(error instanceof Error ? error : new Error(error));
       }
     }
   }

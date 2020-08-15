@@ -12,6 +12,7 @@ import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { ITestStageContext } from '../../stages/TestStage';
 import { ICleanStageContext } from '../../stages/CleanStage';
 import { JestTypeScriptDataFile, IJestTypeScriptDataFileJson } from './JestTypeScriptDataFile';
+import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 
 const PLUGIN_NAME: string = 'JestPlugin';
 const JEST_CONFIGURATION_LOCATION: string = './config/jest.config.json';
@@ -38,6 +39,7 @@ export class JestPlugin implements IHeftPlugin {
     heftConfiguration: HeftConfiguration,
     test: ITestStageContext
   ): Promise<void> {
+    const jestLogger: ScopedLogger = heftSession.requestScopedLogger('jest');
     const buildFolder: string = heftConfiguration.buildFolder;
 
     // In watch mode, Jest starts up in parallel with the compiler, so there's no
@@ -69,8 +71,10 @@ export class JestPlugin implements IHeftPlugin {
     );
 
     if (jestResults.numFailedTests > 0) {
-      throw new Error(
-        `${jestResults.numFailedTests} Jest test${jestResults.numFailedTests > 1 ? 's' : ''} failed`
+      jestLogger.emitError(
+        new Error(
+          `${jestResults.numFailedTests} Jest test${jestResults.numFailedTests > 1 ? 's' : ''} failed`
+        )
       );
     }
   }

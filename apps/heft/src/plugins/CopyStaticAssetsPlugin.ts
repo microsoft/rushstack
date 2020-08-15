@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { LegacyAdapters, FileSystem, Terminal } from '@rushstack/node-core-library';
+import { LegacyAdapters, FileSystem } from '@rushstack/node-core-library';
 import * as glob from 'glob';
 import * as globEscape from 'glob-escape';
 import * as path from 'path';
@@ -12,12 +12,13 @@ import { performance } from 'perf_hooks';
 import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { PrefixProxyTerminalProvider } from '../utilities/PrefixProxyTerminalProvider';
 import { ICopyStaticAssetsConfiguration, IBuildStageContext, ICompileSubstage } from '../stages/BuildStage';
+import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
+
 const PLUGIN_NAME: string = 'CopyStaticAssetsPlugin';
 
 interface ICopyStaticAssetsOptions {
-  terminal: Terminal;
+  logger: ScopedLogger;
   buildFolder: string;
   copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
   watchMode: boolean;
@@ -36,12 +37,10 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
         compile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          const terminal: Terminal = new Terminal(
-            new PrefixProxyTerminalProvider(heftConfiguration.terminalProvider, '[copy-static-assets] ')
-          );
+          const logger: ScopedLogger = heftSession.requestScopedLogger('copy-static-assets');
 
           await this._runCopyAsync({
-            terminal,
+            logger,
             buildFolder: heftConfiguration.buildFolder,
             copyStaticAssetsConfiguration: compile.properties.copyStaticAssetsConfiguration,
             watchMode: build.properties.watchMode
@@ -89,7 +88,7 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
   }
 
   private async _runCopyAsync(options: ICopyStaticAssetsOptions): Promise<void> {
-    const { terminal, buildFolder, copyStaticAssetsConfiguration, watchMode } = options;
+    const { logger, buildFolder, copyStaticAssetsConfiguration, watchMode } = options;
 
     if (!copyStaticAssetsConfiguration.sourceFolderName) {
       return;
@@ -140,7 +139,7 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
       resolvedDestinationFolderPaths
     );
     const duration: number = performance.now() - startTime;
-    terminal.writeLine(
+    logger.terminal.writeLine(
       `Copied ${copyCount} static asset${copyCount === 1 ? '' : 's'} in ${Math.round(duration)}ms`
     );
 
@@ -156,7 +155,7 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
 
   private async _runWatchAsync(options: IRunWatchOptions): Promise<void> {
     const {
-      terminal,
+      logger,
       fileExtensionsGlobPattern,
       resolvedSourceFolderPath,
       resolvedDestinationFolderPaths,
@@ -179,7 +178,7 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
           resolvedSourceFolderPath,
           resolvedDestinationFolderPaths
         );
-        terminal.writeLine(`Copied ${copyCount} static asset${copyCount === 1 ? '' : 's'}`);
+        logger.terminal.writeLine(`Copied ${copyCount} static asset${copyCount === 1 ? '' : 's'}`);
       };
 
       watcher.on('add', copyAsset);
@@ -190,7 +189,7 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
           FileSystem.deleteFile(path.resolve(resolvedDestinationFolder, assetPath));
           deleteCount++;
         }
-        terminal.writeLine(`Deleted ${deleteCount} static asset${deleteCount === 1 ? '' : 's'}`);
+        logger.terminal.writeLine(`Deleted ${deleteCount} static asset${deleteCount === 1 ? '' : 's'}`);
       });
     }
 
