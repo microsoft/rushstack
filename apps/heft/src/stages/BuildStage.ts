@@ -216,7 +216,9 @@ export interface IPreCompileSubstage extends IBuildSubstage<BuildSubstageHooksBa
 /**
  * @public
  */
-export interface ICompileSubstage extends IBuildSubstage<CompileSubstageHooks, ICompileSubstageProperties> {}
+export interface ICompileSubstage extends IBuildSubstage<CompileSubstageHooks, ICompileSubstageProperties> {
+  firstCompilationEmitCallback: () => void;
+}
 
 /**
  * @public
@@ -271,6 +273,7 @@ export interface IBuildStageOptions {
   watchMode: boolean;
   serveMode: boolean;
   typescriptMaxWriteParallelism?: number;
+  firstCompilationEmitCallback: (() => void) | undefined;
 }
 
 export interface IBuildStageStandardParameters {
@@ -328,7 +331,8 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       production: standardParameters.productionFlag.value,
       lite: standardParameters.liteFlag.value,
       locale: standardParameters.localeParameter.value,
-      typescriptMaxWriteParallelism: standardParameters.typescriptMaxWriteParallelismParamter.value
+      typescriptMaxWriteParallelism: standardParameters.typescriptMaxWriteParallelismParamter.value,
+      firstCompilationEmitCallback: undefined
     };
   }
 
@@ -349,6 +353,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       properties: {}
     };
     this.stageHooks.preCompile.call(preCompileSubstage);
+    let firstCompilationEmitCallback: (() => void) | undefined = undefined;
 
     const compileStage: ICompileSubstage = {
       hooks: new CompileSubstageHooks(),
@@ -368,6 +373,15 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
           // For now - these may need to be revised later
           sourceFolderName: 'src',
           destinationFolderNames: ['lib']
+        }
+      },
+      firstCompilationEmitCallback: () => {
+        if (firstCompilationEmitCallback) {
+          firstCompilationEmitCallback();
+        }
+
+        if (this.stageOptions.firstCompilationEmitCallback) {
+          this.stageOptions.firstCompilationEmitCallback();
         }
       }
     };
@@ -413,11 +427,16 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
         bundleStage.hooks.afterConfigureWebpack.promise()
       ]);
 
+      firstCompilationEmitCallback = async () => {
+        await Promise.all([
+          this._runSubstageWithLoggingAsync('Bundle', bundleStage),
+          this._runSubstageWithLoggingAsync('Post-build', postBuildStage)
+        ]);
+      };
+
       await Promise.all([
         this._runSubstageWithLoggingAsync('Pre-compile', preCompileSubstage),
-        this._runSubstageWithLoggingAsync('Compile', compileStage),
-        this._runSubstageWithLoggingAsync('Bundle', bundleStage),
-        this._runSubstageWithLoggingAsync('Post-build', postBuildStage)
+        this._runSubstageWithLoggingAsync('Compile', compileStage)
       ]);
     } else {
       await this._runSubstageWithLoggingAsync('Pre-compile', preCompileSubstage);

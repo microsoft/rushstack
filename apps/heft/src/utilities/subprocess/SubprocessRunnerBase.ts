@@ -249,6 +249,10 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
 
     this._subprocessCommunicationManagerInitializationOptions = subprocessCommunicationManagerInitializationOptions;
 
+    for (const communicationManager of this._subprocessCommunicationManagers) {
+      communicationManager.initialize(this._subprocessCommunicationManagerInitializationOptions);
+    }
+
     this._terminalProviderManager = new TerminalProviderManager({
       configuration: this._innerConfiguration
     });

@@ -170,6 +170,8 @@ export interface ICompilerPackage {
 
 // @public (undocumented)
 export interface ICompileSubstage extends IBuildSubstage<CompileSubstageHooks, ICompileSubstageProperties> {
+    // (undocumented)
+    firstCompilationEmitCallback: () => void;
 }
 
 // @public (undocumented)

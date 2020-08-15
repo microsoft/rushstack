@@ -27,6 +27,7 @@ interface IRunTypeScriptOptions {
   heftConfiguration: HeftConfiguration;
   typeScriptConfiguration: ITypeScriptConfiguration;
   watchMode: boolean;
+  firstEmitCallback: () => void;
 }
 
 interface IRunBuilderForTsconfigOptions {
@@ -38,6 +39,7 @@ interface IRunBuilderForTsconfigOptions {
   copyFromCacheMode?: CopyFromCacheMode;
   watchMode: boolean;
   maxWriteParallelism: number;
+  firstEmitCallback: () => void;
 
   terminalProvider: ITerminalProvider;
   terminalPrefixLabel: string | undefined;
@@ -62,7 +64,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
             heftSession,
             heftConfiguration,
             typeScriptConfiguration: compile.properties.typeScriptConfiguration,
-            watchMode: build.properties.watchMode
+            watchMode: build.properties.watchMode,
+            firstEmitCallback: compile.firstCompilationEmitCallback
           });
         });
       });
@@ -84,11 +87,15 @@ export class TypeScriptPlugin implements IHeftPlugin {
   }
 
   private async _runTypeScriptAsync(options: IRunTypeScriptOptions): Promise<void> {
-    const { heftSession, heftConfiguration, typeScriptConfiguration, watchMode } = options;
+    const { heftSession, heftConfiguration, typeScriptConfiguration, watchMode, firstEmitCallback } = options;
 
     const builderOptions: Omit<
       IRunBuilderForTsconfigOptions,
-      'terminalProvider' | 'tsconfigFilePath' | 'additionalModuleKindsToEmit' | 'terminalPrefixLabel'
+      | 'terminalProvider'
+      | 'tsconfigFilePath'
+      | 'additionalModuleKindsToEmit'
+      | 'terminalPrefixLabel'
+      | 'firstEmitCallback'
     > = {
       heftSession: heftSession,
       heftConfiguration,
@@ -107,16 +114,19 @@ export class TypeScriptPlugin implements IHeftPlugin {
         tsconfigFilePath: tsconfigFilePaths[0],
         terminalProvider: heftConfiguration.terminalProvider,
         additionalModuleKindsToEmit: typeScriptConfiguration.additionalModuleKindsToEmit,
-        terminalPrefixLabel: undefined
+        terminalPrefixLabel: undefined,
+        firstEmitCallback
       });
     } else {
       const builderProcesses: Promise<void>[] = [];
       for (const tsconfigFilePath of tsconfigFilePaths) {
         const tsconfigFilename: string = path.basename(tsconfigFilePath, path.extname(tsconfigFilePath));
 
+        const isDefaultTsconfig: boolean = tsconfigFilename === 'tsconfig';
         // Only provide additionalModuleKindsToEmit to the default tsconfig.json
-        const additionalModuleKindsToEmit: IEmitModuleKind[] | undefined =
-          tsconfigFilename === 'tsconfig' ? typeScriptConfiguration.additionalModuleKindsToEmit : undefined;
+        const additionalModuleKindsToEmit: IEmitModuleKind[] | undefined = isDefaultTsconfig
+          ? typeScriptConfiguration.additionalModuleKindsToEmit
+          : undefined;
 
         builderProcesses.push(
           this._runBuilderForTsconfig({
@@ -124,7 +134,12 @@ export class TypeScriptPlugin implements IHeftPlugin {
             tsconfigFilePath,
             terminalProvider: heftConfiguration.terminalProvider,
             additionalModuleKindsToEmit,
-            terminalPrefixLabel: tsconfigFilename
+            terminalPrefixLabel: tsconfigFilename,
+            firstEmitCallback: isDefaultTsconfig
+              ? firstEmitCallback
+              : () => {
+                  /* no-op */
+                }
           })
         );
       }
@@ -144,7 +159,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
       copyFromCacheMode,
       additionalModuleKindsToEmit,
       watchMode,
-      maxWriteParallelism
+      maxWriteParallelism,
+      firstEmitCallback
     } = options;
 
     const fullTsconfigFilePath: string = path.resolve(heftConfiguration.buildFolder, tsconfigFilePath);
@@ -175,7 +191,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
     const typeScriptBuilder: TypeScriptBuilder = new TypeScriptBuilder(
       terminalProvider,
       typeScriptBuilderConfiguration,
-      heftSession
+      heftSession,
+      firstEmitCallback
     );
 
     if (heftSession.debugMode) {
