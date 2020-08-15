@@ -16,7 +16,7 @@ export interface ISerializedErrorValue {
 
 export interface ISerializedFileErrorValue extends ISerializedErrorValue {
   filePath: string;
-  line: number;
+  line: number | undefined;
   column: number | undefined;
 }
 
