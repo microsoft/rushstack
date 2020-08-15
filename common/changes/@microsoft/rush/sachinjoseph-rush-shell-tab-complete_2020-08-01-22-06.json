@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add support for shell tab completion.",
+      "comment": "Add support for shell tab completion. See PR for details: https://github.com/microsoft/rushstack/pull/2060",
       "type": "minor"
     }
   ],
