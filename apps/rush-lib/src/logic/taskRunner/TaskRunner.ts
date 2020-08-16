@@ -3,13 +3,18 @@
 
 import * as os from 'os';
 import { Interleaver } from '@rushstack/stream-collator';
-import { Terminal, ConsoleTerminalProvider, Colors, IColorableSequence } from '@rushstack/node-core-library';
+import {
+  Terminal,
+  ConsoleTerminalProvider,
+  Colors,
+  IColorableSequence,
+  AlreadyReportedError
+} from '@rushstack/node-core-library';
 
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { ITask } from './ITask';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 export interface ITaskRunnerOptions {
   quietMode: boolean;

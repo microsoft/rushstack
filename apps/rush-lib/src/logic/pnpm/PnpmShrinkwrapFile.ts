@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 import * as crypto from 'crypto';
 import * as colors from 'colors';
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
@@ -16,7 +16,6 @@ import {
   PnpmOptionsConfiguration
 } from '../../api/RushConfiguration';
 import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 // This is based on PNPM's own configuration:
 // https://github.com/pnpm/pnpm-shrinkwrap/blob/master/src/write.ts

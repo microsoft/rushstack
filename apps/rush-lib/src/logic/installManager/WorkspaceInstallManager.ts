@@ -10,10 +10,10 @@ import {
   InternalError,
   MapExtensions,
   JsonFile,
-  FileConstants
+  FileConstants,
+  AlreadyReportedError
 } from '@rushstack/node-core-library';
 
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';

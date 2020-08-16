@@ -7,7 +7,15 @@ import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import * as globEscape from 'glob-escape';
-import { JsonFile, Text, FileSystem, FileConstants, Sort, InternalError } from '@rushstack/node-core-library';
+import {
+  JsonFile,
+  Text,
+  FileSystem,
+  FileConstants,
+  Sort,
+  InternalError,
+  AlreadyReportedError
+} from '@rushstack/node-core-library';
 
 import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
@@ -19,7 +27,6 @@ import { Utilities } from '../../utilities/Utilities';
 import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../../api/PackageJsonEditor';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 import { InstallHelpers } from './InstallHelpers';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { TempProjectHelper } from '../TempProjectHelper';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { RushConfiguration } from '../..';

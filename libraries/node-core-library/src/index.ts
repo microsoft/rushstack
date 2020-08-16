@@ -7,6 +7,7 @@
  * @packageDocumentation
  */
 
+export { AlreadyReportedError } from './AlreadyReportedError';
 export { FileConstants, FolderConstants } from './Constants';
 export {
   ExecutableStdioStreamMapping,

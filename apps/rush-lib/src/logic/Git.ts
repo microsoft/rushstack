@@ -4,10 +4,9 @@
 import gitInfo = require('git-repo-info');
 import * as os from 'os';
 import * as path from 'path';
-import { Executable } from '@rushstack/node-core-library';
+import { Executable, AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
-import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { GitEmailPolicy } from './policy/GitEmailPolicy';
 import { RushConfiguration } from '../api/RushConfiguration';
 

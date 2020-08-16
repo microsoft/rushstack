@@ -14,6 +14,11 @@ export const enum AlreadyExistsBehavior {
     Overwrite = "overwrite"
 }
 
+// @public
+export class AlreadyReportedError extends Error {
+    constructor();
+}
+
 // @beta
 export class Colors {
     // (undocumented)
