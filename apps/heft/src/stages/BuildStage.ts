@@ -282,7 +282,7 @@ export interface IBuildStageStandardParameters {
   productionFlag: CommandLineFlagParameter;
   localeParameter: CommandLineStringParameter;
   liteFlag: CommandLineFlagParameter;
-  typescriptMaxWriteParallelismParamter: CommandLineIntegerParameter;
+  typescriptMaxWriteParallelismParameter: CommandLineIntegerParameter;
   maxOldSpaceSizeParameter: CommandLineStringParameter;
 }
 
@@ -310,7 +310,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
         description: 'Perform a minimal build, skipping optional steps like linting.'
       }),
 
-      typescriptMaxWriteParallelismParamter: action.defineIntegerParameter({
+      typescriptMaxWriteParallelismParameter: action.defineIntegerParameter({
         parameterLongName: '--typescript-max-write-parallelism',
         argumentName: 'PARALLEILSM',
         description:
@@ -333,7 +333,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       production: standardParameters.productionFlag.value,
       lite: standardParameters.liteFlag.value,
       locale: standardParameters.localeParameter.value,
-      typescriptMaxWriteParallelism: standardParameters.typescriptMaxWriteParallelismParamter.value
+      typescriptMaxWriteParallelism: standardParameters.typescriptMaxWriteParallelismParameter.value
     };
   }
 

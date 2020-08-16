@@ -20,6 +20,13 @@ export class TestStageHooks extends StageHooksBase<ITestStageProperties> {
 export interface ITestStageProperties {
   watchMode: boolean;
   production: boolean;
+
+  findRelatedTests: ReadonlyArray<string> | undefined;
+  silent: boolean | undefined;
+  testNamePattern: string | undefined;
+  testPathPattern: ReadonlyArray<string> | undefined;
+  testTimeout: number | undefined;
+  debugHeftReporter: boolean | undefined;
 }
 
 /**
@@ -30,6 +37,13 @@ export interface ITestStageContext extends IStageContext<TestStageHooks, ITestSt
 export interface ITestStageOptions {
   watchMode: boolean;
   production: boolean;
+
+  findRelatedTests: ReadonlyArray<string> | undefined;
+  silent: boolean | undefined;
+  testNamePattern: string | undefined;
+  testPathPattern: ReadonlyArray<string> | undefined;
+  testTimeout: number | undefined;
+  debugHeftReporter: boolean | undefined;
 }
 
 export class TestStage extends StageBase<TestStageHooks, ITestStageProperties, ITestStageOptions> {
@@ -40,7 +54,14 @@ export class TestStage extends StageBase<TestStageHooks, ITestStageProperties, I
   protected getDefaultStageProperties(options: ITestStageOptions): ITestStageProperties {
     return {
       watchMode: options.watchMode,
-      production: options.production
+      production: options.production,
+
+      findRelatedTests: options.findRelatedTests,
+      silent: options.silent,
+      testNamePattern: options.testNamePattern,
+      testPathPattern: options.testPathPattern,
+      testTimeout: options.testTimeout,
+      debugHeftReporter: options.debugHeftReporter
     };
   }
 
