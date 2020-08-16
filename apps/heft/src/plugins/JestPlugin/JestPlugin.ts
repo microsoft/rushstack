@@ -74,7 +74,10 @@ export class JestPlugin implements IHeftPlugin {
     };
 
     if (!test.properties.debugHeftReporter) {
-      const reporterOptions: IHeftJestReporterOptions = { heftConfiguration };
+      const reporterOptions: IHeftJestReporterOptions = {
+        heftConfiguration,
+        debugMode: heftSession.debugMode
+      };
       jestArgv.reporters = [[path.resolve(__dirname, 'HeftJestReporter.js'), reporterOptions]];
     } else {
       jestLogger.emitWarning(
