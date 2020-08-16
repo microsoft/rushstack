@@ -36,7 +36,7 @@ export class TestAction extends BuildAction {
     super.onDefineParameters();
 
     this._noTestFlag = this.defineFlagParameter({
-      parameterLongName: '--notest',
+      parameterLongName: '--no-test',
       description: 'If specified, run the build without testing.'
     });
 
