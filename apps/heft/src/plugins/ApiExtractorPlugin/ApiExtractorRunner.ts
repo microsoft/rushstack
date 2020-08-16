@@ -61,8 +61,6 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
     return __filename;
   }
 
-  public initialize(): void {}
-
   public async invokeAsync(): Promise<void> {
     this._scopedLogger = await this.requestScopedLoggerAsync('api-extractor');
     this._terminal = this._scopedLogger.terminal;

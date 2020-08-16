@@ -18,6 +18,9 @@ describe('FileError', () => {
 
     const error2: FileError = new FileError('message', 'path/to/file', 5);
     expect(error2.toString(FileErrorFormat.Unix)).toEqual('path/to/file:5 - message');
+
+    const error3: FileError = new FileError('message', 'path/to/file');
+    expect(error3.toString(FileErrorFormat.Unix)).toEqual('path/to/file - message');
   });
 
   it('correctly performs Unix-style file path formatting', () => {
@@ -26,5 +29,8 @@ describe('FileError', () => {
 
     const error2: FileError = new FileError('message', 'path/to/file', 5);
     expect(error2.toString(FileErrorFormat.VisualStudio)).toEqual('path/to/file(5) - message');
+
+    const error3: FileError = new FileError('message', 'path/to/file');
+    expect(error3.toString(FileErrorFormat.VisualStudio)).toEqual('path/to/file - message');
   });
 });

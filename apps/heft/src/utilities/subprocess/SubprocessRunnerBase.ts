@@ -19,7 +19,7 @@ import { HeftSession } from '../../pluginFramework/HeftSession';
 import { TerminalProviderManager } from './TerminalProviderManager';
 import {
   SubprocessCommunicationManagerBase,
-  ISubprocessCommunicationManagerBaseOptions
+  ISubprocessCommunicationManagerInitializationOptions
 } from './SubprocessCommunicationManagerBase';
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { SubprocessLoggerManager } from './SubprocessLoggerManager';
@@ -52,6 +52,7 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
 
   private _terminalProviderManager: TerminalProviderManager;
   private _scopedLoggerManager: SubprocessLoggerManager;
+  private _subprocessCommunicationManagerInitializationOptions: ISubprocessCommunicationManagerInitializationOptions;
 
   private _innerConfiguration: ISubprocessInnerConfiguration;
   public _runningAsSubprocess: boolean = false;
@@ -88,19 +89,13 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
         terminalSupportsColor: parentGlobalTerminalProvider.supportsColor
       };
 
-      const communicationManagerBaseOptions: ISubprocessCommunicationManagerBaseOptions = {
-        sendMessageToParentProcess: this._receiveMessageFromSubprocess.bind(this),
-        sendMessageToSubprocess: this._receiveMessageFromParentProcess.bind(this)
-      };
-      this._terminalProviderManager = new TerminalProviderManager({
-        ...communicationManagerBaseOptions,
-        configuration: this._innerConfiguration
-      });
-      this._scopedLoggerManager = new SubprocessLoggerManager({
-        ...communicationManagerBaseOptions,
-        terminalProviderManager: this._terminalProviderManager,
-        heftSession: heftSession
-      });
+      this._registerDefaultCommunicationManagers(
+        {
+          sendMessageToParentProcess: this._receiveMessageFromSubprocess.bind(this),
+          sendMessageToSubprocess: this._receiveMessageFromParentProcess.bind(this)
+        },
+        heftSession
+      );
 
       const globalTerminalProviderId: number = this._terminalProviderManager.registerTerminalProvider(
         parentGlobalTerminalProvider
@@ -109,10 +104,6 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
       this._globalTerminal = new Terminal(
         this._terminalProviderManager.registerSubprocessTerminalProvider(globalTerminalProviderId)
       );
-
-      this._subprocessCommunicationManagers.push(this._terminalProviderManager, this._scopedLoggerManager);
-
-      this.initialize();
     }
   }
 
@@ -133,32 +124,21 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
     subprocessRunner._runningAsSubprocess = true;
     subprocessRunner._innerConfiguration = innerConfiguration;
 
-    const communicationManagerBaseOptions: ISubprocessCommunicationManagerBaseOptions = {
-      sendMessageToParentProcess: process.send!.bind(process),
-      sendMessageToSubprocess: () => {
-        throw new Error('A subprocess cannot send a message to itself.');
-      }
-    };
-    subprocessRunner._terminalProviderManager = new TerminalProviderManager({
-      ...communicationManagerBaseOptions,
-      configuration: innerConfiguration
-    });
-    subprocessRunner._scopedLoggerManager = new SubprocessLoggerManager({
-      ...communicationManagerBaseOptions,
-      terminalProviderManager: subprocessRunner._terminalProviderManager
-    });
+    subprocessRunner._registerDefaultCommunicationManagers(
+      {
+        sendMessageToParentProcess: process.send!.bind(process),
+        sendMessageToSubprocess: () => {
+          throw new Error('A subprocess cannot send a message to itself.');
+        }
+      },
+      undefined
+    );
 
     subprocessRunner._globalTerminal = new Terminal(
       subprocessRunner._terminalProviderManager.registerSubprocessTerminalProvider(
         innerConfiguration.globalTerminalProviderId
       )
     );
-
-    subprocessRunner._subprocessCommunicationManagers.push(
-      subprocessRunner._terminalProviderManager,
-      subprocessRunner._scopedLoggerManager
-    );
-    subprocessRunner.initialize();
 
     return subprocessRunner;
   }
@@ -222,13 +202,6 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
     });
   }
 
-  /**
-   * @virtual
-   */
-  public initialize(): void {
-    /* virtual */
-  }
-
   public abstract invokeAsync(): Promise<void>;
 
   public async [SUBPROCESS_RUNNER_INNER_INVOKE](): Promise<void> {
@@ -252,8 +225,44 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
     }
   }
 
+  protected registerSubprocessCommunicationManager(
+    communicationManager: SubprocessCommunicationManagerBase
+  ): void {
+    if (this._subprocessCommunicationManagerInitializationOptions) {
+      communicationManager.initialize(this._subprocessCommunicationManagerInitializationOptions);
+    }
+
+    this._subprocessCommunicationManagers.push(communicationManager);
+  }
+
   protected async requestScopedLoggerAsync(loggerName: string): Promise<IScopedLogger> {
     return await this._scopedLoggerManager.requestScopedLoggerAsync(loggerName);
+  }
+
+  private _registerDefaultCommunicationManagers(
+    subprocessCommunicationManagerInitializationOptions: ISubprocessCommunicationManagerInitializationOptions,
+    heftSession: HeftSession | undefined
+  ): void {
+    if (this._subprocessCommunicationManagerInitializationOptions) {
+      throw new Error('Default subprocess communication managers have already been registered.');
+    }
+
+    this._subprocessCommunicationManagerInitializationOptions = subprocessCommunicationManagerInitializationOptions;
+
+    for (const communicationManager of this._subprocessCommunicationManagers) {
+      communicationManager.initialize(this._subprocessCommunicationManagerInitializationOptions);
+    }
+
+    this._terminalProviderManager = new TerminalProviderManager({
+      configuration: this._innerConfiguration
+    });
+    this._scopedLoggerManager = new SubprocessLoggerManager({
+      terminalProviderManager: this._terminalProviderManager,
+      heftSession: heftSession
+    });
+
+    this.registerSubprocessCommunicationManager(this._terminalProviderManager);
+    this.registerSubprocessCommunicationManager(this._scopedLoggerManager);
   }
 
   private _processNodeArgsForSubprocess(terminal: Terminal, nodeArgs: string[]): string[] {

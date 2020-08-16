@@ -20,7 +20,7 @@ export class FileError extends Error {
    */
   private readonly _classId: string = CLASS_ID;
   public readonly filePath: string;
-  public readonly line: number;
+  public readonly line: number | undefined;
   public readonly column: number | undefined;
 
   /**
@@ -28,7 +28,7 @@ export class FileError extends Error {
    *
    * @param message - A message describing the error.
    */
-  public constructor(message: string, filePath: string, line: number, column?: number) {
+  public constructor(message: string, filePath: string, line?: number, column?: number) {
     super(message);
 
     this.filePath = filePath.replace(/\\/g, '/');
@@ -53,8 +53,10 @@ export class FileError extends Error {
       case FileErrorFormat.Unix: {
         if (this.column !== undefined) {
           formattedFileLocation = `:${this.line}:${this.column}`;
-        } else {
+        } else if (this.line !== undefined) {
           formattedFileLocation = `:${this.line}`;
+        } else {
+          formattedFileLocation = '';
         }
 
         break;
@@ -63,8 +65,10 @@ export class FileError extends Error {
       case FileErrorFormat.VisualStudio: {
         if (this.column !== undefined) {
           formattedFileLocation = `(${this.line},${this.column})`;
-        } else {
+        } else if (this.line !== undefined) {
           formattedFileLocation = `(${this.line})`;
+        } else {
+          formattedFileLocation = '';
         }
 
         break;

@@ -21,6 +21,9 @@ describe('SubprocessRunnerBase', () => {
     const fileError2: FileError = new FileError('message', 'path/to/file', 4);
     fileError2.stack = 'ERROR STACK';
     expect(SubprocessRunnerBase.serializeForIpcMessage(fileError2)).toMatchSnapshot();
+    const fileError3: FileError = new FileError('message', 'path/to/file');
+    fileError3.stack = 'ERROR STACK';
+    expect(SubprocessRunnerBase.serializeForIpcMessage(fileError3)).toMatchSnapshot();
   });
 
   it(`${SubprocessRunnerBase.serializeForIpcMessage.name} doesn't handle non-error objects`, () => {
@@ -45,5 +48,7 @@ describe('SubprocessRunnerBase', () => {
     testDeserialization(fileError1);
     const fileError2: FileError = new FileError('message', 'path/to/file', 4);
     testDeserialization(fileError2);
+    const fileError3: FileError = new FileError('message', 'path/to/file');
+    testDeserialization(fileError3);
   });
 });

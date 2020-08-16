@@ -5,10 +5,7 @@ import { ITerminalProvider, TerminalProviderSeverity } from '@rushstack/node-cor
 
 import { ISubprocessInnerConfiguration } from './SubprocessRunnerBase';
 import { ISubprocessMessageBase } from './SubprocessCommunication';
-import {
-  SubprocessCommunicationManagerBase,
-  ISubprocessCommunicationManagerBaseOptions
-} from './SubprocessCommunicationManagerBase';
+import { SubprocessCommunicationManagerBase } from './SubprocessCommunicationManagerBase';
 
 const TERMINAL_PROVIDER_MESSAGE_TYPE: string = 'terminalProviderMessage';
 
@@ -18,7 +15,7 @@ interface ITerminalProviderSubprocessMessage extends ISubprocessMessageBase {
   severity: TerminalProviderSeverity;
 }
 
-export interface ITerminalProviderManagerOptions extends ISubprocessCommunicationManagerBaseOptions {
+export interface ITerminalProviderManagerOptions {
   configuration: ISubprocessInnerConfiguration;
 }
 
@@ -28,7 +25,8 @@ export class TerminalProviderManager extends SubprocessCommunicationManagerBase 
   private readonly _configuration: ISubprocessInnerConfiguration;
 
   public constructor(options: ITerminalProviderManagerOptions) {
-    super(options);
+    super();
+
     this._configuration = options.configuration;
   }
 
@@ -50,7 +48,7 @@ export class TerminalProviderManager extends SubprocessCommunicationManagerBase 
           data,
           severity
         };
-        this._sendMessageToParentProcess(message);
+        this.sendMessageToParentProcess(message);
       }
     };
 

@@ -159,6 +159,11 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
 
   public readonly afterConfigureTypeScript: AsyncSeriesHook = new AsyncSeriesHook();
   public readonly afterConfigureCopyStaticAssets: AsyncSeriesHook = new AsyncSeriesHook();
+
+  /**
+   * @internal
+   */
+  public readonly afterTypescriptFirstEmit: AsyncParallelHook = new AsyncParallelHook();
 }
 
 /**
@@ -413,11 +418,18 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
         bundleStage.hooks.afterConfigureWebpack.promise()
       ]);
 
+      compileStage.hooks.afterTypescriptFirstEmit.tapPromise(
+        'build-stage',
+        async () =>
+          await Promise.all([
+            this._runSubstageWithLoggingAsync('Bundle', bundleStage),
+            this._runSubstageWithLoggingAsync('Post-build', postBuildStage)
+          ])
+      );
+
       await Promise.all([
         this._runSubstageWithLoggingAsync('Pre-compile', preCompileSubstage),
-        this._runSubstageWithLoggingAsync('Compile', compileStage),
-        this._runSubstageWithLoggingAsync('Bundle', bundleStage),
-        this._runSubstageWithLoggingAsync('Post-build', postBuildStage)
+        this._runSubstageWithLoggingAsync('Compile', compileStage)
       ]);
     } else {
       await this._runSubstageWithLoggingAsync('Pre-compile', preCompileSubstage);

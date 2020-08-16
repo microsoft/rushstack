@@ -7,16 +7,24 @@ import { ISubprocessMessageBase } from './SubprocessCommunication';
 
 export type SendMessageFunctionType = (message: ISubprocessMessageBase) => void;
 
-export interface ISubprocessCommunicationManagerBaseOptions {
+export interface ISubprocessCommunicationManagerInitializationOptions {
   sendMessageToParentProcess: SendMessageFunctionType;
   sendMessageToSubprocess: SendMessageFunctionType;
 }
 
 export abstract class SubprocessCommunicationManagerBase {
-  protected readonly _sendMessageToParentProcess: SendMessageFunctionType;
-  protected _sendMessageToSubprocess: SendMessageFunctionType;
+  private _sendMessageToParentProcess: SendMessageFunctionType;
+  private _sendMessageToSubprocess: SendMessageFunctionType;
 
-  public constructor(options: ISubprocessCommunicationManagerBaseOptions) {
+  protected get sendMessageToParentProcess(): SendMessageFunctionType {
+    return this._sendMessageToParentProcess;
+  }
+
+  protected get sendMessageToSubprocess(): SendMessageFunctionType {
+    return this._sendMessageToSubprocess;
+  }
+
+  public initialize(options: ISubprocessCommunicationManagerInitializationOptions): void {
     this._sendMessageToParentProcess = options.sendMessageToParentProcess;
     this._sendMessageToSubprocess = options.sendMessageToSubprocess;
   }
