@@ -73,14 +73,14 @@ export default class HeftJestReporter implements Reporter {
   }
 
   public async onRunStart(
-    { numTotalTestSuites }: AggregatedResult,
+    aggregatedResult: AggregatedResult,
     options: ReporterOnStartOptions
   ): Promise<void> {
     // Jest prints some text that changes the console's color without a newline, so we reset the console's color here
     // and print a newline.
     this._terminal.writeLine('\u001b[0m');
     this._terminal.writeLine(
-      `Run start. ${this._formatWithPlural(numTotalTestSuites, 'test suite', 'test suites')}`
+      `Run start. ${this._formatWithPlural(aggregatedResult.numTotalTestSuites, 'test suite', 'test suites')}`
     );
   }
 
