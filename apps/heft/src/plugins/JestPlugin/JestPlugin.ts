@@ -13,6 +13,7 @@ import { ITestStageContext } from '../../stages/TestStage';
 import { ICleanStageContext } from '../../stages/CleanStage';
 import { JestTypeScriptDataFile, IJestTypeScriptDataFileJson } from './JestTypeScriptDataFile';
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
+import { Config } from '@jest/types';
 
 const PLUGIN_NAME: string = 'JestPlugin';
 const JEST_CONFIGURATION_LOCATION: string = './config/jest.config.json';
@@ -49,26 +50,39 @@ export class JestPlugin implements IHeftPlugin {
     }
 
     const reporterOptions: IHeftJestReporterOptions = { heftConfiguration };
-    const { results: jestResults } = await runCLI(
-      {
-        watch: test.properties.watchMode,
 
-        // In debug mode, avoid forking separate processes that are difficult to debug
-        runInBand: heftSession.debugMode,
-        debug: heftSession.debugMode,
+    const jestArgv: Config.Argv = {
+      watch: test.properties.watchMode,
 
-        config: JEST_CONFIGURATION_LOCATION,
-        reporters: [[path.resolve(__dirname, 'HeftJestReporter.js'), reporterOptions]],
-        cacheDirectory: this._getJestCacheFolder(heftConfiguration),
-        updateSnapshot: !test.properties.production,
+      // In debug mode, avoid forking separate processes that are difficult to debug
+      runInBand: heftSession.debugMode,
+      debug: heftSession.debugMode,
 
-        listTests: false,
-        rootDir: buildFolder,
-        $0: process.argv0,
-        _: []
-      },
-      [buildFolder]
-    );
+      config: JEST_CONFIGURATION_LOCATION,
+      reporters: [[path.resolve(__dirname, 'HeftJestReporter.js'), reporterOptions]],
+      cacheDirectory: this._getJestCacheFolder(heftConfiguration),
+      updateSnapshot: !test.properties.production,
+
+      listTests: false,
+      rootDir: buildFolder,
+
+      detectOpenHandles: test.properties.detectOpenHandles,
+      silent: test.properties.silent,
+      testNamePattern: test.properties.testNamePattern,
+      testPathPattern: test.properties.testPathPattern ? [...test.properties.testPathPattern] : undefined,
+      testTimeout: test.properties.testTimeout,
+
+      $0: process.argv0,
+      _: []
+    };
+
+    if (test.properties.findRelatedTests && test.properties.findRelatedTests.length > 0) {
+      jestArgv.findRelatedTests = true;
+      // This is Jest's weird way of representing space-delimited CLI parameters
+      jestArgv._ = [...test.properties.findRelatedTests];
+    }
+
+    const { results: jestResults } = await runCLI(jestArgv, [buildFolder]);
 
     if (jestResults.numFailedTests > 0) {
       jestLogger.emitError(
