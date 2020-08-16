@@ -23,6 +23,7 @@ export class TestAction extends BuildAction {
   private _testNamePattern: CommandLineStringParameter;
   private _testPathPattern: CommandLineStringListParameter;
   private _testTimeout: CommandLineIntegerParameter;
+  private _debugHeftReporter: CommandLineFlagParameter;
 
   public constructor(heftActionOptions: IHeftActionBaseOptions) {
     super(heftActionOptions, {
@@ -97,6 +98,16 @@ export class TestAction extends BuildAction {
         ' the default is normally 5000 ms.' +
         ' This corresponds to the "--testTimeout" parameter in Jest\'s documentation.'
     });
+
+    this._debugHeftReporter = this.defineFlagParameter({
+      parameterLongName: '--debug-heft-reporter',
+      description:
+        'Normally Heft installs a custom Jest reporter so that test results are presented consistently' +
+        ' with other task logging. If you suspect a problem with the HeftJestReporter, specify' +
+        ' "--debug-heft-reporter" to temporarily disable it so that you can compare with how Jest\'s' +
+        ' default reporter would have presented it. Include this output in your bug report.' +
+        ' Do not use "--debug-heft-reporter" in production.'
+    });
   }
 
   protected async actionExecuteAsync(): Promise<void> {
@@ -134,7 +145,8 @@ export class TestAction extends BuildAction {
         silent: this._silent.value,
         testNamePattern: this._testNamePattern.value,
         testPathPattern: this._testPathPattern.values,
-        testTimeout: this._testTimeout.value
+        testTimeout: this._testTimeout.value,
+        debugHeftReporter: this._debugHeftReporter.value
       };
       await testStage.initializeAsync(testStageOptions);
 

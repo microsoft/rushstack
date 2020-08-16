@@ -49,8 +49,6 @@ export class JestPlugin implements IHeftPlugin {
       this._validateJestTypeScriptDataFile(buildFolder);
     }
 
-    const reporterOptions: IHeftJestReporterOptions = { heftConfiguration };
-
     const jestArgv: Config.Argv = {
       watch: test.properties.watchMode,
 
@@ -59,7 +57,6 @@ export class JestPlugin implements IHeftPlugin {
       debug: heftSession.debugMode,
 
       config: JEST_CONFIGURATION_LOCATION,
-      reporters: [[path.resolve(__dirname, 'HeftJestReporter.js'), reporterOptions]],
       cacheDirectory: this._getJestCacheFolder(heftConfiguration),
       updateSnapshot: !test.properties.production,
 
@@ -75,6 +72,15 @@ export class JestPlugin implements IHeftPlugin {
       $0: process.argv0,
       _: []
     };
+
+    if (!test.properties.debugHeftReporter) {
+      const reporterOptions: IHeftJestReporterOptions = { heftConfiguration };
+      jestArgv.reporters = [[path.resolve(__dirname, 'HeftJestReporter.js'), reporterOptions]];
+    } else {
+      jestLogger.emitWarning(
+        new Error('The "--debug-heft-reporter" parameter was specified; disabling HeftJestReporter')
+      );
+    }
 
     if (test.properties.findRelatedTests && test.properties.findRelatedTests.length > 0) {
       jestArgv.findRelatedTests = true;

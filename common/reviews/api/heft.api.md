@@ -313,6 +313,8 @@ export interface ITestStageContext extends IStageContext<TestStageHooks, ITestSt
 // @public (undocumented)
 export interface ITestStageProperties {
     // (undocumented)
+    debugHeftReporter: boolean | undefined;
+    // (undocumented)
     detectOpenHandles: boolean | undefined;
     // (undocumented)
     findRelatedTests: ReadonlyArray<string> | undefined;
