@@ -63,7 +63,6 @@ export class JestPlugin implements IHeftPlugin {
       listTests: false,
       rootDir: buildFolder,
 
-      detectOpenHandles: test.properties.detectOpenHandles,
       silent: test.properties.silent,
       testNamePattern: test.properties.testNamePattern,
       testPathPattern: test.properties.testPathPattern ? [...test.properties.testPathPattern] : undefined,

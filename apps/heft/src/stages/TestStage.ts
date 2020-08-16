@@ -21,7 +21,6 @@ export interface ITestStageProperties {
   watchMode: boolean;
   production: boolean;
 
-  detectOpenHandles: boolean | undefined;
   findRelatedTests: ReadonlyArray<string> | undefined;
   silent: boolean | undefined;
   testNamePattern: string | undefined;
@@ -39,7 +38,6 @@ export interface ITestStageOptions {
   watchMode: boolean;
   production: boolean;
 
-  detectOpenHandles: boolean | undefined;
   findRelatedTests: ReadonlyArray<string> | undefined;
   silent: boolean | undefined;
   testNamePattern: string | undefined;
@@ -58,7 +56,6 @@ export class TestStage extends StageBase<TestStageHooks, ITestStageProperties, I
       watchMode: options.watchMode,
       production: options.production,
 
-      detectOpenHandles: options.detectOpenHandles,
       findRelatedTests: options.findRelatedTests,
       silent: options.silent,
       testNamePattern: options.testNamePattern,

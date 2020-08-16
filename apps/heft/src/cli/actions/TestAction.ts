@@ -17,7 +17,6 @@ import { IBuildStageContext, ICompileSubstage } from '../../stages/BuildStage';
 export class TestAction extends BuildAction {
   private _noTestFlag: CommandLineFlagParameter;
   private _noBuildFlag: CommandLineFlagParameter;
-  private _detectOpenHandles: CommandLineFlagParameter;
   private _findRelatedTests: CommandLineStringListParameter;
   private _silent: CommandLineFlagParameter;
   private _testNamePattern: CommandLineStringParameter;
@@ -44,13 +43,6 @@ export class TestAction extends BuildAction {
     this._noBuildFlag = this.defineFlagParameter({
       parameterLongName: '--no-build',
       description: 'If provided, only run tests. Do not build first.'
-    });
-
-    this._detectOpenHandles = this.defineFlagParameter({
-      parameterLongName: '--detect-open-handles',
-      description:
-        'Attempt to collect and print open handles preventing Jest from exiting cleanly.' +
-        ' This corresponds to the "--detectOpenHandles" parameter in Jest\'s documentation.'
     });
 
     this._findRelatedTests = this.defineStringListParameter({
@@ -140,7 +132,6 @@ export class TestAction extends BuildAction {
         watchMode: this._watchFlag.value,
         production: this._productionFlag.value,
 
-        detectOpenHandles: this._detectOpenHandles.value,
         findRelatedTests: this._findRelatedTests.values,
         silent: this._silent.value,
         testNamePattern: this._testNamePattern.value,
