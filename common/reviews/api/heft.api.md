@@ -315,8 +315,6 @@ export interface ITestStageProperties {
     // (undocumented)
     debugHeftReporter: boolean | undefined;
     // (undocumented)
-    detectOpenHandles: boolean | undefined;
-    // (undocumented)
     findRelatedTests: ReadonlyArray<string> | undefined;
     // (undocumented)
     production: boolean;
