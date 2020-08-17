@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.5.1",
+      "tag": "@rushstack/heft_v0.5.1",
+      "date": "Mon, 17 Aug 2020 05:31:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a broken dependency"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.0",
       "tag": "@rushstack/heft_v0.5.0",
       "date": "Mon, 17 Aug 2020 04:53:23 GMT",
