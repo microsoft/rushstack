@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { UuidTypeId } from './UuidTypeId';
+
+const uuidAlreadyReportedError: string = 'f26b0640-a49b-49d1-9ead-1a516d5920c7';
+
 /**
  * This exception can be thrown to indicate that an operation failed and an error message has already
  * been reported appropriately. Thus, the catch handler does not have responsibility for reporting
@@ -42,4 +46,10 @@ export class AlreadyReportedError extends Error {
     // Note: the prototype must also be set on any classes which extend this one
     (this as any).__proto__ = AlreadyReportedError.prototype; // eslint-disable-line @typescript-eslint/no-explicit-any
   }
+
+  public static [Symbol.hasInstance](instance: object): boolean {
+    return UuidTypeId.isInstanceOf(instance, uuidAlreadyReportedError);
+  }
 }
+
+UuidTypeId.registerClass(AlreadyReportedError, uuidAlreadyReportedError);

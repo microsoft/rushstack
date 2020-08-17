@@ -16,6 +16,8 @@ export const enum AlreadyExistsBehavior {
 
 // @public
 export class AlreadyReportedError extends Error {
+    // (undocumented)
+    static [Symbol.hasInstance](instance: object): boolean;
     constructor();
 }
 
@@ -654,6 +656,12 @@ export enum TextAttribute {
     // (undocumented)
     Underline = 2
 }
+
+// @public
+export class UuidTypeId {
+    static isInstanceOf(targetObject: unknown, typeUuid: string): boolean;
+    static registerClass(targetClass: new (...args: any[]) => any, typeUuid: string): void;
+    }
 
 
 ```
