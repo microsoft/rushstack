@@ -36,7 +36,7 @@ export interface IMarkdownDocumenterFeatureOnFinishedArgs {
 // @public
 export class MarkdownDocumenterAccessor {
     // Warning: (ae-forgotten-export) The symbol "IMarkdownDocumenterAccessorImplementation" needs to be exported by the entry point index.d.ts
-    // 
+    //
     // @internal
     constructor(implementation: IMarkdownDocumenterAccessorImplementation);
     getLinkForApiItem(apiItem: ApiItem): string | undefined;
@@ -44,6 +44,8 @@ export class MarkdownDocumenterAccessor {
 
 // @public
 export class MarkdownDocumenterFeature extends PluginFeature {
+    // (undocumented)
+    static [Symbol.hasInstance](instance: object): boolean;
     context: MarkdownDocumenterFeatureContext;
     // @virtual
     onBeforeWritePage(eventArgs: IMarkdownDocumenterFeatureOnBeforeWritePageArgs): void;
@@ -62,6 +64,8 @@ export class MarkdownDocumenterFeatureContext {
 
 // @public
 export abstract class PluginFeature {
+    // (undocumented)
+    static [Symbol.hasInstance](instance: object): boolean;
     // @internal
     constructor(initialization: PluginFeatureInitialization);
     context: PluginFeatureContext;

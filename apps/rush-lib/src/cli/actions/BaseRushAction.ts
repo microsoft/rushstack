@@ -10,7 +10,12 @@ import {
   ICommandLineActionOptions,
   CommandLineStringListParameter
 } from '@rushstack/ts-command-line';
-import { LockFile, PackageJsonLookup, IPackageJson } from '@rushstack/node-core-library';
+import {
+  LockFile,
+  PackageJsonLookup,
+  IPackageJson,
+  AlreadyReportedError
+} from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -18,7 +23,6 @@ import { EventHooksManager } from '../../logic/EventHooksManager';
 import { RushCommandLineParser } from './../RushCommandLineParser';
 import { Utilities } from '../../utilities/Utilities';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 export interface IBaseRushActionOptions extends ICommandLineActionOptions {
   /**

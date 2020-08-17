@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
+import { TypeUuid } from '@rushstack/node-core-library';
 
 export const enum FileErrorFormat {
   Unix,
   VisualStudio
 }
 
-const CLASS_ID: string = 'bab8800e-d52b-4e83-9379-8123be97d83d';
+const uuidFileError: string = '37a4c772-2dc8-4c66-89ae-262f8cc1f0c1';
 
 /**
  * An `Error` subclass that should be thrown to report an unexpected state that specifically references
@@ -18,7 +19,6 @@ export class FileError extends Error {
   /**
    * Use this instance property to reliably detect if an instance of a class is an instance of FileError
    */
-  private readonly _classId: string = CLASS_ID;
   public readonly filePath: string;
   public readonly line: number | undefined;
   public readonly column: number | undefined;
@@ -40,10 +40,6 @@ export class FileError extends Error {
     //
     // Note: the prototype must also be set on any classes which extend this one
     (this as any).__proto__ = FileError.prototype; // eslint-disable-line @typescript-eslint/no-explicit-any
-  }
-
-  public static [Symbol.hasInstance](obj: FileError | undefined): boolean {
-    return obj?._classId === CLASS_ID;
   }
 
   /** @override */
@@ -81,4 +77,10 @@ export class FileError extends Error {
 
     return `${this.filePath}${formattedFileLocation} - ${this.message}`;
   }
+
+  public static [Symbol.hasInstance](instance: object): boolean {
+    return TypeUuid.isInstanceOf(instance, uuidFileError);
+  }
 }
+
+TypeUuid.registerClass(FileError, uuidFileError);

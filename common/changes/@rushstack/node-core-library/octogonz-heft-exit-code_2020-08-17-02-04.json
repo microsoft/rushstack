@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Add new APIs AlreadyReportedError and TypeUuid",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

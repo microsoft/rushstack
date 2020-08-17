@@ -4,6 +4,7 @@
 import * as os from 'os';
 import * as colors from 'colors';
 
+import { AlreadyReportedError } from '@rushstack/node-core-library';
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
@@ -15,7 +16,6 @@ import { Event } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { TaskSelector } from '../../logic/TaskSelector';
 import { Stopwatch } from '../../utilities/Stopwatch';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { TaskRunner } from '../../logic/taskRunner/TaskRunner';
 import { TaskCollection } from '../../logic/taskRunner/TaskCollection';

@@ -4,10 +4,10 @@
 import * as colors from 'colors';
 import * as semver from 'semver';
 
+import { AlreadyReportedError } from '@rushstack/node-core-library';
 import { BaseInstallManager, IInstallManagerOptions } from './base/BaseInstallManager';
 import { RushInstallManager } from './installManager/RushInstallManager';
 import { WorkspaceInstallManager } from './installManager/WorkspaceInstallManager';
-import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { PurgeManager } from './PurgeManager';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
