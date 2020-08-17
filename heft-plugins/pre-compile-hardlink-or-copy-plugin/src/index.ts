@@ -79,9 +79,9 @@ export class PreCompileHardlinkOrCopyPlugin implements IHeftPlugin<IPreCompileHa
       options.copyInsteadOfHardlink
     );
     if (options.copyInsteadOfHardlink) {
-      heftConfiguration.terminal.writeLine(`Copied ${linkCount} files`);
+      heftConfiguration.globalTerminal.writeLine(`Copied ${linkCount} files`);
     } else {
-      heftConfiguration.terminal.writeLine(`Linked ${linkCount} files`);
+      heftConfiguration.globalTerminal.writeLine(`Linked ${linkCount} files`);
     }
   }
 
