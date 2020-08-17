@@ -1,6 +1,23 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 13 Aug 2020 09:26:39 GMT and should not be manually modified.
+This log was last generated on Mon, 17 Aug 2020 04:53:23 GMT and should not be manually modified.
+
+## 0.5.0
+Mon, 17 Aug 2020 04:53:23 GMT
+
+### Minor changes
+
+- Formalize the way errors and warnings are emitted.
+- Expose some useful Jest CLI parameters as "heft test" parameters
+- Rename "--notest" to "--no--test"
+- Improve "heft test" to show console output from tests
+
+### Patches
+
+- Normalize the way file paths are printed in errors and warnings.
+- Ensure build steps that depend on emitted TS output aren't triggered until TS has written output to disk.
+- Fix an issue where Heft could complete with errors but not return a nonzero process exit code
+- Reclassify TypeScript messages such as "X is declared but never used" to be reported as warnings instead of errors
 
 ## 0.4.7
 Thu, 13 Aug 2020 09:26:39 GMT

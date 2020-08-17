@@ -1,6 +1,11 @@
 # Change Log - @microsoft/gulp-core-build-mocha
 
-This log was last generated on Wed, 12 Aug 2020 00:10:06 GMT and should not be manually modified.
+This log was last generated on Mon, 17 Aug 2020 04:53:23 GMT and should not be manually modified.
+
+## 3.8.24
+Mon, 17 Aug 2020 04:53:23 GMT
+
+*Version update only*
 
 ## 3.8.23
 Wed, 12 Aug 2020 00:10:06 GMT
