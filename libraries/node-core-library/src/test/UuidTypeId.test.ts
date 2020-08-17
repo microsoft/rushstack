@@ -3,20 +3,20 @@
 
 import { UuidTypeId } from '../UuidTypeId';
 
-class A {}
 const UuidA: string = '122f9816-15c2-480f-8c12-ed94d586b653';
-
-class B extends A {}
-
-class C extends B {
-  public constructor(x: number) {
-    super();
-  }
-}
 const UuidC: string = 'db7dae9b-38d2-4a0a-a62f-ac6b71c2c575';
 
 describe('UuidTypeId', () => {
   test('correctly identifies types with inheritance', () => {
+    class A {}
+    class B extends A {}
+
+    class C extends B {
+      public constructor(x: number) {
+        super();
+      }
+    }
+
     UuidTypeId.registerClass(A, UuidA);
     UuidTypeId.registerClass(C, UuidC);
 
@@ -29,8 +29,9 @@ describe('UuidTypeId', () => {
     expect(UuidTypeId.isInstanceOf(c, UuidC)).toEqual(true);
   });
   test('forbids multiple type assignments', () => {
+    class A {}
     UuidTypeId.registerClass(A, UuidA);
-    expect(UuidTypeId.registerClass(A, UuidC)).toThrowError('already been registered with UuidTypeId');
+    expect(() => UuidTypeId.registerClass(A, UuidC)).toThrow(/already registered/);
   });
   test('works with Symbol.hasInstance', () => {
     const uuidQ: string = 'c9d85505-40de-4553-8da2-6604dccdc65f';

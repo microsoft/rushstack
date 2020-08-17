@@ -50,11 +50,17 @@ export class UuidTypeId {
       throw new Error(`The UUID must be specified as lowercase hexadecimal with dashes: "${typeUuid}"`);
     }
 
-    const existingUuid: string | undefined = targetClass.prototype[classUuidSymbol];
-    if (existingUuid !== undefined) {
-      throw new InternalError('The target class has already been registered with UuidTypeId');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const targetClassPrototype: any = targetClass.prototype;
+
+    if (Object.hasOwnProperty.call(targetClassPrototype, classUuidSymbol)) {
+      const existingUuid: string = targetClassPrototype[classUuidSymbol];
+      throw new InternalError(
+        `Cannot register the target class ${targetClass.name || ''} typeUuid=${typeUuid}` +
+          ` because it was already registered with typeUuid=${existingUuid}`
+      );
     }
-    targetClass.prototype[classUuidSymbol] = typeUuid;
+    targetClassPrototype[classUuidSymbol] = typeUuid;
   }
 
   /**
