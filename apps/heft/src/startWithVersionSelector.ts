@@ -83,7 +83,7 @@ function tryStartLocalHeft(): boolean {
       if (!fs.existsSync(heftEntryPoint)) {
         throw new Error('Unable to find Heft entry point: ' + heftEntryPoint);
       }
-      console.log(`Found local Heft in: ${heftFolder}`);
+      console.log(`Using local Heft from ${heftFolder}`);
       console.log();
     } catch (error) {
       throw new Error('Error probing for local Heft version: ' + error.message);
