@@ -38,6 +38,8 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
   private _heftConfiguration: HeftConfiguration;
   private _internalHeftSession: InternalHeftSession;
 
+  // @ts-ignore (TS6133) '_unmanagedFlag' is declared but its value is never read.
+  private _unmanagedFlag: CommandLineFlagParameter;
   private _debugFlag: CommandLineFlagParameter;
   private _pluginsParameter: CommandLineStringListParameter;
 
@@ -109,6 +111,15 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
   }
 
   protected onDefineParameters(): void {
+    this._unmanagedFlag = this.defineFlagParameter({
+      parameterLongName: '--unmanaged',
+      description:
+        'Disables the Heft version selector: When Heft is invoked via the shell path, normally it' +
+        " will examine the project's package.json dependencies and try to use the locally installed version" +
+        ' of Heft. Specify "--unmanaged" to force the invoked version of Heft to be used. This is useful for' +
+        ' example if you want to test a different version of Heft.'
+    });
+
     this._debugFlag = this.defineFlagParameter({
       parameterLongName: '--debug',
       parameterShortName: '-d',
