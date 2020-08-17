@@ -658,7 +658,7 @@ export enum TextAttribute {
 }
 
 // @public
-export class UuidTypeId {
+export class TypeUuid {
     static isInstanceOf(targetObject: unknown, typeUuid: string): boolean;
     static registerClass(targetClass: new (...args: any[]) => any, typeUuid: string): void;
     }
