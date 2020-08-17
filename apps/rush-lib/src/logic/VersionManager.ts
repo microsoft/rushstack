@@ -4,9 +4,7 @@
 import * as path from 'path';
 import * as semver from 'semver';
 import { cloneDeep } from 'lodash';
-import * as ssri from 'ssri';
-import * as fs from 'fs';
-import { IPackageJson, JsonFile, FileConstants, InternalError } from '@rushstack/node-core-library';
+import { IPackageJson, JsonFile, FileConstants } from '@rushstack/node-core-library';
 
 import { VersionPolicy, BumpType, LockStepVersionPolicy } from '../api/VersionPolicy';
 import { ChangeFile } from '../api/ChangeFile';
@@ -16,14 +14,7 @@ import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { VersionPolicyConfiguration } from '../api/VersionPolicyConfiguration';
 import { PublishUtilities } from './PublishUtilities';
 import { ChangeManager } from './ChangeManager';
-import { TempProjectHelper } from './TempProjectHelper';
-import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from './pnpm/PnpmShrinkwrapFile';
 import { DependencySpecifier } from './DependencySpecifier';
-import { PurgeManager } from './PurgeManager';
-import { RushConstants } from './RushConstants';
-import { RushGlobalFolder } from '../api/RushGlobalFolder';
-import { RushInstallManager } from './installManager/RushInstallManager';
-import { IInstallManagerOptions } from './base/BaseInstallManager';
 
 export class VersionManager {
   private _rushConfiguration: RushConfiguration;
@@ -31,13 +22,11 @@ export class VersionManager {
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
   private _updatedProjects: Map<string, IPackageJson>;
   private _changeFiles: Map<string, ChangeFile>;
-  private _globalFolder: RushGlobalFolder;
 
   public constructor(
     rushConfiguration: RushConfiguration,
     userEmail: string,
-    versionPolicyConfiguration: VersionPolicyConfiguration,
-    globalFolder: RushGlobalFolder
+    versionPolicyConfiguration: VersionPolicyConfiguration
   ) {
     this._rushConfiguration = rushConfiguration;
     this._userEmail = userEmail;
@@ -47,7 +36,6 @@ export class VersionManager {
 
     this._updatedProjects = new Map<string, IPackageJson>();
     this._changeFiles = new Map<string, ChangeFile>();
-    this._globalFolder = globalFolder;
   }
 
   /**
@@ -111,101 +99,6 @@ export class VersionManager {
     this._rushConfiguration = RushConfiguration.loadFromConfigurationFile(
       this._rushConfiguration.rushJsonFile
     );
-
-    if (
-      this._rushConfiguration.packageManager === 'pnpm' &&
-      (!this._rushConfiguration.pnpmOptions ||
-        (this._rushConfiguration.pnpmOptions && !this._rushConfiguration.pnpmOptions.useWorkspaces))
-    ) {
-      const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._globalFolder);
-      const installManagerOptions: IInstallManagerOptions = {
-        debug: false,
-        allowShrinkwrapUpdates: true,
-        bypassPolicy: false,
-        noLink: false,
-        fullUpgrade: false,
-        recheckShrinkwrap: false,
-        networkConcurrency: undefined,
-        collectLogFile: false,
-        variant: this._rushConfiguration.currentInstalledVariant,
-        maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
-        toProjects: []
-      };
-      const installManager: RushInstallManager = new RushInstallManager(
-        this._rushConfiguration,
-        this._globalFolder,
-        purgeManager,
-        installManagerOptions
-      );
-
-      const shrinkwrapFilePath: string = this._rushConfiguration.getCommittedShrinkwrapFilename(
-        this._rushConfiguration.currentInstalledVariant
-      );
-
-      const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
-        shrinkwrapFilePath,
-        this._rushConfiguration.pnpmOptions
-      );
-
-      await installManager.prepareCommonTempAsync(pnpmShrinkwrapFile);
-
-      if (pnpmShrinkwrapFile) {
-        await this._updatePnpmShrinkwrapTarballIntegritiesAsync(pnpmShrinkwrapFile);
-      }
-    }
-  }
-
-  private async _updatePnpmShrinkwrapTarballIntegritiesAsync(
-    pnpmShrinkwrapFile: PnpmShrinkwrapFile
-  ): Promise<void> {
-    const tempProjectHelper: TempProjectHelper = new TempProjectHelper(this._rushConfiguration);
-
-    if (pnpmShrinkwrapFile) {
-      console.log('Updating shrinkwrap.');
-
-      for (const rushProject of this._rushConfiguration.projects) {
-        const tempProjectDependencyKey: string | undefined = pnpmShrinkwrapFile.getTempProjectDependencyKey(
-          rushProject.tempProjectName
-        );
-
-        if (!tempProjectDependencyKey) {
-          throw new Error(`Cannot get dependency key for temp project: ${rushProject.tempProjectName}`);
-        }
-
-        const parentShrinkwrapEntry:
-          | IPnpmShrinkwrapDependencyYaml
-          | undefined = pnpmShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(
-          tempProjectDependencyKey
-        );
-        if (!parentShrinkwrapEntry) {
-          throw new InternalError(
-            `Cannot find shrinkwrap entry using dependency key for temp project: ${rushProject.tempProjectName}`
-          );
-        }
-
-        const newIntegrity: string = (
-          await ssri.fromStream(fs.createReadStream(tempProjectHelper.getTarballFilePath(rushProject)))
-        ).toString();
-
-        if (parentShrinkwrapEntry.resolution.integrity !== newIntegrity) {
-          console.log(
-            `Updating entry for ${rushProject.packageName}: ` +
-              `${parentShrinkwrapEntry.resolution.integrity} -> ${newIntegrity}`
-          );
-          parentShrinkwrapEntry.resolution.integrity = newIntegrity;
-        }
-      }
-
-      pnpmShrinkwrapFile.save(pnpmShrinkwrapFile.shrinkwrapFilename);
-
-      if (
-        this._rushConfiguration
-          .getRepoState(this._rushConfiguration.currentInstalledVariant)
-          .refreshState(this._rushConfiguration)
-      ) {
-        console.log(`Updated repo-state.json`);
-      }
-    }
   }
 
   public get updatedProjects(): Map<string, IPackageJson> {

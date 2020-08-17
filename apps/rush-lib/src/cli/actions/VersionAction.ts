@@ -102,8 +102,7 @@ export class VersionAction extends BaseRushAction {
       this._versionManager = new VersionManager(
         this.rushConfiguration,
         userEmail,
-        this.rushConfiguration.versionPolicyConfiguration,
-        this.parser.rushGlobalFolder
+        this.rushConfiguration.versionPolicyConfiguration
       );
 
       if (this._ensureVersionPolicy.value) {

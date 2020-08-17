@@ -3,9 +3,11 @@
 
 import * as glob from 'glob';
 import * as colors from 'colors';
+import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
+import * as ssri from 'ssri';
 import * as globEscape from 'glob-escape';
 import {
   JsonFile,
@@ -33,6 +35,7 @@ import { RushConfiguration } from '../..';
 import { PurgeManager } from '../PurgeManager';
 import { LinkManagerFactory } from '../LinkManagerFactory';
 import { BaseLinkManager } from '../base/BaseLinkManager';
+import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from '../pnpm/PnpmShrinkwrapFile';
 
 /**
  * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.
@@ -63,6 +66,29 @@ export class RushInstallManager extends BaseInstallManager {
   ) {
     super(rushConfiguration, rushGlobalFolder, purgeManager, options);
     this._tempProjectHelper = new TempProjectHelper(this.rushConfiguration);
+  }
+
+  protected async prepareAsync(): Promise<{ variantIsUpToDate: boolean; shrinkwrapIsUpToDate: boolean }> {
+    const result: { variantIsUpToDate: boolean; shrinkwrapIsUpToDate: boolean } = await super.prepareAsync();
+
+    // We have already done prep work to ensure that the package.json files are "up to date". Some changes
+    // (such as local package version bumps, or adding a reference to another existing local package) do
+    // not need a "rush update" to be run, and as such can be changed manually in the temp shrinkwrap. These
+    // changes will eventually be picked up during a "rush update".
+    if (
+      this.rushConfiguration.packageManager === 'pnpm' &&
+      this.rushConfiguration.pnpmOptions &&
+      !this.options.allowShrinkwrapUpdates &&
+      this.rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall
+    ) {
+      const tempShrinkwrap: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
+        this.rushConfiguration.tempShrinkwrapFilename,
+        this.rushConfiguration.pnpmOptions
+      );
+      await this._updatePnpmShrinkwrapTarballIntegritiesAsync(tempShrinkwrap);
+    }
+
+    return result;
   }
 
   /**
@@ -362,6 +388,53 @@ export class RushInstallManager extends BaseInstallManager {
       dependency.setVersion(specifier.versionSpecifier);
     }
     return true;
+  }
+
+  private async _updatePnpmShrinkwrapTarballIntegritiesAsync(
+    tempShrinkwrapFile: PnpmShrinkwrapFile | undefined
+  ): Promise<void> {
+    if (!tempShrinkwrapFile) {
+      return;
+    }
+
+    const tempProjectHelper: TempProjectHelper = new TempProjectHelper(this.rushConfiguration);
+
+    console.log('Updating shrinkwrap local dependency tarball hashes.');
+
+    for (const rushProject of this.rushConfiguration.projects) {
+      const tempProjectDependencyKey: string | undefined = tempShrinkwrapFile.getTempProjectDependencyKey(
+        rushProject.tempProjectName
+      );
+
+      if (!tempProjectDependencyKey) {
+        throw new Error(`Cannot get dependency key for temp project: ${rushProject.tempProjectName}`);
+      }
+
+      const parentShrinkwrapEntry:
+        | IPnpmShrinkwrapDependencyYaml
+        | undefined = tempShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(
+        tempProjectDependencyKey
+      );
+      if (!parentShrinkwrapEntry) {
+        throw new InternalError(
+          `Cannot find shrinkwrap entry using dependency key for temp project: ${rushProject.tempProjectName}`
+        );
+      }
+
+      const newIntegrity: string = (
+        await ssri.fromStream(fs.createReadStream(tempProjectHelper.getTarballFilePath(rushProject)))
+      ).toString();
+
+      if (parentShrinkwrapEntry.resolution.integrity !== newIntegrity) {
+        console.log(
+          `Updating entry for ${rushProject.packageName}: ` +
+            `${parentShrinkwrapEntry.resolution.integrity} -> ${newIntegrity}`
+        );
+        parentShrinkwrapEntry.resolution.integrity = newIntegrity;
+      }
+    }
+
+    tempShrinkwrapFile.save(tempShrinkwrapFile.shrinkwrapFilename);
   }
 
   /**
