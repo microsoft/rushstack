@@ -98,4 +98,4 @@ export class MarkdownDocumenterFeature extends PluginFeature {
   }
 }
 
-TypeUuid.registerClass(PluginFeature, uuidMarkdownDocumenterFeature);
+TypeUuid.registerClass(MarkdownDocumenterFeature, uuidMarkdownDocumenterFeature);
