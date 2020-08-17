@@ -43,9 +43,15 @@ export class TypeUuid {
 
   /**
    * Registers a JavaScript class as having a type identified by the specified UUID.
+   * @privateRemarks
+   * We cannot use a construct signature for `targetClass` because it may be an abstract class.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static registerClass(targetClass: new (...args) => any, typeUuid: string): void {
+  public static registerClass(targetClass: any, typeUuid: string): void {
+    if (typeof targetClass !== 'function') {
+      throw new Error('The targetClass parameter must be a JavaScript class');
+    }
+
     if (!TypeUuid._uuidRegExp.test(typeUuid)) {
       throw new Error(`The type UUID must be specified as lowercase hexadecimal with dashes: "${typeUuid}"`);
     }

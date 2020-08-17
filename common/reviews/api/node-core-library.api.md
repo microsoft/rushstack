@@ -660,7 +660,7 @@ export enum TextAttribute {
 // @public
 export class TypeUuid {
     static isInstanceOf(targetObject: unknown, typeUuid: string): boolean;
-    static registerClass(targetClass: new (...args: any[]) => any, typeUuid: string): void;
+    static registerClass(targetClass: any, typeUuid: string): void;
     }
 
 
