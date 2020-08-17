@@ -35,28 +35,46 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     this._fileSystem = options.fileSystem;
   }
 
+  /**
+   * getConfigHash returns the sha1 hash unique to the contents of the given config as
+   * well as all the configs that the given one extends.
+   *
+   * If suppied the previousHash parameter, the hash is updated with the contents of the
+   * file's extended configs and itself before being returned. Passing a digested hash to
+   * this parameter will result in an error.
+   */
   public static getConfigHash(
     configFilePath: string,
     terminal: Terminal,
-    fileSystem: IExtendedFileSystem
+    fileSystem: IExtendedFileSystem,
+    previousHash?: crypto.Hash
   ): crypto.Hash {
     interface IMinimalConfig {
-      extends?: string;
+      extends?: string | string[];
     }
 
     terminal.writeVerboseLine(`Examining config file "${configFilePath}"`);
 
     const rawConfig: string = fileSystem.readFile(configFilePath);
     const parsedConfig: IMinimalConfig = JsonFile.parseString(rawConfig);
-    let hash: crypto.Hash;
-    if (parsedConfig.extends) {
+    const extendsProperty: string | string[] | undefined = parsedConfig.extends;
+    let hash: crypto.Hash = previousHash || crypto.createHash('sha1');
+
+    if (extendsProperty instanceof Array) {
+      for (const extendFile of extendsProperty) {
+        const extendFilePath: string = ResolveUtilities.resolvePackagePath(
+          extendFile,
+          path.dirname(configFilePath)
+        );
+        hash = this.getConfigHash(extendFilePath, terminal, fileSystem, hash);
+      }
+    } else if (extendsProperty) {
+      // note that if we get here, extendsProperty is a string
       const extendsFullPath: string = ResolveUtilities.resolvePackagePath(
-        parsedConfig.extends,
+        extendsProperty,
         path.dirname(configFilePath)
       );
-      hash = Tslint.getConfigHash(extendsFullPath, terminal, fileSystem);
-    } else {
-      hash = crypto.createHash('sha1').update(rawConfig);
+      hash = Tslint.getConfigHash(extendsFullPath, terminal, fileSystem, hash);
     }
 
     return hash.update(rawConfig);
