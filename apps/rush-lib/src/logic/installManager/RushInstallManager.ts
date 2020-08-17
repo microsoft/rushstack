@@ -399,8 +399,11 @@ export class RushInstallManager extends BaseInstallManager {
 
     const tempProjectHelper: TempProjectHelper = new TempProjectHelper(this.rushConfiguration);
 
-    console.log('Updating shrinkwrap local dependency tarball hashes.');
+    console.log(
+      `Checking shrinkwrap local dependency tarball hashes in ${tempShrinkwrapFile.shrinkwrapFilename}`
+    );
 
+    let shrinkwrapFileUpdated: boolean = false;
     for (const rushProject of this.rushConfiguration.projects) {
       const tempProjectDependencyKey: string | undefined = tempShrinkwrapFile.getTempProjectDependencyKey(
         rushProject.tempProjectName
@@ -426,15 +429,15 @@ export class RushInstallManager extends BaseInstallManager {
       ).toString();
 
       if (parentShrinkwrapEntry.resolution.integrity !== newIntegrity) {
-        console.log(
-          `Updating entry for ${rushProject.packageName}: ` +
-            `${parentShrinkwrapEntry.resolution.integrity} -> ${newIntegrity}`
-        );
+        shrinkwrapFileUpdated = true;
         parentShrinkwrapEntry.resolution.integrity = newIntegrity;
       }
     }
 
     tempShrinkwrapFile.save(tempShrinkwrapFile.shrinkwrapFilename);
+    if (shrinkwrapFileUpdated) {
+      console.log('Shrinkwrap local dependency tarball hashes were updated.');
+    }
   }
 
   /**
