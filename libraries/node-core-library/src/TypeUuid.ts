@@ -3,28 +3,28 @@
 
 import { InternalError } from './InternalError';
 
-const classUuidSymbol: symbol = Symbol.for('UuidTypeId.classTag');
+const classPrototypeUuidSymbol: symbol = Symbol.for('TypeUuid.classPrototypeUuid');
 
 /**
  * Provides a version-independent implementation of the JavaScript `instanceof` operator.
  *
  * @remarks
- * The JavaScript `instanceof` operator normally only identifies objects from a single library instance.
- * For example, suppose the library `example-lib` exports has two published releases 1.2.0 and 1.3.0, and
- * it exports a `class` called `A`.  Suppose some code consumes version `1.3.0` of the library, but it receives
+ * The JavaScript `instanceof` operator normally only identifies objects from a particular library instance.
+ * For example, suppose the NPM package `example-lib` has two published versions 1.2.0 and 1.3.0, and
+ * it exports a class called `A`.  Suppose some code consumes version `1.3.0` of the library, but it receives
  * an object that was constructed using version `1.2.0`.  In this situation `a instanceof A` will return `false`,
  * even though `a` is an instance of `A`.  The reason is that there are two prototypes for `A`; one for each
  * version.
  *
- * The `UuidTypeId` facility provides a way to make `x instanceof X` return true for both prototypes of `X`,
+ * The `TypeUuid` facility provides a way to make `a instanceof A` return true for both prototypes of `A`,
  * by instead using a universally unique identifier (UUID) to detect object instances.
  *
- * You can use `Symbol.hasInstance` to enable the real `instanceof` operator to recognize UUID type identities:
+ * You can use `Symbol.hasInstance` to enable the system `instanceof` operator to recognize type UUID equivalence:
  * ```ts
  * const uuidWidget: string = '9c340ef0-d29f-4e2e-a09f-42bacc59024b';
  * class Widget {
  *   public static [Symbol.hasInstance](instance: object): boolean {
- *     return UuidTypeId.isInstanceOf(instance, uuidWidget);
+ *     return TypeUuid.isInstanceOf(instance, uuidWidget);
  *   }
  * }
  * ```
@@ -38,7 +38,7 @@ const classUuidSymbol: symbol = Symbol.for('UuidTypeId.classTag');
  *
  * @public
  */
-export class UuidTypeId {
+export class TypeUuid {
   private static _uuidRegExp: RegExp = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 
   /**
@@ -46,21 +46,21 @@ export class UuidTypeId {
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static registerClass(targetClass: new (...args) => any, typeUuid: string): void {
-    if (!UuidTypeId._uuidRegExp.test(typeUuid)) {
-      throw new Error(`The UUID must be specified as lowercase hexadecimal with dashes: "${typeUuid}"`);
+    if (!TypeUuid._uuidRegExp.test(typeUuid)) {
+      throw new Error(`The type UUID must be specified as lowercase hexadecimal with dashes: "${typeUuid}"`);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const targetClassPrototype: any = targetClass.prototype;
 
-    if (Object.hasOwnProperty.call(targetClassPrototype, classUuidSymbol)) {
-      const existingUuid: string = targetClassPrototype[classUuidSymbol];
+    if (Object.hasOwnProperty.call(targetClassPrototype, classPrototypeUuidSymbol)) {
+      const existingUuid: string = targetClassPrototype[classPrototypeUuidSymbol];
       throw new InternalError(
         `Cannot register the target class ${targetClass.name || ''} typeUuid=${typeUuid}` +
           ` because it was already registered with typeUuid=${existingUuid}`
       );
     }
-    targetClassPrototype[classUuidSymbol] = typeUuid;
+    targetClassPrototype[classPrototypeUuidSymbol] = typeUuid;
   }
 
   /**
@@ -70,7 +70,7 @@ export class UuidTypeId {
   public static isInstanceOf(targetObject: unknown, typeUuid: string): boolean {
     let objectPrototype: {} = Object.getPrototypeOf(targetObject);
     while (objectPrototype !== undefined && objectPrototype !== null) {
-      const registeredUuid: string = objectPrototype[classUuidSymbol];
+      const registeredUuid: string = objectPrototype[classPrototypeUuidSymbol];
       if (registeredUuid !== undefined) {
         if (registeredUuid === typeUuid) {
           return true;

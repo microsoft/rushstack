@@ -70,4 +70,4 @@ export { Colors, IColorableSequence, ColorValue, TextAttribute } from './Termina
 export { ITerminalProvider, TerminalProviderSeverity } from './Terminal/ITerminalProvider';
 export { ConsoleTerminalProvider, IConsoleTerminalProviderOptions } from './Terminal/ConsoleTerminalProvider';
 export { StringBufferTerminalProvider } from './Terminal/StringBufferTerminalProvider';
-export { UuidTypeId } from './UuidTypeId';
+export { TypeUuid } from './TypeUuid';

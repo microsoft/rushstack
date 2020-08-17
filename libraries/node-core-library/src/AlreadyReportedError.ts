@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { UuidTypeId } from './UuidTypeId';
+import { TypeUuid } from './TypeUuid';
 
 const uuidAlreadyReportedError: string = 'f26b0640-a49b-49d1-9ead-1a516d5920c7';
 
@@ -48,8 +48,8 @@ export class AlreadyReportedError extends Error {
   }
 
   public static [Symbol.hasInstance](instance: object): boolean {
-    return UuidTypeId.isInstanceOf(instance, uuidAlreadyReportedError);
+    return TypeUuid.isInstanceOf(instance, uuidAlreadyReportedError);
   }
 }
 
-UuidTypeId.registerClass(AlreadyReportedError, uuidAlreadyReportedError);
+TypeUuid.registerClass(AlreadyReportedError, uuidAlreadyReportedError);
