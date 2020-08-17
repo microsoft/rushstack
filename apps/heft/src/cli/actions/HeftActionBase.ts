@@ -6,7 +6,13 @@ import {
   CommandLineFlagParameter,
   ICommandLineActionOptions
 } from '@rushstack/ts-command-line';
-import { Terminal, IPackageJson, Colors, ConsoleTerminalProvider } from '@rushstack/node-core-library';
+import {
+  Terminal,
+  IPackageJson,
+  Colors,
+  ConsoleTerminalProvider,
+  AlreadyReportedError
+} from '@rushstack/node-core-library';
 import { performance } from 'perf_hooks';
 
 import { MetricsCollector } from '../../metrics/MetricsCollector';
@@ -124,6 +130,10 @@ export abstract class HeftActionBase extends CommandLineAction {
       );
       this.terminal.writeLine(`Heft version: ${this.heftConfiguration.heftPackageJson.version}`);
       this.terminal.writeLine(`Node version: ${process.version}`);
+    }
+
+    if (encounteredError) {
+      throw new AlreadyReportedError();
     }
   }
 

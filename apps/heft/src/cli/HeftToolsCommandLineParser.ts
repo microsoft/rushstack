@@ -6,7 +6,12 @@ import {
   CommandLineStringListParameter,
   CommandLineFlagParameter
 } from '@rushstack/ts-command-line';
-import { Terminal, InternalError, ConsoleTerminalProvider } from '@rushstack/node-core-library';
+import {
+  Terminal,
+  InternalError,
+  ConsoleTerminalProvider,
+  AlreadyReportedError
+} from '@rushstack/node-core-library';
 
 import { MetricsCollector } from '../metrics/MetricsCollector';
 import { CleanAction } from './actions/CleanAction';
@@ -165,7 +170,9 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
   }
 
   private async _reportErrorAndSetExitCode(error: Error): Promise<void> {
-    this._terminal.writeErrorLine(error.toString());
+    if (!(error instanceof AlreadyReportedError)) {
+      this._terminal.writeErrorLine(error.toString());
+    }
 
     if (this.isDebug) {
       this._terminal.writeLine();
