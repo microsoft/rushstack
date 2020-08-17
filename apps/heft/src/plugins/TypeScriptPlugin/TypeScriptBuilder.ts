@@ -637,7 +637,10 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       errorObject = new Error(diagnosticMessage);
     }
 
-    const adjustedCategory: TTypescript.DiagnosticCategory = this._getAdjustedDiagnosticCategory(diagnostic);
+    const adjustedCategory: TTypescript.DiagnosticCategory = this._getAdjustedDiagnosticCategory(
+      diagnostic,
+      ts
+    );
 
     switch (adjustedCategory) {
       case ts.DiagnosticCategory.Error: {
@@ -657,7 +660,10 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     }
   }
 
-  private _getAdjustedDiagnosticCategory(diagnostic: TTypescript.Diagnostic): TTypescript.DiagnosticCategory {
+  private _getAdjustedDiagnosticCategory(
+    diagnostic: TTypescript.Diagnostic,
+    ts: ExtendedTypeScript
+  ): TTypescript.DiagnosticCategory {
     // Workaround for https://github.com/microsoft/TypeScript/issues/40058
     // The compiler reports a hard error for issues such as this:
     //
@@ -665,8 +671,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     //
     // These should properly be treated as warnings, because they are purely cosmetic issues.
     // TODO: Maybe heft should provide a config file for managing DiagnosticCategory mappings.
-    if (diagnostic.reportsUnnecessary && diagnostic.category === TTypescript.DiagnosticCategory.Error) {
-      return TTypescript.DiagnosticCategory.Warning;
+    if (diagnostic.reportsUnnecessary && diagnostic.category === ts.DiagnosticCategory.Error) {
+      return ts.DiagnosticCategory.Warning;
     }
 
     return diagnostic.category;
