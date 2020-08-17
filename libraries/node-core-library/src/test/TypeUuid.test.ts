@@ -33,6 +33,11 @@ describe('TypeUuid', () => {
     TypeUuid.registerClass(A, UuidA);
     expect(() => TypeUuid.registerClass(A, UuidC)).toThrow(/already registered/);
   });
+  test('handles undefined and null', () => {
+    expect(TypeUuid.isInstanceOf(undefined, UuidA)).toEqual(false);
+    // eslint-disable-next-line @rushstack/no-null
+    expect(TypeUuid.isInstanceOf(null, UuidA)).toEqual(false);
+  });
   test('works with Symbol.hasInstance', () => {
     const uuidQ: string = 'c9d85505-40de-4553-8da2-6604dccdc65f';
 

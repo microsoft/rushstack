@@ -74,13 +74,15 @@ export class TypeUuid {
    * registered using the specified `typeUuid`.  Base classes are also considered.
    */
   public static isInstanceOf(targetObject: unknown, typeUuid: string): boolean {
+    if (targetObject === undefined || targetObject === null) {
+      return false;
+    }
+
     let objectPrototype: {} = Object.getPrototypeOf(targetObject);
     while (objectPrototype !== undefined && objectPrototype !== null) {
       const registeredUuid: string = objectPrototype[classPrototypeUuidSymbol];
-      if (registeredUuid !== undefined) {
-        if (registeredUuid === typeUuid) {
-          return true;
-        }
+      if (registeredUuid === typeUuid) {
+        return true;
       }
       // Walk upwards an examine base class prototypes
       objectPrototype = Object.getPrototypeOf(objectPrototype);
