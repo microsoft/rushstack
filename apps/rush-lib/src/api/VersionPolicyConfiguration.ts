@@ -64,16 +64,9 @@ export interface IVersionPolicyDependencyJson {
  * @beta
  */
 export class VersionPolicyConfiguration {
-  private static _jsonSchemaCached: JsonSchema | undefined = undefined;
-  private static get _jsonSchema(): JsonSchema {
-    if (!this._jsonSchemaCached) {
-      this._jsonSchemaCached = JsonSchema.fromFile(
-        path.join(__dirname, '../schemas/version-policies.schema.json')
-      );
-    }
-
-    return this._jsonSchemaCached;
-  }
+  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
+    path.join(__dirname, '../schemas/version-policies.schema.json')
+  );
 
   private _versionPolicies: Map<string, VersionPolicy>;
   private _jsonFileName: string;

@@ -47,16 +47,9 @@ export class ApprovedPackagesItem {
  * @public
  */
 export class ApprovedPackagesConfiguration {
-  private static _jsonSchemaCached: JsonSchema | undefined = undefined;
-  private static get _jsonSchema(): JsonSchema {
-    if (!this._jsonSchemaCached) {
-      this._jsonSchemaCached = JsonSchema.fromFile(
-        path.join(__dirname, '../schemas/approved-packages.schema.json')
-      );
-    }
-
-    return this._jsonSchemaCached;
-  }
+  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
+    path.join(__dirname, '../schemas/approved-packages.schema.json')
+  );
 
   public items: ApprovedPackagesItem[] = [];
 

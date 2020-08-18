@@ -35,16 +35,9 @@ export interface IExperimentsJson {
  * @beta
  */
 export class ExperimentsConfiguration {
-  private static _jsonSchemaCached: JsonSchema | undefined = undefined;
-  private static get _jsonSchema(): JsonSchema {
-    if (!this._jsonSchemaCached) {
-      this._jsonSchemaCached = JsonSchema.fromFile(
-        path.resolve(__dirname, '..', 'schemas', 'experiments.schema.json')
-      );
-    }
-
-    return this._jsonSchemaCached;
-  }
+  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
+    path.resolve(__dirname, '..', 'schemas', 'experiments.schema.json')
+  );
 
   private _experimentConfiguration: IExperimentsJson;
   private _jsonFileName: string;

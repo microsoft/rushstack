@@ -34,14 +34,9 @@ interface IRepoStateJson {
  * @public
  */
 export class RepoStateFile {
-  private static _jsonSchemaCached: JsonSchema | undefined = undefined;
-  private static get _jsonSchema(): JsonSchema {
-    if (!this._jsonSchemaCached) {
-      this._jsonSchemaCached = JsonSchema.fromFile(path.join(__dirname, '../schemas/repo-state.schema.json'));
-    }
-
-    return this._jsonSchemaCached;
-  }
+  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
+    path.join(__dirname, '../schemas/repo-state.schema.json')
+  );
 
   private _repoStateFilePath: string;
   private _variant: string | undefined;
