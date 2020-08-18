@@ -7,6 +7,7 @@ import * as colors from 'colors';
 import { CommandLineAction } from './CommandLineAction';
 import { CommandLineParameterProvider, ICommandLineParserData } from './CommandLineParameterProvider';
 import { CommandLineParserExitError, CustomArgumentParser } from './CommandLineParserExitError';
+import { TabCompleteAction } from './TabCompletionAction';
 
 /**
  * Options for the {@link CommandLineParser} constructor.
@@ -22,6 +23,11 @@ export interface ICommandLineParserOptions {
    * General documentation that is included in the "--help" main page
    */
   toolDescription: string;
+
+  /**
+   * Set to true to auto-define a tab completion action. False by default.
+   */
+  enableTabCompletionAction?: boolean;
 }
 
 /**
@@ -35,12 +41,6 @@ export interface ICommandLineParserOptions {
  * @public
  */
 export abstract class CommandLineParser extends CommandLineParameterProvider {
-  /** {@inheritDoc ICommandLineParserOptions.toolFilename} */
-  public readonly toolFilename: string;
-
-  /** {@inheritDoc ICommandLineParserOptions.toolDescription} */
-  public readonly toolDescription: string;
-
   /**
    * Reports which CommandLineAction was specified on the command line.
    * @remarks
@@ -54,6 +54,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   private _actions: CommandLineAction[];
   private _actionsByName: Map<string, CommandLineAction>;
   private _executed: boolean = false;
+  private _tabCompleteActionWasAdded: boolean = false;
 
   public constructor(options: ICommandLineParserOptions) {
     super();
@@ -135,6 +136,10 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    *               the process.argv will be used
    */
   public execute(args?: string[]): Promise<boolean> {
+    if (this._options.enableTabCompletionAction && !this._tabCompleteActionWasAdded) {
+      this.addAction(new TabCompleteAction(this.actions, this.parameters));
+      this._tabCompleteActionWasAdded = true;
+    }
     return this.executeWithoutErrorHandling(args)
       .then(() => {
         return true;

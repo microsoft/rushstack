@@ -2,11 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as _ from 'lodash';
-import { FileSystem, JsonFile, JsonObject } from '@rushstack/node-core-library';
+
+import { FileSystem, JsonFile, JsonObject, Import } from '@rushstack/node-core-library';
 
 import { PackageManagerName } from './packageManager/PackageManager';
 import { RushConfiguration } from './RushConfiguration';
+
+const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
 
@@ -58,7 +60,7 @@ export class LastInstallFlag {
 
     const newState: JsonObject = this._state;
 
-    if (!_.isEqual(oldState, newState)) {
+    if (!lodash.isEqual(oldState, newState)) {
       if (checkValidAndReportStoreIssues) {
         const pkgManager: PackageManagerName = newState.packageManager;
         if (pkgManager === 'pnpm') {

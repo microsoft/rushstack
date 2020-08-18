@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Lazy-import some packages to improve spin up times.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library",
+  "email": "sachinjoseph@users.noreply.github.com"
+}

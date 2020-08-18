@@ -3,10 +3,9 @@
 
 import * as path from 'path';
 import * as semver from 'semver';
-import { cloneDeep } from 'lodash';
 import * as ssri from 'ssri';
 import * as fs from 'fs';
-import { IPackageJson, JsonFile, FileConstants, InternalError } from '@rushstack/node-core-library';
+import { IPackageJson, JsonFile, FileConstants, InternalError, Import } from '@rushstack/node-core-library';
 
 import { VersionPolicy, BumpType, LockStepVersionPolicy } from '../api/VersionPolicy';
 import { ChangeFile } from '../api/ChangeFile';
@@ -22,8 +21,15 @@ import { DependencySpecifier } from './DependencySpecifier';
 import { PurgeManager } from './PurgeManager';
 import { RushConstants } from './RushConstants';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
-import { RushInstallManager } from './installManager/RushInstallManager';
 import { IInstallManagerOptions } from './base/BaseInstallManager';
+
+const lodash: typeof import('lodash') = Import.lazy('lodash', require);
+// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
+import * as RushInstallManagerTypes from './installManager/RushInstallManager';
+const rushInstallManagerModule: typeof RushInstallManagerTypes = Import.lazy(
+  './installManager/RushInstallManager',
+  require
+);
 
 export class VersionManager {
   private _rushConfiguration: RushConfiguration;
@@ -131,7 +137,7 @@ export class VersionManager {
         maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
         toProjects: []
       };
-      const installManager: RushInstallManager = new RushInstallManager(
+      const installManager: RushInstallManagerTypes.RushInstallManager = new rushInstallManagerModule.RushInstallManager(
         this._rushConfiguration,
         this._globalFolder,
         purgeManager,
@@ -300,10 +306,10 @@ export class VersionManager {
       let clonedProject: IPackageJson | undefined = this._updatedProjects.get(rushProject.packageName);
       let projectVersionChanged: boolean = true;
       if (!clonedProject) {
-        clonedProject = cloneDeep(rushProject.packageJson);
+        clonedProject = lodash.cloneDeep(rushProject.packageJson);
         projectVersionChanged = false;
       }
-      this._updateProjectAllDependencies(rushProject, clonedProject, projectVersionChanged);
+      this._updateProjectAllDependencies(rushProject, clonedProject!, projectVersionChanged);
     });
   }
 

@@ -342,6 +342,11 @@ export interface IJsonSchemaValidateOptions {
 }
 
 // @public
+export class Import {
+    static lazy(moduleName: string, require: (id: string) => unknown): any;
+}
+
+// @public
 export interface INodePackageJson {
     bin?: string;
     dependencies?: IPackageJsonDependencyTable;

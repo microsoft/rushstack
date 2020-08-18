@@ -79,15 +79,17 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction {
       }
     }
 
-    console.log(`Starting "rush ${this.actionName}"${os.EOL}`);
-    return this.run();
+    if (!Utilities.shouldRestrictConsoleOutput()) {
+      console.log(`Starting "rush ${this.actionName}"${os.EOL}`);
+    }
+    return this.runAsync();
   }
 
   /**
    * All Rush actions need to implement this method. This method runs after
    * environment has been set up by the base class.
    */
-  protected abstract run(): Promise<void>;
+  protected abstract runAsync(): Promise<void>;
 
   private _ensureEnvironment(): void {
     if (this.rushConfiguration) {

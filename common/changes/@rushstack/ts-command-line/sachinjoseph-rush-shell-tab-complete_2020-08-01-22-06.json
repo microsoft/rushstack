@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/ts-command-line",
+      "comment": "Add support for shell tab completion.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line",
+  "email": "sachinjoseph@users.noreply.github.com"
+}
