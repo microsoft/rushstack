@@ -150,9 +150,11 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
 
     try {
       await super.onExecute();
-      await this._metricsCollector.flushAndTeardownAsync();
     } catch (e) {
-      await this._reportErrorAndSetExitCode(e);
+      await this._reportError(e);
+      throw e;
+    } finally {
+      await this._metricsCollector.flushAndTeardownAsync();
     }
 
     // If we make it here, things are fine and reset the exit code back to 0
@@ -180,7 +182,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     }
   }
 
-  private async _reportErrorAndSetExitCode(error: Error): Promise<void> {
+  private async _reportError(error: Error): Promise<void> {
     if (!(error instanceof AlreadyReportedError)) {
       this._terminal.writeErrorLine(error.toString());
     }
@@ -188,14 +190,6 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     if (this.isDebug) {
       this._terminal.writeLine();
       this._terminal.writeErrorLine(error.stack!);
-    }
-
-    await this._metricsCollector.flushAndTeardownAsync();
-
-    if (!process.exitCode || process.exitCode > 0) {
-      process.exit(process.exitCode);
-    } else {
-      process.exit(1);
     }
   }
 }

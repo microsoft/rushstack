@@ -9,14 +9,6 @@ describe('CommandLineHelp', () => {
   let parser: HeftToolsCommandLineParser;
 
   beforeEach(() => {
-    // ts-command-line calls process.exit() which interferes with Jest
-    jest.spyOn(process, 'exit').mockImplementation((code?: number) => {
-      throw new Error(`Test code called process.exit(${code})`);
-    });
-
-    // This call may terminate the entire test run because it invokes process.exit()
-    // if it encounters errors.
-    // TODO Remove the calls to process.exit() or override them for testing.
     parser = new HeftToolsCommandLineParser();
   });
 
