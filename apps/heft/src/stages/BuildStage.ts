@@ -13,6 +13,7 @@ import {
   CommandLineStringParameter,
   CommandLineIntegerParameter
 } from '@rushstack/ts-command-line';
+import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 
 /**
  * @public
@@ -164,6 +165,11 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
 
   public readonly afterConfigureTypeScript: AsyncSeriesHook = new AsyncSeriesHook();
   public readonly afterConfigureCopyStaticAssets: AsyncSeriesHook = new AsyncSeriesHook();
+
+  /**
+   * @internal
+   */
+  public readonly afterTypescriptFirstEmit: AsyncParallelHook = new AsyncParallelHook();
 }
 
 /**
@@ -282,13 +288,13 @@ export interface IBuildStageStandardParameters {
   productionFlag: CommandLineFlagParameter;
   localeParameter: CommandLineStringParameter;
   liteFlag: CommandLineFlagParameter;
-  typescriptMaxWriteParallelismParamter: CommandLineIntegerParameter;
+  typescriptMaxWriteParallelismParameter: CommandLineIntegerParameter;
   maxOldSpaceSizeParameter: CommandLineStringParameter;
 }
 
 export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties, IBuildStageOptions> {
-  public constructor(heftConfiguration: HeftConfiguration) {
-    super(heftConfiguration, BuildStageHooks);
+  public constructor(heftConfiguration: HeftConfiguration, loggingManager: LoggingManager) {
+    super(heftConfiguration, loggingManager, BuildStageHooks);
   }
 
   public static defineStageStandardParameters(action: CommandLineAction): IBuildStageStandardParameters {
@@ -310,7 +316,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
         description: 'Perform a minimal build, skipping optional steps like linting.'
       }),
 
-      typescriptMaxWriteParallelismParamter: action.defineIntegerParameter({
+      typescriptMaxWriteParallelismParameter: action.defineIntegerParameter({
         parameterLongName: '--typescript-max-write-parallelism',
         argumentName: 'PARALLEILSM',
         description:
@@ -333,7 +339,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       production: standardParameters.productionFlag.value,
       lite: standardParameters.liteFlag.value,
       locale: standardParameters.localeParameter.value,
-      typescriptMaxWriteParallelism: standardParameters.typescriptMaxWriteParallelismParamter.value
+      typescriptMaxWriteParallelism: standardParameters.typescriptMaxWriteParallelismParameter.value
     };
   }
 
@@ -418,14 +424,25 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
         bundleStage.hooks.afterConfigureWebpack.promise()
       ]);
 
+      compileStage.hooks.afterTypescriptFirstEmit.tapPromise(
+        'build-stage',
+        async () =>
+          await Promise.all([
+            this._runSubstageWithLoggingAsync('Bundle', bundleStage),
+            this._runSubstageWithLoggingAsync('Post-build', postBuildStage)
+          ])
+      );
+
       await Promise.all([
         this._runSubstageWithLoggingAsync('Pre-compile', preCompileSubstage),
-        this._runSubstageWithLoggingAsync('Compile', compileStage),
-        this._runSubstageWithLoggingAsync('Bundle', bundleStage),
-        this._runSubstageWithLoggingAsync('Post-build', postBuildStage)
+        this._runSubstageWithLoggingAsync('Compile', compileStage)
       ]);
     } else {
       await this._runSubstageWithLoggingAsync('Pre-compile', preCompileSubstage);
+
+      if (this.loggingManager.errorsHaveBeenEmitted) {
+        return;
+      }
 
       await Promise.all([
         compileStage.hooks.configureTypeScript.promise(),
@@ -439,6 +456,10 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
         compileStage.properties.typeScriptConfiguration.maxWriteParallelism = this.stageOptions.typescriptMaxWriteParallelism;
       }
       await this._runSubstageWithLoggingAsync('Compile', compileStage);
+
+      if (this.loggingManager.errorsHaveBeenEmitted) {
+        return;
+      }
 
       await Promise.all([
         bundleStage.hooks.configureWebpack
@@ -456,6 +477,10 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       await bundleStage.hooks.afterConfigureWebpack.promise();
       await this._runSubstageWithLoggingAsync('Bundle', bundleStage);
 
+      if (this.loggingManager.errorsHaveBeenEmitted) {
+        return;
+      }
+
       await this._runSubstageWithLoggingAsync('Post-build', postBuildStage);
     }
   }
@@ -466,7 +491,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
   ): Promise<void> {
     if (buildStage.hooks.run.isUsed()) {
       await Logging.runFunctionWithLoggingBoundsAsync(
-        this.terminal,
+        this.globalTerminal,
         buildStageName,
         async () => await buildStage.hooks.run.promise()
       );

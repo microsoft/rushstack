@@ -3,6 +3,7 @@
 
 import { StageBase, StageHooksBase, IStageContext } from './StageBase';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
+import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 
 /**
  * @public
@@ -27,8 +28,8 @@ export class DevDeployStage extends StageBase<
   IDevDeployStageProperties,
   IDevDeployStageOptions
 > {
-  public constructor(heftConfiguration: HeftConfiguration) {
-    super(heftConfiguration, DevDeployStageHooks);
+  public constructor(heftConfiguration: HeftConfiguration, loggingManager: LoggingManager) {
+    super(heftConfiguration, loggingManager, DevDeployStageHooks);
   }
 
   protected getDefaultStageProperties(options: IDevDeployStageOptions): IDevDeployStageProperties {
@@ -36,6 +37,6 @@ export class DevDeployStage extends StageBase<
   }
 
   protected async executeInnerAsync(): Promise<void> {
-    this.terminal.writeLine('dev-deploy has not been implemented yet');
+    this.globalTerminal.writeLine('dev-deploy has not been implemented yet');
   }
 }

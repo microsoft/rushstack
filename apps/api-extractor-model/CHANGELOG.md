@@ -1,6 +1,18 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Wed, 05 Aug 2020 18:27:33 GMT and should not be manually modified.
+This log was last generated on Mon, 17 Aug 2020 04:53:23 GMT and should not be manually modified.
+
+## 7.8.15
+Mon, 17 Aug 2020 04:53:23 GMT
+
+*Version update only*
+
+## 7.8.14
+Wed, 12 Aug 2020 00:10:05 GMT
+
+### Patches
+
+- Updated project to build with Heft
 
 ## 7.8.13
 Wed, 05 Aug 2020 18:27:33 GMT

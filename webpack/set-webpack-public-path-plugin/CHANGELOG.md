@@ -1,6 +1,38 @@
 # Change Log - @rushstack/set-webpack-public-path-plugin
 
-This log was last generated on Wed, 05 Aug 2020 18:27:32 GMT and should not be manually modified.
+This log was last generated on Tue, 18 Aug 2020 03:03:24 GMT and should not be manually modified.
+
+## 2.4.37
+Tue, 18 Aug 2020 03:03:24 GMT
+
+*Version update only*
+
+## 2.4.36
+Mon, 17 Aug 2020 05:31:53 GMT
+
+*Version update only*
+
+## 2.4.35
+Mon, 17 Aug 2020 04:53:23 GMT
+
+*Version update only*
+
+## 2.4.34
+Thu, 13 Aug 2020 09:26:40 GMT
+
+*Version update only*
+
+## 2.4.33
+Thu, 13 Aug 2020 04:57:38 GMT
+
+*Version update only*
+
+## 2.4.32
+Wed, 12 Aug 2020 00:10:05 GMT
+
+### Patches
+
+- Updated project to build with Heft
 
 ## 2.4.31
 Wed, 05 Aug 2020 18:27:32 GMT

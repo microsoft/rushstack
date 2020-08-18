@@ -3,6 +3,8 @@
 
 import { HeftToolsCommandLineParser } from './cli/HeftToolsCommandLineParser';
 
+// Launching via lib/start.js bypasses the version selector.  Use that for debugging Heft.
+
 const parser: HeftToolsCommandLineParser = new HeftToolsCommandLineParser();
 
 parser

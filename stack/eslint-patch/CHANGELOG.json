@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.0.3",
+      "tag": "@rushstack/eslint-patch_v1.0.3",
+      "date": "Wed, 12 Aug 2020 00:10:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated project to build with Heft"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.2",
       "tag": "@rushstack/eslint-patch_v1.0.2",
       "date": "Wed, 24 Jun 2020 09:50:48 GMT",

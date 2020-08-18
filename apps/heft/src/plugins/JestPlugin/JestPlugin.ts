@@ -12,6 +12,8 @@ import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { ITestStageContext } from '../../stages/TestStage';
 import { ICleanStageContext } from '../../stages/CleanStage';
 import { JestTypeScriptDataFile, IJestTypeScriptDataFileJson } from './JestTypeScriptDataFile';
+import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
+import { Config } from '@jest/types';
 
 const PLUGIN_NAME: string = 'JestPlugin';
 const JEST_CONFIGURATION_LOCATION: string = './config/jest.config.json';
@@ -38,35 +40,63 @@ export class JestPlugin implements IHeftPlugin {
     heftConfiguration: HeftConfiguration,
     test: ITestStageContext
   ): Promise<void> {
+    const jestLogger: ScopedLogger = heftSession.requestScopedLogger('jest');
     const buildFolder: string = heftConfiguration.buildFolder;
 
-    this._validateJestTypeScriptDataFile(buildFolder);
+    // In watch mode, Jest starts up in parallel with the compiler, so there's no
+    // guarantee that the output files would have been written yet.
+    if (!test.properties.watchMode) {
+      this._validateJestTypeScriptDataFile(buildFolder);
+    }
 
-    const reporterOptions: IHeftJestReporterOptions = { heftConfiguration };
-    const { results: jestResults } = await runCLI(
-      {
-        watch: test.properties.watchMode,
+    const jestArgv: Config.Argv = {
+      watch: test.properties.watchMode,
 
-        // In debug mode, avoid forking separate processes that are difficult to debug
-        runInBand: heftSession.debugMode,
-        debug: heftSession.debugMode,
+      // In debug mode, avoid forking separate processes that are difficult to debug
+      runInBand: heftSession.debugMode,
+      debug: heftSession.debugMode,
 
-        config: JEST_CONFIGURATION_LOCATION,
-        reporters: [[path.resolve(__dirname, 'HeftJestReporter.js'), reporterOptions]],
-        cacheDirectory: this._getJestCacheFolder(heftConfiguration),
-        updateSnapshot: !test.properties.production,
+      config: JEST_CONFIGURATION_LOCATION,
+      cacheDirectory: this._getJestCacheFolder(heftConfiguration),
+      updateSnapshot: !test.properties.production,
 
-        listTests: false,
-        rootDir: buildFolder,
-        $0: process.argv0,
-        _: []
-      },
-      [buildFolder]
-    );
+      listTests: false,
+      rootDir: buildFolder,
+
+      silent: test.properties.silent,
+      testNamePattern: test.properties.testNamePattern,
+      testPathPattern: test.properties.testPathPattern ? [...test.properties.testPathPattern] : undefined,
+      testTimeout: test.properties.testTimeout,
+
+      $0: process.argv0,
+      _: []
+    };
+
+    if (!test.properties.debugHeftReporter) {
+      const reporterOptions: IHeftJestReporterOptions = {
+        heftConfiguration,
+        debugMode: heftSession.debugMode
+      };
+      jestArgv.reporters = [[path.resolve(__dirname, 'HeftJestReporter.js'), reporterOptions]];
+    } else {
+      jestLogger.emitWarning(
+        new Error('The "--debug-heft-reporter" parameter was specified; disabling HeftJestReporter')
+      );
+    }
+
+    if (test.properties.findRelatedTests && test.properties.findRelatedTests.length > 0) {
+      jestArgv.findRelatedTests = true;
+      // This is Jest's weird way of representing space-delimited CLI parameters
+      jestArgv._ = [...test.properties.findRelatedTests];
+    }
+
+    const { results: jestResults } = await runCLI(jestArgv, [buildFolder]);
 
     if (jestResults.numFailedTests > 0) {
-      throw new Error(
-        `${jestResults.numFailedTests} Jest test${jestResults.numFailedTests > 1 ? 's' : ''} failed`
+      jestLogger.emitError(
+        new Error(
+          `${jestResults.numFailedTests} Jest test${jestResults.numFailedTests > 1 ? 's' : ''} failed`
+        )
       );
     }
   }

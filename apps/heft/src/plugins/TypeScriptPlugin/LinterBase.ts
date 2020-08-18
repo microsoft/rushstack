@@ -2,19 +2,19 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Terminal, ITerminalProvider, FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { Terminal, FileSystem, JsonFile } from '@rushstack/node-core-library';
 
-import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
 import {
   IExtendedSourceFile,
   IExtendedProgram,
   IExtendedTypeScript
 } from './internalTypings/TypeScriptInternals';
 import { PerformanceMeasurer } from '../../utilities/Performance';
+import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 
 export interface ILinterBaseOptions {
   ts: IExtendedTypeScript;
-  terminalProvider: ITerminalProvider;
+  scopedLogger: IScopedLogger;
   terminalPrefixLabel: string | undefined;
   buildFolderPath: string;
   buildCacheFolderPath: string;
@@ -60,6 +60,7 @@ interface ITsLintCacheData {
 }
 
 export abstract class LinterBase<TLintResult> {
+  protected readonly _scopedLogger: IScopedLogger;
   protected readonly _terminal: Terminal;
   protected readonly _buildFolderPath: string;
   protected readonly _buildCacheFolderPath: string;
@@ -70,12 +71,9 @@ export abstract class LinterBase<TLintResult> {
   private readonly _linterName: string;
 
   public constructor(linterName: string, options: ILinterBaseOptions) {
-    const proxyTerminalProvider: PrefixProxyTerminalProvider = new PrefixProxyTerminalProvider(
-      options.terminalProvider,
-      options.terminalPrefixLabel ? `[${linterName} (${options.terminalPrefixLabel})] ` : `[${linterName}] `
-    );
+    this._scopedLogger = options.scopedLogger;
+    this._terminal = this._scopedLogger.terminal;
     this._ts = options.ts;
-    this._terminal = new Terminal(proxyTerminalProvider);
     this._buildFolderPath = options.buildFolderPath;
     this._buildCacheFolderPath = options.buildCacheFolderPath;
     this._linterConfigFilePath = options.linterConfigFilePath;

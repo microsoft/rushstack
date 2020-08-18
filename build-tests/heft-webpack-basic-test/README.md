@@ -1,7 +1,8 @@
 # heft-webpack-basic-test
 
 This project folder is one of the **build-tests** for the [Heft](https://www.npmjs.com/package/@rushstack/heft)
-build system.  It illustrates a minimal realistic small project that targets a web browser runtime.
+build system.  It illustrates a realistic small project that targets a web browser runtime and renders using
+the [React](https://reactjs.org/) library.
 
 The following tasks are configured:
 - [TypeScript](https://rushstack.io/pages/heft_tasks/typescript/) compiler

@@ -61,7 +61,7 @@ export class HeftConfiguration {
   private _buildFolder: string;
   private _projectHeftDataFolder: string | undefined;
   private _buildCacheFolder: string | undefined;
-  private _terminal: Terminal;
+  private _globalTerminal: Terminal;
   private _terminalProvider: ITerminalProvider;
 
   private _compilerPackage: ICompilerPackage | undefined;
@@ -102,8 +102,8 @@ export class HeftConfiguration {
   /**
    * Terminal instance to facilitate logging.
    */
-  public get terminal(): Terminal {
-    return this._terminal;
+  public get globalTerminal(): Terminal {
+    return this._globalTerminal;
   }
 
   /**
@@ -135,7 +135,7 @@ export class HeftConfiguration {
     if (!this._hasCompilerPackageBeenAccessed) {
       const resolution: ITaskPackageResolution | undefined = TaskPackageResolver.resolveTaskPackages(
         this._buildFolder,
-        this.terminal
+        this.globalTerminal
       );
 
       this._hasCompilerPackageBeenAccessed = true;
@@ -171,7 +171,7 @@ export class HeftConfiguration {
     }
 
     configuration._terminalProvider = options.terminalProvider;
-    configuration._terminal = new Terminal(options.terminalProvider);
+    configuration._globalTerminal = new Terminal(options.terminalProvider);
 
     return configuration;
   }

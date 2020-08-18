@@ -8,7 +8,7 @@ import * as TEslint from 'eslint';
 
 import { LinterBase, ILinterBaseOptions, ITiming } from './LinterBase';
 import { IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
-import { IColorableSequence, Colors } from '@rushstack/node-core-library';
+import { FileError } from '../../pluginFramework/logging/FileError';
 
 interface IEslintOptions extends ILinterBaseOptions {
   eslintPackagePath: string;
@@ -63,7 +63,9 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   }
 
   public reportFailures(): void {
-    const eslintFailureLogMessages: (string | IColorableSequence)[][] = [];
+    let eslintFailureCount: number = 0;
+    const errors: Error[] = [];
+    const warnings: Error[] = [];
 
     for (const eslintFileResult of this._lintResult) {
       const buildFolderRelativeFilePath: string = path.relative(
@@ -71,26 +73,43 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
         eslintFileResult.filePath
       );
       for (const message of eslintFileResult.messages) {
+        eslintFailureCount++;
         // https://eslint.org/docs/developer-guide/nodejs-api#◆-lintmessage-type
-        const severity: string = message.severity === EslintMessageSeverity.warning ? 'WARNING' : 'ERROR';
-        eslintFailureLogMessages.push([
-          '  ',
-          Colors.yellow(`${severity}: ${buildFolderRelativeFilePath}:${message.line}:${message.column}`),
-          ' - ',
-          Colors.yellow(message.ruleId ? `(${message.ruleId}) ${message.message}` : message.message)
-        ]);
+        const formattedMessage: string = message.ruleId
+          ? `(${message.ruleId}) ${message.message}`
+          : message.message;
+        const errorObject: FileError = new FileError(
+          formattedMessage,
+          buildFolderRelativeFilePath,
+          message.line,
+          message.column
+        );
+        switch (message.severity) {
+          case EslintMessageSeverity.error: {
+            errors.push(errorObject);
+            break;
+          }
+
+          case EslintMessageSeverity.warning: {
+            warnings.push(errorObject);
+            break;
+          }
+        }
       }
     }
 
-    if (eslintFailureLogMessages.length > 0) {
-      this._terminal.writeWarningLine(
-        `Encountered ${eslintFailureLogMessages.length} ESLint error${
-          eslintFailureLogMessages.length > 1 ? 's' : ''
-        }:`
+    if (eslintFailureCount > 0) {
+      this._terminal.writeLine(
+        `Encountered ${eslintFailureCount} ESLint issue${eslintFailureCount > 1 ? 's' : ''}:`
       );
-      for (const eslintFailureLogMessage of eslintFailureLogMessages) {
-        this._terminal.writeWarningLine(...eslintFailureLogMessage);
-      }
+    }
+
+    for (const error of errors) {
+      this._scopedLogger.emitError(error);
+    }
+
+    for (const warning of warnings) {
+      this._scopedLogger.emitWarning(warning);
     }
   }
 

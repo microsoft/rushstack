@@ -14,6 +14,13 @@ export const enum AlreadyExistsBehavior {
     Overwrite = "overwrite"
 }
 
+// @public
+export class AlreadyReportedError extends Error {
+    // (undocumented)
+    static [Symbol.hasInstance](instance: object): boolean;
+    constructor();
+}
+
 // @beta
 export class Colors {
     // (undocumented)
@@ -649,6 +656,12 @@ export enum TextAttribute {
     // (undocumented)
     Underline = 2
 }
+
+// @public
+export class TypeUuid {
+    static isInstanceOf(targetObject: unknown, typeUuid: string): boolean;
+    static registerClass(targetClass: any, typeUuid: string): void;
+    }
 
 
 ```

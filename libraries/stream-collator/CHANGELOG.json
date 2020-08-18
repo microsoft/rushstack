@@ -2,6 +2,95 @@
   "name": "@rushstack/stream-collator",
   "entries": [
     {
+      "version": "3.2.39",
+      "tag": "@rushstack/stream-collator_v3.2.39",
+      "date": "Tue, 18 Aug 2020 03:03:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.6.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.38",
+      "tag": "@rushstack/stream-collator_v3.2.38",
+      "date": "Mon, 17 Aug 2020 05:31:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.37",
+      "tag": "@rushstack/stream-collator_v3.2.37",
+      "date": "Mon, 17 Aug 2020 04:53:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.36",
+      "tag": "@rushstack/stream-collator_v3.2.36",
+      "date": "Thu, 13 Aug 2020 09:26:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.4.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.35",
+      "tag": "@rushstack/stream-collator_v3.2.35",
+      "date": "Thu, 13 Aug 2020 04:57:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.4.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.34",
+      "tag": "@rushstack/stream-collator_v3.2.34",
+      "date": "Wed, 12 Aug 2020 00:10:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated project to build with Heft"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.0.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.4.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.33",
       "tag": "@rushstack/stream-collator_v3.2.33",
       "date": "Wed, 05 Aug 2020 18:27:32 GMT",

@@ -9,9 +9,14 @@ import HttpsProxyAgent = require('https-proxy-agent');
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import { FileSystem, JsonFile, PosixModeBits, NewlineKind } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  JsonFile,
+  PosixModeBits,
+  NewlineKind,
+  AlreadyReportedError
+} from '@rushstack/node-core-library';
 
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
 import { AsyncRecycler } from '../../utilities/AsyncRecycler';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';

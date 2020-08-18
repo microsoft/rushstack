@@ -12,7 +12,7 @@ import {
   CommandLineStringParameter,
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
-import { FileSystem, Path } from '@rushstack/node-core-library';
+import { FileSystem, Path, AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { IChangeFile, IChangeInfo, ChangeType } from '../../api/ChangeManagement';
@@ -27,7 +27,6 @@ import {
   LockStepVersionPolicy,
   VersionPolicyDefinitionName
 } from '../../api/VersionPolicy';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 export class ChangeAction extends BaseRushAction {
   private _verifyParameter: CommandLineFlagParameter;

@@ -28,7 +28,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "heft-node-basic-test build",
+      "name": "node-basic build",
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/heft-node-basic-test/",
       "args": ["--debug", "build", "--clean"],
@@ -38,7 +38,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "heft-node-basic-test test",
+      "name": "node-basic test",
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/heft-node-basic-test/",
       "args": ["--debug", "test", "--clean"],
@@ -48,7 +48,17 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "heft-webpack-basic-test build",
+      "name": "node-basic test --watch",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-node-basic-test/",
+      "args": ["--debug", "test", "--watch", "--clean"],
+      "console": "integratedTerminal",
+      "sourceMaps": false
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "webpack-basic build",
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/heft-webpack-basic-test/",
       "args": ["--debug", "build", "--clean"],
@@ -58,10 +68,20 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "heft-webpack-basic-test test",
+      "name": "webpack-basic test",
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/heft-webpack-basic-test/",
       "args": ["--debug", "test", "--clean"],
+      "console": "integratedTerminal",
+      "sourceMaps": false
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "webpack-basic start",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-webpack-basic-test/",
+      "args": ["--debug", "start", "--clean"],
       "console": "integratedTerminal",
       "sourceMaps": false
     }
