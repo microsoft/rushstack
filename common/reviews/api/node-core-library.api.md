@@ -57,6 +57,7 @@ export class Colors {
     static magenta(text: string | IColorableSequence): IColorableSequence;
     // (undocumented)
     static magentaBackground(text: string | IColorableSequence): IColorableSequence;
+    static normalizeColorTokensForTest(text: string): string;
     // @internal
     static _normalizeStringOrColorableSequence(value: string | IColorableSequence): IColorableSequence;
     // (undocumented)
@@ -587,10 +588,10 @@ export class Sort {
 export class StringBufferTerminalProvider implements ITerminalProvider {
     constructor(supportsColor?: boolean);
     readonly eolCharacter: string;
-    getErrorOutput(): string;
-    getOutput(): string;
-    getVerbose(): string;
-    getWarningOutput(): string;
+    getErrorOutput(normalizeColorCodes?: boolean): string;
+    getOutput(normalizeColorCodes?: boolean): string;
+    getVerbose(normalizeColorCodes?: boolean): string;
+    getWarningOutput(normalizeColorCodes?: boolean): string;
     readonly supportsColor: boolean;
     write(data: string, severity: TerminalProviderSeverity): void;
 }

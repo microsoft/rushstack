@@ -69,35 +69,41 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
   /**
    * Get everything that has been written at log-level severity.
    */
-  public getOutput(): string {
-    return this._normalizeOutput(this._standardBuffer.toString());
+  public getOutput(normalizeColorCodes: boolean = true): string {
+    return this._normalizeOutput(this._standardBuffer.toString(), normalizeColorCodes);
   }
 
   /**
    * Get everything that has been written at verbose-level severity.
    */
-  public getVerbose(): string {
-    return this._normalizeOutput(this._verboseBuffer.toString());
+  public getVerbose(normalizeColorCodes: boolean = true): string {
+    return this._normalizeOutput(this._verboseBuffer.toString(), normalizeColorCodes);
   }
 
   /**
    * Get everything that has been written at error-level severity.
    */
-  public getErrorOutput(): string {
-    return this._normalizeOutput(this._errorBuffer.toString());
+  public getErrorOutput(normalizeColorCodes: boolean = true): string {
+    return this._normalizeOutput(this._errorBuffer.toString(), normalizeColorCodes);
   }
 
   /**
    * Get everything that has been written at warning-level severity.
    */
-  public getWarningOutput(): string {
-    return this._normalizeOutput(this._warningBuffer.toString());
+  public getWarningOutput(normalizeColorCodes: boolean = true): string {
+    return this._normalizeOutput(this._warningBuffer.toString(), normalizeColorCodes);
   }
 
-  private _normalizeOutput(s: string): string {
-    return Text.convertToLf(s)
-      .replace(/\u001b/g, '[x]') // eslint-disable-line no-control-regex
-      .replace(/\n/g, '[-n-]')
-      .replace(/\r/g, '[-r-]');
+  private _normalizeOutput(s: string, normalizeColorCodes: boolean = true): string {
+    s = Text.convertToLf(s);
+
+    if (normalizeColorCodes) {
+      return s
+        .replace(/\u001b/g, '[x]') // eslint-disable-line no-control-regex
+        .replace(/\n/g, '[-n-]')
+        .replace(/\r/g, '[-r-]');
+    } else {
+      return s;
+    }
   }
 }
