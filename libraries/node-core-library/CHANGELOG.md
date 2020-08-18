@@ -1,6 +1,18 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Mon, 17 Aug 2020 04:53:23 GMT and should not be manually modified.
+This log was last generated on Tue, 18 Aug 2020 23:59:42 GMT and should not be manually modified.
+
+## 3.28.0
+Tue, 18 Aug 2020 23:59:42 GMT
+
+### Minor changes
+
+- Add a utility function for making console color codes human-readable.
+- Create a lighter weight function to get own package version.
+
+### Patches
+
+- Lazy-import some packages to improve spin up times.
 
 ## 3.27.0
 Mon, 17 Aug 2020 04:53:23 GMT
