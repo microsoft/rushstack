@@ -3,44 +3,32 @@
 
 import { Colors } from '@rushstack/node-core-library';
 import * as colorsPackage from 'colors';
-import * as path from 'path';
 
-import { RushCommandLineParser } from '../RushCommandLineParser';
+import { HeftToolsCommandLineParser } from '../HeftToolsCommandLineParser';
 
 describe('CommandLineHelp', () => {
-  let oldCwd: string | undefined;
   let colorsEnabled: boolean;
 
-  let parser: RushCommandLineParser;
+  let parser: HeftToolsCommandLineParser;
 
   beforeEach(() => {
-    // ts-command-line calls process.exit() which interferes with Jest
-    jest.spyOn(process, 'exit').mockImplementation((code?: number) => {
-      throw new Error(`Test code called process.exit(${code})`);
-    });
-
-    oldCwd = process.cwd();
-    const localCwd: string = path.join(__dirname, 'repo');
-
-    process.chdir(localCwd);
-
     colorsEnabled = colorsPackage.enabled;
     if (!colorsEnabled) {
       colorsPackage.enable();
     }
 
+    // ts-command-line calls process.exit() which interferes with Jest
+    jest.spyOn(process, 'exit').mockImplementation((code?: number) => {
+      throw new Error(`Test code called process.exit(${code})`);
+    });
+
     // This call may terminate the entire test run because it invokes process.exit()
     // if it encounters errors.
     // TODO Remove the calls to process.exit() or override them for testing.
-    parser = new RushCommandLineParser();
-    parser.execute().catch(console.error);
+    parser = new HeftToolsCommandLineParser();
   });
 
   afterEach(() => {
-    if (oldCwd) {
-      process.chdir(oldCwd);
-    }
-
     if (!colorsEnabled) {
       colorsPackage.disable();
     }

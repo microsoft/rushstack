@@ -45,6 +45,43 @@ export enum TextAttribute {
   Hidden
 }
 
+export enum ConsoleColorCodes {
+  BlackForeground = 30,
+  RedForeground = 31,
+  GreenForeground = 32,
+  YellowForeground = 33,
+  BlueForeground = 34,
+  MagentaForeground = 35,
+  CyanForeground = 36,
+  WhiteForeground = 37,
+  GrayForeground = 90,
+  DefaultForeground = 39,
+
+  BlackBackground = 40,
+  RedBackground = 41,
+  GreenBackground = 42,
+  YellowBackground = 43,
+  BlueBackground = 44,
+  MagentaBackground = 45,
+  CyanBackground = 46,
+  WhiteBackground = 47,
+  GrayBackground = 100,
+  DefaultBackground = 49,
+
+  Bold = 1,
+  BoldOff = 21,
+  Dim = 2,
+  NormalColorOrIntensity = 22,
+  Underline = 4,
+  UnderlineOff = 24,
+  Blink = 5,
+  BlinkOff = 25,
+  InvertColor = 7,
+  InvertColorOFf = 27,
+  Hidden = 8,
+  HiddenOff = 28
+}
+
 /**
  * The static functions on this class are used to produce colored text
  * for use with the node-core-library terminal.
@@ -203,6 +240,24 @@ export class Colors {
 
   public static hidden(text: string | IColorableSequence): IColorableSequence {
     return Colors._applyTextAttribute(text, TextAttribute.Hidden);
+  }
+
+  /**
+   * This utility function can be used to normalize color codes into human-readable
+   * tokens. This is useful for producing more readable test snapshots.
+   *
+   * @beta
+   */
+  public static normalizeColorTokensForTest(text: string): string {
+    // eslint-disable-next-line no-control-regex
+    return text.replace(/\u001b\[(\d+)m/gu, (capture: string, code: number) => {
+      const colorCode: string | undefined = ConsoleColorCodes[code];
+      if (!colorCode) {
+        return `[UnknownColorCode ${code}]`;
+      } else {
+        return `[${colorCode}]`;
+      }
+    });
   }
 
   /**

@@ -57,6 +57,7 @@ export class Colors {
     static magenta(text: string | IColorableSequence): IColorableSequence;
     // (undocumented)
     static magentaBackground(text: string | IColorableSequence): IColorableSequence;
+    static normalizeColorTokensForTest(text: string): string;
     // @internal
     static _normalizeStringOrColorableSequence(value: string | IColorableSequence): IColorableSequence;
     // (undocumented)
@@ -419,6 +420,11 @@ export interface IProtectableMapParameters<K, V> {
     onSet?: (source: ProtectableMap<K, V>, key: K, value: V) => V;
 }
 
+// @beta (undocumented)
+export interface IStringBufferOutputOptions {
+    normalizeSpecialCharacters: boolean;
+}
+
 // @public
 export interface IStringBuilder {
     append(text: string): void;
@@ -592,10 +598,10 @@ export class Sort {
 export class StringBufferTerminalProvider implements ITerminalProvider {
     constructor(supportsColor?: boolean);
     readonly eolCharacter: string;
-    getErrorOutput(): string;
-    getOutput(): string;
-    getVerbose(): string;
-    getWarningOutput(): string;
+    getErrorOutput(options?: IStringBufferOutputOptions): string;
+    getOutput(options?: IStringBufferOutputOptions): string;
+    getVerbose(options?: IStringBufferOutputOptions): string;
+    getWarningOutput(options?: IStringBufferOutputOptions): string;
     readonly supportsColor: boolean;
     write(data: string, severity: TerminalProviderSeverity): void;
 }
