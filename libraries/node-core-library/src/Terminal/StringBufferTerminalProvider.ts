@@ -6,6 +6,19 @@ import { StringBuilder } from '../StringBuilder';
 import { Text } from '../Text';
 
 /**
+ * @beta
+ */
+export interface IStringBufferOutputOptions {
+  /**
+   * If set to true, special characters like \\n, \\r, and the \\u001b character
+   * in color control tokens will get normalized to [-n-], [-r-], and [-x-] respectively
+   *
+   * This option defaults to `true`
+   */
+  normalizeSpecialCharacters: boolean;
+}
+
+/**
  * Terminal provider that stores written data in buffers separated by severity.
  * This terminal provider is designed to be used when code that prints to a terminal
  * is being unit tested.
@@ -69,35 +82,41 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
   /**
    * Get everything that has been written at log-level severity.
    */
-  public getOutput(normalizeColorCodes: boolean = true): string {
-    return this._normalizeOutput(this._standardBuffer.toString(), normalizeColorCodes);
+  public getOutput(options?: IStringBufferOutputOptions): string {
+    return this._normalizeOutput(this._standardBuffer.toString(), options);
   }
 
   /**
    * Get everything that has been written at verbose-level severity.
    */
-  public getVerbose(normalizeColorCodes: boolean = true): string {
-    return this._normalizeOutput(this._verboseBuffer.toString(), normalizeColorCodes);
+  public getVerbose(options?: IStringBufferOutputOptions): string {
+    return this._normalizeOutput(this._verboseBuffer.toString(), options);
   }
 
   /**
    * Get everything that has been written at error-level severity.
    */
-  public getErrorOutput(normalizeColorCodes: boolean = true): string {
-    return this._normalizeOutput(this._errorBuffer.toString(), normalizeColorCodes);
+  public getErrorOutput(options?: IStringBufferOutputOptions): string {
+    return this._normalizeOutput(this._errorBuffer.toString(), options);
   }
 
   /**
    * Get everything that has been written at warning-level severity.
    */
-  public getWarningOutput(normalizeColorCodes: boolean = true): string {
-    return this._normalizeOutput(this._warningBuffer.toString(), normalizeColorCodes);
+  public getWarningOutput(options?: IStringBufferOutputOptions): string {
+    return this._normalizeOutput(this._warningBuffer.toString(), options);
   }
 
-  private _normalizeOutput(s: string, normalizeColorCodes: boolean = true): string {
+  private _normalizeOutput(s: string, options: IStringBufferOutputOptions | undefined): string {
+    options = {
+      normalizeSpecialCharacters: true,
+
+      ...(options || {})
+    };
+
     s = Text.convertToLf(s);
 
-    if (normalizeColorCodes) {
+    if (options.normalizeSpecialCharacters) {
       return s
         .replace(/\u001b/g, '[x]') // eslint-disable-line no-control-regex
         .replace(/\n/g, '[-n-]')

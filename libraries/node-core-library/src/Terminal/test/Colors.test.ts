@@ -28,6 +28,8 @@ describe('Colors', () => {
       terminal.writeLine(...line);
     }
 
-    expect(Colors.normalizeColorTokensForTest(provider.getOutput(false))).toMatchSnapshot();
+    expect(
+      Colors.normalizeColorTokensForTest(provider.getOutput({ normalizeSpecialCharacters: false }))
+    ).toMatchSnapshot();
   });
 });
