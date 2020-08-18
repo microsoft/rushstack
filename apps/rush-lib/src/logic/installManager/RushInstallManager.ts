@@ -77,7 +77,6 @@ export class RushInstallManager extends BaseInstallManager {
     // changes will eventually be picked up during a "rush update".
     if (
       this.rushConfiguration.packageManager === 'pnpm' &&
-      this.rushConfiguration.pnpmOptions &&
       !this.options.allowShrinkwrapUpdates &&
       this.rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall
     ) {
