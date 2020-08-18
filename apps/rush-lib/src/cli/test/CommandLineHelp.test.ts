@@ -2,12 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import { Colors } from '@rushstack/node-core-library';
+import * as colorsPackage from 'colors';
 import * as path from 'path';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
 
 describe('CommandLineHelp', () => {
   let oldCwd: string | undefined;
+  let colorsEnabled: boolean;
 
   let parser: RushCommandLineParser;
 
@@ -22,10 +24,25 @@ describe('CommandLineHelp', () => {
 
     process.chdir(localCwd);
 
+    colorsEnabled = colorsPackage.enabled;
+    if (!colorsEnabled) {
+      colorsPackage.enable();
+    }
+
     // This call may terminate the entire test run because it invokes process.exit()
     // if it encounters errors.
     // TODO Remove the calls to process.exit() or override them for testing.
     parser = new RushCommandLineParser();
+  });
+
+  afterEach(() => {
+    if (oldCwd) {
+      process.chdir(oldCwd);
+    }
+
+    if (!colorsEnabled) {
+      colorsPackage.disable();
+    }
   });
 
   it('prints the global help', () => {
@@ -37,12 +54,6 @@ describe('CommandLineHelp', () => {
     for (const action of parser.actions) {
       const helpText: string = Colors.normalizeColorTokensForTest(action.renderHelpText());
       expect(helpText).toMatchSnapshot(action.actionName);
-    }
-  });
-
-  afterEach(() => {
-    if (oldCwd) {
-      process.chdir(oldCwd);
     }
   });
 });

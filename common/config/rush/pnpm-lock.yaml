@@ -124,6 +124,7 @@ importers:
       '@types/resolve': 1.17.1
       '@types/semver': 7.3.2
       '@types/webpack-dev-server': 3.11.0
+      colors: 1.2.5
     specifiers:
       '@jest/core': ~25.4.0
       '@jest/reporters': ~25.4.0
@@ -144,6 +145,7 @@ importers:
       '@types/webpack': 4.39.8
       '@types/webpack-dev-server': 3.11.0
       chokidar: ~3.4.0
+      colors: ~1.2.1
       glob: ~7.0.5
       glob-escape: ~0.0.2
       jest-snapshot: ~25.4.0
@@ -14073,3 +14075,4 @@ packages:
       commander: 2.20.3
     resolution:
       integrity: sha512-DUOKC/IhbkdLKKiV89gw9DUauTV8U/8yJl1sjf6MtDmzevLKOF2duNJ495S3MFVjqZarr+qNGCPbkg4mu4PpLw==
+registry: ''
