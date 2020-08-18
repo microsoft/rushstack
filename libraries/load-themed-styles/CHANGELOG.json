@@ -2,6 +2,18 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.10.72",
+      "tag": "@microsoft/load-themed-styles_v1.10.72",
+      "date": "Tue, 18 Aug 2020 03:03:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.6.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.10.71",
       "tag": "@microsoft/load-themed-styles_v1.10.71",
       "date": "Mon, 17 Aug 2020 05:31:53 GMT",
