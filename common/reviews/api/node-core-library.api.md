@@ -340,9 +340,8 @@ export interface IJsonSchemaValidateOptions {
     customErrorHeader?: string;
 }
 
-// @public (undocumented)
+// @public
 export class Import {
-    // (undocumented)
     static lazy(moduleName: string, require: (id: string) => unknown): any;
 }
 
