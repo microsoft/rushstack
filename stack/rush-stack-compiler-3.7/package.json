@@ -32,7 +32,7 @@
   "devDependencies": {
     "@microsoft/rush-stack-compiler-shared": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "0.4.3",
+    "@rushstack/heft": "0.5.1",
     "@rushstack/pre-compile-hardlink-or-copy-plugin": "workspace:*"
   }
 }
