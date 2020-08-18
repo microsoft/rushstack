@@ -13,7 +13,8 @@ import {
   HeftConfiguration,
   HeftSession,
   IBuildStageContext,
-  IPreCompileSubstage
+  IPreCompileSubstage,
+  ScopedLogger
 } from '@rushstack/heft';
 import { JsonSchema, FileSystem, FileSystemStats } from '@rushstack/node-core-library';
 
@@ -54,7 +55,7 @@ export class PreCompileHardlinkOrCopyPlugin implements IHeftPlugin<IPreCompileHa
       heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
         build.hooks.preCompile.tap(PLUGIN_NAME, (preCompile: IPreCompileSubstage) => {
           preCompile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-            await this._runLinkOrCopy(heftConfiguration, options);
+            await this._runLinkOrCopy(heftSession, heftConfiguration, options);
           });
         });
       });
@@ -62,6 +63,7 @@ export class PreCompileHardlinkOrCopyPlugin implements IHeftPlugin<IPreCompileHa
   }
 
   private async _runLinkOrCopy(
+    heftSession: HeftSession,
     heftConfiguration: HeftConfiguration,
     options: IPreCompileHardlinkOrCopyPluginOptions
   ): Promise<void> {
@@ -71,6 +73,8 @@ export class PreCompileHardlinkOrCopyPlugin implements IHeftPlugin<IPreCompileHa
       throw new Error(`Invalid options object: ${e}`);
     }
 
+    const logger: ScopedLogger = heftSession.requestScopedLogger(`pre-compile-copy (${options.newLinkPath})`);
+
     const resolvedLinkPath: string = path.resolve(heftConfiguration.buildFolder, options.newLinkPath);
     const resolvedTargetPath: string = path.resolve(heftConfiguration.buildFolder, options.linkTarget);
     const linkCount: number = await this._createLinksOrCopiesRecursive(
@@ -79,9 +83,9 @@ export class PreCompileHardlinkOrCopyPlugin implements IHeftPlugin<IPreCompileHa
       options.copyInsteadOfHardlink
     );
     if (options.copyInsteadOfHardlink) {
-      heftConfiguration.globalTerminal.writeLine(`Copied ${linkCount} files`);
+      logger.terminal.writeLine(`Copied ${linkCount} files`);
     } else {
-      heftConfiguration.globalTerminal.writeLine(`Linked ${linkCount} files`);
+      logger.terminal.writeLine(`Linked ${linkCount} files`);
     }
   }
 
