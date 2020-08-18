@@ -101,28 +101,6 @@ export class PackageJsonLookup {
   }
 
   /**
-   * Gets the version of the package.json of the currently executing script.
-   *
-   * @param dirnameOfCaller - The search for package.json will start at the this directory,
-   * and then move upwards. Use the __dirname macro to get the path to the directory of the
-   * currently executing source file.
-   */
-  public static getOwnPackageJsonVersion(dirnameOfCaller: string): string {
-    let parent: string = path.dirname(dirnameOfCaller);
-    let depth: number = 10;
-    const minDepth: number = 1;
-    do {
-      try {
-        return require(path.resolve(dirnameOfCaller, 'package.json')).version;
-      } catch {
-        dirnameOfCaller = parent;
-        parent = path.dirname(dirnameOfCaller);
-      }
-    } while (parent !== dirnameOfCaller && depth-- >= minDepth);
-    throw new Error("Couldn't get path");
-  }
-
-  /**
    * Clears the internal file cache.
    * @remarks
    * Call this method if changes have been made to the package.json files on disk.

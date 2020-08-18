@@ -93,7 +93,7 @@ export class Rush {
    */
   public static get version(): string {
     if (!this._version) {
-      this._version = PackageJsonLookup.getOwnPackageJsonVersion(__dirname);
+      this._version = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
     }
 
     return this._version!;
