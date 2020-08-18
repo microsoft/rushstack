@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix issues with frozen lockfile installs when new local projects are referenced",
+      "comment": "Fix issues where installs could fail after running 'rush version' while the 'usePnpmFrozenLockfileForRushInstall' experiment is enabled. See PR #2116 for more details.",
       "type": "none"
     }
   ],
