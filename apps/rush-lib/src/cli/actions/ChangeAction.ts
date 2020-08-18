@@ -11,7 +11,7 @@ import {
   CommandLineStringParameter,
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
-import { FileSystem, Path, Import } from '@rushstack/node-core-library';
+import { FileSystem, Path, AlreadyReportedError, Import } from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { IChangeFile, IChangeInfo, ChangeType } from '../../api/ChangeManagement';
@@ -26,7 +26,6 @@ import {
   LockStepVersionPolicy,
   VersionPolicyDefinitionName
 } from '../../api/VersionPolicy';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 // TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
 import * as inquirerTypes from 'inquirer';

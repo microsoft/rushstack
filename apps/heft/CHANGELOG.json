@@ -2,6 +2,79 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.6.0",
+      "tag": "@rushstack/heft_v0.6.0",
+      "date": "Tue, 18 Aug 2020 03:03:23 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a \"version selector\" feature so that if a globally installed Heft binary is invoked, it will try to load the project's locally installed version of Heft"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.1",
+      "tag": "@rushstack/heft_v0.5.1",
+      "date": "Mon, 17 Aug 2020 05:31:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a broken dependency"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.0",
+      "tag": "@rushstack/heft_v0.5.0",
+      "date": "Mon, 17 Aug 2020 04:53:23 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Normalize the way file paths are printed in errors and warnings."
+          },
+          {
+            "comment": "Ensure build steps that depend on emitted TS output aren't triggered until TS has written output to disk."
+          },
+          {
+            "comment": "Fix an issue where Heft could complete with errors but not return a nonzero process exit code"
+          },
+          {
+            "comment": "Reclassify TypeScript messages such as \"X is declared but never used\" to be reported as warnings instead of errors"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Formalize the way errors and warnings are emitted."
+          },
+          {
+            "comment": "Expose some useful Jest CLI parameters as \"heft test\" parameters"
+          },
+          {
+            "comment": "Rename \"--notest\" to \"--no--test\""
+          },
+          {
+            "comment": "Improve \"heft test\" to show console output from tests"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.27.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.4.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.7\" to `0.6.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.7",
       "tag": "@rushstack/heft_v0.4.7",
       "date": "Thu, 13 Aug 2020 09:26:39 GMT",

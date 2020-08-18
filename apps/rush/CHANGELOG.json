@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.32.3",
+      "tag": "@microsoft/rush_v5.32.3",
+      "date": "Tue, 18 Aug 2020 03:48:56 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where install-run.js sometimes assigned the shell PATH incorrectly due to inconsistent character case"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.32.2",
       "tag": "@microsoft/rush_v5.32.2",
       "date": "Fri, 14 Aug 2020 21:03:48 GMT",

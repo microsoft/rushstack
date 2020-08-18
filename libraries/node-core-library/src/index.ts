@@ -7,6 +7,7 @@
  * @packageDocumentation
  */
 
+export { AlreadyReportedError } from './AlreadyReportedError';
 export { FileConstants, FolderConstants } from './Constants';
 export {
   ExecutableStdioStreamMapping,
@@ -70,3 +71,4 @@ export { Colors, IColorableSequence, ColorValue, TextAttribute } from './Termina
 export { ITerminalProvider, TerminalProviderSeverity } from './Terminal/ITerminalProvider';
 export { ConsoleTerminalProvider, IConsoleTerminalProviderOptions } from './Terminal/ConsoleTerminalProvider';
 export { StringBufferTerminalProvider } from './Terminal/StringBufferTerminalProvider';
+export { TypeUuid } from './TypeUuid';

@@ -8,10 +8,7 @@ import {
   ISerializedErrorValue,
   ISubprocessApiCallArgWithValue
 } from './SubprocessCommunication';
-import {
-  SubprocessCommunicationManagerBase,
-  ISubprocessCommunicationManagerBaseOptions
-} from './SubprocessCommunicationManagerBase';
+import { SubprocessCommunicationManagerBase } from './SubprocessCommunicationManagerBase';
 import { TerminalProviderManager } from './TerminalProviderManager';
 import { IScopedLogger, ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { HeftSession } from '../../pluginFramework/HeftSession';
@@ -42,7 +39,7 @@ interface IPromiseResult<TResult> {
   reject: (error: Error) => void;
 }
 
-export interface ISubprocessLoggerManagerOptions extends ISubprocessCommunicationManagerBaseOptions {
+export interface ISubprocessLoggerManagerOptions {
   terminalProviderManager: TerminalProviderManager;
   heftSession?: HeftSession;
 }
@@ -57,7 +54,7 @@ export class SubprocessLoggerManager extends SubprocessCommunicationManagerBase 
   private readonly _requestedLoggers: Map<number, ScopedLogger> = new Map<number, ScopedLogger>();
 
   public constructor(options: ISubprocessLoggerManagerOptions) {
-    super(options);
+    super();
 
     this._heftSession = options.heftSession;
     this._terminalProviderManager = options.terminalProviderManager;
@@ -76,7 +73,7 @@ export class SubprocessLoggerManager extends SubprocessCommunicationManagerBase 
           type: SUBPROCESS_LOGGER_MANAGER_REQUEST_LOGGER_MESSAGE_TYPE,
           loggerName: loggerName
         };
-        this._sendMessageToParentProcess(message);
+        this.sendMessageToParentProcess(message);
       });
     } finally {
       this._loggerNamesAwaitingResponse.delete(loggerName);
@@ -133,7 +130,7 @@ export class SubprocessLoggerManager extends SubprocessCommunicationManagerBase 
           };
         }
 
-        this._sendMessageToSubprocess(responseMessage);
+        this.sendMessageToSubprocess(responseMessage);
 
         break;
       }
@@ -193,7 +190,7 @@ export class SubprocessLoggerManager extends SubprocessCommunicationManagerBase 
             ) as ISubprocessApiCallArgWithValue<ISerializedErrorValue>,
             isError
           };
-          this._sendMessageToParentProcess(message);
+          this.sendMessageToParentProcess(message);
         };
 
         const scopedLogger: IScopedLogger = {

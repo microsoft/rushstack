@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "1.1.0",
+      "tag": "@rushstack/eslint-config_v1.1.0",
+      "date": "Mon, 17 Aug 2020 04:53:23 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Reclassify many lint rules to report ESLint warnings rather than errors"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.4",
       "tag": "@rushstack/eslint-config_v1.0.4",
       "date": "Wed, 12 Aug 2020 00:10:06 GMT",

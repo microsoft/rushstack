@@ -3,9 +3,9 @@
 
 import * as colors from 'colors';
 import * as os from 'os';
+import { AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { Utilities } from '../../utilities/Utilities';
 import { Git } from '../Git';
 

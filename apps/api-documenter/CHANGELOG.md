@@ -1,6 +1,23 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Thu, 13 Aug 2020 09:26:39 GMT and should not be manually modified.
+This log was last generated on Tue, 18 Aug 2020 03:03:23 GMT and should not be manually modified.
+
+## 7.8.28
+Tue, 18 Aug 2020 03:03:23 GMT
+
+*Version update only*
+
+## 7.8.27
+Mon, 17 Aug 2020 05:31:53 GMT
+
+*Version update only*
+
+## 7.8.26
+Mon, 17 Aug 2020 04:53:23 GMT
+
+### Patches
+
+- Fix an issue where an error was sometimes incorrectly reported: "The constructed subclass was not an instance of MarkdownDocumenterFeature"
 
 ## 7.8.25
 Thu, 13 Aug 2020 09:26:39 GMT

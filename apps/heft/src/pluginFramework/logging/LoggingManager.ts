@@ -4,6 +4,7 @@
 import { IHeftPlugin } from '../IHeftPlugin';
 import { ScopedLogger } from './ScopedLogger';
 import { ITerminalProvider } from '@rushstack/node-core-library';
+import { FileErrorFormat, FileError } from './FileError';
 
 export interface ILoggingManagerOptions {
   terminalProvider: ITerminalProvider;
@@ -47,25 +48,40 @@ export class LoggingManager {
     }
   }
 
-  public getErrorStrings(): string[] {
+  public getErrorStrings(fileErrorFormat?: FileErrorFormat): string[] {
     const result: string[] = [];
 
     for (const scopedLogger of this._scopedLoggers.values()) {
-      result.push(...scopedLogger.errors.map((error) => `[${scopedLogger.loggerName}] ${error.message}`));
+      result.push(
+        ...scopedLogger.errors.map(
+          (error) => `[${scopedLogger.loggerName}] ${LoggingManager.getErrorMessage(error, fileErrorFormat)}`
+        )
+      );
     }
 
     return result;
   }
 
-  public getWarningStrings(): string[] {
+  public getWarningStrings(fileErrorFormat?: FileErrorFormat): string[] {
     const result: string[] = [];
 
     for (const scopedLogger of this._scopedLoggers.values()) {
       result.push(
-        ...scopedLogger.warnings.map((warning) => `[${scopedLogger.loggerName}] ${warning.message}`)
+        ...scopedLogger.warnings.map(
+          (warning) =>
+            `[${scopedLogger.loggerName}] ${LoggingManager.getErrorMessage(warning, fileErrorFormat)}`
+        )
       );
     }
 
     return result;
+  }
+
+  public static getErrorMessage(error: Error, fileErrorFormat?: FileErrorFormat): string {
+    if (error instanceof FileError) {
+      return error.toString(fileErrorFormat);
+    } else {
+      return error.message;
+    }
   }
 }

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 12 Aug 2020 00:10:05 GMT and should not be manually modified.
+This log was last generated on Mon, 17 Aug 2020 04:53:23 GMT and should not be manually modified.
+
+## 3.27.0
+Mon, 17 Aug 2020 04:53:23 GMT
+
+### Minor changes
+
+- Add new APIs AlreadyReportedError and TypeUuid
 
 ## 3.26.2
 Wed, 12 Aug 2020 00:10:05 GMT

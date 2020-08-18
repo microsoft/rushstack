@@ -5,12 +5,19 @@ export enum SupportedSerializableArgType {
   Undefined,
   Null,
   Primitive,
-  Error
+  Error,
+  FileError
 }
 
 export interface ISerializedErrorValue {
   errorMessage: string;
   errorStack: string | undefined;
+}
+
+export interface ISerializedFileErrorValue extends ISerializedErrorValue {
+  filePath: string;
+  line: number | undefined;
+  column: number | undefined;
 }
 
 export interface ISubprocessApiCallArg {

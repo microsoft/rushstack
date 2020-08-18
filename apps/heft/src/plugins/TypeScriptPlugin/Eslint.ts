@@ -8,6 +8,7 @@ import * as TEslint from 'eslint';
 
 import { LinterBase, ILinterBaseOptions, ITiming } from './LinterBase';
 import { IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
+import { FileError } from '../../pluginFramework/logging/FileError';
 
 interface IEslintOptions extends ILinterBaseOptions {
   eslintPackagePath: string;
@@ -74,10 +75,15 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
       for (const message of eslintFileResult.messages) {
         eslintFailureCount++;
         // https://eslint.org/docs/developer-guide/nodejs-api#◆-lintmessage-type
-        const formattedMessage: string =
-          `${buildFolderRelativeFilePath}:${message.line}:${message.column} - ` +
-          `${message.ruleId ? `(${message.ruleId}) ${message.message}` : message.message}`;
-        const errorObject: Error = new Error(formattedMessage);
+        const formattedMessage: string = message.ruleId
+          ? `(${message.ruleId}) ${message.message}`
+          : message.message;
+        const errorObject: FileError = new FileError(
+          formattedMessage,
+          buildFolderRelativeFilePath,
+          message.line,
+          message.column
+        );
         switch (message.severity) {
           case EslintMessageSeverity.error: {
             errors.push(errorObject);
@@ -93,7 +99,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     }
 
     if (eslintFailureCount > 0) {
-      this._terminal.writeWarningLine(
+      this._terminal.writeLine(
         `Encountered ${eslintFailureCount} ESLint issue${eslintFailureCount > 1 ? 's' : ''}:`
       );
     }

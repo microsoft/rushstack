@@ -42,3 +42,42 @@ Object {
   },
 }
 `;
+
+exports[`SubprocessRunnerBase serializeForIpcMessage correctly serializes objects 7`] = `
+Object {
+  "type": 4,
+  "value": Object {
+    "column": 29,
+    "errorMessage": "message",
+    "errorStack": "ERROR STACK",
+    "filePath": "path/to/file",
+    "line": 4,
+  },
+}
+`;
+
+exports[`SubprocessRunnerBase serializeForIpcMessage correctly serializes objects 8`] = `
+Object {
+  "type": 4,
+  "value": Object {
+    "column": undefined,
+    "errorMessage": "message",
+    "errorStack": "ERROR STACK",
+    "filePath": "path/to/file",
+    "line": 4,
+  },
+}
+`;
+
+exports[`SubprocessRunnerBase serializeForIpcMessage correctly serializes objects 9`] = `
+Object {
+  "type": 4,
+  "value": Object {
+    "column": undefined,
+    "errorMessage": "message",
+    "errorStack": "ERROR STACK",
+    "filePath": "path/to/file",
+    "line": undefined,
+  },
+}
+`;

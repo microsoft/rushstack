@@ -9,7 +9,8 @@ import {
   Terminal,
   JsonFile,
   IPackageJson,
-  InternalError
+  InternalError,
+  ITerminalProvider
 } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
 import { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.7';
@@ -27,8 +28,11 @@ import { Tslint } from './Tslint';
 import { Eslint } from './Eslint';
 import { ISharedTypeScriptConfiguration } from '../../stages/BuildStage';
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
+import { FileError } from '../../pluginFramework/logging/FileError';
 
 import { EmitFilesPatch, ICachedEmitModuleKind } from './EmitFilesPatch';
+import { HeftSession } from '../../pluginFramework/HeftSession';
+import { FirstEmitCompletedCallbackManager } from './FirstEmitCompletedCallbackManager';
 
 export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfiguration {
   buildFolder: string;
@@ -101,6 +105,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _tslintConfigFilePath: string;
   private _typescriptLogger: IScopedLogger;
   private _typescriptTerminal: Terminal;
+  private _firstEmitCompletedCallbackManager: FirstEmitCompletedCallbackManager;
 
   private __tsCacheFilePath: string;
   private _tsReadJsonCache: Map<string, object> = new Map<string, object>();
@@ -126,6 +131,18 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     }
 
     return this.__tsCacheFilePath;
+  }
+
+  public constructor(
+    parentGlobalTerminalProvider: ITerminalProvider,
+    configuration: ITypeScriptBuilderConfiguration,
+    heftSession: HeftSession,
+    firstEmitCallback: () => void
+  ) {
+    super(parentGlobalTerminalProvider, configuration, heftSession);
+
+    this._firstEmitCompletedCallbackManager = new FirstEmitCompletedCallbackManager(firstEmitCallback);
+    this.registerSubprocessCommunicationManager(this._firstEmitCompletedCallbackManager);
   }
 
   public async invokeAsync(): Promise<void> {
@@ -579,10 +596,12 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     this._typescriptTerminal.writeVerboseLine(
       `${shouldHardlink ? 'Hardlink' : 'Copy from cache'}: ${hardlinkDuration}ms (${hardlinkCount} files)`
     );
+
+    this._firstEmitCompletedCallbackManager.callback();
     //#endregion
 
     if (diagnostics.length > 0) {
-      this._typescriptTerminal.writeErrorLine(
+      this._typescriptTerminal.writeLine(
         `Encountered ${diagnostics.length} TypeScript issue${diagnostics.length > 1 ? 's' : ''}:`
       );
       for (const diagnostic of diagnostics) {
@@ -600,8 +619,9 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   }
 
   private _printDiagnosticMessage(ts: ExtendedTypeScript, diagnostic: TTypescript.Diagnostic): void {
-    let diagnosticMessage: string;
     // Code taken from reference example
+    let diagnosticMessage: string;
+    let errorObject: Error;
     if (diagnostic.file) {
       const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!);
       const message: string = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
@@ -609,16 +629,18 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         this._configuration.buildFolder,
         diagnostic.file.fileName
       );
-      diagnosticMessage =
-        `${buildFolderRelativeFilename}:${line + 1}:${character + 1} - ` +
-        `(TS${diagnostic.code}) ${message}`;
+      const formattedMessage: string = `(TS${diagnostic.code}) ${message}`;
+      errorObject = new FileError(formattedMessage, buildFolderRelativeFilename, line + 1, character + 1);
+      diagnosticMessage = errorObject.toString();
     } else {
       diagnosticMessage = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+      errorObject = new Error(diagnosticMessage);
     }
 
-    const errorObject: Error = new Error(diagnosticMessage);
-
-    const adjustedCategory: TTypescript.DiagnosticCategory = this._getAdjustedDiagnosticCategory(diagnostic);
+    const adjustedCategory: TTypescript.DiagnosticCategory = this._getAdjustedDiagnosticCategory(
+      diagnostic,
+      ts
+    );
 
     switch (adjustedCategory) {
       case ts.DiagnosticCategory.Error: {
@@ -638,7 +660,10 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     }
   }
 
-  private _getAdjustedDiagnosticCategory(diagnostic: TTypescript.Diagnostic): TTypescript.DiagnosticCategory {
+  private _getAdjustedDiagnosticCategory(
+    diagnostic: TTypescript.Diagnostic,
+    ts: ExtendedTypeScript
+  ): TTypescript.DiagnosticCategory {
     // Workaround for https://github.com/microsoft/TypeScript/issues/40058
     // The compiler reports a hard error for issues such as this:
     //
@@ -646,8 +671,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     //
     // These should properly be treated as warnings, because they are purely cosmetic issues.
     // TODO: Maybe heft should provide a config file for managing DiagnosticCategory mappings.
-    if (diagnostic.reportsUnnecessary && diagnostic.category === TTypescript.DiagnosticCategory.Error) {
-      return TTypescript.DiagnosticCategory.Warning;
+    if (diagnostic.reportsUnnecessary && diagnostic.category === ts.DiagnosticCategory.Error) {
+      return ts.DiagnosticCategory.Warning;
     }
 
     return diagnostic.category;
@@ -863,6 +888,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     ts: ExtendedTypeScript,
     tsconfig: TTypescript.ParsedCommandLine
   ): TWatchCompilerHost {
+    let hasAlreadyReportedFirstEmit: boolean = false;
     return ts.createWatchCompilerHost(
       tsconfig.fileNames,
       tsconfig.options,
@@ -895,7 +921,18 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         );
       },
       (diagnostic: TTypescript.Diagnostic) => this._printDiagnosticMessage(ts, diagnostic),
-      (diagnostic: TTypescript.Diagnostic) => this._printDiagnosticMessage(ts, diagnostic),
+      (diagnostic: TTypescript.Diagnostic) => {
+        this._printDiagnosticMessage(ts, diagnostic);
+
+        if (
+          !hasAlreadyReportedFirstEmit &&
+          (diagnostic.code === ts.Diagnostics.Found_0_errors_Watching_for_file_changes.code ||
+            diagnostic.code === ts.Diagnostics.Found_1_error_Watching_for_file_changes.code)
+        ) {
+          this._firstEmitCompletedCallbackManager.callback();
+          hasAlreadyReportedFirstEmit = true;
+        }
+      },
       tsconfig.projectReferences
     );
   }

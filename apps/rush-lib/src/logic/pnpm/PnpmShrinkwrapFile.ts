@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 import * as crypto from 'crypto';
 import * as colors from 'colors';
-import { FileSystem, Import } from '@rushstack/node-core-library';
+import { FileSystem, AlreadyReportedError, Import } from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
@@ -15,7 +15,6 @@ import {
   PnpmOptionsConfiguration
 } from '../../api/RushConfiguration';
 import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);

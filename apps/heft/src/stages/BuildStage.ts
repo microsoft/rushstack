@@ -159,6 +159,11 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
 
   public readonly afterConfigureTypeScript: AsyncSeriesHook = new AsyncSeriesHook();
   public readonly afterConfigureCopyStaticAssets: AsyncSeriesHook = new AsyncSeriesHook();
+
+  /**
+   * @internal
+   */
+  public readonly afterTypescriptFirstEmit: AsyncParallelHook = new AsyncParallelHook();
 }
 
 /**
@@ -277,7 +282,7 @@ export interface IBuildStageStandardParameters {
   productionFlag: CommandLineFlagParameter;
   localeParameter: CommandLineStringParameter;
   liteFlag: CommandLineFlagParameter;
-  typescriptMaxWriteParallelismParamter: CommandLineIntegerParameter;
+  typescriptMaxWriteParallelismParameter: CommandLineIntegerParameter;
   maxOldSpaceSizeParameter: CommandLineStringParameter;
 }
 
@@ -305,7 +310,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
         description: 'Perform a minimal build, skipping optional steps like linting.'
       }),
 
-      typescriptMaxWriteParallelismParamter: action.defineIntegerParameter({
+      typescriptMaxWriteParallelismParameter: action.defineIntegerParameter({
         parameterLongName: '--typescript-max-write-parallelism',
         argumentName: 'PARALLEILSM',
         description:
@@ -328,7 +333,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       production: standardParameters.productionFlag.value,
       lite: standardParameters.liteFlag.value,
       locale: standardParameters.localeParameter.value,
-      typescriptMaxWriteParallelism: standardParameters.typescriptMaxWriteParallelismParamter.value
+      typescriptMaxWriteParallelism: standardParameters.typescriptMaxWriteParallelismParameter.value
     };
   }
 
@@ -413,11 +418,18 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
         bundleStage.hooks.afterConfigureWebpack.promise()
       ]);
 
+      compileStage.hooks.afterTypescriptFirstEmit.tapPromise(
+        'build-stage',
+        async () =>
+          await Promise.all([
+            this._runSubstageWithLoggingAsync('Bundle', bundleStage),
+            this._runSubstageWithLoggingAsync('Post-build', postBuildStage)
+          ])
+      );
+
       await Promise.all([
         this._runSubstageWithLoggingAsync('Pre-compile', preCompileSubstage),
-        this._runSubstageWithLoggingAsync('Compile', compileStage),
-        this._runSubstageWithLoggingAsync('Bundle', bundleStage),
-        this._runSubstageWithLoggingAsync('Post-build', postBuildStage)
+        this._runSubstageWithLoggingAsync('Compile', compileStage)
       ]);
     } else {
       await this._runSubstageWithLoggingAsync('Pre-compile', preCompileSubstage);

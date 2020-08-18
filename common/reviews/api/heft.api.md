@@ -58,6 +58,8 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
     readonly afterConfigureCopyStaticAssets: AsyncSeriesHook;
     // (undocumented)
     readonly afterConfigureTypeScript: AsyncSeriesHook;
+    // @internal (undocumented)
+    readonly afterTypescriptFirstEmit: AsyncParallelHook;
     // (undocumented)
     readonly configureCopyStaticAssets: AsyncSeriesHook;
     // (undocumented)
@@ -311,7 +313,19 @@ export interface ITestStageContext extends IStageContext<TestStageHooks, ITestSt
 // @public (undocumented)
 export interface ITestStageProperties {
     // (undocumented)
+    debugHeftReporter: boolean | undefined;
+    // (undocumented)
+    findRelatedTests: ReadonlyArray<string> | undefined;
+    // (undocumented)
     production: boolean;
+    // (undocumented)
+    silent: boolean | undefined;
+    // (undocumented)
+    testNamePattern: string | undefined;
+    // (undocumented)
+    testPathPattern: ReadonlyArray<string> | undefined;
+    // (undocumented)
+    testTimeout: number | undefined;
     // (undocumented)
     watchMode: boolean;
 }
