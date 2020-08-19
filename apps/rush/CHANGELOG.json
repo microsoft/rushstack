@@ -2,6 +2,84 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.33.0",
+      "tag": "@microsoft/rush_v5.33.0",
+      "date": "Wed, 19 Aug 2020 00:17:48 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add support for shell tab completion. See PR for details: https://github.com/microsoft/rushstack/pull/2060"
+          },
+          {
+            "comment": "Use Import.lazy() to optimize the startup time for Rush"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.32.3",
+      "tag": "@microsoft/rush_v5.32.3",
+      "date": "Tue, 18 Aug 2020 03:48:56 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where install-run.js sometimes assigned the shell PATH incorrectly due to inconsistent character case"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.32.2",
+      "tag": "@microsoft/rush_v5.32.2",
+      "date": "Fri, 14 Aug 2020 21:03:48 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Resolve issue with version --bump where the wrong hash would get written to the pnpm-lock file"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.32.1",
+      "tag": "@microsoft/rush_v5.32.1",
+      "date": "Fri, 14 Aug 2020 04:06:30 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Change method used to calculate integrity of tarballs"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.32.0",
+      "tag": "@microsoft/rush_v5.32.0",
+      "date": "Thu, 13 Aug 2020 00:53:43 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update temp project tarball integrities during rush bump"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.31.0",
+      "tag": "@microsoft/rush_v5.31.0",
+      "date": "Wed, 12 Aug 2020 19:33:44 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Updated project to build with Heft"
+          },
+          {
+            "comment": "Fix an issue where \"rushx\" did not pass additional command-line arguments to the package.json script (GitHub #1232)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.30.3",
       "tag": "@microsoft/rush_v5.30.3",
       "date": "Fri, 07 Aug 2020 21:09:05 GMT",

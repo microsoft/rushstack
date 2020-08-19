@@ -177,6 +177,24 @@ describe('rehydrateAsset', () => {
     }
   });
 
+  it('supports a concat spacer and leading ids', () => {
+    const asset: IAssetInfo = {
+      source: new RawSource(`<before>${CHUNK_MODULES_TOKEN}<after>`),
+      modules: [2, 1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009],
+      extractedComments: [],
+      fileName: 'test',
+      chunk: undefined!,
+      externalNames: new Map()
+    };
+
+    const result: string = rehydrateAsset(asset, modules, banner).source();
+    const expected: string = `/* fnord */\n<before>[,,buzz].concat(Array(997),[b1000,b1001,b1002,b1003,b1004,b1005,b1006,b1007,b1008,b1009])<after>`;
+
+    if (result !== expected) {
+      throw new Error(`Expected ${expected} but received ${result}`);
+    }
+  });
+
   it('reprocesses external names', () => {
     const asset: IAssetInfo = {
       source: new RawSource(`<before>${CHUNK_MODULES_TOKEN}<after>`),

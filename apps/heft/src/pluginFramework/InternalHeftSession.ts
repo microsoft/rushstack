@@ -8,6 +8,7 @@ import { CleanStage } from '../stages/CleanStage';
 import { DevDeployStage } from '../stages/DevDeployStage';
 import { TestStage } from '../stages/TestStage';
 import { MetricsCollector } from '../metrics/MetricsCollector';
+import { LoggingManager } from './logging/LoggingManager';
 
 /**
  * @internal
@@ -19,6 +20,7 @@ export interface IInternalHeftSessionOptions {
   testStage: TestStage;
 
   metricsCollector: MetricsCollector;
+  loggingManager: LoggingManager;
   getIsDebugMode(): boolean;
 }
 
@@ -26,7 +28,7 @@ export interface IInternalHeftSessionOptions {
  * @internal
  */
 export class InternalHeftSession {
-  private _options: IInternalHeftSessionOptions;
+  private readonly _options: IInternalHeftSessionOptions;
 
   public constructor(options: IInternalHeftSessionOptions) {
     this._options = options;

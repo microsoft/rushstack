@@ -1,6 +1,25 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Fri, 03 Jul 2020 05:46:41 GMT and should not be manually modified.
+This log was last generated on Tue, 18 Aug 2020 23:59:42 GMT and should not be manually modified.
+
+## 4.5.0
+Tue, 18 Aug 2020 23:59:42 GMT
+
+### Minor changes
+
+- Add support for shell tab completion.
+
+## 4.4.8
+Mon, 17 Aug 2020 04:53:23 GMT
+
+*Version update only*
+
+## 4.4.7
+Wed, 12 Aug 2020 00:10:05 GMT
+
+### Patches
+
+- Updated project to build with Heft
 
 ## 4.4.6
 Fri, 03 Jul 2020 05:46:41 GMT

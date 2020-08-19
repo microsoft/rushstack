@@ -1,6 +1,72 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 05 Aug 2020 18:27:33 GMT and should not be manually modified.
+This log was last generated on Tue, 18 Aug 2020 23:59:42 GMT and should not be manually modified.
+
+## 0.6.1
+Tue, 18 Aug 2020 23:59:42 GMT
+
+*Version update only*
+
+## 0.6.0
+Tue, 18 Aug 2020 03:03:23 GMT
+
+### Minor changes
+
+- Add a "version selector" feature so that if a globally installed Heft binary is invoked, it will try to load the project's locally installed version of Heft
+
+## 0.5.1
+Mon, 17 Aug 2020 05:31:53 GMT
+
+### Patches
+
+- Fix a broken dependency
+
+## 0.5.0
+Mon, 17 Aug 2020 04:53:23 GMT
+
+### Minor changes
+
+- Formalize the way errors and warnings are emitted.
+- Expose some useful Jest CLI parameters as "heft test" parameters
+- Rename "--notest" to "--no--test"
+- Improve "heft test" to show console output from tests
+
+### Patches
+
+- Normalize the way file paths are printed in errors and warnings.
+- Ensure build steps that depend on emitted TS output aren't triggered until TS has written output to disk.
+- Fix an issue where Heft could complete with errors but not return a nonzero process exit code
+- Reclassify TypeScript messages such as "X is declared but never used" to be reported as warnings instead of errors
+
+## 0.4.7
+Thu, 13 Aug 2020 09:26:39 GMT
+
+### Patches
+
+- Fix a race condition where .js files were sometimes read by Jest before they were written by TypeScript
+- Fix an issue where the TypeScript incremental build cache sometimes did not work correctly in "--watch" mode
+- Add support for "additionalModuleKindsToEmit" in watch mode
+
+## 0.4.6
+Thu, 13 Aug 2020 04:57:38 GMT
+
+### Patches
+
+- Fix an issue with incorrect source maps for the Jest transform
+- Fix a watch mode race condition where "--clean" ran in parallel with "heft test" (GitHub #2078)
+- Fix an issue where "The transpiler output folder does not exist" was sometimes printed erroneously
+
+## 0.4.5
+Wed, 12 Aug 2020 00:10:05 GMT
+
+*Version update only*
+
+## 0.4.4
+Tue, 11 Aug 2020 00:36:22 GMT
+
+### Patches
+
+- Fix an issue where emitted .js.map sourcemaps had an incorrect relative path (GitHub #2086)
 
 ## 0.4.3
 Wed, 05 Aug 2020 18:27:33 GMT

@@ -1,6 +1,43 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Wed, 05 Aug 2020 18:27:32 GMT and should not be manually modified.
+This log was last generated on Tue, 18 Aug 2020 23:59:42 GMT and should not be manually modified.
+
+## 1.10.73
+Tue, 18 Aug 2020 23:59:42 GMT
+
+*Version update only*
+
+## 1.10.72
+Tue, 18 Aug 2020 03:03:23 GMT
+
+*Version update only*
+
+## 1.10.71
+Mon, 17 Aug 2020 05:31:53 GMT
+
+*Version update only*
+
+## 1.10.70
+Mon, 17 Aug 2020 04:53:23 GMT
+
+*Version update only*
+
+## 1.10.69
+Thu, 13 Aug 2020 09:26:39 GMT
+
+*Version update only*
+
+## 1.10.68
+Thu, 13 Aug 2020 04:57:38 GMT
+
+*Version update only*
+
+## 1.10.67
+Wed, 12 Aug 2020 00:10:05 GMT
+
+### Patches
+
+- Updated project to build with Heft
 
 ## 1.10.66
 Wed, 05 Aug 2020 18:27:32 GMT

@@ -6,7 +6,7 @@ import * as os from 'os';
 import * as path from 'path';
 
 import { CommandLineParser, CommandLineFlagParameter, CommandLineAction } from '@rushstack/ts-command-line';
-import { InternalError } from '@rushstack/node-core-library';
+import { InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
@@ -37,7 +37,6 @@ import { BulkScriptAction } from './scriptActions/BulkScriptAction';
 import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
 
 import { Telemetry } from '../logic/Telemetry';
-import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 
@@ -68,7 +67,8 @@ export class RushCommandLineParser extends CommandLineParser {
         ' and automates package publishing.  It can manage decoupled subsets of projects with different' +
         ' release and versioning strategies.  A full API is included to facilitate integration with other' +
         ' automation tools.  If you are looking for a proven turnkey solution for monorepo management,' +
-        ' Rush is for you.'
+        ' Rush is for you.',
+      enableTabCompletionAction: true
     });
 
     this._rushOptions = this._normalizeOptions(options || {});
@@ -76,7 +76,7 @@ export class RushCommandLineParser extends CommandLineParser {
     try {
       const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation({
         startingFolder: this._rushOptions.cwd,
-        showVerbose: true
+        showVerbose: !Utilities.shouldRestrictConsoleOutput()
       });
       if (rushJsonFilename) {
         this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);

@@ -4,6 +4,7 @@
 import { Terminal } from '@rushstack/node-core-library';
 import { AsyncSeriesBailHook, SyncHook, AsyncSeriesHook } from 'tapable';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
+import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 
 /**
  * @public
@@ -42,15 +43,21 @@ export abstract class StageBase<
 > {
   public readonly stageInitializationHook: SyncHook<IStageContext<TStageHooks, TStageProperties>>;
   protected readonly heftConfiguration: HeftConfiguration;
-  protected readonly terminal: Terminal;
+  protected readonly loggingManager: LoggingManager;
+  protected readonly globalTerminal: Terminal;
   protected stageOptions: TStageOptions;
   protected stageProperties: TStageProperties;
   protected stageHooks: TStageHooks;
   private readonly _innerHooksType: new () => TStageHooks;
 
-  public constructor(heftConfiguration: HeftConfiguration, innerHooksType: new () => TStageHooks) {
-    this.terminal = heftConfiguration.terminal;
+  public constructor(
+    heftConfiguration: HeftConfiguration,
+    loggingManager: LoggingManager,
+    innerHooksType: new () => TStageHooks
+  ) {
     this.heftConfiguration = heftConfiguration;
+    this.loggingManager = loggingManager;
+    this.globalTerminal = heftConfiguration.globalTerminal;
     this.stageInitializationHook = new SyncHook<IStageContext<TStageHooks, TStageProperties>>([
       'stageContext'
     ]);

@@ -2,6 +2,53 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.8.16",
+      "tag": "@microsoft/api-extractor-model_v7.8.16",
+      "date": "Tue, 18 Aug 2020 23:59:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.28.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.8.15",
+      "tag": "@microsoft/api-extractor-model_v7.8.15",
+      "date": "Mon, 17 Aug 2020 04:53:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.27.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.8.14",
+      "tag": "@microsoft/api-extractor-model_v7.8.14",
+      "date": "Wed, 12 Aug 2020 00:10:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated project to build with Heft"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.26.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.0.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.8.13",
       "tag": "@microsoft/api-extractor-model_v7.8.13",
       "date": "Wed, 05 Aug 2020 18:27:33 GMT",

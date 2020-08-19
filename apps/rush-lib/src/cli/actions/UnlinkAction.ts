@@ -24,7 +24,7 @@ export class UnlinkAction extends BaseRushAction {
     // No parameters
   }
 
-  protected run(): Promise<void> {
+  protected runAsync(): Promise<void> {
     return Promise.resolve().then(() => {
       const unlinkManager: UnlinkManager = new UnlinkManager(this.rushConfiguration);
 

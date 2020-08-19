@@ -10,7 +10,12 @@ import {
   ICommandLineActionOptions,
   CommandLineStringListParameter
 } from '@rushstack/ts-command-line';
-import { LockFile, PackageJsonLookup, IPackageJson } from '@rushstack/node-core-library';
+import {
+  LockFile,
+  PackageJsonLookup,
+  IPackageJson,
+  AlreadyReportedError
+} from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -18,7 +23,6 @@ import { EventHooksManager } from '../../logic/EventHooksManager';
 import { RushCommandLineParser } from './../RushCommandLineParser';
 import { Utilities } from '../../utilities/Utilities';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 export interface IBaseRushActionOptions extends ICommandLineActionOptions {
   /**
@@ -75,15 +79,17 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction {
       }
     }
 
-    console.log(`Starting "rush ${this.actionName}"${os.EOL}`);
-    return this.run();
+    if (!Utilities.shouldRestrictConsoleOutput()) {
+      console.log(`Starting "rush ${this.actionName}"${os.EOL}`);
+    }
+    return this.runAsync();
   }
 
   /**
    * All Rush actions need to implement this method. This method runs after
    * environment has been set up by the base class.
    */
-  protected abstract run(): Promise<void>;
+  protected abstract runAsync(): Promise<void>;
 
   private _ensureEnvironment(): void {
     if (this.rushConfiguration) {

@@ -2,6 +2,47 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.5.0",
+      "tag": "@rushstack/ts-command-line_v4.5.0",
+      "date": "Tue, 18 Aug 2020 23:59:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for shell tab completion."
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.4.8",
+      "tag": "@rushstack/ts-command-line_v4.4.8",
+      "date": "Mon, 17 Aug 2020 04:53:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.4.7",
+      "tag": "@rushstack/ts-command-line_v4.4.7",
+      "date": "Wed, 12 Aug 2020 00:10:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated project to build with Heft"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.0.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.4.6",
       "tag": "@rushstack/ts-command-line_v4.4.6",
       "date": "Fri, 03 Jul 2020 05:46:41 GMT",

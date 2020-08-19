@@ -31,6 +31,7 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
     readonly alternatives: ReadonlyArray<string>;
     // @override
     appendToArgList(argList: string[]): void;
+    readonly completions: (() => Promise<string[]>) | undefined;
     readonly defaultValue: string | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
@@ -39,6 +40,11 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
     _setValue(data: any): void;
     readonly value: string | undefined;
     }
+
+// @public
+export const enum CommandLineConstants {
+    TabCompletionActionName = "tab-complete"
+}
 
 // @public
 export class CommandLineFlagParameter extends CommandLineParameter {
@@ -51,6 +57,11 @@ export class CommandLineFlagParameter extends CommandLineParameter {
     _setValue(data: any): void;
     readonly value: boolean;
     }
+
+// @public
+export class CommandLineHelper {
+    static isTabCompletionActionRequest(argv: string[]): boolean;
+}
 
 // @public
 export class CommandLineIntegerParameter extends CommandLineParameterWithArgument {
@@ -128,6 +139,7 @@ export abstract class CommandLineParameterWithArgument extends CommandLineParame
     // @internal
     constructor(definition: IBaseCommandLineDefinitionWithArgument);
     readonly argumentName: string;
+    readonly completions: (() => Promise<string[]>) | undefined;
     }
 
 // @public
@@ -142,10 +154,8 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     protected _getArgumentParser(): argparse.ArgumentParser;
     protected onExecute(): Promise<void>;
     selectedAction: CommandLineAction | undefined;
-    readonly toolDescription: string;
-    readonly toolFilename: string;
     tryGetAction(actionName: string): CommandLineAction | undefined;
-}
+    }
 
 // @public
 export class CommandLineRemainder {
@@ -212,6 +222,7 @@ export interface IBaseCommandLineDefinition {
 // @public
 export interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLineDefinition {
     argumentName: string;
+    completions?: () => Promise<string[]>;
 }
 
 // @public
@@ -224,6 +235,7 @@ export interface ICommandLineActionOptions {
 // @public
 export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition {
     alternatives: string[];
+    completions?: () => Promise<string[]>;
     defaultValue?: string;
 }
 
@@ -246,6 +258,7 @@ export interface _ICommandLineParserData {
 
 // @public
 export interface ICommandLineParserOptions {
+    enableTabCompletionAction?: boolean;
     toolDescription: string;
     toolFilename: string;
 }

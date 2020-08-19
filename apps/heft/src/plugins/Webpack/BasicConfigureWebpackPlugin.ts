@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Terminal, FileSystem } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 import * as webpack from 'webpack';
 
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
@@ -15,6 +15,7 @@ import {
   IBuildStageProperties,
   IWebpackConfiguration
 } from '../../stages/BuildStage';
+import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 
 /**
  * See https://webpack.js.org/api/cli/#environment-options
@@ -39,15 +40,15 @@ const WEBPACK_DEV_CONFIG_FILENAME: string = 'webpack.dev.config.js';
 export class BasicConfigureWebpackPlugin implements IHeftPlugin {
   public readonly displayName: string = PLUGIN_NAME;
 
-  public apply(heftCompilation: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftCompilation.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
+  public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
+    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
         bundle.hooks.configureWebpack.tapPromise(
           PLUGIN_NAME,
           async (existingConfiguration: IWebpackConfiguration) => {
             return await this._loadWebpackConfigAsync(
               existingConfiguration,
-              heftConfiguration.terminal,
+              heftSession,
               heftConfiguration.buildFolder,
               build.properties,
               bundle.properties
@@ -60,13 +61,15 @@ export class BasicConfigureWebpackPlugin implements IHeftPlugin {
 
   private async _loadWebpackConfigAsync(
     existingConfiguration: IWebpackConfiguration,
-    terminal: Terminal,
+    heftSession: HeftSession,
     buildFolder: string,
     buildProperties: IBuildStageProperties,
     bundleProperties: IBundleSubstageProperties
   ): Promise<IWebpackConfiguration> {
+    const logger: ScopedLogger = heftSession.requestScopedLogger('configure-webpack');
+
     if (existingConfiguration) {
-      terminal.writeVerboseLine(
+      logger.terminal.writeVerboseLine(
         'Skipping loading webpack config file because the webpack config has already been set.'
       );
       return existingConfiguration;
@@ -76,18 +79,22 @@ export class BasicConfigureWebpackPlugin implements IHeftPlugin {
 
       let webpackConfigJs: IWebpackConfigJs | undefined;
 
-      if (buildProperties.serveMode) {
-        terminal.writeVerboseLine(
-          `Attempting to load webpack configuration from "${WEBPACK_DEV_CONFIG_FILENAME}".`
-        );
-        webpackConfigJs = this._tryLoadWebpackConfiguration(buildFolder, WEBPACK_DEV_CONFIG_FILENAME);
-      }
+      try {
+        if (buildProperties.serveMode) {
+          logger.terminal.writeVerboseLine(
+            `Attempting to load webpack configuration from "${WEBPACK_DEV_CONFIG_FILENAME}".`
+          );
+          webpackConfigJs = this._tryLoadWebpackConfiguration(buildFolder, WEBPACK_DEV_CONFIG_FILENAME);
+        }
 
-      if (!webpackConfigJs) {
-        terminal.writeVerboseLine(
-          `Attempting to load webpack configuration from "${WEBPACK_CONFIG_FILENAME}".`
-        );
-        webpackConfigJs = this._tryLoadWebpackConfiguration(buildFolder, WEBPACK_CONFIG_FILENAME);
+        if (!webpackConfigJs) {
+          logger.terminal.writeVerboseLine(
+            `Attempting to load webpack configuration from "${WEBPACK_CONFIG_FILENAME}".`
+          );
+          webpackConfigJs = this._tryLoadWebpackConfiguration(buildFolder, WEBPACK_CONFIG_FILENAME);
+        }
+      } catch (error) {
+        logger.emitError(error);
       }
 
       if (webpackConfigJs) {

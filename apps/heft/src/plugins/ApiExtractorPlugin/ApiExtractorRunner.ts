@@ -2,11 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Colors, IColorableSequence, ITerminalProvider, Terminal, Path } from '@rushstack/node-core-library';
+import { ITerminalProvider, Terminal, Path } from '@rushstack/node-core-library';
 import { ApiExtractor as TApiExtractor } from '@microsoft/rush-stack-compiler-3.7';
 
 import { SubprocessRunnerBase } from '../../utilities/subprocess/SubprocessRunnerBase';
 import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
+import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 
 export interface IApiExtractorRunnerConfiguration {
   /**
@@ -44,6 +45,7 @@ export interface IApiExtractorRunnerConfiguration {
 }
 
 export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunnerConfiguration> {
+  private _scopedLogger: IScopedLogger;
   private _terminal: Terminal;
 
   public static getTerminal(terminalProvider: ITerminalProvider): Terminal {
@@ -59,11 +61,10 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
     return __filename;
   }
 
-  public initialize(): void {
-    this._terminal = ApiExtractorRunner.getTerminal(this._terminalProvider);
-  }
-
   public async invokeAsync(): Promise<void> {
+    this._scopedLogger = await this.requestScopedLoggerAsync('api-extractor');
+    this._terminal = this._scopedLogger.terminal;
+
     const apiExtractor: typeof TApiExtractor = require(this._configuration.apiExtractorPackagePath);
     const extractorConfig: TApiExtractor.ExtractorConfig = apiExtractor.ExtractorConfig.loadFileAndPrepare(
       this._configuration.configFileLocation
@@ -74,7 +75,7 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
       messageCallback: (message: TApiExtractor.ExtractorMessage) => {
         switch (message.logLevel) {
           case apiExtractor.ExtractorLogLevel.Error: {
-            let logMessage: (IColorableSequence | string)[];
+            let logMessage: string;
             if (message.sourceFilePath) {
               const filePathForLog: string = Path.isUnderOrEqual(
                 message.sourceFilePath,
@@ -82,21 +83,19 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
               )
                 ? path.relative(this._configuration.buildFolder, message.sourceFilePath)
                 : message.sourceFilePath;
-              logMessage = [
-                Colors.red(`ERROR: ${filePathForLog}:${message.sourceFileLine}:${message.sourceFileColumn}`),
-                ` - (${message.category}) `,
-                Colors.red(message.text)
-              ];
+              logMessage =
+                `${filePathForLog}:${message.sourceFileLine}:${message.sourceFileColumn} - ` +
+                `(${message.category}) ${message.text}`;
             } else {
-              logMessage = [message.text];
+              logMessage = message.text;
             }
 
-            this._terminal.writeErrorLine(...logMessage);
+            this._scopedLogger.emitError(new Error(logMessage));
             break;
           }
 
           case apiExtractor.ExtractorLogLevel.Warning: {
-            let logMessage: (IColorableSequence | string)[];
+            let logMessage: string;
             if (message.sourceFilePath) {
               const filePathForLog: string = Path.isUnderOrEqual(
                 message.sourceFilePath,
@@ -104,18 +103,14 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
               )
                 ? path.relative(this._configuration.buildFolder, message.sourceFilePath)
                 : message.sourceFilePath;
-              logMessage = [
-                Colors.yellow(
-                  `WARNING: ${filePathForLog}:${message.sourceFileLine}:${message.sourceFileColumn}`
-                ),
-                ` - (${message.category}) `,
-                Colors.yellow(message.text)
-              ];
+              logMessage =
+                `${filePathForLog}:${message.sourceFileLine}:${message.sourceFileColumn} - ` +
+                `(${message.category}) ${message.text}`;
             } else {
-              logMessage = [message.text];
+              logMessage = message.text;
             }
 
-            this._terminal.writeWarningLine(...logMessage);
+            this._scopedLogger.emitWarning(new Error(logMessage));
             break;
           }
 
@@ -135,7 +130,9 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
           }
 
           default:
-            throw new Error(`Unexpected API Extractor log level: ${message.logLevel}`);
+            this._scopedLogger.emitError(
+              new Error(`Unexpected API Extractor log level: ${message.logLevel}`)
+            );
         }
 
         message.handled = true;

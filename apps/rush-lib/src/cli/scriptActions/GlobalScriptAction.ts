@@ -5,10 +5,15 @@ import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 
+import {
+  FileSystem,
+  LockFile,
+  IPackageJson,
+  JsonFile,
+  AlreadyReportedError
+} from '@rushstack/node-core-library';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { Utilities } from '../../utilities/Utilities';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
-import { FileSystem, LockFile, IPackageJson, JsonFile } from '@rushstack/node-core-library';
 import { InstallHelpers } from '../../logic/installManager/InstallHelpers';
 import { RushConstants } from '../../logic/RushConstants';
 import { LastInstallFlag } from '../../api/LastInstallFlag';
@@ -149,7 +154,7 @@ export class GlobalScriptAction extends BaseScriptAction {
     lock.release();
   }
 
-  public async run(): Promise<void> {
+  public async runAsync(): Promise<void> {
     const additionalPathFolders: string[] = [];
 
     if (this._autoinstallerName) {

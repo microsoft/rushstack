@@ -37,7 +37,7 @@ export class PurgeAction extends BaseRushAction {
     });
   }
 
-  protected run(): Promise<void> {
+  protected runAsync(): Promise<void> {
     return Promise.resolve().then(() => {
       const stopwatch: Stopwatch = Stopwatch.start();
 

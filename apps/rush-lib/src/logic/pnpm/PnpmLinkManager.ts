@@ -8,7 +8,13 @@ import pnpmLinkBins from '@pnpm/link-bins';
 import * as semver from 'semver';
 import * as colors from 'colors';
 
-import { Text, FileSystem, FileConstants, InternalError } from '@rushstack/node-core-library';
+import {
+  Text,
+  FileSystem,
+  FileConstants,
+  InternalError,
+  AlreadyReportedError
+} from '@rushstack/node-core-library';
 
 import { BaseLinkManager } from '../base/BaseLinkManager';
 import { BasePackage } from '../base/BasePackage';
@@ -16,7 +22,6 @@ import { RushConstants } from '../../logic/RushConstants';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from './PnpmShrinkwrapFile';
 import { PnpmProjectDependencyManifest } from './PnpmProjectDependencyManifest';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 // special flag for debugging, will print extra diagnostic information,
 // but comes with performance cost

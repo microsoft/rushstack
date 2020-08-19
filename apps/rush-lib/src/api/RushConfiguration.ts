@@ -716,7 +716,7 @@ export class RushConfiguration {
           tempProjectName
         );
         this._projects.push(project);
-        if (this._projectsByName.get(project.packageName)) {
+        if (this._projectsByName.has(project.packageName)) {
           throw new Error(
             `The project name "${project.packageName}" was specified more than once` +
               ` in the rush.json configuration file.`

@@ -2,6 +2,110 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.10.73",
+      "tag": "@microsoft/load-themed-styles_v1.10.73",
+      "date": "Tue, 18 Aug 2020 23:59:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.6.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.72",
+      "tag": "@microsoft/load-themed-styles_v1.10.72",
+      "date": "Tue, 18 Aug 2020 03:03:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.6.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.71",
+      "tag": "@microsoft/load-themed-styles_v1.10.71",
+      "date": "Mon, 17 Aug 2020 05:31:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.70",
+      "tag": "@microsoft/load-themed-styles_v1.10.70",
+      "date": "Mon, 17 Aug 2020 04:53:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.69",
+      "tag": "@microsoft/load-themed-styles_v1.10.69",
+      "date": "Thu, 13 Aug 2020 09:26:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.4.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.68",
+      "tag": "@microsoft/load-themed-styles_v1.10.68",
+      "date": "Thu, 13 Aug 2020 04:57:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.4.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.67",
+      "tag": "@microsoft/load-themed-styles_v1.10.67",
+      "date": "Wed, 12 Aug 2020 00:10:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated project to build with Heft"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.0.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.4.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.10.66",
       "tag": "@microsoft/load-themed-styles_v1.10.66",
       "date": "Wed, 05 Aug 2020 18:27:32 GMT",

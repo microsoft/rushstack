@@ -6,7 +6,13 @@ import {
   CommandLineFlagParameter,
   ICommandLineActionOptions
 } from '@rushstack/ts-command-line';
-import { Terminal, IPackageJson, Colors, ConsoleTerminalProvider } from '@rushstack/node-core-library';
+import {
+  Terminal,
+  IPackageJson,
+  Colors,
+  ConsoleTerminalProvider,
+  AlreadyReportedError
+} from '@rushstack/node-core-library';
 import { performance } from 'perf_hooks';
 
 import { MetricsCollector } from '../../metrics/MetricsCollector';
@@ -16,6 +22,7 @@ import { BuildStage } from '../../stages/BuildStage';
 import { CleanStage } from '../../stages/CleanStage';
 import { DevDeployStage } from '../../stages/DevDeployStage';
 import { TestStage } from '../../stages/TestStage';
+import { LoggingManager } from '../../pluginFramework/logging/LoggingManager';
 
 export interface IStages {
   buildStage: BuildStage;
@@ -26,6 +33,7 @@ export interface IStages {
 
 export interface IHeftActionBaseOptions {
   terminal: Terminal;
+  loggingManager: LoggingManager;
   metricsCollector: MetricsCollector;
   heftConfiguration: HeftConfiguration;
   pluginManager: PluginManager;
@@ -34,6 +42,7 @@ export interface IHeftActionBaseOptions {
 
 export abstract class HeftActionBase extends CommandLineAction {
   protected readonly terminal: Terminal;
+  protected readonly loggingManager: LoggingManager;
   protected readonly metricsCollector: MetricsCollector;
   protected readonly heftConfiguration: HeftConfiguration;
   protected readonly stages: IStages;
@@ -45,6 +54,7 @@ export abstract class HeftActionBase extends CommandLineAction {
   ) {
     super(commandLineOptions);
     this.terminal = heftActionOptions.terminal;
+    this.loggingManager = heftActionOptions.loggingManager;
     this.metricsCollector = heftActionOptions.metricsCollector;
     this.heftConfiguration = heftActionOptions.heftConfiguration;
     this.stages = heftActionOptions.stages;
@@ -70,11 +80,10 @@ export abstract class HeftActionBase extends CommandLineAction {
   public async onExecute(): Promise<void> {
     this.terminal.writeLine(`Starting ${this.actionName}`);
 
-    if (
-      this.verboseFlag.value &&
-      this.heftConfiguration.terminalProvider instanceof ConsoleTerminalProvider
-    ) {
-      this.heftConfiguration.terminalProvider.verboseEnabled = true;
+    if (this.verboseFlag.value) {
+      if (this.heftConfiguration.terminalProvider instanceof ConsoleTerminalProvider) {
+        this.heftConfiguration.terminalProvider.verboseEnabled = true;
+      }
     }
 
     let encounteredError: boolean = false;
@@ -86,13 +95,34 @@ export abstract class HeftActionBase extends CommandLineAction {
     } finally {
       this.recordMetrics();
 
+      const warningStrings: string[] = this.loggingManager.getWarningStrings();
+      const errorStrings: string[] = this.loggingManager.getErrorStrings();
+
+      const encounteredWarnings: boolean = warningStrings.length > 0;
+      encounteredError = encounteredError || errorStrings.length > 0;
+
       this.terminal.writeLine(
         Colors.bold(
-          (encounteredError ? Colors.red : Colors.green)(
+          (encounteredError ? Colors.red : encounteredWarnings ? Colors.yellow : Colors.green)(
             `-------------------- Finished (${Math.round(performance.now()) / 1000}s) --------------------`
           )
         )
       );
+
+      if (warningStrings.length > 0) {
+        this.terminal.writeWarningLine(`Encountered ${warningStrings.length} warnings:`);
+        for (const warningString of warningStrings) {
+          this.terminal.writeWarningLine(`  ${warningString}`);
+        }
+      }
+
+      if (errorStrings.length > 0) {
+        this.terminal.writeErrorLine(`Encountered ${errorStrings.length} errors:`);
+        for (const errorString of errorStrings) {
+          this.terminal.writeErrorLine(`  ${errorString}`);
+        }
+      }
+
       const projectPackageJson: IPackageJson = this.heftConfiguration.projectPackageJson;
       this.terminal.writeLine(
         `Project: ${projectPackageJson.name}`,
@@ -100,6 +130,10 @@ export abstract class HeftActionBase extends CommandLineAction {
       );
       this.terminal.writeLine(`Heft version: ${this.heftConfiguration.heftPackageJson.version}`);
       this.terminal.writeLine(`Node version: ${process.version}`);
+    }
+
+    if (encounteredError) {
+      throw new AlreadyReportedError();
     }
   }
 
