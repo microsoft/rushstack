@@ -17,6 +17,7 @@ import { IBuildStageContext, ICompileSubstage } from '../../stages/BuildStage';
 export class TestAction extends BuildAction {
   private _noTestFlag: CommandLineFlagParameter;
   private _noBuildFlag: CommandLineFlagParameter;
+  private _updateSnapshotsFlag: CommandLineFlagParameter;
   private _findRelatedTests: CommandLineStringListParameter;
   private _silent: CommandLineFlagParameter;
   private _testNamePattern: CommandLineStringParameter;
@@ -43,6 +44,14 @@ export class TestAction extends BuildAction {
     this._noBuildFlag = this.defineFlagParameter({
       parameterLongName: '--no-build',
       description: 'If provided, only run tests. Do not build first.'
+    });
+
+    this._updateSnapshotsFlag = this.defineFlagParameter({
+      parameterLongName: '--update-snapshots',
+      parameterShortName: '-u',
+      description:
+        'Update Jest snapshots while running the tests.' +
+        ' This corresponds to the "--updateSnapshots" parameter in Jest'
     });
 
     this._findRelatedTests = this.defineStringListParameter({
@@ -130,7 +139,7 @@ export class TestAction extends BuildAction {
       const testStage: TestStage = this.stages.testStage;
       const testStageOptions: ITestStageOptions = {
         watchMode: this._watchFlag.value,
-        production: this._productionFlag.value,
+        updateSnapshots: this._updateSnapshotsFlag.value,
 
         findRelatedTests: this._findRelatedTests.values,
         silent: this._silent.value,
