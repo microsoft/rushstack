@@ -375,6 +375,7 @@ export class RushConfiguration {
     readonly repositoryDefaultFullyQualifiedRemoteBranch: string;
     readonly repositoryDefaultRemote: string;
     readonly repositoryUrl: string | undefined;
+    readonly rushConfigurationJson: IRushConfigurationJson;
     readonly rushJsonFile: string;
     readonly rushJsonFolder: string;
     // @deprecated

@@ -482,17 +482,23 @@ export class RushConfiguration {
 
   private _telemetryEnabled: boolean;
 
+  // Lazily loaded when the projects() getter is called.
   private _projects: RushConfigurationProject[];
+
+  // Lazily loaded when the projectsByName() getter is called.
   private _projectsByName: Map<string, RushConfigurationProject>;
 
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
   private _experimentsConfiguration: ExperimentsConfiguration;
+
+  private readonly _rushConfigurationJson: IRushConfigurationJson;
 
   /**
    * Use RushConfiguration.loadFromConfigurationFile() or Use RushConfiguration.loadFromDefaultLocation()
    * instead.
    */
   private constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string) {
+    this._rushConfigurationJson = rushConfigurationJson;
     EnvironmentConfiguration.initialize();
 
     if (rushConfigurationJson.nodeSupportedVersionRange) {
@@ -692,12 +698,32 @@ export class RushConfiguration {
     );
     this._versionPolicyConfiguration = new VersionPolicyConfiguration(versionPolicyConfigFile);
 
+    const variants: {
+      [variantName: string]: boolean;
+    } = {};
+
+    if (rushConfigurationJson.variants) {
+      for (const variantOptions of rushConfigurationJson.variants) {
+        const { variantName } = variantOptions;
+
+        if (variants[variantName]) {
+          throw new Error(`Duplicate variant named '${variantName}' specified in configuration.`);
+        }
+
+        variants[variantName] = true;
+      }
+    }
+
+    this._variants = variants;
+  }
+
+  private _initializeAndValidateLocalProjects(): void {
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigurationProject>();
 
     // We sort the projects array in alphabetical order.  This ensures that the packages
     // are processed in a deterministic order by the various Rush algorithms.
-    const sortedProjectJsons: IRushConfigurationProjectJson[] = rushConfigurationJson.projects.slice(0);
+    const sortedProjectJsons: IRushConfigurationProjectJson[] = this._rushConfigurationJson.projects.slice(0);
     sortedProjectJsons.sort((a: IRushConfigurationProjectJson, b: IRushConfigurationProjectJson) =>
       a.packageName.localeCompare(b.packageName)
     );
@@ -739,26 +765,8 @@ export class RushConfiguration {
       // Compute the downstream dependencies within the list of Rush projects.
       this._populateDownstreamDependencies(project.packageJson.dependencies, project.packageName);
       this._populateDownstreamDependencies(project.packageJson.devDependencies, project.packageName);
-      this._versionPolicyConfiguration.validate(this._projectsByName);
+      this._versionPolicyConfiguration.validate(this.projectsByName);
     }
-
-    const variants: {
-      [variantName: string]: boolean;
-    } = {};
-
-    if (rushConfigurationJson.variants) {
-      for (const variantOptions of rushConfigurationJson.variants) {
-        const { variantName } = variantOptions;
-
-        if (variants[variantName]) {
-          throw new Error(`Duplicate variant named '${variantName}' specified in configuration.`);
-        }
-
-        variants[variantName] = true;
-      }
-    }
-
-    this._variants = variants;
   }
 
   /**
@@ -992,6 +1000,13 @@ export class RushConfiguration {
    */
   public get packageManagerWrapper(): PackageManager {
     return this._packageManagerWrapper;
+  }
+
+  /**
+   * Gets the JSON data structure for the "rush.json" configuration file.
+   */
+  public get rushConfigurationJson(): IRushConfigurationJson {
+    return this._rushConfigurationJson;
   }
 
   /**
@@ -1341,10 +1356,18 @@ export class RushConfiguration {
   }
 
   public get projects(): RushConfigurationProject[] {
+    if (!this._projects) {
+      this._initializeAndValidateLocalProjects();
+    }
+
     return this._projects;
   }
 
   public get projectsByName(): Map<string, RushConfigurationProject> {
+    if (!this._projectsByName) {
+      this._initializeAndValidateLocalProjects();
+    }
+
     return this._projectsByName;
   }
 
@@ -1509,7 +1532,7 @@ export class RushConfiguration {
    * then undefined is returned.
    */
   public getProjectByName(projectName: string): RushConfigurationProject | undefined {
-    return this._projectsByName.get(projectName);
+    return this.projectsByName.get(projectName);
   }
 
   /**
@@ -1520,13 +1543,13 @@ export class RushConfiguration {
    */
   public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined {
     // Is there an exact match?
-    let result: RushConfigurationProject | undefined = this._projectsByName.get(shorthandProjectName);
+    let result: RushConfigurationProject | undefined = this.projectsByName.get(shorthandProjectName);
     if (result) {
       return result;
     }
 
     // Is there an approximate match?
-    for (const project of this._projects) {
+    for (const project of this.projects) {
       if (this.packageNameParser.getUnscopedName(project.packageName) === shorthandProjectName) {
         if (result) {
           // Ambiguous -- there is more than one match
@@ -1545,7 +1568,7 @@ export class RushConfiguration {
    */
   public findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined {
     // Is there an approximate match?
-    for (const project of this._projects) {
+    for (const project of this.projects) {
       if (project.tempProjectName === tempProjectName) {
         return project;
       }
@@ -1592,7 +1615,7 @@ export class RushConfiguration {
       return;
     }
     Object.keys(dependencies).forEach((dependencyName) => {
-      const depProject: RushConfigurationProject | undefined = this._projectsByName.get(dependencyName);
+      const depProject: RushConfigurationProject | undefined = this.projectsByName.get(dependencyName);
 
       if (depProject) {
         depProject.downstreamDependencyProjects.push(packageName);
