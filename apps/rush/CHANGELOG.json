@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.33.0",
+      "tag": "@microsoft/rush_v5.33.0",
+      "date": "Wed, 19 Aug 2020 00:17:48 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add support for shell tab completion. See PR for details: https://github.com/microsoft/rushstack/pull/2060"
+          },
+          {
+            "comment": "Use Import.lazy() to optimize the startup time for Rush"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.32.3",
       "tag": "@microsoft/rush_v5.32.3",
       "date": "Tue, 18 Aug 2020 03:48:56 GMT",
