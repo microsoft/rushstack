@@ -3,7 +3,7 @@
 
 import * as os from 'os';
 import * as path from 'path';
-import Validator = require('z-schema');
+import Validator = require('z-schema/dist/ZSchema-browser-min');
 
 import { JsonFile, JsonObject } from './JsonFile';
 import { FileSystem } from './FileSystem';

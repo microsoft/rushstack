@@ -1,6 +1,18 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Mon, 17 Aug 2020 05:31:53 GMT and should not be manually modified.
+This log was last generated on Tue, 18 Aug 2020 23:59:42 GMT and should not be manually modified.
+
+## 0.6.1
+Tue, 18 Aug 2020 23:59:42 GMT
+
+*Version update only*
+
+## 0.6.0
+Tue, 18 Aug 2020 03:03:23 GMT
+
+### Minor changes
+
+- Add a "version selector" feature so that if a globally installed Heft binary is invoked, it will try to load the project's locally installed version of Heft
 
 ## 0.5.1
 Mon, 17 Aug 2020 05:31:53 GMT

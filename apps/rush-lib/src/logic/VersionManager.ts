@@ -3,8 +3,7 @@
 
 import * as path from 'path';
 import * as semver from 'semver';
-import { cloneDeep } from 'lodash';
-import { IPackageJson, JsonFile, FileConstants } from '@rushstack/node-core-library';
+import { IPackageJson, JsonFile, FileConstants, Import } from '@rushstack/node-core-library';
 
 import { VersionPolicy, BumpType, LockStepVersionPolicy } from '../api/VersionPolicy';
 import { ChangeFile } from '../api/ChangeFile';
@@ -15,6 +14,8 @@ import { VersionPolicyConfiguration } from '../api/VersionPolicyConfiguration';
 import { PublishUtilities } from './PublishUtilities';
 import { ChangeManager } from './ChangeManager';
 import { DependencySpecifier } from './DependencySpecifier';
+
+const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 export class VersionManager {
   private _rushConfiguration: RushConfiguration;
@@ -193,10 +194,10 @@ export class VersionManager {
       let clonedProject: IPackageJson | undefined = this._updatedProjects.get(rushProject.packageName);
       let projectVersionChanged: boolean = true;
       if (!clonedProject) {
-        clonedProject = cloneDeep(rushProject.packageJson);
+        clonedProject = lodash.cloneDeep(rushProject.packageJson);
         projectVersionChanged = false;
       }
-      this._updateProjectAllDependencies(rushProject, clonedProject, projectVersionChanged);
+      this._updateProjectAllDependencies(rushProject, clonedProject!, projectVersionChanged);
     });
   }
 

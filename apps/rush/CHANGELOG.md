@@ -1,6 +1,21 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 14 Aug 2020 21:03:48 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Aug 2020 00:17:48 GMT and should not be manually modified.
+
+## 5.33.0
+Wed, 19 Aug 2020 00:17:48 GMT
+
+### Updates
+
+- Add support for shell tab completion. See PR for details: https://github.com/microsoft/rushstack/pull/2060
+- Use Import.lazy() to optimize the startup time for Rush
+
+## 5.32.3
+Tue, 18 Aug 2020 03:48:56 GMT
+
+### Updates
+
+- Fix an issue where install-run.js sometimes assigned the shell PATH incorrectly due to inconsistent character case
 
 ## 5.32.2
 Fri, 14 Aug 2020 21:03:48 GMT

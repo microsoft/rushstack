@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
+import { Import } from './Import';
+
+const fsx: typeof import('fs-extra') = Import.lazy('fs-extra', require);
 
 /**
  * Available file handle opening flags.
