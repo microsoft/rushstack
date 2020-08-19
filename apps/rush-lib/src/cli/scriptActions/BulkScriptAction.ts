@@ -223,9 +223,7 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const scopedNames: string[] = [];
 
-    const projectJsons: IRushConfigurationProjectJson[] = this.rushConfiguration.rushConfigurationJson.projects.slice(
-      0
-    );
+    const projectJsons: IRushConfigurationProjectJson[] = [...this.rushConfiguration.rushConfigurationJson.projects];
 
     for (const projectJson of projectJsons) {
       scopedNames.push(projectJson.packageName);
