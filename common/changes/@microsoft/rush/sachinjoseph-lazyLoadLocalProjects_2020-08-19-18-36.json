@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/rush",
       "comment": "Load and validate local projects lazily to further improve Rush startup times.",
-      "type": "patch"
+      "type": "none"
     }
   ],
   "packageName": "@microsoft/rush",
