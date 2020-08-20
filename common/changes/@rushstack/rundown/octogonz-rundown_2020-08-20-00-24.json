@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rundown",
+      "comment": "Initial release",
+      "type": "major"
+    }
+  ],
+  "packageName": "@rushstack/rundown",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
