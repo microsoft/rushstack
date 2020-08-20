@@ -25,21 +25,26 @@ export class Rundown {
 
     const expandedArgs: string[] = stringArgv(args);
 
+    console.log('Starting process: ' + [absoluteScriptPath, ...expandedArgs].join(' '));
+    console.log();
+
     // Example process.argv:
     // ["path/to/launcher.js", "path/to/target-script.js", "first-target-arg"]
     const nodeArgs: string[] = [path.join(__dirname, 'launcher.js'), absoluteScriptPath, ...expandedArgs];
 
     await this._spawnLauncherAsync(nodeArgs, quiet, ignoreExitCode);
+
+    if (!quiet) {
+      console.log();
+    }
   }
 
   public writeSnapshotReport(): void {
     const reportPath: string = 'rundown-snapshot.log';
+    console.log('Writing report file: ' + reportPath);
 
     const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-
-    console.log('Writing ' + reportPath);
     const importedPaths: string[] = [...this._importedModuleMap.keys()];
-
     const importedPackageFolders: Set<string> = new Set();
 
     for (const importedPath of importedPaths) {
@@ -67,7 +72,8 @@ export class Rundown {
 
   public writeInspectReport(traceImports: boolean): void {
     const reportPath: string = 'rundown-inspect.log';
-    console.log('Writing ' + reportPath);
+    console.log('Writing report file: ' + reportPath);
+
     const importedPaths: string[] = [...this._importedModuleMap.keys()];
     importedPaths.sort();
 
