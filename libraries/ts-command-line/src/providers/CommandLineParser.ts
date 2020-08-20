@@ -135,49 +135,50 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    * @param args - the command-line arguments to be parsed; if omitted, then
    *               the process.argv will be used
    */
-  public execute(args?: string[]): Promise<boolean> {
+  public async execute(args?: string[]): Promise<boolean> {
     if (this._options.enableTabCompletionAction && !this._tabCompleteActionWasAdded) {
       this.addAction(new TabCompleteAction(this.actions, this.parameters));
       this._tabCompleteActionWasAdded = true;
     }
-    return this.executeWithoutErrorHandling(args)
-      .then(() => {
-        return true;
-      })
-      .catch((err) => {
-        if (err instanceof CommandLineParserExitError) {
-          // executeWithoutErrorHandling() handles the successful cases,
-          // so here we can assume err has a nonzero exit code
-          if (err.message) {
-            console.error(err.message);
-          }
-          if (!process.exitCode) {
-            process.exitCode = err.exitCode;
-          }
-        } else {
-          let message: string = (err.message || 'An unknown error occurred').trim();
 
-          // If the message doesn't already start with "Error:" then add a prefix
-          if (!/^(error|internal error|warning)\b/i.test(message)) {
-            message = 'Error: ' + message;
-          }
-
-          console.error();
-          console.error(colors.red(message));
-
-          if (!process.exitCode) {
-            process.exitCode = 1;
-          }
+    try {
+      await this.executeWithoutErrorHandling(args);
+      return true;
+    } catch (err) {
+      if (err instanceof CommandLineParserExitError) {
+        // executeWithoutErrorHandling() handles the successful cases,
+        // so here we can assume err has a nonzero exit code
+        if (err.message) {
+          console.error(err.message);
         }
-        return false;
-      });
+        if (!process.exitCode) {
+          process.exitCode = err.exitCode;
+        }
+      } else {
+        let message: string = (err.message || 'An unknown error occurred').trim();
+
+        // If the message doesn't already start with "Error:" then add a prefix
+        if (!/^(error|internal error|warning)\b/i.test(message)) {
+          message = 'Error: ' + message;
+        }
+
+        console.error();
+        console.error(colors.red(message));
+
+        if (!process.exitCode) {
+          process.exitCode = 1;
+        }
+      }
+
+      return false;
+    }
   }
 
   /**
    * This is similar to {@link CommandLineParser.execute}, except that execution errors
    * simply cause the promise to reject.  It is the caller's responsibility to trap
    */
-  public executeWithoutErrorHandling(args?: string[]): Promise<void> {
+  public async executeWithoutErrorHandling(args?: string[]): Promise<void> {
     try {
       if (this._executed) {
         // In the future we could allow the same parser to be invoked multiple times
@@ -195,8 +196,9 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       }
       if (args.length === 0) {
         this._argumentParser.printHelp();
-        return Promise.resolve();
+        return;
       }
+
       const data: ICommandLineParserData = this._argumentParser.parseArgs(args);
 
       this._processParsedData(data);
@@ -221,10 +223,12 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
           if (err.message) {
             console.log(err.message);
           }
-          return Promise.resolve();
+
+          return;
         }
       }
-      return Promise.reject(err);
+
+      throw err;
     }
   }
 
@@ -248,10 +252,9 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    * This hook allows the subclass to perform additional operations before or after
    * the chosen action is executed.
    */
-  protected onExecute(): Promise<void> {
-    if (!this.selectedAction) {
-      return Promise.resolve();
+  protected async onExecute(): Promise<void> {
+    if (this.selectedAction) {
+      await this.selectedAction._execute();
     }
-    return this.selectedAction._execute();
   }
 }
