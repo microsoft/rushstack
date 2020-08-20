@@ -23,7 +23,6 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "0.5.1",
     "@types/jest": "25.2.1",
-    "@types/node": "10.17.13",
-    "@types/string-argv": "~0.3.0"
+    "@types/node": "10.17.13"
   }
 }
