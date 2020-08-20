@@ -32,7 +32,11 @@ export class DeployAction extends BaseRushAction {
         ' a subset of Rush projects and their dependencies to a target folder, which can then be uploaded to' +
         ' a production server.  The "rush deploy" behavior is specified by a scenario config file that must' +
         ' be created first, using the "rush init-deploy" command.',
-      parser
+      parser,
+
+      // It is okay to invoke multiple instances of "rush deploy" simultaneously, if they are writing
+      // to different target folders.
+      safeForSimultaneousRushProcesses: true
     });
   }
 
