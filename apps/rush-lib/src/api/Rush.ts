@@ -10,6 +10,7 @@ import { RushConstants } from '../logic/RushConstants';
 import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
+import { Utilities } from '../utilities/Utilities';
 
 /**
  * Options to pass to the rush "launch" functions.
@@ -37,6 +38,8 @@ export interface ILaunchOptions {
  * @public
  */
 export class Rush {
+  private static _version: string | undefined = undefined;
+
   /**
    * This API is used by the `@microsoft/rush` front end to launch the "rush" command-line.
    * Third-party tools should not use this API.  Instead, they should execute the "rush" binary
@@ -53,7 +56,9 @@ export class Rush {
   public static launch(launcherVersion: string, arg: ILaunchOptions): void {
     const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
 
-    Rush._printStartupBanner(options.isManaged);
+    if (!Utilities.shouldRestrictConsoleOutput()) {
+      Rush._printStartupBanner(options.isManaged);
+    }
 
     if (!CommandLineMigrationAdvisor.checkArgv(process.argv)) {
       // The migration advisor recognized an obsolete command-line
@@ -87,7 +92,11 @@ export class Rush {
    * This is the same as the Rush tool version for that release.
    */
   public static get version(): string {
-    return PackageJsonLookup.loadOwnPackageJson(__dirname).version;
+    if (!this._version) {
+      this._version = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
+    }
+
+    return this._version!;
   }
 
   /**

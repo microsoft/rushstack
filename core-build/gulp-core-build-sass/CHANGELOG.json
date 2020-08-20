@@ -2,6 +2,60 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.12.12",
+      "tag": "@microsoft/gulp-core-build-sass_v4.12.12",
+      "date": "Thu, 20 Aug 2020 18:41:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `1.10.75`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.12.11",
+      "tag": "@microsoft/gulp-core-build-sass_v4.12.11",
+      "date": "Thu, 20 Aug 2020 15:13:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `1.10.74`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" to `6.4.37`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.12.10",
+      "tag": "@microsoft/gulp-core-build-sass_v4.12.10",
+      "date": "Tue, 18 Aug 2020 23:59:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" to `3.16.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `1.10.73`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.28.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" to `6.4.36`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.12.9",
       "tag": "@microsoft/gulp-core-build-sass_v4.12.9",
       "date": "Tue, 18 Aug 2020 03:03:23 GMT",

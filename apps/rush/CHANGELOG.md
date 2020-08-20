@@ -1,6 +1,24 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 18 Aug 2020 03:48:56 GMT and should not be manually modified.
+This log was last generated on Thu, 20 Aug 2020 18:25:41 GMT and should not be manually modified.
+
+## 5.33.1
+Thu, 20 Aug 2020 18:25:41 GMT
+
+### Updates
+
+- Fix issues where installs could fail after running 'rush version' while the 'usePnpmFrozenLockfileForRushInstall' experiment is enabled. See PR #2116 for more details.
+- Fix an issue where "rush deploy" would sometimes report an "already exists" when using the "files" setting in package.json (GitHub #2121)
+- Allow multiple simultaneous invocations of "rush deploy" (GitHub #2125)
+- Load and validate local projects lazily to further improve Rush startup times.
+
+## 5.33.0
+Wed, 19 Aug 2020 00:17:48 GMT
+
+### Updates
+
+- Add support for shell tab completion. See PR for details: https://github.com/microsoft/rushstack/pull/2060
+- Use Import.lazy() to optimize the startup time for Rush
 
 ## 5.32.3
 Tue, 18 Aug 2020 03:48:56 GMT

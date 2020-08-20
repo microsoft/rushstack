@@ -98,6 +98,14 @@ export class JestPlugin implements IHeftPlugin {
           `${jestResults.numFailedTests} Jest test${jestResults.numFailedTests > 1 ? 's' : ''} failed`
         )
       );
+    } else if (jestResults.numFailedTestSuites > 0) {
+      jestLogger.emitError(
+        new Error(
+          `${jestResults.numFailedTestSuites} Jest test suite${
+            jestResults.numFailedTestSuites > 1 ? 's' : ''
+          } failed`
+        )
+      );
     }
   }
 

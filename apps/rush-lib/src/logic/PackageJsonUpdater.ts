@@ -445,7 +445,7 @@ export class PackageJsonUpdater {
 
       console.log();
 
-      console.log(`Found latest version: ${colors.cyan(selectedVersion)}`);
+      console.log(`Found latest version: ${colors.cyan(selectedVersion!)}`);
     }
 
     console.log();

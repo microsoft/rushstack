@@ -4,6 +4,7 @@
 import { Terminal } from '../Terminal';
 import { StringBufferTerminalProvider } from '../StringBufferTerminalProvider';
 import { createColorGrid } from './createColorGrid';
+import { Colors } from '../Colors';
 
 describe('Colors', () => {
   let terminal: Terminal;
@@ -20,5 +21,15 @@ describe('Colors', () => {
     }
 
     expect(provider.getOutput()).toMatchSnapshot();
+  });
+
+  test('correctly normalizes color codes for tests', () => {
+    for (const line of createColorGrid()) {
+      terminal.writeLine(...line);
+    }
+
+    expect(
+      Colors.normalizeColorTokensForTest(provider.getOutput({ normalizeSpecialCharacters: false }))
+    ).toMatchSnapshot();
   });
 });

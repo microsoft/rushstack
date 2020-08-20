@@ -15,10 +15,9 @@ class TestAction extends CommandLineAction {
     });
   }
 
-  protected onExecute(): Promise<void> {
+  protected async onExecute(): Promise<void> {
     expect(this._flag.value).toEqual(true);
     this.done = true;
-    return Promise.resolve();
   }
 
   protected onDefineParameters(): void {
@@ -45,15 +44,15 @@ class TestCommandLine extends CommandLineParser {
 }
 
 describe('CommandLineParser', () => {
-  it('executes an action', () => {
+  it('executes an action', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
 
-    return commandLineParser.execute(['do:the-job', '--flag']).then(() => {
-      expect(commandLineParser.selectedAction).toBeDefined();
-      expect(commandLineParser.selectedAction!.actionName).toEqual('do:the-job');
+    await commandLineParser.execute(['do:the-job', '--flag']);
 
-      const action: TestAction = commandLineParser.selectedAction as TestAction;
-      expect(action.done).toBe(true);
-    });
+    expect(commandLineParser.selectedAction).toBeDefined();
+    expect(commandLineParser.selectedAction!.actionName).toEqual('do:the-job');
+
+    const action: TestAction = commandLineParser.selectedAction as TestAction;
+    expect(action.done).toBe(true);
   });
 });

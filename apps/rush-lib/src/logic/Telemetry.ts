@@ -3,11 +3,12 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { cloneDeep } from 'lodash';
+import { FileSystem, Import } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Rush } from '../api/Rush';
-import { FileSystem } from '@rushstack/node-core-library';
+
+const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 export interface ITelemetryData {
   name: string;
@@ -40,7 +41,7 @@ export class Telemetry {
     if (!this._enabled) {
       return;
     }
-    const data: ITelemetryData = cloneDeep(telemetryData);
+    const data: ITelemetryData = lodash.cloneDeep(telemetryData);
     data.timestamp = data.timestamp || new Date().getTime();
     data.platform = data.platform || process.platform;
     data.rushVersion = data.rushVersion || Rush.version;

@@ -2,6 +2,78 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.3.40",
+      "tag": "@rushstack/localization-plugin_v0.3.40",
+      "date": "Thu, 20 Aug 2020 18:41:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.1.38`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `2.4.40`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.6.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^2.4.39` to `^2.4.40`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.39",
+      "tag": "@rushstack/localization-plugin_v0.3.39",
+      "date": "Thu, 20 Aug 2020 15:13:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.1.37`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `2.4.39`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.6.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^2.4.38` to `^2.4.39`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.38",
+      "tag": "@rushstack/localization-plugin_v0.3.38",
+      "date": "Tue, 18 Aug 2020 23:59:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.28.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.1.36`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `2.4.38`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.6.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^2.4.37` to `^2.4.38`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.37",
       "tag": "@rushstack/localization-plugin_v0.3.37",
       "date": "Tue, 18 Aug 2020 03:03:24 GMT",

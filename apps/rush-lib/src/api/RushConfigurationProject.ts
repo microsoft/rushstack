@@ -123,7 +123,7 @@ export class RushConfigurationProject {
       );
     }
 
-    this._packageJsonEditor = PackageJsonEditor.load(packageJsonFilename);
+    this._packageJsonEditor = PackageJsonEditor.fromObject(this._packageJson, packageJsonFilename);
 
     this._tempProjectName = tempProjectName;
 
