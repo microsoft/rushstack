@@ -64,11 +64,13 @@ export interface IBaseCommandLineDefinition {
   environmentVariable?: string;
 
   /**
-   * This option can be used in cases where a command-line parameter may have
-   * synonyms that the application developer doesn't want to be visible in documentation.
-   * These can be useful when a command-line parameter is renamed, but the developer
-   * doesn't want to break backwards compatibility with systems still invoking the old
-   * longName for the parameter.
+   * Specifies additional names for this parameter that are accepted but not displayed
+   * in the command line help.
+   *
+   * @remarks
+   * This option can be used in cases where a command-line parameter may have been renamed,
+   * but the developer doesn't want to break backwards compatibility with systems that may
+   * still be using the old name. Only the `parameterLongName` syntax is currently allowed.
    */
   undocumentedSynonyms?: string[];
 }
