@@ -998,6 +998,8 @@ export class RushConfiguration {
 
   /**
    * Gets the JSON data structure for the "rush.json" configuration file.
+   *
+   * @internal
    */
   public get rushConfigurationJson(): IRushConfigurationJson {
     return this._rushConfigurationJson;
