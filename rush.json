@@ -451,7 +451,8 @@
     {
       "packageName": "@rushstack/rundown",
       "projectFolder": "apps/rundown",
-      "reviewCategory": "libraries"
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     },
     {
       "packageName": "@microsoft/rush",
