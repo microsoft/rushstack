@@ -86,6 +86,12 @@ function createParser(): DynamicCommandLineParser {
     environmentVariable: 'ENV_STRING2',
     defaultValue: '123'
   });
+  action.defineStringParameter({
+    parameterLongName: '--string-with-undocumented-synonym',
+    description: 'A string with an undocumented synonym',
+    argumentName: 'TEXT',
+    undocumentedSynonyms: ['--undocumented-synonym']
+  });
 
   // String List
   action.defineStringListParameter({
@@ -273,5 +279,28 @@ describe('CommandLineParameter', () => {
       }
       expect(copiedArgs).toMatchSnapshot();
     });
+
+  it('allows an undocumented synonym', async () => {
+    const commandLineParser: CommandLineParser = createParser();
+    const action: CommandLineAction = commandLineParser.getAction('do:the-job');
+
+    const args: string[] = [
+      'do:the-job',
+      '--undocumented-synonym',
+      'undocumented-value',
+      '--integer-required',
+      '6'
+    ];
+
+    await commandLineParser.execute(args);
+
+    expect(commandLineParser.selectedAction).toBe(action);
+
+    const copiedArgs: string[] = [];
+    for (const parameter of action.parameters) {
+      copiedArgs.push(`### ${parameter.longName} output: ###`);
+      parameter.appendToArgList(copiedArgs);
+    }
+    expect(copiedArgs).toMatchSnapshot();
   });
 });
