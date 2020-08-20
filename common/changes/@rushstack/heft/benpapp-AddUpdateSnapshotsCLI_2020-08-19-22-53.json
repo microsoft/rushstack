@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Adds Command Line Argument --update-snapshots which when included causes the test action to update the Jest snapshots, which are otherwise not changed. This replaces the older logic of using --production to prevent updating snapshots, which were otherwise updated.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "BPapp-MS@users.noreply.github.com"
+}
