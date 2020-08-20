@@ -35,17 +35,17 @@ Suppose you maintain a small NPM project that is invoked as follows:
 # The folder where your tool is developed
 $ cd my-tool
 
-# When you invoke "my-tool --my-arg 123" from the shell, let's suppose that it invokes
+# When you invoke "my-tool --my-option 123 --verbose" from the shell, let's suppose that it invokes
 # this Node.js command:
-$ node lib/start.js --my-arg 123
+$ node lib/start.js --my-option 123 --verbose
 ```
 
 And suppose that your tool's startup time is rather slow, because the code calls `require()` to load many different
 NPM packages.  We can create a report to see all the imports:
 
 ```shell
-# We use "--arg" to pass the command-line arguments for "my-tool"
-$ rundown inspect --script lib/start.js --arg=--my-arg --arg=123
+# We use "--args" to pass the command-line arguments for "my-tool"
+$ rundown inspect --script lib/start.js --args="--my-option 123 --verbose"
 ```
 
 The report may look like this:
@@ -95,8 +95,8 @@ The report may look like this:
 
 To see how each file is imported, you can add the `--trace-imports` switch.
 ```shell
-# We use "--arg" to pass the command-line arguments for "my-tool"
-$ rundown inspect --script lib/start.js --arg=--my-arg --arg=123 --trace-imports
+# We use "--args" to pass the command-line arguments for "my-tool"
+$ rundown inspect --script lib/start.js --args="--my-option 123 --verbose" --trace-imports
 ```
 
 The report now shows more detail:
@@ -133,8 +133,8 @@ or [import-lazy](https://www.npmjs.com/package/import-lazy).
 To detect future regressions, use the `rundown snapshot` command to write a snapshot file:
 
 ```shell
-# We use "--arg" to pass the command-line arguments for "my-tool"
-$ rundown snapshot --script lib/start.js --arg=--my-arg --arg=123
+# We use "--args" to pass the command-line arguments for "my-tool"
+$ rundown snapshot --script lib/start.js --args="--my-option 123 --verbose"
 
 # This file can be committed to Git to track regressions
 $ git add rundown-snapshot.log
@@ -184,9 +184,12 @@ Optional arguments:
   -s PATH, --script PATH
                         The path to a .js file that will be the entry point
                         for the target Node.js process
-  -a STRING, --arg STRING
+  -a STRING, --args STRING
                         Specifies command-line arguments to be passed to the
-                        target Node.js process
+                        target Node.js process. The value should be a single
+                        text string delimited by spaces. Example: rundown
+                        inspect --scripts ./example.js --args "--flag
+                        --option=123"
   -q, --quiet           Suppress STDOUT/STDERR for the target Node.js process
   -i, --ignore-exit-code
                         Do not report an error if the target Node.js process
@@ -204,9 +207,12 @@ Optional arguments:
   -s PATH, --script PATH
                         The path to a .js file that will be the entry point
                         for the target Node.js process
-  -a STRING, --arg STRING
+  -a STRING, --args STRING
                         Specifies command-line arguments to be passed to the
-                        target Node.js process
+                        target Node.js process. The value should be a single
+                        text string delimited by spaces. Example: rundown
+                        inspect --scripts ./example.js --args "--flag
+                        --option=123"
   -q, --quiet           Suppress STDOUT/STDERR for the target Node.js process
   -i, --ignore-exit-code
                         Do not report an error if the target Node.js process

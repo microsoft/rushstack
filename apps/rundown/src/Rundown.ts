@@ -4,6 +4,7 @@
 import { FileSystem, PackageJsonLookup, Sort, Text } from '@rushstack/node-core-library';
 import * as child_process from 'child_process';
 import * as path from 'path';
+import stringArgv from 'string-argv';
 
 import { IpcMessage } from './LauncherTypes';
 
@@ -13,7 +14,7 @@ export class Rundown {
 
   public async invokeAsync(
     scriptPath: string,
-    args: ReadonlyArray<string>,
+    args: string,
     quiet: boolean,
     ignoreExitCode: boolean
   ): Promise<void> {
@@ -22,9 +23,11 @@ export class Rundown {
     }
     const absoluteScriptPath: string = path.resolve(scriptPath);
 
+    const expandedArgs: string[] = stringArgv(args);
+
     // Example process.argv:
     // ["path/to/launcher.js", "path/to/target-script.js", "first-target-arg"]
-    const nodeArgs: string[] = [path.join(__dirname, 'launcher.js'), absoluteScriptPath, ...args];
+    const nodeArgs: string[] = [path.join(__dirname, 'launcher.js'), absoluteScriptPath, ...expandedArgs];
 
     await this._spawnLauncherAsync(nodeArgs, quiet, ignoreExitCode);
   }

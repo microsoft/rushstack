@@ -8,13 +8,12 @@ import {
   CommandLineAction,
   ICommandLineActionOptions,
   CommandLineStringParameter,
-  CommandLineStringListParameter,
   CommandLineFlagParameter
 } from '@rushstack/ts-command-line';
 
 export abstract class BaseReportAction extends CommandLineAction {
   protected scriptParameter: CommandLineStringParameter;
-  protected argsParameter: CommandLineStringListParameter;
+  protected argsParameter: CommandLineStringParameter;
   protected quietParameter: CommandLineFlagParameter;
   protected ignoreExitCodeParameter: CommandLineFlagParameter;
 
@@ -31,11 +30,14 @@ export abstract class BaseReportAction extends CommandLineAction {
       description: 'The path to a .js file that will be the entry point for the target Node.js process',
       required: true
     });
-    this.argsParameter = this.defineStringListParameter({
-      parameterLongName: '--arg',
+    this.argsParameter = this.defineStringParameter({
+      parameterLongName: '--args',
       parameterShortName: '-a',
       argumentName: 'STRING',
-      description: 'Specifies command-line arguments to be passed to the target Node.js process'
+      description:
+        'Specifies command-line arguments to be passed to the target Node.js process.  The value' +
+        ' should be a single text string delimited by spaces.' +
+        ' Example: rundown inspect --scripts ./example.js --args "--flag --option=123"'
     });
     this.quietParameter = this.defineFlagParameter({
       parameterLongName: '--quiet',
