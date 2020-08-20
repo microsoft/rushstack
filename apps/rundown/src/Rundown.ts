@@ -4,50 +4,12 @@
 import { FileSystem, PackageJsonLookup, Sort, Text } from '@rushstack/node-core-library';
 import * as child_process from 'child_process';
 import * as path from 'path';
+
 import { IpcMessage } from './LauncherTypes';
 
 export class Rundown {
   // Map from required path --> caller path
   private _importedModuleMap: Map<string, string> = new Map();
-
-  private async _spawnLauncherAsync(
-    nodeArgs: string[],
-    quiet: boolean,
-    ignoreExitCode: boolean
-  ): Promise<void> {
-    const childProcess: child_process.ChildProcess = child_process.spawn(process.execPath, nodeArgs, {
-      stdio: quiet ? ['inherit', 'ignore', 'ignore', 'ipc'] : ['inherit', 'inherit', 'inherit', 'ipc']
-    });
-
-    let completedNormally: boolean = false;
-
-    childProcess.on('message', (message: IpcMessage): void => {
-      switch (message.id) {
-        case 'trace':
-          for (const record of message.records) {
-            this._importedModuleMap.set(record.importedModule, record.callingModule);
-          }
-          break;
-        case 'done':
-          completedNormally = true;
-          break;
-        default:
-          throw new Error('Unknown IPC message: ' + JSON.stringify(message));
-      }
-    });
-
-    return new Promise((resolve, reject) => {
-      childProcess.on('exit', (code: number | null, signal: string | null): void => {
-        if (code !== 0 && !ignoreExitCode) {
-          reject(new Error('Child process terminated with exit code ' + code));
-        } else if (!completedNormally) {
-          reject(new Error('Child process terminated without completing IPC handshake'));
-        } else {
-          resolve();
-        }
-      });
-    });
-  }
 
   public async invokeAsync(
     scriptPath: string,
@@ -88,6 +50,9 @@ export class Rundown {
           const relativePath: string = path.relative(process.cwd(), importedPackageFolder);
           importedPackageFolders.add(Text.replaceAll(relativePath, '\\', '/'));
         }
+      } else {
+        // If the importedPath does not belong to an NPM package, then rundown-snapshot.log can ignore it.
+        // In other words, treat it the same way as the local project's source files.
       }
     }
 
@@ -130,5 +95,44 @@ export class Rundown {
     }
 
     FileSystem.writeFile(reportPath, data);
+  }
+
+  private async _spawnLauncherAsync(
+    nodeArgs: string[],
+    quiet: boolean,
+    ignoreExitCode: boolean
+  ): Promise<void> {
+    const childProcess: child_process.ChildProcess = child_process.spawn(process.execPath, nodeArgs, {
+      stdio: quiet ? ['inherit', 'ignore', 'ignore', 'ipc'] : ['inherit', 'inherit', 'inherit', 'ipc']
+    });
+
+    let completedNormally: boolean = false;
+
+    childProcess.on('message', (message: IpcMessage): void => {
+      switch (message.id) {
+        case 'trace':
+          for (const record of message.records) {
+            this._importedModuleMap.set(record.importedModule, record.callingModule);
+          }
+          break;
+        case 'done':
+          completedNormally = true;
+          break;
+        default:
+          throw new Error('Unknown IPC message: ' + JSON.stringify(message));
+      }
+    });
+
+    return new Promise((resolve, reject) => {
+      childProcess.on('exit', (code: number | null, signal: string | null): void => {
+        if (code !== 0 && !ignoreExitCode) {
+          reject(new Error('Child process terminated with exit code ' + code));
+        } else if (!completedNormally) {
+          reject(new Error('Child process terminated without completing IPC handshake'));
+        } else {
+          resolve();
+        }
+      });
+    });
   }
 }

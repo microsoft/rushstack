@@ -7,7 +7,7 @@ import * as process from 'process';
 import { /* type */ LauncherAction, IIpcTrace, IIpcDone, IIpcTraceRecord } from './LauncherTypes';
 
 // The _ipcTraceRecordsBatch will get transmitted when this many items are accumulated
-const IPC_BATCH_SIZE: number = 1000;
+const IPC_BATCH_SIZE: number = 300;
 
 class Launcher {
   public action: LauncherAction = LauncherAction.Inspect;
