@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rundown",
+      "comment": "Fix incorrect behavior when the \"--args\" parameter was omitted",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rundown",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
