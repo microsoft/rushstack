@@ -450,9 +450,7 @@ export class RushConfiguration {
   private _allowMostlyStandardPackageNames: boolean;
   private _ensureConsistentVersions: boolean;
   private _suppressNodeLtsWarning: boolean;
-  private _variants: {
-    [variantName: string]: boolean;
-  };
+  private _variants: Set<string>;
 
   // "approvedPackagesPolicy" feature
   private _approvedPackagesPolicy: ApprovedPackagesPolicy;
@@ -698,23 +696,19 @@ export class RushConfiguration {
     );
     this._versionPolicyConfiguration = new VersionPolicyConfiguration(versionPolicyConfigFile);
 
-    const variants: {
-      [variantName: string]: boolean;
-    } = {};
+    this._variants = new Set<string>();
 
     if (rushConfigurationJson.variants) {
       for (const variantOptions of rushConfigurationJson.variants) {
         const { variantName } = variantOptions;
 
-        if (variants[variantName]) {
+        if (this._variants.has(variantName)) {
           throw new Error(`Duplicate variant named '${variantName}' specified in configuration.`);
         }
 
-        variants[variantName] = true;
+        this._variants.add(variantName);
       }
     }
-
-    this._variants = variants;
   }
 
   private _initializeAndValidateLocalProjects(): void {
@@ -1499,11 +1493,11 @@ export class RushConfiguration {
    */
   public getCommittedShrinkwrapFilename(variant?: string | undefined): string {
     if (variant) {
-      if (!this._variants[variant]) {
+      if (!this._variants.has(variant)) {
         throw new Error(
           `Invalid variant name '${variant}'. The provided variant parameter needs to be ` +
             `one of the following from rush.json: ` +
-            `${Object.keys(this._variants)
+            `${Array.from(this._variants.values())
               .map((name: string) => `"${name}"`)
               .join(', ')}.`
         );
@@ -1625,11 +1619,11 @@ export class RushConfiguration {
 
   private _getVariantConfigFolderPath(variant?: string | undefined): string {
     if (variant) {
-      if (!this._variants[variant]) {
+      if (!this._variants.has(variant)) {
         throw new Error(
           `Invalid variant name '${variant}'. The provided variant parameter needs to be ` +
             `one of the following from rush.json: ` +
-            `${Object.keys(this._variants)
+            `${Array.from(this._variants.values())
               .map((name: string) => `"${name}"`)
               .join(', ')}.`
         );
