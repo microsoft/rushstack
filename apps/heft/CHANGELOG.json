@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.6.3",
+      "tag": "@rushstack/heft_v0.6.3",
+      "date": "Thu, 20 Aug 2020 18:41:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where failed test suites aren't listed as failures."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.2",
       "tag": "@rushstack/heft_v0.6.2",
       "date": "Thu, 20 Aug 2020 15:13:52 GMT",

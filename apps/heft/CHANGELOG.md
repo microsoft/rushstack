@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 20 Aug 2020 15:13:52 GMT and should not be manually modified.
+This log was last generated on Thu, 20 Aug 2020 18:41:47 GMT and should not be manually modified.
+
+## 0.6.3
+Thu, 20 Aug 2020 18:41:47 GMT
+
+### Patches
+
+- Fix an issue where failed test suites aren't listed as failures.
 
 ## 0.6.2
 Thu, 20 Aug 2020 15:13:52 GMT
