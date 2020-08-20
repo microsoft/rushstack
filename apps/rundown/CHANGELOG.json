@@ -2,6 +2,18 @@
   "name": "@rushstack/rundown",
   "entries": [
     {
+      "version": "1.0.1",
+      "tag": "@rushstack/rundown_v1.0.1",
+      "date": "Thu, 20 Aug 2020 04:47:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix incorrect behavior when the \"--args\" parameter was omitted"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.0",
       "tag": "@rushstack/rundown_v1.0.0",
       "date": "Thu, 20 Aug 2020 01:17:28 GMT",
