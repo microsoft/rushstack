@@ -315,7 +315,7 @@ export class Rush {
     static launch(launcherVersion: string, arg: ILaunchOptions): void;
     static launchRushX(launcherVersion: string, options: ILaunchOptions): void;
     static readonly version: string;
-}
+    }
 
 // @public
 export class RushConfiguration {
@@ -375,6 +375,8 @@ export class RushConfiguration {
     readonly repositoryDefaultFullyQualifiedRemoteBranch: string;
     readonly repositoryDefaultRemote: string;
     readonly repositoryUrl: string | undefined;
+    // @internal
+    readonly rushConfigurationJson: IRushConfigurationJson;
     readonly rushJsonFile: string;
     readonly rushJsonFolder: string;
     // @deprecated

@@ -62,6 +62,17 @@ export interface IBaseCommandLineDefinition {
    *   ordinary String Parameter:  Any value is accepted, including an empty string.
    */
   environmentVariable?: string;
+
+  /**
+   * Specifies additional names for this parameter that are accepted but not displayed
+   * in the command line help.
+   *
+   * @remarks
+   * This option can be used in cases where a command-line parameter may have been renamed,
+   * but the developer doesn't want to break backwards compatibility with systems that may
+   * still be using the old name. Only the `parameterLongName` syntax is currently allowed.
+   */
+  undocumentedSynonyms?: string[];
 }
 
 /**
@@ -82,6 +93,14 @@ export interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLine
    * be comprised of upper-case letters, numbers, and underscores.  It should be kept short.
    */
   argumentName: string;
+
+  /**
+   * An optional callback that provides a list of custom choices for tab completion.
+   * @remarks
+   * This option is only used when `ICommandLineParserOptions.enableTabCompletionAction`
+   * is enabled.
+   */
+  completions?: () => Promise<string[]>;
 }
 
 /**
@@ -100,6 +119,14 @@ export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition
    * {@inheritDoc ICommandLineStringDefinition.defaultValue}
    */
   defaultValue?: string;
+
+  /**
+   * An optional callback that provides a list of custom choices for tab completion.
+   * @remarks
+   * This option is only used when `ICommandLineParserOptions.enableTabCompletionAction`
+   * is enabled.
+   */
+  completions?: () => Promise<string[]>;
 }
 
 /**

@@ -31,7 +31,7 @@ export class ApiExtractorPlugin implements IHeftPlugin {
       heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
         build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
           bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-            await this._runApiExtractorAsync({
+            await this._runApiExtractorAsync(heftSession, {
               heftConfiguration,
               useProjectTypescriptVersion: !!bundle.properties.apiExtractorConfiguration
                 .useProjectTypescriptVersion,
@@ -46,7 +46,10 @@ export class ApiExtractorPlugin implements IHeftPlugin {
     }
   }
 
-  private async _runApiExtractorAsync(options: IRunApiExtractorOptions): Promise<void> {
+  private async _runApiExtractorAsync(
+    heftSession: HeftSession,
+    options: IRunApiExtractorOptions
+  ): Promise<void> {
     const {
       heftConfiguration,
       useProjectTypescriptVersion,
@@ -81,7 +84,8 @@ export class ApiExtractorPlugin implements IHeftPlugin {
           : undefined,
         buildFolder: buildFolder,
         production: production
-      }
+      },
+      heftSession
     );
     if (debugMode) {
       await apiExtractorRunner.invokeAsync();

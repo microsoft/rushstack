@@ -29,6 +29,7 @@ for large scale TypeScript monorepos.
 | [/apps/api-extractor](./apps/api-extractor/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-extractor.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-extractor) | [changelog](./apps/api-extractor/CHANGELOG.md) | [@microsoft/api-extractor](https://www.npmjs.com/package/@microsoft/api-extractor) |
 | [/apps/api-extractor-model](./apps/api-extractor-model/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-extractor-model.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-extractor-model) | [changelog](./apps/api-extractor-model/CHANGELOG.md) | [@microsoft/api-extractor-model](https://www.npmjs.com/package/@microsoft/api-extractor-model) |
 | [/apps/heft](./apps/heft/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fheft.svg)](https://badge.fury.io/js/%40rushstack%2Fheft) | [changelog](./apps/heft/CHANGELOG.md) | [@rushstack/heft](https://www.npmjs.com/package/@rushstack/heft) |
+| [/apps/rundown](./apps/rundown/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frundown.svg)](https://badge.fury.io/js/%40rushstack%2Frundown) | [changelog](./apps/rundown/CHANGELOG.md) | [@rushstack/rundown](https://www.npmjs.com/package/@rushstack/rundown) |
 | [/apps/rush](./apps/rush/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush.svg)](https://badge.fury.io/js/%40microsoft%2Frush) | [changelog](./apps/rush/CHANGELOG.md) | [@microsoft/rush](https://www.npmjs.com/package/@microsoft/rush) |
 | [/apps/rush-buildxl](./apps/rush-buildxl/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-buildxl.svg)](https://badge.fury.io/js/%40microsoft%2Frush-buildxl) | | [@microsoft/rush-buildxl](https://www.npmjs.com/package/@microsoft/rush-buildxl) |
 | [/apps/rush-lib](./apps/rush-lib/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-lib.svg)](https://badge.fury.io/js/%40microsoft%2Frush-lib) | | [@microsoft/rush-lib](https://www.npmjs.com/package/@microsoft/rush-lib) |
@@ -115,6 +116,7 @@ for large scale TypeScript monorepos.
 | [/build-tests/rush-stack-compiler-3.9-library-test](./build-tests/rush-stack-compiler-3.9-library-test/) |  |
 | [/build-tests/ts-command-line-test](./build-tests/ts-command-line-test/) | Building this project is a regression test for ts-command-line |
 | [/build-tests/web-library-build-test](./build-tests/web-library-build-test/) |  |
+| [/heft-plugins/pre-compile-hardlink-or-copy-plugin](./heft-plugins/pre-compile-hardlink-or-copy-plugin/) | Heft plugin that can be used to create a hardlink before the compilation runs. |
 | [/libraries/rushell](./libraries/rushell/) | Execute shell commands using a consistent syntax on every platform |
 | [/repo-scripts/doc-plugin-rush-stack](./repo-scripts/doc-plugin-rush-stack/) | API Documenter plugin used with the rushstack.io website |
 | [/repo-scripts/generate-api-docs](./repo-scripts/generate-api-docs/) | Used to generate API docs for the rushstack.io website |

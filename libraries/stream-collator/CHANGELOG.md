@@ -1,6 +1,53 @@
 # Change Log - @rushstack/stream-collator
 
-This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+This log was last generated on Thu, 20 Aug 2020 15:13:52 GMT and should not be manually modified.
+
+## 3.2.41
+Thu, 20 Aug 2020 15:13:52 GMT
+
+*Version update only*
+
+## 3.2.40
+Tue, 18 Aug 2020 23:59:42 GMT
+
+*Version update only*
+
+## 3.2.39
+Tue, 18 Aug 2020 03:03:24 GMT
+
+*Version update only*
+
+## 3.2.38
+Mon, 17 Aug 2020 05:31:53 GMT
+
+*Version update only*
+
+## 3.2.37
+Mon, 17 Aug 2020 04:53:23 GMT
+
+*Version update only*
+
+## 3.2.36
+Thu, 13 Aug 2020 09:26:40 GMT
+
+*Version update only*
+
+## 3.2.35
+Thu, 13 Aug 2020 04:57:38 GMT
+
+*Version update only*
+
+## 3.2.34
+Wed, 12 Aug 2020 00:10:05 GMT
+
+### Patches
+
+- Updated project to build with Heft
+
+## 3.2.33
+Wed, 05 Aug 2020 18:27:32 GMT
+
+*Version update only*
 
 ## 3.2.32
 Fri, 03 Jul 2020 15:09:04 GMT

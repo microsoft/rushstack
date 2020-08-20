@@ -14,7 +14,21 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "heft-node-basic-test build",
+      "name": "Run in specified folder",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "(your project path)",
+      "args": [
+        "--debug",
+        "build",
+        "--clean"
+      ],
+      "console": "integratedTerminal",
+      "sourceMaps": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "node-basic build",
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/heft-node-basic-test/",
       "args": ["--debug", "build", "--clean"],
@@ -24,7 +38,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "heft-node-basic-test test",
+      "name": "node-basic test",
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/heft-node-basic-test/",
       "args": ["--debug", "test", "--clean"],
@@ -34,9 +48,19 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "heft-node-everything-test build",
+      "name": "node-basic test --watch",
       "program": "${workspaceFolder}/lib/start.js",
-      "cwd": "${workspaceFolder}/../../build-tests/heft-node-everything-test/",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-node-basic-test/",
+      "args": ["--debug", "test", "--watch", "--clean"],
+      "console": "integratedTerminal",
+      "sourceMaps": false
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "webpack-basic build",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-webpack-basic-test/",
       "args": ["--debug", "build", "--clean"],
       "console": "integratedTerminal",
       "sourceMaps": false
@@ -44,9 +68,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "heft-node-everything-test test",
+      "name": "webpack-basic test",
       "program": "${workspaceFolder}/lib/start.js",
-      "cwd": "${workspaceFolder}/../../build-tests/heft-node-everything-test/",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-webpack-basic-test/",
       "args": ["--debug", "test", "--clean"],
       "console": "integratedTerminal",
       "sourceMaps": false
@@ -54,10 +78,10 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "heft-oldest-compiler-test build",
+      "name": "webpack-basic start",
       "program": "${workspaceFolder}/lib/start.js",
-      "cwd": "${workspaceFolder}/../../build-tests/heft-oldest-compiler-test/",
-      "args": ["--debug", "test", "--clean"],
+      "cwd": "${workspaceFolder}/../../build-tests/heft-webpack-basic-test/",
+      "args": ["--debug", "start", "--clean"],
       "console": "integratedTerminal",
       "sourceMaps": false
     }

@@ -86,6 +86,12 @@ function createParser(): DynamicCommandLineParser {
     environmentVariable: 'ENV_STRING2',
     defaultValue: '123'
   });
+  action.defineStringParameter({
+    parameterLongName: '--string-with-undocumented-synonym',
+    description: 'A string with an undocumented synonym',
+    argumentName: 'TEXT',
+    undocumentedSynonyms: ['--undocumented-synonym']
+  });
 
   // String List
   action.defineStringListParameter({
@@ -134,7 +140,7 @@ describe('CommandLineParameter', () => {
     expect(helpText).toMatchSnapshot();
   });
 
-  it('parses an input with ALL parameters', () => {
+  it('parses an input with ALL parameters', async () => {
     const commandLineParser: CommandLineParser = createParser();
     const action: CommandLineAction = commandLineParser.getAction('do:the-job');
 
@@ -156,90 +162,84 @@ describe('CommandLineParameter', () => {
       'second'
     ];
 
-    return commandLineParser.execute(args).then(() => {
-      expect(commandLineParser.selectedAction).toBe(action);
+    await commandLineParser.execute(args);
 
-      expectPropertiesToMatchSnapshot(
-        commandLineParser.getFlagParameter('--global-flag'),
-        snapshotPropertyNames
-      );
+    expect(commandLineParser.selectedAction).toBe(action);
 
-      expectPropertiesToMatchSnapshot(action.getChoiceParameter('--choice'), snapshotPropertyNames);
-      expectPropertiesToMatchSnapshot(
-        action.getChoiceParameter('--choice-with-default'),
-        snapshotPropertyNames
-      );
-      expectPropertiesToMatchSnapshot(action.getFlagParameter('--flag'), snapshotPropertyNames);
-      expectPropertiesToMatchSnapshot(action.getIntegerParameter('--integer'), snapshotPropertyNames);
-      expectPropertiesToMatchSnapshot(
-        action.getIntegerParameter('--integer-with-default'),
-        snapshotPropertyNames
-      );
-      expectPropertiesToMatchSnapshot(
-        action.getIntegerParameter('--integer-required'),
-        snapshotPropertyNames
-      );
-      expectPropertiesToMatchSnapshot(action.getStringParameter('--string'), snapshotPropertyNames);
-      expectPropertiesToMatchSnapshot(
-        action.getStringParameter('--string-with-default'),
-        snapshotPropertyNames
-      );
-      expectPropertiesToMatchSnapshot(action.getStringListParameter('--string-list'), snapshotPropertyNames);
+    expectPropertiesToMatchSnapshot(
+      commandLineParser.getFlagParameter('--global-flag'),
+      snapshotPropertyNames
+    );
 
-      const copiedArgs: string[] = [];
-      for (const parameter of action.parameters) {
-        copiedArgs.push(`### ${parameter.longName} output: ###`);
-        parameter.appendToArgList(copiedArgs);
-      }
-      expect(copiedArgs).toMatchSnapshot();
-    });
+    expectPropertiesToMatchSnapshot(action.getChoiceParameter('--choice'), snapshotPropertyNames);
+    expectPropertiesToMatchSnapshot(
+      action.getChoiceParameter('--choice-with-default'),
+      snapshotPropertyNames
+    );
+    expectPropertiesToMatchSnapshot(action.getFlagParameter('--flag'), snapshotPropertyNames);
+    expectPropertiesToMatchSnapshot(action.getIntegerParameter('--integer'), snapshotPropertyNames);
+    expectPropertiesToMatchSnapshot(
+      action.getIntegerParameter('--integer-with-default'),
+      snapshotPropertyNames
+    );
+    expectPropertiesToMatchSnapshot(action.getIntegerParameter('--integer-required'), snapshotPropertyNames);
+    expectPropertiesToMatchSnapshot(action.getStringParameter('--string'), snapshotPropertyNames);
+    expectPropertiesToMatchSnapshot(
+      action.getStringParameter('--string-with-default'),
+      snapshotPropertyNames
+    );
+    expectPropertiesToMatchSnapshot(action.getStringListParameter('--string-list'), snapshotPropertyNames);
+
+    const copiedArgs: string[] = [];
+    for (const parameter of action.parameters) {
+      copiedArgs.push(`### ${parameter.longName} output: ###`);
+      parameter.appendToArgList(copiedArgs);
+    }
+    expect(copiedArgs).toMatchSnapshot();
   });
 
-  it('parses an input with NO parameters', () => {
+  it('parses an input with NO parameters', async () => {
     const commandLineParser: CommandLineParser = createParser();
     const action: CommandLineAction = commandLineParser.getAction('do:the-job');
     const args: string[] = ['do:the-job', '--integer-required', '123'];
 
-    return commandLineParser.execute(args).then(() => {
-      expect(commandLineParser.selectedAction).toBe(action);
+    await commandLineParser.execute(args);
 
-      expectPropertiesToMatchSnapshot(
-        commandLineParser.getFlagParameter('--global-flag'),
-        snapshotPropertyNames
-      );
+    expect(commandLineParser.selectedAction).toBe(action);
 
-      expectPropertiesToMatchSnapshot(action.getChoiceParameter('--choice'), snapshotPropertyNames);
-      expectPropertiesToMatchSnapshot(
-        action.getChoiceParameter('--choice-with-default'),
-        snapshotPropertyNames
-      );
-      expectPropertiesToMatchSnapshot(action.getFlagParameter('--flag'), snapshotPropertyNames);
-      expectPropertiesToMatchSnapshot(action.getIntegerParameter('--integer'), snapshotPropertyNames);
-      expectPropertiesToMatchSnapshot(
-        action.getIntegerParameter('--integer-with-default'),
-        snapshotPropertyNames
-      );
-      expectPropertiesToMatchSnapshot(
-        action.getIntegerParameter('--integer-required'),
-        snapshotPropertyNames
-      );
-      expectPropertiesToMatchSnapshot(action.getStringParameter('--string'), snapshotPropertyNames);
-      expectPropertiesToMatchSnapshot(
-        action.getStringParameter('--string-with-default'),
-        snapshotPropertyNames
-      );
-      expectPropertiesToMatchSnapshot(action.getStringListParameter('--string-list'), snapshotPropertyNames);
+    expectPropertiesToMatchSnapshot(
+      commandLineParser.getFlagParameter('--global-flag'),
+      snapshotPropertyNames
+    );
 
-      const copiedArgs: string[] = [];
-      for (const parameter of action.parameters) {
-        copiedArgs.push(`### ${parameter.longName} output: ###`);
-        parameter.appendToArgList(copiedArgs);
-      }
-      expect(copiedArgs).toMatchSnapshot();
-    });
+    expectPropertiesToMatchSnapshot(action.getChoiceParameter('--choice'), snapshotPropertyNames);
+    expectPropertiesToMatchSnapshot(
+      action.getChoiceParameter('--choice-with-default'),
+      snapshotPropertyNames
+    );
+    expectPropertiesToMatchSnapshot(action.getFlagParameter('--flag'), snapshotPropertyNames);
+    expectPropertiesToMatchSnapshot(action.getIntegerParameter('--integer'), snapshotPropertyNames);
+    expectPropertiesToMatchSnapshot(
+      action.getIntegerParameter('--integer-with-default'),
+      snapshotPropertyNames
+    );
+    expectPropertiesToMatchSnapshot(action.getIntegerParameter('--integer-required'), snapshotPropertyNames);
+    expectPropertiesToMatchSnapshot(action.getStringParameter('--string'), snapshotPropertyNames);
+    expectPropertiesToMatchSnapshot(
+      action.getStringParameter('--string-with-default'),
+      snapshotPropertyNames
+    );
+    expectPropertiesToMatchSnapshot(action.getStringListParameter('--string-list'), snapshotPropertyNames);
+
+    const copiedArgs: string[] = [];
+    for (const parameter of action.parameters) {
+      copiedArgs.push(`### ${parameter.longName} output: ###`);
+      parameter.appendToArgList(copiedArgs);
+    }
+    expect(copiedArgs).toMatchSnapshot();
   });
 
-  it('parses each parameter from an environment variable', () => {
+  it('parses each parameter from an environment variable', async () => {
     const commandLineParser: CommandLineParser = createParser();
     const action: CommandLineAction = commandLineParser.getAction('do:the-job');
 
@@ -263,15 +263,39 @@ describe('CommandLineParameter', () => {
     process.env.ENV_STRING_LIST = 'simple text';
     process.env.ENV_JSON_STRING_LIST = ' [ 1, true, "Hello, world!" ] ';
 
-    return commandLineParser.execute(args).then(() => {
-      expect(commandLineParser.selectedAction).toBe(action);
+    await commandLineParser.execute(args);
 
-      const copiedArgs: string[] = [];
-      for (const parameter of action.parameters) {
-        copiedArgs.push(`### ${parameter.longName} output: ###`);
-        parameter.appendToArgList(copiedArgs);
-      }
-      expect(copiedArgs).toMatchSnapshot();
-    });
+    expect(commandLineParser.selectedAction).toBe(action);
+
+    const copiedArgs: string[] = [];
+    for (const parameter of action.parameters) {
+      copiedArgs.push(`### ${parameter.longName} output: ###`);
+      parameter.appendToArgList(copiedArgs);
+    }
+    expect(copiedArgs).toMatchSnapshot();
+  });
+
+  it('allows an undocumented synonym', async () => {
+    const commandLineParser: CommandLineParser = createParser();
+    const action: CommandLineAction = commandLineParser.getAction('do:the-job');
+
+    const args: string[] = [
+      'do:the-job',
+      '--undocumented-synonym',
+      'undocumented-value',
+      '--integer-required',
+      '6'
+    ];
+
+    await commandLineParser.execute(args);
+
+    expect(commandLineParser.selectedAction).toBe(action);
+
+    const copiedArgs: string[] = [];
+    for (const parameter of action.parameters) {
+      copiedArgs.push(`### ${parameter.longName} output: ###`);
+      parameter.appendToArgList(copiedArgs);
+    }
+    expect(copiedArgs).toMatchSnapshot();
   });
 });

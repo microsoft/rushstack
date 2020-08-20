@@ -11,6 +11,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@jest/transform",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@jest/types",
       "allowedCategories": [ "libraries" ]
     },
@@ -26,7 +30,6 @@
       "name": "@microsoft/api-extractor-model",
       "allowedCategories": [ "libraries" ]
     },
- 
     {
       "name": "@microsoft/gulp-core-build",
       "allowedCategories": [ "libraries" ]
@@ -192,6 +195,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/pre-compile-hardlink-or-copy-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/set-webpack-public-path-plugin",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -284,6 +291,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "css-loader",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "deasync",
       "allowedCategories": [ "libraries" ]
     },
@@ -330,6 +341,10 @@
     {
       "name": "express",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "file-loader",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "fs-extra",
@@ -612,8 +627,20 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "ssri",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "strict-uri-encode",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "string-argv",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "style-loader",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "sudo",

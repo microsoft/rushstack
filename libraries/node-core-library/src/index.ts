@@ -7,6 +7,7 @@
  * @packageDocumentation
  */
 
+export { AlreadyReportedError } from './AlreadyReportedError';
 export { FileConstants, FolderConstants } from './Constants';
 export {
   ExecutableStdioStreamMapping,
@@ -21,6 +22,7 @@ export {
   IPackageJsonDependencyTable,
   IPackageJsonScriptTable
 } from './IPackageJson';
+export { Import } from './Import';
 export { InternalError } from './InternalError';
 export { JsonObject, JsonFile, IJsonFileSaveOptions, IJsonFileStringifyOptions } from './JsonFile';
 export {
@@ -68,4 +70,8 @@ export { Terminal } from './Terminal/Terminal';
 export { Colors, IColorableSequence, ColorValue, TextAttribute } from './Terminal/Colors';
 export { ITerminalProvider, TerminalProviderSeverity } from './Terminal/ITerminalProvider';
 export { ConsoleTerminalProvider, IConsoleTerminalProviderOptions } from './Terminal/ConsoleTerminalProvider';
-export { StringBufferTerminalProvider } from './Terminal/StringBufferTerminalProvider';
+export {
+  StringBufferTerminalProvider,
+  IStringBufferOutputOptions
+} from './Terminal/StringBufferTerminalProvider';
+export { TypeUuid } from './TypeUuid';

@@ -3,14 +3,20 @@
 
 import * as os from 'os';
 import * as semver from 'semver';
-
+import { Import } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { PackageJsonUpdater, SemVerStyle } from '../../logic/PackageJsonUpdater';
 import { DependencySpecifier } from '../../logic/DependencySpecifier';
+
+// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
+import * as PackageJsonUpdaterTypes from '../../logic/PackageJsonUpdater';
+const packageJsonUpdaterModule: typeof PackageJsonUpdaterTypes = Import.lazy(
+  '../../logic/PackageJsonUpdater',
+  require
+);
 
 export class AddAction extends BaseRushAction {
   private _allFlag: CommandLineFlagParameter;
@@ -87,7 +93,7 @@ export class AddAction extends BaseRushAction {
     });
   }
 
-  public async run(): Promise<void> {
+  public async runAsync(): Promise<void> {
     let projects: RushConfigurationProject[];
     if (this._allFlag.value) {
       projects = this.rushConfiguration.projects;
@@ -136,9 +142,12 @@ export class AddAction extends BaseRushAction {
       }
     }
 
-    const updater: PackageJsonUpdater = new PackageJsonUpdater(this.rushConfiguration, this.rushGlobalFolder);
+    const updater: PackageJsonUpdaterTypes.PackageJsonUpdater = new packageJsonUpdaterModule.PackageJsonUpdater(
+      this.rushConfiguration,
+      this.rushGlobalFolder
+    );
 
-    let rangeStyle: SemVerStyle;
+    let rangeStyle: PackageJsonUpdaterTypes.SemVerStyle;
     if (version && version !== 'latest') {
       if (this._exactFlag.value || this._caretFlag.value) {
         throw new Error(
@@ -147,13 +156,13 @@ export class AddAction extends BaseRushAction {
         );
       }
 
-      rangeStyle = SemVerStyle.Passthrough;
+      rangeStyle = PackageJsonUpdaterTypes.SemVerStyle.Passthrough;
     } else {
       rangeStyle = this._caretFlag.value
-        ? SemVerStyle.Caret
+        ? PackageJsonUpdaterTypes.SemVerStyle.Caret
         : this._exactFlag.value
-        ? SemVerStyle.Exact
-        : SemVerStyle.Tilde;
+        ? PackageJsonUpdaterTypes.SemVerStyle.Exact
+        : PackageJsonUpdaterTypes.SemVerStyle.Tilde;
     }
 
     await updater.doRushAdd({

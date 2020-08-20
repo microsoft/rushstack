@@ -2,12 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
-import * as lockfile from '@yarnpkg/lockfile';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
-import { FileSystem, IParsedPackageNameOrError, InternalError } from '@rushstack/node-core-library';
+import { FileSystem, IParsedPackageNameOrError, InternalError, Import } from '@rushstack/node-core-library';
 import { RushConstants } from '../RushConstants';
 import { DependencySpecifier } from '../DependencySpecifier';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
+
+// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
+import * as YarnPkgLockfileTypes from '@yarnpkg/lockfile';
+const lockfileModule: typeof YarnPkgLockfileTypes = Import.lazy('@yarnpkg/lockfile', require);
 
 /**
  * Used with YarnShrinkwrapFile._encodePackageNameAndSemVer() and _decodePackageNameAndSemVer().
@@ -146,14 +149,14 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
 
   public static loadFromFile(shrinkwrapFilename: string): YarnShrinkwrapFile | undefined {
     let shrinkwrapString: string;
-    let shrinkwrapJson: lockfile.ParseResult;
+    let shrinkwrapJson: YarnPkgLockfileTypes.ParseResult;
     try {
       if (!FileSystem.exists(shrinkwrapFilename)) {
         return undefined; // file does not exist
       }
 
       shrinkwrapString = FileSystem.readFile(shrinkwrapFilename);
-      shrinkwrapJson = lockfile.parse(shrinkwrapString);
+      shrinkwrapJson = lockfileModule.parse(shrinkwrapString);
     } catch (error) {
       throw new Error(`Error reading "${shrinkwrapFilename}":` + os.EOL + `  ${error.message}`);
     }
@@ -235,7 +238,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
 
   /** @override */
   protected serialize(): string {
-    return lockfile.stringify(this._shrinkwrapJson);
+    return lockfileModule.stringify(this._shrinkwrapJson);
   }
 
   /** @override */

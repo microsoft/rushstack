@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as yaml from 'js-yaml';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import * as crypto from 'crypto';
 import * as colors from 'colors';
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, AlreadyReportedError, Import } from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
@@ -16,16 +15,9 @@ import {
   PnpmOptionsConfiguration
 } from '../../api/RushConfiguration';
 import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
+import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
 
-// This is based on PNPM's own configuration:
-// https://github.com/pnpm/pnpm-shrinkwrap/blob/master/src/write.ts
-const SHRINKWRAP_YAML_FORMAT: yaml.DumpOptions = {
-  lineWidth: 1000,
-  noCompatMode: true,
-  noRefs: true,
-  sortKeys: true
-};
+const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
 export interface IPeerDependenciesMetaYaml {
   optional?: boolean;
@@ -238,7 +230,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       }
 
       const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilename);
-      const parsedData: IPnpmShrinkwrapYaml = yaml.safeLoad(shrinkwrapContent);
+      const parsedData: IPnpmShrinkwrapYaml = yamlModule.safeLoad(shrinkwrapContent);
       return new PnpmShrinkwrapFile(parsedData, shrinkwrapYamlFilename);
     } catch (error) {
       throw new Error(`Error reading "${shrinkwrapYamlFilename}":${os.EOL}  ${error.message}`);
@@ -437,7 +429,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       }
     }
 
-    return yaml.safeDump(shrinkwrapToSerialize, SHRINKWRAP_YAML_FORMAT);
+    return yamlModule.safeDump(shrinkwrapToSerialize, PNPM_SHRINKWRAP_YAML_FORMAT);
   }
 
   /**

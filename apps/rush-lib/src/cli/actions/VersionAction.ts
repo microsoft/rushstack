@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { IPackageJson, FileConstants } from '@rushstack/node-core-library';
+import { IPackageJson, FileConstants, Import } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 import { BumpType, LockStepVersionPolicy } from '../../api/VersionPolicy';
@@ -13,9 +13,12 @@ import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismat
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { PolicyValidator } from '../../logic/policy/PolicyValidator';
 import { BaseRushAction } from './BaseRushAction';
-import { VersionManager } from '../../logic/VersionManager';
 import { PublishGit } from '../../logic/PublishGit';
 import { Git } from '../../logic/Git';
+
+// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
+import * as VersionManagerTypes from '../../logic/VersionManager';
+const versionManagerModule: typeof VersionManagerTypes = Import.lazy('../../logic/VersionManager', require);
 
 export const DEFAULT_PACKAGE_UPDATE_MESSAGE: string = 'Applying package updates.';
 
@@ -29,7 +32,7 @@ export class VersionAction extends BaseRushAction {
   private _overwriteBump: CommandLineStringParameter;
   private _prereleaseIdentifier: CommandLineStringParameter;
 
-  private _versionManager: VersionManager;
+  private _versionManager: VersionManagerTypes.VersionManager;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -92,40 +95,42 @@ export class VersionAction extends BaseRushAction {
     });
   }
 
-  protected run(): Promise<void> {
-    return Promise.resolve().then(() => {
-      PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: this._bypassPolicy.value });
-      const userEmail: string = Git.getGitEmail(this.rushConfiguration);
+  protected async runAsync(): Promise<void> {
+    PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: this._bypassPolicy.value });
+    const userEmail: string = Git.getGitEmail(this.rushConfiguration);
 
-      this._validateInput();
+    this._validateInput();
 
-      this._versionManager = new VersionManager(this.rushConfiguration, userEmail);
+    this._versionManager = new versionManagerModule.VersionManager(
+      this.rushConfiguration,
+      userEmail,
+      this.rushConfiguration.versionPolicyConfiguration
+    );
 
-      if (this._ensureVersionPolicy.value) {
-        this._overwritePolicyVersionIfNeeded();
-        const tempBranch: string = 'version/ensure-' + new Date().getTime();
-        this._versionManager.ensure(
-          this._versionPolicy.value,
-          true,
-          !!this._overrideVersion.value || !!this._prereleaseIdentifier.value
-        );
+    if (this._ensureVersionPolicy.value) {
+      this._overwritePolicyVersionIfNeeded();
+      const tempBranch: string = 'version/ensure-' + new Date().getTime();
+      this._versionManager.ensure(
+        this._versionPolicy.value,
+        true,
+        !!this._overrideVersion.value || !!this._prereleaseIdentifier.value
+      );
 
-        const updatedPackages: Map<string, IPackageJson> = this._versionManager.updatedProjects;
-        if (updatedPackages.size > 0) {
-          console.log(`${updatedPackages.size} packages are getting updated.`);
-          this._gitProcess(tempBranch);
-        }
-      } else if (this._bumpVersion.value) {
-        const tempBranch: string = 'version/bump-' + new Date().getTime();
-        this._versionManager.bump(
-          this._versionPolicy.value,
-          this._overwriteBump.value ? BumpType[this._overwriteBump.value] : undefined,
-          this._prereleaseIdentifier.value,
-          true
-        );
+      const updatedPackages: Map<string, IPackageJson> = this._versionManager.updatedProjects;
+      if (updatedPackages.size > 0) {
+        console.log(`${updatedPackages.size} packages are getting updated.`);
         this._gitProcess(tempBranch);
       }
-    });
+    } else if (this._bumpVersion.value) {
+      const tempBranch: string = 'version/bump-' + new Date().getTime();
+      await this._versionManager.bumpAsync(
+        this._versionPolicy.value,
+        this._overwriteBump.value ? BumpType[this._overwriteBump.value] : undefined,
+        this._prereleaseIdentifier.value,
+        true
+      );
+      this._gitProcess(tempBranch);
+    }
   }
 
   private _overwritePolicyVersionIfNeeded(): void {

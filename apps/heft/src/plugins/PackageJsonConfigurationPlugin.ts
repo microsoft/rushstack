@@ -24,7 +24,7 @@ export class PackageJsonConfigurationPlugin implements IHeftPlugin {
   ): void {
     if (heftConfiguration.projectPackageJson.private !== true) {
       if (typeScriptConfiguration.copyFromCacheMode === undefined) {
-        heftConfiguration.terminal.writeVerboseLine(
+        heftConfiguration.globalTerminal.writeVerboseLine(
           'Setting TypeScript copyFromCacheMode to "copy" because the "private" field ' +
             'in package.json is not set to true. Linked files are not handled correctly ' +
             'when package are packed for publishing.'
@@ -32,7 +32,7 @@ export class PackageJsonConfigurationPlugin implements IHeftPlugin {
         // Copy if the package is intended to be published
         typeScriptConfiguration.copyFromCacheMode = 'copy';
       } else if (typeScriptConfiguration.copyFromCacheMode !== 'copy') {
-        heftConfiguration.terminal.writeWarningLine(
+        heftConfiguration.globalTerminal.writeWarningLine(
           `The TypeScript copyFromCacheMode is set to "${typeScriptConfiguration.copyFromCacheMode}", ` +
             'but the the "private" field in package.json is not set to true. ' +
             'Linked files are not handled correctly when package are packed for publishing.'

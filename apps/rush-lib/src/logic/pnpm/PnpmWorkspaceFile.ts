@@ -4,19 +4,12 @@
 import * as globEscape from 'glob-escape';
 import * as os from 'os';
 import * as path from 'path';
-import * as yaml from 'js-yaml';
-import { FileSystem, Sort, Text } from '@rushstack/node-core-library';
+import { FileSystem, Sort, Text, Import } from '@rushstack/node-core-library';
 
 import { BaseWorkspaceFile } from '../base/BaseWorkspaceFile';
+import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
 
-// This is based on PNPM's own configuration:
-// https://github.com/pnpm/pnpm-shrinkwrap/blob/master/src/write.ts
-const WORKSPACE_YAML_FORMAT: yaml.DumpOptions = {
-  lineWidth: 1000,
-  noCompatMode: true,
-  noRefs: true,
-  sortKeys: true
-};
+const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
 /**
  * This interface represents the raw pnpm-workspace.YAML file
@@ -52,7 +45,7 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     try {
       // Populate with the existing file, or an empty list if the file doesn't exist
       workspaceYaml = FileSystem.exists(workspaceYamlFilename)
-        ? yaml.safeLoad(FileSystem.readFile(workspaceYamlFilename).toString())
+        ? yamlModule.safeLoad(FileSystem.readFile(workspaceYamlFilename).toString())
         : { packages: [] };
     } catch (error) {
       throw new Error(`Error reading "${workspaceYamlFilename}":${os.EOL}  ${error.message}`);
@@ -81,6 +74,6 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     const workspaceYaml: IPnpmWorkspaceYaml = {
       packages: Array.from(this._workspacePackages)
     };
-    return yaml.safeDump(workspaceYaml, WORKSPACE_YAML_FORMAT);
+    return yamlModule.safeDump(workspaceYaml, PNPM_SHRINKWRAP_YAML_FORMAT);
   }
 }

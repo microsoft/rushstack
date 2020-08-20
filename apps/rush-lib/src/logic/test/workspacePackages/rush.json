@@ -45,6 +45,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "g",
+      "projectFolder": "g",
+      "reviewCategory": "third-party",
+      "shouldPublish": true
+    },
+    {
       "packageName": "cyclic-dep-1",
       "projectFolder": "cyclic-dep-1",
       "reviewCategory": "third-party",

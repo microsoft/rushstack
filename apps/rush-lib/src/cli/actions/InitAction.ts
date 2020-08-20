@@ -8,8 +8,7 @@ import * as path from 'path';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseConfiglessRushAction } from './BaseRushAction';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
-import { FileSystem, NewlineKind, InternalError } from '@rushstack/node-core-library';
+import { FileSystem, NewlineKind, InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { Rush } from '../../api/Rush';
 
@@ -80,7 +79,7 @@ export class InitAction extends BaseConfiglessRushAction {
     });
   }
 
-  protected run(): Promise<void> {
+  protected runAsync(): Promise<void> {
     const initFolder: string = process.cwd();
 
     if (!this._overwriteParameter.value) {
