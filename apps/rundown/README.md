@@ -188,7 +188,7 @@ Optional arguments:
                         Specifies command-line arguments to be passed to the
                         target Node.js process. The value should be a single
                         text string delimited by spaces. Example: rundown
-                        inspect --scripts ./example.js --args "--flag
+                        inspect --scripts ./example.js --args="--flag
                         --option=123"
   -q, --quiet           Suppress STDOUT/STDERR for the target Node.js process
   -i, --ignore-exit-code
@@ -211,7 +211,7 @@ Optional arguments:
                         Specifies command-line arguments to be passed to the
                         target Node.js process. The value should be a single
                         text string delimited by spaces. Example: rundown
-                        inspect --scripts ./example.js --args "--flag
+                        inspect --scripts ./example.js --args="--flag
                         --option=123"
   -q, --quiet           Suppress STDOUT/STDERR for the target Node.js process
   -i, --ignore-exit-code

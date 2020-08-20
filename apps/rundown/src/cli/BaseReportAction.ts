@@ -37,7 +37,7 @@ export abstract class BaseReportAction extends CommandLineAction {
       description:
         'Specifies command-line arguments to be passed to the target Node.js process.  The value' +
         ' should be a single text string delimited by spaces.' +
-        ' Example: rundown inspect --scripts ./example.js --args "--flag --option=123"'
+        ' Example: rundown inspect --scripts ./example.js --args="--flag --option=123"'
     });
     this.quietParameter = this.defineFlagParameter({
       parameterLongName: '--quiet',
