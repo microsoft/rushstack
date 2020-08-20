@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/rundown",
+  "entries": [
+    {
+      "version": "1.0.0",
+      "tag": "@rushstack/rundown_v1.0.0",
+      "date": "Thu, 20 Aug 2020 01:17:28 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Initial release"
+          }
+        ]
+      }
+    }
+  ]
+}
