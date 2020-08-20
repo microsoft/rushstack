@@ -10,5 +10,6 @@
     "\\.(css)$": "<rootDir>/node_modules/@rushstack/heft/lib/exports/jest-identity-mock-transform",
     "\\.(jpg|png|gif|mp3)$": "<rootDir>/node_modules/@rushstack/heft/lib/exports/jest-string-mock-transform"
   },
+  "setupFiles": ["<rootDir>/node_modules/@rushstack/heft/lib/exports/jest-global-setup.js"],
   "passWithNoTests": true
 }
