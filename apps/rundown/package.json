@@ -11,8 +11,6 @@
   },
   "engineStrict": true,
   "homepage": "https://rushstack.io",
-  "main": "lib/index.js",
-  "typings": "dist/rundown.d.ts",
   "scripts": {
     "build": "heft test --clean"
   },
