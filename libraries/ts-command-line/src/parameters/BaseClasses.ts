@@ -104,7 +104,11 @@ export abstract class CommandLineParameter {
       }
     }
 
-    if (this.undocumentedSynonyms) {
+    if (this.undocumentedSynonyms && this.undocumentedSynonyms.length > 0) {
+      if (this.required) {
+        throw new Error('Undocumented synonyms are not allowed on required parameters.');
+      }
+
       for (const undocumentedSynonym of this.undocumentedSynonyms) {
         if (this.longName === undocumentedSynonym) {
           throw new Error(
