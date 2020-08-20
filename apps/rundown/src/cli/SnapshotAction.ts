@@ -24,7 +24,7 @@ export class SnapshotAction extends BaseReportAction {
     const rundown: Rundown = new Rundown();
     await rundown.invokeAsync(
       this.scriptParameter.value!,
-      this.argsParameter.value!,
+      this.argsParameter.value,
       this.quietParameter.value!!,
       this.ignoreExitCodeParameter.value!!
     );
