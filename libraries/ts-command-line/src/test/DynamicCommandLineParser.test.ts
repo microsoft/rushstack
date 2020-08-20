@@ -4,7 +4,7 @@
 import { DynamicCommandLineParser, DynamicCommandLineAction, CommandLineFlagParameter } from '..';
 
 describe('DynamicCommandLineParser', () => {
-  it('parses an action', () => {
+  it('parses an action', async () => {
     const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser({
       toolFilename: 'example',
       toolDescription: 'An example project'
@@ -21,11 +21,11 @@ describe('DynamicCommandLineParser', () => {
       description: 'The flag'
     });
 
-    return commandLineParser.execute(['do:the-job', '--flag']).then(() => {
-      expect(commandLineParser.selectedAction).toEqual(action);
+    await commandLineParser.execute(['do:the-job', '--flag']);
 
-      const retrievedParameter: CommandLineFlagParameter = action.getFlagParameter('--flag');
-      expect(retrievedParameter.value).toBe(true);
-    });
+    expect(commandLineParser.selectedAction).toEqual(action);
+
+    const retrievedParameter: CommandLineFlagParameter = action.getFlagParameter('--flag');
+    expect(retrievedParameter.value).toBe(true);
   });
 });

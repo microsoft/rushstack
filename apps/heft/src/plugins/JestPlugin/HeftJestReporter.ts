@@ -55,10 +55,12 @@ export default class HeftJestReporter implements Reporter {
     aggregatedResult: AggregatedResult
   ): Promise<void> {
     this._writeConsoleOutput(testResult);
-    const { numPassingTests, numFailingTests, failureMessage } = testResult;
+    const { numPassingTests, numFailingTests, failureMessage, testExecError } = testResult;
 
     if (numFailingTests > 0) {
       this._terminal.write(Colors.redBackground(Colors.black('FAIL')));
+    } else if (testExecError) {
+      this._terminal.write(Colors.redBackground(Colors.black(`FAIL (${testExecError.type})`)));
     } else {
       this._terminal.write(Colors.greenBackground(Colors.black('PASS')));
     }
@@ -172,7 +174,7 @@ export default class HeftJestReporter implements Reporter {
   }
 
   public async onRunComplete(contexts: Set<Context>, results: AggregatedResult): Promise<void> {
-    const { numPassedTests, numFailedTests, numTotalTests } = results;
+    const { numPassedTests, numFailedTests, numTotalTests, numRuntimeErrorTestSuites } = results;
 
     this._terminal.writeLine();
     this._terminal.writeLine('Tests finished:');
@@ -182,6 +184,10 @@ export default class HeftJestReporter implements Reporter {
 
     const failText: string = `  Failures: ${numFailedTests}`;
     this._terminal.writeLine(numFailedTests > 0 ? Colors.red(failText) : failText);
+
+    if (numRuntimeErrorTestSuites) {
+      this._terminal.writeLine(Colors.red(`  Failed test suites: ${numRuntimeErrorTestSuites}`));
+    }
 
     this._terminal.writeLine(`  Total: ${numTotalTests}`);
   }

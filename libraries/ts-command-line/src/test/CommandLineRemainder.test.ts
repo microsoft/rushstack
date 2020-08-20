@@ -52,24 +52,24 @@ describe('CommandLineRemainder', () => {
     expect(helpText).toMatchSnapshot();
   });
 
-  it('parses an action input with remainder', () => {
+  it('parses an action input with remainder', async () => {
     const commandLineParser: CommandLineParser = createParser();
     const action: CommandLineAction = commandLineParser.getAction('run');
     const args: string[] = ['run', '--title', 'The title', 'the', 'remaining', 'args'];
 
-    return commandLineParser.execute(args).then(() => {
-      expect(commandLineParser.selectedAction).toBe(action);
+    await commandLineParser.execute(args);
 
-      const copiedArgs: string[] = [];
-      for (const parameter of action.parameters) {
-        copiedArgs.push(`### ${parameter.longName} output: ###`);
-        parameter.appendToArgList(copiedArgs);
-      }
+    expect(commandLineParser.selectedAction).toBe(action);
 
-      copiedArgs.push(`### remainder output: ###`);
-      action.remainder!.appendToArgList(copiedArgs);
+    const copiedArgs: string[] = [];
+    for (const parameter of action.parameters) {
+      copiedArgs.push(`### ${parameter.longName} output: ###`);
+      parameter.appendToArgList(copiedArgs);
+    }
 
-      expect(copiedArgs).toMatchSnapshot();
-    });
+    copiedArgs.push(`### remainder output: ###`);
+    action.remainder!.appendToArgList(copiedArgs);
+
+    expect(copiedArgs).toMatchSnapshot();
   });
 });

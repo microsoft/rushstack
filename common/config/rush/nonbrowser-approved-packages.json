@@ -635,6 +635,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "string-argv",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "style-loader",
       "allowedCategories": [ "tests" ]
     },

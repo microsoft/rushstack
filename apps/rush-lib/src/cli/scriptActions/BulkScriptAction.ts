@@ -11,6 +11,7 @@ import {
   CommandLineStringListParameter,
   CommandLineParameterKind
 } from '@rushstack/ts-command-line';
+import { PackageName } from '@rushstack/node-core-library';
 
 import { Event } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
@@ -23,6 +24,7 @@ import { Utilities } from '../../utilities/Utilities';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
+import { IRushConfigurationProjectJson } from '../../api/RushConfigurationProject';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -75,7 +77,7 @@ export class BulkScriptAction extends BaseScriptAction {
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
   }
 
-  public run(): Promise<void> {
+  public async runAsync(): Promise<void> {
     // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are deprecated
     const lastLinkFlag: LastLinkFlag = LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration);
     if (!lastLinkFlag.isValid()) {
@@ -173,7 +175,8 @@ export class BulkScriptAction extends BaseScriptAction {
       argumentName: 'PROJECT1',
       description:
         'Run command in the specified project and all of its dependencies. "." can be used as shorthand ' +
-        'to specify the project in the current working directory.'
+        'to specify the project in the current working directory.',
+      completions: this._getProjectNames.bind(this)
     });
     this._fromVersionPolicy = this.defineStringListParameter({
       parameterLongName: '--from-version-policy',
@@ -194,7 +197,8 @@ export class BulkScriptAction extends BaseScriptAction {
       argumentName: 'PROJECT2',
       description:
         'Run command in the specified project and all projects that directly or indirectly depend on the ' +
-        'specified project. "." can be used as shorthand to specify the project in the current working directory.'
+        'specified project. "." can be used as shorthand to specify the project in the current working directory.',
+      completions: this._getProjectNames.bind(this)
     });
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
@@ -212,6 +216,36 @@ export class BulkScriptAction extends BaseScriptAction {
     }
 
     this.defineScriptParameters();
+  }
+
+  private async _getProjectNames(): Promise<string[]> {
+    const unscopedNamesMap: Map<string, number> = new Map<string, number>();
+
+    const scopedNames: string[] = [];
+
+    const projectJsons: IRushConfigurationProjectJson[] = [...this.rushConfiguration.rushConfigurationJson.projects];
+
+    for (const projectJson of projectJsons) {
+      scopedNames.push(projectJson.packageName);
+      const unscopedName: string = PackageName.getUnscopedName(projectJson.packageName);
+      let count: number = 0;
+      if (unscopedNamesMap.has(unscopedName)) {
+        count = unscopedNamesMap.get(unscopedName)!;
+      }
+      unscopedNamesMap.set(unscopedName, count + 1);
+    }
+
+    const unscopedNames: string[] = [];
+
+    for (const unscopedName of unscopedNamesMap.keys()) {
+      const unscopedNameCount: number = unscopedNamesMap.get(unscopedName)!;
+      // don't suggest ambiguous unscoped names
+      if (unscopedNameCount === 1 && !scopedNames.includes(unscopedName)) {
+        unscopedNames.push(unscopedName);
+      }
+    }
+
+    return unscopedNames.sort().concat(scopedNames.sort());
   }
 
   private _doBeforeTask(): void {

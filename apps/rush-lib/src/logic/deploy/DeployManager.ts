@@ -392,8 +392,22 @@ export class DeployManager {
       walker.start();
       const npmPackFiles: string[] = walker.result;
 
+      const alreadyCopiedSourcePaths: Set<string> = new Set();
+
       for (const npmPackFile of npmPackFiles) {
-        const copySourcePath: string = path.join(sourceFolderPath, npmPackFile);
+        // In issue https://github.com/microsoft/rushstack/issues/2121 we found that npm-packlist sometimes returns
+        // duplicate file paths, for example:
+        //
+        //   'dist//index.js'
+        //   'dist/index.js'
+        //
+        // We can detect the duplicates by comparing the path.resolve() result.
+        const copySourcePath: string = path.resolve(sourceFolderPath, npmPackFile);
+        if (alreadyCopiedSourcePaths.has(copySourcePath)) {
+          continue;
+        }
+        alreadyCopiedSourcePaths.add(copySourcePath);
+
         const copyDestinationPath: string = path.join(targetFolderPath, npmPackFile);
 
         if (deployState.symlinkAnalyzer.analyzePath(copySourcePath).kind !== 'link') {

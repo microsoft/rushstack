@@ -9,7 +9,6 @@ import { ChangeFile } from '../../api/ChangeFile';
 import { ChangeType, IChangeInfo } from '../../api/ChangeManagement';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { VersionManager } from '../VersionManager';
-import { RushGlobalFolder } from '../../api/RushGlobalFolder';
 
 function _getChanges(changeFiles: Map<string, ChangeFile>, packageName: string): IChangeInfo[] | undefined {
   const changeFile: ChangeFile | undefined = changeFiles.get(packageName);
@@ -28,8 +27,7 @@ describe('VersionManager', () => {
     versionManager = new VersionManager(
       rushConfiguration,
       'test@microsoft.com',
-      rushConfiguration.versionPolicyConfiguration,
-      new RushGlobalFolder()
+      rushConfiguration.versionPolicyConfiguration
     );
   });
 
@@ -110,8 +108,7 @@ describe('WorkspaceVersionManager', () => {
     versionManager = new VersionManager(
       rushConfiguration,
       'test@microsoft.com',
-      rushConfiguration.versionPolicyConfiguration,
-      new RushGlobalFolder()
+      rushConfiguration.versionPolicyConfiguration
     );
   });
 

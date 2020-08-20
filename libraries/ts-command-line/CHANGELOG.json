@@ -2,6 +2,30 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.6.0",
+      "tag": "@rushstack/ts-command-line_v4.6.0",
+      "date": "Thu, 20 Aug 2020 15:13:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a feature for specifying \"undocumented synonyms\" for parameters."
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.5.0",
+      "tag": "@rushstack/ts-command-line_v4.5.0",
+      "date": "Tue, 18 Aug 2020 23:59:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for shell tab completion."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.4.8",
       "tag": "@rushstack/ts-command-line_v4.4.8",
       "date": "Mon, 17 Aug 2020 04:53:23 GMT",

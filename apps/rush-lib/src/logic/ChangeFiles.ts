@@ -2,13 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import { EOL } from 'os';
-import * as glob from 'glob';
+import { JsonFile, Import } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
 import { IChangeInfo } from '../api/ChangeManagement';
 import { IChangelog } from '../api/Changelog';
-import { JsonFile } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../api/RushConfiguration';
+
+const glob: typeof import('glob') = Import.lazy('glob', require);
 
 /**
  * This class represents the collection of change files existing in the repo and provides operations

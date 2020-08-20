@@ -2,6 +2,56 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.6.3",
+      "tag": "@rushstack/heft_v0.6.3",
+      "date": "Thu, 20 Aug 2020 18:41:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where failed test suites aren't listed as failures."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.2",
+      "tag": "@rushstack/heft_v0.6.2",
+      "date": "Thu, 20 Aug 2020 15:13:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add the --notest parameter back to \"heft test\" temporarily."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.7\" to `0.6.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.1",
+      "tag": "@rushstack/heft_v0.6.1",
+      "date": "Tue, 18 Aug 2020 23:59:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.28.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.7\" to `0.6.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.0",
       "tag": "@rushstack/heft_v0.6.0",
       "date": "Tue, 18 Aug 2020 03:03:23 GMT",

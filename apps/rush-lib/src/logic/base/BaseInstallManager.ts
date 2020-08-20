@@ -5,7 +5,6 @@ import * as colors from 'colors';
 import * as fetch from 'node-fetch';
 import * as fs from 'fs';
 import * as http from 'http';
-import HttpsProxyAgent = require('https-proxy-agent');
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -14,7 +13,8 @@ import {
   JsonFile,
   PosixModeBits,
   NewlineKind,
-  AlreadyReportedError
+  AlreadyReportedError,
+  Import
 } from '@rushstack/node-core-library';
 
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
@@ -35,6 +35,8 @@ import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import { PolicyValidator } from '../policy/PolicyValidator';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+
+const HttpsProxyAgent: typeof import('https-proxy-agent') = Import.lazy('https-proxy-agent', require);
 
 export interface IInstallManagerOptions {
   /**
