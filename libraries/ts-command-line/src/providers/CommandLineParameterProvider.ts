@@ -334,7 +334,7 @@ export abstract class CommandLineParameterProvider {
     }
 
     const argumentParser: argparse.ArgumentParser = this._getArgumentParser();
-    argumentParser.addArgument(names, argparseOptions);
+    argumentParser.addArgument(names, { ...argparseOptions });
     if (parameter.undocumentedSynonyms && parameter.undocumentedSynonyms.length > 0) {
       argumentParser.addArgument(parameter.undocumentedSynonyms, {
         ...argparseOptions,
