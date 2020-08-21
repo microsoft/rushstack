@@ -25,8 +25,12 @@ describe('ChangeManager', () => {
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('2.0.0');
     expect(changeManager.allPackages.get('b')!.packageJson.version).toEqual('1.0.1');
     expect(changeManager.allPackages.get('b')!.packageJson.dependencies!['a']).toEqual('>=2.0.0 <3.0.0');
+    expect(changeManager.allPackages.get('e')!.packageJson.devDependencies!['a']).toEqual('>=2.0.0 <3.0.0');
+    expect(changeManager.allPackages.get('e')!.packageJson.peerDependencies!['a']).toEqual('>=2.0.0 <3.0.0');
     expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.0');
     expect(changeManager.allPackages.get('c')!.packageJson.dependencies!['b']).toEqual('>=1.0.1 <2.0.0');
+    expect(changeManager.allPackages.get('f')!.packageJson.devDependencies!['b']).toEqual('>=1.0.1 <2.0.0');
+    expect(changeManager.allPackages.get('f')!.packageJson.peerDependencies!['b']).toEqual('>=1.0.1 <2.0.0');
   });
 
   it('can update explicit version dependency', () => {
@@ -182,10 +186,18 @@ describe('WorkspaceChangeManager', () => {
     expect(changeManager.allPackages.get('b')!.packageJson.dependencies!['a']).toEqual(
       'workspace:>=2.0.0 <3.0.0'
     );
+    expect(changeManager.allPackages.get('e')!.packageJson.devDependencies!['a']).toEqual(
+      'workspace:>=2.0.0 <3.0.0'
+    );
+    expect(changeManager.allPackages.get('e')!.packageJson.peerDependencies!['a']).toEqual('>=2.0.0 <3.0.0');
     expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.0');
     expect(changeManager.allPackages.get('c')!.packageJson.dependencies!['b']).toEqual(
       'workspace:>=1.0.1 <2.0.0'
     );
+    expect(changeManager.allPackages.get('f')!.packageJson.devDependencies!['b']).toEqual(
+      'workspace:>=1.0.1 <2.0.0'
+    );
+    expect(changeManager.allPackages.get('f')!.packageJson.peerDependencies!['b']).toEqual('>=1.0.1 <2.0.0');
   });
 
   it('can update explicit version dependency', () => {

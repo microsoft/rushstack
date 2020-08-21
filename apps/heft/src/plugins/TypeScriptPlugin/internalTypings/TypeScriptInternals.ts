@@ -32,7 +32,7 @@ export interface IExtendedProgram extends TTypescript.Program {
 }
 export interface IExtendedSourceFile extends TTypescript.SourceFile {
   /**
-   * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/types.ts#L3205
+   * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/types.ts#L3011
    */
   version: string;
 }
@@ -137,10 +137,16 @@ export interface IExtendedTypeScript {
     fileName: string,
     referencePath?: string
   ): string;
-}
 
-export interface IExtendedEmitResult extends TTypescript.EmitResult {
-  changedSourceFiles: Set<IExtendedSourceFile>;
+  Diagnostics: {
+    // https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/diagnosticMessages.json#L4252-L4255
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    Found_1_error_Watching_for_file_changes: TTypescript.DiagnosticMessage;
+
+    // https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/diagnosticMessages.json#L4256-L4259
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    Found_0_errors_Watching_for_file_changes: TTypescript.DiagnosticMessage;
+  };
 }
 
 export type ExtendedTypeScript = typeof TTypescript & IExtendedTypeScript;

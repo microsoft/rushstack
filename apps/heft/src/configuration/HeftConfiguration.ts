@@ -3,10 +3,9 @@
 
 import * as path from 'path';
 import { Terminal, ITerminalProvider, IPackageJson } from '@rushstack/node-core-library';
-import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.7';
 import { trueCasePathSync } from 'true-case-path';
 
-import { RushStackCompilerUtilities } from '../utilities/RushStackCompilerUtilities';
+import { TaskPackageResolver, ITaskPackageResolution } from '../utilities/TaskPackageResolver';
 import { Utilities } from '../utilities/Utilities';
 import { Constants } from '../utilities/Constants';
 
@@ -49,10 +48,10 @@ export interface IHeftActionConfigurationOptions {
  * @public
  */
 export interface ICompilerPackage {
-  apiExtractorPackagePath: string;
+  apiExtractorPackagePath: string | undefined;
   typeScriptPackagePath: string;
-  tslintPackagePath: string;
-  eslintPackagePath: string;
+  tslintPackagePath: string | undefined;
+  eslintPackagePath: string | undefined;
 }
 
 /**
@@ -62,7 +61,7 @@ export class HeftConfiguration {
   private _buildFolder: string;
   private _projectHeftDataFolder: string | undefined;
   private _buildCacheFolder: string | undefined;
-  private _terminal: Terminal;
+  private _globalTerminal: Terminal;
   private _terminalProvider: ITerminalProvider;
 
   private _compilerPackage: ICompilerPackage | undefined;
@@ -103,8 +102,8 @@ export class HeftConfiguration {
   /**
    * Terminal instance to facilitate logging.
    */
-  public get terminal(): Terminal {
-    return this._terminal;
+  public get globalTerminal(): Terminal {
+    return this._globalTerminal;
   }
 
   /**
@@ -134,21 +133,14 @@ export class HeftConfiguration {
    */
   public get compilerPackage(): ICompilerPackage | undefined {
     if (!this._hasCompilerPackageBeenAccessed) {
-      const rushStackCompilerPackage:
-        | typeof TRushStackCompiler
-        | undefined = RushStackCompilerUtilities.tryLoadRushStackCompilerPackageForFolder(
-        this.terminal,
-        this._buildFolder
+      const resolution: ITaskPackageResolution | undefined = TaskPackageResolver.resolveTaskPackages(
+        this._buildFolder,
+        this.globalTerminal
       );
 
       this._hasCompilerPackageBeenAccessed = true;
-      if (rushStackCompilerPackage) {
-        this._compilerPackage = {
-          apiExtractorPackagePath: rushStackCompilerPackage.ToolPaths.apiExtractorPackagePath,
-          typeScriptPackagePath: rushStackCompilerPackage.ToolPaths.typescriptPackagePath,
-          tslintPackagePath: rushStackCompilerPackage.ToolPaths.tslintPackagePath,
-          eslintPackagePath: rushStackCompilerPackage.ToolPaths.eslintPackagePath
-        };
+      if (resolution) {
+        this._compilerPackage = resolution;
       }
     }
 
@@ -179,7 +171,7 @@ export class HeftConfiguration {
     }
 
     configuration._terminalProvider = options.terminalProvider;
-    configuration._terminal = new Terminal(options.terminalProvider);
+    configuration._globalTerminal = new Terminal(options.terminalProvider);
 
     return configuration;
   }

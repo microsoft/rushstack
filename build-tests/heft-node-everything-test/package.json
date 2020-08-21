@@ -1,0 +1,22 @@
+{
+  "name": "heft-node-everything-test",
+  "description": "Building this project tests every task and config file for Heft when targeting the Node.js runtime",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft test --clean --verbose"
+  },
+  "devDependencies": {
+    "@microsoft/api-extractor": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/jest": "25.2.1",
+    "@types/node": "10.17.13",
+    "eslint": "~7.2.0",
+    "tslint-microsoft-contrib": "~6.2.0",
+    "tslint": "~5.20.1",
+    "typescript": "~3.9.5"
+  }
+}

@@ -10,7 +10,12 @@ import {
   ICommandLineActionOptions,
   CommandLineStringListParameter
 } from '@rushstack/ts-command-line';
-import { LockFile, PackageJsonLookup, IPackageJson } from '@rushstack/node-core-library';
+import {
+  LockFile,
+  PackageJsonLookup,
+  IPackageJson,
+  AlreadyReportedError
+} from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -18,7 +23,6 @@ import { EventHooksManager } from '../../logic/EventHooksManager';
 import { RushCommandLineParser } from './../RushCommandLineParser';
 import { Utilities } from '../../utilities/Utilities';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 export interface IBaseRushActionOptions extends ICommandLineActionOptions {
   /**
@@ -75,15 +79,17 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction {
       }
     }
 
-    console.log(`Starting "rush ${this.actionName}"${os.EOL}`);
-    return this.run();
+    if (!Utilities.shouldRestrictConsoleOutput()) {
+      console.log(`Starting "rush ${this.actionName}"${os.EOL}`);
+    }
+    return this.runAsync();
   }
 
   /**
    * All Rush actions need to implement this method. This method runs after
    * environment has been set up by the base class.
    */
-  protected abstract run(): Promise<void>;
+  protected abstract runAsync(): Promise<void>;
 
   private _ensureEnvironment(): void {
     if (this.rushConfiguration) {
@@ -128,17 +134,19 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
   protected mergeProjectsWithVersionPolicy(
     projectsParameters: CommandLineStringListParameter,
     versionPoliciesParameters: CommandLineStringListParameter
-  ): string[] {
+  ): RushConfigurationProject[] {
     const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
-    const projects: string[] = [];
+    const projects: RushConfigurationProject[] = [];
     for (const projectParameter of projectsParameters.values) {
       if (projectParameter === '.') {
         const packageJson: IPackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(process.cwd());
         if (packageJson) {
-          const projectName: string = packageJson.name;
-          if (this.rushConfiguration.projectsByName.has(projectName)) {
-            projects.push(projectName);
+          const project: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(
+            packageJson.name
+          );
+          if (project) {
+            projects.push(project);
           } else {
             console.log(
               colors.red(
@@ -166,7 +174,7 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
           throw new AlreadyReportedError();
         }
 
-        projects.push(project.packageName);
+        projects.push(project);
       }
     }
 
@@ -176,7 +184,7 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
           return project.versionPolicyName === policyName;
         });
         if (matches) {
-          projects.push(project.packageName);
+          projects.push(project);
         }
       });
     }

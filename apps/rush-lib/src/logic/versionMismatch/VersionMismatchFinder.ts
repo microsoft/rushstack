@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as colors from 'colors';
+import { AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
@@ -9,7 +10,6 @@ import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfigurati
 import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
 import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderCommonVersions';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 export interface IVersionMismatchFinderRushCheckOptions {
   variant?: string | undefined;

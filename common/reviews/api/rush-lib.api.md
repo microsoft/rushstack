@@ -197,6 +197,7 @@ export class _LastInstallFlag {
     checkValidAndReportStoreIssues(): boolean;
     clear(): void;
     create(): void;
+    protected readonly flagName: string;
     isValid(): boolean;
     readonly path: string;
     }
@@ -314,7 +315,7 @@ export class Rush {
     static launch(launcherVersion: string, arg: ILaunchOptions): void;
     static launchRushX(launcherVersion: string, options: ILaunchOptions): void;
     static readonly version: string;
-}
+    }
 
 // @public
 export class RushConfiguration {
@@ -374,8 +375,11 @@ export class RushConfiguration {
     readonly repositoryDefaultFullyQualifiedRemoteBranch: string;
     readonly repositoryDefaultRemote: string;
     readonly repositoryUrl: string | undefined;
+    // @internal
+    readonly rushConfigurationJson: IRushConfigurationJson;
     readonly rushJsonFile: string;
     readonly rushJsonFolder: string;
+    // @deprecated
     readonly rushLinkJsonFilename: string;
     readonly shrinkwrapFilename: string;
     readonly shrinkwrapFilePhrase: string;
@@ -402,6 +406,7 @@ export class RushConfigurationProject {
     readonly downstreamDependencyProjects: string[];
     // @beta
     readonly isMainProject: boolean;
+    readonly localDependencyProjects: ReadonlyArray<RushConfigurationProject>;
     // @deprecated
     readonly packageJson: IPackageJson;
     // @beta

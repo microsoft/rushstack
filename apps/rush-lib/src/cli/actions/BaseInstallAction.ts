@@ -4,6 +4,7 @@
 import * as colors from 'colors';
 import * as os from 'os';
 
+import { Import } from '@rushstack/node-core-library';
 import {
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
@@ -13,7 +14,6 @@ import {
 import { BaseRushAction } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';
 import { BaseInstallManager, IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
-import { InstallManagerFactory } from '../../logic/InstallManagerFactory';
 import { PurgeManager } from '../../logic/PurgeManager';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { StandardScriptUpdater } from '../../logic/StandardScriptUpdater';
@@ -21,6 +21,11 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
+
+const installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory') = Import.lazy(
+  '../../logic/InstallManagerFactory',
+  require
+);
 
 /**
  * This is the common base class for InstallAction and UpdateAction.
@@ -50,7 +55,8 @@ export abstract class BaseInstallAction extends BaseRushAction {
         'If "--no-link" is specified, then project symlinks will NOT be created' +
         ' after the installation completes.  You will need to run "rush link" manually.' +
         ' This flag is useful for automated builds that want to report stages individually' +
-        ' or perform extra operations in between the two stages.'
+        ' or perform extra operations in between the two stages. This flag is not supported' +
+        ' when using workspaces.'
     });
     this._networkConcurrencyParameter = this.defineIntegerParameter({
       parameterLongName: '--network-concurrency',
@@ -76,7 +82,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
   protected abstract buildInstallOptions(): IInstallManagerOptions;
 
-  protected run(): Promise<void> {
+  protected runAsync(): Promise<void> {
     VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, {
       variant: this._variant.value
     });
@@ -118,7 +124,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     const installManagerOptions: IInstallManagerOptions = this.buildInstallOptions();
 
-    const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
+    const installManager: BaseInstallManager = installManagerFactoryModule.InstallManagerFactory.getInstallManager(
       this.rushConfiguration,
       this.rushGlobalFolder,
       purgeManager,

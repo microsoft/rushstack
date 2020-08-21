@@ -7,6 +7,19 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Run in specified folder",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "(your project path)",
+      "args": [
+        "--debug",
+        "run",
+        "--local"
+      ],
+      "sourceMaps": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "test-01",
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-01",
@@ -81,19 +94,6 @@
         "--local",
         "--config",
         "./temp/configs/api-extractor-typeof.json"
-      ],
-      "sourceMaps": true
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "scratch",
-      "program": "${workspaceFolder}/lib/start.js",
-      "cwd": "(your project path)",
-      "args": [
-        "--debug",
-        "run",
-        "--local"
       ],
       "sourceMaps": true
     }

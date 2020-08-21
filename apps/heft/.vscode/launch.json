@@ -1,0 +1,89 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach by Process ID",
+      "processId": "${command:PickProcess}",
+      "request": "attach",
+      "skipFiles": ["<node_internals>/**"],
+      "type": "pwa-node"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run in specified folder",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "(your project path)",
+      "args": [
+        "--debug",
+        "build",
+        "--clean"
+      ],
+      "console": "integratedTerminal",
+      "sourceMaps": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "node-basic build",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-node-basic-test/",
+      "args": ["--debug", "build", "--clean"],
+      "console": "integratedTerminal",
+      "sourceMaps": false
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "node-basic test",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-node-basic-test/",
+      "args": ["--debug", "test", "--clean"],
+      "console": "integratedTerminal",
+      "sourceMaps": false
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "node-basic test --watch",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-node-basic-test/",
+      "args": ["--debug", "test", "--watch", "--clean"],
+      "console": "integratedTerminal",
+      "sourceMaps": false
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "webpack-basic build",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-webpack-basic-test/",
+      "args": ["--debug", "build", "--clean"],
+      "console": "integratedTerminal",
+      "sourceMaps": false
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "webpack-basic test",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-webpack-basic-test/",
+      "args": ["--debug", "test", "--clean"],
+      "console": "integratedTerminal",
+      "sourceMaps": false
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "webpack-basic start",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/heft-webpack-basic-test/",
+      "args": ["--debug", "start", "--clean"],
+      "console": "integratedTerminal",
+      "sourceMaps": false
+    }
+  ]
+}

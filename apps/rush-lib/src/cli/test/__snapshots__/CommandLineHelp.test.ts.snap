@@ -53,13 +53,14 @@ Positional arguments:
     build               Build all projects that haven't been built, or have 
                         changed since they were last built.
     rebuild             Clean and rebuild the entire set of projects
+    tab-complete        Provides tab completion.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
   -d, --debug           Show the full call stack if an error occurs while 
                         executing the tool
 
-For detailed help about a specific command, use: rush <command> -h
+[Bold]For detailed help about a specific command, use: rush <command> -h[NormalColorOrIntensity]
 "
 `;
 
@@ -234,7 +235,7 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for each action: deploy 1`] = `
 "usage: rush deploy [-h] [-p PROJECT_NAME] [-s SCENARIO_NAME] [--overwrite]
-                   [-t PATH]
+                   [-t PATH] [--create-archive ARCHIVE_PATH]
                    
 
 (EXPERIMENTAL) After building the repo, \\"rush deploy\\" can be used to prepare 
@@ -267,6 +268,13 @@ Optional arguments:
                         WHEN COMBINING WITH \\"--overwrite\\". This parameter may 
                         alternatively be specified via the 
                         RUSH_DEPLOY_TARGET_FOLDER environment variable.
+  --create-archive ARCHIVE_PATH
+                        If specified, after the deployment has been prepared, 
+                        \\"rush deploy\\" will create an archive containing the 
+                        contents of the target folder. The newly created 
+                        archive file will be placed according to the 
+                        designated path, relative to the target folder. 
+                        Supported file extensions: .zip
 "
 `;
 
@@ -408,7 +416,8 @@ Optional arguments:
                         You will need to run \\"rush link\\" manually. This flag 
                         is useful for automated builds that want to report 
                         stages individually or perform extra operations in 
-                        between the two stages.
+                        between the two stages. This flag is not supported 
+                        when using workspaces.
   --network-concurrency COUNT
                         If specified, limits the maximum number of concurrent 
                         network requests. This is useful when troubleshooting 
@@ -649,6 +658,19 @@ Optional arguments:
 "
 `;
 
+exports[`CommandLineHelp prints the help for each action: tab-complete 1`] = `
+"usage: rush tab-complete [-h] [--word WORD] [--position INDEX]
+
+Provides tab completion.
+
+Optional arguments:
+  -h, --help        Show this help message and exit.
+  --word WORD       The word to complete. The default value is \\"\\".
+  --position INDEX  The position in the word to be completed. The default 
+                    value is 0.
+"
+`;
+
 exports[`CommandLineHelp prints the help for each action: unlink 1`] = `
 "usage: rush unlink [-h]
 
@@ -689,7 +711,8 @@ Optional arguments:
                         You will need to run \\"rush link\\" manually. This flag 
                         is useful for automated builds that want to report 
                         stages individually or perform extra operations in 
-                        between the two stages.
+                        between the two stages. This flag is not supported 
+                        when using workspaces.
   --network-concurrency COUNT
                         If specified, limits the maximum number of concurrent 
                         network requests. This is useful when troubleshooting 

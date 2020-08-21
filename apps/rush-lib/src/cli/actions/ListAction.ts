@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { Import } from '@rushstack/node-core-library';
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import * as Table from 'cli-table';
+
+const cliTable: typeof import('cli-table') = Import.lazy('cli-table', require);
 
 export interface IJsonEntry {
   name: string;
@@ -67,7 +69,7 @@ export class ListAction extends BaseRushAction {
     });
   }
 
-  protected async run(): Promise<void> {
+  protected async runAsync(): Promise<void> {
     const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
     if (this._jsonFlag.value) {
       this._printJson(allPackages);
@@ -113,7 +115,9 @@ export class ListAction extends BaseRushAction {
     if (this._fullPath.value) {
       tableHeader.push('Full Path');
     }
-    const table: Table = new Table({
+
+    // eslint-disable-next-line @typescript-eslint/typedef
+    const table = new cliTable({
       head: tableHeader
     });
 

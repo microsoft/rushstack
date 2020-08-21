@@ -1,16 +1,25 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { Import } from '@rushstack/node-core-library';
+import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
+
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
-import { DeployManager } from '../../logic/deploy/DeployManager';
+
+// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
+import * as deployManagerTypes from '../../logic/deploy/DeployManager';
+const deployManagerModule: typeof deployManagerTypes = Import.lazy(
+  '../../logic/deploy/DeployManager',
+  require
+);
 
 export class DeployAction extends BaseRushAction {
   private _scenario: CommandLineStringParameter;
   private _project: CommandLineStringParameter;
   private _overwrite: CommandLineFlagParameter;
   private _targetFolder: CommandLineStringParameter;
+  private _createArchivePath: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -23,7 +32,11 @@ export class DeployAction extends BaseRushAction {
         ' a subset of Rush projects and their dependencies to a target folder, which can then be uploaded to' +
         ' a production server.  The "rush deploy" behavior is specified by a scenario config file that must' +
         ' be created first, using the "rush init-deploy" command.',
-      parser
+      parser,
+
+      // It is okay to invoke multiple instances of "rush deploy" simultaneously, if they are writing
+      // to different target folders.
+      safeForSimultaneousRushProcesses: true
     });
   }
 
@@ -64,15 +77,28 @@ export class DeployAction extends BaseRushAction {
         ' Use this parameter to specify a different location. ' +
         ' WARNING: USE CAUTION WHEN COMBINING WITH "--overwrite"'
     });
+
+    this._createArchivePath = this.defineStringParameter({
+      parameterLongName: '--create-archive',
+      argumentName: 'ARCHIVE_PATH',
+      description:
+        'If specified, after the deployment has been prepared, "rush deploy"' +
+        ' will create an archive containing the contents of the target folder.' +
+        ' The newly created archive file will be placed according to the designated path, relative' +
+        ' to the target folder. Supported file extensions: .zip'
+    });
   }
 
-  protected async run(): Promise<void> {
-    const deployManager: DeployManager = new DeployManager(this.rushConfiguration);
+  protected async runAsync(): Promise<void> {
+    const deployManager: deployManagerTypes.DeployManager = new deployManagerModule.DeployManager(
+      this.rushConfiguration
+    );
     await deployManager.deployAsync(
       this._project.value,
       this._scenario.value,
       !!this._overwrite.value,
-      this._targetFolder.value
+      this._targetFolder.value,
+      this._createArchivePath.value
     );
   }
 }

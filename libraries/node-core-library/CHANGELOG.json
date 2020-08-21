@@ -2,6 +2,84 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.28.0",
+      "tag": "@rushstack/node-core-library_v3.28.0",
+      "date": "Tue, 18 Aug 2020 23:59:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a utility function for making console color codes human-readable."
+          },
+          {
+            "comment": "Create a lighter weight function to get own package version."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Lazy-import some packages to improve spin up times."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.27.0",
+      "tag": "@rushstack/node-core-library_v3.27.0",
+      "date": "Mon, 17 Aug 2020 04:53:23 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new APIs AlreadyReportedError and TypeUuid"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.26.2",
+      "tag": "@rushstack/node-core-library_v3.26.2",
+      "date": "Wed, 12 Aug 2020 00:10:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated project to build with Heft"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.0.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.26.1",
+      "tag": "@rushstack/node-core-library_v3.26.1",
+      "date": "Wed, 05 Aug 2020 18:27:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Triggering publish of dependents"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.26.0",
+      "tag": "@rushstack/node-core-library_v3.26.0",
+      "date": "Mon, 03 Aug 2020 06:55:14 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Added IJsonFileStringifyOptions.headerComment"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.25.0",
       "tag": "@rushstack/node-core-library_v3.25.0",
       "date": "Fri, 03 Jul 2020 15:09:04 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Wed, 24 Jun 2020 09:50:48 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Aug 2020 00:10:05 GMT and should not be manually modified.
+
+## 0.4.2
+Wed, 12 Aug 2020 00:10:05 GMT
+
+### Patches
+
+- Updated project to build with Heft
 
 ## 0.4.1
 Wed, 24 Jun 2020 09:50:48 GMT

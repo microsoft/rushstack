@@ -1,6 +1,70 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Aug 2020 01:21:18 GMT and should not be manually modified.
+
+## 2.4.44
+Fri, 21 Aug 2020 01:21:18 GMT
+
+*Version update only*
+
+## 2.4.43
+Thu, 20 Aug 2020 18:41:47 GMT
+
+*Version update only*
+
+## 2.4.42
+Thu, 20 Aug 2020 15:13:52 GMT
+
+*Version update only*
+
+## 2.4.41
+Tue, 18 Aug 2020 23:59:42 GMT
+
+*Version update only*
+
+## 2.4.40
+Tue, 18 Aug 2020 03:03:24 GMT
+
+*Version update only*
+
+## 2.4.39
+Mon, 17 Aug 2020 05:31:53 GMT
+
+*Version update only*
+
+## 2.4.38
+Mon, 17 Aug 2020 04:53:23 GMT
+
+*Version update only*
+
+## 2.4.37
+Thu, 13 Aug 2020 09:26:40 GMT
+
+*Version update only*
+
+## 2.4.36
+Thu, 13 Aug 2020 04:57:38 GMT
+
+*Version update only*
+
+## 2.4.35
+Wed, 12 Aug 2020 00:10:05 GMT
+
+### Patches
+
+- Updated project to build with Heft
+
+## 2.4.34
+Wed, 05 Aug 2020 18:27:32 GMT
+
+*Version update only*
+
+## 2.4.33
+Mon, 20 Jul 2020 06:52:33 GMT
+
+### Patches
+
+- Fix hashing when a filename contains a space, a special character (ex. ", \), or a unicode character, and fix git hash-object call when long filenames are provided
 
 ## 2.4.32
 Fri, 03 Jul 2020 15:09:04 GMT

@@ -49,7 +49,7 @@ function _areShallowEqual(object1: JsonObject, object2: JsonObject, writer: ITas
  */
 export class ProjectTask implements ITaskDefinition {
   public get name(): string {
-    return this._rushProject.packageName;
+    return ProjectTask.getTaskName(this._rushProject);
   }
 
   public isIncrementalBuildAllowed: boolean;
@@ -69,6 +69,14 @@ export class ProjectTask implements ITaskDefinition {
     this.isIncrementalBuildAllowed = options.isIncrementalBuildAllowed;
     this._packageChangeAnalyzer = options.packageChangeAnalyzer;
     this._packageDepsFilename = options.packageDepsFilename;
+  }
+
+  /**
+   * A helper method to determine the task name of a ProjectTask. Used when the task
+   * name is required before a task is created.
+   */
+  public static getTaskName(rushProject: RushConfigurationProject): string {
+    return rushProject.packageName;
   }
 
   public execute(writer: ITaskWriter): Promise<TaskStatus> {

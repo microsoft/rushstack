@@ -3,43 +3,38 @@
 
 import { SyncHook } from 'tapable';
 
-import { BuildAction, IBuildActionContext } from '../cli/actions/BuildAction';
-import { CleanAction, ICleanActionContext } from '../cli/actions/CleanAction';
-import { DevDeployAction, IDevDeployActionContext } from '../cli/actions/DevDeployAction';
-import { StartAction, IStartActionContext } from '../cli/actions/StartAction';
-import { TestAction, ITestActionContext } from '../cli/actions/TestAction';
 import { MetricsCollector, MetricsCollectorHooks } from '../metrics/MetricsCollector';
+import { ICleanStageContext } from '../stages/CleanStage';
+import { IDevDeployStageContext } from '../stages/DevDeployStage';
+import { IBuildStageContext } from '../stages/BuildStage';
+import { ITestStageContext } from '../stages/TestStage';
+import { IHeftPlugin } from './IHeftPlugin';
+import { IInternalHeftSessionOptions } from './InternalHeftSession';
+import { ScopedLogger } from './logging/ScopedLogger';
+import { LoggingManager } from './logging/LoggingManager';
 
 /**
  * @public
  */
 export interface IHeftSessionHooks {
-  build: SyncHook<IBuildActionContext>;
-  clean: SyncHook<ICleanActionContext>;
-  devDeploy: SyncHook<IDevDeployActionContext>;
-  start: SyncHook<IStartActionContext>;
-  test: SyncHook<ITestActionContext>;
+  build: SyncHook<IBuildStageContext>;
+  clean: SyncHook<ICleanStageContext>;
+  devDeploy: SyncHook<IDevDeployStageContext>;
+  test: SyncHook<ITestStageContext>;
   metricsCollector: MetricsCollectorHooks;
 }
 
-/**
- * @internal
- */
 export interface IHeftSessionOptions {
-  buildAction: BuildAction;
-  cleanAction: CleanAction;
-  devDeployAction: DevDeployAction;
-  startAction: StartAction;
-  testAction: TestAction;
-
-  metricsCollector: MetricsCollector;
-  getIsDebugMode(): boolean;
+  plugin: IHeftPlugin;
 }
 
 /**
  * @public
  */
 export class HeftSession {
+  private readonly _loggingManager: LoggingManager;
+  private readonly _options: IHeftSessionOptions;
+
   public readonly hooks: IHeftSessionHooks;
 
   /**
@@ -50,28 +45,32 @@ export class HeftSession {
   /**
    * If set to true, the build is running with the --debug flag
    */
-  public get debugMode(): boolean {
-    return this._options.getIsDebugMode();
-  }
-
-  private _options: IHeftSessionOptions;
+  public readonly debugMode: boolean;
 
   /**
    * @internal
    */
-  public constructor(options: IHeftSessionOptions) {
+  public constructor(options: IHeftSessionOptions, internalSessionOptions: IInternalHeftSessionOptions) {
     this._options = options;
-    const { buildAction, cleanAction, devDeployAction, startAction, testAction, metricsCollector } = options;
+
+    this._loggingManager = internalSessionOptions.loggingManager;
+    this.metricsCollector = internalSessionOptions.metricsCollector;
 
     this.hooks = {
-      build: buildAction.actionHook,
-      clean: cleanAction.actionHook,
-      devDeploy: devDeployAction.actionHook,
-      start: startAction.actionHook,
-      test: testAction.testActionHook,
-      metricsCollector: metricsCollector.hooks
+      build: internalSessionOptions.buildStage.stageInitializationHook,
+      clean: internalSessionOptions.cleanStage.stageInitializationHook,
+      devDeploy: internalSessionOptions.devDeployStage.stageInitializationHook,
+      test: internalSessionOptions.testStage.stageInitializationHook,
+      metricsCollector: this.metricsCollector.hooks
     };
 
-    this.metricsCollector = metricsCollector;
+    this.debugMode = internalSessionOptions.getIsDebugMode();
+  }
+
+  /**
+   * Call this function to request a logger with the specified name.
+   */
+  public requestScopedLogger(loggerName: string): ScopedLogger {
+    return this._loggingManager.requestScopedLogger(this._options.plugin, loggerName);
   }
 }

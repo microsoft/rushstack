@@ -37,14 +37,14 @@ export class PurgeAction extends BaseRushAction {
     });
   }
 
-  protected run(): Promise<void> {
+  protected runAsync(): Promise<void> {
     return Promise.resolve().then(() => {
       const stopwatch: Stopwatch = Stopwatch.start();
 
       const unlinkManager: UnlinkManager = new UnlinkManager(this.rushConfiguration);
       const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration, this.rushGlobalFolder);
 
-      unlinkManager.unlink();
+      unlinkManager.unlink(/*force:*/ true);
 
       if (this._unsafeParameter.value!) {
         purgeManager.purgeUnsafe();

@@ -1,6 +1,65 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Aug 2020 01:21:17 GMT and should not be manually modified.
+
+## 7.8.32
+Fri, 21 Aug 2020 01:21:17 GMT
+
+*Version update only*
+
+## 7.8.31
+Thu, 20 Aug 2020 18:41:47 GMT
+
+*Version update only*
+
+## 7.8.30
+Thu, 20 Aug 2020 15:13:52 GMT
+
+*Version update only*
+
+## 7.8.29
+Tue, 18 Aug 2020 23:59:42 GMT
+
+*Version update only*
+
+## 7.8.28
+Tue, 18 Aug 2020 03:03:23 GMT
+
+*Version update only*
+
+## 7.8.27
+Mon, 17 Aug 2020 05:31:53 GMT
+
+*Version update only*
+
+## 7.8.26
+Mon, 17 Aug 2020 04:53:23 GMT
+
+### Patches
+
+- Fix an issue where an error was sometimes incorrectly reported: "The constructed subclass was not an instance of MarkdownDocumenterFeature"
+
+## 7.8.25
+Thu, 13 Aug 2020 09:26:39 GMT
+
+*Version update only*
+
+## 7.8.24
+Thu, 13 Aug 2020 04:57:38 GMT
+
+*Version update only*
+
+## 7.8.23
+Wed, 12 Aug 2020 00:10:05 GMT
+
+### Patches
+
+- Updated project to build with Heft
+
+## 7.8.22
+Wed, 05 Aug 2020 18:27:32 GMT
+
+*Version update only*
 
 ## 7.8.21
 Fri, 03 Jul 2020 15:09:04 GMT

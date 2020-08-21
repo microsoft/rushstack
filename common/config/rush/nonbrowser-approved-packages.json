@@ -11,6 +11,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@jest/transform",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@jest/types",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@microsoft/api-documenter",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -20,10 +28,6 @@
     },
     {
       "name": "@microsoft/api-extractor-model",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "@microsoft/decorators",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -172,7 +176,7 @@
     },
     {
       "name": "@rushstack/heft",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/localization-plugin",
@@ -188,6 +192,10 @@
     },
     {
       "name": "@rushstack/package-deps-hash",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/pre-compile-hardlink-or-copy-plugin",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -283,6 +291,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "css-loader",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "deasync",
       "allowedCategories": [ "libraries" ]
     },
@@ -308,7 +320,7 @@
     },
     {
       "name": "eslint",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "eslint-plugin-promise",
@@ -329,6 +341,10 @@
     {
       "name": "express",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "file-loader",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "fs-extra",
@@ -435,6 +451,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "heft-minimal-rig-test",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "html-webpack-plugin",
       "allowedCategories": [ "tests" ]
     },
@@ -479,6 +499,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jest-snapshot",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jju",
       "allowedCategories": [ "libraries" ]
     },
@@ -488,6 +512,10 @@
     },
     {
       "name": "jsdom",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jszip",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -599,8 +627,20 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "ssri",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "strict-uri-encode",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "string-argv",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "style-loader",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "sudo",
@@ -608,7 +648,7 @@
     },
     {
       "name": "tapable",
-      "allowedCategories": ["libraries"]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "tar",
@@ -640,11 +680,11 @@
     },
     {
       "name": "tslint",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "tslint-microsoft-contrib",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "typescript",
@@ -672,7 +712,7 @@
     },
     {
       "name": "webpack-dev-server",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "webpack-sources",

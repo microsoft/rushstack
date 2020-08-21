@@ -9,7 +9,6 @@ export {
   ICompilerPackage,
   IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
 } from './configuration/HeftConfiguration';
-export { ActionHooksBase, IActionContext } from './cli/actions/HeftActionBase';
 export { HeftSession, IHeftSessionHooks } from './pluginFramework/HeftSession';
 export {
   MetricsCollectorHooks,
@@ -17,33 +16,39 @@ export {
   IPerformanceData as _IPerformanceData,
   MetricsCollector as _MetricsCollector
 } from './metrics/MetricsCollector';
+export { ScopedLogger, IScopedLogger } from './pluginFramework/logging/ScopedLogger';
 
-// Actions
+// Stages
+export { StageHooksBase, IStageContext } from './stages/StageBase';
 export {
-  IBuildActionProperties,
-  BuildHooks,
-  IBuildActionContext,
-  IBuildStage,
-  BuildStageHooksBase,
-  ICompileStageProperties,
-  ICompileStage,
-  ISharedCopyStaticAssetsConfiguration,
+  BuildStageHooks,
+  BuildSubstageHooksBase,
+  BundleSubstageHooks,
+  CompileSubstageHooks,
+  CopyFromCacheMode,
+  IApiExtractorConfiguration,
+  IBuildStageContext,
+  IBuildStageProperties,
+  IBuildSubstage,
+  IBundleSubstage,
+  IBundleSubstageProperties,
+  ICompileSubstage,
+  ICompileSubstageProperties,
   ICopyStaticAssetsConfiguration,
-  ITypeScriptConfiguration,
-  CompileStageHooks,
   IEmitModuleKind,
   IEmitModuleKindBase,
+  IPostBuildSubstage,
+  IPreCompileSubstage,
+  ISharedBundleSubstageWebpackProperties,
+  ISharedCopyStaticAssetsConfiguration,
   ISharedTypeScriptConfiguration,
-  CopyFromCacheMode,
-  IBundleStage,
-  IPostBuildStage,
-  IPreCompileStage
-} from './cli/actions/BuildAction';
-export { ICleanActionProperties, CleanHooks, ICleanActionContext } from './cli/actions/CleanAction';
+  ITypeScriptConfiguration,
+  IWebpackConfiguration
+} from './stages/BuildStage';
+export { ICleanStageProperties, CleanStageHooks, ICleanStageContext } from './stages/CleanStage';
 export {
-  IDevDeployActionProperties,
-  DevDeployHooks,
-  IDevDeployActionContext
-} from './cli/actions/DevDeployAction';
-export { IStartActionProperties, StartHooks, IStartActionContext } from './cli/actions/StartAction';
-export { ITestActionProperties, TestHooks, ITestActionContext } from './cli/actions/TestAction';
+  IDevDeployStageProperties,
+  DevDeployStageHooks,
+  IDevDeployStageContext
+} from './stages/DevDeployStage';
+export { ITestStageProperties, TestStageHooks, ITestStageContext } from './stages/TestStage';

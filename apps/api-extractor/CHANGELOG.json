@@ -2,6 +2,115 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.9.8",
+      "tag": "@microsoft/api-extractor_v7.9.8",
+      "date": "Fri, 21 Aug 2020 01:21:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.6.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.9.7",
+      "tag": "@microsoft/api-extractor_v7.9.7",
+      "date": "Thu, 20 Aug 2020 15:13:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.6.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.9.6",
+      "tag": "@microsoft/api-extractor_v7.9.6",
+      "date": "Tue, 18 Aug 2020 23:59:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.8.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.28.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.9.5",
+      "tag": "@microsoft/api-extractor_v7.9.5",
+      "date": "Mon, 17 Aug 2020 04:53:23 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add keywords to package.json for discoverability"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.8.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.27.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.4.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.9.4",
+      "tag": "@microsoft/api-extractor_v7.9.4",
+      "date": "Wed, 12 Aug 2020 00:10:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated project to build with Heft"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.8.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.26.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.4.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.0.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.9.3",
+      "tag": "@microsoft/api-extractor_v7.9.3",
+      "date": "Wed, 05 Aug 2020 18:27:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.8.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.26.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.9.2",
       "tag": "@microsoft/api-extractor_v7.9.2",
       "date": "Thu, 09 Jul 2020 04:58:36 GMT",

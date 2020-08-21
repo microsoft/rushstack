@@ -72,21 +72,20 @@ export class PnpmProjectDependencyManifest {
   /**
    * Save the current state of the object to project/.rush/temp/shrinkwrap-deps.json
    */
-  public save(): void {
+  public async saveAsync(): Promise<void> {
     const file: { [specifier: string]: string } = {};
     const keys: string[] = Array.from(this._projectDependencyManifestFile.keys()).sort();
     for (const key of keys) {
       file[key] = this._projectDependencyManifestFile.get(key)!;
     }
-
-    JsonFile.save(file, this._projectDependencyManifestFilename, { ensureFolderExists: true });
+    await JsonFile.saveAsync(file, this._projectDependencyManifestFilename, { ensureFolderExists: true });
   }
 
   /**
    * If the project/.rush/temp/shrinkwrap-deps.json file exists, delete it. Otherwise, do nothing.
    */
-  public deleteIfExists(): void {
-    FileSystem.deleteFile(this._projectDependencyManifestFilename, { throwIfNotExists: false });
+  public deleteIfExistsAsync(): Promise<void> {
+    return FileSystem.deleteFileAsync(this._projectDependencyManifestFilename, { throwIfNotExists: false });
   }
 
   private _addDependencyInternal(

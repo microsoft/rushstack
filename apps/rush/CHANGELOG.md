@@ -1,6 +1,105 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 08 Jul 2020 06:56:47 GMT and should not be manually modified.
+This log was last generated on Thu, 20 Aug 2020 18:25:41 GMT and should not be manually modified.
+
+## 5.33.1
+Thu, 20 Aug 2020 18:25:41 GMT
+
+### Updates
+
+- Fix issues where installs could fail after running 'rush version' while the 'usePnpmFrozenLockfileForRushInstall' experiment is enabled. See PR #2116 for more details.
+- Fix an issue where "rush deploy" would sometimes report an "already exists" when using the "files" setting in package.json (GitHub #2121)
+- Allow multiple simultaneous invocations of "rush deploy" (GitHub #2125)
+- Load and validate local projects lazily to further improve Rush startup times.
+
+## 5.33.0
+Wed, 19 Aug 2020 00:17:48 GMT
+
+### Updates
+
+- Add support for shell tab completion. See PR for details: https://github.com/microsoft/rushstack/pull/2060
+- Use Import.lazy() to optimize the startup time for Rush
+
+## 5.32.3
+Tue, 18 Aug 2020 03:48:56 GMT
+
+### Updates
+
+- Fix an issue where install-run.js sometimes assigned the shell PATH incorrectly due to inconsistent character case
+
+## 5.32.2
+Fri, 14 Aug 2020 21:03:48 GMT
+
+### Updates
+
+- Resolve issue with version --bump where the wrong hash would get written to the pnpm-lock file
+
+## 5.32.1
+Fri, 14 Aug 2020 04:06:30 GMT
+
+### Updates
+
+- Change method used to calculate integrity of tarballs
+
+## 5.32.0
+Thu, 13 Aug 2020 00:53:43 GMT
+
+### Patches
+
+- Update temp project tarball integrities during rush bump
+
+## 5.31.0
+Wed, 12 Aug 2020 19:33:44 GMT
+
+### Updates
+
+- Updated project to build with Heft
+- Fix an issue where "rushx" did not pass additional command-line arguments to the package.json script (GitHub #1232)
+
+## 5.30.3
+Fri, 07 Aug 2020 21:09:05 GMT
+
+### Updates
+
+- Fix an issue where Mac OS sometimes reported "An unrecognized file .DS_Store was found in the Rush config folder"
+
+## 5.30.2
+Wed, 05 Aug 2020 17:57:07 GMT
+
+### Updates
+
+- Fix an issue where a package version bump would not bump downstream packages with a `workspace:*` dependency specifier.
+
+## 5.30.1
+Thu, 23 Jul 2020 23:47:59 GMT
+
+### Updates
+
+- Fixed an isssue where the "rush build" incremental analysis sometimes reported a warning with large diffs (GitHub #501) or filenames that contain spaces, quotes, or other unusual characters (GitHub #2007)
+- Prevent incorrect conversion to "workspace:" notation for peer dependencies when running "rush update --full"
+
+## 5.30.0
+Fri, 17 Jul 2020 05:32:38 GMT
+
+### Minor changes
+
+- Prepare to deprecate 'rush link' and 'rush unlink' commands, as well as the '--no-link' install argument. As we move toward using package managers more directly in Rush, the package managers will perform the linking during install (if linking is even necessary). Additionally, these commands directly conflict with (and have different meanings than) their package manager counterparts. Lastly, similar goals can be accomplished by running 'rush install' and 'rush purge'. In addition to these changes, rush-link.json deprecated and is replaced with a new API which keeps the local dependency tree in memory.
+
+## 5.29.1
+Thu, 16 Jul 2020 02:18:39 GMT
+
+### Patches
+
+- Consider package.json when determining if install can be skipped for PNPM workspaces
+
+## 5.29.0
+Tue, 14 Jul 2020 05:20:56 GMT
+
+### Updates
+
+- Give \"rush deploy\" the ability to select a subset of dependencies to copy over (#1978)
+- Fix an issue where package binaries where not created by "rush deploy" (#1982)
+- Add a new setting "folderToCopy" and new command-line parameter "--create-archive" for use with "rush deploy"
 
 ## 5.28.0
 Wed, 08 Jul 2020 06:56:47 GMT

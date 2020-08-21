@@ -4,13 +4,14 @@
 import * as path from 'path';
 import { Tslint as TTslint } from '@microsoft/rush-stack-compiler-3.7';
 import * as crypto from 'crypto';
+import { Terminal, JsonFile } from '@rushstack/node-core-library';
 
 import { LinterBase, ILinterBaseOptions } from './LinterBase';
 import { IExtendedSourceFile, IExtendedProgram } from './internalTypings/TypeScriptInternals';
-import { Terminal, JsonFile, Colors } from '@rushstack/node-core-library';
 import { IExtendedFileSystem } from '../../utilities/fileSystem/IExtendedFileSystem';
 import { ResolveUtilities } from '../../utilities/ResolveUtilities';
 import { IExtendedLinter } from './internalTypings/TslintInternals';
+import { FileError } from '../../pluginFramework/logging/FileError';
 
 interface ITslintOptions extends ILinterBaseOptions {
   tslintPackagePath: string;
@@ -69,23 +70,35 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
   public reportFailures(): void {
     if (this._lintResult.failures?.length) {
       this._terminal.writeWarningLine(
-        `Encountered ${this._lintResult.failures.length} TSLint error${
+        `Encountered ${this._lintResult.failures.length} TSLint issues${
           this._lintResult.failures.length > 1 ? 's' : ''
         }:`
       );
+
       for (const tslintFailure of this._lintResult.failures) {
         const buildFolderRelativeFilename: string = path.relative(
           this._buildFolderPath,
           tslintFailure.getFileName()
         );
         const { line, character } = tslintFailure.getStartPosition().getLineAndCharacter();
-        const severity: string = tslintFailure.getRuleSeverity().toUpperCase();
-        this._terminal.writeWarningLine(
-          '  ',
-          Colors.yellow(`${severity}: ${buildFolderRelativeFilename}:${line + 1}:${character + 1}`),
-          ' - ',
-          Colors.yellow(`(${tslintFailure.getRuleName()}) ${tslintFailure.getFailure()}`)
+        const formattedFailure: string = `(${tslintFailure.getRuleName()}) ${tslintFailure.getFailure()}`;
+        const errorObject: FileError = new FileError(
+          formattedFailure,
+          buildFolderRelativeFilename,
+          line + 1,
+          character + 1
         );
+        switch (tslintFailure.getRuleSeverity()) {
+          case 'error': {
+            this._scopedLogger.emitError(errorObject);
+            break;
+          }
+
+          case 'warning': {
+            this._scopedLogger.emitWarning(errorObject);
+            break;
+          }
+        }
       }
     }
   }

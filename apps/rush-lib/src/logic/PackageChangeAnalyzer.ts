@@ -147,7 +147,7 @@ export class PackageChangeAnalyzer {
         if (!FileSystem.exists(dependencyManifestFilePath)) {
           throw new Error(
             `A project dependency file (${relativeDependencyManifestFilePath}) is missing. You may need to run ` +
-              '"rush unlink" and "rush link".'
+              '"rush install" or "rush update".'
           );
         }
 

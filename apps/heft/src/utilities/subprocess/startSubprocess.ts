@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminalProvider } from '@rushstack/node-core-library';
-
-import { SubprocessTerminalProvider } from './SubprocessTerminalProvider';
 import {
   SubprocessRunnerBase,
   ISubprocessInnerConfiguration,
@@ -18,9 +15,6 @@ const [
   serializedInnerConfiguration,
   serializedSubprocessConfiguration
 ] = process.argv;
-
-const innerConfiguration: ISubprocessInnerConfiguration = JSON.parse(serializedInnerConfiguration);
-const terminalProvider: ITerminalProvider = new SubprocessTerminalProvider(innerConfiguration);
 
 const subprocessRunnerModule: object = require(subprocessModulePath);
 const subprocessRunnerModuleExports: string[] = Object.getOwnPropertyNames(subprocessRunnerModule).filter(
@@ -46,9 +40,12 @@ if (!SubprocessRunnerClass[SUBPROCESS_RUNNER_CLASS_LABEL]) {
   );
 }
 
+const innerConfiguration: ISubprocessInnerConfiguration = JSON.parse(serializedInnerConfiguration);
 const subprocessConfiguration: object = JSON.parse(serializedSubprocessConfiguration);
-const subprocessRunner: SubprocessRunnerSubclass = new SubprocessRunnerClass(
-  terminalProvider,
+
+const subprocessRunner: SubprocessRunnerSubclass = SubprocessRunnerClass.initializeSubprocess(
+  SubprocessRunnerClass,
+  innerConfiguration,
   subprocessConfiguration
 );
 

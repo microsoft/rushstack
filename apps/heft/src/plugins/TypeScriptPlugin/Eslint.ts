@@ -3,11 +3,12 @@
 
 import * as path from 'path';
 import * as crypto from 'crypto';
+import * as semver from 'semver';
 import * as TEslint from 'eslint';
 
 import { LinterBase, ILinterBaseOptions, ITiming } from './LinterBase';
 import { IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
-import { IColorableSequence, Colors } from '@rushstack/node-core-library';
+import { FileError } from '../../pluginFramework/logging/FileError';
 
 interface IEslintOptions extends ILinterBaseOptions {
   eslintPackagePath: string;
@@ -24,6 +25,7 @@ const enum EslintMessageSeverity {
 }
 
 export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
+  private readonly _eslintPackagePath: string;
   private readonly _eslintPackage: typeof TEslint;
   private readonly _eslintTimings: Map<string, string> = new Map<string, string>();
 
@@ -37,15 +39,33 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
 
     this._patchTimer(options.eslintPackagePath); // This must happen before the rest of the linter package is loaded
 
+    this._eslintPackagePath = options.eslintPackagePath;
     this._eslintPackage = require(options.eslintPackagePath);
   }
 
   public printVersionHeader(): void {
     this._terminal.writeLine(`Using ESLint version ${this._eslintPackage.Linter.version}`);
+
+    const majorVersion: number = semver.major(this._eslintPackage.Linter.version);
+    if (majorVersion < 7) {
+      throw new Error(
+        'Heft requires ESLint 7 or newer.  Your ESLint version is too old:\n' + this._eslintPackagePath
+      );
+    }
+    if (majorVersion > 7) {
+      // We don't use writeWarningLine() here because, if the person wants to take their chances with
+      // a newer ESLint release, their build should be allowed to succeed.
+      this._terminal.writeLine(
+        'The ESLint version is newer than the latest version that was tested with Heft; it may not work correctly:'
+      );
+      this._terminal.writeLine(this._eslintPackagePath);
+    }
   }
 
   public reportFailures(): void {
-    const eslintFailureLogMessages: (string | IColorableSequence)[][] = [];
+    let eslintFailureCount: number = 0;
+    const errors: Error[] = [];
+    const warnings: Error[] = [];
 
     for (const eslintFileResult of this._lintResult) {
       const buildFolderRelativeFilePath: string = path.relative(
@@ -53,26 +73,43 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
         eslintFileResult.filePath
       );
       for (const message of eslintFileResult.messages) {
+        eslintFailureCount++;
         // https://eslint.org/docs/developer-guide/nodejs-api#◆-lintmessage-type
-        const severity: string = message.severity === EslintMessageSeverity.warning ? 'WARNING' : 'ERROR';
-        eslintFailureLogMessages.push([
-          '  ',
-          Colors.yellow(`${severity}: ${buildFolderRelativeFilePath}:${message.line}:${message.column}`),
-          ' - ',
-          Colors.yellow(message.ruleId ? `(${message.ruleId}) ${message.message}` : message.message)
-        ]);
+        const formattedMessage: string = message.ruleId
+          ? `(${message.ruleId}) ${message.message}`
+          : message.message;
+        const errorObject: FileError = new FileError(
+          formattedMessage,
+          buildFolderRelativeFilePath,
+          message.line,
+          message.column
+        );
+        switch (message.severity) {
+          case EslintMessageSeverity.error: {
+            errors.push(errorObject);
+            break;
+          }
+
+          case EslintMessageSeverity.warning: {
+            warnings.push(errorObject);
+            break;
+          }
+        }
       }
     }
 
-    if (eslintFailureLogMessages.length > 0) {
-      this._terminal.writeWarningLine(
-        `Encountered ${eslintFailureLogMessages.length} ESLint error${
-          eslintFailureLogMessages.length > 1 ? 's' : ''
-        }:`
+    if (eslintFailureCount > 0) {
+      this._terminal.writeLine(
+        `Encountered ${eslintFailureCount} ESLint issue${eslintFailureCount > 1 ? 's' : ''}:`
       );
-      for (const eslintFailureLogMessage of eslintFailureLogMessages) {
-        this._terminal.writeWarningLine(...eslintFailureLogMessage);
-      }
+    }
+
+    for (const error of errors) {
+      this._scopedLogger.emitError(error);
+    }
+
+    for (const warning of warnings) {
+      this._scopedLogger.emitWarning(warning);
     }
   }
 

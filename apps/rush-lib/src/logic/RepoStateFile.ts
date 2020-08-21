@@ -37,6 +37,7 @@ export class RepoStateFile {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
     path.join(__dirname, '../schemas/repo-state.schema.json')
   );
+
   private _repoStateFilePath: string;
   private _variant: string | undefined;
   private _pnpmShrinkwrapHash: string | undefined;
