@@ -448,7 +448,7 @@ export class Utilities {
    */
   public static shouldRestrictConsoleOutput(): boolean {
     return (
-      CommandLineHelper.isTabCompletionActionRequest(process.argv) || process.argv.indexOf('--json') === -1
+      CommandLineHelper.isTabCompletionActionRequest(process.argv) || process.argv.indexOf('--json') !== -1
     );
   }
 
