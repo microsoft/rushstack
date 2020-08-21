@@ -21,6 +21,24 @@ import { FileSystem } from './FileSystem';
 export type JsonObject = any;
 
 /**
+ * The Rush Stack lint rules discourage usage of `null`.  However, JSON parsers always return JavaScript's
+ * `null` to keep the two syntaxes consistent.  When creating interfaces that describe JSON structures,
+ * use `JsonNull` to avoid triggering the lint rule.  Do not use `JsonNull` for any other purpose.
+ *
+ * @remarks
+ * If you are designing a new JSON file format, it's a good idea to avoid `null` entirely.  In most cases
+ * there are better representations that convey more information about an item that is unknown, omitted, or disabled.
+ *
+ * To understand why `null` is deprecated, please see the `@rushstack/eslint-plugin` documentation here:
+ *
+ * {@link https://www.npmjs.com/package/@rushstack/eslint-plugin#rushstackno-null}
+ *
+ * @public
+ */
+// eslint-disable-next-line @rushstack/no-new-null
+export type JsonNull = null;
+
+/**
  * Options for JsonFile.stringify()
  *
  * @public

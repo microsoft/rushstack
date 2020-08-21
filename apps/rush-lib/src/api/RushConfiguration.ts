@@ -6,7 +6,14 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as semver from 'semver';
-import { JsonFile, JsonSchema, Path, FileSystem, PackageNameParser } from '@rushstack/node-core-library';
+import {
+  JsonFile,
+  JsonSchema,
+  JsonNull,
+  Path,
+  FileSystem,
+  PackageNameParser
+} from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
 
 import { Rush } from '../api/Rush';
@@ -232,8 +239,7 @@ export interface IRushConfigurationJson {
  * This represents the JSON data structure for the "current-variant.json" data file.
  */
 export interface ICurrentVariantJson {
-  // eslint-disable-next-line @rushstack/no-new-null
-  variant: string | null; // Use `null` instead of `undefined` because `undefined` is not handled by JSON.
+  variant: string | JsonNull;
 }
 
 /**
