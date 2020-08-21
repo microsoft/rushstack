@@ -232,6 +232,7 @@ export interface IRushConfigurationJson {
  * This represents the JSON data structure for the "current-variant.json" data file.
  */
 export interface ICurrentVariantJson {
+  // eslint-disable-next-line @rushstack/no-new-null
   variant: string | null; // Use `null` instead of `undefined` because `undefined` is not handled by JSON.
 }
 
