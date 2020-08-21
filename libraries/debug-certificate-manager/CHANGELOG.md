@@ -1,6 +1,11 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Thu, 20 Aug 2020 18:41:47 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Aug 2020 01:21:18 GMT and should not be manually modified.
+
+## 0.2.40
+Fri, 21 Aug 2020 01:21:18 GMT
+
+*Version update only*
 
 ## 0.2.39
 Thu, 20 Aug 2020 18:41:47 GMT

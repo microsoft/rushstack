@@ -1,6 +1,11 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Thu, 20 Aug 2020 18:41:47 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Aug 2020 01:21:18 GMT and should not be manually modified.
+
+## 3.7.40
+Fri, 21 Aug 2020 01:21:18 GMT
+
+*Version update only*
 
 ## 3.7.39
 Thu, 20 Aug 2020 18:41:47 GMT
