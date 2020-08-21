@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 20 Aug 2020 18:25:41 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Aug 2020 22:45:58 GMT and should not be manually modified.
+
+## 5.33.2
+Fri, 21 Aug 2020 22:45:58 GMT
+
+### Updates
+
+- Fix an issue where PNPM would sometimes prompt for input during "rush publish" (GitHub #1940)
+- Fix an issue that prevented Rush from logging in verbose mode
 
 ## 5.33.1
 Thu, 20 Aug 2020 18:25:41 GMT
