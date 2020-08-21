@@ -212,7 +212,6 @@ export class TaskSelector {
 
     const rawCommand: string = rushProject.packageJson.scripts[script];
 
-    // eslint-disable-next-line @rushstack/no-null
     if (rawCommand === undefined || rawCommand === null) {
       return undefined;
     }
