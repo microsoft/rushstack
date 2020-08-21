@@ -258,7 +258,7 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
 
   const filesToHash: string[] = [];
   currentlyChangedFiles.forEach((changeType: string, filename: string) => {
-    if (changeType === 'D') {
+    if (changeType.endsWith('D')) {
       delete changes.files[filename];
     } else {
       if (!excludedHashes[filename]) {
