@@ -35,7 +35,7 @@ ruleTester.run('no-new-null', noNewNullRule, {
       errors: [{ messageId: 'error-new-usage-of-null' }]
     },
     {
-      code: 'function (args: null): void {}',
+      code: 'const functionExpression = function (arg: null): void {}',
       errors: [{ messageId: 'error-new-usage-of-null' }]
     },
     {
