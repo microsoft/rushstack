@@ -51,14 +51,14 @@ ruleTester.run('no-new-null', noNewNullRule, {
       errors: [{ messageId: 'error-new-usage-of-null' }]
     },
     {
-      code: `
-                class PublicNulls {
-                    property: string | null;
-                    propertyFunc: (val: string | null) => void;
-                    legacyImplicitPublic(hello: string | null): void {}
-                    public legacyExplicitPublic(hello: string | null): void {}
-                }
-            `,
+      code: [
+        'class PublicNulls {',
+        '  property: string | null;',
+        '  propertyFunc: (val: string | null) => void;',
+        '  legacyImplicitPublic(hello: string | null): void {}',
+        '  public legacyExplicitPublic(hello: string | null): void {}',
+        '}'
+      ].join('\n'),
       errors: [
         {
           messageId: 'error-new-usage-of-null'
@@ -77,26 +77,26 @@ ruleTester.run('no-new-null', noNewNullRule, {
   ],
   valid: [
     {
-      code: `
-              export function wrapLegacy(hello: string): void {
-                const innerCallback: (err: NodeJS.ErrnoException | null) => void = (e) => {};
-                return innerCallback(null);
-              }
-            `
+      code: [
+        'export function wrapLegacy(hello: string): void {',
+        '  const innerCallback: (err: NodeJS.ErrnoException | null) => void = (e) => {};',
+        '  return innerCallback(null);',
+        '}'
+      ].join('\n')
     },
     {
-      code: `
-              class PrivateNulls {
-                  // private pField: string | null;
-                  private pFunc: (val: string | null) => void;
-                  l = this.legacyPrivate(null);
-                  // field = this.legacyPrivate('null');
-                  private legacyPrivate(hello: string | null): void {
-                    // this.pFunc(this.pField)
-                    this.pFunc('hello')
-                  }
-              }
-            `
+      code: [
+        'class PrivateNulls {',
+        '  // private pField: string | null;',
+        '  private pFunc: (val: string | null) => void;',
+        '  l = this.legacyPrivate(null);',
+        "  // field = this.legacyPrivate('null');",
+        '  private legacyPrivate(hello: string | null): void {',
+        '    // this.pFunc(this.pField)',
+        "    this.pFunc('hello')",
+        '  }',
+        '}'
+      ].join('\n')
     }
   ]
 });
