@@ -166,7 +166,6 @@ importers:
       '@rushstack/heft': 'link:../heft'
       '@types/jest': 25.2.1
       '@types/node': 10.17.13
-      '@types/string-argv': 0.3.0
     specifiers:
       '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
@@ -175,7 +174,6 @@ importers:
       '@rushstack/ts-command-line': 'workspace:*'
       '@types/jest': 25.2.1
       '@types/node': 10.17.13
-      '@types/string-argv': ~0.3.0
       string-argv: ~0.3.1
   ../../apps/rush:
     dependencies:
@@ -1383,7 +1381,6 @@ importers:
       '@rushstack/heft': 0.5.1
       '@types/jest': 25.2.1
       '@types/node': 10.17.13
-      '@types/string-argv': 0.3.0
     specifiers:
       '@microsoft/rush-stack-compiler-3.5': 0.8.4
       '@rushstack/eslint-config': 'workspace:*'
@@ -1391,7 +1388,6 @@ importers:
       '@types/argparse': 1.0.38
       '@types/jest': 25.2.1
       '@types/node': 10.17.13
-      '@types/string-argv': ~0.3.0
       argparse: ~1.0.9
       colors: ~1.2.1
       string-argv: ~0.3.1
@@ -1511,6 +1507,7 @@ importers:
       '@rushstack/heft': 0.5.1
       '@types/eslint': 7.2.0
       '@types/estree': 0.0.44
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       '@typescript-eslint/experimental-utils': 3.4.0_eslint@7.2.0+typescript@3.9.7
       '@typescript-eslint/parser': 3.4.0_eslint@7.2.0+typescript@3.9.7
@@ -1522,6 +1519,7 @@ importers:
       '@rushstack/heft': 0.5.1
       '@types/eslint': 7.2.0
       '@types/estree': 0.0.44
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       '@typescript-eslint/experimental-utils': 3.4.0
       '@typescript-eslint/parser': 3.4.0
@@ -3344,13 +3342,6 @@ packages:
     dev: true
     resolution:
       integrity: sha512-R6vDd7CHxcWMzv5wfVhR3qyCRVQoZKwVd6kit0rkozTThRZSXZKEW2Kz3AxfVqq9+UyJAz1g8Q+bJ3CL6NzztQ==
-  /@types/string-argv/0.3.0:
-    dependencies:
-      string-argv: 0.3.1
-    deprecated: 'This is a stub types definition. string-argv provides its own type definitions, so you do not need this installed.'
-    dev: true
-    resolution:
-      integrity: sha512-2ILZD9aKjOkNtE9zfNJOLUEsE+SHt46WxyuEVBIMH7n+f0fXfrsA2K1XArizP4IYZ2RGWbJJIRyFdJsJYp0miQ==
   /@types/tapable/1.0.5:
     resolution:
       integrity: sha512-/gG2M/Imw7cQFp8PGvz/SwocNrmKFjFsm5Pb8HdbHkZ1K8pmuPzOX4VeVoiEecFCVf4CsN1r3/BRvx+6sNqwtQ==
@@ -11766,6 +11757,7 @@ packages:
     resolution:
       integrity: sha1-ucczDHBChi9rFC3CdLvMWGbONUY=
   /string-argv/0.3.1:
+    dev: false
     engines:
       node: '>=0.6.19'
     resolution:
