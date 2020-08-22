@@ -2,6 +2,27 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.9.9",
+      "tag": "@microsoft/api-extractor_v7.9.9",
+      "date": "Sat, 22 Aug 2020 05:55:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.8.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.29.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.6.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.9.8",
       "tag": "@microsoft/api-extractor_v7.9.8",
       "date": "Fri, 21 Aug 2020 01:21:18 GMT",

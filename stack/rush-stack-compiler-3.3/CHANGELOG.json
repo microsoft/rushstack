@@ -2,6 +2,27 @@
   "name": "@microsoft/rush-stack-compiler-3.3",
   "entries": [
     {
+      "version": "0.9.8",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.9.8",
+      "date": "Sat, 22 Aug 2020 05:55:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.9.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.29.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.7",
       "tag": "@microsoft/rush-stack-compiler-3.3_v0.9.7",
       "date": "Fri, 21 Aug 2020 01:21:18 GMT",

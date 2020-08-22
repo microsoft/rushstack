@@ -2,6 +2,23 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.29.0",
+      "tag": "@rushstack/node-core-library_v3.29.0",
+      "date": "Sat, 22 Aug 2020 05:55:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduce a \"JsonNull\" type for describing legacy JSON structures without triggering the \"@rushstack/no-new-null\" lint rule"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.28.0",
       "tag": "@rushstack/node-core-library_v3.28.0",
       "date": "Tue, 18 Aug 2020 23:59:42 GMT",
