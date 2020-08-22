@@ -22,9 +22,9 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.8.4",
+    "@microsoft/rush-stack-compiler-3.5": "0.8.8",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "0.5.1",
+    "@rushstack/heft": "0.6.5",
     "@types/fs-extra": "7.0.0",
     "@types/jest": "25.2.1",
     "@types/jju": "1.4.1",

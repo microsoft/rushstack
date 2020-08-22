@@ -61,7 +61,7 @@
     "@types/webpack-dev-server": "3.11.0",
     "@microsoft/rush-stack-compiler-3.7": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "0.5.1",
+    "@rushstack/heft": "0.6.5",
     "colors": "~1.2.1"
   }
 }
