@@ -356,7 +356,7 @@ export abstract class BaseInstallManager {
     // This will be used by bulk scripts to determine the correct Shrinkwrap file to track.
     const currentVariantJsonFilename: string = this._rushConfiguration.currentVariantJsonFilename;
     const currentVariantJson: ICurrentVariantJson = {
-      variant: this.options.variant || null // eslint-disable-line @rushstack/no-null
+      variant: this.options.variant || null
     };
 
     // Determine if the variant is already current by updating current-variant.json.

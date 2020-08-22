@@ -455,6 +455,9 @@ export class JsonFile {
     }
 
 // @public
+export type JsonNull = null;
+
+// @public
 export type JsonObject = any;
 
 // @public

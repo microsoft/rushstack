@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-plugin",
+      "comment": "Add a new rule \"@rushstack/no-new-null\" that will replace \"@rushstack/no-null\"",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin",
+  "email": "trane@users.noreply.github.com"
+}
