@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/stream-collator",
-  "version": "3.2.43",
+  "version": "3.2.44",
   "description": "Display intelligible realtime output from your asynchronous streams",
   "repository": {
     "type": "git",
