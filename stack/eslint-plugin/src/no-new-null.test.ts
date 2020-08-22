@@ -86,6 +86,13 @@ ruleTester.run('no-new-null', noNewNullRule, {
     },
     {
       code: [
+        'function functionWithLocalVariableTypes(): void {',
+        '  const match: RegExpExecArray | null = null;',
+        '}'
+      ].join('\n')
+    },
+    {
+      code: [
         'class PrivateNulls {',
         '  // private pField: string | null;',
         '  private pFunc: (val: string | null) => void;',
