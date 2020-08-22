@@ -16,7 +16,7 @@ const noNewNullRule: TSESLint.RuleModule<MessageIds, Options> = {
     type: 'problem',
     messages: {
       'error-new-usage-of-null':
-        'New usage of "null" in type definitions is deprecated; use "undefined" instead'
+        'Usage of "null" is deprecated except when describing legacy APIs; use "undefined" instead'
     },
     schema: [
       {
@@ -26,7 +26,9 @@ const noNewNullRule: TSESLint.RuleModule<MessageIds, Options> = {
     ],
     docs: {
       description:
-        'Prevent usage of JavaScript\'s "null" keyword in new type definitions. It ignores when that definition is not accessible, e.g. private or not exportable',
+        'Prevent usage of JavaScript\'s "null" keyword in new type declarations. To avoid hampering usage' +
+        ' of preexisting APIs that require "null", the rule ignores declarations that are local variables,' +
+        ' private members, or types that are not exported.',
       category: 'Stylistic Issues',
       recommended: 'error',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
