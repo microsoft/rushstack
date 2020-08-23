@@ -19,7 +19,8 @@ const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
     type: 'problem',
     messages: {
       'error-unhoisted-jest-mock':
-        "Jest's mocks must be installed before the associated module is imported. Move this line to the top of its block."
+        "Jest's module mocking APIs must be called before their associated module is imported. " +
+        ' Move this statement to the top of its code block.'
     },
     schema: [
       {
@@ -28,7 +29,13 @@ const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
       }
     ],
     docs: {
-      description: 'Require Jest mock calls to be manually hoisted to the top of their scope.',
+      description:
+        'Require Jest module mocking APIs to be called before any other statements in their code block.' +
+        ' Jest module mocking APIs such as "jest.mock(\'./example\')" must be called before the associated module' +
+        ' is imported, otherwise they will have no effect. Transpilers such as ts-jest and babel-jest automatically' +
+        ' "hoist" these calls, however this can produce counterintuitive results. Instead, the hoist-jest-mocks' +
+        ' lint rule requires developers to manually hoist these calls. For technical background, please read the' +
+        ' Jest documentation here: https://jestjs.io/docs/en/es6-class-mocks',
       category: 'Possible Errors',
       recommended: 'error',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
