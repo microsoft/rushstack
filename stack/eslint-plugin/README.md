@@ -11,10 +11,10 @@ Require Jest module mocking APIs to be called before any other statements in the
 
 #### Rule Details
 
-Jest module mocking APIs such as "jest.mock(\'./example\')" must be called before the associated module
-is imported, otherwise they will have no effect. Transpilers such as ts-jest and babel-jest automatically
-"hoist" these calls, however this can produce counterintuitive results. Instead, the hoist-jest-mocks
-lint rule requires developers to manually hoist these calls.
+Jest module mocking APIs such as "jest.mock()" must be called before the associated module is imported, otherwise
+they will have no effect. Transpilers such as `ts-jest` and `babel-jest` automatically "hoist" these calls, however
+this can produce counterintuitive behavior. Instead, the `hoist-jest-mocks` lint rule simply requires developers
+to write the statements in the correct order.
 
 The following APIs are affected: 'jest.mock()', 'jest.unmock()', 'jest.enableAutomock()', 'jest.disableAutomock()',
 'jest.deepUnmock()'.
@@ -38,11 +38,11 @@ test("example", () => {
 The following patterns are NOT considered problems:
 
 ```ts
-jest.mock('./file');
+jest.mock('./file'); // okay, because mock() is first
 import * as file from './file';
 
 test("example", () => {
-  jest.mock('./file2');
+  jest.mock('./file2'); // okay, because mock() is first within the test() code block
   const file2: typeof import('./file2') = require('./file2');
 });
 ```
@@ -216,4 +216,3 @@ enum E {
 }
 let e: E._PrivateMember = E._PrivateMember; // okay, because _PrivateMember is declared by E
 ```
-
