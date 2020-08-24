@@ -3,7 +3,7 @@
 
 import { sync } from 'resolve';
 import * as path from 'path';
-import { FileSystem, PackageJsonLookup } from '@rushstack/node-core-library';
+import { FileSystem, PackageJsonLookup, IPackageJson } from '@rushstack/node-core-library';
 
 const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
@@ -89,5 +89,17 @@ export class ResolveUtilities {
 
     const resolvedPackagePath: string = ResolveUtilities.resolvePackage(packageName, rootPath, options);
     return path.resolve(resolvedPackagePath, pathInsidePackage);
+  }
+
+  public static resolvePackageMainFilePath(packagePath: string): string {
+    const packageJson: IPackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(packagePath);
+    if (!packageJson) {
+      throw new Error(
+        `Supplied package path ${packagePath} could not resolve a package.json while searching for main file`
+      );
+    } else if (!packageJson.main) {
+      throw new Error(`Package at path ${packagePath} specifies no main file`);
+    }
+    return path.resolve(packagePath, packageJson.main);
   }
 }

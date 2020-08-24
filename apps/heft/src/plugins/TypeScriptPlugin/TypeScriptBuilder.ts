@@ -147,6 +147,9 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   ) {
     super(parentGlobalTerminalProvider, configuration, heftSession);
 
+    // This is read by the subprocess runner
+    this.extraNodeArgv = this._configuration.extraNodeArgv;
+
     this._firstEmitCompletedCallbackManager = new FirstEmitCompletedCallbackManager(firstEmitCallback);
     this.registerSubprocessCommunicationManager(this._firstEmitCompletedCallbackManager);
   }
@@ -204,9 +207,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     if (this._eslintEnabled) {
       this._eslintEnabled = this._fileSystem.exists(this._eslintConfigFilePath);
     }
-
-    // This is handled by the parent class
-    this.extraNodeArgv = this._configuration.extraNodeArgv;
 
     // Report a warning if the TypeScript version is too old/new.  The current oldest supported version is
     // TypeScript 2.9. Prior to that the "ts.getConfigFileParsingDiagnostics()" API is missing; more fixups

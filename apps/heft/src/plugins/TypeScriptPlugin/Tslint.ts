@@ -55,7 +55,12 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     }
 
     terminal.writeVerboseLine(`Examining config file "${configFilePath}"`);
-
+    // if configFilePath is not a json file, assume that it is a package whose main file
+    // is a config file, per the the "extends" spec of tslint.json, found at
+    //  https://palantir.github.io/tslint/usage/configuration/
+    if (!configFilePath.endsWith('.json')) {
+      configFilePath = ResolveUtilities.resolvePackageMainFilePath(configFilePath);
+    }
     const rawConfig: string = fileSystem.readFile(configFilePath);
     const parsedConfig: IMinimalConfig = JsonFile.parseString(rawConfig);
     const extendsProperty: string | string[] | undefined = parsedConfig.extends;
