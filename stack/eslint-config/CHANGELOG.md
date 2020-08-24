@@ -1,6 +1,18 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Mon, 17 Aug 2020 04:53:23 GMT and should not be manually modified.
+This log was last generated on Mon, 24 Aug 2020 07:35:20 GMT and should not be manually modified.
+
+## 1.2.1
+Mon, 24 Aug 2020 07:35:20 GMT
+
+*Version update only*
+
+## 1.2.0
+Sat, 22 Aug 2020 05:55:42 GMT
+
+### Minor changes
+
+- Replace the "@rushstack/no-null" rule with a more flexible rule "@rushstack/no-new-null" (GitHub #2017)
 
 ## 1.1.0
 Mon, 17 Aug 2020 04:53:23 GMT

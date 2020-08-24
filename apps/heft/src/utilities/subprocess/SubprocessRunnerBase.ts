@@ -383,7 +383,6 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
       }
 
       case SupportedSerializableArgType.Null: {
-        // eslint-disable-next-line @rushstack/no-null
         return null;
       }
 

@@ -16,7 +16,7 @@ export class RushJsonConfigurationFilesPlugin extends JsonConfigurationFilesPlug
       try {
         this.__rushConfigurationFolder = RushUtilities.getRushConfigFolder();
       } catch (error) {
-        this.__rushConfigurationFolder = null; // eslint-disable-line @rushstack/no-null
+        this.__rushConfigurationFolder = null;
       }
     }
 

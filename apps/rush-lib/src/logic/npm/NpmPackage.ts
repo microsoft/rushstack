@@ -93,11 +93,11 @@ export class NpmPackage extends BasePackage {
     const packageJson: IPackageJson = JsonFile.load(packageJsonFilename);
     const npmPackage: readPackageTree.Node = {
       children: [],
-      error: null, // eslint-disable-line @rushstack/no-null
+      error: null,
       id: 0,
       isLink: false,
       package: packageJson,
-      parent: null, // eslint-disable-line @rushstack/no-null
+      parent: null,
       path: installFolderName,
       realpath: installFolderName
     };

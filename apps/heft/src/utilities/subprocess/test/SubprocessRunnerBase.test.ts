@@ -9,7 +9,6 @@ describe('SubprocessRunnerBase', () => {
     expect(SubprocessRunnerBase.serializeForIpcMessage(1)).toMatchSnapshot();
     expect(SubprocessRunnerBase.serializeForIpcMessage(false)).toMatchSnapshot();
     expect(SubprocessRunnerBase.serializeForIpcMessage('abc')).toMatchSnapshot();
-    // eslint-disable-next-line @rushstack/no-null
     expect(SubprocessRunnerBase.serializeForIpcMessage(null)).toMatchSnapshot();
     expect(SubprocessRunnerBase.serializeForIpcMessage(undefined)).toMatchSnapshot();
     const error: Error = new Error();
@@ -40,7 +39,6 @@ describe('SubprocessRunnerBase', () => {
     testDeserialization(1);
     testDeserialization(false);
     testDeserialization('abc');
-    // eslint-disable-next-line @rushstack/no-null
     testDeserialization(null);
     testDeserialization(undefined);
     testDeserialization(new Error());

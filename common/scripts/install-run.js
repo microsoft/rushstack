@@ -386,11 +386,21 @@ function installAndRun(packageName, packageVersion, packageBinName, packageBinAr
     console.log(os.EOL + statusMessage + os.EOL + statusMessageLine + os.EOL);
     const binPath = _getBinPath(packageInstallFolder, packageBinName);
     const binFolderPath = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
-    const result = childProcess.spawnSync(binPath, packageBinArgs, {
-        stdio: 'inherit',
-        cwd: process.cwd(),
-        env: Object.assign({}, process.env, { PATH: [binFolderPath, process.env.PATH].join(path.delimiter) })
-    });
+    // Windows environment variables are case-insensitive.  Instead of using SpawnSyncOptions.env, we need to
+    // assign via the process.env proxy to ensure that we append to the right PATH key.
+    const originalEnvPath = process.env.PATH || '';
+    let result;
+    try {
+        process.env.PATH = [binFolderPath, originalEnvPath].join(path.delimiter);
+        result = childProcess.spawnSync(binPath, packageBinArgs, {
+            stdio: 'inherit',
+            cwd: process.cwd(),
+            env: process.env
+        });
+    }
+    finally {
+        process.env.PATH = originalEnvPath;
+    }
     if (result.status !== null) {
         return result.status;
     }

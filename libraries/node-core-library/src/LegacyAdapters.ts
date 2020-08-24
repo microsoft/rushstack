@@ -8,6 +8,7 @@ import * as semver from 'semver';
  * Callback used by {@link LegacyAdapters}.
  * @public
  */
+// eslint-disable-next-line @rushstack/no-new-null
 export type LegacyCallback<TResult, TError> = (error: TError | null | undefined, result: TResult) => void;
 
 /**

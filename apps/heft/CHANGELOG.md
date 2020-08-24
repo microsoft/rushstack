@@ -1,6 +1,23 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 20 Aug 2020 18:41:47 GMT and should not be manually modified.
+This log was last generated on Mon, 24 Aug 2020 07:35:20 GMT and should not be manually modified.
+
+## 0.6.6
+Mon, 24 Aug 2020 07:35:20 GMT
+
+*Version update only*
+
+## 0.6.5
+Sat, 22 Aug 2020 05:55:42 GMT
+
+*Version update only*
+
+## 0.6.4
+Fri, 21 Aug 2020 01:21:17 GMT
+
+### Patches
+
+- Fix an issue with Heft exiting with exit code 0 after a CLI error.
 
 ## 0.6.3
 Thu, 20 Aug 2020 18:41:47 GMT

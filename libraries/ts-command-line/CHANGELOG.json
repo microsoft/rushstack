@@ -2,6 +2,42 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.6.3",
+      "tag": "@rushstack/ts-command-line_v4.6.3",
+      "date": "Mon, 24 Aug 2020 07:35:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.2.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.6.2",
+      "tag": "@rushstack/ts-command-line_v4.6.2",
+      "date": "Sat, 22 Aug 2020 05:55:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.6.1",
+      "tag": "@rushstack/ts-command-line_v4.6.1",
+      "date": "Fri, 21 Aug 2020 01:21:17 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where usage of a parameter specified undocumentedSynonyms yielded invalid data."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.6.0",
       "tag": "@rushstack/ts-command-line_v4.6.0",
       "date": "Thu, 20 Aug 2020 15:13:52 GMT",

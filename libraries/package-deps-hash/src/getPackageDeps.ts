@@ -109,6 +109,8 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
        *   - '??' == untracked
        *   - 'R' == rename
        *   - 'RM' == rename with modifications
+       *   - '[MARC]D' == deleted in work tree
+       * Full list of examples: https://git-scm.com/docs/git-status#_short_format
        */
       const match: RegExpMatchArray | null = line.match(/("(\\"|[^"])+")|(\S+\s*)/g);
 
@@ -258,7 +260,8 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
 
   const filesToHash: string[] = [];
   currentlyChangedFiles.forEach((changeType: string, filename: string) => {
-    if (changeType === 'D') {
+    // See comments inside parseGitStatus() for more information
+    if (changeType === 'D' || (changeType.length === 2 && changeType.charAt(1) === 'D')) {
       delete changes.files[filename];
     } else {
       if (!excludedHashes[filename]) {

@@ -166,6 +166,7 @@ export interface IExtendedModule extends webpack.compilation.Module {
   /**
    * Id for the module
    */
+  // eslint-disable-next-line @rushstack/no-new-null
   id: string | number | null;
   /**
    * Gets a descriptive identifier for the module.

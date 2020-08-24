@@ -51,6 +51,7 @@ interface IEslintMessage {
   severity: EslintSeverity;
 
   // Example: "BinaryExpression"
+  // eslint-disable-next-line @rushstack/no-new-null
   nodeType: string | null;
 }
 
