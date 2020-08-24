@@ -5,6 +5,48 @@ which provides a TypeScript ESLint ruleset tailored for large teams and projects
 Please see [that project's documentation](https://www.npmjs.com/package/@rushstack/eslint-config)
 for details.  To learn about Rush Stack, please visit: [https://rushstack.io/](https://rushstack.io/)
 
+## `@rushstack/hoist-jest-mock`
+
+Require Jest module mocking APIs to be called before any other statements in their code block.
+
+#### Rule Details
+
+Jest module mocking APIs such as "jest.mock()" must be called before the associated module is imported, otherwise
+they will have no effect. Transpilers such as `ts-jest` and `babel-jest` automatically "hoist" these calls, however
+this can produce counterintuitive behavior. Instead, the `hoist-jest-mocks` lint rule simply requires developers
+to write the statements in the correct order.
+
+The following APIs are affected: 'jest.mock()', 'jest.unmock()', 'jest.enableAutomock()', 'jest.disableAutomock()',
+'jest.deepUnmock()'.
+
+For technical background, please read the Jest documentation here: https://jestjs.io/docs/en/es6-class-mocks
+
+#### Examples
+
+The following patterns are considered problems when `@rushstack/hoist-jest-mock` is enabled:
+
+```ts
+import * as file from './file';
+jest.mock('./file'); // error
+
+test("example", () => {
+  const file2: typeof import('./file2') = require('./file2');
+  jest.mock('./file2'); // error
+});
+```
+
+The following patterns are NOT considered problems:
+
+```ts
+jest.mock('./file'); // okay, because mock() is first
+import * as file from './file';
+
+test("example", () => {
+  jest.mock('./file2'); // okay, because mock() is first within the test() code block
+  const file2: typeof import('./file2') = require('./file2');
+});
+```
+
 ## `@rushstack/no-new-null`
 
 Prevent usage of the JavaScript `null` value, while allowing code to access existing APIs that
@@ -174,4 +216,3 @@ enum E {
 }
 let e: E._PrivateMember = E._PrivateMember; // okay, because _PrivateMember is declared by E
 ```
-

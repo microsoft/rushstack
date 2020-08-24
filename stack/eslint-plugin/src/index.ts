@@ -3,8 +3,9 @@
 
 import { TSESLint } from '@typescript-eslint/experimental-utils';
 
-import { noNullRule } from './no-null';
+import { hoistJestMock } from './hoist-jest-mock';
 import { noNewNullRule } from './no-new-null';
+import { noNullRule } from './no-null';
 import { noUntypedUnderscoreRule } from './no-untyped-underscore';
 
 interface IPlugin {
@@ -13,9 +14,16 @@ interface IPlugin {
 
 const plugin: IPlugin = {
   rules: {
-    // NOTE: The actual ESLint rule name will be "@rushstack/no-null".
-    'no-null': noNullRule,
+    // Full name: "@rushstack/hoist-jest-mock"
+    'hoist-jest-mock': hoistJestMock,
+
+    // Full name: "@rushstack/no-new-null"
     'no-new-null': noNewNullRule,
+
+    // Full name: "@rushstack/no-null"
+    'no-null': noNullRule,
+
+    // Full name: "@rushstack/no-untyped-underscore"
     'no-untyped-underscore': noUntypedUnderscoreRule
   }
 };
