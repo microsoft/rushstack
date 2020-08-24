@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Adding new typescript.json parameter, subprocessNodeArgv, which is an array of strings that get added as command line parameters to the node instance of the compilation subprocess",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "BPapp-MS@users.noreply.github.com"
+}

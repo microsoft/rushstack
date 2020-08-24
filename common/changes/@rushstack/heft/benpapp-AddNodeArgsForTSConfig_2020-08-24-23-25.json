@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Making it so that the getConfigHash function in Tslint.ts is compatible with the variety of values of the \"extends\" parameter on config files, including arrays of strings that can specify paths to either config files, or packages who define a config file as \"main\" in the package.json",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "BPapp-MS@users.noreply.github.com"
+}
