@@ -50,7 +50,7 @@ function tryStartLocalHeft(): boolean {
     console.log('(Bypassing the Heft version selector because "--unmanaged" was specified.)');
     console.log();
     return false;
-  } else {
+  } else if (process.argv.indexOf('--debug') >= 0) {
     // The unmanaged flag could be undiscoverable if it's not in their locally installed version
     console.log(
       'Searching for a locally installed version of Heft. Use the --unmanaged flag if you want to avoid this'
