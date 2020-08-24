@@ -103,8 +103,8 @@ exports[`CommandLineHelp prints the help for each action: test 1`] = `
 "usage: heft test [-h] [-v] [--production] [--locale LOCALE] [-l]
                  [--typescript-max-write-parallelism PARALLEILSM]
                  [--max-old-space-size SIZE] [--watch] [--clean] [--no-test]
-                 [--no-build] [--find-related-tests SOURCE_FILE] [--silent]
-                 [-t REGEXP] [--test-path-pattern REGEXP]
+                 [--no-build] [-u] [--find-related-tests SOURCE_FILE]
+                 [--silent] [-t REGEXP] [--test-path-pattern REGEXP]
                  [--test-timeout-ms INTEGER] [--debug-heft-reporter]
                  
 
@@ -125,6 +125,10 @@ Optional arguments:
   --clean               If specified, clean the package before building.
   --no-test             If specified, run the build without testing.
   --no-build            If provided, only run tests. Do not build first.
+  -u, --update-snapshots
+                        Update Jest snapshots while running the tests. This 
+                        corresponds to the \\"--updateSnapshots\\" parameter in 
+                        Jest
   --find-related-tests SOURCE_FILE
                         Find and run the tests that cover a space separated 
                         list of source files that were passed in as arguments.

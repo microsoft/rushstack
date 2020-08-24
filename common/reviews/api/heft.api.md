@@ -317,8 +317,6 @@ export interface ITestStageProperties {
     // (undocumented)
     findRelatedTests: ReadonlyArray<string> | undefined;
     // (undocumented)
-    production: boolean;
-    // (undocumented)
     silent: boolean | undefined;
     // (undocumented)
     testNamePattern: string | undefined;
@@ -326,6 +324,8 @@ export interface ITestStageProperties {
     testPathPattern: ReadonlyArray<string> | undefined;
     // (undocumented)
     testTimeout: number | undefined;
+    // (undocumented)
+    updateSnapshots: boolean;
     // (undocumented)
     watchMode: boolean;
 }
