@@ -295,8 +295,8 @@ export interface ISharedTypeScriptConfiguration {
     additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
     copyFromCacheMode?: CopyFromCacheMode | undefined;
     emitFolderPathForJest?: string;
-    extraNodeArgv?: string[];
     maxWriteParallelism: number;
+    subprocessNodeArgv?: string[];
 }
 
 // @public (undocumented)
