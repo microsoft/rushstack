@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "Adds Command Line Argument --update-snapshots which when included causes the test action to update the Jest snapshots, which are otherwise not changed. This replaces the older logic of using --production to prevent updating snapshots, which were otherwise updated.",
+      "comment": "Adds a \"--update-snapshots\" command line flag which, when included, causes the test action to update the Jest snapshots. If this flag is omitted, tests with conditions that do not match the snapshots will fail. This replaces the older logic of using --production to prevent updating snapshots, which were otherwise updated.",
       "type": "minor"
     }
   ],
