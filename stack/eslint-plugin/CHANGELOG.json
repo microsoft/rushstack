@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin",
   "entries": [
     {
+      "version": "0.6.0",
+      "tag": "@rushstack/eslint-plugin_v0.6.0",
+      "date": "Mon, 24 Aug 2020 07:35:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new rule @rushstack/hoist-jest-mock"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.0",
       "tag": "@rushstack/eslint-plugin_v0.5.0",
       "date": "Sat, 22 Aug 2020 05:55:42 GMT",

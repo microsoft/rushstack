@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Sat, 22 Aug 2020 05:55:42 GMT and should not be manually modified.
+This log was last generated on Mon, 24 Aug 2020 07:35:20 GMT and should not be manually modified.
+
+## 0.6.0
+Mon, 24 Aug 2020 07:35:20 GMT
+
+### Minor changes
+
+- Add new rule @rushstack/hoist-jest-mock
 
 ## 0.5.0
 Sat, 22 Aug 2020 05:55:42 GMT
