@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Mon, 24 Aug 2020 07:35:20 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Aug 2020 00:10:12 GMT and should not be manually modified.
+
+## 0.7.0
+Tue, 25 Aug 2020 00:10:12 GMT
+
+### Minor changes
+
+- Adds a "--update-snapshots" command line flag which, when included, causes the test action to update the Jest snapshots. If this flag is omitted, tests with conditions that do not match the snapshots will fail. This replaces the older logic of using --production to prevent updating snapshots, which were otherwise updated.
 
 ## 0.6.6
 Mon, 24 Aug 2020 07:35:20 GMT

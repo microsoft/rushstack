@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.7.0",
+      "tag": "@rushstack/heft_v0.7.0",
+      "date": "Tue, 25 Aug 2020 00:10:12 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Adds a \"--update-snapshots\" command line flag which, when included, causes the test action to update the Jest snapshots. If this flag is omitted, tests with conditions that do not match the snapshots will fail. This replaces the older logic of using --production to prevent updating snapshots, which were otherwise updated."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.6",
       "tag": "@rushstack/heft_v0.6.6",
       "date": "Mon, 24 Aug 2020 07:35:20 GMT",
