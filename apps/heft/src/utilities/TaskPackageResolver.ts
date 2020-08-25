@@ -8,7 +8,7 @@ import {
   FileSystem,
   JsonFile,
   INodePackageJson,
-  Resolve
+  Import
 } from '@rushstack/node-core-library';
 
 interface ITsconfig {
@@ -121,7 +121,7 @@ export class TaskPackageResolver {
 
     let resolvedPackageFolder: string | undefined;
     try {
-      resolvedPackageFolder = Resolve.resolvePackagePath(taskPackageName, baseFolder);
+      resolvedPackageFolder = Import.resolve(taskPackageName, baseFolder);
     } catch (e) {
       // Ignore errors
       resolvedPackageFolder = undefined;
@@ -183,7 +183,7 @@ export class TaskPackageResolver {
           `Following a tsconfig.json "extends" property "${tsconfig.extends}" that is a package path.`
         );
         // Package path
-        baseTsconfigPath = Resolve.resolvePackage(tsconfig.extends, path.dirname(tsconfigPath));
+        baseTsconfigPath = Import.resolve(tsconfig.extends, path.dirname(tsconfigPath));
       }
 
       terminal.writeVerboseLine(`Resolved "extends" path to: ${baseTsconfigPath}`);

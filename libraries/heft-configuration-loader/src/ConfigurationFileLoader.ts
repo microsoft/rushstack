@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { JSONPath } from 'jsonpath-plus';
-import { JsonSchema, JsonFile, PackageJsonLookup, Resolve } from '@rushstack/node-core-library';
+import { JsonSchema, JsonFile, PackageJsonLookup, Import } from '@rushstack/node-core-library';
 
 interface IConfigurationJson {
   extends?: string;
@@ -382,7 +382,7 @@ export class ConfigurationFileLoader<TConfigurationFile> {
       }
 
       case PathResolutionMethod.NodeResolve: {
-        return Resolve.resolvePackagePath(propertyValue, configurationFilePath);
+        return Import.resolve(propertyValue, configurationFilePath);
       }
 
       default: {

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Terminal, InternalError, FileSystem, Resolve } from '@rushstack/node-core-library';
+import { Terminal, InternalError, FileSystem, Import } from '@rushstack/node-core-library';
 import {
   InheritanceType,
   PathResolutionMethod,
@@ -153,7 +153,7 @@ export class PluginManager {
     this._terminal.writeVerboseLine(`Resolving plugin ${pluginSpecifier}`);
 
     try {
-      resolvedPluginPath = Resolve.resolvePackagePath(pluginSpecifier, this._heftConfiguration.buildFolder);
+      resolvedPluginPath = Import.resolve(pluginSpecifier, this._heftConfiguration.buildFolder);
     } catch (e) {
       throw new InternalError(`Error resolving specified plugin "${pluginSpecifier}". Resolve error: ${e}`);
     }

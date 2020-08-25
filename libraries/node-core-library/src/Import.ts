@@ -1,7 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as nodeJsPath from 'path';
 import importLazy = require('import-lazy');
+import * as Resolve from 'resolve';
+
+import { PackageJsonLookup } from './PackageJsonLookup';
+import { FileSystem } from './FileSystem';
+
+const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
+
+/**
+ * @alpha
+ */
+export interface IResolveOptions {
+  doNotResolveSymlinks: boolean;
+}
 
 /**
  * Helpers for resolving and importing Node.js modules.
@@ -82,5 +96,75 @@ export class Import {
   public static lazy(moduleName: string, require: (id: string) => unknown): any {
     const importLazyLocal: (moduleName: string) => unknown = importLazy(require);
     return importLazyLocal(moduleName);
+  }
+
+  /**
+   * Resolves a path in a package, relative to another path.
+   */
+  public static resolve(path: string, rootPath: string, options?: Partial<IResolveOptions>): string {
+    options = {
+      doNotResolveSymlinks: false,
+      ...options
+    };
+
+    if (nodeJsPath.isAbsolute(path)) {
+      return path;
+    }
+
+    let normalizedRootPath: string = options.doNotResolveSymlinks
+      ? rootPath
+      : FileSystem.getRealPath(rootPath);
+
+    if (path.startsWith('.')) {
+      // This looks like a conventional relative path
+      return nodeJsPath.resolve(normalizedRootPath, path);
+    }
+
+    normalizedRootPath = packageJsonLookup.tryGetPackageFolderFor(normalizedRootPath) || normalizedRootPath;
+
+    let slashAfterPackageNameIndex: number;
+    if (path.startsWith('@')) {
+      // This looks like a scoped package name
+      slashAfterPackageNameIndex = path.indexOf('/', path.indexOf('/') + 1);
+    } else {
+      slashAfterPackageNameIndex = path.indexOf('/');
+    }
+
+    let packageName: string;
+    let pathInsidePackage: string;
+    if (slashAfterPackageNameIndex === -1) {
+      // This looks like a package name without a path
+      packageName = path;
+      pathInsidePackage = '';
+    } else {
+      packageName = path.substr(0, slashAfterPackageNameIndex);
+      pathInsidePackage = path.substr(slashAfterPackageNameIndex + 1);
+    }
+
+    let resolvedPackagePath: string;
+    try {
+      resolvedPackagePath = nodeJsPath.dirname(
+        Resolve.sync(packageName, {
+          basedir: normalizedRootPath,
+          packageFilter: (pkg: { main: string }): { main: string } => {
+            // In case the "main" property isn't defined, set it to something we know will exist
+            pkg.main = 'package.json';
+            return pkg;
+          }
+        })
+      );
+    } catch (e) {
+      // If we fail, see if we're trying to resolve to the current package
+      const ownPackageJsonPath: string | undefined = packageJsonLookup.tryGetPackageJsonFilePathFor(
+        normalizedRootPath
+      );
+      if (ownPackageJsonPath && packageJsonLookup.loadPackageJson(ownPackageJsonPath).name === packageName) {
+        resolvedPackagePath = nodeJsPath.dirname(ownPackageJsonPath);
+      } else {
+        throw e;
+      }
+    }
+
+    return nodeJsPath.resolve(resolvedPackagePath, pathInsidePackage);
   }
 }

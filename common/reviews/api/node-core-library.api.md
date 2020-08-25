@@ -344,6 +344,8 @@ export interface IJsonSchemaValidateOptions {
 // @public
 export class Import {
     static lazy(moduleName: string, require: (id: string) => unknown): any;
+    // Warning: (ae-incompatible-release-tags) The symbol "resolve" is marked as @public, but its signature references "IResolveOptions" which is marked as @alpha
+    static resolve(path: string, rootPath: string, options?: Partial<IResolveOptions>): string;
 }
 
 // @public
@@ -421,7 +423,7 @@ export interface IProtectableMapParameters<K, V> {
 }
 
 // @alpha (undocumented)
-export interface IResolvePackageOptions {
+export interface IResolveOptions {
     // (undocumented)
     doNotResolveSymlinks: boolean;
 }
@@ -590,12 +592,6 @@ export class ProtectableMap<K, V> {
     readonly protectedView: Map<K, V>;
     set(key: K, value: V): this;
     readonly size: number;
-}
-
-// @alpha (undocumented)
-export class Resolve {
-    static resolvePackage(packageName: string, rootPath: string, options?: Partial<IResolvePackageOptions>): string;
-    static resolvePackagePath(packagePath: string, rootPath: string, options?: Partial<IResolvePackageOptions>): string;
 }
 
 // @public
