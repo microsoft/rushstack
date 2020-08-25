@@ -8,8 +8,6 @@ import * as Resolve from 'resolve';
 import { PackageJsonLookup } from './PackageJsonLookup';
 import { FileSystem } from './FileSystem';
 
-const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-
 /**
  * @alpha
  */
@@ -120,7 +118,8 @@ export class Import {
       return nodeJsPath.resolve(normalizedRootPath, path);
     }
 
-    normalizedRootPath = packageJsonLookup.tryGetPackageFolderFor(normalizedRootPath) || normalizedRootPath;
+    normalizedRootPath =
+      PackageJsonLookup.instance.tryGetPackageFolderFor(normalizedRootPath) || normalizedRootPath;
 
     let slashAfterPackageNameIndex: number;
     if (path.startsWith('@')) {
@@ -155,10 +154,13 @@ export class Import {
       );
     } catch (e) {
       // If we fail, see if we're trying to resolve to the current package
-      const ownPackageJsonPath: string | undefined = packageJsonLookup.tryGetPackageJsonFilePathFor(
+      const ownPackageJsonPath: string | undefined = PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(
         normalizedRootPath
       );
-      if (ownPackageJsonPath && packageJsonLookup.loadPackageJson(ownPackageJsonPath).name === packageName) {
+      if (
+        ownPackageJsonPath &&
+        PackageJsonLookup.instance.loadPackageJson(ownPackageJsonPath).name === packageName
+      ) {
         resolvedPackagePath = nodeJsPath.dirname(ownPackageJsonPath);
       } else {
         throw e;

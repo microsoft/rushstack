@@ -526,6 +526,7 @@ export const enum NewlineKind {
 export class PackageJsonLookup {
     constructor(parameters?: IPackageJsonLookupParameters);
     clearCache(): void;
+    static readonly instance: PackageJsonLookup;
     loadNodePackageJson(jsonFilename: string): INodePackageJson;
     static loadOwnPackageJson(dirnameOfCaller: string): IPackageJson;
     loadPackageJson(jsonFilename: string): IPackageJson;
