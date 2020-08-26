@@ -2,6 +2,42 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.33.2",
+      "tag": "@microsoft/rush_v5.33.2",
+      "date": "Fri, 21 Aug 2020 22:45:58 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where PNPM would sometimes prompt for input during \"rush publish\" (GitHub #1940)"
+          },
+          {
+            "comment": "Fix an issue that prevented Rush from logging in verbose mode"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.33.1",
+      "tag": "@microsoft/rush_v5.33.1",
+      "date": "Thu, 20 Aug 2020 18:25:41 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix issues where installs could fail after running 'rush version' while the 'usePnpmFrozenLockfileForRushInstall' experiment is enabled. See PR #2116 for more details."
+          },
+          {
+            "comment": "Fix an issue where \"rush deploy\" would sometimes report an \"already exists\" when using the \"files\" setting in package.json (GitHub #2121)"
+          },
+          {
+            "comment": "Allow multiple simultaneous invocations of \"rush deploy\" (GitHub #2125)"
+          },
+          {
+            "comment": "Load and validate local projects lazily to further improve Rush startup times."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.33.0",
       "tag": "@microsoft/rush_v5.33.0",
       "date": "Wed, 19 Aug 2020 00:17:48 GMT",

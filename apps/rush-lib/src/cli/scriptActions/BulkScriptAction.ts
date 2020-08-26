@@ -24,6 +24,7 @@ import { Utilities } from '../../utilities/Utilities';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
+import { IRushConfigurationProjectJson } from '../../api/RushConfigurationProject';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -221,10 +222,12 @@ export class BulkScriptAction extends BaseScriptAction {
     const unscopedNamesMap: Map<string, number> = new Map<string, number>();
 
     const scopedNames: string[] = [];
-    for (const project of this.rushConfiguration.projects) {
-      scopedNames.push(project.packageName);
 
-      const unscopedName: string = PackageName.getUnscopedName(project.packageName);
+    const projectJsons: IRushConfigurationProjectJson[] = [...this.rushConfiguration.rushConfigurationJson.projects];
+
+    for (const projectJson of projectJsons) {
+      scopedNames.push(projectJson.packageName);
+      const unscopedName: string = PackageName.getUnscopedName(projectJson.packageName);
       let count: number = 0;
       if (unscopedNamesMap.has(unscopedName)) {
         count = unscopedNamesMap.get(unscopedName)!;

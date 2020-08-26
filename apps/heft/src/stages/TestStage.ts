@@ -19,7 +19,7 @@ export class TestStageHooks extends StageHooksBase<ITestStageProperties> {
  */
 export interface ITestStageProperties {
   watchMode: boolean;
-  production: boolean;
+  updateSnapshots: boolean;
 
   findRelatedTests: ReadonlyArray<string> | undefined;
   silent: boolean | undefined;
@@ -36,7 +36,7 @@ export interface ITestStageContext extends IStageContext<TestStageHooks, ITestSt
 
 export interface ITestStageOptions {
   watchMode: boolean;
-  production: boolean;
+  updateSnapshots: boolean;
 
   findRelatedTests: ReadonlyArray<string> | undefined;
   silent: boolean | undefined;
@@ -54,7 +54,7 @@ export class TestStage extends StageBase<TestStageHooks, ITestStageProperties, I
   protected getDefaultStageProperties(options: ITestStageOptions): ITestStageProperties {
     return {
       watchMode: options.watchMode,
-      production: options.production,
+      updateSnapshots: options.updateSnapshots,
 
       findRelatedTests: options.findRelatedTests,
       silent: options.silent,

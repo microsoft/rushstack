@@ -6,7 +6,14 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as semver from 'semver';
-import { JsonFile, JsonSchema, Path, FileSystem, PackageNameParser } from '@rushstack/node-core-library';
+import {
+  JsonFile,
+  JsonSchema,
+  JsonNull,
+  Path,
+  FileSystem,
+  PackageNameParser
+} from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
 
 import { Rush } from '../api/Rush';
@@ -232,7 +239,7 @@ export interface IRushConfigurationJson {
  * This represents the JSON data structure for the "current-variant.json" data file.
  */
 export interface ICurrentVariantJson {
-  variant: string | null; // Use `null` instead of `undefined` because `undefined` is not handled by JSON.
+  variant: string | JsonNull;
 }
 
 /**
@@ -450,9 +457,7 @@ export class RushConfiguration {
   private _allowMostlyStandardPackageNames: boolean;
   private _ensureConsistentVersions: boolean;
   private _suppressNodeLtsWarning: boolean;
-  private _variants: {
-    [variantName: string]: boolean;
-  };
+  private _variants: Set<string>;
 
   // "approvedPackagesPolicy" feature
   private _approvedPackagesPolicy: ApprovedPackagesPolicy;
@@ -482,17 +487,23 @@ export class RushConfiguration {
 
   private _telemetryEnabled: boolean;
 
+  // Lazily loaded when the projects() getter is called.
   private _projects: RushConfigurationProject[];
+
+  // Lazily loaded when the projectsByName() getter is called.
   private _projectsByName: Map<string, RushConfigurationProject>;
 
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
   private _experimentsConfiguration: ExperimentsConfiguration;
+
+  private readonly _rushConfigurationJson: IRushConfigurationJson;
 
   /**
    * Use RushConfiguration.loadFromConfigurationFile() or Use RushConfiguration.loadFromDefaultLocation()
    * instead.
    */
   private constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string) {
+    this._rushConfigurationJson = rushConfigurationJson;
     EnvironmentConfiguration.initialize();
 
     if (rushConfigurationJson.nodeSupportedVersionRange) {
@@ -692,12 +703,28 @@ export class RushConfiguration {
     );
     this._versionPolicyConfiguration = new VersionPolicyConfiguration(versionPolicyConfigFile);
 
+    this._variants = new Set<string>();
+
+    if (rushConfigurationJson.variants) {
+      for (const variantOptions of rushConfigurationJson.variants) {
+        const { variantName } = variantOptions;
+
+        if (this._variants.has(variantName)) {
+          throw new Error(`Duplicate variant named '${variantName}' specified in configuration.`);
+        }
+
+        this._variants.add(variantName);
+      }
+    }
+  }
+
+  private _initializeAndValidateLocalProjects(): void {
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigurationProject>();
 
     // We sort the projects array in alphabetical order.  This ensures that the packages
     // are processed in a deterministic order by the various Rush algorithms.
-    const sortedProjectJsons: IRushConfigurationProjectJson[] = rushConfigurationJson.projects.slice(0);
+    const sortedProjectJsons: IRushConfigurationProjectJson[] = this._rushConfigurationJson.projects.slice(0);
     sortedProjectJsons.sort((a: IRushConfigurationProjectJson, b: IRushConfigurationProjectJson) =>
       a.packageName.localeCompare(b.packageName)
     );
@@ -739,26 +766,8 @@ export class RushConfiguration {
       // Compute the downstream dependencies within the list of Rush projects.
       this._populateDownstreamDependencies(project.packageJson.dependencies, project.packageName);
       this._populateDownstreamDependencies(project.packageJson.devDependencies, project.packageName);
-      this._versionPolicyConfiguration.validate(this._projectsByName);
+      this._versionPolicyConfiguration.validate(this.projectsByName);
     }
-
-    const variants: {
-      [variantName: string]: boolean;
-    } = {};
-
-    if (rushConfigurationJson.variants) {
-      for (const variantOptions of rushConfigurationJson.variants) {
-        const { variantName } = variantOptions;
-
-        if (variants[variantName]) {
-          throw new Error(`Duplicate variant named '${variantName}' specified in configuration.`);
-        }
-
-        variants[variantName] = true;
-      }
-    }
-
-    this._variants = variants;
   }
 
   /**
@@ -992,6 +1001,15 @@ export class RushConfiguration {
    */
   public get packageManagerWrapper(): PackageManager {
     return this._packageManagerWrapper;
+  }
+
+  /**
+   * Gets the JSON data structure for the "rush.json" configuration file.
+   *
+   * @internal
+   */
+  public get rushConfigurationJson(): IRushConfigurationJson {
+    return this._rushConfigurationJson;
   }
 
   /**
@@ -1341,10 +1359,18 @@ export class RushConfiguration {
   }
 
   public get projects(): RushConfigurationProject[] {
+    if (!this._projects) {
+      this._initializeAndValidateLocalProjects();
+    }
+
     return this._projects;
   }
 
   public get projectsByName(): Map<string, RushConfigurationProject> {
+    if (!this._projectsByName) {
+      this._initializeAndValidateLocalProjects();
+    }
+
     return this._projectsByName;
   }
 
@@ -1476,11 +1502,11 @@ export class RushConfiguration {
    */
   public getCommittedShrinkwrapFilename(variant?: string | undefined): string {
     if (variant) {
-      if (!this._variants[variant]) {
+      if (!this._variants.has(variant)) {
         throw new Error(
           `Invalid variant name '${variant}'. The provided variant parameter needs to be ` +
             `one of the following from rush.json: ` +
-            `${Object.keys(this._variants)
+            `${Array.from(this._variants.values())
               .map((name: string) => `"${name}"`)
               .join(', ')}.`
         );
@@ -1509,7 +1535,7 @@ export class RushConfiguration {
    * then undefined is returned.
    */
   public getProjectByName(projectName: string): RushConfigurationProject | undefined {
-    return this._projectsByName.get(projectName);
+    return this.projectsByName.get(projectName);
   }
 
   /**
@@ -1520,13 +1546,13 @@ export class RushConfiguration {
    */
   public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined {
     // Is there an exact match?
-    let result: RushConfigurationProject | undefined = this._projectsByName.get(shorthandProjectName);
+    let result: RushConfigurationProject | undefined = this.projectsByName.get(shorthandProjectName);
     if (result) {
       return result;
     }
 
     // Is there an approximate match?
-    for (const project of this._projects) {
+    for (const project of this.projects) {
       if (this.packageNameParser.getUnscopedName(project.packageName) === shorthandProjectName) {
         if (result) {
           // Ambiguous -- there is more than one match
@@ -1545,7 +1571,7 @@ export class RushConfiguration {
    */
   public findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined {
     // Is there an approximate match?
-    for (const project of this._projects) {
+    for (const project of this.projects) {
       if (project.tempProjectName === tempProjectName) {
         return project;
       }
@@ -1592,7 +1618,7 @@ export class RushConfiguration {
       return;
     }
     Object.keys(dependencies).forEach((dependencyName) => {
-      const depProject: RushConfigurationProject | undefined = this._projectsByName.get(dependencyName);
+      const depProject: RushConfigurationProject | undefined = this.projectsByName.get(dependencyName);
 
       if (depProject) {
         depProject.downstreamDependencyProjects.push(packageName);
@@ -1602,11 +1628,11 @@ export class RushConfiguration {
 
   private _getVariantConfigFolderPath(variant?: string | undefined): string {
     if (variant) {
-      if (!this._variants[variant]) {
+      if (!this._variants.has(variant)) {
         throw new Error(
           `Invalid variant name '${variant}'. The provided variant parameter needs to be ` +
             `one of the following from rush.json: ` +
-            `${Object.keys(this._variants)
+            `${Array.from(this._variants.values())
               .map((name: string) => `"${name}"`)
               .join(', ')}.`
         );

@@ -10,7 +10,8 @@ const parser: HeftToolsCommandLineParser = new HeftToolsCommandLineParser();
 parser
   .execute()
   .then(() => {
-    process.exit(0); // This should be removed when the issue with aria not tearing down
+    // This should be removed when the issue with aria not tearing down
+    process.exit(process.exitCode === undefined ? 0 : process.exitCode);
   })
   .catch((error) => {
     parser.terminal.writeErrorLine(error);

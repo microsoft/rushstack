@@ -22,26 +22,26 @@ class TestCommandLine extends CommandLineParser {
 }
 
 describe('Actionless CommandLineParser', () => {
-  it('parses a flag', () => {
+  it('parses a flag', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
 
-    return commandLineParser.execute(['--flag']).then(() => {
-      expect(commandLineParser.selectedAction).toBeUndefined();
-      expect(commandLineParser.flag.value).toBe(true);
-    });
+    await commandLineParser.execute(['--flag']);
+
+    expect(commandLineParser.selectedAction).toBeUndefined();
+    expect(commandLineParser.flag.value).toBe(true);
   });
 
-  it('parses a flag and remainder', () => {
+  it('parses a flag and remainder', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
 
     commandLineParser.defineCommandLineRemainder({
       description: 'remainder description'
     });
 
-    return commandLineParser.execute(['--flag', 'the', 'remaining', 'args']).then(() => {
-      expect(commandLineParser.selectedAction).toBeUndefined();
-      expect(commandLineParser.flag.value).toBe(true);
-      expect(commandLineParser.remainder!.values).toEqual(['the', 'remaining', 'args']);
-    });
+    await commandLineParser.execute(['--flag', 'the', 'remaining', 'args']);
+
+    expect(commandLineParser.selectedAction).toBeUndefined();
+    expect(commandLineParser.flag.value).toBe(true);
+    expect(commandLineParser.remainder!.values).toEqual(['the', 'remaining', 'args']);
   });
 });

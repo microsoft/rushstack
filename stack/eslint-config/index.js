@@ -55,7 +55,7 @@ module.exports = {
       rules: {
         // The @rushstack rules are documented in the package README:
         // https://www.npmjs.com/package/@rushstack/eslint-plugin
-        '@rushstack/no-null': 'warn',
+        '@rushstack/no-new-null': 'warn',
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         '@typescript-eslint/adjacent-overload-signatures': 'warn',

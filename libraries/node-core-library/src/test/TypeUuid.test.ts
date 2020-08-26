@@ -35,7 +35,6 @@ describe('TypeUuid', () => {
   });
   test('handles undefined and null', () => {
     expect(TypeUuid.isInstanceOf(undefined, UuidA)).toEqual(false);
-    // eslint-disable-next-line @rushstack/no-null
     expect(TypeUuid.isInstanceOf(null, UuidA)).toEqual(false);
   });
   test('works with Symbol.hasInstance', () => {

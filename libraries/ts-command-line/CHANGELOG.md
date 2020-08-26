@@ -1,6 +1,30 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Tue, 18 Aug 2020 23:59:42 GMT and should not be manually modified.
+This log was last generated on Mon, 24 Aug 2020 07:35:20 GMT and should not be manually modified.
+
+## 4.6.3
+Mon, 24 Aug 2020 07:35:20 GMT
+
+*Version update only*
+
+## 4.6.2
+Sat, 22 Aug 2020 05:55:43 GMT
+
+*Version update only*
+
+## 4.6.1
+Fri, 21 Aug 2020 01:21:17 GMT
+
+### Patches
+
+- Fix an issue where usage of a parameter specified undocumentedSynonyms yielded invalid data.
+
+## 4.6.0
+Thu, 20 Aug 2020 15:13:52 GMT
+
+### Minor changes
+
+- Add a feature for specifying "undocumented synonyms" for parameters.
 
 ## 4.5.0
 Tue, 18 Aug 2020 23:59:42 GMT

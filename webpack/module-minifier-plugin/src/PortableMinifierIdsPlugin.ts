@@ -97,7 +97,7 @@ export class PortableMinifierModuleIdsPlugin implements Plugin {
 
       STABLE_MODULE_ID_REGEX.lastIndex = -1;
       // RegExp.exec uses null or an array as the return type, explicitly
-      let match: RegExpExecArray | null = null; // eslint-disable-line @rushstack/no-null
+      let match: RegExpExecArray | null = null;
       while ((match = STABLE_MODULE_ID_REGEX.exec(code))) {
         const id: string = match[1];
         const mapped: string | number | undefined = stableIdToFinalId.get(id);

@@ -58,7 +58,7 @@ export class JestPlugin implements IHeftPlugin {
 
       config: JEST_CONFIGURATION_LOCATION,
       cacheDirectory: this._getJestCacheFolder(heftConfiguration),
-      updateSnapshot: !test.properties.production,
+      updateSnapshot: test.properties.updateSnapshots,
 
       listTests: false,
       rootDir: buildFolder,
@@ -96,6 +96,14 @@ export class JestPlugin implements IHeftPlugin {
       jestLogger.emitError(
         new Error(
           `${jestResults.numFailedTests} Jest test${jestResults.numFailedTests > 1 ? 's' : ''} failed`
+        )
+      );
+    } else if (jestResults.numFailedTestSuites > 0) {
+      jestLogger.emitError(
+        new Error(
+          `${jestResults.numFailedTestSuites} Jest test suite${
+            jestResults.numFailedTestSuites > 1 ? 's' : ''
+          } failed`
         )
       );
     }

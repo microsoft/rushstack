@@ -14,7 +14,7 @@ export class Rundown {
 
   public async invokeAsync(
     scriptPath: string,
-    args: string,
+    args: string | undefined,
     quiet: boolean,
     ignoreExitCode: boolean
   ): Promise<void> {
@@ -23,7 +23,7 @@ export class Rundown {
     }
     const absoluteScriptPath: string = path.resolve(scriptPath);
 
-    const expandedArgs: string[] = stringArgv(args);
+    const expandedArgs: string[] = args === undefined ? [] : stringArgv(args);
 
     console.log('Starting process: ' + [absoluteScriptPath, ...expandedArgs].join(' '));
     console.log();

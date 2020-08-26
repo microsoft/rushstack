@@ -2,6 +2,35 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "1.2.1",
+      "tag": "@rushstack/eslint-config_v1.2.1",
+      "date": "Mon, 24 Aug 2020 07:35:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.6.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.0",
+      "tag": "@rushstack/eslint-config_v1.2.0",
+      "date": "Sat, 22 Aug 2020 05:55:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Replace the \"@rushstack/no-null\" rule with a more flexible rule \"@rushstack/no-new-null\" (GitHub #2017)"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.5.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.0",
       "tag": "@rushstack/eslint-config_v1.1.0",
       "date": "Mon, 17 Aug 2020 04:53:23 GMT",

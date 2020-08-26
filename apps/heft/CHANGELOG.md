@@ -1,6 +1,44 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 18 Aug 2020 23:59:42 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Aug 2020 00:10:12 GMT and should not be manually modified.
+
+## 0.7.0
+Tue, 25 Aug 2020 00:10:12 GMT
+
+### Minor changes
+
+- Adds a "--update-snapshots" command line flag which, when included, causes the test action to update the Jest snapshots. If this flag is omitted, tests with conditions that do not match the snapshots will fail. This replaces the older logic of using --production to prevent updating snapshots, which were otherwise updated.
+
+## 0.6.6
+Mon, 24 Aug 2020 07:35:20 GMT
+
+*Version update only*
+
+## 0.6.5
+Sat, 22 Aug 2020 05:55:42 GMT
+
+*Version update only*
+
+## 0.6.4
+Fri, 21 Aug 2020 01:21:17 GMT
+
+### Patches
+
+- Fix an issue with Heft exiting with exit code 0 after a CLI error.
+
+## 0.6.3
+Thu, 20 Aug 2020 18:41:47 GMT
+
+### Patches
+
+- Fix an issue where failed test suites aren't listed as failures.
+
+## 0.6.2
+Thu, 20 Aug 2020 15:13:52 GMT
+
+### Patches
+
+- Add the --notest parameter back to "heft test" temporarily.
 
 ## 0.6.1
 Tue, 18 Aug 2020 23:59:42 GMT

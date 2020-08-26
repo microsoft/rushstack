@@ -62,6 +62,17 @@ export interface IBaseCommandLineDefinition {
    *   ordinary String Parameter:  Any value is accepted, including an empty string.
    */
   environmentVariable?: string;
+
+  /**
+   * Specifies additional names for this parameter that are accepted but not displayed
+   * in the command line help.
+   *
+   * @remarks
+   * This option can be used in cases where a command-line parameter may have been renamed,
+   * but the developer doesn't want to break backwards compatibility with systems that may
+   * still be using the old name. Only the `parameterLongName` syntax is currently allowed.
+   */
+  undocumentedSynonyms?: string[];
 }
 
 /**

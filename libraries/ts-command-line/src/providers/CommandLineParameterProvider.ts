@@ -333,7 +333,14 @@ export abstract class CommandLineParameterProvider {
         break;
     }
 
-    this._getArgumentParser().addArgument(names, argparseOptions);
+    const argumentParser: argparse.ArgumentParser = this._getArgumentParser();
+    argumentParser.addArgument(names, { ...argparseOptions });
+    if (parameter.undocumentedSynonyms && parameter.undocumentedSynonyms.length > 0) {
+      argumentParser.addArgument(parameter.undocumentedSynonyms, {
+        ...argparseOptions,
+        help: argparse.Const.SUPPRESS
+      });
+    }
 
     this._parameters.push(parameter);
     this._parametersByLongName.set(parameter.longName, parameter);

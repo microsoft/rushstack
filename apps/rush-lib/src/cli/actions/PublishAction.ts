@@ -4,6 +4,7 @@
 import * as colors from 'colors';
 import { EOL } from 'os';
 import * as path from 'path';
+import * as semver from 'semver';
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
@@ -418,6 +419,15 @@ export class PublishAction extends BaseRushAction {
 
       if (this._npmAccessLevel.value) {
         args.push(`--access`, this._npmAccessLevel.value);
+      }
+
+      if (
+        this.rushConfiguration.packageManager === 'pnpm' &&
+        semver.gte(this.rushConfiguration.packageManagerToolVersion, '4.11.0')
+      ) {
+        // PNPM 4.11.0 introduced a feature that may interrupt publishing and prompt the user for input.
+        // See this issue for details: https://github.com/microsoft/rushstack/issues/1940
+        args.push('--no-git-checks');
       }
 
       // TODO: Yarn's "publish" command line is fairly different from NPM and PNPM.  The right thing to do here
