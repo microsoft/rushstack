@@ -10,6 +10,13 @@
     "\\.(css)$": "<rootDir>/node_modules/@rushstack/heft/lib/exports/jest-identity-mock-transform",
     "\\.(jpg|png|gif|mp3)$": "<rootDir>/node_modules/@rushstack/heft/lib/exports/jest-string-mock-transform"
   },
+  "//": [
+    "The modulePathIgnorePatterns below accepts these sorts of paths:",
+    "  <rootDir>/src",
+    "  <rootDir>/src/file.ts",
+    "...and ignores anything else under <rootDir>"
+  ],
+  "modulePathIgnorePatterns": ["^<rootDir>/(?!(?:src/)|(?:src$))"],
   "setupFiles": ["<rootDir>/node_modules/@rushstack/heft/lib/exports/jest-global-setup.js"],
   "passWithNoTests": true
 }
