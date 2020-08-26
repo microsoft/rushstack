@@ -3,7 +3,8 @@
 
 jest.mock('./SoundPlayer'); // SoundPlayer is now a mock constructor
 
-import { SoundPlayer, mockPlaySoundFile } from './SoundPlayer';
+import { SoundPlayer } from './SoundPlayer';
+import { mockPlaySoundFile } from './__mocks__/SoundPlayer';
 import { SoundPlayerConsumer } from './SoundPlayerConsumer';
 
 beforeEach(() => {
@@ -23,4 +24,11 @@ it('We can check if the consumer called a method on the class instance', () => {
   const coolSoundFileName: string = 'song.mp3';
   soundPlayerConsumer.playSomethingCool();
   expect(mockPlaySoundFile).toHaveBeenCalledWith(coolSoundFileName);
+});
+
+// The test below validates that jest-__mocks__-resolver.js is working correctly
+import { SoundPlayer as MockSoundPlayer } from './__mocks__/SoundPlayer';
+
+it('Importing ./__mocks__/SoundPlayer returns the same object as importing ./SoundPlayer', () => {
+  expect(SoundPlayer).toBe(MockSoundPlayer);
 });

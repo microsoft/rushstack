@@ -13,5 +13,3 @@ export class SoundPlayer {
     console.log('Foo=' + this._foo);
   }
 }
-
-export const mockPlaySoundFile: any = undefined;

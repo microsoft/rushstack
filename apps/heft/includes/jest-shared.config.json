@@ -6,9 +6,9 @@
   "testMatch": ["<rootDir>/src/**/*.test.{ts,tsx}"],
   "transformIgnorePatterns": [],
   "transform": {
-    "\\.(ts|tsx)$": "<rootDir>/node_modules/@rushstack/heft/lib/exports/jest-build-transform",
-    "\\.(css)$": "<rootDir>/node_modules/@rushstack/heft/lib/exports/jest-identity-mock-transform",
-    "\\.(jpg|png|gif|mp3)$": "<rootDir>/node_modules/@rushstack/heft/lib/exports/jest-string-mock-transform"
+    "\\.(ts|tsx)$": "@rushstack/heft/lib/exports/jest-build-transform.js",
+    "\\.(css)$": "@rushstack/heft/lib/exports/jest-identity-mock-transform.js",
+    "\\.(jpg|png|gif|mp3)$": "@rushstack/heft/lib/exports/jest-string-mock-transform.js"
   },
   "//": [
     "The modulePathIgnorePatterns below accepts these sorts of paths:",
@@ -17,6 +17,7 @@
     "...and ignores anything else under <rootDir>"
   ],
   "modulePathIgnorePatterns": ["^<rootDir>/(?!(?:src/)|(?:src$))"],
-  "setupFiles": ["<rootDir>/node_modules/@rushstack/heft/lib/exports/jest-global-setup.js"],
+  "setupFiles": ["@rushstack/heft/lib/exports/jest-global-setup.js"],
+  "resolver": "@rushstack/heft/lib/exports/jest-improved-resolver.js",
   "passWithNoTests": true
 }
