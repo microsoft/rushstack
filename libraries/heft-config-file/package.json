@@ -1,17 +1,17 @@
 {
-  "name": "@rushstack/heft-configuration-loader",
+  "name": "@rushstack/heft-config-file",
   "version": "0.0.0",
   "description": "Configuration file loader for @rushstack/heft",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/heft-configuration-loader"
+    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/heft-config-file"
   },
   "engines": {
     "node": ">=10.13.0"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
   "main": "lib/index.js",
-  "types": "dist/heft-configuration-loader.d.ts",
+  "types": "dist/heft-config-file.d.ts",
   "license": "MIT",
   "scripts": {
     "build": "heft test --clean",

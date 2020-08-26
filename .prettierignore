@@ -102,7 +102,7 @@ dist-prod
 apps/rush-lib/assets/rush-init/
 
 # These are intentionally invalid files
-libraries/heft-configuration-loader/src/test/errorCases/invalidJson/config.json
+libraries/heft-config-file/src/test/errorCases/invalidJson/config.json
 
 # We'll consider enabling this later; Prettier reformats code blocks, which affects end-user content
 *.md

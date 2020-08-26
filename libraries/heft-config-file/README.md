@@ -1,4 +1,4 @@
-# @rushstack/heft-configuration-loader
+# @rushstack/heft-config-file
 
 > 🚨 *This is an early preview release. Please report issues!* 🚨
 

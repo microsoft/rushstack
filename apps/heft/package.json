@@ -35,7 +35,7 @@
     "@jest/core": "~25.4.0",
     "@jest/reporters": "~25.4.0",
     "@jest/transform": "~25.4.0",
-    "@rushstack/heft-configuration-loader": "workspace:*",
+    "@rushstack/heft-config-file": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "@types/tapable": "1.0.5",

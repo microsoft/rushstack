@@ -3,11 +3,7 @@
 
 import * as path from 'path';
 import { Terminal, InternalError, FileSystem, Import } from '@rushstack/node-core-library';
-import {
-  InheritanceType,
-  PathResolutionMethod,
-  ConfigurationFileLoader
-} from '@rushstack/heft-configuration-loader';
+import { InheritanceType, PathResolutionMethod, ConfigurationFileLoader } from '@rushstack/heft-config-file';
 
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IHeftPlugin } from './IHeftPlugin';

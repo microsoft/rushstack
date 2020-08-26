@@ -179,7 +179,7 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "@rushstack/heft-configuration-loader",
+      "name": "@rushstack/heft-config-file",
       "allowedCategories": [ "libraries" ]
     },
     {

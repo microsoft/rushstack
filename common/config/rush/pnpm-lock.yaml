@@ -98,7 +98,7 @@ importers:
       '@jest/core': 25.4.0
       '@jest/reporters': 25.4.0
       '@jest/transform': 25.4.0
-      '@rushstack/heft-configuration-loader': 'link:../../libraries/heft-configuration-loader'
+      '@rushstack/heft-config-file': 'link:../../libraries/heft-config-file'
       '@rushstack/node-core-library': 'link:../../libraries/node-core-library'
       '@rushstack/ts-command-line': 'link:../../libraries/ts-command-line'
       '@types/tapable': 1.0.5
@@ -132,7 +132,7 @@ importers:
       '@microsoft/rush-stack-compiler-3.7': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.6.5
-      '@rushstack/heft-configuration-loader': 'workspace:*'
+      '@rushstack/heft-config-file': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@rushstack/ts-command-line': 'workspace:*'
       '@types/eslint': 7.2.0
@@ -1264,7 +1264,7 @@ importers:
       deasync: ~0.1.19
       node-forge: ~0.7.1
       sudo: ~1.0.3
-  ../../libraries/heft-configuration-loader:
+  ../../libraries/heft-config-file:
     dependencies:
       '@rushstack/node-core-library': 'link:../node-core-library'
       jsonpath-plus: 4.0.0
