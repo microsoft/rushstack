@@ -312,6 +312,14 @@ export interface IFileWriterFlags {
     exclusive?: boolean;
 }
 
+// @public (undocumented)
+export interface IImportResolveOptions {
+    allowSelfReference?: boolean;
+    baseFolderPath: string;
+    includeSystemModules?: boolean;
+    resolvePath: string;
+}
+
 // @public
 export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
     ensureFolderExists?: boolean;
@@ -344,8 +352,7 @@ export interface IJsonSchemaValidateOptions {
 // @public
 export class Import {
     static lazy(moduleName: string, require: (id: string) => unknown): any;
-    // Warning: (ae-incompatible-release-tags) The symbol "resolve" is marked as @public, but its signature references "IResolveOptions" which is marked as @alpha
-    static resolve(path: string, rootPath: string, options?: Partial<IResolveOptions>): string;
+    static resolve(options: IImportResolveOptions): string;
 }
 
 // @public
@@ -420,12 +427,6 @@ export interface IProtectableMapParameters<K, V> {
     onClear?: (source: ProtectableMap<K, V>) => void;
     onDelete?: (source: ProtectableMap<K, V>, key: K) => void;
     onSet?: (source: ProtectableMap<K, V>, key: K, value: V) => V;
-}
-
-// @alpha (undocumented)
-export interface IResolveOptions {
-    // (undocumented)
-    doNotResolveSymlinks: boolean;
 }
 
 // @beta (undocumented)

@@ -4,15 +4,46 @@
 import * as nodeJsPath from 'path';
 import importLazy = require('import-lazy');
 import * as Resolve from 'resolve';
+import nodeModule = require('module');
 
 import { PackageJsonLookup } from './PackageJsonLookup';
 import { FileSystem } from './FileSystem';
 
 /**
- * @alpha
+ * @public
  */
-export interface IResolveOptions {
-  doNotResolveSymlinks: boolean;
+export interface IImportResolveOptions {
+  /**
+   * The path to resolve.
+   */
+  resolvePath: string;
+
+  /**
+   * The path from which {@link IImportResolveOptions.resolvePath} should be resolved
+   */
+  baseFolderPath: string;
+
+  /**
+   * If true, if the package name matches a Node.js system module, then the return
+   * value will be the package name without any path.  This will take precedence over
+   * an installed NPM package of the same name.
+   *
+   * Example:
+   * `Import.resolveModulePath({ resolvePath: "fs", basePath: process.cwd() })`
+   *  --\> "fs"
+   */
+  includeSystemModules?: boolean;
+
+  /**
+   * If true, then resolvePath is allowed to refer to the package.json of the active project.
+   * It will take precedence over any installed dependency with the same name.
+   * Note that this requires an additional PackageJsonLookup calculation.
+   *
+   * Example:
+   * `Import.resolveModulePath({ resolvePath: "my-project", basePath: process.cwd(), allowSelfReference: true })`
+   *  --\> "path/to/my-project"
+   */
+  allowSelfReference?: boolean;
 }
 
 /**
@@ -20,6 +51,8 @@ export interface IResolveOptions {
  * @public
  */
 export class Import {
+  private static _builtInModules: Set<string> | undefined;
+
   /**
    * Provides a way to improve process startup times by lazy-loading imported modules.
    *
@@ -99,61 +132,64 @@ export class Import {
   /**
    * Resolves a path in a package, relative to another path.
    */
-  public static resolve(path: string, rootPath: string, options?: Partial<IResolveOptions>): string {
-    options = {
-      doNotResolveSymlinks: false,
-      ...options
-    };
+  public static resolve(options: IImportResolveOptions): string {
+    const { resolvePath } = options;
 
-    if (nodeJsPath.isAbsolute(path)) {
-      return path;
+    if (nodeJsPath.isAbsolute(resolvePath)) {
+      return resolvePath;
     }
 
-    let normalizedRootPath: string = options.doNotResolveSymlinks
-      ? rootPath
-      : FileSystem.getRealPath(rootPath);
+    let normalizedRootPath: string = FileSystem.getRealPath(options.baseFolderPath);
 
-    if (path.startsWith('.')) {
+    if (resolvePath.startsWith('.')) {
       // This looks like a conventional relative path
-      return nodeJsPath.resolve(normalizedRootPath, path);
+      return nodeJsPath.resolve(normalizedRootPath, resolvePath);
     }
 
     normalizedRootPath =
       PackageJsonLookup.instance.tryGetPackageFolderFor(normalizedRootPath) || normalizedRootPath;
 
     let slashAfterPackageNameIndex: number;
-    if (path.startsWith('@')) {
+    if (resolvePath.startsWith('@')) {
       // This looks like a scoped package name
-      slashAfterPackageNameIndex = path.indexOf('/', path.indexOf('/') + 1);
+      slashAfterPackageNameIndex = resolvePath.indexOf('/', resolvePath.indexOf('/') + 1);
     } else {
-      slashAfterPackageNameIndex = path.indexOf('/');
+      slashAfterPackageNameIndex = resolvePath.indexOf('/');
     }
 
     let packageName: string;
-    let pathInsidePackage: string;
+    let pathInsidePackage: string | undefined;
     if (slashAfterPackageNameIndex === -1) {
       // This looks like a package name without a path
-      packageName = path;
-      pathInsidePackage = '';
+      packageName = resolvePath;
     } else {
-      packageName = path.substr(0, slashAfterPackageNameIndex);
-      pathInsidePackage = path.substr(slashAfterPackageNameIndex + 1);
+      packageName = resolvePath.substr(0, slashAfterPackageNameIndex);
+      pathInsidePackage = resolvePath.substr(slashAfterPackageNameIndex + 1);
     }
 
-    let resolvedPackagePath: string;
-    try {
-      resolvedPackagePath = nodeJsPath.dirname(
-        Resolve.sync(packageName, {
-          basedir: normalizedRootPath,
-          packageFilter: (pkg: { main: string }): { main: string } => {
-            // In case the "main" property isn't defined, set it to something we know will exist
-            pkg.main = 'package.json';
-            return pkg;
-          }
-        })
-      );
-    } catch (e) {
-      // If we fail, see if we're trying to resolve to the current package
+    if (options.includeSystemModules === true) {
+      if (!Import._builtInModules) {
+        Import._builtInModules = new Set<string>(nodeModule.builtinModules);
+      }
+
+      // First, check resolvePath because some built-in modules have more than one slash in their name
+      if (Import._builtInModules.has(resolvePath)) {
+        return resolvePath;
+      } else if (Import._builtInModules.has(packageName)) {
+        if (pathInsidePackage !== undefined) {
+          throw new Error(
+            `The package name "${packageName}" resolved to a NodeJS system module, but the ` +
+              `path to resolve ("${resolvePath}") contains a path inside the system module, which is not allowed.`
+          );
+        }
+
+        return packageName;
+      }
+    }
+
+    let resolvedPackagePath: string | undefined;
+    if (options.allowSelfReference === true) {
+      // See if we're trying to resolve to the current package
       const ownPackageJsonPath: string | undefined = PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(
         normalizedRootPath
       );
@@ -162,11 +198,35 @@ export class Import {
         PackageJsonLookup.instance.loadPackageJson(ownPackageJsonPath).name === packageName
       ) {
         resolvedPackagePath = nodeJsPath.dirname(ownPackageJsonPath);
-      } else {
-        throw e;
       }
     }
 
-    return nodeJsPath.resolve(resolvedPackagePath, pathInsidePackage);
+    if (!resolvedPackagePath) {
+      try {
+        resolvedPackagePath = nodeJsPath.dirname(
+          Resolve.sync(
+            // Append a slash to the package name to ensure `resolve.sync` doesn't attempt to return a system package
+            `${packageName}/`,
+            {
+              basedir: normalizedRootPath,
+              preserveSymlinks: false,
+              packageFilter: (pkg: { main: string }): { main: string } => {
+                // In case the "main" property isn't defined, set it to something we know will exist
+                pkg.main = 'package.json';
+                return pkg;
+              }
+            }
+          )
+        );
+      } catch (e) {
+        throw new Error(`Cannot find module "${packageName}" from "${normalizedRootPath}".`);
+      }
+    }
+
+    if (pathInsidePackage) {
+      return nodeJsPath.resolve(resolvedPackagePath, pathInsidePackage);
+    } else {
+      return resolvedPackagePath;
+    }
   }
 }
