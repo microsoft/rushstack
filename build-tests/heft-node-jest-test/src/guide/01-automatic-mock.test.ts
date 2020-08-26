@@ -12,7 +12,6 @@ beforeEach(() => {
 });
 
 it('We can check if the consumer called the class constructor', () => {
-  // eslint-disable-next-line no-new
   new SoundPlayerConsumer();
   expect(SoundPlayer).toHaveBeenCalledTimes(1);
 });
@@ -31,7 +30,6 @@ it('We can check if the consumer called a method on the class instance', () => {
   // mock.instances is available with automatic mocks:
   const mockSoundPlayerInstance: SoundPlayer = mocked(SoundPlayer).mock.instances[0];
 
-  // eslint-disable-next-line @typescript-eslint/typedef
   const mockPlaySoundFile = mocked(mockSoundPlayerInstance.playSoundFile);
   expect(mockPlaySoundFile.mock.calls[0][0]).toEqual(coolSoundFileName);
 

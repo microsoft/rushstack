@@ -734,6 +734,34 @@ module.exports = {
         // "no-restricted-syntax": [
         // ],
       }
+    },
+    {
+      // For unit tests, we can be a little bit less strict.  The settings below revise the
+      // defaults specified above.
+      files: ['*.test.ts', '*.test.tsx'],
+      rules: {
+        // Unit tests sometimes use a standalone statement like "new Thing(123);" to test a constructor.
+        'no-new': 'off',
+
+        // Jest's mocking API is designed in a way that produces compositional data types that often have
+        // no concise description.  Since test code does not ship, and typically does not introduce new
+        // concepts or algorithms, the usual arguments for prioritizing readability over writability can be
+        // relaxed in this case. We follow C#'s model of allowing type inference for local variable declarations,
+        // but still requiring strict types for function signatures.
+        '@typescript-eslint/typedef': [
+          'warn',
+          {
+            arrayDestructuring: false,
+            arrowParameter: false,
+            memberVariableDeclaration: true,
+            objectDestructuring: false,
+            parameter: true,
+            propertyDeclaration: true,
+            variableDeclaration: false, // <--- special case for test files
+            variableDeclarationIgnoreFunction: true
+          }
+        ]
+      }
     }
   ]
 };

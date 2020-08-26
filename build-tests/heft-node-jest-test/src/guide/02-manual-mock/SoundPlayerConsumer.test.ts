@@ -14,7 +14,6 @@ beforeEach(() => {
 });
 
 it('We can check if the consumer called the class constructor', () => {
-  // eslint-disable-next-line no-new
   new SoundPlayerConsumer();
   expect(SoundPlayer).toHaveBeenCalledTimes(1);
 });
