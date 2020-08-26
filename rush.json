@@ -555,6 +555,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-node-jest-test",
+      "projectFolder": "build-tests/heft-node-jest-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-oldest-compiler-test",
       "projectFolder": "build-tests/heft-oldest-compiler-test",
       "reviewCategory": "tests",
