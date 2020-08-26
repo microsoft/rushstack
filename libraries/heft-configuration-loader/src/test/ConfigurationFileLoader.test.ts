@@ -4,6 +4,7 @@
 import * as path from 'path';
 
 import { ConfigurationFileLoader, PathResolutionMethod, InheritanceType } from '../ConfigurationFileLoader';
+import { FileSystem } from '@rushstack/node-core-library';
 
 describe('ConfigLoader', () => {
   const projectRoot: string = path.resolve(__dirname, '..', '..');
@@ -250,13 +251,19 @@ describe('ConfigLoader', () => {
       const expectedConfigFile: IComplexConfigFile = {
         plugins: [
           {
-            plugin: path.resolve(projectRoot, 'node_modules', '@rushstack', 'node-core-library')
+            plugin: await FileSystem.getRealPathAsync(
+              path.resolve(projectRoot, 'node_modules', '@rushstack', 'node-core-library')
+            )
           },
           {
-            plugin: path.resolve(projectRoot, 'node_modules', '@rushstack', 'heft')
+            plugin: await FileSystem.getRealPathAsync(
+              path.resolve(projectRoot, 'node_modules', '@rushstack', 'heft')
+            )
           },
           {
-            plugin: path.resolve(projectRoot, 'node_modules', '@rushstack', 'eslint-config')
+            plugin: await FileSystem.getRealPathAsync(
+              path.resolve(projectRoot, 'node_modules', '@rushstack', 'eslint-config')
+            )
           }
         ]
       };

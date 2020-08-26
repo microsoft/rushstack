@@ -121,7 +121,7 @@ export class TaskPackageResolver {
 
     let resolvedPackageFolder: string | undefined;
     try {
-      resolvedPackageFolder = Import.resolve(taskPackageName, baseFolder);
+      resolvedPackageFolder = Import.resolve({ resolvePath: taskPackageName, baseFolderPath: baseFolder });
     } catch (e) {
       // Ignore errors
       resolvedPackageFolder = undefined;
@@ -183,7 +183,10 @@ export class TaskPackageResolver {
           `Following a tsconfig.json "extends" property "${tsconfig.extends}" that is a package path.`
         );
         // Package path
-        baseTsconfigPath = Import.resolve(tsconfig.extends, path.dirname(tsconfigPath));
+        baseTsconfigPath = Import.resolve({
+          resolvePath: tsconfig.extends,
+          baseFolderPath: path.dirname(tsconfigPath)
+        });
       }
 
       terminal.writeVerboseLine(`Resolved "extends" path to: ${baseTsconfigPath}`);

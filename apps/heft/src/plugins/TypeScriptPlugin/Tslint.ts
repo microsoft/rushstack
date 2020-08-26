@@ -51,7 +51,10 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     const parsedConfig: IMinimalConfig = JsonFile.parseString(rawConfig);
     let hash: crypto.Hash;
     if (parsedConfig.extends) {
-      const extendsFullPath: string = Import.resolve(parsedConfig.extends, path.dirname(configFilePath));
+      const extendsFullPath: string = Import.resolve({
+        resolvePath: parsedConfig.extends,
+        baseFolderPath: path.dirname(configFilePath)
+      });
       hash = Tslint.getConfigHash(extendsFullPath, terminal, fileSystem);
     } else {
       hash = crypto.createHash('sha1').update(rawConfig);

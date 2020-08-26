@@ -382,7 +382,10 @@ export class ConfigurationFileLoader<TConfigurationFile> {
       }
 
       case PathResolutionMethod.NodeResolve: {
-        return Import.resolve(propertyValue, configurationFilePath);
+        return Import.resolve({
+          resolvePath: propertyValue,
+          baseFolderPath: path.dirname(configurationFilePath)
+        });
       }
 
       default: {
