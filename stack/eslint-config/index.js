@@ -55,7 +55,14 @@ module.exports = {
       rules: {
         // The @rushstack rules are documented in the package README:
         // https://www.npmjs.com/package/@rushstack/eslint-plugin
+
+        // RATIONALE:         See the @rushstack/eslint-plugin documentation
         '@rushstack/no-new-null': 'warn',
+
+        // RATIONALE:         See the @rushstack/eslint-plugin documentation
+        //                    This is enabled and classified as an error because it is required when using Heft.
+        //                    It's not required when using ts-jest, but still a good practice.
+        '@rushstack/hoist-jest-mock': 'error',
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         '@typescript-eslint/adjacent-overload-signatures': 'warn',
