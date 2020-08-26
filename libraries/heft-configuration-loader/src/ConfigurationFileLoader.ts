@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import { JSONPath } from 'jsonpath-plus';
-import { JsonSchema, JsonFile, PackageJsonLookup, Import } from '@rushstack/node-core-library';
+import * as nodeJsPath from 'path';
+import { JSONPath, JSONPathClass } from 'jsonpath-plus';
+import { JsonSchema, JsonFile, PackageJsonLookup, Import, FileSystem } from '@rushstack/node-core-library';
 
 interface IConfigurationJson {
   extends?: string;
@@ -119,6 +119,11 @@ export class ConfigurationFileLoader<TConfigurationFile> {
   > = new Map<string, IConfigurationFileCacheEntry<TConfigurationFile>>();
   private readonly _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
+  /**
+   * @internal
+   */
+  public static _formatPathForError: (path: string) => string = (path: string) => path;
+
   public constructor(jsonSchemaPath: string, options?: IConfigurationFileLoaderOptions<TConfigurationFile>);
   public constructor(jsonSchema: JsonSchema, options?: IConfigurationFileLoaderOptions<TConfigurationFile>);
   public constructor(
@@ -136,7 +141,7 @@ export class ConfigurationFileLoader<TConfigurationFile> {
 
   public async loadConfigurationFileAsync(configurationFilePath: string): Promise<TConfigurationFile> {
     return await this._loadConfigurationFileAsyncInner(
-      path.resolve(configurationFilePath),
+      nodeJsPath.resolve(configurationFilePath),
       new Set<string>()
     );
   }
@@ -180,20 +185,38 @@ export class ConfigurationFileLoader<TConfigurationFile> {
       | undefined = this._configurationFileCache.get(resolvedConfigurationFilePath);
     if (!cacheEntry) {
       try {
+        const resolvedConfigurationFilePathForErrors: string = ConfigurationFileLoader._formatPathForError(
+          resolvedConfigurationFilePath
+        );
+
         if (visitedConfigurationFilePaths.has(resolvedConfigurationFilePath)) {
           throw new Error(
             'A loop has been detected in the "extends" properties of configuration file at ' +
-              `"${resolvedConfigurationFilePath}".`
+              `"${resolvedConfigurationFilePathForErrors}".`
           );
         }
 
         visitedConfigurationFilePaths.add(resolvedConfigurationFilePath);
 
-        const configurationJson: IConfigurationJson &
-          TConfigurationFile = await JsonFile.loadAndValidateAsync(
-          resolvedConfigurationFilePath,
-          this._schema
-        );
+        let fileText: string;
+        try {
+          fileText = await FileSystem.readFileAsync(resolvedConfigurationFilePath);
+        } catch (e) {
+          if (FileSystem.isNotExistError(e)) {
+            throw new Error(`File does not exist: ${resolvedConfigurationFilePathForErrors}`);
+          } else {
+            throw e;
+          }
+        }
+
+        let configurationJson: IConfigurationJson & TConfigurationFile;
+        try {
+          configurationJson = await JsonFile.parseString(fileText);
+        } catch (e) {
+          throw new Error(`In config file "${resolvedConfigurationFilePathForErrors}": ${e}`);
+        }
+
+        this._schema.validateObject(configurationJson, resolvedConfigurationFilePathForErrors);
 
         this._annotateProperties(resolvedConfigurationFilePath, configurationJson);
 
@@ -218,8 +241,8 @@ export class ConfigurationFileLoader<TConfigurationFile> {
 
         let parentConfiguration: Partial<TConfigurationFile> = {};
         if (configurationJson.extends) {
-          const resolvedParentConfigPath: string = path.resolve(
-            path.dirname(resolvedConfigurationFilePath),
+          const resolvedParentConfigPath: string = nodeJsPath.resolve(
+            nodeJsPath.dirname(resolvedConfigurationFilePath),
             configurationJson.extends
           );
           parentConfiguration = await this._loadConfigurationFileAsyncInner(
@@ -320,6 +343,12 @@ export class ConfigurationFileLoader<TConfigurationFile> {
           result[propertyName] = newValue;
         }
 
+        try {
+          this._schema.validateObject(result, resolvedConfigurationFilePathForErrors);
+        } catch (e) {
+          throw new Error(`Resolved configuration object does not match schema: ${e}`);
+        }
+
         cacheEntry = { configurationFile: result };
       } catch (e) {
         cacheEntry = { error: e };
@@ -367,7 +396,7 @@ export class ConfigurationFileLoader<TConfigurationFile> {
   ): string {
     switch (resolutionMethod) {
       case PathResolutionMethod.resolvePathRelativeToConfigurationFile: {
-        return path.resolve(path.dirname(configurationFilePath), propertyValue);
+        return nodeJsPath.resolve(nodeJsPath.dirname(configurationFilePath), propertyValue);
       }
 
       case PathResolutionMethod.resolvePathRelativeToProjectRoot: {
@@ -375,16 +404,20 @@ export class ConfigurationFileLoader<TConfigurationFile> {
           configurationFilePath
         );
         if (!packageRoot) {
-          throw new Error(`Could not find a package root for path "${configurationFilePath}"`);
+          throw new Error(
+            `Could not find a package root for path "${ConfigurationFileLoader._formatPathForError(
+              configurationFilePath
+            )}"`
+          );
         }
 
-        return path.resolve(packageRoot, propertyValue);
+        return nodeJsPath.resolve(packageRoot, propertyValue);
       }
 
       case PathResolutionMethod.NodeResolve: {
         return Import.resolve({
           resolvePath: propertyValue,
-          baseFolderPath: path.dirname(configurationFilePath)
+          baseFolderPath: nodeJsPath.dirname(configurationFilePath)
         });
       }
 

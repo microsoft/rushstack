@@ -449,6 +449,8 @@ export interface ITerminalProvider {
 
 // @public
 export class JsonFile {
+    // @internal (undocumented)
+    static _formatPathForError: (path: string) => string;
     static load(jsonFilename: string): JsonObject;
     static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): JsonObject;
     static loadAndValidateAsync(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): Promise<JsonObject>;
