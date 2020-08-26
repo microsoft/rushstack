@@ -25,7 +25,7 @@ it('We can check if the consumer called a method on the class instance', () => {
   expect(mockPlaySoundFile).toHaveBeenCalledWith(coolSoundFileName);
 });
 
-// The test below validates that jest-__mocks__-resolver.js is working correctly
+// The test below validates that jest-improved-resolver.js is working correctly
 import { SoundPlayer as MockSoundPlayer } from './__mocks__/SoundPlayer';
 
 it('Importing ./__mocks__/SoundPlayer returns the same object as importing ./SoundPlayer', () => {
