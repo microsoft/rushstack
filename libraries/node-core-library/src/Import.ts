@@ -25,23 +25,38 @@ export interface IImportResolveOptions {
 
   /**
    * If true, if the package name matches a Node.js system module, then the return
-   * value will be the package name without any path.  This will take precedence over
-   * an installed NPM package of the same name.
+   * value will be the package name without any path.
+   *
+   * @remarks
+   * This will take precedence over an installed NPM package of the same name.
    *
    * Example:
-   * `Import.resolveModulePath({ resolvePath: "fs", basePath: process.cwd() })`
-   *  --\> "fs"
+   * ```ts
+   * // Returns the string "fs" indicating the Node.js system module
+   * Import.resolveModulePath({
+   *   resolvePath: "fs",
+   *   basePath: process.cwd()
+   * })
+   * ```
    */
   includeSystemModules?: boolean;
 
   /**
    * If true, then resolvePath is allowed to refer to the package.json of the active project.
-   * It will take precedence over any installed dependency with the same name.
+   *
+   * @remarks
+   * This will take precedence over any installed dependency with the same name.
    * Note that this requires an additional PackageJsonLookup calculation.
    *
    * Example:
-   * `Import.resolveModulePath({ resolvePath: "my-project", basePath: process.cwd(), allowSelfReference: true })`
-   *  --\> "path/to/my-project"
+   * ```ts
+   * // Returns an absolute path to the current package
+   * Import.resolveModulePath({
+   *   resolvePath: "current-project",
+   *   basePath: process.cwd(),
+   *   allowSelfReference: true
+   * })
+   * ```
    */
   allowSelfReference?: boolean;
 }
