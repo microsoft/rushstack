@@ -525,6 +525,21 @@ importers:
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
       typescript: ~3.9.5
+  ../../build-tests/heft-node-jest-test:
+    devDependencies:
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
+      '@types/heft-jest': 1.0.0
+      '@types/node': 10.17.13
+      eslint: 7.2.0
+      typescript: 3.9.7
+    specifiers:
+      '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
+      '@types/heft-jest': 1.0.0
+      '@types/node': 10.17.13
+      eslint: ~7.2.0
+      typescript: ~3.9.5
   ../../build-tests/heft-oldest-compiler-test:
     devDependencies:
       '@microsoft/rush-stack-compiler-2.9': 'link:../../stack/rush-stack-compiler-2.9'
@@ -3061,6 +3076,12 @@ packages:
       chokidar: 2.1.8
     resolution:
       integrity: sha512-0E8/iV/7FKWyQWSmi7jnUvgXXgaw+pfAzEB06Xu+l0iXVJppLbpOye5z7E2klw5akXd+8kPtYuk65YBcZPM4ow==
+  /@types/heft-jest/1.0.0:
+    dependencies:
+      '@types/jest': 25.2.1
+    dev: true
+    resolution:
+      integrity: sha512-ZLbPaJ9C7ALDcjpKzLbcsI9Q85f9MfrPMzJpGo6GtJAVT4latyJgywHijs+0vDQGVFXDp+LFJEx+PYANrOrC2g==
   /@types/http-proxy-middleware/0.19.3:
     dependencies:
       '@types/connect': 3.4.33
@@ -14110,3 +14131,4 @@ packages:
       commander: 2.20.3
     resolution:
       integrity: sha512-DUOKC/IhbkdLKKiV89gw9DUauTV8U/8yJl1sjf6MtDmzevLKOF2duNJ495S3MFVjqZarr+qNGCPbkg4mu4PpLw==
+registry: ''
