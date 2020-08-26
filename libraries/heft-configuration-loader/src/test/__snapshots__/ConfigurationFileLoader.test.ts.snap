@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConfigLoader error cases Throws an error for a file that doesn't match its schema 1`] = `
+[Error: JSON validation failed:
+<project root>/src/test/errorCases/invalidType/config.json
+
+Error: #/filePaths
+       Expected type array but found type string]
+`;
+
+exports[`ConfigLoader error cases Throws an error when a combined config file doesn't match the schema 1`] = `
+[Error: Resolved configuration object does not match schema: Error: JSON validation failed:
+<project root>/src/test/errorCases/invalidCombinedFile/config1.json
+
+Error: #/
+       Data does not match any schemas from 'oneOf'
+  Error: #/
+         Additional properties not allowed: folderPaths
+  Error: #/
+         Additional properties not allowed: filePaths]
+`;
+
+exports[`ConfigLoader error cases Throws an error when the file isn't valid JSON 1`] = `
+[Error: In config file "<project root>/src/test/errorCases/invalidJson/config.json": SyntaxError: Unexpected token '\\n' at 2:19
+  "filePaths": "A
+                 ^]
+`;
+
+exports[`ConfigLoader error cases Throws an error when there is a circular reference in "extends" properties 1`] = `[Error: A loop has been detected in the "extends" properties of configuration file at "<project root>/src/test/errorCases/circularReference/config1.json".]`;
+
+exports[`ConfigLoader error cases throws an error when the file doesn't exist 1`] = `[Error: File does not exist: <project root>/src/test/errorCases/invalidType/notExist.json]`;

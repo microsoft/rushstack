@@ -1,18 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import * as nodeJsPath from 'path';
 
 import { ConfigurationFileLoader, PathResolutionMethod, InheritanceType } from '../ConfigurationFileLoader';
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 
 describe('ConfigLoader', () => {
-  const projectRoot: string = path.resolve(__dirname, '..', '..');
+  const projectRoot: string = nodeJsPath.resolve(__dirname, '..', '..');
 
   describe('A simple config file', () => {
-    const configFileFolder: string = path.resolve(__dirname, 'simplestConfigFile');
-    const configFilePath: string = path.resolve(configFileFolder, 'simplestConfigFile.json');
-    const schemaPath: string = path.resolve(configFileFolder, 'simplestConfigFile.schema.json');
+    const configFileFolder: string = nodeJsPath.resolve(__dirname, 'simplestConfigFile');
+    const configFilePath: string = nodeJsPath.resolve(configFileFolder, 'simplestConfigFile.json');
+    const schemaPath: string = nodeJsPath.resolve(configFileFolder, 'simplestConfigFile.schema.json');
 
     interface ISimplestConfigFile {
       thing: string;
@@ -48,7 +48,7 @@ describe('ConfigLoader', () => {
         configFilePath
       );
       const expectedConfigFile: ISimplestConfigFile = {
-        thing: path.resolve(configFileFolder, 'A')
+        thing: nodeJsPath.resolve(configFileFolder, 'A')
       };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
       expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(configFilePath);
@@ -71,7 +71,7 @@ describe('ConfigLoader', () => {
         configFilePath
       );
       const expectedConfigFile: ISimplestConfigFile = {
-        thing: path.resolve(projectRoot, 'A')
+        thing: nodeJsPath.resolve(projectRoot, 'A')
       };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
       expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(configFilePath);
@@ -82,9 +82,9 @@ describe('ConfigLoader', () => {
   });
 
   describe('A simple config file containing an array', () => {
-    const configFileFolder: string = path.resolve(__dirname, 'simpleConfigFile');
-    const configFilePath: string = path.resolve(configFileFolder, 'simpleConfigFile.json');
-    const schemaPath: string = path.resolve(configFileFolder, 'simpleConfigFile.schema.json');
+    const configFileFolder: string = nodeJsPath.resolve(__dirname, 'simpleConfigFile');
+    const configFilePath: string = nodeJsPath.resolve(configFileFolder, 'simpleConfigFile.json');
+    const schemaPath: string = nodeJsPath.resolve(configFileFolder, 'simpleConfigFile.schema.json');
 
     interface ISimpleConfigFile {
       things: string[];
@@ -116,9 +116,9 @@ describe('ConfigLoader', () => {
       );
       const expectedConfigFile: ISimpleConfigFile = {
         things: [
-          path.resolve(configFileFolder, 'A'),
-          path.resolve(configFileFolder, 'B'),
-          path.resolve(configFileFolder, 'C')
+          nodeJsPath.resolve(configFileFolder, 'A'),
+          nodeJsPath.resolve(configFileFolder, 'B'),
+          nodeJsPath.resolve(configFileFolder, 'C')
         ]
       };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
@@ -139,9 +139,9 @@ describe('ConfigLoader', () => {
       );
       const expectedConfigFile: ISimpleConfigFile = {
         things: [
-          path.resolve(projectRoot, 'A'),
-          path.resolve(projectRoot, 'B'),
-          path.resolve(projectRoot, 'C')
+          nodeJsPath.resolve(projectRoot, 'A'),
+          nodeJsPath.resolve(projectRoot, 'B'),
+          nodeJsPath.resolve(projectRoot, 'C')
         ]
       };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
@@ -149,9 +149,12 @@ describe('ConfigLoader', () => {
   });
 
   describe('A simple config file with "extends"', () => {
-    const configFileFolder: string = path.resolve(__dirname, 'simpleConfigFileWithExtends');
-    const configFilePath: string = path.resolve(configFileFolder, 'simpleConfigFileWithExtends.json');
-    const schemaPath: string = path.resolve(configFileFolder, 'simpleConfigFileWithExtends.schema.json');
+    const configFileFolder: string = nodeJsPath.resolve(__dirname, 'simpleConfigFileWithExtends');
+    const configFilePath: string = nodeJsPath.resolve(configFileFolder, 'simpleConfigFileWithExtends.json');
+    const schemaPath: string = nodeJsPath.resolve(
+      configFileFolder,
+      'simpleConfigFileWithExtends.schema.json'
+    );
 
     interface ISimpleConfigFile {
       things: string[];
@@ -211,15 +214,15 @@ describe('ConfigLoader', () => {
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath
       );
-      const parentConfigFileFolder: string = path.resolve(configFileFolder, '..', 'simpleConfigFile');
+      const parentConfigFileFolder: string = nodeJsPath.resolve(configFileFolder, '..', 'simpleConfigFile');
 
       const expectedConfigFile: ISimpleConfigFile = {
         things: [
-          path.resolve(parentConfigFileFolder, 'A'),
-          path.resolve(parentConfigFileFolder, 'B'),
-          path.resolve(parentConfigFileFolder, 'C'),
-          path.resolve(configFileFolder, 'D'),
-          path.resolve(configFileFolder, 'E')
+          nodeJsPath.resolve(parentConfigFileFolder, 'A'),
+          nodeJsPath.resolve(parentConfigFileFolder, 'B'),
+          nodeJsPath.resolve(parentConfigFileFolder, 'C'),
+          nodeJsPath.resolve(configFileFolder, 'D'),
+          nodeJsPath.resolve(configFileFolder, 'E')
         ]
       };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
@@ -232,9 +235,13 @@ describe('ConfigLoader', () => {
     }
 
     it('Correctly loads a complex config file', async () => {
-      const configFilePath: string = path.resolve(__dirname, 'complexConfigFile', 'pluginsB.json');
-      const parentConfigFilePath: string = path.resolve(__dirname, 'complexConfigFile', 'pluginsA.json');
-      const schemaPath: string = path.resolve(__dirname, 'complexConfigFile', 'plugins.schema.json');
+      const configFilePath: string = nodeJsPath.resolve(__dirname, 'complexConfigFile', 'pluginsB.json');
+      const parentConfigFilePath: string = nodeJsPath.resolve(
+        __dirname,
+        'complexConfigFile',
+        'pluginsA.json'
+      );
+      const schemaPath: string = nodeJsPath.resolve(__dirname, 'complexConfigFile', 'plugins.schema.json');
 
       const configFileLoader: ConfigurationFileLoader<IComplexConfigFile> = new ConfigurationFileLoader<
         IComplexConfigFile
@@ -252,17 +259,17 @@ describe('ConfigLoader', () => {
         plugins: [
           {
             plugin: await FileSystem.getRealPathAsync(
-              path.resolve(projectRoot, 'node_modules', '@rushstack', 'node-core-library')
+              nodeJsPath.resolve(projectRoot, 'node_modules', '@rushstack', 'node-core-library')
             )
           },
           {
             plugin: await FileSystem.getRealPathAsync(
-              path.resolve(projectRoot, 'node_modules', '@rushstack', 'heft')
+              nodeJsPath.resolve(projectRoot, 'node_modules', '@rushstack', 'heft')
             )
           },
           {
             plugin: await FileSystem.getRealPathAsync(
-              path.resolve(projectRoot, 'node_modules', '@rushstack', 'eslint-config')
+              nodeJsPath.resolve(projectRoot, 'node_modules', '@rushstack', 'eslint-config')
             )
           }
         ]
@@ -294,6 +301,84 @@ describe('ConfigLoader', () => {
       );
       expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.plugins[1])).toEqual(configFilePath);
       expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.plugins[2])).toEqual(configFilePath);
+    });
+  });
+
+  describe('error cases', () => {
+    const errorCasesFolder: string = nodeJsPath.join(__dirname, 'errorCases');
+
+    beforeEach(() => {
+      const projectRoot: string = nodeJsPath.resolve(__dirname, '..', '..');
+      const formatPathForError: (path: string) => string = (path: string) =>
+        `<project root>/${nodeJsPath.relative(projectRoot, path).replace(/\\/g, '/')}`;
+      jest.spyOn(ConfigurationFileLoader, '_formatPathForError').mockImplementation(formatPathForError);
+      jest.spyOn(JsonFile, '_formatPathForError').mockImplementation(formatPathForError);
+    });
+
+    it("throws an error when the file doesn't exist", async () => {
+      const errorCaseFolder: string = nodeJsPath.join(errorCasesFolder, 'invalidType');
+      const configFileLoader: ConfigurationFileLoader<void> = new ConfigurationFileLoader(
+        nodeJsPath.join(errorCaseFolder, 'config.schema.json')
+      );
+      try {
+        await configFileLoader.loadConfigurationFileAsync(nodeJsPath.join(errorCaseFolder, 'notExist.json'));
+        fail();
+      } catch (e) {
+        expect(e).toMatchSnapshot();
+      }
+    });
+
+    it("Throws an error when the file isn't valid JSON", async () => {
+      const errorCaseFolder: string = nodeJsPath.join(errorCasesFolder, 'invalidJson');
+      const configFileLoader: ConfigurationFileLoader<void> = new ConfigurationFileLoader(
+        nodeJsPath.join(errorCaseFolder, 'config.schema.json')
+      );
+      try {
+        await configFileLoader.loadConfigurationFileAsync(nodeJsPath.join(errorCaseFolder, 'config.json'));
+        fail();
+      } catch (e) {
+        expect(e).toMatchSnapshot();
+      }
+    });
+
+    it("Throws an error for a file that doesn't match its schema", async () => {
+      const errorCaseFolder: string = nodeJsPath.join(errorCasesFolder, 'invalidType');
+      const configFileLoader: ConfigurationFileLoader<void> = new ConfigurationFileLoader(
+        nodeJsPath.join(errorCaseFolder, 'config.schema.json')
+      );
+      try {
+        await configFileLoader.loadConfigurationFileAsync(nodeJsPath.join(errorCaseFolder, 'config.json'));
+        fail();
+      } catch (e) {
+        expect(e).toMatchSnapshot();
+      }
+    });
+
+    it('Throws an error when there is a circular reference in "extends" properties', async () => {
+      const errorCaseFolder: string = nodeJsPath.join(errorCasesFolder, 'circularReference');
+      const configFileLoader: ConfigurationFileLoader<void> = new ConfigurationFileLoader(
+        nodeJsPath.join(errorCaseFolder, 'config.schema.json')
+      );
+      try {
+        await configFileLoader.loadConfigurationFileAsync(nodeJsPath.join(errorCaseFolder, 'config1.json'));
+        fail();
+      } catch (e) {
+        expect(e).toMatchSnapshot();
+      }
+    });
+
+    it("Throws an error when a combined config file doesn't match the schema", async () => {
+      const errorCaseFolder: string = nodeJsPath.join(errorCasesFolder, 'invalidCombinedFile');
+      const configFileLoader: ConfigurationFileLoader<void> = new ConfigurationFileLoader(
+        nodeJsPath.join(errorCaseFolder, 'config.schema.json')
+      );
+
+      try {
+        await configFileLoader.loadConfigurationFileAsync(nodeJsPath.join(errorCaseFolder, 'config1.json'));
+        fail();
+      } catch (e) {
+        expect(e).toMatchSnapshot();
+      }
     });
   });
 });
