@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as nodeJsPath from 'path';
+import * as path from 'path';
 import importLazy = require('import-lazy');
 import * as Resolve from 'resolve';
 import nodeModule = require('module');
@@ -150,7 +150,7 @@ export class Import {
   public static resolve(options: IImportResolveOptions): string {
     const { resolvePath } = options;
 
-    if (nodeJsPath.isAbsolute(resolvePath)) {
+    if (path.isAbsolute(resolvePath)) {
       return resolvePath;
     }
 
@@ -158,7 +158,7 @@ export class Import {
 
     if (resolvePath.startsWith('.')) {
       // This looks like a conventional relative path
-      return nodeJsPath.resolve(normalizedRootPath, resolvePath);
+      return path.resolve(normalizedRootPath, resolvePath);
     }
 
     normalizedRootPath =
@@ -212,13 +212,13 @@ export class Import {
         ownPackageJsonPath &&
         PackageJsonLookup.instance.loadPackageJson(ownPackageJsonPath).name === packageName
       ) {
-        resolvedPackagePath = nodeJsPath.dirname(ownPackageJsonPath);
+        resolvedPackagePath = path.dirname(ownPackageJsonPath);
       }
     }
 
     if (!resolvedPackagePath) {
       try {
-        resolvedPackagePath = nodeJsPath.dirname(
+        resolvedPackagePath = path.dirname(
           Resolve.sync(
             // Append a slash to the package name to ensure `resolve.sync` doesn't attempt to return a system package
             `${packageName}/`,
@@ -239,7 +239,7 @@ export class Import {
     }
 
     if (pathInsidePackage) {
-      return nodeJsPath.resolve(resolvedPackagePath, pathInsidePackage);
+      return path.resolve(resolvedPackagePath, pathInsidePackage);
     } else {
       return resolvedPackagePath;
     }
