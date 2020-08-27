@@ -19,8 +19,8 @@ const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
     type: 'problem',
     messages: {
       'error-unhoisted-jest-mock':
-        "Jest's module mocking APIs must be called before their associated module is imported. " +
-        ' Move this statement to the top of its code block.'
+        "Jest's module mocking APIs must be called before regular imports. Move this call so that it precedes" +
+        ' the import found on line {{importLine}}.'
     },
     schema: [
       {
@@ -30,7 +30,7 @@ const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
     ],
     docs: {
       description:
-        'Require Jest module mocking APIs to be called before any other statements in their code block.' +
+        'Require Jest module mocking APIs to be called before other modules are imported.' +
         ' Jest module mocking APIs such as "jest.mock(\'./example\')" must be called before the associated module' +
         ' is imported, otherwise they will have no effect. Transpilers such as ts-jest and babel-jest automatically' +
         ' "hoist" these calls, however this can produce counterintuitive results. Instead, the hoist-jest-mocks' +
@@ -43,6 +43,8 @@ const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
   },
 
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {
+    // Returns true for a statement such as "jest.mock()" that needs to precede
+    // module imports (i.e. be "hoisted").
     function isHoistableJestCall(node: TSESTree.Node | undefined): boolean {
       if (node === undefined) {
         return false;
@@ -69,31 +71,88 @@ const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
       return false;
     }
 
-    function isHoistableJestStatement(node: TSESTree.Node): boolean {
-      switch (node.type) {
-        case AST_NODE_TYPES.ExpressionStatement:
-          return isHoistableJestCall(node.expression);
+    // Given part of an expression, walk upwards in the tree and find the containing statement
+    function findOuterStatement(node: TSESTree.Node): TSESTree.Node {
+      let current: TSESTree.Node | undefined = node;
+      while (current.parent) {
+        switch (current.parent.type) {
+          // Statements are always found inside a block:
+          case AST_NODE_TYPES.Program:
+          case AST_NODE_TYPES.BlockStatement:
+          case AST_NODE_TYPES.TSModuleBlock:
+            return current;
+        }
+        current = current.parent;
       }
-      return false;
+      return node;
     }
 
-    return {
-      'TSModuleBlock, BlockStatement, Program': (
-        node: TSESTree.TSModuleBlock | TSESTree.BlockStatement | TSESTree.Program
-      ): void => {
-        let encounteredRegularStatements: boolean = false;
+    // This tracks the first require() or import expression that we found in the file.
+    let firstImportNode: TSESTree.Node | undefined = undefined;
 
-        for (const statement of node.body) {
-          if (isHoistableJestStatement(statement)) {
-            // Are we still at the start of the block?
-            if (encounteredRegularStatements) {
-              context.report({ node: statement, messageId: 'error-unhoisted-jest-mock' });
-            }
-          } else {
-            // We encountered a non-hoistable statement, so any further children that we visit
-            // must also be non-hoistable
-            encounteredRegularStatements = true;
+    // Avoid reporting more than one error for a given statement.
+    // Example: jest.mock('a').mock('b');
+    const reportedStatements: Set<TSESTree.Node> = new Set();
+
+    return {
+      CallExpression: (node: TSESTree.CallExpression): void => {
+        if (firstImportNode === undefined) {
+          // EXAMPLE:  const x = require('x')
+          if (matchTree(node, hoistJestMockPatterns.requireCallExpression)) {
+            firstImportNode = node;
           }
+        }
+
+        if (firstImportNode) {
+          // EXAMPLE:  jest.mock()
+          if (isHoistableJestCall(node)) {
+            const outerStatement: TSESTree.Node = findOuterStatement(node);
+            if (!reportedStatements.has(outerStatement)) {
+              reportedStatements.add(outerStatement);
+              debugger;
+              context.report({
+                node,
+                messageId: 'error-unhoisted-jest-mock',
+                data: { importLine: firstImportNode.loc.start.line }
+              });
+            }
+          }
+        }
+      },
+
+      ImportExpression: (node: TSESTree.ImportExpression): void => {
+        if (firstImportNode === undefined) {
+          // EXAMPLE:  const x = import('x');
+          if (matchTree(node, hoistJestMockPatterns.importExpression)) {
+            firstImportNode = node;
+          }
+        }
+      },
+
+      ImportDeclaration: (node: TSESTree.ImportDeclaration): void => {
+        if (firstImportNode === undefined) {
+          // EXAMPLE:  import { X } from "Y";
+          // IGNORE:   import type { X } from "Y";
+          if (node.importKind !== 'type') {
+            firstImportNode = node;
+          }
+        }
+      },
+
+      ExportDeclaration: (node: TSESTree.ExportDeclaration): void => {
+        if (firstImportNode === undefined) {
+          // EXAMPLE: export * from "Y";
+          // IGNORE:  export type { Y } from "Y";
+          if (node['exportKind'] !== 'type') {
+            firstImportNode = node;
+          }
+        }
+      },
+
+      TSImportEqualsDeclaration: (node: TSESTree.TSImportEqualsDeclaration): void => {
+        if (firstImportNode === undefined) {
+          // EXAMPLE:  import x = require("x");
+          firstImportNode = node;
         }
       }
     };
