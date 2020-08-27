@@ -313,11 +313,20 @@ export interface IFileWriterFlags {
 }
 
 // @public (undocumented)
+export interface IImportResolveModuleOptions extends IImportResolveOptions {
+    modulePath: string;
+}
+
+// @public (undocumented)
 export interface IImportResolveOptions {
     allowSelfReference?: boolean;
     baseFolderPath: string;
     includeSystemModules?: boolean;
-    resolvePath: string;
+}
+
+// @public (undocumented)
+export interface IImportResolvePackageOptions extends IImportResolveOptions {
+    packageName: string;
 }
 
 // @public
@@ -352,7 +361,8 @@ export interface IJsonSchemaValidateOptions {
 // @public
 export class Import {
     static lazy(moduleName: string, require: (id: string) => unknown): any;
-    static resolve(options: IImportResolveOptions): string;
+    static resolveModule(options: IImportResolveModuleOptions): string;
+    static resolvePackage(options: IImportResolvePackageOptions): string;
 }
 
 // @public

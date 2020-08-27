@@ -8,18 +8,15 @@ import nodeModule = require('module');
 
 import { PackageJsonLookup } from './PackageJsonLookup';
 import { FileSystem } from './FileSystem';
+import { IPackageJson } from './IPackageJson';
 
 /**
  * @public
  */
 export interface IImportResolveOptions {
   /**
-   * The path to resolve.
-   */
-  resolvePath: string;
-
-  /**
-   * The path from which {@link IImportResolveOptions.resolvePath} should be resolved
+   * The path from which {@link IImportResolveModuleOptions.modulePath} or
+   * {@link IImportResolvePackageOptions.packageName} should be resolved.
    */
   baseFolderPath: string;
 
@@ -62,11 +59,44 @@ export interface IImportResolveOptions {
 }
 
 /**
+ * @public
+ */
+export interface IImportResolveModuleOptions extends IImportResolveOptions {
+  /**
+   * The module identifier to resolve. For example "\@rushstack/node-core-library" or
+   * "\@rushstack/node-core-library/lib/index.js"
+   */
+  modulePath: string;
+}
+
+/**
+ * @public
+ */
+export interface IImportResolvePackageOptions extends IImportResolveOptions {
+  /**
+   * The package name to resolve. For example "\@rushstack/node-core-library"
+   */
+  packageName: string;
+}
+
+interface IPackageDescriptor {
+  packageRootPath: string;
+  packageName: string;
+}
+
+/**
  * Helpers for resolving and importing Node.js modules.
  * @public
  */
 export class Import {
-  private static _builtInModules: Set<string> | undefined;
+  private static __builtInModules: Set<string> | undefined;
+  private static get _builtInModules(): Set<string> {
+    if (!Import.__builtInModules) {
+      Import.__builtInModules = new Set<string>(nodeModule.builtinModules);
+    }
+
+    return Import.__builtInModules;
+  }
 
   /**
    * Provides a way to improve process startup times by lazy-loading imported modules.
@@ -145,103 +175,107 @@ export class Import {
   }
 
   /**
-   * Resolves a path in a package, relative to another path.
+   * Resolve a module, from the perspective of a specified folder. This is used to resolve a path that
+   * would be used in a `require(...)` or `import '...'` statement.
    */
-  public static resolve(options: IImportResolveOptions): string {
-    const { resolvePath } = options;
+  public static resolveModule(options: IImportResolveModuleOptions): string {
+    const { modulePath } = options;
 
-    if (path.isAbsolute(resolvePath)) {
-      return resolvePath;
+    if (path.isAbsolute(modulePath)) {
+      return modulePath;
     }
 
-    let normalizedRootPath: string = FileSystem.getRealPath(options.baseFolderPath);
+    const normalizedRootPath: string = FileSystem.getRealPath(options.baseFolderPath);
 
-    if (resolvePath.startsWith('.')) {
+    if (modulePath.startsWith('.')) {
       // This looks like a conventional relative path
-      return path.resolve(normalizedRootPath, resolvePath);
+      return path.resolve(normalizedRootPath, modulePath);
     }
 
-    normalizedRootPath =
-      PackageJsonLookup.instance.tryGetPackageFolderFor(normalizedRootPath) || normalizedRootPath;
-
-    let slashAfterPackageNameIndex: number;
-    if (resolvePath.startsWith('@')) {
-      // This looks like a scoped package name
-      slashAfterPackageNameIndex = resolvePath.indexOf('/', resolvePath.indexOf('/') + 1);
-    } else {
-      slashAfterPackageNameIndex = resolvePath.indexOf('/');
+    if (options.includeSystemModules === true && Import._builtInModules.has(modulePath)) {
+      return modulePath;
     }
 
-    let packageName: string;
-    let pathInsidePackage: string | undefined;
-    if (slashAfterPackageNameIndex === -1) {
-      // This looks like a package name without a path
-      packageName = resolvePath;
-    } else {
-      packageName = resolvePath.substr(0, slashAfterPackageNameIndex);
-      pathInsidePackage = resolvePath.substr(slashAfterPackageNameIndex + 1);
-    }
-
-    if (options.includeSystemModules === true) {
-      if (!Import._builtInModules) {
-        Import._builtInModules = new Set<string>(nodeModule.builtinModules);
-      }
-
-      // First, check resolvePath because some built-in modules have more than one slash in their name
-      if (Import._builtInModules.has(resolvePath)) {
-        return resolvePath;
-      } else if (Import._builtInModules.has(packageName)) {
-        if (pathInsidePackage !== undefined) {
-          throw new Error(
-            `The package name "${packageName}" resolved to a NodeJS system module, but the ` +
-              `path to resolve ("${resolvePath}") contains a path inside the system module, which is not allowed.`
-          );
-        }
-
-        return packageName;
-      }
-    }
-
-    let resolvedPackagePath: string | undefined;
     if (options.allowSelfReference === true) {
-      // See if we're trying to resolve to the current package
-      const ownPackageJsonPath: string | undefined = PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(
-        normalizedRootPath
+      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(options.baseFolderPath);
+      if (ownPackage && modulePath.startsWith(ownPackage.packageName)) {
+        const packagePath: string = modulePath.substr(ownPackage.packageName.length + 1);
+        return path.resolve(ownPackage.packageRootPath, packagePath);
+      }
+    }
+
+    try {
+      return Resolve.sync(
+        // Append a slash to the package name to ensure `resolve.sync` doesn't attempt to return a system package
+        options.includeSystemModules !== true && modulePath.indexOf('/') === -1
+          ? `${modulePath}/`
+          : modulePath,
+        {
+          basedir: normalizedRootPath,
+          preserveSymlinks: false
+        }
       );
-      if (
-        ownPackageJsonPath &&
-        PackageJsonLookup.instance.loadPackageJson(ownPackageJsonPath).name === packageName
-      ) {
-        resolvedPackagePath = path.dirname(ownPackageJsonPath);
+    } catch (e) {
+      throw new Error(`Cannot find module "${modulePath}" from "${options.baseFolderPath}".`);
+    }
+  }
+
+  /**
+   * Resolve the path to a package, from the perspective of a specified folder.
+   */
+  public static resolvePackage(options: IImportResolvePackageOptions): string {
+    const { packageName } = options;
+
+    if (options.includeSystemModules && Import._builtInModules.has(packageName)) {
+      return packageName;
+    }
+
+    const normalizedRootPath: string = FileSystem.getRealPath(options.baseFolderPath);
+
+    if (options.allowSelfReference) {
+      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(options.baseFolderPath);
+      if (ownPackage && ownPackage.packageName === packageName) {
+        return ownPackage.packageRootPath;
       }
     }
 
-    if (!resolvedPackagePath) {
-      try {
-        resolvedPackagePath = path.dirname(
-          Resolve.sync(
-            // Append a slash to the package name to ensure `resolve.sync` doesn't attempt to return a system package
-            `${packageName}/`,
-            {
-              basedir: normalizedRootPath,
-              preserveSymlinks: false,
-              packageFilter: (pkg: { main: string }): { main: string } => {
-                // In case the "main" property isn't defined, set it to something we know will exist
-                pkg.main = 'package.json';
-                return pkg;
-              }
-            }
-          )
-        );
-      } catch (e) {
-        throw new Error(`Cannot find module "${packageName}" from "${normalizedRootPath}".`);
-      }
-    }
+    try {
+      const resolvedPath: string = Resolve.sync(packageName, {
+        basedir: normalizedRootPath,
+        preserveSymlinks: false,
+        packageFilter: (pkg: { main: string }): { main: string } => {
+          // In case the "main" property isn't defined, set it to something we know will exist
+          pkg.main = 'package.json';
+          return pkg;
+        }
+      });
 
-    if (pathInsidePackage) {
-      return path.resolve(resolvedPackagePath, pathInsidePackage);
+      const packagePath: string = path.dirname(resolvedPath);
+      const packageJson: IPackageJson = PackageJsonLookup.instance.loadPackageJson(
+        path.join(packagePath, 'package.json')
+      );
+      if (packageJson.name === packageName) {
+        return packagePath;
+      } else {
+        throw new Error();
+      }
+    } catch (e) {
+      throw new Error(`Cannot find package "${packageName}" from "${options.baseFolderPath}".`);
+    }
+  }
+
+  private static _getPackageName(rootPath: string): IPackageDescriptor | undefined {
+    const packageJsonPath: string | undefined = PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(
+      rootPath
+    );
+    if (packageJsonPath) {
+      const packageJson: IPackageJson = PackageJsonLookup.instance.loadPackageJson(packageJsonPath);
+      return {
+        packageRootPath: path.dirname(packageJsonPath),
+        packageName: packageJson.name
+      };
     } else {
-      return resolvedPackagePath;
+      return undefined;
     }
   }
 }
