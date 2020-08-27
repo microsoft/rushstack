@@ -312,19 +312,19 @@ export interface IFileWriterFlags {
     exclusive?: boolean;
 }
 
-// @public (undocumented)
+// @public
 export interface IImportResolveModuleOptions extends IImportResolveOptions {
     modulePath: string;
 }
 
-// @public (undocumented)
+// @public
 export interface IImportResolveOptions {
     allowSelfReference?: boolean;
     baseFolderPath: string;
     includeSystemModules?: boolean;
 }
 
-// @public (undocumented)
+// @public
 export interface IImportResolvePackageOptions extends IImportResolveOptions {
     packageName: string;
 }

@@ -11,6 +11,7 @@ import { FileSystem } from './FileSystem';
 import { IPackageJson } from './IPackageJson';
 
 /**
+ * Common options shared by {@link IImportResolveModuleOptions} and {@link IImportResolvePackageOptions}
  * @public
  */
 export interface IImportResolveOptions {
@@ -59,6 +60,7 @@ export interface IImportResolveOptions {
 }
 
 /**
+ * Options for {@link Import.resolveModule}
  * @public
  */
 export interface IImportResolveModuleOptions extends IImportResolveOptions {
@@ -70,6 +72,7 @@ export interface IImportResolveModuleOptions extends IImportResolveOptions {
 }
 
 /**
+ * Options for {@link Import.resolvePackage}
  * @public
  */
 export interface IImportResolvePackageOptions extends IImportResolveOptions {
@@ -175,8 +178,28 @@ export class Import {
   }
 
   /**
-   * Resolve a module, from the perspective of a specified folder. This is used to resolve a path that
-   * would be used in a `require(...)` or `import '...'` statement.
+   * This resolves a module path using similar logic as the Node.js `require.resolve()` API,
+   * but supporting extra features such as specifying the base folder.
+   *
+   * @remarks
+   * A module path is a text string that might appear in a statement such as
+   * `import { X } from "____";` or `const x = require("___");`.  The implementation is based
+   * on the popular `resolve` NPM package.
+   *
+   * Suppose `example` is an NPM package whose entry point is `lib/index.js`:
+   * ```ts
+   * // Returns "/path/to/project/node_modules/example/lib/index.js"
+   * Import.resolveModule({ modulePath: 'example' });
+   *
+   * // Returns "/path/to/project/node_modules/example/lib/other.js"
+   * Import.resolveModule({ modulePath: 'example/lib/other' });
+   * ```
+   * If you need to determine the containing package folder
+   * (`/path/to/project/node_modules/example`), use {@link Import.resolvePackage} instead.
+   *
+   * @returns the absolute path of the resolved module.
+   * If {@link IImportResolveOptions.includeSystemModules} is specified
+   * and a system module is found, then its name is returned without any file path.
    */
   public static resolveModule(options: IImportResolveModuleOptions): string {
     const { modulePath } = options;
@@ -221,7 +244,24 @@ export class Import {
   }
 
   /**
-   * Resolve the path to a package, from the perspective of a specified folder.
+   * Performs module resolution to determine the folder where a package is installed.
+   *
+   * @remarks
+   * Suppose `example` is an NPM package whose entry point is `lib/index.js`:
+   * ```ts
+   * // Returns "/path/to/project/node_modules/example"
+   * Import.resolvePackage({ packageName: 'example' });
+   * ```
+   *
+   * If you need to resolve a module path, use {@link Import.resolveModule} instead:
+   * ```ts
+   * // Returns "/path/to/project/node_modules/example/lib/index.js"
+   * Import.resolveModule({ modulePath: 'example' });
+   * ```
+   *
+   * @returns the absolute path of the package folder.
+   * If {@link IImportResolveOptions.includeSystemModules} is specified
+   * and a system module is found, then its name is returned without any file path.
    */
   public static resolvePackage(options: IImportResolvePackageOptions): string {
     const { packageName } = options;
@@ -244,7 +284,10 @@ export class Import {
         basedir: normalizedRootPath,
         preserveSymlinks: false,
         packageFilter: (pkg: { main: string }): { main: string } => {
-          // In case the "main" property isn't defined, set it to something we know will exist
+          // Hardwire "main" to point to a file that is guaranteed to exist.
+          // This helps resolve packages such as @types/node that have no entry point.
+          // And then we can use path.dirname() below to locate the package folder,
+          // even if the real entry point was in an subfolder with arbitrary nesting.
           pkg.main = 'package.json';
           return pkg;
         }
