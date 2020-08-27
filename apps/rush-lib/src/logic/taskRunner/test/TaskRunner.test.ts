@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// The TaskRunner prints "x.xx seconds" in TestRunner.test.ts.snap; ensure that the Stopwatch timing is deterministic
+jest.mock('../../../utilities/Utilities');
+
 import { EOL } from 'os';
 import { TaskRunner, ITaskRunnerOptions } from '../TaskRunner';
 import { ITaskWriter } from '@rushstack/stream-collator';
@@ -9,8 +12,6 @@ import { ITaskDefinition, ITask } from '../ITask';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import { Utilities } from '../../../utilities/Utilities';
 
-// The TaskRunner prints "x.xx seconds" in TestRunner.test.ts.snap; ensure that the Stopwatch timing is deterministic
-jest.mock('../../../utilities/Utilities');
 const mockGetTimeInMs: jest.Mock = jest.fn();
 Utilities.getTimeInMs = mockGetTimeInMs;
 
