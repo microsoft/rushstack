@@ -62,6 +62,8 @@ interface IConfigurationFileCacheEntry<TConfigurationFile> {
 }
 
 /**
+ * Used to specify how node(s) in a JSON object should be processed after being loaded.
+ *
  * @beta
  */
 export interface IJsonPathMetadata {
@@ -76,6 +78,9 @@ export type IPropertyInheritanceTypes<TConfigurationFile> = {
 };
 
 /**
+ * Keys in this object are JSONPaths {@link https://jsonpath.com/}, and values are objects
+ * that describe how node(s) selected by the JSONPath are processed after loading.
+ *
  * @beta
  */
 export interface IJsonPathsMetadata {
@@ -86,7 +91,15 @@ export interface IJsonPathsMetadata {
  * @beta
  */
 export interface IConfigurationFileOptions<TConfigurationFile> {
+  /**
+   * Use this property to specify how JSON nodes are postprocessed.
+   */
   jsonPathMetadata?: IJsonPathsMetadata;
+
+  /**
+   * Use this property to control how root-level properties are handled between parent and child
+   * configuration files.
+   */
   propertyInheritanceTypes?: IPropertyInheritanceTypes<TConfigurationFile>;
 }
 

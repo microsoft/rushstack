@@ -20,19 +20,17 @@ export class ConfigurationFile<TConfigurationFile> {
 
 // @beta (undocumented)
 export interface IConfigurationFileOptions<TConfigurationFile> {
-    // (undocumented)
     jsonPathMetadata?: IJsonPathsMetadata;
-    // (undocumented)
     propertyInheritanceTypes?: IPropertyInheritanceTypes<TConfigurationFile>;
 }
 
-// @beta (undocumented)
+// @beta
 export interface IJsonPathMetadata {
     // (undocumented)
     pathResolutionMethod?: PathResolutionMethod;
 }
 
-// @beta (undocumented)
+// @beta
 export interface IJsonPathsMetadata {
     // (undocumented)
     [jsonPath: string]: IJsonPathMetadata;
