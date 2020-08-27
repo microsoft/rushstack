@@ -3,9 +3,7 @@
 
 const mockPlaySoundFile = jest.fn();
 
-// eslint-disable-next-line
 jest.mock('./SoundPlayer', () => {
-  // Works and lets you check for constructor calls:
   return {
     SoundPlayer: jest.fn().mockImplementation(() => {
       return { playSoundFile: mockPlaySoundFile };
