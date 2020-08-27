@@ -10,7 +10,7 @@ describe('Import', () => {
 
   describe('resolveModule', () => {
     it('returns an absolute path as-is', () => {
-      const absolutePaths: string[] = ['C:\\test\\path', '/var/test/path'];
+      const absolutePaths: string[] = ['/var/test/path'];
 
       for (const absolutePath of absolutePaths) {
         expect(Import.resolveModule({ modulePath: absolutePath, baseFolderPath: __dirname })).toEqual(
