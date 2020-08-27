@@ -259,17 +259,24 @@ describe('ConfigLoader', () => {
         plugins: [
           {
             plugin: await FileSystem.getRealPathAsync(
-              nodeJsPath.resolve(projectRoot, 'node_modules', '@rushstack', 'node-core-library')
+              nodeJsPath.resolve(
+                projectRoot,
+                'node_modules',
+                '@rushstack',
+                'node-core-library',
+                'lib',
+                'index.js'
+              )
             )
           },
           {
             plugin: await FileSystem.getRealPathAsync(
-              nodeJsPath.resolve(projectRoot, 'node_modules', '@rushstack', 'heft')
+              nodeJsPath.resolve(projectRoot, 'node_modules', '@rushstack', 'heft', 'lib', 'index.js')
             )
           },
           {
             plugin: await FileSystem.getRealPathAsync(
-              nodeJsPath.resolve(projectRoot, 'node_modules', '@rushstack', 'eslint-config')
+              nodeJsPath.resolve(projectRoot, 'node_modules', '@rushstack', 'eslint-config', 'index.js')
             )
           }
         ]

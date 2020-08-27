@@ -149,8 +149,8 @@ export class PluginManager {
     this._terminal.writeVerboseLine(`Resolving plugin ${pluginSpecifier}`);
 
     try {
-      resolvedPluginPath = Import.resolve({
-        resolvePath: pluginSpecifier,
+      resolvedPluginPath = Import.resolveModule({
+        modulePath: pluginSpecifier,
         baseFolderPath: this._heftConfiguration.buildFolder
       });
     } catch (e) {

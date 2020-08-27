@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as nodeJsPath from 'path';
-import { JSONPath, JSONPathClass } from 'jsonpath-plus';
+import { JSONPath } from 'jsonpath-plus';
 import { JsonSchema, JsonFile, PackageJsonLookup, Import, FileSystem } from '@rushstack/node-core-library';
 
 interface IConfigurationJson {
@@ -119,11 +119,6 @@ export class ConfigurationFileLoader<TConfigurationFile> {
   > = new Map<string, IConfigurationFileCacheEntry<TConfigurationFile>>();
   private readonly _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
-  /**
-   * @internal
-   */
-  public static _formatPathForError: (path: string) => string = (path: string) => path;
-
   public constructor(jsonSchemaPath: string, options?: IConfigurationFileLoaderOptions<TConfigurationFile>);
   public constructor(jsonSchema: JsonSchema, options?: IConfigurationFileLoaderOptions<TConfigurationFile>);
   public constructor(
@@ -145,6 +140,11 @@ export class ConfigurationFileLoader<TConfigurationFile> {
       new Set<string>()
     );
   }
+
+  /**
+   * @internal
+   */
+  public static _formatPathForError: (path: string) => string = (path: string) => path;
 
   /**
    * Get the path to the source file that the referenced property was originally
@@ -203,10 +203,10 @@ export class ConfigurationFileLoader<TConfigurationFile> {
           fileText = await FileSystem.readFileAsync(resolvedConfigurationFilePath);
         } catch (e) {
           if (FileSystem.isNotExistError(e)) {
-            throw new Error(`File does not exist: ${resolvedConfigurationFilePathForErrors}`);
-          } else {
-            throw e;
+            e.message = `File does not exist: ${resolvedConfigurationFilePathForErrors}`;
           }
+
+          throw e;
         }
 
         let configurationJson: IConfigurationJson & TConfigurationFile;
@@ -415,8 +415,8 @@ export class ConfigurationFileLoader<TConfigurationFile> {
       }
 
       case PathResolutionMethod.NodeResolve: {
-        return Import.resolve({
-          resolvePath: propertyValue,
+        return Import.resolveModule({
+          modulePath: propertyValue,
           baseFolderPath: nodeJsPath.dirname(configurationFilePath)
         });
       }
