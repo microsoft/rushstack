@@ -1,0 +1,5 @@
+{
+  "$schema": "http://schema.net/",
+  "extends": "../simpleConfigFile/simpleConfigFile.json",
+  "things": ["D", "E"]
+}

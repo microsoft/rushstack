@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Terminal, InternalError, JsonFile, FileSystem, JsonSchema } from '@rushstack/node-core-library';
-import * as resolve from 'resolve';
+import { Terminal, InternalError, FileSystem, Import } from '@rushstack/node-core-library';
+import { InheritanceType, PathResolutionMethod, ConfigurationFile } from '@rushstack/heft-config-file';
 
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IHeftPlugin } from './IHeftPlugin';
@@ -61,29 +61,43 @@ export class PluginManager {
 
   public initializePlugin(pluginSpecifier: string, options?: object): void {
     const resolvedPluginPath: string = this._resolvePlugin(pluginSpecifier);
-    const plugin: IHeftPlugin<object | void> = this._loadAndValidatePluginPackage(resolvedPluginPath);
-    this._applyPlugin(plugin, options);
+    this._initializeResolvedPlugin(resolvedPluginPath, options);
   }
 
-  public initializePluginsFromConfigFile(): void {
+  public async initializePluginsFromConfigFileAsync(): Promise<void> {
     try {
       const pluginConfigFilePath: string = path.join(
         this._heftConfiguration.projectHeftDataFolder,
         'plugins.json'
       );
-      const pluginConfigurationJson: IPluginConfigurationJson = JsonFile.loadAndValidate(
-        pluginConfigFilePath,
-        JsonSchema.fromFile(path.join(__dirname, '..', 'schemas', 'plugins.schema.json'))
+      const schemaPath: string = path.join(__dirname, '..', 'schemas', 'plugins.schema.json');
+      const pluginConfigFileLoader: ConfigurationFile<IPluginConfigurationJson> = new ConfigurationFile<
+        IPluginConfigurationJson
+      >(schemaPath, {
+        propertyInheritanceTypes: { plugins: InheritanceType.append },
+        jsonPathMetadata: {
+          '$.plugins.*.plugin': {
+            pathResolutionMethod: PathResolutionMethod.NodeResolve
+          }
+        }
+      });
+      const pluginConfigurationJson: IPluginConfigurationJson = await pluginConfigFileLoader.loadConfigurationFileAsync(
+        pluginConfigFilePath
       );
 
       for (const pluginSpecifier of pluginConfigurationJson.plugins) {
-        this.initializePlugin(pluginSpecifier.plugin, pluginSpecifier.options);
+        this._initializeResolvedPlugin(pluginSpecifier.plugin, pluginSpecifier.options);
       }
     } catch (e) {
       if (!FileSystem.isNotExistError(e)) {
         throw e;
       }
     }
+  }
+
+  private _initializeResolvedPlugin(resolvedPluginPath: string, options?: object): void {
+    const plugin: IHeftPlugin<object | void> = this._loadAndValidatePluginPackage(resolvedPluginPath);
+    this._applyPlugin(plugin, options);
   }
 
   private _applyPlugin(plugin: IHeftPlugin<object | void>, options?: object): void {
@@ -135,8 +149,9 @@ export class PluginManager {
     this._terminal.writeVerboseLine(`Resolving plugin ${pluginSpecifier}`);
 
     try {
-      resolvedPluginPath = resolve.sync(pluginSpecifier, {
-        basedir: this._heftConfiguration.buildFolder
+      resolvedPluginPath = Import.resolveModule({
+        modulePath: pluginSpecifier,
+        baseFolderPath: this._heftConfiguration.buildFolder
       });
     } catch (e) {
       throw new InternalError(`Error resolving specified plugin "${pluginSpecifier}". Resolve error: ${e}`);

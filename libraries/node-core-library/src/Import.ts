@@ -1,13 +1,106 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
 import importLazy = require('import-lazy');
+import * as Resolve from 'resolve';
+import nodeModule = require('module');
+
+import { PackageJsonLookup } from './PackageJsonLookup';
+import { FileSystem } from './FileSystem';
+import { IPackageJson } from './IPackageJson';
+
+/**
+ * Common options shared by {@link IImportResolveModuleOptions} and {@link IImportResolvePackageOptions}
+ * @public
+ */
+export interface IImportResolveOptions {
+  /**
+   * The path from which {@link IImportResolveModuleOptions.modulePath} or
+   * {@link IImportResolvePackageOptions.packageName} should be resolved.
+   */
+  baseFolderPath: string;
+
+  /**
+   * If true, if the package name matches a Node.js system module, then the return
+   * value will be the package name without any path.
+   *
+   * @remarks
+   * This will take precedence over an installed NPM package of the same name.
+   *
+   * Example:
+   * ```ts
+   * // Returns the string "fs" indicating the Node.js system module
+   * Import.resolveModulePath({
+   *   resolvePath: "fs",
+   *   basePath: process.cwd()
+   * })
+   * ```
+   */
+  includeSystemModules?: boolean;
+
+  /**
+   * If true, then resolvePath is allowed to refer to the package.json of the active project.
+   *
+   * @remarks
+   * This will take precedence over any installed dependency with the same name.
+   * Note that this requires an additional PackageJsonLookup calculation.
+   *
+   * Example:
+   * ```ts
+   * // Returns an absolute path to the current package
+   * Import.resolveModulePath({
+   *   resolvePath: "current-project",
+   *   basePath: process.cwd(),
+   *   allowSelfReference: true
+   * })
+   * ```
+   */
+  allowSelfReference?: boolean;
+}
+
+/**
+ * Options for {@link Import.resolveModule}
+ * @public
+ */
+export interface IImportResolveModuleOptions extends IImportResolveOptions {
+  /**
+   * The module identifier to resolve. For example "\@rushstack/node-core-library" or
+   * "\@rushstack/node-core-library/lib/index.js"
+   */
+  modulePath: string;
+}
+
+/**
+ * Options for {@link Import.resolvePackage}
+ * @public
+ */
+export interface IImportResolvePackageOptions extends IImportResolveOptions {
+  /**
+   * The package name to resolve. For example "\@rushstack/node-core-library"
+   */
+  packageName: string;
+}
+
+interface IPackageDescriptor {
+  packageRootPath: string;
+  packageName: string;
+}
 
 /**
  * Helpers for resolving and importing Node.js modules.
  * @public
  */
 export class Import {
+  private static __builtInModules: Set<string> | undefined;
+  private static get _builtInModules(): Set<string> {
+    if (!Import.__builtInModules) {
+      Import.__builtInModules = new Set<string>(nodeModule.builtinModules);
+    }
+
+    return Import.__builtInModules;
+  }
+
   /**
    * Provides a way to improve process startup times by lazy-loading imported modules.
    *
@@ -82,5 +175,150 @@ export class Import {
   public static lazy(moduleName: string, require: (id: string) => unknown): any {
     const importLazyLocal: (moduleName: string) => unknown = importLazy(require);
     return importLazyLocal(moduleName);
+  }
+
+  /**
+   * This resolves a module path using similar logic as the Node.js `require.resolve()` API,
+   * but supporting extra features such as specifying the base folder.
+   *
+   * @remarks
+   * A module path is a text string that might appear in a statement such as
+   * `import { X } from "____";` or `const x = require("___");`.  The implementation is based
+   * on the popular `resolve` NPM package.
+   *
+   * Suppose `example` is an NPM package whose entry point is `lib/index.js`:
+   * ```ts
+   * // Returns "/path/to/project/node_modules/example/lib/index.js"
+   * Import.resolveModule({ modulePath: 'example' });
+   *
+   * // Returns "/path/to/project/node_modules/example/lib/other.js"
+   * Import.resolveModule({ modulePath: 'example/lib/other' });
+   * ```
+   * If you need to determine the containing package folder
+   * (`/path/to/project/node_modules/example`), use {@link Import.resolvePackage} instead.
+   *
+   * @returns the absolute path of the resolved module.
+   * If {@link IImportResolveOptions.includeSystemModules} is specified
+   * and a system module is found, then its name is returned without any file path.
+   */
+  public static resolveModule(options: IImportResolveModuleOptions): string {
+    const { modulePath } = options;
+
+    if (path.isAbsolute(modulePath)) {
+      return modulePath;
+    }
+
+    const normalizedRootPath: string = FileSystem.getRealPath(options.baseFolderPath);
+
+    if (modulePath.startsWith('.')) {
+      // This looks like a conventional relative path
+      return path.resolve(normalizedRootPath, modulePath);
+    }
+
+    if (options.includeSystemModules === true && Import._builtInModules.has(modulePath)) {
+      return modulePath;
+    }
+
+    if (options.allowSelfReference === true) {
+      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(options.baseFolderPath);
+      if (ownPackage && modulePath.startsWith(ownPackage.packageName)) {
+        const packagePath: string = modulePath.substr(ownPackage.packageName.length + 1);
+        return path.resolve(ownPackage.packageRootPath, packagePath);
+      }
+    }
+
+    try {
+      return Resolve.sync(
+        // Append a slash to the package name to ensure `resolve.sync` doesn't attempt to return a system package
+        options.includeSystemModules !== true && modulePath.indexOf('/') === -1
+          ? `${modulePath}/`
+          : modulePath,
+        {
+          basedir: normalizedRootPath,
+          preserveSymlinks: false
+        }
+      );
+    } catch (e) {
+      throw new Error(`Cannot find module "${modulePath}" from "${options.baseFolderPath}".`);
+    }
+  }
+
+  /**
+   * Performs module resolution to determine the folder where a package is installed.
+   *
+   * @remarks
+   * Suppose `example` is an NPM package whose entry point is `lib/index.js`:
+   * ```ts
+   * // Returns "/path/to/project/node_modules/example"
+   * Import.resolvePackage({ packageName: 'example' });
+   * ```
+   *
+   * If you need to resolve a module path, use {@link Import.resolveModule} instead:
+   * ```ts
+   * // Returns "/path/to/project/node_modules/example/lib/index.js"
+   * Import.resolveModule({ modulePath: 'example' });
+   * ```
+   *
+   * @returns the absolute path of the package folder.
+   * If {@link IImportResolveOptions.includeSystemModules} is specified
+   * and a system module is found, then its name is returned without any file path.
+   */
+  public static resolvePackage(options: IImportResolvePackageOptions): string {
+    const { packageName } = options;
+
+    if (options.includeSystemModules && Import._builtInModules.has(packageName)) {
+      return packageName;
+    }
+
+    const normalizedRootPath: string = FileSystem.getRealPath(options.baseFolderPath);
+
+    if (options.allowSelfReference) {
+      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(options.baseFolderPath);
+      if (ownPackage && ownPackage.packageName === packageName) {
+        return ownPackage.packageRootPath;
+      }
+    }
+
+    try {
+      const resolvedPath: string = Resolve.sync(packageName, {
+        basedir: normalizedRootPath,
+        preserveSymlinks: false,
+        packageFilter: (pkg: { main: string }): { main: string } => {
+          // Hardwire "main" to point to a file that is guaranteed to exist.
+          // This helps resolve packages such as @types/node that have no entry point.
+          // And then we can use path.dirname() below to locate the package folder,
+          // even if the real entry point was in an subfolder with arbitrary nesting.
+          pkg.main = 'package.json';
+          return pkg;
+        }
+      });
+
+      const packagePath: string = path.dirname(resolvedPath);
+      const packageJson: IPackageJson = PackageJsonLookup.instance.loadPackageJson(
+        path.join(packagePath, 'package.json')
+      );
+      if (packageJson.name === packageName) {
+        return packagePath;
+      } else {
+        throw new Error();
+      }
+    } catch (e) {
+      throw new Error(`Cannot find package "${packageName}" from "${options.baseFolderPath}".`);
+    }
+  }
+
+  private static _getPackageName(rootPath: string): IPackageDescriptor | undefined {
+    const packageJsonPath: string | undefined = PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(
+      rootPath
+    );
+    if (packageJsonPath) {
+      const packageJson: IPackageJson = PackageJsonLookup.instance.loadPackageJson(packageJsonPath);
+      return {
+        packageRootPath: path.dirname(packageJsonPath),
+        packageName: packageJson.name
+      };
+    } else {
+      return undefined;
+    }
   }
 }

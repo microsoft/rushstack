@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+
+  "oneOf": [
+    {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "extends": {
+          "type": "string"
+        },
+        "filePaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "extends": {
+          "type": "string"
+        },
+        "folderPaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ]
+}
