@@ -85,7 +85,7 @@ export interface IJsonPathsMetadata {
 /**
  * @beta
  */
-export interface IConfigurationFileLoaderOptions<TConfigurationFile> {
+export interface IConfigurationFileOptions<TConfigurationFile> {
   jsonPathMetadata?: IJsonPathsMetadata;
   propertyInheritanceTypes?: IPropertyInheritanceTypes<TConfigurationFile>;
 }
@@ -108,7 +108,7 @@ export interface IOriginalValueOptions<TParentProperty> {
 /**
  * @beta
  */
-export class ConfigurationFileLoader<TConfigurationFile> {
+export class ConfigurationFile<TConfigurationFile> {
   private readonly _schema: JsonSchema;
   private readonly _jsonPathMetadata: IJsonPathsMetadata;
   private readonly _propertyInheritanceTypes: IPropertyInheritanceTypes<TConfigurationFile>;
@@ -119,11 +119,11 @@ export class ConfigurationFileLoader<TConfigurationFile> {
   > = new Map<string, IConfigurationFileCacheEntry<TConfigurationFile>>();
   private readonly _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
-  public constructor(jsonSchemaPath: string, options?: IConfigurationFileLoaderOptions<TConfigurationFile>);
-  public constructor(jsonSchema: JsonSchema, options?: IConfigurationFileLoaderOptions<TConfigurationFile>);
+  public constructor(jsonSchemaPath: string, options?: IConfigurationFileOptions<TConfigurationFile>);
+  public constructor(jsonSchema: JsonSchema, options?: IConfigurationFileOptions<TConfigurationFile>);
   public constructor(
     jsonSchema: string | JsonSchema,
-    options?: IConfigurationFileLoaderOptions<TConfigurationFile>
+    options?: IConfigurationFileOptions<TConfigurationFile>
   ) {
     if (typeof jsonSchema === 'string') {
       jsonSchema = JsonSchema.fromFile(jsonSchema);
@@ -135,7 +135,7 @@ export class ConfigurationFileLoader<TConfigurationFile> {
   }
 
   public async loadConfigurationFileAsync(configurationFilePath: string): Promise<TConfigurationFile> {
-    return await this._loadConfigurationFileAsyncInner(
+    return await this._loadConfigurationFileInnerAsync(
       nodeJsPath.resolve(configurationFilePath),
       new Set<string>()
     );
@@ -176,7 +176,7 @@ export class ConfigurationFileLoader<TConfigurationFile> {
     throw new Error(`No original value could be determined for property "${options.propertyName}"`);
   }
 
-  private async _loadConfigurationFileAsyncInner(
+  private async _loadConfigurationFileInnerAsync(
     resolvedConfigurationFilePath: string,
     visitedConfigurationFilePaths: Set<string>
   ): Promise<TConfigurationFile> {
@@ -185,7 +185,7 @@ export class ConfigurationFileLoader<TConfigurationFile> {
       | undefined = this._configurationFileCache.get(resolvedConfigurationFilePath);
     if (!cacheEntry) {
       try {
-        const resolvedConfigurationFilePathForErrors: string = ConfigurationFileLoader._formatPathForError(
+        const resolvedConfigurationFilePathForErrors: string = ConfigurationFile._formatPathForError(
           resolvedConfigurationFilePath
         );
 
@@ -245,7 +245,7 @@ export class ConfigurationFileLoader<TConfigurationFile> {
             nodeJsPath.dirname(resolvedConfigurationFilePath),
             configurationJson.extends
           );
-          parentConfiguration = await this._loadConfigurationFileAsyncInner(
+          parentConfiguration = await this._loadConfigurationFileInnerAsync(
             resolvedParentConfigPath,
             visitedConfigurationFilePaths
           );
@@ -405,7 +405,7 @@ export class ConfigurationFileLoader<TConfigurationFile> {
         );
         if (!packageRoot) {
           throw new Error(
-            `Could not find a package root for path "${ConfigurationFileLoader._formatPathForError(
+            `Could not find a package root for path "${ConfigurationFile._formatPathForError(
               configurationFilePath
             )}"`
           );

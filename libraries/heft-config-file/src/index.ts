@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 export {
-  ConfigurationFileLoader,
-  IConfigurationFileLoaderOptions,
+  ConfigurationFile,
+  IConfigurationFileOptions,
   IJsonPathMetadata,
   IJsonPathsMetadata,
   InheritanceType,
   IOriginalValueOptions,
   IPropertyInheritanceTypes,
   PathResolutionMethod
-} from './ConfigurationFileLoader';
+} from './ConfigurationFile';

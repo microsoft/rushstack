@@ -7,9 +7,9 @@
 import { JsonSchema } from '@rushstack/node-core-library';
 
 // @beta (undocumented)
-export class ConfigurationFileLoader<TConfigurationFile> {
-    constructor(jsonSchemaPath: string, options?: IConfigurationFileLoaderOptions<TConfigurationFile>);
-    constructor(jsonSchema: JsonSchema, options?: IConfigurationFileLoaderOptions<TConfigurationFile>);
+export class ConfigurationFile<TConfigurationFile> {
+    constructor(jsonSchemaPath: string, options?: IConfigurationFileOptions<TConfigurationFile>);
+    constructor(jsonSchema: JsonSchema, options?: IConfigurationFileOptions<TConfigurationFile>);
     // @internal (undocumented)
     static _formatPathForError: (path: string) => string;
     getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
@@ -19,7 +19,7 @@ export class ConfigurationFileLoader<TConfigurationFile> {
     }
 
 // @beta (undocumented)
-export interface IConfigurationFileLoaderOptions<TConfigurationFile> {
+export interface IConfigurationFileOptions<TConfigurationFile> {
     // (undocumented)
     jsonPathMetadata?: IJsonPathsMetadata;
     // (undocumented)

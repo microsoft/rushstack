@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { Terminal, InternalError, FileSystem, Import } from '@rushstack/node-core-library';
-import { InheritanceType, PathResolutionMethod, ConfigurationFileLoader } from '@rushstack/heft-config-file';
+import { InheritanceType, PathResolutionMethod, ConfigurationFile } from '@rushstack/heft-config-file';
 
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IHeftPlugin } from './IHeftPlugin';
@@ -71,7 +71,7 @@ export class PluginManager {
         'plugins.json'
       );
       const schemaPath: string = path.join(__dirname, '..', 'schemas', 'plugins.schema.json');
-      const pluginConfigFileLoader: ConfigurationFileLoader<IPluginConfigurationJson> = new ConfigurationFileLoader<
+      const pluginConfigFileLoader: ConfigurationFile<IPluginConfigurationJson> = new ConfigurationFile<
         IPluginConfigurationJson
       >(schemaPath, {
         propertyInheritanceTypes: { plugins: InheritanceType.append },
