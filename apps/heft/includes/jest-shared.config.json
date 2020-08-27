@@ -1,7 +1,10 @@
 {
   "silent": false,
-
   "rootDir": "../../../../",
+
+  "//": ["Adding '<rootDir>/src' here enables src/__mocks__ to be used for mocking Node.js system modules."],
+  "roots": ["<rootDir>", "<rootDir>/src"],
+
   "testURL": "http://localhost/",
   "testMatch": ["<rootDir>/src/**/*.test.{ts,tsx}"],
   "transformIgnorePatterns": [],
