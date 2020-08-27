@@ -738,7 +738,21 @@ module.exports = {
     {
       // For unit tests, we can be a little bit less strict.  The settings below revise the
       // defaults specified above.
-      files: ['*.test.ts', '*.test.tsx'],
+      files: [
+        // Test files
+        '*.test.ts',
+        '*.test.tsx',
+
+        // Facebook convention
+        '**/__mocks__/*.ts',
+        '**/__mocks__/*.tsx',
+        '**/__tests__/*.ts',
+        '**/__tests__/*.tsx',
+
+        // Microsoft convention
+        '**/test/*.ts',
+        '**/test/*.tsx'
+      ],
       rules: {
         // Unit tests sometimes use a standalone statement like "new Thing(123);" to test a constructor.
         'no-new': 'off',
