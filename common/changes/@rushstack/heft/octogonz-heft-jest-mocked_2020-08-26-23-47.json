@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Add a \"resolver\" setting to jest-shared-config.json, which fixes an issue with importing manual mocks from a \"__mocks__\" subfolder. (See jest-improved-resolver.js for details.)",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
