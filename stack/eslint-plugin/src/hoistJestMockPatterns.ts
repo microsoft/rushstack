@@ -46,3 +46,22 @@ export const jestCallExpression = {
     }
   }
 };
+
+// Matches require() in a statement expression like this:
+//   const x = require("package-name");
+export const requireCallExpression = {
+  type: 'CallExpression',
+  callee: {
+    type: 'Identifier',
+    name: 'require'
+  }
+};
+
+// Matches import in a statement expression like this:
+//   const x = import("package-name");
+export const importExpression = {
+  type: 'ImportExpression',
+  source: {
+    type: 'Literal'
+  }
+};
