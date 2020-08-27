@@ -1,0 +1,14 @@
+{
+  "$schema": "http://schema.net/",
+
+  "extends": "./pluginsA.json",
+
+  "plugins": [
+    {
+      "plugin": "@rushstack/heft"
+    },
+    {
+      "plugin": "@rushstack/eslint-config"
+    }
+  ]
+}

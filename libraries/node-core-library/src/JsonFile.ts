@@ -100,6 +100,11 @@ const DEFAULT_ENCODING: string = 'utf8';
  */
 export class JsonFile {
   /**
+   * @internal
+   */
+  public static _formatPathForError: (path: string) => string = (path: string) => path;
+
+  /**
    * Loads a JSON file.
    */
   public static load(jsonFilename: string): JsonObject {
@@ -110,7 +115,9 @@ export class JsonFile {
       if (FileSystem.isNotExistError(error)) {
         throw error;
       } else {
-        throw new Error(`Error reading "${jsonFilename}":` + os.EOL + `  ${error.message}`);
+        throw new Error(
+          `Error reading "${JsonFile._formatPathForError(jsonFilename)}":` + os.EOL + `  ${error.message}`
+        );
       }
     }
   }
@@ -126,7 +133,9 @@ export class JsonFile {
       if (FileSystem.isNotExistError(error)) {
         throw error;
       } else {
-        throw new Error(`Error reading "${jsonFilename}":` + os.EOL + `  ${error.message}`);
+        throw new Error(
+          `Error reading "${JsonFile._formatPathForError(jsonFilename)}":` + os.EOL + `  ${error.message}`
+        );
       }
     }
   }

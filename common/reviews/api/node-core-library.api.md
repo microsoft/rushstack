@@ -313,6 +313,23 @@ export interface IFileWriterFlags {
 }
 
 // @public
+export interface IImportResolveModuleOptions extends IImportResolveOptions {
+    modulePath: string;
+}
+
+// @public
+export interface IImportResolveOptions {
+    allowSelfReference?: boolean;
+    baseFolderPath: string;
+    includeSystemModules?: boolean;
+}
+
+// @public
+export interface IImportResolvePackageOptions extends IImportResolveOptions {
+    packageName: string;
+}
+
+// @public
 export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
     ensureFolderExists?: boolean;
     onlyIfChanged?: boolean;
@@ -344,6 +361,8 @@ export interface IJsonSchemaValidateOptions {
 // @public
 export class Import {
     static lazy(moduleName: string, require: (id: string) => unknown): any;
+    static resolveModule(options: IImportResolveModuleOptions): string;
+    static resolvePackage(options: IImportResolvePackageOptions): string;
 }
 
 // @public
@@ -440,6 +459,8 @@ export interface ITerminalProvider {
 
 // @public
 export class JsonFile {
+    // @internal (undocumented)
+    static _formatPathForError: (path: string) => string;
     static load(jsonFilename: string): JsonObject;
     static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): JsonObject;
     static loadAndValidateAsync(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): Promise<JsonObject>;
@@ -518,6 +539,7 @@ export const enum NewlineKind {
 export class PackageJsonLookup {
     constructor(parameters?: IPackageJsonLookupParameters);
     clearCache(): void;
+    static readonly instance: PackageJsonLookup;
     loadNodePackageJson(jsonFilename: string): INodePackageJson;
     static loadOwnPackageJson(dirnameOfCaller: string): IPackageJson;
     loadPackageJson(jsonFilename: string): IPackageJson;

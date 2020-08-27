@@ -26,25 +26,33 @@ For technical background, please read the Jest documentation here: https://jestj
 The following patterns are considered problems when `@rushstack/hoist-jest-mock` is enabled:
 
 ```ts
-import * as file from './file';
+import * as file from './file'; // import statement
 jest.mock('./file'); // error
 
 test("example", () => {
-  const file2: typeof import('./file2') = require('./file2');
   jest.mock('./file2'); // error
 });
+```
+
+```ts
+require('./file'); // import statement
+jest.mock('./file'); // error
 ```
 
 The following patterns are NOT considered problems:
 
 ```ts
-jest.mock('./file'); // okay, because mock() is first
-import * as file from './file';
+jest.mock('./file'); // okay, because mock() precedes the import below
+import * as file from './file'; // import statement
+```
 
-test("example", () => {
-  jest.mock('./file2'); // okay, because mock() is first within the test() code block
-  const file2: typeof import('./file2') = require('./file2');
-});
+```ts
+// These statements are not real "imports" because they import compile-time types
+// without any runtime effects
+import type { X } from './file';
+let y: typeof import('./file');
+
+jest.mock('./file'); // okay
 ```
 
 ## `@rushstack/no-new-null`

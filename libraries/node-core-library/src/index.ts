@@ -22,7 +22,12 @@ export {
   IPackageJsonDependencyTable,
   IPackageJsonScriptTable
 } from './IPackageJson';
-export { Import } from './Import';
+export {
+  Import,
+  IImportResolveOptions,
+  IImportResolveModuleOptions,
+  IImportResolvePackageOptions
+} from './Import';
 export { InternalError } from './InternalError';
 export { JsonObject, JsonFile, JsonNull, IJsonFileSaveOptions, IJsonFileStringifyOptions } from './JsonFile';
 export {

@@ -98,6 +98,7 @@ importers:
       '@jest/core': 25.4.0
       '@jest/reporters': 25.4.0
       '@jest/transform': 25.4.0
+      '@rushstack/heft-config-file': 'link:../../libraries/heft-config-file'
       '@rushstack/node-core-library': 'link:../../libraries/node-core-library'
       '@rushstack/ts-command-line': 'link:../../libraries/ts-command-line'
       '@types/tapable': 1.0.5
@@ -106,7 +107,6 @@ importers:
       glob: 7.0.6
       glob-escape: 0.0.2
       jest-snapshot: 25.4.0
-      resolve: 1.17.0
       semver: 7.3.2
       tapable: 1.1.3
       true-case-path: 2.2.1
@@ -121,7 +121,6 @@ importers:
       '@types/glob': 7.1.1
       '@types/jest': 25.2.1
       '@types/node': 10.17.13
-      '@types/resolve': 1.17.1
       '@types/semver': 7.3.3
       '@types/webpack-dev-server': 3.11.0
       colors: 1.2.5
@@ -133,13 +132,13 @@ importers:
       '@microsoft/rush-stack-compiler-3.7': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.6.5
+      '@rushstack/heft-config-file': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@rushstack/ts-command-line': 'workspace:*'
       '@types/eslint': 7.2.0
       '@types/glob': 7.1.1
       '@types/jest': 25.2.1
       '@types/node': 10.17.13
-      '@types/resolve': 1.17.1
       '@types/semver': ~7.3.1
       '@types/tapable': 1.0.5
       '@types/webpack': 4.39.8
@@ -149,7 +148,6 @@ importers:
       glob: ~7.0.5
       glob-escape: ~0.0.2
       jest-snapshot: ~25.4.0
-      resolve: ~1.17.0
       semver: ~7.3.0
       tapable: 1.1.3
       true-case-path: ~2.2.1
@@ -524,21 +522,6 @@ importers:
       eslint: ~7.2.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
-      typescript: ~3.9.5
-  ../../build-tests/heft-node-jest-test:
-    devDependencies:
-      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
-      '@rushstack/heft': 'link:../../apps/heft'
-      '@types/heft-jest': 1.0.0
-      '@types/node': 10.17.13
-      eslint: 7.2.0
-      typescript: 3.9.7
-    specifiers:
-      '@rushstack/eslint-config': 'workspace:*'
-      '@rushstack/heft': 'workspace:*'
-      '@types/heft-jest': 1.0.0
-      '@types/node': 10.17.13
-      eslint: ~7.2.0
       typescript: ~3.9.5
   ../../build-tests/heft-oldest-compiler-test:
     devDependencies:
@@ -1281,6 +1264,28 @@ importers:
       deasync: ~0.1.19
       node-forge: ~0.7.1
       sudo: ~1.0.3
+  ../../libraries/heft-config-file:
+    dependencies:
+      '@rushstack/node-core-library': 'link:../node-core-library'
+      jsonpath-plus: 4.0.0
+      lodash: 4.17.19
+    devDependencies:
+      '@microsoft/rush-stack-compiler-3.7': 'link:../../stack/rush-stack-compiler-3.7'
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 0.6.5
+      '@types/jest': 25.2.1
+      '@types/lodash': 4.14.116
+      '@types/node': 10.17.13
+    specifiers:
+      '@microsoft/rush-stack-compiler-3.7': 'workspace:*'
+      '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 0.6.5
+      '@rushstack/node-core-library': 'workspace:*'
+      '@types/jest': 25.2.1
+      '@types/lodash': 4.14.116
+      '@types/node': 10.17.13
+      jsonpath-plus: ~4.0.0
+      lodash: ~4.17.15
   ../../libraries/load-themed-styles:
     devDependencies:
       '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
@@ -1301,6 +1306,7 @@ importers:
       fs-extra: 7.0.1
       import-lazy: 4.0.0
       jju: 1.4.0
+      resolve: 1.17.0
       semver: 7.3.2
       timsort: 0.3.0
       z-schema: 3.18.4
@@ -1311,6 +1317,7 @@ importers:
       '@types/fs-extra': 7.0.0
       '@types/jest': 25.2.1
       '@types/jju': 1.4.1
+      '@types/resolve': 1.17.1
       '@types/semver': 7.3.3
       '@types/timsort': 0.3.0
       '@types/z-schema': 3.16.31
@@ -1322,6 +1329,7 @@ importers:
       '@types/jest': 25.2.1
       '@types/jju': 1.4.1
       '@types/node': 10.17.13
+      '@types/resolve': 1.17.1
       '@types/semver': ~7.3.1
       '@types/timsort': 0.3.0
       '@types/z-schema': 3.16.31
@@ -1329,6 +1337,7 @@ importers:
       fs-extra: ~7.0.1
       import-lazy: ~4.0.0
       jju: ~1.4.0
+      resolve: ~1.17.0
       semver: ~7.3.0
       timsort: ~0.3.0
       z-schema: ~3.18.3
@@ -3076,12 +3085,6 @@ packages:
       chokidar: 2.1.8
     resolution:
       integrity: sha512-0E8/iV/7FKWyQWSmi7jnUvgXXgaw+pfAzEB06Xu+l0iXVJppLbpOye5z7E2klw5akXd+8kPtYuk65YBcZPM4ow==
-  /@types/heft-jest/1.0.0:
-    dependencies:
-      '@types/jest': 25.2.1
-    dev: true
-    resolution:
-      integrity: sha512-ZLbPaJ9C7ALDcjpKzLbcsI9Q85f9MfrPMzJpGo6GtJAVT4latyJgywHijs+0vDQGVFXDp+LFJEx+PYANrOrC2g==
   /@types/http-proxy-middleware/0.19.3:
     dependencies:
       '@types/connect': 3.4.33
@@ -8734,6 +8737,12 @@ packages:
       graceful-fs: 4.2.4
     resolution:
       integrity: sha1-h3Gq4HmbZAdrdmQPygWPnBDjPss=
+  /jsonpath-plus/4.0.0:
+    dev: false
+    engines:
+      node: '>=10.0'
+    resolution:
+      integrity: sha512-e0Jtg4KAzDJKKwzbLaUtinCn0RZseWBVRTRGihSpvFlM3wTR7ExSp+PTdeTsDrLNJUe7L7JYJe8mblHX5SCT6A==
   /jsprim/1.4.1:
     dependencies:
       assert-plus: 1.0.0
