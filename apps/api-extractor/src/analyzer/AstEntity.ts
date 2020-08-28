@@ -2,14 +2,18 @@
 // See LICENSE in the project root for license information.
 
 /**
- * `AstEntity` is the abstract base class for analyzer objects that can become a CollectorEntity.
+ * `AstEntity` is the abstract base class for analyzer objects that can become a `CollectorEntity`.
  *
  * @remarks
  *
  * The subclasses are:
- *
- * - `AstSymbol`
- * - `AstSyntheticEntity`
+ * ```
+ * - AstEntity
+ *   - AstSymbol
+ *   - AstSyntheticEntity
+ *     - AstImport
+ *     - AstImportAsModule
+ * ```
  */
 export abstract class AstEntity {
   /**
@@ -19,7 +23,7 @@ export abstract class AstEntity {
    *
    * @remarks
    * For the most part, `localName` corresponds to `followedSymbol.name`, but there
-   * are some edge cases.  For example, the symbol name for `export default class X { }`
+   * are some edge cases.  For example, the ts.Symbol.name for `export default class X { }`
    * is actually `"default"`, not `"X"`.
    */
   public abstract readonly localName: string;
@@ -37,10 +41,5 @@ export abstract class AstEntity {
  *
  * This strategy does not work for cases where the output looks very different from the input.  Today these
  * cases are always kinds of `import` statements, but that may change in the future.
- *
- * The subclasses are:
- *
- * - `AstImport`
- * - `AstImportAsModule`
  */
 export abstract class AstSyntheticEntity extends AstEntity {}

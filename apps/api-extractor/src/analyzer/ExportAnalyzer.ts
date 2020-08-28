@@ -74,10 +74,7 @@ export class ExportAnalyzer {
   private readonly _importableAmbientSourceFiles: Set<ts.SourceFile> = new Set<ts.SourceFile>();
 
   private readonly _astImportsByKey: Map<string, AstImport> = new Map<string, AstImport>();
-  private readonly _astImportAsModuleByModule: Map<AstModule, AstImportAsModule> = new Map<
-    AstModule,
-    AstImportAsModule
-  >();
+  private readonly _astImportAsModuleByModule: Map<AstModule, AstImportAsModule> = new Map();
 
   public constructor(
     program: ts.Program,

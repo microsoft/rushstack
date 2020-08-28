@@ -440,13 +440,16 @@ export class Collector {
     }
 
     if (astEntity instanceof AstImportAsModule) {
-      this.astSymbolTable
-        .fetchAstModuleExportInfo(astEntity.astModule)
-        .exportedLocalEntities.forEach((exportedEntity: AstEntity) => {
-          // Create a CollectorEntity for each top-level export of AstImportInternal entity
-          this._createCollectorEntity(exportedEntity, undefined);
-          this._createEntityForIndirectReferences(exportedEntity, alreadySeenAstEntities); // TODO- create entity for module export
-        });
+      const astModuleExportInfo: AstModuleExportInfo = this.astSymbolTable.fetchAstModuleExportInfo(
+        astEntity.astModule
+      );
+      for (const exportedEntity of astModuleExportInfo.exportedLocalEntities.values()) {
+        // Create a CollectorEntity for each top-level export of AstImportInternal entity
+        this._createCollectorEntity(exportedEntity, undefined);
+        this._createEntityForIndirectReferences(exportedEntity, alreadySeenAstEntities);
+
+        // TODO - create entity for module export
+      }
     }
   }
 

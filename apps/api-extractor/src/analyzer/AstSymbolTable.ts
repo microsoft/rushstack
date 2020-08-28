@@ -284,17 +284,11 @@ export class AstSymbolTable {
     // mark before actual analyzing, to handle module cyclic reexport
     astImportAsModule.analyzed = true;
 
-    this.fetchAstModuleExportInfo(astImportAsModule.astModule).exportedLocalEntities.forEach(
-      (exportedEntity) => {
-        if (exportedEntity instanceof AstImportAsModule) {
-          this._analyzeAstImportAsModule(exportedEntity);
-        }
-
-        if (exportedEntity instanceof AstSymbol) {
-          this._analyzeAstSymbol(exportedEntity);
-        }
-      }
-    );
+    for (const exportedEntity of this.fetchAstModuleExportInfo(
+      astImportAsModule.astModule
+    ).exportedLocalEntities.values()) {
+      this.analyze(exportedEntity);
+    }
   }
 
   private _analyzeAstSymbol(astSymbol: AstSymbol): void {
