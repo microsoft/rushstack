@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DocDeclarationReference, SelectorKind } from '@microsoft/tsdoc';
+import { DocDeclarationReference, DocMemberSelector, SelectorKind } from '@microsoft/tsdoc';
 import { ApiItem } from '../items/ApiItem';
 import { ApiModel } from './ApiModel';
 import { ApiPackage } from './ApiPackage';
@@ -111,40 +111,69 @@ export class ModelReferenceResolver {
         result.errorMessage = `The member reference ${JSON.stringify(identifier)} was not found`;
         return result;
       }
-      if (foundMembers.length > 1) {
-        if (memberReference.selector && memberReference.selector.selectorKind === SelectorKind.Index) {
-          const selectedMembers: ApiItem[] = [];
 
-          const selectorOverloadIndex: number = parseInt(memberReference.selector.selector);
-          for (const foundMember of foundMembers) {
-            if (ApiParameterListMixin.isBaseClassOf(foundMember)) {
-              if (foundMember.overloadIndex === selectorOverloadIndex) {
-                selectedMembers.push(foundMember);
-              }
-            }
-          }
-
-          if (selectedMembers.length === 0) {
-            result.errorMessage =
-              `An overload for ${JSON.stringify(identifier)} was not found that matches` +
-              ` the TSDoc selector ":${selectorOverloadIndex}"`;
-            return result;
-          }
-
-          if (selectedMembers.length === 1) {
-            result.resolvedApiItem = selectedMembers[0];
-            return result;
-          }
+      const memberSelector: DocMemberSelector | undefined = memberReference.selector;
+      if (memberSelector === undefined) {
+        if (foundMembers.length > 1) {
+          result.errorMessage = `The member reference ${JSON.stringify(identifier)} was ambiguous`;
+          return result;
         }
-
-        // TODO: Support other TSDoc selectors
-        result.errorMessage = `The member reference ${JSON.stringify(identifier)} was ambiguous`;
-        return result;
+        currentItem = foundMembers[0];
+      } else {
+        let memberSelectorResult: IResolveDeclarationReferenceResult;
+        switch (memberSelector.selectorKind) {
+          case SelectorKind.Index:
+            memberSelectorResult = this._selectUsingIndexSelector(foundMembers, memberSelector, identifier);
+            break;
+          default:
+            // TODO: Support other TSDoc selectors
+            result.errorMessage = `The selector "${memberSelector.selector}" is not a supported selector type`;
+            return result;
+        }
+        if (memberSelectorResult.resolvedApiItem === undefined) {
+          return memberSelectorResult;
+        }
+        currentItem = memberSelectorResult.resolvedApiItem;
       }
-
-      currentItem = foundMembers[0];
     }
     result.resolvedApiItem = currentItem;
+    return result;
+  }
+
+  private _selectUsingIndexSelector(
+    foundMembers: ReadonlyArray<ApiItem>,
+    memberSelector: DocMemberSelector,
+    identifier: string
+  ): IResolveDeclarationReferenceResult {
+    const result: IResolveDeclarationReferenceResult = {
+      resolvedApiItem: undefined,
+      errorMessage: undefined
+    };
+
+    const selectedMembers: ApiItem[] = [];
+
+    const selectorOverloadIndex: number = parseInt(memberSelector.selector);
+    for (const foundMember of foundMembers) {
+      if (ApiParameterListMixin.isBaseClassOf(foundMember)) {
+        if (foundMember.overloadIndex === selectorOverloadIndex) {
+          selectedMembers.push(foundMember);
+        }
+      }
+    }
+
+    if (selectedMembers.length === 0) {
+      result.errorMessage =
+        `An overload for ${JSON.stringify(identifier)} was not found that matches` +
+        ` the TSDoc selector ":${selectorOverloadIndex}"`;
+      return result;
+    }
+
+    if (selectedMembers.length === 1) {
+      result.resolvedApiItem = selectedMembers[0];
+      return result;
+    }
+
+    result.errorMessage = `The member reference ${JSON.stringify(identifier)} was ambiguous`;
     return result;
   }
 }
