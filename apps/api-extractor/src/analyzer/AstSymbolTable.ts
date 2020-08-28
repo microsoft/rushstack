@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* eslint-disable no-bitwise */ // for ts.SymbolFlags
+
 import * as ts from 'typescript';
 import { PackageJsonLookup, InternalError } from '@rushstack/node-core-library';
 
@@ -523,13 +525,13 @@ export class AstSymbolTable {
 
     const arbitraryDeclaration: ts.Declaration = followedSymbol.declarations[0];
 
-    // eslint-disable-next-line no-bitwise
     if (
       followedSymbol.flags &
-        (ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral | ts.SymbolFlags.Transient) &&
-      !TypeScriptInternals.isLateBoundSymbol(followedSymbol)
+      (ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral | ts.SymbolFlags.Transient)
     ) {
-      return undefined;
+      if (!TypeScriptInternals.isLateBoundSymbol(followedSymbol)) {
+        return undefined;
+      }
     }
 
     // API Extractor doesn't analyze ambient declarations at all

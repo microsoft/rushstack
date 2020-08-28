@@ -377,8 +377,8 @@ export class ExportAnalyzer {
           }
         }
 
+        // eslint-disable-next-line no-bitwise
         if (!(current.flags & ts.SymbolFlags.Alias)) {
-          // eslint-disable-line no-bitwise
           break;
         }
 

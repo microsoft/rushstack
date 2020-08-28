@@ -100,7 +100,7 @@ export interface IDocInterface3 {
    * An identifier that does need quotes.  It misleadingly looks like an ECMAScript symbol.
    */
   // prettier-ignore
-  "[not.a.symbol]": string;;
+  "[not.a.symbol]": string;
 }
 
 /**
