@@ -497,7 +497,7 @@ export class ExportAnalyzer {
           let importAsModule: AstImportAsModule | undefined = this._astImportAsModuleByModule.get(astModule);
           if (importAsModule === undefined) {
             importAsModule = new AstImportAsModule({
-              exportName: declarationSymbol.name,
+              namespaceName: declarationSymbol.name,
               astModule: astModule
             });
             this._astImportAsModuleByModule.set(astModule, importAsModule);
