@@ -52,6 +52,17 @@ export enum DocEnum {
 }
 
 // @public
+export enum DocEnumNamespaceMerge {
+    Left = 0,
+    Right = 1
+}
+
+// @public
+export namespace DocEnumNamespaceMerge {
+    export function exampleFunction(): void;
+}
+
+// @public
 export namespace EcmaSmbols {
     const example: unique symbol;
 }
