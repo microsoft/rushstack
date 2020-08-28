@@ -1,12 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as ts from 'typescript';
+
 import { AstModule } from './AstModule';
 import { AstSyntheticEntity } from './AstEntity';
 
 export interface IAstNamespaceImportOptions {
   readonly astModule: AstModule;
   readonly namespaceName: string;
+  readonly declaration: ts.Declaration;
 }
 
 /**
@@ -58,10 +61,16 @@ export class AstNamespaceImport extends AstSyntheticEntity {
    */
   public readonly namespaceName: string;
 
+  /**
+   * The original `ts.SyntaxKind.NamespaceImport` which can be used as a location for error messages.
+   */
+  public readonly declaration: ts.Declaration;
+
   public constructor(options: IAstNamespaceImportOptions) {
     super();
     this.astModule = options.astModule;
     this.namespaceName = options.namespaceName;
+    this.declaration = options.declaration;
   }
 
   /** {@inheritdoc} */

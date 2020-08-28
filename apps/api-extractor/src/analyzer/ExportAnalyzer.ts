@@ -500,7 +500,8 @@ export class ExportAnalyzer {
           if (namespaceImport === undefined) {
             namespaceImport = new AstNamespaceImport({
               namespaceName: declarationSymbol.name,
-              astModule: astModule
+              astModule: astModule,
+              declaration: declaration
             });
             this._astNamespaceImportByModule.set(astModule, namespaceImport);
           }
