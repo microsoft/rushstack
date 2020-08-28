@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { DocDeclarationReference, DocMemberSelector, SelectorKind } from '@microsoft/tsdoc';
-import { ApiItem } from '../items/ApiItem';
+import { ApiItem, ApiItemKind } from '../items/ApiItem';
 import { ApiModel } from './ApiModel';
 import { ApiPackage } from './ApiPackage';
 import { ApiEntryPoint } from './ApiEntryPoint';
@@ -122,11 +122,13 @@ export class ModelReferenceResolver {
       } else {
         let memberSelectorResult: IResolveDeclarationReferenceResult;
         switch (memberSelector.selectorKind) {
+          case SelectorKind.System:
+            memberSelectorResult = this._selectUsingSystemSelector(foundMembers, memberSelector, identifier);
+            break;
           case SelectorKind.Index:
             memberSelectorResult = this._selectUsingIndexSelector(foundMembers, memberSelector, identifier);
             break;
           default:
-            // TODO: Support other TSDoc selectors
             result.errorMessage = `The selector "${memberSelector.selector}" is not a supported selector type`;
             return result;
         }
@@ -137,6 +139,60 @@ export class ModelReferenceResolver {
       }
     }
     result.resolvedApiItem = currentItem;
+    return result;
+  }
+
+  private _selectUsingSystemSelector(
+    foundMembers: ReadonlyArray<ApiItem>,
+    memberSelector: DocMemberSelector,
+    identifier: string
+  ): IResolveDeclarationReferenceResult {
+    const result: IResolveDeclarationReferenceResult = {
+      resolvedApiItem: undefined,
+      errorMessage: undefined
+    };
+
+    const selectorName: string = memberSelector.selector;
+
+    let selectorItemKind: ApiItemKind;
+    switch (selectorName) {
+      case 'class':
+        selectorItemKind = ApiItemKind.Class;
+        break;
+      case 'enum':
+        selectorItemKind = ApiItemKind.Enum;
+        break;
+      case 'function':
+        selectorItemKind = ApiItemKind.Function;
+        break;
+      case 'interface':
+        selectorItemKind = ApiItemKind.Interface;
+        break;
+      case 'namespace':
+        selectorItemKind = ApiItemKind.Namespace;
+        break;
+      case 'type':
+        selectorItemKind = ApiItemKind.TypeAlias;
+        break;
+      case 'variable':
+        selectorItemKind = ApiItemKind.Variable;
+        break;
+      default:
+        result.errorMessage = `Unsupported system selector "${selectorName}"`;
+        return result;
+    }
+
+    const matches: ApiItem[] = foundMembers.filter((x) => x.kind === selectorItemKind);
+    if (matches.length === 0) {
+      result.errorMessage =
+        `A declaration for "${identifier}" was not found that matches the` +
+        ` TSDoc selector "${selectorName}"`;
+      return result;
+    }
+    if (matches.length > 1) {
+      result.errorMessage = `More than one declaration "${identifier}" matches the TSDoc selector "${selectorName}"`;
+    }
+    result.resolvedApiItem = matches[0];
     return result;
   }
 
