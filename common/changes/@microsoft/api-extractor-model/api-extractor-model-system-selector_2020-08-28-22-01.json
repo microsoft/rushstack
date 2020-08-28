@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "Add support for system selectors in declaration references",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model",
+  "email": "649348+MattiasBuelens@users.noreply.github.com"
+}
