@@ -12,6 +12,6 @@
     "@rushstack/heft": "workspace:*",
     "@microsoft/rush-stack-compiler-3.9": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
-    "@types/jest": "25.2.1"
+    "@types/heft-jest": "1.0.1"
   }
 }

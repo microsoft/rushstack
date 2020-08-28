@@ -17,7 +17,7 @@
     "@microsoft/rush-stack-compiler-3.5": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/jest": "25.2.1",
+    "@types/heft-jest": "1.0.1",
     "@types/webpack-env": "1.13.0"
   }
 }

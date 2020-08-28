@@ -12,7 +12,7 @@
     "@microsoft/rush-stack-compiler-3.5": "workspace:*",
     "@microsoft/load-themed-styles": "workspace:*",
     "@microsoft/web-library-build": "workspace:*",
-    "@types/jest": "25.2.1",
+    "@types/heft-jest": "1.0.1",
     "gulp": "~4.0.2",
     "jest": "~25.4.0",
     "ts-jest": "~25.1.0"

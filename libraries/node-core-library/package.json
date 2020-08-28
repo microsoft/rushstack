@@ -27,7 +27,7 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "0.8.0",
     "@types/fs-extra": "7.0.0",
-    "@types/jest": "25.2.1",
+    "@types/heft-jest": "1.0.1",
     "@types/jju": "1.4.1",
     "@types/resolve": "1.17.1",
     "@types/semver": "~7.3.1",
