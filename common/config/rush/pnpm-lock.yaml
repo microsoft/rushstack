@@ -415,17 +415,19 @@ importers:
       typescript: ~3.9.5
   ../../build-tests/api-extractor-test-01:
     dependencies:
-      '@types/heft-jest': 1.0.1
+      '@types/jest': 25.2.1
       '@types/long': 4.0.0
       long: 4.0.0
     devDependencies:
       '@microsoft/api-extractor': 'link:../../apps/api-extractor'
+      '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       fs-extra: 7.0.1
       typescript: 3.9.7
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
       '@types/heft-jest': 1.0.1
+      '@types/jest': 25.2.1
       '@types/long': 4.0.0
       '@types/node': 10.17.13
       fs-extra: ~7.0.1
@@ -3150,7 +3152,6 @@ packages:
     dependencies:
       jest-diff: 25.5.0
       pretty-format: 25.5.0
-    dev: true
     resolution:
       integrity: sha512-msra1bCaAeEdkSyA0CZ6gW1ukMIvZ5YoJkdXw/qhQdsuuDlFTcEUrUw8CLCPt2rVRUfXlClVvK2gvPs9IokZaA==
   /@types/jest/26.0.10:
@@ -14194,3 +14195,4 @@ packages:
       commander: 2.20.3
     resolution:
       integrity: sha512-DUOKC/IhbkdLKKiV89gw9DUauTV8U/8yJl1sjf6MtDmzevLKOF2duNJ495S3MFVjqZarr+qNGCPbkg4mu4PpLw==
+registry: ''
