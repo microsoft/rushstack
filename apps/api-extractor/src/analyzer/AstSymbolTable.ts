@@ -13,7 +13,7 @@ import { AstModule, AstModuleExportInfo } from './AstModule';
 import { PackageMetadataManager } from './PackageMetadataManager';
 import { ExportAnalyzer } from './ExportAnalyzer';
 import { AstEntity } from './AstEntity';
-import { AstImportAsModule } from './AstImportAsModule';
+import { AstNamespaceImport } from './AstNamespaceImport';
 import { MessageRouter } from '../collector/MessageRouter';
 import { TypeScriptInternals, IGlobalVariableAnalyzer } from './TypeScriptInternals';
 import { StringChecks } from './StringChecks';
@@ -154,8 +154,8 @@ export class AstSymbolTable {
       return this._analyzeAstSymbol(astEntity);
     }
 
-    if (astEntity instanceof AstImportAsModule) {
-      return this._analyzeAstImportAsModule(astEntity);
+    if (astEntity instanceof AstNamespaceImport) {
+      return this._analyzeAstNamespaceImport(astEntity);
     }
   }
 
@@ -276,16 +276,16 @@ export class AstSymbolTable {
     return unquotedName;
   }
 
-  private _analyzeAstImportAsModule(astImportAsModule: AstImportAsModule): void {
-    if (astImportAsModule.analyzed) {
+  private _analyzeAstNamespaceImport(astNamespaceImport: AstNamespaceImport): void {
+    if (astNamespaceImport.analyzed) {
       return;
     }
 
     // mark before actual analyzing, to handle module cyclic reexport
-    astImportAsModule.analyzed = true;
+    astNamespaceImport.analyzed = true;
 
     for (const exportedEntity of this.fetchAstModuleExportInfo(
-      astImportAsModule.astModule
+      astNamespaceImport.astModule
     ).exportedLocalEntities.values()) {
       this.analyze(exportedEntity);
     }
@@ -325,9 +325,9 @@ export class AstSymbolTable {
             }
           }
 
-          if (referencedAstEntity instanceof AstImportAsModule) {
+          if (referencedAstEntity instanceof AstNamespaceImport) {
             if (!referencedAstEntity.astModule.isExternal) {
-              this._analyzeAstImportAsModule(referencedAstEntity);
+              this._analyzeAstNamespaceImport(referencedAstEntity);
             }
           }
         }

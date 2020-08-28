@@ -19,7 +19,7 @@ import { SymbolMetadata } from '../collector/SymbolMetadata';
 import { StringWriter } from './StringWriter';
 import { DtsEmitHelpers } from './DtsEmitHelpers';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
-import { AstImportAsModule } from '../analyzer/AstImportAsModule';
+import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 import { AstModuleExportInfo } from '../analyzer/AstModule';
 
 /**
@@ -146,7 +146,7 @@ export class DtsRollupGenerator {
         }
       }
 
-      if (entity.astEntity instanceof AstImportAsModule) {
+      if (entity.astEntity instanceof AstNamespaceImport) {
         const astModuleExportInfo: AstModuleExportInfo = collector.astSymbolTable.fetchAstModuleExportInfo(
           entity.astEntity.astModule
         );

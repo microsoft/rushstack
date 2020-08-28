@@ -12,7 +12,7 @@
  *   - AstSymbol
  *   - AstSyntheticEntity
  *     - AstImport
- *     - AstImportAsModule
+ *     - AstNamespaceImport
  * ```
  */
 export abstract class AstEntity {

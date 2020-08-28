@@ -24,7 +24,7 @@ import { TypeScriptInternals, IGlobalVariableAnalyzer } from '../analyzer/TypeSc
 import { MessageRouter } from './MessageRouter';
 import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
 import { ExtractorConfig } from '../api/ExtractorConfig';
-import { AstImportAsModule } from '../analyzer/AstImportAsModule';
+import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 import { AstImport } from '../analyzer/AstImport';
 
 /**
@@ -439,7 +439,7 @@ export class Collector {
       });
     }
 
-    if (astEntity instanceof AstImportAsModule) {
+    if (astEntity instanceof AstNamespaceImport) {
       const astModuleExportInfo: AstModuleExportInfo = this.astSymbolTable.fetchAstModuleExportInfo(
         astEntity.astModule
       );
@@ -876,7 +876,7 @@ export class Collector {
       return this._collectReferenceDirectivesFromSourceFiles(sourceFiles);
     }
 
-    if (astEntity instanceof AstImportAsModule) {
+    if (astEntity instanceof AstNamespaceImport) {
       const sourceFiles: ts.SourceFile[] = [astEntity.astModule.sourceFile];
       return this._collectReferenceDirectivesFromSourceFiles(sourceFiles);
     }

@@ -4,13 +4,13 @@
 import { AstModule } from './AstModule';
 import { AstSyntheticEntity } from './AstEntity';
 
-export interface IAstImportAsModuleOptions {
+export interface IAstNamespaceImportOptions {
   readonly astModule: AstModule;
   readonly namespaceName: string;
 }
 
 /**
- * `AstImportAsModule` represents a namespace that is created implicitly by a statement
+ * `AstNamespaceImport` represents a namespace that is created implicitly by a statement
  * such as `import * as example from "./file";`
  *
  * @remarks
@@ -37,9 +37,9 @@ export interface IAstImportAsModuleOptions {
  *
  * The current implementation does not attempt to relocate f1()/f2() to be inside the `namespace`
  * because other type signatures may reference them directly (without using the namespace qualifier).
- * The `declare namespace example` is a synthetic construct represented by `AstImportAsModule`.
+ * The `declare namespace example` is a synthetic construct represented by `AstNamespaceImport`.
  */
-export class AstImportAsModule extends AstSyntheticEntity {
+export class AstNamespaceImport extends AstSyntheticEntity {
   /**
    * Returns true if the AstSymbolTable.analyze() was called for this object.
    * See that function for details.
@@ -58,7 +58,7 @@ export class AstImportAsModule extends AstSyntheticEntity {
    */
   public readonly namespaceName: string;
 
-  public constructor(options: IAstImportAsModuleOptions) {
+  public constructor(options: IAstNamespaceImportOptions) {
     super();
     this.astModule = options.astModule;
     this.namespaceName = options.namespaceName;

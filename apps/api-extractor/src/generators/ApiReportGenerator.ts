@@ -16,7 +16,7 @@ import { AstSymbol } from '../analyzer/AstSymbol';
 import { ExtractorMessage } from '../api/ExtractorMessage';
 import { StringWriter } from './StringWriter';
 import { DtsEmitHelpers } from './DtsEmitHelpers';
-import { AstImportAsModule } from '../analyzer/AstImportAsModule';
+import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 
 export class ApiReportGenerator {
   private static _trimSpacesRegExp: RegExp = / +$/gm;
@@ -127,7 +127,7 @@ export class ApiReportGenerator {
           }
         }
 
-        if (entity.astEntity instanceof AstImportAsModule) {
+        if (entity.astEntity instanceof AstNamespaceImport) {
           throw new Error(
             '"import * as ___ from ___;" is not supported for local files when generating report.' +
               '\nFailure in: ' +
@@ -182,9 +182,9 @@ export class ApiReportGenerator {
     return stringWriter.toString().replace(ApiReportGenerator._trimSpacesRegExp, '');
   }
 
-  private static _getSourceFilePath(importAsModule: AstImportAsModule): string {
+  private static _getSourceFilePath(namespaceImport: AstNamespaceImport): string {
     const fallback: string = 'unknown source file';
-    const { astModule } = importAsModule;
+    const { astModule } = namespaceImport;
 
     if (astModule === undefined || astModule.sourceFile === undefined) {
       return fallback;

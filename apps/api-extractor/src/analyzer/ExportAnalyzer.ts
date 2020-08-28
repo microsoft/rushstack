@@ -12,7 +12,7 @@ import { TypeScriptInternals } from './TypeScriptInternals';
 import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
 import { IFetchAstSymbolOptions } from './AstSymbolTable';
 import { AstEntity } from './AstEntity';
-import { AstImportAsModule } from './AstImportAsModule';
+import { AstNamespaceImport } from './AstNamespaceImport';
 
 /**
  * Exposes the minimal APIs from AstSymbolTable that are needed by ExportAnalyzer.
@@ -74,7 +74,7 @@ export class ExportAnalyzer {
   private readonly _importableAmbientSourceFiles: Set<ts.SourceFile> = new Set<ts.SourceFile>();
 
   private readonly _astImportsByKey: Map<string, AstImport> = new Map<string, AstImport>();
-  private readonly _astImportAsModuleByModule: Map<AstModule, AstImportAsModule> = new Map();
+  private readonly _astNamespaceImportByModule: Map<AstModule, AstNamespaceImport> = new Map();
 
   public constructor(
     program: ts.Program,
@@ -328,7 +328,7 @@ export class ExportAnalyzer {
                     this._astSymbolTable.analyze(astEntity);
                   }
 
-                  if (astEntity instanceof AstImportAsModule && !astEntity.astModule.isExternal) {
+                  if (astEntity instanceof AstNamespaceImport && !astEntity.astModule.isExternal) {
                     this._astSymbolTable.analyze(astEntity);
                   }
 
@@ -494,15 +494,17 @@ export class ExportAnalyzer {
 
         if (externalModulePath === undefined) {
           const astModule: AstModule = this._fetchSpecifierAstModule(importDeclaration, declarationSymbol);
-          let importAsModule: AstImportAsModule | undefined = this._astImportAsModuleByModule.get(astModule);
-          if (importAsModule === undefined) {
-            importAsModule = new AstImportAsModule({
+          let namespaceImport: AstNamespaceImport | undefined = this._astNamespaceImportByModule.get(
+            astModule
+          );
+          if (namespaceImport === undefined) {
+            namespaceImport = new AstNamespaceImport({
               namespaceName: declarationSymbol.name,
               astModule: astModule
             });
-            this._astImportAsModuleByModule.set(astModule, importAsModule);
+            this._astNamespaceImportByModule.set(astModule, namespaceImport);
           }
-          return importAsModule;
+          return namespaceImport;
         }
 
         // Here importSymbol=undefined because {@inheritDoc} and such are not going to work correctly for

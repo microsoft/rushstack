@@ -12,7 +12,7 @@ import { SymbolMetadata } from '../collector/SymbolMetadata';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
-import { AstImportAsModule } from '../analyzer/AstImportAsModule';
+import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 
 export class ValidationEnhancer {
   public static analyze(collector: Collector): void {
@@ -31,7 +31,7 @@ export class ValidationEnhancer {
         }
       }
 
-      if (entity.astEntity instanceof AstImportAsModule) {
+      if (entity.astEntity instanceof AstNamespaceImport) {
         // TODO [MA]: validation for local module import
       }
     }
@@ -217,7 +217,7 @@ export class ValidationEnhancer {
         }
       }
 
-      if (referencedEntity instanceof AstImportAsModule) {
+      if (referencedEntity instanceof AstNamespaceImport) {
         // TODO [MA]: add validation for local import
       }
     }
