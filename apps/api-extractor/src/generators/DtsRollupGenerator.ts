@@ -161,7 +161,7 @@ export class DtsRollupGenerator {
           // We could support this, but we would need to find a way to safely represent it.
           throw new Error(
             `The ${entity.nameForEmit} namespace import includes a start export, which is not supported:\n` +
-              +SourceFileLocationFormatter.formatDeclaration(astEntity.declaration)
+              SourceFileLocationFormatter.formatDeclaration(astEntity.declaration)
           );
         }
 
