@@ -33,7 +33,7 @@
     "@microsoft/rush-stack-compiler-3.5": "workspace:*",
     "@microsoft/rush-stack-compiler-shared": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "0.6.5",
+    "@rushstack/heft": "0.8.0",
     "@rushstack/pre-compile-hardlink-or-copy-plugin": "workspace:*"
   }
 }
