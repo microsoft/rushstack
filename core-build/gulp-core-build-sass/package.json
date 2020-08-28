@@ -32,7 +32,7 @@
     "@types/autoprefixer": "9.7.2",
     "@types/clean-css": "4.2.1",
     "@types/glob": "7.1.1",
-    "@types/heft-jest": "1.0.1",
+    "@types/jest": "25.2.1",
     "@types/node-sass": "4.11.1",
     "gulp": "~4.0.2",
     "jest": "~25.4.0"
