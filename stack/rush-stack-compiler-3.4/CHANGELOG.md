@@ -1,6 +1,99 @@
 # Change Log - @microsoft/rush-stack-compiler-3.4
 
-This log was last generated on Mon, 01 Jun 2020 08:34:17 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Aug 2020 11:27:06 GMT and should not be manually modified.
+
+## 0.8.10
+Thu, 27 Aug 2020 11:27:06 GMT
+
+*Version update only*
+
+## 0.8.9
+Mon, 24 Aug 2020 07:35:20 GMT
+
+*Version update only*
+
+## 0.8.8
+Sat, 22 Aug 2020 05:55:43 GMT
+
+*Version update only*
+
+## 0.8.7
+Fri, 21 Aug 2020 01:21:18 GMT
+
+*Version update only*
+
+## 0.8.6
+Thu, 20 Aug 2020 15:13:53 GMT
+
+*Version update only*
+
+## 0.8.5
+Tue, 18 Aug 2020 23:59:42 GMT
+
+*Version update only*
+
+## 0.8.4
+Mon, 17 Aug 2020 04:53:23 GMT
+
+*Version update only*
+
+## 0.8.3
+Wed, 12 Aug 2020 00:10:05 GMT
+
+### Patches
+
+- Updated project to build with Heft
+
+## 0.8.2
+Wed, 05 Aug 2020 18:27:33 GMT
+
+*Version update only*
+
+## 0.8.1
+Fri, 03 Jul 2020 15:09:04 GMT
+
+*Version update only*
+
+## 0.8.0
+Fri, 03 Jul 2020 05:46:41 GMT
+
+### Minor changes
+
+- Disable the "--typescript-compiler-folder" setting for API Extractor, since it was causing errors with the latest TypeScript engine
+
+## 0.7.2
+Thu, 25 Jun 2020 06:43:35 GMT
+
+*Version update only*
+
+## 0.7.1
+Wed, 24 Jun 2020 09:50:48 GMT
+
+*Version update only*
+
+## 0.7.0
+Wed, 24 Jun 2020 09:04:28 GMT
+
+### Minor changes
+
+- Upgrade to ESLint 7
+
+## 0.6.1
+Mon, 15 Jun 2020 22:17:18 GMT
+
+*Version update only*
+
+## 0.6.0
+Fri, 12 Jun 2020 09:19:21 GMT
+
+### Minor changes
+
+- Expose the @microsoft/api-extractor package's path
+
+## 0.5.3
+Wed, 10 Jun 2020 20:48:30 GMT
+
+*Version update only*
 
 ## 0.5.2
 Mon, 01 Jun 2020 08:34:17 GMT

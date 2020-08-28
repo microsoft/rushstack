@@ -22,8 +22,10 @@ export const enum ConsoleMessageId {
     ApiReportFolderMissing = "console-api-report-folder-missing",
     ApiReportNotCopied = "console-api-report-not-copied",
     ApiReportUnchanged = "console-api-report-unchanged",
+    CompilerVersionNotice = "console-compiler-version-notice",
     Diagnostics = "console-diagnostics",
     FoundTSDocMetadata = "console-found-tsdoc-metadata",
+    Preamble = "console-preamble",
     WritingDocModelFile = "console-writing-doc-model-file",
     WritingDtsRollup = "console-writing-dts-rollup"
 }

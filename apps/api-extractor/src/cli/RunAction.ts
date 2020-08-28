@@ -138,7 +138,7 @@ export class RunAction extends CommandLineAction {
         }
       }
 
-      console.log(`Using configuration from ${configFilename}` + os.EOL);
+      console.log(`Using configuration from ${configFilename}`);
     }
 
     const configObjectFullPath: string = path.resolve(configFilename);

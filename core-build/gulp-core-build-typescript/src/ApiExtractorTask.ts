@@ -5,7 +5,7 @@ import * as path from 'path';
 import { IBuildConfig } from '@microsoft/gulp-core-build';
 import { JsonFile, FileSystem, JsonObject } from '@rushstack/node-core-library';
 import { ExtractorConfig, IExtractorInvokeOptions } from '@microsoft/api-extractor';
-import { ApiExtractorRunner as TApiExtractorRunner } from '@microsoft/rush-stack-compiler-3.1';
+import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.1';
 
 import { RSCTask, IRSCTaskConfig } from './RSCTask';
 
@@ -38,12 +38,12 @@ export class ApiExtractorTask extends RSCTask<IApiExtractorTaskConfig> {
       localBuild: !this.buildConfig.production
     };
 
-    const ApiExtractorRunner: typeof TApiExtractorRunner = this._rushStackCompiler.ApiExtractorRunner;
-    const extractorConfig: ExtractorConfig = this._rushStackCompiler.ApiExtractor.ExtractorConfig.loadFileAndPrepare(
+    const rushStackCompiler: typeof TRushStackCompiler = this._rushStackCompiler as typeof TRushStackCompiler;
+    const extractorConfig: ExtractorConfig = rushStackCompiler.ApiExtractor.ExtractorConfig.loadFileAndPrepare(
       this._getApiExtractorConfigFilePath(this.buildConfig.rootPath)
     );
 
-    const apiExtractorRunner: TApiExtractorRunner = new ApiExtractorRunner(
+    const apiExtractorRunner: TRushStackCompiler.ApiExtractorRunner = new rushStackCompiler.ApiExtractorRunner(
       {
         fileError: this.fileError.bind(this),
         fileWarning: this.fileWarning.bind(this)

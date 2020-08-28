@@ -86,7 +86,7 @@ export class PublishGit {
   }
 
   public commit(commitMessage: string): void {
-    PublishUtilities.execCommand(!!this._targetBranch, 'git', ['commit', '-m', commitMessage]);
+    PublishUtilities.execCommand(!!this._targetBranch, 'git', ['commit', '-m', commitMessage, '--no-verify']);
   }
 
   public push(branchName: string | undefined): void {

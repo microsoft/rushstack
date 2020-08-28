@@ -1,6 +1,142 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Mon, 01 Jun 2020 08:34:17 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Aug 2020 11:27:06 GMT and should not be manually modified.
+
+## 7.8.36
+Thu, 27 Aug 2020 11:27:06 GMT
+
+*Version update only*
+
+## 7.8.35
+Tue, 25 Aug 2020 00:10:12 GMT
+
+*Version update only*
+
+## 7.8.34
+Mon, 24 Aug 2020 07:35:20 GMT
+
+*Version update only*
+
+## 7.8.33
+Sat, 22 Aug 2020 05:55:42 GMT
+
+*Version update only*
+
+## 7.8.32
+Fri, 21 Aug 2020 01:21:17 GMT
+
+*Version update only*
+
+## 7.8.31
+Thu, 20 Aug 2020 18:41:47 GMT
+
+*Version update only*
+
+## 7.8.30
+Thu, 20 Aug 2020 15:13:52 GMT
+
+*Version update only*
+
+## 7.8.29
+Tue, 18 Aug 2020 23:59:42 GMT
+
+*Version update only*
+
+## 7.8.28
+Tue, 18 Aug 2020 03:03:23 GMT
+
+*Version update only*
+
+## 7.8.27
+Mon, 17 Aug 2020 05:31:53 GMT
+
+*Version update only*
+
+## 7.8.26
+Mon, 17 Aug 2020 04:53:23 GMT
+
+### Patches
+
+- Fix an issue where an error was sometimes incorrectly reported: "The constructed subclass was not an instance of MarkdownDocumenterFeature"
+
+## 7.8.25
+Thu, 13 Aug 2020 09:26:39 GMT
+
+*Version update only*
+
+## 7.8.24
+Thu, 13 Aug 2020 04:57:38 GMT
+
+*Version update only*
+
+## 7.8.23
+Wed, 12 Aug 2020 00:10:05 GMT
+
+### Patches
+
+- Updated project to build with Heft
+
+## 7.8.22
+Wed, 05 Aug 2020 18:27:32 GMT
+
+*Version update only*
+
+## 7.8.21
+Fri, 03 Jul 2020 15:09:04 GMT
+
+*Version update only*
+
+## 7.8.20
+Fri, 03 Jul 2020 05:46:41 GMT
+
+*Version update only*
+
+## 7.8.19
+Sat, 27 Jun 2020 00:09:38 GMT
+
+*Version update only*
+
+## 7.8.18
+Fri, 26 Jun 2020 22:16:39 GMT
+
+*Version update only*
+
+## 7.8.17
+Thu, 25 Jun 2020 06:43:35 GMT
+
+*Version update only*
+
+## 7.8.16
+Wed, 24 Jun 2020 09:50:48 GMT
+
+*Version update only*
+
+## 7.8.15
+Wed, 24 Jun 2020 09:04:28 GMT
+
+*Version update only*
+
+## 7.8.14
+Sun, 21 Jun 2020 04:21:01 GMT
+
+### Patches
+
+- Improve the Markdown target to show hyperlinked "extends" and "implements" types for class and interface APIs
+
+## 7.8.13
+Mon, 15 Jun 2020 22:17:17 GMT
+
+*Version update only*
+
+## 7.8.12
+Fri, 12 Jun 2020 09:19:21 GMT
+
+*Version update only*
+
+## 7.8.11
+Wed, 10 Jun 2020 20:48:30 GMT
+
+*Version update only*
 
 ## 7.8.10
 Mon, 01 Jun 2020 08:34:17 GMT

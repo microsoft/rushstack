@@ -93,9 +93,15 @@ export function runScenarios(buildConfigPath: string): void {
       localBuild: true,
       showVerboseMessages: true,
       messageCallback: (message: ExtractorMessage) => {
-        if (message.messageId === ConsoleMessageId.ApiReportCreated) {
-          // This script deletes the outputs for a clean build, so don't issue a warning if the file gets created
-          message.logLevel = ExtractorLogLevel.None;
+        switch (message.messageId) {
+          case ConsoleMessageId.ApiReportCreated:
+            // This script deletes the outputs for a clean build, so don't issue a warning if the file gets created
+            message.logLevel = ExtractorLogLevel.None;
+            break;
+          case ConsoleMessageId.Preamble:
+            // Less verbose output
+            message.logLevel = ExtractorLogLevel.None;
+            break;
         }
       },
       compilerState

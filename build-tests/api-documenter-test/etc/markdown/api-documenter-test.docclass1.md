@@ -11,6 +11,9 @@ This is an example class.
 ```typescript
 export declare class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInterface2 
 ```
+<b>Extends:</b> [DocBaseClass](./api-documenter-test.docbaseclass.md)
+
+<b>Implements:</b> [IDocInterface1](./api-documenter-test.idocinterface1.md)<!-- -->, [IDocInterface2](./api-documenter-test.idocinterface2.md)
 
 ## Remarks
 

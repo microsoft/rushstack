@@ -182,7 +182,7 @@ export class MessageRouter {
         return; // ignore noise
     }
 
-    const messageText: string = `${diagnostic.messageText}`;
+    const messageText: string = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
     const options: IExtractorMessageOptions = {
       category: ExtractorMessageCategory.Compiler,
       messageId: `TS${diagnostic.code}`,
@@ -276,7 +276,6 @@ export class MessageRouter {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static buildJsonDumpObject(input: any): any | undefined {
     if (input === null || input === undefined) {
-      // eslint-disable-next-line @rushstack/no-null
       return null; // JSON uses null instead of undefined
     }
 

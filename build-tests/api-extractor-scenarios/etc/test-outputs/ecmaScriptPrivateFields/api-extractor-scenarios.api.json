@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "toolPackage": "@microsoft/api-extractor",
+    "toolVersion": "[test mode]",
+    "schemaVersion": 1003,
+    "oldestForwardsCompatibleVersion": 1001
+  },
+  "kind": "Package",
+  "canonicalReference": "api-extractor-scenarios!",
+  "docComment": "",
+  "name": "api-extractor-scenarios",
+  "members": [
+    {
+      "kind": "EntryPoint",
+      "canonicalReference": "api-extractor-scenarios!",
+      "name": "",
+      "members": [
+        {
+          "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!Example:class",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare class Example "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "Example",
+          "members": [],
+          "implementsTokenRanges": []
+        }
+      ]
+    }
+  ]
+}

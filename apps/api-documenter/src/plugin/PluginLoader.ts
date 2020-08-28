@@ -30,7 +30,6 @@ export class PluginLoader {
         });
 
         // Load the package
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const entryPoint: object | undefined = require(resolvedEntryPointPath);
 
         if (!entryPoint) {

@@ -89,7 +89,6 @@ export class RushVersionSelector {
         require(path.join(expectedRushPath, 'node_modules', '@microsoft', 'rush', 'lib', 'start'));
       } else {
         // For newer rush-lib, RushCommandSelector can test whether "rushx" is supported or not
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const rushCliEntrypoint: {} = require(path.join(
           expectedRushPath,
           'node_modules',

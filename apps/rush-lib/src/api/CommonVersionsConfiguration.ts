@@ -1,13 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as crypto from 'crypto';
 import * as path from 'path';
 import {
   JsonFile,
   JsonSchema,
   MapExtensions,
   ProtectableMap,
-  FileSystem
+  FileSystem,
+  Sort
 } from '@rushstack/node-core-library';
 import { PackageNameParsers } from './PackageNameParsers';
 import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
@@ -146,6 +148,23 @@ export class CommonVersionsConfiguration {
    */
   public get filePath(): string {
     return this._filePath;
+  }
+
+  /**
+   * Get a sha1 hash of the preferred versions.
+   */
+  public getPreferredVersionsHash(): string {
+    // Sort so that the hash is stable
+    const orderedPreferredVersions: Map<string, string> = new Map<string, string>(
+      this._preferredVersions.protectedView
+    );
+    Sort.sortMapKeys(orderedPreferredVersions);
+
+    // JSON.stringify does not support maps, so we need to convert to an object first
+    const preferredVersionsObj: { [dependency: string]: string } = MapExtensions.toObject(
+      orderedPreferredVersions
+    );
+    return crypto.createHash('sha1').update(JSON.stringify(preferredVersionsObj)).digest('hex');
   }
 
   /**

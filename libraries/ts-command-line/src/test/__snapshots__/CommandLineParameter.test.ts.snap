@@ -1,5 +1,39 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`CommandLineParameter allows an undocumented synonym 1`] = `
+Array [
+  "### --choice output: ###",
+  "--choice",
+  "one",
+  "### --choice-with-default output: ###",
+  "--choice-with-default",
+  "two",
+  "### --flag output: ###",
+  "--flag",
+  "### --integer output: ###",
+  "--integer",
+  "111",
+  "### --integer-with-default output: ###",
+  "--integer-with-default",
+  "222",
+  "### --integer-required output: ###",
+  "--integer-required",
+  "6",
+  "### --string output: ###",
+  "--string",
+  "Hello, world!",
+  "### --string-with-default output: ###",
+  "--string-with-default",
+  "Hello, world!",
+  "### --string-with-undocumented-synonym output: ###",
+  "--string-with-undocumented-synonym",
+  "undocumented-value",
+  "### --string-list output: ###",
+  "--string-list",
+  "simple text",
+]
+`;
+
 exports[`CommandLineParameter parses an input with ALL parameters 1`] = `
 Object {
   "argumentName": undefined,
@@ -178,6 +212,7 @@ Array [
   "### --string-with-default output: ###",
   "--string-with-default",
   "123",
+  "### --string-with-undocumented-synonym output: ###",
   "### --string-list output: ###",
   "--string-list",
   "first",
@@ -354,6 +389,7 @@ Array [
   "### --string-with-default output: ###",
   "--string-with-default",
   "123",
+  "### --string-with-undocumented-synonym output: ###",
   "### --string-list output: ###",
 ]
 `;
@@ -383,6 +419,7 @@ Array [
   "### --string-with-default output: ###",
   "--string-with-default",
   "Hello, world!",
+  "### --string-with-undocumented-synonym output: ###",
   "### --string-list output: ###",
   "--string-list",
   "simple text",
@@ -401,7 +438,9 @@ exports[`CommandLineParameter prints the action help 1`] = `
                           [--choice-with-default {one,two,three,default}] [-f]
                           [-i NUMBER] [--integer-with-default NUMBER]
                           --integer-required NUMBER [-s TEXT]
-                          [--string-with-default TEXT] [-l LIST_ITEM]
+                          [--string-with-default TEXT]
+                          [--string-with-undocumented-synonym TEXT]
+                          [-l LIST_ITEM]
                           
 
 a longer description
@@ -434,6 +473,8 @@ Optional arguments:
                         A string with a default. This parameter may 
                         alternatively be specified via the ENV_STRING2 
                         environment variable. The default value is \\"123\\".
+  --string-with-undocumented-synonym TEXT
+                        A string with an undocumented synonym
   -l LIST_ITEM, --string-list LIST_ITEM
                         This parameter be specified multiple times to make a 
                         list of strings. This parameter may alternatively be 

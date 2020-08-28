@@ -3,13 +3,20 @@
 
 import * as os from 'os';
 import * as semver from 'semver';
-
+import { Import } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { PackageJsonUpdater, SemVerStyle } from '../../logic/PackageJsonUpdater';
+import { DependencySpecifier } from '../../logic/DependencySpecifier';
+
+// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
+import * as PackageJsonUpdaterTypes from '../../logic/PackageJsonUpdater';
+const packageJsonUpdaterModule: typeof PackageJsonUpdaterTypes = Import.lazy(
+  '../../logic/PackageJsonUpdater',
+  require
+);
 
 export class AddAction extends BaseRushAction {
   private _allFlag: CommandLineFlagParameter;
@@ -25,9 +32,9 @@ export class AddAction extends BaseRushAction {
       'Adds a specified package as a dependency of the current project (as determined by the current working directory)' +
         ' and then runs "rush update". If no version is specified, a version will be automatically detected (typically' +
         ' either the latest version or a version that won\'t break the "ensureConsistentVersions" policy). If a version' +
-        ' range is specified, the latest version in the range will be used. The version will be automatically prepended' +
-        ' with a tilde, unless the "--exact" or "--caret" flags are used. The "--make-consistent" flag can be used to' +
-        ' update all packages with the dependency.'
+        ' range (or a workspace range) is specified, the latest version in the range will be used. The version will be' +
+        ' automatically prepended with a tilde, unless the "--exact" or "--caret" flags are used. The "--make-consistent"' +
+        ' flag can be used to update all packages with the dependency.'
     ];
     super({
       actionName: 'add',
@@ -86,7 +93,7 @@ export class AddAction extends BaseRushAction {
     });
   }
 
-  public async run(): Promise<void> {
+  public async runAsync(): Promise<void> {
     let projects: RushConfigurationProject[];
     if (this._allFlag.value) {
       projects = this.rushConfiguration.projects;
@@ -128,13 +135,19 @@ export class AddAction extends BaseRushAction {
       throw new Error(`The package name "${packageName}" is not valid.`);
     }
 
-    if (version && version !== 'latest' && !semver.validRange(version) && !semver.valid(version)) {
-      throw new Error(`The SemVer specifier "${version}" is not valid.`);
+    if (version && version !== 'latest') {
+      const specifier: DependencySpecifier = new DependencySpecifier(packageName, version);
+      if (!semver.validRange(specifier.versionSpecifier) && !semver.valid(specifier.versionSpecifier)) {
+        throw new Error(`The SemVer specifier "${version}" is not valid.`);
+      }
     }
 
-    const updater: PackageJsonUpdater = new PackageJsonUpdater(this.rushConfiguration, this.rushGlobalFolder);
+    const updater: PackageJsonUpdaterTypes.PackageJsonUpdater = new packageJsonUpdaterModule.PackageJsonUpdater(
+      this.rushConfiguration,
+      this.rushGlobalFolder
+    );
 
-    let rangeStyle: SemVerStyle;
+    let rangeStyle: PackageJsonUpdaterTypes.SemVerStyle;
     if (version && version !== 'latest') {
       if (this._exactFlag.value || this._caretFlag.value) {
         throw new Error(
@@ -143,13 +156,13 @@ export class AddAction extends BaseRushAction {
         );
       }
 
-      rangeStyle = SemVerStyle.Passthrough;
+      rangeStyle = PackageJsonUpdaterTypes.SemVerStyle.Passthrough;
     } else {
       rangeStyle = this._caretFlag.value
-        ? SemVerStyle.Caret
+        ? PackageJsonUpdaterTypes.SemVerStyle.Caret
         : this._exactFlag.value
-        ? SemVerStyle.Exact
-        : SemVerStyle.Tilde;
+        ? PackageJsonUpdaterTypes.SemVerStyle.Exact
+        : PackageJsonUpdaterTypes.SemVerStyle.Tilde;
     }
 
     await updater.doRushAdd({

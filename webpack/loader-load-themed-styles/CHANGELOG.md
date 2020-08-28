@@ -1,6 +1,133 @@
 # Change Log - @microsoft/loader-load-themed-styles
 
-This log was last generated on Mon, 01 Jun 2020 08:34:17 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Aug 2020 11:27:06 GMT and should not be manually modified.
+
+## 1.8.47
+Thu, 27 Aug 2020 11:27:06 GMT
+
+*Version update only*
+
+## 1.8.46
+Tue, 25 Aug 2020 00:10:12 GMT
+
+*Version update only*
+
+## 1.8.45
+Mon, 24 Aug 2020 07:35:21 GMT
+
+*Version update only*
+
+## 1.8.44
+Sat, 22 Aug 2020 05:55:43 GMT
+
+*Version update only*
+
+## 1.8.43
+Fri, 21 Aug 2020 01:21:18 GMT
+
+*Version update only*
+
+## 1.8.42
+Thu, 20 Aug 2020 18:41:47 GMT
+
+*Version update only*
+
+## 1.8.41
+Thu, 20 Aug 2020 15:13:53 GMT
+
+*Version update only*
+
+## 1.8.40
+Tue, 18 Aug 2020 23:59:42 GMT
+
+*Version update only*
+
+## 1.8.39
+Tue, 18 Aug 2020 03:03:24 GMT
+
+*Version update only*
+
+## 1.8.38
+Mon, 17 Aug 2020 05:31:53 GMT
+
+*Version update only*
+
+## 1.8.37
+Mon, 17 Aug 2020 04:53:23 GMT
+
+*Version update only*
+
+## 1.8.36
+Thu, 13 Aug 2020 09:26:40 GMT
+
+*Version update only*
+
+## 1.8.35
+Thu, 13 Aug 2020 04:57:38 GMT
+
+*Version update only*
+
+## 1.8.34
+Wed, 12 Aug 2020 00:10:05 GMT
+
+### Patches
+
+- Updated project to build with Heft
+
+## 1.8.33
+Wed, 05 Aug 2020 18:27:32 GMT
+
+*Version update only*
+
+## 1.8.32
+Fri, 03 Jul 2020 15:09:04 GMT
+
+*Version update only*
+
+## 1.8.31
+Fri, 03 Jul 2020 05:46:42 GMT
+
+*Version update only*
+
+## 1.8.30
+Sat, 27 Jun 2020 00:09:38 GMT
+
+*Version update only*
+
+## 1.8.29
+Fri, 26 Jun 2020 22:16:39 GMT
+
+*Version update only*
+
+## 1.8.28
+Thu, 25 Jun 2020 06:43:35 GMT
+
+*Version update only*
+
+## 1.8.27
+Wed, 24 Jun 2020 09:50:48 GMT
+
+*Version update only*
+
+## 1.8.26
+Wed, 24 Jun 2020 09:04:28 GMT
+
+*Version update only*
+
+## 1.8.25
+Mon, 15 Jun 2020 22:17:18 GMT
+
+*Version update only*
+
+## 1.8.24
+Fri, 12 Jun 2020 09:19:21 GMT
+
+*Version update only*
+
+## 1.8.23
+Wed, 10 Jun 2020 20:48:30 GMT
+
+*Version update only*
 
 ## 1.8.22
 Mon, 01 Jun 2020 08:34:17 GMT

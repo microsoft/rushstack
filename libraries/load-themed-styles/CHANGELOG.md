@@ -1,6 +1,133 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Mon, 01 Jun 2020 08:34:17 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Aug 2020 11:27:06 GMT and should not be manually modified.
+
+## 1.10.80
+Thu, 27 Aug 2020 11:27:06 GMT
+
+*Version update only*
+
+## 1.10.79
+Tue, 25 Aug 2020 00:10:12 GMT
+
+*Version update only*
+
+## 1.10.78
+Mon, 24 Aug 2020 07:35:20 GMT
+
+*Version update only*
+
+## 1.10.77
+Sat, 22 Aug 2020 05:55:42 GMT
+
+*Version update only*
+
+## 1.10.76
+Fri, 21 Aug 2020 01:21:18 GMT
+
+*Version update only*
+
+## 1.10.75
+Thu, 20 Aug 2020 18:41:47 GMT
+
+*Version update only*
+
+## 1.10.74
+Thu, 20 Aug 2020 15:13:52 GMT
+
+*Version update only*
+
+## 1.10.73
+Tue, 18 Aug 2020 23:59:42 GMT
+
+*Version update only*
+
+## 1.10.72
+Tue, 18 Aug 2020 03:03:23 GMT
+
+*Version update only*
+
+## 1.10.71
+Mon, 17 Aug 2020 05:31:53 GMT
+
+*Version update only*
+
+## 1.10.70
+Mon, 17 Aug 2020 04:53:23 GMT
+
+*Version update only*
+
+## 1.10.69
+Thu, 13 Aug 2020 09:26:39 GMT
+
+*Version update only*
+
+## 1.10.68
+Thu, 13 Aug 2020 04:57:38 GMT
+
+*Version update only*
+
+## 1.10.67
+Wed, 12 Aug 2020 00:10:05 GMT
+
+### Patches
+
+- Updated project to build with Heft
+
+## 1.10.66
+Wed, 05 Aug 2020 18:27:32 GMT
+
+*Version update only*
+
+## 1.10.65
+Fri, 03 Jul 2020 15:09:04 GMT
+
+*Version update only*
+
+## 1.10.64
+Fri, 03 Jul 2020 05:46:42 GMT
+
+*Version update only*
+
+## 1.10.63
+Sat, 27 Jun 2020 00:09:38 GMT
+
+*Version update only*
+
+## 1.10.62
+Fri, 26 Jun 2020 22:16:39 GMT
+
+*Version update only*
+
+## 1.10.61
+Thu, 25 Jun 2020 06:43:35 GMT
+
+*Version update only*
+
+## 1.10.60
+Wed, 24 Jun 2020 09:50:48 GMT
+
+*Version update only*
+
+## 1.10.59
+Wed, 24 Jun 2020 09:04:28 GMT
+
+*Version update only*
+
+## 1.10.58
+Mon, 15 Jun 2020 22:17:18 GMT
+
+*Version update only*
+
+## 1.10.57
+Fri, 12 Jun 2020 09:19:21 GMT
+
+*Version update only*
+
+## 1.10.56
+Wed, 10 Jun 2020 20:48:30 GMT
+
+*Version update only*
 
 ## 1.10.55
 Mon, 01 Jun 2020 08:34:17 GMT

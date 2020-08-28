@@ -36,7 +36,7 @@ const _returnTypeExcerpt: unique symbol = Symbol('ApiReturnTypeMixin._returnType
  *
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface ApiReturnTypeMixin extends ApiItem {
   /**
    * An {@link Excerpt} that describes the type of the function's return value.

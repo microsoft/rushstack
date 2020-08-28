@@ -6,10 +6,7 @@ import { JsonFile, FileSystem, LegacyAdapters, JsonObject } from '@rushstack/nod
 import * as glob from 'glob';
 import * as globEscape from 'glob-escape';
 import * as decomment from 'decomment';
-import {
-  TypescriptCompiler as TTypescriptCompiler,
-  Typescript as TTypescript
-} from '@microsoft/rush-stack-compiler-3.1';
+import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.1';
 
 import { RSCTask, IRSCTaskConfig } from './RSCTask';
 import { TsParseConfigHost } from './TsParseConfigHost';
@@ -87,7 +84,8 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
       })
     );
 
-    const typescriptCompiler: TTypescriptCompiler = new this._rushStackCompiler.TypescriptCompiler(
+    const rushStackCompiler: typeof TRushStackCompiler = this._rushStackCompiler as typeof TRushStackCompiler;
+    const typescriptCompiler: TRushStackCompiler.TypescriptCompiler = new rushStackCompiler.TypescriptCompiler(
       {
         customArgs: this.taskConfig.customArgs,
         fileError: this.fileError.bind(this),
@@ -107,7 +105,7 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
     });
 
     if (this.taskConfig.removeCommentsFromJavaScript === true) {
-      buildPromise = buildPromise.then(() => this._removeComments(this._rushStackCompiler.Typescript));
+      buildPromise = buildPromise.then(() => this._removeComments(rushStackCompiler.Typescript));
     }
 
     return buildPromise;
@@ -129,7 +127,7 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
     }
   }
 
-  private _removeComments(typescript: typeof TTypescript): Promise<void> {
+  private _removeComments(typescript: typeof TRushStackCompiler.Typescript): Promise<void> {
     const configFilePath: string | undefined = typescript.findConfigFile(
       this.buildConfig.rootPath,
       FileSystem.exists

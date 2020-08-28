@@ -72,7 +72,6 @@ export class ApiItem {
   public static deserialize(jsonObject: IApiItemJson, context: DeserializerContext): ApiItem {
     // The Deserializer class is coupled with a ton of other classes, so  we delay loading it
     // to avoid ES5 circular imports.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const deserializerModule: typeof import('../model/Deserializer') = require('../model/Deserializer');
     return deserializerModule.Deserializer.deserialize(context, jsonObject);
   }

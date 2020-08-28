@@ -8,8 +8,7 @@ import * as path from 'path';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseConfiglessRushAction } from './BaseRushAction';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
-import { FileSystem, NewlineKind, InternalError } from '@rushstack/node-core-library';
+import { FileSystem, NewlineKind, InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { Rush } from '../../api/Rush';
 
@@ -80,7 +79,7 @@ export class InitAction extends BaseConfiglessRushAction {
     });
   }
 
-  protected run(): Promise<void> {
+  protected runAsync(): Promise<void> {
     const initFolder: string = process.cwd();
 
     if (!this._overwriteParameter.value) {
@@ -160,11 +159,13 @@ export class InitAction extends BaseConfiglessRushAction {
       '[dot]gitignore',
       '[dot]travis.yml',
       'common/config/rush/[dot]npmrc',
+      'common/config/rush/[dot]npmrc-publish',
       'common/config/rush/command-line.json',
       'common/config/rush/common-versions.json',
       'common/config/rush/experiments.json',
       'common/config/rush/pnpmfile.js',
-      'common/config/rush/version-policies.json'
+      'common/config/rush/version-policies.json',
+      'common/git-hooks/commit-msg.sample'
     ];
 
     const assetsSubfolder: string = path.resolve(__dirname, '../../../assets/rush-init');

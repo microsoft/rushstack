@@ -201,7 +201,13 @@ export class PackageJsonEditor {
       this._onChange.bind(this)
     );
 
-    if (dependencyType === DependencyType.Regular || dependencyType === DependencyType.Optional) {
+    // Rush collapses everything that isn't a devDependency into the dependencies
+    // field, so we need to set the value dependening on dependency type
+    if (
+      dependencyType === DependencyType.Regular ||
+      dependencyType === DependencyType.Optional ||
+      dependencyType === DependencyType.Peer
+    ) {
       this._dependencies.set(packageName, dependency);
     } else {
       this._devDependencies.set(packageName, dependency);

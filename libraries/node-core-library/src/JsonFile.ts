@@ -21,6 +21,24 @@ import { FileSystem } from './FileSystem';
 export type JsonObject = any;
 
 /**
+ * The Rush Stack lint rules discourage usage of `null`.  However, JSON parsers always return JavaScript's
+ * `null` to keep the two syntaxes consistent.  When creating interfaces that describe JSON structures,
+ * use `JsonNull` to avoid triggering the lint rule.  Do not use `JsonNull` for any other purpose.
+ *
+ * @remarks
+ * If you are designing a new JSON file format, it's a good idea to avoid `null` entirely.  In most cases
+ * there are better representations that convey more information about an item that is unknown, omitted, or disabled.
+ *
+ * To understand why `null` is deprecated, please see the `@rushstack/eslint-plugin` documentation here:
+ *
+ * {@link https://www.npmjs.com/package/@rushstack/eslint-plugin#rushstackno-null}
+ *
+ * @public
+ */
+// eslint-disable-next-line @rushstack/no-new-null
+export type JsonNull = null;
+
+/**
  * Options for JsonFile.stringify()
  *
  * @public
@@ -36,6 +54,15 @@ export interface IJsonFileStringifyOptions {
    * Note that this is slightly slower than the native JSON.stringify() implementation.
    */
   prettyFormatting?: boolean;
+
+  /**
+   * If specified, this header will be prepended to the start of the file.  The header must consist
+   * of lines prefixed by "//" characters.
+   * @remarks
+   * When used with {@link IJsonFileSaveOptions.updateExistingFile}
+   * or {@link JsonFile.updateString}, the header will ONLY be added for a newly created file.
+   */
+  headerComment?: string;
 }
 
 /**
@@ -73,6 +100,11 @@ const DEFAULT_ENCODING: string = 'utf8';
  */
 export class JsonFile {
   /**
+   * @internal
+   */
+  public static _formatPathForError: (path: string) => string = (path: string) => path;
+
+  /**
    * Loads a JSON file.
    */
   public static load(jsonFilename: string): JsonObject {
@@ -83,7 +115,9 @@ export class JsonFile {
       if (FileSystem.isNotExistError(error)) {
         throw error;
       } else {
-        throw new Error(`Error reading "${jsonFilename}":` + os.EOL + `  ${error.message}`);
+        throw new Error(
+          `Error reading "${JsonFile._formatPathForError(jsonFilename)}":` + os.EOL + `  ${error.message}`
+        );
       }
     }
   }
@@ -99,7 +133,9 @@ export class JsonFile {
       if (FileSystem.isNotExistError(error)) {
         throw error;
       } else {
-        throw new Error(`Error reading "${jsonFilename}":` + os.EOL + `  ${error.message}`);
+        throw new Error(
+          `Error reading "${JsonFile._formatPathForError(jsonFilename)}":` + os.EOL + `  ${error.message}`
+        );
       }
     }
   }
@@ -209,8 +245,16 @@ export class JsonFile {
         mode: 'json',
         indent: 2
       });
+
+      if (options.headerComment !== undefined) {
+        stringified = JsonFile._formatJsonHeaderComment(options.headerComment) + stringified;
+      }
     } else {
       stringified = JSON.stringify(newJsonObject, undefined, 2);
+
+      if (options.headerComment !== undefined) {
+        stringified = JsonFile._formatJsonHeaderComment(options.headerComment) + stringified;
+      }
     }
 
     // Add the trailing newline
@@ -396,5 +440,24 @@ export class JsonFile {
       }
     }
     return result;
+  }
+
+  private static _formatJsonHeaderComment(headerComment: string): string {
+    if (headerComment === '') {
+      return '';
+    }
+    const lines: string[] = headerComment.split('\n');
+    const result: string[] = [];
+    for (const line of lines) {
+      if (!/^\s*$/.test(line) && !/^\s*\/\//.test(line)) {
+        throw new Error(
+          'The headerComment lines must be blank or start with the "//" prefix.\n' +
+            'Invalid line' +
+            JSON.stringify(line)
+        );
+      }
+      result.push(Text.replaceAll(line, '\r', ''));
+    }
+    return lines.join('\n') + '\n';
   }
 }

@@ -1,0 +1,16 @@
+{
+  "name": "heft-minimal-rig-usage-test",
+  "description": "A test project for Heft that resolves its compiler from the 'heft-minimal-rig-test' package",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft test --clean --verbose"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "@types/node": "10.17.13",
+    "heft-minimal-rig-test": "workspace:*"
+  }
+}

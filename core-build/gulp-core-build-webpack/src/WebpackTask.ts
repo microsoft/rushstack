@@ -75,9 +75,7 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
   }
 
   public isEnabled(buildConfig: IBuildConfig): boolean {
-    return (
-      super.isEnabled(buildConfig) && this.taskConfig.configPath !== null // eslint-disable-line @rushstack/no-null
-    );
+    return super.isEnabled(buildConfig) && this.taskConfig.configPath !== null;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

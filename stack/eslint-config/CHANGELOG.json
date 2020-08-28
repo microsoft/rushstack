@@ -2,6 +2,148 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "1.3.0",
+      "tag": "@rushstack/eslint-config_v1.3.0",
+      "date": "Thu, 27 Aug 2020 11:27:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Enable the \"@rushstack/hoist-jest-mock\" lint rule to catch a common mistake when using Jest with Heft"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Add an override to relax some lint rules for *.test.ts files, making unit tests easier to write"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.6.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.1",
+      "tag": "@rushstack/eslint-config_v1.2.1",
+      "date": "Mon, 24 Aug 2020 07:35:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.6.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.0",
+      "tag": "@rushstack/eslint-config_v1.2.0",
+      "date": "Sat, 22 Aug 2020 05:55:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Replace the \"@rushstack/no-null\" rule with a more flexible rule \"@rushstack/no-new-null\" (GitHub #2017)"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.0",
+      "tag": "@rushstack/eslint-config_v1.1.0",
+      "date": "Mon, 17 Aug 2020 04:53:23 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Reclassify many lint rules to report ESLint warnings rather than errors"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.4",
+      "tag": "@rushstack/eslint-config_v1.0.4",
+      "date": "Wed, 12 Aug 2020 00:10:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.0.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.3",
+      "tag": "@rushstack/eslint-config_v1.0.3",
+      "date": "Sat, 25 Jul 2020 01:38:03 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update README.md to add the missing file extension for .eslintrc.js"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.2",
+      "tag": "@rushstack/eslint-config_v1.0.2",
+      "date": "Thu, 25 Jun 2020 06:43:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Enable variableDeclarationIgnoreFunction for the \"@typescript-eslint/typedef\" rule"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.1",
+      "tag": "@rushstack/eslint-config_v1.0.1",
+      "date": "Wed, 24 Jun 2020 09:50:48 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with the published file set"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" from `1.0.1` to `1.0.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" from `0.4.0` to `0.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.0",
+      "tag": "@rushstack/eslint-config_v1.0.0",
+      "date": "Wed, 24 Jun 2020 09:04:28 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Upgrade to ESLint 7. Breaking change: patch-eslint6.js has been renamed to patch-eslint-resolver.js"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" from `1.0.0` to `1.0.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" from `0.3.2` to `0.4.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.8",
       "tag": "@rushstack/eslint-config_v0.5.8",
       "date": "Wed, 27 May 2020 05:15:10 GMT",

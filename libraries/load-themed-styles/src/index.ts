@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 /**
  * An IThemingInstruction can specify a rawString to be preserved or a theme slot and a default value
  * to use if that slot is not specified by the theme.
@@ -355,7 +358,7 @@ export function splitStyles(styles: string): ThemableArray {
   const result: ThemableArray = [];
   if (styles) {
     let pos: number = 0; // Current position in styles.
-    let tokenMatch: RegExpExecArray | null; // eslint-disable-line @rushstack/no-null
+    let tokenMatch: RegExpExecArray | null;
     while ((tokenMatch = _themeTokenRegex.exec(styles))) {
       const matchIndex: number = tokenMatch.index;
       if (matchIndex > pos) {

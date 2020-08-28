@@ -18,28 +18,34 @@ export class DtsEmitHelpers {
     collectorEntity: CollectorEntity,
     astImport: AstImport
   ): void {
+    const importPrefix: string = astImport.isTypeOnlyEverywhere ? 'import type' : 'import';
+
     switch (astImport.importKind) {
       case AstImportKind.DefaultImport:
         if (collectorEntity.nameForEmit !== astImport.exportName) {
-          stringWriter.write(`import { default as ${collectorEntity.nameForEmit} }`);
+          stringWriter.write(`${importPrefix} { default as ${collectorEntity.nameForEmit} }`);
         } else {
-          stringWriter.write(`import ${astImport.exportName}`);
+          stringWriter.write(`${importPrefix} ${astImport.exportName}`);
         }
         stringWriter.writeLine(` from '${astImport.modulePath}';`);
         break;
       case AstImportKind.NamedImport:
         if (collectorEntity.nameForEmit !== astImport.exportName) {
-          stringWriter.write(`import { ${astImport.exportName} as ${collectorEntity.nameForEmit} }`);
+          stringWriter.write(`${importPrefix} { ${astImport.exportName} as ${collectorEntity.nameForEmit} }`);
         } else {
-          stringWriter.write(`import { ${astImport.exportName} }`);
+          stringWriter.write(`${importPrefix} { ${astImport.exportName} }`);
         }
         stringWriter.writeLine(` from '${astImport.modulePath}';`);
         break;
       case AstImportKind.StarImport:
-        stringWriter.writeLine(`import * as ${collectorEntity.nameForEmit} from '${astImport.modulePath}';`);
+        stringWriter.writeLine(
+          `${importPrefix} * as ${collectorEntity.nameForEmit} from '${astImport.modulePath}';`
+        );
         break;
       case AstImportKind.EqualsImport:
-        stringWriter.writeLine(`import ${collectorEntity.nameForEmit} = require('${astImport.modulePath}');`);
+        stringWriter.writeLine(
+          `${importPrefix} ${collectorEntity.nameForEmit} = require('${astImport.modulePath}');`
+        );
         break;
       default:
         throw new InternalError('Unimplemented AstImportKind');

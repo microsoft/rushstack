@@ -35,7 +35,7 @@ const _releaseTag: unique symbol = Symbol('ApiReleaseTagMixin._releaseTag');
  *
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface ApiReleaseTagMixin extends ApiItem {
   /**
    * The effective release tag for this declaration.  If it is not explicitly specified, the value may be

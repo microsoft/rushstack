@@ -1,9 +1,12 @@
-import * as yaml from 'js-yaml';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import * as os from 'os';
+import * as path from 'path';
 import * as semver from 'semver';
 import * as crypto from 'crypto';
 import * as colors from 'colors';
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, AlreadyReportedError, Import } from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
@@ -11,17 +14,10 @@ import {
   PackageManagerOptionsConfigurationBase,
   PnpmOptionsConfiguration
 } from '../../api/RushConfiguration';
-import { IPolicyValidatorOptions } from '../policy/PolicyValidator';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
+import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
+import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
 
-// This is based on PNPM's own configuration:
-// https://github.com/pnpm/pnpm-shrinkwrap/blob/master/src/write.ts
-const SHRINKWRAP_YAML_FORMAT: yaml.DumpOptions = {
-  lineWidth: 1000,
-  noCompatMode: true,
-  noRefs: true,
-  sortKeys: true
-};
+const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
 export interface IPeerDependenciesMetaYaml {
   optional?: boolean;
@@ -46,6 +42,17 @@ export interface IPnpmShrinkwrapDependencyYaml {
    * https://github.com/yarnpkg/rfcs/blob/master/accepted/0000-optional-peer-dependencies.md
    */
   peerDependenciesMeta: { [dependency: string]: IPeerDependenciesMetaYaml };
+}
+
+export interface IPnpmShrinkwrapImporterYaml {
+  /** The list of resolved version numbers for direct dependencies */
+  dependencies: { [dependency: string]: string };
+  /** The list of resolved version numbers for dev dependencies */
+  devDependencies: { [dependency: string]: string };
+  /** The list of resolved version numbers for optional dependencies */
+  optionalDependencies: { [dependency: string]: string };
+  /** The list of specifiers used to resolve dependency versions */
+  specifiers: { [dependency: string]: string };
 }
 
 /**
@@ -82,6 +89,8 @@ export interface IPnpmShrinkwrapDependencyYaml {
 interface IPnpmShrinkwrapYaml {
   /** The list of resolved version numbers for direct dependencies */
   dependencies: { [dependency: string]: string };
+  /** The list of importers for local workspace projects */
+  importers: { [relativePath: string]: IPnpmShrinkwrapImporterYaml };
   /** The description of the solved graph */
   packages: { [dependencyVersion: string]: IPnpmShrinkwrapDependencyYaml };
   /** URL of the registry which was used */
@@ -154,7 +163,20 @@ export function parsePnpmDependencyKey(
   }
 
   if (!semver.valid(parsedVersionPart)) {
-    return undefined;
+    const urlRegex: RegExp = /^(@?)([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\/([^\/\\]+\/?)*([^\/\\]+)$/i;
+    // Test for urls:
+    // Examples:
+    //     @github.com/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
+    //     github.com/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
+    //     github.com.au/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
+    //     bitbucket.com/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
+    //     bitbucket.co.in/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
+    if (urlRegex.test(dependencyKey)) {
+      const dependencySpecifier: DependencySpecifier = new DependencySpecifier(dependencyName, dependencyKey);
+      return dependencySpecifier;
+    } else {
+      return undefined;
+    }
   }
 
   // Is it an alias for a different package?
@@ -173,22 +195,12 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    */
   public readonly shrinkwrapFilename: string;
 
-  private static readonly _shrinkwrapHashPrefix: string = '# shrinkwrap hash:';
   private _shrinkwrapJson: IPnpmShrinkwrapYaml;
-  private _shrinkwrapHash: string | undefined;
-  private _shrinkwrapHashEnabled: boolean | undefined;
 
-  private constructor(
-    shrinkwrapJson: IPnpmShrinkwrapYaml,
-    shrinkwrapFilename: string,
-    shrinkwrapHash?: string,
-    shrinkwrapHashEnabled?: boolean
-  ) {
+  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, shrinkwrapFilename: string) {
     super();
     this._shrinkwrapJson = shrinkwrapJson;
     this.shrinkwrapFilename = shrinkwrapFilename;
-    this._shrinkwrapHash = shrinkwrapHash;
-    this._shrinkwrapHashEnabled = shrinkwrapHashEnabled;
 
     // Normalize the data
     if (!this._shrinkwrapJson.registry) {
@@ -196,6 +208,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
     if (!this._shrinkwrapJson.dependencies) {
       this._shrinkwrapJson.dependencies = {};
+    }
+    if (!this._shrinkwrapJson.importers) {
+      this._shrinkwrapJson.importers = {};
     }
     if (!this._shrinkwrapJson.specifiers) {
       this._shrinkwrapJson.specifiers = {};
@@ -215,39 +230,22 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       }
 
       const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilename);
-      const parsedData: IPnpmShrinkwrapYaml = yaml.safeLoad(shrinkwrapContent);
-
-      let shrinkwrapHash: string | undefined;
-      if (pnpmOptions.preventManualShrinkwrapChanges) {
-        // Grab the shrinkwrap hash out of the comment where we store it.
-        const hashYamlCommentRegExp: RegExp = new RegExp(
-          `\\n\\s*${PnpmShrinkwrapFile._shrinkwrapHashPrefix}\\s*(\\S+)\\s*$`
-        );
-        const match: RegExpMatchArray | null = shrinkwrapContent.match(hashYamlCommentRegExp);
-        shrinkwrapHash = match ? match[1] : undefined;
-      }
-
-      return new PnpmShrinkwrapFile(
-        parsedData,
-        shrinkwrapYamlFilename,
-        shrinkwrapHash,
-        pnpmOptions.preventManualShrinkwrapChanges
-      );
+      const parsedData: IPnpmShrinkwrapYaml = yamlModule.safeLoad(shrinkwrapContent);
+      return new PnpmShrinkwrapFile(parsedData, shrinkwrapYamlFilename);
     } catch (error) {
       throw new Error(`Error reading "${shrinkwrapYamlFilename}":${os.EOL}  ${error.message}`);
     }
   }
 
-  /** @override */
-  public shouldForceRecheck(): boolean {
-    // Ensure the shrinkwrap is rechecked when the hash is enabled but no hash is populated.
-    return super.shouldForceRecheck() || (!!this._shrinkwrapHashEnabled && !this._shrinkwrapHash);
+  public getShrinkwrapHash(): string {
+    const shrinkwrapContent: string = this.serialize();
+    return crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
   }
 
   /** @override */
   public validate(
     packageManagerOptionsConfig: PackageManagerOptionsConfigurationBase,
-    policyOptions: IPolicyValidatorOptions
+    policyOptions: IShrinkwrapFilePolicyValidatorOptions
   ): void {
     super.validate(packageManagerOptionsConfig, policyOptions);
     if (!(packageManagerOptionsConfig instanceof PnpmOptionsConfiguration)) {
@@ -257,19 +255,17 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // Only check the hash if allowShrinkwrapUpdates is false. If true, the shrinkwrap file
     // may have changed and the hash could be invalid.
     if (packageManagerOptionsConfig.preventManualShrinkwrapChanges && !policyOptions.allowShrinkwrapUpdates) {
-      if (!this._shrinkwrapHash) {
+      if (!policyOptions.repoState.pnpmShrinkwrapHash) {
         console.log(
           colors.red(
-            'The shrinkwrap file does not contain the generated hash. You may need to run "rush update" to ' +
+            'The existing shrinkwrap file hash could not be found. You may need to run "rush update" to ' +
               'populate the hash. See the "preventManualShrinkwrapChanges" setting documentation for details.'
           ) + os.EOL
         );
         throw new AlreadyReportedError();
       }
 
-      const shrinkwrapContent: string = yaml.safeDump(this._shrinkwrapJson, SHRINKWRAP_YAML_FORMAT);
-      const calculatedHash: string = crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
-      if (calculatedHash !== this._shrinkwrapHash) {
+      if (this.getShrinkwrapHash() !== policyOptions.repoState.pnpmShrinkwrapHash) {
         console.log(
           colors.red(
             'The shrinkwrap file hash does not match the expected hash. Please run "rush update" to ensure the ' +
@@ -419,15 +415,21 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * @override
    */
   protected serialize(): string {
-    let shrinkwrapContent: string = yaml.safeDump(this._shrinkwrapJson, SHRINKWRAP_YAML_FORMAT);
-    if (this._shrinkwrapHashEnabled) {
-      this._shrinkwrapHash = crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
-      shrinkwrapContent = `${shrinkwrapContent.trimRight()}\n${PnpmShrinkwrapFile._shrinkwrapHashPrefix} ${
-        this._shrinkwrapHash
-      }\n`;
+    // Ensure that if any of the top-level properties are provided but empty that they are removed. We populate the object
+    // properties when we read the shrinkwrap but PNPM does not set these top-level properties unless they are present.
+    const shrinkwrapToSerialize: Partial<IPnpmShrinkwrapYaml> = { ...this._shrinkwrapJson };
+    for (const key of Object.keys(shrinkwrapToSerialize).filter((key) =>
+      shrinkwrapToSerialize.hasOwnProperty(key)
+    )) {
+      if (
+        typeof shrinkwrapToSerialize[key] === 'object' &&
+        Object.entries(shrinkwrapToSerialize[key] || {}).length === 0
+      ) {
+        delete shrinkwrapToSerialize[key];
+      }
     }
 
-    return shrinkwrapContent;
+    return yamlModule.safeDump(shrinkwrapToSerialize, PNPM_SHRINKWRAP_YAML_FORMAT);
   }
 
   /**
@@ -502,6 +504,66 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     const dependencyKey: string = packageDescription.dependencies[packageName];
+    return this._parsePnpmDependencyKey(packageName, dependencyKey);
+  }
+
+  /** @override */
+  public getWorkspaceKeys(): ReadonlyArray<string> {
+    const result: string[] = [];
+    for (const key of Object.keys(this._shrinkwrapJson.importers)) {
+      // Avoid including the common workspace
+      if (key !== '.') {
+        result.push(key);
+      }
+    }
+    result.sort(); // make the result deterministic
+    return result;
+  }
+
+  /** @override */
+  public getWorkspaceKeyByPath(workspaceRoot: string, projectFolder: string): string {
+    return path.relative(workspaceRoot, projectFolder).replace(new RegExp(`\\${path.sep}`, 'g'), '/');
+  }
+
+  public getWorkspaceImporter(importerPath: string): IPnpmShrinkwrapImporterYaml | undefined {
+    return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.importers, importerPath);
+  }
+
+  /**
+   * Gets the resolved version number of a dependency for a specific temp project.
+   * For PNPM, we can reuse the version that another project is using.
+   * Note that this function modifies the shrinkwrap data.
+   *
+   * @override
+   */
+  protected getWorkspaceDependencyVersion(
+    dependencySpecifier: DependencySpecifier,
+    workspaceKey: string
+  ): DependencySpecifier | undefined {
+    // PNPM doesn't have the same advantage of NPM, where we can skip generate as long as the
+    // shrinkwrap file puts our dependency in either the top of the node_modules folder
+    // or underneath the package we are looking at.
+    // This is because the PNPM shrinkwrap file describes the exact links that need to be created
+    // to recreate the graph..
+    // Because of this, we actually need to check for a version that this package is directly
+    // linked to.
+
+    const packageName: string = dependencySpecifier.packageName;
+    const projectImporter: IPnpmShrinkwrapImporterYaml | undefined = this.getWorkspaceImporter(workspaceKey);
+    if (!projectImporter) {
+      return undefined;
+    }
+
+    const allDependencies: { [dependency: string]: string } = {
+      ...(projectImporter.optionalDependencies || {}),
+      ...(projectImporter.dependencies || {}),
+      ...(projectImporter.devDependencies || {})
+    };
+    if (!allDependencies.hasOwnProperty(packageName)) {
+      return undefined;
+    }
+
+    const dependencyKey: string = allDependencies[packageName];
     return this._parsePnpmDependencyKey(packageName, dependencyKey);
   }
 

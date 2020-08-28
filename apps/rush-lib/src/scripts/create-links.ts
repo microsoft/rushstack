@@ -42,21 +42,21 @@ function ensureFolder(folderPath: string): void {
   fs.mkdirSync(folderPath);
 }
 
-function removeLinks(targetSubdeploymentFolder: string, deployMetadataObject: IDeployMetadataJson): void {
+function removeLinks(targetRootFolder: string, deployMetadataObject: IDeployMetadataJson): void {
   for (const linkInfo of deployMetadataObject.links) {
     // Link to the relative path for symlinks
-    const newLinkPath: string = path.join(targetSubdeploymentFolder, linkInfo.linkPath);
+    const newLinkPath: string = path.join(targetRootFolder, linkInfo.linkPath);
     if (fs.existsSync(newLinkPath)) {
       fs.unlinkSync(newLinkPath);
     }
   }
 }
 
-function createLinks(targetSubdeploymentFolder: string, deployMetadataObject: IDeployMetadataJson): void {
+function createLinks(targetRootFolder: string, deployMetadataObject: IDeployMetadataJson): void {
   for (const linkInfo of deployMetadataObject.links) {
     // Link to the relative path for symlinks
-    const newLinkPath: string = path.join(targetSubdeploymentFolder, linkInfo.linkPath);
-    const linkTargetPath: string = path.join(targetSubdeploymentFolder, linkInfo.targetPath);
+    const newLinkPath: string = path.join(targetRootFolder, linkInfo.linkPath);
+    const linkTargetPath: string = path.join(targetRootFolder, linkInfo.targetPath);
 
     // Make sure the containing folder exists
     ensureFolder(path.dirname(newLinkPath));
@@ -103,8 +103,8 @@ function main(): boolean {
     return false;
   }
 
-  const targetSubdeploymentFolder: string = __dirname;
-  const deployMetadataPath: string = path.join(targetSubdeploymentFolder, 'deploy-metadata.json');
+  const targetRootFolder: string = __dirname;
+  const deployMetadataPath: string = path.join(targetRootFolder, 'deploy-metadata.json');
 
   if (!fs.existsSync(deployMetadataPath)) {
     throw new Error('Input file not found: ' + deployMetadataPath);
@@ -115,11 +115,11 @@ function main(): boolean {
 
   if (args[0] === 'create') {
     console.log(`\nCreating links for deployment scenario "${deployMetadataObject.scenarioName}"`);
-    removeLinks(targetSubdeploymentFolder, deployMetadataObject);
-    createLinks(targetSubdeploymentFolder, deployMetadataObject);
+    removeLinks(targetRootFolder, deployMetadataObject);
+    createLinks(targetRootFolder, deployMetadataObject);
   } else {
     console.log(`\nRemoving links for deployment scenario "${deployMetadataObject.scenarioName}"`);
-    removeLinks(targetSubdeploymentFolder, deployMetadataObject);
+    removeLinks(targetRootFolder, deployMetadataObject);
   }
 
   console.log('The operation completed successfully.');

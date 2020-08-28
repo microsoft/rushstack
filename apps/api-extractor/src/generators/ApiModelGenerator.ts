@@ -56,7 +56,8 @@ export class ApiModelGenerator {
       collector.packageJsonLookup,
       collector.workingPackage.name,
       collector.program,
-      collector.typeChecker
+      collector.typeChecker,
+      collector.bundledPackageNames
     );
   }
 

@@ -9,7 +9,6 @@ import { GulpTask } from '@microsoft/gulp-core-build';
 import { IBuildConfig } from '@microsoft/gulp-core-build';
 import { JsonObject } from '@rushstack/node-core-library';
 import { Terminal } from '@rushstack/node-core-library';
-import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.1';
 
 // Warning: (ae-forgotten-export) The symbol "ApiExtractorTask" needs to be exported by the entry point index.d.ts
 //

@@ -2,10 +2,16 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
+
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { IPolicyValidatorOptions } from './PolicyValidator';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
+import { RepoStateFile } from '../RepoStateFile';
+
+export interface IShrinkwrapFilePolicyValidatorOptions extends IPolicyValidatorOptions {
+  repoState: RepoStateFile;
+}
 
 /**
  *  A policy that validates shrinkwrap files used by package managers.
@@ -25,6 +31,9 @@ export class ShrinkwrapFilePolicy {
     }
 
     // Run shrinkwrap-specific validation
-    shrinkwrapFile.validate(rushConfiguration.packageManagerOptions, options);
+    shrinkwrapFile.validate(rushConfiguration.packageManagerOptions, {
+      ...options,
+      repoState: rushConfiguration.getRepoState(options.shrinkwrapVariant)
+    });
   }
 }

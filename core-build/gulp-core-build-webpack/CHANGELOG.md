@@ -1,6 +1,108 @@
 # Change Log - @microsoft/gulp-core-build-webpack
 
-This log was last generated on Mon, 01 Jun 2020 08:34:17 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Aug 2020 11:27:06 GMT and should not be manually modified.
+
+## 5.0.38
+Thu, 27 Aug 2020 11:27:06 GMT
+
+*Version update only*
+
+## 5.0.37
+Mon, 24 Aug 2020 07:35:20 GMT
+
+*Version update only*
+
+## 5.0.36
+Sat, 22 Aug 2020 05:55:42 GMT
+
+*Version update only*
+
+## 5.0.35
+Fri, 21 Aug 2020 01:21:18 GMT
+
+*Version update only*
+
+## 5.0.34
+Thu, 20 Aug 2020 15:13:53 GMT
+
+*Version update only*
+
+## 5.0.33
+Tue, 18 Aug 2020 23:59:42 GMT
+
+*Version update only*
+
+## 5.0.32
+Mon, 17 Aug 2020 04:53:23 GMT
+
+*Version update only*
+
+## 5.0.31
+Wed, 12 Aug 2020 00:10:06 GMT
+
+*Version update only*
+
+## 5.0.30
+Wed, 05 Aug 2020 18:27:32 GMT
+
+*Version update only*
+
+## 5.0.29
+Mon, 20 Jul 2020 06:52:33 GMT
+
+### Patches
+
+- Update webpack
+
+## 5.0.28
+Fri, 03 Jul 2020 15:09:04 GMT
+
+*Version update only*
+
+## 5.0.27
+Fri, 03 Jul 2020 05:46:42 GMT
+
+*Version update only*
+
+## 5.0.26
+Sat, 27 Jun 2020 00:09:38 GMT
+
+*Version update only*
+
+## 5.0.25
+Fri, 26 Jun 2020 22:16:39 GMT
+
+*Version update only*
+
+## 5.0.24
+Thu, 25 Jun 2020 06:43:35 GMT
+
+*Version update only*
+
+## 5.0.23
+Wed, 24 Jun 2020 09:50:48 GMT
+
+*Version update only*
+
+## 5.0.22
+Wed, 24 Jun 2020 09:04:28 GMT
+
+*Version update only*
+
+## 5.0.21
+Mon, 15 Jun 2020 22:17:18 GMT
+
+*Version update only*
+
+## 5.0.20
+Fri, 12 Jun 2020 09:19:21 GMT
+
+*Version update only*
+
+## 5.0.19
+Wed, 10 Jun 2020 20:48:30 GMT
+
+*Version update only*
 
 ## 5.0.18
 Mon, 01 Jun 2020 08:34:17 GMT

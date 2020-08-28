@@ -3,8 +3,7 @@
 
 import * as path from 'path';
 import * as semver from 'semver';
-import { cloneDeep } from 'lodash';
-import { IPackageJson, JsonFile, FileConstants } from '@rushstack/node-core-library';
+import { IPackageJson, JsonFile, FileConstants, Import } from '@rushstack/node-core-library';
 
 import { VersionPolicy, BumpType, LockStepVersionPolicy } from '../api/VersionPolicy';
 import { ChangeFile } from '../api/ChangeFile';
@@ -14,6 +13,9 @@ import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { VersionPolicyConfiguration } from '../api/VersionPolicyConfiguration';
 import { PublishUtilities } from './PublishUtilities';
 import { ChangeManager } from './ChangeManager';
+import { DependencySpecifier } from './DependencySpecifier';
+
+const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 export class VersionManager {
   private _rushConfiguration: RushConfiguration;
@@ -23,14 +25,14 @@ export class VersionManager {
   private _changeFiles: Map<string, ChangeFile>;
 
   public constructor(
-    _rushConfiguration: RushConfiguration,
-    _userEmail: string,
-    _versionPolicyConfiguration?: VersionPolicyConfiguration
+    rushConfiguration: RushConfiguration,
+    userEmail: string,
+    versionPolicyConfiguration: VersionPolicyConfiguration
   ) {
-    this._rushConfiguration = _rushConfiguration;
-    this._userEmail = _userEmail;
-    this._versionPolicyConfiguration = _versionPolicyConfiguration
-      ? _versionPolicyConfiguration
+    this._rushConfiguration = rushConfiguration;
+    this._userEmail = userEmail;
+    this._versionPolicyConfiguration = versionPolicyConfiguration
+      ? versionPolicyConfiguration
       : this._rushConfiguration.versionPolicyConfiguration;
 
     this._updatedProjects = new Map<string, IPackageJson>();
@@ -60,19 +62,20 @@ export class VersionManager {
    * @param identifier - overrides the prerelease identifier and only works for lock step policy
    * @param shouldCommit - whether the changes will be written to disk
    */
-  public bump(
+  public async bumpAsync(
     lockStepVersionPolicyName?: string,
     bumpType?: BumpType,
     identifier?: string,
     shouldCommit?: boolean
-  ): void {
+  ): Promise<void> {
     // Bump all the lock step version policies.
     this._versionPolicyConfiguration.bump(lockStepVersionPolicyName, bumpType, identifier, shouldCommit);
 
     // Update packages and generate change files due to lock step bump.
     this._ensure(lockStepVersionPolicyName, shouldCommit);
 
-    // Refresh rush configuration
+    // Refresh rush configuration since we may have modified the package.json versions
+    // when calling this._ensure(...)
     this._rushConfiguration = RushConfiguration.loadFromConfigurationFile(
       this._rushConfiguration.rushJsonFile
     );
@@ -82,6 +85,7 @@ export class VersionManager {
       this._rushConfiguration,
       this._getLockStepProjects()
     );
+
     changeManager.load(this._rushConfiguration.changesFolder);
     if (changeManager.hasChanges()) {
       changeManager.validateChanges(this._versionPolicyConfiguration);
@@ -90,6 +94,12 @@ export class VersionManager {
       });
       changeManager.updateChangelog(!!shouldCommit);
     }
+
+    // Refresh rush configuration again, since we've further modified the package.json files
+    // by calling changeManager.apply(...)
+    this._rushConfiguration = RushConfiguration.loadFromConfigurationFile(
+      this._rushConfiguration.rushJsonFile
+    );
   }
 
   public get updatedProjects(): Map<string, IPackageJson> {
@@ -184,10 +194,10 @@ export class VersionManager {
       let clonedProject: IPackageJson | undefined = this._updatedProjects.get(rushProject.packageName);
       let projectVersionChanged: boolean = true;
       if (!clonedProject) {
-        clonedProject = cloneDeep(rushProject.packageJson);
+        clonedProject = lodash.cloneDeep(rushProject.packageJson);
         projectVersionChanged = false;
       }
-      this._updateProjectAllDependencies(rushProject, clonedProject, projectVersionChanged);
+      this._updateProjectAllDependencies(rushProject, clonedProject!, projectVersionChanged);
     });
   }
 
@@ -313,7 +323,14 @@ export class VersionManager {
     oldDependencyVersion: string,
     newDependencyVersion: string
   ): void {
-    if (!semver.satisfies(updatedDependentProject.version, oldDependencyVersion) && !projectVersionChanged) {
+    const oldSpecifier: DependencySpecifier = new DependencySpecifier(
+      updatedDependentProject.name,
+      oldDependencyVersion
+    );
+    if (
+      !semver.satisfies(updatedDependentProject.version, oldSpecifier.versionSpecifier) &&
+      !projectVersionChanged
+    ) {
       this._addChange(changes, {
         changeType: ChangeType.patch,
         packageName: clonedProject.name

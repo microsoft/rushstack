@@ -20,8 +20,8 @@ export abstract class VersionMismatchFinderEntity {
     this.skipRushCheck = options.skipRushCheck;
   }
 
-  public abstract filePath: string;
-  public abstract allDependencies: ReadonlyArray<PackageJsonDependency>;
+  public abstract get filePath(): string;
+  public abstract get allDependencies(): ReadonlyArray<PackageJsonDependency>;
 
   public abstract tryGetDependency(packageName: string): PackageJsonDependency | undefined;
   public abstract tryGetDevDependency(packageName: string): PackageJsonDependency | undefined;

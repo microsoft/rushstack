@@ -83,6 +83,10 @@ export class StandardBuildFolders {
 // @beta (undocumented)
 export class ToolPaths {
     // (undocumented)
+    static readonly apiExtractorPackageJson: IPackageJson;
+    // (undocumented)
+    static readonly apiExtractorPackagePath: string;
+    // (undocumented)
     static readonly eslintPackageJson: IPackageJson;
     // (undocumented)
     static readonly eslintPackagePath: string;

@@ -1,6 +1,27 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+const macros = require('./macros');
+
+// Rule severity guidelines
+// ------------------------
+//
+// Errors are generally printed in red, and may prevent other build tasks from running (e.g. unit tests).
+// Developers should never ignore errors.  Warnings are generally printed in yellow, and do not block local
+// development, although they must be fixed/suppressed before merging.  Developers will commonly ignore warnings
+// until their feature is working.
+//
+// Rules that should be a WARNING:
+// - An issue that is very common in partially implemented work (e.g. missing type declaration)
+// - An issue that "keeps things nice" but otherwise doesn't affect the meaning of the code (e.g. naming convention)
+// - Security rules -- developers may need to temporarily introduce "insecure" expressions while debugging;
+//   if our policy forces them to suppress the lint rule, they may forget to reenable it later.
+//
+// Rules that should be an ERROR:
+// - An issue that is very likely to be a typo (e.g. "x = x;")
+// - An issue that catches code that is likely to malfunction (e.g. unterminated promise chain)
+// - An obsolete language feature that nobody should be using for any good reason
+
 module.exports = {
   // Disable the parser by default
   parser: '',
@@ -34,10 +55,17 @@ module.exports = {
       rules: {
         // The @rushstack rules are documented in the package README:
         // https://www.npmjs.com/package/@rushstack/eslint-plugin
-        '@rushstack/no-null': 'error',
+
+        // RATIONALE:         See the @rushstack/eslint-plugin documentation
+        '@rushstack/no-new-null': 'warn',
+
+        // RATIONALE:         See the @rushstack/eslint-plugin documentation
+        //                    This is enabled and classified as an error because it is required when using Heft.
+        //                    It's not required when using ts-jest, but still a good practice.
+        '@rushstack/hoist-jest-mock': 'error',
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/adjacent-overload-signatures': 'error',
+        '@typescript-eslint/adjacent-overload-signatures': 'warn',
 
         // RATIONALE:         We require "string[]" (instead of "Array<string>") because it is idiomatic TypeScript.
         //                    We require "ReadonlyArray<string>" (instead of "readonly string[]") because, although
@@ -46,7 +74,7 @@ module.exports = {
         //                    lint rules should not require usage of bleeding edge language features.  In the future
         //                    when TypeScript 3 is obsolete, we'll change this rule to require "readonly string[]".
         '@typescript-eslint/array-type': [
-          'error',
+          'warn',
           {
             default: 'array',
             readonly: 'generic'
@@ -57,57 +85,59 @@ module.exports = {
         //
         // CONFIGURATION:     By default, these are banned: String, Boolean, Number, Object, Symbol
         '@typescript-eslint/ban-types': [
-          'error',
+          'warn',
           {
+            extendDefaults: false, // (the complete list is in this file)
             types: {
               String: {
-                message: "Use 'string' instead",
+                message: 'Use "string" instead',
                 fixWith: 'string'
               },
               Boolean: {
-                message: "Use 'boolean' instead",
+                message: 'Use "boolean" instead',
                 fixWith: 'boolean'
               },
               Number: {
-                message: "Use 'number' instead",
+                message: 'Use "number" instead',
                 fixWith: 'number'
               },
               Object: {
-                message: "Use 'object' instead, or else define a proper TypeScript type:"
+                message: 'Use "object" instead, or else define a proper TypeScript type:'
               },
               Symbol: {
-                message: "Use 'symbol' instead",
+                message: 'Use "symbol" instead',
                 fixWith: 'symbol'
+              },
+              Function: {
+                message: [
+                  'The "Function" type accepts any function-like value.',
+                  'It provides no type safety when calling the function, which can be a common source of bugs.',
+                  'It also accepts things like class declarations, which will throw at runtime as they will not be called with "new".',
+                  'If you are expecting the function to accept certain arguments, you should explicitly define the function shape.'
+                ].join('\n')
               }
+
+              // This is a good idea, but before enabling it we need to put some thought into the recommended
+              // coding practices; the default suggestions are too vague.
+              //
+              // '{}': {
+              //   message: [
+              //     '"{}" actually means "any non-nullish value".',
+              //     '- If you want a type meaning "any object", you probably want "Record<string, unknown>" instead.',
+              //     '- If you want a type meaning "any value", you probably want "unknown" instead.'
+              //   ].join('\n')
+              // }
             }
           }
         ],
 
-        // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/camelcase': [
-          'error',
-          {
-            // This is a special exception for naming patterns that use an underscore to separate two camel-cased
-            // parts.  Example:  "checkBox1_onChanged" or "_checkBox1_onChanged"
-            allow: ['^_?[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*_[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*$']
-          }
-        ],
-
-        // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/class-name-casing': [
-          'error',
-          {
-            allowUnderscorePrefix: true
-          }
-        ],
-
         // RATIONALE:         We require "x as number" instead of "<number>x" to avoid conflicts with JSX.
-        '@typescript-eslint/consistent-type-assertions': 'error',
+        '@typescript-eslint/consistent-type-assertions': 'warn',
 
         // RATIONALE:         We prefer "interface IBlah { x: number }" over "type Blah = { x: number }"
         //                    because code is more readable when it is built from stereotypical forms
         //                    (interfaces, enums, functions, etc.) instead of freeform type algebra.
-        '@typescript-eslint/consistent-type-definitions': 'error',
+        '@typescript-eslint/consistent-type-definitions': 'warn',
 
         // RATIONALE:         Code is more readable when the type of every variable is immediately obvious.
         //                    Even if the compiler may be able to infer a type, this inference will be unavailable
@@ -116,7 +146,7 @@ module.exports = {
         //
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         '@typescript-eslint/explicit-function-return-type': [
-          'error',
+          'warn',
           {
             allowExpressions: true,
             allowTypedFunctionExpressions: true,
@@ -125,28 +155,7 @@ module.exports = {
         ],
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/explicit-member-accessibility': 'error',
-
-        // RATIONALE:         It is very common for a class to implement an interface of the same name.
-        //                    For example, the Widget class may implement the IWidget interface.  The "I" prefix
-        //                    avoids the need to invent a separate name such as "AbstractWidget" or "WidgetInterface".
-        //                    In TypeScript it is also common to declare interfaces that are implemented by primitive
-        //                    objects, here the "I" prefix also helps by avoiding spurious conflicts with classes
-        //                    by the same name.
-        //
-        '@typescript-eslint/interface-name-prefix': [
-          'error',
-          {
-            prefixWithI: 'always',
-            allowUnderscorePrefix: true
-          }
-        ],
-
-        // RATIONALE:         Requiring private members to be prefixed with an underscore prevents accidental access
-        //                    by scripts that are coded in plain JavaScript and cannot see the TypeScript visibility
-        //                    declarations.  Also, using underscore prefixes allows the private field to be exposed
-        //                    by a public getter/setter with the same name (but omitting the underscore).
-        '@typescript-eslint/member-naming': ['error', { private: '^_' }],
+        '@typescript-eslint/explicit-member-accessibility': 'warn',
 
         // RATIONALE:         Object-oriented programming organizes code into "classes" that associate
         //                    data structures (the class's fields) and the operations performed on those
@@ -158,15 +167,181 @@ module.exports = {
         //                    reordering methods produces spurious diffs that make PRs hard to read.  For classes
         //                    with lots of methods, alphabetization is probably a more useful secondary ordering.
         '@typescript-eslint/member-ordering': [
-          'error',
+          'warn',
           {
             default: 'never',
             classes: ['field', 'constructor', 'method']
           }
         ],
 
+        // NOTE: This new rule replaces several deprecated rules from @typescript-eslint/eslint-plugin@2.3.3:
+        //
+        // - @typescript-eslint/camelcase
+        // - @typescript-eslint/class-name-casing
+        // - @typescript-eslint/interface-name-prefix
+        // - @typescript-eslint/member-naming
+        //
+        // Docs: https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/naming-convention.md
+        '@typescript-eslint/naming-convention': [
+          'warn',
+          ...macros.expandNamingConventionSelectors([
+            {
+              // We should be stricter about 'enumMember', but it often functions legitimately as an ad hoc namespace.
+              selectors: ['variable', 'enumMember', 'function'],
+
+              format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+              leadingUnderscore: 'allow',
+
+              filter: {
+                regex: [
+                  // This is a special exception for naming patterns that use an underscore to separate two camel-cased
+                  // parts.  Example:  "checkBox1_onChanged" or "_checkBox1_onChanged"
+                  '^_?[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*_[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*$'
+                ]
+                  .map((x) => `(${x})`)
+                  .join('|'),
+                match: false
+              }
+            },
+
+            {
+              selectors: ['parameter'],
+
+              format: ['camelCase'],
+
+              filter: {
+                regex: [
+                  // Silently accept names with a double-underscore prefix; we would like to be more strict about this,
+                  // pending a fix for https://github.com/typescript-eslint/typescript-eslint/issues/2240
+                  '^__'
+                ]
+                  .map((x) => `(${x})`)
+                  .join('|'),
+                match: false
+              }
+            },
+
+            // Genuine properties
+            {
+              selectors: ['parameterProperty', 'accessor'],
+              enforceLeadingUnderscoreWhenPrivate: true,
+
+              format: ['camelCase', 'UPPER_CASE'],
+
+              filter: {
+                regex: [
+                  // Silently accept names with a double-underscore prefix; we would like to be more strict about this,
+                  // pending a fix for https://github.com/typescript-eslint/typescript-eslint/issues/2240
+                  '^__',
+                  // Ignore quoted identifiers such as { "X+Y": 123 }.  Currently @typescript-eslint/naming-convention
+                  // cannot detect whether an identifier is quoted or not, so we simply assume that it is quoted
+                  // if-and-only-if it contains characters that require quoting.
+                  '[^a-zA-Z0-9_]',
+                  // This is a special exception for naming patterns that use an underscore to separate two camel-cased
+                  // parts.  Example:  "checkBox1_onChanged" or "_checkBox1_onChanged"
+                  '^_?[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*_[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*$'
+                ]
+                  .map((x) => `(${x})`)
+                  .join('|'),
+                match: false
+              }
+            },
+
+            // Properties that incorrectly match other contexts
+            // See issue https://github.com/typescript-eslint/typescript-eslint/issues/2244
+            {
+              selectors: ['property'],
+              enforceLeadingUnderscoreWhenPrivate: true,
+
+              // The @typescript-eslint/naming-convention "property" selector matches cases like this:
+              //
+              //   someLegacyApiWeCannotChange.invokeMethod({ SomeProperty: 123 });
+              //
+              // and this:
+              //
+              //   const { CONSTANT1, CONSTANT2 } = someNamespace.constants;
+              //
+              // Thus for now "property" is more like a variable than a class member.
+              format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+              leadingUnderscore: 'allow',
+
+              filter: {
+                regex: [
+                  // Silently accept names with a double-underscore prefix; we would like to be more strict about this,
+                  // pending a fix for https://github.com/typescript-eslint/typescript-eslint/issues/2240
+                  '^__',
+                  // Ignore quoted identifiers such as { "X+Y": 123 }.  Currently @typescript-eslint/naming-convention
+                  // cannot detect whether an identifier is quoted or not, so we simply assume that it is quoted
+                  // if-and-only-if it contains characters that require quoting.
+                  '[^a-zA-Z0-9_]',
+                  // This is a special exception for naming patterns that use an underscore to separate two camel-cased
+                  // parts.  Example:  "checkBox1_onChanged" or "_checkBox1_onChanged"
+                  '^_?[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*_[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*$'
+                ]
+                  .map((x) => `(${x})`)
+                  .join('|'),
+                match: false
+              }
+            },
+
+            {
+              selectors: ['method'],
+              enforceLeadingUnderscoreWhenPrivate: true,
+
+              // A PascalCase method can arise somewhat legitimately in this way:
+              //
+              // class MyClass {
+              //    public static MyReactButton(props: IButtonProps): JSX.Element {
+              //      . . .
+              //    }
+              // }
+              format: ['camelCase', 'PascalCase'],
+              leadingUnderscore: 'allow',
+
+              filter: {
+                regex: [
+                  // Silently accept names with a double-underscore prefix; we would like to be more strict about this,
+                  // pending a fix for https://github.com/typescript-eslint/typescript-eslint/issues/2240
+                  '^__',
+                  // This is a special exception for naming patterns that use an underscore to separate two camel-cased
+                  // parts.  Example:  "checkBox1_onChanged" or "_checkBox1_onChanged"
+                  '^_?[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*_[a-z][a-z0-9]*([A-Z][a-z]?[a-z0-9]*)*$'
+                ]
+                  .map((x) => `(${x})`)
+                  .join('|'),
+                match: false
+              }
+            },
+
+            // Types should use PascalCase
+            {
+              // Group selector for: class, interface, typeAlias, enum, typeParameter
+              selectors: ['class', 'typeAlias', 'enum', 'typeParameter'],
+              format: ['PascalCase'],
+              leadingUnderscore: 'allow'
+            },
+
+            {
+              selectors: ['interface'],
+
+              // It is very common for a class to implement an interface of the same name.
+              // For example, the Widget class may implement the IWidget interface.  The "I" prefix
+              // avoids the need to invent a separate name such as "AbstractWidget" or "WidgetInterface".
+              // In TypeScript it is also common to declare interfaces that are implemented by primitive
+              // objects, here the "I" prefix also helps by avoiding spurious conflicts with classes
+              // by the same name.
+              format: ['PascalCase'],
+
+              custom: {
+                regex: '^_?I[A-Z]',
+                match: true
+              }
+            }
+          ])
+        ],
+
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/no-array-constructor': 'error',
+        '@typescript-eslint/no-array-constructor': 'warn',
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         //
@@ -174,7 +349,7 @@ module.exports = {
         //                    This rule should be suppressed only in very special cases such as JSON.stringify()
         //                    where the type really can be anything.  Even if the type is flexible, another type
         //                    may be more appropriate such as "unknown", "{}", or "Record<k,V>".
-        '@typescript-eslint/no-explicit-any': 'error',
+        '@typescript-eslint/no-explicit-any': 'warn',
 
         // RATIONALE:         The #1 rule of promises is that every promise chain must be terminated by a catch()
         //                    handler.  Thus wherever a Promise arises, the code must either append a catch handler,
@@ -202,7 +377,7 @@ module.exports = {
         //
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         '@typescript-eslint/no-namespace': [
-          'error',
+          'warn',
           {
             // Discourage "namespace" in .ts and .tsx files
             allowDeclarations: false,
@@ -220,14 +395,14 @@ module.exports = {
         //                    just to save some typing.
         //
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/no-parameter-properties': 'error',
+        '@typescript-eslint/no-parameter-properties': 'warn',
 
         // RATIONALE:         When left in shipping code, unused variables often indicate a mistake.  Dead code
         //                    may impact performance.
         //
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         '@typescript-eslint/no-unused-vars': [
-          'error',
+          'warn',
           {
             vars: 'all',
             // Unused function arguments often indicate a mistake in JavaScript code.  However in TypeScript code,
@@ -240,63 +415,97 @@ module.exports = {
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         '@typescript-eslint/no-use-before-define': 'error',
 
-        // RATIONALE:         The require() API is generally obsolete.  Use "import" instead.
-        //
-        // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/no-var-requires': 'error',
+        // TODO: This is a good rule for web browser apps, but it is commonly needed API for Node.js tools.
+        // '@typescript-eslint/no-var-requires': 'error',
 
         // RATIONALE:         The "module" keyword is deprecated except when describing legacy libraries.
         //
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/prefer-namespace-keyword': 'error',
+        '@typescript-eslint/prefer-namespace-keyword': 'warn',
 
         // RATIONALE:         We require explicit type annotations, even when the compiler could infer the type.
-        //                    This is a controversial rule because it makes code more verbose.  The reason is that
-        //                    type inference is useless when reviewing the diff for a pull request or a Git history.
-        //                    Unless the person is already familiar with every file (unlikely in a large project),
-        //                    it can be very difficult to guess the types for a typical statement such as
-        //                    "let item = provider.fetch(options);".  In this situation, explicit type annotations
-        //                    greatly increase readability and justify the extra effort required to write them.
-        //                    Requiring type annotations also discourages anonymous type algebra, and code is easier
-        //                    to reason about when its authors went through the exercise of choosing meaningful names.
+        //                    This can be a controversial policy because it makes code more verbose.  There are
+        //                    a couple downsides to type inference, however.  First, it is not always available.
+        //                    For example, when reviewing a pull request or examining a Git history, we may see
+        //                    code like this:
+        //
+        //                        // What is the type of "y" here? The compiler knows, but the
+        //                        // person reading the code may have no clue.
+        //                        const x = f.();
+        //                        const y = x.z;
+        //
+        //                    Second, relying on implicit types also discourages design discussions and documentation.
+        //                    Consider this example:
+        //
+        //                        // Where's the documentation for "correlation" and "inventory"?
+        //                        // Where would you even write the TSDoc comments?
+        //                        function g() {
+        //                          return { correlation: 123, inventory: 'xyz' };
+        //                        }
+        //
+        //                    Implicit types make sense for small scale scenarios, where everyone is familiar with
+        //                    the project, and code should be "easy to write".  Explicit types are preferable
+        //                    for large scale scenarios, where people regularly work with source files they've never
+        //                    seen before, and code should be "easy to read."
         //
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         '@typescript-eslint/typedef': [
-          'error',
+          'warn',
           {
             arrayDestructuring: false,
             arrowParameter: false,
             memberVariableDeclaration: true,
-            parameter: true,
             objectDestructuring: false,
+            parameter: true,
             propertyDeclaration: true,
-            variableDeclaration: true
+            variableDeclaration: true,
+
+            // Normally we require type declarations for class members.  However, that rule is relaxed
+            // for situations where we need to bind the "this" pointer for a callback.  For example, consider
+            // this event handler for a React component:
+            //
+            //     class MyComponent {
+            //       public render(): React.ReactNode {
+            //          return (
+            //            <a href="#" onClick={this._onClick}> click me </a>
+            //          );
+            //        }
+            //
+            //        // The assignment here avoids the need for "this._onClick.bind(this)"
+            //        private _onClick = (event: React.MouseEvent<HTMLAnchorElement>): void => {
+            //          console.log("Clicked! " + this.props.title);
+            //        };
+            //      }
+            //
+            // This coding style has limitations and should be used sparingly.  For example, "_onClick"
+            // will not participate correctly in "virtual"/"override" inheritance.
+            variableDeclarationIgnoreFunction: true
           }
         ],
 
-        // RATIONALE:         Catches a common coding mistake.
+        // RATIONALE:         This rule warns if setters are defined without getters, which is probably a mistake.
         'accessor-pairs': 'error',
 
         // RATIONALE:         In TypeScript, if you write x["y"] instead of x.y, it disables type checking.
         'dot-notation': [
-          'error',
+          'warn',
           {
             allowPattern: '^_'
           }
         ],
 
-        // RATIONALE:         Catches a common coding mistake.
+        // RATIONALE:         Catches code that is likely to be incorrect
         eqeqeq: 'error',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'for-direction': 'error',
+        'for-direction': 'warn',
 
         // RATIONALE:         Catches a common coding mistake.
         'guard-for-in': 'error',
 
         // RATIONALE:         If you have more than 2,000 lines in a single source file, it's probably time
         //                    to split up your code.
-        'max-lines': ['error', { max: 2000 }],
+        'max-lines': ['warn', { max: 2000 }],
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-async-promise-executor': 'error',
@@ -304,7 +513,7 @@ module.exports = {
         // RATIONALE:         "|" and "&" are relatively rare, and are more likely to appear as a mistake when
         //                    someone meant "||" or "&&".  (But nobody types the other operators by mistake.)
         'no-bitwise': [
-          'error',
+          'warn',
           {
             allow: [
               '^',
@@ -334,32 +543,34 @@ module.exports = {
         'no-cond-assign': 'error',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'no-constant-condition': 'error',
+        'no-constant-condition': 'warn',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-control-regex': 'error',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'no-debugger': 'error',
+        'no-debugger': 'warn',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-delete-var': 'error',
 
+        // RATIONALE:         Catches code that is likely to be incorrect
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-duplicate-case': 'error',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'no-empty': 'error',
+        'no-empty': 'warn',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-empty-character-class': 'error',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'no-empty-pattern': 'error',
+        'no-empty-pattern': 'warn',
 
         // RATIONALE:         Eval is a security concern and a performance concern.
-        'no-eval': 'error',
+        'no-eval': 'warn',
 
+        // RATIONALE:         Catches code that is likely to be incorrect
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-ex-assign': 'error',
 
@@ -371,16 +582,15 @@ module.exports = {
         'no-extend-native': 'error',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'no-extra-boolean-cast': 'error',
+        'no-extra-boolean-cast': 'warn',
 
-        // RATIONALE:         Catches a common coding mistake.
-        'no-extra-label': 'error',
+        'no-extra-label': 'warn',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-fallthrough': 'error',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'no-func-assign': 'error',
+        'no-func-assign': 'warn',
 
         // RATIONALE:         Catches a common coding mistake.
         'no-implied-eval': 'error',
@@ -392,7 +602,7 @@ module.exports = {
         'no-label-var': 'error',
 
         // RATIONALE:         Eliminates redundant code.
-        'no-lone-blocks': 'error',
+        'no-lone-blocks': 'warn',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-misleading-character-class': 'error',
@@ -404,23 +614,25 @@ module.exports = {
         //                    a variable.  Either it's part of an awkward expression like "(new Thing()).doSomething()",
         //                    or else implies that the constructor is doing nontrivial computations, which is often
         //                    a poor class design.
-        'no-new': 'error',
+        'no-new': 'warn',
 
-        // RATIONALE:         Obsolete notation that is error-prone.
+        // RATIONALE:         Obsolete language feature that is deprecated.
         'no-new-func': 'error',
 
-        // RATIONALE:         Obsolete notation.
+        // RATIONALE:         Obsolete language feature that is deprecated.
         'no-new-object': 'error',
 
         // RATIONALE:         Obsolete notation.
-        'no-new-wrappers': 'error',
+        'no-new-wrappers': 'warn',
 
+        // RATIONALE:         Catches code that is likely to be incorrect
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-octal': 'error',
 
-        // RATIONALE:         Catches a common coding mistake.
+        // RATIONALE:         Catches code that is likely to be incorrect
         'no-octal-escape': 'error',
 
+        // RATIONALE:         Catches code that is likely to be incorrect
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-regex-spaces': 'error',
 
@@ -428,7 +640,7 @@ module.exports = {
         'no-return-assign': 'error',
 
         // RATIONALE:         Security risk.
-        'no-script-url': 'error',
+        'no-script-url': 'warn',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-self-assign': 'error',
@@ -442,9 +654,11 @@ module.exports = {
         //                    in the debugger.
         'no-sequences': 'error',
 
+        // RATIONALE:         Catches code that is likely to be incorrect
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-shadow-restricted-names': 'error',
 
+        // RATIONALE:         Obsolete language feature that is deprecated.
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-sparse-arrays': 'error',
 
@@ -456,22 +670,22 @@ module.exports = {
         'no-throw-literal': 'error',
 
         // RATIONALE:         Catches a common coding mistake.
-        'no-unmodified-loop-condition': 'error',
+        'no-unmodified-loop-condition': 'warn',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-unsafe-finally': 'error',
 
         // RATIONALE:         Catches a common coding mistake.
-        'no-unused-expressions': 'error',
+        'no-unused-expressions': 'warn',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'no-unused-labels': 'error',
+        'no-unused-labels': 'warn',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'no-useless-catch': 'error',
+        'no-useless-catch': 'warn',
 
         // RATIONALE:         Avoids a potential performance problem.
-        'no-useless-concat': 'error',
+        'no-useless-concat': 'warn',
 
         // RATIONALE:         The "var" keyword is deprecated because of its confusing "hoisting" behavior.
         //                    Always use "let" or "const" instead.
@@ -482,20 +696,23 @@ module.exports = {
         // RATIONALE:         Generally not needed in modern code.
         'no-void': 'error',
 
+        // RATIONALE:         Obsolete language feature that is deprecated.
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'no-with': 'error',
 
+        // RATIONALE:         Makes logic easier to understand, since constants always have a known value
         // @typescript-eslint\eslint-plugin\dist\configs\eslint-recommended.js
-        'prefer-const': 'error',
+        'prefer-const': 'warn',
 
         // RATIONALE:         Catches a common coding mistake where "resolve" and "reject" are confused.
         'promise/param-names': 'error',
 
+        // RATIONALE:         Catches code that is likely to be incorrect
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'require-atomic-updates': 'error',
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        'require-yield': 'error',
+        'require-yield': 'warn',
 
         // "Use strict" is redundant when using the TypeScript compiler.
         strict: ['error', 'never'],
@@ -503,6 +720,7 @@ module.exports = {
         // We're still experimenting with this plugin, so for now it is off by default.
         'tsdoc/syntax': 'off',
 
+        // RATIONALE:         Catches code that is likely to be incorrect
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         'use-isnan': 'error'
 
@@ -515,6 +733,48 @@ module.exports = {
         //
         // "no-restricted-syntax": [
         // ],
+      }
+    },
+    {
+      // For unit tests, we can be a little bit less strict.  The settings below revise the
+      // defaults specified above.
+      files: [
+        // Test files
+        '*.test.ts',
+        '*.test.tsx',
+
+        // Facebook convention
+        '**/__mocks__/*.ts',
+        '**/__mocks__/*.tsx',
+        '**/__tests__/*.ts',
+        '**/__tests__/*.tsx',
+
+        // Microsoft convention
+        '**/test/*.ts',
+        '**/test/*.tsx'
+      ],
+      rules: {
+        // Unit tests sometimes use a standalone statement like "new Thing(123);" to test a constructor.
+        'no-new': 'off',
+
+        // Jest's mocking API is designed in a way that produces compositional data types that often have
+        // no concise description.  Since test code does not ship, and typically does not introduce new
+        // concepts or algorithms, the usual arguments for prioritizing readability over writability can be
+        // relaxed in this case. We follow C#'s model of allowing type inference for local variable declarations,
+        // but still requiring strict types for function signatures.
+        '@typescript-eslint/typedef': [
+          'warn',
+          {
+            arrayDestructuring: false,
+            arrowParameter: false,
+            memberVariableDeclaration: true,
+            objectDestructuring: false,
+            parameter: true,
+            propertyDeclaration: true,
+            variableDeclaration: false, // <--- special case for test files
+            variableDeclarationIgnoreFunction: true
+          }
+        ]
       }
     }
   ]

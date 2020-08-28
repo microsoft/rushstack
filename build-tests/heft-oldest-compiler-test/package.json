@@ -1,0 +1,16 @@
+{
+  "name": "heft-oldest-compiler-test",
+  "description": "Building this project tests Heft with the oldest supported TypeScript compiler version",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft test --clean"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "@microsoft/rush-stack-compiler-2.9": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*"
+  }
+}

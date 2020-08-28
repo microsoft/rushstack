@@ -14,6 +14,13 @@ export const enum AlreadyExistsBehavior {
     Overwrite = "overwrite"
 }
 
+// @public
+export class AlreadyReportedError extends Error {
+    // (undocumented)
+    static [Symbol.hasInstance](instance: object): boolean;
+    constructor();
+}
+
 // @beta
 export class Colors {
     // (undocumented)
@@ -50,6 +57,7 @@ export class Colors {
     static magenta(text: string | IColorableSequence): IColorableSequence;
     // (undocumented)
     static magentaBackground(text: string | IColorableSequence): IColorableSequence;
+    static normalizeColorTokensForTest(text: string): string;
     // @internal
     static _normalizeStringOrColorableSequence(value: string | IColorableSequence): IColorableSequence;
     // (undocumented)
@@ -305,6 +313,23 @@ export interface IFileWriterFlags {
 }
 
 // @public
+export interface IImportResolveModuleOptions extends IImportResolveOptions {
+    modulePath: string;
+}
+
+// @public
+export interface IImportResolveOptions {
+    allowSelfReference?: boolean;
+    baseFolderPath: string;
+    includeSystemModules?: boolean;
+}
+
+// @public
+export interface IImportResolvePackageOptions extends IImportResolveOptions {
+    packageName: string;
+}
+
+// @public
 export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
     ensureFolderExists?: boolean;
     onlyIfChanged?: boolean;
@@ -313,6 +338,7 @@ export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
 
 // @public
 export interface IJsonFileStringifyOptions {
+    headerComment?: string;
     newlineConversion?: NewlineKind;
     prettyFormatting?: boolean;
 }
@@ -330,6 +356,13 @@ export interface IJsonSchemaFromFileOptions {
 // @public
 export interface IJsonSchemaValidateOptions {
     customErrorHeader?: string;
+}
+
+// @public
+export class Import {
+    static lazy(moduleName: string, require: (id: string) => unknown): any;
+    static resolveModule(options: IImportResolveModuleOptions): string;
+    static resolvePackage(options: IImportResolvePackageOptions): string;
 }
 
 // @public
@@ -406,6 +439,11 @@ export interface IProtectableMapParameters<K, V> {
     onSet?: (source: ProtectableMap<K, V>, key: K, value: V) => V;
 }
 
+// @beta (undocumented)
+export interface IStringBufferOutputOptions {
+    normalizeSpecialCharacters: boolean;
+}
+
 // @public
 export interface IStringBuilder {
     append(text: string): void;
@@ -421,6 +459,8 @@ export interface ITerminalProvider {
 
 // @public
 export class JsonFile {
+    // @internal (undocumented)
+    static _formatPathForError: (path: string) => string;
     static load(jsonFilename: string): JsonObject;
     static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): JsonObject;
     static loadAndValidateAsync(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): Promise<JsonObject>;
@@ -434,6 +474,9 @@ export class JsonFile {
     static updateString(previousJson: string, newJsonObject: JsonObject, options?: IJsonFileStringifyOptions): string;
     static validateNoUndefinedMembers(jsonObject: JsonObject): void;
     }
+
+// @public
+export type JsonNull = null;
 
 // @public
 export type JsonObject = any;
@@ -468,18 +511,21 @@ export type LegacyCallback<TResult, TError> = (error: TError | null | undefined,
 
 // @public
 export class LockFile {
-    static acquire(resourceDir: string, resourceName: string, maxWaitMs?: number): Promise<LockFile>;
+    static acquire(resourceFolder: string, resourceName: string, maxWaitMs?: number): Promise<LockFile>;
     readonly dirtyWhenAcquired: boolean;
     readonly filePath: string;
-    static getLockFilePath(resourceDir: string, resourceName: string, pid?: number): string;
+    static getLockFilePath(resourceFolder: string, resourceName: string, pid?: number): string;
     readonly isReleased: boolean;
     release(): void;
-    static tryAcquire(resourceDir: string, resourceName: string): LockFile | undefined;
+    static tryAcquire(resourceFolder: string, resourceName: string): LockFile | undefined;
     }
 
 // @public
 export class MapExtensions {
     static mergeFromMap<K, V>(targetMap: Map<K, V>, sourceMap: ReadonlyMap<K, V>): void;
+    static toObject<TValue>(map: Map<string, TValue>): {
+        [key: string]: TValue;
+    };
 }
 
 // @public
@@ -493,6 +539,7 @@ export const enum NewlineKind {
 export class PackageJsonLookup {
     constructor(parameters?: IPackageJsonLookupParameters);
     clearCache(): void;
+    static readonly instance: PackageJsonLookup;
     loadNodePackageJson(jsonFilename: string): INodePackageJson;
     static loadOwnPackageJson(dirnameOfCaller: string): IPackageJson;
     loadPackageJson(jsonFilename: string): IPackageJson;
@@ -576,10 +623,10 @@ export class Sort {
 export class StringBufferTerminalProvider implements ITerminalProvider {
     constructor(supportsColor?: boolean);
     readonly eolCharacter: string;
-    getErrorOutput(): string;
-    getOutput(): string;
-    getVerbose(): string;
-    getWarningOutput(): string;
+    getErrorOutput(options?: IStringBufferOutputOptions): string;
+    getOutput(options?: IStringBufferOutputOptions): string;
+    getVerbose(options?: IStringBufferOutputOptions): string;
+    getWarningOutput(options?: IStringBufferOutputOptions): string;
     readonly supportsColor: boolean;
     write(data: string, severity: TerminalProviderSeverity): void;
 }
@@ -645,6 +692,12 @@ export enum TextAttribute {
     // (undocumented)
     Underline = 2
 }
+
+// @public
+export class TypeUuid {
+    static isInstanceOf(targetObject: unknown, typeUuid: string): boolean;
+    static registerClass(targetClass: any, typeUuid: string): void;
+    }
 
 
 ```

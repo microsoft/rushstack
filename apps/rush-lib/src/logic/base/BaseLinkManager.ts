@@ -13,6 +13,7 @@ import { Utilities } from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { BasePackage } from './BasePackage';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 
 export enum SymlinkKind {
   File,
@@ -185,21 +186,13 @@ export abstract class BaseLinkManager {
    *   if true, this option forces the links to be recreated.
    */
   public async createSymlinksForProjects(force: boolean): Promise<void> {
-    if (!force) {
-      if (FileSystem.exists(this._rushConfiguration.rushLinkJsonFilename)) {
-        console.log(colors.green(`Skipping linking -- everything is already up to date.`));
-        return;
-      }
-    }
-
     console.log('Linking projects together...');
     const stopwatch: Stopwatch = Stopwatch.start();
 
-    // Delete the flag file if it exists; if we get interrupted, this will ensure that
-    // a full "rush link" is required next time
-    Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
-
     await this._linkProjects();
+
+    // TODO: Remove when "rush link" and "rush unlink" are deprecated
+    LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration).create();
 
     stopwatch.stop();
     console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));

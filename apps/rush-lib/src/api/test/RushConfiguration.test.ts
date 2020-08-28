@@ -75,11 +75,6 @@ describe('RushConfiguration', () => {
       './repo/common/temp/npm-local/node_modules/.bin/npm'
     );
     assertPathProperty('rushJsonFolder', rushConfiguration.rushJsonFolder, './repo');
-    assertPathProperty(
-      'rushLinkJsonFilename',
-      rushConfiguration.rushLinkJsonFilename,
-      './repo/common/temp/rush-link.json'
-    );
 
     expect(rushConfiguration.packageManagerToolVersion).toEqual('4.5.0');
 
@@ -154,11 +149,6 @@ describe('RushConfiguration', () => {
       './repo/common/temp/pnpm-local/node_modules/.bin/pnpm'
     );
     assertPathProperty('rushJsonFolder', rushConfiguration.rushJsonFolder, './repo');
-    assertPathProperty(
-      'rushLinkJsonFilename',
-      rushConfiguration.rushLinkJsonFilename,
-      './repo/common/temp/rush-link.json'
-    );
 
     expect(rushConfiguration.packageManagerToolVersion).toEqual('4.5.0');
 
@@ -242,11 +232,6 @@ describe('RushConfiguration', () => {
       'packageManagerToolFilename',
       rushConfiguration.packageManagerToolFilename,
       `${expectedValue}/pnpm-local/node_modules/.bin/pnpm`
-    );
-    assertPathProperty(
-      'rushLinkJsonFilename',
-      rushConfiguration.rushLinkJsonFilename,
-      path.join(expectedValue, 'rush-link.json')
     );
   });
 

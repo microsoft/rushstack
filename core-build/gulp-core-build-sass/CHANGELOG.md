@@ -1,6 +1,138 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Mon, 01 Jun 2020 08:34:17 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Aug 2020 11:27:06 GMT and should not be manually modified.
+
+## 4.12.17
+Thu, 27 Aug 2020 11:27:06 GMT
+
+*Version update only*
+
+## 4.12.16
+Tue, 25 Aug 2020 00:10:12 GMT
+
+*Version update only*
+
+## 4.12.15
+Mon, 24 Aug 2020 07:35:20 GMT
+
+*Version update only*
+
+## 4.12.14
+Sat, 22 Aug 2020 05:55:42 GMT
+
+*Version update only*
+
+## 4.12.13
+Fri, 21 Aug 2020 01:21:18 GMT
+
+*Version update only*
+
+## 4.12.12
+Thu, 20 Aug 2020 18:41:47 GMT
+
+*Version update only*
+
+## 4.12.11
+Thu, 20 Aug 2020 15:13:53 GMT
+
+*Version update only*
+
+## 4.12.10
+Tue, 18 Aug 2020 23:59:42 GMT
+
+*Version update only*
+
+## 4.12.9
+Tue, 18 Aug 2020 03:03:23 GMT
+
+*Version update only*
+
+## 4.12.8
+Mon, 17 Aug 2020 05:31:53 GMT
+
+*Version update only*
+
+## 4.12.7
+Mon, 17 Aug 2020 04:53:23 GMT
+
+*Version update only*
+
+## 4.12.6
+Thu, 13 Aug 2020 09:26:39 GMT
+
+*Version update only*
+
+## 4.12.5
+Thu, 13 Aug 2020 04:57:38 GMT
+
+*Version update only*
+
+## 4.12.4
+Wed, 12 Aug 2020 00:10:05 GMT
+
+*Version update only*
+
+## 4.12.3
+Wed, 05 Aug 2020 18:27:32 GMT
+
+*Version update only*
+
+## 4.12.2
+Fri, 03 Jul 2020 15:09:04 GMT
+
+*Version update only*
+
+## 4.12.1
+Fri, 03 Jul 2020 05:46:41 GMT
+
+*Version update only*
+
+## 4.12.0
+Fri, 03 Jul 2020 00:10:16 GMT
+
+### Minor changes
+
+- Allow customization of generated CSS module class names.
+
+## 4.11.12
+Sat, 27 Jun 2020 00:09:38 GMT
+
+*Version update only*
+
+## 4.11.11
+Fri, 26 Jun 2020 22:16:39 GMT
+
+*Version update only*
+
+## 4.11.10
+Thu, 25 Jun 2020 06:43:35 GMT
+
+*Version update only*
+
+## 4.11.9
+Wed, 24 Jun 2020 09:50:48 GMT
+
+*Version update only*
+
+## 4.11.8
+Wed, 24 Jun 2020 09:04:28 GMT
+
+*Version update only*
+
+## 4.11.7
+Mon, 15 Jun 2020 22:17:18 GMT
+
+*Version update only*
+
+## 4.11.6
+Fri, 12 Jun 2020 09:19:21 GMT
+
+*Version update only*
+
+## 4.11.5
+Wed, 10 Jun 2020 20:48:30 GMT
+
+*Version update only*
 
 ## 4.11.4
 Mon, 01 Jun 2020 08:34:17 GMT

@@ -1,0 +1,13 @@
+{
+  "name": "heft-minimal-rig-test",
+  "description": "This is a minimal rig package that is imported by the 'heft-minimal-rig-usage-test' project",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "build": ""
+  },
+  "dependencies": {
+    "typescript": "~3.9.5"
+  }
+}

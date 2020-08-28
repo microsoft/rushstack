@@ -39,6 +39,8 @@ export { CommonVersionsConfiguration } from './api/CommonVersionsConfiguration';
 
 export { PackageJsonEditor, PackageJsonDependency, DependencyType } from './api/PackageJsonEditor';
 
+export { RepoStateFile } from './logic/RepoStateFile';
+
 export { EventHooks, Event } from './api/EventHooks';
 
 export { ChangeManager } from './api/ChangeManager';

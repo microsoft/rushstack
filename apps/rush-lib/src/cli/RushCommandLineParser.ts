@@ -6,7 +6,7 @@ import * as os from 'os';
 import * as path from 'path';
 
 import { CommandLineParser, CommandLineFlagParameter, CommandLineAction } from '@rushstack/ts-command-line';
-import { InternalError } from '@rushstack/node-core-library';
+import { InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
@@ -19,23 +19,24 @@ import { AddAction } from './actions/AddAction';
 import { ChangeAction } from './actions/ChangeAction';
 import { CheckAction } from './actions/CheckAction';
 import { DeployAction } from './actions/DeployAction';
-import { UpdateAction } from './actions/UpdateAction';
-import { InstallAction } from './actions/InstallAction';
 import { InitAction } from './actions/InitAction';
+import { InitAutoinstallerAction } from './actions/InitAutoinstallerAction';
 import { InitDeployAction } from './actions/InitDeployAction';
+import { InstallAction } from './actions/InstallAction';
 import { LinkAction } from './actions/LinkAction';
 import { ListAction } from './actions/ListAction';
 import { PublishAction } from './actions/PublishAction';
 import { PurgeAction } from './actions/PurgeAction';
-import { UnlinkAction } from './actions/UnlinkAction';
 import { ScanAction } from './actions/ScanAction';
+import { UnlinkAction } from './actions/UnlinkAction';
+import { UpdateAction } from './actions/UpdateAction';
+import { UpdateAutoinstallerAction } from './actions/UpdateAutoinstallerAction';
 import { VersionAction } from './actions/VersionAction';
 
 import { BulkScriptAction } from './scriptActions/BulkScriptAction';
 import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
 
 import { Telemetry } from '../logic/Telemetry';
-import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 
@@ -66,7 +67,8 @@ export class RushCommandLineParser extends CommandLineParser {
         ' and automates package publishing.  It can manage decoupled subsets of projects with different' +
         ' release and versioning strategies.  A full API is included to facilitate integration with other' +
         ' automation tools.  If you are looking for a proven turnkey solution for monorepo management,' +
-        ' Rush is for you.'
+        ' Rush is for you.',
+      enableTabCompletionAction: true
     });
 
     this._rushOptions = this._normalizeOptions(options || {});
@@ -74,7 +76,7 @@ export class RushCommandLineParser extends CommandLineParser {
     try {
       const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation({
         startingFolder: this._rushOptions.cwd,
-        showVerbose: true
+        showVerbose: !Utilities.shouldRestrictConsoleOutput()
       });
       if (rushJsonFilename) {
         this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
@@ -162,16 +164,18 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new ChangeAction(this));
       this.addAction(new CheckAction(this));
       this.addAction(new DeployAction(this));
-      this.addAction(new InstallAction(this));
       this.addAction(new InitAction(this));
+      this.addAction(new InitAutoinstallerAction(this));
       this.addAction(new InitDeployAction(this));
+      this.addAction(new InstallAction(this));
       this.addAction(new LinkAction(this));
       this.addAction(new ListAction(this));
       this.addAction(new PublishAction(this));
       this.addAction(new PurgeAction(this));
       this.addAction(new ScanAction(this));
-      this.addAction(new UpdateAction(this));
       this.addAction(new UnlinkAction(this));
+      this.addAction(new UpdateAction(this));
+      this.addAction(new UpdateAutoinstallerAction(this));
       this.addAction(new VersionAction(this));
 
       this._populateScriptActions();
@@ -279,7 +283,9 @@ export class RushCommandLineParser extends CommandLineParser {
             parser: this,
             commandLineConfiguration: commandLineConfiguration,
 
-            shellCommand: command.shellCommand
+            shellCommand: command.shellCommand,
+
+            autoinstallerName: command.autoinstallerName
           })
         );
         break;

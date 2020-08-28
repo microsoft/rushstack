@@ -2,6 +2,676 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.3.45",
+      "tag": "@rushstack/localization-plugin_v0.3.45",
+      "date": "Thu, 27 Aug 2020 11:27:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.30.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.1.43`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `2.4.45`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.8.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^2.4.44` to `^2.4.45`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.44",
+      "tag": "@rushstack/localization-plugin_v0.3.44",
+      "date": "Tue, 25 Aug 2020 00:10:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.1.42`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `2.4.44`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^2.4.43` to `^2.4.44`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.43",
+      "tag": "@rushstack/localization-plugin_v0.3.43",
+      "date": "Mon, 24 Aug 2020 07:35:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.29.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.1.41`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `2.4.43`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.2.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.6.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^2.4.42` to `^2.4.43`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.42",
+      "tag": "@rushstack/localization-plugin_v0.3.42",
+      "date": "Sat, 22 Aug 2020 05:55:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.29.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.1.40`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `2.4.42`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.6.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^2.4.41` to `^2.4.42`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.41",
+      "tag": "@rushstack/localization-plugin_v0.3.41",
+      "date": "Fri, 21 Aug 2020 01:21:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.1.39`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `2.4.41`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.6.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^2.4.40` to `^2.4.41`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.40",
+      "tag": "@rushstack/localization-plugin_v0.3.40",
+      "date": "Thu, 20 Aug 2020 18:41:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.1.38`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `2.4.40`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.6.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^2.4.39` to `^2.4.40`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.39",
+      "tag": "@rushstack/localization-plugin_v0.3.39",
+      "date": "Thu, 20 Aug 2020 15:13:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.1.37`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `2.4.39`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.6.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^2.4.38` to `^2.4.39`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.38",
+      "tag": "@rushstack/localization-plugin_v0.3.38",
+      "date": "Tue, 18 Aug 2020 23:59:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.28.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.1.36`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `2.4.38`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.6.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^2.4.37` to `^2.4.38`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.37",
+      "tag": "@rushstack/localization-plugin_v0.3.37",
+      "date": "Tue, 18 Aug 2020 03:03:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.1.35`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `2.4.37`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^2.4.36` to `^2.4.37`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.36",
+      "tag": "@rushstack/localization-plugin_v0.3.36",
+      "date": "Mon, 17 Aug 2020 05:31:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.1.34`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `2.4.36`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^2.4.35` to `^2.4.36`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.35",
+      "tag": "@rushstack/localization-plugin_v0.3.35",
+      "date": "Mon, 17 Aug 2020 04:53:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.27.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.1.33`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `2.4.35`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^2.4.34` to `^2.4.35`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.34",
+      "tag": "@rushstack/localization-plugin_v0.3.34",
+      "date": "Thu, 13 Aug 2020 09:26:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.1.32`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `2.4.34`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.4.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^2.4.33` to `^2.4.34`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.33",
+      "tag": "@rushstack/localization-plugin_v0.3.33",
+      "date": "Thu, 13 Aug 2020 04:57:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.1.31`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `2.4.33`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.4.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^2.4.32` to `^2.4.33`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.32",
+      "tag": "@rushstack/localization-plugin_v0.3.32",
+      "date": "Wed, 12 Aug 2020 00:10:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated project to build with Heft"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.26.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.1.30`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `2.4.32`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.0.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.4.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^2.4.31` to `^2.4.32`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.31",
+      "tag": "@rushstack/localization-plugin_v0.3.31",
+      "date": "Wed, 05 Aug 2020 18:27:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.26.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.1.29`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" to `6.4.33`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `2.4.31`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^2.4.30` to `^2.4.31`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.30",
+      "tag": "@rushstack/localization-plugin_v0.3.30",
+      "date": "Fri, 24 Jul 2020 20:40:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix broken peer dependency specifier"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.29",
+      "tag": "@rushstack/localization-plugin_v0.3.29",
+      "date": "Wed, 15 Jul 2020 15:09:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix specification of optional peerDependencies."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `2.4.30`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^2.3.4` to `^2.4.30`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.28",
+      "tag": "@rushstack/localization-plugin_v0.3.28",
+      "date": "Tue, 14 Jul 2020 19:32:58 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix the way the loc file typings are generated in watch mode for large projects."
+          },
+          {
+            "comment": "Make @types/webpack an optionalPeerDependency instead of a peerDependency."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.27",
+      "tag": "@rushstack/localization-plugin_v0.3.27",
+      "date": "Tue, 07 Jul 2020 00:09:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the localization plugin would throw if resolveMissingTranslatedStrings returns undefined for a locale."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.26",
+      "tag": "@rushstack/localization-plugin_v0.3.26",
+      "date": "Fri, 03 Jul 2020 15:09:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.24.4` to `3.25.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" from `0.1.27` to `0.1.28`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.8.0` to `0.8.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.31` to `6.4.32`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `2.4.28` to `2.4.29`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.25",
+      "tag": "@rushstack/localization-plugin_v0.3.25",
+      "date": "Fri, 03 Jul 2020 05:46:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" from `0.1.26` to `0.1.27`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.7.2` to `0.8.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.30` to `6.4.31`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `2.4.27` to `2.4.28`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.24",
+      "tag": "@rushstack/localization-plugin_v0.3.24",
+      "date": "Sat, 27 Jun 2020 00:09:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" from `0.1.25` to `0.1.26`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.29` to `6.4.30`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `2.4.26` to `2.4.27`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.23",
+      "tag": "@rushstack/localization-plugin_v0.3.23",
+      "date": "Fri, 26 Jun 2020 22:16:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" from `0.1.24` to `0.1.25`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.28` to `6.4.29`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `2.4.25` to `2.4.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.22",
+      "tag": "@rushstack/localization-plugin_v0.3.22",
+      "date": "Thu, 25 Jun 2020 06:43:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.24.3` to `3.24.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" from `0.1.23` to `0.1.24`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.7.1` to `0.7.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.27` to `6.4.28`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `2.4.24` to `2.4.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `1.0.1` to `1.0.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.21",
+      "tag": "@rushstack/localization-plugin_v0.3.21",
+      "date": "Wed, 24 Jun 2020 09:50:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.24.2` to `3.24.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" from `0.1.22` to `0.1.23`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.7.0` to `0.7.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.26` to `6.4.27`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `2.4.23` to `2.4.24`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `1.0.0` to `1.0.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.20",
+      "tag": "@rushstack/localization-plugin_v0.3.20",
+      "date": "Wed, 24 Jun 2020 09:04:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.24.1` to `3.24.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" from `0.1.21` to `0.1.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.6.1` to `0.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.25` to `6.4.26`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `2.4.22` to `2.4.23`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" from `0.5.8` to `1.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.19",
+      "tag": "@rushstack/localization-plugin_v0.3.19",
+      "date": "Mon, 15 Jun 2020 22:17:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" from `0.1.20` to `0.1.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.6.0` to `0.6.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.24` to `6.4.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `2.4.21` to `2.4.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.18",
+      "tag": "@rushstack/localization-plugin_v0.3.18",
+      "date": "Fri, 12 Jun 2020 09:19:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" from `0.1.19` to `0.1.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.5.3` to `0.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.23` to `6.4.24`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `2.4.20` to `2.4.21`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.17",
+      "tag": "@rushstack/localization-plugin_v0.3.17",
+      "date": "Wed, 10 Jun 2020 20:48:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" from `3.24.0` to `3.24.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" from `0.1.18` to `0.1.19`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" from `0.5.2` to `0.5.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.4.22` to `6.4.23`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `2.4.19` to `2.4.20`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.16",
       "tag": "@rushstack/localization-plugin_v0.3.16",
       "date": "Mon, 01 Jun 2020 08:34:17 GMT",

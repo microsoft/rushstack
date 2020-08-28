@@ -11,8 +11,6 @@ import * as HttpsType from 'https';
 import * as pathType from 'path';
 import * as ExpressType from 'express';
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-
 import { ICertificate, CertificateManager } from '@rushstack/debug-certificate-manager';
 
 /**
@@ -88,6 +86,7 @@ export interface IServeTaskConfig {
 }
 
 interface IApiMap {
+  // eslint-disable-next-line
   [route: string]: Function;
 }
 
@@ -138,6 +137,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
     gulpConnect.server({
       https: httpsServerOptions,
       livereload: true,
+      // eslint-disable-next-line @typescript-eslint/ban-types
       middleware: (): Function[] => [this._logRequestsMiddleware, this._enableCorsMiddleware],
       port: port,
       root: path.join(rootPath, this.taskConfig.rootFolder || ''),

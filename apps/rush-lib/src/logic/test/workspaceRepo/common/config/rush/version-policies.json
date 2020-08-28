@@ -1,0 +1,17 @@
+[
+  {
+    "policyName": "testPolicy1",
+    "definitionName": "lockStepVersion",
+    "version": "10.10.0",
+    "nextBump": "patch"
+  },
+  {
+    "policyName": "testPolicy2",
+    "definitionName": "individualVersion",
+    "lockedMajor": 5
+  },
+  {
+    "policyName": "testPolicy3",
+    "definitionName": "individualVersion"
+  }
+]

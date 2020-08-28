@@ -60,12 +60,12 @@ $ npm install --save-dev typescript
 $ npm install --save-dev @rushstack/eslint-config
 ```
 
-Next, create an **.eslintrc** config file that provides the NodeJS `__dirname` context:
+Next, create an **.eslintrc.js** config file that provides the NodeJS `__dirname` context:
 
-**.eslintrc**
+**.eslintrc.js**
 ```ts
 // This is a workaround for https://github.com/eslint/eslint/issues/3458
-require("@rushstack/eslint-config/patch-eslint6");
+require('@rushstack/eslint-config/patch/modern-module-resolution');
 
 module.exports = {
   extends: [ "@rushstack/eslint-config" ],
@@ -76,10 +76,10 @@ module.exports = {
 For projects using React, you'll need a **tsconfig.json** with `"jsx": "react"`.  You also need to configure your
 React version, which the lint rules use to determine deprecated APIs.  Specify it like this:
 
-**.eslintrc**
+**.eslintrc.js**
 ```ts
 // This is a workaround for https://github.com/eslint/eslint/issues/3458
-require("@rushstack/eslint-config/patch-eslint6");
+require('@rushstack/eslint-config/patch/modern-module-resolution');
 
 module.exports = {
   extends: [

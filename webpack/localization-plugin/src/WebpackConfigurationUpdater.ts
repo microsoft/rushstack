@@ -71,7 +71,6 @@ export class WebpackConfigurationUpdater {
   private static _tryUpdateLocaleTokenInPublicPathPlugin(options: IWebpackConfigurationUpdaterOptions): void {
     let setPublicPathPlugin: typeof SetPublicPathPluginPackageType.SetPublicPathPlugin | undefined;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const pluginPackage: typeof SetPublicPathPluginPackageType = require('@rushstack/set-webpack-public-path-plugin');
       setPublicPathPlugin = pluginPackage.SetPublicPathPlugin;
     } catch (e) {

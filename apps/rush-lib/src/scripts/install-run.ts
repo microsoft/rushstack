@@ -62,26 +62,38 @@ function _parsePackageSpecifier(rawPackageSpecifier: string): IPackageSpecifier 
  * we'd prefer to skip that line and continue looking in other places such as the user's
  * home directory.
  *
- * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities._copyNpmrcFile()
+ * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities.copyAndTrimNpmrcFile()
  */
 function _copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string): void {
   console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`); // Verbose
   let npmrcFileLines: string[] = fs.readFileSync(sourceNpmrcPath).toString().split('\n');
   npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
   const resultLines: string[] = [];
+
+  // This finds environment variable tokens that look like "${VAR_NAME}"
+  const expansionRegExp: RegExp = /\$\{([^\}]+)\}/g;
+
+  // Comment lines start with "#" or ";"
+  const commentRegExp: RegExp = /^\s*[#;]/;
+
   // Trim out lines that reference environment variables that aren't defined
   for (const line of npmrcFileLines) {
-    // This finds environment variable tokens that look like "${VAR_NAME}"
-    const regex: RegExp = /\$\{([^\}]+)\}/g;
-    const environmentVariables: string[] | null = line.match(regex);
     let lineShouldBeTrimmed: boolean = false;
-    if (environmentVariables) {
-      for (const token of environmentVariables) {
-        // Remove the leading "${" and the trailing "}" from the token
-        const environmentVariableName: string = token.substring(2, token.length - 1);
-        if (!process.env[environmentVariableName]) {
-          lineShouldBeTrimmed = true;
-          break;
+
+    // Ignore comment lines
+    if (!commentRegExp.test(line)) {
+      const environmentVariables: string[] | null = line.match(expansionRegExp);
+      if (environmentVariables) {
+        for (const token of environmentVariables) {
+          // Remove the leading "${" and the trailing "}" from the token
+          const environmentVariableName: string = token.substring(2, token.length - 1);
+
+          // Is the environment variable defined?
+          if (!process.env[environmentVariableName]) {
+            // No, so trim this line
+            lineShouldBeTrimmed = true;
+            break;
+          }
         }
       }
     }
@@ -433,15 +445,21 @@ export function installAndRun(
 
   const binPath: string = _getBinPath(packageInstallFolder, packageBinName);
   const binFolderPath: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
-  const result: childProcess.SpawnSyncReturns<Buffer> = childProcess.spawnSync(binPath, packageBinArgs, {
-    stdio: 'inherit',
-    cwd: process.cwd(),
-    env: {
-      ...process.env,
-      PATH: [binFolderPath, process.env.PATH].join(path.delimiter)
-    }
-  });
 
+  // Windows environment variables are case-insensitive.  Instead of using SpawnSyncOptions.env, we need to
+  // assign via the process.env proxy to ensure that we append to the right PATH key.
+  const originalEnvPath: string = process.env.PATH || '';
+  let result: childProcess.SpawnSyncReturns<Buffer>;
+  try {
+    process.env.PATH = [binFolderPath, originalEnvPath].join(path.delimiter);
+    result = childProcess.spawnSync(binPath, packageBinArgs, {
+      stdio: 'inherit',
+      cwd: process.cwd(),
+      env: process.env
+    });
+  } finally {
+    process.env.PATH = originalEnvPath;
+  }
   if (result.status !== null) {
     return result.status;
   } else {

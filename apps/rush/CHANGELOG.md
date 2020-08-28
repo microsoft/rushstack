@@ -1,6 +1,186 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 08 Jun 2020 18:04:35 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Aug 2020 22:45:58 GMT and should not be manually modified.
+
+## 5.33.2
+Fri, 21 Aug 2020 22:45:58 GMT
+
+### Updates
+
+- Fix an issue where PNPM would sometimes prompt for input during "rush publish" (GitHub #1940)
+- Fix an issue that prevented Rush from logging in verbose mode
+
+## 5.33.1
+Thu, 20 Aug 2020 18:25:41 GMT
+
+### Updates
+
+- Fix issues where installs could fail after running 'rush version' while the 'usePnpmFrozenLockfileForRushInstall' experiment is enabled. See PR #2116 for more details.
+- Fix an issue where "rush deploy" would sometimes report an "already exists" when using the "files" setting in package.json (GitHub #2121)
+- Allow multiple simultaneous invocations of "rush deploy" (GitHub #2125)
+- Load and validate local projects lazily to further improve Rush startup times.
+
+## 5.33.0
+Wed, 19 Aug 2020 00:17:48 GMT
+
+### Updates
+
+- Add support for shell tab completion. See PR for details: https://github.com/microsoft/rushstack/pull/2060
+- Use Import.lazy() to optimize the startup time for Rush
+
+## 5.32.3
+Tue, 18 Aug 2020 03:48:56 GMT
+
+### Updates
+
+- Fix an issue where install-run.js sometimes assigned the shell PATH incorrectly due to inconsistent character case
+
+## 5.32.2
+Fri, 14 Aug 2020 21:03:48 GMT
+
+### Updates
+
+- Resolve issue with version --bump where the wrong hash would get written to the pnpm-lock file
+
+## 5.32.1
+Fri, 14 Aug 2020 04:06:30 GMT
+
+### Updates
+
+- Change method used to calculate integrity of tarballs
+
+## 5.32.0
+Thu, 13 Aug 2020 00:53:43 GMT
+
+### Patches
+
+- Update temp project tarball integrities during rush bump
+
+## 5.31.0
+Wed, 12 Aug 2020 19:33:44 GMT
+
+### Updates
+
+- Updated project to build with Heft
+- Fix an issue where "rushx" did not pass additional command-line arguments to the package.json script (GitHub #1232)
+
+## 5.30.3
+Fri, 07 Aug 2020 21:09:05 GMT
+
+### Updates
+
+- Fix an issue where Mac OS sometimes reported "An unrecognized file .DS_Store was found in the Rush config folder"
+
+## 5.30.2
+Wed, 05 Aug 2020 17:57:07 GMT
+
+### Updates
+
+- Fix an issue where a package version bump would not bump downstream packages with a `workspace:*` dependency specifier.
+
+## 5.30.1
+Thu, 23 Jul 2020 23:47:59 GMT
+
+### Updates
+
+- Fixed an isssue where the "rush build" incremental analysis sometimes reported a warning with large diffs (GitHub #501) or filenames that contain spaces, quotes, or other unusual characters (GitHub #2007)
+- Prevent incorrect conversion to "workspace:" notation for peer dependencies when running "rush update --full"
+
+## 5.30.0
+Fri, 17 Jul 2020 05:32:38 GMT
+
+### Minor changes
+
+- Prepare to deprecate 'rush link' and 'rush unlink' commands, as well as the '--no-link' install argument. As we move toward using package managers more directly in Rush, the package managers will perform the linking during install (if linking is even necessary). Additionally, these commands directly conflict with (and have different meanings than) their package manager counterparts. Lastly, similar goals can be accomplished by running 'rush install' and 'rush purge'. In addition to these changes, rush-link.json deprecated and is replaced with a new API which keeps the local dependency tree in memory.
+
+## 5.29.1
+Thu, 16 Jul 2020 02:18:39 GMT
+
+### Patches
+
+- Consider package.json when determining if install can be skipped for PNPM workspaces
+
+## 5.29.0
+Tue, 14 Jul 2020 05:20:56 GMT
+
+### Updates
+
+- Give \"rush deploy\" the ability to select a subset of dependencies to copy over (#1978)
+- Fix an issue where package binaries where not created by "rush deploy" (#1982)
+- Add a new setting "folderToCopy" and new command-line parameter "--create-archive" for use with "rush deploy"
+
+## 5.28.0
+Wed, 08 Jul 2020 06:56:47 GMT
+
+### Minor changes
+
+- Add preliminary workspaces support for PNPM
+
+### Updates
+
+- Add new commands "rush init-autoinstaller" and "rush update-autoinstaller"
+- Add support for filtered installs when using workspaces
+
+## 5.27.3
+Fri, 03 Jul 2020 06:16:09 GMT
+
+### Updates
+
+- Added support for new format used by pnpm for tarball URLs that now begin with an @ symbol
+
+## 5.27.2
+Thu, 02 Jul 2020 01:52:18 GMT
+
+### Updates
+
+- Improve "rush deploy" to copy PNPM workaround links (fixes GitHub #1942 and 1943)
+
+## 5.27.1
+Mon, 29 Jun 2020 18:39:59 GMT
+
+### Updates
+
+- Fix an issue where environment variable trimming for .npmrc was unnecessarily performed on comment lines
+- Add a "rush init" template for .npmrc-publish
+- Fix a regression affecting GitHub specifiers for package.json dependencies (issue #1749)
+
+## 5.27.0
+Sun, 21 Jun 2020 04:48:53 GMT
+
+### Updates
+
+- Improve "rush deploy" to apply pnpmfile.js when calculating dependencies
+
+## 5.26.0
+Mon, 15 Jun 2020 01:26:24 GMT
+
+### Updates
+
+- Breaking change for the experimental "rush deploy" feature: Simplify the config file design, based on the discussion from GitHub #1906
+
+## 5.25.2
+Thu, 11 Jun 2020 05:34:31 GMT
+
+### Updates
+
+- Fix an issue where Git hook scripts failed in some environments due to CRLF newlines
+
+## 5.25.1
+Thu, 11 Jun 2020 05:05:30 GMT
+
+### Updates
+
+- Fix some minor errors in the "rush init" template that occured when Prettier reformatted the template file macros
+- Add a sample Git hook file to the "rush init" template
+- Fix a minor issue where "rush link" failed if no projects were defined yet in rush.json
+- Add "--no-verify" for commits performed by "rush version", since Git hook scripts may fail on CI machines
+
+## 5.25.0
+Wed, 10 Jun 2020 23:53:27 GMT
+
+### Updates
+
+- Add new command-line.json setting "autoinstallerName"
 
 ## 5.24.4
 Mon, 08 Jun 2020 18:04:35 GMT
@@ -795,7 +975,7 @@ Sat, 4 Nov 2017 03:22:28 GMT
 
 ### Breaking changes
 
-- Complete release notes are here: https://github.com/Microsoft/web-build-tools/wiki#november-3-2017---rush-4-released
+- Complete release notes are here: https://github.com/microsoft/web-build-tools/wiki#november-3-2017---rush-4-released
 - Adding custom commands and options.
 - Adding rush version selector.
 - Updating the semantics of rush change.

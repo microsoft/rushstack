@@ -82,6 +82,18 @@ export class AstDeclaration {
     }
 
     this.modifierFlags = ts.getCombinedModifierFlags(this.declaration);
+
+    // Check for ECMAScript private fields, for example:
+    //
+    //    class Person { #name: string; }
+    //
+    const declarationName: ts.DeclarationName | undefined = ts.getNameOfDeclaration(this.declaration);
+    if (declarationName) {
+      if (ts.isPrivateIdentifier(declarationName)) {
+        // eslint-disable-next-line no-bitwise
+        this.modifierFlags |= ts.ModifierFlags.Private;
+      }
+    }
   }
 
   /**

@@ -120,6 +120,12 @@ export class RushConstants {
   public static readonly commonVersionsFilename: string = 'common-versions.json';
 
   /**
+   * The filename ("repo-state.json") for a file used by Rush to
+   * store the state of various features as they stand in the repo.
+   */
+  public static readonly repoStateFilename: string = 'repo-state.json';
+
+  /**
    * The name of the per-project folder where project-specific Rush files are stored. For example,
    * the package-deps files, which are used by commands to determine if a particular project needs to be rebuilt.
    */

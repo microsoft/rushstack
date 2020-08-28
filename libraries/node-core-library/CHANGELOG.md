@@ -1,6 +1,94 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Sat, 30 May 2020 02:59:54 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Aug 2020 11:27:06 GMT and should not be manually modified.
+
+## 3.30.0
+Thu, 27 Aug 2020 11:27:06 GMT
+
+### Minor changes
+
+- Include an API for resolving packages and modules.
+
+## 3.29.1
+Mon, 24 Aug 2020 07:35:20 GMT
+
+*Version update only*
+
+## 3.29.0
+Sat, 22 Aug 2020 05:55:42 GMT
+
+### Minor changes
+
+- Introduce a "JsonNull" type for describing legacy JSON structures without triggering the "@rushstack/no-new-null" lint rule
+
+## 3.28.0
+Tue, 18 Aug 2020 23:59:42 GMT
+
+### Minor changes
+
+- Add a utility function for making console color codes human-readable.
+- Create a lighter weight function to get own package version.
+
+### Patches
+
+- Lazy-import some packages to improve spin up times.
+
+## 3.27.0
+Mon, 17 Aug 2020 04:53:23 GMT
+
+### Minor changes
+
+- Add new APIs AlreadyReportedError and TypeUuid
+
+## 3.26.2
+Wed, 12 Aug 2020 00:10:05 GMT
+
+### Patches
+
+- Updated project to build with Heft
+
+## 3.26.1
+Wed, 05 Aug 2020 18:27:32 GMT
+
+### Patches
+
+- Triggering publish of dependents
+
+## 3.26.0
+Mon, 03 Aug 2020 06:55:14 GMT
+
+### Minor changes
+
+- Added IJsonFileStringifyOptions.headerComment
+
+## 3.25.0
+Fri, 03 Jul 2020 15:09:04 GMT
+
+### Minor changes
+
+- Add a utility method to convert a map into an object
+
+## 3.24.4
+Thu, 25 Jun 2020 06:43:35 GMT
+
+*Version update only*
+
+## 3.24.3
+Wed, 24 Jun 2020 09:50:48 GMT
+
+*Version update only*
+
+## 3.24.2
+Wed, 24 Jun 2020 09:04:28 GMT
+
+*Version update only*
+
+## 3.24.1
+Wed, 10 Jun 2020 20:48:30 GMT
+
+### Patches
+
+- Improve API docs for "LockFile"
 
 ## 3.24.0
 Sat, 30 May 2020 02:59:54 GMT
